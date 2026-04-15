@@ -67,6 +67,8 @@ DEFINE_VALUE(FRAME_SLOT_OFFSET, ark::Frame::GetVregsOffset() + interpreter::VReg
 DEFINE_VALUE(CFRAME_LR_SLOT, CFrameReturnAddr::Start())
 DEFINE_VALUE(CFRAME_STACK_START_SLOT, CFrameSlots::Start())
 DEFINE_VALUE(CFRAME_CALLEE_REGS_START_SLOT, CFrameLayout::RegsRegion::Start())
+DEFINE_VALUE(CFRAME_CALLEE_REGS_END_SLOT, (CFrameLayout::RegsRegion::Start() + CFrameLayout(RUNTIME_ARCH, 0).GetCalleeLastSlot(false)))
+DEFINE_VALUE(CFRAME_CALLEE_VREGS_END_SLOT, (CFrameLayout::RegsRegion::Start() + CFrameLayout(RUNTIME_ARCH, 0).GetCalleeLastSlot(true)))
 DEFINE_VALUE(CFRAME_LOCALS_COUNT, (CFrameSlots::Start() - CFrameData::Start()))
 DEFINE_VALUE(CFRAME_HEADER_SIZE, (CFrameFlags::End() - CFrameReturnAddr::Start()))
 DEFINE_VALUE(CFRAME_FLAGS_SLOT, (CFrameFlags::Start()))

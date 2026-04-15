@@ -627,6 +627,11 @@ bool Graph::HasFloatRegs() const
     return FlagFloatRegs::Get(bitFields_);
 }
 
+bool Graph::IsAsync() const
+{
+    return FlagIsAsync::Get(bitFields_);
+}
+
 static void MarkSuccessBlocks(BasicBlock *block, Marker marker)
 {
     auto loop = block->GetSuccessor(0)->GetLoop();

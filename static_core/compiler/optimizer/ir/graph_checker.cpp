@@ -1197,15 +1197,17 @@ bool GraphChecker::SaveStateSuspendDominatesAnyUser(SaveStateInst *ss, const Ins
 
 void GraphChecker::ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, const Inst *otherInst)
 {
-    auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(),
-                           [ss, otherInst](Input input) { return ss->GetDataFlowInput(input.GetInst()) == otherInst; });
+    auto *normalizedInst = Inst::GetDataFlowInput(const_cast<Inst *>(otherInst));
+    auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(), [ss, normalizedInst](Input input) {
+        return ss->GetDataFlowInput(input.GetInst()) == normalizedInst;
+    });
     bool isSaved = it != ss->GetInputs().end();
     if (!isSaved) {
-        bool isNullPtrOrConst = otherInst->IsConst() || otherInst->GetOpcode() == Opcode::NullPtr;
+        bool isNullPtrOrConst = normalizedInst->IsConst() || normalizedInst->GetOpcode() == Opcode::NullPtr;
         if (isNullPtrOrConst && ss->GetImmediates() != nullptr) {
             uint64_t rawValue =
-                otherInst->GetOpcode() == Opcode::NullPtr ? 0 : otherInst->CastToConstant()->GetRawValue();
-            auto type = otherInst->GetType();
+                normalizedInst->GetOpcode() == Opcode::NullPtr ? 0 : normalizedInst->CastToConstant()->GetRawValue();
+            auto type = normalizedInst->GetType();
             // There are no INT64 in dynamic (same like in OptimizeSaveStateConstantInputs).
             if (type == DataType::INT64 && ss->GetBasicBlock()->GetGraph()->IsDynamicMethod()) {
                 type = DataType::INT32;
@@ -3013,27 +3015,55 @@ void GraphChecker::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[may
                                                   << *asyncContext << std::endl);
 }
 
+BasicBlock *GraphChecker::FindDispatchPrologue([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    BasicBlock *dispatchBlock = inst->GetBasicBlock();
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetPredsBlocks().size() == 1U,
+                                        std::cerr << "Dispatch block must have exactly one predecessor: " << *inst
+                                                  << std::endl);
+    BasicBlock *prologueBlock = dispatchBlock->GetPredBlockByIndex(0);
+    BasicBlock *startBlock = prologueBlock->GetGraph()->GetStartBlock();
+    BasicBlock *bb = prologueBlock;
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, prologueBlock != startBlock,
+                                        std::cerr << "Dispatch prologue must not be the start block\n");
+    do {
+        if (bb != prologueBlock) {
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, bb->IsTryBegin(),
+                                                std::cerr << "Dispatch prologue must be reachable from start block by "
+                                                             "only one path through try begin blocks\n");
+        }
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !bb->GetPredsBlocks().empty(),
+                                            std::cerr << "Dispatch prologue must be reachable from start block\n");
+        auto *pred = bb->GetPredecessor(0);
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, pred->IsDominate(bb),
+            std::cerr << "Dispatch prologue must be reachable from start block by only one path\n");
+        bb = pred;
+    } while (bb != startBlock);
+    return prologueBlock;
+}
+
 void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     [[maybe_unused]] auto graph = static_cast<GraphChecker *>(v)->GetGraph();
     [[maybe_unused]] auto startBlock = graph->GetStartBlock();
     [[maybe_unused]] auto dispatchBlock = inst->GetBasicBlock();
+    [[maybe_unused]] auto prologueBlock = FindDispatchPrologue(v, inst);
+
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, startBlock->GetSuccsBlocks().size() == 1U,
                                         std::cerr
                                             << "Start block must have exactly one successor for Dispatch shape\n");
-    [[maybe_unused]] auto prologueBlock = startBlock->GetSuccessor(0U);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock != startBlock,
                                         std::cerr << "Dispatch instruction must not be in start block: " << *inst
                                                   << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, dispatchBlock->IsTry(), std::cerr << "Dispatch instruction must be in try block: " << *inst << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, prologueBlock->GetSuccsBlocks().size() == 2U,
                                         std::cerr << "Dispatch prologue block must be a two-way branch: " << *inst
                                                   << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetPredsBlocks().size() == 1U,
-                                        std::cerr << "Dispatch block must have exactly one predecessor: " << *inst
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !prologueBlock->IsTryBegin(),
+                                        std::cerr << "Dispatch prologue block must not be a try-begin block: " << *inst
                                                   << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        v, dispatchBlock->GetPredecessor(0U) == prologueBlock,
-        std::cerr << "Dispatch block must be reached from the post-start prologue block: " << *inst << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetSuccsBlocks().size() == 1U,
                                         std::cerr << "Dispatch block must have one successor: " << *inst << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, dispatchBlock->GetSuccessor(0U)->IsEndBlock(),
@@ -3044,9 +3074,6 @@ void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unuse
         std::cerr << "Dispatch must be the only executable instruction in its basic block: " << *inst << std::endl);
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(), std::cerr << "Dispatch can't have users");
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(inst->GetInput(0U).GetInst()->GetType()),
-                                        std::cerr << "Dispatch instruction input must be reference: " << *inst
-                                                  << std::endl);
 }
 
 void GraphChecker::VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)

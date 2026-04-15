@@ -98,6 +98,7 @@ public:
     FRAME_INFO_FIELD(AdjustSpReg, bool);
     FRAME_INFO_FIELD(HasFloatRegs, bool);
     FRAME_INFO_FIELD(PushCallers, bool);
+    FRAME_INFO_FIELD(FlagsInThreadReg, bool);
 
     using PositionedCallers = BitField<bool, 0, 1>;
     using PositionedCallees = PositionedCallers::NextFlag;
@@ -112,6 +113,7 @@ public:
     // Whether we need to push callers below stack during calls. Actually it is some kind of workaround, and we need
     // to rework it and make better solution, e.g allocate size for callers in a frame and save them there.
     using PushCallers = HasFloatRegs::NextFlag;
+    using FlagsInThreadReg = PushCallers::NextFlag;
 
     // The following static 'constructors' are for situations
     // when we have to generate prologue/epilogue but there is

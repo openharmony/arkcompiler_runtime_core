@@ -522,6 +522,8 @@ private:
             (std::cerr << "Instruction must have SaveState as last input:\n", inst->Dump(&std::cerr)));
     }
 
+    static BasicBlock *FindDispatchPrologue([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+
     std::string GetPassName() const
     {
         return passName_;
