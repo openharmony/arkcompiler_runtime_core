@@ -21,7 +21,8 @@ desc: >-
     The type of each dimension expression must be assignable (see Assignability) to an int type.
     Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}
