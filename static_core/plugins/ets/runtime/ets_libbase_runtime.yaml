@@ -24,7 +24,7 @@ coretypes:
 - managed_class: std.core.RuntimeLinker
   mirror_class: ark::ets::EtsRuntimeLinker
 
-- managed_class: std.core.AbcFile
+- managed_class: arkruntime.AbcFile
   mirror_class: ark::ets::EtsAbcFile
 
 - managed_class: std.core.AbcRuntimeLinker
@@ -85,7 +85,7 @@ coretypes:
 - managed_class: std.concurrency.AtomicInt
   mirror_class: ark::ets::EtsAtomicInt
 
-- managed_class: std.core.StackTraceElement
+- managed_class: arkruntime.StackTraceElement
   mirror_class: ark::ets::EtsStackTraceElement
 
 - managed_class: std.core.Error
@@ -5495,15 +5495,15 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStackTraceLines
     clear_flags: [ no_dce ]
 
-  - name: StdCoreStackTraceProvisionStackTrace
+  - name: ArkRuntimeStackTraceProvisionStackTrace
     space: ets
-    class_name: std.core.StackTrace
+    class_name: arkruntime.StackTrace
     method_name: provisionStackTrace
     static: true
     signature:
-      ret: std.core.StackTraceElement[]
+      ret: arkruntime.StackTraceElement[]
       args: []
-    impl: ark::ets::intrinsics::StdCoreStackTraceProvisionStackTrace
+    impl: ark::ets::intrinsics::ArkRuntimeStackTraceProvisionStackTrace
     clear_flags: [ no_dce ]
 
   - name: StdCoreExit
@@ -7636,34 +7636,34 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::EtsGetNearestNonBootRuntimeLinker
 
-####################
-# std.core.AbcFile #
-####################
-  - name: StdCoreAbcFileLoadAbcFile
+######################
+# arkruntime.AbcFile #
+######################
+  - name: ArkRuntimeAbcFileLoadAbcFile
     space: ets
-    class_name: std.core.AbcFile
+    class_name: arkruntime.AbcFile
     method_name: loadAbcFile
     static: true
     signature:
-      ret: std.core.AbcFile
+      ret: arkruntime.AbcFile
       args: [ std.core.RuntimeLinker, std.core.String ]
     impl: ark::ets::intrinsics::EtsAbcFileLoadAbcFile
 
-  - name: StdCoreAbcFileLoadFromMemory
+  - name: ArkRuntimeAbcFileLoadFromMemory
     space: ets
-    class_name: std.core.AbcFile
+    class_name: arkruntime.AbcFile
     method_name: loadFromMemory
     static: true
     signature:
-      ret: std.core.AbcFile
+      ret: arkruntime.AbcFile
       args:
         - std.core.RuntimeLinker
         - i8[]
     impl: ark::ets::intrinsics::EtsAbcFileLoadFromMemory
 
-  - name: StdCoreAbcFileLoadClass
+  - name: ArkRuntimeAbcFileLoadClass
     space: ets
-    class_name: std.core.AbcFile
+    class_name: arkruntime.AbcFile
     method_name: loadClass
     static: false
     signature:
@@ -7671,9 +7671,9 @@ intrinsics:
       args: [ std.core.RuntimeLinker, std.core.String, u1 ]
     impl: ark::ets::intrinsics::EtsAbcFileLoadClass
 
-  - name: StdCoreAbcFileGetFilename
+  - name: ArkRuntimeAbcFileGetFilename
     space: ets
-    class_name: std.core.AbcFile
+    class_name: arkruntime.AbcFile
     method_name: getFilename
     static: false
     signature:
@@ -7702,7 +7702,7 @@ intrinsics:
     signature:
       ret: void
       args:
-        - std.core.AbcFile[]
+        - arkruntime.AbcFile[]
     impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerAddNewAbcFiles
 
 ###################

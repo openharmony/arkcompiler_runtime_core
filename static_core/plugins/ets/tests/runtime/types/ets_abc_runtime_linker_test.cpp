@@ -40,7 +40,7 @@ public:
 
 TEST_F(EtsAbcRuntimeLinkerTest, AbcFileMemoryLayout)
 {
-    EtsClass *abcFileClass = GetPlatformTypes()->coreAbcFile;
+    EtsClass *abcFileClass = GetPlatformTypes()->arkruntimeAbcFile;
     MirrorFieldInfo::CompareMemberOffsets(abcFileClass, GetEtsAbcClassMembers());
 }
 

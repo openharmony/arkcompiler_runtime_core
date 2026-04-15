@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,17 +96,3 @@ export abstract class RuntimeLinker {
      */
     private native initializeContext(): void
 }
-
-/**
- * Loads library from specified path.
- *
- * @param path to library to load
- */
-export native function loadLibrary(path: String): void
-
-/**
- * use the permission check hook when loadLibrary 
- * @param path to library to load
- * @param fileName The name of the file, for example: @ohos.bundle.d.ts
- */
-export native function loadLibraryWithPermissionCheck(path: String, fileName: String): void

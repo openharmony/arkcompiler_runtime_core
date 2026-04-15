@@ -19,6 +19,8 @@
 
 package std.core;
 
+import { StackTrace, StackTraceElement } from "arkruntime"
+
 /**
  * Defines ErrorOptions interface
  *

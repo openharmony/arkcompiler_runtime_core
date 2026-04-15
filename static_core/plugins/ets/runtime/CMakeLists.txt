@@ -67,7 +67,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AniHelpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Class.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcFile.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/arkruntime_AbcFile.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcRuntimeLinker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
@@ -86,7 +86,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AsyncContext.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/std_core_StackTrace.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/arkruntime_StackTrace.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
     ${ETS_EXT_SOURCES}/intrinsics/reflect_Proxy.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp

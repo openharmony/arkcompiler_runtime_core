@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-package std.core;
+package arkruntime;
 
 /** 
   * @class Represents ABC file. 
   * Intended to be used by AbcRuntimeLinker and other platform extensions. 
   */
+@annotation.InternalAPI
 export final class AbcFile {
     private fileHandlePtr: long
 
@@ -53,7 +54,7 @@ export final class AbcFile {
     public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: ValueArray<byte>): AbcFile
 
     public static loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile {
-        return AbcFile.loadFromMemory(runtimeLinker, arkruntime.stub.toValueArray(rawFile))
+        return AbcFile.loadFromMemory(runtimeLinker, stub.toValueArray(rawFile))
     }
 
     /** 
