@@ -16,13 +16,15 @@
 /*---
 desc: Compilation error with incorrect value type
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0319: Type '"30"' is not compatible with type 'Int' at property 'age'
 ---*/
 
 class Person {
-  name: String;
-  age: int;
+    name: String
+    age: int
 }
 
-function main(): void{ 
-  let person: Person = { name: "Bob", age: "30" };
+function main(): void {
+    let person: Person = { name: 'Bob', age: '30' }
 }

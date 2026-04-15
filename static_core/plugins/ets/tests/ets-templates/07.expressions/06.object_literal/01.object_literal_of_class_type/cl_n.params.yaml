@@ -19,6 +19,8 @@ cases:
           }
       use: |-
           let a: A = {} // CTE, no parameterless constructor
+      expected_out: |-
+          Semantic error ESE0291: Type A has no parameterless constructor. Initialization with literals is not supported if the type has no parameterless constructor. Declare the parameterless constructor explicitly or remove parametered constructors!
 
     - decl: |-
           class A {
@@ -29,6 +31,8 @@ cases:
           }
       use: |-
           let a: A = { fld: new Object() } // CTE, no parameterless constructor
+      expected_out: |-
+          Semantic error ESE0291: Type A has no parameterless constructor. Initialization with literals is not supported if the type has no parameterless constructor. Declare the parameterless constructor explicitly or remove parametered constructors!
 
     - decl: |-
           class A {
@@ -37,6 +41,8 @@ cases:
           }
       use: |-
           let a: A = {} // CTE, parameterless constructor is not accessible
+      expected_out: |-
+          Semantic error ESE0139: Signature constructor(): undefined is not visible here.
 
     - decl: |-
           class A {
@@ -44,6 +50,8 @@ cases:
           }
       use: |-
           let a: A = { age: 42 } // CTE, no such field
+      expected_out: |-
+          Semantic error ESE0065: type A has no property named age
 
     - decl: |-
           class A {
@@ -51,6 +59,8 @@ cases:
           }
       use: |-
           let a: A = { name: "John" } // CTE, field is not accessible
+      expected_out: |-
+          Semantic error ESE0293: Property name is not visible here.
 
     - decl: |-
           class B {
@@ -58,6 +68,8 @@ cases:
           }
       use: |-
           let b: B = { name: 0 }  // CTE, type is wrong
+      expected_out: |-
+          Semantic error ESE0319: Type 'Int' is not compatible with type 'String|null' at property 'name'
 
     - decl: |-
           class B {
@@ -65,6 +77,8 @@ cases:
           }
       use: |-
           let b: B = { name: "John" }  // CTE, not a member field
+      expected_out: |-
+          Semantic error ESE0065: type B has no property named name
 
     - decl: |-
           class A {
@@ -73,6 +87,8 @@ cases:
           }
       use: |-
           let a: A = { name: "John", age: 42, name: "James" } // CTE, duplicate field
+      expected_out: |-
+          Semantic error ESE0280: Property 'name' might not have been initialized.
 
     - decl: |-
           class A {
@@ -81,23 +97,27 @@ cases:
           }
       use: |-
           let a = { name: "John", age: 42 } // CTE, type cannot be inferred
+      expected_out: |-
+          Semantic error ESE0174: Cannot infer type for a because class composite needs an explicit target type
 
     - decl: |-
-        interface IName {
-          name: string
-        }
-        interface IAge {
-          age: number
-        }
-        class Person implements IName, IAge {
-          private _name: string = ''
-          private _age: number = 0.0
-        
-          get name(): string { return this._name }
-          get age(): number { return this._age }
-          set name(value: string) { this._name = value }
-          set age(value: number) { this._age = value }
-        }
+          interface IName {
+            name: string
+          }
+          interface IAge {
+            age: number
+          }
+          class Person implements IName, IAge {
+            private _name: string = ''
+            private _age: number = 0.0
+
+            get name(): string { return this._name }
+            get age(): number { return this._age }
+            set name(value: string) { this._name = value }
+            set age(value: number) { this._age = value }
+          }
       use: |-
-        let f1: Person = { _name: 'Alice', _age: 17 }
-        
+          let f1: Person = { _name: 'Alice', _age: 17 }
+      expected_out: |-
+          Semantic error ESE0293: Property _name is not visible here.
+          Semantic error ESE0293: Property _age is not visible here.

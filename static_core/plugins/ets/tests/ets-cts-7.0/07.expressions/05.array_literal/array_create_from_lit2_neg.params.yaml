@@ -10,23 +10,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+---
 cases:
   - desc: |-
       Create 1D Array with wrong type values
     sub_cases_logic:
-      - |-
-        let a: Object[] = [1, 3, undefined]
-      - |-
-        let a: Object[] = [1, null, 3]
-      - |-
-        let a: int[] = [1, 3, 5.7]
-      - |-
-        let a: int[] = [1, "abc", 5]
-      - |-
-        let a: string[] = ["abc", 3, "efg"]
-      - |-
-        let a: boolean[] = [true, false, "true"]
+      - code: |-
+            let a: Object[] = [1, 3, undefined]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 2 with type 'undefined' is not compatible with the target array element type 'Object'
+      - code: |-
+            let a: Object[] = [1, null, 3]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 1 with type 'null' is not compatible with the target array element type 'Object'
+      - code: |-
+            let a: int[] = [1, 3, 5.7]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 2 with type 'Double' is not compatible with the target array element type 'Int'
+      - code: |-
+            let a: int[] = [1, "abc", 5]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 1 with type '"abc"' is not compatible with the target array element type 'Int'
+      - code: |-
+            let a: string[] = ["abc", 3, "efg"]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 1 with type 'Int' is not compatible with the target array element type 'String'
+      - code: |-
+            let a: boolean[] = [true, false, "true"]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 2 with type '"true"' is not compatible with the target array element type 'Boolean'
 
   - desc: |-
       Create 1D Array with not covariant subtypes
@@ -35,10 +47,14 @@ cases:
       class Dog extends Animal {}
       class Cat extends Animal {}
     sub_cases_logic:
-      - |-
-        let dogs: Dog[] = [new Dog, new Animal, new Dog]
-      - |-
-        let dogs: Dog[] = [new Dog, new Dog, new Cat]
+      - code: |-
+            let dogs: Dog[] = [new Dog, new Animal, new Dog]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 1 with type 'Animal' is not compatible with the target array element type 'Dog'
+      - code: |-
+            let dogs: Dog[] = [new Dog, new Dog, new Cat]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 2 with type 'Cat' is not compatible with the target array element type 'Dog'
 
   - desc: |-
       Create 1D Array with not covariant function subtypes
@@ -68,13 +84,23 @@ cases:
         return new C
       }
     sub_cases_logic:
-      - |-
-        let a: HandlerReq[] = [handlerCInt]
-      - |-
-        let a: HandlerReq[] = [handlerBInt]
-      - |-
-        let a: HandlerReq[] = [handlerB]
-      - |-
-        let a: HandlerReq[] = [handlerBIntInt]
-      - |-
-        let a: HandlerReq[] = [handlerNothing]
+      - code: |-
+            let a: HandlerReq[] = [handlerCInt]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 0 with type '((p1: C, p2: Int) => B)' is not compatible with the target array element type '((p1: B, p2: Int) => B)'
+      - code: |-
+            let a: HandlerReq[] = [handlerBInt]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 0 with type '((p1: B, p2: Int) => A)' is not compatible with the target array element type '((p1: B, p2: Int) => B)'
+      - code: |-
+            let a: HandlerReq[] = [handlerB]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 0 with type '((p1: B) => A)' is not compatible with the target array element type '((p1: B, p2: Int) => B)'
+      - code: |-
+            let a: HandlerReq[] = [handlerBIntInt]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 0 with type '((p1: B, p2: Int, p3: Int) => B)' is not compatible with the target array element type '((p1: B, p2: Int) => B)'
+      - code: |-
+            let a: HandlerReq[] = [handlerNothing]
+        expected_out: |-
+            Semantic error ESE0227: Array element at index 0 with type '(() => C)' is not compatible with the target array element type '((p1: B, p2: Int) => B)'

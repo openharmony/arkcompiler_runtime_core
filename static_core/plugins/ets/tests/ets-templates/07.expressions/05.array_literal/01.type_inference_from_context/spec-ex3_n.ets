@@ -15,15 +15,18 @@
 
 /*---
 desc: >-
-  The type of an array literal can be inferred from the context
-  that can be specified as one of the following: explicit type annotation
-  of a variable declaration, left-hand part type of an assignment,
-  explicit return type of a function, a method, or a lambda in a return
-  statement, parameter type in a call, target type of a cast expression,
-  or type of an array element or a class field.
+    The type of an array literal can be inferred from the context
+    that can be specified as one of the following: explicit type annotation
+    of a variable declaration, left-hand part type of an assignment,
+    explicit return type of a function, a method, or a lambda in a return
+    statement, parameter type in a call, target type of a cast expression,
+    or type of an array element or a class field.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0
+    Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 1
 ---*/
 
 function main() {
-    let incorrect: [number, string] = ["hello", 1] // compile-time error
+    let incorrect: [number, string] = ["hello", 1]
 }

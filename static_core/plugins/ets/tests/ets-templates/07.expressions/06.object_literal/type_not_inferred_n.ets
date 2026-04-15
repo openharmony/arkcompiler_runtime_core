@@ -16,8 +16,10 @@
 /*---
 desc: Compilation error when a Class composite type not inferred
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0174: Cannot infer type for p because class composite needs an explicit target type
 ---*/
-  
+
 function main(): void {
-  let p = {name: "Bob", age: 25}
+    let p = { name: 'Bob', age: 25 }
 }

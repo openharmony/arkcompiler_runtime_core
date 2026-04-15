@@ -17,7 +17,9 @@
 desc: >-
     Assignment of the value of expression to the corresponding field of x as its initial value.
     This rule also applies to readonly fields.
-tags: ['compile-only', 'negative']
+tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE4002: Cannot assign to a readonly field b
 ---*/
 
 class X {

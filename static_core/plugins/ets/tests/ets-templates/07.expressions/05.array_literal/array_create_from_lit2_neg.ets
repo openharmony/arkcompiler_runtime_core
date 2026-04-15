@@ -14,28 +14,19 @@
  */
 
 {% for c in cases %}
-
-{% if 'sub_cases_logic' in c %}
-  {% set sub_cases_logic=c.sub_cases_logic %}
-{% else %}
-  {% set sub_cases_logic=[""] %}
-{% endif %}
-
-{% for scl in sub_cases_logic %}
+{% for s in c['sub_cases_logic'] %}
 
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
+expected_out: |-
+    {{s.expected_out}}
 ---*/
 
 {{c.decl}}
 
 function main(): void {
-{% if 'logic' in c %}  {{c.logic|indent(width=2)}}
-{% endif -%}
-{% if scl != "" %}  {{scl|indent(width=2)}}
-{% endif -%}
+    {{s.code|indent}}
 }
-
 {% endfor %}
 {% endfor %}

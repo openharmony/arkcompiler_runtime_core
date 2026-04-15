@@ -18,7 +18,6 @@
 /*---
 desc: >-
     The type of an array literal can be inferred from the declaration context.
-tags: [{{c.tags}}]
 ---*/
 {{c.defs}}
 let a: {{d[0]}}
