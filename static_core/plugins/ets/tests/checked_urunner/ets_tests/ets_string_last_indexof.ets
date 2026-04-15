@@ -34,3 +34,15 @@ function main() {
     arktest.assertEQ(u8Line.lastIndexOf(c'a'), 0);
     arktest.assertEQ(u8Line.lastIndexOf(c'a', 5), 0);
 }
+
+//! CHECKER       JIT, check that irtoc implementation of LastIndexOf function works correctly in case when we have similar strings in memory
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*bugfixIrtocLastIndexOf.*'", entry: "ets_string_last_indexof.ETSGLOBAL::bugfixIrtocLastIndexOf"
+
+let ws1 = '一二三四一二三四一二三四一二三四一二三';
+let wsa1 = ['一二三','一二三','一二三','一二三','一二三'];
+let ws2 = '一二三四一二三四一二三四一二三四一二三四';
+
+function bugfixIrtocLastIndexOf() {
+    return ws1.split('四').length - 5;
+}
