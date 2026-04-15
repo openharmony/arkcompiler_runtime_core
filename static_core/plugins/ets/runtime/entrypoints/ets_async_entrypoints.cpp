@@ -25,46 +25,59 @@
 
 namespace ark::ets {
 
-#if defined(PANDA_TARGET_AMD64)
-static void SaveLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, StackWalker &walker)
+#if defined(PANDA_TARGET_AMD64) || defined(PANDA_TARGET_ARM64)
+static void SaveLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, CFrame cframe, uintptr_t suspendRetAddr)
 {
     auto executionCtx = coro->GetExecutionCtx();
+    auto refValues = asyncContext->GetRefValues(executionCtx);
+    auto primValues = asyncContext->GetPrimValues(executionCtx);
     auto frameOffsets = asyncContext->GetFrameOffsets(executionCtx);
     uint32_t refCount = 0;
-    [[maybe_unused]] const auto refsSaved = walker.IterateVRegsWithInfo(
-        // See EtsAsyncSuspendImpl note
-        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        [executionCtx, asyncContext, frameOffsets, &refCount](const auto &regInfo, const auto &vreg) {
-            if (regInfo.GetLocation() == compiler::VRegInfo::Location::CONSTANT || !vreg.HasObject()) {
-                return true;
-            }
-
-            ASSERT(regInfo.GetLocation() == compiler::VRegInfo::Location::SLOT);
-            auto locationValue = static_cast<int>(regInfo.GetValue());
-            frameOffsets->Set(refCount, static_cast<EtsShort>(locationValue));
-            asyncContext->AddReference(executionCtx, refCount, EtsObject::FromCoreType(vreg.GetReference()));
-            refCount++;
-            return true;
-        });
-    ASSERT(refsSaved);
-
     uint32_t primCount = 0;
-    [[maybe_unused]] const auto primsSaved = walker.IterateVRegsWithInfo(
-        // See EtsAsyncSuspendImpl note
-        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        [executionCtx, asyncContext, frameOffsets, refCount, &primCount](const auto &regInfo, const auto &vreg) {
-            if (regInfo.GetLocation() == compiler::VRegInfo::Location::CONSTANT || vreg.HasObject()) {
-                return true;
-            }
 
-            ASSERT(regInfo.GetLocation() == compiler::VRegInfo::Location::SLOT);
-            auto locationValue = static_cast<int>(regInfo.GetValue());
-            frameOffsets->Set(refCount + primCount, static_cast<EtsShort>(locationValue));
-            asyncContext->AddPrimitive(executionCtx, primCount, static_cast<EtsLong>(vreg.GetValue()));
-            primCount++;
-            return true;
-        });
-    ASSERT(primsSaved);
+    auto *compiledCode = cframe.GetMethod()->GetCompiledEntryPoint();
+    compiler::CodeInfo codeInfo(compiler::CodeInfo::GetCodeOriginFromEntryPoint(compiledCode));
+    auto npc = down_cast<uint32_t>(suspendRetAddr - bit_cast<uintptr_t>(compiledCode));
+    auto stackMap = codeInfo.FindStackMapForNativePc(npc);
+    ASSERT(stackMap.IsValid());
+
+    asyncContext->SetCompiledCode(bit_cast<uintptr_t>(compiledCode));
+    asyncContext->SetPc(npc);
+
+    auto *internalAllocator = mem::InternalAllocator<>::GetInternalAllocatorFromRuntime();
+    ASSERT(internalAllocator != nullptr);
+    auto vregList = codeInfo.GetVRegList(stackMap, internalAllocator);
+
+    for (auto vregInfo : vregList) {
+        if (!vregInfo.IsLive() || vregInfo.GetLocation() == compiler::VRegInfo::Location::CONSTANT ||
+            !vregInfo.IsObject()) {
+            continue;
+        }
+
+        ASSERT(vregInfo.GetLocation() == compiler::VRegInfo::Location::SLOT);
+        auto locationValue = static_cast<int>(vregInfo.GetValue());
+        auto *refValue = bit_cast<void *>(cframe.GetValueFromSlot(locationValue));
+        // remove possible garbage from high part?
+        refValue = ToVoidPtr(ToObjPtr(refValue));
+        frameOffsets->Set(refCount, static_cast<EtsShort>(locationValue));
+        refValues->Set(refCount, static_cast<EtsObject *>(refValue));
+        ++refCount;
+    }
+
+    // NOTE: remove the second pass?
+    for (auto vregInfo : vregList) {
+        if (!vregInfo.IsLive() || vregInfo.GetLocation() == compiler::VRegInfo::Location::CONSTANT ||
+            vregInfo.IsObject()) {
+            continue;
+        }
+
+        ASSERT(vregInfo.GetLocation() == compiler::VRegInfo::Location::SLOT);
+        auto locationValue = static_cast<int>(vregInfo.GetValue());
+        auto primValue = cframe.GetValueFromSlot(locationValue);
+        frameOffsets->Set(refCount + primCount, static_cast<EtsShort>(locationValue));
+        primValues->Set(primCount, primValue);
+        ++primCount;
+    }
 
     // See EtsAsyncSuspendImpl note
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -73,20 +86,14 @@ static void SaveLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, Sta
     asyncContext->SetPrimCount(primCount);
 }
 
-static void RestoreLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, StackWalker &walker)
+static void RestoreLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, CFrame cframe)
 {
     auto executionCtx = coro->GetExecutionCtx();
-    const auto awaiteePromise = asyncContext->GetAwaitee(executionCtx);
-    ASSERT(awaiteePromise != nullptr);
-    ASSERT(!awaiteePromise->IsPending());
-    [[maybe_unused]] const auto awaitedValue = EtsObject::ToCoreType(awaiteePromise->GetValue(executionCtx));
     auto refValues = asyncContext->GetRefValues(executionCtx);
     auto primValues = asyncContext->GetPrimValues(executionCtx);
     auto frameOffsets = asyncContext->GetFrameOffsets(executionCtx);
     const uint32_t refCount = asyncContext->GetRefCount();
     const uint32_t primCount = asyncContext->GetPrimCount();
-
-    auto &cframe = walker.GetCFrame();
 
     for (uint32_t idx = 0; idx < refCount; idx++) {
         auto locationValue = frameOffsets->Get(idx);
@@ -108,18 +115,15 @@ static void RestoreLiveVRegs(EtsCoroutine *coro, EtsAsyncContext *asyncContext, 
 extern "C" ObjectHeader *EtsAsyncSuspendImpl(EtsCoroutine *coro, ObjectHeader *asyncContextObj, void *fp,
                                              uintptr_t suspendRetAddr)
 {
-    auto asyncContext = EtsAsyncContext::FromCoreType(asyncContextObj);
+    auto *asyncContext = EtsAsyncContext::FromCoreType(asyncContextObj);
     if (UNLIKELY(asyncContext == nullptr)) {
         ThrowNullPointerException();
         return nullptr;
     }
 
-    auto executionCtx = coro->GetExecutionCtx();
-    asyncContext->SetAwaitId(static_cast<EtsLong>(suspendRetAddr));
+    SaveLiveVRegs(coro, asyncContext, CFrame(fp), suspendRetAddr);
 
-    StackWalker walker(fp, true, suspendRetAddr);
-    SaveLiveVRegs(coro, asyncContext, walker);
-
+    auto *executionCtx = coro->GetExecutionCtx();
     // Note: We don't inline async functions, so they are always on the top frame and,
     // therefore we don't call GetMethod and GC won't start.
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -132,22 +136,21 @@ extern "C" uintptr_t EtsAsyncDispatchImpl(EtsCoroutine *coro, ObjectHeader *asyn
         return 0U;
     }
 
-    auto asyncContext = EtsAsyncContext::FromCoreType(asyncContextObj);
-    const auto resumeAddr = static_cast<uintptr_t>(asyncContext->GetAwaitId());
-    // awaitId can be 0 when the async function is resumed without awaiting, e.g. when the awaited promise is already
+    auto *asyncContext = EtsAsyncContext::FromCoreType(asyncContextObj);
+    const auto resumeAddr = static_cast<uintptr_t>(asyncContext->GetCompiledCode() + asyncContext->GetPc());
+    // resumeAddr can be 0 when the async function is resumed without awaiting, e.g. when the awaited promise is already
     // resolved at the moment of awaiting.
     if (resumeAddr == 0U) {
         return 0U;
     }
 
-    StackWalker walker(fp, true, resumeAddr);
-    RestoreLiveVRegs(coro, asyncContext, walker);
+    RestoreLiveVRegs(coro, asyncContext, CFrame(fp));
 
     return resumeAddr;
 }
 #endif
 
-#if !defined(PANDA_TARGET_AMD64)
+#if !defined(PANDA_TARGET_AMD64) && !defined(PANDA_TARGET_ARM64)
 extern "C" void EtsAsyncSuspendStub([[maybe_unused]] ObjectHeader *asyncContext) {}
 
 extern "C" void EtsAsyncDispatchStub([[maybe_unused]] ObjectHeader *asyncContext) {}

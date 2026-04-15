@@ -60,6 +60,7 @@ bool FillSaveStateSuspendInputs::RunImpl()
 
     graph->SetMaxPrimCountAtSuspend(maxPrimCount_);
     graph->SetMaxRefCountAtSuspend(maxRefCount_);
+    graph->SetMaxSuspendBridges(maxSuspendBridges_);
 
     COMPILER_LOG(DEBUG, FILL_SS_SUSPEND) << "FillSaveStateSuspendInputs pass completed, modified=" << modified;
 
@@ -70,15 +71,23 @@ void FillSaveStateSuspendInputs::UpdateCounters(SaveStateInst *saveStateSuspend)
 {
     uint32_t refCount = 0;
     uint32_t primCount = 0;
-    for (auto input : saveStateSuspend->GetInputs()) {
-        if (IsReference(input.GetInst()->GetType())) {
-            refCount++;
+    uint32_t suspendBridges = 0;
+    for (size_t i = 0U; i < saveStateSuspend->GetInputsCount(); ++i) {
+        if (saveStateSuspend->GetVirtualRegister(i).IsBridge()) {
+            ++suspendBridges;
+        }
+
+        auto *input = saveStateSuspend->GetInput(i).GetInst();
+        if (IsReference(input->GetType())) {
+            ++refCount;
         } else {
-            primCount++;
+            ++primCount;
         }
     }
+
     maxPrimCount_ = std::max(maxPrimCount_, primCount + static_cast<uint32_t>(saveStateSuspend->GetImmediatesCount()));
     maxRefCount_ = std::max(maxRefCount_, refCount);
+    maxSuspendBridges_ = std::max(maxSuspendBridges_, suspendBridges);
 }
 
 bool FillSaveStateSuspendInputs::ProcessSaveStateSuspend(SaveStateInst *saveStateSuspend)

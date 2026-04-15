@@ -73,6 +73,7 @@ static size_t CountInstInGraph(Graph *graph, Opcode opcode)
 // CC-OFFNXT(huge_method, G.FUN.01) test, solid logic
 TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
 {
+    // Fake bytecode to test Dispatch basic block creation
     auto source = R"(
     .record arkruntime.AsyncContext {
     }
@@ -80,10 +81,7 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     }
     .record std.core.Object {
     }
-
-    .record Pair {
-        std.core.Object ref
-        i64 primitive
+    .record std.core.Error {
     }
 
     .function arkruntime.AsyncContext arkruntime.AsyncContext.current() <static> {
@@ -91,43 +89,21 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
         return.obj
     }
 
-    .function arkruntime.AsyncContext arkruntime.AsyncContext.init() <static> {
-        lda.null
-        return.obj
-    }
-
-    .function std.core.Promise arkruntime.AsyncContext.resolve(arkruntime.AsyncContext a0, std.core.Object a1) {
-        lda.null
-        return.obj
-    }
-
-    .function std.core.Object std.core.Promise.awaitResolution(std.core.Promise a0) {
-        lda.null
-        return.obj
-    }
-
     .function std.core.Promise async_foo(std.core.Promise a0) {
+    try_begin:
         call.short arkruntime.AsyncContext.current
         sta.obj v0
         ets.async.dispatch v0
-        call.short arkruntime.AsyncContext.init
-        sta.obj v4
-
-        newobj v1, std.core.Object
-        movi.64 v2, 42
-
-        call.virt.short std.core.Promise.awaitResolution, a0
-        ets.async.suspend v4
-        checkcast Pair
-        sta.obj v3
-
-        lda.obj v1
-        stobj.obj v3, Pair.ref
-        lda.64 v2
-        stobj.64 v3, Pair.primitive
-
-        call.virt.short arkruntime.AsyncContext.resolve, v4, v3
+        lda.null
+        sta.obj v0
+        ets.async.suspend v0
+        lda.null
         return.obj
+    try_end:
+        lda.null
+        return.obj
+
+    .catch std.core.Error, try_begin, try_end, try_end
     }
     )";
 
@@ -154,7 +130,7 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     ASSERT_TRUE(dispatchBlock->GetSuccessor(0U)->IsEndBlock());
 
     auto prologueBlock = dispatchBlock->GetPredecessor(0U);
-    ASSERT_EQ(prologueBlock, GetGraph()->GetStartBlock()->GetSuccessor(0U));
+    ASSERT_EQ(prologueBlock, GetGraph()->GetStartBlock()->GetSuccessor(0U)->GetSuccessor(0U));  // skip try begin
     ASSERT_EQ(prologueBlock->GetTrueSuccessor(), dispatchBlock);
     ASSERT_EQ(prologueBlock->GetLastInst()->GetOpcode(), Opcode::IfImm);
     ASSERT_TRUE(prologueBlock->GetLastInst()->CastToIfImm()->IsUnlikely());
@@ -164,13 +140,8 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     auto continuationBlock = prologueBlock->GetFalseSuccessor();
     ASSERT_EQ(saveStateSuspend->GetBasicBlock(), continuationBlock);
     ASSERT_EQ(continuationBlock->GetLastInst()->GetOpcode(), Opcode::Return);
-    ASSERT_EQ(continuationBlock->GetLastInst()->GetInput(0U).GetInst()->GetOpcode(), Opcode::CallVirtual);
-    ASSERT_EQ(CountInstInBlock(continuationBlock, Opcode::CallStatic), 1U);
     ASSERT_NE(saveStateSuspendInst->GetAsyncContext(), nullptr);
-    ASSERT_EQ(saveStateSuspendInst->GetAsyncContext(), FindFirstInst(continuationBlock, Opcode::CallStatic));
-    ASSERT_EQ(saveStateSuspendInst->GetVirtualRegister(0U).Value(), 4U);
-    ASSERT_EQ(CountInstInBlock(continuationBlock, Opcode::CallVirtual), 2U);
-    ASSERT_EQ(CountInstInBlock(continuationBlock, Opcode::StoreObject), 2U);
+    ASSERT_EQ(saveStateSuspendInst->GetVirtualRegister(0U).Value(), 0U);
 }
 
 }  // namespace ark::compiler

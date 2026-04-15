@@ -40,6 +40,29 @@ Codegen Hi-Level implementation
 
 namespace ark::compiler {
 
+namespace {
+size_t GetSuspendPseudoVRegCount(const Graph *graph, uint32_t inliningDepth = 0U)
+{
+    return (graph->IsAsync() && inliningDepth == 0U) ? static_cast<size_t>(graph->GetMaxSuspendBridges()) : 0U;
+}
+
+size_t GetBaseVRegCount(Codegen *codegen, SaveStateInst *saveState)
+{
+    auto runtime = codegen->GetRuntime();
+    size_t vregsCount = 0;
+    if (auto caller = saveState->GetCallerInst()) {
+        vregsCount = runtime->GetMethodRegistersCount(caller->GetCallMethod()) +
+                     runtime->GetMethodArgumentsCount(caller->GetCallMethod());
+    } else {
+        vregsCount = runtime->GetMethodRegistersCount(saveState->GetMethod()) +
+                     runtime->GetMethodArgumentsCount(saveState->GetMethod());
+    }
+    ASSERT(!codegen->GetGraph()->IsBytecodeOptimizer());
+    // 1 for acc, number of env regs for dynamic method
+    return vregsCount + 1U + codegen->GetGraph()->GetEnvCount();
+}
+}  // namespace
+
 class OsrEntryStub {
     void FixIntervals(Codegen *codegen, Encoder *encoder)
     {
@@ -234,6 +257,7 @@ void Codegen::CreateFrameInfo()
     frame->SetSaveUnusedCalleeRegs(!GetGraph()->GetMethodProperties().GetCompactPrologueAllowed());
     frame->SetAdjustSpReg(true);
     frame->SetHasFloatRegs(GetGraph()->HasFloatRegs());
+    frame->SetFlagsInThreadReg(GetGraph()->IsAsync());
 
     GetCodeBuilder()->SetHasFloatRegs(GetGraph()->HasFloatRegs());
 
@@ -425,8 +449,16 @@ bool Codegen::BeginMethod()
         GetEncoder()->SetCodeOffset(0);
     }
 
-    codeBuilder_->BeginMethod(GetFrameLayout().GetFrameSize<CFrameLayout::OffsetUnit::BYTES>(),
-                              GetGraph()->GetVRegsCount() + GetGraph()->GetEnvCount());
+    // add "fake" vregs for SaveStateSuspend bridge inputs
+    size_t vregsCount = GetGraph()->GetVRegsCount() + GetGraph()->GetEnvCount() +
+                        GetSuspendPseudoVRegCount(GetGraph());  // 1 for acc is already added in Graph's GetVRegsCount()
+    if (vregsCount >= VirtualRegister::MAX_NUM_VIRT_REGS) {
+        COMPILER_LOG(WARNING, CODEGEN) << "Can't encode so many bridges for SaveStateSuspend, vregsCount: "
+                                       << vregsCount;
+        return false;
+    }
+
+    codeBuilder_->BeginMethod(GetFrameLayout().GetFrameSize<CFrameLayout::OffsetUnit::BYTES>(), vregsCount);
 
     GetEncoder()->BindLabel(GetLabelEntry());
     SetStartCodeOffset(GetEncoder()->GetCursorOffset());
@@ -989,17 +1021,8 @@ void Codegen::CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, I
     bool hasInlineInfo = saveState->GetCallerInst() != nullptr;
     size_t vregsCount = 0;
     if (requireVregMap) {
-        auto runtime = GetRuntime();
-        if (auto caller = saveState->GetCallerInst()) {
-            vregsCount = runtime->GetMethodRegistersCount(caller->GetCallMethod()) +
-                         runtime->GetMethodArgumentsCount(caller->GetCallMethod());
-        } else {
-            vregsCount = runtime->GetMethodRegistersCount(saveState->GetMethod()) +
-                         runtime->GetMethodArgumentsCount(saveState->GetMethod());
-        }
-        ASSERT(!GetGraph()->IsBytecodeOptimizer());
-        // 1 for acc, number of env regs for dynamic method
-        vregsCount += 1U + GetGraph()->GetEnvCount();
+        vregsCount = GetBaseVRegCount(this, saveState);
+        vregsCount += GetSuspendPseudoVRegCount(GetGraph(), saveState->GetInliningDepth());
 #ifndef NDEBUG
         ASSERT_PRINT(!saveState->GetInputsWereDeleted() || saveState->GetInputsWereDeletedSafely(),
                      "Some vregs were deleted from the save state");
@@ -1096,22 +1119,29 @@ void Codegen::CreateVreg(const Location &location, Inst *inst, const VirtualRegi
 
 void Codegen::FillVregIndices(SaveStateInst *saveState)
 {
+    size_t bridgeVregIndex = GetBaseVRegCount(this, saveState);
     for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
         size_t vregIndex = saveState->GetVirtualRegister(i).Value();
         if (vregIndex == VirtualRegister::BRIDGE) {
-            continue;
+            if (!saveState->IsSaveStateSuspend()) {
+                continue;
+            }
+            ASSERT(bridgeVregIndex < vregIndices_.size());
+            // Allocate new "fake" vreg index to generate vregInfo for this SaveStateSuspend bridge input
+            vregIndex = bridgeVregIndex++;
         }
         ASSERT(vregIndex < vregIndices_.size());
         vregIndices_[vregIndex].first = i;
     }
     for (size_t i = 0; i < saveState->GetImmediatesCount(); i++) {
         auto vregImm = saveState->GetImmediate(i);
-        if (vregImm.vreg == VirtualRegister::BRIDGE) {
+        size_t vregIndex = vregImm.vreg;
+        if (vregIndex == VirtualRegister::BRIDGE) {
             continue;
         }
-        ASSERT(vregImm.vreg < vregIndices_.size());
-        ASSERT(vregIndices_[vregImm.vreg].first == -1);
-        vregIndices_[vregImm.vreg].second = i;
+        ASSERT(vregIndex < vregIndices_.size());
+        ASSERT(vregIndices_[vregIndex].first == -1);
+        vregIndices_[vregIndex].second = i;
     }
 }
 

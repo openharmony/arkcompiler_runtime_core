@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,13 +129,26 @@ Location Aarch64ParameterInfo::GetNextLocation(DataType::Type type)
     return Location::MakeRegister(target.GetParamRegId(currentScalarNumber_++));
 }
 
-Reg Aarch64CallingConvention::InitFlagsReg(bool hasFloatRegs)
+Reg Aarch64CallingConvention::InitFlagsReg(bool hasFloatRegs, bool flagsInThreadReg)
 {
     auto flags {static_cast<uint64_t>(hasFloatRegs) << CFrameLayout::HasFloatRegsFlag::START_BIT};
     auto flagsReg {GetTarget().GetZeroReg()};
-    if (flags != 0U) {
+    if (flagsInThreadReg) {
+        // Extract IsResumed flag from thread register, clear tag bit, combine with float flag
+        auto threadReg = Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType());
+        constexpr uint64_t TAG = 0x1;
         flagsReg = GetTarget().GetLinkReg();
-        GetEncoder()->EncodeMov(flagsReg, Imm(flags));
+        GetEncoder()->EncodeAnd(flagsReg, threadReg, Imm(TAG));
+        GetEncoder()->EncodeAnd(threadReg, threadReg, Imm(~TAG));
+        GetEncoder()->EncodeShl(flagsReg, flagsReg, Imm(CFrameLayout::IsResumedFlag::START_BIT));
+        if (flags != 0U) {
+            GetEncoder()->EncodeOr(flagsReg, flagsReg, Imm(flags));
+        }
+    } else {
+        if (flags != 0U) {
+            flagsReg = GetTarget().GetLinkReg();
+            GetEncoder()->EncodeMov(flagsReg, Imm(flags));
+        }
     }
     return flagsReg;
 }
@@ -231,10 +244,12 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
         static_assert(CFrameMethod::End() == CFrameFlags::Start());
         constexpr int64_t SLOTS_COUNT = CFrameMethod::GetSize() + CFrameFlags::GetSize();
 
-        GetMasm()->Stp(VixlReg(InitFlagsReg(frameInfo.GetHasFloatRegs())),  // Reset OSR flag and set HasFloatRegsFlag
-                       VixlReg(GetTarget().GetParamReg(0)),                 // Set Method pointer
-                       vixl::aarch64::MemOperand(VixlReg(sp), VixlImm(-SLOTS_COUNT * fl.GetSlotSize()),
-                                                 vixl::aarch64::AddrMode::PreIndex));
+        GetMasm()->Stp(
+            VixlReg(InitFlagsReg(frameInfo.GetHasFloatRegs(),
+                                 frameInfo.GetFlagsInThreadReg())),  // Reset OSR flag and set HasFloatRegsFlag
+            VixlReg(GetTarget().GetParamReg(0)),                     // Set Method pointer
+            vixl::aarch64::MemOperand(VixlReg(sp), VixlImm(-SLOTS_COUNT * fl.GetSlotSize()),
+                                      vixl::aarch64::AddrMode::PreIndex));
         spToRegsSlots -= SLOTS_COUNT;
     }
 

@@ -206,6 +206,7 @@ public:
         SetNeedCleanup(true);
         SetCanOptimizeNativeMethods(g_options.IsCompilerOptimizeNativeCalls() && (GetArch() != Arch::AARCH32) &&
                                     GetRuntime()->IsNativeMethodOptimizationEnabled());
+        SetIsAsync(args.runtime->HasAsyncAnnotation(args.method));
     }
 
     ~Graph() override;
@@ -836,10 +837,16 @@ public:
         FlagFloatRegs::Set(true, &bitFields_);
     }
 
+    void SetIsAsync(bool isAsync)
+    {
+        FlagIsAsync::Set(isAsync, &bitFields_);
+    }
+
     bool HasLoop() const;
     PANDA_PUBLIC_API bool HasIrreducibleLoop() const;
     bool HasInfiniteLoop() const;
     bool HasFloatRegs() const;
+    bool IsAsync() const;
 
     /**
      * Try-catch info
@@ -1325,7 +1332,7 @@ public:
 
     int64_t GetThrowCounter(const BasicBlock *block);
 
-    uint32_t GetMaxPrimCountAtSuspend()
+    uint32_t GetMaxPrimCountAtSuspend() const
     {
         return maxPrimCountAtSuspend_;
     }
@@ -1335,7 +1342,7 @@ public:
         maxPrimCountAtSuspend_ = count;
     }
 
-    uint32_t GetMaxRefCountAtSuspend()
+    uint32_t GetMaxRefCountAtSuspend() const
     {
         return maxRefCountAtSuspend_;
     }
@@ -1343,6 +1350,16 @@ public:
     void SetMaxRefCountAtSuspend(uint32_t count)
     {
         maxRefCountAtSuspend_ = count;
+    }
+
+    uint32_t GetMaxSuspendBridges() const
+    {
+        return maxSuspendBridges_;
+    }
+
+    void SetMaxSuspendBridges(uint32_t count)
+    {
+        maxSuspendBridges_ = count;
     }
 
     /// This class provides methods for ranged-based `for` loop over all parameters in the graph.
@@ -1451,7 +1468,8 @@ private:
     using FlagIrredicibleLoop = FlagNeedCleanup::NextFlag;
     using FlagInfiniteLoop = FlagIrredicibleLoop::NextFlag;
     using FlagFloatRegs = FlagInfiniteLoop::NextFlag;
-    using FlagDefaultLocationsInit = FlagFloatRegs::NextFlag;
+    using FlagIsAsync = FlagFloatRegs::NextFlag;
+    using FlagDefaultLocationsInit = FlagIsAsync::NextFlag;
     using FlagIrtocPrologEpilogOptimized = FlagDefaultLocationsInit::NextFlag;
     using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
     using FlagCanOptimizeNativeMethods = FlagThrowApplied::NextFlag;
@@ -1530,6 +1548,7 @@ private:
     // Maximum number of Primitives/References used in SaveStateSuspend instruction
     uint32_t maxPrimCountAtSuspend_ {0};
     uint32_t maxRefCountAtSuspend_ {0};
+    uint32_t maxSuspendBridges_ {0};
 
     // Source language of the method being compiled
     SourceLanguage lang_ {SourceLanguage::PANDA_ASSEMBLY};

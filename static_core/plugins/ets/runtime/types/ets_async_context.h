@@ -65,6 +65,7 @@ public:
     inline EtsShortArray *GetFrameOffsets(EtsExecutionContext *executionCtx) const;
     inline EtsLong GetCompiledCode() const;
     inline EtsLong GetAwaitId() const;
+    inline EtsInt GetPc() const;
 
     void AddReference(EtsExecutionContext *executionCtx, uint32_t idx, EtsObject *ref);
     void AddPrimitive(EtsExecutionContext *executionCtx, uint32_t idx, EtsLong primitive);
