@@ -19,63 +19,63 @@ cases:
   - base: "i: A"
     derived: "i: B"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: B): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: B): undefined in Derived not overriding any method
 
 # Function
   #1 paramval is the same, retval is contravariant -> expected CTE
   - base: "i: FUN_AA"
     derived: "i: FUN_AB"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: ((p1: A) => B)): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: ((p1: A) => B)): undefined in Derived not overriding any method
 
   #2 paramval is covariant, retval is covariant -> CTE
   - base: "i: FUN_AB"
     derived: "i: FUN_BC"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: ((p1: B) => C)): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: ((p1: B) => C)): undefined in Derived not overriding any method
 
   #3 paramval is the same, retval is covariant -> CTE
   - base: "i: FUN_AB"
     derived: "i: FUN_AC"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: ((p1: A) => C)): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: ((p1: A) => C)): undefined in Derived not overriding any method
 
   #4 paramval is contravariant, retval is contravariant -> CTE
   - base: "i: FUN_BB"
     derived: "i: FUN_AA"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: ((p1: A) => A)): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: ((p1: A) => A)): undefined in Derived not overriding any method
 
 # Array
   #5 not-related types -> CTE
   - base: "i: FixedArray<int>"
     derived: "i: FixedArray<float>"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: FixedArray<Float>): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: FixedArray<Float>): undefined in Derived not overriding any method
   #6
   - base: "i: int[]"
     derived: "i: float[]"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: Array<Float>): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: Array<Float>): undefined in Derived not overriding any method
   #7
   - base: "i: int[]"
     derived: "i: double[]"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: Array<Double>): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: Array<Double>): undefined in Derived not overriding any method
   #8
   - base: "i: FixedArray<String>"
     derived: "i: FixedArray<Number>"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: FixedArray<Double>): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: FixedArray<Double>): undefined in Derived not overriding any method
 
   #9 using of covariant relationship -> CTE
   - base: "i: FixedArray<A>"
     derived: "i: FixedArray<B>"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: FixedArray<B>): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: FixedArray<B>): undefined in Derived not overriding any method
 
   #10 Array<B> and Array<A> have no subtype relation thus override fail
   - base: "i: B[]"
     derived: "i: A[]"
     expected_error: |-
-      Semantic error ESE0136: Method foo(i: Array<A>): void in Derived not overriding any method
+      Semantic error ESE0136: Method foo(i: Array<A>): undefined in Derived not overriding any method

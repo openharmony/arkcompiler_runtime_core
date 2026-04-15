@@ -18,42 +18,42 @@ cases:
       class Derived extends Base {
         override private_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0136: Method private_foo(): void in Derived not overriding any method"
+    expected_out: "Semantic error ESE0136: Method private_foo(): undefined in Derived not overriding any method"
     expected_error: |-
-      /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
+      /* @@@ label Error TypeError: Method private_foo(): undefined in Derived not overriding any method */
 
   - decl: |-
       class Derived extends Base implements Interface {
         public override private_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0136: Method private_foo(): void in Derived not overriding any method"
+    expected_out: "Semantic error ESE0136: Method private_foo(): undefined in Derived not overriding any method"
     expected_error: |-
-      /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
+      /* @@@ label Error TypeError: Method private_foo(): undefined in Derived not overriding any method */
 
   - decl: |-
       class Derived extends Base implements Interface {
         protected override private_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0136: Method private_foo(): void in Derived not overriding any method"
+    expected_out: "Semantic error ESE0136: Method private_foo(): undefined in Derived not overriding any method"
     expected_error: |-
-      /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
+      /* @@@ label Error TypeError: Method private_foo(): undefined in Derived not overriding any method */
 
 
   - decl: |-
       class Derived extends Base implements Interface {
         private override private_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0136: Method private_foo(): void in Derived not overriding any method"
+    expected_out: "Semantic error ESE0136: Method private_foo(): undefined in Derived not overriding any method"
     expected_error: |-
-      /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
+      /* @@@ label Error TypeError: Method private_foo(): undefined in Derived not overriding any method */
 
   - decl: |-
       class Derived extends Base implements Interface {
         private override private_interface_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0136: Method private_interface_foo(): void in Derived not overriding any method"
+    expected_out: "Semantic error ESE0136: Method private_interface_foo(): undefined in Derived not overriding any method"
     expected_error: |-
-      /* @@@ label Error TypeError: Method private_interface_foo(): void in Derived not overriding any method */
+      /* @@@ label Error TypeError: Method private_interface_foo(): undefined in Derived not overriding any method */
 
   # use method with the same name as private method of the superinterface
 
@@ -62,6 +62,6 @@ cases:
         public_foo() { this.private_interface_foo(); }
         override private_interface_foo/* @@ label */() { res = 11; }
       }
-    expected_out: "Semantic error ESE0136: Method private_interface_foo(): void in Derived not overriding any method"
+    expected_out: "Semantic error ESE0136: Method private_interface_foo(): undefined in Derived not overriding any method"
     expected_error: |-
-      /* @@@ label Error TypeError: Method private_interface_foo(): void in Derived not overriding any method */
+      /* @@@ label Error TypeError: Method private_interface_foo(): undefined in Derived not overriding any method */
