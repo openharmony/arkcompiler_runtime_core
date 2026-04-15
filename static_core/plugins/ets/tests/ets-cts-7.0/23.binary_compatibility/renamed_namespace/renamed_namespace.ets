@@ -17,8 +17,19 @@
 desc: Test File.
 tags: [negative]
 files: ['./renamed_namespace.libr.ets']
-expected_out: |
-    TODO: Some verifier error
+negative_steps: [runtime-with-new-libs.ark]
+expected_error:
+    runtime-with-new-libs.ark:
+    - "E/verifier: Cannot link class: Cannot find class Lrenamed_namespace/libr/a;"
+    - "E/verifier: Verifier error 55: Cache miss for field at offset"
+    - "E/verifier: Verifier error 61: Cannot resolve field id"
+    - "E/verifier: Method verification failed: void renamed_namespace.ETSGLOBAL::main()"
+    - "E/verifier: Class verification failed: 'renamed_namespace.ETSGLOBAL' method: void renamed_namespace.ETSGLOBAL::main()"
+    - "E/runtime: Cannot initialize class 'renamed_namespace.ETSGLOBAL'"
+    - "Unhandled exception: std.core.LinkerVerificationError"
+    - "LinkerVerificationError: Lrenamed_namespace/ETSGLOBAL;"
+    - "at std.core.LinkerError.<ctor>"
+    - "at std.core.LinkerVerificationError.<ctor>"
 ---*/
 
 import { a as a } from './renamed_namespace.libr.ets';
