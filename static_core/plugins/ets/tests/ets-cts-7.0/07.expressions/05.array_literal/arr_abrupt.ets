@@ -13,16 +13,49 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
   Initializer expressions are executed from left to right.
   The n'th expression specifies the value of the n-1'th element of the array.
 ---*/
 
-{{c.decl}}
-
-function main() {
-    {{c.use|indent}}
+let arr: int[] = new int[4](0)
+function getFromArr(cnt: int): int {
+    return arr[cnt]
 }
-{% endfor %}
+
+function throwIfTrue(p: boolean): boolean {
+    if (p) {
+        throw new Error()
+    }
+    return p
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("arr_abrupt")
+
+    suite.addTest("abrupt completion from out-of-bounds index", () => {
+        let cnt: int = 0
+        let a: int[] = [ 42 ]
+        try {
+            a = [getFromArr(cnt++), getFromArr(cnt++), getFromArr(cnt++), getFromArr(cnt++), getFromArr(cnt++)]
+        } catch (e) {
+            arktest.assertTrue( a.length == 1 && a[0] == 42 )
+            return
+        }
+        arktest.assertTrue( false )
+    })
+
+    suite.addTest("abrupt completion from thrown Error", () => {
+        let a: boolean[] = []
+        try {
+            a = [throwIfTrue(false), throwIfTrue(false), throwIfTrue(true), throwIfTrue(false), throwIfTrue(false)]
+        } catch (e) {
+            arktest.assertTrue( a.length == 0 )
+            return
+        }
+        arktest.assertTrue( false )
+    })
+
+    return suite.run()
+}
