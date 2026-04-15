@@ -55,7 +55,7 @@ interface I3 {
 interface I4 extends I3 { 
         foo_i4_p1(p: P1): string { return "I4" }
         foo_i4_p2(p: P2): string { return "I4" }
-        overload foo { foo, foo_i4_p1, foo_i4_p2 }
+        overload foo { foo, foo_i4_p1, foo_i4_p2, foo_i3_p1, foo_i3_p2 }
     }
 class C2 extends C1 implements I4 {   
     foo() {}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,17 @@
  */
 
 /*---
-desc: Test File.
-files: ['./namespace_type_def_added.libr.ets']
+desc: Rewriting of constants in the test class.
 ---*/
 
-import { N } from './namespace_type_def_added.libr.ets';
+interface G {
+    readonly CONSTANT: string;
+}
 
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
+class A implements G {
+    readonly CONSTANT: string = "X";
+}
+
+class B extends A {
+    readonly CONSTANT: string = "X";
 }

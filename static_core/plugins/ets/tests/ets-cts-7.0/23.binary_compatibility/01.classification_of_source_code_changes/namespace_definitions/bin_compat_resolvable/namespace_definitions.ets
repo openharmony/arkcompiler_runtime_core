@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: New lib version
-tags:
-- compile-only
-- not-a-test
+desc: |-
+    {{c.desc}}
+files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
 ---*/
 
-export namespace N {
-    export namespace NN {
-        let a: string = 'a'
-    }
-    export function m(): string {
-        return 'm'
-    }
-    export let a: string = 'a'
-    export let b: string = 'b'
+import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+
+function main(): void {
+    arktest.assertEQ({{c.call}}, {{c.value}})
 }
+
+{% endfor %}
