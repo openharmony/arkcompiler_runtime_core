@@ -307,13 +307,13 @@ export function escape(str: string): string {
 }
 
 function unhex(c: char): int {
-    if ((c.compareTo(c'0') >= 0) && (c.compareTo(c'9') <= 0)) {
+    if (c >= c'0' && c <= c'9') {
         return c.toInt() - c'0'.toInt()
     }
-    if ((c.compareTo(c'A') >= 0) && (c.compareTo(c'F') <= 0)) {
+    if (c >= c'A' && c <= c'F') {
         return c.toInt() - c'A'.toInt() + 10
     }
-    if ((c.compareTo(c'a') >= 0) && (c.compareTo(c'f') <= 0)) {
+    if (c >= c'a' && c <= c'f') {
         return c.toInt() - c'a'.toInt() + 10
     }
     throw new Error("invalid codepoint")

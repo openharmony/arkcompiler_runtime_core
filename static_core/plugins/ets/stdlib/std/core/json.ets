@@ -249,8 +249,6 @@ export class JSON {
         return 'false'
     }
 
-    private static readonly ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
-    private static readonly NON_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
     private static scanEscapeInfo(str: String): FixedArray<int> {
@@ -2246,12 +2244,6 @@ class TypeColor {
 }
 
 class UnifiedJsonParser {
-    private static readonly ESCAPE_MAP: Map<char, string> = new Map<char, string>([
-        [c'"', "\""], [c'\\', "\\"], [c'/', "/"],
-        [c'b', "\b"], [c'f', "\f"], [c'n', "\n"],
-        [c'r', "\r"], [c't', "\t"]
-    ])
-
     private source: string
     private index: int
     private length: int
@@ -2529,149 +2521,187 @@ class UnifiedJsonParser {
         this.advance()
         let start = this.index
 
-        while (this.index < this.length) {
-            if (this.ch == c'\\') {
-                return this.parseStringWithEscape(start)
-            }
-            if (this.ch == c'"') {
-                let result = this.source.substring(start, this.index)
-                this.advance()
-                return jsonx.JsonElement.createString(result)
-            }
-            this.advance()
+        let closeQuote = this.source.indexOf(c'"', start)
+
+        if (closeQuote == -1) {
+            this.index = this.length
+            this.updateCh()
+            throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
-        throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+        let sub = this.source.substring(start, closeQuote)
+        let backslashPos = sub.indexOf(c'\\')
+
+        if (backslashPos == -1) {
+            this.index = closeQuote + 1
+            this.updateCh()
+            return jsonx.JsonElement.createString(sub)
+        }
+
+        this.index = start
+        this.updateCh()
+        return this.parseStringWithEscape(start)
     }
 
     private parseStringWithEscape(start: int): jsonx.JsonElement {
         let result = new StringBuilder()
-        let lastEnd = start
+        let src = this.source
+        let len = this.length
+        let idx = this.index
+        let lastCopy = idx
 
-        while (this.index < this.length) {
-            if (this.ch == c'\0') {
-                throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
-            }
-            let currentChar = this.ch
-            this.advance()
-
-            if (currentChar == c'\\') {
-                if (lastEnd < this.index - 1) {
-                    result.append(this.source.substring(lastEnd, this.index - 1))
+        while (idx < len) {
+            let c = src.charAt(idx)
+            if (c == c'"') {
+                if (lastCopy < idx) {
+                    result.append(src.substring(lastCopy, idx))
                 }
-                result.append(this.parseEscape())
-                lastEnd = this.index
-            } else if (currentChar == c'"') {
-                if (lastEnd < this.index - 1) {
-                    result.append(this.source.substring(lastEnd, this.index - 1))
-                }
+                this.index = idx + 1
+                this.updateCh()
                 return jsonx.JsonElement.createString(result.toString())
             }
+            if (c == c'\\') {
+                if (lastCopy < idx) {
+                    result.append(src.substring(lastCopy, idx))
+                }
+                idx++
+                idx = this.parseEscapeFast(result, src, idx, len)
+                lastCopy = idx
+                continue
+            }
+            idx++
         }
-
-        throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+        this.index = len
+        this.updateCh()
+        throw new JsonParseError(`Unterminated string at ${start}`, start, len)
     }
 
     private parseStringRaw(): string {
         this.advance()
         let start = this.index
 
-        while (this.index < this.length) {
-            if (this.ch == c'\\') {
-                return this.parseStringWithEscapeRaw(start)
-            }
-            if (this.ch == c'"') {
-                let result = this.source.substring(start, this.index)
-                this.advance()
-                return result
-            }
-            this.advance()
+        let closeQuote = this.source.indexOf(c'"', start)
+
+        if (closeQuote == -1) {
+            this.index = this.length
+            this.updateCh()
+            throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
-        throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+        let sub = this.source.substring(start, closeQuote)
+        let backslashPos = sub.indexOf(c'\\')
+
+        if (backslashPos == -1) {
+            this.index = closeQuote + 1
+            this.updateCh()
+            return sub
+        }
+
+        this.index = start
+        this.updateCh()
+        return this.parseStringWithEscapeRaw(start)
     }
 
     private parseStringWithEscapeRaw(start: int): string {
-        let result = ""
-        let lastEnd = start
+        let result = new StringBuilder()
+        let src = this.source
+        let len = this.length
+        let idx = this.index
+        let lastCopy = idx
 
-        while (this.index < this.length) {
-            if (this.ch == c'\0') {
-                throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
-            }
-            let currentChar = this.ch
-            this.advance()
-
-            if (currentChar == c'\\') {
-                if (lastEnd < this.index - 1) {
-                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
+        while (idx < len) {
+            let c = src.charAt(idx)
+            if (c == c'"') {
+                if (lastCopy < idx) {
+                    result.append(src.substring(lastCopy, idx))
                 }
-                result = result.concat(this.parseEscape())
-                lastEnd = this.index
-            } else if (currentChar == c'"') {
-                if (lastEnd < this.index - 1) {
-                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
-                }
-                return result
+                this.index = idx + 1
+                this.updateCh()
+                return result.toString()
             }
+            if (c == c'\\') {
+                if (lastCopy < idx) {
+                    result.append(src.substring(lastCopy, idx))
+                }
+                idx++
+                idx = this.parseEscapeFast(result, src, idx, len)
+                lastCopy = idx
+                continue
+            }
+            idx++
         }
-
-        throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+        this.index = len
+        this.updateCh()
+        throw new JsonParseError(`Unterminated string at ${start}`, start, len)
     }
 
-    private parseEscape(): string {
-        if (this.index >= this.length) {
-            throw new JsonParseError(`Incomplete escape sequence at ${this.getPositionDesc()}`,
-                this.index, this.index)
+    private parseEscapeFast(result: StringBuilder, src: string, idx: int, len: int): int {
+        if (idx >= len) {
+            this.index = len
+            this.updateCh()
+            throw new JsonParseError(
+                `Incomplete escape sequence at ${idx}`,
+                idx, idx)
         }
-
-        let escChar = this.ch
-        this.advance()
+        let escChar = src.charAt(idx)
+        idx++
         switch (escChar) {
             case c'"':
-                return "\""
+                result.append(c'"')
+                break
             case c'\\':
-                return "\\"
+                result.append(c'\\')
+                break
             case c'/':
-                return "/"
+                result.append(c'/')
+                break
             case c'b':
-                return "\b"
+                result.append(c'\b')
+                break
             case c'f':
-                return "\f"
+                result.append(c'\f')
+                break
             case c'n':
-                return "\n"
+                result.append(c'\n')
+                break
             case c'r':
-                return "\r"
+                result.append(c'\r')
+                break
             case c't':
-                return "\t"
-            case c'u':
-                return this.parseUnicodeEscape()
-            default:
-                throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${this.getPositionDesc()}`,
-                    this.index - 2, this.index)
-        }
-    }
-
-    private parseUnicodeEscape(): string {
-        if (this.index + 4 > this.length) {
-            throw new JsonParseError(`Incomplete Unicode escape sequence at ${this.getPositionDesc()}`,
-                this.index, this.index)
-        }
-
-        let hexStr = this.source.substring(this.index, this.index + 4)
-
-        for (let i = 0; i < 4; i++) {
-            let c = hexStr.charAt(i)
-            if (!((c >= c'0' && c <= c'9') || (c >= c'a' && c <= c'f') || (c >= c'A' && c <= c'F'))) {
-                throw new JsonParseError(`Invalid hexadecimal digit '${c}' at ${this.getPositionDesc()}`,
-                    this.index + i, this.index + i + 1)
+                result.append(c'\t')
+                break
+            case c'u': {
+                if (idx + 4 > len) {
+                    this.index = idx
+                    this.updateCh()
+                    throw new JsonParseError(
+                        `Incomplete Unicode escape sequence at ${this.getPositionDesc()}`,
+                        idx, idx)
+                }
+                let cp: int = 0
+                for (let i = 0; i < 4; i++) {
+                    let d = src.charAt(idx + i)
+                    if (!Char.isHexDigit(d)) {
+                        this.index = idx + i
+                        this.updateCh()
+                        throw new JsonParseError(
+                            `Invalid hexadecimal digit '${d}' at ${this.getPositionDesc()}`,
+                            idx + i, idx + i + 1)
+                    }
+                    cp = cp * 16 + unhex(d)
+                }
+                idx += 4
+                result.append(String.fromCharCode(cp))
+                break
             }
+            default:
+                this.index = idx
+                this.updateCh()
+                throw new JsonParseError(
+                    `Invalid escape sequence '\\${escChar}' at ${this.getPositionDesc()}`,
+                    idx - 2, idx)
         }
-
-        this.advanceBy(4)
-
-        let codePoint = Double.parseInt(hexStr, 16).toInt()
-        return String.fromCharCode(codePoint)
+        return idx
     }
 
     private parseNumber(): jsonx.JsonElement {
@@ -2883,51 +2913,63 @@ class UnifiedJsonParser {
         this.advance()
         let start = this.index
 
-        while (this.index < this.length) {
-            if (this.ch == c'\\') {
-                return this.parseStringWithEscapeToJSON(start)
-            }
-            if (this.ch == c'"') {
-                let result = this.source.substring(start, this.index)
-                this.advance()
-                let jsonStr = new JSONString()
-                jsonStr.value = result
-                return jsonStr
-            }
-            this.advance()
+        let closeQuote = this.source.indexOf(c'"', start)
+
+        if (closeQuote == -1) {
+            this.index = this.length
+            this.updateCh()
+            throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
-        throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+        let sub = this.source.substring(start, closeQuote)
+        let backslashPos = sub.indexOf(c'\\')
+
+        if (backslashPos == -1) {
+            this.index = closeQuote + 1
+            this.updateCh()
+            let jsonStr = new JSONString()
+            jsonStr.value = sub
+            return jsonStr
+        }
+
+        this.index = start
+        this.updateCh()
+        return this.parseStringWithEscapeToJSON(start)
     }
 
     private parseStringWithEscapeToJSON(start: int): JSONString {
-        let result = ""
-        let lastEnd = start
+        let result = new StringBuilder()
+        let src = this.source
+        let len = this.length
+        let idx = this.index
+        let lastCopy = idx
 
-        while (this.index < this.length) {
-            if (this.ch == c'\0') {
-                throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
-            }
-            let currentChar = this.ch
-            this.advance()
-
-            if (currentChar == c'\\') {
-                if (lastEnd < this.index - 1) {
-                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
+        while (idx < len) {
+            let c = src.charAt(idx)
+            if (c == c'"') {
+                if (lastCopy < idx) {
+                    result.append(src.substring(lastCopy, idx))
                 }
-                result = result.concat(this.parseEscape())
-                lastEnd = this.index
-            } else if (currentChar == c'"') {
-                if (lastEnd < this.index - 1) {
-                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
-                }
+                this.index = idx + 1
+                this.updateCh()
                 let jsonStr = new JSONString()
-                jsonStr.value = result
+                jsonStr.value = result.toString()
                 return jsonStr
             }
+            if (c == c'\\') {
+                if (lastCopy < idx) {
+                    result.append(src.substring(lastCopy, idx))
+                }
+                idx++
+                idx = this.parseEscapeFast(result, src, idx, len)
+                lastCopy = idx
+                continue
+            }
+            idx++
         }
-
-        throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+        this.index = len
+        this.updateCh()
+        throw new JsonParseError(`Unterminated string at ${start}`, start, len)
     }
 
     private parseNumberToJSON(): JSONNumber {
