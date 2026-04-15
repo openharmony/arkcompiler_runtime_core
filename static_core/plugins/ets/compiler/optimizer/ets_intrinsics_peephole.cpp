@@ -681,34 +681,6 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
     return true;
 }
 
-bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
-{
-    ASSERT(intrinsic->GetInputsCount() == 2U);
-    auto graph = intrinsic->GetBasicBlock()->GetGraph();
-#ifdef COMPILER_DEBUG_CHECKS
-    if (!graph->IsInliningComplete()) {
-        return false;
-    }
-#endif  // COMPILER_DEBUG_CHECKS
-    auto obj = intrinsic->GetInput(0).GetInst();
-    auto typeInfo = obj->GetObjectTypeInfo();
-    // When encoding LoadType, we call resolveType from the method and id,
-    // but the union class has no methods -- no vtable/itable is built for it,
-    // so there cannot be an instance of the union class.
-    // #27093
-    if (typeInfo && (graph->GetRuntime()->GetClassType(typeInfo.GetClass()) != ClassType::UNION_CLASS)) {
-        auto loadType = graph->CreateInstLoadType(DataType::REFERENCE, intrinsic->GetPc());
-        loadType->SetMethod(graph->GetMethod());
-        loadType->SetTypeId(graph->GetRuntime()->GetClassIdWithinFile(graph->GetMethod(), typeInfo.GetClass()));
-        loadType->SetSaveState(intrinsic->GetSaveState());
-        intrinsic->InsertAfter(loadType);
-        intrinsic->ReplaceUsers(loadType);
-    } else {
-        intrinsic->ReplaceUsers(graph->GetOrCreateNullPtr());
-    }
-    return true;
-}
-
 bool Peepholes::PeepholeNullcheck([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     auto input = intrinsic->GetInput(0).GetInst();
