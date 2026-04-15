@@ -34,7 +34,7 @@ inf:
     - { x: Double.NEGATIVE_INFINITY, y: 1.5, result: Double.POSITIVE_INFINITY }
 
     - { x: 0, y: -1, result: Double.POSITIVE_INFINITY }
-    - { x: "-0", y: -1, result: Double.POSITIVE_INFINITY }
+    - { x: "-0", y: -1, result: Double.NEGATIVE_INFINITY }
 
     - { x: 0, y: Double.POSITIVE_INFINITY, result: 0 }
     - { x: 1, y: Double.POSITIVE_INFINITY, result: 1 }
