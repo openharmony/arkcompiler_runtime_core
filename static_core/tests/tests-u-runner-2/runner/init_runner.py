@@ -15,13 +15,14 @@
 # limitations under the License.
 #
 import argparse
+import readline
 import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import ClassVar, NamedTuple
 
-from runner.common_exceptions import FileNotFoundException
-from runner.utils import write_2_file
+from runner.common_exceptions import FileNotFoundException, InvalidInitialization
+from runner.utils import RUNTIME_CORE_ENV_NAME, URUNNER_CFG_NAME, convert_underscore, get_default_cfg_path, write_2_file
 
 Str2Path = Callable[[str], Path]
 
@@ -35,6 +36,7 @@ class MandatoryProp(NamedTuple):
     value: PropValue | None
     is_path: IsPath
     require_exist: RequireExist
+    mandatory: bool
 
 
 MandatoryProps = dict[PropName, MandatoryProp]
@@ -65,6 +67,8 @@ class InitRunner:
             main_text = f"Attempt #{i} of {attempts}: type the value of the mandatory variable {prop}: "
             next_text = f"Empty or not-existing path are NOT suitable!\n{main_text}"
             value = input(main_text if i == 1 else next_text)
+            if value and sys.stdin.isatty():
+                readline.add_history(value)
             if value and (Path(value).expanduser().exists() or not require_exist):
                 return value
         raise FileNotFoundError(f"All {attempts} attempts to enter value for '{prop}' are out.")
@@ -79,6 +83,28 @@ class InitRunner:
         if current.exists():
             return current
         raise FileNotFoundException(f"Path {current} does not exist, but must.")
+
+    @staticmethod
+    def check_default_property_val(prop: str, value: str, is_path: IsPath, require_exist: bool) -> str:
+        if is_path:
+            path_value = Path(value).expanduser().resolve()
+            value = path_value.as_posix()
+        if require_exist:
+            if not Path(value).expanduser().exists():
+                raise FileNotFoundError(f"Incorrect value for {prop} - {value}. Path doesn't exist.")
+        return value
+
+    @staticmethod
+    def _resolve_urunner_cfg_property(prop: PropName, cli_value: PropValue | None, is_path: bool, require_exist: bool,
+                                      props: dict[PropName, PropValue]) -> PropValue:
+        cfg_value = cli_value
+        if cfg_value is None:
+            path_runtime_core = props.get(RUNTIME_CORE_ENV_NAME, "")
+            if not path_runtime_core:
+                raise FileNotFoundError("Cannot detect default CFG_PATH: runtime core path is not set.")
+            cfg_value = str(get_default_cfg_path(path_runtime_core))
+
+        return InitRunner.check_default_property_val(prop, str(cfg_value), is_path, require_exist)
 
     @classmethod
     def require_path(cls, require_exist: bool) -> Str2Path:
@@ -98,15 +124,15 @@ class InitRunner:
             dest=CONFIG_PATH,
             help='Set path where to save the URunner config to')
 
-        for prop_name, (prop_value, is_path, require_exist) in mandatory_props.items():
+        for prop_name, (prop_value, is_path, require_exist, mandatory) in mandatory_props.items():
             process_type = str if not is_path else cls.require_path(require_exist)
             expected_value = 'an existing path' if is_path and require_exist \
                 else 'a path that will be created during runner work' if is_path and not require_exist \
                 else 'any value'
             init_parser.add_argument(
-                f'--{prop_name.lower()}', action='store', default=prop_value,
+                f'--{convert_underscore(prop_name.lower())}', action='store', default=prop_value,
                 dest=prop_name, type=process_type,
-                help=f'Set mandatory property {prop_name}. Expected {expected_value}. '
+                help=f'Set property {prop_name} (Mandatory: {mandatory}). Expected {expected_value}. '
                      f'(saved and later used in configs as ${prop_name})')
 
     @classmethod
@@ -143,12 +169,16 @@ class InitRunner:
             self.urunner_env_path = self.convert_2_path(init_args[CONFIG_PATH]) / self.urunner_env_name
 
         props: dict[PropName, PropValue] = {}
-        for prop, (_, is_path, require_exist) in mandatory_props.items():
+        for prop, (_, is_path, require_exist, mandatory) in mandatory_props.items():
             cli_value = init_args[prop]
-            if cli_value is None:
-                props[prop] = self.init_property(prop, cli_value, is_path, require_exist)
-            else:
-                props[prop] = cli_value
+            if mandatory:
+                props[prop] = self._resolve_mandatory_property(prop, cli_value, is_path, require_exist)
+                continue
+
+            optional_value = self._resolve_optional_property(prop, cli_value, is_path, require_exist, props)
+
+            if optional_value is not None:
+                props[prop] = optional_value
 
         result = [f"{prop}={value}" for prop, value in props.items()]
         write_2_file(self.urunner_env_path, "\n".join(result))
@@ -164,3 +194,23 @@ class InitRunner:
                 path_value = Path(value).expanduser().resolve()
                 value = path_value.as_posix()
         return value
+
+    def _resolve_mandatory_property(self, prop: PropName, cli_value: PropValue | None, is_path: IsPath,
+                                    require_exist: RequireExist) -> PropValue:
+        if cli_value is None:
+            return self.init_property(prop, cli_value, is_path, require_exist)
+        return cli_value
+
+    def _resolve_optional_property(self, prop: PropName, cli_value: PropValue | None, is_path: bool,
+                                   require_exist: bool, props: dict[PropName, PropValue]) -> PropValue | None:
+
+        handlers: dict[PropName, Callable[[PropName, PropValue | None, bool, bool, dict[PropName, PropValue]],
+                                        PropValue | None]] = {
+            URUNNER_CFG_NAME: InitRunner._resolve_urunner_cfg_property,
+        }
+
+        handler = handlers.get(prop)
+        if handler is not None:
+            return handler(prop, cli_value, is_path, require_exist, props)
+
+        raise InvalidInitialization(f"Handler is not specified for non-mandatory property {prop}")

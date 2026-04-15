@@ -123,5 +123,6 @@ args = {
     'runner.work-dir-runner': None,
     'runner.panda-build': None,
     'runner.arkcompiler-runtime-core-path': None,
-    'runner.arkcompiler-ets-frontend-path': None
+    'runner.arkcompiler-ets-frontend-path': None,
+    'runner.cfg-path': None
 }

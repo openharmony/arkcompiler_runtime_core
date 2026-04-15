@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,12 +37,13 @@ class InitCLIRunnerTest(TestCase):
         # before
         expected_cfg.unlink(missing_ok=True)
         mandatory_props = {
-            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True),
-            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True),
-            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True),
-            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True, mandatory=True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True, mandatory=True),
+            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True, mandatory=True),
+            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False, mandatory=True),
+            'CFG_PATH': MandatoryProp("eee", is_path=True, require_exist=True, mandatory=False)
         }
-        for _, (prop_path, _2, require_exist) in mandatory_props.items():
+        for _, (prop_path, _2, require_exist, _) in mandatory_props.items():
             folder = self.current_folder / cast(str, prop_path)
             if require_exist:
                 folder.mkdir(parents=True, exist_ok=True)
@@ -60,7 +61,7 @@ class InitCLIRunnerTest(TestCase):
 
         # clear up
         expected_cfg.unlink(missing_ok=True)
-        for _, (prop_path, _, require_exist) in mandatory_props.items():
+        for _, (prop_path, _, require_exist, _) in mandatory_props.items():
             folder = self.current_folder / cast(str, prop_path)
             if require_exist:
                 shutil.rmtree(folder, ignore_errors=True)
@@ -110,10 +111,10 @@ class InitCLIRunnerTest(TestCase):
         expected = {
             "--home": 2,
             "--local": 2,
-            "--arkcompiler_runtime_core_path": 0,
-            "--arkcompiler_ets_frontend_path": 0,
-            "--panda_build": 0,
-            "--work_dir": 0,
+            "--arkcompiler-runtime-core-path": 0,
+            "--arkcompiler-ets-frontend-path": 0,
+            "--panda-build": 0,
+            "--work-dir": 0,
         }
         self.check_help(expected_props={}, expected_help=expected, handle=handle)
 
@@ -124,17 +125,19 @@ class InitCLIRunnerTest(TestCase):
         Test that info only about mandatory options is output as well if they are set
         """
         expected_content = {
-            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True),
-            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True),
-            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True),
-            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True, mandatory=True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True, mandatory=True),
+            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True, mandatory=True),
+            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False, mandatory=True),
+            'CFG_PATH': MandatoryProp("eee", is_path=True, require_exist=True, mandatory=False)
         }
         expected = {
             "--home": 2,
             "--local": 2,
-            "--arkcompiler_runtime_core_path": 2,
-            "--arkcompiler_ets_frontend_path": 2,
-            "--panda_build": 2,
-            "--work_dir": 2,
+            "--arkcompiler-runtime-core-path": 2,
+            "--arkcompiler-ets-frontend-path": 2,
+            "--panda-build": 2,
+            "--work-dir": 2,
+            "--cfg-path": 2
         }
         self.check_help(expected_props=expected_content, expected_help=expected, handle=handle)

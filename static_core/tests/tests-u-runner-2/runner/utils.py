@@ -60,9 +60,13 @@ ALLOWED_TEST_EXTS = (
     (".d", ".ets"),
     (".ets",),
 )
+DEFAULT_CFG_REL_PATH = Path("static_core/tests/tests-u-runner-2/cfg")
 
 ExpectedData = str | list[str] | dict[str, str | list[str]]
 ExpectedField = dict[str, list[str]]
+
+URUNNER_CFG_NAME = 'CFG_PATH'
+RUNTIME_CORE_ENV_NAME = "ARKCOMPILER_RUNTIME_CORE_PATH"
 
 
 class FontColor(BaseEnum):
@@ -390,8 +394,14 @@ def get_validator_class(clazz: str) -> type[IValidator]:
 
 
 def get_config_folder() -> Path:
-    urunner_folder = Path(__file__).parent.parent
-    return urunner_folder.joinpath("cfg")
+    config_folder_path = os.getenv("CFG_PATH")
+    if config_folder_path is not None:
+        return Path(config_folder_path)
+    raise InvalidConfiguration("Configs folder is not set")
+
+
+def get_default_cfg_path(runtime_core_path: str) -> Path:
+    return (Path(runtime_core_path).expanduser() / DEFAULT_CFG_REL_PATH).resolve()
 
 
 def get_config_workflow_folder() -> Path:
