@@ -28,7 +28,7 @@ cases:
           }
       params: different number of type parameters
       expected_out: |-
-        "Semantic error ESE0136: Method foo<J>(i: J): void in Derived<T> not overriding any method"
+        "Semantic error ESE0136: Method foo<J>(i: J): undefined in Derived<T> not overriding any method"
 
     - base: |-
           class Base {
@@ -44,7 +44,7 @@ cases:
           }
       params: override-incompatible type parameter (covariant)
       expected_out: |-
-        "Semantic error ESE150729: Class member foo with type void in Derived cannot override foo with type void field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
+        "Semantic error ESE150729: Class member foo with type undefined in Derived cannot override foo with type undefined field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
 
     - decl: |-
           interface I {}
@@ -63,7 +63,7 @@ cases:
           }
       params: override-incompatible type parameter (covariance)
       expected_out: |-
-        "Semantic error ESE150729: Class member foo with type void in Derived cannot override foo with type void field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
+        "Semantic error ESE150729: Class member foo with type undefined in Derived cannot override foo with type undefined field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
 
     - decl: |-
           interface I {}
@@ -81,7 +81,7 @@ cases:
           }
       params: different number of type parameters
       expected_out: |-
-        "Semantic error ESE0136: Method foo<J>(i: J, j: J): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo<J>(i: J, j: J): undefined in Derived not overriding any method"
 
     # TYPE PARAMETER, RETURN TYPE
     - base: |-
