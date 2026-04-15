@@ -18,6 +18,7 @@ desc: Fixed arrays are not compatible with resizable arrays
 tags:
 - negative
 - compile-only
+expected_out: "Semantic error ESE0318: Type 'Array<Double>' cannot be assigned to type 'FixedArray<Double>'"
 ---*/
 
 function main(): void {

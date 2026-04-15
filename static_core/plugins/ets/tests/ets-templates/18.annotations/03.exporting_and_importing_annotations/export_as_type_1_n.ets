@@ -21,6 +21,7 @@ name: Export With Rename
 tags:
 - compile-only
 - negative
+expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
 ---*/
 
 @interface MyAnnotationToExport {}

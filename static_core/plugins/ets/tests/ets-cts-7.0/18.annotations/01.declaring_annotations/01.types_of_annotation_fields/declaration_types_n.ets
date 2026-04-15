@@ -25,6 +25,7 @@ desc: The choice of types for annotation fields is limited to the following
            including multidimensional arrays (e.g., FixedArray<FixedArray<string>>).
 tags: [compile-only, negative]
 params: "{{ case.type }}"
+expected_out: {{ case.expected_out }}
 ---*/
 
 class SomeClass {
@@ -33,7 +34,7 @@ class SomeClass {
 
 type SomeUnion = "One" | "Two"
 
-const tuple: [number] = 1
+const tuple: [number] = [1]
 
 // Annotation declaration:
 @interface ClassAnnotation {

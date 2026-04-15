@@ -18,6 +18,7 @@
 desc: If an annotation is used in front of type in parentheses, then the parentheses
       become a mandatory part of the annotation to prevent ambiguity.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY150811: Annotation usage must have parentheses when used in front of a parenthesized type."
 ---*/
 
 @Target([AnnotationTargets.TYPE])

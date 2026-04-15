@@ -14,10 +14,11 @@
  */
 
 /*---
-desc: The array length property is read-only
+desc: Fixed array length modification
 tags:
 - negative
 - compile-only
+expected_out: "Semantic error ESE0024: Setting the length of an array is not permitted"
 ---*/
 
 function main(): void {

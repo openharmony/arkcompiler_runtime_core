@@ -14,10 +14,11 @@
  */
 
 /*---
-desc: Fixed arrays are not compatible with resizable arrays
+desc: Pass Array as FixedArray parameter
 tags:
 - negative
 - compile-only
+expected_err: "Semantic error ESE0127: No matching call signature for processFixed(Array<Double>)Semantic error ESE0046: Type 'Array<Double>' is not compatible with type 'FixedArray<Double>' at index 1"
 ---*/
 
 function processFixed(arr: FixedArray<number>): void {

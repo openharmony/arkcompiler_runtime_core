@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,35 +13,23 @@
 ---
 
 cases:
-  - type: |-
-      () => { return 1 }
-    value: |-
-      () => { return 1 }
-  - type: |-
-      SomeClass
-    value: |-
-      {someField: "str"}
-  - type: |-
-      SomeUnion
-    value: |-
-      '"One"'
-  - type: |-
-      [number]
-    value: |-
-      tuple
-  - type: |-
-      Int
-    value: |-
-      1
-  - type: |-
-      Float
-    value: |-
-      1
-  - type: |-
-      Double
-    value: |-
-      1
-  - type: |-
-      string
-    value: |-
-      new String("str")
+  - type: () => { return 1 }
+    value: () => { return 1 }
+    expected_out: 
+      - "Semantic error ESE0042: Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields."
+  - type: SomeClass
+    value: {someField: "str"}
+    expected_out: 
+      - "Semantic error ESE0042: Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields."
+  - type: SomeUnion
+    value: '"One"'
+    expected_out: 
+      - "Semantic error ESE0042: Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields."
+  - type: [number]
+    value: tuple
+    expected_out: 
+      - "Semantic error ESE0042: Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields."
+  - type: constructor
+    value: new String("str")
+    expected_out: 
+      - "Syntax error ESY0027: Invalid value for annotation field, expected a constant literal."

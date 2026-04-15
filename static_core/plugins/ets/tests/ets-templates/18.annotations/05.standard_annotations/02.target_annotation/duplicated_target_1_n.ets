@@ -18,6 +18,7 @@
 desc: Target is a standard meta-annotation that is used to annotate a declaration of another annotation. A compile-time
        error occurs if @Target is used elsewhere.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE263981: Annotation target 'FUNCTION' is duplicated."
 ---*/
 
 @Target({targets: [AnnotationTargets.FUNCTION, AnnotationTargets.FUNCTION]})

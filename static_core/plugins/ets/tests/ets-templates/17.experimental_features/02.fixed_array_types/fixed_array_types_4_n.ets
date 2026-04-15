@@ -14,10 +14,11 @@
  */
 
 /*---
-desc: The length of a fixed array cannot be changed
+desc: Check fixed array push method
 tags:
 - negative
 - compile-only
+expected_out: "Semantic error ESE0087: Property 'push' does not exist on type 'Object'"
 ---*/
 
 function main(): void {

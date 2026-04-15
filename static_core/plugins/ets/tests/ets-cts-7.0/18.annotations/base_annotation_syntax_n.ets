@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: {{case.descr}}
 tags: [compile-only, negative]
+expected_out: "{{ case.exp_out }}"
 ---*/
 
 // Annotation declaration:

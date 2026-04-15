@@ -14,10 +14,11 @@
  */
 
 /*---
-desc: The new array generates an adjustable array
+desc: FixedArray requires generic type parameter
 tags:
 - negative
 - compile-only
+expected_out: "Semantic error ESE0170: Type 'Array<T>' is generic but type argument were not provided."
 ---*/
 
 function main(): void {
