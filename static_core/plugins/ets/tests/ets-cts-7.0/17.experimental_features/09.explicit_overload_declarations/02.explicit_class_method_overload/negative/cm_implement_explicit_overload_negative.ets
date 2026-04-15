@@ -18,7 +18,7 @@ limitations under the License.
 desc: If a class implements some interfaces with an explicit overload of the same name,
       then a new explicit overload must include all overloaded methods
 tags: [compile-only, negative]
-expected_out: "TODO: Expected output unknown"
+expected_out: "{{c.expected_out}}"
 ---*/
 
 interface I1 {
