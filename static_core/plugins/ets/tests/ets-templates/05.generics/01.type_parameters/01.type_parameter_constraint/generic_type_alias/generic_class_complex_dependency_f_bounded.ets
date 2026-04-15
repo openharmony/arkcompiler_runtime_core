@@ -21,8 +21,10 @@ params: >-
 
 class U<S> {
     field0: S
-    constructor(v: S){
-        this.field0 = v
+    constructor(v?: S) {
+        if (v !== undefined) {
+            this.field0 = v
+        }
     }
 }
 
@@ -45,8 +47,9 @@ abstract class Aa<T extends U<T>> {
 }
 
 class B extends U<B> {
-    constructor(){
-        super(this)
+    constructor() {
+        super()
+        this.field0 = this
     }
 }
 

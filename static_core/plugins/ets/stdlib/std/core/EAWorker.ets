@@ -143,6 +143,10 @@ export class EAWorker {
         this.worker = supportInterop ? new InteropWorker(name) : new StaticWorker(name);
     }
 
+    protected setInitialTask(task: Object): void {
+        this.initialTask = task as Task;
+    }
+
     /**
      * Get all registered EAWorker instances.
      *

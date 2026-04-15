@@ -447,12 +447,6 @@
 09.classes/09.constructor_declaration/01.constructor_body/check_fld_init25.ets
 09.classes/09.constructor_declaration/01.constructor_body/check_fld_init26.ets
 
-#32863  CTE expected when 'this' is used in constructor arguments
-09.classes/09.constructor_declaration/01.constructor_body/this_in_args/01_n.ets
-09.classes/09.constructor_declaration/01.constructor_body/this_in_args/02_n.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_4.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_11.ets
-
 #33800
 10.interfaces/02.superinterfaces_and_subinterfaces/extend_clause_with_not_accessible_type_n.ets
 

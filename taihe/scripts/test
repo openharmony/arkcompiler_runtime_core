@@ -23,8 +23,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from subprocess import CalledProcessError
 
-TAIHE_BIN_VERSION = "1.9.1"
-TAIHE_BIN_BUILD_DATE = "20260423"
+TAIHE_BIN_VERSION = "1.13.1"
+TAIHE_BIN_BUILD_DATE = "20260521"
 TAIHE_FFI_GEN_REPO_URLS = [
     # https
     "https://gitcode.com/openharmony-sig/arkcompiler_taihe_ffi_gen.git",
