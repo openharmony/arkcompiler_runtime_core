@@ -23,6 +23,8 @@ desc: >-
   statement, parameter type in a call, target type of a cast expression,
   or type of an array element or a class field.
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}

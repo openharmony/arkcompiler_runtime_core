@@ -18,6 +18,8 @@ desc: >-
     A compile-time error occurs
     if the identifier does not name an accessible member field (see Accessible) in type C
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0293: Property nick is not visible here.
 ---*/
 
 class Friend {

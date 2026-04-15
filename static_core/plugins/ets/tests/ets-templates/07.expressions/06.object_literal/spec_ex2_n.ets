@@ -18,9 +18,10 @@ desc: >-
     Only an object literal of interface type can contain object literal methods. An attempt to declare
     a method in an object literal of class type causes a compile-time error
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0065: type Base1 has no property named m
 ---*/
 
 class Base1 {}
 
 const o1: Base1 = { m(): void {} } // compile-time error
-

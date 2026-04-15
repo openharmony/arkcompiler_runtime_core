@@ -18,6 +18,9 @@ desc: >-
     A compile-time error occurs if a class has a private or a protected method,
     and its object literal contains same-name methods with override-compatible signatures
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0127: No matching call signature for method(Base)
+    Semantic error ESE0046: Type 'Base' is not compatible with type 'Derived' at index 1
 ---*/
 
 class Base {}
@@ -25,12 +28,14 @@ class Base {}
 class Derived extends Base {}
 
 interface I {
-  method (p: Derived): Base
+    method(p: Derived): Base
 }
 
 function main(): void {
     const o: I = {
-        method (p: Base): Derived { return new Derived } // OK
+        method(p: Base): Derived {
+            return new Derived()
+        }, // OK
     }
-    o.method (new Base) // compile-time error
+    o.method(new Base()) // compile-time error
 }

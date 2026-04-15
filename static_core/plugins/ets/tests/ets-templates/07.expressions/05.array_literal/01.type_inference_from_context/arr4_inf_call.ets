@@ -18,7 +18,6 @@
 /*---
 desc: >-
     The type of an array literal can be inferred from the call context.
-tags: [{{c.tags}}]
 ---*/
 {{c.defs}}
 function foo(a: {{d[0]}}) {
