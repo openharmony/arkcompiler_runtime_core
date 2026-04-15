@@ -63,18 +63,6 @@ export final class Runtime {
      */
     public native static isLittleEndianPlatform(): boolean;
 
-    // Deprecated.
-    /**
-     * Get type information of the specified object. This method is deprecated.
-     *
-     * @param { Any } o The object to get type information for
-     * @returns { Class|undefined } The Class type of the object, return undefined if cannot be determined
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    native static __getTypeInfo(o: Any): Class|undefined;
-
     // Internal stub to create a FixedArray of the specified type and length
     private native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
 

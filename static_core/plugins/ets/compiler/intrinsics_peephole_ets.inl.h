@@ -24,7 +24,6 @@ static bool PeepholeIntShortToString(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeLongToString(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeFloatToString(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeDoubleToString(GraphVisitor *v, IntrinsicInst *intrinsic);
-static bool PeepholeGetTypeInfo(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeNullcheck(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStringFromCharCodeSingle(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeIstrue(GraphVisitor *v, IntrinsicInst *intrinsic);
