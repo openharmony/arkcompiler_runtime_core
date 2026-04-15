@@ -365,7 +365,6 @@ bool Mutator::TryBindMutator()
     mutatorManager.BindMutator(*this);
 
     allocBuffer_ = ThreadLocal::GetAllocBuffer();
-    reinterpret_cast<AllocationBuffer *>(allocBuffer_)->IncreaseRefCount();
     DCHECK_CC(allocBuffer_ != nullptr);
     return true;
 }
@@ -385,10 +384,7 @@ void Mutator::BindMutator()
 void Mutator::UnbindMutator()
 {
     DCHECK_CC(!IsInRunningState());
-    if (allocBuffer_ != nullptr) {
-        reinterpret_cast<AllocationBuffer *>(allocBuffer_)->DecreaseRefCount();
-        allocBuffer_ = nullptr;
-    }
+    allocBuffer_ = nullptr;
     auto &mutatorManager = MutatorManager::Instance();
     mutatorManager.UnbindMutator(*this);
 }
@@ -396,15 +392,7 @@ void Mutator::UnbindMutator()
 void Mutator::ReleaseAllocBuffer()
 {
     MutatorManagedScope scope(this);
-    if (allocBuffer_) {
-        auto buf = reinterpret_cast<AllocationBuffer *>(allocBuffer_);
-        if (buf->DecreaseRefCount()) {
-            buf->Unregister();
-            ThreadLocal::SetAllocBuffer(nullptr);
-            delete buf;
-        }
-        allocBuffer_ = nullptr;
-    }
+    allocBuffer_ = nullptr;
 }
 
 void Mutator::UnregisterMutator(Mutator *mutator)
