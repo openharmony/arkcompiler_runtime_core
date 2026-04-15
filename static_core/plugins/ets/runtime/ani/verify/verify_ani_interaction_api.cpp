@@ -327,10 +327,20 @@ NO_UB_SANITIZE static ani_status FindClass(VEnv *venv, const char *classDescript
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FindEnum(VEnv *venv, const char *enumDescriptor, ani_enum *result)
+NO_UB_SANITIZE static ani_status FindEnum(VEnv *venv, const char *enumDescriptor, VEnum **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FindEnum(venv->GetEnv(), enumDescriptor, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnumDescriptor(enumDescriptor, "enum_descriptor"),
+        ANIArg::MakeForEnumStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_enum result {};
+    ani_status status = GetInteractionAPI(venv)->FindEnum(venv->GetEnv(), enumDescriptor, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1215,54 +1225,124 @@ NO_UB_SANITIZE static ani_status FixedArray_Get_Ref(VEnv *venv, ani_fixedarray_r
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Enum_GetEnumItemByName(VEnv *venv, ani_enum enm, const char *name,
-                                                        ani_enum_item *result)
+NO_UB_SANITIZE static ani_status Enum_GetEnumItemByName(VEnv *venv, VEnum *venum, const char *name, VEnumItem **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Enum_GetEnumItemByName(venv->GetEnv(), enm, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnum(venum, "enm"),
+        ANIArg::MakeForUTF8String(name, "name"),
+        ANIArg::MakeForEnumItemStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_enum_item result {};
+    ani_status status = GetInteractionAPI(venv)->Enum_GetEnumItemByName(venv->GetEnv(), venum->GetRef(), name, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Enum_GetEnumItemByIndex(VEnv *venv, ani_enum enm, ani_size index,
-                                                         ani_enum_item *result)
+NO_UB_SANITIZE static ani_status Enum_GetEnumItemByIndex(VEnv *venv, VEnum *venum, ani_size index, VEnumItem **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Enum_GetEnumItemByIndex(venv->GetEnv(), enm, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnum(venum, "enm"),
+        ANIArg::MakeForSize(index, "index"),
+        ANIArg::MakeForEnumItemStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_enum_item result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Enum_GetEnumItemByIndex(venv->GetEnv(), venum->GetRef(), index, &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status EnumItem_GetEnum(VEnv *venv, ani_enum_item enumItem, ani_enum *result)
+NO_UB_SANITIZE static ani_status EnumItem_GetEnum(VEnv *venv, VEnumItem *venumItem, VEnum **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->EnumItem_GetEnum(venv->GetEnv(), enumItem, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnumItem(venumItem, "enum_item"),
+        ANIArg::MakeForEnumStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_enum result {};
+    ani_status status = GetInteractionAPI(venv)->EnumItem_GetEnum(venv->GetEnv(), venumItem->GetRef(), &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(VEnv *venv, ani_enum_item enumItem, ani_int *result)
+NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(VEnv *venv, VEnumItem *venumItem, ani_int *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->EnumItem_GetValue_Int(venv->GetEnv(), enumItem, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnumItem(venumItem, "enum_item"),
+        ANIArg::MakeForIntStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->EnumItem_GetValue_Int(venv->GetEnv(), venumItem->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status EnumItem_GetValue_String(VEnv *venv, ani_enum_item enumItem, ani_string *result)
+NO_UB_SANITIZE static ani_status EnumItem_GetValue_String(VEnv *venv, VEnumItem *venumItem, VString **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->EnumItem_GetValue_String(venv->GetEnv(), enumItem, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnumItem(venumItem, "enum_item"),
+        ANIArg::MakeForStringStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_string result {};
+    ani_status status = GetInteractionAPI(venv)->EnumItem_GetValue_String(venv->GetEnv(), venumItem->GetRef(), &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status EnumItem_GetName(VEnv *venv, ani_enum_item enumItem, ani_string *result)
+NO_UB_SANITIZE static ani_status EnumItem_GetName(VEnv *venv, VEnumItem *venumItem, VString **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->EnumItem_GetName(venv->GetEnv(), enumItem, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnumItem(venumItem, "enum_item"),
+        ANIArg::MakeForStringStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_string result {};
+    ani_status status = GetInteractionAPI(venv)->EnumItem_GetName(venv->GetEnv(), venumItem->GetRef(), &result);
+
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status EnumItem_GetIndex(VEnv *venv, ani_enum_item enumItem, ani_size *result)
+NO_UB_SANITIZE static ani_status EnumItem_GetIndex(VEnv *venv, VEnumItem *venumItem, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->EnumItem_GetIndex(venv->GetEnv(), enumItem, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnumItem(venumItem, "enum_item"),
+        ANIArg::MakeForSizeStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->EnumItem_GetIndex(venv->GetEnv(), venumItem->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

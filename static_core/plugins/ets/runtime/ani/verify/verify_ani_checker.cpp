@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -43,6 +44,27 @@ public:
         }
         auto klass = s.ToInternalType(ref)->GetClass();
         return klass->IsClassClass();
+    }
+
+    static bool IsEnum(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (!IsClass(s, ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(static_cast<ani_class>(ref));
+        return klass->IsEtsEnum();
+    }
+
+    static bool IsEnumItem(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(ref)) {
+            return false;
+        }
+        if (s.IsNull(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        return klass->IsEtsEnum();
     }
 
     static bool IsError(ScopedManagedCodeFix &s, ani_ref ref)
@@ -89,6 +111,20 @@ public:
         return objectKlass->IsAssignableFrom(klass);
     }
 };
+
+static ClassLinkerContext *GetClassLinkerContext(EtsExecutionContext *executionCtx)
+{
+    auto stack = StackWalker::Create(EtsCoroutine::CastFromThread(executionCtx->GetMT()));
+    if (!stack.HasFrame()) {
+        return nullptr;
+    }
+
+    auto *method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
+    if (method != nullptr) {
+        return method->GetClass()->GetLoadContext();
+    }
+    return nullptr;
+}
 
 class CallArgs {
 public:
@@ -284,8 +320,14 @@ std::string_view ANIRefTypeToString(ScopedManagedCodeFix &s, ani_ref ref)
         if (ANIRefTypeChecker::IsString(s, ref)) {
             return "ani_string";
         }
+        if (ANIRefTypeChecker::IsEnum(s, ref)) {
+            return "ani_enum";
+        }
         if (ANIRefTypeChecker::IsClass(s, ref)) {
             return "ani_class";
+        }
+        if (ANIRefTypeChecker::IsEnumItem(s, ref)) {
+            return "ani_enum_item";
         }
         return "ani_object";
     }
@@ -372,6 +414,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_SIZE:                         return "ani_size";
         case ValueType::ANI_REF:                          return "ani_ref";
         case ValueType::ANI_CLASS:                        return "ani_class";
+        case ValueType::ANI_ENUM:                         return "ani_enum";
+        case ValueType::ANI_ENUM_ITEM:                    return "ani_enum_item";
         case ValueType::ANI_METHOD:                       return "ani_method";
         case ValueType::ANI_STATIC_METHOD:                return "ani_static_method";
         case ValueType::ANI_FUNCTION:                     return "ani_function";
@@ -402,6 +446,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_DOUBLE_STORAGE:               return "ani_double *";
         case ValueType::ANI_REF_STORAGE:                  return "ani_ref *";
         case ValueType::ANI_OBJECT_STORAGE:               return "ani_object *";
+        case ValueType::ANI_ENUM_STORAGE:                 return "ani_enum *";
+        case ValueType::ANI_ENUM_ITEM_STORAGE:            return "ani_enum_item *";
         case ValueType::ANI_STRING_STORAGE:               return "ani_string *";
         case ValueType::ANI_SIZE_STORAGE:                 return "ani_size *";
         case ValueType::ANI_BOOLEAN:                      return "ani_boolean";
@@ -698,6 +744,69 @@ public:
         }
 
         class_ = s.ToInternalType(vclass->GetRef());
+        return {};
+    }
+
+    VerificationResult VerifyEnumDescriptor(const char *enumDescriptor)
+    {
+        auto err = VerifyTypePtr(enumDescriptor, "const char *");
+        if (err) {
+            return err;
+        }
+
+        std::optional<PandaString> enumDesc = Mangle::ConvertDescriptor(enumDescriptor);
+        if (!enumDesc.has_value()) {
+            PandaStringStream ss;
+            ss << "invalid enum descriptor";
+            return {ss.str(), ANIErrorSeverity::ERROR};
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto *ctx = GetClassLinkerContext(s.GetExecutionContext());
+        if (ctx == nullptr) {
+            ctx = classLinker->GetExtension(panda_file::SourceLang::ETS)->GetBootContext();
+        }
+
+        Class *klass = classLinker->FindLoadedClass(utf::CStringAsMutf8(enumDesc.value().c_str()), ctx);
+        if (klass == nullptr) {
+            return {};
+        }
+        if (!EtsClass::FromRuntimeClass(klass)->IsEtsEnum()) {
+            return {"descriptor is not enum", ANIErrorSeverity::FATAL};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyEnum(VEnum *venum)
+    {
+        auto err = VerifyRef(venum);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsEnum(s, venum->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, venum->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyEnumItem(VEnumItem *venumItem)
+    {
+        auto err = VerifyRef(venumItem);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsEnumItem(s, venumItem->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, venumItem->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
         return {};
     }
 
@@ -1577,6 +1686,18 @@ static VerificationResult VerifyClass(Verifier &v, const ANIArg &arg)
     return v.VerifyClass(arg.GetValueClass());
 }
 
+static VerificationResult VerifyEnum(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENUM);
+    return v.VerifyEnum(arg.GetValueEnum());
+}
+
+static VerificationResult VerifyEnumItem(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENUM_ITEM);
+    return v.VerifyEnumItem(arg.GetValueEnumItem());
+}
+
 static VerificationResult VerifyString(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STRING);
@@ -1599,6 +1720,12 @@ static VerificationResult VerifyUTF8String(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_STRING);
     return v.VerifyTypePtr(arg.GetValueUTF8String(), "const char *");
+}
+
+static VerificationResult VerifyEnumDescriptor(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENUM_DESCRIPTOR);
+    return v.VerifyEnumDescriptor(arg.GetValueUTF8String());
 }
 
 static VerificationResult VerifyMethodName(Verifier &v, const ANIArg &arg)
@@ -1923,6 +2050,18 @@ static VerificationResult VerifyRefStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueRefStorage(), "ani_ref");
+}
+
+static VerificationResult VerifyEnumStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENUM_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueEnumStorage(), "ani_enum");
+}
+
+static VerificationResult VerifyEnumItemStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENUM_ITEM_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueEnumItemStorage(), "ani_enum_item");
 }
 
 static VerificationResult VerifyStringStorage(Verifier &v, const ANIArg &arg)

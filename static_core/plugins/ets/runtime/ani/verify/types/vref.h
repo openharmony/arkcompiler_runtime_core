@@ -54,6 +54,22 @@ public:
     }
 };
 
+class VEnum final : public VObject {
+public:
+    ani_enum GetRef()
+    {
+        return static_cast<ani_enum>(VObject::GetRef());
+    }
+};
+
+class VEnumItem final : public VObject {
+public:
+    ani_enum_item GetRef()
+    {
+        return static_cast<ani_enum_item>(VObject::GetRef());
+    }
+};
+
 class VString final : public VObject {
 public:
     ani_string GetRef()

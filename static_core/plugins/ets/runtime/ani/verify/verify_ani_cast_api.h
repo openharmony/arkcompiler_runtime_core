@@ -26,6 +26,8 @@ class VRef;
 class VModule;
 class VObject;
 class VClass;
+class VEnum;
+class VEnumItem;
 class VString;
 class VMethod;
 class VStaticMethod;
@@ -89,6 +91,16 @@ struct TypeMapping<VClass *> {
 };
 
 template <>
+struct TypeMapping<VEnum *> {
+    using Type = ani_enum;
+};
+
+template <>
+struct TypeMapping<VEnumItem *> {
+    using Type = ani_enum_item;
+};
+
+template <>
 struct TypeMapping<VRef **> {
     using Type = ani_ref *;
 };
@@ -111,6 +123,16 @@ struct TypeMapping<VObject *> {
 template <>
 struct TypeMapping<VClass **> {
     using Type = ani_class *;
+};
+
+template <>
+struct TypeMapping<VEnum **> {
+    using Type = ani_enum *;
+};
+
+template <>
+struct TypeMapping<VEnumItem **> {
+    using Type = ani_enum_item *;
 };
 
 template <>
