@@ -15,6 +15,7 @@
 
 /*---
 desc: Suspendable jobs with the same priority are scheduled in FIFO order
+tags: [no-warmup]
 ---*/
 
 async function ready(): Promise<int> {
@@ -42,7 +43,9 @@ async function startTest(): Promise<void> {
   await p1
   await p2
 
-  arktest.assertTrue(order.length == 2 && order[0] == 1 && order[1] == 2)
+  arktest.assertEQ(order.length, 2)
+  arktest.assertEQ(order[0], 1)
+  arktest.assertEQ(order[1], 2)
 }
 
 async function main(): Promise<void> {
