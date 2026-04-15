@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,19 @@
  */
 
 /*---
-desc: New lib version
-tags:
-- compile-only
-- not-a-test
+desc: Rewriting of constants in the test class.
 ---*/
 
-export namespace N {
-    export function m(): string {
-        return 'm'
-    }
+interface G {
+    readonly CONSTANT: string;
+}
+
+class A implements G {
+    static readonly CONSTANT = "Constant from A";
+    readonly CONSTANT: string = "Constant from interface A";
+}
+
+class B extends A {
+    static readonly CONSTANT = "Constant from B";
+    readonly CONSTANT: string = "Constant from interface B";
 }

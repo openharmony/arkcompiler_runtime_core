@@ -19,7 +19,7 @@ desc: >-
   If the divisor value of the bigint division operator is 0n,
   then a compile-time error occurs when detected at compile time.
 tags: [compile-only, negative]
-expected_out: 'BigInt: division by zero'
+expected_out: 'Syntax error ESY206401: BigInt: division by zero'
 ---*/
 
 function main(): void {

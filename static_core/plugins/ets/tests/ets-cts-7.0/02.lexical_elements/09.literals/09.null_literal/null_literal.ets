@@ -35,5 +35,10 @@ function main(): int {
         arktest.assertTrue( x === null )
     });
 
+    suite.addTest("Standalone literal", () => {
+        null //standalone literal
+        arktest.assertTrue(null instanceof null)
+    });
+
     return suite.run();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,21 @@
  */
 
 /*---
-desc: Test File.
-files: ['./namespace_function_added.libr.ets']
+desc: Interface combined with multi-level inheritance of static constants.
 ---*/
 
-import { N } from './namespace_function_added.libr.ets';
+interface Greetable {
+    readonly MESSAGE: string;
+}
 
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
+class GrandParent implements Greetable {
+    static readonly MESSAGE = "Hello from GrandParent";
+    readonly MESSAGE = "Hello from GrandParent Instance";
+}
+
+class Parent extends GrandParent {}
+
+class Child extends Parent {
+    static readonly MESSAGE = "Hello from Child";
+    readonly MESSAGE = "Hello from Child Instance";
 }

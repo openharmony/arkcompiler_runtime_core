@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-{% for f in bigint_functions %}
 /*---
 desc: >-
     Built-in functions allow to convert strings representing numbers or any integer values into bigint ones.
 ---*/
 
-function main() {
-    let x: bigint = {{f.func}};
-    arktest.assertEQ(x, {{f.res}})
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Bigint_methods_and_constructor");
+
+    {% for f in bigint_functions %}
+    testSuite.addTest("method_{{loop.index}}", () => {
+        let x: bigint = {{f.func}};
+        arktest.assertEQ(x, {{f.res}})
+    });
+    {% endfor %}
+
+    return testSuite.run();
 }
-{% endfor %}
