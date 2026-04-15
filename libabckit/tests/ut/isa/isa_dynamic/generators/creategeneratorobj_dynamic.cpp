@@ -82,7 +82,7 @@ TEST_F(LibAbcKitCreateDynCreateGeneratorObjInstTest, CreateDynCreategeneratorobj
 {
     auto output = helpers::ExecuteDynamicAbc(
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/generators/creategeneratorobj_dynamic.abc", "creategeneratorobj_dynamic");
-    EXPECT_TRUE(helpers::Match(output, "Cannot get source code of function\n"));
+    EXPECT_TRUE(helpers::Match(output, "Cannot get source code\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/generators/creategeneratorobj_dynamic.abc",
