@@ -1749,7 +1749,7 @@ def GenerateStringIndexOfAfter(cgmode)
 
   IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
     offs := Cast(ShlI(start_index).Imm(1).i32).u32
-    data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFE).u32
+    data_size_u16 := ShrI(AndI(str_len_packed).Imm(0xFFFFFFFE).u32).Imm(1).u32
     data_size_u16 := Sub(data_size_u16, offs).u32
     data_ptr_u16 := Add(str_data, Cast(offs).word).ptr
     # 0 < data size < 16
