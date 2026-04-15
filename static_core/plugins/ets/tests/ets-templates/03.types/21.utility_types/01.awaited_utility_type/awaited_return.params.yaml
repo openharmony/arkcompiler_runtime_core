@@ -13,35 +13,18 @@
 
 ---
 cases:
+#0
     - return_value: |-
-          waitForCompletion(async ()=>{
-              return await Promise.resolve("hello" as T)
-          })
+        await Promise.resolve("hello")
       expected_value: |-
         "hello"
-
+#1
     - return_value: |-
-          waitForCompletion(async ()=>{
-              return await new Promise<T>((resolve) => {
-                  setTimeout(() => {
-                    resolve("hello" as T)
-                  }, 1000)
-              })
-          })
+          Promise.resolve("hello").then( () => "hello")
       expected_value: |-
         "hello"
-
+#2
     - return_value: |-
-          waitForCompletion(async ()=>{
-              return await new Promise<Promise<T>>((resolve) => {
-                resolve(
-                    new Promise<T>((resolve) => {
-                      setTimeout(() => {
-                          resolve("hello" as T)
-                      }, 1)
-                  })
-                )
-              })
-          })
+          Promise.resolve("hello2").then( () => "hello3").then( () => "hello")
       expected_value: |-
         "hello"

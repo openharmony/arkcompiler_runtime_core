@@ -20,14 +20,14 @@ desc: >-
 ---*/
 
 async function foo(i: Awaited<Promise<FixedArray<Promise<number>>>>) {
-  arktest.assertEQ(await i[0], 1.7)
-  arktest.assertTrue(i instanceof FixedArray<Promise>)
+    arktest.assertEQ(await i[0], 1.7)
+    arktest.assertTrue(i instanceof FixedArray<Promise>)
 }
 
 async function bar() {
-  foo(await Promise.resolve([Promise.resolve(1.7)] as FixedArray<Promise<number>>))
+    foo( await Promise.resolve([Promise.resolve(1.7)] as FixedArray<Promise<number>>) )
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }

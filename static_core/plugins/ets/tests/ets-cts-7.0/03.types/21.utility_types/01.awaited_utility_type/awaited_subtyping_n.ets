@@ -26,11 +26,11 @@ class Derived extends Base {}
 class E extends Derived {}
 
 async function foo <T extends Base> (p: Awaited<T>) {
-  bar(p)
+    bar(p)
 }
 
 async function bar <T extends Derived> (p: Awaited<T>) { }
 
-function main() {
-  waitForCompletion(bar<Base>(new Base()))
+async function main(): Promise<void> {
+    await bar<Base>( new Base() )
 }

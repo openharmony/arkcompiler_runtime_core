@@ -22,17 +22,17 @@ desc: >-
 ---*/
 
 
-async function foo(i: Awaited<{{c.expectedType}}>, j: {{c.expectedType}}) {
-  arktest.assertEQ(i, j)
-  arktest.assertTrue(i instanceof {{c.expectedType}})
+async function foo( i: Awaited<{{c.expectedType}}>, j: {{c.expectedType}} ) {
+    arktest.assertEQ(i, j)
+    arktest.assertTrue( i instanceof {{c.expectedType}} )
 }
 
 async function bar() {
-  foo(await Promise.resolve({{c.expectedVal}}), {{c.expectedVal}})
+    foo( await Promise.resolve({{c.expectedVal}}), {{c.expectedVal}} )
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }
 
-{% endfor %}
+{%- endfor %}

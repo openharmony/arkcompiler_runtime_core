@@ -13,38 +13,39 @@
 
 ---
 cases:
+#0
   - expectedVal: "true"
     expectedType: boolean
-
+#1
   - expectedVal: "false"
     expectedType: boolean
-
+#2
   - expectedVal: 4 as byte
     expectedType: byte
-
+#3
   - expectedVal: 4 as short
     expectedType: short
-
+#4
   - expectedVal: 4 as int
     expectedType: int
-
+#5
   - expectedVal: 4 as long
     expectedType: long
-
+#6
   - expectedVal: 4.0 as float
     expectedType: float
-
+#7
   - expectedVal: 4.0 as double
     expectedType: double
-
+#8
   - expectedVal: 4.0 as number
     expectedType: number
-
+#9
   - expectedVal: '"some string"'
     expectedType: string
-
+#10
   - expectedVal: undefined
     expectedType: undefined
-
+#11
   - expectedVal: 'null'
     expectedType: 'null'

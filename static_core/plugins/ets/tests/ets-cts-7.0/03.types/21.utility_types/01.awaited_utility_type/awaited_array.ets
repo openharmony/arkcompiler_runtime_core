@@ -20,15 +20,15 @@ desc: >-
 ---*/
 
 async function foo(i: Awaited<Promise<Array<Promise<number>>>>) {
-  i.push(new Promise<number>((resolve)=> resolve(5) ))
-  arktest.assertEQ(await i[0], 5)
-  arktest.assertTrue(i instanceof Array)
+    i.push( new Promise<number>( (resolve) => resolve(5) ) )
+    arktest.assertEQ(await i[0], 5)
+    arktest.assertTrue(i instanceof Array)
 }
 
 async function bar() {
-  foo(await Promise.resolve(new Array<Promise<number>>()))
+    foo( await Promise.resolve( new Array<Promise<number>>() ) )
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }

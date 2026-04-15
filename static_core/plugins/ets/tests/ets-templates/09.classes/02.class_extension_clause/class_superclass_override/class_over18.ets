@@ -18,21 +18,24 @@ desc: Subclass overrides parent method and uses parent's asynchronous method.
 ---*/
 
 class Parent {
-  async greet(): Promise<string> {
-    return "Hello from Parent";
-  }
+    async greet(): Promise<string> {
+        return "Hello from Parent";
+    }
 }
 
 class Child extends Parent {
-  async greet(): Promise<string> {
-    const parentGreeting = await super.greet();
-    return `${parentGreeting} and Hello from Child`;
-  }
+    async greet(): Promise<string> {
+        const parentGreeting = await super.greet();
+        return `${parentGreeting} and Hello from Child`;
+    }
 }
 
-function main(): void {
-  waitForCompletion(async () => {
+async function test() {
     let child = new Child();
     arktest.assertEQ(await child.greet(), "Hello from Parent and Hello from Child");
-  });
+    return true
+}
+
+async function main(): Promise<void> {
+    await test()
 }

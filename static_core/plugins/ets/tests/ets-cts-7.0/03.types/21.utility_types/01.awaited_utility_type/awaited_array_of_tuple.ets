@@ -20,15 +20,15 @@ desc: >-
 ---*/
 
 async function foo(i: Awaited<(string|number)[]>, j: (string|number)[]) {
-  arktest.assertEQ(i[0], j[0])
-  arktest.assertEQ(i[1], j[1])
-  arktest.assertTrue(i instanceof Array)
+    arktest.assertEQ(i[0], j[0])
+    arktest.assertEQ(i[1], j[1])
+    arktest.assertTrue(i instanceof Array)
 }
 
 async function bar() {
-  foo(await Promise.resolve(['str', 4.1]), ['str', 4.1])
+    foo( await Promise.resolve(['str', 4.1]), ['str', 4.1] )
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }

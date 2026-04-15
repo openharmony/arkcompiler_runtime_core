@@ -19,14 +19,14 @@ desc: >-
 ---*/
 
 async function foo(i: Awaited<"literal string">, j: "literal string") {
-  arktest.assertEQ(i, j)
-  arktest.assertTrue(i instanceof string)
+    arktest.assertEQ(i, j)
+    arktest.assertTrue(i instanceof string)
 }
 
 async function bar() {
-  foo(await Promise.resolve("literal string"), "literal string")
+    foo(await Promise.resolve("literal string"), "literal string")
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }

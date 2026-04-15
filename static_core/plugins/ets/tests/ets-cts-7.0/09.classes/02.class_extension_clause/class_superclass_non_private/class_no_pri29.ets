@@ -17,31 +17,35 @@
 desc: >-
     The child class calls the parent class method, and the asynchronous method overridden by the child class
     is used in the parent class method.
+tags: [no-warmup]
 ---*/
 
 class Parent {
-  public async fetchMessage(): Promise<string> {
-    return "Hello from Parent!";
-  }
+    public async fetchMessage(): Promise<string> {
+        return "Hello from Parent!";
+    }
 
-  public async greet(): Promise<string> {
-    return await this.fetchMessage();
-  }
+    public async greet(): Promise<string> {
+        return await this.fetchMessage();
+    }
 }
 
 class Child extends Parent {
-  public async fetchMessage(): Promise<string> {
-    return "Hello from Child!";
-  }
+    public async fetchMessage(): Promise<string> {
+        return "Hello from Child!";
+    }
 
-  public async callParentGreet(): Promise<string> {
-    return await this.greet();
-  }
+    public async callParentGreet(): Promise<string> {
+        return await this.greet();
+    }
 }
 
-function main(): void {
-  waitForCompletion(async () => {
+async function test() {
     const child = new Child();
     arktest.assertEQ(await child.callParentGreet(), "Hello from Child!");
-  });
+    return true
+}
+
+async function main(): Promise<void> {
+    await test()
 }

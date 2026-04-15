@@ -43,7 +43,11 @@ desc: {{c.desc}}
 
 {{decl}}
 
+{%- if c.async %}
+async function main(): Promise<void> {
+{% else %}
 function main(): void {
+{%- endif %}
 {{logic_data}}
 }
 

@@ -20,13 +20,13 @@ desc: >-
 ---*/
 
 async function foo(i: Awaited<Promise<number>|boolean|string>) {
-  arktest.assertEQ(i, 9.7)
+    arktest.assertEQ(i, 9.7)
 }
 
 async function boo() {
-  foo(await Promise.resolve(9.7))
+    foo( await Promise.resolve(9.7) )
 }
 
-function main() {
-  waitForCompletion(boo)
+async function main(): Promise<void> {
+    await boo()
 }
