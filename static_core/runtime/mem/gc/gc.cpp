@@ -757,9 +757,6 @@ size_t GC::GetNativeBytesFromMallinfoAndRegister() const
 
 bool GC::WaitForGC(GCTask task)
 {
-    if (task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE) {
-        this->GetPandaVm()->PostForkEnd();
-    }
     // NOTE(maksenov): Notify only about pauses (#4681)
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorStartEvent();
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
