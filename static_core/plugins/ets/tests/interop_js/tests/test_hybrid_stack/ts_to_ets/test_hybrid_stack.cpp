@@ -37,6 +37,11 @@ bool CompFrameType(const std::vector<bool> &isStaticFrameV, const std::vector<bo
 
 static bool TestHybridStack()
 {
+    bool isEmpty = true;
+    if (!UnionStackIsEmpty(&isEmpty)) {
+        return false;
+    }
+    ASSERT(!isEmpty);
     std::vector<bool> isStaticFrameV;
     [[maybe_unused]] bool res =
         ForEachFrameInUnionStack([&isStaticFrameV]([[maybe_unused]] const void *frame, bool isStaticFrame) {
@@ -79,6 +84,11 @@ static bool TestHybridStack()
 
 static bool TestHybridStackLambda()
 {
+    bool isEmpty = true;
+    if (!UnionStackIsEmpty(&isEmpty)) {
+        return false;
+    }
+    ASSERT(!isEmpty);
     std::vector<bool> isStaticFrameV;
     [[maybe_unused]] bool res =
         ForEachFrameInUnionStack([&isStaticFrameV]([[maybe_unused]] const void *frame, bool isStaticFrame) {
@@ -119,6 +129,11 @@ static bool TestHybridStackLambda()
 
 static bool TestHybridStackESValue()
 {
+    bool isEmpty = true;
+    if (!UnionStackIsEmpty(&isEmpty)) {
+        return false;
+    }
+    ASSERT(!isEmpty);
     std::vector<bool> isStaticFrameV;
     [[maybe_unused]] bool res =
         ForEachFrameInUnionStack([&isStaticFrameV]([[maybe_unused]] const void *frame, bool isStaticFrame) {
@@ -158,6 +173,11 @@ static bool TestHybridStackESValue()
 
 static bool TestHybridStackSTValue()
 {
+    bool isEmpty = true;
+    if (!UnionStackIsEmpty(&isEmpty)) {
+        return false;
+    }
+    ASSERT(!isEmpty);
     std::vector<bool> isStaticFrameV;
     // NOLINTNEXTLINE
     [[maybe_unused]] bool res =
