@@ -1060,6 +1060,11 @@ public:
         return GetFlag(inst_flags::LOW_LEVEL);
     }
 
+    bool IsNative() const
+    {
+        return GetFlag(inst_flags::NATIVE);
+    }
+
     // Returns true if the instruction not hoistable
     bool IsNotHoistable() const
     {
@@ -4560,9 +4565,8 @@ public:
     {
         SetIsArray(isArray);
     }
-    explicit LoadInst(Initializer t, bool needBarrier = false, bool isArray = true) : Base(std::move(t))
+    explicit LoadInst(Initializer t, bool isArray = true) : Base(std::move(t))
     {
-        SetNeedReadBarrier(needBarrier);
         SetIsArray(isArray);
     }
 
@@ -4676,10 +4680,7 @@ public:
     using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
 
-    explicit StoreInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
-    {
-        SetNeedWriteBarrier(needBarrier);
-    }
+    explicit StoreInst(Initializer t) : Base(std::move(t)) {}
 
     Inst *GetArray()
     {
@@ -4733,12 +4734,11 @@ public:
         SetIsArray(isArray);
     }
 
-    LoadInstI(Initializer t, uint64_t imm, bool isVolatile = false, bool needBarrier = false, bool isArray = true)
+    LoadInstI(Initializer t, uint64_t imm, bool isVolatile = false, bool isArray = true)
         : Base(std::move(t)), ImmediateMixin(imm)
     {
         SetIsArray(isArray);
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -4783,11 +4783,9 @@ public:
     using Base::Base;
 
     LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    LoadMemInstI(Initializer t, uint64_t imm, bool isVolatile = false, bool needBarrier = false)
-        : Base(std::move(t)), ImmediateMixin(imm)
+    LoadMemInstI(Initializer t, uint64_t imm, bool isVolatile = false) : Base(std::move(t)), ImmediateMixin(imm)
     {
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     Inst *GetPointer()
@@ -5383,12 +5381,10 @@ public:
     using Base = ObjectTypeMixin<VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
     using Base::Base;
 
-    LoadObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
-                   bool needBarrier = false)
+    LoadObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5430,10 +5426,9 @@ public:
     using Base = ScaleMixin<VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
     using Base::Base;
 
-    explicit LoadMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
+    explicit LoadMemInst(Initializer t, bool isVolatile = false) : Base(std::move(t))
     {
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5528,11 +5523,10 @@ public:
     using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
-    LoadResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
+    LoadResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5576,12 +5570,10 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
-                    bool needBarrier = false)
+    StoreObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
         SetVolatile(isVolatile);
-        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5626,11 +5618,7 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedWriteBarrier(needBarrier);
-    }
+    StoreResolvedObjectFieldInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -5675,10 +5663,9 @@ public:
 
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
-    explicit StoreMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
+    explicit StoreMemInst(Initializer t, bool isVolatile = false) : Base(std::move(t))
     {
         SetVolatile(isVolatile);
-        SetNeedWriteBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5724,12 +5711,10 @@ public:
     using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
-    LoadStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
-                   bool needBarrier = false)
+    LoadStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     void SetVnObject(VnObject *vnObj) const override;
@@ -5802,11 +5787,10 @@ public:
     using Base = VolatileMixin<NeedReadBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
-    LoadResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
+    LoadResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool isVolatile = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
         SetVolatile(isVolatile);
-        SetNeedReadBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5845,11 +5829,9 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
-                    bool needBarrier = false)
+    StoreStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetNeedWriteBarrier(needBarrier);
         SetVolatile(isVolatile);
     }
 
@@ -5898,11 +5880,7 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 0U;
 
-    UnresolvedStoreStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedWriteBarrier(needBarrier);
-    }
+    UnresolvedStoreStaticInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
@@ -5936,11 +5914,7 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1U;
 
-    StoreResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedWriteBarrier(needBarrier);
-    }
+    StoreResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -6863,10 +6837,7 @@ public:
     using Base = NeedReadBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>;
     using Base::Base;
 
-    explicit LoadArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
-    {
-        SetNeedReadBarrier(needBarrier);
-    }
+    explicit LoadArrayPairInst(Initializer t) : Base(std::move(t)) {}
 
     Inst *GetArray()
     {
@@ -6968,10 +6939,7 @@ public:
     using Base = NeedWriteBarrierMixin<WithGCBarrierEntrypointInst<4U>>;
     using Base::Base;
 
-    explicit StoreArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
-    {
-        SetNeedWriteBarrier(needBarrier);
-    }
+    explicit StoreArrayPairInst(Initializer t) : Base(std::move(t)) {}
 
     Inst *GetIndex()
     {
@@ -7081,10 +7049,7 @@ public:
 
     explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
-    LoadArrayPairInstI(Initializer t, uint64_t imm, bool needBarrier = false) : Base(std::move(t)), ImmediateMixin(imm)
-    {
-        SetNeedReadBarrier(needBarrier);
-    }
+    LoadArrayPairInstI(Initializer t, uint64_t imm) : Base(std::move(t)), ImmediateMixin(imm) {}
 
     Inst *GetArray()
     {
@@ -7175,10 +7140,7 @@ public:
 
     explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
-    StoreArrayPairInstI(Initializer t, uint64_t imm, bool needBarrier = false) : Base(std::move(t)), ImmediateMixin(imm)
-    {
-        SetNeedWriteBarrier(needBarrier);
-    }
+    StoreArrayPairInstI(Initializer t, uint64_t imm) : Base(std::move(t)), ImmediateMixin(imm) {}
 
     DataType::Type GetInputType(size_t index) const override
     {

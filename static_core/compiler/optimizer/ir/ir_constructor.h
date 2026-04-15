@@ -1327,36 +1327,12 @@ public:
 
     void UpdateSpecialFlagsForReference(Inst *inst)
     {
-        // The code below handles only a subset of stores (e.g. Store/StoreI are not considered)
-        // It might be somehow related to the interpreter implementation using irtoc.
+        // Set WriteBarrier for managed Stores only (maybe related to the irtoc interpreter implementation).
         // See 29803 for the details.
+        // MayNeedGCBarrier() filters out the group of 'Dynamic' instructions and FillConstArray.
         if (inst->GetType() == DataType::REFERENCE) {
-            if (inst->GetOpcode() == Opcode::StoreArray) {
-                inst->CastToStoreArray()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreArrayI) {
-                inst->CastToStoreArrayI()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreStatic) {
-                inst->CastToStoreStatic()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::UnresolvedStoreStatic) {
-                inst->CastToUnresolvedStoreStatic()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreObject) {
-                inst->CastToStoreObject()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreResolvedObjectField) {
-                inst->CastToStoreResolvedObjectField()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreResolvedObjectFieldStatic) {
-                inst->CastToStoreResolvedObjectFieldStatic()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreArrayPair) {
-                inst->CastToStoreArrayPair()->SetNeedWriteBarrier(true);
-            }
-            if (inst->GetOpcode() == Opcode::StoreArrayPairI) {
-                inst->CastToStoreArrayPairI()->SetNeedWriteBarrier(true);
+            if (inst->IsStore() && !inst->IsNative() && inst->MayNeedGCBarrier()) {
+                InstSetNeedWriteBarrier(inst, true);
             }
         }
     }

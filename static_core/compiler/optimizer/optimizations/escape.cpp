@@ -2055,13 +2055,13 @@ void ScalarReplacement::InitializeObject(Inst *alloc, Inst *instBefore, VirtualS
             store = graph_->CreateInstStoreObject(
                 fieldType, alloc->GetPc(), alloc, fieldSourceInst,
                 TypeIdMixin {graph_->GetRuntime()->GetFieldId(field), graph_->GetMethod()}, field,
-                graph_->GetRuntime()->IsFieldVolatile(field), DataType::IsReference(fieldType));
+                graph_->GetRuntime()->IsFieldVolatile(field));
         } else {
             ASSERT(std::holds_alternative<Index>(fieldVariant));
             auto index = std::get<Index>(fieldVariant).index;
             auto type = state->GetArrayComponentType();
             store = graph_->CreateInstStoreArray(type, alloc->GetPc(), alloc, graph_->FindOrCreateConstant(index),
-                                                 fieldSourceInst, DataType::IsReference(type));
+                                                 fieldSourceInst);
         }
         if (instBefore != nullptr) {
             if (!state->IsPhi()) {

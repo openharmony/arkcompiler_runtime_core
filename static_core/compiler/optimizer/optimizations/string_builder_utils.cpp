@@ -782,7 +782,7 @@ Inst *StoreStringBuilderBufferField(Graph *graph, Inst *buffer, Inst *instance, 
     auto field = runtime->GetFieldStringBuilderBuffer(klass);
     auto storeObject = graph->CreateInstStoreObject(DataType::REFERENCE, ctorCall->GetPc(), instance, buffer,
                                                     TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), true);
+                                                    runtime->IsFieldVolatile(field));
     InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
 
     return storeObject;
@@ -795,7 +795,7 @@ void StoreStringBuilderIndexField(Graph *graph, Inst *index, Inst *instance, Run
     auto field = runtime->GetFieldStringBuilderIndex(klass);
     auto storeObject = graph->CreateInstStoreObject(DataType::INT32, ctorCall->GetPc(), instance, index,
                                                     TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), false);
+                                                    runtime->IsFieldVolatile(field));
     InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
 }
 
@@ -806,7 +806,7 @@ void StoreStringBuilderLengthField(Graph *graph, Inst *length, Inst *instance, R
     auto field = runtime->GetFieldStringBuilderLength(klass);
     auto storeObject = graph->CreateInstStoreObject(DataType::INT32, ctorCall->GetPc(), instance, length,
                                                     TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), false);
+                                                    runtime->IsFieldVolatile(field));
     InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
 }
 
@@ -817,7 +817,7 @@ void StoreStringBuilderIsCompressedField(Graph *graph, Inst *isCompressed, Inst 
     auto field = runtime->GetFieldStringBuilderCompress(klass);
     auto storeObject = graph->CreateInstStoreObject(DataType::BOOL, ctorCall->GetPc(), instance, isCompressed,
                                                     TypeIdMixin {runtime->GetFieldId(field), graph->GetMethod()}, field,
-                                                    runtime->IsFieldVolatile(field), false);
+                                                    runtime->IsFieldVolatile(field));
     InsertBeforeWithSaveState(storeObject, ctorCall->GetSaveState());
 }
 

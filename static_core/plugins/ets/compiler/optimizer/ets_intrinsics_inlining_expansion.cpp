@@ -85,8 +85,7 @@ void Inlining::ExpandIntrinsicCoreArraySet(CallInst *callInst)
     auto buffer = GetGraph()->CreateInstLoadObject(
         DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), callInst->GetCallMethod()},
         bufferField, runtime->IsFieldVolatile(bufferField));
-    // true : needBarrier
-    auto *storeValue = GetGraph()->CreateInstStoreArray(DataType::REFERENCE, bcAddr, buffer, boundsCheck, value, true);
+    auto *storeValue = GetGraph()->CreateInstStoreArray(DataType::REFERENCE, bcAddr, buffer, boundsCheck, value);
 
     callInst->InsertAfter(actualLength);
     actualLength->InsertAfter(boundsCheck);
