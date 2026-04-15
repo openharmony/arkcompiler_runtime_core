@@ -921,83 +921,106 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
             regalloc_set: reg_mask,
             mode: mode,
             lang: lang.empty? ? 'PANDA_ASSEMBLY' : lang.upcase) {
-        # Arm32 is not supported
-        if Options.arch == :arm32
-            Intrinsic(:UNREACHABLE).void.Terminator
-            next
-        end
-        If(str1_orig, str2_orig).EQ.Unlikely.b {
-            Return(1).b
+      # Arm32 is not supported
+      if Options.arch == :arm32
+        Intrinsic(:UNREACHABLE).void.Terminator
+        next
+      end
+      # Do the cheapest checks from the very beginning
+      If(str1_orig, str2_orig).EQ.Unlikely.b {
+        Return(1).b
+      }
+      if dynamic
+        length1 := LoadI(str1_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        length2 := LoadI(str2_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        length1 := AndI(length1).Imm("~(2U)").u32
+        length2 := AndI(length2).Imm("~(2U)").u32
+        If(length1, length2).NE.Unlikely.b {
+          Goto(:NotEqual)
         }
-        unless dynamic
-            If(str1_orig, 0).EQ.Unlikely.b {
-                Goto(:NotEqual)
-            }
-            If(str2_orig, 0).EQ.Unlikely.b {
-                Goto(:NotEqual)
-            }
-        end
-        if cgmode == :NativePlus
-            str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
-        else
-            check_not_tree_string_type(str1_orig) if defines.DEBUG
-            # it still can be slice
-            check_string_type(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
-            str1 := str1_orig
-        end
-        str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
-        if dynamic
-            length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
-            length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
-            length1 := AndI(length1).Imm("~(2U)").u32
-            length2 := AndI(length2).Imm("~(2U)").u32
-            If(length1, length2).NE.Unlikely.b {
-                Goto(:NotEqual)
-            }
-            length := Cast(length1.u32).u64
-        else
-            class1 := load_class(str1)
-            class2 := load_class(str2)
-            If(class1, class2).NE.Unlikely.b {
-                Goto(:NotEqual)
-            }
-            length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
-            length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
-            If(length1, length2).NE.Unlikely.b {
-                Goto(:NotEqual)
-            }
-            length := Cast(length1.u32).u64
-        end
-        length := unpack_length_with_compression(length, Constants::STRING_LENGTH_SHIFT)
-        If(length, 8).GT.b {
-            Goto(:Long)
+        length := Cast(length1.u32).u64
+      else
+        If(str1_orig, 0).EQ.Unlikely.b {
+          Goto(:NotEqual)
         }
-        odd_bytes := Sub(8, length).u64
-        last_idx := Sub(Constants::STRING_DATA_OFFSET, odd_bytes).u64
-        buf1 := Load(str1, last_idx).u64
-        buf2 := Load(str2, last_idx).u64
-        odd_bits := Shl(odd_bytes, 3).u64
-        diff := Shr(Xor(buf1, buf2).u64, odd_bits).u64
-        res := Compare(diff, 0).EQ.b
-        if dynamic
-            # If length is 0, odd_bits is 64 and Shr above does nothing, so we
-            # effectively compare last 8 bytes of two strings before their data
-            # (length and hash code). Hash code for empty string is always 0,
-            # but value stored in length field of equal strings can be different
-            # in dynamic implementation, so we check (length == 0) separately
-            res := Or(res, Compare(length, 0).EQ.b).b
-        end
-        Return(res).b
+        If(str2_orig, 0).EQ.Unlikely.b {
+          Goto(:NotEqual)
+        }
+        length1 := LoadI(str1_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        length2 := LoadI(str2_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        If(length1, length2).NE.Unlikely.b {
+          Goto(:NotEqual)
+        }
+        length := Cast(length1.u32).u64
+      end
 
-    Label(:Long)
+      if cgmode == :NativePlus
+        str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
+        str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
+      else
+        if dynamic
+          # Go through the SlowPath if strings are 'Sliced' or 'Tree'
+          check_string_type(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
+          check_string_type(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
+          str1 := str1_orig
+          str2 := str2_orig
+        else
+          # StringEquals requires FlatCheck, so str_orig1 ('this') argument must not be 'TreeString'
+          # if cgmode is :FastPath.
+          check_not_tree_string_type(str1_orig) if defines.DEBUG
+          # Still have to check if it is 'SlicedString'.
+          class1 := load_class(str1_orig)
+          If(LoadI(class1).Imm(Constants::STRING_TYPE_OFFSET).u64, Constants::STRING_TYPE_SLICE).EQ {
+            Goto(:SlowPathEntrypoint)
+          }
+          # str2_orig can be any object, so if it's not String, then return 'false'
+          class2 := load_class(str2_orig)
+          If(load_base_class(class1), load_base_class(class2)).NE.Unlikely.b {
+            Goto(:NotEqual)
+          }
+          # now check string kind of str2_orig
+          type2 := LoadI(class2).Imm(Constants::STRING_TYPE_OFFSET).u64
+          If(type2, Constants::STRING_TYPE_SLICE).EQ {
+            Goto(:SlowPathEntrypoint)
+          }
+          If(type2, Constants::STRING_TYPE_TREE).EQ {
+            str2_flattened := try_get_flattened_tree_str(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
+          }
+          str1 := str1_orig
+          str2 := Phi(str2_orig, str2_flattened).ref
+        end  # !dynamic
+      end  # :FastPath
+
+      length := unpack_length_with_compression(length, Constants::STRING_LENGTH_SHIFT)
+      If(length, 8).GT.b {
+        Goto(:Long)
+      }
+      odd_bytes := Sub(8, length).u64
+      last_idx := Sub(Constants::STRING_DATA_OFFSET, odd_bytes).u64
+      buf1 := Load(str1, last_idx).u64
+      buf2 := Load(str2, last_idx).u64
+      odd_bits := Shl(odd_bytes, 3).u64
+      diff := Shr(Xor(buf1, buf2).u64, odd_bits).u64
+      res := Compare(diff, 0).EQ.b
+      if dynamic
+        # If length is 0, odd_bits is 64 and Shr above does nothing, so we
+        # effectively compare last 8 bytes of two strings before their data
+        # (length and hash code). Hash code for empty string is always 0,
+        # but value stored in length field of equal strings can be different
+        # in dynamic implementation, so we check (length == 0) separately
+        res := Or(res, Compare(length, 0).EQ.b).b
+      end
+      Return(res).b
+
+      Label(:Long)
         hashcode1 := LoadI(str1).Imm(Constants::STRING_HASHCODE_OFFSET).u32
         If(hashcode1, 0).NE.b {
-            hashcode2 := LoadI(str2).Imm(Constants::STRING_HASHCODE_OFFSET).u32
-            If(hashcode2, 0).NE.b {
-                If(hashcode1, hashcode2).NE.b {
-                    Goto(:NotEqual)
-                }
+          hashcode2 := LoadI(str2).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+          If(hashcode2, 0).NE.b {
+            If(hashcode1, hashcode2).NE.b {
+              Goto(:NotEqual)
             }
+          }
         }
 
         unroll := Compare(length, 64).GE.b
@@ -1009,32 +1032,32 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
         first_idx := Constants::STRING_DATA_OFFSET
         last_idx := Sub(Add(first_idx, length).u64, 8).u64
 
-    Label(:Loop)
+      Label(:Loop)
         idx := Phi(first_idx, next_idx).u64
         buf1 := Load(str1, idx).u64
         buf2 := Load(str2, idx).u64
         If(buf1, buf2).NE.Unlikely.b {
-            Goto(:NotEqual)
+          Goto(:NotEqual)
         }
         next_idx := Add(idx, 8).u64
         If(next_idx, last_idx).GE.Unlikely.b {
-            buf1 := Load(str1, last_idx).u64
-            buf2 := Load(str2, last_idx).u64
-            res := Compare(buf1, buf2).EQ.b
-            Return(res).b
+          buf1 := Load(str1, last_idx).u64
+          buf2 := Load(str2, last_idx).u64
+          res := Compare(buf1, buf2).EQ.b
+          Return(res).b
         }
         Goto(:Loop)
-    Label(:NotEqual)
+      Label(:NotEqual)
         Return(0).b
-    LabelGlobal(:SlowPathEntrypoint)
-      if cgmode == :NativePlus
-        method = "#{lang.empty? ? 'Core' : lang}StringEqualsEntrypoint"
-        Return(Call(str1_orig, str2_orig).Method(method).b).b
-      else
-        entrypoint = get_entrypoint_offset("#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_SLOW_PATH")
-        entrypoint_bridge = "#{lang.empty? ? '' : lang}StringEqualsUsualBridge"
-        Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(entrypoint).MethodAsImm(entrypoint_bridge).Terminator.b
-        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
-      end
+      LabelGlobal(:SlowPathEntrypoint)
+        if cgmode == :NativePlus
+          method = "#{lang.empty? ? 'Core' : lang}StringEqualsEntrypoint"
+          Return(Call(str1_orig, str2_orig).Method(method).b).b
+        else
+          entrypoint = get_entrypoint_offset("#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_SLOW_PATH")
+          entrypoint_bridge = "#{lang.empty? ? '' : lang}StringEqualsUsualBridge"
+          Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(entrypoint).MethodAsImm(entrypoint_bridge).Terminator.b
+          Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+        end
     }
 end
