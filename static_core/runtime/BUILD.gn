@@ -237,7 +237,6 @@ _libarkruntime_calculated_sources = [
   "mem/gc/epsilon/epsilon_barrier.cpp",
   "mem/gc/g1/g1-allocator.cpp",
   "mem/gc/g1/g1-gc.cpp",
-  "mem/gc/g1/g1-helpers.cpp",
   "mem/gc/g1/g1_analytics.cpp",
   "mem/gc/g1/g1_pause_tracker.cpp",
   "mem/gc/g1/hot_cards.cpp",

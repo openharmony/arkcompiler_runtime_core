@@ -154,7 +154,6 @@ set(SOURCES
     file_manager.cpp
     mem/gc/generational-gc-base.cpp
     mem/gc/g1/g1-gc.cpp
-    mem/gc/g1/g1-helpers.cpp
     mem/gc/g1/ref_updater.cpp
     mem/gc/g1/g1-allocator.cpp
     mem/gc/g1/g1_analytics.cpp

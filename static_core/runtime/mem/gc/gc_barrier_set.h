@@ -172,40 +172,8 @@ public:
     static constexpr size_t G1_POST_BARRIER_RING_BUFFER_SIZE = 1024 * 8;
     using G1PostBarrierRingBufferType = mem::LockFreeBuffer<mem::CardTable::CardPtr, G1_POST_BARRIER_RING_BUFFER_SIZE>;
 
-    GCG1BarrierSet(mem::InternalAllocatorPtr allocator,
-                   // PRE ARGS:
-                   ObjRefProcessFunc preStoreFunc,
-                   // POST ARGS:
-                   ObjTwoRefProcessFunc postFunc, uint8_t regionSizeBitsCount, CardTable *cardTable,
-                   ThreadLocalCardQueues *updatedRefsQueue, os::memory::Mutex *queueLock)
-        : GCBarrierSet(allocator, BarrierType::PRE_RB_NONE, BarrierType::PRE_SATB_BARRIER,
-                       BarrierType::POST_INTERREGION_BARRIER),
-          preStoreFunc_(preStoreFunc),
-          postFunc_(postFunc),
-          regionSizeBitsCount_(regionSizeBitsCount),
-          cardTable_(cardTable),
-          minAddr_(ToVoidPtr(cardTable->GetMinAddress())),
-          updatedRefsQueue_(updatedRefsQueue),
-          queueLock_(queueLock)
-    {
-        ASSERT(preStoreFunc_ != nullptr);
-        ASSERT(postFunc_ != nullptr);
-        // PRE
-        AddBarrierOperand(
-            BarrierPosition::BARRIER_POSITION_PRE, "STORE_IN_BUFF_TO_MARK_FUNC",
-            BarrierOperand(BarrierOperandType::FUNC_WITH_OBJ_REF_ADDRESS, BarrierOperandValue(preStoreFunc_)));
-        // POST
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS",
-                          BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(regionSizeBitsCount_)));
-        AddBarrierOperand(
-            BarrierPosition::BARRIER_POSITION_POST, "UPDATE_CARD_FUNC",
-            BarrierOperand(BarrierOperandType::FUNC_WITH_TWO_OBJ_REF_ADDRESSES, BarrierOperandValue(postFunc_)));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR",
-                          BarrierOperand(BarrierOperandType::UINT8_ADDRESS,
-                                         BarrierOperandValue(reinterpret_cast<uint8_t *>(*cardTable->begin()))));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR",
-                          BarrierOperand(BarrierOperandType::ADDRESS, BarrierOperandValue(minAddr_)));
-    }
+    GCG1BarrierSet(mem::InternalAllocatorPtr allocator, uint8_t regionSizeBitsCount, CardTable *cardTable,
+                   ThreadLocalCardQueues *updatedRefsQueue, os::memory::Mutex *queueLock);
 
     bool IsPreBarrierEnabled() override;
 

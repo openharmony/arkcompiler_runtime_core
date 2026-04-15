@@ -22,7 +22,6 @@
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
-#include "runtime/mem/gc/g1/g1-helpers.h"
 #include "runtime/mem/gc/g1/ref_cache_builder.h"
 #include "runtime/mem/gc/g1/update_remset_task_queue.h"
 #include "runtime/mem/gc/g1/update_remset_thread.h"
@@ -1190,10 +1189,9 @@ void G1GC<LanguageConfig>::InitializeImpl()
     this->CreateCardTable(allocator, PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
                           PoolManager::GetMmapMemPool()->GetTotalObjectSize());
 
-    auto barrierSet =
-        allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
-                                       ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
-                                       this->GetCardTable(), updatedRefsQueue_, &queueLock_);
+    auto barrierSet = allocator->New<GCG1BarrierSet>(
+        allocator, ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()), this->GetCardTable(),
+        updatedRefsQueue_, &queueLock_);
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
 

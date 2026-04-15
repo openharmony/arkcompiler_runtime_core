@@ -16,6 +16,7 @@
 #ifndef PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
 #define PANDA_LIBPANDABASE_MEM_GC_BARRIER_H
 
+#include "libarkbase/mem/mem.h"
 #include "libarkbase/utils/bit_field.h"
 
 #include <atomic>
@@ -161,9 +162,9 @@ constexpr bool IsEmptyBarrier(BarrierType barrierType)
            (barrierType == BarrierType::PRE_RB_NONE) || (barrierType == BarrierType::POST_RB_NONE);
 }
 
-using ObjRefProcessFunc = void (*)(void *);
-using ObjFieldProcessFunc = void *(*)(void **);
-using ObjTwoRefProcessFunc = void (*)(const void *, const void *);
+using ObjRefProcessFunc = void (*)(ObjectPointerType);
+using ObjFieldProcessFunc = void *(*)(ObjectPointerType *);
+using ObjTwoRefProcessFunc = void (*)(ObjectPointerType, ObjectPointerType);
 
 enum class BarrierOperandType {
     ADDRESS = 0,                      // just an address (void*)
