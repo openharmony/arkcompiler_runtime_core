@@ -1,8 +1,2 @@
-#34042
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_17.ets
-07.expressions/07.spread_expression/spex_const_15.ets
-07.expressions/07.spread_expression/spex_func_15.ets
-07.expressions/07.spread_expression/spex_meth_15.ets
-
 #34082
 16.concurrency/04.parallel_execution/03.eaworker_api/eaworker_two_workers_smoke.ets
