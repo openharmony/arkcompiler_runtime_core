@@ -18,6 +18,7 @@ from typing import ClassVar
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from runner import utils
 from runner.enum_types.validation_result import ValidatorFailKind
 from runner.extensions.validators.parser.parser_validator import ParserValidator
 from runner.options.options_step import StepKind
@@ -218,7 +219,7 @@ class ParserValidatorTest(TestCase):
             "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
             "At File: diagnostic_format_custom_1.ets:21:21"
         )
-        result = ParserValidator.normalize_build_system_path(input_str)
+        result = utils.normalize_build_system_path(input_str)
         self.assertEqual(result, expected)
 
     def test_normalize_build_system_path_windows(self) -> None:
@@ -234,7 +235,7 @@ class ParserValidatorTest(TestCase):
             "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
             "At File: diagnostic_format_custom_1.ets:21:21"
         )
-        result = ParserValidator.normalize_build_system_path(input_str)
+        result = utils.normalize_build_system_path(input_str)
         self.assertEqual(result, expected)
 
     def test_normalize_build_system_path_windows_forward_slash(self) -> None:
@@ -250,7 +251,7 @@ class ParserValidatorTest(TestCase):
             "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
             "At File: diagnostic_format_custom_1.ets:21:21"
         )
-        result = ParserValidator.normalize_build_system_path(input_str)
+        result = utils.normalize_build_system_path(input_str)
         self.assertEqual(result, expected)
 
     def test_normalize_build_system_path_short_path(self) -> None:
@@ -259,7 +260,7 @@ class ParserValidatorTest(TestCase):
         """
         input_str = "Error Message: Type '\"string\"' cannot be assigned to type 'Double' At File: /tmp/test.ets:10:5"
         expected = "Error Message: Type '\"string\"' cannot be assigned to type 'Double' At File: test.ets:10:5"
-        result = ParserValidator.normalize_build_system_path(input_str)
+        result = utils.normalize_build_system_path(input_str)
         self.assertEqual(result, expected)
 
     def test_normalize_build_system_path_no_match(self) -> None:
@@ -268,7 +269,7 @@ class ParserValidatorTest(TestCase):
         """
         input_str = "Error Message: Type '\"string\"' cannot be assigned to type 'Double'"
         expected = "Error Message: Type '\"string\"' cannot be assigned to type 'Double'"
-        result = ParserValidator.normalize_build_system_path(input_str)
+        result = utils.normalize_build_system_path(input_str)
         self.assertEqual(result, expected)
 
     def test_normalize_build_system_path_multiline(self) -> None:
@@ -293,5 +294,5 @@ class ParserValidatorTest(TestCase):
             "Error Message: Invalid destination type for floating-point constant value "
             "At File: diagnostic_format_custom_1.ets:25:12"
         )
-        result = ParserValidator.normalize_build_system_path(input_str)
+        result = utils.normalize_build_system_path(input_str)
         self.assertEqual(result, expected)

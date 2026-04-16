@@ -32,6 +32,7 @@ from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.flows.itest_flow import ITestFlow
 from runner.extensions.flows.test_flow_registry import workflow_registry
+from runner.extensions.updaters.iupdater import get_updater_class
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
@@ -116,7 +117,6 @@ class TestStandardFlow(ITestFlow, Test):
         # It's supposed if the first step is failed then no step is executed further
         self.fail_kind: str | None = None
 
-        self.expected_err_log = ""
         self.flow_utils = StandardFlowUtils(test_env)
         self.validator_utils = ValidatorUtils(self, test_env)
         self.runtime_steps = [step for step in self.test_env.config.workflow.steps
@@ -260,6 +260,9 @@ class TestStandardFlow(ITestFlow, Test):
 
         if self.continue_if_failed:
             self._finalize_test_status(steps)
+
+        if self.update_expected and not self.excluded:
+            self._update_expected()
 
         self.is_completed = True
         return self
@@ -624,6 +627,20 @@ class TestStandardFlow(ITestFlow, Test):
             else:
                 dep_files_args.append(arg)
         return dep_files_args
+
+    def _update_expected(self) -> None:
+        """Update expected output files using the configured updater.
+        
+        Instantiates and runs the updater class specified in the test suite configuration
+        to update expected output files based on the current test execution results.
+        Skips updating if update_expected is disabled, test is excluded, or no updater is configured.
+        """
+        updater_class_name = self.test_env.config.test_suite.updater_class
+        if not self.update_expected or self.excluded or updater_class_name is None:
+            return
+        updater_class = get_updater_class(updater_class_name)
+        updater = updater_class(self.test_env.config)
+        updater.process(self.path, self.step_reports)
 
 
 class ValidatorUtils:

@@ -16,6 +16,8 @@
 
 from dataclasses import dataclass
 
+from runner.options.options_step import StepKind
+
 
 @dataclass
 class StepReport:
@@ -23,6 +25,7 @@ class StepReport:
     Log of a step execution, validation and pre/post-requirements checks.
     """
     name: str  # name of step
+    step_kind: StepKind = StepKind.NONE  # kind of step
     command_line: str = ""  # executed command line
     cmd_output: str = ""  # content of stdout after executing the command line
     cmd_error: str = ""  # content of stderr after executing the command line
@@ -51,6 +54,8 @@ class StepReport:
             result.append(f"{step}: Validator messages: {self.validator_messages.strip()}")
         if self.extra:
             result.append(f"{step}: Extra: {self.extra.strip()}")
+        if self.step_kind != StepKind.NONE:
+            result.append(f"{step}: Step kind: {self.step_kind.value}")
         if self.status:
             status = self.status.strip()
             result.append(f"{step}: Step status: {status}")

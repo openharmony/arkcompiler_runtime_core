@@ -81,7 +81,7 @@ class OneStepRunner:
     def __init__(self, step: Step, test_env: TestEnv) -> None:
         self.test_env = test_env
         self.step = step
-        self.report: StepReport = StepReport(step.name)
+        self.report: StepReport = StepReport(step.name, step.step_kind)
         self.coverage_config = self.test_env.config.general.coverage
         self.coverage_manager = test_env.coverage
 
