@@ -73,23 +73,41 @@ Copy the template first:
 
 Duplicate `configs/config.example.json` as `configs/config.json`, then edit it in place.
 
-`configs/` stays at the repository root even though executable sources live under `src/`. This keeps local machine-specific configuration separate from tracked source files.
-
 The most important fields in `configs/config.json` are:
 
+Required for the normal collection workflow:
+
 - `project_path`: the OpenHarmony project to analyze
-- `sdk_path`: DevEco SDK root directory (the parent directory that contains both `hms/` and `openharmony/`)
-- `hdc_path`: explicit path to the `hdc` executable (recommended on Windows; use this to avoid SDK auto-discovery)
+- `sdk_hms_path`: DevEco SDK `hms` directory, for example `/path/to/sdk/default/hms`
+- `sdk_openharmony_path`: DevEco SDK `openharmony` or `base` directory, for example `/path/to/sdk/default/openharmony`
+
+Conditionally required:
+
+- `hdc_path`: set this when `hdc` cannot be discovered automatically; recommended on Windows
+- `hapray_python`: set this when Hapray cannot find a usable Python 3.10-3.12 runtime automatically
+
+Common optional fields:
+
 - `deps_root`: dependency root, default is `.deps`
-- `hapray_python`: Python interpreter used for Hapray
 - `npm_registry` / `pip_index_url`: optional mirror settings
-- `windows_short_alias_root`: optional root directory for Hapray short-path aliases on Windows
+- `npm_strict_ssl`, `npm_fetch_timeout`, `npm_fetch_retries`, `pip_timeout`, `pip_retries`: dependency download behavior
 - `hapray_testcases` / `hapray_round` / `hapray_devices`: Hapray runtime parameters
 - `node_max_old_space_size`: Node heap size used by Homecheck
+
+Advanced optional fields:
+
+- `windows_short_alias_root`: root directory for Hapray short-path aliases on Windows
+- `homecheck_path` / `hapray_path`: override the bootstrapped dependency locations with existing tool directories
+- `c_sdk_paths`: extra C/C++ SDK directories passed to Homecheck
+- `analysis_dir`: custom Homecheck analysis output directory
+- `hapray_so_dir`: extra native library directory passed to Hapray
+- `hapray_no_trace`: disable trace collection for Hapray runs
+- `hapray_circles`: control whether Hapray adds the `--circles` flag
 
 Notes:
 
 - Native Windows paths can be written directly as `C:\\...`
+- `sdk_hms_path` and `sdk_openharmony_path` should point to the component directories themselves, not to the parent SDK root
 - `deps_root` is important on Windows when the repository path is long. In that case, use a shorter absolute path such as `C:\\test\\.amv-deps\\migration_visualizer`
 - When `windows_short_alias_root` is empty, the script will derive the Hapray short-path alias directory from `deps_root` first. In most cases, setting a short `deps_root` is enough
 
@@ -97,6 +115,16 @@ For manual-listening mode, make sure:
 
 - `project_path` points to the actual application project you want to operate
 - the `bundleName` in `AppScope/app.json5` matches the `--manual-package` argument
+
+Minimal example:
+
+```json
+{
+  "project_path": "/path/to/project",
+  "sdk_hms_path": "/path/to/sdk/default/hms",
+  "sdk_openharmony_path": "/path/to/sdk/default/openharmony"
+}
+```
 
 ## Prepare Dependencies
 
@@ -135,7 +163,6 @@ Notes:
 
 - `bootstrap.sh` and `bootstrap.cmd` both read `deps_root` from `configs/config.json`
 - You can also override it temporarily from the command line with `--deps-root <path>`
-- `bootstrap.cmd` and `arkts-migration-visualizer` both support `--deps-root <path>`
 - The rule is: **command-line arguments take precedence over `configs/config.json`**
 - If you want the entire workflow to use the same temporary dependency directory, pass the same `--deps-root` value to bootstrap and to `arkts-migration-visualizer`
 - Dependencies are stored under `deps_root`, including:
@@ -203,7 +230,7 @@ Examples:
 ```bash
 arkts-migration-visualizer --skip-collect
 arkts-migration-visualizer --skip-collect --run-dir artifacts/test_run_YYYYMMDD_HHMMSS
-arkts-migration-visualizer -t ".*TestCase_0010"
+arkts-migration-visualizer -t ".*testcase"
 ```
 
 ### Manual Performance Listening
@@ -253,19 +280,7 @@ Common options:
 - `--thread-id`: repeat to limit export to one or more thread ids
 - `--no-merge-samples`: keep adjacent samples separate instead of merging intervals
 
-## Internal Stages
-
-`src/arkts_migration_visualizer/collect/perf_runner.py`, `src/arkts_migration_visualizer/build/integrate_dep.py`, and `src/arkts_migration_visualizer/collect/export_hapray_timeline_trace.py` are internal pipeline modules used by the packaged tool entrypoint.
-
-They are no longer supported as standalone user-facing entrypoints. The supported workflow entry is:
-
-```bash
-arkts-migration-visualizer
-```
-
 ## Testing
-
-The project ships package-manager-backed development targets through `pyproject.toml`.
 
 Install development tools:
 
@@ -279,13 +294,6 @@ Run the built-in targets from the repository root:
 hatch run test
 hatch run lint
 ```
-
-The test suite focuses on:
-
-- `src/arkts_migration_visualizer/deps/bootstrap_impl.py` Hapray bootstrap layout and depatch behavior
-- `src/arkts_migration_visualizer/build/integrate_dep.py` core data integration logic
-- `src/arkts_migration_visualizer/collect/perf_runner.py` helper logic and artifact extraction
-- `src/arkts_migration_visualizer/cli.py` orchestration behavior
 
 ### Start a Local Server
 

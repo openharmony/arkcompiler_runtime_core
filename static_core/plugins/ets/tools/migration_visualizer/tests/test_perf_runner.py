@@ -16,6 +16,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -25,6 +28,26 @@ from support import load_module
 
 
 class PerfRunnerTest(unittest.TestCase):
+    def test_perf_runner_direct_execution_reports_internal_stage_message(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        script_path = (
+            project_root / "src" / "arkts_migration_visualizer" / "collect" / "perf_runner.py"
+        )
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            cwd=project_root,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("perf_runner.py is an internal pipeline stage", result.stderr)
+
     def test_extract_bundle_name_ignores_json5_comments(self) -> None:
         perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -274,8 +297,8 @@ class PerfRunnerTest(unittest.TestCase):
         perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
-            sdk_path = repo_root / "sdk" / "default"
-            hdc_path = sdk_path / "base" / "toolchains" / "hdc"
+            sdk_openharmony_path = repo_root / "sdk" / "default" / "base"
+            hdc_path = sdk_openharmony_path / "toolchains" / "hdc"
             hdc_path.parent.mkdir(parents=True)
             hdc_path.write_text("hdc", encoding="utf-8")
 
@@ -285,9 +308,74 @@ class PerfRunnerTest(unittest.TestCase):
                 return_value=None,
             ):
                 self.assertEqual(
-                    perf_runner.find_hdc_executable(repo_root, {}, None, sdk_path),
+                    perf_runner.find_hdc_executable(repo_root, {}, None, sdk_openharmony_path),
                     hdc_path.resolve(),
                 )
+
+    def test_build_homecheck_config_uses_split_sdk_paths_from_legacy_layout(self) -> None:
+        perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            run_dir = repo_root / "artifacts" / "test_run"
+            output_dir = run_dir / "homecheck_output"
+            sdk_root = repo_root / "sdk"
+            sdk_hms_path = sdk_root / "default" / "hms"
+            sdk_openharmony_path = sdk_root / "default" / "openharmony"
+            (sdk_hms_path / "ets").mkdir(parents=True)
+            (sdk_openharmony_path / "ets").mkdir(parents=True)
+            project_path = repo_root / "project"
+            project_path.mkdir(parents=True)
+            run_dir.mkdir(parents=True)
+
+            cfg_path = perf_runner.build_homecheck_config(
+                run_dir,
+                {
+                    "project_path": str(project_path),
+                    "sdk_hms_path": str(sdk_hms_path),
+                    "sdk_openharmony_path": str(sdk_openharmony_path),
+                },
+                output_dir,
+                repo_root,
+            )
+
+            config = json.loads(cfg_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["projectPath"], str(project_path.resolve()))
+            self.assertEqual(config["sdkPath"], str(sdk_root.resolve()))
+            self.assertEqual(config["outputDir"], str(output_dir))
+
+    def test_build_homecheck_config_creates_sdk_shim_for_split_nonlegacy_layout(self) -> None:
+        perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            run_dir = repo_root / "artifacts" / "test_run"
+            output_dir = run_dir / "homecheck_output"
+            deps_root = repo_root / ".deps"
+            sdk_version_root = repo_root / "sdk" / "5.0.0"
+            sdk_hms_path = sdk_version_root / "hms"
+            sdk_openharmony_path = sdk_version_root / "base"
+            (sdk_hms_path / "ets").mkdir(parents=True)
+            (sdk_openharmony_path / "ets").mkdir(parents=True)
+            project_path = repo_root / "project"
+            project_path.mkdir(parents=True)
+            run_dir.mkdir(parents=True)
+
+            cfg_path = perf_runner.build_homecheck_config(
+                run_dir,
+                {
+                    "project_path": str(project_path),
+                    "deps_root": str(deps_root),
+                    "sdk_hms_path": str(sdk_hms_path),
+                    "sdk_openharmony_path": str(sdk_openharmony_path),
+                },
+                output_dir,
+                repo_root,
+            )
+
+            config = json.loads(cfg_path.read_text(encoding="utf-8"))
+            shim_root = deps_root / "runtime" / "sdk_shim"
+            self.assertEqual(config["sdkPath"], str(shim_root.resolve()))
+            self.assertTrue((shim_root / "default" / "hms" / "ets").exists())
+            self.assertTrue((shim_root / "default" / "openharmony" / "ets").exists())
 
     def test_build_hapray_env_creates_workspace_tool_links(self) -> None:
         perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
@@ -400,6 +488,24 @@ class PerfRunnerTest(unittest.TestCase):
             legacy_bootstrap.write_text("# legacy bootstrap\n", encoding="utf-8")
 
             self.assertEqual(perf_runner.dependency_bootstrap_impl_path(repo_root), src_bootstrap)
+
+    def test_dependency_bootstrap_impl_path_prefers_current_package_layout(self) -> None:
+        perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            current_bootstrap = (
+                repo_root / "src" / "arkts_migration_visualizer" / "deps" / "bootstrap_impl.py"
+            )
+            src_bootstrap = repo_root / "src" / "scripts" / "deps" / "internal" / "bootstrap_impl.py"
+            legacy_bootstrap = repo_root / "scripts" / "deps" / "internal" / "bootstrap_impl.py"
+            current_bootstrap.parent.mkdir(parents=True)
+            src_bootstrap.parent.mkdir(parents=True)
+            legacy_bootstrap.parent.mkdir(parents=True)
+            current_bootstrap.write_text("# current bootstrap\n", encoding="utf-8")
+            src_bootstrap.write_text("# src bootstrap\n", encoding="utf-8")
+            legacy_bootstrap.write_text("# legacy bootstrap\n", encoding="utf-8")
+
+            self.assertEqual(perf_runner.dependency_bootstrap_impl_path(repo_root), current_bootstrap)
 
     def test_resolve_tool_roots_for_mode_bootstraps_missing_homecheck_entry(self) -> None:
         perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")

@@ -34,20 +34,20 @@ import json
 import os
 import shutil
 import re
+import runpy
 import subprocess
 import sys
 import time
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from arkts_migration_visualizer.common.fs_utils import (
-    ensure_executable_script,
-    ensure_symlink,
-    reset_path,
-)
+_FS_UTILS = runpy.run_path(str(Path(__file__).resolve().parents[1] / "common" / "fs_utils.py"))
+reset_path = _FS_UTILS["reset_path"]
+ensure_symlink = _FS_UTILS["ensure_symlink"]
+ensure_executable_script = _FS_UTILS["ensure_executable_script"]
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -88,6 +88,7 @@ class ToolSpec:
     source_dir: Path
     runtime_dir: Optional[Path] = None
     workspace_subdir: Optional[str] = None
+    npm_dependency_pins: Dict[str, str] = field(default_factory=dict)
 
 
 def log(message: str) -> None:
@@ -277,6 +278,19 @@ def validate_windows_deps_root(deps_root: Path, tools: Dict[str, ToolSpec]) -> N
     raise CommandError("\n".join(lines))
 
 
+def normalize_npm_dependency_pins(raw_pins: Any) -> Dict[str, str]:
+    if not isinstance(raw_pins, dict):
+        return {}
+
+    normalized: Dict[str, str] = {}
+    for package, version in raw_pins.items():
+        normalized_package = str(package).strip()
+        normalized_version = str(version).strip()
+        if normalized_package and normalized_version:
+            normalized[normalized_package] = normalized_version
+    return normalized
+
+
 def load_manifest(path: Path, deps_root_override: str = "") -> Tuple[Path, Dict[str, ToolSpec]]:
     manifest = json.loads(path.read_text(encoding="utf-8"))
     repo_root = path.parent.parent
@@ -286,6 +300,7 @@ def load_manifest(path: Path, deps_root_override: str = "") -> Tuple[Path, Dict[
         deps_root = (repo_root / manifest.get("depsRoot", ".deps")).resolve()
     tools = {}
     for name, raw in manifest.get("tools", {}).items():
+        npm_dependency_pins = normalize_npm_dependency_pins(raw.get("npmDependencyPins"))
         tools[name] = ToolSpec(
             name=name,
             repo=raw["repo"],
@@ -293,6 +308,7 @@ def load_manifest(path: Path, deps_root_override: str = "") -> Tuple[Path, Dict[
             source_dir=(deps_root / raw["sourceDir"]).resolve(),
             runtime_dir=(deps_root / raw["runtimeDir"]).resolve() if raw.get("runtimeDir") else None,
             workspace_subdir=raw.get("workspaceSubdir"),
+            npm_dependency_pins=npm_dependency_pins,
         )
     validate_windows_deps_root(deps_root, tools)
     return deps_root, tools
@@ -412,6 +428,78 @@ def npm_dependency_install_command(project_dir: Path, env: Dict[str, str]) -> Li
     return tool_cmd("npm", subcommand, "--ignore-scripts", "--workspaces=false", "--no-audit", env=env)
 
 
+def apply_npm_dependency_pins(project_dir: Path, pins: Dict[str, str]) -> bool:
+    if not pins:
+        return False
+
+    package_json_path = project_dir / "package.json"
+    if not package_json_path.is_file():
+        raise FileNotFoundError(f"missing package.json for npm dependency pinning: {package_json_path}")
+
+    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
+    changed = False
+
+    for package_name, version in pins.items():
+        updated = False
+        for section_name in ("dependencies", "devDependencies", "optionalDependencies"):
+            section = package_json.get(section_name)
+            if not isinstance(section, dict) or package_name not in section:
+                continue
+            if section[package_name] != version:
+                section[package_name] = version
+                changed = True
+            updated = True
+            break
+        if not updated:
+            dependencies = package_json.get("dependencies")
+            if dependencies is None:
+                dependencies = {}
+                package_json["dependencies"] = dependencies
+            if not isinstance(dependencies, dict):
+                raise CommandError(f"package.json dependencies must be an object: {package_json_path}")
+            if dependencies.get(package_name) != version:
+                dependencies[package_name] = version
+                changed = True
+
+    if not changed:
+        return False
+
+    package_json_path.write_text(json.dumps(package_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    package_lock_path = project_dir / "package-lock.json"
+    if package_lock_path.exists():
+        package_lock_path.unlink()
+    return True
+
+
+def lockfile_mapping(lock_data: Dict[str, Any], field_name: str) -> Dict[str, Any]:
+    value = lock_data.get(field_name)
+    return value if isinstance(value, dict) else {}
+
+
+def read_locked_npm_dependency_versions(project_dir: Path, package_names: List[str]) -> Dict[str, str]:
+    package_lock_path = project_dir / "package-lock.json"
+    if not package_names or not package_lock_path.is_file():
+        return {}
+
+    lock_data = json.loads(package_lock_path.read_text(encoding="utf-8"))
+    packages = lockfile_mapping(lock_data, "packages")
+    dependencies = lockfile_mapping(lock_data, "dependencies")
+
+    versions: Dict[str, str] = {}
+    for package_name in package_names:
+        version = ""
+        package_entry = packages.get(f"node_modules/{package_name}")
+        if isinstance(package_entry, dict):
+            version = str(package_entry.get("version") or "").strip()
+        if not version:
+            dependency_entry = dependencies.get(package_name)
+            if isinstance(dependency_entry, dict):
+                version = str(dependency_entry.get("version") or "").strip()
+        if version:
+            versions[package_name] = version
+    return versions
+
+
 def python_package_env(index_url: Optional[str], timeout: int, retries: int, cache_dir: Optional[Path] = None) -> Dict[str, str]:
     env = os.environ.copy()
     if index_url:
@@ -494,10 +582,11 @@ def bootstrap_homecheck(
     fetch_timeout: int,
     fetch_retries: int,
     npm_strict_ssl: Optional[str],
-) -> Dict[str, str]:
+) -> Dict[str, object]:
     if not spec.runtime_dir:
         raise CommandError("homecheck runtimeDir is missing from manifest")
     npm_environment = npm_env(registry, fetch_timeout, fetch_retries, npm_strict_ssl)
+    apply_npm_dependency_pins(spec.source_dir, spec.npm_dependency_pins)
     run_cmd_retry(
         npm_dependency_install_command(spec.source_dir, npm_environment),
         cwd=spec.source_dir,
@@ -532,6 +621,10 @@ def bootstrap_homecheck(
         "homeDep": str(home_dep_js),
         "runtimeDir": str(spec.runtime_dir),
         "tarball": str(tarball_path),
+        "npmDependencyPins": spec.npm_dependency_pins,
+        "npmDependencyVersions": read_locked_npm_dependency_versions(
+            spec.source_dir, list(spec.npm_dependency_pins.keys())
+        ),
     }
 
 
@@ -825,7 +918,6 @@ def ensure_trace_streamer_assets(repo_root: Path) -> Path:
     if trace_streamer_bin.is_file() and not trace_streamer_bin.is_symlink():
         if os.name != "nt":
             trace_streamer_bin.chmod(0o755)
-        ensure_hapray_tool_alias(target_dir, hapray_tools_dir(repo_root) / "trace_streamer_binary")
         return target_dir
 
     if target_dir.exists() or target_dir.is_symlink():
@@ -842,7 +934,6 @@ def ensure_trace_streamer_assets(repo_root: Path) -> Path:
         raise FileNotFoundError(f"missing extracted trace streamer: {trace_streamer_bin}")
     if os.name != "nt":
         trace_streamer_bin.chmod(0o755)
-    ensure_hapray_tool_alias(target_dir, hapray_tools_dir(repo_root) / "trace_streamer_binary")
     return target_dir
 
 
@@ -882,13 +973,11 @@ def ensure_hilogtool_assets(repo_root: Path) -> Path:
         raise FileNotFoundError(f"missing hilogtool executable: {preferred_executable}")
     if os.name != "nt":
         preferred_executable.chmod(0o755)
-    ensure_hapray_tool_alias(target_dir, hapray_tools_dir(repo_root) / "hilogtool")
     return target_dir
 
 
 def ensure_xvm_assets(repo_root: Path) -> Path:
     target_dir = extract_zip_tree(repo_root / "third-party" / "xvm.zip", hapray_dist_tools_dir(repo_root) / "xvm")
-    ensure_hapray_tool_alias(target_dir, hapray_tools_dir(repo_root) / "xvm")
     return target_dir
 
 
@@ -928,7 +1017,6 @@ def ensure_web_report_assets(
 
     ensure_file_copy(report_template, tools_web_dir / "report_template.html")
     ensure_file_copy(hiperf_template, tools_web_dir / "hiperf_report_template.html")
-    ensure_hapray_tool_alias(tools_web_dir, hapray_tools_dir(repo_root) / "web")
     return tools_web_dir
 
 
@@ -1127,9 +1215,6 @@ def ensure_hapray_tools_layout(repo_root: Path, workspace: Path) -> Dict[str, st
     if static_analyzer_dir.exists() or static_analyzer_dir.is_symlink():
         ensure_hapray_tool_alias(static_analyzer_dir, dist_tools_dir / "static_analyzer")
         created["static_analyzer"] = str(dist_tools_dir / "static_analyzer")
-
-    ensure_hapray_tool_alias(source_tools_dir, workspace / "tools")
-    created["workspace_tools"] = str(workspace / "tools")
     return created
 
 
@@ -1430,7 +1515,6 @@ node "%~dp0hapray-sa-cmd.js" %*
 """,
     )
     exe_path, launcher_compiler = ensure_windows_hapray_launcher(dist_dir)
-    ensure_hapray_tool_alias(dist_dir, hapray_tools_dir(repo_root) / "sa-cmd")
     preferred_path = cmd_path if os.name == "nt" else script_path
     return preferred_path, js_path, cmd_path, exe_path, launcher_compiler, build_details
 
@@ -1683,6 +1767,7 @@ def bootstrap_hapray(
     )
     tools_layout = ensure_hapray_tools_layout(spec.source_dir, workspace)
     workspace_tools, workspace_sa_cmd, workspace_trace_streamer = ensure_workspace_tool_links(workspace, spec.source_dir)
+    tools_layout["workspace_tools"] = str(workspace_tools)
     ext_tools_dir = spec.source_dir / "tools"
     ensure_hapray_runtime_dirs(workspace)
     runtime_patch_info = determine_hapray_runtime_patch_info(sa_cmd_exe, launcher_compiler)
@@ -1863,13 +1948,15 @@ def main() -> None:
 
     for spec in selected_tools(tools, args.tool):
         commit = ensure_git_checkout(spec)
-        tool_result: Dict[str, str] = {
+        tool_result: Dict[str, object] = {
             "repo": spec.repo,
             "ref": spec.ref,
             "commit": commit,
             "sourceDir": str(spec.source_dir),
             "status": "downloaded",
         }
+        if spec.npm_dependency_pins:
+            tool_result["npmDependencyPins"] = spec.npm_dependency_pins
         if not args.fetch_only:
             if spec.name == "homecheck":
                 tool_result.update(

@@ -15,6 +15,9 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 import tempfile
 import types
 import unittest
@@ -25,6 +28,170 @@ from support import load_module, write_json
 
 
 class RunAllTest(unittest.TestCase):
+    def test_package_main_runs_directly_from_src_tree_without_editable_install(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        script_path = project_root / "src" / "arkts_migration_visualizer" / "__main__.py"
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+
+        result = subprocess.run(
+            [sys.executable, str(script_path), "--help"],
+            cwd=project_root,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
+        self.assertIn("usage:", result.stdout)
+        self.assertIn("export-timeline", result.stdout)
+
+    def test_run_collection_stage_falls_back_to_local_module_when_package_import_is_unavailable(self) -> None:
+        run_all = load_module("run_all", "src/arkts_migration_visualizer/cli.py")
+        captured = {}
+
+        class FakeCollectionRequest:
+            def __init__(self, **kwargs):
+                captured["request_kwargs"] = kwargs
+                self.kwargs = kwargs
+
+        fake_module = types.SimpleNamespace(
+            CollectionRequest=FakeCollectionRequest,
+            collect_artifacts=lambda request: "/tmp/fallback-run-dir",
+        )
+
+        def fake_import_module(name):
+            if name == "arkts_migration_visualizer.collect.perf_runner":
+                exc = ModuleNotFoundError("No module named 'arkts_migration_visualizer'")
+                exc.name = "arkts_migration_visualizer"
+                raise exc
+            raise AssertionError(f"unexpected import: {name}")
+
+        with mock.patch.object(run_all.importlib, "import_module", side_effect=fake_import_module), mock.patch.object(
+            run_all,
+            "_load_local_stage_module",
+            return_value=fake_module,
+        ) as local_loader_mock:
+            result = run_all.run_collection_stage(
+                ".*Demo",
+                deps_root="/tmp/deps",
+                manual_package="com.example.demo",
+                manual_ability="EntryAbility",
+                manual_duration=45,
+            )
+
+        self.assertEqual(result, Path("/tmp/fallback-run-dir"))
+        local_loader_mock.assert_called_once_with(
+            "_local_arkts_migration_visualizer_collect_perf_runner",
+            "collect/perf_runner.py",
+        )
+        self.assertEqual(
+            captured["request_kwargs"],
+            {
+                "testcase_regex": None,
+                "manual_package": "com.example.demo",
+                "manual_ability": "EntryAbility",
+                "manual_duration": 45,
+                "deps_root": "/tmp/deps",
+            },
+        )
+
+    def test_run_build_stage_falls_back_to_local_module_when_package_import_is_unavailable(self) -> None:
+        run_all = load_module("run_all", "src/arkts_migration_visualizer/cli.py")
+        captured = {}
+
+        class FakeIntegrationRequest:
+            def __init__(self, **kwargs):
+                captured["request_kwargs"] = kwargs
+                self.kwargs = kwargs
+
+        fake_module = types.SimpleNamespace(
+            IntegrationRequest=FakeIntegrationRequest,
+            integrate_artifact_bundle=lambda request: "/tmp/fallback-output.json",
+        )
+
+        def fake_import_module(name):
+            if name == "arkts_migration_visualizer.build.integrate_dep":
+                exc = ModuleNotFoundError("No module named 'arkts_migration_visualizer'")
+                exc.name = "arkts_migration_visualizer"
+                raise exc
+            raise AssertionError(f"unexpected import: {name}")
+
+        with mock.patch.object(run_all.importlib, "import_module", side_effect=fake_import_module), mock.patch.object(
+            run_all,
+            "_load_local_stage_module",
+            return_value=fake_module,
+        ) as local_loader_mock:
+            result = run_all.run_build_stage(Path("/tmp/run-dir"), Path("/tmp/out.json"))
+
+        self.assertEqual(result, Path("/tmp/fallback-output.json"))
+        local_loader_mock.assert_called_once_with(
+            "_local_arkts_migration_visualizer_build_integrate_dep",
+            "build/integrate_dep.py",
+        )
+        self.assertEqual(
+            captured["request_kwargs"],
+            {
+                "input_dir": Path("/tmp/run-dir"),
+                "output_path": Path("/tmp/out.json"),
+                "debug_enabled": True,
+            },
+        )
+
+    def test_run_timeline_export_stage_falls_back_to_local_module_when_package_import_is_unavailable(self) -> None:
+        run_all = load_module("run_all", "src/arkts_migration_visualizer/cli.py")
+        captured = {}
+        export_result = types.SimpleNamespace(output_path=Path("/tmp/fallback-trace.json"))
+
+        class FakeTimelineExportRequest:
+            def __init__(self, **kwargs):
+                captured["request_kwargs"] = kwargs
+                self.kwargs = kwargs
+
+        fake_module = types.SimpleNamespace(
+            TimelineExportRequest=FakeTimelineExportRequest,
+            export_timeline_trace_artifact=lambda request: export_result,
+        )
+
+        def fake_import_module(name):
+            if name == "arkts_migration_visualizer.collect.export_hapray_timeline_trace":
+                exc = ModuleNotFoundError("No module named 'arkts_migration_visualizer'")
+                exc.name = "arkts_migration_visualizer"
+                raise exc
+            raise AssertionError(f"unexpected import: {name}")
+
+        with mock.patch.object(run_all.importlib, "import_module", side_effect=fake_import_module), mock.patch.object(
+            run_all,
+            "_load_local_stage_module",
+            return_value=fake_module,
+        ) as local_loader_mock:
+            result = run_all.run_timeline_export_stage(
+                "perf.db",
+                output_path="trace.json",
+                step=2,
+                event_name="instructions",
+                thread_ids=[101, 102],
+                merge_samples=False,
+            )
+
+        self.assertIs(result, export_result)
+        local_loader_mock.assert_called_once_with(
+            "_local_arkts_migration_visualizer_collect_export_hapray_timeline_trace",
+            "collect/export_hapray_timeline_trace.py",
+        )
+        self.assertEqual(
+            captured["request_kwargs"],
+            {
+                "input_path": Path("perf.db"),
+                "output_path": "trace.json",
+                "step": 2,
+                "event_name": "instructions",
+                "thread_ids": (101, 102),
+                "merge_samples": False,
+            },
+        )
+
     def test_pyproject_declares_tool_entrypoint_and_targets(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
         content = (project_root / "pyproject.toml").read_text(encoding="utf-8")

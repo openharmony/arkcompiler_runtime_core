@@ -29,6 +29,7 @@ import hashlib
 import json
 import os
 import re
+import runpy
 import shutil
 import subprocess
 import sys
@@ -38,11 +39,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from arkts_migration_visualizer.common.fs_utils import (
-    create_windows_directory_junction,
-    ensure_executable_script,
-    ensure_symlink,
-)
+_FS_UTILS = runpy.run_path(str(Path(__file__).resolve().parents[1] / "common" / "fs_utils.py"))
+create_windows_directory_junction = _FS_UTILS["create_windows_directory_junction"]
+ensure_executable_script = _FS_UTILS["ensure_executable_script"]
+ensure_symlink = _FS_UTILS["ensure_symlink"]
 
 
 REQUIRED_FILES = (
@@ -988,21 +988,42 @@ def resolve_tool_roots_for_mode(repo_root: Path, cfg: Dict[str, Any], *, prefer_
     return homecheck_root, hapray_root
 
 
-def ensure_homecheck_sdk_layout(repo_root: Path, cfg: Dict[str, Any], sdk_path: Path) -> Path:
-    legacy_sdk = sdk_path / "default" / "openharmony" / "ets"
-    legacy_hms = sdk_path / "default" / "hms" / "ets"
-    if legacy_sdk.is_dir() and legacy_hms.is_dir():
-        return sdk_path
+def resolve_sdk_component_paths(repo_root: Path, cfg: Dict[str, Any]) -> Tuple[Optional[Path], Optional[Path]]:
+    return (
+        resolve_path(repo_root, cfg.get("sdk_hms_path", "")),
+        resolve_path(repo_root, cfg.get("sdk_openharmony_path", "")),
+    )
 
-    next_sdk = sdk_path / "base" / "ets"
-    next_hms = sdk_path / "hms" / "ets"
-    if next_sdk.is_dir() and next_hms.is_dir():
-        shim_root = resolved_deps_root(repo_root, cfg) / "runtime" / "sdk_shim"
-        ensure_symlink(next_sdk, shim_root / "default" / "openharmony" / "ets")
-        ensure_symlink(next_hms, shim_root / "default" / "hms" / "ets")
-        return shim_root
 
-    return sdk_path
+def infer_legacy_sdk_root(
+    sdk_hms_path: Optional[Path],
+    sdk_openharmony_path: Optional[Path],
+) -> Optional[Path]:
+    if not sdk_hms_path or not sdk_openharmony_path:
+        return None
+    if sdk_hms_path.name != "hms" or sdk_openharmony_path.name != "openharmony":
+        return None
+    if sdk_hms_path.parent != sdk_openharmony_path.parent:
+        return None
+    if sdk_hms_path.parent.name != "default":
+        return None
+    return sdk_hms_path.parent.parent
+
+
+def ensure_homecheck_sdk_layout(
+    repo_root: Path,
+    cfg: Dict[str, Any],
+    sdk_hms_path: Path,
+    sdk_openharmony_path: Path,
+) -> Path:
+    legacy_root = infer_legacy_sdk_root(sdk_hms_path, sdk_openharmony_path)
+    if legacy_root:
+        return legacy_root
+
+    shim_root = resolved_deps_root(repo_root, cfg) / "runtime" / "sdk_shim"
+    ensure_symlink(sdk_openharmony_path / "ets", shim_root / "default" / "openharmony" / "ets")
+    ensure_symlink(sdk_hms_path / "ets", shim_root / "default" / "hms" / "ets")
+    return shim_root
 
 
 def infer_windows_home_dirs(paths: List[Optional[Path]]) -> List[Path]:
@@ -1079,7 +1100,7 @@ def find_hdc_executable(
     repo_root: Path,
     cfg: Dict[str, Any],
     project_path: Optional[Path],
-    sdk_path: Optional[Path],
+    sdk_openharmony_path: Optional[Path],
 ) -> Optional[Path]:
     explicit_hdc = resolve_path(repo_root, str(cfg.get("hdc_path", "")))
     if explicit_hdc and explicit_hdc.exists():
@@ -1091,19 +1112,15 @@ def find_hdc_executable(
             return Path(candidate).resolve()
 
     search_candidates: List[Path] = []
-    if sdk_path:
+    if sdk_openharmony_path:
         search_candidates.extend(
             [
-                sdk_path / "base" / "toolchains" / "hdc",
-                sdk_path / "base" / "toolchains" / "hdc.exe",
-                sdk_path / "toolchains" / "hdc",
-                sdk_path / "toolchains" / "hdc.exe",
-                sdk_path / "default" / "openharmony" / "toolchains" / "hdc",
-                sdk_path / "default" / "openharmony" / "toolchains" / "hdc.exe",
+                sdk_openharmony_path / "toolchains" / "hdc",
+                sdk_openharmony_path / "toolchains" / "hdc.exe",
             ]
         )
 
-    for home in infer_windows_home_dirs([project_path, sdk_path]):
+    for home in infer_windows_home_dirs([project_path, sdk_openharmony_path]):
         search_candidates.extend(
             [
                 *sorted((home / "AppData" / "Local" / _LEGACY_LOCAL_SDK_VENDOR / "Sdk").glob("*/base/toolchains/hdc.exe"), reverse=True),
@@ -1175,13 +1192,14 @@ def build_hapray_env(repo_root: Path, cfg: Dict[str, Any], hapray_workspace: Pat
         path_entries.append(str(node_path.parent))
 
     project_path = resolve_path(repo_root, cfg.get("project_path", ""))
-    sdk_path = resolve_path(repo_root, cfg.get("sdk_path", ""))
-    hdc_path = find_hdc_executable(repo_root, cfg, project_path, sdk_path)
+    _, sdk_openharmony_path = resolve_sdk_component_paths(repo_root, cfg)
+    hdc_path = find_hdc_executable(repo_root, cfg, project_path, sdk_openharmony_path)
     if not hdc_path:
         sys.exit(
             "Could not locate the hdc executable required by Hapray.\n"
-            "Configure configs/config.json -> hdc_path explicitly, or make hdc available under sdk_path/toolchains "
-            "(for example ~/Library/OpenHarmony/Sdk/<version>/toolchains/hdc on macOS)."
+            "Configure configs/config.json -> hdc_path explicitly, or make hdc available under "
+            "sdk_openharmony_path/toolchains (for example ~/Library/OpenHarmony/Sdk/<version>/base/toolchains/hdc "
+            "on macOS)."
         )
     if os.name != "nt" and hdc_path.suffix.lower() == ".exe":
         shim_dir = hapray_workspace / ".bootstrap" / "bin"
@@ -1300,26 +1318,34 @@ def ensure_hapray_source_launcher(hapray_workspace: Path) -> Path:
 
 
 def build_homecheck_config(run_dir: Path, cfg: Dict[str, Any], output_dir: Path, repo_root: Path) -> Path:
-    if not cfg.get("sdk_path"):
-        sys.exit("Missing configuration: sdk_path")
+    if not cfg.get("sdk_hms_path") or not cfg.get("sdk_openharmony_path"):
+        sys.exit("Missing configuration: sdk_hms_path / sdk_openharmony_path")
 
     project_path = resolve_project_path_or_exit(repo_root, cfg)
-    sdk_path = resolve_path(repo_root, cfg.get("sdk_path", ""))
+    sdk_hms_path, sdk_openharmony_path = resolve_sdk_component_paths(repo_root, cfg)
     c_sdk_paths = [
         str(resolved)
         for resolved in (resolve_path(repo_root, item) for item in cfg.get("c_sdk_paths", []))
         if resolved
     ]
     analysis_dir = cfg.get("analysis_dir", "")
-    if not sdk_path:
-        sys.exit("Failed to resolve project_path/sdk_path")
-    ensure_exists(sdk_path, "sdk_path target SDK directory")
-    sdk_path = ensure_homecheck_sdk_layout(repo_root, cfg, sdk_path)
+    if not sdk_hms_path or not sdk_openharmony_path:
+        sys.exit("Failed to resolve sdk_hms_path/sdk_openharmony_path")
+    ensure_exists(sdk_hms_path, "sdk_hms_path target SDK directory")
+    ensure_exists(sdk_openharmony_path, "sdk_openharmony_path target SDK directory")
+    ensure_exists(sdk_hms_path / "ets", "sdk_hms_path/ets SDK directory")
+    ensure_exists(sdk_openharmony_path / "ets", "sdk_openharmony_path/ets SDK directory")
+    homecheck_sdk_root = ensure_homecheck_sdk_layout(
+        repo_root,
+        cfg,
+        sdk_hms_path,
+        sdk_openharmony_path,
+    )
 
     homecheck_cfg = {
         "mode": "all",
         "projectPath": str(project_path),
-        "sdkPath": str(sdk_path),
+        "sdkPath": str(homecheck_sdk_root),
         "cSdkPaths": c_sdk_paths,
         "outputDir": str(output_dir),
     }

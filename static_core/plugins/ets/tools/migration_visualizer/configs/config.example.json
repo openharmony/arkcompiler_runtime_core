@@ -1,7 +1,8 @@
 {
-  "deps_root": ".deps",
+  "deps_root": "",
   "project_path": "/path/to/project",
-  "sdk_path": "/path/to/sdk",
+  "sdk_hms_path": "/path/to/sdk/default/hms",
+  "sdk_openharmony_path": "/path/to/sdk/default/openharmony",
   "c_sdk_paths": [],
   "analysis_dir": "",
   "homecheck_path": "",
