@@ -6,9 +6,6 @@
 03.types/19.union_types/union_type_assignment_66.ets
 03.types/19.union_types/union_type_assignment_77.ets
 
-#31037
-03.types/19.union_types/union_of_gen_in_lambda_func_params.ets
-
 #33158
 03.types/19.union_types/ut_45.ets
 
