@@ -157,7 +157,7 @@
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
 #32103
-07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
+07.expressions/16.instanceof_expression/instantiated_generic_type_n_2.ets
 
 #33191
 07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_0.ets

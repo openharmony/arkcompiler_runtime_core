@@ -90,7 +90,6 @@ cases:
       use: |-
           // nullish expression
           arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)
-      tags: 'negative, compile-only'
 
     - decl: |-
           let a1: Object[]|null = null
