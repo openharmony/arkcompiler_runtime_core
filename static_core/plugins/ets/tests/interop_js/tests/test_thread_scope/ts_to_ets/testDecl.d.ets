@@ -17,12 +17,26 @@ export declare class Foo {
     constructor();
     objectProperty: Any;
     stringProperty: string;
+    string50: string;
+    string100: string;
+    string500: string;
+    string1000: string;
+    string5000: string;
+    string10000: string;
+    string50000: string;
     numberProperty: number;
 }
 
 export declare let testObject: Any;
 
 export declare let testStr: string;
+export declare let testStr50: string;
+export declare let testStr100: string;
+export declare let testStr500: string;
+export declare let testStr1000: string;
+export declare let testStr5000: string;
+export declare let testStr10000: string;
+export declare let testStr50000: string;
 
 export declare let testNumber: number;
 
