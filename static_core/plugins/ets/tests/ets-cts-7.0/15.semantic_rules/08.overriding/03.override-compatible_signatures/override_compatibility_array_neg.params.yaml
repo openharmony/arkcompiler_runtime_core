@@ -25,7 +25,7 @@ cases:
       }
     params: override-incompatible parameter
     expected_out: |-
-      "Semantic error ESE0136: Method foo(i: Array<Base>): void in Derived not overriding any method"
+      "Semantic error ESE0136: Method foo(i: Array<Base>): undefined in Derived not overriding any method"
 #1
   - base: |-
       foo(i: Array<Base>) {
@@ -37,7 +37,7 @@ cases:
       }
     params: override-incompatible parameter
     expected_out: |-
-      "Semantic error ESE0136: Method foo(i: Array<Derived>): void in Derived not overriding any method"
+      "Semantic error ESE0136: Method foo(i: Array<Derived>): undefined in Derived not overriding any method"
 
   # RESIZABLE ARRAY, RETURN TYPE
 #2
