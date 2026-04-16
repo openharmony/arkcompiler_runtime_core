@@ -24,7 +24,7 @@ cases:
           }
       params: override-incompatible parameter
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: FixedArray<Derived>): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: FixedArray<Derived>): undefined in Derived not overriding any method"
 
     # FIXED ARRAY, RETURN TYPE
     - base: |-
