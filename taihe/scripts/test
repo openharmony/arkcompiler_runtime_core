@@ -15,11 +15,23 @@
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 from subprocess import CalledProcessError
+
+TAIHE_BIN_VERSION = "1.8.1"
+TAIHE_BIN_BUILD_DATE = "20260409"
+TAIHE_FFI_GEN_REPO_URLS = [
+    # https
+    "https://gitcode.com/openharmony-sig/arkcompiler_taihe_ffi_gen.git",
+    # SSH
+    # "git@gitcode.com:openharmony-sig/arkcompiler_taihe_ffi_gen.git",
+]
+TAIHE_FFI_GEN_REPLACED_PATHS = ("test", "cmake")
 
 
 class Color:
@@ -95,6 +107,93 @@ def get_project_root() -> Path:
     return Path(__file__).parent.parent.resolve()
 
 
+def remove_path(path: Path):
+    if path.is_symlink() or path.is_file():
+        path.unlink()
+    elif path.is_dir():
+        shutil.rmtree(path)
+    elif path.exists():
+        raise RuntimeError(f"Unsupported path type: {path}")
+
+
+def copy_path(src: Path, dst: Path):
+    remove_path(dst)
+    if src.is_dir():
+        shutil.copytree(src, dst, symlinks=True)
+    else:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+
+
+def get_taihe_ffi_gen_branch() -> str:
+    return os.environ.get("TAIHE_FFI_GEN_BRANCH", f"v{TAIHE_BIN_VERSION}")
+
+
+def get_taihe_ffi_gen_repo_urls() -> list[str]:
+    repo_url = os.environ.get("TAIHE_FFI_GEN_REPO")
+    if repo_url:
+        return [repo_url, *[url for url in TAIHE_FFI_GEN_REPO_URLS if url != repo_url]]
+    return TAIHE_FFI_GEN_REPO_URLS
+
+
+def clone_taihe_ffi_gen_repo(project_root: Path, branch: str, clone_dir: Path):
+    last_error: CalledProcessError | None = None
+    for repo_url in get_taihe_ffi_gen_repo_urls():
+        if clone_dir.exists():
+            shutil.rmtree(clone_dir)
+        log_stage(f"Fetch arkcompiler_taihe_ffi_gen branch {branch} from {repo_url}")
+        try:
+            run_command(
+                [
+                    "git",
+                    "clone",
+                    "--depth",
+                    "1",
+                    "--branch",
+                    branch,
+                    repo_url,
+                    str(clone_dir),
+                ],
+                cwd=project_root,
+            )
+            return
+        except CalledProcessError as e:
+            last_error = e
+            log_error(f"Failed to fetch {repo_url} branch {branch}")
+
+    raise RuntimeError(
+        f"Unable to fetch arkcompiler_taihe_ffi_gen branch {branch}"
+    ) from last_error
+
+
+def replace_test_sources_from_taihe_ffi_gen(project_root: Path, source_root: Path):
+    for rel_path in TAIHE_FFI_GEN_REPLACED_PATHS:
+        src = source_root / rel_path
+        dst = project_root / rel_path
+        if not src.exists():
+            raise FileNotFoundError(f"arkcompiler_taihe_ffi_gen is missing {rel_path}")
+        log_stage(f"Replace {rel_path} from arkcompiler_taihe_ffi_gen")
+        copy_path(src, dst)
+
+
+def prepare_ggw_ci_sources(project_root: Path):
+    branch = get_taihe_ffi_gen_branch()
+    cache_root = project_root / ".cache"
+    cache_root.mkdir(exist_ok=True)
+
+    with tempfile.TemporaryDirectory(
+        prefix="arkcompiler_taihe_ffi_gen_", dir=cache_root
+    ) as tmp_dir:
+        clone_dir = Path(tmp_dir) / "repo"
+        clone_taihe_ffi_gen_repo(project_root, branch, clone_dir)
+        replace_test_sources_from_taihe_ffi_gen(project_root, clone_dir)
+
+    build_bin_dir = project_root / "build_bin"
+    if build_bin_dir.exists():
+        log_stage("Remove stale build_bin after replacing test sources")
+        remove_path(build_bin_dir)
+
+
 class PythonEnv:
     """Context manager for activating and restoring a Python virtual environment."""
 
@@ -164,12 +263,13 @@ def run_core_tests(project_root: Path, **config: Path | str):
         log_stage(f"Testing: {test_dir}")
         run_taihe_tryit(["test", "-u", "cpp", test_dir], project_root)
 
+
 def run_ani_test_build(
     project_root: Path,
     build_dir_name: str,
     enable_coverage: bool = True,
     taihec_path: Path | None = None,
-    panda_home: Path | str | None = None
+    panda_home: Path | str | None = None,
 ):
     build_dir = project_root / build_dir_name
 
@@ -189,29 +289,38 @@ def run_ani_test_build(
     build_cmd = ["cmake", "--build", str(build_dir), "--verbose"]
     run_command(build_cmd, cwd=project_root)
 
+
 def run_ani_tests(project_root: Path, **config: Path | str):
     log_stage("Run ANI tests...")
     run_ani_test_build(
         project_root,
         build_dir_name="build",
         enable_coverage=True,
-        panda_home=config.get("panda_home")
+        panda_home=config.get("panda_home"),
     )
+
 
 def run_bin_ani_tests(project_root: Path, **config: Path | str):
     log_stage("Run BIN-ANI tests...")
 
-    taihe_bin_tar_name = "taihe-linux-x86_64-1.7.2-20260328.tar.gz"
-    taihe_bin_tar_url = f"https://gitcode.com/tongdiaoZS/taihe-bin/releases/download/1.7.2/{taihe_bin_tar_name}"
+    taihe_bin_tar_name = (
+        f"taihe-linux-x86_64-{TAIHE_BIN_VERSION}-{TAIHE_BIN_BUILD_DATE}.tar.gz"
+    )
+    taihe_bin_tar_url = f"https://gitcode.com/tongdiaoZS/taihe-bin/releases/download/{TAIHE_BIN_VERSION}/{taihe_bin_tar_name}"
     taihe_bin_tar_path = project_root / taihe_bin_tar_name
     taihe_bin_extract_dir = project_root / "taihe_bin"
 
     if not taihe_bin_tar_path.exists():
         log_verbose("Downloading Taihe binary package...")
         try:
-            run_command(["curl", "-fSL", "-o", str(taihe_bin_tar_path), taihe_bin_tar_url], cwd=project_root)
+            run_command(
+                ["curl", "-fSL", "-o", str(taihe_bin_tar_path), taihe_bin_tar_url],
+                cwd=project_root,
+            )
         except CalledProcessError as e:
-            log_error(f"Failed to download Taihe binary package from {taihe_bin_tar_url}")
+            log_error(
+                f"Failed to download Taihe binary package from {taihe_bin_tar_url}"
+            )
             log_error(f"curl exited with code {e.returncode}")
             raise
     else:
@@ -220,7 +329,10 @@ def run_bin_ani_tests(project_root: Path, **config: Path | str):
     if not taihe_bin_extract_dir.exists():
         log_verbose("Extracting Taihe binary package...")
         run_command(["mkdir", "-p", str(taihe_bin_extract_dir)], cwd=project_root)
-        run_command(["tar", "-xzf", str(taihe_bin_tar_path), "-C", str(taihe_bin_extract_dir)], cwd=project_root)
+        run_command(
+            ["tar", "-xzf", str(taihe_bin_tar_path), "-C", str(taihe_bin_extract_dir)],
+            cwd=project_root,
+        )
     else:
         log_verbose("Taihe binary directory already exists. Skipping extraction.")
 
@@ -234,7 +346,7 @@ def run_bin_ani_tests(project_root: Path, **config: Path | str):
         build_dir_name="build_bin",
         enable_coverage=False,
         taihec_path=taihe_bin_path,
-        panda_home=config.get("panda_home")
+        panda_home=config.get("panda_home"),
     )
 
 
@@ -317,6 +429,9 @@ def main():
         selected_tests = args.run
     else:
         selected_tests = ["pytest", "core", "ani", "cmake"]
+
+    if args.mode == "ggw-ci":
+        prepare_ggw_ci_sources(project_root)
 
     only_bin_ani = all(name == "bin_ani" for name in selected_tests)
 
