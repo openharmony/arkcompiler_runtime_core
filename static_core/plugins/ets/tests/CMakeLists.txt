@@ -314,9 +314,10 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
         return()
     endif()
 
+    set(noValueArgs ENABLE_AN_FORCE)
     set(oneValueArgs OPT_LEVEL)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS )
-    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(ARG "${noValueArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
     set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.abc)
@@ -343,11 +344,19 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
         "${ARG_ENTRYPOINT}.ETSGLOBAL::main"
     )
 
+    if(ARG_ENABLE_AN_FORCE)
+        list(APPEND RUNTIME_ARGUMENTS "--enable-an:force")
+    endif()
+
     add_custom_target(${TARGET}
         COMMENT "Running ark AOT(${PAOC_MODE}) for ets file: ${OUTPUT_ABC}"
         COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
         DEPENDS ark etsstdlib ${TARGET_AOT}
     )
+
+    if(ARG_ENABLE_AN_FORCE)
+        add_dependencies(${TARGET} "ets-compile-stdlib-default")
+    endif()
 
     add_dependencies(ets_run_aot_ets_code_tests ${TARGET})
 endfunction()

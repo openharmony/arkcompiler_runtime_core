@@ -21,4 +21,5 @@ generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.Et
 parameters:
     extension: ets
     load-runtimes: ets
+    stdlib: "${parameters.build}/plugins/ets/etsstdlib.stackless.abc"
     work-dir: ${WORK_DIR}/${suite-name}

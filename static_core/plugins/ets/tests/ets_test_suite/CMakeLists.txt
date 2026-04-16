@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 function(add_ets_test test_suite)
     set(prefix ARG)
-    set(noValues SKIP_ARM32_COMPILER)
+    set(noValues SKIP_ARM32_COMPILER ENABLE_AN_FORCE)
     set(singleValues FILE TEST_NAME ENTRYPOINT TEST_PATH)
     set(multiValues OPTIONS MODE COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
@@ -53,7 +53,7 @@ function(add_ets_test test_suite)
     if ("AOT" IN_LIST ARG_MODE)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-aot)
         LIST(APPEND targets ${target})
-        run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target}
+        run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target} ${ARG_ENABLE_AN_FORCE}
                          RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
                          COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
         )
@@ -62,7 +62,7 @@ function(add_ets_test test_suite)
     if ("LLVMAOT" IN_LIST ARG_MODE AND PANDA_LLVM_AOT)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-llvmaot)
         LIST(APPEND targets ${target})
-        run_aot_ets_code(llvm ${test_in} ${test_out_dir} ${target}
+        run_aot_ets_code(llvm ${test_in} ${test_out_dir} ${target} ${ARG_ENABLE_AN_FORCE}
                          RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS}
                          COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
         )
