@@ -60,6 +60,7 @@ public:
 
     VField *GetVerifiedField(ani_field field);
     VStaticField *GetVerifiedStaticField(ani_static_field staticField);
+    VVariable *GetVerifiedVariable(ani_variable variable);
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteGlobalVerifiedRef(VRef *vgref);

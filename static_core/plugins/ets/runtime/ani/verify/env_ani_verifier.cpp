@@ -163,6 +163,11 @@ VStaticField *EnvANIVerifier::GetVerifiedStaticField(ani_static_field staticFiel
     return static_cast<VStaticField *>(verifier_->AddField(ToInternalField(staticField)));
 }
 
+VVariable *EnvANIVerifier::GetVerifiedVariable(ani_variable variable)
+{
+    return static_cast<VVariable *>(verifier_->AddField(ToInternalField(variable)));
+}
+
 void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
 {
     ASSERT(!frames_.empty());

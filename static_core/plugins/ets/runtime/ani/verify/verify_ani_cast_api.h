@@ -32,6 +32,7 @@ class VStaticMethod;
 class VFunction;
 class VField;
 class VStaticField;
+class VVariable;
 class VError;
 class VArray;
 class VFixedArrayBoolean;
@@ -165,6 +166,16 @@ struct TypeMapping<VStaticField *> {
 template <>
 struct TypeMapping<VStaticField **> {
     using Type = ani_static_field *;
+};
+
+template <>
+struct TypeMapping<VVariable *> {
+    using Type = ani_variable;
+};
+
+template <>
+struct TypeMapping<VVariable **> {
+    using Type = ani_variable *;
 };
 
 template <>

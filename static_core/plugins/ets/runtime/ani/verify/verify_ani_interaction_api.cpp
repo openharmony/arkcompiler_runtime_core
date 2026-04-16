@@ -349,10 +349,15 @@ NO_UB_SANITIZE static ani_status Module_FindFunction(VEnv *venv, VModule *vmodul
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Module_FindVariable(VEnv *venv, VModule *vmodule, const char *name,
-                                                     ani_variable *result)
+                                                     VVariable **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Module_FindVariable(venv->GetEnv(), vmodule->GetRef(), name, result);
+    ani_variable result {};
+    ani_status status = GetInteractionAPI(venv)->Module_FindVariable(venv->GetEnv(), vmodule->GetRef(), name, &result);
+    if (LIKELY(status == ANI_OK)) {
+        *vresult = venv->GetVerifiedVariable(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -365,10 +370,15 @@ NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, ani_namespac
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, ani_namespace ns, const char *name,
-                                                        ani_variable *result)
+                                                        VVariable **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), ns, name, result);
+    ani_variable result {};
+    ani_status status = GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), ns, name, &result);
+    if (LIKELY(status == ANI_OK)) {
+        *vresult = venv->GetVerifiedVariable(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1264,129 +1274,252 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(VEnv *venv, ani_fn_object
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Boolean(VEnv *venv, ani_variable variable, ani_boolean value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Boolean(VEnv *venv, VVariable *vvariable, ani_boolean value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Boolean(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::BOOLEAN, AccessMode::READWRITE),
+        ANIArg::MakeForBoolean(value, "value"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Boolean(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Char(VEnv *venv, ani_variable variable, ani_char value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Char(VEnv *venv, VVariable *vvariable, ani_char value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Char(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::CHAR, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Char(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Byte(VEnv *venv, ani_variable variable, ani_byte value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Byte(VEnv *venv, VVariable *vvariable, ani_byte value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Byte(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::BYTE, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Byte(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Short(VEnv *venv, ani_variable variable, ani_short value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Short(VEnv *venv, VVariable *vvariable, ani_short value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Short(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::SHORT, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Short(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Int(VEnv *venv, ani_variable variable, ani_int value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Int(VEnv *venv, VVariable *vvariable, ani_int value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Int(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::INT, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Int(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Long(VEnv *venv, ani_variable variable, ani_long value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Long(VEnv *venv, VVariable *vvariable, ani_long value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Long(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::LONG, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Long(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Float(VEnv *venv, ani_variable variable, ani_float value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Float(VEnv *venv, VVariable *vvariable, ani_float value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Float(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::FLOAT, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Float(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Double(VEnv *venv, ani_variable variable, ani_double value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Double(VEnv *venv, VVariable *vvariable, ani_double value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Double(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::DOUBLE, AccessMode::READWRITE),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Double(venv->GetEnv(), vvariable->GetVariable(), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(VEnv *venv, ani_variable variable, ani_ref value)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(VEnv *venv, VVariable *vvariable, VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_SetValue_Ref(venv->GetEnv(), variable, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::OBJECT, AccessMode::READWRITE),
+        ANIArg::MakeForRef(vvalue, "value"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_SetValue_Ref(venv->GetEnv(), vvariable->GetVariable(), vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(VEnv *venv, ani_variable variable, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(VEnv *venv, VVariable *vvariable, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Boolean(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::BOOLEAN, AccessMode::READ),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Boolean(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Char(VEnv *venv, ani_variable variable, ani_char *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Char(VEnv *venv, VVariable *vvariable, ani_char *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Char(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::CHAR, AccessMode::READ),
+        ANIArg::MakeForCharStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Char(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(VEnv *venv, ani_variable variable, ani_byte *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(VEnv *venv, VVariable *vvariable, ani_byte *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Byte(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::BYTE, AccessMode::READ),
+        ANIArg::MakeForByteStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Byte(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Short(VEnv *venv, ani_variable variable, ani_short *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Short(VEnv *venv, VVariable *vvariable, ani_short *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Short(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::SHORT, AccessMode::READ),
+        ANIArg::MakeForShortStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Short(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Int(VEnv *venv, ani_variable variable, ani_int *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Int(VEnv *venv, VVariable *vvariable, ani_int *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Int(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::INT, AccessMode::READ),
+        ANIArg::MakeForIntStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Int(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Long(VEnv *venv, ani_variable variable, ani_long *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Long(VEnv *venv, VVariable *vvariable, ani_long *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Long(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::LONG, AccessMode::READ),
+        ANIArg::MakeForLongStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Long(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Float(VEnv *venv, ani_variable variable, ani_float *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Float(VEnv *venv, VVariable *vvariable, ani_float *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Float(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::FLOAT, AccessMode::READ),
+        ANIArg::MakeForFloatStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Float(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Double(VEnv *venv, ani_variable variable, ani_double *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Double(VEnv *venv, VVariable *vvariable, ani_double *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Double(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::DOUBLE, AccessMode::READ),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Variable_GetValue_Double(venv->GetEnv(), vvariable->GetVariable(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Variable_GetValue_Ref(VEnv *venv, ani_variable variable, ani_ref *result)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Ref(VEnv *venv, VVariable *vvariable, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Variable_GetValue_Ref(venv->GetEnv(), variable, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForVariable(vvariable, "variable", EtsType::OBJECT, AccessMode::READ),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Variable_GetValue_Ref(venv->GetEnv(), vvariable->GetVariable(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

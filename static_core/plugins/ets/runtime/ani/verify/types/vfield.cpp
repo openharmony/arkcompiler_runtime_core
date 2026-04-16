@@ -44,4 +44,9 @@ ani_static_field VStaticField::GetField() const
     return ToAniStaticField(impl::VField::GetEtsField());
 }
 
+ani_variable VVariable::GetVariable() const
+{
+    return ToAniVariable(impl::VField::GetEtsField());
+}
+
 }  // namespace ark::ets::ani::verify

@@ -1,0 +1,236 @@
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License"
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "plugins/ets/tests/ani/ani_gtest/verify_ani_gtest.h"
+
+namespace ark::ets::ani::verify::testing {
+
+class VariableSetValue{{ Type }}Test : public VerifyAniTest {
+public:
+    void SetUp() override
+    {
+        VerifyAniTest::SetUp();
+        ASSERT_EQ(env_->FindNamespace("ani_verify_test_variable_set_value_{{ type }}.anyns", &ns_), ANI_OK);
+        ASSERT_NE(ns_, nullptr);
+    }
+
+protected:
+    ani_namespace ns_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+TEST_F(VariableSetValue{{ Type }}Test, success)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ test_value[1:-1] }}", sizeof("{{ test_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, value), ANI_OK);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, {{ test_value }}), ANI_OK);
+{% endif %}
+    ASSERT_NO_ABORT_MESSAGE();
+}
+
+TEST_F(VariableSetValue{{ Type }}Test, null_env)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ test_value[1:-1] }}", sizeof("{{ test_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(nullptr, variable, value), ANI_ERROR);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(nullptr, variable, {{ test_value }}), ANI_ERROR);
+{% endif %}
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"variable", "ani_variable"},
+{% if type == "ref" or type == "boolean" %}
+        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
+{% endif %}
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+
+TEST_F(VariableSetValue{{ Type }}Test, null_variable)
+{
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ test_value[1:-1] }}", sizeof("{{ test_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, nullptr, value), ANI_ERROR);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, nullptr, {{ test_value }}), ANI_ERROR);
+{% endif %}
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"variable", "ani_variable", "wrong variable"},
+{% if type == "ref" or type == "boolean" %}
+        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
+{% endif %}
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+
+TEST_F(VariableSetValue{{ Type }}Test, wrong_variable)
+{
+    const auto fakeVariable = reinterpret_cast<ani_variable>(static_cast<long>(0x0ff0f0f));  // NOLINT(google-runtime-int)
+
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ test_value[1:-1] }}", sizeof("{{ test_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, fakeVariable, value), ANI_ERROR);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, fakeVariable, {{ test_value }}), ANI_ERROR);
+{% endif %}
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"variable", "ani_variable", "wrong variable"},
+{% if type == "ref" or type == "boolean" %}
+        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
+{% endif %}
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+
+TEST_F(VariableSetValue{{ Type }}Test, wrong_type)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "wrongValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ test_value[1:-1] }}", sizeof("{{ test_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, value), ANI_INVALID_TYPE);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, {{ test_value }}), ANI_INVALID_TYPE);
+{% endif %}
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"variable", "ani_variable", "wrong return type"},
+{% if type == "ref" or type == "boolean" %}
+        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
+{% endif %}
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+
+// NOTE: enable when #34319 is resolved
+TEST_F(VariableSetValue{{ Type }}Test, DISABLED_const_variable)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "constValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ test_value[1:-1] }}", sizeof("{{ test_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, value), ANI_ERROR);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, {{ test_value }}), ANI_ERROR);
+{% endif %}
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"variable", "ani_variable", "variable is const"},
+{% if type == "ref" or type == "boolean" %}
+        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
+{% endif %}
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+
+{% if type == "boolean" %}
+TEST_F(VariableSetValue{{ Type }}Test, wrong_value)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, static_cast<ani_boolean>(2U)), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"variable", "ani_variable"},
+        {"value", "ani_boolean", "wrong value for ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+{% elif type == "ref" %}
+TEST_F(VariableSetValue{{ Type }}Test, null_value)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, nullptr), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"variable", "ani_variable"},
+        {"value", "ani_ref", "wrong reference"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
+}
+{% endif %}
+
+TEST_F(VariableSetValue{{ Type }}Test, local_scope)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ASSERT_EQ(env_->CreateLocalScope(3U), ANI_OK);
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ alt_value[1:-1] }}", sizeof("{{ alt_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, value), ANI_OK);
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, {{ alt_value }}), ANI_OK);
+{% endif %}
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+    ASSERT_NO_ABORT_MESSAGE();
+}
+
+TEST_F(VariableSetValue{{ Type }}Test, set_then_get)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "value", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+{% if type == "ref" %}
+    ani_string value {};
+    ASSERT_EQ(env_->String_NewUTF8("{{ alt_value[1:-1] }}", sizeof("{{ alt_value[1:-1] }}") - 1U, &value), ANI_OK);
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, value), ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, variable, &result), ANI_OK);
+
+    std::string str;
+    GetStdString(static_cast<ani_string>(result), str);
+    ASSERT_EQ(str, "{{ alt_value[1:-1] }}");
+{% else %}
+    ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(env_, variable, {{ alt_value }}), ANI_OK);
+
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(env_, variable, &result), ANI_OK);
+    ASSERT_EQ(result, {{ alt_value }});
+{% endif %}
+    ASSERT_NO_ABORT_MESSAGE();
+}
+
+}  // namespace ark::ets::ani::verify::testing
