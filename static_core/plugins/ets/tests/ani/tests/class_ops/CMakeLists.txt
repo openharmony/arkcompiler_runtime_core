@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -325,4 +325,14 @@ ani_add_gtest(ani_test_class_ops_find_combination_in_module
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_in_module_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_in_module_test.ets
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_mismatch
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_mismatch_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_mismatch_test.ets
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_mismatch
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_mismatch_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_mismatch_test.ets
 )
