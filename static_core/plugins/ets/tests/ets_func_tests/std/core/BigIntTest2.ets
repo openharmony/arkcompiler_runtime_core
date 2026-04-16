@@ -14,70 +14,36 @@
  */
 
 function testBigIntToString1() {
-    let n = 10n;
-    let result = n.toString(undefined);
-    arktest.assertEQ(result, "10")
-}
-
-function testBigIntToString2() {
-    let n = -10n;
-    let result = n.toString(undefined);
-    arktest.assertEQ(result, "-10")
-}
-
-function testBigIntToString3() {
-    let n = new bigint(0b10);
-    let result = n.toString(undefined);
-    arktest.assertEQ(result, "2")
-}
-
-function testBigIntToString4() {
-    let n = new bigint(0x10);
-    let result = n.toString(undefined);
-    arktest.assertEQ(result, "16")
-}
-
-function testBigIntToString5() {
-    let n = 10n;
-    let r: number|undefined = undefined;
-    let result = n.toString(r);
-    arktest.assertEQ(result, "10")
-    r = 16;
-    result = n.toString(r);
-    arktest.assertEQ(result, "a")
-}
-
-function testBigIntToString6() {
     let n = -106233993686329866388788451887415352037722042843148312087371682210961017881854n;
     let result = n.toString(16);
     arktest.assertEQ(result, "-eade4f43ef29faba54e2276cd2fb250b9cfe381912e4cb7b4d98ca527fa544fe")
 }
 
-function testBigIntToString7() {
+function testBigIntToString2() {
     let n = -24734529127909305130315118443084729844173892131808286553102471449170n;
     let result = n.toString(2);
     arktest.assertEQ(result, "-11101010110111100100111101000011111011110010100111111010101110100101010011100010001001110110110011010010111110110010010100001011100111001111111000111000000110010001001011100100110010110111101101001101100110001100101001010010")
 }
 
-function testBigIntToString8() {
+function testBigIntToString3() {
     let n = 17994542461121645181648364671329822175764606026173143432826568886866n;
     let result = n.toString(4);
     arktest.assertEQ(result, "2222313210331003323302213322232211103202021312303102332302110023213033320320012101023210302313231031212030221102")
 }
 
-function testBigIntToString9() {
+function testBigIntToString4() {
     let n = 4581999761941507497992146088338584893584933027760574876539n;
     let result = n.toString(8);
     arktest.assertEQ(result, "5655711720767451765351247042355464575445027163761601442271145573")
 }
 
-function testBigIntToString10() {
+function testBigIntToString5() {
     let n = 4581999761941507497992146088338584893584933027760574876539n;
     let result = n.toString(32);
     arktest.assertEQ(result, "2tdsjq3tskvleiks8jmpknr4k5ppvho349e9irr")
 }
 
-function testBigIntToString11() {
+function testBigIntToString6() {
     let n = 4581999761941507497992146088338584893584933027760574876539n;
     let result = n.toString(10);
     arktest.assertEQ(result, "4581999761941507497992146088338584893584933027760574876539")
@@ -196,17 +162,12 @@ function testBigIntWithLongMax(): void {
 function main(): int {
     const suite = new arktest.ArkTestsuite("test bigint toString by undefined")
     
-    suite.addTest("convert 10 to toString(undefined)", testBigIntToString1)
-    suite.addTest("convert -10 to toString(undefined)", testBigIntToString2)
-    suite.addTest("convert 0b10 to toString(undefined)", testBigIntToString3)
-    suite.addTest("convert 0x10 to toString(undefined)", testBigIntToString4)
-    suite.addTest("test union number|undefined as params for toString", testBigIntToString5)
-    suite.addTest("convert -106233993686329866388788451887415352037722042843148312087371682210961017881854 to toString(16)",testBigIntToString6)
-    suite.addTest("convert -24734529127909305130315118443084729844173892131808286553102471449170 to toString(2)",testBigIntToString7)
-    suite.addTest("convert 17994542461121645181648364671329822175764606026173143432826568886866 to toString(4)",testBigIntToString8)
-    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(8)",testBigIntToString9)
-    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(32)",testBigIntToString10)
-    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(10)",testBigIntToString11)
+    suite.addTest("convert -106233993686329866388788451887415352037722042843148312087371682210961017881854 to toString(16)",testBigIntToString1)
+    suite.addTest("convert -24734529127909305130315118443084729844173892131808286553102471449170 to toString(2)",testBigIntToString2)
+    suite.addTest("convert 17994542461121645181648364671329822175764606026173143432826568886866 to toString(4)",testBigIntToString3)
+    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(8)",testBigIntToString4)
+    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(32)",testBigIntToString5)
+    suite.addTest("convert 4581999761941507497992146088338584893584933027760574876539 to toString(10)",testBigIntToString6)
     suite.addTest("test large numbers and decimals", testBigIntConstructor1)
     suite.addTest("test ordinary numbers", testBigIntConstructor2)
     suite.addTest("test strings", testBigIntConstructor3)

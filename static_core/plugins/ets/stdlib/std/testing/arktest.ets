@@ -484,7 +484,7 @@ export namespace arktest {
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        toString(): string {
+        public override toString(): string {
             return "" + this.code
         }
     }

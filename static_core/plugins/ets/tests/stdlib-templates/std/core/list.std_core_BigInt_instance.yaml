@@ -57,8 +57,8 @@
   init_object_type: int,
   init_object_data: "[10, 1024, -556, 100000, 0]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 10, 16, 8, 20]'},
 
@@ -84,8 +84,8 @@
                       51063684789608676731n,
                       51063684789608676731n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -119,8 +119,8 @@
                       -63709978348888212256n,
                       -63709978348888212256n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -154,8 +154,8 @@
                       29853410893954857835n,
                       29853410893954857835n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -189,8 +189,8 @@
                       -51063684789608676731n,
                       -51063684789608676731n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -224,8 +224,8 @@
                       60383732539666137261n,
                       60383732539666137261n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -259,8 +259,8 @@
                       -85265749682314499570n,
                       -85265749682314499570n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -294,8 +294,8 @@
                       26958043318278087215n,
                       26958043318278087215n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -329,8 +329,8 @@
                       -85726978516900663641n,
                       -85726978516900663641n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 7, 8, 10, 16, 25, 33, 36]'},
 
@@ -364,8 +364,8 @@
                       0n, 1n, -1n, 10n, -10n, 100n, -100n, 1000n, -1000n, 10000n, -10000n,
                       0n, 1n, -1n, 10n, -10n, 100n, -100n, 1000n, -1000n, 10000n, -10000n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
   param_list: {"param1": '[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                            7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
@@ -398,10 +398,10 @@
   init_object_type: BigInt,
   init_object_data: "[0n, 0n, 0n, 0n, 0n, 0n, 0n]",
 
-  param_init_data_types: {"param1":"FixedArray<Double>"},
-  param_types: {"param1":double},
+  param_init_data_types: {"param1":"FixedArray<int>"},
+  param_types: {"param1": int},
   param_nature: {"param1": primitive},
-  param_list: {"param1": '[-1, 0, 1, 37, -Infinity, +Infinity, NaN]'},
+  param_list: {"param1": '[-1, 0, 1, 37]'},
 
   method_return_type: String,
   expected_data_item_type: String,

@@ -30,7 +30,7 @@ export final class WeakSet<K extends Object> {
     // NOTE(cheezzario) move creation to constructor
     private readonly elements: WeakMap<K, null> = new WeakMap<K, null>()
 
-    toString(): String {
+    public override toString(): String {
         return "[object WeakSet]";
     }
 

@@ -1704,7 +1704,7 @@ export class DateTimeFormat {
         * The toString() method of Intl.Locale instances returns this Locale's full locale identifier string.
         * @return The locale's Unicode locale identifier string.
         */
-        public toString() : BCP47LanguageTag {
+        public override toString() : BCP47LanguageTag {
             return this.tag
         }
 
@@ -2116,7 +2116,7 @@ export class DateTimeFormat {
             return this._useGrouping;
         }
 
-        public toString(): string {
+        public override toString(): string {
             return JSON.stringify(this)
         }
 

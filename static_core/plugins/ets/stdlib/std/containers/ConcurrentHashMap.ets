@@ -32,7 +32,7 @@ export namespace containers {
             this.val = val;
         }
 
-        toString(): string {
+        public override toString(): string {
             return `{${this.key},${this.val}}`;
         }
     }
