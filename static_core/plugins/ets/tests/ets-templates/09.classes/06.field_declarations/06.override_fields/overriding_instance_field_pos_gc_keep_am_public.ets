@@ -19,7 +19,7 @@ desc: >-
     of a field in a derived class must be the same as in the base
     class instantiated with a parameter of the same type as the type
     of the field in the derived class.
-params: generic class
+params: generic class, keep public access modifier
 ---*/
 
 class B<T> {
