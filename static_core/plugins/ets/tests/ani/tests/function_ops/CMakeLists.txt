@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -69,4 +69,10 @@ ani_add_gtest(ani_test_function_call_char
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.ets
+)
+
+ani_add_gtest(ani_test_function_call_mismatch
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_mismatch_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_mismatch_test.ets
 )

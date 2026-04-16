@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -395,4 +395,14 @@ ani_add_gtest(ani_test_object_set_property_by_name_double
 ani_add_gtest(ani_test_object_set_property_by_name_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_property_by_name_ref_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_property_by_name_ref_test.ets
+)
+
+ani_add_gtest(ani_test_object_ops_object_call_method_by_name_mismatch
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_by_name_mismatch_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_by_name_mismatch_test.ets
+)
+
+ani_add_gtest(ani_test_object_ops_call_object_method_mismatch
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_mismatch_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_mismatch_test.ets
 )
