@@ -129,7 +129,7 @@ TEST_F(ReferenceIsUndefinedTest, CheckUndefinedFromNative)
 {
     ani_module mod {};
     ASSERT_EQ(env_->FindModule(MODULE_NAME, &mod), ANI_OK);
-    ani_native_function fn {"getUndefinedFromNative", ":Y", reinterpret_cast<void *>(GetUndefinedFromNativeImpl)};
+    ani_native_function fn {"getUndefinedFromNative", ":", reinterpret_cast<void *>(GetUndefinedFromNativeImpl)};
     ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &fn, 1), ANI_OK);
 
     auto isCorrectUndefined = CallEtsFunction<ani_boolean>(MODULE_NAME, "checkUndefinedFromNative");

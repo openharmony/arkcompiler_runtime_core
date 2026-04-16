@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,8 @@ namespace ark::ets::ani::verify::testing {
                 std::string invalidStr = " | INVALID: ";                                                     \
                 ASSERT_THAT(lineList[i].c_str(), ::testing::HasSubstr(invalidStr.c_str())) << abortMsg;      \
                 auto errStartPos = lineList[i].find(invalidStr.c_str());                                     \
-                auto errStr = lineList[i].substr(errStartPos + invalidStr.size());                           \
-                ASSERT_STREQ(error->c_str(), errStr.c_str()) << abortMsg;                                    \
+                auto errString = lineList[i].substr(errStartPos + invalidStr.size());                        \
+                ASSERT_STREQ(error->c_str(), errString.c_str()) << abortMsg;                                 \
             }                                                                                                \
             ++i;                                                                                             \
         }                                                                                                    \

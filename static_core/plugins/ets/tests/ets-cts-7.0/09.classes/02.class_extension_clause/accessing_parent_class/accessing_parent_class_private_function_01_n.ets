@@ -16,7 +16,7 @@
 /*---
 desc: Subclasses accessing the initialization function of parent class members.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0139: Signature changeMembers(): void is not visible here."
+expected_out: "Semantic error ESE0139: Signature changeMembers(): undefined is not visible here."
 ---*/
 
 class Base {

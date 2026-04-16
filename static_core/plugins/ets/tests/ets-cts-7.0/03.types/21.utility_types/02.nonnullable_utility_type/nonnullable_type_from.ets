@@ -25,7 +25,7 @@ desc: Type NonNullable<T> constructs a type by excluding null and undefined type
 {% endif %}
 
 function main() {
-    arktest.assertTrue({{c.type}}.equals(Type.from<{{c.check}}>()) )
+    arktest.assertTrue({{c.type}} == Class.from<{{c.check}}>())
 }
 
 {% endfor %}

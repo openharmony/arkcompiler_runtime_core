@@ -15,4 +15,4 @@
 primitives:
   - { type: 'undefined', expected: "Semantic error ESE0010: Value is possibly nullish." }
   - { type: 'null' , expected: "Semantic error ESE0010: Value is possibly nullish."}
-  - { type: 'void' , expected: "Semantic error ESE0232: 'void' used as type annotation."}
+  - { type: 'void' , expected: "Semantic error ESE0010: Value is possibly nullish."}

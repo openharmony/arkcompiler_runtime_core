@@ -55,7 +55,7 @@ cases:
         type TL = () => void
       use: |-
         let r: Record<TL, string>
-      response: "Semantic error ESE0228: Type argument ''(() => void)'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
+      response: "Semantic error ESE0228: Type argument ''(() => undefined)'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - use: |-
         let r: Record<Any, string> = {}  // CTE: TypeError: Type argument 'Any' should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
@@ -65,7 +65,7 @@ cases:
       response: "Semantic error ESE0228: Type argument ''Void'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
     - use: |-
         let r: Record<void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
-      response: "Semantic error ESE0228: Type argument ''void'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
+      response: "Semantic error ESE0228: Type argument ''undefined'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - decl: |-
         type SA = String[]

@@ -17,7 +17,7 @@
 desc: >-
     A compile-time error occurs if subinterface tries to access private method 
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0139: Signature foo(): void is not visible here."
+expected_out: "Semantic error ESE0139: Signature foo(): undefined is not visible here."
 ---*/
 
 interface Base {

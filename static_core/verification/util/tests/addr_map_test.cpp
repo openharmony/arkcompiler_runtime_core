@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ TEST_F(VerifierTest, AddrMap)
     amap2.Mark(&mem[70U], &mem[90U]);
     EXPECT_FALSE(amap1.HasCommonMarks(amap2));
     amap2.Mark(&mem[60U]);
-    char *ptr;
+    char *ptr = nullptr;
     EXPECT_TRUE(amap1.GetFirstCommonMark(amap2, &ptr));
     EXPECT_EQ(ptr, &mem[60U]);
 

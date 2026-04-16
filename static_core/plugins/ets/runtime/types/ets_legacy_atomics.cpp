@@ -75,9 +75,8 @@ struct EpInfo {
     TimerEvent timerEvent;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-    EpInfo(ContentionList &bucket, std::list<WaiterListNode>::iterator nodeIterator, JobManager *jobMan,
-           ark::EventId id)
-        : bucket(bucket), nodeIterator(nodeIterator), timerEvent(jobMan, id) {};
+    EpInfo(ContentionList &bckt, std::list<WaiterListNode>::iterator nIterator, JobManager *jobMan, ark::EventId id)
+        : bucket(bckt), nodeIterator(nIterator), timerEvent(jobMan, id) {};
 };
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

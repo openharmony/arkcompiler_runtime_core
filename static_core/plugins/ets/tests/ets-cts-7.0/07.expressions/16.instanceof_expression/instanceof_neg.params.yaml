@@ -31,24 +31,7 @@ cases:
       - { type: 'never' }
       - { type: 'void' }
 
-  - expr: 'null'
-    types:
-      - { type: 'void' }
-
-  - expr: 'undefined'
-    types:
-      - { type: 'void' }
-
   - expr: 'Object'
-    types:
-      - { type: 'Any' }
-      - { type: 'null' }
-      - { type: 'undefined' }
-      - { type: 'Object' }
-      - { type: 'never' }
-      - { type: 'void' }
-
-  - expr: '(() => {})()' # void
     types:
       - { type: 'Any' }
       - { type: 'null' }

@@ -16,14 +16,14 @@ cases:
     # function: empty body — CTE per spec foo5
     - decl: |-
         function foo(): never {}
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # function: body with normal statements, no throw — CTE
     - decl: |-
         function foo(): never {
             let x = 1
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # function: return value — CTE
     - decl: |-
@@ -46,7 +46,7 @@ cases:
                 throw new Error()
             }
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # lambda: empty body — CTE per spec foo6
     - decl: |-
@@ -79,7 +79,7 @@ cases:
         class C {
             foo(): never {}
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # class instance method: body with normal statements, no throw — CTE
     - decl: |-
@@ -88,7 +88,7 @@ cases:
                 let x = 1
             }
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # class instance method: return value — CTE
     - decl: |-
@@ -113,7 +113,7 @@ cases:
         class C {
             static foo(): never {}
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # static class method: body with normal statements — CTE
     - decl: |-
@@ -122,14 +122,14 @@ cases:
                 let x = 1
             }
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # abstract class method: empty body — CTE
     - decl: |-
         abstract class C {
             foo(): never {}
         }
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."
 
     # interface default method: body with normal statements — CTE
     - decl: |-
@@ -139,4 +139,4 @@ cases:
             }
         }
         class C implements I {}
-      expected_out: "Semantic error ESE0103: Function with a non void return type must return a value."
+      expected_out: "Semantic error ESE0103: Function with non-void/undefined return type must return a value."

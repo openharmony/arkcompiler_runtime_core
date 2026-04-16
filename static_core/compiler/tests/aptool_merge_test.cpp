@@ -441,7 +441,8 @@ TEST_F(AptoolMergeTest, MergeEscalatesInlineCacheToMegamorphicWhenTargetsExceedF
     auto *method100 = FindMethod(*loaded, 100U);
     ASSERT_NE(method100, nullptr);
     ASSERT_EQ(method100->GetInlineCaches().size(), 1U);
-    const auto &inlineCache = method100->GetInlineCaches()[0];
+    const auto &inlineCaches = method100->GetInlineCaches();
+    const auto &inlineCache = inlineCaches[0];
     EXPECT_EQ(inlineCache.pc, 0x30U);
     EXPECT_EQ(inlineCache.classes[0].first, static_cast<uint32_t>(InlineCache::MEGAMORPHIC_FLAG));
     EXPECT_EQ(inlineCache.classes[0].second, -1);

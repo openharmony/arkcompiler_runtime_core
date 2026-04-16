@@ -25,7 +25,7 @@ cases:
           cntr = 0
           let v: A[] = new A[100](new A())
           return 1
-      expected_out: "Semantic error ESE0139: Signature constructor(): void is not visible here."
+      expected_out: "Semantic error ESE0139: Signature constructor(): undefined is not visible here."
 
     - defs: |-
           class A {
@@ -52,4 +52,4 @@ cases:
       use: |-
           let v: A[] = new A[100](new A())
           return 1
-      expected_out: "Semantic error ESE0139: Signature constructor(): void is not visible here."
+      expected_out: "Semantic error ESE0139: Signature constructor(): undefined is not visible here."

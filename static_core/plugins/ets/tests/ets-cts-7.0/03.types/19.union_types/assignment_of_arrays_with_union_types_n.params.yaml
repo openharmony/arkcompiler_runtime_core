@@ -46,7 +46,7 @@ cases:
       value: 1, [true, false]
       desc: Error assignment of a boolean array to an array of string or function union type.
       stdout: |-
-        "Semantic error ESE0227: Array element at index 1 with type 'Array<Boolean>' is not compatible with the target array element type 'String|((() => void))|Double'"  
+        "Semantic error ESE0227: Array element at index 1 with type 'Array<Boolean>' is not compatible with the target array element type 'String|((() => undefined))|Double'"  
 
     - type: boolean | float
       value: '"abc"'

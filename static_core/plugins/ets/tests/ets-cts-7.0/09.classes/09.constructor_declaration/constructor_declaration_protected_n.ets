@@ -18,7 +18,7 @@ desc: >-
     Declaring a constructor inaccessible prevents class instantiation from using this constructor.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE0139: Signature constructor(p: Int): void is not visible here.
+    Semantic error ESE0139: Signature constructor(p: Int): undefined is not visible here.
 ---*/
 
 class A {

@@ -754,11 +754,11 @@ operations:
       - type1: ["foo_type", "foo1"]
         type2: ["byte", "1"]
         expected_out: |-
-          "Semantic error ESE0105: Operator '==' cannot be applied to types '(() => void)' and 'Byte'."
+          "Semantic error ESE0105: Operator '==' cannot be applied to types '(() => undefined)' and 'Byte'."
       - type2: ["foo_type", "foo1"]
         type1: ["byte", "1"]
         expected_out: |-
-          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Byte' and '(() => void)'."
+          "Semantic error ESE0105: Operator '==' cannot be applied to types 'Byte' and '(() => undefined)'."
       - type1: ["foo_type", "foo1"]
         type2: ["null", "null"]
         expect_cte: false
@@ -778,7 +778,7 @@ operations:
       - type1: ["foo_type", "foo1"]
         type2: ["byte", "1"]
         expected_out: |-
-          "Semantic error ESE0105: Operator '!=' cannot be applied to types '(() => void)' and 'Byte'."
+          "Semantic error ESE0105: Operator '!=' cannot be applied to types '(() => undefined)' and 'Byte'."
 
   - op: { sign: "===", name: "eq_ext4" }
     decl: |-
@@ -788,7 +788,7 @@ operations:
       - type1: ["foo_type", "foo1"]
         type2: ["byte", "1"]
         expected_out: |-
-          "Semantic error ESE0105: Operator '===' cannot be applied to types '(() => void)' and 'Byte'."
+          "Semantic error ESE0105: Operator '===' cannot be applied to types '(() => undefined)' and 'Byte'."
 
   - op: { sign: "!==", name: "neq_ext4" }
     decl: |-
@@ -798,7 +798,7 @@ operations:
       - type1: ["foo_type", "foo1"]
         type2: ["byte", "1"]
         expected_out: |-
-          "Semantic error ESE0105: Operator '!==' cannot be applied to types '(() => void)' and 'Byte'."
+          "Semantic error ESE0105: Operator '!==' cannot be applied to types '(() => undefined)' and 'Byte'."
 
   - op: { sign: "<", name: "less3" }
     decl: |-

@@ -75,19 +75,6 @@ cases:
           }
       }
 
-  # getter returns void
-  - decl: |-
-      class A {
-          _age: int = 0;
-      
-          set age(value: int) {
-            this._age = value;
-          }
-      
-          get age(): void {
-          }
-      }
-
   # setter has no parameters
   - decl: |-
       class A {
@@ -317,19 +304,6 @@ cases:
       
           get age(): int {
             return this._age;
-          }
-      }
-
-  # (static case) getter returns void
-  - decl: |-
-      class A {
-          static _age: int = 0;
-      
-          static set age(value: int) {
-            A._age = value;
-          }
-      
-          static get age(): void {
           }
       }
 

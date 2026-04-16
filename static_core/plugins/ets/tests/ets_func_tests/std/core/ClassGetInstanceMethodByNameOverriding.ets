@@ -103,7 +103,7 @@ namespace Erasure {
 function checkErasure() {
     let bas = Class.from<Erasure.Base>()
     let der = Class.from<Erasure.Derived>()
-    let und = Class.from<undefined>()
+    let und = Class.PRIMITIVE_VOID
 
     checkExists(bas, "undefinedMethod")
     checkExists(der, "undefinedMethod")

@@ -33,10 +33,10 @@ block_statements:
       class A {
         foo(): void { return 5 }
       }
-    exp_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
+    exp_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
   - decl: |
       function foo(): void { return 5 }
-    exp_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'void'"
+    exp_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
   - decl: |
       class A {
         foo(): int { return }
