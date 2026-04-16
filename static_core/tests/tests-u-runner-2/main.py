@@ -56,7 +56,6 @@ def main() -> None:
     logger = load_config(args)
     config = Config(args)
 
-    config.workflow.check_binary_artifacts()
     config.workflow.check_types()
     logger.all(f"Loaded configuration: {config}")
 
