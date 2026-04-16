@@ -43,6 +43,14 @@ inline void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *excep
     ThrowEtsException(executionCtx, exceptionClass, msg.data());
 }
 
+void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, int32_t errorCode, const char *msg);
+
+inline void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *exceptionClass, int32_t errorCode,
+                              std::string_view msg)
+{
+    ThrowEtsException(executionCtx, exceptionClass, errorCode, msg.data());
+}
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_

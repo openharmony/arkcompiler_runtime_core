@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <string>
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -32,7 +34,8 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
         // just throw exception
         auto executionCtx = EtsExecutionContext::GetCurrent();
         InteropCtx::ThrowETSError(
-            executionCtx, "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found.");
+            executionCtx, INTEROP_DYNAMIC_FUNCTION_CLASS_NOT_FOUND,
+            "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found");
         return;
     }
     interopDynamicFunction->GetRuntimeClass()->SetXRefClass();
@@ -41,8 +44,8 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     // Get and store interop create dynamic function method
     auto *createDynamicFunctionMethod = interopDynamicFunction->GetStaticMethod("CreateDynamicFunction", nullptr);
     if (UNLIKELY(createDynamicFunctionMethod == nullptr)) {
-        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(),
-                                  "Interop: CreateDynamicFunction() of Lstd/interop/js/DynamicFunction; is not found.");
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), INTEROP_DYNAMIC_FUNCTION_CLASS_NOT_FOUND,
+                                  "Interop: CreateDynamicFunction() of Lstd/interop/js/DynamicFunction; is not found");
         return;
     }
     this->interopCreateDynamicFunctionMethod_ = createDynamicFunctionMethod;

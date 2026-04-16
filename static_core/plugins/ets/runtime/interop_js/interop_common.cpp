@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "libarkbase/os/mutex.h"
 #ifdef OHOS_PANDA_TRACE_ENABLE
 #include "syspara/parameters.h"
@@ -31,6 +32,18 @@ namespace ark::ets::interop::js {
 [[noreturn]] void InteropFatal(const std::string &message)
 {
     InteropCtx::Fatal(message.c_str());
+    UNREACHABLE();
+}
+
+[[noreturn]] void InteropFatal(int32_t code, const char *message)
+{
+    InteropCtx::Fatal(code, message);
+    UNREACHABLE();
+}
+
+[[noreturn]] void InteropFatal(int32_t code, const std::string &message)
+{
+    InteropCtx::Fatal(code, message.c_str());
     UNREACHABLE();
 }
 
@@ -150,7 +163,7 @@ void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass
 {
     const char *from = fromKlass->GetDescriptor();
     const char *to = toKlass->GetDescriptor();
-    InteropCtx::ThrowJSTypeError(env, std::string(from) + " is not assignable to " + to);
+    InteropCtx::ThrowJSTypeError(env, INTEROP_TYPE_NOT_ASSIGNABLE, std::string(from) + " is not assignable to " + to);
 }
 
 static bool GetPropertyStatusHandling([[maybe_unused]] napi_env env, napi_status rc)
@@ -162,7 +175,8 @@ static bool GetPropertyStatusHandling([[maybe_unused]] napi_env env, napi_status
     }
 #else
     if (UNLIKELY(rc == napi_object_expected && !NapiIsExceptionPending(env))) {
-        InteropCtx::ThrowJSTypeError(env, "Cannot convert undefined or null to object");
+        InteropCtx::ThrowJSTypeError(env, INTEROP_CANNOT_CONVERT_NULL_OR_UNDEFINED_TO_OBJECT,
+                                     "Cannot convert undefined or null to object");
         return false;
     }
 

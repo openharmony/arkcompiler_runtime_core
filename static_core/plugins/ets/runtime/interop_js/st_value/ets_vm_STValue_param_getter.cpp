@@ -46,6 +46,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -101,12 +102,12 @@ bool GetString(napi_env env, napi_value jsVal, const std::string &paramName, std
     napi_valuetype paramType;
     napi_status status = napi_typeof(env, jsVal, &paramType);
     if (status != napi_ok) {
-        STValueThrowJSError(env, "Failed to get param type; param=" + paramName);
+        STValueThrowJSError(env, INTEROP_PARAMETER_INDEX_OUT_OF_RANGE, "Failed to get param type; param=" + paramName);
         return false;
     }
 
     if (paramType != napi_string) {
-        STValueThrowJSError(env, "param are not string type; param=" + paramName);
+        STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "param are not string type; param=" + paramName);
         return false;
     }
 
@@ -124,7 +125,7 @@ bool GetArray(napi_env env, napi_value jsVal, const std::string &arrayName, std:
     bool isArray = false;
     NAPI_CHECK_FATAL(napi_is_array(env, jsVal, &isArray));
     if (!isArray) {
-        STValueThrowJSError(env, "param are not array type; param=" + arrayName);
+        STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "param are not array type; param=" + arrayName);
         return false;
     }
 
@@ -139,8 +140,9 @@ bool GetArray(napi_env env, napi_value jsVal, const std::string &arrayName, std:
         ani_value value {};
         NAPI_CHECK_FATAL(napi_get_element(env, jsVal, i, &element));
         if (!GetAniValueFromSTValue(env, element, value)) {
-            STValueThrowJSError(env, "param array element are not STValue type; param=" + arrayName +
-                                         "; index=" + std::to_string(i));
+            STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH,
+                                "param array element are not STValue type; param=" + arrayName +
+                                    "; index=" + std::to_string(i));
             return false;
         }
         arrayValue.push_back(value);
@@ -153,12 +155,14 @@ bool CheckArgsAndGetReturnType(napi_env env, const std::string &signature, size_
     // 1. there is not : in signature
     size_t colonPos = signature.find(':');
     if (colonPos == std::string::npos) {
-        STValueThrowJSError(env, "can not find : in signature;signature=" + signature);
+        STValueThrowJSError(env, INTEROP_FUNCTION_SIGNATURE_MISMATCH,
+                            "can not find : in signature;signature=" + signature);
         return false;
     }
 
     if (CountArgsNum(signature.substr(0, colonPos)) != argsLength) {
-        STValueThrowJSError(env, "Argument count mismatch with function signature." + signature);
+        STValueThrowJSError(env, INTEROP_FUNCTION_SIGNATURE_MISMATCH,
+                            "Argument count mismatch with function signature." + signature);
         return false;
     }
 
@@ -187,7 +191,7 @@ bool CheckArgsAndGetReturnType(napi_env env, const std::string &signature, size_
 
     std::string msg = "Illegal signature, no matching type for \'";
     msg = msg + returnTypeSign + "\'" + ";signature=" + signature;
-    STValueThrowJSError(env, msg);
+    STValueThrowJSError(env, INTEROP_FUNCTION_SIGNATURE_MISMATCH, msg);
     return false;
 }
 }  // namespace ark::ets::interop::js

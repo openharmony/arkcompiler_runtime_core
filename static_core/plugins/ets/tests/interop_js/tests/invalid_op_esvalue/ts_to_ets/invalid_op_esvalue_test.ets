@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,7 +212,7 @@ function checkIntSetIndex(): boolean {
     try {
         ESValue.wrapInt(123).setProperty(1, ESValue.wrapInt(456));
     } catch (e) {
-        res = e.message === 'Need object';
+        res = e.message.includes('Need object');
     }
     return res;
 }
@@ -222,7 +222,7 @@ function checkTsGetProperty(): boolean {
     try {
         module.getProperty('Base').getProperty('base').getProperty('base1');
     } catch (e) {
-        res = e.message === 'Need object';
+        res = e.message.includes('Need object');
     }
     return res;
 }
@@ -232,7 +232,7 @@ function checkTsInstantiate(): boolean {
     try {
         module.getProperty('base').instantiate();
     } catch (e) {
-        res = e.message === 'Need function';
+        res = e.message.includes('Need function');
     }
     return res;
 }
@@ -242,7 +242,7 @@ function checkTsInvoke(): boolean {
     try {
         module.getProperty('base').invoke();
     } catch (e) {
-        res = e.message === 'Need function';
+        res = e.message.includes('Need function');
     }
     return res;
 }
@@ -252,7 +252,7 @@ function checkTsGetIndex(): boolean {
     try {
         module.getProperty('base').getProperty(1).getProperty(1);
     } catch (e) {
-        res = e.message === 'Need object';
+        res = e.message.includes('Need object');
     }
     return res;
 }
@@ -262,7 +262,7 @@ function checkTsHasProperty(): boolean {
     try {
         module.getProperty('base').getProperty(1).hasProperty(ESValue.wrap(111));
     } catch (e) {
-        res = e.message === 'Need object';
+        res = e.message.includes('Need object');
     }
     return res;
 }
@@ -272,7 +272,7 @@ function checkTsToBoolean(): boolean {
     try {
         module.getProperty('base').toBoolean();
     } catch (e) {
-        res = e.message === 'Boolean expected';
+        res = e.message.includes('Boolean expected');
     }
     return res;
 }
@@ -283,7 +283,7 @@ function checkTsToPromise(): boolean {
     try {
         module.getProperty('base').toPromise();
     } catch (e) {
-        res = e.message === 'Promise expected';
+        res = e.message.includes('Promise expected');
     }
     return res;
 }
@@ -293,7 +293,7 @@ function checkTsToString(): boolean {
     try {
         module.getProperty('base').getProperty('baseVal').toString();
     } catch (e) {
-        res = e.message === 'String expected';
+        res = e.message.includes('String expected');
     }
     return res;
 }
