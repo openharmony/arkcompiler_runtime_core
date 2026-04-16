@@ -1133,7 +1133,6 @@
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # cache
     - int32_t                  # int, char code
     - ark::Class*              # string class pointer
 
