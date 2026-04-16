@@ -1,0 +1,188 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Tuple type relation tests — negative cases (compile-only, expected to fail).
+# Per spec, tuple types are related ONLY when identical — no covariance.
+# These cases verify that covariant, contravariant, and incompatible tuple
+# assignments are correctly rejected by the compiler.
+
+---
+cases:
+
+    # ================================================================
+    # A. Covariant assignment should fail
+    # ================================================================
+
+    # Single-element covariant
+    - desc: Single-element tuple covariant assignment should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String]' cannot be assigned to type '[Object]'
+      use: |-
+          let src: [string] = ['hello']
+          let target: [Object] = src
+
+    # Covariant to Any
+    - desc: Tuple covariance to Any should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String]' cannot be assigned to type '[Any]'
+      use: |-
+          let src: [string] = ['hello']
+          let target: [Any] = src
+
+    # Two-element covariant
+    - desc: Two-element tuple covariant assignment should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String, Double]' cannot be assigned to type '[Object, Object]'
+      use: |-
+          let src: [string, number] = ['hi', 42.0]
+          let target: [Object, Object] = src
+
+    # Multi-level type hierarchy covariant
+    - desc: Multi-level type hierarchy tuple covariance should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String]' cannot be assigned to type '[Object]'
+          Semantic error ESE0318: Type '[Object]' cannot be assigned to type '[Any]'
+          Semantic error ESE0318: Type '[String]' cannot be assigned to type '[Any]'
+      use: |-
+          let s: [string] = ['abc']
+          let o: [Object] = s
+          let obj: [Object] = [new Object()]
+          let a: [Any] = obj
+          let s2: [string] = ['xyz']
+          let a2: [Any] = s2
+
+    # Partial element covariant
+    - desc: Partial element covariance in tuple should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String, Double]' cannot be assigned to type '[Object, Double]'
+      use: |-
+          let src: [string, number] = ['hi', 10.0]
+          let target: [Object, number] = src
+
+    # ================================================================
+    # B. Contravariant / incompatible assignment should fail
+    # ================================================================
+
+    # Contravariant assignment
+    - desc: Contravariant tuple assignment should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[Any]' cannot be assigned to type '[String]'
+          Semantic error ESE0318: Type '[Object]' cannot be assigned to type '[String]'
+      use: |-
+          let a: [Any] = ['hello']
+          let s: [string] = a
+          let o: [Object] = ['hello']
+          let s2: [string] = o
+
+    # Incompatible element types
+    - desc: Incompatible tuple element types should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[Double]' cannot be assigned to type '[String]'
+      use: |-
+          let n: [number] = [42.0]
+          let s: [string] = n
+
+    # ================================================================
+    # C. Array / tuple symmetry — negative
+    # ================================================================
+
+    # Array covariance should fail
+    - desc: Array covariance should fail — consistent with tuple behavior
+      expected_out: |-
+          Semantic error ESE0318: Type 'Array<String>' cannot be assigned to type 'Array<Object>'
+      use: |-
+          let arr: Array<string> = ['a', 'b']
+          let anyArr: Array<Object> = arr
+
+    # Tuple covariance should fail (symmetric)
+    - desc: Tuple covariance should fail — consistent with array behavior
+      expected_out: |-
+          Semantic error ESE0318: Type '[String, String]' cannot be assigned to type '[Object, Object]'
+      use: |-
+          let tup: [string, string] = ['a', 'b']
+          let anyTup: [Object, Object] = tup
+
+    # ================================================================
+    # D. Readonly tuples — negative
+    # ================================================================
+
+    # Readonly → mutable should fail
+    - desc: Readonly tuple should not be assignable to mutable tuple
+      expected_out: |-
+          Semantic error ESE0318: Type 'readonly [String]' cannot be assigned to type '[String]'
+      use: |-
+          let ro: readonly [string] = ['hello']
+          let mut: [string] = ro
+
+    # Readonly covariance should still fail
+    - desc: Readonly tuple covariance should still fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String]' cannot be assigned to type 'readonly [Object]'
+          Semantic error ESE0318: Type 'readonly [String]' cannot be assigned to type 'readonly [Object]'
+      use: |-
+          let src: [string] = ['hello']
+          let target: readonly [Object] = src
+          let src2: readonly [string] = ['hello']
+          let target2: readonly [Object] = src2
+
+    # ================================================================
+    # E. Method return / parameter types — negative
+    # ================================================================
+
+    # Covariant parameter passing should fail
+    - desc: Tuple covariant parameter passing should fail
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for takeTupleObject([String])
+          Semantic error ESE0046: Type '[String]' is not compatible with type '[Object]' at index 1
+      decl: |-
+          function takeTupleObject(t: [Object]): string {
+            return t[0] as string
+          }
+      use: |-
+          let s: [string] = ['param']
+          let r = takeTupleObject(s)
+
+    # ================================================================
+    # F. Boundary conditions
+    # ================================================================
+
+    # Tuple size mismatch
+    - desc: Tuple size mismatch in assignment should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String]' cannot be assigned to type '[String, String]'
+      use: |-
+          let small: [string] = ['hello']
+          let big: [string, string] = small
+          let big2: [string, string] = ['a', 'b']
+          let small2: [string] = big2
+
+    # Multi-element non-identical
+    - desc: Multi-element tuple with non-identical element types should fail
+      expected_out: |-
+          Semantic error ESE0318: Type '[String, Double, Boolean]' cannot be assigned to type '[Any, Object, Any]'
+      use: |-
+          let src: [string, number, boolean] = ['a', 1.0, true]
+          let target: [Any, Object, Any] = src
+
+    # ================================================================
+    # G. Cast path — negative
+    # ================================================================
+
+    # Explicit cast [string] as [number] warns
+    - desc: Explicit tuple cast to incompatible type should warn
+      tags: [compile-only]
+      expected_out: |-
+          Warning W0326: Attempting to cast type '[String]' to '[Double]' can throw 'CastClassError' exception at runtime
+      use: |-
+          let src: [string] = ['hello']
+          let bad = src as [number]

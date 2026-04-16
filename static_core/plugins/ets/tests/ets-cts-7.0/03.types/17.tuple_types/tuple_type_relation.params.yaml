@@ -1,0 +1,408 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Tuple type relation tests — positive cases.
+# Per spec, tuple types are related ONLY when identical — no covariance.
+# These cases verify that identical tuple assignments, bridge method returns,
+# explicit casts, and generic overrides compile and run correctly.
+
+---
+cases:
+
+    # ================================================================
+    # A. Identical tuple assignment
+    # ================================================================
+
+    # case0 Single-element identical tuple assignment
+    - desc: Identical single-element tuple assignment
+      use: |-
+          let t1: [string] = ['hello']
+          let t2: [string] = t1
+          arktest.assertEQ(t2[0], 'hello')
+          let t3: [number] = [42.0]
+          let t4: [number] = t3
+          arktest.assertEQ(t4[0], 42.0)
+          let obj = new Object()
+          let t5: [Object] = [obj]
+          let t6: [Object] = t5
+          arktest.assertTrue(t6[0] instanceof Object)
+
+    # case1 Multi-element identical tuple assignment
+    - desc: Identical multi-element tuple assignment
+      use: |-
+          let t1: [string, number] = ['hi', 42.0]
+          let t2: [string, number] = t1
+          arktest.assertEQ(t2[0], 'hi')
+          arktest.assertEQ(t2[1], 42.0)
+          let t3: [number, string, boolean] = [1.0, 'ok', true]
+          let t4: [number, string, boolean] = t3
+          arktest.assertEQ(t4[0], 1.0)
+          arktest.assertEQ(t4[1], 'ok')
+          arktest.assertEQ(t4[2], true)
+
+    # ================================================================
+    # B. Array / tuple symmetry — positive
+    # ================================================================
+
+    # case2 Identical array and tuple assignment both pass
+    - desc: Identical array and tuple assignment both pass
+      use: |-
+          let arr: Array<string> = ['a', 'b']
+          let sameArr: Array<string> = arr
+          arktest.assertEQ(sameArr[0], 'a')
+          let tup: [string, string] = ['a', 'b']
+          let sameTup: [string, string] = tup
+          arktest.assertEQ(sameTup[0], 'a')
+
+    # case3 Generic class override — identical types for array and tuple
+    - desc: Generic class override — array and tuple both require identical types
+      decl: |-
+          class Parent<T> {
+            processArray(a: T): Array<T> {
+              let x = [a]
+              return x
+            }
+            processTuple(a: T): [T] {
+              let x: [T] = [a]
+              return x
+            }
+          }
+          class Child1 extends Parent<string> {}
+          class Child2 extends Parent<string> {
+            override processArray(a: string): Array<string> {
+              let x = [a]
+              return x
+            }
+            override processTuple(a: string): [string] {
+              let x: [string] = [a]
+              return x
+            }
+          }
+      use: |-
+          let p1: Parent<string> = new Child1()
+          let p2: Parent<string> = new Child2()
+          let r1 = p1.processArray('hi')
+          arktest.assertEQ(r1[0], 'hi')
+          let r2 = p1.processTuple('hi')
+          arktest.assertEQ(r2[0], 'hi')
+          let r3 = p2.processArray('hi')
+          arktest.assertEQ(r3[0], 'hi')
+          let r4 = p2.processTuple('hi')
+          arktest.assertEQ(r4[0], 'hi')
+
+    # ================================================================
+    # C. Readonly tuples — positive
+    # ================================================================
+
+    # case4 Mutable → readonly and readonly → readonly
+    - desc: Mutable to readonly and readonly to readonly tuple assignment
+      use: |-
+          let src1: [string] = ['hello']
+          let ro1: readonly [string] = src1
+          arktest.assertEQ(ro1[0], 'hello')
+          let src2: readonly [string] = ['world']
+          let ro2: readonly [string] = src2
+          arktest.assertEQ(ro2[0], 'world')
+
+    # ================================================================
+    # D. Method return / parameter types — positive
+    # ================================================================
+
+    # case5 Identical tuple return type
+    - desc: Method returning identical tuple type
+      decl: |-
+          function makeTuple(): [string] {
+            return ['hello']
+          }
+          function makeTupleVar(): [string] {
+            let x: [string] = ['world']
+            return x
+          }
+      use: |-
+          let r1 = makeTuple()
+          arktest.assertEQ(r1[0], 'hello')
+          let r2 = makeTupleVar()
+          arktest.assertEQ(r2[0], 'world')
+
+    # case6 Identical tuple parameter passing
+    - desc: Tuple parameter passing with identical types
+      decl: |-
+          function takeTuple(t: [string]): string {
+            return t[0]
+          }
+      use: |-
+          let s: [string] = ['param']
+          let r = takeTuple(s)
+          arktest.assertEQ(r, 'param')
+
+    # ================================================================
+    # E. Bridge method tuple return — positive
+    # ================================================================
+
+    # Two-element tuple [T, U] bridge
+    - desc: Bridge method with two-element tuple return [T, U]
+      decl: |-
+          class Parent<T, U> {
+            swap(a: T, b: U): [U, T] {
+              return [b, a]
+            }
+          }
+          class Child extends Parent<string, number> {
+            override swap(a: string, b: number): [number, string] {
+              return [b + 100.0, a + '!']
+            }
+          }
+      use: |-
+          let p: Parent<string, number> = new Child()
+          let r = p.swap('hi', 5.0)
+          arktest.assertEQ(r[0], 105.0)
+          arktest.assertEQ(r[1], 'hi!')
+
+    # Three-element tuple [T, U, V] bridge
+    - desc: Bridge method with three-element tuple return [T, U, V]
+      decl: |-
+          class Parent<T, U, V> {
+            make(a: T, b: U, c: V): [T, U, V] {
+              return [a, b, c]
+            }
+          }
+          class Child extends Parent<string, number, boolean> {
+            override make(a: string, b: number, c: boolean): [string, number, boolean] {
+              return [a.toUpperCase(), b * 2.0, !c]
+            }
+          }
+      use: |-
+          let p: Parent<string, number, boolean> = new Child()
+          let r = p.make('go', 3.0, true)
+          arktest.assertEQ(r[0], 'GO')
+          arktest.assertEQ(r[1], 6.0)
+          arktest.assertEQ(r[2], false)
+
+    # Repeated type parameter [T, T] bridge
+    - desc: Bridge method with repeated type parameter [T, T]
+      decl: |-
+          class Parent<T> {
+            dup(v: T): [T, T] {
+              return [v, v]
+            }
+          }
+          class Child extends Parent<string> {
+            override dup(v: string): [string, string] {
+              return [v.toUpperCase(), v.toLowerCase()]
+            }
+          }
+      use: |-
+          let p: Parent<string> = new Child()
+          let r = p.dup('Hi')
+          arktest.assertEQ(r[0], 'HI')
+          arktest.assertEQ(r[1], 'hi')
+
+    # Partial concrete type [T, string] bridge
+    - desc: Bridge method with partial concrete tuple [T, string]
+      decl: |-
+          class Parent<T> {
+            pair(v: T): [T, string] {
+              return [v, '']
+            }
+          }
+          class Child extends Parent<number> {
+            override pair(v: number): [number, string] {
+              return [v * 10.0, v.toString()]
+            }
+          }
+      use: |-
+          let p: Parent<number> = new Child()
+          let r = p.pair(7.0)
+          arktest.assertEQ(r[0], 70.0)
+          arktest.assertEQ(r[1], '7')
+
+    # Getter tuple return bridge
+    - desc: Bridge getter with tuple return type [T, U]
+      decl: |-
+          class Parent<T, U> {
+            private v1: T
+            private v2: U
+            constructor(a: T, b: U) {
+              this.v1 = a
+              this.v2 = b
+            }
+            get pair(): [T, U] {
+              return [this.v1, this.v2]
+            }
+          }
+          class Child extends Parent<string, number> {
+            constructor(a: string, b: number) {
+              super(a, b)
+            }
+            override get pair(): [string, number] {
+              let p = super.pair
+              return [p[0].toUpperCase(), p[1] * 10.0]
+            }
+          }
+      use: |-
+          let p: Parent<string, number> = new Child('go', 4.0)
+          let r = p.pair
+          arktest.assertEQ(r[0], 'GO')
+          arktest.assertEQ(r[1], 40.0)
+
+    # Array and tuple bridge methods in same class
+    - desc: Bridge methods with both Array and tuple return types in same class
+      decl: |-
+          class Parent<T> {
+            asArray(v: T): Array<T> {
+              let x = [v]
+              return x
+            }
+            asTuple(v: T): [T] {
+              let x: [T] = [v]
+              return x
+            }
+          }
+          class Child extends Parent<string> {
+            override asArray(v: string): Array<string> {
+              let x = [v, v.toUpperCase()]
+              return x
+            }
+            override asTuple(v: string): [string] {
+              return [v + '#']
+            }
+          }
+      use: |-
+          let p: Parent<string> = new Child()
+          let r1 = p.asArray('hi')
+          arktest.assertEQ(r1[0], 'hi')
+          arktest.assertEQ(r1[1], 'HI')
+          let r2 = p.asTuple('ok')
+          arktest.assertEQ(r2[0], 'ok#')
+
+    # ================================================================
+    # F. Cast path correctness — positive
+    # ================================================================
+
+    # Explicit cast [string] as [Any] passes
+    - desc: Explicit tuple cast to compatible type should pass
+      use: |-
+          let src: [string] = ['hello']
+          let casted = src as [Any]
+          arktest.assertEQ(casted[0] as string, 'hello')
+          let src2: [string, number] = ['hi', 42.0]
+          let casted2 = src2 as [Any, Any]
+          arktest.assertEQ(casted2[0] as string, 'hi')
+          arktest.assertEQ(casted2[1] as number, 42.0)
+
+    # ================================================================
+    # G. Multi-level inheritance + interface
+    # ================================================================
+
+    # Three-level inheritance chain with tuple bridge
+    - desc: Three-level inheritance chain with tuple return bridge
+      decl: |-
+          class A<T, U> {
+            foo(a: T, b: U): [T, U] {
+              return [a, b]
+            }
+          }
+          class B<T> extends A<T, number> {
+            override foo(a: T, b: number): [T, number] {
+              return super.foo(a, b * 2.0)
+            }
+          }
+          class C extends B<string> {
+            override foo(a: string, b: number): [string, number] {
+              return [a.toUpperCase(), b + 100.0]
+            }
+          }
+      use: |-
+          let a: A<string, number> = new C()
+          let r1 = a.foo('hi', 5.0)
+          arktest.assertEQ(r1[0], 'HI')
+          arktest.assertEQ(r1[1], 105.0)
+          let b: B<string> = new C()
+          let r2 = b.foo('xx', 3.0)
+          arktest.assertEQ(r2[0], 'XX')
+          arktest.assertEQ(r2[1], 103.0)
+
+    # Generic interface with tuple return bridge
+    - desc: Generic interface with tuple return type bridge
+      decl: |-
+          interface I<T, U> {
+            transform(a: T, b: U): [U, T]
+          }
+          class Impl implements I<string, number> {
+            transform(a: string, b: number): [number, string] {
+              return [b + 1.0, a.repeat(2)]
+            }
+          }
+      use: |-
+          let i: I<string, number> = new Impl()
+          let r = i.transform('ab', 9.0)
+          arktest.assertEQ(r[0], 10.0)
+          arktest.assertEQ(r[1], 'abab')
+
+    # ================================================================
+    # H. Array/Tuple bridge method
+    # ================================================================
+
+    # Array bridge method
+    - desc: Array bridge method with generic override
+      decl: |-
+          class Parent<T> {
+            process(a: T): Array<T> {
+              let x = [a]
+              return x
+            }
+          }
+          class Child extends Parent<string> {
+            override process(a: string): Array<string> {
+              let x = [a]
+              return x
+            }
+          }
+      use: |-
+          let p: Parent<string> = new Child()
+          let r = p.process('hello')
+          arktest.assertEQ(r[0], 'hello')
+
+    # Tuple bridge method
+    - desc: Tuple bridge method with generic override
+      decl: |-
+          class Parent<T> {
+            process(a: T): [T] {
+              let x: [T] = [a]
+              return x
+            }
+          }
+          class Child extends Parent<string> {
+            override process(a: string): [string] {
+              let x: [string] = [a]
+              return x
+            }
+          }
+      use: |-
+          let p: Parent<string> = new Child()
+          let r = p.process('hello')
+          arktest.assertEQ(r[0], 'hello')
+
+    - desc: Root cause trigger — Tuple bridge method with generic override
+      decl: |-
+          function foo(): [Object] {
+            return ['a']
+          }
+          function bar(): Object[] {
+            return ['a']
+          }
+      use: |-
+          let r1 = foo()
+          arktest.assertEQ((r1[0] as string), 'a')
+          let r2 = bar()
+          arktest.assertEQ((r2[0] as string), 'a')
