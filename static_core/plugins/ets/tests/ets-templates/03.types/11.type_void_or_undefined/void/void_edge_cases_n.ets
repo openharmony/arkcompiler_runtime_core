@@ -13,20 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{%- for c in cases %}
 /*---
-desc: >-
-    The switch expression type must be of type char, byte, short, int, long, Char, Byte, Short, Int, Long, string,
-    or enum.
-tags: [negative, compile-only]
+desc: {{c.description}}
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0135: Nested functions are not allowed."
 ---*/
 
-function main(): void {
-  let i: int | undefined = undefined;
-  switch (i) {
-    case void:
-      arktest.assertTrue(true)
-      break;
-    default:
-      arktest.assertTrue(false)
-  }
+{%- if c.declarations %}
+{%- for declaration in c.declarations %}
+{{declaration}}
+{%- endfor %}
+{%- endif %}
+
+function main() {
+    {%- for statement in c.statements %}
+    {{statement}};
+    {%- endfor %}
 }
+{%- endfor %}

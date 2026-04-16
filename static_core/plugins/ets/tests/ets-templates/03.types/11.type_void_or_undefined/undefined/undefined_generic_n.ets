@@ -18,6 +18,7 @@ desc: >-
     The undefined type can be used as the type argument that instantiates a generic type if specific value
     of the type argument is irrelevant.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'A<undefined>'"
 ---*/
 
 class A<T> {}
