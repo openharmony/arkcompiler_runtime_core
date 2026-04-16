@@ -13,73 +13,171 @@
 
 ---
 cases:
-  - expr: 'void'
-    types:
-      - { type: 'Any' }
-      - { type: 'null' }
-      - { type: 'undefined' }
-      - { type: 'Object' }
-      - { type: 'never' }
-      - { type: 'void' }
+    - expr: void
+      types:
+          - expected_out: |-
+                Syntax error ESY0227: Unexpected token 'void'.
+            type: Any
 
-  - expr: 'never'
-    types:
-      - { type: 'Any' }
-      - { type: 'null' }
-      - { type: 'undefined' }
-      - { type: 'Object' }
-      - { type: 'never' }
-      - { type: 'void' }
+          - expected_out: |-
+                Syntax error ESY0227: Unexpected token 'void'.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: 'null'
 
-  - expr: 'Object'
-    types:
-      - { type: 'Any' }
-      - { type: 'null' }
-      - { type: 'undefined' }
-      - { type: 'Object' }
-      - { type: 'never' }
-      - { type: 'void' }
+          - expected_out: |-
+                Syntax error ESY0227: Unexpected token 'void'.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: undefined
 
-  - expr: '((): Any => "abc")()'
-    types:
-      - { type: '"abc"' }
+          - expected_out: |-
+                Syntax error ESY0227: Unexpected token 'void'.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: Object
 
-  - expr: '[1, 2]'
-    types:
-      - { type: 'Array<int>' }
-      - { type: 'FixedArray' }
+          - expected_out: |-
+                Syntax error ESY0227: Unexpected token 'void'.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: never
 
-  - decl: |-
-      let a: Array<number> = [1.0, 2.0]
-    expr: '((): Any => a)()'
-    types:
-      - { type: 'Array<number>' }
-      - { type: 'FixedArray' }
+          - expected_out: |-
+                Syntax error ESY0227: Unexpected token 'void'.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: void
 
-  - decl: |-
-      let a: FixedArray<number> = [1.0, 2.0]
-    expr: '((): Any => a)()'
-    types:
-      - { type: 'Array<number>' }
-      - { type: 'FixedArray' }
+    - expr: never
+      types:
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+            type: Any
 
-  - decl: |-
-      type TT = [int, string]
-      let a: TT = [42, "abc"]
-    expr: '((): Any => a)()'
-    types:
-      - { type: 'Array<int>' }
-      - { type: 'FixedArray' }
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as false
+            type: 'null'
 
-  - decl: |-
-      class A<T> {}
-    expr: '((): Any => new A<string>())()'
-    types:
-      - { type: 'A<string>' }
-      - { type: 'A<>' }
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as false
+            type: undefined
 
-  - decl: |-
-      let a: Record<string, int> = { '1': 1 }
-    expr: '((): Any => a)()'
-    types:
-      - { type: 'Record<string, int>' }
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: Object
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+            type: never
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as false
+            type: void
+
+    - expr: Object
+      types:
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+            type: Any
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as false
+            type: 'null'
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as false
+            type: undefined
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+            type: Object
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+            type: never
+
+          - expected_out: |-
+                Syntax error ESY0310: The left operand of 'instanceof' operator cannot be a type.
+                Warning W1001506: the value of the instanceof expression is known at compile-time as false
+            type: void
+
+    - expr: '((): Any => "abc")()'
+      types:
+          - expected_out: |-
+                Semantic error ESE38251: Type '"abc"' cannot be used on the right hand side of an 'instanceof' expression
+                Semantic error ESE0127: No matching call signature for (Boolean)
+            type: '"abc"'
+
+    - expr: '[1, 2]'
+      types:
+          - expected_out: |-
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+                Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
+            type: Array<int>
+
+          - expected_out: |-
+                Warning W1001506: the value of the instanceof expression is known at compile-time as true
+                Semantic error ESE0277: FixedArray<T> must have only one type parameter.
+                Semantic error ESE0127: No matching call signature for (Boolean)
+            type: FixedArray
+
+    - decl: 'let a: Array<number> = [1.0, 2.0]'
+      expr: '((): Any => a)()'
+      types:
+          - expected_out: |-
+                Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
+            type: Array<number>
+
+          - expected_out: |-
+                Semantic error ESE0277: FixedArray<T> must have only one type parameter.
+                Semantic error ESE0127: No matching call signature for (Boolean)
+            type: FixedArray
+
+    - decl: 'let a: FixedArray<number> = [1.0, 2.0]'
+      expr: '((): Any => a)()'
+      types:
+          - expected_out: |-
+                Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
+            type: Array<number>
+
+          - expected_out: |-
+                Semantic error ESE0277: FixedArray<T> must have only one type parameter.
+                Semantic error ESE0127: No matching call signature for (Boolean)
+            type: FixedArray
+
+    - decl: |-
+          type TT = [int, string]
+          let a: TT = [42, "abc"]
+      expr: '((): Any => a)()'
+      types:
+          - expected_out: |-
+                Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
+            type: Array<int>
+
+          - expected_out: |-
+                Semantic error ESE0277: FixedArray<T> must have only one type parameter.
+                Semantic error ESE0127: No matching call signature for (Boolean)
+            type: FixedArray
+
+    - decl: class A<T> {}
+      expr: '((): Any => new A<string>())()'
+      types:
+          - expected_out: |-
+                Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
+            type: A<string>
+
+          - expected_out: |-
+                Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
+                Semantic error ESE0171: Type 'A<T>' has 1 number of type parameters, but 0 type arguments were provided.
+                Semantic error ESE0127: No matching call signature for (Boolean)
+            type: A<>
+
+    - decl: "let a: Record<string, int> = { '1': 1 }"
+      expr: '((): Any => a)()'
+      types:
+          - expected_out: |-
+                Syntax error ESY18871: Type parameter is erased from type 'Record' when used in instanceof expression.
+            type: Record<string, int>

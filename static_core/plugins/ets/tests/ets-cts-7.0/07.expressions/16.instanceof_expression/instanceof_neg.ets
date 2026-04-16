@@ -18,6 +18,8 @@
 /*---
 desc: Any instanceof expression in the form 'expr instanceof T' is of type boolean
 tags: [compile-only, negative]
+expected_out: |-
+    {{t.expected_out}}
 ---*/
 
 {{c.decl}}

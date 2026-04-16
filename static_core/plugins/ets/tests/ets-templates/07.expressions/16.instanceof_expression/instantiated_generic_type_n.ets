@@ -20,11 +20,13 @@ desc: |-
     Generic type in the form of type name can be used as the operand T of an instanceof expression.
     In this case, the check is performed against the erased type.
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}
 
 function main() {
-    {{c.use}}
+    {{c.use|indent}}
 }
 {% endfor %}

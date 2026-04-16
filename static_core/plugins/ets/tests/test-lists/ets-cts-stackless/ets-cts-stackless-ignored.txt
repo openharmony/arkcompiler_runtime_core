@@ -194,9 +194,6 @@
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
-#32103
-07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
-
 #33188
 07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_0.ets
 07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_1.ets
