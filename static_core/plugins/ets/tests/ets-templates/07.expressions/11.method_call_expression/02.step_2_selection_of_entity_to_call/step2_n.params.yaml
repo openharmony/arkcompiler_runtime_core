@@ -29,6 +29,9 @@ cases:
           // more than one applicable method
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
+      expected_out: |-
+          Semantic error ESE0130: Function met is already declared.
+          Semantic error ESE0131: Function met with this assembly signature already declared.
 
     - decl: |-
           class C {
@@ -49,3 +52,6 @@ cases:
           // no applicable method
           let c: C = new C()
           arktest.assertEQ( c.met(),  "n" )
+      expected_out: |-
+          Semantic error ESE0130: Function met is already declared.
+          Semantic error ESE0131: Function met with this assembly signature already declared.
