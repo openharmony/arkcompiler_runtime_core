@@ -25,6 +25,8 @@ cases:
       use: |-
           // select method with no boxing/unboxing
           let c: C = new C
+      expected_out: |-
+          Semantic error ESE0130: Function met is already declared.
 
     - decl: |-
           class C {
@@ -38,6 +40,8 @@ cases:
       use: |-
           // select method with rest parameter
           let c: C = new C
+      expected_out: |-
+          Semantic error ESE0131: Function met with this assembly signature already declared.
 
     - decl: |-
           class C {
@@ -53,6 +57,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "nD1" )
           arktest.assertEQ( c.met(new Number()),  "ND1" )
+      expected_out: |-
+          Semantic error ESE0130: Function met is already declared.
 
     - decl: |-
           class C {
@@ -68,6 +74,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "nD2" )
           arktest.assertEQ( c.met(new Number()),  "ND2" )
+      expected_out: |-
+          Semantic error ESE0130: Function met is already declared.
 
     # step2_12
     # The best candidate is the candidate that requires no transformation for all arguments.
@@ -93,6 +101,9 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
+      expected_out: |-
+          Semantic error ESE0130: Function met is already declared.
+          Semantic error ESE0131: Function met with this assembly signature already declared.
 
     #step2_13
     - decl: |-
@@ -112,3 +123,5 @@ cases:
         let c: C = new C()
         arktest.assertEQ( c.met(0.0),  "test" )
         arktest.assertEQ( c.met(0.0, 1, 2, 3),  'spread_test' )
+      expected_out: |-
+        Semantic error ESE0131: Function met with this assembly signature already declared.

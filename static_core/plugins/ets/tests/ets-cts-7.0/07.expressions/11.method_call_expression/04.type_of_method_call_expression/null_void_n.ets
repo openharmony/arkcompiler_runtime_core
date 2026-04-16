@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
-{% for icf in cases %}
-
 /*---
-desc: A compile-time error occurs if the identifier {{icf.text}}
-tags: [negative, compile-only]
+desc: Type of method call expression
+tags:
+    - compile-only
+    - negative
 expected_out: |-
-    {{icf.expected_out}}
+    Semantic error ESE0091: Type 'null' is not compatible with the enclosing method's return type 'undefined'
 ---*/
 
 class A {
-    public a1: int;
-    public a2: int;
-    private pa3: int;
+    nevermore(): void { return null }
 }
 
-class B extends A {
-    public b1: int;
-    private pb2: int;
+function main() {
 }
-
-function main(): void {
-    {{icf.init|indent}}
-    {{icf.check|indent}}
-}
-{% endfor %}

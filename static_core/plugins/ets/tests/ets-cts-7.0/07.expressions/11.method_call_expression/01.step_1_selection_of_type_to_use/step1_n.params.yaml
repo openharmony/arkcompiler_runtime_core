@@ -22,6 +22,8 @@ cases:
           }
       use: |-
           let a: A = new A()
+      expected_out: |-
+          Semantic error ESE0087: Property 'met' does not exist on type 'Base'
 
     - decl: |-
           interface I {
@@ -36,5 +38,5 @@ cases:
           }
       use: |-
           let a: A = new A()
-
-
+      expected_out: |-
+          Semantic error ESE0087: Property 'met' does not exist on type 'Object'
