@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+export STATIC_ROOT_DIR="@PANDA_ROOT@"
+exec "@URUNNER_SCRIPT@" --show-progress --force-generate --processes=all "$@"

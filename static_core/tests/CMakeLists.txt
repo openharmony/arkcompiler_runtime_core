@@ -45,6 +45,7 @@ if(PANDA_COMPILER_ENABLE)
 endif()
 
 add_subdirectory(panda)
+add_subdirectory(tests-u-runner-2)
 
 # Add a single test run to the build tree.
 #

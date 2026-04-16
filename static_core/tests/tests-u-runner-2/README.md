@@ -134,7 +134,29 @@ Shell-like input history is preserved — use the **Up arrow** to recall previou
   --work-dir /path/to/work-dir
 ```
 
-**Option C — Create the file manually:**
+**Option C — CMake-managed setup**
+
+When URunner is added to the CMake build, the build system generates `${build_dir}/.urunner.env` automatically.
+In this mode `runner.sh init` is not required for local runs started from the build directory.
+
+The generated file contains:
+```bash
+ARKCOMPILER_RUNTIME_CORE_PATH=<runtime_core source root>
+ARKCOMPILER_ETS_FRONTEND_PATH=<ets frontend repository root>
+PANDA_BUILD=<current build dir>
+WORK_DIR=<build dir>/urunner-work
+```
+
+For convenience, the build also generates `${build_dir}/runner.sh`, a wrapper around the source runner script with
+`STATIC_ROOT_DIR` preset for the current checkout. This wrapper also sets progress to be visible, enables
+force-generate and use all processes by default, which are sensible defaults for local development and test
+reproduction.
+```bash
+cd <build_dir>
+./runner.sh panda-int ets-runtime # ./runner.sh is ready to use!
+```
+
+**Option D — Create the file manually:**
 
 Create `.urunner.env` in the runner directory (or your home directory) with the following content:
 
@@ -202,6 +224,25 @@ source ~/.venv-panda/bin/activate
 python3 main.py <workflow-name> <test-suite-name> [options...]
 deactivate
 ```
+
+### Using CMake/Ninja targets
+
+The build may provide local helper targets. E.g.:
+
+- `ur_ets_runtime` - runs `panda-int ets-runtime`
+- `ur_ets_astchecker` - runs `es2panda-verifier astchecker`
+- `ur_ets_func` - runs `panda-int ets-func`
+- `ur_ets_cts` - runs `panda-int ets-cts`
+
+Those targets are also depends on ArkTS Runtime/Frontend components and rebuild them automatically.
+
+Examples:
+```bash
+ninja -C <build_dir> ur_ets_runtime
+```
+
+This setup is intended for local developer workflows. The CMake URunner targets are not intended to be part of the
+umbrella `tests` target or CI target chains.
 
 ### Using the Package Entry Point
 
