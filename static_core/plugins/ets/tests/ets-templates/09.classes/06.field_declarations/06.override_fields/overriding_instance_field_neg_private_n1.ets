@@ -15,19 +15,18 @@ limitations under the License.
 
 /*---
 desc: >-
-    An overriding member can keep or extend an access modifier
-    of a member that is inherited or implemented.
-    Otherwise, a compile-time error occurs.
+    A compile-time error occurs if an attempt is made
+    to override private member
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE1600001: Access modifier of field 'num' in class 'D' and in the base class 'C' must be the same."
+expected_out: "Semantic error ESE1365480: The 'override' modifier is invalid here because the property 'num' is private in class 'C'."
 ---*/
 
 class C {
-  protected num: number = 1
+  private num: number = 1
 }
 
 class D extends C {
-  private num: number = 2
+  private override num: number = 2
 }
 
 function main(): void {

@@ -15,15 +15,14 @@ limitations under the License.
 
 /*---
 desc: >-
-    An overriding member can keep or extend an access modifier
-    of a member that is inherited or implemented.
-    Otherwise, a compile-time error occurs.
+    A compile-time error occurs if: Access Modifiers of the overriding field
+    and of the overridden field are different.
 tags: [compile-only, negative]
 expected_out: "Semantic error ESE1600001: Access modifier of field 'f' in class 'D' and in the base class 'Base' must be the same."
 ---*/
 
 class Base<T> {
-  f: T
+  protected f: T
   constructor(v: T) {
     this.f = v
   }
