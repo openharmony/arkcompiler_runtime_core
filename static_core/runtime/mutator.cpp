@@ -411,6 +411,9 @@ void Mutator::BindMutator()
 
 void Mutator::UnbindMutator()
 {
+    if (this != GetCurrent()) {
+        return;
+    }
     common_vm::Mutator::UnbindMutator();
 }
 
