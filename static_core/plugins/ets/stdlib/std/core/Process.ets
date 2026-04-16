@@ -52,35 +52,6 @@ export namespace StdProcess {
 
     const MAX_BUFFER_SIZE: int = 1024 * 1024;
 
-    const DEFAULT_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => { console.error("Unhandled Job fail:", reason) };
-
-    const DEFAULT_ERROR_HANDLER_CALLBACK : (error: Object) => void = (error: Object): void => {
-        console.error('Unhandled exception:', Class.of(error).getName());
-        let out = new String();
-        let toStr = new String();
-        let stack = new String();
-        if (error instanceof Error) {
-            error = error as Error;
-            try {
-                toStr = error.toString() as string;
-            } catch (e) {
-                toStr = 'invoke toString failed';
-            }
-            out += toStr;
-            try {
-                stack = error.stack as string;
-            } catch (e) {
-                stack = 'exception dump failed';
-            }
-            out += '\n' + stack;
-        } else {
-            throw new Error('Process:: Unknown error type');
-        }
-        console.error(out);
-        let procManager = new StdProcess.ProcessManager();
-        procManager.exit(1);
-    };
-
     /**
      * @class Represents child process created by executing process.runCmd()
      */
@@ -556,6 +527,101 @@ export namespace StdProcess {
         errorHandler.reset(listener);
     }
 
+    const THROW_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => {
+        throw reason;
+    }
+    const WARN_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => {
+        console.error("Unhandled Job fail:", reason);
+    }
+    const NONE_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => {}
+
+    const THROW_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => {
+        throw reason;
+    }
+    const WARN_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => {
+        console.error("Unhandled Promise fail:", reason);
+    }
+    const NONE_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => {}
+
+    const DEFAULT_ERROR_HANDLER_CALLBACK = (error: Object): void => {
+        console.error('Unhandled exception:', Class.of(error).getName());
+        let out = new String();
+        let toStr = new String();
+        let stack = new String();
+        if (error instanceof Error) {
+            error = error as Error;
+            try {
+                toStr = error.toString() as string;
+            } catch (e) {
+                toStr = 'invoke toString failed';
+            }
+            out += toStr;
+            try {
+                stack = error.stack as string;
+            } catch (e) {
+                stack = 'exception dump failed';
+            }
+            out += '\n' + stack;
+        } else {
+            throw new Error('Process:: Unknown error type');
+        }
+        console.error(out);
+        let procManager = new StdProcess.ProcessManager();
+        procManager.exit(1);
+    }
+
+    enum DefaultHandlerMode {
+        Throw,
+        Warn,
+        None
+    }
+
+    function getDefaultPromiseHandler(defaultHandlerMode: int)
+    {
+        if (defaultHandlerMode == DefaultHandlerMode.Throw) {
+            return THROW_PROMISE_HANDLER_CALLBACK;
+        }
+        if (defaultHandlerMode == DefaultHandlerMode.Warn) {
+            return WARN_PROMISE_HANDLER_CALLBACK;
+        }
+        return NONE_PROMISE_HANDLER_CALLBACK;
+    }
+
+    function getDefaultJobHandler(defaultHandlerMode: int)
+    {
+        if (defaultHandlerMode == DefaultHandlerMode.Throw) {
+            return THROW_JOB_HANDLER_CALLBACK;
+        }
+        if (defaultHandlerMode == DefaultHandlerMode.Warn) {
+            return WARN_JOB_HANDLER_CALLBACK;
+        }
+        return NONE_JOB_HANDLER_CALLBACK;
+    }
+
+    function callJobHandler(objAndReason: Object[], defaultHandlerMode: int)
+    {
+        let reason = objAndReason[0] as Error;
+        let obj = objAndReason[1];
+        if (failedJobHandler.size == 0) {
+            let jobHandler = getDefaultJobHandler(defaultHandlerMode);
+            jobHandler(reason, obj);
+            return;
+        }
+        failedJobHandler.apply(reason, obj);
+    }
+
+    function callPromiseHandler(objAndReason: Object[], defaultHandlerMode: int)
+    {
+        let reason = objAndReason[0] as Error;
+        let obj = objAndReason[1];
+        if (rejectedPromiseHandler.size == 0) {
+            let promiseHandler = getDefaultPromiseHandler(defaultHandlerMode);
+            promiseHandler(reason, obj);
+            return;
+        }
+        rejectedPromiseHandler.apply(reason, obj);
+    }
+
     /**
     * This method applies default or user-provided handler to
     * all unhandled failed job results
@@ -563,11 +629,9 @@ export namespace StdProcess {
     * @param { Object[][] } objs array of pairs of fail results and failed jobs
     *
     */
-    function listUnhandledJobs(objs: Object[][]): void {
+    function listUnhandledJobs(objs: Object[][], defaultHandlerMode: int): void {
         for (let objAndReason of objs) {
-            let reason = objAndReason[0] as Error;
-            let obj = objAndReason[1];
-            failedJobHandler.apply(reason, obj);
+            callJobHandler(objAndReason, defaultHandlerMode);
         }
     }
 
@@ -578,11 +642,9 @@ export namespace StdProcess {
     * @param { Object[][] } objs array of pairs of rejection results and rejected promises
     *
     */
-    function listUnhandledPromises(objs: Object[][]): void {
+    function listUnhandledPromises(objs: Object[][], defaultHandlerMode: int): void {
         for (let objAndReason of objs) {
-            let reason = objAndReason[0] as Error;
-            let obj = objAndReason[1];
-            rejectedPromiseHandler.apply(reason, obj);
+            callPromiseHandler(objAndReason, defaultHandlerMode);
         }
     }
 
@@ -598,7 +660,7 @@ export namespace StdProcess {
         errorHandler.handleUncaughtError(error);
     }
 
-    let failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+    let failedJobHandler: RejectedHandler = new RejectedHandler();
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
     let errorHandler: ProcessErrorHandler = new ProcessErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
 }

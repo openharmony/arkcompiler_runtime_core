@@ -135,16 +135,20 @@ bool StacklessJobManager::TerminateExecutionContext(JobExecutionContext *executi
 
 LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
 {
-    ASSERT(params.launchImmediately == false);
-
     os::memory::LockHolder lh(workersLock_);
     auto [w, affinityMask] = ChooseWorkerForJob(params);
     if UNLIKELY (w == nullptr) {
         DestroyJob(job);
         return LaunchResult::NO_SUITABLE_WORKER;
     }
-
     job->SetAffinityMask(affinityMask);
+
+    if (params.launchImmediately) {
+        workersLock_.Unlock();
+        w->AddJobAndExecute(job);
+        workersLock_.Lock();
+        return LaunchResult::OK;
+    }
     if (params.startEvent != nullptr) {
         w->AddJobWithDependency(job, params.startEvent);
         return LaunchResult::OK;
@@ -477,6 +481,7 @@ void StacklessJobManager::WaitForMutatorJobsCompletion()
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
         GetCurrentWorker()->ExecuteJobs();
+        GetCurrentWorker()->GetSchedulerExecutionCtx()->ListUnhandledEventsOnProgramExit();
         {
             os::memory::LockHolder lkCompletion(programCompletionLock_);
             if (AllJobsAreExecuted()) {

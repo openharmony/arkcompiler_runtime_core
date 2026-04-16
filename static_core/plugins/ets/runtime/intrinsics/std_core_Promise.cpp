@@ -156,9 +156,7 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
         hpromise->SubmitCallback(executionCtx, hcallback.GetPtr(), workerDomain);
         return;
     }
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(hpromise.GetPtr(), executionCtx);
-    }
+    executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(hpromise.GetPtr(), executionCtx);
     ASSERT(hpromise->GetQueueSize() == 0);
     ASSERT(hpromise->GetCallbackQueue(executionCtx) == nullptr);
     ASSERT(hpromise->GetWorkerDomainQueue(executionCtx) == nullptr);

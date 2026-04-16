@@ -55,8 +55,10 @@ void JobExecutionContext::ExecuteJob(Job *job)
     job->SetExecutionContext(this);
     SetJob(job);
 
+    parentJ->SetStatus(Job::Status::YIELDED);
     job->SetStatus(Job::Status::RUNNING);
     job->InvokeEntrypoint();
+    parentJ->SetStatus(Job::Status::RUNNING);
 
     SetJob(parentJ);
     job->SetExecutionContext(nullptr);

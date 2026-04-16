@@ -255,7 +255,7 @@ void EtsCoroutine::UpdateCachedObjects()
 void EtsCoroutine::OnContextSwitchedTo()
 {
     if ((GetPriority() == CoroutinePriority::MEDIUM_PRIORITY) && (GetType() == Coroutine::Type::MUTATOR)) {
-        ProcessUnhandledRejectedPromises(false);
+        executionCtx_.ProcessUnhandledRejectedPromises(false);
     }
 }
 
@@ -274,54 +274,12 @@ void EtsCoroutine::HandleUncaughtException()
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
 {
     ProcessUnhandledFailedJobs();
-    ProcessUnhandledRejectedPromises(true);
+    executionCtx_.ProcessUnhandledRejectedPromises(true);
 }
 
 void EtsCoroutine::ProcessUnhandledFailedJobs()
 {
-    if (Runtime::GetOptions().IsArkAot()) {
-        return;
-    }
-    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
-    ASSERT(umanager != nullptr);
-    bool listJobs =
-        Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
-    if (listJobs) {
-        ASSERT_NATIVE_CODE();
-        if (umanager->HasFailedJobObjects()) {
-            {
-                [[maybe_unused]] ScopedManagedCodeThread sc(this);
-                umanager->ListFailedJobs(EtsExecutionContext::FromMT(this));
-            }
-            if (HasPendingException()) {
-                HandleUncaughtException();
-            }
-        }
-    }
-}
-
-void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
-{
-    if (Runtime::GetOptions().IsArkAot()) {
-        return;
-    }
-    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
-    ASSERT(umanager != nullptr);
-    bool listPromises =
-        Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
-    if (listPromises) {
-        ASSERT_NATIVE_CODE();
-        if (umanager->HasRejectedPromiseObjects(&executionCtx_, listAllObjects)) {
-            LOG(DEBUG, COROUTINES) << "Start processing unhandled promises in " << GetName();
-            {
-                [[maybe_unused]] ScopedManagedCodeThread sc(this);
-                umanager->ListRejectedPromises(&executionCtx_, listAllObjects);
-            }
-            if (HasPendingException()) {
-                HandleUncaughtException();
-            }
-        }
-    }
+    executionCtx_.ProcessUnhandledFailedJobs();
 }
 
 bool EtsCoroutine::IsContextSwitchRisky() const

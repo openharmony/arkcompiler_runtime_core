@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
 
@@ -103,6 +104,46 @@ void EtsExecutionContext::SetTaskpoolTaskId(int32_t taskid)
 int32_t EtsExecutionContext::GetTaskpoolTaskId() const
 {
     return taskpoolTaskid_;
+}
+
+void EtsExecutionContext::ProcessUnhandledFailedJobs()
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
+    ASSERT_NATIVE_CODE();
+    if (umanager->HasFailedJobObjects()) {
+        {
+            [[maybe_unused]] ScopedManagedCodeThread sc(GetMT());
+            umanager->ListFailedJobs(this);
+        }
+        if (GetMT()->HasPendingException()) {
+            GetPandaVM()->HandleUncaughtException();
+        }
+    }
+}
+
+void EtsExecutionContext::ProcessUnhandledRejectedPromises(bool listAllObjects)
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
+    ASSERT_NATIVE_CODE();
+    if (umanager->HasRejectedPromiseObjects(this, listAllObjects)) {
+        LOG(DEBUG, EXECUTION) << "Start processing unhandled promises in "
+                              << JobExecutionContext::CastFromMutator(GetMT())->GetJob()->GetName();
+        {
+            [[maybe_unused]] ScopedManagedCodeThread sc(GetMT());
+            umanager->ListRejectedPromises(this, listAllObjects);
+        }
+        if (GetMT()->HasPendingException()) {
+            GetPandaVM()->HandleUncaughtException();
+        }
+    }
 }
 
 }  // namespace ark::ets

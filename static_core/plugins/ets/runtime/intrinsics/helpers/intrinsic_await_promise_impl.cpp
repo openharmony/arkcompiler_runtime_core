@@ -89,9 +89,7 @@ static EtsObject *HandleAwaitStackful(EtsPromise *promise)
         LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
         return promiseHandle->GetValue(etsCtx);
     }
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
-    }
+    etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
     LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
     auto *exc = promiseHandle->GetValue(etsCtx);
     etsCtx->GetMT()->SetException(exc->GetCoreType());
@@ -154,9 +152,7 @@ static EtsObject *HandleSettledPromise(EtsExecutionContext *etsCtx, EtsHandle<Et
         LOG(DEBUG, COROUTINES) << "Promise::awaitSync: promise is resolved!";
         return promiseHandle->GetValue(etsCtx);
     }
-    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
-    }
+    etsCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promiseHandle.GetPtr(), etsCtx);
     LOG(DEBUG, COROUTINES) << "Promise::awaitSync: promise is rejected!";
     auto *exc = promiseHandle->GetValue(etsCtx);
     etsCtx->GetMT()->SetException(exc->GetCoreType());
