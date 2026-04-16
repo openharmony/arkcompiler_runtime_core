@@ -53,6 +53,8 @@ function(add_ets_coroutines_test)
         set(list_unhandled_option "--list-unhandled-on-exit:jobs,promises")
     endif()
 
+    get_target_property(STACKLESS_STDLIB etsstdlib.stackless FILE)
+
     foreach(impl ${ARG_IMPL})
         string(TOLOWER "${impl}" impl_name)
         set(impl_option "--coroutine-impl=${impl_name}")
@@ -63,6 +65,8 @@ function(add_ets_coroutines_test)
         set(fe_options "")
         if (impl STREQUAL "STACKLESS")
             list(APPEND fe_options "--stackless-coros=true")
+            set(BOOT_PANDA_FILES_OLD ${BOOT_PANDA_FILES})
+            set(BOOT_PANDA_FILES ${STACKLESS_STDLIB})
         endif()
 
         foreach(workers_count ${ARG_WORKERS})
@@ -97,6 +101,10 @@ function(add_ets_coroutines_test)
                 )
             endforeach()
         endforeach()
+
+        if (impl STREQUAL "STACKLESS")
+            set(BOOT_PANDA_FILES ${BOOT_PANDA_FILES_OLD})
+        endif()
     endforeach()
 endfunction()
 

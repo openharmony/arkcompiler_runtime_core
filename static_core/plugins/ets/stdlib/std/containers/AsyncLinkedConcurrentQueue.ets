@@ -145,7 +145,7 @@ export namespace containers.stackless {
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        public async pop(): Promise<T> {
+        public async pop(): Promise<Awaited<T>> {
             let previousSize: int = -1;
             let first: T | undefined = undefined;
             ConcurrencyHelpers.mutexLock(this.popMutex);
@@ -157,7 +157,7 @@ export namespace containers.stackless {
                 ConcurrencyHelpers.mutexUnlock(this.popMutex);
             }
             this.resumeProducersIfQueueWasFull(previousSize);
-            return first as T;
+            return Promise.resolve(first!);
         }
 
         /**

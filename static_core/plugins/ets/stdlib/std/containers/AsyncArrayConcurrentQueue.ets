@@ -120,7 +120,7 @@ export namespace containers.stackless {
         * @returns { Promise<T> } A Promise that resolves when the element has been successfully removed from the queue.
         * @syscap SystemCapability.Utils.Lang
         */
-        public async pop(): Promise<T> {
+        public async pop(): Promise<Awaited<T>> {
             ConcurrencyHelpers.mutexLock(this.mutex);
             await this.waitUntilQueueIsNotEmpty();
             try {
@@ -128,7 +128,7 @@ export namespace containers.stackless {
                 this.array[this.curHeadIdx] = undefined;
                 this.increaseHeadIdx();
                 this.condVar.notifyOne(this.mutex);
-                return val as T;
+                return Promise.resolve(val!);
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.mutex);
             }

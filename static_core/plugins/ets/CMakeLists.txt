@@ -175,9 +175,13 @@ add_subdirectory(tools)
 # NOTE(nsizov): change this logic when ets compiler moved into ets plugin
 if(TARGET es2panda)
     compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc" etsstdlib)
+    # NOTE(konstanting): this is a temporary stackless StdLib, will be removed after transition
+    compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.stackless.abc" etsstdlib.stackless COMPILER_EXTRA_OPTIONS "--stackless-coros=true")
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
+    set_target_properties(etsstdlib.stackless PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.stackless.abc")
     add_dependencies(ark etsstdlib)
+    add_dependencies(etsstdlib etsstdlib.stackless)
     add_subdirectory(sdk)
 
     # host-tools cannot have libarkruntime as for and verifier as well.
