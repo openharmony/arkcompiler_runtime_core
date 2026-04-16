@@ -2449,11 +2449,11 @@ void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistr
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
 {
-    this->GetPandaVm()->GetMutatorManager()->RegisterMutator(mutator, [this](Mutator *mutator) {
+    this->GetPandaVm()->GetMutatorManager()->RegisterMutator(mutator, [this](Mutator *mttr) {
         // Any access to other threads' data (including MAIN's) might cause a race here
         // so it sets barriers to mutator under MutatorManager lock
-        mutator->SetPreWrbEntrypoint(reinterpret_cast<void *>(currentPreWrbEntrypoint_));
-        LOG(DEBUG, GC) << "Set prewrb " << currentPreWrbEntrypoint_ << " to mutator " << mutator;
+        mttr->SetPreWrbEntrypoint(reinterpret_cast<void *>(currentPreWrbEntrypoint_));
+        LOG(DEBUG, GC) << "Set prewrb " << currentPreWrbEntrypoint_ << " to mutator " << mttr;
         return true;
     });
 }

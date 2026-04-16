@@ -17,7 +17,7 @@ function GetNull(): null {
     return null
 }
 
-function GetUndefined(): undefined {
+function GetUndefined(): Object|undefined {
     return undefined
 }
 

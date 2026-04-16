@@ -22,12 +22,12 @@ constraints:
   - type: void
     use: Object
     expected_out: |-
-        Semantic error ESE0228: Type argument 'Object' should be a subtype of 'void' constraint
+        Semantic error ESE0228: Type argument 'Object' should be a subtype of 'undefined' constraint
 
   - type: void
     use: Any
     expected_out: |-
-        Semantic error ESE0228: Type argument 'Any' should be a subtype of 'void' constraint
+        Semantic error ESE0228: Type argument 'Any' should be a subtype of 'undefined' constraint
 
   - type: number
     use: byte

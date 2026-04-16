@@ -27,7 +27,7 @@ desc: |-
 
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE873275: Class member protected_foo with type void in Derived cannot override protected_foo with type void field from class Base
+    Semantic error ESE873275: Class member protected_foo with type undefined in Derived cannot override protected_foo with type undefined field from class Base
     because the overridden method has weaker access privileges.
 ---*/
 
@@ -59,6 +59,6 @@ function main() {
     res = 0
 }
 
-/* @@@ label Error TypeError: protected_foo(i: Double): void in Derived cannot override
-protected_foo(i: Double): void in Base because overridden method has weaker access privilege. */
-/* @@@ label Error Method protected_foo(i: Double): void in Derived not overriding any method */
+/* @@@ label Error TypeError: protected_foo(i: Double): undefined in Derived cannot override
+protected_foo(i: Double): undefined in Base because overridden method has weaker access privilege. */
+/* @@@ label Error Method protected_foo(i: Double): undefined in Derived not overriding any method */

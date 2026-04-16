@@ -149,7 +149,7 @@ cases:
       A
     literal: "{a: 'a'}"
     expected: |-
-      Semantic error ESE0139: Signature constructor(): void is not visible here.
+      Semantic error ESE0139: Signature constructor(): undefined is not visible here.
 
   - decl: |-
       class A {
@@ -162,7 +162,7 @@ cases:
       A
     literal: "{a: 'a'}"
     expected: |-
-      Semantic error ESE0139: Signature constructor(): void is not visible here.
+      Semantic error ESE0139: Signature constructor(): undefined is not visible here.
 
   - decl: |-
       class A {

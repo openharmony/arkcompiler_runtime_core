@@ -17,7 +17,7 @@
 desc: Multiple inheritance conflict detection.
 tags: [compile-only, negative]
 expected_out: >-
-    Semantic error ESE985118: Class member draw with type void in E cannot implement draw with type String property from interface B
+    Semantic error ESE985118: Class member draw with type undefined in E cannot implement draw with type String property from interface B
     because the implementing return type is not compatible with the interface return type.
 ---*/
 

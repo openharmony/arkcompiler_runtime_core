@@ -320,8 +320,8 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkWithExecutionFlag)
     WorkStatus status = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
-            auto *asyncWorkContext = reinterpret_cast<AsyncWorkContext *>(data);
-            asyncWorkContext->executed = true;
+            auto *context = reinterpret_cast<AsyncWorkContext *>(data);
+            context->executed = true;
         },
         [](ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
             auto *context = reinterpret_cast<AsyncWorkContext *>(data);

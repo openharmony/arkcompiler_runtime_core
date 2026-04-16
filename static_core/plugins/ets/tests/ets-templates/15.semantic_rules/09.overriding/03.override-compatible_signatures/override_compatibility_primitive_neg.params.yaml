@@ -25,7 +25,7 @@ cases:
           }
       params: override-incompatible parameter
       expected_out: |-
-        "Semantic error ESE0136: Method foo(i: Long): void in Derived not overriding any method"
+        "Semantic error ESE0136: Method foo(i: Long): undefined in Derived not overriding any method"
 
     # VALUE TYPES, RETURN TYPE
 
@@ -54,7 +54,7 @@ cases:
           }
       params: override-incompatible return type
       expected_out: |-
-        "Semantic error ESE0141: Class member foo with type Double in Derived cannot override foo with type void field from class Base because the overriding return type is not compatible with the other return type."
+        "Semantic error ESE0141: Class member foo with type Double in Derived cannot override foo with type undefined field from class Base because the overriding return type is not compatible with the other return type."
 
     - base: |-
           foo(): number {
@@ -67,4 +67,4 @@ cases:
           }
       params: override-incompatible return type
       expected_out: |-
-        "Semantic error ESE0141: Class member foo with type void in Derived cannot override foo with type Double field from class Base because the overriding return type is not compatible with the other return type."
+        "Semantic error ESE0141: Class member foo with type undefined in Derived cannot override foo with type Double field from class Base because the overriding return type is not compatible with the other return type."

@@ -33,11 +33,6 @@ cases:
         native set age(a: number) {}
     expected_out: "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
 
-  # get-accessor without return type and can't infer it
-  - decl: |-
-      get magicNumber() { }
-    expected_out: "Semantic error ESE0086: Getter must return a value"
-
   # set-accessor without parameters
   - decl: |-
       let saved_age = 0        
