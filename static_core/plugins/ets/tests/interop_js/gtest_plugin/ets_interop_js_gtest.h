@@ -28,6 +28,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "libarkbase/utils/span.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -520,7 +521,8 @@ private:
 
         auto methodRes = ResolveEntryPoint(ctx, qualifiedName);
         if (UNLIKELY(!methodRes)) {
-            InteropCtx::ThrowJSError(env, "CallEtsFunction: " + qualifiedName + " " + std::string(methodRes.Error()));
+            InteropCtx::ThrowJSError(env, INTEROP_METHOD_NOT_FOUND,
+                                     "CallEtsFunction: " + qualifiedName + " " + std::string(methodRes.Error()));
             return std::nullopt;
         }
 

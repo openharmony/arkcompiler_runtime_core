@@ -14,6 +14,7 @@
  */
 
 #include <unistd.h>
+#include <string>
 #include <string_view>
 #include "ets_coroutine.h"
 #include "runtime/execution/job_execution_context.h"
@@ -28,6 +29,7 @@
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 // NOTE(konstanting, #23205): in case of interop with Node, libuv will be available automatically via
 // the load of the ets_vm_plugin module. But since the libuv users are now in the libarkruntime, we should

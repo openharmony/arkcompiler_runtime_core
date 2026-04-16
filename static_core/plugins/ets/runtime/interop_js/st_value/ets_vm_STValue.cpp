@@ -38,6 +38,7 @@
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_impl.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -53,15 +54,17 @@ const char *g_stvalueDataPtrHigh = "_STValueDataPtrHigh";
 void AniExpectOK(ani_status status)
 {
     if (status != ANI_OK) {
-        INTEROP_LOG(FATAL) << "The ANI call must succeed, but got status: " << status;
+        INTEROP_LOG(FATAL) << "The ANI call must succeed, but got status: " << status
+                           << ". Error code: " << std::to_string(INTEROP_ANI_CALL_FAILED);
     }
 }
 
-void STValueThrowJSError(napi_env env, const std::string &msg)
+void STValueThrowJSError(napi_env env, int32_t code, const std::string &msg)
 {
-    INTEROP_LOG(INFO) << "ThrowJSError: " << msg;
+    std::string errorCode = std::to_string(code);
+    INTEROP_LOG(INFO) << "ThrowJSError: " << msg << ". Error code: " << errorCode;
     ASSERT(!NapiIsExceptionPending(env));
-    NAPI_CHECK_FATAL(napi_throw_error(env, nullptr, msg.c_str()));
+    NAPI_CHECK_FATAL(napi_throw_error(env, errorCode.c_str(), msg.c_str()));
 }
 
 static std::string GetErrorMessage(ani_env *aniEnv, ani_error aniError)
@@ -101,7 +104,8 @@ bool AniCheckAndThrowToDynamic(napi_env env, ani_status status)
     AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     if (!hasError) {
-        STValueThrowJSError(env, "Unknown ANI error occurred, status: " + std::to_string(status));
+        STValueThrowJSError(env, INTEROP_UNKNOWN_ANI_ERROR_OCCURRED,
+                            "Unknown ANI error occurred, status: " + std::to_string(status));
         return false;
     }
 
@@ -111,11 +115,11 @@ bool AniCheckAndThrowToDynamic(napi_env env, ani_status status)
 
     std::string errorDescription = GetErrorMessage(aniEnv, error);
     std::string errorMessage = "ANI error occurred, got error: " + errorDescription;
-    STValueThrowJSError(env, errorMessage);
+    STValueThrowJSError(env, INTEROP_ANI_CALL_FAILED, errorMessage);
     return false;
 }
 
-bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg)
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, int32_t code, const std::string &errorMsg)
 {
     if (status == ANI_OK) {
         return true;
@@ -127,7 +131,7 @@ bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::strin
     AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     if (!hasError) {
-        STValueThrowJSError(env, errorMsg);
+        STValueThrowJSError(env, INTEROP_UNKNOWN_ANI_ERROR_OCCURRED, errorMsg);
         return false;
     }
 
@@ -135,7 +139,7 @@ bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::strin
     ani_error error = nullptr;
     AniExpectOK(aniEnv->GetUnhandledError(&error));
     AniExpectOK(aniEnv->ResetError());
-    STValueThrowJSError(env, errorMsg);
+    STValueThrowJSError(env, code, errorMsg);
     return false;
 }
 
@@ -271,7 +275,7 @@ bool CheckNapiIsArray(napi_env env, napi_value jsObject)
     bool isArray = false;
     NAPI_CHECK_FATAL(napi_is_array(env, jsObject, &isArray));
     if (!isArray) {
-        STValueThrowJSError(env, "arg list is not an Array.");
+        STValueThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "arg list is not an Array.");
         return false;
     }
     return true;
@@ -483,8 +487,9 @@ napi_value GetSTValueClass(napi_env env)
 
 void ThrowJSBadArgCountError(napi_env env, size_t jsArgc, size_t expectedArgc)
 {
-    STValueThrowJSError(env, "Expect " + std::to_string(expectedArgc) + " args, but got " + std::to_string(jsArgc) +
-                                 " args");
+    STValueThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
+                        "Expect " + std::to_string(expectedArgc) + " args, but got " + std::to_string(jsArgc) +
+                            " args");
 }
 
 std::string GetSTypeName(SType stype)
@@ -518,7 +523,7 @@ std::string GetSTypeName(SType stype)
 
 void ThrowUnsupportedSTypeError(napi_env env, SType stype)
 {
-    STValueThrowJSError(env, "Unsupported SType: " + GetSTypeName(stype));
+    STValueThrowJSError(env, INTEROP_UNSUPPORTED_TYPE_CONVERSION, "Unsupported SType: " + GetSTypeName(stype));
 }
 
 void ThrowTypeCheckError(napi_env env, const std::string &name, const std::string &type)
@@ -526,7 +531,8 @@ void ThrowTypeCheckError(napi_env env, const std::string &name, const std::strin
     if (NapiIsExceptionPending(env)) {
         return;
     }
-    STValueThrowJSError(env, name + " STValue instance does not wrap a value of type " + type);
+    STValueThrowJSError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
+                        name + " STValue instance does not wrap a value of type " + type);
 }
 
 void ThrowJSNonBooleanError(napi_env env, const std::string &name)

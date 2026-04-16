@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <string>
 #include "runtime/include/mem/panda_string.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/include/class_linker-inl.h"
@@ -30,6 +31,7 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "common_interfaces/objects/base_type.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
@@ -82,7 +84,8 @@ using common_vm::TaggedType;
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         status = napi_load_module_with_module_request(env, moduleName.c_str(), &result, abcFilePath.c_str());
         if (status != napi_ok) {
-            INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
+            INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception"
+                               << ". Error code: " << std::to_string(INTEROP_MODULE_LOAD_FAILED);
             ctx->ForwardJSException(executionCtx);
             return nullptr;
         }
@@ -90,8 +93,8 @@ using common_vm::TaggedType;
     if (IsUndefined(env, result) || result == nullptr) {
         // NOLINTNEXTLINE(readability-redundant-string-cstr)
         PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to Undefined result";
-        INTEROP_LOG(ERROR) << exp;
-        InteropCtx::ThrowETSError(executionCtx, exp.c_str());
+        INTEROP_LOG(ERROR) << exp << ". Error code: " << std::to_string(INTEROP_MODULE_LOAD_FAILED);
+        InteropCtx::ThrowETSError(executionCtx, INTEROP_MODULE_LOAD_FAILED, std::string(exp));
         return nullptr;
     }
     return JSValue::CreateRefValue(executionCtx, ctx, result, napi_object);
@@ -141,7 +144,7 @@ JSValue *JSRuntimeNewJSValueString(EtsString *v)
     }
     std::string str;
     if (v->IsUtf16()) {
-        InteropCtx::Fatal("not implemented");
+        InteropCtx::Fatal(INTEROP_FEATURE_NOT_IMPLEMENTED, "not implemented");
     } else {
         PandaVector<uint8_t> tree8Buf;
         uint8_t *data = v->IsTreeString() ? v->GetTreeStringDataMUtf8(tree8Buf) : v->GetDataMUtf8();
@@ -451,7 +454,8 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
 
     if (IsStdClass(cls)) {
         // NOTE(v.cherkashin): Add support compat types, #13577
-        INTEROP_LOG(FATAL) << __func__ << " doesn't support compat types";
+        INTEROP_LOG(FATAL) << __func__ << " doesn't support compat types. Error code: "
+                           << std::to_string(INTEROP_TYPE_NOT_ASSIGNABLE);
     }
 
     return 0;
@@ -461,7 +465,8 @@ static ALWAYS_INLINE inline bool CheckEtsObjectFoundException(EtsExecutionContex
 {
     if (EtsReferenceNullish(executionCtx, etsObject)) {
         PandaString message = "Need object";
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message.c_str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, INTEROP_ARGUMENT_TYPE_MISMATCH,
+                          message.c_str());
         return true;
     }
     return false;
@@ -514,15 +519,16 @@ static bool CheckModuleLoadStatus(EtsExecutionContext *executionCtx, napi_status
     auto ctx = InteropCtx::Current(executionCtx);
     auto env = ctx->GetJSEnv();
     if (status != napi_ok) {
-        INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
+        INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception"
+                           << ". Error code: " << std::to_string(INTEROP_MODULE_LOAD_FAILED);
         ctx->ForwardJSException(executionCtx);
         return false;
     }
     if (IsNullOrUndefined(env, loadedObj)) {
         // NOLINTNEXTLINE(readability-redundant-string-cstr)
         PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to null result";
-        INTEROP_LOG(ERROR) << exp;
-        InteropCtx::ThrowETSError(executionCtx, exp.c_str());
+        INTEROP_LOG(ERROR) << exp << ". Error code: " << std::to_string(INTEROP_MODULE_LOAD_FAILED);
+        InteropCtx::ThrowETSError(executionCtx, INTEROP_MODULE_LOAD_FAILED, std::string(exp));
         return false;
     }
     return true;
@@ -1039,7 +1045,8 @@ uint8_t ESValueAnyInstanceOf(EtsObject *etsObject, EtsObject *ctor)
     bool result = false;
     if (etsObject == nullptr || ctor == nullptr) {
         PandaString message = "Need object";
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message.c_str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, INTEROP_ARGUMENT_TYPE_MISMATCH,
+                          message.c_str());
     } else {
         result = EtsIsinstance(executionCtx->GetMT(), etsObject, ctor);
     }
@@ -1153,7 +1160,8 @@ uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType
     EtsField *field = paramType->GetClass()->GetFieldIDByName("cls", nullptr);
     auto clsObj = paramTypeHandle->GetFieldObject(field);
     if (clsObj == nullptr) {
-        INTEROP_LOG(ERROR) << "failed to get field by name";
+        INTEROP_LOG(ERROR) << "failed to get field by name"
+                           << ". Error code: " << std::to_string(INTEROP_FIELD_ACCESS_FAILED);
         return static_cast<uint8_t>(false);
     }
     auto cls = reinterpret_cast<EtsClass *>(clsObj);
@@ -1298,7 +1306,7 @@ void *CompilerJSCallCheck(void *fn)
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     napi_env env = ctx->GetJSEnv();
     if (UNLIKELY(GetValueType(env, jsFn) != napi_function)) {
-        ctx->ThrowJSTypeError(env, "call target is not a function");
+        ctx->ThrowJSTypeError(env, INTEROP_CALL_TARGET_IS_NOT_A_FUNCTION, "call target is not a function");
         ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
@@ -1572,7 +1580,7 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
     napi_status status = state == EtsPromise::STATE_RESOLVED ? napi_resolve_deferred(env, deferred, completionValue)
                                                              : napi_reject_deferred(env, deferred, completionValue);
     if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Cannot resolve promise");
+        napi_throw_error(env, std::to_string(INTEROP_NAPI_ERROR_OCCURRED).c_str(), "Cannot resolve promise");
     }
 }
 
@@ -1642,7 +1650,7 @@ EtsStdCoreArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     bool isArrayBuffer = false;
     NAPI_CHECK_FATAL(napi_is_arraybuffer(env, dynamicArrayBuffer, &isArrayBuffer));
     if (!isArrayBuffer) {
-        ctx->ThrowETSError(executionCtx, "Dynamic object is not arraybuffer");
+        ctx->ThrowETSError(executionCtx, INTEROP_TYPE_NOT_ASSIGNABLE, "Dynamic object is not arraybuffer");
     }
 
     void *data = nullptr;

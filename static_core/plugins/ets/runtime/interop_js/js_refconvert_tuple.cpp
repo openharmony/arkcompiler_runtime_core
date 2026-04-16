@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_tuple.h"
+#include <string>
 #include "plugins/ets/runtime/ets_platform_types.h"
 
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
@@ -21,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/types/ets_tuple.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -102,7 +104,7 @@ static napi_value TupleGetCallBackHandler(napi_env env, size_t argc, napi_value 
         ASSERT(refconv != nullptr);
         return refconv->Wrap(ctx, elementObject);
     } else {
-        InteropFatal("Interop: Tuple types with arity >16 are not yet implemented.");
+        InteropFatal(INTEROP_FEATURE_NOT_IMPLEMENTED, "Interop: Tuple types with arity >16 are not yet implemented.");
     }
 }
 
@@ -132,8 +134,8 @@ static napi_value TupleSetCallBackHandler(napi_env env, size_t argc, napi_value 
 
         uint32_t fieldsCnt = etsThis->GetClass()->GetFieldsNumber();
         if (tupleIdx >= fieldsCnt) {
-            // if the tuple index is out of bounds, throw an error
-            InteropCtx::ThrowJSError(env, "Tuple index out of bounds");
+            // if tuple index is out of bounds, throw an error
+            InteropCtx::ThrowJSError(env, INTEROP_TUPLE_INDEX_OUT_OF_BOUNDS, "Tuple index out of bounds");
             return GetBoolean(env, true);
         }
 
@@ -144,7 +146,7 @@ static napi_value TupleSetCallBackHandler(napi_env env, size_t argc, napi_value 
         return GetBoolean(env, true);
     } else {
         // handle TupleN
-        InteropFatal("Interop: Tuple types with arity >16 are not yet implemented.");
+        InteropFatal(INTEROP_FEATURE_NOT_IMPLEMENTED, "Interop: Tuple types with arity >16 are not yet implemented.");
     }
 }
 
@@ -208,7 +210,7 @@ napi_value JSRefConvertTuple<IS_TUPLEN>::WrapImpl(InteropCtx *ctx, EtsObject *et
         return proxyObject;
     } else {
         // handle TupleN
-        InteropFatal("Interop: Tuple types with arity >16 are not yet implemented.");
+        InteropFatal(INTEROP_FEATURE_NOT_IMPLEMENTED, "Interop: Tuple types with arity >16 are not yet implemented.");
     }
 }
 
@@ -218,7 +220,8 @@ EtsObject *JSRefConvertTuple<IS_TUPLEN>::UnwrapImpl([[maybe_unused]] InteropCtx 
 {
     // just throw exception
     auto executionCtx = EtsExecutionContext::GetCurrent();
-    InteropCtx::ThrowETSError(executionCtx, "Assigning a dynamic object to a static tuple object is not supported.");
+    InteropCtx::ThrowETSError(executionCtx, INTEROP_UNSUPPORTED_TYPE_CONVERSION,
+                              "Assigning a dynamic object to a static tuple object is not supported.");
     return nullptr;
 }
 

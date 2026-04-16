@@ -14,8 +14,10 @@
  */
 
 #include "plugins/ets/runtime/interop_js/js_value.h"
+#include <string>
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/mem/local_object_handle.h"
 
@@ -69,7 +71,8 @@ void JSValue::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
             delete jsValue->GetBigInt();
             return;
         default:
-            InteropCtx::Fatal("Finalizer called for non-finalizable type: " + std::to_string(type));
+            InteropCtx::Fatal(INTEROP_UNSUPPORTED_JSVALUE_TYPE,
+                              "Finalizer called for non-finalizable type: " + std::to_string(type));
     }
     UNREACHABLE();
 }
@@ -116,7 +119,7 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
             return jsvalue.GetPtr();
         }
         default:
-            InteropCtx::Fatal("Unsupported JSValue.Type: " + std::to_string(jsType));
+            InteropCtx::Fatal(INTEROP_UNSUPPORTED_JSVALUE_TYPE, "Unsupported JSValue.Type: " + std::to_string(jsType));
     }
     UNREACHABLE();
 }
@@ -207,7 +210,7 @@ napi_value JSValue::GetNapiValue(EtsExecutionContext *executionCtx, InteropCtx *
             return GetRefValue(env, handle);
         }
         default: {
-            InteropCtx::Fatal("Unsupported JSValue.Type: " + std::to_string(jsType));
+            InteropCtx::Fatal(INTEROP_UNSUPPORTED_JSVALUE_TYPE, "Unsupported JSValue.Type: " + std::to_string(jsType));
         }
     }
     UNREACHABLE();

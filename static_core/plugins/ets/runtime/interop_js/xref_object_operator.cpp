@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -500,7 +501,7 @@ napi_value XRefObjectOperator::GetNapiValue(EtsExecutionContext *executionCtx) c
     auto jsObject = JSValue::GetNapiValue(executionCtx, ctx, jsValueHandle);
     // NOTE(MockMockBlack): will be removed after this is stable
     if (UNLIKELY(jsObject == nullptr)) {
-        InteropCtx::Fatal("Failed to get NAPI value for XRefObject");
+        InteropCtx::Fatal(INTEROP_INVALID_ARGUMENT_VALUE, "Failed to get NAPI value for XRefObject");
     }
 
     return jsObject;

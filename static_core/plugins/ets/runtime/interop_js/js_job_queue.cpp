@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/interop_js/js_job_queue.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include <node_api.h>
+#include <string>
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -28,6 +29,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "runtime/execution/coroutines/stackful/stackful_coroutine.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -53,7 +55,8 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
         hasException = executionCtx->GetMT()->HasPendingException();
     }
     if (hasException) {
-        napi_throw_error(env, nullptr, "EtsVM internal error");
+        std::string code = std::to_string(INTEROP_ETSVM_INTERNAL_ERROR);
+        napi_throw_error(env, code.c_str(), "EtsVM internal error");
     }
     napi_value undefined;
     napi_get_undefined(env, &undefined);
@@ -80,7 +83,7 @@ void JsJobQueue::Post(EtsObject *callback)
     napi_get_undefined(env, &undefined);
     napi_status status = napi_create_promise(env, &deferred, &jsPromise);
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot allocate a Promise instance");
+        InteropCtx::Fatal(INTEROP_PROMISE_CREATION_FAILED, "Cannot allocate a Promise instance");
     }
     status = napi_get_named_property(env, jsPromise, "then", &thenFn);
     ASSERT(status == napi_ok);
@@ -90,7 +93,7 @@ void JsJobQueue::Post(EtsObject *callback)
     napi_value thenCallback;
     status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot create a function");
+        InteropCtx::Fatal(INTEROP_FUNCTION_CREATION_FAILED, "Cannot create a function");
     }
 
     napi_value thenPromise;
@@ -113,7 +116,7 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
     napi_value value;
     napi_status status = napi_get_cb_info(env, info, &argc, &value, nullptr, reinterpret_cast<void **>(&promiseRef));
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot call napi_get_cb_info!");
+        InteropCtx::Fatal(INTEROP_NAPI_ERROR_OCCURRED, "Cannot call napi_get_cb_info!");
     }
     ASSERT(promiseRef != nullptr);
 
@@ -178,7 +181,7 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
     napi_value thenFn;
     napi_status status = napi_get_named_property(env, jsPromise, "then", &thenFn);
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot call then() from a JS promise");
+        InteropCtx::Fatal(INTEROP_NAPI_ERROR_OCCURRED, "Cannot call then() from a JS promise");
     }
 
     mem::Reference *promiseRef =
@@ -188,18 +191,18 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 
     status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback[0]);
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot create a function");
+        InteropCtx::Fatal(INTEROP_FUNCTION_CREATION_FAILED, "Cannot create a function");
     }
 
     status = napi_create_function(env, nullptr, 0, OnJsPromiseRejected, promiseRef, &thenCallback[1]);
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot create a function");
+        InteropCtx::Fatal(INTEROP_FUNCTION_CREATION_FAILED, "Cannot create a function");
     }
 
     napi_value thenResult;
     status = napi_call_function(env, jsPromise, thenFn, 2U, thenCallback.data(), &thenResult);
     if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot call then() from a JS Promise");
+        InteropCtx::Fatal(INTEROP_NAPI_ERROR_OCCURRED, "Cannot call then() from a JS Promise");
     }
 }
 

@@ -47,7 +47,7 @@ public:
             (curAddr_--)->~Record();
             return;
         }
-        InteropFatal("InteropCallStack is empty");
+        InteropFatal(INTEROP_CALL_STACK_EMPTY, "InteropCallStack is empty");
     }
 
     Record *Current() override
@@ -78,7 +78,7 @@ private:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             return curAddr_++;
         }
-        InteropFatal("InteropCallStack overflow");
+        InteropFatal(INTEROP_CALL_STACK_OVERFLOW, "InteropCallStack overflow");
     }
 
     bool ForEachDynamicFrame(void *currFrameSP, void *toFrameSP,

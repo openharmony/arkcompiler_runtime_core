@@ -23,6 +23,7 @@
 #include <variant>
 #include "ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 namespace ark::ets::interop::js {
 
@@ -177,13 +178,13 @@ PANDA_PUBLIC_API napi_value GetSTValueClass(napi_env env);
 PANDA_PUBLIC_API napi_value CreateSTypeObject(napi_env env);
 uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue);
 bool AniCheckAndThrowToDynamic(napi_env env, ani_status status);
-bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg);
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, int32_t code, const std::string &errorMsg);
 void AniExpectOK(ani_status status);
 SType GetTypeFromType(napi_env env, napi_value stNapiType);
 bool GetAniValueFromSTValue(napi_env env, napi_value element, ani_value &value);
 bool IsSTValueInstance(napi_env env, napi_value value);
 bool CheckNapiIsArray(napi_env env, napi_value jsObject);
-void STValueThrowJSError(napi_env env, const std::string &msg);
+void STValueThrowJSError(napi_env env, int32_t code, const std::string &msg);
 
 void ThrowJSBadArgCountError(napi_env env, size_t jsArgc, size_t expectedArgc);
 std::string GetSTypeName(SType stype);
@@ -219,27 +220,27 @@ ani_env *GetAniEnv()
     return aniEnv;
 }
 
-#define NAPI_TO_ANI_SCOPE                                       \
-    do {                                                        \
-        auto *m = Mutator::GetCurrent();                        \
-        if (m == nullptr) {                                     \
-            STValueThrowJSError(env, "Thread is not attached"); \
-            /* CC-OFFNXT(G.PRE.05) function gen */              \
-            return nullptr;                                     \
-        }                                                       \
-        auto *c = EtsExecutionContext::GetCurrent();            \
-        if (c == nullptr) {                                     \
-            STValueThrowJSError(env, "Thread is not attached"); \
-            /* CC-OFFNXT(G.PRE.05) function gen */              \
-            return nullptr;                                     \
-        }                                                       \
-        auto *ctx = InteropCtx::Current(c);                     \
-        if (ctx == nullptr) {                                   \
-            STValueThrowJSError(env, "Thread is not attached"); \
-            /* CC-OFFNXT(G.PRE.05) function gen */              \
-            return nullptr;                                     \
-        }                                                       \
-    } while (0);                                                \
+#define NAPI_TO_ANI_SCOPE                                                                    \
+    do {                                                                                     \
+        auto *m = Mutator::GetCurrent();                                                     \
+        if (m == nullptr) {                                                                  \
+            STValueThrowJSError(env, INTEROP_THREAD_NOT_ATTACHED, "Thread is not attached"); \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                           \
+            return nullptr;                                                                  \
+        }                                                                                    \
+        auto *c = EtsExecutionContext::GetCurrent();                                         \
+        if (c == nullptr) {                                                                  \
+            STValueThrowJSError(env, INTEROP_THREAD_NOT_ATTACHED, "Thread is not attached"); \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                           \
+            return nullptr;                                                                  \
+        }                                                                                    \
+        auto *ctx = InteropCtx::Current(c);                                                  \
+        if (ctx == nullptr) {                                                                \
+            STValueThrowJSError(env, INTEROP_THREAD_NOT_ATTACHED, "Thread is not attached"); \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                           \
+            return nullptr;                                                                  \
+        }                                                                                    \
+    } while (0);                                                                             \
     INTEROP_CODE_SCOPE_JS_TO_ETS(EtsExecutionContext::GetCurrent())
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
