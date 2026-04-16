@@ -22,7 +22,6 @@ desc: >-
     Union types normalization allows minimizing the number of types and literals
     within a union type while keeping the type's safety. Some types or literals
     can also be replaced for more general types.
-tags: [{% if k == 'neg'%}compile-only, negative{% endif %}]
 ---*/
 {{c.decl}}
 
