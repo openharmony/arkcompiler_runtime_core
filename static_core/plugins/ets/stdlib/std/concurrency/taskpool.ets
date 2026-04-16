@@ -101,8 +101,8 @@ export namespace taskpool {
                 const internalTask = InternalTask.of(task);
                 const taskPriority = internalTask?.priority;
                 if (taskPriority != undefined && this.currentPriority !== taskPriority) {
-                    this.currentPriority = taskPriority;
                     this.updateCurrentWorkerPriority(taskPriority);
+                    this.currentPriority = taskPriority;
                 }
                 ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
                     const curCount: int | undefined = this.currentTasks.get(task);
@@ -160,7 +160,7 @@ export namespace taskpool {
         }
 
         private updateCurrentWorkerPriority(taskPriority: Priority): void {
-            this.setPriority(GlobalQueueWorker.getWorkerPriority(taskPriority));
+            setCurrentTaskpoolWorkerPriority(GlobalQueueWorker.getWorkerPriority(taskPriority).valueOf());
         }
 
         public isWorkerActive(): boolean {
@@ -3021,6 +3021,7 @@ export namespace taskpool {
     native function getTaskPoolWorkersLimit(): int;
     native function getTaskId(): int;
     native function setTaskId(taskid: int): void;
+    native function setCurrentTaskpoolWorkerPriority(priority: int): void;
 
     // managed mutex for taskpool containers below
     const mutex: Object = ConcurrencyHelpers.mutexCreate();
