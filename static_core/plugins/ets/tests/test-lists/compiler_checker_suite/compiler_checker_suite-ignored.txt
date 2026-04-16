@@ -1,3 +1,6 @@
+#31608
+ets_tests/codegen_new_obj_call.ets
+
 #32664
 ets_tests/multiarray.ets
 ets_tests/lse_parameter_aliasing.ets
