@@ -22,14 +22,15 @@
 //! INST          /CallStatic .*std.core.String::fromCharCode/
 //! PASS_AFTER    "Inline"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
-//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
 //! METHOD         "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
-//! PASS_AFTER_NTH "Peephole", 2
-//! INST_NOT       /Intrinsic.StdCoreStringFromCharCodeSingle/
-//! INST           /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! PASS_AFTER     "IrBuilder"
+//! INST           /Intrinsic.StdCoreStringFromCharCodeSingle/
 //! INST_NOT       /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! ASM_METHOD     "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
+//! ASM_INST       "Intrinsic.StdCoreStringFromCharCodeSingle"
+//! ASM_INST       "CallEntrypoint: CreateStringFromCharCodeSingleTlab"
 
 //! CHECKER       AOT IR Builder, check String creation from a single and numerous char code(s) with no string caches
 //! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=true \
@@ -40,13 +41,15 @@
 //! INST          /CallStatic .*std.core.String::fromCharCode/
 //! PASS_AFTER    "Inline"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
-//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
 //! METHOD         "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
-//! PASS_AFTER_NTH "Peephole", 2
-//! INST_NOT       /Intrinsic.StdCoreStringFromCharCodeSingle/
-//! INST           /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! PASS_AFTER     "IrBuilder"
+//! INST           /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT       /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! ASM_METHOD     "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
+//! ASM_INST       "Intrinsic.StdCoreStringFromCharCodeSingle"
+//! ASM_INST       "CallEntrypoint: CreateStringFromCharCodeSingleNoCacheTlab"
 
 //! CHECKER       JIT IR Builder, check String creation from a single and numerous char code(s)
 //! RUN           force_jit: true,
@@ -58,14 +61,15 @@
 //! INST          /CallStatic .*std.core.String::fromCharCode/
 //! PASS_AFTER    "Inline"
 //! INST          /Intrinsic.StdCoreStringFromCharCode/
-//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
 //! METHOD         "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
-//! PASS_AFTER_NTH "Peephole", 2
-//! INST_NOT       /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! PASS_AFTER     "IrBuilder"
+//! INST           /Intrinsic.StdCoreStringFromCharCodeSingle/
 //! INST_NOT       /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
-//! INST           /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! ASM_METHOD     "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
+//! ASM_INST       "Intrinsic.StdCoreStringFromCharCodeSingle"
+//! ASM_INST       "CallEntrypoint: CreateStringFromCharCodeSingleTlab"
 
 function fromCharCodes(code1: int, code2: int): string {
     return string.fromCharCode(code1, code2);

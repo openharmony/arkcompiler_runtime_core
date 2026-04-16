@@ -643,22 +643,23 @@ void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src
 
 void Codegen::CreateStringFromCharCodeSingle(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
-    ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
-    auto cache = src[FIRST_OPERAND];
-    auto number = src[SECOND_OPERAND];
-    static constexpr auto EID = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
-
+    ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto number = src[FIRST_OPERAND];
+    auto eid = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+    if (!GetGraph()->GetRuntime()->IsStringCachesUsed()) {
+        eid = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
+    }
     if (GetGraph()->IsAotMode()) {
         ScopedTmpReg klassReg(GetEncoder());
         GetEncoder()->EncodeLdr(
             klassReg, false,
             MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
-        CallFastPath(inst, EID, dst, {}, cache, number, klassReg);
+        CallFastPath(inst, eid, dst, {}, number, klassReg);
     } else {
         auto klassImm =
             TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
-        CallFastPath(inst, EID, dst, {}, cache, number, klassImm);
+        CallFastPath(inst, eid, dst, {}, number, klassImm);
     }
 }
 

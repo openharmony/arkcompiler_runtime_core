@@ -121,17 +121,6 @@ intrinsics:
     clear_flags: [ heap_inv, acc_write ]
     peephole_func: PeepholeNullcheck
 
-  - name: CompilerEtsStringFromCharCodeSingle
-    space: ets
-    compiler_only: true
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ ref, u64 ]
-    codegen_arch: [ arm64, amd64 ]
-    codegen_func: CreateStringFromCharCodeSingle
-    llvm_codegen_func: EmitStringFromCharCodeSingle
-
   - name: CompilerEtsStringFromCharCodeSingleNoCache
     space: ets
     compiler_only: true

@@ -18,6 +18,7 @@
 #include "optimizer/ir/datatype.h"
 #include "libarkbase/utils/regmask.h"
 #include "intrinsic_string_flat_check.inl"
+#include "cross_values.h"
 
 namespace ark::compiler {
 
@@ -366,8 +367,7 @@ void EncodeVisitor::VisitLoadUniqueObject(GraphVisitor *visitor, Inst *inst)
     if (graph->IsJitOrOsrMode()) {
         enc->GetEncoder()->EncodeMov(dst, Imm(runtime->GetUniqueObject()));
     } else {
-        auto ref = MemRef(enc->GetCodegen()->ThreadReg(), runtime->GetTlsUniqueObjectOffset(graph->GetArch()));
-        enc->GetEncoder()->EncodeLdr(dst, false, ref);
+        enc->GetCodegen()->LoadFromExecutionContext(dst, runtime->GetExecutionContextNullValueOffset(graph->GetArch()));
     }
 }
 
@@ -1270,9 +1270,8 @@ void EncodeVisitor::VisitLoadRuntimeClass(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
-    size_t classAddrOffset = codegen->GetGraph()->GetRuntime()->GetTlsPromiseClassPointerOffset(codegen->GetArch());
-    auto mem = MemRef(codegen->ThreadReg(), classAddrOffset);
-    enc->GetEncoder()->EncodeLdr(dst, false, mem);
+    codegen->LoadFromExecutionContext(dst,
+                                      codegen->GetRuntime()->GetExecutionContextPromiseClassOffset(codegen->GetArch()));
 }
 
 void EncodeVisitor::EncodeLoadAndInitClassInAot(EncodeVisitor *enc, Encoder *encoder, Inst *inst, uint32_t classId,

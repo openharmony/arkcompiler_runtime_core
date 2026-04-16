@@ -1416,7 +1416,9 @@ intrinsics:
       ret: std.core.String
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringFromCharCodeSingle
-    peephole_func: PeepholeStringFromCharCodeSingle
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateStringFromCharCodeSingle
+    llvm_codegen_func: EmitStringFromCharCodeSingle
 
   - name: StdCoreStringRepeat
     space: ets
