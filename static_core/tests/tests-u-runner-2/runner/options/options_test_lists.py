@@ -31,6 +31,7 @@ EXCLUDE_IGNORED_TESTS = "exclude-ignored-tests"
 EXCLUDE_IGNORED_TEST_LISTS = "exclude-ignored-test-lists"
 UPDATE_EXCLUDED = "update-excluded"
 UPDATE_EXPECTED = "update-expected"
+DEFAULT_UPDATE_EXPECTED = False
 TEST_LIST_ARCH = "test-list-arch"
 TEST_LIST_SAN = "test-list-san"
 TEST_LIST_OS = "test-list-os"
@@ -88,9 +89,12 @@ class TestListsOptions(IOptions):
             dest=f"{dest}{UPDATE_EXCLUDED}",
             help='update list of excluded tests - put all failed tests into default excluded test list')
         parser.add_argument(
-            f'--{UPDATE_EXPECTED}', action='store_true', default=False,
+            f'--{UPDATE_EXPECTED}', action='store_true',
+            default=DEFAULT_UPDATE_EXPECTED,
             dest=f"{dest}{UPDATE_EXPECTED}",
-            help='update files with expected results')
+            help='if set the expected files for the test suite will be updated. '
+                 'By default, the expected files will not be updated. '
+                 'Check the test suite documentation whether the updater is available.')
 
     @staticmethod
     def add_tags_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
@@ -174,7 +178,7 @@ class TestListsOptions(IOptions):
 
     @cached_property
     def update_expected(self) -> bool:
-        return cast(bool, self.__parameters[UPDATE_EXPECTED])
+        return cast(bool, self.__parameters.get(UPDATE_EXPECTED, DEFAULT_UPDATE_EXPECTED))
 
     def get_command_line(self) -> str:
         options = [

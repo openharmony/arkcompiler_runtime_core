@@ -626,3 +626,8 @@ def escape(line: str, *, escaped_chars: str = ".+?", add_dots: str = "*") -> str
         dst = dst.replace(char, f".{char}")
 
     return dst
+
+
+def normalize_build_system_path(output: str) -> str:
+    pattern = r'At File:\s*(?:[A-Za-z]:)?[/\\].*?[/\\]([^/\\]+\.ets:\d+:\d+)'
+    return re.sub(pattern, r'At File: \1', output)

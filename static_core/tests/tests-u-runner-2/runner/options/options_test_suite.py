@@ -63,6 +63,8 @@ class TestSuiteOptions(IOptions):
     __DEFAULT_USE_METADATA = True
     __VALIDATOR_CLASS = "validator"
     __DEFAULT_VALIDATOR_CLASS = None
+    __UPDATER_CLASS = "updater"
+    __DEFAULT_UPDATER_CLASS = None
 
     def __init__(self, args: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(None)
@@ -110,6 +112,12 @@ class TestSuiteOptions(IOptions):
     def validator_class(self) -> str | None:
         if (validator := self.__parameters.get(self.__VALIDATOR_CLASS, self.__DEFAULT_VALIDATOR_CLASS)) is not None:
             return cast(str, validator)
+        return None
+
+    @property
+    def updater_class(self) -> str | None:
+        if (updater := self.__parameters.get(self.__UPDATER_CLASS, self.__DEFAULT_UPDATER_CLASS)) is not None:
+            return cast(str, updater)
         return None
 
     @staticmethod

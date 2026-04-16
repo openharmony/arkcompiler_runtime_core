@@ -129,7 +129,10 @@ Example:
 -   `--test-file TEST_FILE` - run ONLY ONE specified test. **Attention** - not test suite, but the single test from the suite.
 -   `--rerun-failed` - rerun only tests from the previous run's `failures.txt` in the same work directory.
 -   `--update-excluded` - regenerates excluded test lists
--   `--update-expected` - regenerates expected test lists (applied only for JS Parser test suite)
+-   `--update-expected` - regenerates expected output files for test suites that support updaters. When enabled, the runner will update expected output files based on the actual test execution results. This is particularly useful for:
+    - **Parser test suites**: Updates `<test-name>-expected.txt` files with normalized compiler output
+    - **Other test suites with configured updaters**: Each test suite can specify its own updater class in the configuration
+    - **Note**: This option is ignored for excluded tests and requires the test suite to have an `updater_class` configured
 -   `--report-format` - specifies in what format to generate failure reports. By default, `md`. Possible value: `html`. As well reports in the plain text format with `.log` extension are always generated.
 -   `--filter FILTER` - test filter regexp
 -   `--show-progress` - show progress bar during test execution
