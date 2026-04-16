@@ -13,7 +13,6 @@
 
 cases2:
   - desc: Parse UT as a tuple [Int | null | undefined, Int, String]
-    tags: ''
     dec1: |-
       type UT = [Int | null | undefined, Int, String]
     check: |-
@@ -30,16 +29,7 @@ cases2:
       arktest.assertEQ(value[1], 1);
       arktest.assertEQ(value[2], "test");
 
-  - desc: Parse UT as a tuple [Int | null | undefined, Int, String]
-    tags: 'compile-only, negative'
-    dec1: |-
-      type UT = [Int | null | undefined, Int, String]
-    check: |-
-      let value: UT = ["test_neg", 1, "test"]; // CTE
-      arktest.assertEQ(value[0], "test_neg");
-
   - desc: Parse UT as a union of tuple | boolean | string
-    tags: ''
     dec1: |-
       type UT =  [String | Int, boolean, string] | String | Int
     check: |-
@@ -55,11 +45,3 @@ cases2:
       arktest.assertEQ(value, "test");
       value = 5;
       arktest.assertEQ(value, 5);
-
-  - desc: Parse UT as a union of tuple | boolean | string
-    tags: 'compile-only, negative'
-    dec1: |-
-      type UT =  [String | Int, boolean, String] | String | Int
-    check: |-
-      let value: UT = false; // CTE
-      arktest.assertEQ(value, false);

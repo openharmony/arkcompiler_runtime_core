@@ -17,10 +17,10 @@
 03.types/21.utility_types/01.awaited_utility_type/awaited_circular_n.ets
 
 #33270
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_0.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_1.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_2.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_3.ets
+03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_0.ets
+03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_1.ets
+03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_2.ets
+03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_3.ets
 
 #31615 RTE for partial class field assignment
 03.types/21.utility_types/03.partial_utility_type/partial_inherit3.ets
