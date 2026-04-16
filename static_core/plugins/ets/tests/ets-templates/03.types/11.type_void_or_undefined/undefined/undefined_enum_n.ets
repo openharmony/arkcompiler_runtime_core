@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Using type undefined as type annotation is not recommended, except in nullish types.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0316: Hard keyword 'undefined' cannot be used as identifier"
 ---*/
 
 enum STR { red, undefined }

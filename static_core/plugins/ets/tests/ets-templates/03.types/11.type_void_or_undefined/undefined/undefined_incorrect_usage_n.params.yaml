@@ -1,0 +1,87 @@
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not usage this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # List of named type declaration operations
+incorrect_cases:
+  - declaration: 'undefined class A {}'
+    usage: 'let a = new A'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'class'."
+  - declaration: 'class undefined {}'
+    usage: 'let a = new undefined()'
+    exp_out: |-
+      "Syntax error ESY0316: Hard keyword 'undefined' cannot be used as identifier"
+  - declaration: 'class MCU implements undefined {}'
+    usage: 'let a = new MCU'
+    exp_out: |-
+      "Syntax error ESY0122: Identifier expected."
+  - declaration: 'class MCU extends undefined {}'
+    usage: 'let a = new MCU'
+    exp_out: |-
+      "Syntax error ESY0230: Expected '{', got 'undefined'."
+  - declaration: 'interface undefined {}'
+    usage: 'let a: undefined'
+    exp_out: |-
+      "Syntax error ESY0316: Hard keyword 'undefined' cannot be used as identifier"
+  - declaration: 'undefined interface I {}'
+    usage: 'let a = 1'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'interface'."
+  - declaration: 'undefined function foo() { return 1}'
+    usage: 'arktest.assertTrue(foo() == 2)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'function'."
+  - declaration: 'function undefined() { return 1}'
+    usage: 'arktest.assertTrue(undefined() == 1)'
+    exp_out: |-
+      "Semantic error ESE0002: Type 'undefined' has no call signatures."
+  - declaration: 'undefined foo() { return 1}'
+    usage: 'arktest.assertTrue(foo() == 1)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'foo'."
+  - declaration: 'function foo(undefined int) { return 1}'
+    usage: 'arktest.assertTrue(foo() == undefined)'
+    exp_out: |-
+      "Syntax error ESY0194: Parameter declaration should have an explicit type annotation."
+  - declaration: 'class A { undefined:int = 1 }'
+    usage: 'arktest.assertTrue(new A().undefined == 1)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'undefined'."
+  - declaration: 'class A { static undefined:int = 1 }'
+    usage: 'arktest.assertTrue(A.undefined == 1)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'undefined'."
+  - declaration: 'class A { undefined:undefined = undefined }'
+    usage: 'arktest.assertTrue(new A().undefined == undefined)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'undefined'."
+  - declaration: 'class A { undefined foo() { return 1} }'
+    usage: 'arktest.assertTrue(new A().foo() == 1)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'undefined'."
+  - declaration: 'class A { undefined() { return 1} }'
+    usage: 'arktest.assertTrue(new A().undefined() == 1)'
+    exp_out: |-
+      "Syntax error ESY0316: Hard keyword 'undefined' cannot be used as identifier"
+  - declaration: 'class A implements undefined { }'
+    usage: 'arktest.assertTrue(new A() instanceof A)'
+    exp_out: |-
+      "Syntax error ESY0122: Identifier expected."
+  - declaration: 'class A undefined String { }'
+    usage: 'arktest.assertTrue(new A() instanceof A)'
+    exp_out: |-
+      "Syntax error ESY0230: Expected '{', got 'undefined'."
+  - declaration: 'undefined A { }'
+    usage: 'arktest.assertTrue(new A() instanceof A)'
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'A'."

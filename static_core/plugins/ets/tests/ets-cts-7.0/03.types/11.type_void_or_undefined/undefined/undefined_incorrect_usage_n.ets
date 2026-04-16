@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Using type undefined as type annotation is not recommended, except in nullish types.
 tags: [compile-only, negative]
+expected_out: {{ic.exp_out}}
 ---*/
 
 {{ic.declaration}}

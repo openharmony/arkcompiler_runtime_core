@@ -18,6 +18,8 @@ cases:
       - "function helper(f: () => void): void { return f() }"
     statements:
       - "let hack: undefined = helper(() => 1)"
+    exp_out: |-
+      "Semantic error ESE0046: Type '(() => Int)' is not compatible with type '(() => undefined)' at index 1"
 
   - description: "Void in conditional types should follow consumption rules"
     declarations:
@@ -25,3 +27,5 @@ cases:
       - "function test<T>(x: T): Test<T> { return x as Test<T> }"
     statements:
       - "let result = test<void>(undefined)"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'void'."

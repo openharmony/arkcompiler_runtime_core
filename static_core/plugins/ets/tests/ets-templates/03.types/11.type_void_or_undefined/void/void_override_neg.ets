@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: {{c.description}}
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: Class member qux with type undefined in Derived cannot override qux with type Double field from class Base because the overriding return type is not compatible with the other return type."
 ---*/
 
 {%- for declaration in c.declarations %}

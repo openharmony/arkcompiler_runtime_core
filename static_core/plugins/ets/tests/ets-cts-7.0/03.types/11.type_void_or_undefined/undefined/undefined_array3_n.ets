@@ -14,10 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The only value of type undefined is represented by the keyword undefined (see Undefined Literal).
+desc: Using type undefined as type annotation is not recommended, except in nullish types.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0046: Type 'undefined' is not compatible with type 'Int' at index 2"
 ---*/
 
 function main(): void {
-  let a: Undefined;
+  let i: int[] = new int[2](0)
+  i[0] = undefined;
 }

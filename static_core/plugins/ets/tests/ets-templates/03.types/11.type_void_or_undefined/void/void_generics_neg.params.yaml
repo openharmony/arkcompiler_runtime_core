@@ -18,6 +18,8 @@ cases:
       - "function foo<T>(f: () => T): T { return f() }"
     statements:
       - "let v = foo<void>(() => 0)"
+    exp_out: |-
+      "Semantic error ESE0046: Type '(() => Int)' is not compatible with type '(() => undefined)' at index 1"
 
   - description: "Generic function with array of void should be CTE"
     declarations:
@@ -25,4 +27,5 @@ cases:
     statements:
       - "foo<void>([1])"
       - "let v = foo<void>([1])"
-
+    exp_out: |-
+      "Semantic error ESE0127: No matching call signature for foo(Array<Int>)"
