@@ -19,6 +19,7 @@
 #include "libarkbase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
+#include "runtime/include/thread.h"
 #include "runtime/include/runtime.h"
 
 namespace ark::ets::intrinsics::taskpool {
@@ -79,6 +80,12 @@ extern "C" EtsBoolean IsSupportingInterop()
     res = Runtime::GetOptions().IsTaskpoolSupportInterop(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
 #endif /* PANDA_ETS_INTEROP_JS */
     return ark::ets::ToEtsBoolean(res);
+}
+
+extern "C" void SetCurrentTaskpoolWorkerPriority(EtsInt priority)
+{
+    [[maybe_unused]] auto result = QosHelper::SetCurrentWorkerPriority(static_cast<::Priority>(priority));
+    LOG(DEBUG, RUNTIME) << "QosHelper::SetCurrentWorkerPriority priority=" << priority << ", result=" << result;
 }
 
 extern "C" EtsInt GetTaskPoolWorkersLimit()
