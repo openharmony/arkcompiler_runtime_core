@@ -2,9 +2,6 @@
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
 
-#33158
-03.types/19.union_types/ut_45.ets
-
 #30677
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets

@@ -103,7 +103,7 @@ async function testGeneralDomain(): Promise<void> {
         await test(false);
         await launch<Promise<void>>() { return test(false); };
         await ea.run<Promise<void>>(async () => { await test(false); });
-        jobs.push(launch() { return test(true); });
+        jobs.push(launch() { test(true); });
         promises.push(ea.run<void>(async () => { test(true); }));
     }
 
@@ -145,7 +145,7 @@ async function testExactIdDomain(): Promise<void> {
         await test(false);
         await launch<Promise<void>>() { return test(false); };
         await ea.run<Promise<void>>(async () => { await test(false); });
-        jobs.push(launch() { return test(true); });
+        jobs.push(launch() { test(true); });
         promises.push(ea.run<void>(async () => { await test(true); }));
     }
 
@@ -180,7 +180,7 @@ async function testMainDomain(): Promise<void> {
         await test(false);
         await launch<Promise<void>>() { return test(false); };
         await ea.run<Promise<void>>(async () => { await test(false); });
-        jobs.push(launch() { return test(true); });
+        jobs.push(launch() { test(true); });
         promises.push(ea.run<void>(async () => { await test(true); }));
     }
 
