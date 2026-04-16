@@ -7307,154 +7307,303 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_V(VEnv *venv, VObj
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(VEnv *venv, ani_tuple_value tupleValue, ani_size *result)
+NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(VEnv *venv, VTupleValue *vtupleValue, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetNumberOfItems(venv->GetEnv(), tupleValue, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForSizeStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetNumberOfItems(venv->GetEnv(), vtupleValue->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Boolean(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Boolean(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                             ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Boolean(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::BOOLEAN, "index"),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Boolean(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Char(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Char(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                          ani_char *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Char(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::CHAR, "index"),
+        ANIArg::MakeForCharStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Char(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Byte(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Byte(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                          ani_byte *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Byte(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::BYTE, "index"),
+        ANIArg::MakeForByteStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Byte(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Short(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Short(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                           ani_short *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Short(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::SHORT, "index"),
+        ANIArg::MakeForShortStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Short(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Int(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Int(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                         ani_int *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Int(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::INT, "index"),
+        ANIArg::MakeForIntStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Int(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Long(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Long(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                          ani_long *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Long(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::LONG, "index"),
+        ANIArg::MakeForLongStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Long(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Float(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Float(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                           ani_float *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Float(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::FLOAT, "index"),
+        ANIArg::MakeForFloatStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Float(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Double(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Double(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                            ani_double *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Double(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::DOUBLE, "index"),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Double(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_GetItem_Ref(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
-                                                        ani_ref *result)
+NO_UB_SANITIZE static ani_status TupleValue_GetItem_Ref(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
+                                                        VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Ref(venv->GetEnv(), tupleValue, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::OBJECT, "index"),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->TupleValue_GetItem_Ref(venv->GetEnv(), vtupleValue->GetRef(), index, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Boolean(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Boolean(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                             ani_boolean value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Boolean(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::BOOLEAN, "index"),
+        ANIArg::MakeForBoolean(value, "value"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Boolean(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Char(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Char(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                          ani_char value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Boolean(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::CHAR, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Char(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Byte(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Byte(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                          ani_byte value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Byte(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::BYTE, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Byte(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Short(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Short(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                           ani_short value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Short(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::SHORT, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Short(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Int(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Int(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                         ani_int value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Int(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::INT, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Int(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Long(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Long(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                          ani_long value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Long(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::LONG, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Long(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Float(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Float(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                           ani_float value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Float(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::FLOAT, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Float(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Double(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Double(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
                                                            ani_double value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Double(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::DOUBLE, "index"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Double(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(VEnv *venv, ani_tuple_value tupleValue, ani_size index,
-                                                        ani_ref value)
+NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(VEnv *venv, VTupleValue *vtupleValue, ani_size index,
+                                                        VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Ref(venv->GetEnv(), tupleValue, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
+        ANIArg::MakeForTupleIndex(index, EtsType::OBJECT, "index"),
+        ANIArg::MakeForRef(vvalue, "value"),
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Ref(venv->GetEnv(), vtupleValue->GetRef(), index,
+                                                           vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

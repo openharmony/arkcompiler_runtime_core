@@ -94,6 +94,14 @@ public:
     }
 };
 
+class VTupleValue final : public VObject {
+public:
+    ani_tuple_value GetRef()
+    {
+        return static_cast<ani_tuple_value>(VObject::GetRef());
+    }
+};
+
 class VFixedArray : public VObject {
 public:
     ani_fixedarray GetRef()

@@ -38,6 +38,8 @@
     X(VERIFY_STRING,                        VerifyString)                         \
     X(VERIFY_ERROR,                         VerifyError)                          \
     X(VERIFY_ARRAY,                         VerifyArray)                          \
+    X(VERIFY_TUPLE_VALUE,                   VerifyTupleValue)                     \
+    X(VERIFY_TUPLE_INDEX,                   VerifyTupleIndex)                     \
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
@@ -133,6 +135,7 @@
     X(ANI_ENUM,                         Enum,                      VEnum *)                  \
     X(ANI_ENUM_ITEM,                    EnumItem,                  VEnumItem *)              \
     X(ANI_OBJECT,                       Object,                    VObject *)                \
+    X(ANI_TUPLE_VALUE,                  TupleValue,                VTupleValue *)            \
     X(ANI_METHOD,                       Method,                    VMethod *)                \
     X(ANI_STATIC_METHOD,                StaticMethod,              VStaticMethod *)          \
     X(ANI_FUNCTION,                     Function,                  VFunction *)              \
@@ -244,6 +247,7 @@ class VEnv;
 
 class VRef;
 class VObject;
+class VTupleValue;
 class VClass;
 class VEnum;
 class VEnumItem;
@@ -572,6 +576,16 @@ public:
     static ANIArg MakeForArray(VArray *varray, std::string_view name)
     {
         return ANIArg(ArgValueByArray(varray), name, Action::VERIFY_ARRAY);
+    }
+
+    static ANIArg MakeForTupleValue(VTupleValue *vtupleValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByTupleValue(vtupleValue), name, Action::VERIFY_TUPLE_VALUE);
+    }
+
+    static ANIArg MakeForTupleIndex(ani_size index, EtsType tupleElementType, std::string_view name)
+    {
+        return ANIArg(ArgValueBySize(index), name, Action::VERIFY_TUPLE_INDEX, tupleElementType);
     }
 
     static ANIArg MakeForArrayIndex(ani_size index, std::string_view name)

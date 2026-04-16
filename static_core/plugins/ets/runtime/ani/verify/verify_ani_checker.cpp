@@ -29,6 +29,8 @@
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
@@ -100,6 +102,17 @@ public:
         return arrayKlass->IsAssignableFrom(klass);
     }
 
+    static bool IsTupleValue(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (s.IsNullishValue(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        EtsClass *tupleKlass = PlatformTypes()->coreTuple;
+
+        return tupleKlass->IsAssignableFrom(klass);
+    }
+
     static bool IsObject(ScopedManagedCodeFix &s, ani_ref ref)
     {
         if (s.IsNullishValue(ref)) {
@@ -124,6 +137,81 @@ static ClassLinkerContext *GetClassLinkerContext(EtsExecutionContext *executionC
         return method->GetClass()->GetLoadContext();
     }
     return nullptr;
+}
+
+static ani_size DoGetTupleLength(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> internalTuple)
+{
+    if (UNLIKELY(PlatformTypes(executionCtx)->coreTupleN->IsAssignableFrom(internalTuple->GetClass()))) {
+        EtsClass *klass = internalTuple->GetClass();
+        EtsField *field = klass->GetFieldIDByName("$tupleValues", nullptr);
+        ASSERT(field != nullptr);
+
+        auto *valuesArray = internalTuple->GetFieldObject(field);
+        ASSERT(valuesArray->GetClass()->GetRuntimeClass()->IsObjectArrayClass());
+
+        auto *objectArray = EtsObjectArray::FromCoreType(valuesArray->GetCoreType());
+        return objectArray->GetLength();
+    }
+
+    return internalTuple->GetClass()->GetFieldsNumber();
+}
+
+static Class *GetTuplePrimitiveBoxClass(EtsExecutionContext *executionCtx, EtsType expectedType)
+{
+    switch (expectedType) {
+        case EtsType::BOOLEAN:
+            return EtsBoxPrimitive<ani_boolean>::GetBoxClass(executionCtx);
+        case EtsType::CHAR:
+            return EtsBoxPrimitive<ani_char>::GetBoxClass(executionCtx);
+        case EtsType::BYTE:
+            return EtsBoxPrimitive<ani_byte>::GetBoxClass(executionCtx);
+        case EtsType::SHORT:
+            return EtsBoxPrimitive<ani_short>::GetBoxClass(executionCtx);
+        case EtsType::INT:
+            return EtsBoxPrimitive<ani_int>::GetBoxClass(executionCtx);
+        case EtsType::LONG:
+            return EtsBoxPrimitive<ani_long>::GetBoxClass(executionCtx);
+        case EtsType::FLOAT:
+            return EtsBoxPrimitive<ani_float>::GetBoxClass(executionCtx);
+        case EtsType::DOUBLE:
+            return EtsBoxPrimitive<ani_double>::GetBoxClass(executionCtx);
+        default:
+            UNREACHABLE();
+    }
+}
+
+static Class *GetTupleElementRuntimeClass(EtsObject *element)
+{
+    if (element == nullptr || element->GetClass() == nullptr) {
+        return nullptr;
+    }
+
+    return element->GetClass()->GetRuntimeClass();
+}
+
+static bool IsPrimitiveBoxedTupleElement(EtsExecutionContext *executionCtx, Class *runtimeClass)
+{
+    return runtimeClass == EtsBoxPrimitive<ani_boolean>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_char>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_byte>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_short>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_int>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_long>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_float>::GetBoxClass(executionCtx) ||
+           runtimeClass == EtsBoxPrimitive<ani_double>::GetBoxClass(executionCtx);
+}
+
+static bool IsCorrectTupleElementType(EtsExecutionContext *executionCtx, EtsObject *element, EtsType expectedType)
+{
+    auto *runtimeClass = GetTupleElementRuntimeClass(element);
+    if (runtimeClass == nullptr) {
+        return false;
+    }
+    if (expectedType == EtsType::OBJECT) {
+        return !IsPrimitiveBoxedTupleElement(executionCtx, runtimeClass);
+    }
+
+    return runtimeClass == GetTuplePrimitiveBoxClass(executionCtx, expectedType);
 }
 
 class CallArgs {
@@ -323,6 +411,12 @@ std::string_view ANIRefTypeToString(ScopedManagedCodeFix &s, ani_ref ref)
         if (ANIRefTypeChecker::IsEnum(s, ref)) {
             return "ani_enum";
         }
+        if (ANIRefTypeChecker::IsTupleValue(s, ref)) {
+            return "ani_tuple_value";
+        }
+        if (ANIRefTypeChecker::IsArray(s, ref)) {
+            return "ani_array";
+        }
         if (ANIRefTypeChecker::IsClass(s, ref)) {
             return "ani_class";
         }
@@ -423,6 +517,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_STATIC_FIELD:                 return "ani_static_field";
         case ValueType::ANI_VARIABLE:                     return "ani_variable";
         case ValueType::ANI_OBJECT:                       return "ani_object";
+        case ValueType::ANI_TUPLE_VALUE:                  return "ani_tuple_value";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
         case ValueType::ANI_VVA_ARGS:                     return "va_list *";
@@ -858,6 +953,49 @@ public:
 
         // Set as current array for subsequent index validation
         currentArray_ = varray;
+        return {};
+    }
+
+    VerificationResult VerifyTupleValue(VTupleValue *vtupleValue)
+    {
+        auto err = VerifyRef(vtupleValue);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsTupleValue(s, vtupleValue->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vtupleValue->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+
+        // Save context for subsequent index validation
+        currentTupleValue_ = vtupleValue;
+        return {};
+    }
+
+    VerificationResult VerifyTupleIndex(ani_size index, EtsType tupleElementType)
+    {
+        if (currentTupleValue_ == nullptr) {
+            return {};
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        auto *executionCtx = s.GetExecutionContext();
+        EtsHandleScope scope(executionCtx);
+        EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(currentTupleValue_->GetRef()));
+        if (index >= DoGetTupleLength(executionCtx, internalTuple)) {
+            return {"out of range", ANIErrorSeverity::ERROR};
+        }
+
+        EtsClass *klass = internalTuple->GetClass();
+        EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
+        ASSERT(field != nullptr);
+
+        if (!IsCorrectTupleElementType(executionCtx, internalTuple->GetFieldObject(field), tupleElementType)) {
+            return {"wrong tuple element type at this index", ANIErrorSeverity::FATAL};
+        }
         return {};
     }
 
@@ -1634,6 +1772,7 @@ private:
     EtsMethod *resolvedMethod_ {nullptr};
     std::optional<ANIArg::AniMethodArgs> methodArgsForExtInfo_ {};
     VArray *currentArray_ {};
+    VTupleValue *currentTupleValue_ {};
 };
 
 using CheckerHandler = VerificationResult (*)(Verifier &, const ANIArg &);
@@ -1810,6 +1949,18 @@ static VerificationResult VerifyArray(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY);
     return v.VerifyArray(arg.GetValueArray());
+}
+
+static VerificationResult VerifyTupleValue(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_TUPLE_VALUE);
+    return v.VerifyTupleValue(arg.GetValueTupleValue());
+}
+
+static VerificationResult VerifyTupleIndex(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_TUPLE_INDEX);
+    return v.VerifyTupleIndex(arg.GetValueSize(), arg.GetReturnType());
 }
 
 static VerificationResult VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
