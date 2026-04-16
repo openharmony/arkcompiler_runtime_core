@@ -952,6 +952,11 @@ private:
     GlobalEvacuationStack &globalStack_;
 };
 
+void ArkCollector::ProcessReferencesAfterCopy()
+{
+    BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessReferencesAfterCopy(); });
+}
+
 void ArkCollector::DoGarbageCollection()
 {
     GCTracer gcTracer(gcReason_, gcType_);
@@ -1053,7 +1058,7 @@ void ArkCollector::DoGarbageCollection()
         SweepThreadLocalJitFort();
 
         CopyFromSpace();
-
+        ProcessReferencesAfterCopy();
         WVerify::VerifyAfterForward(*this);
 
         PrepareFix();

@@ -26,6 +26,9 @@
 #include "plugins/ets/runtime/types/ets_finreg_node.h"
 #include "plugins/ets/runtime/types/ets_finalization_registry.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "common_interfaces/objects/base_object.h"
+#endif
 
 namespace ark::mem::ets {
 
@@ -231,6 +234,22 @@ void EtsReferenceProcessor::ProcessClearedReferences()
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         EnqueueFinalizer(weakRef);
     }
+}
+
+void EtsReferenceProcessor::ProcessReferencesAfterCopy()
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    weakReferences_.FlushSets();
+    while (!weakReferences_.IsEmpty()) {
+        auto *weakRefObj = weakReferences_.Extract();
+        auto weakRef = reinterpret_cast<common_vm::BaseObject *>(weakRefObj);
+        if (weakRef->IsForwarded()) {
+            weakReferences_.Insert(reinterpret_cast<ObjectHeader *>(weakRef->GetForwardingPointer()));
+        } else {
+            weakReferences_.Insert(weakRefObj);
+        }
+    }
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 }  // namespace ark::mem::ets
