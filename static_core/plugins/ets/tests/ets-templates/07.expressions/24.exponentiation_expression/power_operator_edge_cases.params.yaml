@@ -19,8 +19,7 @@ cases:
       - "let exponent: byte = 0"
     expression: "base ** exponent"
     assertions:
-      - "arktest.assertTrue(result instanceof int)"
-      - "arktest.assertEQ(result, 1)"
+      - "arktest.assertEQ(result, 1.0)"
 
   - description: "Zero base for short"
     declarations:
@@ -28,8 +27,7 @@ cases:
       - "let exponent: short = 5"
     expression: "base ** exponent"
     assertions:
-      - "arktest.assertTrue(result instanceof int)"
-      - "arktest.assertEQ(result, 0)"
+      - "arktest.assertEQ(result, 0.0)"
 
   - description: "One exponent for int"
     declarations:
@@ -37,7 +35,7 @@ cases:
       - "let exponent: int = 1"
     expression: "base ** exponent"
     assertions:
-      - "arktest.assertEQ(result, 42)"
+      - "arktest.assertEQ(result, 42.0)"
 
   - description: "Negative base with even exponent"
     declarations:
@@ -45,7 +43,7 @@ cases:
       - "let exponent: int = 4"
     expression: "base ** exponent"
     assertions:
-      - "arktest.assertEQ(result, 16)"
+      - "arktest.assertEQ(result, 16.0)"
 
   - description: "Negative base with odd exponent"
     declarations:
@@ -53,4 +51,4 @@ cases:
       - "let exponent: int = 3"
     expression: "base ** exponent"
     assertions:
-      - "arktest.assertEQ(result, -27)"
+      - "arktest.assertEQ(result, -27.0)"

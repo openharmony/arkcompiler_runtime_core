@@ -39,15 +39,15 @@ cases:
     val2: "2"
     expected: "40000"
 
-  # Int operations that actually overflow
+  # Int operations - no overflow since ** returns double
   - type1: "int"
     type2: "int"
     val1: "65536"
     val2: "2"
-    expected: "2147483647"  # This will vary based on actual overflow behavior
+    expected: "4294967296"
 
   - type1: "int"
     type2: "int"
     val1: "2147483647"
     val2: "2"
-    expected: "2147483647"  # This will vary based on actual overflow behavior
+    expected: "4611686014132420608"

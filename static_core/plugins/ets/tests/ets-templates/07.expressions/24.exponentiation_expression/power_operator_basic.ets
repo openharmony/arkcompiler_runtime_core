@@ -22,10 +22,8 @@ function main() {
     let a: {{c.type1}} = {{c.val1}};
     let b: {{c.type2}} = {{c.val2}};
     let result = a ** b;
-    
-    // Check result type is int for byte/short operations
-    arktest.assertTrue(result instanceof int);
+
     // Check calculation correctness
-    arktest.assertEQ(result, {{c.expected}});
+    arktest.assertEQ(result, {{c.expected}}.0);
 }
 {%- endfor %}

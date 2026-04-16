@@ -33,10 +33,10 @@ operations:
       result_type: "int"
     }
   - {
-      value1: 11, type1: "byte", 
-      value2: 122, type2: "long", 
-      operation: "**", 
-      result_type: "long"
+      value1: 11, type1: "byte",
+      value2: 122, type2: "long",
+      operation: "**",
+      result_type: "double"
     }
   - {
       value1: 44, type1: "short", 
@@ -57,10 +57,10 @@ operations:
       result_type: "long"
     }
   - {
-      value1: 44932, type1: "int", 
-      value2: 7345, type2: "int", 
-      operation: "**", 
-      result_type: "int"
+      value1: 44932, type1: "int",
+      value2: 7345, type2: "int",
+      operation: "**",
+      result_type: "double"
     }
   - {
       value1: 492, type1: "int", 

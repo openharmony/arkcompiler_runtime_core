@@ -22,11 +22,8 @@ function main() {
     let a: {{c.type1}} = {{c.val1}};
     let b: {{c.type2}} = {{c.val2}};
     let result = a ** b;
-    
-    // For byte/short operations, result should always be int (no overflow)
-    arktest.assertTrue(result instanceof int);
 
-    // For int/long, check the actual overflow result
-    arktest.assertEQ(result, {{c.expected}});
+    // Check the actual result
+    arktest.assertEQ(result, {{c.expected}}.0);
 }
 {%- endfor %}

@@ -22,9 +22,8 @@ function main() {
     let a: long = {{c.val1}};
     let b: long = {{c.val2}};
     let result = a ** b;
-    
-    // Long should remain long, no casting to other types
-    arktest.assertTrue(result instanceof long);
-    arktest.assertEQ(result, {{c.expected}});
+
+    // Check calculation correctness
+    arktest.assertEQ(result, {{c.expected}}.0);
 }
 {%- endfor %}
