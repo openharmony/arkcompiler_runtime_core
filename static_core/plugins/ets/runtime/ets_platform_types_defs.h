@@ -217,8 +217,8 @@
        coreReflectProxyInvokeGet)                                                                                     \
     /* Process */                                                                                                     \
     TP("Lstd/core/StdProcess;", coreStdProcess)                                                                       \
-    SM("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;:V", coreStdProcessListUnhandledJobs)           \
-    SM("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;:V", coreStdProcessListUnhandledPromises)   \
+    SM("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;I:V", coreStdProcessListUnhandledJobs)          \
+    SM("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;I:V", coreStdProcessListUnhandledPromises)  \
     SM("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V", coreStdProcessHandleUncaughtError)      \
     /* JSON */                                                                                                        \
     TP("Lstd/core/JSON;", coreJSON)                                                                                   \

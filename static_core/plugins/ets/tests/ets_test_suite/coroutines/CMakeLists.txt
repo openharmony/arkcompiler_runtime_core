@@ -50,7 +50,7 @@ function(add_ets_coroutines_test)
     get_filename_component(test_name "${ARG_FILE}" NAME_WE)
 
     if (ARG_LIST_UNHANDLED)
-        set(list_unhandled_option "--list-unhandled-on-exit:jobs,promises")
+        list(APPEND list_unhandled_option "--list-unhandled-on-exit:jobs=throw" "--list-unhandled-on-exit:promises=throw")
     endif()
 
     get_target_property(STACKLESS_STDLIB etsstdlib.stackless FILE)

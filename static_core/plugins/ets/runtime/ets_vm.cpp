@@ -56,6 +56,7 @@
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
@@ -651,14 +652,18 @@ static Expected<int, Runtime::Error> WaitForEntrypointCompletion(Value result)
         ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
         JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()->ExecuteJobs();
     }
-
     ASSERT(promise->IsResolved() || promise->IsRejected());
-    if (promise->IsRejected()) {
-        executionCtx->GetMT()->SetException(promise->GetValue(executionCtx)->GetCoreType());
-    } else {
-        // NOTE(panferovi): try to obtain int from promise??
-    }
 
+    if (promise->IsResolved()) {
+        if (promise->GetValue(executionCtx) == nullptr) {
+            return 0;  // Promise<void>
+        }
+        if (promise->GetValue(executionCtx)->GetClass() == PlatformTypes(executionCtx)->coreInt) {
+            return EtsBoxPrimitive<EtsInt>::FromCoreType(promise->GetValue(executionCtx))->GetValue();
+        }
+        return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
+    }
+    executionCtx->GetMT()->SetException(promise->GetValue(executionCtx)->GetCoreType());
     return 0;
 }
 

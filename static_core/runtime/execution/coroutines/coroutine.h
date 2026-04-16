@@ -113,9 +113,6 @@ public:
     /// Get coroutine status. It is independent from MutatorStatus.
     Status GetCoroutineStatus() const;
 
-    /// @brief list unhandled language specific events on program exit
-    virtual void ListUnhandledEventsOnProgramExit() {};
-
     /**
      * Suspend a coroutine, so its status becomes either Status::RUNNABLE or Status::BLOCKED, depending on the suspend
      * reason.

@@ -944,6 +944,7 @@
 16.concurrency/04.parallel_execution/03.eaworker_api/lifetime_n_1.ets
 16.concurrency/05.synchronization/01.asynchronous_lock/asynclock_0.ets
 16.concurrency/06.api_details_and_restrictions/01.launch_api_details_and_restrictions/launch_api.ets
+16.concurrency/06.api_details_and_restrictions/02.using_the_asynchronous_api/async_main_entry_point.ets
 16.concurrency/06.api_details_and_restrictions/03.promise_class_api/promise_await_cross_job.ets
 16.concurrency/06.api_details_and_restrictions/05.error_handling_policy/error_main_throws_n.ets
 
@@ -2368,6 +2369,7 @@
 16.concurrency/05.synchronization/03.asynchronous_read_write_lock/asynchronous_read_write_lock_n_0.ets
 16.concurrency/05.synchronization/03.asynchronous_read_write_lock/asynchronous_read_write_lock_n_1.ets
 16.concurrency/05.synchronization/04.asynchronous_condition_variable/asynchronous_condition_variable.ets
+16.concurrency/06.api_details_and_restrictions/02.using_the_asynchronous_api/async_main_entry_point.ets
 16.concurrency/06.api_details_and_restrictions/03.promise_class_api/promise_callbacks.ets
 16.concurrency/06.api_details_and_restrictions/04.unhandled_rejected_promises/async_error_call_stack.ets
 16.concurrency/06.api_details_and_restrictions/04.unhandled_rejected_promises/concurrent_nested_n.ets

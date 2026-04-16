@@ -254,12 +254,20 @@ options:
   description: Collect rejected promises/jobs and throw if there is at least one unhandled on program exit
   sub_options:
   - name: promises
-    type: bool
-    default: true
+    type: std::string
+    default: none
+    possible_values:
+      - throw
+      - warn
+      - none
     description: "promises"
   - name: jobs
-    type: bool
-    default: false
+    type: std::string
+    default: none
+    possible_values:
+      - throw
+      - warn
+      - none
     description: "jobs"
 
 - name: verify-ani

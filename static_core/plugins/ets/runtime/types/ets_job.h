@@ -159,11 +159,7 @@ public:
         ASSERT(error != nullptr);
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, value_), error->GetCoreType());
         state_ = STATE_FAILED;
-
-        if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-            executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddFailedJob(this);
-        }
-
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddFailedJob(this);
         // Unblock awaitee executionCtxs
         GetEvent(executionCtx)->Fire();
     }
