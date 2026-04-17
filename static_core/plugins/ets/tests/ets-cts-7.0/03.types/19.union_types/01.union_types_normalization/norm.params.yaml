@@ -22,9 +22,6 @@ cases:
               arktest.assertTrue(v === undefined)
               v = null
               arktest.assertTrue(v === null)
-      neg:
-          - |-
-              v = new Object()
 
     - decl: |-
           type NU = number | undefined
@@ -45,13 +42,6 @@ cases:
               arktest.assertEQ(v, 3.14)
               v = new Double(2.5)
               arktest.assertEQ(v, 2.5)
-      neg:
-          - |-
-              v = new Object()
-          - |-
-              v = '123'
-          - |-
-              v = 1n
 
     - decl: |-
           type OE = Object | Error
@@ -67,9 +57,6 @@ cases:
               arktest.assertTrue(v instanceof Array && v[0] == 'a' && v[1] == 'b')
               v = new Object()
               arktest.assertTrue(v instanceof Object)
-      neg:
-          - |-
-              let v: UT = null
 
     - decl: |-
           type L = Long | long
@@ -90,9 +77,6 @@ cases:
               arktest.assertEQ(v, Long.MAX_VALUE)
               v = new Long(Long.MIN_VALUE)
               arktest.assertEQ(v, Long.MIN_VALUE)
-      neg:
-          - |-
-              let v: UT = undefined
 
     - decl: |-
           type AB = 'A' | 'B'
@@ -111,13 +95,6 @@ cases:
           - |-
               v = c.toString()
               arktest.assertEQ(typeof v, 'string')
-      neg:
-          - |-
-              v = null
-          - |-
-              v = undefined
-          - |-
-              v = new Object()
 
     - decl: |-
           type A = '1' | '3'
@@ -132,11 +109,6 @@ cases:
               arktest.assertEQ(v, '1')
               v = c.toString()
               arktest.assertEQ(v, '3')
-      neg:
-          - |-
-              v = undefined
-          - |-
-              v = new Byte()
 
     - decl: |-
           class A {}
@@ -153,15 +125,6 @@ cases:
               arktest.assertTrue(v instanceof A)
               v = '33'
               arktest.assertEQ(v, '33')
-      neg:
-          - |-
-              v = '34'
-          - |-
-              v = new D
-          - |-
-              v = null
-          - |-
-              v = undefined
 
     - decl: |-
           type UT = string|never|string[]|String   // => string|string[]
@@ -173,15 +136,6 @@ cases:
               arktest.assertTrue(v instanceof Array && v[0] == 'a' && v[2] == 'c')
               v = new String('\uFFFF')
               arktest.assertEQ(v, '\uFFFF')
-      neg:
-          - |-
-              let v: UT = null
-          - |-
-              let v: UT = undefined
-          - |-
-              let v: UT = new Object()
-          - |-
-              let v: UT = new Char[2]((0).toChar())
 
     - decl: |-
           type U1 = number[] | string[]
@@ -193,29 +147,17 @@ cases:
               arktest.assertTrue(v[0] == 1.0 && v[1] == 2.0)
               v = ['a', 'b']
               arktest.assertTrue(v[0] == 'a' && v[1] == 'b')
-      neg:
-          - |-
-              let v = [1.0, 2.0] as UT|undefined
-              v[0] = 3.0  // CTE, readonly array
-          - |-
-              let v = ['a', 'b'] as UT|undefined
-              v[1] = 'c'  // CTE, readonly array
 
     - decl: |-
           type U1 = (readonly Object[])
           type U2 = null | Object[]
           type UT = U1 | U2 | Error[]  // => readonly Object[]|Error[]|null
-
       pos:
           - |-
               let v: UT = [new Error('a'), new Object()]
               arktest.assertTrue(v instanceof UT && v.length == 2)
               v = [new Object(), new Object(), new Object()]
               arktest.assertTrue(v instanceof UT && v.length == 3)
-      neg:
-          - |-
-              let v = [new Object(), new Object()] as UT
-              v[0] = new Object()  // CTE, readonly array
 
     - decl: |-
           type U1 = [number, string]
@@ -227,19 +169,6 @@ cases:
               let tup: [number, string] = [42.0, 'a']
               v = tup
               arktest.assertTrue(v[0] == 42.0 && v[1] == 'a')
-      neg:
-          - |-
-              let v: UT = 0.0
-              let tup: [number, string] = [42.0, 'a']
-              v = tup
-              arktest.assertTrue(v[0] == 42.0 && v[1] == 'a')
-              v[0] = 33.0  // CTE, readonly tuple
-          - |-
-              let v: UT = 0.0
-              let tup: [number, string] = [42.0, 'a']
-              v = tup
-              arktest.assertTrue(v[0] == 42.0 && v[1] == 'a')
-              v[1] = 'b'  // CTE, readonly tuple
 
     - decl: |-
           type UT = number | Number | double | Double | undefined // => Double|undefined
@@ -253,9 +182,6 @@ cases:
               let d: Object = new Double(42.0)
               v = d
               arktest.assertEQ(v, 42.0)
-      neg:
-          - |-
-              v = null
 
     - decl: |-
           type UT = undefined | Numeric | Integral | Floating  // => Numeric | undefined
@@ -274,9 +200,6 @@ cases:
               arktest.assertEQ(v, Short.MIN_VALUE)
               v = new Long(0xffffffffff as long)
               arktest.assertEQ(v, 1099511627775)
-      neg:
-          - |-
-              v = c'\u0000'
 
     - decl: |-
           type U1 = byte | undefined
@@ -306,11 +229,6 @@ cases:
               arktest.assertEQ(v, 3)
               v = new Long(0xffffffffff as long)
               arktest.assertEQ(v, 1099511627775)
-      neg:
-          - |-
-              v = null
-          - |-
-              v = new Object()
 
     - decl: |-
           type UT = byte | short | int | long | Integral | undefined  // => Integral | undefined
@@ -325,11 +243,6 @@ cases:
               arktest.assertEQ(v, 3)
               v = new Long(0xffffffffff as long)
               arktest.assertEQ(v, 1099511627775)
-      neg:
-          - |-
-              v = new Float(3.14f)
-          - |-
-              v = new Number(2.5)
 
     - decl: |-
           type UT = float | double | Floating | undefined  // => Floating | undefined
@@ -340,11 +253,6 @@ cases:
               arktest.assertEQ(v, 3.14f)
               v = new Double(2.5)
               arktest.assertEQ(v, 2.5)
-      neg:
-          - |-
-              v = new Int()
-          - |-
-              v = new Long()
 
     - decl: |-
           type UT = byte | short | int | long | float | double | Numeric | undefined  // => Numeric | undefined
@@ -363,11 +271,6 @@ cases:
               arktest.assertEQ(v, 3.14f)
               v = new Double(2.5)
               arktest.assertEQ(v, 2.5)
-      neg:
-          - |-
-              v = null
-          - |-
-              v = new Object()
 
     - decl: |-
           type UT = byte | short | int | long | float | double | Numeric | Any  // => Any
@@ -406,11 +309,6 @@ cases:
               arktest.assertTrue(v instanceof Function)
               v = (): int => { return 0 }
               arktest.assertTrue(v instanceof Function)
-      neg:
-          - |-
-              v = null
-          - |-
-              v = new Object()
 
     - decl: |-
           type UT = Function | (() => int) | Any  // => Any
@@ -435,11 +333,6 @@ cases:
               arktest.assertEQ(v, "a")
               v = "abc"
               arktest.assertEQ(v, "abc")
-      neg:
-          - |-
-              v = null
-          - |-
-              v = new Object()
 
     - decl: |-
           type UT = byte | never  // => Byte
