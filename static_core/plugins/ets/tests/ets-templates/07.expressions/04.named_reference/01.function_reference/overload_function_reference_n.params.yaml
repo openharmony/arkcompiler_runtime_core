@@ -12,38 +12,48 @@
 # limitations under the License.
 
 assertions:
-  - assertion: |-
-      function main() {
-        let fr = foo //  TypeError: Overloaded method is used as value
-      }
+    - assertion: |-
+          function main() {
+            let fr = foo //  TypeError: Overloaded method is used as value
+          }
+      expected_out: |-
+          Semantic error ESE0307: Overloaded method is used as value
 
-  - assertion: |-
-      function main() {
-        let fr = (() => foo )()
-      }
+    - assertion: |-
+          function main() {
+            let fr = (() => foo )()
+          }
+      expected_out: |-
+          Semantic error ESE0307: Overloaded method is used as value
 
-  - assertion: |-
-      function returnFun(): Function {
-        return foo
-      }
-      
-      function main() {
-        let fr = returnFun()
-      }
+    - assertion: |-
+          function returnFun(): Function {
+            return foo
+          }
+          function main() {
+            let fr = returnFun()
+          }
+      expected_out: |-
+          Semantic error ESE0307: Overloaded method is used as value
 
-  - assertion: |-
-      const ref = foo
+    - assertion: |-
+          const ref = foo
+      expected_out: |-
+          Semantic error ESE0307: Overloaded method is used as value
 
-  - assertion: |-
-      class TestFR {
-        cfoo = foo
-      }
+    - assertion: |-
+          class TestFR {
+            cfoo = foo
+          }
+      expected_out: |-
+          Semantic error ESE0307: Overloaded method is used as value
 
-  - assertion: |-
-      class TestFR {
-        static cfoo: Function
-      }
-      
-      function main() {
-        TestFR.cfoo = foo
-      }
+    - assertion: |-
+          class TestFR {
+            static cfoo: Function
+          }
+          function main() {
+            TestFR.cfoo = foo
+          }
+      expected_out: |-
+          Semantic error ESE0307: Overloaded method is used as value

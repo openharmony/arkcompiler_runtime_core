@@ -16,11 +16,13 @@
 /*---
 desc: When the interface module that is not imported is referenced, an error is reported during compilation.
 files:
-- ./named_reference_export6.ets
-- ./named_reference_export7.ets
+    - ./named_reference_export6.ets
+    - ./named_reference_export7.ets
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0371: Cannot find type 'Calculable'.
 ---*/
 
 import {ShapeInterfaces} from './named_reference_export6.ets';

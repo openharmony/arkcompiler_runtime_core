@@ -16,8 +16,10 @@
 /*---
 desc: Accessing private members causes errors.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0293: Property secretProp is not visible here.
 ---*/
 
 class SecretClass {

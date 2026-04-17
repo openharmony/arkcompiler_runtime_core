@@ -18,18 +18,17 @@ desc: >-
     A method reference refers to a static or instance method of a class or an interface.
     A compile-time error occurs if a method overload alias is used in a named reference
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0208: 'foo' is an instance property of 'Aliases'
+    Semantic error ESE0307: Overloaded method is used as value
 ---*/
 
-
-
-
 class Aliases {
-
-    foo<T>(par: T): void {}
-
+    fooE(): void {}
+    fooS(par: string): void {}
+    overload foo { fooE, fooS }
 }
 
 function main() {
-    let alias: Aliases = new Aliases()
-    let ref = alias.foo
+    let ref = Aliases.foo // TypeError: 'foo' is an instance property of 'Aliases' && TypeError: Overloaded method is used as value
 }

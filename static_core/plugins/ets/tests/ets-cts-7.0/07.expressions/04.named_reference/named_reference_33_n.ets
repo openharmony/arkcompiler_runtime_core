@@ -16,8 +16,10 @@
 /*---
 desc: The type parameters of the generic class method are not explicit, resulting in a compilation error.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0170: Type 'Myclass<T>' is generic but type argument were not provided.
 ---*/
 
 class Myclass<T> {

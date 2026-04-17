@@ -16,10 +16,12 @@
 /*---
 desc: Reference to an undefined function.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0143: Unresolved reference foo
 ---*/
 
 function main(): void {
-  foo();
+    foo();
 }

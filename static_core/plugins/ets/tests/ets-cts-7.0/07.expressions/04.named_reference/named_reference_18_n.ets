@@ -16,8 +16,11 @@
 /*---
 desc: A compilation error is triggered when the type does not match.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0127: No matching call signature for strictType("10")
+    Semantic error ESE0046: Type '"10"' is not compatible with type 'Double' at index 1
 ---*/
 
 function strictType(param: number): number {

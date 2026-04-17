@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-
- /*---
- desc: A function reference refers to a declared or imported function.
-       A compile-time error occurs if an overload alias is used in a named reference
- tags: [compile-only, negative]
- ---*/
+/*---
+desc: >-
+    A function reference refers to a declared or imported function.
+    A compile-time error occurs if an overload alias is used in a named reference
+tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0002: Type 'Function' has no call signatures.
+    Semantic error ESE0172: No static $_invoke method and static $_instantiate method in ref. ref() is not allowed.
+---*/
 
 function fooE(): void { console.log('I am fooE') }
 
