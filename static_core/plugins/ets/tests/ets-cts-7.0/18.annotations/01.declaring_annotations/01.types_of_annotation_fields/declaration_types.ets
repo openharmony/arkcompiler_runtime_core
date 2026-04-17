@@ -23,7 +23,6 @@ desc: The choice of types for annotation fields is limited to the following
          - Enumeration types (see Enumerations);
          - Array of the above types (e.g., FixedArray<string>),
            including multidimensional arrays (e.g., FixedArray<FixedArray<string>>).
-tags: [compile-only, {{ case.negative }}]
 params: "{{ case.type }}"
 ---*/
 

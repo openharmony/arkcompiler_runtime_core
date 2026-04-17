@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -23,7 +23,6 @@ desc: The choice of types for annotation fields is limited to the following
          - Enumeration types (see Enumerations);
          - Array of the above types (e.g., FixedArray<string>),
            including multidimensional arrays (e.g., FixedArray<FixedArray<string>>).
-tags: [compile-only, {{ case.negative }}]
 params: "{{ case.type }}"
 ---*/
 
