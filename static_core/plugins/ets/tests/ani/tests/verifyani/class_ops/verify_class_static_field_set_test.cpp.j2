@@ -139,9 +139,9 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_wrong_type)
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("test", 4U, &string), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, field, string), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, field, string), ANI_INVALID_TYPE);
 {% else %}
-    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, field, {{ test_value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_{{ Type }}(env_, class_, field, {{ test_value }}), ANI_INVALID_TYPE);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {

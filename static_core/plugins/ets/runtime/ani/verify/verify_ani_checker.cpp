@@ -855,24 +855,36 @@ public:
         return {};
     }
 
-    VerificationResult VerifyReadField(VField *vfield, EtsType fieldType)
+    template <bool IS_STATIC, typename FieldHandle>
+    VerificationResult VerifyReadFieldImpl(FieldHandle *vfield, EtsType fieldType)
     {
         if (!GetEnvANIVerifier()->IsValidField(vfield)) {
-            return {"wrong field", ANIErrorSeverity::FATAL};
+            if constexpr (IS_STATIC) {
+                return {"wrong static field", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong field", ANIErrorSeverity::FATAL};
+            }
         }
 
-        auto err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
+        constexpr auto FIELD_KIND =
+            IS_STATIC ? impl::VField::ANIFieldType::STATIC_FIELD : impl::VField::ANIFieldType::FIELD;
+        auto err = DoVerifyField(vfield, FIELD_KIND, fieldType);
         if (err) {
             return err;
         }
 
         if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return {"wrong object for field", ANIErrorSeverity::FATAL};
+            if constexpr (IS_STATIC) {
+                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong object for field", ANIErrorSeverity::FATAL};
+            }
         }
         return {};
     }
 
-    VerificationResult VerifyReadFieldByName(const char *name, EtsType fieldType)
+    template <bool IS_STATIC>
+    VerificationResult VerifyReadFieldByNameImpl(const char *name, EtsType fieldType)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
@@ -880,62 +892,51 @@ public:
         }
 
         if (class_ == nullptr) {
-            return {"wrong object for field", ANIErrorSeverity::FATAL};
+            if constexpr (IS_STATIC) {
+                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong object for field", ANIErrorSeverity::FATAL};
+            }
         }
 
-        EtsField *field = class_->GetFieldIDByName(name, nullptr);
+        EtsField *field = nullptr;
+        if constexpr (IS_STATIC) {
+            field = class_->GetStaticFieldIDByName(name, nullptr);
+        } else {
+            field = class_->GetFieldIDByName(name, nullptr);
+        }
 
         if (field == nullptr) {
-            return {};
+            if constexpr (IS_STATIC) {
+                return {"wrong static field", ANIErrorSeverity::ERROR};
+            } else {
+                return {};
+            }
         }
 
-        err = DoVerifyFieldByName(field, fieldType, false);
-        if (err) {
-            return err;
-        }
-
-        return {};
+        return DoVerifyFieldByName(field, fieldType, IS_STATIC);
     }
 
-    VerificationResult VerifyReadStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
+    template <bool IS_STATIC, typename FieldHandle>
+    VerificationResult VerifyWriteFieldImpl(FieldHandle *vfield, EtsType fieldType)
     {
-        if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
-            return {"wrong static field", ANIErrorSeverity::FATAL};
-        }
-
-        auto err = DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
+        auto err = VerifyReadFieldImpl<IS_STATIC>(vfield, fieldType);
         if (err) {
             return err;
-        }
-
-        if (class_ == nullptr || !vstaticfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return {"wrong class for static field", ANIErrorSeverity::FATAL};
-        }
-        return {};
-    }
-
-    VerificationResult VerifyWriteField(VField *vfield, EtsType fieldType)
-    {
-        if (!GetEnvANIVerifier()->IsValidField(vfield)) {
-            return {"wrong field", ANIErrorSeverity::FATAL};
-        }
-
-        auto err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
-        if (err) {
-            return err;
-        }
-
-        if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
 
         if (vfield->GetEtsField()->IsReadonly()) {
-            return {"field is read-only", ANIErrorSeverity::FATAL};
+            if constexpr (IS_STATIC) {
+                return {"static field is read-only", ANIErrorSeverity::FATAL};
+            } else {
+                return {"field is read-only", ANIErrorSeverity::FATAL};
+            }
         }
         return {};
     }
 
-    VerificationResult VerifyWriteFieldByName(const char *name, EtsType fieldType)
+    template <bool IS_STATIC>
+    VerificationResult VerifyWriteFieldByNameImpl(const char *name, EtsType fieldType)
     {
         auto err = VerifyTypePtr(name, "const char *");
         if (err) {
@@ -943,46 +944,82 @@ public:
         }
 
         if (class_ == nullptr) {
-            return {"wrong object for field", ANIErrorSeverity::FATAL};
+            if constexpr (IS_STATIC) {
+                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong object for field", ANIErrorSeverity::FATAL};
+            }
         }
 
-        EtsField *field = class_->GetFieldIDByName(name, nullptr);
+        EtsField *field = nullptr;
+        if constexpr (IS_STATIC) {
+            field = class_->GetStaticFieldIDByName(name, nullptr);
+        } else {
+            field = class_->GetFieldIDByName(name, nullptr);
+        }
 
         if (field == nullptr) {
-            return {};
+            if constexpr (IS_STATIC) {
+                return {"wrong static field", ANIErrorSeverity::ERROR};
+            } else {
+                return {};
+            }
         }
 
-        err = DoVerifyFieldByName(field, fieldType, false);
+        err = DoVerifyFieldByName(field, fieldType, IS_STATIC);
         if (err) {
             return err;
         }
 
         if (field->IsReadonly()) {
-            return {"field is read-only", ANIErrorSeverity::FATAL};
+            if constexpr (IS_STATIC) {
+                return {"static field is read-only", ANIErrorSeverity::FATAL};
+            } else {
+                return {"field is read-only", ANIErrorSeverity::FATAL};
+            }
         }
 
         return {};
     }
 
+    VerificationResult VerifyReadField(VField *vfield, EtsType fieldType)
+    {
+        return VerifyReadFieldImpl<false>(vfield, fieldType);
+    }
+
+    VerificationResult VerifyReadStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
+    {
+        return VerifyReadFieldImpl<true>(vstaticfield, staticFieldType);
+    }
+
+    VerificationResult VerifyReadFieldByName(const char *name, EtsType fieldType)
+    {
+        return VerifyReadFieldByNameImpl<false>(name, fieldType);
+    }
+
+    VerificationResult VerifyReadStaticFieldByName(const char *name, EtsType staticFieldType)
+    {
+        return VerifyReadFieldByNameImpl<true>(name, staticFieldType);
+    }
+
+    VerificationResult VerifyWriteField(VField *vfield, EtsType fieldType)
+    {
+        return VerifyWriteFieldImpl<false>(vfield, fieldType);
+    }
+
     VerificationResult VerifyWriteStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
     {
-        if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
-            return {"wrong static field", ANIErrorSeverity::FATAL};
-        }
+        return VerifyWriteFieldImpl<true>(vstaticfield, staticFieldType);
+    }
 
-        auto err = DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
-        if (err) {
-            return err;
-        }
+    VerificationResult VerifyWriteFieldByName(const char *name, EtsType fieldType)
+    {
+        return VerifyWriteFieldByNameImpl<false>(name, fieldType);
+    }
 
-        if (class_ == nullptr || !vstaticfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return {"wrong class for static field", ANIErrorSeverity::FATAL};
-        }
-
-        if (vstaticfield->GetEtsField()->IsReadonly()) {
-            return {"static field is read-only", ANIErrorSeverity::FATAL};
-        }
-        return {};
+    VerificationResult VerifyWriteStaticFieldByName(const char *name, EtsType staticFieldType)
+    {
+        return VerifyWriteFieldByNameImpl<true>(name, staticFieldType);
     }
 
     template <bool IS_STATIC>
@@ -1269,7 +1306,7 @@ public:
 
         EtsType fieldReturnType = vfield->GetEtsField()->GetEtsType();
         if (fieldReturnType != returnType) {
-            return {"wrong return type", ANIErrorSeverity::FATAL};
+            return {"wrong return type", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1304,10 +1341,13 @@ public:
             PandaStringStream ss;
             ss << "wrong field type: " << EtsTypeToString(field->GetEtsType())
                << ", expected: " << EtsTypeToString(expectedType);
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
 
         if (!field->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            if (isStaticField) {
+                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+            }
             return {"wrong object for field", ANIErrorSeverity::FATAL};
         }
 
@@ -1643,6 +1683,12 @@ static VerificationResult VerifyReadFieldByName(Verifier &v, const ANIArg &arg)
     return v.VerifyReadFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
+static VerificationResult VerifyReadStaticFieldByName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_STATIC_FIELD_BY_NAME);
+    return v.VerifyReadStaticFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
+}
+
 static VerificationResult VerifyReadStaticField(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_STATIC_FIELD);
@@ -1659,6 +1705,12 @@ static VerificationResult VerifyWriteFieldByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_FIELD_BY_NAME);
     return v.VerifyWriteFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
+}
+
+static VerificationResult VerifyWriteStaticFieldByName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_STATIC_FIELD_BY_NAME);
+    return v.VerifyWriteStaticFieldByName(arg.GetValueUTF8String(), arg.GetReturnType());
 }
 
 static VerificationResult VerifyWriteStaticField(Verifier &v, const ANIArg &arg)

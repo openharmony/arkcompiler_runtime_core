@@ -231,7 +231,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_type)
     ASSERT_EQ(env_->Class_FindField(class_, "{{ wrong_ret }}Field", &field), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, field, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(env_, object_, field, &result), ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

@@ -2469,147 +2469,271 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(VEnv *venv, VClass *vc
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Boolean(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Boolean(VEnv *venv, VClass *vcls, const char *name,
                                                                     ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Boolean(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BOOLEAN, AccessMode::READ),
+        ANIArg::MakeForBooleanStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Char(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Char(VEnv *venv, VClass *vcls, const char *name,
                                                                  ani_char *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Char(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::CHAR, AccessMode::READ),
+        ANIArg::MakeForCharStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Byte(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Byte(VEnv *venv, VClass *vcls, const char *name,
                                                                  ani_byte *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Byte(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BYTE, AccessMode::READ),
+        ANIArg::MakeForByteStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Short(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Short(VEnv *venv, VClass *vcls, const char *name,
                                                                   ani_short *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Short(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::SHORT, AccessMode::READ),
+        ANIArg::MakeForShortStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Int(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Int(VEnv *venv, VClass *vcls, const char *name,
                                                                 ani_int *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Int(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::INT, AccessMode::READ),
+        ANIArg::MakeForIntStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Long(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Long(VEnv *venv, VClass *vcls, const char *name,
                                                                  ani_long *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Long(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::LONG, AccessMode::READ),
+        ANIArg::MakeForLongStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Float(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Float(VEnv *venv, VClass *vcls, const char *name,
                                                                   ani_float *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Float(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::FLOAT, AccessMode::READ),
+        ANIArg::MakeForFloatStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Double(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Double(VEnv *venv, VClass *vcls, const char *name,
                                                                    ani_double *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Double(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::DOUBLE, AccessMode::READ),
+        ANIArg::MakeForDoubleStorage(result, "result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(VEnv *venv, ani_class cls, const char *name,
-                                                                ani_ref *result)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(VEnv *venv, VClass *vcls, const char *name,
+                                                                VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Ref(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::OBJECT, AccessMode::READ),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Class_GetStaticFieldByName_Ref(venv->GetEnv(), vcls->GetRef(), name, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Boolean(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Boolean(VEnv *venv, VClass *vcls, const char *name,
                                                                     ani_boolean value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Boolean(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BOOLEAN, AccessMode::READWRITE),
+        ANIArg::MakeForBoolean(value, "value")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Char(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Char(VEnv *venv, VClass *vcls, const char *name,
                                                                  ani_char value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Char(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::CHAR, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Byte(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Byte(VEnv *venv, VClass *vcls, const char *name,
                                                                  ani_byte value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Byte(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BYTE, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Short(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Short(VEnv *venv, VClass *vcls, const char *name,
                                                                   ani_short value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Short(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::SHORT, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Int(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Int(VEnv *venv, VClass *vcls, const char *name,
                                                                 ani_int value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Int(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::INT, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Long(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Long(VEnv *venv, VClass *vcls, const char *name,
                                                                  ani_long value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Long(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::LONG, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Float(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Float(VEnv *venv, VClass *vcls, const char *name,
                                                                   ani_float value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Float(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::FLOAT, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Double(VEnv *venv, ani_class cls, const char *name,
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Double(VEnv *venv, VClass *vcls, const char *name,
                                                                    ani_double value)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Double(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::DOUBLE, AccessMode::READWRITE)
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(VEnv *venv, ani_class cls, const char *name,
-                                                                ani_ref value)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(VEnv *venv, VClass *vcls, const char *name,
+                                                                VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Ref(venv->GetEnv(), cls, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vcls, "class"),
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::OBJECT, AccessMode::READWRITE),
+        ANIArg::MakeForRef(vvalue, "value")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Ref(venv->GetEnv(), vcls->GetRef(), name,
+                                                                   vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
