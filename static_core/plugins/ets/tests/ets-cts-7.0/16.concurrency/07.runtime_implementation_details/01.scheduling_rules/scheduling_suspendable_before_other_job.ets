@@ -14,35 +14,42 @@
  */
 
 /*---
-desc: Promise callbacks with the same priority are scheduled in FIFO order
+desc: Suspendable job is scheduled before other job on the same worker thread
 tags: [no-warmup]
 ---*/
 
-async function resolved(): Promise<int> {
+async function ready(): Promise<int> {
+  return 0
+}
+
+async function suspendable(order: int[]): Promise<int> {
+  await ready()
+  order.push(1)
   return 0
 }
 
 async function startTest(): Promise<void> {
   let order: int[] = []
 
-  let p = resolved()
+  const ea = new EAWorker()
+  ea.start()
 
-  let c1 = p.then((v: int): int => {
-    order.push(1)
-    return v
+  await ea.run<undefined>(async () => {
+    let high: Promise<int> = suspendable(order)
+
+    let low: Promise<undefined> = launch<undefined>() {
+      order.push(2)
+    }
+
+    await high
+    await low
   })
-
-  let c2 = p.then((v: int): int => {
-    order.push(2)
-    return v
-  })
-
-  await c1
-  await c2
 
   arktest.assertEQ(order.length, 2)
   arktest.assertEQ(order[0], 1)
   arktest.assertEQ(order[1], 2)
+
+  ea.quit()
 }
 
 async function main(): Promise<void> {

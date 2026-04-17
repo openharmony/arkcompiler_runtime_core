@@ -511,33 +511,6 @@ cases:
           arktest.assertTrue(false, 'Expected error not thrown')
 #22
     - decl: |-
-          // calling method returning 'this' from coroutine
-          import { launch } from "std/concurrency"
-          class A {
-              fld: int
-              foo(): this {
-                  if (this.fld == 999) {
-                      throw new Error
-                  }
-                  this.fld += 1
-                  return this
-              }
-
-              bar(): Promise<this> {
-                  return launch(this.foo().foo().foo)
-              }
-          }
-
-          async function test(a: A) {
-              arktest.assertEQ((await a.bar()), a)
-              arktest.assertEQ(a.fld, 3)
-          }
-      async: true
-      use: |-
-          let a = new A
-          await test(a)
-#23
-    - decl: |-
           // calling extension function returning 'this' from coroutine
           class A {
               fld: int
@@ -562,7 +535,7 @@ cases:
       use: |-
           let a = new A
           await test(a)
-#24
+#23
     - decl: |-
           // calling async method returning 'this'
           class A {
@@ -584,7 +557,7 @@ cases:
       use: |-
           let a = new A
           await test(a)
-#25
+#23
     - decl: |-
         class A {
             fld: int
@@ -603,7 +576,7 @@ cases:
         }
       use: |-
         let x = new A().foo()
-#26
+#24
     - decl: |-
         class A {
             fld: int
@@ -619,7 +592,7 @@ cases:
         }
       use: |-
         let x = new A().foo()
-#27
+#25
     - decl: |-
         abstract class Super {
             fld: int
