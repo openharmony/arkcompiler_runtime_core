@@ -18,7 +18,14 @@
 desc: |-
     if types A and B do not overlap (and therefore an expression always evaluated to false at compile time), then:
     - if each of A and B is either a predefined type or a union of predefined types, a compile-time-error is issued.
+{% if c.expect_cte is defined and not c.expect_cte %}
+tags: [compile-only]
+{% else %}
 tags: [compile-only, negative]
+{% endif %}
+{% if c.expected_out is defined %}
+expected_out: {{c.expected_out}}
+{% endif %}
 ---*/
 
 function main(): void {

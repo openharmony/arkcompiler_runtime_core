@@ -21,7 +21,11 @@ cases:
 
     - { rtype: 'String', rval: '"test5"', op: '==', ltype: 'Float', lval: '0.1' }
     - { rtype: 'String', rval: '"test6"', op: '==', ltype: 'Double', lval: '4E10' }
-    - { rtype: 'String', rval: '"test7"', op: '==', ltype: 'BigInt', lval: '123456789n' }
+    - {
+      rtype: 'String', rval: '"test7"', op: '==', ltype: 'BigInt', lval: '123456789n',
+      expect_cte: false,
+      expected_out: "'Warning W65001: The equality expression is always false.'"
+    }
     - { rtype: 'String', rval: '"test8"', op: '==', ltype: 'FixedArray<String>', lval: '["test1"]' }
     - { rtype: 'String', rval: '"test9"', op: '==', ltype: 'TestClass', lval: 'new TestClass()' }
 
@@ -33,7 +37,11 @@ cases:
 
     - { rtype: 'String', rval: '"test15"', op: '!=', ltype: 'Double', lval: '1E19' }
     - { rtype: 'String', rval: '"test16"', op: '!=', ltype: 'Float', lval: '0.0001' }
-    - { rtype: 'String', rval: '"test17"', op: '!=', ltype: 'BigInt', lval: '0n' }
+    - {
+      rtype: 'String', rval: '"test17"', op: '!=', ltype: 'BigInt', lval: '0n',
+      expect_cte: false,
+      expected_out: "'Warning W65000: The equality expression is always true.'"
+    }
     - { rtype: 'String', rval: '"test18"', op: '!=', ltype: 'FixedArray<String>', lval: '["test2"]' }
     - { rtype: 'String', rval: '"test19"', op: '!=', ltype: 'TestClass', lval: 'new TestClass()' }
 
@@ -44,8 +52,12 @@ cases:
     - { ltype: 'String', lval: '"test24"', op: '===', rtype: 'Long' , rval: '-147483647' }
 
     - { rtype: 'String', rval: '"test25"', op: '===', ltype: 'Double', lval: '-0.7543221' }
-    - { rtype: 'String', rval: '"test26"', op: '===', ltype: 'Rloat', lval: '1.111111' }
-    - { rtype: 'String', rval: '"test27"', op: '===', ltype: 'BigInt', lval: '1919191919191919n' }
+    - { rtype: 'String', rval: '"test26"', op: '===', ltype: 'Float', lval: '1.111111' }
+    - {
+      rtype: 'String', rval: '"test27"', op: '===', ltype: 'BigInt', lval: '1919191919191919n',
+      expect_cte: false,
+      expected_out: "'Warning W65001: The equality expression is always false.'"
+    }
     - { rtype: 'String', rval: '"test28"', op: '===', ltype: 'FixedArray<String>', lval: '["test3"]' }
     - { rtype: 'String', rval: '"test29"', op: '===', ltype: 'TestClass', lval: 'new TestClass()' }
 
@@ -57,6 +69,10 @@ cases:
 
     - { rtype: 'String', rval: '"test35"', op: '!==', ltype: 'Double', lval: 'Infinity' }
     - { rtype: 'String', rval: '"test36"', op: '!==', ltype: 'float', lval: '12345.0' }
-    - { rtype: 'String', rval: '"test37"', op: '!==', ltype: 'BigInt', lval: '123456789n' }
+    - {
+      rtype: 'String', rval: '"test37"', op: '!==', ltype: 'BigInt', lval: '123456789n',
+      expect_cte: false,
+      expected_out: "'Warning W65000: The equality expression is always true.'"
+    }
     - { rtype: 'String', rval: '"test38"', op: '!==', ltype: 'FixedArray<String>', lval: '["test4"]' }
     - { rtype: 'String', rval: '"test29"', op: '!==', ltype: 'TestClass', lval: 'new TestClass()' }

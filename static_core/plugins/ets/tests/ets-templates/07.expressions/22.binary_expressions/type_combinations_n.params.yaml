@@ -389,8 +389,9 @@ operations:
           "Semantic error ESE0105: Operator '==' cannot be applied to types 'Double' and 'Boolean'."
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
+        expect_cte: false
         expected_out: |-
-          "Semantic error ESE0105: Operator '==' cannot be applied to types 'BigInt' and 'Boolean'."
+          "Warning W65001: The equality expression is always false."
 
   - op: { sign: "!=", name: "neq" }
     pairs:
@@ -416,8 +417,9 @@ operations:
           "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Double' and 'Boolean'."
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
+        expect_cte: false
         expected_out: |-
-          "Semantic error ESE0105: Operator '!=' cannot be applied to types 'BigInt' and 'Boolean'."
+          "Warning W65000: The equality expression is always true."
 
   - op: { sign: "===", name: "eq_ext" }
     pairs:
@@ -443,8 +445,9 @@ operations:
           "Semantic error ESE0105: Operator '===' cannot be applied to types 'Double' and 'Boolean'."
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
+        expect_cte: false
         expected_out: |-
-          "Semantic error ESE0105: Operator '===' cannot be applied to types 'BigInt' and 'Boolean'."
+          "Warning W65001: The equality expression is always false."
 
   - op: { sign: "!==", name: "neq_ext" }
     pairs:
@@ -470,8 +473,9 @@ operations:
           "Semantic error ESE0105: Operator '!==' cannot be applied to types 'Double' and 'Boolean'."
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
+        expect_cte: false
         expected_out: |-
-          "Semantic error ESE0105: Operator '!==' cannot be applied to types 'BigInt' and 'Boolean'."
+          "Warning W65000: The equality expression is always true."
 
   - op: { sign: "&", name: "and_bit" }
     pairs:

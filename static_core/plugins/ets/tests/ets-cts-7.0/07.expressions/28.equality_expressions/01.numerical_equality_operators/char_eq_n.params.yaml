@@ -20,7 +20,11 @@ cases:
     # char and string
     - { c1: "c'ㇰ'", c2: "'ㇰ'", op: "!=" }
     # char and bigint
-    - { c1: "c'a'", c2: "97n", op: "!==" }
+    - {
+      c1: "c'a'", c2: "97n", op: "!==",
+      expect_cte: false,
+      expected_out: "'Warning W65000: The equality expression is always true.'"
+    }
     # char and boolean
     - { c1: "c'\\u0000'", c2: "true", op: "===" }
     # boolean and char
@@ -28,4 +32,8 @@ cases:
     # char and string
     - { c1: "c'ㇰ'", c2: "'ㇰ'", op: "!==" }
     # bigint and char
-    - { c1: "97n", c2: "c'a'", op: "!==" }
+    - {
+      c1: "97n", c2: "c'a'", op: "!==",
+      expect_cte: false,
+      expected_out: "'Warning W65000: The equality expression is always true.'"
+    }
