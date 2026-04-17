@@ -65,6 +65,16 @@ export class ArraySort {
   }
 
   /**
+   * Compare sorted and initial arrays sum
+   * @Teardown
+   */
+   public compareSums(): void {
+    let sum_result = Array.from(this.ints).reduce((acc, curr) => acc + curr, 0)
+    let sum_initial = Array.from(this.intsInitial).reduce((acc, curr) => acc + curr, 0)
+    console.log("Bench completed correctly:" + (sum_result == sum_initial))
+   }
+
+  /**
    * @Benchmark
    * @Bugs sortbug
    * @Tags sorttag

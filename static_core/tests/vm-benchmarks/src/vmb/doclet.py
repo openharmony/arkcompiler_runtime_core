@@ -86,6 +86,7 @@ class Doclet(StringEnum):
     PARAM = "Param"
     SETUP = "Setup"
     RETURNS = "returns"
+    TEARDOWN = "Teardown"
     # Lang-agnostic
     IMPORT = "Import"
     INCLUDE = "Include"
@@ -96,7 +97,7 @@ class Doclet(StringEnum):
 
     @staticmethod
     def exclusive_doclets() -> Iterable[Doclet]:
-        return Doclet.STATE, Doclet.BENCHMARK, Doclet.SETUP, Doclet.PARAM
+        return Doclet.STATE, Doclet.BENCHMARK, Doclet.SETUP, Doclet.PARAM, Doclet.TEARDOWN
 
 
 @dataclass
@@ -121,6 +122,7 @@ class BenchClass:
     bugs: List[str] = field(default_factory=list)
     seamless: List[str] = field(default_factory=list)
     generator: Optional[str] = None
+    teardown: Optional[str] = None
 
 
 class DocletParser(LineParser):
@@ -237,12 +239,20 @@ class DocletParser(LineParser):
         self.ensure_state().params[p[0]] = \
             split_params(self.ensure_value(param_values))
 
-    def process_setup(self) -> None:
+    def _process_fixture(self, label: str) -> Optional[str]:
         self.skip_empty()
         f = self.lang.parse_func(self.current)
         if not f:
-            raise ValueError('Setup func declaration not found!')
-        self.ensure_state().setup = f[0]
+            raise ValueError(f'{label} func declaration not found!')
+        return f[0]
+
+    def process_setup(self) -> None:
+        f = self._process_fixture(label="Setup")
+        self.ensure_state().setup = f
+
+    def process_teardown(self) -> None:
+        f = self._process_fixture(label="Teardown")
+        self.ensure_state().teardown = f
 
     def process_tag(self, value: str, states: List[NameVal]) -> None:
         self.__pending_tags += split_params(value)
@@ -303,6 +313,9 @@ class DocletParser(LineParser):
         for _ in filter_doclets(Doclet.SETUP)[:1]:
             self.process_setup()
             return
+        for _ in filter_doclets(Doclet.TEARDOWN)[:1]:
+            self.process_teardown()
+            return
         for _, value in benchmarks:
             self.process_benchmark(value, filter_doclets(Doclet.RETURNS))
             return
@@ -342,6 +355,8 @@ class TemplateVars:  # pylint: disable=invalid-name
     state_name: str = ''
     # Setup method call: bench.SomeMethod();'
     state_setup: str = ''
+    # Teardown method call: bench.SomeMethod();'
+    state_teardown: str = ''
     # '\n'-joined list of 'bench.param1=5;'
     state_params: str = ''
     # ';'-joined param list of 'param1=5'
@@ -444,6 +459,8 @@ class TemplateVars:  # pylint: disable=invalid-name
                     continue
                 tp.state_setup = f'bench.{parsed.setup}();' \
                     if parsed.setup else ''
+                tp.state_teardown = f'bench.{parsed.teardown}();' \
+                    if parsed.teardown else ''
                 tp.tags = tags
                 tp.bugs = set(parsed.bugs + b.bugs)
                 # Override measure settings in following order:
