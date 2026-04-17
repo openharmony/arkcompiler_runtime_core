@@ -15,6 +15,7 @@
 
 #include "runtime/include/mutator.h"
 
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/panda_vm.h"
 
@@ -171,6 +172,10 @@ void Mutator::CleanUpMutatorStatus()
 {
 #if !defined(ARK_USE_COMMON_RUNTIME)
     InitializeMutatorFlag();
+    {
+        os::memory::LockHolder lock(suspendLock_);
+        suspendCount_ = 0;
+    }
     StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(MutatorStatus::CREATED);
 #endif
 }
