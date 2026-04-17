@@ -4,6 +4,3 @@ ets_tests/codegen_new_obj_call.ets
 #32664
 ets_tests/multiarray.ets
 ets_tests/lse_parameter_aliasing.ets
-
-#34042
-ets_tests/external_inlining/ext_inlining_inline_ic_check.ets

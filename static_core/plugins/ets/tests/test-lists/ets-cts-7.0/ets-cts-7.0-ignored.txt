@@ -124,7 +124,6 @@
 07.expressions/12.function_call_expression/fixed_array_predefined_7.ets
 
 # 33235
-07.expressions/14.chaining_operator/condition_compile_time_w.ets
 07.expressions/14.chaining_operator/expression_not_nullish_0.ets
 07.expressions/14.chaining_operator/expression_not_nullish_1.ets
 07.expressions/14.chaining_operator/expression_not_nullish_2.ets
@@ -709,14 +708,6 @@
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_6.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_5.ets
-
-#34177
-16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_other_jobs.ets
-16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_promise_callbacks.ets
-16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_suspendable_jobs.ets
-16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_mixed_priorities_grouping.ets
-16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_promise_callback_before_other_job.ets
-16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_suspendable_before_other_job.ets
 
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
