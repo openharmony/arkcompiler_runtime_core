@@ -16,12 +16,14 @@
 /*---
 desc: Compilation error if constructor is not accessible
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0139: Signature constructor(): undefined is not visible here.
 ---*/
 
 class MyClass {
-  private constructor() {}
+    private constructor() {}
 }
 
 function main(): void {
-  let obj: MyClass = {};
+    let obj: MyClass = {}
 }

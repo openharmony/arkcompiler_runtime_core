@@ -15,12 +15,19 @@
 cases:
     - use: |-
           let a: number[] = ["a", "b"]  // wrong types
+      expected_out: |-
+          Semantic error ESE0227: Array element at index 0 with type '"a"' is not compatible with the target array element type 'Double'
+          Semantic error ESE0227: Array element at index 1 with type '"b"' is not compatible with the target array element type 'Double'
 
     - use: |-
           let a: int[] = [true]  // wrong type
+      expected_out: |-
+          Semantic error ESE0227: Array element at index 0 with type 'Boolean' is not compatible with the target array element type 'Int'
 
     - use: |-
           let a: string[] = ["a", null]  // wrong type
+      expected_out: |-
+          Semantic error ESE0227: Array element at index 1 with type 'null' is not compatible with the target array element type 'String'
 
     - decl: |-
           class A {}
@@ -31,3 +38,7 @@ cases:
           }
       use: |-
           arktest.assertEQ( foo([new B(), new C()] as A[]), 2 ) // A[] is super type of B[]
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for assertEQ(..., Int)
+          Semantic error ESE0127: No matching call signature for foo(Array<A>)
+          Semantic error ESE0046: Type 'Array<A>' is not compatible with type 'Array<B>' at index 1

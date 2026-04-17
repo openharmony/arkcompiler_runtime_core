@@ -16,14 +16,16 @@
 /*---
 desc: A compile-time error occurs if The inferred type has abstract methods
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0257: Abstract class has abstract method foo
 ---*/
 
 abstract class AbstractPerson {
-  name: String = "";
-  age: int;
-  abstract foo();
+    name: String = ''
+    age: int
+    abstract foo()
 }
 
 function main(): void {
-  let p: AbstractPerson = { name: "Alice", age: 25 };
+    let p: AbstractPerson = { name: 'Alice', age: 25 }
 }

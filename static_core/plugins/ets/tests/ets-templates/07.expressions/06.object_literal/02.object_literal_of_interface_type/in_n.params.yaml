@@ -19,6 +19,9 @@ cases:
           }
       use: |-
           let a: A = { age: 42 } // CTE, no such field
+      expected_out: |-
+          Semantic error ESE0400: Non-optional property 'name' in type 'A' is missing in object literal.
+          Semantic error ESE0065: type A has no property named age
 
     - decl: |-
           class B {
@@ -26,6 +29,8 @@ cases:
           }
       use: |-
           let b: B = { name: 0 }  // CTE, type is wrong
+      expected_out: |-
+          Semantic error ESE0319: Type 'Int' is not compatible with type 'String|null' at property 'name'
 
     - decl: |-
           interface A {
@@ -33,6 +38,8 @@ cases:
           }
       use: |-
           let a: A = { name: "John", name: "James" } // CTE, duplicate field
+      expected_out: |-
+          Semantic error ESE0100: An object literal cannot have multiple properties with the same name.
 
     - decl: |-
           interface A {
@@ -41,6 +48,8 @@ cases:
           }
       use: |-
           let a: A = { name: "John" } // CTE, missed field
+      expected_out: |-
+          Semantic error ESE0400: Non-optional property 'age' in type 'A' is missing in object literal.
 
     - decl: |-
           interface A {
@@ -48,11 +57,15 @@ cases:
           }
       use: |-
           let a: A = {} // CTE, non-optional property must be assigned a value.
+      expected_out: |-
+          Semantic error ESE0400: Non-optional property 'age' in type 'A' is missing in object literal.
 
     - decl: |-
-        interface A {
-            name: string | null
-            foo(): void
-        }
+          interface A {
+              name: string | null
+              foo(): void
+          }
       use: |-
-        let a: A = { name: 'John' } // CTE, empty method foo is not specified in literal
+          let a: A = { name: 'John' } // CTE, empty method foo is not specified in literal
+      expected_out: |-
+          Semantic error ESE0256: Interface has methods

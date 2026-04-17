@@ -16,11 +16,13 @@
 /*---
 desc: Compilation error when using an inaccessible field
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0065: type Friend has no property named surname
 ---*/
 
 class Friend {
-  name: String
-  private age: int
+    name: String
+    private age: int
 }
 
-let person: Friend = { surname: "Anderson" }
+let person: Friend = { surname: 'Anderson' }

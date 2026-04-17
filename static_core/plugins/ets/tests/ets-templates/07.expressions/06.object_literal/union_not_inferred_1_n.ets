@@ -19,6 +19,8 @@ desc: >-
     The context is a union type,
     and an object literal can be treated as value of several of union component types
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0061: Ambiguous reference to 'A|B'
 ---*/
 
 class A { field = 1 }

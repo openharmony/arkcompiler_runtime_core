@@ -18,6 +18,8 @@ desc: >-
     A compile-time error occurs if type of an expression in a name-value pair
     is not assignable (see Assignability) to the field type
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0319: Type 'Int' is not compatible with type 'String' at property 'name'
 ---*/
 
 class Friend {
