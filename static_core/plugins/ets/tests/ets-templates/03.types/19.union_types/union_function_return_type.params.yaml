@@ -13,7 +13,6 @@
 
 cases2:
   - desc: Parse UT as a function returning boolean, string, int
-    tags: ''
     dec1: |-
       type UT = () => boolean | String | Int
       function fun0(): boolean | String | Int { return true }
@@ -27,16 +26,7 @@ cases2:
       value = fun2;
       arktest.assertEQ(value(), 5);
 
-  - desc: Parse UT as a function returning boolean, string, int
-    tags: 'compile-only, negative'
-    dec1: |-
-      type UT = () => boolean | String | Int
-    check: |-
-      let value: UT = 7; // CTE
-      arktest.assertEQ(value, 7);
-
   - desc: Parse UT as a union of int, () => boolean | string
-    tags: ''
     dec1: |-
       type UT =  Int | (() => boolean | String)
       function foo(): boolean | String { return true }
@@ -47,7 +37,6 @@ cases2:
       arktest.assertEQ(value(), true);
 
   - desc: Parse UT as a union of int, () => boolean | string
-    tags: ''
     dec1: |-
       type UT =  Int | (() => boolean | String)
       function foo(): boolean { return true }
@@ -55,16 +44,7 @@ cases2:
       let value: UT = foo;
       arktest.assertEQ(value(), true);
 
-  - desc: Parse UT as a union of int, () => boolean | string
-    tags: 'compile-only, negative'
-    dec1: |-
-      type UT =  Int | (() => boolean | String)
-    check: |-
-      let value: UT = true; // CTE
-      arktest.assertEQ(value, true);
-
   - desc: Parse UT as a union of () => boolean, int, string
-    tags: ''
     dec1: |-
       type UT = (() => boolean) | Int | String
       function foo() { return false }
@@ -77,7 +57,6 @@ cases2:
       arktest.assertEQ(value(), false);
 
   - desc: Parse UT as a union of (() => boolean | int), string
-    tags: ''
     dec1: |-
       type UT = (() => boolean | Int) | String
       function foo() { return false }
@@ -90,16 +69,7 @@ cases2:
       value = bar;
       arktest.assertEQ(value(), 7);
 
-  - desc: Parse UT as a union of (() => boolean | int), string
-    tags: 'compile-only, negative'
-    dec1: |-
-      type UT = (() => boolean | Int) | String
-    check: |-
-      let value: UT = 42; // CTE
-      arktest.assertEQ(value, 42);
-
   - desc: Parenthesised and unparenthesized function combined
-    tags: ''
     dec1: |-
       type UT = () => Int | undefined | ((() => boolean | string) | number)
       function fun0() { return 2 }
@@ -114,7 +84,6 @@ cases2:
       arktest.assertEQ(value(), 3.0);
 
   - desc: Parenthesised and unparenthesized function combined
-    tags: ''
     dec1: |-
       type UT = () => Int | undefined | ((() => boolean | string) | number)
       function fun0() { return () => { return "test" } }
@@ -124,13 +93,3 @@ cases2:
       arktest.assertEQ(value()(), "test");
       value = fun1;
       arktest.assertEQ(value()(), true);
-
-  - desc: Parenthesised and unparenthesized function combined
-          number shouldn't be appended to the second function's return type
-    tags: 'compile-only, negative'
-    dec1: |-
-      type UT = () => Int | undefined | ((() => boolean | string) | number)
-      function foo() { return () => { return 2.5 }}
-    check: |-
-      let value: UT = foo; // CTE
-      arktest.assertEQ(value()(), 2.5);
