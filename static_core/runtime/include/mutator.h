@@ -197,6 +197,10 @@ public:
 
     void MakeTSANHappyForThreadState();
 
+#if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
+    virtual void ResetSafepointTimer([[maybe_unused]] bool needRecord) {}
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
+
 #if defined(ARK_USE_COMMON_RUNTIME)
     void BindMutator();
 
