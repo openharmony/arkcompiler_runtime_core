@@ -14,19 +14,19 @@
 cases:
   - module: foo
     signature: "foo()"
-    out: "Semantic error ESE0130: Function foo is already declared."
+    out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
   - module: goo as bar
     signature: "bar()"
-    out: "Semantic error ESE0130: Function goo is already declared."
+    out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
   - module: foo1
     signature: "foo1(x: int)"
-    out: "Semantic error ESE0130: Function foo1 is already declared."
+    out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
   - module: goo1 as bar
     signature: "bar(x: int)"
-    out: "Semantic error ESE0130: Function goo1 is already declared."
+    out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
   - module: foo1
     signature: "foo1(y: int)"
-    out: "Semantic error ESE0130: Function foo1 is already declared."
+    out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
   - module: goo1 as bar
     signature: "bar(y: int)"
-    out: "Semantic error ESE0130: Function goo1 is already declared."
+    out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."

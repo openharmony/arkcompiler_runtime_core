@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ files:
 
 import { a, foo, bar, COPT} from './selective_export'
 
-function foo(i: Required<COPT>) {
+function fooWithOpt(i: Required<COPT>) {
     let v: int = 0;
     if (i.j != undefined) {
         v += 1
@@ -35,5 +35,5 @@ function main(): void {
     let sum: int = a + foo() + bar();
     const result: int = 7;
     arktest.assertEQ(sum, result)
-    arktest.assertEQ( foo( {i: 1.9, j: 'some str'} ), 3 )
+    arktest.assertEQ( fooWithOpt( {i: 1.9, j: 'some str'} ), 3 )
 }

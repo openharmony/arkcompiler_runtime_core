@@ -19,7 +19,7 @@ cases:
       main: |-
           arktest.assertEQ('b' + v!, 'ba')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           class A {
@@ -30,7 +30,7 @@ cases:
           let w = v!.fld
           arktest.assertEQ(w, 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           class A {
@@ -43,28 +43,28 @@ cases:
           let w = v!.meth()
           arktest.assertEQ(w, 42)
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - main: |-
           let v: Array<string|int|null|undefined>|null|undefined = [42]  // local variable, smart-casting
           let w = v![0]
           arktest.assertEQ(w, 42)
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - main: |-
           let v: FixedArray<int>|null|undefined = [42]  // local variable, smart-casting
           let w = v![0]
           arktest.assertEQ(w, 42)
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - main: |-
           let v: string[]|null|undefined = ['a']  // local variable, smart-casting
           let w = v![0]
           arktest.assertEQ(w, 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           let v: Array<string[]> = [['a', 'b', 'c']]
@@ -72,14 +72,14 @@ cases:
           let w = v[0]![1]
           arktest.assertEQ(w, 'b')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - main: |-
           let v: Record<int, string>|null|undefined = { 42: 'a' }  // local variable, smart-casting
           let w = v![42]
           arktest.assertEQ(w, 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           function foo(p: int): string {
@@ -90,14 +90,14 @@ cases:
           let w = v!(42)
           arktest.assertEQ(w, '<42>')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - main: |-
           let v: [string, int]|null|undefined = ['a', 42]  // local variable, smart-casting
           let w = v![0]
           arktest.assertEQ(w, 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     # generic type as non-nullish expression
     - decl: |-
@@ -107,7 +107,7 @@ cases:
       main: |-
           arktest.assertEQ(foo(42), '42')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           function foo<T extends Object>(p: [T, T, T]): T {
@@ -117,7 +117,7 @@ cases:
       main: |-
           arktest.assertEQ(foo<int>(v)!, 2)  // non-nullish due to constraint
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     # call expression as non-nullish expression
     - decl: |-
@@ -127,7 +127,7 @@ cases:
       main: |-
           arktest.assertEQ(foo()!, 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           class A {
@@ -138,7 +138,7 @@ cases:
       main: |-
           arktest.assertEQ(new A().meth()!, 42)
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     # non-nullish function argument for nullish parameter
     - decl: |-
@@ -149,7 +149,7 @@ cases:
       main: |-
           arktest.assertEQ(foo(v!), 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           function foo(p: string|int|null) {
@@ -159,7 +159,7 @@ cases:
           let v: string|int|null = 'a' // local variable, smart-casting
           arktest.assertEQ(foo(v!), 'a')
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     # extra '!' generates warning
     - decl: |-
@@ -168,7 +168,7 @@ cases:
           let w = v!
           arktest.assertEQ(w!, 42)  // second '!' generates warning
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           function foo(): int|string|undefined {
@@ -178,7 +178,7 @@ cases:
           let w: int|string|undefined = foo()!   // local variable, smart-casting
           arktest.assertEQ(w!, 42)
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
 
     - decl: |-
           class A {
@@ -189,4 +189,4 @@ cases:
       main: |-
           arktest.assertEQ(A.meth()!!, 'a') // second '!' generates warning
       warning: |-
-          TBD: Warning: Ensure-Not-Nullish expression always evaluates to non-nullish
+          Warning W0015: The operand of the ensure-not-nullish expression is always non-nullish.
