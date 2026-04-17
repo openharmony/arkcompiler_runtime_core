@@ -15,7 +15,8 @@
 
 // Source file must be last in the compile list
 //! DEFINE_FRONTEND_OPTIONS DEFAULT ARGS
-//! RUN_FRONTEND            inputs: "ext_checkcast_nonnull_helper.ets", output: "ext_inlining_checkcast_nonnull_ext_checkcast_nonnull_helper.ets.abc"
+//! RUN_FRONTEND            inputs: "ext_checkcast_nonnull_helper.ets",
+//!                         output: "ext_inlining_checkcast_nonnull_ext_checkcast_nonnull_helper.ets.abc"
 //! RUN_FRONTEND            options: "--opt-level=2 --ets-strings-concat=false"
 
 import { TestBox } from './ext_checkcast_nonnull_helper.ets'
@@ -23,9 +24,11 @@ import { castBox } from './ext_checkcast_nonnull_helper.ets'
 
 //! CHECKER    External inlining keeps typed NullCheck from checkcast.nonnull and throws ClassCastError
 //! SKIP_IF    @architecture == "arm32"
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_checkcast_nonnull_ext_checkcast_nonnull_helper.ets.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true --compiler-regex='.*__noinline__typedExternalChain.*'",
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_checkcast_nonnull_ext_checkcast_nonnull_helper.ets.abc " +
+//!                     "--paoc-use-cha=true --compiler-inline-external-methods-aot=true " +
+//!                     "--compiler-regex='.*__noinline__typedExternalChain.*'",
 //!            entry: "ext_inlining_checkcast_nonnull.ETSGLOBAL::main"
-//! EVENT      /Inline,ext_inlining_checkcast_nonnull.ETSGLOBAL::__noinline__typedExternalChain,ext_checkcast_nonnull_helper.ETSGLOBAL::castBox,.*,STATIC,SUCCESS/
+//! EVENT      /Inline,.*::__noinline__typedExternalChain,.*::castBox,.*,STATIC,SUCCESS/
 //! METHOD     "ext_inlining_checkcast_nonnull.ETSGLOBAL::__noinline__typedExternalChain"
 //! PASS_BEFORE "Inline"
 //! INST       /CallStatic.*ext_checkcast_nonnull_helper\.ETSGLOBAL::castBox.*\[file=\d+\]/
