@@ -333,11 +333,6 @@
 #33901
 10.interfaces/04.interface_properties/interface_property_declaration_n_6.ets
 
-#34172
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_12_n.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_22_n.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_36_n.ets
-
 #33639
 11.enumerations/enum_decl_25.ets
 11.enumerations/enum_decl_26.ets
@@ -592,15 +587,6 @@
 14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_15.ets
 14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_16.ets
 14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_17.ets
-
-#29270
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_1.ets
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_2.ets
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_3.ets
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_4.ets
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_5.ets
-14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_6.ets
 
 #33736
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_const_prefix_n.ets
