@@ -18,6 +18,8 @@ desc: >-
     A compile-time error occurs if a class has a private or a protected method,
     and its object literal contains same-name methods with override-compatible signatures
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0074: Class methods cannot be overridden within an object literal.
 ---*/
 
 class Base {}

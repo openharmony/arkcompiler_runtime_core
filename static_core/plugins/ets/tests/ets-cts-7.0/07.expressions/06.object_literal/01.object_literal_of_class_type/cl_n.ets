@@ -18,6 +18,8 @@
 desc: >-
     A compile-time error occurs if the identifier does not name an accessible member field (Scopes) in the type C.
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}

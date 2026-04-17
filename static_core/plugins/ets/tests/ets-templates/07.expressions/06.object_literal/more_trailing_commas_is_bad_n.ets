@@ -16,13 +16,22 @@
 /*---
 desc: The comma at the end of the composite class is ignored but more produces error
 tags: [negative, compile-only]
+expected_out: |-
+    Syntax error ESY0016: Unexpected token.
+    Semantic error ESE0065: type Person has no property named *ERROR_LITERAL*
+    Syntax error ESY0228: Unexpected token, expected '('.
+    Syntax error ESY0230: Expected '{', got '}'.
+    Syntax error ESY0194: Parameter declaration should have an explicit type annotation.
+    Syntax error ESY0229: Unexpected token, expected ',' or ')'.
+    Syntax error ESY0112: Unexpected token, expected an identifier.
+    Syntax error ESY0230: Expected '}', got 'end of stream'.
 ---*/
 
 class Person {
-  name: String = ""
-  age: int
+    name: String = ""
+    age: int
 }
-  
+
 function main(): void {
-  let p: Person = { name: "Alice", age: 25,, }
+    let p: Person = { name: "Alice", age: 25,, }
 }

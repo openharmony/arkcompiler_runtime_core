@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
- /*---
- desc: Compilation error when attempt to init field multiple times
- tags: [negative, compile-only]
- ---*/
+/*---
+desc: Compilation error when attempt to init field multiple times
+tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0100: An object literal cannot have multiple properties with the same name.
+---*/
 
 interface Many {
     one: String
 }
 
- function main(): void {
-    let a: Many = {one: "one", one: "one", one: "one", one: "one"}
- }
+function main(): void {
+    let a: Many = { one: 'one', one: 'one', one: 'one', one: 'one' }
+}

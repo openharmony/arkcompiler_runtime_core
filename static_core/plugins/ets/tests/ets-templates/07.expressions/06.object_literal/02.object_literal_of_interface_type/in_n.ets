@@ -18,6 +18,8 @@
 desc: >-
     A compile-time error occurs if the interface type I has methods. It must contain fields only.
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
 {{c.decl}}

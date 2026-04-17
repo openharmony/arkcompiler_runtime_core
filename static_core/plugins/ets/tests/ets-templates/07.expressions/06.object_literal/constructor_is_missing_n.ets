@@ -16,12 +16,14 @@
 /*---
 desc: Compilation error if parameterless constructor is missing
 tags: [negative, compile-only]
+expected_out: |-
+    Semantic error ESE0291: Type MyClass has no parameterless constructor. Initialization with literals is not supported if the type has no parameterless constructor. Declare the parameterless constructor explicitly or remove parametered constructors!
 ---*/
 
 class MyClass {
-  constructor(x: int) {}
+    constructor(x: int) {}
 }
 
 function main(): void {
-  let obj: MyClass = {};
+    let obj: MyClass = {}
 }
