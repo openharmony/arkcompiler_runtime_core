@@ -14,30 +14,41 @@
  */
 
 /*---
-desc: Simultaneously overriding a field from a superclass and implements a property from a superinterface.
-assertion: A property can be implemented as a field in different combinations.
+desc: Ambient Interface declarations
+tags: [compile-only, not-a-test]
 ---*/
 
-interface I {
-    num: number
+export interface A { a: number }
+
+export interface B {
+    a: int
+    b: float
+    c: FixedArray<byte>
 }
 
-class C {
-    num: number = 1
+export interface C {
+    foo(x: number, y: string): string
 }
 
-class D extends C implements I {
-    num: number = 2
+export interface D<T1> {
+    a: T1
 }
 
-function main() {
-    let c: C = new C();
-    let dd: D = new D();
-    let cd: C = new D();
-    let id: I = new D();
-
-    arktest.assertEQ(c.num, 1)
-    arktest.assertEQ(dd.num, 2)
-    arktest.assertEQ(cd.num, 2)
-    arktest.assertEQ(id.num, 2)
+export interface E<U, R> {
+    foo(x: U): R
 }
+
+export interface F {
+    f: number
+}
+
+export interface M extends F {
+}
+
+export interface K {
+    a: string
+    get foo(): string
+    set foo(v: string)
+}
+
+export interface J {}
