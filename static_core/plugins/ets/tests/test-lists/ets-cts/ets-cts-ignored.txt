@@ -331,11 +331,11 @@
 09.classes/06.field_declarations/access_static_field_neg_51.ets
 09.classes/06.field_declarations/access_static_field_neg_52.ets
 09.classes/06.field_declarations/access_static_field_neg_53.ets
-09.classes/08.class_accessor_declarations/inheritance_static_setter_not_inherited.ets
-09.classes/10.inheritance/inheritance_static_members_from_superclass_0.ets
-09.classes/10.inheritance/inheritance_static_members_from_superclass_1.ets
-09.classes/10.inheritance/inheritance_static_members_from_superclass_2.ets
-09.classes/10.inheritance/inheritance_static_members_from_superclass_3.ets
+09.classes/08.class_accessor_declarations/inheritance_static_setter_not_inherited_n.ets
+09.classes/10.inheritance/inheritance_static_members_from_superclass_n_0.ets
+09.classes/10.inheritance/inheritance_static_members_from_superclass_n_1.ets
+09.classes/10.inheritance/inheritance_static_members_from_superclass_n_2.ets
+09.classes/10.inheritance/inheritance_static_members_from_superclass_n_3.ets
 
 #32586
 09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_0.ets
