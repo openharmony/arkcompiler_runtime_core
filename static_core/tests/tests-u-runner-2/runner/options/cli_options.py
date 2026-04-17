@@ -345,13 +345,16 @@ class CliParserBuilder:
     @staticmethod
     def gather_config_options(cfg_name: str, cfg_data: dict,
                               parser: argparse.ArgumentParser) -> tuple[argparse.ArgumentParser, dict]:
-
+        config_types = {'test-suite': 'Test suite',
+                       'workflow': 'Workflow'}
         if CliOptionsConsts.CFG_TYPE.value not in cfg_data:
             raise InvalidConfiguration(f"Cannot detect type of config {cfg_name}. "
                                        f"Have you specified key {CliOptionsConsts.CFG_TYPE.value}?")
         cli_params = cfg_data.get(CliOptionsConsts.CFG_PARAMETERS.value, {})
-
-        config = parser.add_argument_group(title=f"Config '{cfg_name}' options")
+        config_desc = cli_utils.make_config_description(cfg_data)
+        config_type = config_types.get(cast(str, cfg_data.get(CliOptionsConsts.CFG_TYPE.value, "")), "")
+        config = parser.add_argument_group(title=f"{config_type} '{cfg_name.upper()}' options",
+                                           description=config_desc)
 
         keys_with_default_lists = {}
         for key, default_value in cli_params.items():
@@ -398,11 +401,6 @@ class CliParserBuilder:
             config_data=self.configs.load_test_suite_config())
         return parser_for_test_suite, keys_from_ts
 
-    def create_parser_for_default_test_suite(self) -> argparse.ArgumentParser:
-        return CliParserBuilder.default_test_suite_options(argparse.ArgumentParser(
-            add_help=False, description="Config 'URunner' options",
-            conflict_handler="resolve"), self.configs.test_suite_name)
-
     def create_parser_for_config(self, config_name: str,
                                  config_data: dict) -> tuple[argparse.ArgumentParser, dict]:
         wf_config = argparse.ArgumentParser(
@@ -432,13 +430,11 @@ class CliOptionsParser:
 
     def __init__(self, configs_loader: ConfigsLoader, runner_parser: argparse.ArgumentParser,
                  test_suite_parser: argparse.ArgumentParser,
-                 default_test_suite_parser: argparse.ArgumentParser,
                  workflow_parser: argparse.ArgumentParser, env_vars_parser: argparse.ArgumentParser, *argv: str):
         self.configs = configs_loader
 
         self.runner_parser = runner_parser
         self.test_suite_parser = test_suite_parser
-        self.default_test_suite_parser = default_test_suite_parser
         self.workflow_parser = workflow_parser
         self.env_parser = env_vars_parser
         self.argv = argv
@@ -449,11 +445,14 @@ class CliOptionsParser:
         usage = f"\n%(prog)s {self.configs.workflow_name} {self.configs.test_suite_name} [options]\n\n"
         parser = argparse.ArgumentParser(
             usage=usage,
-            description="Universal test runner",
-            parents=[self.test_suite_parser, self.default_test_suite_parser,
-                     self.workflow_parser, self.runner_parser, self.env_parser],
+            description="Universal Test Runner",
+            parents=[self.workflow_parser, self.test_suite_parser,
+                    self.runner_parser, self.env_parser],
             conflict_handler="resolve",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+        # add test_suite default options
+        TestSuiteOptions.add_cli_args(parser,
+                                      f"{self.configs.test_suite_name}.{CliOptionsConsts.CFG_PARAMETERS.value}")
         try:
             self.full_options = vars(parser.parse_args(self.argv))
         except (argparse.ArgumentError, argparse.ArgumentTypeError):
@@ -502,9 +501,7 @@ def get_args(env_properties: list[MandatoryPropDescription]) -> dict[str, Option
     env_vars_parser = parser_builder.create_parser_for_env_vars(env_properties)
 
     cli = CliOptionsParser(configs_loader, parser_builder.create_parser_for_runner(),
-                            test_suite_parser,
-                            parser_builder.create_parser_for_default_test_suite(),
-                            workflow_parser, env_vars_parser, *remaining)
+                            test_suite_parser, workflow_parser, env_vars_parser, *remaining)
     cli.parse_args()
 
     cli.full_options[f"{CliOptionsConsts.CFG_RUNNER.value}.cli_options"] = remaining

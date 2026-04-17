@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,11 +36,12 @@ class TimeReportOptions(IOptions):
 
     @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
-        parser.add_argument(
+        group = parser.add_argument_group(title="URunner run options")
+        group.add_argument(
             f'--{TimeReportOptions.__TIME_REPORT}', action='store_true', default=False,
             dest=f"{dest}{TimeReportOptions.__TIME_REPORT}",
             help='Log execution test time')
-        parser.add_argument(
+        group.add_argument(
             f'--{TimeReportOptions.__TIME_EDGES}', action='store',
             default=TimeReportOptions.__DEFAULT_EDGES,
             type=TimeReportOptions.__process_time_edges,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,39 +51,40 @@ class CoverageOptions(IOptions):
             parser (argparse.ArgumentParser): The parser to add arguments to.
             dest (str | None): Optional prefix for argument destinations.
         """
-        parser.add_argument(
+        group = parser.add_argument_group(title="URunner coverage-related options")
+        group.add_argument(
             f'--{USE_LLVM_COV}', action='store_true', default=False,
             dest=f"{dest}{USE_LLVM_COV}")
-        parser.add_argument(
+        group.add_argument(
             f'--{USE_LCOV}', action='store_true', default=False,
             dest=f"{dest}{USE_LCOV}")
-        parser.add_argument(
+        group.add_argument(
             f'--{COVERAGE_PER_BINARY}', action='store_true', default=False,
             dest=f"{dest}{COVERAGE_PER_BINARY}")
-        parser.add_argument(
+        group.add_argument(
             f'--{PROFDATA_FILES_DIR}', default=None,
             type=make_dir_if_not_exist,
             dest=f"{dest}{PROFDATA_FILES_DIR}",
             help='Directory where coverage intermediate files (*.profdata) are created.')
-        parser.add_argument(
+        group.add_argument(
             f'--{COVERAGE_HTML_REPORT_DIR}', default=None,
             type=make_dir_if_not_exist,
             dest=f"{dest}{COVERAGE_HTML_REPORT_DIR}",
             help='Stacks files in the specified directory')
-        parser.add_argument(
+        group.add_argument(
             f'--{LLVM_COV_EXCLUDE}',
             action='append',
             dest=f"{dest}{LLVM_COV_EXCLUDE}",
             help="Add one or more REGEX exclude patterns for llvm-cov")
-        parser.add_argument(
+        group.add_argument(
             f'--{LCOV_EXCLUDE}',
             action='append',
             dest=f"{dest}{LCOV_EXCLUDE}",
             help="Add one or more GLOB exclude patterns for lcov")
-        parser.add_argument(
+        group.add_argument(
             f'--{CLEAN_GCDA_BEFORE_RUN}', action='store_true', default=False,
             dest=f"{dest}{CLEAN_GCDA_BEFORE_RUN}")
-        parser.add_argument(
+        group.add_argument(
             f'--{GCOV_TOOL}', default=None,
             type=str,
             dest=f"{dest}{GCOV_TOOL}",
