@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: echo
+description: "Workflow config for test_suite_config_test2"
 parameters:
     string-param: hello
     int-param: 20
@@ -23,6 +24,7 @@ parameters:
         - "--thread=0"
 steps:
     echo:
+        description: "Simple echo step"
         executable-path: /usr/bin/echo
         args:
             - "--arktsconfig=${parameters.string-param}"

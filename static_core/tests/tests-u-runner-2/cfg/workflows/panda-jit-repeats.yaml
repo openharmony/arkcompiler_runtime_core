@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: panda-jit-repeats
+description: "Compiles and verifies ETS tests, then runs Ark with JIT enabled and jit repeats option"
 parameters:
     # common
     build: ${PANDA_BUILD}

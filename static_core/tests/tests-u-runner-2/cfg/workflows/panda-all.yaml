@@ -14,6 +14,8 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: panda-all
+description: "Runs compile/verify, interpreter, JIT, and AOT execution flows for the same ETS test to provide broad 
+            runtime coverage."
 parameters:
     # common
     build: ${PANDA_BUILD}

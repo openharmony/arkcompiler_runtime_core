@@ -58,7 +58,8 @@ class ETSOptions(IOptions):
 
     @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
-        parser.add_argument(
+        group = parser.add_argument_group(title="URunner run options")
+        group.add_argument(
             f'--{ETSOptionsConsts.FORCE_GENERATE.value}',
             nargs='?',
             const=True,
@@ -66,11 +67,11 @@ class ETSOptions(IOptions):
             type=ETSOptions.str2bool,
             dest=f"{dest}{ETSOptionsConsts.FORCE_GENERATE.value}",
             help='Regenerate ETS test cases from templates. Use after changing test sources or templates.')
-        parser.add_argument(
+        group.add_argument(
             f'--{ETSOptionsConsts.COMPARE_FILES.value}', action='store_true', default=False,
             dest=f"{dest}{ETSOptionsConsts.COMPARE_FILES.value}",
             help='switch on mode of comparing compiled abc files')
-        parser.add_argument(
+        group.add_argument(
             f'--{ETSOptionsConsts.COMPARE_FILES_ITERATIONS.value}', action='store_true',
             default=ETSOptionsConsts.DEFAULT_COMPARE_FILES_ITERATIONS.value,
             dest=f"{dest}{ETSOptionsConsts.COMPARE_FILES_ITERATIONS.value}",

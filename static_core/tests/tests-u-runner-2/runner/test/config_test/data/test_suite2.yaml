@@ -16,6 +16,7 @@ type: test-suite
 suite-name: test_suite
 test-root: .
 list-root: .
+description: "Test suite config for test_suite_config_test2 test"
 
 parameters:
     extension: sts

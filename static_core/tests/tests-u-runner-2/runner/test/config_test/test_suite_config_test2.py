@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import os
 import unittest
+from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 from typing import ClassVar, cast
@@ -95,7 +97,6 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *args)
         cli.parse_args()
 
@@ -121,7 +122,6 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *args)
         cli.parse_args()
 
@@ -147,7 +147,6 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *args)
         cli.parse_args()
 
@@ -174,7 +173,6 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *args)
         cli.parse_args()
 
@@ -202,7 +200,6 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
         cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
                                test_suite_parser,
-                               parser_builder.create_parser_for_default_test_suite(),
                                workflow_parser, env_parser, *args)
         cli.parse_args()
 
@@ -214,3 +211,28 @@ class TestSuiteConfigTest2(unittest.TestCase):
         expected = ['--thread=0', '--parse-only', '--dump-ast', '--extension=${parameters.extension}']
         self.assertEqual(sorted(expected),
                          sorted(cast(list, actual.get('test_suite2.parameters.es2panda-full-args'))))
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest2.data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    def test_help_with_description(self) -> None:
+        args = ["--help"]
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, _ = parser_builder.create_parser_for_test_suite()
+        workflow_parser, _ = parser_builder.create_parser_for_workflow()
+        env_parser = parser_builder.create_parser_for_env_vars(TestSuiteConfigTest2.env_properties)
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               workflow_parser, env_parser, *args)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            with self.assertRaises(SystemExit):
+                cli.parse_args()
+
+        help_text = buf.getvalue()
+        self.assertIn("Test suite config for test_suite_config_test2 test", help_text)
+        self.assertIn("Workflow config for test_suite_config_test2", help_text)
+        self.assertIn("step description: Simple echo step", help_text)

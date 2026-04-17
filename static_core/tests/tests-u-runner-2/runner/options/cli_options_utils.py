@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,6 +36,11 @@ class CliOptionsConsts(BaseEnum):
     VERBOSE = "verbose"
     VERBOSE_FILTER = "verbose-filter"
     QEMU = "qemu"
+    DESCRIPTION = "description"
+    STEPS = "steps"
+
+
+FROM = "from"
 
 
 def get_config_list(cfg_path: Path) -> list[str]:
@@ -88,3 +93,21 @@ def add_config_info(configs_loader: "ConfigsLoader",
         utils.load_config(str(configs_loader.get_test_suite_path())))
 
     return full_options
+
+
+def make_config_description(config_data: dict) -> str:
+    desc = config_data.get(f"{CliOptionsConsts.DESCRIPTION.value}", "")
+    steps = config_data.get(f"{CliOptionsConsts.STEPS.value}", {})
+
+    config_desc = [desc]
+    if steps:
+        config_desc.append(f"{CliOptionsConsts.STEPS.value.upper()}:")
+    for step_name, step_data in steps.items():
+        if FROM in step_data:
+            config_desc.append(step_name + f" (from {step_data.get(FROM)})")
+        else:
+            config_desc.append(step_name)
+
+        if CliOptionsConsts.DESCRIPTION.value in step_data:
+            config_desc.append(f"\tstep description: {step_data.get(CliOptionsConsts.DESCRIPTION.value)}")
+    return '\n'.join(config_desc)
