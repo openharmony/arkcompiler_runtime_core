@@ -45,9 +45,7 @@ void RegionalHeap::DumpAllRegionSummary(const char* msg) const
     auto to = toSpace_.GetAllocatedSize();
     auto young = youngSpace_.GetAllocatedSize();
     auto old = oldSpace_.GetAllocatedSize();
-    auto other = nonMovableSpace_.GetAllocatedSize() + largeSpace_.GetAllocatedSize() +
-                                appSpawnSpace_.GetAllocatedSize() + readonlySpace_.GetAllocatedSize() +
-                                rawpointerSpace_.GetAllocatedSize();
+    auto other = nonMovableSpace_.GetAllocatedSize() + largeSpace_.GetAllocatedSize();
 
     std::ostringstream oss;
     oss << msg << "Current allocated: " << Pretty(from + to + young + old + other) << ". (from: " << Pretty(from)
@@ -66,9 +64,6 @@ void RegionalHeap::DumpAllRegionStats(const char* msg) const
     toSpace_.DumpRegionStats();
     nonMovableSpace_.DumpRegionStats();
     largeSpace_.DumpRegionStats();
-    appSpawnSpace_.DumpRegionStats();
-    rawpointerSpace_.DumpRegionStats();
-    readonlySpace_.DumpRegionStats();
 
     regionManager_.DumpRegionStats();
 
@@ -78,9 +73,6 @@ void RegionalHeap::DumpAllRegionStats(const char* msg) const
 
 HeapAddress RegionalHeap::TryAllocateOnce(size_t allocSize, AllocType allocType)
 {
-    if (UNLIKELY_CC(allocType == AllocType::READ_ONLY_OBJECT)) {
-        return readonlySpace_.Alloc(allocSize);
-    }
     if (UNLIKELY_CC(allocSize >= RegionDesc::LARGE_OBJECT_DEFAULT_THRESHOLD)) {
         return largeSpace_.Alloc(allocSize);
     }
@@ -231,8 +223,6 @@ void RegionalHeap::CopyRegion(RegionDesc* region)
         return;
     }
 
-    int32_t rawPointerCount = region->GetRawPointerObjectCount();
-    CHECK_CC(rawPointerCount == 0);
     Collector& collector = Heap::GetHeap().GetCollector();
     bool forwarded = region->VisitLiveObjectsUntilFalse(
         [&collector](BaseObject* obj) { return collector.ForwardObject(obj); });
@@ -381,9 +371,6 @@ HeapAddress AllocationBuffer::Allocate(size_t totalSize, AllocType allocType)
 {
     // a hoisted specific fast path which can be inlined
     HeapAddress addr = 0;
-    if (UNLIKELY_CC(allocType == AllocType::RAW_POINTER_OBJECT)) {
-        return AllocateRawPointerObject(totalSize);
-    }
 
     ASSERT_LOGF(allocType == AllocType::MOVEABLE_OBJECT || allocType == AllocType::MOVEABLE_OLD_OBJECT,
                 "unexpected alloc type");
@@ -443,30 +430,6 @@ HeapAddress AllocationBuffer::AllocateImpl(size_t totalSize, AllocType allocType
     UNREACHABLE_CC();
 }
 
-HeapAddress AllocationBuffer::AllocateRawPointerObject(size_t totalSize)
-{
-    RegionDesc* region = tlRawPointerRegions_.GetHeadRegion();
-    if (region != nullptr) {
-        HeapAddress allocAddr = region->Alloc(totalSize);
-        if (allocAddr != 0) {
-            return allocAddr;
-        }
-    }
-    RegionManager& manager = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator()).GetRegionManager();
-    size_t needRegionNum = totalSize / RegionDesc::UNIT_SIZE + 1;
-    // region should have at least 2 unit
-    needRegionNum = (needRegionNum == 1) ? 2 : needRegionNum;
-    region = manager.TakeRegion(needRegionNum, RegionDesc::UnitRole::SMALL_SIZED_UNITS);
-    if (region == nullptr) {
-        return 0;
-    }
-    // region is enough for totalSize.
-    HeapAddress allocAddr = region->Alloc(totalSize);
-    ASSERT_LOGF(allocAddr != 0, "allocation failure");
-    tlRawPointerRegions_.PrependRegion(region, RegionDesc::RegionType::TL_RAW_POINTER_REGION);
-    return allocAddr;
-}
-
 #ifndef NDEBUG
 bool RegionalHeap::IsHeapObject(HeapAddress addr) const
 {
@@ -502,8 +465,6 @@ void RegionalHeap::MarkRememberSet(const std::function<void(BaseObject*)>& func)
     oldSpace_.MarkRememberSet(func);
     nonMovableSpace_.MarkRememberSet(func);
     largeSpace_.MarkRememberSet(func);
-    appSpawnSpace_.MarkRememberSet(func);
-    rawpointerSpace_.MarkRememberSet(func);
 }
 
 void RegionalHeap::ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObject*)>& visitor) const
@@ -522,9 +483,7 @@ void RegionalHeap::MarkJitFortMemInstalled(void *thread, BaseObject *obj)
         jitFortPostGCInstallTask_.emplace(nullptr, obj);
     } else {
         // a threadlocal JitFort mem
-        if (thread) {
-            MarkThreadLocalJitFortInstalled(thread, obj);
-        } else {
+        if (!thread) {
             RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(obj))->SetJitFortAwaitInstallFlag(false);
         }
         awaitingJitFort_.erase(obj);

@@ -87,7 +87,6 @@ public:
     void WaitStop();
 
     void EnqueueFinalizables(const std::function<bool(BaseObject*)>& finalizable, uint32_t countLimit = UINT_MAX);
-    void RegisterFinalizer(BaseObject* obj);
     bool IsRunning() const { return running_; }
     uint32_t GetTid() const { return tid_; }
 

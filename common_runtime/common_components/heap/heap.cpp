@@ -110,7 +110,6 @@ public:
     size_t GetAccumulatedFreeSize() const override;
     HeapAddress GetStartAddress() const override;
     HeapAddress GetSpaceEndAddress() const override;
-    void VisitStaticRoots(const RefFieldVisitor& visitor) override;
     bool ForEachObject(const std::function<void(BaseObject*)>&, bool) override;
     void InstallBarrier(const GCPhase phase) override;
     FinalizerProcessor& GetFinalizerProcessor() override;
@@ -156,8 +155,6 @@ private:
     YoungCopyBarrier youngCopyBarrier_;
     std::atomic<Barrier*> currentBarrier_ = nullptr;
     HeuristicGCPolicy heuristicGCPolicy_;
-    // manage gc roots entry
-    StaticRootTable staticRootTable_;
 
     std::atomic<bool> isGCEnabled_ = { true };
 
@@ -362,8 +359,6 @@ HeapAddress HeapImpl::GetStartAddress() const { return theSpace_->GetSpaceStartA
 HeapAddress HeapImpl::GetSpaceEndAddress() const { return theSpace_->GetSpaceEndAddress(); }
 
 Heap& Heap::GetHeap() { return *g_heapInstance; }
-
-void HeapImpl::VisitStaticRoots(const RefFieldVisitor& visitor) { staticRootTable_.VisitRoots(visitor); }
 
 FinalizerProcessor& HeapImpl::GetFinalizerProcessor() { return collectorResources_.GetFinalizerProcessor(); }
 

@@ -17,7 +17,6 @@
 
 #include "common_components/common_runtime/base_runtime_param.h"
 #include "common_components/log/log.h"
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/common/page_pool.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_components/heap/heap.h"
@@ -180,8 +179,7 @@ void BaseRuntime::RemoveGCListener(GCListener *listener)
 
 void BaseRuntime::PreFork(Mutator *mutator)
 {
-    // Need appspawn space and compress gc.
-    RequestGC(GC_REASON_APPSPAWN, false, GC_TYPE_FULL);
+    RequestGC(GC_REASON_USER, false, GC_TYPE_FULL);
     {
         MutatorNativeScope scope(mutator);
         HeapManager::StopRuntimeThreads();
@@ -203,11 +201,6 @@ void BaseRuntime::NotifyWarmStart()
     if (!Heap::GetHeap().IsGcStarted() && !Heap::GetHeap().OnStartupEvent()) {
         StartupStatusManager::OnAppStartup();
     }
-}
-
-void BaseRuntime::WriteRoot(void *obj)
-{
-    Heap::GetBarrier().WriteRoot(reinterpret_cast<BaseObject *>(obj));
 }
 
 void BaseRuntime::WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator)

@@ -29,7 +29,6 @@
 #include <cstdint>
 
 #include "common_interfaces/heap/heap_visitor.h"
-#include "common_interfaces/objects/field.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/objects/base_state_word.h"
 namespace common_vm {

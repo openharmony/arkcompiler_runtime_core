@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "common_components/base/config.h"
 #include "common_components/base/utf_helper.h"
 #include "common_interfaces/objects/utils/span.h"
 #include "common_components/log/log.h"

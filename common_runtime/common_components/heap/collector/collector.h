@@ -81,13 +81,9 @@ public:
 
     virtual bool TryUpdateRefField(BaseObject*, RefField<>&, BaseObject*&) const = 0;
     virtual bool TryForwardRefField(BaseObject*, RefField<>&, BaseObject*&) const = 0;
-    virtual bool TryUntagRefField(BaseObject*, RefField<>&, BaseObject*&) const = 0;
-    virtual RefField<> GetAndTryTagRefField(BaseObject*) const = 0;
 
     virtual bool IsOldPointer(RefField<>&) const = 0;
     virtual bool IsCurrentPointer(RefField<>&) const = 0;
-    virtual void AddRawPointerObject(BaseObject*) = 0;
-    virtual void RemoveRawPointerObject(BaseObject*) = 0;
 
     BaseObject* FindLatestVersion(BaseObject* obj) const
     {

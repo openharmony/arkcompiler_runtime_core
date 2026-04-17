@@ -27,7 +27,6 @@
 #include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/objects/base_object.h"
-#include "common_interfaces/profiler/heap_profiler_listener.h"
 
 namespace common_vm {
 class Allocator;
@@ -64,7 +63,6 @@ public:
     static void throwOOM()
     {
         // Maybe we need to add heapdump logic here
-        HeapProfilerListener::GetInstance().OnOutOfMemoryEventCb();
         LOG_COMMON(FATAL) << "Out of Memory, abort.";
         UNREACHABLE_CC();
     }
@@ -175,8 +173,6 @@ public:
     virtual void SetGCPhase(const GCPhase phase) = 0;
 
     virtual bool ForEachObject(const std::function<void(BaseObject*)>&, bool safe) = 0;
-
-    virtual void VisitStaticRoots(const RefFieldVisitor& visitor) = 0;
 
     virtual FinalizerProcessor& GetFinalizerProcessor() = 0;
 
