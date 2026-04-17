@@ -16,8 +16,10 @@
 /*---
 desc: The qualified name does not exist, compilation error.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0143: Unresolved reference A
 ---*/
 
 function main(): void {

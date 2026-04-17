@@ -16,10 +16,12 @@
 /*---
 desc: Type of a named reference expression is the type of the entity a named reference refers to.
 files:
-- ./named_reference_export4.ets
+    - ./named_reference_export4.ets
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0349: Namespace 'Shapes' is already defined.
 ---*/
 
 import {Shapes} from "./named_reference_export4.ets"
@@ -27,7 +29,5 @@ import {Shapes} from "./named_reference_export4.ets"
 class Shapes {}
 
 function main() {
-
   let s = new Shapes;
-  
 }

@@ -16,10 +16,12 @@
 {% for case in assertions %}
 
 /*---
- desc: A function reference refers to a declared or imported function.
-       A compile-time error occurs if an overload alias is used in a named reference
- tags: [compile-only, negative]
-
+desc: >-
+    A function reference refers to a declared or imported function.
+    A compile-time error occurs if an overload alias is used in a named reference
+tags: [compile-only, negative]
+expected_out: |-
+    {{case.expected_out}}
 ---*/
 
 function fooE(): void {}
@@ -27,6 +29,6 @@ function fooS(x: string): void {}
 
 overload foo { fooE, fooS }
 
-{{case.assertion|indent}}
+{{case.assertion}}
 
 {% endfor %}

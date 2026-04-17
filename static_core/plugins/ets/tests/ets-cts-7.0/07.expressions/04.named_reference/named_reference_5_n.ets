@@ -16,10 +16,12 @@
 /*---
 desc: Reference to undefined variables.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0143: Unresolved reference x
 ---*/
 
 function main(): void {
-  let y: number = x;
+    let y: number = x;
 }

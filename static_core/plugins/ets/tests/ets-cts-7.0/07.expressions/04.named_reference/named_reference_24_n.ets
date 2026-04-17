@@ -16,8 +16,11 @@
 /*---
 desc: Incorrect function parameters.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0124: Expected 1 arguments, got 0.
+    Semantic error ESE0127: No matching call signature for foo()
 ---*/
 
 function foo(param: number): number {

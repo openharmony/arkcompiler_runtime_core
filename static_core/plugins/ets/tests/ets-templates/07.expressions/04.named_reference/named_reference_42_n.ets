@@ -16,8 +16,10 @@
 /*---
 desc: Overloading of functions causes ambiguity errors.
 tags:
-- negative
-- compile-only
+    - negative
+    - compile-only
+expected_out: |-
+    Semantic error ESE0307: Overloaded method is used as value
 ---*/
 
 function bar(p: string) {
