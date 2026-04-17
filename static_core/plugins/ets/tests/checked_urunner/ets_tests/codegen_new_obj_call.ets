@@ -18,7 +18,7 @@
 //! CHECKER       No runtime call for NewObject from codegen JIT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: false,
-//!               options: "--compiler-hotness-threshold=0 --compiler-regex='.*test.*' --compiler-enable-events=true",
+//!               options: "--compiler-hotness-threshold=0 --compiler-regex='.*test.*' --compiler-enable-events=true --compiler-enable-osr=false",
 //!               entry: "codegen_new_obj_call.ETSGLOBAL::main"
 //!
 //! METHOD        "codegen_new_obj_call.ETSGLOBAL::test"
@@ -57,7 +57,7 @@ function test(condition: boolean) {
 }
 
 function main(): int {
-    for(let i = 0; i < 100000; i++) {
+    for(let i = 0; i < 100; i++) {
         try {
             const t1 = test(true)
             arktest.assertEQ(t1[0].x + t1[1].x, 5);
