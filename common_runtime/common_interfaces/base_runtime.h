@@ -38,16 +38,10 @@
 #include "common_interfaces/vm_interface.h"
 
 namespace common_vm {
-class BaseStringTableImpl;
-template <typename Impl>
-class BaseStringTableInterface;
-using StringTableCleanUpCallback = std::function<void(void)>;
-using StringTableProcessCallback = std::function<void(const WeakRefFieldVisitor &)>;
 class BaseObject;
 class HeapManager;
 class Mutator;
 class MutatorManager;
-class BaseClassRoots;
 
 // Used by Collector::RequestGC.
 // It tells why GC is triggered.
@@ -65,7 +59,6 @@ enum GCReason : uint32_t {
     GC_REASON_HEU_SYNC,                // Just wait one gc request to reduce heap fragmentation.
     GC_REASON_NATIVE_SYNC,             // Just wait one gc request to reduce native heap consumption.
     GC_REASON_FORCE,                   // force gc is triggered when runtime triggers gc actively.
-    GC_REASON_APPSPAWN,                // appspawn gc is triggered when prefork.
     GC_REASON_XREF,                    // force gc the whole heap include XRef.
     GC_REASON_BACKGROUND,              // trigger gc caused by switching to background.
     GC_REASON_HINT,                    // trigger gc caused by hint gc.
@@ -76,7 +69,7 @@ enum GCReason : uint32_t {
 
 constexpr inline const char *GCREASON_STRING[] = {
     "user",  "oom",      "backup", "heuristic", "young", "native_alloc", "heuristic_sync", "native_alloc_sync",
-    "force", "appspawn", "xref",   "backgound", "hint",  "idle",
+    "force", "xref",   "backgound", "hint",  "idle",
 };
 
 constexpr const char *GCReasonToString(GCReason reason)
@@ -161,7 +154,6 @@ public:
     void RemoveGCListener(GCListener *listener);
 
     // Need refactor, move to other file
-    static void WriteRoot(void *obj);
     static void WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator);
     static void *ReadBarrier(void *obj, void *field);
     static void *ReadBarrier(void **field);
@@ -201,49 +193,11 @@ public:
         return *heapManager_;
     }
 
-    BaseClassRoots &GetBaseClassRoots()
-    {
-        return *baseClassRoots_;
-    }
-
-    BaseStringTableInterface<BaseStringTableImpl> &GetStringTable()
-    {
-        return *stringTable_;
-    }
-
-    void StringTableCleanUp()
-    {
-        if (stringTableCleanUpCallback_) {
-            stringTableCleanUpCallback_();
-        }
-    }
-
-    void SetStringTableCleanUpCallback(StringTableCleanUpCallback callback)
-    {
-        stringTableCleanUpCallback_ = callback;
-    }
-
-    void ProcessStringTable(const WeakRefFieldVisitor &visitor)
-    {
-        if (stringTableProcessCallback_) {
-            stringTableProcessCallback_(visitor);
-        }
-    }
-
-    void SetStringTableProcessCallback(StringTableProcessCallback callback)
-    {
-        stringTableProcessCallback_ = callback;
-    }
-
 private:
     RuntimeParam param_ {};
 
     HeapManager *heapManager_ = nullptr;
     MutatorManager *mutatorManager_ = nullptr;
-    BaseClassRoots *baseClassRoots_ = nullptr;
-    BaseStringTableInterface<BaseStringTableImpl> *stringTable_ = nullptr;
-    StringTableCleanUpCallback stringTableCleanUpCallback_ {};
-    StringTableProcessCallback stringTableProcessCallback_ {};
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;

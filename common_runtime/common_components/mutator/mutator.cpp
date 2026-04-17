@@ -18,7 +18,6 @@
 #include <stack>
 #include <unistd.h>
 
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/common/type_def.h"
 #include "mutator/satb_buffer.h"
 #if defined(_WIN64)
@@ -98,13 +97,9 @@ void Mutator::HandleSuspensionRequest()
             SuspendForStw();
             if (HasSuspensionRequest(SUSPENSION_FOR_GC_PHASE)) {
                 TransitionGCPhase(true);
-            } else if (HasSuspensionRequest(SUSPENSION_FOR_CPU_PROFILE)) {
-                TransitionToCpuProfile(true);
             }
         } else if (HasSuspensionRequest(SUSPENSION_FOR_GC_PHASE)) {
             TransitionGCPhase(true);
-        } else if (HasSuspensionRequest(SUSPENSION_FOR_CPU_PROFILE)) {
-            TransitionToCpuProfile(true);
         } else if (HasSuspensionRequest(SUSPENSION_FOR_EXIT)) {
             // CC-OFFNXT(G.CTL.03): required by program logic
             while (true) {
@@ -129,10 +124,6 @@ void Mutator::HandleSuspensionRequest()
 
 void Mutator::HandleGCCallback()
 {
-    void *vm = GetEcmaVMPtr();
-    if (vm != nullptr) {
-        JSGCCallback(vm);
-    }
     BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
 }
 
@@ -307,19 +298,6 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
         [m = this, newPhase](VMInterface *vm) { m->UpdateReadBarrierEntrypoint(newPhase); });
     // Clear mutator's suspend request after phase transition
     ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE);  // atomic seq-cst
-}
-
-inline void Mutator::HandleCpuProfile()
-{
-    LOG_COMMON(FATAL) << "Unresolved fatal";
-    UNREACHABLE_CC();
-}
-
-void Mutator::TransitionToCpuProfileExclusive()
-{
-    HandleCpuProfile();
-    SetSafepointActive(false);
-    ClearSuspensionFlag(SUSPENSION_FOR_CPU_PROFILE);
 }
 
 void PreRunManagedCode(Mutator *mutator, int layers, ThreadLocalData *threadData)

@@ -15,7 +15,6 @@
 
 #include "common_components/heap/space/large_space.h"
 #include "heap/allocator/region_manager.h"
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/heap/collector/collector.h"
 #include "common_components/heap/collector/marking_collector.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
@@ -60,9 +59,6 @@ size_t LargeSpace::CollectLargeGarbage()
             RegionDesc* del = region;
             region = region->GetNextRegion();
             largeRegionList_.DeleteRegion(del);
-            if (IsMachineCodeObject(reinterpret_cast<HeapAddress>(obj))) {
-                JitFortUnProt(del->GetRegionBaseSize(), reinterpret_cast<void*>(del->GetRegionBaseFast()));
-            }
             if (del->GetRegionSize() > RegionDesc::LARGE_OBJECT_RELEASE_THRESHOLD) {
                 garbageSize += regionManager_.ReleaseRegion(del);
             } else {

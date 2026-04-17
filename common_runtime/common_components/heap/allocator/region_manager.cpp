@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <unistd.h>
 
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/heap/allocator/region_desc.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"
@@ -258,12 +257,8 @@ static const char *RegionDescRegionTypeToString(RegionDesc::RegionType type)
         [static_cast<uint8_t>(RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION)] = "MONOSIZE_NONMOVABLE_REGION",
         [static_cast<uint8_t>(RegionDesc::RegionType::FULL_MONOSIZE_NONMOVABLE_REGION)] =
                                                             "FULL_MONOSIZE_NONMOVABLE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::RAW_POINTER_REGION)] = "RAW_POINTER_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::TL_RAW_POINTER_REGION)] = "TL_RAW_POINTER_REGION",
         [static_cast<uint8_t>(RegionDesc::RegionType::RECENT_LARGE_REGION)] = "RECENT_LARGE_REGION",
         [static_cast<uint8_t>(RegionDesc::RegionType::LARGE_REGION)] = "LARGE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::READ_ONLY_REGION)] = "READ_ONLY_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::APPSPAWN_REGION)] = "APPSPAWN_REGION",
     };
     ASSERT_LOGF(type < RegionDesc::RegionType::END_OF_REGION_TYPE, "Invalid region type");
     return enumStr[static_cast<uint8_t>(type)];

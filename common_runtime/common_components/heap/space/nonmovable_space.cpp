@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/heap/allocator/region_desc.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"

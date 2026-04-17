@@ -14,13 +14,11 @@
  */
 #include "common_components/heap/ark_collector/ark_collector.h"
 
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/log/log.h"
 #include "common_components/mutator/mutator_manager-inl.h"
 #include "common_components/heap/verification.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/ref_field.h"
-#include "common_interfaces/profiler/heap_profiler_listener.h"
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/regional_heap.h"
 
@@ -63,11 +61,6 @@ bool ArkCollector::TryUpdateRefFieldImpl(BaseObject* obj, RefField<>& field, Bas
     if (IsFromObject(fromObj)) { //LCOV_EXCL_BR_LINE
         if (copy) { //LCOV_EXCL_BR_LINE
             toObj = const_cast<ArkCollector*>(this)->TryForwardObject(fromObj);
-            if (toObj != nullptr) { //LCOV_EXCL_BR_LINE
-                HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(fromObj),
-                                                                reinterpret_cast<uintptr_t>(toObj),
-                                                                toObj->GetSize());
-            }
         } else { //LCOV_EXCL_BR_LINE
             toObj = FindToVersion(fromObj);
         }
@@ -116,30 +109,6 @@ bool ArkCollector::TryForwardRefField(BaseObject* obj, RefField<>& field, BaseOb
 {
     BaseObject* oldRef = nullptr;
     return TryUpdateRefFieldImpl<true>(obj, field, oldRef, newRef);
-}
-
-// this api untags current pointer as well as old pointer, caller should take care of this.
-bool ArkCollector::TryUntagRefField(BaseObject* obj, RefField<>& field, BaseObject*& target) const
-{
-    for (;;) { //LCOV_EXCL_BR_LINE
-        RefField<> oldRef(field);
-        if (!oldRef.IsTagged()) { //LCOV_EXCL_BR_LINE
-            return false;
-        }
-        target = oldRef.GetTargetObject();
-        RefField<> newRef(target);
-        if (field.CompareExchange(oldRef.GetFieldValue(), newRef.GetFieldValue())) { //LCOV_EXCL_BR_LINE
-            if (obj != nullptr) { //LCOV_EXCL_BR_LINE
-                DLOG(FIX, "untag obj %p<%p>(%zu) ref-field@%p: %#zx -> %#zx", obj, obj->GetTypeInfo(),
-                     obj->GetSize(), &field, oldRef.GetFieldValue(), newRef.GetFieldValue());
-            } else { //LCOV_EXCL_BR_LINE
-                DLOG(FIX, "untag ref@%p: %#zx -> %#zx", &field, oldRef.GetFieldValue(), newRef.GetFieldValue());
-            }
-            return true;
-        }
-    }
-
-    return false;
 }
 
 static void MarkingRefField(BaseObject *obj, BaseObject *targetObj, RefField<> &field,
@@ -313,31 +282,6 @@ void ArkCollector::FixObjectRefFields(BaseObject* obj) const
     obj->ForEachRefField(refFunc, refFunc);
 }
 
-BaseObject* ArkCollector::ForwardUpdateRawRef(ObjectRef& root)
-{
-    auto& refField = reinterpret_cast<RefField<>&>(root);
-    RefField<> oldField(refField);
-    BaseObject* oldObj = oldField.GetTargetObject();
-    DLOG(FIX, "try fix raw-ref @%p: %p", &root, oldObj);
-    if (IsFromObject(oldObj)) {
-        BaseObject* toVersion = TryForwardObject(oldObj);
-        CHECK_CC(toVersion != nullptr);
-        HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(oldObj),
-                                                        reinterpret_cast<uintptr_t>(toVersion),
-                                                        toVersion->GetSize());
-        RefField<> newField(toVersion);
-        // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
-        if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-            DLOG(FIX, "fix raw-ref @%p: %p -> %p", &root, oldObj, toVersion);
-            LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD raw ref @" << &root
-                                     << ": " << oldObj << " -> " << toVersion;
-            return toVersion;
-        }
-    }
-
-    return oldObj;
-}
-
 class RemarkAndPreforwardVisitor {
 public:
     RemarkAndPreforwardVisitor(LocalCollectStack &collectStack, ArkCollector *collector)
@@ -358,9 +302,6 @@ public:
                 Heap::throwOOM();
                 return;
             }
-            HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(oldObj),
-                                                            reinterpret_cast<uintptr_t>(toVersion),
-                                                            toVersion->GetSize());
             RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
@@ -493,9 +434,6 @@ void ArkCollector::PreforwardConcurrentRoots()
         if (IsFromObject(oldObj)) {
             BaseObject *toVersion = TryForwardObject(oldObj);
             ASSERT_LOGF(toVersion != nullptr, "TryForwardObject failed");
-            HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(oldObj),
-                                                            reinterpret_cast<uintptr_t>(toVersion),
-                                                            toVersion->GetSize());
             RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
@@ -514,7 +452,6 @@ void ArkCollector::PreforwardStaticWeakRoots()
 
     WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
     VisitWeakRoots(weakVisitor);
-    InvokeSharedNativePointerCallbacks();
     MutatorManager::Instance().VisitAllMutators([](Mutator& mutator) {
         // Request finalize callback in each vm-thread when gc finished.
         mutator.SetFinalizeRequest();
@@ -636,9 +573,6 @@ WeakRefFieldVisitor ArkCollector::GetWeakRefFieldVisitor()
         if (IsFromObject(oldObj)) {
             BaseObject *toVersion = TryForwardObject(oldObj);
             CHECK_CC(toVersion != nullptr);
-            HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(oldObj),
-                                                            reinterpret_cast<uintptr_t>(toVersion),
-                                                            toVersion->GetSize());
             RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be
             // a to-object), no need to retry.
@@ -660,9 +594,6 @@ RefFieldVisitor ArkCollector::GetPrefowardRefFieldVisitor()
         if (IsFromObject(oldObj)) {
             BaseObject *toVersion = TryForwardObject(oldObj);
             CHECK_CC(toVersion != nullptr);
-            HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(oldObj),
-                                                            reinterpret_cast<uintptr_t>(toVersion),
-                                                            toVersion->GetSize());
             RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be
             // a to-object), no need to retry.
@@ -702,7 +633,6 @@ void ArkCollector::PreforwardFlip()
     };
     STWParam stwParam{"final-mark"};
     MutatorManager::Instance().FlipMutators(stwParam, remarkAndForwardGlobalRoot, &forwardMutatorRoot);
-    InvokeSharedNativePointerCallbacks();
     GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
     AllocationBuffer* allocBuffer = AllocationBuffer::GetAllocBuffer();
     if (LIKELY_CC(allocBuffer != nullptr)) {
@@ -730,7 +660,6 @@ void ArkCollector::ConcurrentPreforward()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::ConcurrentPreforward", "");
     PreforwardConcurrentRoots();
-    ProcessStringTable();
 }
 
 void ArkCollector::PrepareFix()
@@ -748,15 +677,7 @@ void ArkCollector::PrepareFix()
         ScopedStopTheWorld stw(prepareFixStwParam);
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PrepareFix[STW]", "");
 
-#ifndef GC_STW_STRINGTABLE
-        BaseRuntime::GetInstance()->StringTableCleanUp();
-#endif
-
         GetGCStats().recordSTWTime(prepareFixStwParam.GetElapsedNs());
-    } else {
-#ifndef GC_STW_STRINGTABLE
-        BaseRuntime::GetInstance()->StringTableCleanUp();
-#endif
     }
 }
 
@@ -843,7 +764,6 @@ void ArkCollector::CollectGarbageWithXRef()
     if (isNotYoungGC) {
         CollectLargeGarbage();
     }
-    SweepThreadLocalJitFort();
 
     CopyFromSpace();
     WVerify::VerifyAfterForward(*this);
@@ -986,7 +906,6 @@ void ArkCollector::DoGarbageCollection()
         if (!isYoungGC) {
             CollectLargeGarbage();
         }
-        SweepThreadLocalJitFort();
 
         CopyFromSpace();
         WVerify::VerifyAfterForward(*this);
@@ -1026,7 +945,6 @@ void ArkCollector::DoGarbageCollection()
         if (!isYoungGC) {
             CollectLargeGarbage();
         }
-        SweepThreadLocalJitFort();
 
         CopyFromSpace();
         WVerify::VerifyAfterForward(*this);
@@ -1055,7 +973,6 @@ void ArkCollector::DoGarbageCollection()
         if (!isYoungGC) {
             CollectLargeGarbage();
         }
-        SweepThreadLocalJitFort();
 
         CopyFromSpace();
         ProcessReferencesAfterCopy();
@@ -1508,60 +1425,6 @@ CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam& param
     return rootSet;
 }
 
-void ArkCollector::ProcessStringTable()
-{
-#ifdef GC_STW_STRINGTABLE
-    return;
-#endif
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-        // no need to fix weak ref in young gc
-        return;
-    }
-
-    WeakRefFieldVisitor weakVisitor = [this](RefField<> &refField) -> bool {
-        auto isSurvivor = [this](BaseObject* oldObj) {
-            RegionDesc* region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(oldObj));
-            return (gcReason_ == GC_REASON_YOUNG && !region->IsInYoungSpace())
-                || region->IsMarkedObject(oldObj)
-                || region->IsNewObjectSinceMarking(oldObj)
-                || region->IsToRegion();
-        };
-
-        RefField<> oldField(refField);
-        BaseObject *oldObj = oldField.GetTargetObject();
-        if (oldObj == nullptr) {
-            return false;
-        }
-        if (!isSurvivor(oldObj)) {
-            // CAS failure means some mutator or gc thread writes a new ref (must be
-            // a to-object), no need to retry.
-            RefField<> newField(nullptr);
-            if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                DLOG(FIX, "fix weak raw-ref @%p: %p -> %p", &refField, oldObj, nullptr);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "CLEAR string table weak ref @" << &refField
-                                         << ": " << oldObj << " -> null";
-            }
-            return false;
-        }
-        DLOG(FIX, "visit weak raw-ref @%p: %p", &refField, oldObj);
-        if (IsFromObject(oldObj)) {
-            BaseObject *toVersion = TryForwardObject(oldObj);
-            CHECK_CC(toVersion != nullptr);
-            RefField<> newField(toVersion);
-            // CAS failure means some mutator or gc thread writes a new ref (must be
-            // a to-object), no need to retry.
-            if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                DLOG(FIX, "fix weak raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "FIX string table ref @" << &refField
-                                         << ": " << oldObj << " -> " << toVersion;
-            }
-        }
-        return true;
-    };
-    BaseRuntime::GetInstance()->ProcessStringTable(weakVisitor);
-}
-
-
 void ArkCollector::ProcessFinalizers()
 {
     std::function<bool(BaseObject*)> finalizable = [this](BaseObject* obj) { return !IsMarkedObject(obj); };
@@ -1573,11 +1436,6 @@ void ArkCollector::ProcessFinalizers()
 BaseObject* ArkCollector::ForwardObject(BaseObject* obj)
 {
     BaseObject* to = TryForwardObject(obj);
-    if (to != nullptr) {
-        HeapProfilerListener::GetInstance().OnMoveEvent(reinterpret_cast<uintptr_t>(obj),
-                                                        reinterpret_cast<uintptr_t>(to),
-                                                        to->GetSize());
-    }
     return (to != nullptr) ? to : obj;
 }
 
@@ -1635,7 +1493,7 @@ BaseObject* ArkCollector::CopyObjectAfterExclusive(BaseObject* obj)
         LOG_COMMON(FATAL) << "forward free obj: " << obj <<
             "is survived: " << (IsSurvivedObject(obj) ? "true" : "false");
     }
-    BaseObject* toObj = fwdTable_.RouteObject(obj, size);
+    BaseObject* toObj = reinterpret_cast<RegionalHeap&>(theAllocator_).RouteObject(obj, size);
     if (toObj == nullptr) {
         // ConcurrentGC
         obj->UnlockExclusive(BaseStateWord::ForwardState::NORMAL);
@@ -1673,13 +1531,8 @@ void ArkCollector::CollectSmallSpace()
     {
         COMMON_PHASE_TIMER("CollectFromSpaceGarbage");
         stats.collectedBytes += stats.smallGarbageSize;
-        if (gcReason_ == GC_REASON_APPSPAWN) {
-            VLOG(DEBUG, "APPSPAWN GC Collect");
-            space.CollectAppSpawnSpaceGarbage();
-        } else {
-            space.CollectFromSpaceGarbage();
-            space.HandlePromotion();
-        }
+        space.CollectFromSpaceGarbage();
+        space.HandlePromotion();
     }
 
     size_t candidateBytes = stats.fromSpaceSize + stats.nonMovableSpaceSize + stats.largeSpaceSize;

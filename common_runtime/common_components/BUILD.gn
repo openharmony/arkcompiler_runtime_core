@@ -23,7 +23,6 @@ crt_sources = [
   "common/run_type.cpp",
   "common_runtime/base_runtime.cpp",
   "common_runtime/base_runtime_param.cpp",
-  "common_runtime/hooks.cpp",
   "heap/allocator/allocator.cpp",
   "heap/allocator/fix_heap.cpp",
   "heap/allocator/memory_map.cpp",
@@ -68,9 +67,6 @@ crt_sources = [
   "mutator/thread_local.cpp",
   "objects/base_object.cpp",
   "objects/base_string.cpp",
-  "objects/base_string_table.cpp",
-  "objects/composite_base_class.cpp",
-  "profiler/heap_profiler_listener.cpp",
   "taskpool/runner.cpp",
   "taskpool/task_queue.cpp",
   "taskpool/taskpool.cpp",
@@ -83,7 +79,6 @@ if (is_mingw) {
     "platform/windows/thread.cpp",
   ]
 } else {
-  crt_sources += [ "platform/unix/map.cpp" ]
   if (is_mac) {
     crt_sources += [
       "platform/unix/mac/cpu.cpp",

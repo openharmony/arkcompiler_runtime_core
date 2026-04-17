@@ -41,56 +41,6 @@ BaseObject* IdleBarrier::AtomicReadRefField(BaseObject* obj, RefField<true>& fie
     return target;
 }
 
-void IdleBarrier::ReadStruct(HeapAddress dst, BaseObject* obj, HeapAddress src, size_t size) const
-{
-    LOGF_CHECK(memcpy_s(reinterpret_cast<void*>(dst), size, reinterpret_cast<void*>(src), size) == EOK) <<
-        "read struct memcpy_s failed";
-}
-
-void IdleBarrier::AtomicWriteRefField(BaseObject* obj, RefField<true>& field, BaseObject* newRef,
-                                      MemoryOrder order) const
-{
-    if (obj != nullptr) {
-        DLOG(BARRIER, "atomic write obj %p<%p>(%zu) ref@%p: %p", obj, obj->GetTypeInfo(), obj->GetSize(), &field,
-             newRef);
-    } else {
-        DLOG(BARRIER, "atomic write static ref@%p: %p", &field, newRef);
-    }
-    field.SetTargetObject(newRef, order);
-}
-
-BaseObject* IdleBarrier::AtomicSwapRefField(BaseObject* obj, RefField<true>& field, BaseObject* newRef,
-                                            MemoryOrder order) const
-{
-    // newRef must be the latest versions.
-    HeapAddress oldValue = field.Exchange(newRef, order);
-    RefField<> oldField(oldValue);
-    BaseObject* oldRef = ReadRefField(nullptr, oldField);
-    DLOG(BARRIER, "atomic swap obj %p<%p>(%zu) ref@%p: old %#zx(%p), new %#zx(%p)", obj, obj->GetTypeInfo(),
-         obj->GetSize(), &field, oldValue, oldRef, field.GetFieldValue(order), newRef);
-    return oldRef;
-}
-
-bool IdleBarrier::CompareAndSwapRefField(BaseObject* obj, RefField<true>& field, BaseObject* oldRef,
-                                         BaseObject* newRef, MemoryOrder sOrder, MemoryOrder fOrder) const
-{
-    HeapAddress oldFieldValue = field.GetFieldValue(std::memory_order_seq_cst);
-    RefField<false> oldField(oldFieldValue);
-    BaseObject* oldVersion = ReadRefField(nullptr, oldField);
-
-    // oldRef and newRef must be the latest versions.
-    while (oldVersion == oldRef) {
-        RefField<> newField(newRef);
-        if (field.CompareExchange(oldFieldValue, newField.GetFieldValue(), sOrder, fOrder)) {
-            return true;
-        }
-        oldFieldValue = field.GetFieldValue(std::memory_order_seq_cst);
-        RefField<false> tmp(oldFieldValue);
-        oldVersion = ReadRefField(nullptr, tmp);
-    }
-    return false;
-}
-
 void IdleBarrier::UpdateRememberSet(BaseObject* object, BaseObject* ref) const
 {
     DCHECK_CC(object != nullptr);
@@ -106,20 +56,6 @@ void IdleBarrier::UpdateRememberSet(BaseObject* object, BaseObject* ref) const
     }
 }
 
-void IdleBarrier::WriteRoot(BaseObject *obj) const
-{
-    DLOG(BARRIER, "write root obj %p", obj);
-}
-
-void IdleBarrier::WriteRefField(BaseObject* obj, RefField<false>& field, BaseObject* ref) const
-{
-    DLOG(BARRIER, "write obj %p ref@%p: %p => %p", obj, &field, field.GetTargetObject(), ref);
-    if (Heap::IsTaggedObject((HeapAddress)ref)) {
-        UpdateRememberSet(obj, ref);
-    }
-    field.SetTargetObject(ref);
-}
-
 void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
 {
     if (!Heap::IsTaggedObject((HeapAddress)ref)) {
@@ -127,36 +63,5 @@ void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false
     }
     UpdateRememberSet(obj, ref);
     DLOG(BARRIER, "write obj %p ref@%p: %p => %p", obj, &field, field.GetTargetObject(), ref);
-}
-
-void IdleBarrier::WriteStruct(BaseObject* obj, HeapAddress dst, size_t dstLen, HeapAddress src, size_t srcLen) const
-{
-    CHECK_CC(memcpy_s(reinterpret_cast<void*>(dst), dstLen, reinterpret_cast<void*>(src), srcLen) == EOK);
-#if defined(COMMON_TSAN_SUPPORT)
-    CHECK_CC(srcLen == dstLen);
-    Sanitizer::TsanWriteMemoryRange(reinterpret_cast<void*>(dst), dstLen);
-    Sanitizer::TsanReadMemoryRange(reinterpret_cast<void*>(src), srcLen);
-#endif
-}
-
-void IdleBarrier::WriteStaticRef(RefField<false>& field, BaseObject* ref) const { WriteRefField(nullptr, field, ref); }
-
-void IdleBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MIndex dstSize, BaseObject* srcObj,
-                                  HeapAddress srcField, MIndex srcSize) const
-{
-#ifndef NDEBUG
-    if (!dstObj->HasRefField()) {
-        LOG_COMMON(FATAL) << "array " << dstObj << " doesn't have class-type element";
-        return;
-    }
-#endif
-
-    LOGF_CHECK(memmove_s(reinterpret_cast<void*>(dstField), dstSize, reinterpret_cast<void*>(srcField), srcSize) ==
-        EOK) << "memmove_s failed";
-
-#if defined(COMMON_TSAN_SUPPORT)
-    Sanitizer::TsanWriteMemoryRange(reinterpret_cast<void*>(dstField), dstSize);
-    Sanitizer::TsanReadMemoryRange(reinterpret_cast<void*>(srcField), srcSize);
-#endif
 }
 } // namespace common_vm

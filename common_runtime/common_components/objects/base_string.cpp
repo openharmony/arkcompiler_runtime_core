@@ -17,8 +17,6 @@
 #include "common_interfaces/objects/string/base_string-inl.h"
 #include "common_interfaces/objects/utils/utf_utils.h"
 #include "common_components/base/utf_helper.h"
-#include "common_components/platform/string_hash.h"
-#include "common_components/platform/string_hash_helper.h"
 
 #include <codecvt>
 #include <locale>
@@ -35,21 +33,6 @@ size_t UtfUtils::ConvertRegionUtf16ToLatin1(const uint16_t *utf16In, uint8_t *la
                                             size_t latin1Len)
 {
     return utf_helper::ConvertRegionUtf16ToLatin1(utf16In, latin1Out, utf16Len, latin1Len);
-}
-
-// To change the hash algorithm of BaseString, please modify BaseString::CalculateConcatHashCode
-// and BaseStringHashHelper::ComputeHashForDataPlatform simultaneously!!
-template <typename T>
-uint32_t ComputeHashForDataInternal(const T *data, size_t size, uint32_t hashSeed)
-{
-    if (size <= static_cast<size_t>(StringHash::MIN_SIZE_FOR_UNROLLING)) {
-        uint32_t hash = hashSeed;
-        for (uint32_t i = 0; i < size; i++) {
-            hash = (hash << static_cast<uint32_t>(StringHash::HASH_SHIFT)) - hash + data[i];
-        }
-        return hash;
-    }
-    return StringHashHelper::ComputeHashForDataPlatform(data, size, hashSeed);
 }
 
 // static

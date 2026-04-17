@@ -23,7 +23,6 @@
 #endif
 
 #include "common_components/platform/os.h"
-#include "common_components/common_runtime/hooks.h"
 #include "common_components/base/sys_call.h"
 #include "common_components/log/log.h"
 
@@ -130,7 +129,6 @@ MemoryMap* MemoryMap::MapMemoryAlignInner4G(uint64_t reqSize, uint64_t initSize,
     munmap(rightUnmapAddr, rightUnmapSize);
 #endif
 #endif
-    SetBaseAddress(baseAddr);
 
     bool failure = false;
 #if defined(_WIN64) || defined(__APPLE__)

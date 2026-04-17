@@ -61,7 +61,7 @@ bool CMCGCAdapter<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
             type = common_vm::GCType::GC_TYPE_YOUNG;
             break;
         case GCTaskCause::PYGOTE_FORK_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_APPSPAWN;
+            reason = common_vm::GCReason::GC_REASON_USER;
             break;
         case GCTaskCause::STARTUP_COMPLETE_CAUSE:
             reason = common_vm::GCReason::GC_REASON_HINT;

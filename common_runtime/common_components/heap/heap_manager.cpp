@@ -48,21 +48,4 @@ void HeapManager::MarkJitFortMemInstalled(void *vm, void *obj)
     RegionalHeap& regionalHeap = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
     regionalHeap.MarkJitFortMemInstalled(vm, reinterpret_cast<BaseObject*>(obj));
 }
-
-void HeapManager::SetReadOnlyToROSpace()
-{
-    RegionalHeap& regionalHeap = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
-    regionalHeap.SetReadOnlyToROSpace();
-}
-
-void HeapManager::ClearReadOnlyFromROSpace()
-{
-    RegionalHeap& regionalHeap = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
-    regionalHeap.ClearReadOnlyFromROSpace();
-}
-
-bool HeapManager::IsInROSpace(BaseObject *obj)
-{
-    return RegionalHeap::IsReadOnlyObject(obj);
-}
 } // namespace common_vm
