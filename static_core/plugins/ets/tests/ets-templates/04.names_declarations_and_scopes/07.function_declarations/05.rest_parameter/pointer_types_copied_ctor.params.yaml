@@ -1,0 +1,149 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # 0. mixed params: regular parameter before tuple rest
+  - desc: >-
+      Constructor with regular parameters before tuple rest parameter
+      should not modify original tuple
+    code: |-
+      let arg: [number, string] = [10, 'hello']
+      class A {
+          public sum: number
+          constructor(x: number, ...rest: [number, string]) {
+              rest[0] = 0
+              this.sum = x
+          }
+      }
+      let a = new A(5, ...arg)
+      arktest.assertEQ(a.sum, 5, `constructor did not receive regular parameter correctly`)
+      arktest.assertEQ(arg[0], 10, `constructor with mixed params modified original tuple`)
+
+  # 1. 4-element tuple
+  - desc: >-
+      Constructor with 4-element tuple rest parameter
+      should not modify original tuple
+    code: |-
+      let arg: [number, string, boolean, number] = [1, 'abc', true, 42]
+      class A {
+          constructor(...rest: [number, string, boolean, number]) {
+              rest[0] = 999
+              rest[2] = false
+          }
+      }
+      new A(...arg)
+      arktest.assertEQ(arg[0], 1, `constructor modified multi-element tuple element 0`)
+      arktest.assertEQ(arg[2], true, `constructor modified multi-element tuple element 2`)
+
+  # 2. repeated calls with same tuple
+  - desc: >-
+      Multiple constructor calls with same tuple should each
+      get independent copies
+    code: |-
+      let arg: [number, string] = [1, 'abc']
+      class A {
+          constructor(...rest: [number, string]) {
+              rest[0] = rest[0] + 100
+          }
+      }
+      new A(...arg)
+      new A(...arg)
+      new A(...arg)
+      arktest.assertEQ(arg[0], 1, `repeated constructor calls modified original tuple`)
+
+  # 3. inheritance: subclass constructor with tuple rest
+  - desc: >-
+      Subclass constructor with tuple rest parameter should
+      not modify original tuple
+    code: |-
+      class Base {
+          val: number
+          constructor(v: number) {
+              this.val = v
+          }
+      }
+      let arg: [number, string] = [42, 'test']
+      class Derived extends Base {
+          constructor(...rest: [number, string]) {
+              super(rest[0])
+              rest[0] = 0
+          }
+      }
+      let d = new Derived(...arg)
+      arktest.assertEQ(arg[0], 42, `subclass constructor modified original tuple`)
+      arktest.assertEQ(d.val, 42, `subclass did not pass correct value to super`)
+
+  # 4. constructor call inside instance method
+  - desc: >-
+      Creating object with tuple rest parameter inside instance
+      method should not modify original tuple
+    code: |-
+      class A {
+          constructor(...rest: [number, string]) {
+              rest[0] = 0
+          }
+      }
+      class B {
+          public foo(t: [number, string]): void {
+              new A(...t)
+          }
+      }
+      let arg: [number, string] = [7, 'xyz']
+      new B().foo(arg)
+      arktest.assertEQ(arg[0], 7, `constructor call inside method modified original tuple`)
+
+  # 5. read before write
+  - desc: >-
+      Constructor reads rest parameter values before modifying them,
+      both should work correctly
+    code: |-
+      class A {
+          public x: number
+          public y: string
+          constructor(...rest: [number, string]) {
+              this.x = rest[0]
+              this.y = rest[1]
+              rest[0] = 999
+              rest[1] = 'modified'
+          }
+      }
+      let arg: [number, string] = [55, 'original']
+      let a = new A(...arg)
+      arktest.assertEQ(a.x, 55, `constructor did not read correct value before modification`)
+      arktest.assertEQ(a.y, 'original', `constructor did not read correct string before modification`)
+      arktest.assertEQ(arg[0], 55, `original tuple element 0 was modified after read`)
+      arktest.assertEQ(arg[1], 'original', `original tuple element 1 was modified after read`)
+
+  # 6. reference type elements - shallow copy
+  - desc: >-
+      Constructor with reference type tuple rest parameter should
+      not modify original tuple references
+    code: |-
+      class Obj {
+          val: number
+          constructor(v: number) {
+              this.val = v
+          }
+      }
+      let o1 = new Obj(1)
+      let o2 = new Obj(2)
+      let arg: [Obj, Obj] = [o1, o2]
+      class A {
+          constructor(...rest: [Obj, Obj]) {
+              rest[0] = new Obj(999)
+          }
+      }
+      new A(...arg)
+      arktest.assertEQ(arg[0].val, 1, `constructor replaced reference in original tuple`)
+      arktest.assertEQ(arg[1].val, 2, `constructor modified untouched element in original tuple`)
