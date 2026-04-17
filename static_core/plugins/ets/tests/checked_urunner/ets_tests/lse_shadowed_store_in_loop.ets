@@ -15,19 +15,25 @@
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash
 //! RUN          force_jit: true,
-//!              options: "--compiler-regex='.*testLoopStore.*' --compiler-inlining-blacklist='leakRef'",
+//!              options: "--compiler-regex='.*testLoopStore.*' " +
+//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef'",
 //!              entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
+//! INST_NOT     /CallStatic\.Inlined.*leakRef/
+//! INST         /CallStatic.*leakRef/
 //! INST_COUNT   /StoreObject.*Container\.x/, 3
 //! PASS_AFTER   "LSE"
 //! INST_COUNT   /StoreObject.*Container\.x/, 2
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash (AOT)
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*testLoopStore.*' --compiler-inlining-blacklist='leakRef'"
+//! RUN_PAOC     options: "--compiler-regex='.*testLoopStore.*' " +
+//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef'"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
+//! INST_NOT     /CallStatic\.Inlined.*leakRef/
+//! INST         /CallStatic.*leakRef/
 //! INST_COUNT   /StoreObject.*Container\.x/, 3
 //! PASS_AFTER   "LSE"
 //! INST_COUNT   /StoreObject.*Container\.x/, 2
@@ -35,10 +41,13 @@
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash (AOT-PGO)
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PGO_PROF entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main --compiler-inlining-blacklist='leakRef'"
-//! RUN_PGO_PAOC options: "--compiler-regex='.*testLoopStore.*'"
+//! RUN_PGO_PROF entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
+//! RUN_PGO_PAOC options: "--compiler-regex='.*testLoopStore.*' " +
+//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef'"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
+//! INST_NOT     /CallStatic\.Inlined.*leakRef/
+//! INST         /CallStatic.*leakRef/
 //! INST_COUNT   /StoreObject.*Container\.x/, 3
 //! PASS_AFTER   "LSE"
 //! INST_COUNT   /StoreObject.*Container\.x/, 2

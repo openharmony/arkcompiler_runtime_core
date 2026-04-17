@@ -26,7 +26,7 @@
 //! PASS_AFTER_NEXT "RegAllocLinearScan"
 
 class TestClass {
-    failed: boolean = false
+    public failed: boolean = false
 
     testCallee(a: int, b: int): void {
         console.log(`testCallee called with ${a}, ${b}`)
@@ -38,11 +38,11 @@ class TestClass {
 }
 
 function failure() {
-    console.log("failure")
+    console.log('failure')
 }
 
 function success() {
-    console.log("success")
+    console.log('success')
 }
 
 function testCaller(): void {
