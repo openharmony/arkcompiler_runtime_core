@@ -1,0 +1,74 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
+
+#include "common_interfaces/objects/base_object.h"
+#include "common_components/common/type_def.h"
+#include <vector>
+
+namespace common_vm {
+class Collector;
+// Barrier is the base class to define read/write barriers.
+class Barrier {
+public:
+    static constexpr uint64_t TAG_WEAK = 0x01ULL;
+    explicit Barrier(Collector &collector) : theCollector(collector) {}
+    virtual ~Barrier() {}
+
+    virtual BaseObject *ReadRefField(BaseObject *obj, RefField<false> &field) const;
+    virtual BaseObject *ReadStaticRef(RefField<false> &field) const;
+
+    virtual void PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const;
+    virtual void WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const;
+
+    virtual BaseObject *AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const;
+
+protected:
+    class LocalRefFieldContainer {
+    public:
+        // multi-thread unsafe.
+        void Push(RefField<> *ref)
+        {
+            if (size_ >= CACHE_CAPACITY) {
+                excessive_.push_back(ref);
+            } else {
+                cache_[size_] = ref;
+            }
+            size_++;
+        }
+        void VisitRefField(const RefFieldVisitor &visitor)
+        {
+            size_t cacheSize = size_ < CACHE_CAPACITY ? size_ : CACHE_CAPACITY;
+            for (size_t i = 0; i != cacheSize; ++i) {
+                visitor(*cache_[i]);
+            }
+            for (auto *ref : excessive_) {
+                visitor(*ref);
+            }
+        }
+
+    private:
+        static constexpr size_t CACHE_CAPACITY = 10;
+        RefField<> *cache_[CACHE_CAPACITY] {nullptr};
+        size_t size_ {0};
+        std::vector<RefField<> *> excessive_;
+    };
+    Collector &theCollector;
+};
+}  // namespace common_vm
+
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H

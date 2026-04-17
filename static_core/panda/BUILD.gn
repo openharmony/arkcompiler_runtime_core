@@ -39,9 +39,6 @@ ohos_executable("arkts_bin") {
     "$ark_root/platforms/target_defaults:arktarget_options",
     "$ark_root/runtime:libarkruntime",
   ]
-  if (ark_use_common_runtime) {
-    deps += [ "$common_runtime_root:libcommon_runtime" ]
-  }
   external_deps = [ sdk_libc_secshared_dep ]
 
   output_name = "ark"

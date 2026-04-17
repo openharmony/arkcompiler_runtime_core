@@ -34,7 +34,7 @@ ohos_static_library("arkbacktrace") {
     include_dirs = [
         "$ark_root",
         "$ark_root/../",
-        "$ark_root/../common_runtime/common_interfaces",
+        "$ark_root/runtime/mem/gc/cmc/common_interfaces",
         "$ark_root/runtime/include",
         "$ark_root/runtime/tooling/backtrace",
         "$target_gen_dir",

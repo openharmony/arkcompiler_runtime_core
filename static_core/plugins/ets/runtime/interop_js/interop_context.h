@@ -42,6 +42,7 @@
 
 #include <node_api.h>
 #include <unordered_map>
+#include <mutex>
 
 namespace ark {
 

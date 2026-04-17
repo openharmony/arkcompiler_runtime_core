@@ -64,7 +64,7 @@ config("arkruntime_public_config") {
   ]
   configs += plugin_runtime_configs
   if (defined(ark_static_standalone_build) && ark_static_standalone_build) {
-    include_dirs += [ "$ark_root/../common_runtime" ]
+    include_dirs += [ "$ark_root/runtime/mem/gc/cmc" ]
   } else {
     configs += [ "$common_runtime_root:common_runtime_public_config" ]
   }
@@ -683,7 +683,7 @@ ohos_shared_library("libarkruntime") {
   }
 
   if (ark_use_common_runtime) {
-    deps += [ "$common_runtime_root:libcommon_runtime" ]
+    deps += [ "$common_runtime_root/common_components:libarkcommon_runtime" ]
   }
 
   if (!(ark_standalone_build || ark_static_standalone_build)) {
@@ -733,7 +733,7 @@ ohos_shared_library("libarkruntime_host") {
   }
 
   if (ark_use_common_runtime) {
-    deps += [ "$common_runtime_root:libcommon_runtime" ]
+    deps += [ "$common_runtime_root/common_components:libarkcommon_runtime" ]
   }
 
   if (!(ark_standalone_build || ark_static_standalone_build)) {

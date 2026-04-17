@@ -71,7 +71,7 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
     "$abckit_root:abckit_config",
   ]
   if (ark_use_common_runtime) {
-    configs += [ "//arkcompiler/runtime_core/common_runtime:common_runtime_public_config" ]
+    configs += [ "//arkcompiler/runtime_core/static_core/runtime/mem/gc/cmc:common_runtime_public_config" ]
   }
 
   deps = [ "$ark_root_static/compiler:libarktscompiler" ]

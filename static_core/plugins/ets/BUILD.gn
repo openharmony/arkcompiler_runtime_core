@@ -228,7 +228,7 @@ config("runtime") {
     "$ark_root/libarkfile:arkfile_public_config",
   ]
   if (defined(ark_static_standalone_build) && ark_static_standalone_build) {
-    include_dirs += [ "$ark_root/../common_runtime" ]
+    include_dirs += [ "$ark_root/runtime/mem/gc/cmc" ]
   } else {
     configs += [ "$common_runtime_root:common_runtime_public_config" ]
   }
