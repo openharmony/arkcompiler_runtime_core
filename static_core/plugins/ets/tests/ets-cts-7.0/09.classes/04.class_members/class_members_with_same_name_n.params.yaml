@@ -13,7 +13,19 @@
 
 --- # List of valid class members
 class_members:
-  - {original: "public foo() {};", replicated: "public foo(): int {};"}
-  - {original: "public foo(): int {};", replicated: "protected foo(): int {};"}
-  - {original: "private foo(): int {};", replicated: "foo: int;"}
-  - {original: "static foo: int;", replicated: "static foo() {};" }
+  - original: "public foo() {};"
+    replicated: "public foo(): int {};"
+    exp_out: |-
+      "Semantic error ESE0130: Function foo is already declared."
+  - original: "public foo(): int {};"
+    replicated: "protected foo(): int {};"
+    exp_out: |-
+      "Semantic error ESE0130: Function foo is already declared."
+  - original: "private foo(): int {};"
+    replicated: "foo: int;"
+    exp_out: |-
+      "Semantic error ESE0351: Variable 'foo' has already been declared."
+  - original: "static foo: int;"
+    replicated: "static foo() {};"
+    exp_out: |-
+      "Semantic error ESE0351: Variable 'foo' has already been declared."

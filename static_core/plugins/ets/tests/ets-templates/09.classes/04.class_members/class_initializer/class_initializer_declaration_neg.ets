@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,6 +15,7 @@ limitations under the License.
 /*---
 desc: Cannot get access to variables created inside the initialization block
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0087: Property 'b' does not exist on type 'A'"
 ---*/
 
 class A {

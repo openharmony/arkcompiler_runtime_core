@@ -13,5 +13,13 @@
 
 --- # List of valid class members
 class_members:
-  - {member: "private foo(): int { return 5; }", call: "this.foo();", result: "5" }
-  - {member: "private result: int = 5;", call: "this.result;", result: "5" }
+  - member: "private foo(): int { return 5; }"
+    call: "this.foo();"
+    result: "5"
+    exp_out: |-
+      "Semantic error ESE0139: Signature foo(): Int is not visible here."
+  - member: "private result: int = 5;"
+    call: "this.result;"
+    result: "5"
+    exp_out: |-
+      "Semantic error ESE0293: Property result is not visible here."

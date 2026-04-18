@@ -23,10 +23,11 @@ desc: >-
         • Constructors, and
         • Class initializers.
 tags: [negative, compile-only]
+expected_out: {{cm.exp_out}}
 ---*/
 
 class A {
-  {{cm}}
+  {{cm.m}}
 }
 
 function main(): void {}

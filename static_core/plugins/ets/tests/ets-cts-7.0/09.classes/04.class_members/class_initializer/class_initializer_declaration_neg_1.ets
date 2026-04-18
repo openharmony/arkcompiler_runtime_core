@@ -15,6 +15,7 @@ limitations under the License.
 /*---
 desc: Class initializer inside class method
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0227: Unexpected token 'static'."
 ---*/
 
 class A {

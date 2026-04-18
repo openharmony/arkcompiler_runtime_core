@@ -18,11 +18,12 @@ limitations under the License.
 /*---
 desc: Class members appears twice
 tags: [negative, compile-only]
+expected_out: {{cm.exp_out}}
 ---*/
 
 final class A {
-  {{cm}}
-  {{cm}}
+  {{cm.m}}
+  {{cm.m}}
 }
 
 function main(): void {}

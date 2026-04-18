@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Missing catch
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0039: A try statement should contain either finally clause or at least one catch clause."
 ---*/
 
 abstract class A {

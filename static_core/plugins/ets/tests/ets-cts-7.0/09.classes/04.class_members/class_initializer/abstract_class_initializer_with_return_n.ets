@@ -18,6 +18,7 @@ desc: Class initializer with return statement.
 assert: >-
     It is a compile-time error if a return statement appears anywhere within a class initializer. Abstract class case.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0287: Unexpected return value."
 ---*/
 
 abstract class A {

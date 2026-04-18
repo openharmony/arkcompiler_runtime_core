@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Missing catch
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0039: A try statement should contain either finally clause or at least one catch clause."
 ---*/
 
 abstract class A {

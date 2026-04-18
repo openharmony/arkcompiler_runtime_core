@@ -18,6 +18,7 @@ desc: >-
     Class initializers (along with field initializers for static fields as described in Field Initialization) ensure
     that all static fields receive their initial values before they are used for the first time.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0280: Property 'a' might not have been initialized."
 ---*/
 
 class A {

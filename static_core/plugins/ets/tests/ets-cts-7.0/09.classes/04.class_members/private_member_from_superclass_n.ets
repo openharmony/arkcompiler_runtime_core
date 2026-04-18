@@ -19,6 +19,7 @@ limitations under the License.
 desc: class members
 assert: Members of a class that are declared private are not inherited by superclasses of that class.
 tags: [negative, compile-only]
+expected_out: {{cm.exp_out}}
 ---*/
 
 class A {

@@ -18,6 +18,7 @@ desc:  >-
       In addition, a compile-time error occurs if a class initializer contains the following:
       - Any type of a variable declared outside the class initializer.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0143: Unresolved reference a"
 ---*/
 
 class A {
