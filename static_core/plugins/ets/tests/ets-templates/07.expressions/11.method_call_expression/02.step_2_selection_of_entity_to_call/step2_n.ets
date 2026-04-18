@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
-{% for icf in cases %}
-
+{%- for c in cases %}
 /*---
-desc: A compile-time error occurs if the identifier {{icf.text}}
+desc: >-
+    The object reference and the method identifier are used to determine the type in which to search the method.
 tags: [negative, compile-only]
 expected_out: |-
-    {{icf.expected_out}}
+    {{c.expected_out}}
 ---*/
 
-class A {
-    public a1: int;
-    public a2: int;
-    private pa3: int;
-}
+{{c.decl}}
 
-class B extends A {
-    public b1: int;
-    private pb2: int;
+function main() {
+    {{c.use|indent}}
 }
-
-function main(): void {
-    {{icf.init|indent}}
-    {{icf.check|indent}}
-}
-{% endfor %}
+{%- endfor %}

@@ -13,10 +13,44 @@
 
 ---
 cases:
-  - { init: "let c: A = new A();", check: "c.a1.a2 = 1;", text: "names several accessible member fields in type T."}
-  - { init: "let c: B = new B();", check: "c.i1.a1 = 1;", text: "names several accessible member fields in type T." }
-  - { init: "let c: B = new B();", check: "c.b1.a1 = 1;", text: "names several accessible member fields in type T." }
-  - { init: "let c: A = new A();", check: "c.b1 = 1;", text: "does not name an accessible member field in type T." }
-  - { init: "let c: A = new A();", check: "c.pb2 = 1;", text: "does not name an accessible member field in type T." }
-  - { init: "let c: B = new B();", check: "c.pb2 = 1;", text: "does not name an accessible member field in type T." }
-  - { init: "let c: B = new B();", check: "c.pa3 = 1;", text: "does not name an accessible member field in type T." }
+    - init: 'let c: A = new A();'
+      check: c.a1.a2 = 1;
+      text: names several accessible member fields in type T.
+      expected_out: |-
+          Semantic error ESE0087: Property 'a2' does not exist on type 'Int'
+
+    - init: 'let c: B = new B();'
+      check: c.i1.a1 = 1;
+      text: names several accessible member fields in type T.
+      expected_out: |-
+          Semantic error ESE0087: Property 'i1' does not exist on type 'B'
+
+    - init: 'let c: B = new B();'
+      check: c.b1.a1 = 1;
+      text: names several accessible member fields in type T.
+      expected_out: |-
+          Semantic error ESE0087: Property 'a1' does not exist on type 'Int'
+
+    - init: 'let c: A = new A();'
+      check: c.b1 = 1;
+      text: does not name an accessible member field in type T.
+      expected_out: |-
+          Semantic error ESE0087: Property 'b1' does not exist on type 'A'
+
+    - init: 'let c: A = new A();'
+      check: c.pb2 = 1;
+      text: does not name an accessible member field in type T.
+      expected_out: |-
+          Semantic error ESE0087: Property 'pb2' does not exist on type 'A'
+
+    - init: 'let c: B = new B();'
+      check: c.pb2 = 1;
+      text: does not name an accessible member field in type T.
+      expected_out: |-
+          Semantic error ESE0293: Property pb2 is not visible here.
+
+    - init: 'let c: B = new B();'
+      check: c.pa3 = 1;
+      text: does not name an accessible member field in type T.
+      expected_out: |-
+        Semantic error ESE0293: Property pa3 is not visible here.
