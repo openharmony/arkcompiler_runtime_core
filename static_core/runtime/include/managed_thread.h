@@ -771,6 +771,10 @@ public:
         return &threadRandomState_;
     }
 
+#if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
+    void ResetSafepointTimer(bool needRecord) override;
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
+
 protected:
     void ProtectNativeStack();
 

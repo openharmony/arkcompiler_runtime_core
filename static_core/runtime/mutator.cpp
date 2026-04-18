@@ -297,9 +297,7 @@ void Mutator::SafepointPoll()
 void Mutator::Safepoint()
 {
 #if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
-    if (LIKELY(type_ == Mutator::MutatorType::MANAGED)) {
-        SafepointTimerTable::ResetTimers(static_cast<ManagedThread *>(this)->GetInternalId(), true);
-    }
+    this->ResetSafepointTimer(true);
 #endif  // SAFEPOINT_TIME_CHECKER_ENABLED
 #if !defined(NDEBUG)
     // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
@@ -315,9 +313,7 @@ void Mutator::Safepoint()
         WaitSuspension();
     }
 #if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
-    if (LIKELY(type_ == Mutator::MutatorType::MANAGED)) {
-        SafepointTimerTable::ResetTimers(static_cast<ManagedThread *>(this)->GetInternalId(), false);
-    }
+    this->ResetSafepointTimer(false);
 #endif  // SAFEPOINT_TIME_CHECKER_ENABLED
 }
 
