@@ -17,14 +17,15 @@
 desc: Access to field by nullable reference type
 assert: An expression must be a non-nullable reference type T to be used for Field Access. Otherwise, a compile-time error occurs.
 tags: [negative, compile-only]
+expected_out: |-
+    Syntax error ESY0306: Optional variable is deprecated and no longer supported.
 ---*/
 
 class A {
-  public x: int;
+    public x: int;
 }
 
 function main(): void {
     let instance?: A = new A();
-
-    arktest.assertTrue( instance.x == 1 )
+    arktest.assertTrue(instance.x == 1)
 }

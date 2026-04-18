@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Access to field by nullable reference type
-assert: An expression must be a non-nullable reference type T to be used for Field Access. Otherwise, a compile-time error occurs.
+desc: >-
+    The object reference and the method identifier are used to determine the type in which to search the method.
 tags: [negative, compile-only]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
-class A {
-  public x: int;
-}
+{{c.decl}}
 
-function main(): void {
-    let instance?: A = new A();
-
-    arktest.assertTrue( instance.x == 1 )
+function main() {
+    {{c.use|indent}}
 }
+{%- endfor %}

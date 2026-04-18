@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,17 @@
  */
 
 /*---
-desc: Type of method call expression
-tags:
-- compile-only
-- negative
+desc: Call instance method of a class.
+assert: A method call expression calls a static or instance method of a class or an interface.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0273: Expected 0 type arguments, got 1 ."
 ---*/
 
-class A {
-    nevermore(): void { return null } // TypeError: Unexpected return value, enclosing method return type is void.
+class IFoo {
+    foo() {}
 }
 
 function main() {
+    let ifoo: IFoo = new IFoo()
+    ifoo.foo<string>()
 }
-
-
