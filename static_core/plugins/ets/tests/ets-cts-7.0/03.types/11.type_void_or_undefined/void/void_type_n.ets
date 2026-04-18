@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Void type CTE
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0227: Unexpected token 'void'."
 ---*/
 
 {{c}}

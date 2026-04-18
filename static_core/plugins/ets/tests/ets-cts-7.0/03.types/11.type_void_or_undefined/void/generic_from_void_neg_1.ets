@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Void type in generic
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0228: Type argument 'String' should be a subtype of 'undefined' constraint"
 ---*/
 
 class A<T extends void = String> {

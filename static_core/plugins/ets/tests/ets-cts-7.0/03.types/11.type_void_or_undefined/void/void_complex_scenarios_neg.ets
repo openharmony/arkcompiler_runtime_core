@@ -17,6 +17,7 @@ limitations under the License.
 /*---
 desc: {{c.description}}
 tags: [compile-only, negative]
+expected_out: {{c.exp_out}}
 ---*/
 
 {%- if c.declarations %}
