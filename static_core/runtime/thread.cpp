@@ -938,4 +938,11 @@ void ManagedThread::CleanUp()
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 
+#if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
+void ManagedThread::ResetSafepointTimer(bool needRecord)  // override
+{
+    SafepointTimerTable::ResetTimers(this->GetInternalId(), needRecord);
+}
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
+
 }  // namespace ark
