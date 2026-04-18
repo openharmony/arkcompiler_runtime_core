@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Using type undefined as type annotation is not recommended, except in nullish types.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0046: Type 'undefined' is not compatible with type 'Int' at index 1"
 ---*/
 
-enum STR { red, blue }
-
 function main(): void {
-  let i: STR = STR.undefined;
+  let i: int[] = new int[2](0)
+  i[undefined] = 0;
 }

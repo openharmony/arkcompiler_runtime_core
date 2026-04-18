@@ -16,18 +16,26 @@ cases:
   - description: "Assigning number-returning function to void-returning function should be CTE"
     statements:
       - "let f1: () => void = () => 1"
+    exp_out: |-
+      "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
 
   - description: "Cannot assign void return value to undefined variable"
     statements:
       - "declare let cb: () => void"
       - "let test1: undefined = cb()"
+    exp_out: |-
+      "Semantic error ESE0143: Unresolved reference declare"
 
   - description: "Cannot assign void-typed variable"
     statements:
       - "function foo(): void {}"
       - "let s: void = foo()"
+    exp_out: |-
+      "Syntax error ESY0135: Nested functions are not allowed."
 
   - description: "Cannot use void in union types for variables"
     statements:
       - "function foo(): void {}"
       - "let t: void | number = foo()"
+    exp_out: |-
+      "Syntax error ESY0135: Nested functions are not allowed."

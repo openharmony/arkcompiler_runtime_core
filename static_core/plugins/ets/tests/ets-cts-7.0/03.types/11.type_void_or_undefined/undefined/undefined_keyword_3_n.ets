@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: The only value of type undefined is represented by the keyword undefined (see Undefined Literal).
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0371: Cannot find type 'UNDEFINED'."
 ---*/
 
 function main(): void {
