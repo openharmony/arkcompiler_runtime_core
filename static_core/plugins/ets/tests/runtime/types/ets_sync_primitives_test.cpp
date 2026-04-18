@@ -63,8 +63,7 @@ public:
 
     static std::vector<MirrorFieldInfo> GetMutexMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsMutex, waitersList_, "waitersList"),
-                                             MIRROR_FIELD_INFO(EtsMutex, waiters_, "waiters")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsMutex, state_, "state")};
     }
 
     static std::vector<MirrorFieldInfo> GetEventMembers()
