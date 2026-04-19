@@ -514,7 +514,7 @@ async function cancelBeforeTimeout() {
     }
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let timeoutTaskSuite = new arktest.ArkTestsuite('taskpool.Timeout');
     let timeoutTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     timeoutTaskSuite.addAsyncTest('TaskExecuteWithinTimeout', taskExecuteWithinTimeout);
@@ -532,7 +532,7 @@ function main(): int {
     timeoutTaskSuiteDisabled.addAsyncTest('TimeoutNotTriggerSuccessAndFailedCallbacks', timeoutNotTriggerSuccessAndFailedCallbacks);
     timeoutTaskSuite.addAsyncTest('CancelBeforeTimeout', cancelBeforeTimeout);
 
-    let res = timeoutTaskSuite.run();
+    let res = await timeoutTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }

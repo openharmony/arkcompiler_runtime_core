@@ -67,11 +67,11 @@ async function cancelByTaskIdTest(){
     arktest.assertEQ(await p, 'canceled');
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CancelTest');
     commonTaskSuite.addAsyncTest('cancelByTaskIdTest', cancelByTaskIdTest);
 
-    let res = commonTaskSuite.run();
+    let res = await commonTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }
