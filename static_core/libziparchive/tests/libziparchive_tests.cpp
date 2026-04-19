@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "libarkfile/file.h"
 #include "libarkbase/os/file.h"
 #include "libarkbase/os/mem.h"
+#include "extractortool/zip_file.h"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
@@ -440,6 +441,47 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
     }
 }
 
+static void ModifyCentralDirEntryNameSize(const char *archivename, uint16_t overflowNameSize)
+{
+    FILE *fp = fopen(archivename, "rbe");
+    ASSERT_NE(fp, nullptr);
+    (void)fseek(fp, 0, SEEK_END);
+    auto fileSize = ftell(fp);
+    (void)fseek(fp, 0, SEEK_SET);
+    std::vector<uint8_t> buffer(fileSize);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT_EQ(fread(buffer.data(), 1, fileSize, fp), static_cast<size_t>(fileSize));
+    (void)fclose(fp);
+
+    constexpr uint32_t EOCD_SIGNATURE = 0x06054b50;
+    constexpr size_t EOCD_MIN_SIZE = 22U;
+    constexpr size_t EOCD_OFFSET_OFFSET = 16U;
+    constexpr size_t NAME_SIZE_OFFSET = 28U;
+
+    size_t eocdPos = 0;
+    size_t maxCommentLen = static_cast<size_t>(fileSize) - EOCD_MIN_SIZE;
+    for (size_t offset = 0; offset <= maxCommentLen; ++offset) {
+        size_t pos = static_cast<size_t>(fileSize) - EOCD_MIN_SIZE - offset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (*reinterpret_cast<uint32_t *>(buffer.data() + pos) == EOCD_SIGNATURE) {
+            eocdPos = pos;
+            break;
+        }
+    }
+    ASSERT_GT(eocdPos, 0U);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    uint32_t centralDirOffset = *reinterpret_cast<uint32_t *>(buffer.data() + eocdPos + EOCD_OFFSET_OFFSET);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    *reinterpret_cast<uint16_t *>(buffer.data() + centralDirOffset + NAME_SIZE_OFFSET) = overflowNameSize;
+
+    fp = fopen(archivename, "wbe");
+    ASSERT_NE(fp, nullptr);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT_EQ(fwrite(buffer.data(), 1, fileSize, fp), static_cast<size_t>(fileSize));
+    (void)fclose(fp);
+}
+
 TEST(LIBZIPARCHIVE, ZipFile)
 {
     /*
@@ -669,5 +711,28 @@ TEST(LIBZIPARCHIVE, IllegalPathTest)
     ASSERT_EQ(OpenCurrentFile(zipfile), ZIPARCHIVE_ERR);
     ASSERT_EQ(CloseCurrentFile(zipfile), ZIPARCHIVE_ERR);
     ASSERT_EQ(CloseArchiveFile(zipfile), ZIPARCHIVE_ERR);
+}
+
+TEST(LIBZIPARCHIVE, ZipFileParseAllEntriesOverflowTest)
+{
+    std::vector<uint8_t> pfData {};
+    {
+        pandasm::Parser p;
+        auto res = p.Parse(R"()", "src.pa");
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    static const char *archivename = "__LIBZIPARCHIVE__ZipFileParseOverflowTest__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 1, pfData, Z_NO_COMPRESSION);
+    ModifyCentralDirEntryNameSize(archivename, UINT16_MAX);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_FALSE(zipFile.Open()) << "ZipFile::Open should fail for corrupted central directory entry";
+    (void)remove(archivename);
 }
 }  // namespace ark::test

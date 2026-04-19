@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,7 +223,15 @@ bool ZipFile::ParseAllEntries()
 
     bool ret = true;
     auto *entryPtr = reinterpret_cast<uint8_t *>(centralData.data());
+    auto *dataEnd = entryPtr + centralData.size();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (uint16_t i = 0; i < endDir_.totalEntries; i++) {
+        auto *entry = reinterpret_cast<CentralDirEntry *>(entryPtr);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (entryPtr + sizeof(CentralDirEntry) + entry->nameSize + entry->extraSize + entry->commentSize > dataEnd) {
+            LOG(ERROR, ZIPARCHIVE) << "Parse entry" << i << " overflow";
+            ret = false;
+            break;
+        }
         if (!ParseOneEntry(entryPtr)) {
             LOG(ERROR, ZIPARCHIVE) << "Parse entry" << i << " failed";
             ret = false;
