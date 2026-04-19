@@ -25,7 +25,8 @@ cases:
           override get field(): Base { return new Base }
           override set field(a_field: Base) {}
       }
-
+    exp_out: |-
+      Semantic error ESE0141: Class member field with type Base in Derived cannot override field with type Derived field from class Base because the overriding return type is not compatible with the other return type.
 
   # broken  contravariance for parameters
   - decl: |-
@@ -38,7 +39,8 @@ cases:
           override get field(): Derived { return new Derived }
           override set field(a_field: Derived) {}
       }
-
+    exp_out: |-
+      Semantic error ESE0136: Method field(a_field: Derived): undefined in Derived not overriding any method
 
   # broken both covariance for the return type and contravariance for parameters
   - decl: |-
@@ -51,4 +53,5 @@ cases:
           override get field(): Base { return new Base }
           override set field(a_field: Derived) {}
       }
-
+    exp_out: |-
+      Semantic error ESE0141: Class member field with type Base in Derived cannot override field with type Derived field from class Base because the overriding return type is not compatible with the other return type.

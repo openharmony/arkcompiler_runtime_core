@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,6 +19,7 @@ assert: >-
     For a reference to a static field f declared in class or interface C, it is a compile-time error if.
     The reference appears either in a static variable's initializer of C or in a static initializer of C.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0375: Property 'f' is used before being assigned."
 ---*/
 
 class C {

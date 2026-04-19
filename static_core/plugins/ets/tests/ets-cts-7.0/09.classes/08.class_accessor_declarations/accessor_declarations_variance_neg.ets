@@ -19,6 +19,7 @@ desc: >-
     In the process of inheriting and overriding, accessors behave as methods. The getter parameter type follows
     the covariance pattern, and the setter parameter type follows the contravariance pattern.
 tags: [compile-only, negative]
+expected_out: "{{c.exp_out}}"
 ---*/
 
 {{c.decl}}

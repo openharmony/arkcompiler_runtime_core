@@ -28,6 +28,8 @@ cases:
     sub_cases_logic:
       - |-
         let a: I = {}
+    out: |-
+      Semantic error ESE0400: Non-optional property 'field' in type 'I' is missing in object literal.
 
   - desc: |-
       static modifier cannot appear on a type member.
@@ -40,3 +42,5 @@ cases:
         interface I {
           static field: [check_type]
         }
+    out: |-
+      Syntax error ESY0224: Identifier expected, got 'static'.

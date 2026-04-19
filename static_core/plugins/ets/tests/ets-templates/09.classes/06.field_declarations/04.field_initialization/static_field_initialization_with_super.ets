@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,6 +19,7 @@ assert: >-
     It there is an initializer in a static field declaration, then the following rules apply to the initializer.
     It is a compile-time error if the keyword this or keyword super occurs in the initializer.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'super' cannot be referenced from a static context"
 ---*/
 
 class A {

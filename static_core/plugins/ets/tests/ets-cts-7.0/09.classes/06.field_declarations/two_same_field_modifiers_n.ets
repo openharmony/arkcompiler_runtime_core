@@ -35,6 +35,7 @@ limitations under the License.
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0115: Duplicated modifier is not allowed."
 ---*/
 
 {{decl}}

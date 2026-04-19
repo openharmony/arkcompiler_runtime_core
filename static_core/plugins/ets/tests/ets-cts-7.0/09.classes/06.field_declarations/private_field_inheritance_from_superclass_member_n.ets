@@ -17,6 +17,7 @@
 desc: Inheritance private field from of a superclass.
 assert: Nevertheless, a private field is never inherited by a superclass.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0293: Property x is not visible here."
 ---*/
 
 namespace A {

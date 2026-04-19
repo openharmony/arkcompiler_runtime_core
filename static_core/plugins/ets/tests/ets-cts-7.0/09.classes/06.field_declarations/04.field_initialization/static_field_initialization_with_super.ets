@@ -19,6 +19,7 @@ assert: >-
     It there is an initializer in a static field declaration, then the following rules apply to the initializer.
     It is a compile-time error if the keyword this or keyword super occurs in the initializer.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'super' cannot be referenced from a static context"
 ---*/
 
 class A {

@@ -33,6 +33,8 @@ cases:
             this._age = value + 5;
           }
       }
+    exp_out: |-
+      Semantic error ESE0136: Method age1(value: Int): undefined in B not overriding any method
 
   - decl: |-
       class A {
@@ -52,6 +54,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0136: Method age1(): Int in B not overriding any method
 
   - decl: |-
       class A {
@@ -74,6 +78,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0136: Method age1(value: Int): undefined in B not overriding any method
 
   # setter has no parameters
   - decl: |-
@@ -88,6 +94,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY0063: Setter must have exactly one formal parameter.
 
   # setter has more than one parameter
   - decl: |-
@@ -102,6 +110,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY0063: Setter must have exactly one formal parameter.
 
   # setter has a parameter with optional (default) value
   - decl: |-
@@ -116,6 +126,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY13534: Setter cannot have optional parameter.
 
   # setter has a parameter with optional value
   - decl: |-
@@ -128,6 +140,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY13534: Setter cannot have optional parameter.
 
   # name of an accessor is the same as that of a non-static field of same class
   - decl: |-
@@ -139,6 +153,8 @@ cases:
             this._age = value;
           }
       }
+    exp_out: |-
+      Semantic error ESE0351: Variable 'age' has already been declared.
 
   - decl: |-
       class A {
@@ -149,6 +165,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY0058: Getter must not have formal parameters.
 
   - decl: |-
       class A {
@@ -163,6 +181,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY0058: Getter must not have formal parameters.
 
   # name of an accessor is the same as that of a non-static field of parent class
   - decl: |-
@@ -176,6 +196,8 @@ cases:
             this._age = value;
           }
       }
+    exp_out: |-
+      Semantic error ESE45073: 'age' is defined as a property in class 'Base', but is overridden here in 'A' as an accessor.
 
   - decl: |-
       class Base {
@@ -188,6 +210,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE45073: 'age' is defined as a property in class 'Base', but is overridden here in 'A' as an accessor.
 
   - decl: |-
       class Base {
@@ -204,6 +228,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE45073: 'age' is defined as a property in class 'Base', but is overridden here in 'A' as an accessor.
 
   # name of an accessor is the same as that of a method of same class
   - decl: |-
@@ -238,6 +264,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0218: Method cannot use the same name as age accessor property
 
   # name of an accessor is the same as that of a method of parent class
   - decl: |-
@@ -255,6 +283,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0216: Class A cannot extend class Base because the overriding declaration type for method age is not compatible with the declaration type required by the base class.
 
   - decl: |-
       class Base {
@@ -273,6 +303,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0216: Class A cannot extend class Base because the overriding declaration type for method age is not compatible with the declaration type required by the base class.
 
   # name of an accessor is the same as that of a method of interface
   - decl: |-
@@ -290,6 +322,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0215: Class A cannot implement interface Base because the declaration type for method age is not compatible with the declaration type required by the interface.
 
   - decl: |-
       interface Base {
@@ -306,6 +340,8 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0215: Class A cannot implement interface Base because the declaration type for method age is not compatible with the declaration type required by the interface.
 
   # (static case) setter has no parameters
   - decl: |-
@@ -320,6 +356,8 @@ cases:
             return A._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY0063: Setter must have exactly one formal parameter.
 
   # (static case) setter has more than one parameter
   - decl: |-
@@ -334,6 +372,8 @@ cases:
             return A._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY0063: Setter must have exactly one formal parameter.
 
   # (static case) setter has a parameter with optional (default) value
   - decl: |-
@@ -348,6 +388,8 @@ cases:
             return A._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY13534: Setter cannot have optional parameter.
 
   # (static case) setter has a parameter with optional value
   - decl: |-
@@ -360,15 +402,13 @@ cases:
             return A._age;
           }
       }
+    exp_out: |-
+      Syntax error ESY13534: Setter cannot have optional parameter.
 
   # (static case) name of an accessor is the same as that of a method of same class
   - decl: |-
       class A {
           static _age: int = 0;
-      
-          static set age(value: int) {
-            A._age = value;
-          }
       
           static get age(): int {
             return A._age;
@@ -378,7 +418,25 @@ cases:
             A._age = value;
           }
       }
+    exp_out: |-
+      Semantic error ESE0218: Method cannot use the same name as age accessor property
 
+  - decl: |-
+      class A {
+          static _age: int = 0;
+      
+          static set age(value: int) {
+            A._age = value;
+          }
+      
+          static age(): int {
+            return A._age;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0218: Method cannot use the same name as age accessor property
+
+  - decl: |-
       class A {
           static _age: int = 0;
       
@@ -394,6 +452,8 @@ cases:
             return A._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0218: Method cannot use the same name as age accessor property
 
   # accessor modifiers are different - abstract
   - decl: |-
@@ -402,20 +462,25 @@ cases:
       
           abstract set age(value: int);
       
-          abstract get age(): int {
+          get age(): int {
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
 
+  - decl: |-
       abstract class A {
           _age: int = 0;
       
-          abstract set age(value: int) {
+          set age(value: int) {
             this._age = value;
           }
       
           abstract get age();
       }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
 
   # accessor modifiers are different - native
   - decl: |-
@@ -428,7 +493,10 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
 
+  - decl: |-
       class A {
           _age: int = 0;
       
@@ -438,6 +506,95 @@ cases:
       
           native get age(): int;
       }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
+
+  # accessor modifiers are different - static
+  - decl: |-
+      class A {
+          static _age: int = 0;
+      
+          static set age(value: int) {
+            A._age = value;
+          }
+      
+          get age(): int {
+            return A._age;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
+
+  - decl: |-
+      class A {
+          static _age: int = 0;
+      
+          set age(value: int) {
+            A._age = value;
+          }
+      
+          static get age(): int {
+            return A._age;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
+
+  # accessor modifiers are different - override only in setter
+  - decl: |-
+      class EParent {
+        _age: int = 0;
+      
+        set age(value: int) {
+          this._age = value;
+        }
+      
+        get age(): int {
+          return this._age;
+        }
+      }
+
+      class E extends EParent {
+        _age: int = 0;
+      
+        override set age(value: int) {
+          this._age = value;
+        }
+      
+        get age(): int {
+          return this._age;
+        }
+      }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
+
+  # accessor modifiers are different - override only in getter
+  - decl: |-
+      class DParent {
+        _age: int = 0;
+      
+        set age(value: int) {
+          this._age = value;
+        }
+      
+        get age(): int {
+          return this._age;
+        }
+      }
+      
+      class D extends DParent {
+        _age: int = 0;
+      
+        set age(value: int) {
+          this._age = value;
+        }
+      
+        override get age(): int {
+          return this._age;
+        }
+      }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
 
   # accessor modifiers are different - final
   - decl: |-
@@ -464,3 +621,5 @@ cases:
             return this._age;
           }
       }
+    exp_out: |-
+      Semantic error ESE0220: Getter and setter methods must have the same accessor modifiers
