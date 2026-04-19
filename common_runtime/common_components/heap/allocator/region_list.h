@@ -16,7 +16,7 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_LIST_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_LIST_H
 
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 
 namespace common_vm {
 class RegionList {

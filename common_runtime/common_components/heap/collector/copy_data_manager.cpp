@@ -20,7 +20,7 @@
 #endif
 
 #include "common_components/base/immortal_wrapper.h"
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #include "common_components/heap/collector/region_bitmap.h"
 #include "common_components/heap/collector/copy_data_manager.h"
 #include "common_components/platform/os.h"

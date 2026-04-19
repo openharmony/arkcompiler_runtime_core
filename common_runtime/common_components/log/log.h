@@ -255,11 +255,11 @@ DummyStream operator<<(DummyStream s, [[maybe_unused]] const T &v)
 #define LOGF_CHECK(cond) LOGF_IF(!(cond))
 
 #ifndef NDEBUG
-#define DLOG(type, format...) LOG_GC(DEBUG) << FormatLog(format)
+#define DLOG(type, ...) LOG_GC(DEBUG) << FormatLog(__VA_ARGS__)
 #else  // NDEBUG
-#define DLOG(type, format...) (void)(0)
+#define DLOG(type, ...) (void)(0)
 #endif  // NDEBUG
-#define VLOG(level, format...) LOG_GC(level) << FormatLog(format)
+#define VLOG(level, ...) LOG_GC(level) << FormatLog(__VA_ARGS__)
 
 #define COMMON_PHASE_TIMER(...) Timer ARK_pt_##__LINE__(__VA_ARGS__)
 

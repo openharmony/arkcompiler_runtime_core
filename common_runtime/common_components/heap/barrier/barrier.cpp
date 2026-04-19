@@ -25,6 +25,11 @@
 
 namespace common_vm {
 
+void Barrier::PreWriteBarrier(Mutator *mutator, BaseObject* rememberedObject) const
+{
+    DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+}
+
 void Barrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
 {
     DLOG(BARRIER, "write obj %p ref-field@%p: %p => %p", obj, &field, field.GetTargetObject(), ref);

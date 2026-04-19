@@ -33,6 +33,7 @@ public:
 class YoungCopyBarrier : public CopyBarrier {
 public:
     explicit YoungCopyBarrier(Collector &collector) : CopyBarrier(collector) {}
+    void PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const override;
     void WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const override;
 };
 }  // namespace common_vm

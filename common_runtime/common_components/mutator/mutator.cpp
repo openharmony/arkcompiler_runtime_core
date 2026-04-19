@@ -219,13 +219,9 @@ void Mutator::ClearSatbBufferNode()
     CastSatbNode(satbNode_)->Clear();
 }
 
-void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor)
-{
-}
+void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
 
-void Mutator::UpdateReadBarrierEntrypoint(common_vm::GCPhase phase)
-{
-}
+void Mutator::UpdateBarrierEntrypoint(common_vm::GCPhase phase) {}
 
 void Mutator::DumpMutator() const
 {
@@ -293,9 +289,9 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
 {
     HandleGCPhase(newPhase);
     SetSafepointActive(false);
-    mutatorPhase_.store(newPhase, std::memory_order_relaxed); // handshake between mutator & mainGC thread
+    mutatorPhase_.store(newPhase, std::memory_order_relaxed);  // handshake between mutator & mainGC thread
     BaseRuntime::GetInstance()->ForEachVM(
-        [m = this, newPhase](VMInterface *vm) { m->UpdateReadBarrierEntrypoint(newPhase); });
+        [m = this, newPhase](VMInterface *vm) { m->UpdateBarrierEntrypoint(newPhase); });
     // Clear mutator's suspend request after phase transition
     ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE);  // atomic seq-cst
 }
@@ -317,8 +313,8 @@ void Mutator::RegisterNewMutator(Mutator *mutator)
     GCPhase phase = Heap::GetHeap().GetGCPhase();
     {
         std::lock_guard<std::mutex> guard(mutatorManager.allMutatorListLock_);
-        DCHECK_CC(std::find(mutatorManager.allMutatorList_.begin(),
-                            mutatorManager.allMutatorList_.end(), mutator) == mutatorManager.allMutatorList_.end());
+        DCHECK_CC(std::find(mutatorManager.allMutatorList_.begin(), mutatorManager.allMutatorList_.end(), mutator) ==
+                  mutatorManager.allMutatorList_.end());
         if (UNLIKELY_CC(mutatorManager.StwTriggered())) {
             mutator->SetSafepointActive(true);
             mutator->SetSuspensionFlag(SuspensionType::SUSPENSION_FOR_STW);
@@ -326,8 +322,9 @@ void Mutator::RegisterNewMutator(Mutator *mutator)
         mutatorManager.allMutatorList_.push_back(mutator);
     }
     mutator->SetMutatorPhase(phase);
-    // Enable read barrier for mutators created during concurrent copy/fix.
-    if (phase >= GCPhase::GC_PHASE_PRECOPY) {
+    // Enable pre write barrier for mutators created during concurrent marking and enable read barrier for mutators
+    // created during concurrent copy/fix.
+    if (phase >= GCPhase::GC_PHASE_ENUM) {
         mutator->TransitionToGCPhaseExclusive(phase);
     }
     mutatorManager.MutatorManagementRUnlock();

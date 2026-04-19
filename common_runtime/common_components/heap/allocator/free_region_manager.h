@@ -17,7 +17,7 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_FREE_REGION_MANAGER_H
 
 #include "common_components/heap/allocator/treap.h"
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #include "common_components/common/scoped_object_access.h"
 
 namespace common_vm {

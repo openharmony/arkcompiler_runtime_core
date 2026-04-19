@@ -16,7 +16,7 @@
 #include "verification.h"
 
 #include "ark_collector/ark_collector.h"
-#include "allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #include "allocator/regional_heap.h"
 #include "common/mark_work_stack.h"
 #include "common/type_def.h"

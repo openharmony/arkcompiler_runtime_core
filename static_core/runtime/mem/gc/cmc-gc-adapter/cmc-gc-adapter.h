@@ -67,6 +67,16 @@ public:
         UpdateReadBarrierEntrypointInMutator<false>(thread);
     }
 
+    void EnablePreWriteBarrier(ManagedThread *thread)
+    {
+        UpdatePreWriteBarrierEntrypointInMutator<true>(thread);
+    }
+
+    void DisablePreWriteBarrier(ManagedThread *thread)
+    {
+        UpdatePreWriteBarrierEntrypointInMutator<false>(thread);
+    }
+
 private:
     void MarkObject(ObjectHeader *object) override;
     bool IsMarked(const ObjectHeader *object) const override;
@@ -87,6 +97,20 @@ private:
 
         void *entrypointFuncUntyped = reinterpret_cast<void *>(entrypointFunc);
         thread->SetReadBarrierEntrypoint(entrypointFuncUntyped);
+    }
+
+    template <bool ENABLE_BARRIER>
+    void UpdatePreWriteBarrierEntrypointInMutator(ManagedThread *thread)
+    {
+        ObjRefProcessFunc entrypointFunc = nullptr;
+
+        if constexpr (ENABLE_BARRIER) {
+            auto addr = this->GetBarrierSet()->GetBarrierOperand(ark::mem::BarrierPosition::BARRIER_POSITION_PRE,
+                                                                 "PRE_CMC_WRITE_BARRIER");
+            entrypointFunc = std::get<ObjRefProcessFunc>(addr.GetValue());
+        }
+        void *entrypointFuncUntyped = reinterpret_cast<void *>(entrypointFunc);
+        thread->SetPreWrbEntrypoint(entrypointFuncUntyped);
     }
 };
 

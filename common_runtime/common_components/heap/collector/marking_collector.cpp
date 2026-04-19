@@ -338,9 +338,9 @@ void MarkingCollector::Remark()
     const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Remark[STW]", "");
     COMMON_PHASE_TIMER("STW re-marking");
-    RemarkAndPreforwardStaticRoots(globalMarkStack);
-    ConcurrentRemark(globalMarkStack, maxWorkers > 0); // Mark enqueue
+    ConcurrentRemark(globalMarkStack, maxWorkers > 0);  // Mark enqueue
     TracingImpl(globalMarkStack, maxWorkers > 0, true);
+    PreforwardStaticRoots();
     MarkAwaitingJitFort(); // Mark awaiting
     ClearWeakStack(maxWorkers > 0);
 

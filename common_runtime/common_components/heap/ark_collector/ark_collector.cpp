@@ -344,6 +344,48 @@ private:
     ArkCollector *collector_;
 };
 
+class PreforwardVisitor {
+public:
+    explicit PreforwardVisitor(ArkCollector *collector) : collector_(collector) {}
+
+    void operator()(RefField<> &refField)
+    {
+        RefField<> oldField(refField);
+        BaseObject* oldObj = oldField.GetTargetObject();
+        DLOG(FIX, "visit raw-ref @%p: %p", &refField, oldObj);
+
+        auto regionType =
+            RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(oldObj))
+                ->GetRegionType();
+        if (regionType != RegionDesc::RegionType::FROM_REGION) {
+            return;
+        }
+
+        BaseObject* toVersion = collector_->TryForwardObject(oldObj);
+        if (toVersion == nullptr) { //LCOV_EXCL_BR_LINE
+            Heap::throwOOM();
+            return;
+        }
+        RefField<> newField(toVersion);
+        // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
+        if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
+            DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+        }
+        MarkToObject(toVersion);
+    }
+private:
+    void MarkToObject(BaseObject *toVersion)
+    {
+        if (!collector_->MarkObject(toVersion)) {
+            auto *region = RegionDesc::GetAliveRegionDescAt(toVersion);
+            region->AddLiveByteCount(toVersion->GetSize());
+        }
+    }
+
+private:
+    ArkCollector *collector_;
+};
+
 class RemarkingAndPreforwardTask : public common_vm::Task {
 public:
     RemarkingAndPreforwardTask(ArkCollector *collector, GlobalMarkStack &globalMarkStack, TaskPackMonitor &monitor,
@@ -420,9 +462,16 @@ void ArkCollector::RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkSta
     } else {
         LocalCollectStack collectStack(&globalMarkStack);
         RemarkAndPreforwardVisitor visitor(collectStack, this);
-        VisitSTWRoots(visitor);
+        VisitRoots(visitor);
         collectStack.Publish();
     }
+}
+
+void ArkCollector::PreforwardStaticRoots()
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardStaticRoots", "");
+    PreforwardVisitor visitor(this);
+    VisitRoots(visitor);
 }
 
 void ArkCollector::PreforwardConcurrentRoots()
@@ -1154,8 +1203,10 @@ void ArkCollector::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
         BaseObject *obj = remarkStack.back();
         remarkStack.pop_back();
         CHECK_CC(Heap::IsHeapAddress(obj));
+        if (IsFromObject(obj)) {
+            obj = ForwardObject(obj);
+        }
         auto *region = RegionDesc::GetAliveRegionDescAt(obj);
-        CHECK_CC(!region->IsFromRegion());
         if (!MarkObject(obj)) {
             auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, localStack);
             region->AddLiveByteCount(size);
@@ -1206,6 +1257,9 @@ void ArkCollector::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
             BaseObject *obj = remarkStack.back();
             remarkStack.pop_back();
             CHECK_CC(Heap::IsHeapAddress(obj));
+            if (IsFromObject(obj)) {
+                obj = ForwardObject(obj);
+            }
             if (!MarkObject(obj)) {
                 EnqueueRefsToYoungCollectionSpace(obj, stack);
                 needProcess = true;

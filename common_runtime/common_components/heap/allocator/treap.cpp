@@ -14,7 +14,7 @@
  */
 #include "common_components/heap/allocator/treap.h"
 
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 
 namespace common_vm {
 bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDesc)

@@ -14,7 +14,7 @@
  */
 #include "common_components/heap/ark_collector/idle_barrier.h"
 #include "common_components/heap/heap.h"
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #include "common_components/log/log.h"
 
 #if defined(COMMON_TSAN_SUPPORT)
@@ -54,6 +54,11 @@ void IdleBarrier::UpdateRememberSet(BaseObject* object, BaseObject* ref) const
                  objMetaRegion->GetRegionDesc(), object, ref, ref->GetTypeInfo());
         }
     }
+}
+
+void IdleBarrier::PreWriteBarrier(Mutator *mutator, BaseObject* rememberedObject) const
+{
+    DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
 }
 
 void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const

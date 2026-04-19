@@ -126,6 +126,8 @@ enum BarrierType : uint8_t {
      * CMC_READ_BARRIER - CMC-GC Read Barrier function
      */
     CMC_READ_BARRIER = EncodeBarrierType(2U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::READ_BARRIER),
+    PRE_CMC_WRITE_BARRIER =
+        EncodeBarrierType(7U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::WRITE_BARRIER),
 };
 
 constexpr bool IsPreBarrier(BarrierType barrierType)
