@@ -26,7 +26,7 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from typing import Any, DefaultDict, Dict, Iterable, List, Optional, Sequence, Set, Tuple, TypedDict, cast
 
 
 DEBUG_DIR: Optional[str] = None
@@ -34,6 +34,29 @@ DEBUG_ENABLED = True
 SOURCE_PRIMARY_MARKERS = ("src", "source")
 SOURCE_SECONDARY_MARKERS = ("resources",)
 SOURCE_TERTIARY_MARKERS = ("test", "tests")
+DECLARATION_FILE_SUFFIXES = (".d.ts", ".d.ets")
+
+
+GraphNodeId = str | int
+
+
+GraphNode = TypedDict(
+    "GraphNode",
+    {
+        "id": GraphNodeId,
+        "name": str,
+        "kind": int | str,
+        "origin": str,
+        "backsourceFrom": str,
+    },
+    total=False,
+)
+
+
+class GraphEdge(TypedDict, total=False):
+    source: GraphNodeId
+    target: GraphNodeId
+    count: int
 
 
 @dataclass
@@ -129,6 +152,19 @@ def normalize_har_name(raw_name: str) -> str:
     return candidate
 
 
+def extract_external_declaration_dependency_name(raw_name: str) -> str:
+    """Extract package names from SDK declaration files such as @kit.ArkUI.d.ts."""
+    candidate = last_path_part(raw_name)
+    lower_candidate = candidate.lower()
+    for suffix in DECLARATION_FILE_SUFFIXES:
+        if not lower_candidate.endswith(suffix):
+            continue
+        dependency_name = candidate[: -len(suffix)]
+        if dependency_name.startswith("@"):
+            return dependency_name
+    return ""
+
+
 def normalize_path_key(raw_path: str) -> str:
     parts = split_path_parts(raw_path)
     return "/".join(part.lower() for part in parts)
@@ -166,14 +202,14 @@ def get_hapray_har_items(report: Dict[str, Any]) -> List[Dict[str, Any]]:
     return har_items if isinstance(har_items, list) else []
 
 
-def iter_nodes(graph: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
+def iter_nodes(graph: Dict[str, Any]) -> Iterable[GraphNode]:
     nodes = graph.get("nodes", [])
-    return nodes if isinstance(nodes, list) else []
+    return (cast(GraphNode, node) for node in nodes) if isinstance(nodes, list) else []
 
 
-def iter_edges(graph: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
+def iter_edges(graph: Dict[str, Any]) -> Iterable[GraphEdge]:
     edges = graph.get("edges", [])
-    return edges if isinstance(edges, list) else []
+    return (cast(GraphEdge, edge) for edge in edges) if isinstance(edges, list) else []
 
 
 def load_category_map(graph: Dict[str, Any]) -> Dict[int, str]:
@@ -188,13 +224,20 @@ def load_category_map(graph: Dict[str, Any]) -> Dict[int, str]:
     return result
 
 
-def is_file_node(node: Dict[str, Any], category_map: Dict[int, str]) -> bool:
+def is_file_node(node: GraphNode, category_map: Dict[int, str]) -> bool:
     kind = node.get("kind")
     if isinstance(kind, int):
         return category_map.get(kind) == "FILE"
     if isinstance(kind, str):
         return kind.upper() == "FILE"
     return False
+
+
+def graph_node_name(node: Optional[GraphNode]) -> str:
+    if node is None:
+        return ""
+    name = node.get("name")
+    return name if isinstance(name, str) else ""
 
 
 def compute_common_dir_prefix(paths: Sequence[str]) -> List[str]:
@@ -918,9 +961,10 @@ def build_output(
     path_leakage_names: Set[str],
 ) -> Dict[str, Any]:
     file_category_map = load_category_map(file_dep_graph)
-    file_nodes_by_id: Dict[Any, Dict[str, Any]] = {}
-    file_id_to_har: Dict[Any, str] = {}
-    file_id_alias: Dict[Any, Any] = {}
+    graph_nodes_by_id: Dict[GraphNodeId, GraphNode] = {}
+    file_nodes_by_id: Dict[GraphNodeId, GraphNode] = {}
+    file_id_to_har: Dict[GraphNodeId, str] = {}
+    file_id_alias: Dict[GraphNodeId, GraphNodeId] = {}
     file_graphs: DefaultDict[str, Dict[str, List[Dict[str, Any]]]] = defaultdict(
         lambda: {"nodes": [], "edges": []}
     )
@@ -931,8 +975,10 @@ def build_output(
     runtime_component_set = set(runtime_component_names)
     static_component_names = [name for name in component_names if name not in runtime_component_set]
     path_leakage_name_set = {name.lower() for name in path_leakage_names if name}
-    representative_id_by_path: Dict[str, Any] = {}
-    added_file_node_ids: Set[Any] = set()
+    representative_id_by_path: Dict[str, GraphNodeId] = {}
+    added_file_node_ids: Set[GraphNodeId] = set()
+    file_edges_seen: Set[Tuple[GraphNodeId, GraphNodeId]] = set()
+    cross_har_edges_seen: Set[Tuple[GraphNodeId, GraphNodeId, str]] = set()
 
     def is_path_leakage_name(name: str) -> bool:
         return bool(name) and name.lower() in path_leakage_name_set
@@ -940,6 +986,7 @@ def build_output(
     for node in iter_nodes(file_dep_graph):
         if not isinstance(node, dict) or "id" not in node or "name" not in node:
             continue
+        graph_nodes_by_id[node["id"]] = node
         if not is_file_node(node, file_category_map):
             continue
         raw_name = str(node["name"])
@@ -1060,24 +1107,43 @@ def build_output(
         if source_name and target_name:
             ensure_har_edge(source_name, target_name)
 
-    cross_tmp: DefaultDict[Any, DefaultDict[str, int]] = defaultdict(lambda: defaultdict(int))
+    cross_tmp: DefaultDict[GraphNodeId, DefaultDict[str, int]] = defaultdict(lambda: defaultdict(int))
     for edge in iter_edges(file_dep_graph):
         if not isinstance(edge, dict):
             continue
         original_source_id = edge.get("source")
         original_target_id = edge.get("target")
+        if not isinstance(original_source_id, (str, int)) or not isinstance(original_target_id, (str, int)):
+            continue
         original_source_node = file_nodes_by_id.get(original_source_id)
         original_target_node = file_nodes_by_id.get(original_target_id)
-        if original_source_node and is_non_source_artifact_file(str(original_source_node.get("name", ""))):
-            continue
-        if original_target_node and is_non_source_artifact_file(str(original_target_node.get("name", ""))):
-            continue
 
         source_id = file_id_alias.get(original_source_id, original_source_id)
         target_id = file_id_alias.get(original_target_id, original_target_id)
+        original_source_name = graph_node_name(original_source_node)
+        original_target_name = graph_node_name(original_target_node)
+        source_is_artifact = is_non_source_artifact_file(original_source_name)
+        target_is_artifact = is_non_source_artifact_file(original_target_name)
+        source_is_unresolved_artifact = (
+            bool(original_source_name) and source_is_artifact and source_id == original_source_id
+        )
+        source_is_resolved_artifact = (
+            bool(original_source_name) and source_is_artifact and source_id != original_source_id
+        )
+        target_is_unresolved_artifact = (
+            bool(original_target_name) and target_is_artifact and target_id == original_target_id
+        )
+        target_is_resolved_artifact = (
+            bool(original_target_name) and target_is_artifact and target_id != original_target_id
+        )
+        # Keep build/cache edges only when they can be mapped back to a real source file.
+        if source_is_unresolved_artifact or target_is_unresolved_artifact:
+            continue
         if source_id == target_id:
             continue
         if source_id not in file_id_to_har:
+            continue
+        if (source_is_resolved_artifact or target_is_resolved_artifact) and target_id not in file_id_to_har:
             continue
 
         source_har = file_id_to_har[source_id]
@@ -1085,14 +1151,18 @@ def build_output(
         if target_id in file_id_to_har:
             target_har = file_id_to_har[target_id]
         else:
-            target_node = file_nodes_by_id.get(target_id)
+            target_node = original_target_node or file_nodes_by_id.get(target_id)
             if target_node:
-                target_har = file_to_har_map.get(str(target_node["name"]), "")
+                target_har = extract_external_declaration_dependency_name(str(target_node["name"]))
+                if not target_har:
+                    target_har = file_to_har_map.get(str(target_node["name"]), "")
             else:
-                for node in iter_nodes(file_dep_graph):
-                    if isinstance(node, dict) and node.get("id") == target_id and "name" in node:
-                        target_har = normalize_har_name(str(node["name"]))
-                        break
+                target_node = graph_nodes_by_id.get(target_id)
+                target_node_name = graph_node_name(target_node)
+                if target_node_name:
+                    target_har = extract_external_declaration_dependency_name(target_node_name)
+                    if not target_har:
+                        target_har = normalize_har_name(target_node_name)
 
         if not target_har:
             continue
@@ -1101,12 +1171,20 @@ def build_output(
 
         ensure_har_node(source_har)
         ensure_har_node(target_har, external=target_id not in file_id_to_har)
-        ensure_har_edge(source_har, target_har)
 
         if target_id in file_id_to_har and source_har == target_har:
+            file_edge_key = (source_id, target_id)
+            if file_edge_key in file_edges_seen:
+                continue
+            file_edges_seen.add(file_edge_key)
             file_graphs[source_har]["edges"].append({"source": source_id, "target": target_id})
             continue
 
+        cross_har_edge_key = (source_id, target_id, target_har)
+        if cross_har_edge_key in cross_har_edges_seen:
+            continue
+        cross_har_edges_seen.add(cross_har_edge_key)
+        ensure_har_edge(source_har, target_har)
         cross_tmp[source_id][target_har] += 1
 
     allowed_component_files = {

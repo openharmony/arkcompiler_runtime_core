@@ -14,7 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from arkts_migration_visualizer.cli import main
+from __future__ import annotations
+
+from collections.abc import Callable
+from pathlib import Path
+import runpy
+from typing import cast
+
+
+def _load_main() -> Callable[[], None]:
+    module_globals = runpy.run_path(str(Path(__file__).resolve().with_name("cli.py")))
+    main_func = module_globals.get("main")
+    if not callable(main_func):
+        raise RuntimeError("cli.py does not export a callable main()")
+    return cast(Callable[[], None], main_func)
+
+
+main = _load_main()
 
 
 if __name__ == "__main__":

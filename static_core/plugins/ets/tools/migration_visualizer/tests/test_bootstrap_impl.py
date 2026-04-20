@@ -15,6 +15,9 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -25,6 +28,27 @@ from support import load_module
 
 
 class BootstrapImplTest(unittest.TestCase):
+    def test_bootstrap_impl_runs_directly_from_src_tree_without_editable_install(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        script_path = (
+            project_root / "src" / "arkts_migration_visualizer" / "deps" / "bootstrap_impl.py"
+        )
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+
+        result = subprocess.run(
+            [sys.executable, str(script_path), "--help"],
+            cwd=project_root,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr or result.stdout)
+        self.assertIn("usage:", result.stdout)
+        self.assertIn("--tool", result.stdout)
+
     def test_clone_git_repo_retries_after_partial_checkout_failure(self) -> None:
         bootstrap_impl = load_module("bootstrap_impl", "src/arkts_migration_visualizer/deps/bootstrap_impl.py")
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -125,8 +149,8 @@ class BootstrapImplTest(unittest.TestCase):
             self.assertTrue((source_tools / "sa-cmd").exists())
             self.assertTrue((source_tools / "trace_streamer_binary").exists())
             self.assertTrue((dist_tools / "static_analyzer").exists())
-            self.assertTrue((workspace / "tools").exists())
-            self.assertIn("workspace_tools", layout)
+            self.assertIn("sa-cmd", layout)
+            self.assertIn("trace_streamer_binary", layout)
             self.assertIn("static_analyzer", layout)
 
     def test_determine_hapray_runtime_patch_status_prefers_native_windows_launcher(self) -> None:
@@ -245,6 +269,97 @@ class BootstrapImplTest(unittest.TestCase):
             self.assertEqual(command[1], "ci")
             self.assertIn("--ignore-scripts", command)
             self.assertIn("--workspaces=false", command)
+
+    def test_load_manifest_reads_homecheck_npm_dependency_pins(self) -> None:
+        bootstrap_impl = load_module("bootstrap_impl", "src/arkts_migration_visualizer/deps/bootstrap_impl.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            manifest_dir = repo_root / "configs"
+            manifest_dir.mkdir(parents=True)
+            manifest_path = manifest_dir / "dependency_manifest.json"
+            manifest_path.write_text(
+                """{
+  "schemaVersion": 1,
+  "depsRoot": ".deps",
+  "tools": {
+    "homecheck": {
+      "repo": "https://example.com/homecheck.git",
+      "ref": "abc123",
+      "npmDependencyPins": {
+        "arkanalyzer": "1.0.87"
+      },
+      "sourceDir": "sources/homecheck",
+      "runtimeDir": "runtime/homecheck"
+    }
+  }
+}
+""",
+                encoding="utf-8",
+            )
+
+            deps_root, tools = bootstrap_impl.load_manifest(manifest_path)
+
+            self.assertEqual(deps_root, (repo_root / ".deps").resolve())
+            self.assertEqual(tools["homecheck"].npm_dependency_pins, {"arkanalyzer": "1.0.87"})
+
+    def test_apply_npm_dependency_pins_rewrites_package_json_and_removes_stale_lock(self) -> None:
+        bootstrap_impl = load_module("bootstrap_impl", "src/arkts_migration_visualizer/deps/bootstrap_impl.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_dir = Path(temp_dir)
+            package_json_path = project_dir / "package.json"
+            package_json_path.write_text(
+                """{
+  "name": "homecheck",
+  "dependencies": {
+    "arkanalyzer": "^1.0.74",
+    "semver": "7.7.2"
+  }
+}
+""",
+                encoding="utf-8",
+            )
+            package_lock_path = project_dir / "package-lock.json"
+            package_lock_path.write_text("{}", encoding="utf-8")
+
+            changed = bootstrap_impl.apply_npm_dependency_pins(project_dir, {"arkanalyzer": "1.0.87"})
+
+            self.assertTrue(changed)
+            self.assertFalse(package_lock_path.exists())
+            self.assertEqual(
+                bootstrap_impl.json.loads(package_json_path.read_text(encoding="utf-8"))["dependencies"]["arkanalyzer"],
+                "1.0.87",
+            )
+            self.assertEqual(
+                bootstrap_impl.json.loads(package_json_path.read_text(encoding="utf-8"))["dependencies"]["semver"],
+                "7.7.2",
+            )
+
+    def test_read_locked_npm_dependency_versions_reads_package_lock_v3(self) -> None:
+        bootstrap_impl = load_module("bootstrap_impl", "src/arkts_migration_visualizer/deps/bootstrap_impl.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_dir = Path(temp_dir)
+            (project_dir / "package-lock.json").write_text(
+                """{
+  "name": "homecheck",
+  "lockfileVersion": 3,
+  "packages": {
+    "": {
+      "dependencies": {
+        "arkanalyzer": "1.0.87"
+      }
+    },
+    "node_modules/arkanalyzer": {
+      "version": "1.0.87"
+    }
+  }
+}
+""",
+                encoding="utf-8",
+            )
+
+            versions = bootstrap_impl.read_locked_npm_dependency_versions(project_dir, ["arkanalyzer"])
+
+            self.assertEqual(versions, {"arkanalyzer": "1.0.87"})
 
     def test_npm_script_env_removes_install_time_workspace_flags(self) -> None:
         bootstrap_impl = load_module("bootstrap_impl", "src/arkts_migration_visualizer/deps/bootstrap_impl.py")

@@ -18,13 +18,40 @@ from __future__ import annotations
 
 import os
 import shutil
+import stat
 from pathlib import Path
 from typing import Optional
 
 
-def reset_path(path: Path) -> None:
-    if path.is_symlink() or path.is_file():
+def is_windows_reparse_point(path: Path) -> bool:
+    if os.name != "nt":
+        return False
+
+    try:
+        attributes = os.lstat(path).st_file_attributes
+    except (AttributeError, OSError, ValueError):
+        return False
+
+    return bool(attributes & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400))
+
+
+def remove_link_path(path: Path) -> None:
+    if is_windows_reparse_point(path):
+        path.rmdir()
+        return
+
+    try:
         path.unlink()
+    except IsADirectoryError:
+        path.rmdir()
+
+
+def reset_path(path: Path) -> None:
+    if not path.exists() and not path.is_symlink():
+        return
+
+    if path.is_symlink() or path.is_file() or is_windows_reparse_point(path):
+        remove_link_path(path)
         return
     if path.is_dir():
         shutil.rmtree(path)
@@ -163,10 +190,17 @@ def ensure_windows_junction(source: Path, target: Path) -> Optional[Path]:
     return create_windows_directory_junction(target, source)
 
 
+def points_to_same_path(source: Path, target: Path) -> bool:
+    try:
+        return target.resolve() == source.resolve()
+    except OSError:
+        return False
+
+
 def ensure_symlink(source: Path, target: Path) -> Path:
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists() or target.is_symlink():
-        if target.is_symlink() and target.resolve() == source.resolve():
+        if points_to_same_path(source, target):
             return target
         reset_path(target)
     try:

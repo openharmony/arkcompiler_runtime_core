@@ -22,9 +22,12 @@ Package entrypoint for: collect four artifacts -> build visualization input
 from __future__ import annotations
 
 import argparse
+import importlib
 import os
+import runpy
 import socket
 import sys
+import types
 import webbrowser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -47,6 +50,7 @@ REQUIRED_FILES = (
 DEFAULT_COMMAND = "run"
 EXPORT_TIMELINE_COMMAND = "export-timeline"
 _T = TypeVar("_T")
+_LOCAL_STAGE_MODULES = {}
 
 
 def log(msg, quiet=False):
@@ -56,6 +60,42 @@ def log(msg, quiet=False):
 
 def shell_python_command() -> str:
     return "python" if os.name == "nt" else "python3"
+
+
+def _load_local_stage_module(module_name: str, relative_path: str):
+    cached = _LOCAL_STAGE_MODULES.get(relative_path)
+    if cached is not None:
+        return cached
+
+    module_path = PACKAGE_ROOT / relative_path
+    module = types.ModuleType(module_name)
+    module.__dict__.update(runpy.run_path(str(module_path)))
+    _LOCAL_STAGE_MODULES[relative_path] = module
+    return module
+
+
+def _package_is_importable() -> bool:
+    return importlib.util.find_spec("arkts_migration_visualizer") is not None
+
+
+def _is_missing_local_package(exc: ModuleNotFoundError) -> bool:
+    missing_name = getattr(exc, "name", "") or ""
+    return missing_name == "arkts_migration_visualizer" or missing_name.startswith(
+        "arkts_migration_visualizer."
+    )
+
+
+def _load_stage_module(import_name: str, relative_path: str):
+    if _package_is_importable():
+        try:
+            return importlib.import_module(import_name)
+        except ModuleNotFoundError as exc:
+            if not _is_missing_local_package(exc):
+                raise
+            local_name = "_local_" + import_name.replace(".", "_")
+            return _load_local_stage_module(local_name, relative_path)
+    local_name = "_local_" + import_name.replace(".", "_")
+    return _load_local_stage_module(local_name, relative_path)
 
 
 def run_stage_or_exit(stage_name: str, action: Callable[[], _T]) -> _T:
@@ -76,33 +116,33 @@ def run_collection_stage(
     manual_ability: Optional[str] = None,
     manual_duration: int = 30,
 ) -> Path:
-    from arkts_migration_visualizer.collect.perf_runner import (
-        CollectionRequest,
-        collect_artifacts,
+    perf_runner = _load_stage_module(
+        "arkts_migration_visualizer.collect.perf_runner",
+        "collect/perf_runner.py",
     )
 
-    request = CollectionRequest(
+    request = perf_runner.CollectionRequest(
         testcase_regex=None if manual_package else testcase_regex,
         manual_package=manual_package,
         manual_ability=manual_ability,
         manual_duration=manual_duration,
         deps_root=deps_root,
     )
-    return Path(collect_artifacts(request))
+    return Path(perf_runner.collect_artifacts(request))
 
 
 def run_build_stage(run_dir: Path, output_path: Path) -> Path:
-    from arkts_migration_visualizer.build.integrate_dep import (
-        IntegrationRequest,
-        integrate_artifact_bundle,
+    integrate_dep = _load_stage_module(
+        "arkts_migration_visualizer.build.integrate_dep",
+        "build/integrate_dep.py",
     )
 
-    request = IntegrationRequest(
+    request = integrate_dep.IntegrationRequest(
         input_dir=run_dir,
         output_path=output_path,
         debug_enabled=True,
     )
-    return Path(integrate_artifact_bundle(request))
+    return Path(integrate_dep.integrate_artifact_bundle(request))
 
 
 def run_timeline_export_stage(
@@ -114,12 +154,12 @@ def run_timeline_export_stage(
     thread_ids: Optional[List[int]] = None,
     merge_samples: bool = True,
 ):
-    from arkts_migration_visualizer.collect.export_hapray_timeline_trace import (
-        TimelineExportRequest,
-        export_timeline_trace_artifact,
+    exporter = _load_stage_module(
+        "arkts_migration_visualizer.collect.export_hapray_timeline_trace",
+        "collect/export_hapray_timeline_trace.py",
     )
 
-    request = TimelineExportRequest(
+    request = exporter.TimelineExportRequest(
         input_path=Path(input_path),
         output_path=output_path,
         step=step,
@@ -127,7 +167,7 @@ def run_timeline_export_stage(
         thread_ids=tuple(thread_ids or ()),
         merge_samples=merge_samples,
     )
-    return export_timeline_trace_artifact(request)
+    return exporter.export_timeline_trace_artifact(request)
 
 
 def find_latest_run_dir() -> Optional[Path]:

@@ -4,13 +4,16 @@
   "tools": {
     "homecheck": {
       "repo": "https://gitcode.com/openharmony-sig/homecheck",
-      "ref": "ed9f09e",
+      "ref": "f7b7be24dff187d4d32197774825af6dc8c5d094",
+      "npmDependencyPins": {
+        "arkanalyzer": "1.0.87"
+      },
       "sourceDir": "sources/homecheck",
       "runtimeDir": "runtime/homecheck"
     },
     "hapray": {
       "repo": "https://gitcode.com/SMAT/ArkAnalyzer-HapRay",
-      "ref": "ee78d0c",
+      "ref": "ee78d0ca4c5bdf989d0aafc8a8f0fe8f400156c6",
       "sourceDir": "sources/ArkAnalyzer-HapRay",
       "workspaceSubdir": "perf_testing"
     }
