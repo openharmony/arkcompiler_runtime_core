@@ -118,7 +118,10 @@ class BaseValidator(IValidator):
         expected_rc = [0]
         if test.negative_steps:
             if step.step_name in test.negative_steps:
-                expected_rc = [1, 255] if step.step_kind == StepKind.RUNTIME.value else [1]
+                if step.step_kind in (StepKind.RUNTIME.value, StepKind.VERIFIER.value):
+                    expected_rc = [1, 255]
+                else:
+                    expected_rc = [1]
         else:
             if step.step_kind == StepKind.RUNTIME.value and test.is_negative_runtime:
                 expected_rc = [1, 255]

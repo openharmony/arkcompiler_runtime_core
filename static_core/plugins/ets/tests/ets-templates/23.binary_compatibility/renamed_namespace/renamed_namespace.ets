@@ -17,8 +17,10 @@
 desc: Test File.
 tags: [negative]
 files: ['./renamed_namespace.libr.ets']
-negative_steps: [runtime-with-new-libs.ark]
+negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
 expected_error:
+    verify-new-libs: |-
+        E/verifier: Error: method void renamed_namespace.ETSGLOBAL::main() failed to verify
     runtime-with-new-libs.ark:
     - "E/verifier: Cannot link class: Cannot find class Lrenamed_namespace/libr/a;"
     - "E/verifier: Verifier error 55: Cache miss for field at offset"

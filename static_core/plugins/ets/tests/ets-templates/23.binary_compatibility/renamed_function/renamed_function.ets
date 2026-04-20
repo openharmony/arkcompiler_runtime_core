@@ -16,8 +16,10 @@
 /*---
 desc: Test File.
 tags: [negative]
-negative_steps: [runtime-with-new-libs.ark]
+negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
 expected_error:
+    verify-new-libs: |-
+        E/verifier: Error: method void renamed_function.ETSGLOBAL::main() failed to verify
     runtime-with-new-libs.ark:
     - "E/verifier: Cannot link class: Cannot find method 'a ()D' in class 'renamed_function.libr.ETSGLOBAL'"
     - "E/verifier: Verifier error 54: Cache miss for method at offset"

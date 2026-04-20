@@ -268,7 +268,7 @@ class OptionsTest(TestCase):
                             if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
                             else ""
                         self.check_boot_panda_files(
-                            ['intermediate/dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
+                            ['intermediate/dependent_test2.ets.abc'],
                             boot_panda_files)
                     case StepKind.AOT:
                         new_step = test.prepare_aot_step(step)
