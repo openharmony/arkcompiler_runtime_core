@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,6 +178,7 @@ public:
     }
 
 private:
+    static void ApplyHandlerMask(int signo, const struct sigaction &action, void *ucontextRaw);
     static bool SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontextRaw);
 
     constexpr static const int HOOK_LENGTH = 2;
@@ -190,11 +191,26 @@ private:
 
 static std::array<SignalHook, _NSIG + 1> g_signalHooks;
 
+void SignalHook::ApplyHandlerMask(int signo, const struct sigaction &action, void *ucontextRaw)
+{
+    auto *ucontext = static_cast<ucontext_t *>(ucontextRaw);
+    sigset_t mask;
+    sigemptyset(&mask);
+    for (int i = 0; i < _NSIG; ++i) {
+        if (sigismember(&ucontext->uc_sigmask, i) == 1 || sigismember(&action.sa_mask, i) == 1) {
+            sigaddset(&mask, i);
+        }
+    }
+    if ((static_cast<size_t>(action.sa_flags) & static_cast<size_t>(SA_NODEFER)) == 0) {
+        sigaddset(&mask, signo);
+    }
+    g_realSigProcMask(SIG_SETMASK, &mask, nullptr);
+}
+
 void SignalHook::CallOldAction(int signo, siginfo_t *siginfo, void *ucontextRaw)
 {
     auto handlerFlags = static_cast<size_t>(g_signalHooks[signo].oldAction_.sa_flags);
-    sigset_t mask = g_signalHooks[signo].oldAction_.sa_mask;
-    g_realSigProcMask(SIG_SETMASK, &mask, nullptr);
+    ApplyHandlerMask(signo, g_signalHooks[signo].oldAction_, ucontextRaw);
 
     if ((handlerFlags & SA_SIGINFO)) {                                              // NOLINT
         g_signalHooks[signo].oldAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
@@ -251,21 +267,7 @@ void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontextRaw)
 
     // call user handler
     auto handlerFlags = static_cast<size_t>(g_signalHooks[signo].userAction_.sa_flags);
-    auto *ucontext = static_cast<ucontext_t *>(ucontextRaw);
-    sigset_t mask;
-    sigemptyset(&mask);
-    constexpr int N = sizeof(sigset_t) * 2;
-    for (int i = 0; i < N; ++i) {
-        if (sigismember(&ucontext->uc_sigmask, i) == 1 ||
-            sigismember(&g_signalHooks[signo].userAction_.sa_mask, i) == 1) {
-            sigaddset(&mask, i);
-        }
-    }
-
-    if ((handlerFlags & SA_NODEFER) == 0) {  // NOLINT
-        sigaddset(&mask, signo);
-    }
-    g_realSigProcMask(SIG_SETMASK, &mask, nullptr);
+    ApplyHandlerMask(signo, g_signalHooks[signo].userAction_, ucontextRaw);
 
     if ((handlerFlags & SA_SIGINFO)) {                                               // NOLINT
         g_signalHooks[signo].userAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
