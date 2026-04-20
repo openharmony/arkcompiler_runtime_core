@@ -18,6 +18,7 @@ desc: >-
     The result of a cast expression is a value, not a variable
     (even if the operand expression is a variable).
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0025: Invalid left-hand side of assignment expression"
 ---*/
 
 class A {}

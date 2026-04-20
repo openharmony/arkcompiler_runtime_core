@@ -20,6 +20,7 @@ desc: >-
     while T1, T2, or both are a union type, then a compile-time error occurs
     if T1 and T2 have no overlap
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0105: Operator '==' cannot be applied to types 'null|undefined' and 'Object|String'."
 ---*/
 {{c.decl}}
 

@@ -13,6 +13,11 @@
 
 --- # List of valid on-bound integer unary tests
 unary_minus_onbound:
-  - {type: byte,  origin: -128}
-  - {type: short, origin: -32768}
-
+  - type: byte
+    origin: -128
+    exp_out: |-
+      "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Byte'"
+  - type: short
+    origin: -32768
+    exp_out: |-
+      "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Short'"
