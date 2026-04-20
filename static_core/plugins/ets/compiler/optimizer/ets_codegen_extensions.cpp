@@ -248,6 +248,22 @@ void Codegen::EtsAsyncDispatch(Inst *inst)
     auto encoder = GetEncoder();
     auto asyncContext = ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto param = GetTarget().GetParamReg(0, asyncContext.GetType());
+    auto deoptLabel = CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::ASYNC_CTX_MISMATCH)->GetLabel();
+
+    {
+        ScopedTmpReg compiledCodeReg(encoder);
+        auto currentCodeOffset = encoder->GetCursorOffset();  // Save offset before getting current PC
+        encoder->EncodeGetCurrentPc(compiledCodeReg);
+        auto codeEntryOffset = currentCodeOffset - GetStartCodeOffset();
+        encoder->EncodeSub(compiledCodeReg, compiledCodeReg, Imm(codeEntryOffset));
+
+        ScopedTmpReg ctxCompiledCodeReg(encoder);
+        encoder->EncodeLdr(ctxCompiledCodeReg, false,
+                           MemRef(asyncContext, GetRuntime()->GetAsyncContextCompiledCodeOffset(GetArch())));
+
+        encoder->EncodeJump(deoptLabel, ctxCompiledCodeReg, compiledCodeReg, Condition::NE);
+    }
+
     // Move AsyncContext only when it's not already in the first argument register.
     if (asyncContext.GetId() != param.GetId()) {
         encoder->EncodeMov(param, asyncContext);

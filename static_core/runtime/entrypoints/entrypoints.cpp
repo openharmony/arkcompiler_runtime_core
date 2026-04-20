@@ -1659,7 +1659,7 @@ extern "C" bool CallCompilerSlowPathOSR(ManagedThread *thread, Method *method, F
     CHECK_STACK_WALKER;
     if constexpr (ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR) {
         ASSERT(ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR);
-        if (!frame->IsDeoptimized() && Runtime::GetOptions().IsCompilerEnableOsr()) {
+        if (frame->CanOsr()) {
             frame->SetAcc(ark::interpreter::AccVRegister(acc, accTag));
             return method->DecrementHotnessCounter<false>(thread, insOffset + offset, &frame->GetAcc(), true);
         }

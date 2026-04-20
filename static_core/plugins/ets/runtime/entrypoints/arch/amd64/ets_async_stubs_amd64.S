@@ -38,20 +38,12 @@ EtsAsyncDispatchStub:
     addq $8, %rsp
     CFI_ADJUST_CFA_OFFSET(-8)
 
-    // Check whether runtime returned a native resume address.
-    testq %rax, %rax
-    // If there is no resume target, leave through the normal return path.
-    jz .Ldispatch_exit
     // Remove return address from stack.
     addq $8, %rsp
     CFI_ADJUST_CFA_OFFSET(-8)
-    // Otherwise jump directly to the compiled resume entry.
+    // Jump directly to the compiled resume entry.
     jmp *%rax
 
-    // Local exit path when dispatch falls through.
-.Ldispatch_exit:
-    // Return to the original caller when there is nothing to resume.
-    retq
     // Finish unwind information for the dispatch stub.
     CFI_ENDPROC
 

@@ -3023,10 +3023,14 @@ BasicBlock *GraphChecker::FindDispatchPrologue([[maybe_unused]] GraphVisitor *v,
                                                   << std::endl);
     BasicBlock *prologueBlock = dispatchBlock->GetPredBlockByIndex(0);
     BasicBlock *startBlock = prologueBlock->GetGraph()->GetStartBlock();
+    if (prologueBlock == startBlock) {
+        // Prologue is merged with dispatch block
+        prologueBlock = dispatchBlock;
+    }
     BasicBlock *bb = prologueBlock;
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, prologueBlock != startBlock,
                                         std::cerr << "Dispatch prologue must not be the start block\n");
-    do {
+    while (bb != startBlock) {
         if (bb != prologueBlock) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, bb->IsTryBegin(),
                                                 std::cerr << "Dispatch prologue must be reachable from start block by "
@@ -3039,7 +3043,7 @@ BasicBlock *GraphChecker::FindDispatchPrologue([[maybe_unused]] GraphVisitor *v,
             v, pred->IsDominate(bb),
             std::cerr << "Dispatch prologue must be reachable from start block by only one path\n");
         bb = pred;
-    } while (bb != startBlock);
+    }
     return prologueBlock;
 }
 
@@ -3058,9 +3062,15 @@ void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unuse
                                                   << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, dispatchBlock->IsTry(), std::cerr << "Dispatch instruction must be in try block: " << *inst << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, prologueBlock->GetSuccsBlocks().size() == 2U,
-                                        std::cerr << "Dispatch prologue block must be a two-way branch: " << *inst
-                                                  << std::endl);
+    if (prologueBlock->GetSuccsBlocks().size() != 2U) {
+        auto deoptInst = std::find_if(prologueBlock->Insts().begin(), prologueBlock->Insts().end(),
+                                      [inst](Inst *deopt) { return deopt->CanDeoptimize() && deopt != inst; });
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, deoptInst != prologueBlock->Insts().end(),
+            std::cerr
+                << "Prologue block must be a two-way branch or must have a can_deoptimize instruction before dispatch: "
+                << *inst << std::endl);
+    }
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !prologueBlock->IsTryBegin(),
                                         std::cerr << "Dispatch prologue block must not be a try-begin block: " << *inst
                                                   << std::endl);
@@ -3070,8 +3080,8 @@ void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unuse
                                         std::cerr << "Dispatch block must terminate to end block: " << *inst
                                                   << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        v, dispatchBlock->GetFirstInst() == inst && dispatchBlock->GetLastInst() == inst,
-        std::cerr << "Dispatch must be the only executable instruction in its basic block: " << *inst << std::endl);
+        v, dispatchBlock->GetLastInst() == inst,
+        std::cerr << "Dispatch must be the last instruction in its basic block: " << *inst << std::endl);
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(), std::cerr << "Dispatch can't have users");
 }

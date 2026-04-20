@@ -537,62 +537,88 @@ bool StackWalker::IsCompilerBoundFrame(SlotType *prev)
     return false;
 }
 
-Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
+Frame *StackWalker::GetFrameFromPrevFrameDynamic(Frame *prevFrame, Method *method)
 {
+    ASSERT(IsDynamicMethod());
     auto vregList =
         codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
-    auto *method = GetMethod();
-    ASSERT(method != nullptr);
-    Frame *frame;
-    if (IsDynamicMethod()) {
-        /* If there is a usage of rest arguments in dynamic function, then a managed object to contain actual arguments
-         * is constructed in prologue. Thus there is no need to reconstruct rest arguments here
-         */
-        auto numActualArgs = method->GetNumArgs();
-        /* If there are no arguments-keeping object construction in execution path, the number of actual args may be
-         * retreived from cframe
-         */
-        size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
-        frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method,
-                                                                               prevFrame);
-        ASSERT(frame != nullptr);
-        frame->SetDynamic();
-        DynamicFrameHandler frameHandler(frame);
-        static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
-        for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
-            if (!vregList[i].IsLive()) {
-                continue;
-            }
-            auto regRef = frameHandler.GetVReg(i);
-            GetCFrame().GetPackVRegValue(vregList[i], codeInfo_,
-                                         reinterpret_cast<SlotType **>(calleeStack_.stack.data()), regRef);
+    /* If there is a usage of rest arguments in dynamic function, then a managed object to contain actual arguments
+     * is constructed in prologue. Thus there is no need to reconstruct rest arguments here
+     */
+    auto numActualArgs = method->GetNumArgs();
+    /* If there are no arguments-keeping object construction in execution path, the number of actual args may be
+     * retreived from cframe
+     */
+    size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
+    auto *frame =
+        interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method, prevFrame);
+    ASSERT(frame != nullptr);
+    frame->SetDynamic();
+    DynamicFrameHandler frameHandler(frame);
+    static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
+    for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
+        if (!vregList[i].IsLive()) {
+            continue;
         }
-        {
-            auto vreg = vregList[vregList.size() - ACC_OFFSET];
-            if (vreg.IsLive()) {
-                auto regRef = frameHandler.GetAccAsVReg();
-                GetCFrame().GetPackVRegValue(vreg, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
-                                             regRef);
-            }
-        }
-        EnvData envData {vregList, GetCFrame(), codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data())};
-        Mutator::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
-    } else {
-        auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
-        ASSERT((frameNumVregs + 1) >= vregList.size());
-        frame = interpreter::RuntimeInterface::CreateFrame(frameNumVregs, method, prevFrame);
-        StaticFrameHandler frameHandler(frame);
-        for (size_t i = 0; i < vregList.size(); i++) {
-            if (!vregList[i].IsLive()) {
-                continue;
-            }
-            bool isAcc = i == (vregList.size() - 1);
-            auto regRef = isAcc ? frame->GetAccAsVReg() : frameHandler.GetVReg(i);
-            GetCFrame().GetVRegValue(vregList[i], codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
+        auto regRef = frameHandler.GetVReg(i);
+        GetCFrame().GetPackVRegValue(vregList[i], codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
                                      regRef);
+    }
+    auto accVreg = vregList[vregList.size() - ACC_OFFSET];
+    if (accVreg.IsLive()) {
+        auto regRef = frameHandler.GetAccAsVReg();
+        GetCFrame().GetPackVRegValue(accVreg, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
+                                     regRef);
+    }
+    EnvData envData {vregList, GetCFrame(), codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data())};
+    Mutator::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
+    return frame;
+}
+
+Frame *StackWalker::GetFrameFromPrevFrameStatic(Frame *prevFrame, Method *method)
+{
+    ASSERT(!IsDynamicMethod());
+    auto vregList =
+        codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
+    auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
+    if (!method->HasAsyncAnnotation()) {
+        // no SaveStateSuspend bridges
+        ASSERT(frameNumVregs + 1 >= vregList.size());
+    }
+    auto *frame = interpreter::RuntimeInterface::CreateFrame(
+        frameNumVregs, method, prevFrame,
+        CallFlags(GetCFrame().IsResumed() ? CallFlags::IS_RESUMED : CallFlags::DEFAULT_CALL));
+    StaticFrameHandler frameHandler(frame);
+    for (size_t i = 0; i < vregList.size(); i++) {
+        if (!vregList[i].IsLive()) {
+            continue;
         }
+        auto &vregInfo = vregList[i];
+        if (vregInfo.IsAccumulator()) {
+            GetCFrame().GetVRegValue(vregInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
+                                     frame->GetAccAsVReg());
+            continue;
+        }
+        ASSERT(!vregInfo.IsSpecialVReg());
+        auto vregIndex = vregInfo.GetIndex();
+        if (vregIndex >= frameNumVregs) {
+            // skip SaveStateSuspend bridges
+            continue;
+        }
+        GetCFrame().GetVRegValue(vregInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
+                                 frameHandler.GetVReg(vregIndex));
     }
     return frame;
+}
+
+Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
+{
+    auto *method = GetMethod();
+    ASSERT(method != nullptr);
+    if (IsDynamicMethod()) {
+        return GetFrameFromPrevFrameDynamic(prevFrame, method);
+    }
+    return GetFrameFromPrevFrameStatic(prevFrame, method);
 }
 
 Frame *StackWalker::ConvertToIFrame(FrameKind *prevFrameKind, uint32_t *numInlinedMethods)

@@ -267,3 +267,10 @@ events:
   fields:
   - name: message
     type: std::string
+
+- name: convert_async_ctx
+  fields:
+  - name: method_name
+    type: std::string
+  - name: pc
+    type: uintptr_t

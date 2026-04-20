@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_entrypoints.h"
+#include "ets_execution_context_wrapper.h"
 #include "plugins/ets/runtime/types/ets_async_context.h"
 
 #include "runtime/execution/job_execution_context.h"
@@ -43,6 +44,8 @@
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/include/class_linker-inl.h"
+#include "runtime/include/stack_walker-inl.h"
+#include "runtime/interpreter/frame.h"
 #include "types/ets_object.h"
 #include "intrinsics.h"
 #include "types/ets_promise.h"
@@ -244,6 +247,26 @@ extern "C" bool EtsIstrueEntrypoint(ManagedThread *thread, ObjectHeader *obj)
 {
     EtsObject *eobj = EtsObject::FromCoreType(obj);
     return EtsIstrue(EtsExecutionContext::FromMT(thread), eobj);
+}
+
+extern "C" void EtsEnsureCapacityForAsyncContextEntrypoint(EtsExecutionContextWrapper *wrapper,
+                                                           ObjectHeader *asyncContextObj, uint32_t frameSize)
+{
+    auto *asyncCtx = EtsAsyncContext::FromCoreType(asyncContextObj);
+    ASSERT(asyncCtx != nullptr);
+    auto *executionCtx = wrapper->GetExecutionCtx();
+    ASSERT(executionCtx != nullptr);
+    EtsAsyncContext::EnsureCapacityForInterpreterFrame(asyncCtx, executionCtx, frameSize);
+}
+
+extern "C" uint32_t EtsRestoreCompiledAsyncContextEntrypoint(EtsExecutionContextWrapper *wrapper, Frame *frame,
+                                                             ObjectHeader *asyncContextObj)
+{
+    auto *asyncCtx = EtsAsyncContext::FromCoreType(asyncContextObj);
+    ASSERT(asyncCtx != nullptr);
+    auto *executionCtx = wrapper->GetExecutionCtx();
+    ASSERT(executionCtx != nullptr);
+    return asyncCtx->RestoreCompiledContext(frame, executionCtx);
 }
 
 extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)

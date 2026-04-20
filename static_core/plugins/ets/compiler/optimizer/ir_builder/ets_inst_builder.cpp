@@ -150,7 +150,8 @@ void InstBuilder::BuildSuspend(const BytecodeInstruction *bcInst)
     }
 
     auto asyncContextVreg = bcInst->GetVReg(0);
-    auto saveStateSuspend = CreateSaveState(Opcode::SaveStateSuspend, GetPc(bcInst->GetAddress()));
+    // Set resuming bytecode PC
+    auto saveStateSuspend = CreateSaveState(Opcode::SaveStateSuspend, GetPc(bcInst->GetNext().GetAddress()));
 
     // AsyncContext is already among SaveStateSuspend inputs.
     size_t actualAsyncContextInputIdx = saveStateSuspend->GetInputsCount();
@@ -193,7 +194,9 @@ void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
 
     auto pc = GetPc(bcInst->GetAddress());
     auto asyncContext = GetDefinition(bcInst->GetVReg(0));
-    auto dispatchInst = GetGraph()->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext);
+    auto saveState = CreateSaveState(Opcode::SaveStateDeoptimize, pc);
+    AddInstruction(saveState);
+    auto dispatchInst = GetGraph()->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext, saveState);
     AddInstruction(dispatchInst);
     GetGraph()->SetDispatchInst(dispatchInst);
 }

@@ -171,7 +171,7 @@ public:
         return method_;
     }
 
-    ALWAYS_INLINE const uint8_t *GetInstrOffset();
+    const uint8_t *GetInstrOffset() const;
 
     ALWAYS_INLINE inline void SetPrevFrame(Frame *prev)
     {
@@ -288,6 +288,8 @@ public:
     {
         SetDeoptimized();
     }
+
+    bool CanOsr() const;
 
     ALWAYS_INLINE inline bool IsStackless() const
     {

@@ -1038,6 +1038,12 @@ bool OptimizeSaveStateConstantInputs(SaveStateInst *saveState)
         return false;
     }
 
+    // NOTE(nkholiavin, #34308): constants may be considered not live at SaveStateSuspend if their later uses are
+    // replaced by immediates
+    if (graph->IsAsync()) {
+        return false;
+    }
+
     // Can't use OptimizeSaveStateConstantInputs for SaveStateSuspend, because constants may be spilled onto the stack,
     // and EtsAsyncDispatchImpl won't be able to properly restore them without recording their location in codeinfo.
     ASSERT(!saveState->IsSaveStateSuspend());

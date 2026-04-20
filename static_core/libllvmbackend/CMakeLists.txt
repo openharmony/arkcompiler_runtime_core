@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -241,6 +241,7 @@ if (PANDA_LLVM_AOT AND PANDA_TARGET_AMD64 AND PANDA_COMPILER_TARGET_AARCH64 AND 
     set(PANDA_LLVM_AOT_TESTS_SOURCES
         ${PANDA_ROOT}/compiler/tests/unit_test.cpp
         ${PANDA_ROOT}/compiler/tests/inst_generator.cpp
+        tests/code_info_producer_test.cpp
         tests/inst_generator_test.cpp
     )
     set(PANDA_LLVM_AOT_TESTS_LIBRARIES arkcompiler arkbase arkassembler arkruntime llvmbackend)

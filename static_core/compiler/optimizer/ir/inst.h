@@ -7581,15 +7581,19 @@ public:
     }
 };
 
-class DispatchInst : public FixedInputsInst1 {
+class DispatchInst : public FixedInputsInst2 {
 public:
-    using Base = FixedInputsInst1;
+    using Base = FixedInputsInst2;
     using Base::Base;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(Base::ValidateInputsCount(index));
-        return DataType::REFERENCE;
+        if (index == 0) {
+            return DataType::REFERENCE;
+        }
+        // this is SaveState input
+        return DataType::NO_TYPE;
     }
 };
 

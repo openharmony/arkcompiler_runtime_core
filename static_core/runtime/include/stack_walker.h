@@ -370,6 +370,10 @@ private:
 
     Frame *GetFrameFromPrevFrame(Frame *prevFrame);
 
+    Frame *GetFrameFromPrevFrameDynamic(Frame *prevFrame, Method *method);
+
+    Frame *GetFrameFromPrevFrameStatic(Frame *prevFrame, Method *method);
+
     void DumpVRegs(std::ostream &os);
 
 #ifndef NDEBUG

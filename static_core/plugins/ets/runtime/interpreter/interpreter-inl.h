@@ -198,38 +198,20 @@ public:
         auto resumePointId = reinterpret_cast<int64_t>(this->GetInst().GetNext().GetAddress());
         asyncCtx->SetAwaitId(resumePointId);
 
-        // save vregs to context
-        auto frameHandler = GetFrameHandler(frame);
+        // make sure we have enough space in potentially compiled async context
         auto *executionCtx = this->GetExecutionContext();
-        auto *frameOffsets = asyncCtx->GetFrameOffsets(executionCtx);
-        auto *method = frame->GetMethod();
-        ASSERT(method != nullptr);
-        uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
-        ASSERT(frameSize <= frame->GetSize());
-        uint32_t idx = 0;
-        for (uint32_t frameIdx = 0; frameIdx < frameSize; frameIdx++) {
-            auto vreg = frameHandler.GetVReg(frameIdx);
-            if (vreg.HasObject()) {
-                frameOffsets->Set(idx, frameIdx);
-                asyncCtx->AddReference(executionCtx, idx, EtsObject::FromCoreType(vreg.GetReference()));
-                idx++;
+        if (UNLIKELY(asyncCtx->GetCompiledCode() != 0)) {
+            asyncCtx = EtsAsyncContext::EnsureCapacityForInterpreterFrame(asyncCtx, executionCtx,
+                                                                          frame->GetSize());  // may trigger GC
+            if (UNLIKELY(asyncCtx == nullptr)) {
+                this->MoveToExceptionHandler();
+                return;
             }
+            asyncCtx->SetCompiledCode(0);
         }
 
-        uint32_t refCount = std::exchange(idx, 0);
-        for (uint32_t frameIdx = 0; frameIdx < frameSize; frameIdx++) {
-            auto vreg = frameHandler.GetVReg(frameIdx);
-            if (!vreg.HasObject()) {
-                frameOffsets->Set(refCount + idx, frameIdx);
-                asyncCtx->AddPrimitive(executionCtx, idx, vreg.GetValue());
-                idx++;
-            }
-        }
-        uint32_t primCount = idx;
-        asyncCtx->SetRefCount(refCount);
-        asyncCtx->SetPrimCount(primCount);
-        asyncCtx->SetCompiledCode(0);
-
+        // save vregs to context
+        asyncCtx->SaveInterpreterContext(frame, executionCtx);
         frame->GetAcc().Set(asyncCtx->GetReturnValue(executionCtx)->GetCoreType());
     }
 
@@ -248,44 +230,16 @@ public:
             this->template MoveToNextInst<FORMAT, true>();
             return;
         }
-        ASSERT(asyncCtx->GetCompiledCode() == 0);
 
-        // load vregs from context
-        auto frameHandler = GetFrameHandler(frame);
-
-        auto *refValues = asyncCtx->GetRefValues(executionCtx);
-        auto *primValues = asyncCtx->GetPrimValues(executionCtx);
-        auto *frameOffsets = asyncCtx->GetFrameOffsets(executionCtx);
-        uint32_t refCount = asyncCtx->GetRefCount();
-        uint32_t primCount = asyncCtx->GetPrimCount();
-
-        [[maybe_unused]] auto *method = frame->GetMethod();
-        ASSERT(method != nullptr);
-        [[maybe_unused]] uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
-        ASSERT(frameSize <= frame->GetSize());
-        ASSERT(refCount + primCount == frameSize);
-
-        for (uint32_t idx = 0; idx < refCount; idx++) {
-            auto offset = frameOffsets->Get(idx);
-            auto vreg = frameHandler.GetVReg(offset);
-            auto *ref = refValues->Get(idx);
-            vreg.SetReference(EtsObject::ToCoreType(ref));
-            refValues->Set(idx, nullptr);
+        // load vregs & resume point id from context
+        const uint8_t *resumePoint;
+        if (asyncCtx->GetCompiledCode() == 0) {
+            resumePoint = reinterpret_cast<const uint8_t *>(asyncCtx->RestoreInterpreterContext(frame, executionCtx));
+        } else {
+            resumePoint = this->GetFrame()->GetMethod()->GetInstructions() +
+                          asyncCtx->RestoreCompiledContext(frame, executionCtx);
         }
-
-        for (uint32_t idx = 0; idx < primCount; idx++) {
-            auto offset = frameOffsets->Get(refCount + idx);
-            auto vreg = frameHandler.GetVReg(offset);
-            auto prim = primValues->Get(idx);
-            vreg.SetPrimitive(prim);
-        }
-
-        asyncCtx->SetRefCount(0);
-        asyncCtx->SetPrimCount(0);
-
-        // load resume point id
-        auto resumePointId = reinterpret_cast<const uint8_t *>(asyncCtx->GetAwaitId());
-        this->template JumpTo<true>(resumePointId);
+        this->template JumpTo<true>(resumePoint);
     }
 
 private:

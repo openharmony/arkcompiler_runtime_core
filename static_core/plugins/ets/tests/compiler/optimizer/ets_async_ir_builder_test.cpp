@@ -114,40 +114,43 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
 #ifdef COMPILER_DEBUG_CHECKS
     GetGraph()->SetInliningComplete();
     GraphChecker checker(GetGraph());
-    ASSERT_TRUE(checker.Check());
+    EXPECT_TRUE(checker.Check());
 #endif
 
-    ASSERT_EQ(CountInstInGraph(GetGraph(), Opcode::Dispatch), 1U);
-    ASSERT_EQ(CountInstInGraph(GetGraph(), Opcode::SaveStateSuspend), 1U);
+    EXPECT_EQ(CountInstInGraph(GetGraph(), Opcode::Dispatch), 1U);
+    EXPECT_EQ(CountInstInGraph(GetGraph(), Opcode::SaveStateSuspend), 1U);
 
     auto dispatch = FindFirstInst(GetGraph(), Opcode::Dispatch);
+    auto dispatchSaveState = dispatch->GetSaveState();
     auto saveStateSuspend = FindFirstInst(GetGraph(), Opcode::SaveStateSuspend);
     ASSERT_NE(dispatch, nullptr);
+    ASSERT_NE(dispatchSaveState, nullptr);
     ASSERT_NE(saveStateSuspend, nullptr);
-    ASSERT_EQ(GetGraph()->GetDispatchInst(), dispatch);
+    EXPECT_EQ(GetGraph()->GetDispatchInst(), dispatch);
     auto saveStateSuspendInst = saveStateSuspend->CastToSaveStateSuspend();
 
     auto dispatchBlock = dispatch->GetBasicBlock();
-    ASSERT_EQ(dispatchBlock->GetFirstInst(), dispatch);
-    ASSERT_EQ(dispatchBlock->GetLastInst(), dispatch);
-    ASSERT_TRUE(dispatchBlock->GetSuccessor(0U)->IsEndBlock());
+    EXPECT_EQ(dispatchBlock->GetFirstInst(), dispatchSaveState);
+    EXPECT_EQ(dispatchBlock->GetLastInst(), dispatch);
+    EXPECT_EQ(dispatchBlock->CountInsts(), 2U);
+    EXPECT_TRUE(dispatchBlock->GetSuccessor(0U)->IsEndBlock());
 
     auto prologueBlock = dispatchBlock->GetPredecessor(0U);
-    ASSERT_EQ(prologueBlock, GetGraph()->GetStartBlock()->GetSuccessor(0U)->GetSuccessor(0U));  // skip try begin
-    ASSERT_NE(prologueBlock->GetTryId(), INVALID_ID);
-    ASSERT_EQ(prologueBlock->GetTrueSuccessor(), dispatchBlock);
-    ASSERT_EQ(prologueBlock->GetLastInst()->GetOpcode(), Opcode::IfImm);
-    ASSERT_TRUE(prologueBlock->GetLastInst()->CastToIfImm()->IsUnlikely());
-    ASSERT_EQ(CountInstInBlock(prologueBlock, Opcode::CallStatic), 1U);
-    ASSERT_EQ(dispatch->GetInput(0U).GetInst(), FindFirstInst(prologueBlock, Opcode::CallStatic));
-    ASSERT_EQ(dispatchBlock->GetTryId(), prologueBlock->GetTryId());
+    EXPECT_EQ(prologueBlock, GetGraph()->GetStartBlock()->GetSuccessor(0U)->GetSuccessor(0U));  // skip try begin
+    EXPECT_NE(prologueBlock->GetTryId(), INVALID_ID);
+    EXPECT_EQ(prologueBlock->GetTrueSuccessor(), dispatchBlock);
+    EXPECT_EQ(prologueBlock->GetLastInst()->GetOpcode(), Opcode::IfImm);
+    EXPECT_TRUE(prologueBlock->GetLastInst()->CastToIfImm()->IsUnlikely());
+    EXPECT_EQ(CountInstInBlock(prologueBlock, Opcode::CallStatic), 1U);
+    EXPECT_EQ(dispatch->GetInput(0U).GetInst(), FindFirstInst(prologueBlock, Opcode::CallStatic));
+    EXPECT_EQ(dispatchBlock->GetTryId(), prologueBlock->GetTryId());
 
     auto continuationBlock = prologueBlock->GetFalseSuccessor();
-    ASSERT_EQ(continuationBlock->GetTryId(), prologueBlock->GetTryId());
-    ASSERT_EQ(saveStateSuspend->GetBasicBlock(), continuationBlock);
-    ASSERT_EQ(continuationBlock->GetLastInst()->GetOpcode(), Opcode::Return);
-    ASSERT_NE(saveStateSuspendInst->GetAsyncContext(), nullptr);
-    ASSERT_EQ(saveStateSuspendInst->GetVirtualRegister(0U).Value(), 0U);
+    EXPECT_EQ(continuationBlock->GetTryId(), prologueBlock->GetTryId());
+    EXPECT_EQ(saveStateSuspend->GetBasicBlock(), continuationBlock);
+    EXPECT_EQ(continuationBlock->GetLastInst()->GetOpcode(), Opcode::Return);
+    EXPECT_NE(saveStateSuspendInst->GetAsyncContext(), nullptr);
+    EXPECT_EQ(saveStateSuspendInst->GetVirtualRegister(0U).Value(), 0U);
 }
 
 }  // namespace ark::compiler

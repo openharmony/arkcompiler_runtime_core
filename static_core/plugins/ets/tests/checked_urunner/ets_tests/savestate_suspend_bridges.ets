@@ -30,6 +30,7 @@
 //! PASS_AFTER    "FillSaveStateSuspendInputs"
 //! INST          /SaveStateSuspend.*bridge.*bridge.*bridge.*bridge.*bridge/
 //! RUN           entry: "savestate_suspend_bridges.ETSGLOBAL::main", options: "--coroutine-impl=stackless"
+//! EVENT_NOT     /Deoptimization,.*/
 
 class Pair {
     ref: Object | undefined;

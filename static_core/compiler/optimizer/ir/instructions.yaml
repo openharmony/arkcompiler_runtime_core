@@ -1200,8 +1200,8 @@ instructions:
 
   - opcode: Dispatch
     base: DispatchInst
-    signature: [ref]
-    flags: [no_dce, no_hoist, compiler_barrier, terminator]
+    signature: [ref, save_state]
+    flags: [no_dce, no_hoist, compiler_barrier, terminator, can_deoptimize, require_state]
     modes: [jit_aot]
     description: >-
       Async resume dispatch terminator. Used on the non-null async-context path to continue execution

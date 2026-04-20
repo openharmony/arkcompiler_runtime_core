@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "runtime/interpreter/interpreter.h"
 
+#include "include/runtime.h"
 #include "runtime/interpreter/arch/macros.h"
 #include "runtime/interpreter/interpreter_impl.h"
 
@@ -33,9 +34,15 @@ void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpTo
 }  // namespace ark::interpreter
 
 namespace ark {
-ALWAYS_INLINE inline const uint8_t *Frame::GetInstrOffset()
+const uint8_t *Frame::GetInstrOffset() const
 {
     return (method_->GetInstructions());
+}
+
+bool Frame::CanOsr() const
+{
+    // Currently, osr is not supported for async methods
+    return Runtime::GetOptions().IsCompilerEnableOsr() && !IsDeoptimized() && !method_->HasAsyncAnnotation();
 }
 
 }  // namespace ark
