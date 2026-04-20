@@ -13,5 +13,12 @@
 
 --- # List of wildcard type arguments
 wildcards:
-  - out Int
-  - in Int
+    - option: out Int
+      expected_out: |-
+          Semantic error ESE0371: Cannot find type 'out'.
+          Semantic error ESE0179: Interface expected here.
+
+    - option: in Int
+      expected_out: |-
+          Semantic error ESE0179: Interface expected here.
+          Syntax error ESY0295: Int is a predefined type, cannot be used as an identifier

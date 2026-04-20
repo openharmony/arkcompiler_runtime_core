@@ -15,15 +15,19 @@
 
 /*---
 desc: >-
-      A class can implement Optional Interface Properties) from superinterfaces
-      or use implicitly defined accessors from an interface.
+    A class can implement Optional Interface Properties) from superinterfaces
+    or use implicitly defined accessors from an interface.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0215: Class C cannot implement interface I because the declaration type for field n is not compatible with the declaration type required by the interface.
+    Semantic error ESE0337: Cannot implement interface I: property 'n' must have a setter, but the implementation is readonly
+    Semantic error ESE79074: Property 'n' must be optional in 'C', which is originally declared in 'I'.
 ---*/
 
 interface I {
-  n?: number
+    n?: number
 }
 
 class C implements I {
-  readonly n: number = 42
+    readonly n: number = 42
 }

@@ -153,6 +153,9 @@
 08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
 08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
 
+#34342
+09.classes/03.class_implementation_clause/implements_class_n.ets
+
 #33998 no CTE override superclass field by accessor
 09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/override_superclass_field_with_accessor_n_0.ets
 09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/override_superclass_field_with_accessor_n_1.ets

@@ -19,6 +19,8 @@ assert: >-
     If a property is defined in the readonly form, then the implementation of the property can
     either keep the readonly form or extend it to a writable form as follows
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0209: Cannot assign to this property because it is readonly.
 ---*/
 
 interface Style {

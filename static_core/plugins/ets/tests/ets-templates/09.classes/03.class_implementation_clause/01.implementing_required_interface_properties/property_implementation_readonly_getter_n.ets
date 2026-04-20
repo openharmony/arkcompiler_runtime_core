@@ -19,6 +19,11 @@ assert: >-
     If a property is defined in a form that requires a setter, then the implementation of the property
     in the form of a readonly field causes a compile-time error
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0215: Class StyleClassTwo cannot implement interface Style because the declaration type for field color is not compatible with the declaration type required by the interface.
+    Semantic error ESE0215: Class StyleClassTwo cannot implement interface Style because the declaration type for field writable is not compatible with the declaration type required by the interface.
+    Semantic error ESE0337: Cannot implement interface Style: property 'color' must have a setter, but the implementation is readonly
+    Semantic error ESE0337: Cannot implement interface Style: property 'writable' must have a setter, but the implementation is readonly
 ---*/
 
 interface Style {
