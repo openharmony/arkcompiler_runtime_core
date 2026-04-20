@@ -384,6 +384,23 @@ public:
     }
 };
 
+void EtsClassWrapper::Destroy(napi_env env)
+{
+    ASSERT(env != nullptr);
+    if (jsCtorRef_ != nullptr) {
+        napi_delete_reference(env, jsCtorRef_);
+    }
+    if (jsProxyCtorRef_ != nullptr) {
+        napi_delete_reference(env, jsProxyCtorRef_);
+    }
+    if (jsProxyHandlerRef_ != nullptr) {
+        napi_delete_reference(env, jsProxyHandlerRef_);
+    }
+    if (jsBuiltinCtorRef_ != nullptr) {
+        napi_delete_reference(env, jsBuiltinCtorRef_);
+    }
+}
+
 /*static*/
 std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertEtsInterface([[maybe_unused]] InteropCtx *ctx,
                                                                               Class *klass)
@@ -672,7 +689,7 @@ void EtsClassWrapper::ProcessMethods(napi_env &env, Span<EtsMethodSet *> methods
         ASSERT(!method->IsConstructor());
         auto lazyLink = &etsMethodWrappers[methodIdx++];
         lazyLink->Set(method);
-        // Skip ETS-defined toJSON; unified toJSON is attached per-instance in JSCtorCallback
+        // Skip ETS-defined toJSON
         if (strcmp(method->GetName(), "toJSON") == 0) {
             continue;
         }
@@ -1186,7 +1203,6 @@ void EtsClassWrapper::InitToJSON(napi_env env, napi_value jsCtor)
     napi_value prototype;
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &prototype));
     NAPI_CHECK_FATAL(napi_set_named_property(env, prototype, "toJSON", toJsonFn));
-    NAPI_CHECK_FATAL(napi_create_reference(env, toJsonFn, 1, &this->toJsonFnRef_));
 }
 
 SharedReference *EtsClassWrapper::SetupSharedReference(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,

@@ -30,7 +30,7 @@ export class BaseClass implements JsonSerializable {
     }
 }
 
-export class DerivedClass extends BaseClass {}
+export class DerivedClass extends BaseClass { }
 
 export class OverridingClass extends BaseClass {
     public override toJSON(): string {
@@ -95,4 +95,28 @@ export class EnumContainer {
 
 export function createEnumContainer(): EnumContainer {
     return new EnumContainer();
+}
+
+// Classes for testing nested ETS object serialization (JSON.stringify(a.b))
+export class InnerObj {
+    public value: string = 'inner';
+    public count: int = 42;
+}
+
+export class OuterObj {
+    public label: string = 'outer';
+    public inner: InnerObj = new InnerObj();
+}
+
+export class DeepNestedObj {
+    public name: string = 'deep';
+    public child: OuterObj = new OuterObj();
+}
+
+export function createOuterObj(): OuterObj {
+    return new OuterObj();
+}
+
+export function createDeepNestedObj(): DeepNestedObj {
+    return new DeepNestedObj();
 }

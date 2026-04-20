@@ -110,6 +110,7 @@ public:
 
     EtsObject *UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue);
     EtsObject *CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue);
+    void Destroy(napi_env env);
 
     ~EtsClassWrapper() = default;
 
@@ -198,8 +199,6 @@ private:
     bool needProxy_ = false;
     napi_ref jsProxyCtorRef_ {};
     napi_ref jsProxyHandlerRef_ {};
-    napi_ref toJsonFnRef_ {};  // Cached toJSON function for instance-level serialization
-
     static constexpr const char *INTERFACE_ITERABLE_NAME = "std.core.IterableIterator";
 };
 

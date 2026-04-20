@@ -456,6 +456,7 @@ InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJ
 
 InteropCtx::~InteropCtx()
 {
+    etsClassWrappersCache_.EnumerateWrappers([this](ets_proxy::EtsClassWrapper *wrapper) { wrapper->Destroy(jsEnv_); });
     Refstor()->Remove(jsvalueFregistryRef_);
 }
 

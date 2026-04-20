@@ -28,6 +28,8 @@ const createNested = etsVm.getFunction('Lto_json_stringify/ETSGLOBAL;', 'createN
 const createColorRed = etsVm.getFunction('Lto_json_stringify/ETSGLOBAL;', 'createColorRed');
 const createStringColorGreen = etsVm.getFunction('Lto_json_stringify/ETSGLOBAL;', 'createStringColorGreen');
 const createEnumContainer = etsVm.getFunction('Lto_json_stringify/ETSGLOBAL;', 'createEnumContainer');
+const createOuterObj = etsVm.getFunction('Lto_json_stringify/ETSGLOBAL;', 'createOuterObj');
+const createDeepNestedObj = etsVm.getFunction('Lto_json_stringify/ETSGLOBAL;', 'createDeepNestedObj');
 
 function testStandardStringify(): void {
     let obj = createStandard();
@@ -83,6 +85,32 @@ function testEnumInObjectStringify(): void {
     ASSERT_EQ(json, '{"color":2,"stringColor":"red"}');
 }
 
+// Test: JSON.stringify(a.b) where a and b are both ETS objects
+function testNestedEtsObjectStringify(): void {
+    let outer = createOuterObj();
+    // Serialize the sub-object a.b directly
+    let innerJson = JSON.stringify(outer.inner);
+    ASSERT_EQ(innerJson, '{"value":"inner","count":42}');
+}
+
+// Test: JSON.stringify(a) where a contains a nested ETS object
+function testOuterEtsObjectStringify(): void {
+    let outer = createOuterObj();
+    let json = JSON.stringify(outer);
+    ASSERT_EQ(json, '{"label":"outer","inner":{"value":"inner","count":42}}');
+}
+
+// Test: JSON.stringify(a.b.c) deep nesting
+function testDeepNestedEtsObjectStringify(): void {
+    let deep = createDeepNestedObj();
+    // Serialize a.b (child is an OuterObj)
+    let childJson = JSON.stringify(deep.child);
+    ASSERT_EQ(childJson, '{"label":"outer","inner":{"value":"inner","count":42}}');
+    // Serialize a.b.c (child.inner is an InnerObj)
+    let innerJson = JSON.stringify(deep.child.inner);
+    ASSERT_EQ(innerJson, '{"value":"inner","count":42}');
+}
+
 function main(): void {
     testStandardStringify();
     testCustomStringify();
@@ -91,6 +119,9 @@ function main(): void {
     testNestedStringify();
     testEnumStringify();
     testEnumInObjectStringify();
+    testNestedEtsObjectStringify();
+    testOuterEtsObjectStringify();
+    testDeepNestedEtsObjectStringify();
 }
 
 main();

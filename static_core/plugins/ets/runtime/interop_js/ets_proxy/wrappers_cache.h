@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,14 @@ public:
     {
         auto nh = cache_.extract(key);
         return nh ? std::move(nh.mapped()) : nullptr;
+    }
+
+    template <typename Callback>
+    void EnumerateWrappers(Callback cb)
+    {
+        for (auto &pair : cache_) {
+            cb(pair.second.get());
+        }
     }
 
 private:
