@@ -35,11 +35,10 @@ class InteropPlatformBase(PlatformBase, ABC):
         super().__init__(args)
         self.panda_root = ToolBase.ensure_dir_env('PANDA_BUILD')
         self.es2abc_interop = self.tools_get('es2abc_interop')
-        self.es2panda = self.tools_get('es2panda')
+        self.es2panda = self.tools_get('es2panda_interop')
         self.arkjs_interop = self.tools_get('arkjs_interop')
-        self.ark = self.tools_get('ark')
-        # transfer serialized ark vm custom options for using as env var
-        opts_obj = self.ark.custom_opts_obj()
+        # For now use custom opts from arkjs_interop tool as ark options. They're not used there anyway.
+        opts_obj = self.arkjs_interop.custom_opts_obj()
         if OptFlags.INT in self.flags:
             opts_obj["compiler-enable-jit"] = "false"
         elif OptFlags.JIT in self.flags:
@@ -48,19 +47,20 @@ class InteropPlatformBase(PlatformBase, ABC):
 
     @property
     def required_tools(self) -> List[str]:
-        # For d2d only es2abc and arkjs required
-        # but since we use them from Panda build, it is safe to init all the tools
-        return ['es2abc_interop', 'es2panda', 'arkjs_interop', 'ark']
+        return ['es2abc_interop', 'es2panda_interop', 'arkjs_interop']
 
     def establish_arkjs_module(self) -> None:
         # ideally this should be inside `generated/libs` and cd on exec
         module = Path.cwd().joinpath('module')
         module.mkdir(parents=True, exist_ok=True)
-        for p in (Path(self.panda_root).joinpath('lib/module/ets_interop_js_napi.so'),
-                  Path(self.panda_root).joinpath('lib/interop_js/libinterop_test_helper.so')):
+        for p in (Path(self.panda_root).joinpath('arkcompiler/runtime_core/libets_interop_js_napi.so'),
+                  Path(self.panda_root).joinpath('arkcompiler/runtime_core/libinterop_test_helper.so')):
             if not p.exists():
                 raise RuntimeError(f'Lib `{str(p)}` not found!')
-            force_link(module.joinpath(p.name), p)
+            link_name = p.name
+            if link_name == "libets_interop_js_napi.so":
+                link_name = "ets_interop_js_napi.so"
+            force_link(module.joinpath(link_name), p)
 
     def zip_classes(self, bu: BenchUnit,
                     abc: Optional[Path] = None, zip_path: Optional[Path] = None) -> Path:

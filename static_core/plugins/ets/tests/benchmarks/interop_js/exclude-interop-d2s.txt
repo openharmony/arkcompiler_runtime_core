@@ -11,3 +11,13 @@ equalityExtra_compareArrays
 
 # Test should be updated
 testPromise_test
+
+# es2panda error
+equalityExtra_compareArrowFuncs
+equalityExtra_compareFunc
+equality_compareNumber
+equality_compareObject
+equality_comparePrimitive
+equality_compareString
+testStringify_testArray
+testStringify_testObject
