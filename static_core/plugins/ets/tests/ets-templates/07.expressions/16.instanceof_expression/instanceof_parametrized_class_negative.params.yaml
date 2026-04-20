@@ -13,8 +13,22 @@
 
 ---
 cases:
-    - { type: 'T' }
-    - { type: 'A<T>' }
-    - { type: 'A<number>' }
-    - { type: 'A<A<T>>' }
-    - { type: 'A<A<number>>' }
+    - expected_out: |-
+          Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression
+      type: T
+
+    - expected_out: |-
+          Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
+      type: A<T>
+
+    - expected_out: |-
+          Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
+      type: A<number>
+
+    - expected_out: |-
+          Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
+      type: A<A<T>>
+
+    - expected_out: |-
+          Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
+      type: A<A<number>>

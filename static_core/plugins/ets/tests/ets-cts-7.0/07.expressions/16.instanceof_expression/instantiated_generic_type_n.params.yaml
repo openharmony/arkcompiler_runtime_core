@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,34 +13,41 @@
 
 ---
 cases:
-  - decl: |-
-      let a: Array<int> = [0, 1]
-    use: |-
-      arktest.assertTrue(a instanceof Array<int>)
+    - decl: |-
+          let a: Array<int> = [0, 1]
+      use: |-
+          arktest.assertTrue(a instanceof Array<int>)
+      expected_out: |-
+          Warning W1001506: the value of the instanceof expression is known at compile-time as true
+          Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
 
-  - decl: |-
-      // per spec, "T[] and Array<T> specify identical, i.e., indistinguishable types"
-      let a: int[] = [0, 1]
-    use: |-
-      arktest.assertTrue(a instanceof int[])
+    - decl: |-
+          // per spec, "T[] and Array<T> specify identical, i.e., indistinguishable types"
+          let a: int[] = [0, 1]
+      use: |-
+          arktest.assertTrue(a instanceof int[])
+      expected_out: |-
+          Warning W1001506: the value of the instanceof expression is known at compile-time as true
+          Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
 
-  - decl: |-
-      let a: FixedArray<int> = [0, 1]
-    use: |-
-      arktest.assertTrue(a instanceof FixedArray<int>)
+    - decl: |-
+          class A<T> {}
+          let a: A<int> = new A<int>()
+      use: |-
+          arktest.assertTrue(a instanceof A<int>)
+      expected_out: |-
+          Warning W1001506: the value of the instanceof expression is known at compile-time as true
+          Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
 
-  - decl: |-
-      class A<T> {}
-      let a: A<int> = new A<int>()
-    use: |-
-      arktest.assertTrue(a instanceof A<int>)
-
-  - decl: |-
-      class A<T> {}
-      function foo<T>(a: A<T>) {
-          // foo can be invoked only with instantiated generic type
-          arktest.assertTrue(a instanceof A<T>)
-      }
-      let a: A<int> = new A<int>()
-    use: |-
-      foo(a)
+    - decl: |-
+          class A<T> {}
+          function foo<T>(a: A<T>) {
+              // foo can be invoked only with instantiated generic type
+              arktest.assertTrue(a instanceof A<T>)
+          }
+          let a: A<int> = new A<int>()
+      use: |-
+          foo(a)
+      expected_out: |-
+          Warning W1001506: the value of the instanceof expression is known at compile-time as true
+          Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
