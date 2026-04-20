@@ -744,10 +744,6 @@
 17.experimental_features/01.type_char/02.char_operations/rel_n_4.ets
 17.experimental_features/01.type_char/02.char_operations/rel_n_6.ets
 
-#33934 Unexpected CTE on char relational operations with char literals
-17.experimental_features/01.type_char/02.char_operations/rel_literals.ets
-17.experimental_features/01.type_char/02.char_operations/rel_loc_const.ets
-
 #28490
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_2.ets
 17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_23.ets
