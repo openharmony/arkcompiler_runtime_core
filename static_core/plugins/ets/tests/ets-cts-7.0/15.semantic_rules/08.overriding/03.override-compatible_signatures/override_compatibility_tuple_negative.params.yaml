@@ -24,6 +24,8 @@ cases:
               res = 2
           }
       params: overload-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Base, Derived]): undefined in Derived not overriding any method
 
     - base: |-
           foo(i: TPL_DO) {
@@ -34,6 +36,8 @@ cases:
               res = 2
           }
       params: overload-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Derived, Derived]): undefined in Derived not overriding any method
 
     - base: |-
           foo(i: TPL_OOO) {
@@ -43,27 +47,33 @@ cases:
           override foo(i: TPL_BBB) {
               res = 2
           }
-      params: overload-compatible parameter
+      params: overload-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Base, [Base, Base]]): undefined in Derived not overriding any method
 
     - base: |-
           foo(i: TPL_OO) {
               res = 1
           }
       derived: |-
-          foo(i: TPL_DD) {
+        override foo(i: TPL_DD) {
               res = 2
           }
       params: overload-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Derived, Derived]): undefined in Derived not overriding any method
 
     - base: |-
           foo(i: TPL_BD) {
               res = 1
           }
       derived: |-
-          override oo(i: TPL_BB) {
+          override foo(i: TPL_BB) {
               res = 2
           }
       params: overload-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Base, Base]): undefined in Derived not overriding any method
 
     - base: |-
           foo(i: TPL_BB) {
@@ -74,6 +84,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Derived, Derived]): undefined in Derived not overriding any method
 
     - base: |-
           foo(i: TPL_DD) {
@@ -84,6 +96,8 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: [Base, Base]): undefined in Derived not overriding any method
 
     # TUPLE, RETURN TYPE
 
@@ -98,6 +112,8 @@ cases:
               return bb
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type [Base, Base] in Derived cannot override foo with type [Base, Derived] field from class Base because the overriding return type is not compatible with the other return type.
 
     - base: |-
           foo(): TPL_BD {
@@ -110,6 +126,8 @@ cases:
               return bb
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type [Base, Base] in Derived cannot override foo with type [Base, Derived] field from class Base because the overriding return type is not compatible with the other return type.
 
     - base: |-
           foo(): TPL_OB {
@@ -122,6 +140,8 @@ cases:
               return bd
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type [Base, Derived] in Derived cannot override foo with type [Object, Base] field from class Base because the overriding return type is not compatible with the other return type.
 
     - base: |-
           foo(): TPL_OB {
@@ -134,6 +154,8 @@ cases:
               return bd
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type [Base, Derived] in Derived cannot override foo with type [Object, Base] field from class Base because the overriding return type is not compatible with the other return type.
 
     - base: |-
           foo(): TPL_BB {
@@ -146,6 +168,8 @@ cases:
               return od
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type [Object, Derived] in Derived cannot override foo with type [Base, Base] field from class Base because the overriding return type is not compatible with the other return type.
 
     - base: |-
           foo(): TPL_BB {
@@ -158,3 +182,5 @@ cases:
               return od
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type [Object, Derived] in Derived cannot override foo with type [Base, Base] field from class Base because the overriding return type is not compatible with the other return type.

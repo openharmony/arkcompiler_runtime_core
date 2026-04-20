@@ -26,6 +26,7 @@ desc: >-
     Every type is override-compatible with itself (see Invariance).
 tags: [negative, compile-only]
 params: {{c.params}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 let res: number = 0;
@@ -42,6 +43,7 @@ type TPL_BBD = [Base, [Base, Derived]]
 type TPL_DD = [Derived, Derived]
 type TPL_DDD = [Derived, [Derived, Derived]]
 type TPL_OOO = [Object, [Object, Object]]
+type TPL_OO = [Object, Object]
 
 class Base {
     {{c.base|indent}}

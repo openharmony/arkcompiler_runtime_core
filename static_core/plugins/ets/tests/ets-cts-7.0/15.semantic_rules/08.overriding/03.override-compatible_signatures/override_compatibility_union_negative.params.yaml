@@ -15,7 +15,6 @@
 cases:
     # UNION, PARAMETER
     - base: |-
-
         foo(i: UnionAB) {
             res = 4
         }
@@ -23,11 +22,11 @@ cases:
         override foo(i: UnionCD) {
             res = 1
         }
-
       call: |-
           res = 0
-
       params: override-incompatible with same parameter
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: UC|UD): undefined in Derived not overriding any method
 
     # UNION, RETURN TYPE
     - base: |-
@@ -35,15 +34,15 @@ cases:
           res = 1
           return new UC
         }
-
       derived: |-
         override foo(): UnionAB {
           res = 2
           return new A
         }
-
       call: |-
         res = 0
         new Derived().foo()
         arktest.assertEQ(2, res)
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0141: Class member foo with type UA|UB in Derived cannot override foo with type UC|UD field from class Base because the overriding return type is not compatible with the other return type.

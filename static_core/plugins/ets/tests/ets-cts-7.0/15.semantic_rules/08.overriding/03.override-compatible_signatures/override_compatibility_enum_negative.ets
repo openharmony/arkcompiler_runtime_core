@@ -27,6 +27,7 @@ desc: >-
 
 tags: [negative, compile-only]
 params: {{c.params}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 enum SHIPYARD { None, Flippers, SwimRing, Boat }
