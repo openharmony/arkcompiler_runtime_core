@@ -18,16 +18,22 @@ cases:
       type2: string|bigint
       op: '=='
       code: foo(1.0, 1n)
+      exp_out: |-
+        "Semantic error ESE0105: Operator '==' cannot be applied to types 'Double|Boolean' and 'String|BigInt'."
 
     - type1: string|boolean
       type2: number|bigint
       op: '!='
       code: foo('1', 1)
+      exp_out: |-
+        "Semantic error ESE0105: Operator '!=' cannot be applied to types 'String|Boolean' and 'Double|BigInt'."
 
     - type1: null|bigint
       type2: undefined|boolean
       op: '!='
       code: foo(1n, true)
+      exp_out: |-
+        "Semantic error ESE0105: Operator '!=' cannot be applied to types 'null|BigInt' and 'undefined|Boolean'."
 
     - decl: |-
           class A {}
@@ -38,3 +44,5 @@ cases:
       type2: C|D|undefined
       op: '=='
       code: foo(null, undefined)
+      exp_out: |-
+        "Semantic error ESE0105: Operator '==' cannot be applied to types 'A|B|null' and 'C|D|undefined'."

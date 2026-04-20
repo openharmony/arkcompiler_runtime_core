@@ -19,6 +19,7 @@
 desc: Unary minus operator (outbound) (these are special cases for numeric overflow behavior. Special attention wanted).
 params: {{onb.type}} {{onb.origin}}
 tags: [negative, compile-only]
+expected_out: {{onb.exp_out}}
 ---*/
 
 function main(): void {

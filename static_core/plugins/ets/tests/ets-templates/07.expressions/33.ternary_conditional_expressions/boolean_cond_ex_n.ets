@@ -16,6 +16,7 @@
 /*---
 desc: Conditional expression boolean
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type '\"Hello\"|Boolean' cannot be assigned to type 'Boolean'"
 ---*/
 
 function main(): void {

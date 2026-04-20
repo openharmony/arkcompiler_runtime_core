@@ -18,6 +18,7 @@
 desc: >-
     Type inference in cast expressions
 tags: [compile-only, negative]
+expected_out: {{c.exp_out}}
 ---*/
 
 function main(): void {

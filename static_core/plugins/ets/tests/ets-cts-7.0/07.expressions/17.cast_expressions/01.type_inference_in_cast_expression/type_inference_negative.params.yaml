@@ -15,31 +15,59 @@
 cases:
   - type: byte
     val: 1285555
+    exp_out: |-
+      "Semantic error ESE1050320: 1285555 won't fit in a byte"
   - type: short
     val: 32768
+    exp_out: |-
+      "Semantic error ESE1050320: 32768 won't fit in a short"
   - type: int
     val: 2147483648
+    exp_out: |-
+      "Semantic error ESE1050320: 2147483648 won't fit in a int"
   - type: long
     val: 9223372036854775808
+    exp_out: |-
+      "Syntax error ESY0249: Invalid number."
   - type: void
     val: 1
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast number literal to 'undefined'"
   - type: never
     val: 1
+    exp_out: |-
+      "Semantic error ESE0305: Cast to 'never' is prohibited"
   - type: byte
     val: "[1, 2]"
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast array literal to 'Byte'"
   - type: short
     val: "[1, 2]"
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast array literal to 'Short'"
   - type: int
     val: "[1, 2]"
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast array literal to 'Int'"
   - type: long
     val: "[1, 2]"
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast array literal to 'Long'"
   - type: float
     val: "[1, 2]"
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast array literal to 'Float'"
   - type: double
     val: "[1, 2]"
+    exp_out: |-
+      "Semantic error ESE0326: Cannot cast array literal to 'Double'"
   - type: NumE
     val: 2
     decl: enum NumE {A, B}
+    exp_out: |-
+      "Syntax error ESY0040: Illegal start of ENUM expression."
   - type: StrE
     val: "'aaa'"
     decl: enum StrE {S1 = "abc", S2 = "bbb"}
+    exp_out: |-
+      "Syntax error ESY0040: Illegal start of ENUM expression."

@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: String comparison {{str.left}} {{str.op}} {{str.right}}
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0144: Type name 'string' used in the wrong context"
 ---*/
 
 function main(): void {

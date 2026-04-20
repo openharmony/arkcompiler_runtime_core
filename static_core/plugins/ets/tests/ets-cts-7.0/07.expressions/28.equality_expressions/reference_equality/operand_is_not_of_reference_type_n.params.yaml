@@ -13,6 +13,18 @@
 
 --- # List of reference equality operators
 reference_eq:
-  - {left:  "a", right:  "b", op: "==="}
-  - {left:  "b", right:  "a", op: "==="}
-  - {left:  "10", right:  "b", op: "==="}
+  - left:  "a"
+    right:  "b"
+    op: "==="
+    exp_out: |-
+      "Semantic error ESE0105: Operator '===' cannot be applied to types 'Int' and '\"Hello\"'."
+  - left:  "b"
+    right:  "a"
+    op: "==="
+    exp_out: |-
+      "Semantic error ESE0105: Operator '===' cannot be applied to types '\"Hello\"' and 'Int'."
+  - left:  "10"
+    right:  "b"
+    op: "==="
+    exp_out: |-
+      "Semantic error ESE0105: Operator '===' cannot be applied to types 'Int' and '\"Hello\"'."
