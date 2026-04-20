@@ -200,6 +200,13 @@ function process_manifest() {
             exit 1
         fi
 
+        pushd "$lib_dir"
+            if [[ -n "$(git status -s -uno 2>&1)" ]] ; then
+                echo "$MSG_PREFIX Repository $lib_name is not clean after cloning. Please check $lib_dir"
+                exit 1
+            fi
+        popd
+
         if [[ "$patch_mode" == "with_patches" ]] ; then
             apply_patches "$lib_name" "$lib_dir"
         elif [[ "$patch_mode" != "no_patches" ]] ; then
