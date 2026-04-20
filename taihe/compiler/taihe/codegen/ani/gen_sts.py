@@ -16,6 +16,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from json import dumps
+import math
 from typing import ClassVar
 
 from taihe.codegen.abi.analyses import (
@@ -51,6 +52,7 @@ from taihe.semantics.declarations import (
     UnionDecl,
 )
 from taihe.semantics.types import NonVoidType
+from taihe.semantics.types import ScalarKind, ScalarType
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
 
@@ -480,12 +482,22 @@ class StsEnumGenerator:
         self.target = target
         self.enum = enum
 
+    def _render_enum_value(self, value: object) -> str:
+        if isinstance(self.enum.ty, ScalarType) and self.enum.ty.kind == ScalarKind.F32:
+            if isinstance(value, float):
+                if math.isnan(value):
+                    return "Float.NaN"
+                if math.isinf(value):
+                    return "Float.POSITIVE_INFINITY" if value > 0 else "Float.NEGATIVE_INFINITY"
+                return f"{dumps(value)}f"
+        return dumps(value)
+
     def gen_enum(self):
         if ConstAttr.get(self.enum) is not None:
             enum_ty_ani_info = TypeAniInfo.get(self.am, self.enum.ty)
             for item in self.enum.items:
                 self.target.writelns(
-                    f"export const {item.name}: {enum_ty_ani_info.sts_type_in(self.target)} = {dumps(item.value)};",
+                    f"export const {item.name}: {enum_ty_ani_info.sts_type_in(self.target)} = {self._render_enum_value(item.value)};",
                 )
             return
 
@@ -503,7 +515,7 @@ class StsEnumGenerator:
         ):
             for item in self.enum.items:
                 self.target.writelns(
-                    f"{item.name} = {dumps(item.value)},",
+                    f"{item.name} = {self._render_enum_value(item.value)},",
                 )
 
 

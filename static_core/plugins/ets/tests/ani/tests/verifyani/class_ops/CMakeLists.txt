@@ -101,7 +101,7 @@ ani_verify_add_generated_tests(ani_verify_test_class_get_static_field_by_name
            "short: Type=Short,type=short,ret_type=short,wrong_ret=int,value=1"
            "int: Type=Int,type=int,ret_type=int,wrong_ret=byte,value=1234"
            "long: Type=Long,type=long,ret_type=long,wrong_ret=int,value=1"
-           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.0"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.0f"
            "double: Type=Double,type=double,ret_type=double,wrong_ret=int,value=1.0"
            "ref: Type=Ref,type=ref,ret_type=Object,wrong_ret=int,value="
 )
@@ -116,7 +116,7 @@ ani_verify_add_generated_tests(ani_verify_test_class_set_static_field_by_name
            "short: Type=Short,type=short,ret_type=short,wrong_ret=int,value=1,cpp_value=2"
            "int: Type=Int,type=int,ret_type=int,wrong_ret=byte,value=1234,cpp_value=5678"
            "long: Type=Long,type=long,ret_type=long,wrong_ret=int,value=1,cpp_value=2"
-           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.0,cpp_value=2.0F"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.0f,cpp_value=2.0F"
            "double: Type=Double,type=double,ret_type=double,wrong_ret=int,value=1.0,cpp_value=2.0"
            "ref: Type=Ref,type=ref,ret_type=Object,wrong_ret=int,value=,cpp_value=nullptr"
 )

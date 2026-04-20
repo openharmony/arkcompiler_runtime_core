@@ -143,7 +143,7 @@ final class P {
     fldChar: char = c'x'
     fldInt: int = 100000
     fldLong: long = 3000000
-    fldFloat: float = 5.0
+    fldFloat: float = 5.0f
     fldDouble: double = 123456789.99
     foo() {}
 }

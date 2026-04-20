@@ -26,7 +26,7 @@ declarations:
   - >
     export namespace Ambient {
       export const x: Object = "object"
-      export const y: float = 1.0
+      export const y: float = 1.0f
       export const z: Byte[] = [0x48, 0x65, 0x6C, 0x6C, 0x6F]
     }
   - >
@@ -70,7 +70,7 @@ declarations:
     export namespace Ambient {
       namespace NestedAmbient {
         let x: int = 1
-        const y: float = 1.0
+        const y: float = 1.0f
         function foo(): void {}
         class A {}
         interface I {}
@@ -80,7 +80,7 @@ declarations:
       } 
       export namespace NestedAmbientExp {
         export let x: int = 2
-        export const y: float = 2.0
+        export const y: float = 2.0f
         export function foo(): int { return 3 }
         export class A { a: string = 'a' }
         export interface I {        

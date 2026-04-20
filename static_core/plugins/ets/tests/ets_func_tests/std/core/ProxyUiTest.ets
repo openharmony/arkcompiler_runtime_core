@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,7 +141,7 @@ class ProxyTestImpl<Object> implements ProxyTest<Object>{
     a5: char = c'5'
     a6: double = 6
     a7: string = "7"
-    a8: float = 8.0
+    a8: float = 8.0f
     a9: long = 8000000000
     a10: string | number = 1
     a11: BaseImpl | number = 1
@@ -411,7 +411,7 @@ function createProxyTestBody(proxy: ProxyTest<Object>) {
     arktest.assertEQ(proxy.a7, "test")
     proxy.a8
     arktest.assertEQ(LATEST_EVENT, Event.GETTER_CALLED)
-    proxy.a8 = 1.0
+    proxy.a8 = 1.0f
     arktest.assertEQ(LATEST_EVENT, Event.SETTER_CALLED)
     arktest.assertEQ(proxy.a8, 1.0)
     proxy.a9
@@ -529,7 +529,7 @@ function createProxyTestOptBody(proxy: ProxyTest<Object>) {
         arktest.assertEQ(proxy.a7, "test")
         proxy.a8
         arktest.assertEQ(LATEST_EVENT, Event.GETTER_CALLED)
-        proxy.a8 = 1.0
+        proxy.a8 = 1.0f
         arktest.assertEQ(LATEST_EVENT, Event.SETTER_CALLED)
         arktest.assertEQ(proxy.a8, 1.0)
         proxy.a9

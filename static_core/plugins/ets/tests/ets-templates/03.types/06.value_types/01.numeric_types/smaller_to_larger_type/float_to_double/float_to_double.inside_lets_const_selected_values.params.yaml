@@ -12,14 +12,14 @@
 # limitations under the License.
 
 testData:
-  - { initialType: "float", value: ".81220", resultType: "double" , result: ".8122", absError: "0.00001", desc: "0. Conversion of the positive decimal float value (without specifying numbers before the point, absolute value less than 1) to the double."}
-  - { initialType: "Float", value: "-0.8123", resultType: "double" , result: "-8123.00_00E-4", absError: "0.00001", desc: "1. Conversion of the negative decimal Float (alias) value (absolute value less than 1) to the double."}
-  - { initialType: "float", value: "0.81_2200", resultType: "double" , result: ".8122e+0", absError: "0.00001", desc: "2. Conversion of the positive decimal float value (less than 1) to the double."}
-  - { initialType: "float", value: "-0.1e-3", resultType: "double" , result: "-1E-4", absError: "0.00001", desc: "3. Conversion of the negative decimal float value (E notation, negative exponent, absolute value less than 1) to the double."}
-  - { initialType: "float", value: "1e-3", resultType: "double" , result: "+0.001", absError: "0.0001", desc: "4. Conversion of the positive decimal float value (E notation, negative exponent) to the double."}
-  - { initialType: "float", value: "-1e-3", resultType: "double" , result: "-1e-3", absError: "0.0001", desc: "5. Conversion of the negative decimal float value (E notation, negative exponent) to the double."}
-  - { initialType: "Float", value: "-1e3", resultType: "double" , result: "-1E3", absError: "0.0001", desc: "6. Conversion of the negative decimal Float (alias) value (E notation, positive exponent, significand equals to -1) to the double."}
-  - { initialType: "Float", value: "-0e12", resultType: "double" , result: "0", absError: "0.0000001", desc: "7. Conversion of the zero decimal Float (alias) value (E notation, positive exponent, significand equals to 0, minus sign) to the double."}
-  - { initialType: "Float", value: "+0e0", resultType: "double" , result: "0.0", absError: "0.000001", desc: "8. Conversion of the zero decimal Float (alias) value (E notation, positive exponent, significand equals to 0, plus sign) to the double."}
-  - { initialType: "float", value: "+12E10", resultType: "double" , result: "1.2e11", absError: "1e9", desc: "9. Conversion of the positive decimal float value (E notation, positive exponent, plus sign) to the double."}
+  - { initialType: "float", value: ".81220f", resultType: "double" , result: ".8122", absError: "0.00001", desc: "0. Conversion of the positive decimal float value (without specifying numbers before the point, absolute value less than 1) to the double."}
+  - { initialType: "Float", value: "-0.8123f", resultType: "double" , result: "-8123.00_00E-4", absError: "0.00001", desc: "1. Conversion of the negative decimal Float (alias) value (absolute value less than 1) to the double."}
+  - { initialType: "float", value: "0.81_2200f", resultType: "double" , result: ".8122e+0", absError: "0.00001", desc: "2. Conversion of the positive decimal float value (less than 1) to the double."}
+  - { initialType: "float", value: "-0.1e-3f", resultType: "double" , result: "-1E-4", absError: "0.00001", desc: "3. Conversion of the negative decimal float value (E notation, negative exponent, absolute value less than 1) to the double."}
+  - { initialType: "float", value: "1e-3f", resultType: "double" , result: "+0.001", absError: "0.0001", desc: "4. Conversion of the positive decimal float value (E notation, negative exponent) to the double."}
+  - { initialType: "float", value: "-1e-3f", resultType: "double" , result: "-1e-3", absError: "0.0001", desc: "5. Conversion of the negative decimal float value (E notation, negative exponent) to the double."}
+  - { initialType: "Float", value: "-1e3f", resultType: "double" , result: "-1E3", absError: "0.0001", desc: "6. Conversion of the negative decimal Float (alias) value (E notation, positive exponent, significand equals to -1) to the double."}
+  - { initialType: "Float", value: "-0e12f", resultType: "double" , result: "0", absError: "0.0000001", desc: "7. Conversion of the zero decimal Float (alias) value (E notation, positive exponent, significand equals to 0, minus sign) to the double."}
+  - { initialType: "Float", value: "+0e0f", resultType: "double" , result: "0.0", absError: "0.000001", desc: "8. Conversion of the zero decimal Float (alias) value (E notation, positive exponent, significand equals to 0, plus sign) to the double."}
+  - { initialType: "float", value: "+12E10f", resultType: "double" , result: "1.2e11", absError: "1e9", desc: "9. Conversion of the positive decimal float value (E notation, positive exponent, plus sign) to the double."}
  

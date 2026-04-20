@@ -47,7 +47,7 @@ function indexOfTest5() {
     let val10: byte = 10;
     let val20: short = 20;
     let val30: long = 30;
-    let val40: float = 40.0;
+    let val40: float = 40.0f;
     let a: Array<Object | string | number | boolean> = 
     new Array<Object | string | number | boolean>(true, false, val10, 'x', 10.0, 'y', val20, 'z', 20.0, val30, val40, 30, 40.0);
 
@@ -91,7 +91,7 @@ function lastIndexOfTest5() {
     let val10: byte = 10;
     let val20: short = 20;
     let val30: long = 30;
-    let val40: float = 40.0;
+    let val40: float = 40.0f;
     let a: Array<Object | string | number | boolean> = 
     new Array<Object | string | number | boolean>(true, false, val10, 'x', 10.0, 'y', val20, 'z', 20.0, val30, val40, 30, 40.0);
 

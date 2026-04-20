@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,7 +244,7 @@ class ProxyTestImpl<Resource> implements ProxyTest<Resource>{
     a5: char = c'5'
     a6: double = 6
     a7: string = "7"
-    a8: float = 8.0
+    a8: float = 8.0f
     a9: long = 8000000000
     a10: string | number = 1
     a11: BaseImpl | number = 1
