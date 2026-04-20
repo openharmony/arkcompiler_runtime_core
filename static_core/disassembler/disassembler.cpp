@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,14 +29,16 @@
 
 namespace ark::disasm {
 
-void Disassembler::Disassemble(std::string_view filenameIn, const bool quiet, const bool skipStrings)
+bool Disassembler::Disassemble(std::string_view filenameIn, const bool quiet, const bool skipStrings)
 {
     auto file = panda_file::File::Open(filenameIn);
     if (file == nullptr) {
-        LOG(FATAL, DISASSEMBLER) << "> unable to open specified pandafile: <" << filenameIn << ">";
+        LOG(ERROR, DISASSEMBLER) << "> unable to open specified pandafile: <" << filenameIn << ">";
+        return false;
     }
 
     Disassemble(file, quiet, skipStrings);
+    return true;
 }
 
 void Disassembler::Disassemble(const panda_file::File &file, const bool quiet, const bool skipStrings)

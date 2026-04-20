@@ -68,13 +68,15 @@ static void PrintHelp(ark::PandArgParser &paParser)
     std::cerr << std::endl;
 }
 
-static void Disassemble(const Options &options)
+static bool Disassemble(const Options &options)
 {
     auto inputFile = options.inputFile.GetValue();
     LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << inputFile << "\n";
 
     ark::disasm::Disassembler disasm {};
-    disasm.Disassemble(inputFile, options.quiet.GetValue(), options.skipStrings.GetValue());
+    if (!disasm.Disassemble(inputFile, options.quiet.GetValue(), options.skipStrings.GetValue())) {
+        return false;
+    }
     auto verbose = options.verbose.GetValue();
     if (verbose) {
         disasm.CollectInfo();
@@ -83,8 +85,13 @@ static void Disassemble(const Options &options)
 
     std::ofstream resPa;
     resPa.open(options.outputFile.GetValue(), std::ios::trunc | std::ios::out);
+    if (!resPa.is_open()) {
+        LOG(ERROR, DISASSEMBLER) << "> unable to open output file: <" << options.outputFile.GetValue() << ">";
+        return false;
+    }
     disasm.Serialize(resPa, options.withSeparators.GetValue(), verbose);
     resPa.close();
+    return true;
 }
 
 static bool ProcessArgs(ark::PandArgParser &paParser, const Options &options, int argc, const char **argv)
@@ -135,7 +142,9 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    Disassemble(options);
+    if (!Disassemble(options)) {
+        return 1;
+    }
 
     paParser.DisableTail();
 
