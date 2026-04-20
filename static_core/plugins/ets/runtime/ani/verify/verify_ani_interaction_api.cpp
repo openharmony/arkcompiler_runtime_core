@@ -311,10 +311,14 @@ NO_UB_SANITIZE static ani_status FindModule(VEnv *venv, const char *moduleDescri
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FindNamespace(VEnv *venv, const char *namespaceDescriptor, ani_namespace *result)
+NO_UB_SANITIZE static ani_status FindNamespace(VEnv *venv, const char *namespaceDescriptor, VNamespace **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FindNamespace(venv->GetEnv(), namespaceDescriptor, result);
+
+    ani_namespace result {};
+    ani_status status = GetInteractionAPI(venv)->FindNamespace(venv->GetEnv(), namespaceDescriptor, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -372,20 +376,28 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(VEnv *venv, VModule *vmodul
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, ani_namespace ns, const char *name,
-                                                        const char *signature, ani_function *result)
+NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, VNamespace *vnamespace, const char *name,
+                                                        const char *signature, VFunction **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Namespace_FindFunction(venv->GetEnv(), ns, name, signature, result);
+
+    ani_function result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Namespace_FindFunction(venv->GetEnv(), vnamespace->GetRef(), name, signature, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedFunction(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, ani_namespace ns, const char *name,
+NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, VNamespace *vnamespace, const char *name,
                                                         VVariable **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
     ani_variable result {};
-    ani_status status = GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), ns, name, &result);
+    ani_status status =
+        GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), vnamespace->GetRef(), name, &result);
     if (LIKELY(status == ANI_OK)) {
         *vresult = venv->GetVerifiedVariable(result);
     }
@@ -396,25 +408,47 @@ NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, ani_namespac
 NO_UB_SANITIZE static ani_status Module_BindNativeFunctions(VEnv *venv, VModule *vmodule,
                                                             const ani_native_function *functions, ani_size nrFunctions)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForModule(vmodule, "module"),
+        ANIArg::MakeForNativeFunctions(functions, nrFunctions, "functions"),
+        ANIArg::MakeForSize(nrFunctions, "nr_functions")
+    );
+    // clang-format on
     return GetInteractionAPI(venv)->Module_BindNativeFunctions(venv->GetEnv(), vmodule->GetRef(), functions,
                                                                nrFunctions);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(VEnv *venv, ani_namespace ns,
+NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(VEnv *venv, VNamespace *vnamespace,
                                                                const ani_native_function *functions,
                                                                ani_size nrFunctions)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Namespace_BindNativeFunctions(venv->GetEnv(), ns, functions, nrFunctions);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForNamespace(vnamespace, "ns"),
+        ANIArg::MakeForNativeFunctions(functions, nrFunctions, "functions"),
+        ANIArg::MakeForSize(nrFunctions, "nr_functions")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Namespace_BindNativeFunctions(venv->GetEnv(), vnamespace->GetRef(), functions,
+                                                                  nrFunctions);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_BindNativeMethods(VEnv *venv, VClass *vclass, const ani_native_function *methods,
                                                          ani_size nrMethods)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForNativeMethods(methods, nrMethods, "methods"),
+        ANIArg::MakeForSize(nrMethods, "nr_methods")
+    );
+    // clang-format on
     return GetInteractionAPI(venv)->Class_BindNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
 }
 
@@ -7819,7 +7853,14 @@ NO_UB_SANITIZE static ani_status Any_New(VEnv *venv, ani_ref ctor, ani_size argc
 NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(VEnv *venv, VClass *vclass,
                                                                const ani_native_function *methods, ani_size nrMethods)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForNativeStaticMethods(methods, nrMethods, "methods"),
+        ANIArg::MakeForSize(nrMethods, "nr_methods")
+    );
+    // clang-format on
     return GetInteractionAPI(venv)->Class_BindStaticNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
 }
 

@@ -24,6 +24,7 @@ class VVm;
 class VEnv;
 class VRef;
 class VModule;
+class VNamespace;
 class VObject;
 class VTupleValue;
 class VClass;
@@ -83,6 +84,11 @@ struct TypeMapping<VModule *> {
 };
 
 template <>
+struct TypeMapping<VNamespace *> {
+    using Type = ani_namespace;
+};
+
+template <>
 struct TypeMapping<VString *> {
     using Type = ani_string;
 };
@@ -110,6 +116,11 @@ struct TypeMapping<VRef **> {
 template <>
 struct TypeMapping<VModule **> {
     using Type = ani_module *;
+};
+
+template <>
+struct TypeMapping<VNamespace **> {
+    using Type = ani_namespace *;
 };
 
 template <>

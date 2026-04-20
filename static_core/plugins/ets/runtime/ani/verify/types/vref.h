@@ -30,14 +30,6 @@ public:
     ~VRef() = delete;
 };
 
-class VModule final : public VRef {
-public:
-    ani_module GetRef()
-    {
-        return static_cast<ani_module>(VRef::GetRef());
-    }
-};
-
 class VObject : public VRef {
 public:
     ani_object GetRef()
@@ -46,7 +38,7 @@ public:
     }
 };
 
-class VClass final : public VObject {
+class VClass : public VObject {
 public:
     ani_class GetRef()
     {
@@ -67,6 +59,22 @@ public:
     ani_enum_item GetRef()
     {
         return static_cast<ani_enum_item>(VObject::GetRef());
+    }
+};
+
+class VModule final : public VClass {
+public:
+    ani_module GetRef()
+    {
+        return static_cast<ani_module>(VClass::GetRef());
+    }
+};
+
+class VNamespace final : public VClass {
+public:
+    ani_namespace GetRef()
+    {
+        return static_cast<ani_namespace>(VClass::GetRef());
     }
 };
 

@@ -522,6 +522,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_OPTIONS:                      return "ani_options *";
         case ValueType::ANI_SIZE:                         return "ani_size";
         case ValueType::ANI_REF:                          return "ani_ref";
+        case ValueType::ANI_MODULE:                       return "ani_module";
+        case ValueType::ANI_NAMESPACE:                    return "ani_namespace";
         case ValueType::ANI_CLASS:                        return "ani_class";
         case ValueType::ANI_ENUM:                         return "ani_enum";
         case ValueType::ANI_ENUM_ITEM:                    return "ani_enum_item";
@@ -568,6 +570,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_ARRAYBUFFER:                  return "ani_arraybuffer";
         case ValueType::ANI_ARRAY_STORAGE:                return "ani_array *";
         case ValueType::ANI_ARRAYBUFFER_STORAGE:          return "ani_arraybuffer *";
+        case ValueType::ANI_NATIVE_FUNCTIONS:             return "const ani_native_function *";
         case ValueType::VOID_PTR_STORAGE:                 return "void **";
         case ValueType::ANI_FIXED_ARRAY_BOOLEAN_STORAGE:  return "ani_fixedarray_boolean *";
         case ValueType::ANI_FIXED_ARRAY_CHAR_STORAGE:     return "ani_fixedarray_char *";
@@ -899,6 +902,19 @@ public:
         return {};
     }
 
+    VerificationResult VerifyModule(VModule *vmodule)
+    {
+        auto err = VerifyClass(vmodule);
+        if (err) {
+            return err;
+        }
+        if (!class_->IsModule()) {
+            class_ = nullptr;
+            return {"wrong reference", ANIErrorSeverity::FATAL};
+        }
+        return {};
+    }
+
     VerificationResult VerifyEnum(VEnum *venum)
     {
         auto err = VerifyRef(venum);
@@ -927,6 +943,19 @@ public:
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, venumItem->GetRef());
             return {ss.str(), ANIErrorSeverity::ERROR};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyNamespace(VNamespace *vnamespace)
+    {
+        auto err = VerifyClass(vnamespace);
+        if (err) {
+            return err;
+        }
+        if (!class_->IsModule()) {
+            class_ = nullptr;
+            return {"wrong reference", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -1699,6 +1728,129 @@ public:
         return {PandaString(errorMessage), ANIErrorSeverity::ERROR};
     }
 
+    static PandaString GetNativeFunctionError(ani_size index, std::string_view message)
+    {
+        PandaStringStream ss;
+        ss << message << " at index " << index;
+        return ss.str();
+    }
+
+    static std::string_view GetNativeMethodKind(bool isStaticMethod, bool isClassMethod)
+    {
+        if (!isClassMethod) {
+            return "native function";
+        }
+        return isStaticMethod ? "static native method" : "native method";
+    }
+
+    VerificationResult VerifyNativeFunctions(const ani_native_function *functions, ani_size nrFunctions)
+    {
+        return DoVerifyNativeFunctions(functions, nrFunctions, true, false);
+    }
+
+    VerificationResult VerifyNativeMethods(const ani_native_function *methods, ani_size nrMethods)
+    {
+        return DoVerifyNativeFunctions(methods, nrMethods, false, true);
+    }
+
+    VerificationResult VerifyStaticNativeMethods(const ani_native_function *methods, ani_size nrMethods)
+    {
+        return DoVerifyNativeFunctions(methods, nrMethods, true, true);
+    }
+
+    VerificationResult DoVerifyNativeFunctions(const ani_native_function *functions, ani_size nrFunctions,
+                                               bool isStaticMethod, bool isClassMethod)
+    {
+        auto err = VerifyTypePtr(functions, "const ani_native_function *");
+        if (err) {
+            return err;
+        }
+        if (nrFunctions == 0) {
+            return {};
+        }
+        if (class_ == nullptr) {
+            return {"wrong class for native function", ANIErrorSeverity::FATAL};
+        }
+
+        for (ani_size i = 0; i < nrFunctions; ++i) {
+            const auto &function = functions[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            err = VerifyNativeFunction(function, i, isStaticMethod, isClassMethod);
+            if (err) {
+                return err;
+            }
+        }
+        return {};
+    }
+
+    VerificationResult VerifyNativeFunction(const ani_native_function &function, ani_size index, bool isStaticMethod,
+                                            bool isClassMethod)
+    {
+        if (function.name == nullptr) {
+            return {GetNativeFunctionError(index, "wrong native function name"), ANIErrorSeverity::FATAL};
+        }
+        if (function.pointer == nullptr) {
+            return {GetNativeFunctionError(index, "wrong native function pointer"), ANIErrorSeverity::FATAL};
+        }
+
+        std::optional<EtsMethodSignature> methodSignature;
+        if (function.signature != nullptr) {
+            Mangle::ConvertSignatureToProto(methodSignature, function.signature);
+            if (!methodSignature.has_value()) {
+                return {GetNativeFunctionError(index, "wrong native function signature"), ANIErrorSeverity::ERROR};
+            }
+        }
+
+        EtsMethod *method = nullptr;
+        ani_status status =
+            ResolveNativeCallable(function.name, methodSignature, isStaticMethod, isClassMethod, &method);
+        if (status == ANI_AMBIGUOUS) {
+            PandaStringStream ss;
+            ss << "ambiguous " << GetNativeMethodKind(isStaticMethod, isClassMethod);
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
+        }
+        if (method == nullptr) {
+            PandaStringStream ss;
+            ss << "wrong " << GetNativeMethodKind(isStaticMethod, isClassMethod);
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
+        }
+        if (!method->IsNative()) {
+            PandaStringStream ss;
+            ss << GetNativeMethodKind(isStaticMethod, isClassMethod) << " is not native";
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
+        }
+        if (method->IsIntrinsic()) {
+            return {GetNativeFunctionError(index, "native function is intrinsic"), ANIErrorSeverity::ERROR};
+        }
+        if (method->IsBoundNativeFunction()) {
+            return {GetNativeFunctionError(index, "native function is already bound"), ANIErrorSeverity::ERROR};
+        }
+        return {};
+    }
+
+    ani_status ResolveNativeCallable(const char *name, std::optional<EtsMethodSignature> &methodSignature,
+                                     bool isStaticMethod, bool isClassMethod, EtsMethod **result)
+    {
+        ASSERT(result != nullptr);
+        if (!isClassMethod) {
+            *result = class_->GetStaticMethod(name, methodSignature);
+            return ANI_OK;
+        }
+
+        if (isStaticMethod && methodSignature.has_value()) {
+            *result = class_->GetDirectMethod(true, name, methodSignature.value());
+            return ANI_OK;
+        }
+
+        if (!methodSignature.has_value()) {
+            bool isUnique = false;
+            *result = class_->GetDirectMethod(isStaticMethod, name, &isUnique);
+            return isUnique ? ANI_OK : ANI_AMBIGUOUS;
+        }
+
+        *result = class_->GetDirectMethod(isStaticMethod, name, methodSignature.value());
+        return ANI_OK;
+    }
+
     VerificationResult VerifyMethodAArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         ASSERT(methodArgs != nullptr);
@@ -1860,6 +2012,18 @@ static VerificationResult VerifyRef(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF);
     return v.VerifyRef(arg.GetValueRef());
+}
+
+static VerificationResult VerifyModule(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_MODULE);
+    return v.VerifyModule(arg.GetValueModule());
+}
+
+static VerificationResult VerifyNamespace(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NAMESPACE);
+    return v.VerifyNamespace(arg.GetValueNamespace());
 }
 
 static VerificationResult VerifyClass(Verifier &v, const ANIArg &arg)
@@ -2292,6 +2456,24 @@ static VerificationResult VerifySize([[maybe_unused]] Verifier &v, [[maybe_unuse
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE);
     return {};
+}
+
+static VerificationResult VerifyNativeFunctions(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NATIVE_FUNCTIONS);
+    return v.VerifyNativeFunctions(arg.GetValueNativeFunctions(), arg.GetNativeFunctionCount());
+}
+
+static VerificationResult VerifyNativeMethods(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NATIVE_METHODS);
+    return v.VerifyNativeMethods(arg.GetValueNativeFunctions(), arg.GetNativeFunctionCount());
+}
+
+static VerificationResult VerifyStaticNativeMethods(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_NATIVE_METHODS);
+    return v.VerifyStaticNativeMethods(arg.GetValueNativeFunctions(), arg.GetNativeFunctionCount());
 }
 
 static VerificationResult VerifyBoolean(Verifier &v, const ANIArg &arg)
