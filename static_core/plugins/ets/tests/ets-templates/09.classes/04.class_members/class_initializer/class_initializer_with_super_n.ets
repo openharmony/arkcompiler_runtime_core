@@ -18,6 +18,7 @@ desc: >-
       In addition, a compile-time error occurs if a class initializer contains the following:
       - Keyword super (see Method Call Expression and Field Access Expression);
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'super' cannot be referenced from a static context"
 ---*/
 
 class A {

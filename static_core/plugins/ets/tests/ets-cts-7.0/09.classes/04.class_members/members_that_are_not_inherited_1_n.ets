@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Constructors and class initializers are not members and are not inherited.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0192: Must call super constructor"
 ---*/
 
 class CA {

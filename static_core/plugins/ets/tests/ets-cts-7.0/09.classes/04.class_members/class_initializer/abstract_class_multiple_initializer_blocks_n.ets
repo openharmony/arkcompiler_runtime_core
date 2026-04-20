@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Only single class initializer block is allowed per class. Abstract class case.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0034: Only one static block is allowed in one namespace or class."
 ---*/
 
 abstract class A {

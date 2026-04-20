@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,27 +13,75 @@
 
 --- # List of invalid class members
 class_members:
-  - "class B{}"
-  - "abstract class B{}"
-  - "protected interface I{}"
-  - "enum Color {Red, Green}"
-  - "type a = int"
-  - "throw new Error(\"incorrect\")"
-  - "try {} catch (e) {}"
-  - "for( let i = 0; i<1; i++) { i++ }"
-  - "while( 1 ) { return }"
-  - "continue"
-  - "break"
-  - "return"
-  - "{}"
-  - "()"
-  - "[]"
-  - "[][]"
-  - "++"
-  - "let a: int = 0"
-  - "function foo() {}"
-  - "switch(1) {}"
-  - "if(1){}"
-  - "new Object()"
-  - "Math.round(1.2)"
-  - "import {sin} from \"std/math\";"
+  - m: "class B{}"
+    exp_out: |-
+      "Syntax error ESY0233: Unexpected token. A constructor, method, accessor, or property was expected."
+  - m: "abstract class B{}"
+    exp_out: |-
+      "Syntax error ESY0233: Unexpected token. A constructor, method, accessor, or property was expected."
+  - m: "protected interface I{}"
+    exp_out: |-
+      "Syntax error ESY0233: Unexpected token. A constructor, method, accessor, or property was expected."
+  - m: "enum Color {Red, Green}"
+    exp_out: |-
+      "Syntax error ESY0233: Unexpected token. A constructor, method, accessor, or property was expected."
+  - m: "type a = int"
+    exp_out: |-
+      "Syntax error ESY0121: Field type annotation expected."
+  - m: "throw new Error(\"incorrect\")"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'throw'."
+  - m: "try {} catch (e) {}"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'try'."
+  - m: "for( let i = 0; i<1; i++) { i++ }"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'for'."
+  - m: "while( 1 ) { return }"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'while'."
+  - m: "continue"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'continue'."
+  - m: "break"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'break'."
+  - m: "return"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'return'."
+  - m: "{}"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token '{'."
+  - m: "()"
+    exp_out: |-
+      "Syntax error ESY103145: Call signatures in object types are not supported. Use '$_invoke' method instead."
+  - m: "[]"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token ']'."
+  - m: "[][]"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token ']'."
+  - m: "++"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token '++'."
+  - m: "let a: int = 0"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'let'."
+  - m: "function foo() {}"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'function'."
+  - m: "switch(1) {}"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'switch'."
+  - m: "if(1){}"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'if'."
+  - m: "new Object()"
+    exp_out: |-
+      "Syntax error ESY0228: Unexpected token, expected '('."
+  - m: "Math.round(1.2)"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token '.'."
+  - m: "import {sin} from \"std/math\";"
+    exp_out: |-
+      "Syntax error ESY0227: Unexpected token 'import'."

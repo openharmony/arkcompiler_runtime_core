@@ -19,6 +19,7 @@ desc: >-
       - Keyword super (see Method Call Expression and Field Access Expression);
       Abstract class case.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'super' cannot be referenced from a static context"
 ---*/
 
 abstract class A {

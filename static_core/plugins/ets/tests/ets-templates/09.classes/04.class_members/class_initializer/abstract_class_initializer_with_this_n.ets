@@ -19,6 +19,7 @@ desc:  >-
       - Keyword this (see this Expression);
       Abstract class case.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'this' cannot be referenced from a static context"
 ---*/
 
 abstract class A {

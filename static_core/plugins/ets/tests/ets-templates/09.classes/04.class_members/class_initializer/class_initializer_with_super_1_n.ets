@@ -18,6 +18,7 @@ desc:  >-
       In addition, a compile-time error occurs if a class initializer contains the following:
       - Keyword super (see Method Call Expression and Field Access Expression);
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0201: Call to 'super' must be first statement in constructor"
 ---*/
 
 class A {}

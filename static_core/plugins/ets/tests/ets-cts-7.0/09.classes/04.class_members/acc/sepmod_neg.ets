@@ -21,6 +21,7 @@ desc: >-
     of the current class.
 tags: [compile-only, negative]
 files: [{{c.files}}]
+expected_out: "Semantic error ESE0139: Signature foo(p: Double): undefined is not visible here."
 ---*/
 
 {{c.decl}}

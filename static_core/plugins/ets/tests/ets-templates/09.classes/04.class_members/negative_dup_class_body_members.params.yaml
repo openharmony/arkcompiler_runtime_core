@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,10 +13,24 @@
 
 --- # List of valid class members
 class_members:
-  - "f: int;"
-  - "m(): void {}"
-  - "class B{}"
-  - "interface I{}"
-  - "enum E{V1, V2}"
-  - "constructor() {}"
-  - "final get age(): int {return 2}; set age(i: int) {}"
+  - m: "f: int;"
+    exp_out: |-
+      "Semantic error ESE0351: Variable 'f' has already been declared."
+  - m: "m(): void {}"
+    exp_out: |-
+      "Semantic error ESE0130: Function m is already declared."
+  - m: "class B{}"
+    exp_out: |-
+      "Semantic error ESE0351: Variable 'B' has already been declared."
+  - m: "interface I{}"
+    exp_out: |-
+      "Semantic error ESE0351: Variable 'I' has already been declared."
+  - m: "enum E{V1, V2}"
+    exp_out: |-
+      "Semantic error ESE0351: Variable 'E' has already been declared."
+  - m: "constructor() {}"
+    exp_out: |-
+      "Semantic error ESE0130: Function constructor is already declared."
+  - m: "final get age(): int {return 2}; set age(i: int) {}"
+    exp_out: |-
+      "Semantic error ESE0130: Function age is already declared."

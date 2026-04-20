@@ -15,6 +15,7 @@ limitations under the License.
 /*---
 desc: Cannot get access to variables created inside the initialization block
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0087: Property 'b' does not exist on type 'A'"
 ---*/
 
 class A {

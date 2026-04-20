@@ -18,6 +18,7 @@ desc:  >-
       In addition, a compile-time error occurs if a class initializer contains the following:
       - Keyword this (see this Expression);
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'this' cannot be referenced from a static context"
 ---*/
 
 class A {
