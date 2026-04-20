@@ -580,11 +580,11 @@ TEST_F(ClassCallStaticMethodBooleanTest, class_from_local_scope)
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Child", &cls), ANI_OK);
-    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
-
     ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+
     ani_boolean result;
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethod_Boolean(env_, cls, method, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
@@ -1128,11 +1128,10 @@ TEST_F(ClassCallStaticMethodBooleanATest, class_from_local_scope)
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
-    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
-
     ani_static_method method;
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, args_.data()), ANI_ERROR);

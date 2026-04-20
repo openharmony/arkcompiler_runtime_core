@@ -189,10 +189,10 @@ ani_status ResolveNamedMethod(EtsClass *klass, const char *name, const char *sig
     ASSERT(name != nullptr);
     ASSERT(result != nullptr);
 
-    PandaString methodName = NormalizeMethodNameForAni(name);
     if (isStaticMethod) {
-        return ResolveClassMethodByName<true>(klass, methodName.c_str(), signature, result);
+        return ResolveClassMethodByName<true>(klass, name, signature, result);
     }
+    PandaString methodName = NormalizeMethodNameForAni(name);
     return ResolveClassMethodByName<false>(klass, methodName.c_str(), signature, result);
 }
 
@@ -385,6 +385,10 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_UTF16_STRING:                 return "const uint16_t *";
         case ValueType::ANI_ENV_STORAGE:                  return "ani_env **";
         case ValueType::ANI_VM_STORAGE:                   return "ani_env **";
+        case ValueType::ANI_METHOD_STORAGE:               return "ani_method *";
+        case ValueType::ANI_STATIC_METHOD_STORAGE:        return "ani_static_method *";
+        case ValueType::ANI_FIELD_STORAGE:                return "ani_field *";
+        case ValueType::ANI_STATIC_FIELD_STORAGE:         return "ani_static_field *";
         case ValueType::ANI_BOOLEAN_STORAGE:              return "ani_boolean *";
         case ValueType::ANI_CHAR_STORAGE:                 return "ani_char *";
         case ValueType::ANI_BYTE_STORAGE:                 return "ani_byte *";
@@ -981,6 +985,155 @@ public:
         return {};
     }
 
+    template <bool IS_STATIC>
+    VerificationResult VerifyFindFieldNameImpl(const char *name)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr) {
+            if constexpr (IS_STATIC) {
+                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong class for field", ANIErrorSeverity::FATAL};
+            }
+        }
+
+        EtsField *field = nullptr;
+        if constexpr (IS_STATIC) {
+            field = class_->GetStaticFieldIDByName(name, nullptr);
+        } else {
+            field = class_->GetFieldIDByName(name, nullptr);
+        }
+
+        if (field != nullptr) {
+            return {};
+        }
+
+        if constexpr (IS_STATIC) {
+            return {"wrong static field", ANIErrorSeverity::ERROR};
+        } else {
+            return {"wrong field", ANIErrorSeverity::ERROR};
+        }
+    }
+
+    template <bool IS_STATIC>
+    VerificationResult VerifyFindMethodSignatureImpl(const char *signature)
+    {
+        signature_ = signature;
+        if (class_ == nullptr) {
+            if constexpr (IS_STATIC) {
+                return {"wrong class for static method", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong class for method", ANIErrorSeverity::FATAL};
+            }
+        }
+        if (name_ == nullptr) {
+            return {};
+        }
+
+        if constexpr (IS_STATIC) {
+            return VerifyFindMethod(name_, signature_, true, "wrong static method");
+        } else {
+            return VerifyFindMethod(name_, signature_, false, "wrong method");
+        }
+    }
+
+    template <bool IS_SETTER>
+    VerificationResult VerifyFindAccessorNameImpl(const char *name)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+        if (class_ == nullptr) {
+            if constexpr (IS_SETTER) {
+                return {"wrong class for setter", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong class for getter", ANIErrorSeverity::FATAL};
+            }
+        }
+
+        PandaString methodName(IS_SETTER ? "%%set-" : "%%get-");
+        methodName += name;
+        if constexpr (IS_SETTER) {
+            return VerifyFindMethod(methodName.c_str(), nullptr, false, "wrong setter");
+        } else {
+            return VerifyFindMethod(methodName.c_str(), nullptr, false, "wrong getter");
+        }
+    }
+
+    template <bool IS_SETTER>
+    VerificationResult VerifyFindIndexableSignatureImpl(const char *signature)
+    {
+        signature_ = signature;
+        if (class_ == nullptr) {
+            if constexpr (IS_SETTER) {
+                return {"wrong class for indexable setter", ANIErrorSeverity::FATAL};
+            } else {
+                return {"wrong class for indexable getter", ANIErrorSeverity::FATAL};
+            }
+        }
+
+        if constexpr (IS_SETTER) {
+            return VerifyFindMethod("$_set", signature_, false, "wrong indexable setter");
+        } else {
+            return VerifyFindMethod("$_get", signature_, false, "wrong indexable getter");
+        }
+    }
+
+    VerificationResult VerifyFindFieldName(const char *name)
+    {
+        return VerifyFindFieldNameImpl<false>(name);
+    }
+
+    VerificationResult VerifyFindStaticFieldName(const char *name)
+    {
+        return VerifyFindFieldNameImpl<true>(name);
+    }
+
+    VerificationResult VerifyFindMethodSignature(const char *signature)
+    {
+        return VerifyFindMethodSignatureImpl<false>(signature);
+    }
+
+    VerificationResult VerifyFindStaticMethodSignature(const char *signature)
+    {
+        return VerifyFindMethodSignatureImpl<true>(signature);
+    }
+
+    VerificationResult VerifyFindSetterName(const char *name)
+    {
+        return VerifyFindAccessorNameImpl<true>(name);
+    }
+
+    VerificationResult VerifyFindGetterName(const char *name)
+    {
+        return VerifyFindAccessorNameImpl<false>(name);
+    }
+
+    VerificationResult VerifyFindIndexableGetterSignature(const char *signature)
+    {
+        return VerifyFindIndexableSignatureImpl<false>(signature);
+    }
+
+    VerificationResult VerifyFindIndexableSetterSignature(const char *signature)
+    {
+        return VerifyFindIndexableSignatureImpl<true>(signature);
+    }
+
+    VerificationResult VerifyFindIterator(VClass *vclass)
+    {
+        auto err = VerifyClass(vclass);
+        if (err) {
+            return err;
+        }
+
+        return VerifyFindMethod("$_iterator", nullptr, false, "wrong iterator");
+    }
+
     VerificationResult VerifyReadPropertyByName(const char *name, EtsType propertyType)
     {
         auto err = VerifyTypePtr(name, "const char *");
@@ -1159,6 +1312,23 @@ public:
         }
 
         return {};
+    }
+
+    VerificationResult VerifyFindMethod(const char *name, const char *signature, bool isStaticMethod,
+                                        std::string_view errorMessage)
+    {
+        EtsMethod *method = nullptr;
+        ani_status status = ResolveNamedMethod(class_, name, signature, isStaticMethod, &method);
+        if (status == ANI_OK) {
+            return {};
+        }
+        if (status == ANI_INVALID_DESCRIPTOR) {
+            return {"wrong method signature", ANIErrorSeverity::ERROR};
+        }
+        if (status == ANI_AMBIGUOUS) {
+            return {"ambiguous method", ANIErrorSeverity::ERROR};
+        }
+        return {PandaString(errorMessage), ANIErrorSeverity::ERROR};
     }
 
     VerificationResult VerifyMethodAArgs(ANIArg::AniMethodArgs *methodArgs)
@@ -1365,6 +1535,48 @@ static VerificationResult VerifyStaticMethodName(Verifier &v, const ANIArg &arg)
     return v.VerifyStaticMethodName(arg.GetValueUTF8String());
 }
 
+static VerificationResult VerifyFindMethodSignature(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_METHOD_SIGNATURE);
+    return v.VerifyFindMethodSignature(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindStaticMethodSignature(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_STATIC_METHOD_SIGNATURE);
+    return v.VerifyFindStaticMethodSignature(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindSetterName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_SETTER_NAME);
+    return v.VerifyFindSetterName(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindGetterName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_GETTER_NAME);
+    return v.VerifyFindGetterName(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindIndexableGetterSignature(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_INDEXABLE_GETTER_SIG);
+    return v.VerifyFindIndexableGetterSignature(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindIndexableSetterSignature(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_INDEXABLE_SETTER_SIG);
+    return v.VerifyFindIndexableSetterSignature(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindIterator(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_ITERATOR);
+    return v.VerifyFindIterator(arg.GetValueClass());
+}
+
 static VerificationResult VerifyMethodReturnType(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_RETURN_TYPE);
@@ -1455,6 +1667,18 @@ static VerificationResult VerifyWriteStaticField(Verifier &v, const ANIArg &arg)
     return v.VerifyWriteStaticField(arg.GetValueStaticField(), arg.GetReturnType());
 }
 
+static VerificationResult VerifyFindFieldName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_FIELD_NAME);
+    return v.VerifyFindFieldName(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindStaticFieldName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_STATIC_FIELD_NAME);
+    return v.VerifyFindStaticFieldName(arg.GetValueUTF8String());
+}
+
 static VerificationResult VerifyReadPropertyByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_PROPERTY_BY_NAME);
@@ -1519,6 +1743,30 @@ static VerificationResult VerifyEnvStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ENV_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueEnvStorage(), "ani_env *");
+}
+
+static VerificationResult VerifyMethodStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueMethodStorage(), "ani_method");
+}
+
+static VerificationResult VerifyStaticMethodStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_METHOD_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueStaticMethodStorage(), "ani_static_method");
+}
+
+static VerificationResult VerifyFieldStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIELD_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFieldStorage(), "ani_field");
+}
+
+static VerificationResult VerifyStaticFieldStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_FIELD_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueStaticFieldStorage(), "ani_static_field");
 }
 
 static VerificationResult VerifyBooleanStorage(Verifier &v, const ANIArg &arg)

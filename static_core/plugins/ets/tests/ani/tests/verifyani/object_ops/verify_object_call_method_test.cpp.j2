@@ -562,9 +562,9 @@ TEST_F(ObjectCallMethod{{ Type }}Test, object_from_local_scope)
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
     GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
-    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
     ani_{{ type }} result;
     ASSERT_EQ(
         env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
@@ -624,8 +624,8 @@ TEST_F(ObjectCallMethod{{ Type }}Test, object_from_escape_local_scope)
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object);
-    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(
@@ -1049,9 +1049,9 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, object_from_local_scope)
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
     GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
-    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
@@ -1109,8 +1109,8 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, object_from_escape_local_scope)
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object);
-    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
 
     ani_{{ type }} result;
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_OK);

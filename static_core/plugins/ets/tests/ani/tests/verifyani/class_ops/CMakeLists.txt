@@ -16,6 +16,51 @@ ani_verify_add_gtest(ani_verify_test_class_call_static_method_boolean
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_call_static_method_boolean_test.ets
 )
 
+ani_verify_add_gtest(ani_verify_test_class_find_field
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_field_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_field_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_static_field
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_static_field_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_static_field_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_method
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_method_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_method_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_static_method
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_static_method_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_static_method_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_setter
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_setter_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_setter_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_getter
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_getter_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_getter_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_indexable_getter
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_indexable_getter_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_indexable_getter_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_indexable_setter
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_indexable_setter_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_indexable_setter_test.ets
+)
+
+ani_verify_add_gtest(ani_verify_test_class_find_iterator
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_iterator_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_find_iterator_test.ets
+)
+
 # Generated tests for Class_GetStaticField APIs
 ani_verify_add_generated_tests(ani_verify_test_class_static_field_get
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_static_field_get_test.cpp.j2

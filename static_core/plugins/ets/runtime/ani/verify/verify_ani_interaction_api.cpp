@@ -2011,8 +2011,16 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_V(VEnv *venv, VFunction *vfn
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_FindField(VEnv *venv, VClass *vclass, const char *name, VField **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForFindFieldName(name, "name"),
+        ANIArg::MakeForFieldStorage(vresult, "result")
+    );
+    // clang-format on
     ani_field result {};
+
     ani_status status = GetInteractionAPI(venv)->Class_FindField(venv->GetEnv(), vclass->GetRef(), name, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedField(result);
@@ -2024,7 +2032,14 @@ NO_UB_SANITIZE static ani_status Class_FindField(VEnv *venv, VClass *vclass, con
 NO_UB_SANITIZE static ani_status Class_FindStaticField(VEnv *venv, VClass *vclass, const char *name,
                                                        VStaticField **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForFindStaticFieldName(name, "name"),
+        ANIArg::MakeForStaticFieldStorage(vresult, "result")
+    );
+    // clang-format on
     ani_static_field result {};
     ani_status status = GetInteractionAPI(venv)->Class_FindStaticField(venv->GetEnv(), vclass->GetRef(), name, &result);
     if (LIKELY((status) == ANI_OK)) {
@@ -2037,7 +2052,15 @@ NO_UB_SANITIZE static ani_status Class_FindStaticField(VEnv *venv, VClass *vclas
 NO_UB_SANITIZE static ani_status Class_FindMethod(VEnv *venv, VClass *vclass, const char *name, const char *signature,
                                                   VMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForMethodName(name, "name"),
+        ANIArg::MakeForFindMethodSignature(signature, "signature"),
+        ANIArg::MakeForMethodStorage(vresult, "result")
+    );
+    // clang-format on
     ani_method result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
@@ -2051,7 +2074,15 @@ NO_UB_SANITIZE static ani_status Class_FindMethod(VEnv *venv, VClass *vclass, co
 NO_UB_SANITIZE static ani_status Class_FindStaticMethod(VEnv *venv, VClass *vclass, const char *name,
                                                         const char *signature, VStaticMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForStaticMethodName(name, "name"),
+        ANIArg::MakeForFindStaticMethodSignature(signature, "signature"),
+        ANIArg::MakeForStaticMethodStorage(vresult, "result")
+    );
+    // clang-format on
     ani_static_method result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
@@ -2062,40 +2093,101 @@ NO_UB_SANITIZE static ani_status Class_FindStaticMethod(VEnv *venv, VClass *vcla
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_FindSetter(VEnv *venv, ani_class cls, const char *name, ani_method *result)
+NO_UB_SANITIZE static ani_status Class_FindSetter(VEnv *venv, VClass *vclass, const char *name, VMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindSetter(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForFindSetterName(name, "name"),
+        ANIArg::MakeForMethodStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_method result {};
+    ani_status status = GetInteractionAPI(venv)->Class_FindSetter(venv->GetEnv(), vclass->GetRef(), name, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_FindGetter(VEnv *venv, ani_class cls, const char *name, ani_method *result)
+NO_UB_SANITIZE static ani_status Class_FindGetter(VEnv *venv, VClass *vclass, const char *name, VMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindGetter(venv->GetEnv(), cls, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForFindGetterName(name, "name"),
+        ANIArg::MakeForMethodStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_method result {};
+    ani_status status = GetInteractionAPI(venv)->Class_FindGetter(venv->GetEnv(), vclass->GetRef(), name, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_FindIndexableGetter(VEnv *venv, ani_class cls, const char *signature,
-                                                           ani_method *result)
+NO_UB_SANITIZE static ani_status Class_FindIndexableGetter(VEnv *venv, VClass *vclass, const char *signature,
+                                                           VMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindIndexableGetter(venv->GetEnv(), cls, signature, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForFindIndexableGetterSignature(signature, "signature"),
+        ANIArg::MakeForMethodStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_method result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindIndexableGetter(venv->GetEnv(), vclass->GetRef(), signature, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_FindIndexableSetter(VEnv *venv, ani_class cls, const char *signature,
-                                                           ani_method *result)
+NO_UB_SANITIZE static ani_status Class_FindIndexableSetter(VEnv *venv, VClass *vclass, const char *signature,
+                                                           VMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindIndexableSetter(venv->GetEnv(), cls, signature, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClass(vclass, "class"),
+        ANIArg::MakeForFindIndexableSetterSignature(signature, "signature"),
+        ANIArg::MakeForMethodStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_method result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindIndexableSetter(venv->GetEnv(), vclass->GetRef(), signature, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_FindIterator(VEnv *venv, ani_class cls, ani_method *result)
+NO_UB_SANITIZE static ani_status Class_FindIterator(VEnv *venv, VClass *vclass, VMethod **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindIterator(venv->GetEnv(), cls, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForFindIterator(vclass, "class"),
+        ANIArg::MakeForMethodStorage(vresult, "result")
+    );
+    // clang-format on
+    ani_method result {};
+    ani_status status = GetInteractionAPI(venv)->Class_FindIterator(venv->GetEnv(), vclass->GetRef(), &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2251,7 +2343,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Boolean(VEnv *venv, VClass
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticField(vfield, "static_field", EtsType::BOOLEAN, AccessMode::READWRITE),
+        ANIArg::MakeForStaticField(vfield, "static_field", EtsType::BOOLEAN, AccessMode::READWRITE)
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Boolean(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
