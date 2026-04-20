@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,18 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/ani_verify_tests.cmake)
-
-add_subdirectory(array_ops)
-add_subdirectory(class_ops)
-add_subdirectory(env_ops)
-add_subdirectory(error_ops)
-# NOTE(arutiunianan, #32898) re-enable after fix of flaky failures
-# add_subdirectory(function_ops)
-add_subdirectory(local_scope_ops)
-add_subdirectory(object_ops)
-add_subdirectory(ref_ops)
-add_subdirectory(scope_ops)
-add_subdirectory(string_ops)
-add_subdirectory(vm_ops)
-add_subdirectory(promise_ops)
+ani_verify_add_gtest(ani_verify_test_null_venv
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_null_venv_test.cpp
+)
