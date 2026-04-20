@@ -30,21 +30,16 @@ namespace ark::helpers::math {
  * @param x - should be power of 2
  * @return log2(x) or undefined if x 0
  */
-constexpr uint32_t GetIntLog2(const uint32_t x)
+template <typename T>
+constexpr T GetIntLog2(const T x)
 {
+    static_assert(std::is_unsigned<T>::value, "T must be unsigned type");
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<uint32_t>(PANDA_BIT_UTILS_CTZ(x));
-}
-
-/**
- * @brief returns log2 for argument
- * @param x - of type long, should be power of 2
- * @return log2(x) or undefined if x 0
- */
-constexpr uint64_t GetIntLog2(const uint64_t x)
-{
-    ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<uint64_t>(PANDA_BIT_UTILS_CTZLL(x));
+    if constexpr (sizeof(T) <= sizeof(uint32_t)) {
+        return static_cast<T>(PANDA_BIT_UTILS_CTZ(x));
+    } else {
+        return static_cast<T>(PANDA_BIT_UTILS_CTZLL(x));
+    }
 }
 
 template <typename T>
