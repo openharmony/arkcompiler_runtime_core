@@ -394,6 +394,7 @@ Supported doclets are:
 * `@Seamless ./libX.ext` Declares a dependency for cross-language interoperability.
 * `@Tags t1 [, t2...]` on a root class or method. List of benchmark tags.
 * `@Bugs b1 [, b2...]` on a root class or method. List of associated issues.
+* `@Teardown` on an finalization method of a state.
 
 JS specific doclets (JSDoc-like) are:
 * `@arg {<State name>} <name>` on a benchmark method.

@@ -27,6 +27,7 @@ Note: full actual list is in `src/vmb/doclet.py::TemplateVars`
 - `gc` - GC pause (ms)
 - `tags`
 - `bugs`
+- `state_teardown` - Finazalition method call, f.e: `bench.SomeMethod();`
 
 
 Note that `bench` variable name is 'reserved' (i.e. hard-coded into test generator).

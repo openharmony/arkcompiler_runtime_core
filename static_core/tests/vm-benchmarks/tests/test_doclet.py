@@ -63,6 +63,14 @@ export class ArraySort {
     }
 
     /**
+     * Check sum of test array.
+     * @Teardown
+     */
+    public calcSum(): void {
+        /* blah */
+    }
+
+    /**
      * @Benchmark -it 3
      * @Tags Ohos
      * @Bugs gitee0123456789
@@ -127,6 +135,15 @@ ETS_NOSTATE_SETUP = '''
 class X {
   /**
    * @Setup
+   */
+  x(): int {
+}
+'''
+
+ETS_NOSTATE_TEARDOWN = '''
+class X {
+  /**
+   * @Teardown
    */
   x(): int {
 }
@@ -270,7 +287,7 @@ def test_duplicate_doclets():
 def test_no_state():
     ets = ets_mod.Lang()
     TestCase().assertTrue(ets is not None)
-    for src in (ETS_NOSTATE_BENCH, ETS_NOSTATE_SETUP, ETS_NOSTATE_PARAM):
+    for src in (ETS_NOSTATE_BENCH, ETS_NOSTATE_SETUP, ETS_NOSTATE_PARAM, ETS_NOSTATE_TEARDOWN):
         with pytest.raises(ValueError):
             DocletParser.create(src, ets).parse()
 

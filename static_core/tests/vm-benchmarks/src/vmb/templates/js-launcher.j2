@@ -115,6 +115,7 @@ class VmbLauncher {
         VmbLauncher.runIters("Iter", VmbLauncher.MI, VmbLauncher.IT, bench);
         VmbLauncher.log("Benchmark result: {{bench_name}} " + 1.0*VmbLauncher.totalMs*MS2NS/VmbLauncher.totalOps);
     {% endif %}
+        {{state_teardown}}
         Consumer.consumeObj(bench);
     }
 
