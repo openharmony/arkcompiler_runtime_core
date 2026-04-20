@@ -1,2 +1,6 @@
 #34082
 16.concurrency/04.parallel_execution/03.eaworker_api/eaworker_two_workers_smoke.ets
+
+#34177
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_promise_callbacks.ets
+16.concurrency/07.runtime_implementation_details/01.scheduling_rules/scheduling_fifo_suspendable_jobs.ets
