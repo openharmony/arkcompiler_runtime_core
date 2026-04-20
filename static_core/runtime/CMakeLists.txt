@@ -74,7 +74,6 @@ set(SOURCES
     mem/gc/gc_root_type.cpp
     mem/gc/gc_stats.cpp
     mem/gc/gc_trigger.cpp
-    mem/gc/gc-hung/gc_hung.cpp
     mem/gc/card_table.cpp
     mem/gc/heap-space-misc/crossing_map.cpp
     mem/gc/heap-space-misc/crossing_map_singleton.cpp

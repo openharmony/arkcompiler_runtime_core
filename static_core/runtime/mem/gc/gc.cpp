@@ -40,7 +40,6 @@
 #include "runtime/mem/pygote_space_allocator-inl.h"
 #include "runtime/mem/heap_manager.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
-#include "runtime/mem/gc/gc-hung/gc_hung.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/object_accessor-inl.h"
 #include "runtime/include/coretypes/class.h"
@@ -395,7 +394,6 @@ void GC::RunPhases(GCTask &task)
     LOG_DEBUG_GC << "Bytes in heap before GC " << std::dec << bytesInHeapBeforeGc;
     {
         GCScopedStats scopedStats(GetPandaVm()->GetGCStats(), gcType_ == GCType::STW_GC ? GetStats() : nullptr);
-        ScopedGcHung scopedHung(&task);
         GetPandaVm()->GetGCStats()->ResetLastPause();
 
         FireGCStarted(task, bytesInHeapBeforeGc);
