@@ -18,18 +18,21 @@ cases:
     use: |-
       class C {}
       @ClassAuthor({authorName: "Bob"})
+    exp_out: "Syntax error ESY0028: Annotations are not allowed on this type of declaration."
 
   - descr: |-
       For an annotation to be used, the name of the annotation must be prefixed with the character '@'
     use: |-
       ClassAuthor({authorName: "Bob"})
       class C {}
+    exp_out: "Semantic error ESE0230: Annotation missing '@' symbol before annotation name."
 
   - descr: |-
       No white space and line separator is allowed between the character '@' and the name
     use: |-
       @ ClassAuthor({authorName: "Bob"})
       class C {}
+    exp_out: "Syntax error ESY125879: No white space or line separator is allowed between '@' and the annotation name."
 
   - descr: |-
       No white space and line separator is allowed between the character '@' and the name
@@ -37,6 +40,7 @@ cases:
       @
       ClassAuthor({authorName: "Bob"})
       class C {}
+    exp_out: "Syntax error ESY125879: No white space or line separator is allowed between '@' and the annotation name."
 
   - descr: |-
       A compile-time error occurs if the annotation name is not accessible
@@ -51,12 +55,14 @@ cases:
         @ClassAuthor2({authorName: "Bob"})
         class C {}
       }
+    exp_out: "Semantic error ESE0371: Cannot find type 'ClassAuthor2'."
 
   - descr: |-
       No white space and line separator is allowed between the character '@' and the name
     use: |-
       @ /* Commentary cannot placed here */ ClassAuthor({authorName: "Bob"})
       class C {}
+    exp_out: "Syntax error ESY125879: No white space or line separator is allowed between '@' and the annotation name."
 
   - descr: |-
       No white space and line separator is allowed between the character '@' and the name
@@ -64,4 +70,5 @@ cases:
       @  //Commentary cannot placed here
       ClassAuthor({authorName: "Bob"})
       class C {}
+    exp_out: "Syntax error ESY125879: No white space or line separator is allowed between '@' and the annotation name."
 

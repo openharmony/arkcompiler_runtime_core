@@ -16,6 +16,7 @@
 /*---
 desc: FixedArrays are covariant.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'FixedArray<A>' cannot be assigned to type 'FixedArray<B>'"
 ---*/
 
 class A {}

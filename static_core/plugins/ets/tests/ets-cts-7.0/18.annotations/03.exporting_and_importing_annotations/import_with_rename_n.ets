@@ -20,6 +20,7 @@ desc: As any other declared entity, an annotation can be exported by using the k
 name: Export With Rename
 tags: [compile-only, negative]
 files: ['./to_export.ets']
+expected_out: "Semantic error ESE0357: Can not rename annotation 'ClassAnnotation' in export or import statements."
 ---*/
 
 import { ClassAnnotation as AnnotationRenamed } from "./to_export"

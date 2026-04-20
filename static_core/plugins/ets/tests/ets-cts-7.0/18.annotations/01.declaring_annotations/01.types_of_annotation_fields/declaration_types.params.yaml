@@ -53,3 +53,7 @@ cases:
       MyEnum 
     value: |-
       MyEnum.EnumField1
+  - type: Array<int> 
+    value: [1, 2, 3]
+  - type: FixedArray<string> 
+    value: ["1", "2", "3"]

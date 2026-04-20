@@ -21,6 +21,7 @@ desc: An annotation is not a type. Using export type or import type notations to
 name: Import As Type
 tags: [compile-only, negative]
 files: ['./to_export.ets']
+expected_out: "Syntax error ESY7095: Import type notation to import annotations is forbidden"
 ---*/
 
 import type { ClassAnnotation } from "./to_export"

@@ -21,6 +21,7 @@ name: Export With Rename
 tags:
 - compile-only
 - negative
+expected_out: "Semantic error ESE0351: Variable 'MyAnnotationToExport' has already been declared."
 ---*/
 
 @interface MyAnnotationToExport {}

@@ -21,6 +21,7 @@ name: Export As Default
 tags:
 - compile-only
 - negative
+expected_out: "Syntax error ESY0042: Can not export annotation default."
 ---*/
 
 export default @interface MyAnnotationExportDefault {} //  SyntaxError: Can not export annotation default.

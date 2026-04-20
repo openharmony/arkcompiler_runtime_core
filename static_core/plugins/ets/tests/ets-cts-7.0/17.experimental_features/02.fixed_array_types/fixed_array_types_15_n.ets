@@ -14,10 +14,11 @@
  */
 
 /*---
-desc: The element type is inconsistent with the declaration, and compilation error occurs
+desc: Fixed array initializer with mixed types
 tags:
 - negative
 - compile-only
+expected_out: "Semantic error ESE0227: Array element at index 2 with type '\"3\"' is not compatible with the target array element type 'Double'"
 ---*/
 
 function main(): void {

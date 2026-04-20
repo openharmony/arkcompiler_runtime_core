@@ -17,6 +17,7 @@ limitations under the License.
 desc: An annotation declaration does not define a type,
       and a type alias can be neither applied to the annotation
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
 ---*/
 
 // Annotation declaration:

@@ -21,6 +21,7 @@ name: Export With Rename
 tags:
 - compile-only
 - negative
+expected_out: "Syntax error ESY0280: Can not rename annotation 'MyAnnotationToExport' in export or import statements."
 ---*/
 
 @interface MyAnnotationToExport {}
