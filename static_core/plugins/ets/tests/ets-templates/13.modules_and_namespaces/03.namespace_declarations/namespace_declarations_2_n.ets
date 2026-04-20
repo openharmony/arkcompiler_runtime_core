@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL -  TypeError Type 'int' cannot be assigned to type 'String'
 tags: [compile-only, negative]
+files:
+    - ./namespace_storage.ets
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0318: Type 'Int' cannot be assigned to type 'String'
 ---*/
 
-{{c.decl}}
+import {Space2 as Space1} from "./namespace_storage"
 
-{% endfor %}
+function main() {
+    Space1.nsVar = 4321
+}

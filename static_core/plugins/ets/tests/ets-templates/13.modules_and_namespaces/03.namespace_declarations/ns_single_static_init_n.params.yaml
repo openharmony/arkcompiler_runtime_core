@@ -13,28 +13,35 @@
 
 ---
 cases:
-  - decl: |-
-        namespace X {
-          static {}
-        }
-        namespace X {
-          static {}
-        }
-
-  - decl: |-
-        namespace A.B {
-          static {}
-        }
-        namespace A.B {
-          static {}
-        }
-
-  - decl: |-
-        namespace A {
-          namespace B {
+    - decl: |-
+          namespace X {
             static {}
           }
-        }
-        namespace A.B {
-          static {}
-        }    
+          namespace X {
+            static {}
+          }
+      expected_out: |-
+          Syntax error ESY0034: Only one static block is allowed in one namespace or class.
+
+    - decl: |-
+          namespace A.B {
+            static {}
+          }
+          namespace A.B {
+            static {}
+          }
+      expected_out: |-
+          Syntax error ESY0034: Only one static block is allowed in one namespace or class.
+
+    - decl: |-
+          namespace A {
+            namespace B {
+              static {}
+            }
+          }
+          namespace A.B {
+            static {}
+          }
+      expected_out: |-
+          Syntax error ESY0034: Only one static block is allowed in one namespace or class.
+          Syntax error ESY0006: Unable to merge namespaces 'B', because their modifiers are different.

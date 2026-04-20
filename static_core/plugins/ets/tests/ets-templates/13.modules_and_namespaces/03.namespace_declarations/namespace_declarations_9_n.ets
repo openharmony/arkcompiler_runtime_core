@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - TypeError Function foo is already declared.
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0130: Function foo is already declared.
 ---*/
 
-{{c.decl}}
+namespace A {
+    export function foo(): string {
+        return "Another FOO"
+    }
+}
 
-{% endfor %}
+namespace A {
+    export function foo(): string {
+        return "foo"
+    }
+}

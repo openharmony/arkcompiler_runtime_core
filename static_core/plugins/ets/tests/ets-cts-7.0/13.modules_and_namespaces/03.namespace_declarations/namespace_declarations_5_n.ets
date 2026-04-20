@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - Namespace 'NS2' is already defined.
 tags: [compile-only, negative]
+files:
+    - ./namespace_storage.ets
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0349: Namespace 'NS2' is already defined.
 ---*/
 
-{{c.decl}}
+import {NS2 as NS2} from "./namespace_storage"
 
-{% endfor %}
+class NS2 {
+    static sayHello() {
+        return "Hello from Class";
+    }
+}
+
+function main() {
+    arktest.assertEQ(NS2.sayHello(), "Hello from Class")
+}

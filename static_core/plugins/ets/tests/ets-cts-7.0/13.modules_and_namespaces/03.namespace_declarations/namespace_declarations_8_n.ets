@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - 'SyntaxError Unable to merge namespaces 'C', because their modifiers are different.
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Syntax error ESY0006: Unable to merge namespaces 'C', because their modifiers are different.
 ---*/
 
-{{c.decl}}
+namespace A {
+    let variable1 = 1
+    namespace C {
+        let variable11 = 11
+    }
+}
 
-{% endfor %}
+namespace A.C {
+    let variable12 = 12
+}

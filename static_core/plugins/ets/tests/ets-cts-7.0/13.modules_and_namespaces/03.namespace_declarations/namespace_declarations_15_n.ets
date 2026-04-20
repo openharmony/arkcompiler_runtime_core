@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - Hard keyword 'abstract' cannot be used as identifier
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Syntax error ESY0316: Hard keyword 'abstract' cannot be used as identifier
+    Syntax error ESY0224: Identifier expected, got 'abstract'.
+    Syntax error ESY0227: Unexpected token 'abstract'.
 ---*/
 
-{{c.decl}}
+namespace abstract {
+    function foo(): string {
+        return "Foo1"
+    }
+}
 
-{% endfor %}
+function main() {
+    arktest.assertEQ(abstract.boo(), "Foo1")
+}
