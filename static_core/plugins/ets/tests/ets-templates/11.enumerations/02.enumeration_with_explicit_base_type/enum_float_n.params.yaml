@@ -42,11 +42,11 @@ cases:
         enum Enum: float { first = false }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "wit"
 
   - desc: |-
@@ -61,9 +61,9 @@ cases:
         enum Enum: float { first = "abc", second = 1.5f }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "mot"
 
   - desc: |-
@@ -79,9 +79,9 @@ cases:
           second = 1.7976931348623157e+308 }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "oor"
 
   - desc: |-

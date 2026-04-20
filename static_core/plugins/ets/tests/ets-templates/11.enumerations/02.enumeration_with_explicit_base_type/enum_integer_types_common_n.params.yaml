@@ -33,13 +33,13 @@ cases:
         enum Enum: [check_type] { first = false }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "wit"
 
   - desc: |-
@@ -59,9 +59,9 @@ cases:
         enum Enum: [check_type] { first = "abc", second = 1 }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "mot"
 
   - desc: |-
@@ -80,7 +80,7 @@ cases:
         enum Enum: [check_type] { first, second, third = [c_value] }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "oor"
 
   - desc: |-
@@ -104,11 +104,11 @@ cases:
         enum Enum: [check_type] { first, second, third = [c_value] as [init_value_type] }
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "navt"
 
   - desc: |-

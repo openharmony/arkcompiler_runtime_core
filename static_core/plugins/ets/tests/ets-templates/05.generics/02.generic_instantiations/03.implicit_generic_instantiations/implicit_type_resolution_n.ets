@@ -19,7 +19,7 @@ limitations under the License.
 /*---
 desc: Implicit type resolution for functions with receiver and mixed calls
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0127: No matching call signature"
+expected_out: "Semantic error ESE8745: Type parameter 'T' can not be inferred for the call to 'foo'. Specify the type argument explicitly."
 ---*/
 
 type X = Array<{{c.type}}>
