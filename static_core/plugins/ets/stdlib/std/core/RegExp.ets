@@ -44,7 +44,7 @@ export class RegExpResultArray extends Array<String | undefined> {
      */
     readonly isCorrect: boolean
 
-    private resultRaw_: String = ""
+    private resultRaw_: ValueArray<int> = new ValueArray<int>(0)
     /** The 0-based index of the match in the string */
     protected index_: int = 0
     /** The original string that was matched against */
@@ -55,8 +55,11 @@ export class RegExpResultArray extends Array<String | undefined> {
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
     protected indices_: Array<Array<int>> = []
 
-    /** named groups names and indeces */
-    protected groupsRaw_: String = ""
+    /** named groups names */
+    protected groupKeysRaw_: FixedArray<String> = new FixedArray<String>(0)
+
+    /** named groups [start0, end0, start1, end1, ...] */
+    protected groupValsRaw_: ValueArray<int> = new ValueArray<int>(0)
 
     /** named groups names and indeces */
     public groups: RegExpGroupsContainer | undefined = undefined
@@ -155,15 +158,14 @@ export class RegExpResultArray extends Array<String | undefined> {
     }
 
     /**
-     * Parses groupsRaw_ to groups
+     * Parses raw group keys and values to groups
      */
     protected updateGroups(): void {
         throw new Error("not overridden")
     }
 
     private updateIndicesAndResult(hasIndices: boolean): void {
-        const data = this.resultRaw_.split(',')
-        const n: int = (data.length / 2)
+        const n: int = (this.resultRaw_.length / 2)
 
         if (n > this.length) {
             this.extendTo(n, undefined as (String | undefined))
@@ -171,9 +173,9 @@ export class RegExpResultArray extends Array<String | undefined> {
 
         if (hasIndices) {
             this.indices_ = new Array<Array<int>>(n)
-            for (let i = 0; i < data.length; i += 2) {
-                const index: int = Int.parseInt(data[i], 10)
-                const endIndex: int = Int.parseInt(data[i + 1], 10)
+            for (let i = 0; i < this.resultRaw_.length; i += 2) {
+                const index: int = this.resultRaw_[i]
+                const endIndex: int = this.resultRaw_[i + 1]
                 const pos: int = (i / 2);
                 if (index == -1 || endIndex == -1) {
                     this.indices_[pos] = [0, 0]
@@ -185,9 +187,9 @@ export class RegExpResultArray extends Array<String | undefined> {
             }
         } else {
             this.indices_ = []
-            for (let i = 0; i < data.length; i += 2) {
-                const index = Int.parseInt(data[i], 10)
-                const endIndex = Int.parseInt(data[i + 1], 10)
+            for (let i = 0; i < this.resultRaw_.length; i += 2) {
+                const index = this.resultRaw_[i]
+                const endIndex = this.resultRaw_[i + 1]
                 const pos: int = (i / 2);
                 if (index != -1 && endIndex != -1) {
                     const str = this.input_.substring(index, endIndex)
@@ -291,12 +293,17 @@ export class RegExpMatchArray extends RegExpResultArray {
     }
 
     /**
-     * Parses groupsRaw_ to groups
+     * Parses raw group keys and values to groups
      */
     protected override updateGroups(): void {
-        if (this.groupsRaw_ == "") {
+        const keys = this.groupKeysRaw_
+        if (keys == null || keys.length == 0) {
             this.groups = undefined
             return
+        }
+        const vals = this.groupValsRaw_
+        if (vals == null || vals.length != keys.length * 2) {
+            throw new Error("internal error: invalid group data")
         }
         let result = new RegExpGroupsContainer()
 
@@ -304,23 +311,16 @@ export class RegExpMatchArray extends RegExpResultArray {
             return
         }
 
-        for (let groupData of this.groupsRaw_.split(";")) {
-            if (groupData.length == 0) {
-                continue
-            }
-            let unitData = groupData.split(",")
-            if (unitData.length != 3) {
-                throw new Error("internal error: invalid group data")
-            }
-            let index = Int.parseInt(unitData[1], 10)
-            let endIndex = Int.parseInt(unitData[2], 10)
+        for (let i: int = 0; i < keys.length; ++i) {
+            const index: int = vals[i * 2]
+            const endIndex: int = vals[i * 2 + 1]
             if (index >= 0 && endIndex >= 0) {
                 if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes")
                 }
-                result.set(unitData[0], this.input!.substring(index, endIndex))
+                result.set(keys[i], this.input!.substring(index, endIndex))
             } else {
-                result.set(unitData[0], undefined)
+                result.set(keys[i], undefined)
             }
         }
         if (result.size == 0) {
@@ -410,30 +410,31 @@ export class RegExpExecArray extends RegExpResultArray {
     }
 
     /**
-     * Parses groupsRaw_ to groups
+     * Parses raw group keys and values to groups
      */
     protected override updateGroups(): void {
-        if (this.groupsRaw_ == "") {
+        const keys = this.groupKeysRaw_
+        if (keys == null || keys.length == 0) {
             this.groups = undefined
             return
         }
+        const vals = this.groupValsRaw_
+        if (vals == null || vals.length != keys.length * 2) {
+            throw new Error("internal error: invalid group data")
+        }
         let result = new RegExpGroupsContainer()
 
-        for (let groupData of this.groupsRaw_.split(";")) {
-            let unitData = groupData.split(",")
-            if (unitData.length != 3) {
-                throw new Error("internal error: invalid group data")
-            }
-            let index = Int.parseInt(unitData[1], 10)
-            let endIndex = Int.parseInt(unitData[2], 10)
+        for (let i: int = 0; i < keys.length; ++i) {
+            const index: int = vals[i * 2]
+            const endIndex: int = vals[i * 2 + 1]
             if (index >= 0 && endIndex >= 0) {
                 if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes index = " + index + " endIndex = " + endIndex + 
                     " length = " + this.input_.length)
                 }
-                result.set(unitData[0], this.input.substring(index, endIndex))
+                result.set(keys[i], this.input.substring(index, endIndex))
             } else {
-                result.set(unitData[0], undefined)
+                result.set(keys[i], undefined)
             }
         }
         this.groups = result

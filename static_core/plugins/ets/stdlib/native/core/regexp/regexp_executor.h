@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_H
 
+#include "plugins/ets/stdlib/native/core/regexp/regexp_group_meta.h"
 #include "plugins/ets/stdlib/native/core/regexp/regexp_exec_result.h"
 
 #include <ani.h>
@@ -24,8 +25,6 @@
 #include <vector>
 
 namespace ark::ets::stdlib {
-
-class pcre2_code;
 
 class EtsRegExp {
 public:
@@ -39,12 +38,12 @@ public:
     bool Compile(const uint16_t *pattern, int len);
     void Destroy();
 
-    void *GetCompiledRe8() const
+    Pcre2Obj GetCompiledRe8() const
     {
         return re8_;
     }
 
-    void *GetCompiledRe16() const
+    Pcre2Obj GetCompiledRe16() const
     {
         return re16_;
     }
@@ -59,6 +58,16 @@ public:
         return flagUnicode_ || flagVnicode_;
     }
 
+    bool IsGlobal() const
+    {
+        return flagGlobal_;
+    }
+
+    bool IsSticky() const
+    {
+        return flagSticky_;
+    }
+
 private:
     void SetFlag(const char &chr);
     void SetUnicodeFlag(const char &chr);
@@ -67,8 +76,8 @@ private:
     static uint32_t GetExtraCompileFlags();
     static void ThrowBadFlagsException(ani_env *env);
 
-    void *re8_ = nullptr;
-    void *re16_ = nullptr;
+    Pcre2Obj re8_ = nullptr;
+    Pcre2Obj re16_ = nullptr;
     bool flagGlobal_ = false;           // g
     bool flagMultiline_ = false;        // m
     bool flagCaseInsentitive_ = false;  // i

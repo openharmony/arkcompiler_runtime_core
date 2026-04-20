@@ -16,23 +16,24 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_16_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_16_H
 
+#include "plugins/ets/stdlib/native/core/regexp/regexp_group_meta.h"
 #include "plugins/ets/stdlib/native/core/regexp/regexp_exec_result.h"
 
 #include <cstdint>
 
 namespace ark::ets::stdlib {
 
-using Pcre2Obj = void *;
-
 class RegExp16 {
 public:
     static Pcre2Obj CreatePcre2Object(const uint16_t *pattern, uint32_t flags, uint32_t extraFlags, const int len);
     static RegExpExecResult Execute(Pcre2Obj re, uint32_t matchFlags, const uint16_t *str, int len,
                                     const int startOffset);
+    // CC-OFFNXT(G.FUN.01, huge_method) solid logic
+    static bool TestMatch(Pcre2Obj re, uint32_t matchFlags, const uint16_t *str, int len, const int startOffset,
+                          int32_t &endIndex);
     static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
-    static void EraseExtraGroups(const uint16_t *pattern, const size_t len, RegExpExecResult &result);
-    static bool IsUncountable(const uint16_t *pattern, const size_t len, size_t index);
+    static void ApplyGroupMeta(const PatternGroupMeta &groupMeta, RegExpExecResult &result);
     static void SanitizeGroupCaptureResults(const std::vector<bool> &countableGroups,
                                             const std::map<size_t, size_t> &parentGroups, RegExpExecResult &result);
 };
