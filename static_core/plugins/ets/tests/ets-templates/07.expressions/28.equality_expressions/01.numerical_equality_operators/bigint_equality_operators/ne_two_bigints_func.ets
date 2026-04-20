@@ -35,7 +35,7 @@ function ne_2(a: bigint, b: BigInt): void {
     arktest.assertTrue(a !== b)
     arktest.assertTrue((a < b) || (a > b) || (b < a) || (b > a))
 }
-function ne_3(a: BigInt, b: bigint): void {
+function ne_3(a: BigInt, b: BigInt): void {
     arktest.assertNE(a, b)
     arktest.assertFalse(a == b)
     arktest.assertFalse(a === b)

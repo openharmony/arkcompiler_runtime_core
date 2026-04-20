@@ -13,42 +13,42 @@
 
 --- # List of string comparison conditions
 cases:
-  - {ltype: "boolean", rtype: "int", left: "false", right: 99, op: "<"}
-  - {ltype: "boolean", rtype: "double", left: "true", right: 25.145, op: "<"}
-  - {ltype: "boolean", rtype: "char", left: "true", right: c'f', op: "<"}
-  - {ltype: "boolean", rtype: "string", left: "true", right: "true", op: "<"}
+  - {ltype: "boolean", rtype: "int", left: "false", right: 99, op: "<", out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Int'."}
+  - {ltype: "boolean", rtype: "double", left: "true", right: 25.145, op: "<", out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Double'."}
+  - {ltype: "boolean", rtype: "char", left: "true", right: c'f', op: "<", out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Char'."}
+  - {ltype: "boolean", rtype: "string", left: "true", right: "true", op: "<", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "int", rtype: "boolean", left: 0, right: "false", op: "<="}
-  - {ltype: "double", rtype: "boolean", left: -0.9999999, right: "true", op: "<="}
-  - {ltype: "char", rtype: "boolean", left: c't', right: "true", op: "<="}
-  - {ltype: "string", rtype: "boolean", left: "true", right: "true", op: "<="}
+  - {ltype: "int", rtype: "boolean", left: 0, right: "false", op: "<=", out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Int' and 'Boolean'."}
+  - {ltype: "double", rtype: "boolean", left: -0.9999999, right: "true", op: "<=", out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Double' and 'Boolean'."}
+  - {ltype: "char", rtype: "boolean", left: c't', right: "true", op: "<=", out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Char' and 'Boolean'."}
+  - {ltype: "string", rtype: "boolean", left: "true", right: "true", op: "<=", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "boolean", rtype: "int", left: "false", right: -532, op: ">"}
-  - {ltype: "boolean", rtype: "double", left: "true", right: 538.000000001, op: ">"}
-  - {ltype: "boolean", rtype: "char", left: "false", right: c'0', op: ">"}
-  - {ltype: "boolean", rtype: "string", left: "true", right: "false", op: ">"}
+  - {ltype: "boolean", rtype: "int", left: "false", right: -532, op: ">", out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Int'."}
+  - {ltype: "boolean", rtype: "double", left: "true", right: 538.000000001, op: ">", out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Double'."}
+  - {ltype: "boolean", rtype: "char", left: "false", right: c'0', op: ">", out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Char'."}
+  - {ltype: "boolean", rtype: "string", left: "true", right: "false", op: ">", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "int", rtype: "boolean", left: 1, right: "true", op: ">="}
-  - {ltype: "double", rtype: "boolean", left: 0.098, right: "true", op: ">="}
-  - {ltype: "char", rtype: "boolean", left: c'n', right: "false", op: ">="}
-  - {ltype: "string", rtype: "boolean", left: "true", right: "true", op: "<="}
+  - {ltype: "int", rtype: "boolean", left: 1, right: "true", op: ">=", out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Int' and 'Boolean'."}
+  - {ltype: "double", rtype: "boolean", left: 0.098, right: "true", op: ">=", out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Double' and 'Boolean'."}
+  - {ltype: "char", rtype: "boolean", left: c'n', right: "false", op: ">=", out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Char' and 'Boolean'."}
+  - {ltype: "string", rtype: "boolean", left: "true", right: "true", op: "<=", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "Boolean", rtype: "int", left: "false", right: 99, op: "<"}
-  - {ltype: "Boolean", rtype: "double", left: "true", right: 25.145, op: "<"}
-  - {ltype: "Boolean", rtype: "char", left: "true", right: c'f', op: "<"}
-  - {ltype: "Boolean", rtype: "String", left: "true", right: "true", op: "<"}
+  - {ltype: "Boolean", rtype: "int", left: "false", right: 99, op: "<", out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Int'."}
+  - {ltype: "Boolean", rtype: "double", left: "true", right: 25.145, op: "<", out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Double'."}
+  - {ltype: "Boolean", rtype: "char", left: "true", right: c'f', op: "<", out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'Boolean' and 'Char'."}
+  - {ltype: "Boolean", rtype: "String", left: "true", right: "true", op: "<", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "int", rtype: "Boolean", left: 0, right: "false", op: "<="}
-  - {ltype: "double", rtype: "Boolean", left: -0.9999999, right: "true", op: "<="}
-  - {ltype: "char", rtype: "Boolean", left: c't', right: "true", op: "<="}
-  - {ltype: "String", rtype: "Boolean", left: "false", right: "true", op: "<="}
+  - {ltype: "int", rtype: "Boolean", left: 0, right: "false", op: "<=", out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Int' and 'Boolean'."}
+  - {ltype: "double", rtype: "Boolean", left: -0.9999999, right: "true", op: "<=", out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Double' and 'Boolean'."}
+  - {ltype: "char", rtype: "Boolean", left: c't', right: "true", op: "<=", out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'Char' and 'Boolean'."}
+  - {ltype: "String", rtype: "Boolean", left: "false", right: "true", op: "<=", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "Boolean", rtype: "int", left: "false", right: -532, op: ">"}
-  - {ltype: "Boolean", rtype: "double", left: "true", right: 538.000000001, op: ">"}
-  - {ltype: "Boolean", rtype: "char", left: "false", right: c'0', op: ">"}
-  - {ltype: "Boolean", rtype: "String", left: "false", right: "true", op: "<"}
+  - {ltype: "Boolean", rtype: "int", left: "false", right: -532, op: ">", out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Int'."}
+  - {ltype: "Boolean", rtype: "double", left: "true", right: 538.000000001, op: ">", out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Double'."}
+  - {ltype: "Boolean", rtype: "char", left: "false", right: c'0', op: ">", out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'Boolean' and 'Char'."}
+  - {ltype: "Boolean", rtype: "String", left: "false", right: "true", op: "<", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}
 
-  - {ltype: "int", rtype: "Boolean", left: 1, right: "true", op: ">="}
-  - {ltype: "double", rtype: "Boolean", left: 0.098, right: "true", op: ">="}
-  - {ltype: "char", rtype: "Boolean", left: c'n', right: "false", op: ">="}
-  - {ltype: "String", rtype: "Boolean", left: "true", right: "false", op: ">="}
+  - {ltype: "int", rtype: "Boolean", left: 1, right: "true", op: ">=", out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Int' and 'Boolean'."}
+  - {ltype: "double", rtype: "Boolean", left: 0.098, right: "true", op: ">=", out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Double' and 'Boolean'."}
+  - {ltype: "char", rtype: "Boolean", left: c'n', right: "false", op: ">=", out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'Char' and 'Boolean'."}
+  - {ltype: "String", rtype: "Boolean", left: "true", right: "false", op: ">=", out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'String'"}

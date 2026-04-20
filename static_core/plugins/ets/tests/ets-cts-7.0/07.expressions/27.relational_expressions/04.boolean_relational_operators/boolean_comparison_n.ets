@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Comparing boolean with non-boolean types {{case.left}} {{case.op}} {{case.right}}
 tags: [compile-only, negative]
+expected_out: "{{case.out}}"
 ---*/
 
 function main(): void {

@@ -35,7 +35,7 @@ function main(): int {
 {%- for b in c['values'] %}
         ne<bigint, bigint>({{c.a}}, {{b}})
         ne<bigint, BigInt>({{c.a}}, {{b}})
-        ne<BigInt, bigint>({{c.a}}, {{b}})
+        ne<BigInt, BigInt>({{c.a}}, {{b}})
 {%- endfor %}
     })
 {%- endfor %}

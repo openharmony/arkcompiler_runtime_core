@@ -19,16 +19,17 @@
 desc: >-
     If one operand is of type bigint, and the other is of a numeric type, then the
     result is false.
+    Verify comparing bigint (LowerCase) and BigInt (Camel Case) to Any
 ---*/
 
-function eq_1(a: bigint, b: Any) {
+function ne_1(a: bigint, b: Any) {
     arktest.assertNE(a, b)
     arktest.assertTrue(a != b)
     arktest.assertTrue(a !== b)
     arktest.assertFalse(a == b)
     arktest.assertFalse(a === b)
 }
-function eq_2(a: BigInt, b: Any) {
+function ne_2(a: BigInt, b: Any) {
     arktest.assertNE(a, b)
     arktest.assertTrue(a != b)
     arktest.assertTrue(a !== b)
@@ -40,8 +41,8 @@ function main(): int {
     let tests = new arktest.ArkTestsuite('Bigint equality with not a bigint type passed through a function argument')
 {%- for c in yaml_file.cases %}
     tests.addTest('{{loop.index}}', () => {
-        eq_1(0n, {{c.exp}})
-        eq_2(0n, {{c.exp}})
+        ne_1(0n, {{c.exp}})
+        ne_2(0n, {{c.exp}})
     })
 {% endfor %}
     return tests.run()

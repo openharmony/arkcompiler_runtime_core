@@ -66,7 +66,7 @@ cases:
   - { desc: "bigint >= function() (double)", b: '2n', op: '>=', operand_val: 'Double.NEGATIVE_INFINITY', expected_bool: 'true' }
   - { desc: "bigint >= function() (double)", b: '2n', op: '>=', operand_val: 'Double.NaN', expected_bool: 'false' }
   - { desc: "bigint >= function() (float, fractional > 0)", b: '2n', op: '>=', operand_val: '2.05', expected_bool: 'false' }
-  - { desc: "bigint >= function() (float, fractional = 0)", b: '2n', op: '<=', operand_val: '2.0', expected_bool: 'true' }
+  - { desc: "bigint >= function() (float, fractional = 0)", b: '2n', op: '>=', operand_val: '2.0', expected_bool: 'true' }
 
   # With BigInt constructor
   - { desc: "new BigInt < function() (true)", b: 'new BigInt(10)', op: '<', operand_val: '20.5', expected_bool: 'true' }
