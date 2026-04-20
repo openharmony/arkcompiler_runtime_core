@@ -262,16 +262,6 @@ class ChildOfParentWithIface extends ParentWithIface {
     extra: int = 99
 }
 
-interface IfaceWithoutAnnotation {
-    get plain(): string
-}
-
-class ImplWithoutAnnotation implements IfaceWithoutAnnotation {
-    override get plain(): string {
-        return "no_annotation"
-    }
-}
-
 // ---------------------------------------------------------------------------
 // Test: interface getter included in stringifyWithGetters
 // ---------------------------------------------------------------------------
@@ -290,7 +280,7 @@ function testInterfaceGetterIncluded(): void {
 
 function testInterfaceGetterInStringify(): void {
     const obj = new SimpleIfaceImpl()
-    const json = JSON.stringify(obj)
+    const json = JSON.stringifyWithGetters(obj)
     const parsed = JSON.parseJsonElement(json)
     arktest.assertEQ(parsed.getInteger("value"), 7)
     arktest.assertEQ(parsed.getString("computed"), "val_7")
@@ -330,17 +320,6 @@ function testChildInheritsInterfaceGetter(): void {
     const parsed = JSON.parseJsonElement(json)
     arktest.assertEQ(parsed.getInteger("extra"), 99)
     arktest.assertEQ(parsed.getString("computed"), "parent")
-}
-
-// ---------------------------------------------------------------------------
-// Test: interface getter without @JSONStringifyGetter is still included
-// ---------------------------------------------------------------------------
-
-function testUnannotatedInterfaceGetterIncluded(): void {
-    const obj = new ImplWithoutAnnotation()
-    const json = JSON.stringifyWithGetters(obj)
-    const parsed = JSON.parseJsonElement(json)
-    arktest.assertEQ(parsed.getString("plain"), "no_annotation")
 }
 
 // ---------------------------------------------------------------------------
@@ -437,7 +416,6 @@ function main(): int {
     suite.addTest('multiple interface getters', testMultipleInterfaceGetters)
     suite.addTest('derived interface getters', testDerivedInterfaceGetters)
     suite.addTest('child inherits interface getter', testChildInheritsInterfaceGetter)
-    suite.addTest('unannotated interface getter included', testUnannotatedInterfaceGetterIncluded)
     suite.addTest('interface getter with fieldsFilter', testInterfaceGetterWithFieldsFilter)
     suite.addTest('stringifyWithGetters then parseUpdate', testStringifyWithGettersThenParseUpdate)
     suite.addTest('stringifyWithGetters then parseUpdate inherited', testStringifyWithGettersThenParseUpdateInherited)

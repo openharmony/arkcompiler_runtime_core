@@ -1584,43 +1584,6 @@ class JSONWriter {
         }
     }
 
-    private static isFieldNameAlreadySerialized(name: string, writableFields: Array<[string, Any]>): boolean {
-        for (let k = 0; k < writableFields.length; k++) {
-            if (writableFields[k][0] == name) {
-                return true
-            }
-        }
-        return false
-    }
-
-    private collectInterfaceFields(obj: Object, objCls: Class,
-        writableFields: Array<[string, Any]>): Array<[string, Any]> {
-
-        const interfaceFields = new Array<[string, Any]>()
-        let currentClass: Class | undefined = objCls
-        while (currentClass != undefined) {
-            const interfaces = currentClass.getInterfaces()
-            for (let i = 0; i < interfaces.length; i++) {
-                const iface = interfaces[i]
-                const gettersValues = JSONWriter.getGettersKeyValuePairs(
-                    iface,
-                    obj,
-                    this.useFieldsFilter,
-                    this.fieldsFilter
-                )
-                for (let j = 0; j < gettersValues.length; j++) {
-                    const pair = gettersValues[j]
-                    if (!JSONWriter.isFieldNameAlreadySerialized(pair[0], writableFields) &&
-                        !JSONWriter.isFieldNameAlreadySerialized(pair[0], interfaceFields)) {
-                        interfaceFields.push(pair)
-                    }
-                }
-            }
-            currentClass = currentClass.getSuper()
-        }
-        return interfaceFields
-    }
-
     private writeClassValue(obj: Object, objCls: Class): void {
         const currentBuffer = this.buffer
         // we need this local buffer to discard empty object prolog: '{','\n',<space> and replace it with '{}'
@@ -1632,27 +1595,7 @@ class JSONWriter {
         }
 
         let fieldDumped = false
-        let writableFields = new Array<[string, Any]>()
-        if (reflect.isLiteralInitializedInterface(obj)) {
-            const gettersValuesRaw = JSONWriter.getGettersKeyValuePairs(
-                objCls,
-                obj,
-                this.useFieldsFilter,
-                this.fieldsFilter
-            )
-            for (let gi = 0; gi < gettersValuesRaw.length; gi++) {
-                writableFields.push(gettersValuesRaw[gi])
-            }
-            const fieldPairs = this.getWritableFields(objCls, obj)
-            for (let fi = 0; fi < fieldPairs.length; fi++) {
-                const fpair = fieldPairs[fi]
-                if (!JSONWriter.isFieldNameAlreadySerialized(fpair[0], writableFields)) {
-                    writableFields.push(fpair)
-                }
-            }
-        } else {
-            writableFields = this.getWritableFields(objCls, obj)
-        }
+        const writableFields = this.getWritableFields(objCls, obj)
         if (writableFields.length > 0) {
             this.path.add(obj)
             fieldDumped = this.writeClassFields(writableFields, fieldDumped)
@@ -1666,28 +1609,11 @@ class JSONWriter {
                 this.useFieldsFilter,
                 this.fieldsFilter
             )
-            const annotatedFiltered = new Array<[string, Any]>()
-            for (let ai = 0; ai < annotatedGetters.length; ai++) {
-                const apair = annotatedGetters[ai]
-                if (!JSONWriter.isFieldNameAlreadySerialized(apair[0], writableFields)) {
-                    annotatedFiltered.push(apair)
-                }
-            }
-            if (annotatedFiltered.length > 0) {
+            if (annotatedGetters.length > 0) {
                 this.path.add(obj)
-                fieldDumped = this.writeClassFields(annotatedFiltered, fieldDumped)
+                fieldDumped = this.writeClassFields(annotatedGetters, fieldDumped)
                 this.path.delete(obj)
-                for (let aj = 0; aj < annotatedFiltered.length; aj++) {
-                    writableFields.push(annotatedFiltered[aj])
-                }
             }
-        }
-
-        const interfaceFields = this.collectInterfaceFields(obj, objCls, writableFields)
-        if (interfaceFields.length > 0) {
-            this.path.add(obj)
-            fieldDumped = this.writeClassFields(interfaceFields, fieldDumped)
-            this.path.delete(obj)
         }
 
         if (this.useIndent) {
@@ -1821,32 +1747,6 @@ class JSONWriter {
     }
 
     /**
-    * @brief Returns values of public getters of a class.
-    * Searches only within direct methods of the class. Does not apply fields filter.
-    */
-    private static getGettersKeyValuePairs(cls: Class, obj: Object, useFieldsFilter: boolean,
-        fieldsFilter: FixedArray<string>) {
-
-        const namesAndValues = new Array<[string, Any]>()
-        const clsMethods = cls.getInstanceMethods()
-        for (const method of clsMethods) {
-            if (!method.isGetter()) {
-                continue
-            }
-            const name = method.getName().substring(JSONWriter.GETTER_PREFIX_LEN)
-            if (useFieldsFilter && !JSONWriter.searchField(fieldsFilter, name)) {
-                continue
-            }
-            if (JSONWriter.isFieldNameAlreadySerialized(name, namesAndValues)) {
-                continue
-            }
-            const value = method.invoke(obj)
-            namesAndValues.push([name, value])
-        }
-        return namesAndValues
-    }
-
-    /**
     * @brief Returns values of `@JSONStringifyGetter`-annotated `get` accessor properties
     * across the class hierarchy.
     * A method is included only if it both carries the `@JSONStringifyGetter` annotation
@@ -1869,9 +1769,6 @@ class JSONWriter {
                 }
                 const name = method.getName().substring(JSONWriter.GETTER_PREFIX_LEN)
                 if (useFieldsFilter && !JSONWriter.searchField(fieldsFilter, name)) {
-                    continue
-                }
-                if (JSONWriter.isFieldNameAlreadySerialized(name, namesAndValues)) {
                     continue
                 }
                 const value = method.invoke(obj)
