@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Supertype relation among array types
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type '[Derived, Derived]' cannot be assigned to type '[Base, Base]'"
 ---*/
 
 

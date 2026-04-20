@@ -19,12 +19,19 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           sup = sub
+      response:
+        #Starting space is important in multiline literals. Do not remove!
+        - "Semantic error ESE0318: Type 'Array<B|String|null>|null|String|undefined' cannot be assigned to type
+ 'Array<A|String|null>|null|String|undefined'"
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           sub = sup
+      response:
+        - "Semantic error ESE0318: Type 'Array<A|String|null>|null|String|undefined' cannot be assigned to type
+ 'Array<B|String|null>|null|String|undefined'"
 
     # class literal
     - decl: |-
@@ -34,6 +41,9 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           let x: X = { f: sub }
+      response:
+        - "Semantic error ESE0319: Type 'Array<B|String|null>|null|String|undefined' is not compatible with type
+ 'Array<A|String|null>|null|String|undefined' at property 'f'"
 
     - decl: |-
           class X {
@@ -41,7 +51,10 @@ cases:
           }
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
-          let x: X = { f: sup }'
+          let x: X = { f: sup }
+      response:
+        - "Semantic error ESE0319: Type 'Array<A|String|null>|null|String|undefined' is not compatible with type
+ 'Array<B|String|null>|null|String|undefined' at property 'f'"
 
     # interface literal
     - decl: |-
@@ -51,6 +64,9 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           let i: I = { f: sub }
+      response:
+        - "Semantic error ESE0319: Type 'Array<B|String|null>|null|String|undefined' is not compatible with type
+ 'undefined|Array<A|String|null>|null|String' at property 'f'"
 
     - decl: |-
           interface I {
@@ -59,28 +75,43 @@ cases:
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
           let i: I = { f: sup }
+      response:
+        - "Semantic error ESE0319: Type 'Array<A|String|null>|null|String|undefined' is not compatible with type
+ 'undefined|Array<B|String|null>|null|String' at property 'f'"
 
     # array literal
     - decl: |-
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           let arr: Array<Array<A|string|null>|null|string|undefined> = [sub]
+      response:
+        - "Semantic error ESE0227: Array element at index 0 with type 'Array<B|String|null>|null|String|undefined'
+ is not compatible with the target array element type 'Array<A|String|null>|null|String|undefined'"
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
           let arr: Array<Array<B|string|null>|null|string|undefined> = [sup]
+      response:
+        - "Semantic error ESE0227: Array element at index 0 with type 'Array<A|String|null>|null|String|undefined'
+ is not compatible with the target array element type 'Array<B|String|null>|null|String|undefined'"
 
     # tuple literal
     - decl: |-
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
-          let tup: [Array<A|string|null>|null|string|undefined, Array<A|string|null>|null|string|undefined] = [sub, sub]'
+          let tup: [Array<A|string|null>|null|string|undefined, Array<A|string|null>|null|string|undefined] = [sub, sub]
+      response:
+        - "Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0"
+        - "Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 1"
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
           let tup: [Array<B|string|null>|null|string|undefined, Array<B|string|null>|null|string|undefined] = [sup, sup]
+      response:
+        - "Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 0"
+        - "Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 1"
 
     # call context
     - decl: |-
@@ -88,9 +119,17 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           ((p: Array<A|string|null>|null|string|undefined) => {})(sub)
+      response:
+        - "Semantic error ESE0127: No matching call signature for (Array<B|String|null>|null|String|undefined)"
+        - "Semantic error ESE0046: Type 'Array<B|String|null>|null|String|undefined' is not compatible with type
+ 'Array<A|String|null>|null|String|undefined' at index 1"
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           ((p: Array<B|string|null>|null|string|undefined) => {})(sup)
+      response:
+        - "Semantic error ESE0127: No matching call signature for (Array<A|String|null>|null|String|undefined)"
+        - "Semantic error ESE0046: Type 'Array<A|String|null>|null|String|undefined' is not compatible with type
+ 'Array<B|String|null>|null|String|undefined' at index 1"

@@ -16,6 +16,10 @@
 /*---
 desc: Ensuring that method_one in subclasses keeps parameter and return types unchanged.
 tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE0141: Class member foo with type Base in Derived cannot override foo with type
+Derived field from class Base because the overriding return type is not compatible with the other return type."
+    - "Semantic error ESE0136: Method foo(p: Derived): Base in Derived not overriding any method"
 ---*/
 
 class Base {

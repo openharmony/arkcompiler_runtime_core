@@ -13,9 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% set response = "Semantic error ESE0046: Type ''\"str\"'' is not compatible with type ''Double'' at index 1" %}
+
 /*---
 desc: Invariance refers to the ability to use the originally-specified type as a derived one.
 tags: [compile-only, negative]
+expected_out:
+    - 'Semantic error ESE0127: No matching call signature for foo("str")'
+    - '{{response}}'
 ---*/
 
 function foo( i: number) {}

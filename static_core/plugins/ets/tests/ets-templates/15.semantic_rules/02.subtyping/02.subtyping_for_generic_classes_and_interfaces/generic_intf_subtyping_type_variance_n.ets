@@ -18,6 +18,9 @@ limitations under the License.
 /*---
 desc: Subtyping relation between generic classes and interfaces with type variance
 tags: [negative, compile-only]
+expected_out:
+      - "Semantic error ESE0332: Type Parameter 'T' is declared as 'in' but occurs in 'out' position."
+      - "Semantic error ESE0333: Type Parameter 'S' is declared as 'out' but occurs in 'in' position."
 ---*/
 
 class D {
