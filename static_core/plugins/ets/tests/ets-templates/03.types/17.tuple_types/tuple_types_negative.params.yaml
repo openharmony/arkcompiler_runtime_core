@@ -17,9 +17,9 @@ cases:
           const index: number = 1.01
       use: |-
           let e: [string, boolean] = ["A", true]
-          e[index] // only int indices allowed
+          e[index] // only const indices allowed
       expected_out: |-
-          Semantic error ESE0200: Only integer type allowed for element access on tuples.
+          Semantic error ESE0199: Only constant expression allowed for element access on tuples.
 
     - use: |-
           let e: [string, boolean] = ["A", true]
@@ -56,17 +56,17 @@ cases:
           const index: int = -1
       use: |-
           let e: [string, boolean] = ["A", true]
-          e[index] // negative index
+          e[index] // only const indices allowed
       expected_out: |-
-          Semantic error ESE0200: Only integer type allowed for element access on tuples.
+          Semantic error ESE0199: Only constant expression allowed for element access on tuples.
 
     - decl: |-
           const index: int = 2
       use: |-
           let e: [string, boolean] = ["A", true]
-          e[index] // out of range index
+          e[index] // only const indices allowed
       expected_out: |-
-          Semantic error ESE0200: Only integer type allowed for element access on tuples.
+          Semantic error ESE0199: Only constant expression allowed for element access on tuples.
 
     - use: |-
           let e: [] = []  // empty tuple

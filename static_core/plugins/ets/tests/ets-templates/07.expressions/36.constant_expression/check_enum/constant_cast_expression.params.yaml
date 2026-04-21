@@ -16,3 +16,5 @@ cases:
     - { type: 'short', expr: '10000', expected: 10001 }
     - { type: 'int', expr: '42', expected: 43 }
     - { type: 'long', expr: '100', expected: 101 }
+    - { type: 'byte', expr: '1 + 2', expected: 4 }
+    - { type: 'byte', expr: '1', cast_type: 'int', expected: 2 }

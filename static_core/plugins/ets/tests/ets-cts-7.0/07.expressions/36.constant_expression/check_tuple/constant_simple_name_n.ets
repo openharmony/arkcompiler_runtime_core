@@ -18,7 +18,7 @@ desc: >-
     Simple names that refer to top-level constants are not constant expressions in tuple
     indices.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0200: Only integer type allowed for element access on tuples."
+expected_out: "Semantic error ESE0199: Only constant expression allowed for element access on tuples."
 ---*/
 
 const idx: int = 1
