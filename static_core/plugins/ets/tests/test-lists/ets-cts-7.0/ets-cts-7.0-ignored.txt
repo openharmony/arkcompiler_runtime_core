@@ -122,10 +122,6 @@
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
-#33191
-07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_0.ets
-07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/cast_warning_trivially_succeeds_throws_1.ets
-
 #33776 es2panda aborts on ensure-not-nullish expression over array indexing expression
 07.expressions/19.ensure-not-nullish_expression/warn2_4.ets
 07.expressions/19.ensure-not-nullish_expression/warn2_6.ets

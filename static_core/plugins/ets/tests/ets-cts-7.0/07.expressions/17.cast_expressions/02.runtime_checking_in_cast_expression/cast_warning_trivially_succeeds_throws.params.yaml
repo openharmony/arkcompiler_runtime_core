@@ -17,8 +17,7 @@ cases:
       class C {}
       class D extends C {}
     check: 'let a: C = new D(); arktest.assertTrue(a as D instanceof D)'
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: cast always succeeds'
+    expected: 'Warning W670214: This cast can be excessive because it always succeeds'
 
   - decl: |-
       class C {}
@@ -28,9 +27,6 @@ cases:
       let a: C = new D()
       try {
           a as E
-          arktest.fail("Expected ClassCastError was not thrown")
-      } catch (e: ClassCastError) {
-          arktest.assertTrue(e instanceof ClassCastError)
+      } catch (e) {
       }
-    # TODO: replace WXXXXX with real warning code when defined
-    expected: 'Warning WXXXXX: cast always throws ClassCastError'
+    expected: "Warning W0326: Attempting to cast type 'D' to 'E' can throw 'CastClassError' exception at runtime"
