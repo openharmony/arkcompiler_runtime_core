@@ -102,15 +102,20 @@ void AotBuilder::EndFile()
 
 int AotBuilder::Write(const std::string &cmdline, const std::string &fileName)
 {
+    return Write(-1, cmdline, fileName);
+}
+
+int AotBuilder::Write(int anFd, const std::string &cmdline, const std::string &fileName)
+{
     switch (arch_) {
         case Arch::AARCH32:
-            return WriteImpl<Arch::AARCH32>(cmdline, fileName);
+            return WriteImpl<Arch::AARCH32>(cmdline, fileName, anFd);
         case Arch::AARCH64:
-            return WriteImpl<Arch::AARCH64>(cmdline, fileName);
+            return WriteImpl<Arch::AARCH64>(cmdline, fileName, anFd);
         case Arch::X86:
-            return WriteImpl<Arch::X86>(cmdline, fileName);
+            return WriteImpl<Arch::X86>(cmdline, fileName, anFd);
         case Arch::X86_64:
-            return WriteImpl<Arch::X86_64>(cmdline, fileName);
+            return WriteImpl<Arch::X86_64>(cmdline, fileName, anFd);
         default:
             LOG(ERROR, COMPILER) << "AotBuilder: Unsupported arch";
             return 1;
@@ -146,13 +151,20 @@ void AotBuilder::FillHeader(const std::string &cmdline, const std::string &fileN
 }
 
 template <Arch ARCH>
-int AotBuilder::WriteImpl(const std::string &cmdline, const std::string &fileName)
+int AotBuilder::WriteImpl(const std::string &cmdline, const std::string &fileName, int anFd)
 {
     ElfBuilder<ARCH> builder;
 
-    PrepareElfBuilder<ARCH>(builder, cmdline, fileName);
+    PrepareElfBuilder(builder, cmdline, fileName);
     builder.Build(fileName);
-    builder.Write(fileName);
+    if (anFd >= 0) {
+        if (!builder.Write(anFd)) {
+            LOG(ERROR, COMPILER) << "Failed to write ELF to fd=" << anFd;
+            return 1;
+        }
+    } else {
+        builder.Write(fileName);
+    }
 
     return 0;
 }

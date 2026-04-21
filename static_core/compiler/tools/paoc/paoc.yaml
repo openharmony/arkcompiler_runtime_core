@@ -116,6 +116,16 @@ options:
     default: 0
     description: Time limit for the whole AOT compilation in milliseconds (0 means no limit)
 
+  - name: paoc-an-fd
+    type: int
+    default: -1
+    description: File descriptor for .an file passed from compiler_service
+
+  - name: paoc-hap-fd
+    type: int
+    default: -1
+    description: File descriptor for HAP file passed from compiler_service
+
   - name: paoc-use-profile
     description: Load and use AOT profile information
     sub_options:

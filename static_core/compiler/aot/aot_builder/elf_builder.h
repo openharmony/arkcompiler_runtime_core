@@ -19,6 +19,7 @@
 #include <elf.h>
 #include <algorithm>
 #include <cstdint>
+#include <unistd.h>
 #include <vector>
 #include <string>
 #include <tuple>
@@ -402,6 +403,7 @@ public:
     void SettleSection(Section *section);
 
     void Write(const std::string &fileName);
+    bool Write(int anFd);
     void Write(Span<uint8_t> stream);
 
     ElfOff UpdateOffset(ElfWord align)
@@ -928,6 +930,39 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Write(const std::string &fileName)
 
     std::ofstream elfFile(fileName, std::ios::binary);
     elfFile.write(reinterpret_cast<char *>(dataSpan.Data()), dataSpan.Size());
+}
+
+template <Arch ARCH, bool IS_JIT_MODE>
+bool ElfBuilder<ARCH, IS_JIT_MODE>::Write(int anFd)
+{
+    std::vector<uint8_t> data(GetFileSize());
+    auto dataSpan {Span(data)};
+    Write(dataSpan);
+
+    // Ensure fd is at offset 0 and truncated before writing
+    if (lseek(anFd, 0, SEEK_SET) < 0) {
+        LOG(ERROR, COMPILER) << "Failed to lseek fd=" << anFd << " errno=" << errno;
+        return false;
+    }
+    if (ftruncate(anFd, 0) != 0) {
+        LOG(ERROR, COMPILER) << "Failed to ftruncate fd=" << anFd << " errno=" << errno;
+        return false;
+    }
+
+    size_t remaining = dataSpan.Size();
+    const uint8_t *ptr = dataSpan.Data();
+    while (remaining > 0) {
+        ssize_t written = write(anFd, ptr, remaining);
+        if (written <= 0) {
+            LOG(ERROR, COMPILER) << "Failed to write ELF to fd=" << anFd << " remaining=" << remaining
+                                 << " errno=" << errno;
+            return false;
+        }
+        ptr += written;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        remaining -= written;
+    }
+    fsync(anFd);
+    return true;
 }
 
 inline void CopyToSpan(Span<uint8_t> to, const char *from, size_t size, size_t beginIndex)
