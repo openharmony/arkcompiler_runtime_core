@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 from runner.common_exceptions import InvalidInitialization
 from runner.init_runner import IsPath, MandatoryProp, MandatoryProps, PropName, RequireExist
 from runner.logger import Log
-from runner.utils import FontColor
+from runner.utils import RUNTIME_CORE_ENV_NAME, URUNNER_CFG_NAME, FontColor, get_default_cfg_path
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -32,6 +32,7 @@ class MandatoryPropDescription(NamedTuple):
     name: PropName
     is_path: IsPath
     require_exist: RequireExist
+    mandatory: bool = True
 
 
 class RunnerEnv:
@@ -39,7 +40,8 @@ class RunnerEnv:
         MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True),
         MandatoryPropDescription('ARKCOMPILER_ETS_FRONTEND_PATH', is_path=True, require_exist=True),
         MandatoryPropDescription('PANDA_BUILD', is_path=True, require_exist=True),
-        MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)
+        MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False),
+        MandatoryPropDescription('CFG_PATH', is_path=True, require_exist=True, mandatory=False)
     ]
     urunner_path_name: ClassVar[str] = 'URUNNER_PATH'
 
@@ -57,13 +59,20 @@ class RunnerEnv:
             return
 
         var_value = os.getenv(prop_desc.name)
-        if var_value is None:
+        if var_value is None and prop_desc.mandatory:
             raise InvalidInitialization(
                 f"Mandatory environment variable '{prop_desc.name}' is not set. \n\n"
                 f"Run this command to initialize the runner: \n{FontColor.RED.value}./runner.sh "
                 f"init{FontColor.RESET.value} \n"
                 f"To see all available initialization options run:\n{FontColor.RED.value}./runner.sh "
                 f"init --help{FontColor.RESET.value}\n")
+        if var_value is None and prop_desc.name == URUNNER_CFG_NAME:
+            runtime_core_path = os.getenv(RUNTIME_CORE_ENV_NAME)
+            if not runtime_core_path:
+                raise FileNotFoundError("Cannot detect default CFG_PATH: runtime core path is not set.")
+            var_value = get_default_cfg_path(runtime_core_path).as_posix()
+        if var_value is None:
+            return
         if not prop_desc.is_path:
             return
         expanded = Path(var_value).expanduser().resolve()
@@ -75,8 +84,9 @@ class RunnerEnv:
     @classmethod
     def get_mandatory_props(cls) -> MandatoryProps:
         result: MandatoryProps = {}
-        for (prop_name, is_path, require_exist) in cls.mandatory_props:
-            result[prop_name] = MandatoryProp(value=os.getenv(prop_name), is_path=is_path, require_exist=require_exist)
+        for (prop_name, is_path, require_exist, mandatory) in cls.mandatory_props:
+            result[prop_name] = MandatoryProp(value=os.getenv(prop_name), is_path=is_path, require_exist=require_exist,
+                                              mandatory=mandatory)
         return result
 
     def load_environment(self, runner_help_mode: bool = False) -> list[MandatoryPropDescription]:

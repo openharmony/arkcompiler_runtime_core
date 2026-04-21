@@ -27,7 +27,10 @@ WORK_DIR=<your path to temporary folder where all intermediate files and reports
 ```bash
 ./runner.sh init
 ```
-This creates the file in interactive mode. Saved variables can be used later in test suite or workflow config files by name.
+This creates the file in interactive mode.
+Variable values can be provided either as command-line arguments or entered one by one in the console.
+When entering values manually, shell-like input history is preserved, so the previous value can be recalled with the Up arrow.
+Saved variables can be used later in test suite or workflow config files by name.
 
 ### Shell script
 Script `runner.sh` activates the virtual environment with all required libraries

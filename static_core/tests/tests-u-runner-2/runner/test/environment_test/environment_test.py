@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #
 
 import os
+import shutil
 from pathlib import Path
 from typing import ClassVar, cast
 from unittest import TestCase
@@ -51,10 +52,11 @@ class EnvironmentTest(TestCase):
     @patch.dict(os.environ, {}, clear=True)
     def test_get_mandatory_props_empty(self) -> None:
         expected = {
-            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp(None, is_path=True, require_exist=True),
-            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp(None, is_path=True, require_exist=True),
-            'PANDA_BUILD': MandatoryProp(None, is_path=True, require_exist=True),
-            'WORK_DIR': MandatoryProp(None, is_path=True, require_exist=False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp(None, is_path=True, require_exist=True, mandatory=True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp(None, is_path=True, require_exist=True, mandatory=True),
+            'PANDA_BUILD': MandatoryProp(None, is_path=True, require_exist=True, mandatory=True),
+            'WORK_DIR': MandatoryProp(None, is_path=True, require_exist=False, mandatory=True),
+            'CFG_PATH': MandatoryProp(None, is_path=True, require_exist=True, mandatory=False)
         }
         props = RunnerEnv.get_mandatory_props()
         self.assertIsInstance(props, dict)
@@ -64,14 +66,16 @@ class EnvironmentTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': "aaa",
         'ARKCOMPILER_ETS_FRONTEND_PATH': "bbb",
         'PANDA_BUILD': "ccc",
-        'WORK_DIR': "ddd"
+        'WORK_DIR': "ddd",
+        'CFG_PATH': "eee"
     }, clear=True)
     def test_get_mandatory_props_full(self) -> None:
         expected = {
-            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True),
-            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True),
-            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True),
-            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True, mandatory=True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True, mandatory=True),
+            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True, mandatory=True),
+            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False, mandatory=True),
+            'CFG_PATH': MandatoryProp("eee", is_path=True, require_exist=True, mandatory=False)
         }
         props = RunnerEnv.get_mandatory_props()
         self.assertIsInstance(props, dict)
@@ -223,33 +227,113 @@ class EnvironmentTest(TestCase):
         frontend_path = current_path / f"bbb-{random_suffix()}"
         build_path = current_path / f"ccc-{random_suffix()}"
         work_path = current_path / f"ddd-{random_suffix()}"
+        cfg_path = current_path / f"eee-{random_suffix()}"
 
         runtime_path.mkdir(parents=True, exist_ok=True)
         frontend_path.mkdir(parents=True, exist_ok=True)
         build_path.mkdir(parents=True, exist_ok=True)
+        cfg_path.mkdir(parents=True, exist_ok=True)
 
         os.environ[RunnerEnv.mandatory_props[0][0]] = str(runtime_path)
         os.environ[RunnerEnv.mandatory_props[1][0]] = str(frontend_path)
         os.environ[RunnerEnv.mandatory_props[2][0]] = str(build_path)
         os.environ[RunnerEnv.mandatory_props[3][0]] = str(work_path)
+        os.environ[RunnerEnv.mandatory_props[4][0]] = str(cfg_path)
         # test
         runner_env = RunnerEnv(global_env=self.urunner_path)
         runner_env.load_environment()
-        runtime_name = RunnerEnv.mandatory_props[0][0]
-        runtime_env = os.getenv(runtime_name)
-        frontend_name = RunnerEnv.mandatory_props[1][0]
-        frontend_env = os.getenv(frontend_name)
-        build_name = RunnerEnv.mandatory_props[2][0]
-        build_env = os.getenv(build_name)
-        work_name = RunnerEnv.mandatory_props[3][0]
-        work_env = os.getenv(work_name)
+        runtime_env = os.getenv(RunnerEnv.mandatory_props[0][0])
+        frontend_env = os.getenv(RunnerEnv.mandatory_props[1][0])
+        build_env = os.getenv(RunnerEnv.mandatory_props[2][0])
+        work_env = os.getenv(RunnerEnv.mandatory_props[3][0])
+        cfg_env = os.getenv(RunnerEnv.mandatory_props[4][0])
+
         self.assertFalse(self.urunner_path.exists())
         self.assertEqual(str(runtime_path), runtime_env, f"for {RunnerEnv.mandatory_props[0][0]}")
         self.assertEqual(str(frontend_path), frontend_env, f"for {RunnerEnv.mandatory_props[1][0]}")
         self.assertEqual(str(build_path), build_env, f"for {RunnerEnv.mandatory_props[2][0]}")
         self.assertEqual(str(work_path), work_env, f"for {RunnerEnv.mandatory_props[3][0]}")
+        self.assertEqual(str(cfg_path), cfg_env, f"for {RunnerEnv.mandatory_props[4][0]}")
         # clear up
+        cfg_path.rmdir()
         runtime_path.rmdir()
         frontend_path.rmdir()
         build_path.rmdir()
         self.urunner_path.unlink(missing_ok=True)
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_load_env_from_file_cfg_path_default(self) -> None:
+        # preparation
+        self.urunner_path.unlink(missing_ok=True)
+        current_path = Path(__file__).parent
+        runtime_path = current_path / f"aaa-{random_suffix()}"
+        frontend_path = current_path / f"bbb-{random_suffix()}"
+        build_path = current_path / f"ccc-{random_suffix()}"
+        work_path = current_path / f"ddd-{random_suffix()}"
+        default_cfg_pth = runtime_path / "static_core" / "tests" / "tests-u-runner-2" / "cfg"
+
+        props = {
+            'ARKCOMPILER_RUNTIME_CORE_PATH': str(runtime_path),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': str(frontend_path),
+            'PANDA_BUILD': str(build_path),
+            'WORK_DIR': str(work_path)
+        }
+        result = [f"{prop}={value}" for prop, value in props.items()]
+        write_2_file(self.urunner_path, "\n".join(result))
+
+        runtime_path.mkdir(parents=True, exist_ok=True)
+        frontend_path.mkdir(parents=True, exist_ok=True)
+        build_path.mkdir(parents=True, exist_ok=True)
+        default_cfg_pth.mkdir(parents=True, exist_ok=True)
+
+        try:
+            runner_env = RunnerEnv(global_env=self.urunner_path)
+            runner_env.load_environment()
+
+            self.assertEqual(len(os.environ), 5)
+            for key, val in props.items():
+                self.assertEqual(os.environ.get(key), val)
+            self.assertEqual(os.environ.get("CFG_PATH"), str(default_cfg_pth))
+        finally:
+            shutil.rmtree(runtime_path)
+            shutil.rmtree(frontend_path)
+            shutil.rmtree(build_path)
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_load_env_from_file_cfg_path_set(self) -> None:
+        # preparation
+        self.urunner_path.unlink(missing_ok=True)
+        current_path = Path(__file__).parent
+        runtime_path = current_path / f"aaa-{random_suffix()}"
+        frontend_path = current_path / f"bbb-{random_suffix()}"
+        build_path = current_path / f"ccc-{random_suffix()}"
+        work_path = current_path / f"ddd-{random_suffix()}"
+        cfg_pth = runtime_path / "cfg"
+
+        props = {
+            'ARKCOMPILER_RUNTIME_CORE_PATH': str(runtime_path),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': str(frontend_path),
+            'PANDA_BUILD': str(build_path),
+            'WORK_DIR': str(work_path),
+            'CFG_PATH': str(cfg_pth)
+        }
+        result = [f"{prop}={value}" for prop, value in props.items()]
+        write_2_file(self.urunner_path, "\n".join(result))
+
+        runtime_path.mkdir(parents=True, exist_ok=True)
+        frontend_path.mkdir(parents=True, exist_ok=True)
+        build_path.mkdir(parents=True, exist_ok=True)
+        cfg_pth.mkdir(parents=True, exist_ok=True)
+
+        try:
+            runner_env = RunnerEnv(global_env=self.urunner_path)
+            runner_env.load_environment()
+
+            self.assertEqual(len(os.environ), 5)
+            for key, val in props.items():
+                self.assertEqual(os.environ.get(key), val)
+            self.assertEqual(os.environ.get("CFG_PATH"), str(cfg_pth))
+        finally:
+            shutil.rmtree(runtime_path)
+            shutil.rmtree(frontend_path)
+            shutil.rmtree(build_path)
