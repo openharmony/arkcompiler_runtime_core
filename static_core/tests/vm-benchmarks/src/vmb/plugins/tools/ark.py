@@ -76,6 +76,13 @@ class Tool(ToolBase):
     def name(self) -> str:
         return 'Ark VM'
 
+    @property
+    def version(self) -> str:
+        res = self.sh.run(f'{self.ark} --version')
+        if res.ret == 1:
+            return ' '.join(str(res.out or res.err).split())
+        return super().version
+
     def get_cmd(self, name: str, abc: str, options: str, gclog: str, an: str) -> str:
         an_files = self.an_files + [an] \
             if an and (OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags) \

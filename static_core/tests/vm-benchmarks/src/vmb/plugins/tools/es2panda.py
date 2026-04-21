@@ -139,7 +139,9 @@ class Tool(ToolBase):
     @property
     def version(self) -> str:
         res = self.sh.run(f'{self.es2panda} --version')
-        return ' '.join(str(res.err).split())
+        if res.ret == 1:
+            return ' '.join(str(res.out or res.err).split())
+        return super().version
 
     def update_config(self, bu: BenchUnit) -> str:
         static: Iterable[Path] = bu.libs('.ets')
