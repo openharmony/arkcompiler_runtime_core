@@ -27,7 +27,7 @@ cases:
       interface I {
         toString(i: int): string;
       }
-  - doc: Object public method configured to be have no params
+  - doc: Object public method configured to have no params
     error: |-
       "Semantic error ESE0130: Function bar is already declared.'"
     decl: |-

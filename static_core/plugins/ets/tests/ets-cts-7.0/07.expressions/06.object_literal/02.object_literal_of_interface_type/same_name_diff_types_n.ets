@@ -14,14 +14,19 @@
  */
 
 /*---
-desc: Old lib version
-tags:
-- compile-only
-- not-a-test
+desc: >-
+    If a property is defined as both a getter and a setter, then the parameter type of the setter and the return type
+    of the getter must be the same. Otherwise, a compile-time error occurs
+    as described in Implementing Required Interface Properties.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0319: Type 'Int' is not compatible with type 'String' at property 't'"
 ---*/
 
-import  *  as PI from '../../param_interfaces/param_interfaces.ets'
+interface I {
+  set t(s: string)
+  get t(): int
+}
 
-export class A {
-    a: PI.PI2 = new PI.B()
+function main() {
+  let i: I = {t: 2}
 }

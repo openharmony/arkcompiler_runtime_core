@@ -14,10 +14,8 @@
  */
 
 /*---
-desc: Fixed array negative index access
-tags:
-- negative
-- compile-only
+desc: The index is a negative number. A compilation error occurs
+tags: [negative, compile-only]
 expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 ---*/
 

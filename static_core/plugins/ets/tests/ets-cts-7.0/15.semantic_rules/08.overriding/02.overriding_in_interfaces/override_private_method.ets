@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,20 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Supertype relation among array types
-tags: [compile-only, negative]
+desc: >-
+    C.foo() is just a new method declaration.
+    I.foo() is not accessible here at all.
 ---*/
 
-class Base {}
-class Derived extends Base {}
+interface I {
+  private foo(): int { return 1 }
+}
 
-function bad(ab: Array<Base>, ad: Array<Derived>) {
-    ab = ad  // TypeError: Type 'Array<Derived>' cannot be assigned to type 'Array<Base>'
+class C implements I {
+  foo(): int { return 2 }
+}
+
+function main() {
+  let i: C = { }
+  arktest.assertEQ(i.foo(), 2)
 }

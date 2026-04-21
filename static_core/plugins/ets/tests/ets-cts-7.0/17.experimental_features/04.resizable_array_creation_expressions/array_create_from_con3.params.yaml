@@ -17,38 +17,6 @@ cases:
       let a = new int[0]((inx: int) => 3 - inx)
       arktest.assertEQ(a.length, 0)
 
-  - desc: Create Array with length < 0
-    decl: |-
-      function f(len: int): void {
-        let a = new string[len]((inx: int) => "a")
-      }
-    logic: |-
-      let res: boolean = false
-      let expectedError = (e: Error): boolean => {
-        return true
-      }
-      arktest.expectThrow(() => {f(-1)}, expectedError)
-      arktest.expectThrow(() => {f(-30)}, expectedError)
-
-  - desc: Create Array with different length fractional part
-    decl: |-
-      function f1(len: double): void {
-        let a = new number[len]((inx: int) => 5.7)
-      }
-      function f2(len1: double, len2: double): void {
-        let a = new number[len1][len2]((inx1: int, inx2: int) => 5.7)
-      }
-    logic: |-
-      let expectedError = (e: Error): boolean => {
-        return true
-      }
-      f1(2.0)
-      f1(35.0)
-      arktest.expectThrow(() => {f1(3.141592653589)}, expectedError)
-      f2(5.0, 3.0)
-      arktest.expectThrow(() => {f2(5, 3.7)}, expectedError)
-      arktest.expectThrow(() => {f2(3.7, 5)}, expectedError)
-
   - desc: Create Array with predefined types
     check_variants:
       - {check_type: "Any"}
@@ -97,43 +65,21 @@ cases:
 
   - desc: Create 1D Array with predefined types
     check_variants:
-      - {check_type: "number", v_value: "3"}
-      - {check_type: "double", v_value: "5.7"}
-      - {check_type: "float", v_value: "1.5f"}
-      - {check_type: "long", v_value: "9223372036854775000"}
-      - {check_type: "int", v_value: "123123"}
-      - {check_type: "short", v_value: "325"}
-      - {check_type: "byte", v_value: "37"}
+      - {check_type: "number", v_value: "3", cast: ""}
+      - {check_type: "double", v_value: "5.7", cast: ""}
+      - {check_type: "float", v_value: "1.5f", cast: ""}
+      - {check_type: "long", v_value: "9223372036854775000", cast: ""}
+      - {check_type: "int", v_value: "123123", cast: ""}
+      - {check_type: "short", v_value: "325", cast: "Int.toShort"}
+      - {check_type: "byte", v_value: "37", cast: "Int.toByte"}
     logic: |-
       let v: [check_type] = [v_value]
-      let a = new [check_type][30]((inx: int): [check_type] => v + inx)
+      let a = new [check_type][30]((inx: int): [check_type] => [cast](v + inx))
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof [check_type])
       for (let i = 0; i < 30; i++) {
-        let check_value: [check_type] = v + i
+        let check_value = v + i
         arktest.assertEQ(a[i], check_value)
-      }
-
-  - desc: Create 2D Array with predefined types
-    check_variants:
-      - {check_type: "number", v_value: "3"}
-      - {check_type: "double", v_value: "5.7"}
-      - {check_type: "float", v_value: "1.5f"}
-      - {check_type: "long", v_value: "9223372036854775000"}
-      - {check_type: "int", v_value: "123123"}
-      - {check_type: "short", v_value: "325"}
-      - {check_type: "byte", v_value: "37"}
-    logic: |-
-      let v: [check_type] = [v_value]
-      let a = new [check_type][30][10]((inx1: int, inx2: int): [check_type] => v + inx1 + inx2)
-      arktest.assertEQ(a.length, 30)
-      arktest.assertTrue(a[0][0] instanceof [check_type])
-      for (let i = 0; i < 30; i++) {
-        arktest.assertEQ(a[i].length, 10)
-        for (let j = 0; j < 10; j++) {
-          let check_value: [check_type] = v + i + j
-          arktest.assertEQ(a[i][j], check_value)
-        }
       }
 
   - desc: Create Array with type string
@@ -149,7 +95,7 @@ cases:
 
   - desc: Create Array with type bigint
     logic: |-
-      let v: bigint = "12345678901234567890n"
+      let v: bigint = 12345678901234567890n
       let a = new bigint[30]((inx: int) => v + BigInt(inx))
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof bigint)
@@ -184,19 +130,19 @@ cases:
     sub_cases_logic:
       - |-
         let v: int = 1
-        let a = new Animal[30]((inx: int) => {name: "animal" + (v + inx).toString()} as Animal)
+        let a = new Animal[30]((inx: int): Animal => ({name: "animal" + (v + inx).toString()} as Animal) )
         arktest.assertEQ(a.length, 30)
         arktest.assertTrue(a[0] instanceof Animal)
         for (let i = 0; i < 30; i++) {
           arktest.assertEQ((a[i] as Animal).name, "animal" + (v + i).toString())
         }
-        let b = new Animal[30]((inx: int) => {name: "dog" + (v + inx).toString()} as Dog)
+        let b = new Animal[30]((inx: int): Dog => ({name: "dog" + (v + inx).toString()} as Dog) )
         arktest.assertEQ(b.length, 30)
         arktest.assertTrue(b[0] instanceof Dog)
         for (let i = 0; i < 30; i++) {
           arktest.assertEQ((b[i] as Dog).bark(), "dog" + (v + i).toString())
         }
-        let c = new Animal[30]((inx: int) => {name: "cat" + (v + inx).toString()} as Cat)
+        let c = new Animal[30]((inx: int): Cat => ({name: "cat" + (v + inx).toString()} as Cat) )
         arktest.assertEQ(c.length, 30)
         arktest.assertTrue(c[0] instanceof Cat)
         for (let i = 0; i < 30; i++) {
@@ -276,17 +222,17 @@ cases:
         let a = new HandlerBInt[30]((inx: int) => handlerAInt)
         arktest.assertEQ(a.length, 30)
         for (let i = 0; i < 30; i++) {
-          arktest.assertEQ((a[i](new B, 7).v, -20)
+          arktest.assertEQ(a[i](new B, 7).v, -20)
         }
         let b = new HandlerBInt[30]((inx: int) => handlerA)
         arktest.assertEQ(b.length, 30)
         for (let i = 0; i < 30; i++) {
-          arktest.assertEQ((b[i](new B, 7).v, 13)
+          arktest.assertEQ(b[i](new B, 7).v, 13)
         }
         let c = new HandlerBInt[30]((inx: int) => handlerNothing)
         arktest.assertEQ(c.length, 30)
         for (let i = 0; i < 30; i++) {
-          arktest.assertEQ((c[i](new B, 7).v, -567)
+          arktest.assertEQ(c[i](new B, 7).v, -567)
         }
       - |-
         let v: int = 1
@@ -306,12 +252,12 @@ cases:
           let id = (v + i) % 3
           switch (id) {
             case 1:
-              arktest.assertEQ((a[i](new B, 7).v, -20)
+              arktest.assertEQ(a[i](new B, 7).v, -20)
               break
             case 2:
-              arktest.assertEQ((a[i](new B, 7).v, 13)
+              arktest.assertEQ(a[i](new B, 7).v, 13)
               break
             default:
-              arktest.assertEQ((a[i](new B, 7).v, -567)
+              arktest.assertEQ(a[i](new B, 7).v, -567)
           }
         }

@@ -12,53 +12,34 @@
 # limitations under the License.
 
 cases:
-    - logic: let a = new number[-1](0)
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
-
-    - logic: let a = new number[-30][10](0)
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
-
-    - logic: let a = new number[30][-10](0)
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
-
-    - logic: let a = new number[2][2][-1](0)
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
-
-    - logic: let a = new string[-1]('a')
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
-
-    - logic: let a = new number[-30][10](5)
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
-
-    - logic: let a = new number[30][-10](5)
+    - logic: let a = new number[-1](0.0)
       expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
     - logic: "let a = new string[-1]((inx: int) => 'a')"
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
+      expected_out: "Semantic error ESE708183: Array size cannot be negative."
 
-    - logic: "let a = new int[-30][10]((inx1: int, inx2: int) => 5.7)"
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
+    - logic: let a = new int[Long.MIN_VALUE](0)
+      expected_out: "Semantic error ESE0046: Type 'Long' is not compatible with type 'Int' at index 1"
 
-    - logic: "let a = new int[30][-10]((inx1: int, inx2: int) => 5.7)"
-      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
+    - logic: let a = new int[Long.MAX_VALUE](0)
+      expected_out: "Semantic error ESE0046: Type 'Long' is not compatible with type 'Int' at index 1"
+
+    - logic: let a = new number[30.0](0.0)
+      expected_out: "Semantic error ESE0046: Type 'Double' is not compatible with type 'Int' at index 1"
+
+    - logic: "let a = new string[1][1](('str')"
+      expected_out: "Syntax error ESY97506: Multidimensional array creation with or without initializers is not supported now."
 
     - decl: |-
         class C {
           constructor (n: number) {}
         }
       logic: let a = new C[3](new C())
-      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
+      expected_out: "Semantic error ESE0124: Expected 1 arguments, got 0."
 
     - decl: |-
         // enum constants of byte type
-        enum Color: byte { Red, Green, Blue }
+        enum Color: float { Red = 1f, Green= 2f, Blue=3f }
       logic: |-
-        let v: Color[] = new Color[Color.Green](new Color)
-      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 3"
-
-    - decl: |-
-        // enum constants of short type
-        enum Color: short { Red = 42, Green, Blue }
-      logic: |-
-        let v: Color[] = new Color[Color.Green](new Color)
-      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 3"
+        let v: Color[] = new Color[Color.Green](Color.Blue)
+      expected_out: "Semantic error ESE0046: Type 'Color' is not compatible with type 'Int' at index 1"

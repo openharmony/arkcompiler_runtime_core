@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,17 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Supertype relation among array types
+desc: >-
+    Literal interface object cannot have own methods
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0139: Signature foo(): Int is not visible here."
 ---*/
 
-class Base {}
-class Derived extends Base {}
+interface I {
+  private foo(): int { return 1 }
+}
 
-function bad(ab: Array<Base>, ad: Array<Derived>) {
-    ab = ad  // TypeError: Type 'Array<Derived>' cannot be assigned to type 'Array<Base>'
+function main() {
+  let i: I = { foo(): int { return 2} }
+  i.foo()
 }

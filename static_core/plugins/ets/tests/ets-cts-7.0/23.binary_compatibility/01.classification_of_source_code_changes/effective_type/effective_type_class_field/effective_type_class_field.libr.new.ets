@@ -23,5 +23,5 @@ tags:
 import  *  as PI from '../../param_interfaces/param_interfaces.ets'
 
 export class A {
-    a: PI.PI4 = {}
+    a: PI.PI2 = new PI.D()
 }

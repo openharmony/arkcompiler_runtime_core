@@ -287,20 +287,16 @@
 #33800
 10.interfaces/02.superinterfaces_and_subinterfaces/extend_clause_with_not_accessible_type_n.ets
 
+#31862 verifier error on conflicting default implementations in interfaces
+10.interfaces/03.interface_members/hidden_members_1.ets
+
 #33880 methods with the same name as Object public method
 10.interfaces/03.interface_members/object_public_methods_n_0.ets
 10.interfaces/03.interface_members/object_public_methods_n_1.ets
+10.interfaces/03.interface_members/object_public_methods_n_2.ets
 10.interfaces/03.interface_members/object_public_methods_n_3.ets
 10.interfaces/03.interface_members/object_public_methods_n_4.ets
 10.interfaces/03.interface_members/object_public_methods_n_5.ets
-
-#33879 private member of the superinterface affects its subinterfaces
-10.interfaces/03.interface_members/hidden_members_1.ets
-10.interfaces/03.interface_members/hidden_members_2.ets
-10.interfaces/03.interface_members/object_public_methods_n_2.ets
-
-#33901
-10.interfaces/04.interface_properties/interface_property_declaration_n_6.ets
 
 #33639
 11.enumerations/enum_decl_25.ets
@@ -500,9 +496,6 @@
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
 
-#34033 readonly T[] and ReadonlyArray<T> identity
-15.semantic_rules/03.type_identity/readonly_arrays_identity.ets
-
 #33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 
@@ -637,43 +630,6 @@
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0002.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
 
-#28490
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_2.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_23.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_24.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_25.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_26.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_27.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_28.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_29.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_30.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_31.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_32.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_33.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_34.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_35.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_36.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_37.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_38.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_39.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_40.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_41.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con2_43.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_2.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_16.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_17.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_18.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_19.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_20.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_21.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_22.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_23.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_24.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_26.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_28.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_30.ets
-17.experimental_features/04.resizable_array_creation_expressions/array_create_from_con3_31.ets
-
 #34018
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_22.ets
 
@@ -746,10 +702,6 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
-
-#33617
-23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_class_field/effective_type_class_field.ets
-23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_variable/effective_type_variable.ets
 
 #29270
 23.binary_compatibility/01.classification_of_source_code_changes/class_and_interface_declaration/ambient_decl_not_loadable/interface_usage_n_2.ets

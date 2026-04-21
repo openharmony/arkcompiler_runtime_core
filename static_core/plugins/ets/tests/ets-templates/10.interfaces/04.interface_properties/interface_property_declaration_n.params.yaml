@@ -69,9 +69,12 @@ cases:
       class C implements I {}
   - doc: Getter and setter expected to be of the same type
     error: |-
-      "#33901 CTE is missing"
+      "Semantic error ESE0319: Type 'Int' is not compatible with type 'String' at property 'text'"
     decl: |-
       interface I {
         set text(i: string)
         get text(): int
+      }
+      class C implements I {
+        text: int = 0
       }
