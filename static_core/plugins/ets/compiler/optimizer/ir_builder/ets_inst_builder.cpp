@@ -186,31 +186,16 @@ void InstBuilder::BuildSuspend(const BytecodeInstruction *bcInst)
 void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
 {
     // NOTE(compiler_team): support stackless in BCO #33857.
-    if (GetGraph()->IsBytecodeOptimizer()) {
+    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }
 
-    auto graph = GetGraph();
     auto pc = GetPc(bcInst->GetAddress());
-    auto currentBlock = GetCurrentBlock();
-
-    // Create compare and if instructions in the current block to check async context.
     auto asyncContext = GetDefinition(bcInst->GetVReg(0));
-    auto compareInst = graph->CreateInstCompare(DataType::BOOL, pc, asyncContext, graph->GetOrCreateNullPtr(),
-                                                DataType::REFERENCE, ConditionCode::CC_NE);
-    auto ifImmInst = graph->CreateInstIfImm(DataType::NO_TYPE, pc, compareInst, 0U, DataType::BOOL,
-                                            ConditionCode::CC_NE, GetMethod());
-    ifImmInst->SetUnlikely();
-    AddInstruction(compareInst);
-    AddInstruction(ifImmInst);
-
-    // Create dispatch instruction in separate block.
-    auto dispatchBlock = currentBlock->GetSuccessor(0U);
-    dispatchBlock->SetTry(currentBlock->IsTry());
-    dispatchBlock->SetTryId(currentBlock->GetTryId());
-    auto dispatchInst = graph->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext);
-    dispatchBlock->AppendInst(dispatchInst);
+    auto dispatchInst = GetGraph()->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext);
+    AddInstruction(dispatchInst);
+    GetGraph()->SetDispatchInst(dispatchInst);
 }
 
 }  // namespace ark::compiler

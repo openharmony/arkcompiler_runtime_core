@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -482,10 +482,9 @@ BasicBlock *BasicBlock::SplitBlockAfterInstruction(Inst *inst, bool makeEdge)
     ASSERT(!IsStartBlock() && !IsEndBlock());
 
     auto nextInst = inst->GetNext();
-    auto newBb = GetGraph()->CreateEmptyBlock((nextInst != nullptr) ? nextInst->GetPc() : INVALID_PC);
+    auto newBb = GetGraph()->CreateEmptyBlock(this);
     ASSERT(newBb != nullptr);
-    newBb->SetAllFields(this->GetAllFields());
-    newBb->SetOsrEntry(false);
+    newBb->SetGuestPc((nextInst != nullptr) ? nextInst->GetPc() : INVALID_PC);
     GetLoop()->AppendBlock(newBb);
 
     for (; nextInst != nullptr; nextInst = nextInst->GetNext()) {
