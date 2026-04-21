@@ -30,46 +30,6 @@ BaseObject* RemarkBarrier::ReadRefField(BaseObject* obj, RefField<false>& field)
 
 BaseObject* RemarkBarrier::ReadStaticRef(RefField<false>& field) const { return ReadRefField(nullptr, field); }
 
-#ifdef ARK_USE_SATB_BARRIER
-void RemarkBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
-{
-    RefField<> tmpField(field);
-    BaseObject* rememberedObject = nullptr;
-    rememberedObject = tmpField.GetTargetObject();
-    if (!Heap::IsTaggedObject(field.GetFieldValue())) {
-        return;
-    }
-    UpdateRememberSet(obj, ref);
-    if (UNLIKELY_CC(mutator == nullptr)) {
-        mutator = Mutator::GetMutator();
-    }
-    if (rememberedObject != nullptr) {
-        mutator->RememberObjectInSatbBuffer(rememberedObject);
-    }
-    if (ref != nullptr) {
-        if (!Heap::IsTaggedObject((HeapAddress)ref)) {
-            return;
-        }
-        ref = reinterpret_cast<BaseObject*>(reinterpret_cast<uintptr_t>(ref) & ~TAG_WEAK);
-        mutator->RememberObjectInSatbBuffer(ref);
-    }
-
-    DLOG(BARRIER, "write obj %p ref-field@%p: %#zx -> %p", obj, &field, rememberedObject, ref);
-}
-#else
-void RemarkBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
-{
-    if (!Heap::IsTaggedObject((HeapAddress)ref)) {
-        return;
-    }
-    UpdateRememberSet(obj, ref);
-    ref = reinterpret_cast<BaseObject*>(reinterpret_cast<uintptr_t>(ref) & ~TAG_WEAK);
-    ASSERT_LOGF(mutator != nullptr, "Mutator is nullptr");
-    mutator->RememberObjectInSatbBuffer(ref);
-    DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
-}
-#endif
-
 BaseObject* RemarkBarrier::AtomicReadRefField(BaseObject* obj, RefField<true>& field, MemoryOrder order) const
 {
     BaseObject* target = nullptr;

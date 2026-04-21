@@ -370,13 +370,19 @@ void Mutator::VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor)
     });
 }
 
-void Mutator::UpdateReadBarrierEntrypoint(common_vm::GCPhase phase)
+void Mutator::UpdateBarrierEntrypoint(common_vm::GCPhase phase)
 {
     auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
     auto *gc = static_cast<mem::CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
     auto *managedThread = ManagedThread::CastFromMutator(this);
-    if (phase >= common_vm::GCPhase::GC_PHASE_PRECOPY) {
+    if (phase >= common_vm::GCPhase::GC_PHASE_ENUM && phase < common_vm::GCPhase::GC_PHASE_FINAL_MARK) {
+        gc->EnablePreWriteBarrier(managedThread);
+    } else if (phase >= common_vm::GCPhase::GC_PHASE_FINAL_MARK && phase < common_vm::GCPhase::GC_PHASE_PRECOPY) {
+        gc->DisablePreWriteBarrier(managedThread);
+    } else if (phase >= common_vm::GCPhase::GC_PHASE_PRECOPY && phase < common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
         gc->EnableReadBarrier(managedThread);
+    } else if (phase == common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
+        gc->EnablePreWriteBarrier(managedThread);
     } else if (phase == common_vm::GCPhase::GC_PHASE_IDLE) {
         gc->DisableReadBarrier(managedThread);
     }

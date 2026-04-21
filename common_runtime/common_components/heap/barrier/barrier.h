@@ -32,6 +32,7 @@ public:
     virtual BaseObject* ReadRefField(BaseObject* obj, RefField<false>& field) const;
     virtual BaseObject* ReadStaticRef(RefField<false>& field) const;
 
+    virtual void PreWriteBarrier(Mutator *mutator, BaseObject* rememberedObject) const;
     virtual void WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const;
 
     virtual BaseObject* AtomicReadRefField(BaseObject* obj, RefField<true>& field,

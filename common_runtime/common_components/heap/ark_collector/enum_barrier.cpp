@@ -32,46 +32,21 @@ BaseObject* EnumBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) c
 
 BaseObject* EnumBarrier::ReadStaticRef(RefField<false>& field) const { return ReadRefField(nullptr, field); }
 
-#ifdef ARK_USE_SATB_BARRIER
-void EnumBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
+void EnumBarrier::PreWriteBarrier(Mutator *mutator, BaseObject* rememberedObject) const
 {
-    RefField<> tmpField(field);
-    BaseObject* remeberedObject = nullptr;
-    //Because it is possible to read a Double,
-    // and the lower 48 bits happen to be a HeapAddress, we need to avoid this situation
-    if (!Heap::IsTaggedObject(field.GetFieldValue())) {
-        return;
+    if (rememberedObject != nullptr) {
+        mutator->RememberObjectInSatbBuffer(rememberedObject);
+        DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
     }
-    UpdateRememberSet(obj, ref);
-    remeberedObject = tmpField.GetTargetObject();
-    if (UNLIKELY_CC(mutator == nullptr)) {
-        mutator = Mutator::GetMutator();
-    }
-    if (remeberedObject != nullptr) {
-        mutator->RememberObjectInSatbBuffer(remeberedObject);
-    }
-    if (ref != nullptr) {
-        // Wait Conccurent Enum Fix
-        // ref maybe not valid
-        // mutator->RememberObjectInSatbBuffer(ref)
-    }
-    DLOG(BARRIER, "write obj %p ref@%p: 0x%zx -> %p", obj, &field, remeberedObject, ref);
 }
-#else
+
 void EnumBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
 {
-    if (!Heap::IsTaggedObject((HeapAddress)ref)) {
-        return;
-    }
     if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
         UpdateRememberSet(obj, ref);
+        DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
     }
-    ref = (BaseObject*)((uintptr_t)ref & ~(TAG_WEAK));
-    ASSERT_LOGF(mutator != nullptr, "Mutator is nullptr");
-    mutator->RememberObjectInSatbBuffer(ref);
-    DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
 }
-#endif
 
 BaseObject* EnumBarrier::AtomicReadRefField(BaseObject* obj, RefField<true>& field, MemoryOrder order) const
 {

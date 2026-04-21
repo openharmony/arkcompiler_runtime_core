@@ -297,7 +297,8 @@ config("ark_common_config") {
     "-fno-rtti",
     "-fno-exceptions",
     "-Wno-invalid-offsetof",
-
+    "-Wno-gnu-anonymous-struct",
+    "-Wno-nested-anon-types",
     "-Wno-gnu-statement-expression",
     "-Wno-unused-parameter",
     "-Wno-unused-result",

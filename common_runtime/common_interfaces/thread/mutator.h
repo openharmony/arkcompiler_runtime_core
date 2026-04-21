@@ -267,7 +267,7 @@ public:
     bool TransitionGCPhase(bool bySelf);
 
     virtual void VisitMutatorRoots(const RefFieldVisitor& visitor);
-    virtual void UpdateReadBarrierEntrypoint(common_vm::GCPhase phase);
+    virtual void UpdateBarrierEntrypoint(common_vm::GCPhase phase);
 
     void DumpMutator() const;
 

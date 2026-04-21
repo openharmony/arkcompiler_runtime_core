@@ -32,47 +32,21 @@ BaseObject* MarkingBarrier::ReadRefField(BaseObject* obj, RefField<false>& field
 
 BaseObject* MarkingBarrier::ReadStaticRef(RefField<false>& field) const { return ReadRefField(nullptr, field); }
 
-#ifdef ARK_USE_SATB_BARRIER
-void MarkingBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
+void MarkingBarrier::PreWriteBarrier(Mutator *mutator, BaseObject* rememberedObject) const
 {
-    RefField<> tmpField(field);
-    BaseObject* rememberedObject = nullptr;
-    rememberedObject = tmpField.GetTargetObject();
-    if (!Heap::IsTaggedObject(field.GetFieldValue())) {
-        return;
-    }
-    UpdateRememberSet(obj, ref);
-    if (UNLIKELY_CC(mutator == nullptr)) {
-        mutator = Mutator::GetMutator();
-    }
     if (rememberedObject != nullptr) {
         mutator->RememberObjectInSatbBuffer(rememberedObject);
+        DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
     }
-    if (ref != nullptr) {
-        if (!Heap::IsTaggedObject((HeapAddress)ref)) {
-            return;
-        }
-        ref = (BaseObject*)((uintptr_t)ref & ~(TAG_WEAK));
-        mutator->RememberObjectInSatbBuffer(ref);
-    }
-
-    DLOG(BARRIER, "write obj %p ref-field@%p: %#zx -> %p", obj, &field, rememberedObject, ref);
 }
-#else
+
 void MarkingBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
 {
-    if (!Heap::IsTaggedObject((HeapAddress)ref)) {
-        return;
-    }
     if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
         UpdateRememberSet(obj, ref);
+        DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
     }
-    ref = (BaseObject*)((uintptr_t)ref & ~(TAG_WEAK));
-    ASSERT_LOGF(mutator != nullptr, "Mutator is nullptr");
-    mutator->RememberObjectInSatbBuffer(ref);
-    DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
 }
-#endif
 
 BaseObject* MarkingBarrier::AtomicReadRefField(BaseObject* obj, RefField<true>& field, MemoryOrder order) const
 {

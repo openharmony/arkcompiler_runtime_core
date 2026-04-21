@@ -290,6 +290,12 @@ protected:
         UNREACHABLE_CC();
     }
 
+    virtual void PreforwardStaticRoots()
+    {
+        LOG_COMMON(FATAL) << "Unresolved fatal";
+        UNREACHABLE_CC();
+    }
+
     bool PushRootToWorkStack(LocalCollectStack &markStack, BaseObject *obj);
     void PushRootsToWorkStack(LocalCollectStack &markStack, const CArrayList<BaseObject *> &collectedRoots);
     void MarkingRoots(const CArrayList<BaseObject *> &collectedRoots);

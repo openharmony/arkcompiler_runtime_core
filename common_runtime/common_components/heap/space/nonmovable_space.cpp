@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/collector/collector.h"

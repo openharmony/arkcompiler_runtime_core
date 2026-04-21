@@ -173,6 +173,7 @@ void ManagedThread::InitCardTableData(mem::GCBarrierSet *barrier)
         case mem::PRE_RB_NONE:
         case mem::PRE_SATB_BARRIER:
         case ark::mem::BarrierType::CMC_READ_BARRIER:
+        case ark::mem::BarrierType::PRE_CMC_WRITE_BARRIER:
             LOG(FATAL, RUNTIME) << "Post barrier expected";
             break;
     }
@@ -198,7 +199,7 @@ ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, P
         InitCardTableData(barrierSet);
         preBarrierType_ = barrierSet->GetPreType();
         postBarrierType_ = barrierSet->GetPostType();
-        if (barrierSet->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
+        if (barrierSet->GetPreType() == ark::mem::BarrierType::PRE_SATB_BARRIER) {
             preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
             // need to initialize in constructor because we have barriers between constructor and InitBuffers in
             // InitializedClasses
@@ -263,7 +264,7 @@ void ManagedThread::InitBuffers()
     auto allocator = GetInternalAllocator(this);
     mem::GC *gc = GetVM()->GetGC();
     auto barrier = gc->GetBarrierSet();
-    if (barrier->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
+    if (barrier->GetPreType() == ark::mem::BarrierType::PRE_SATB_BARRIER) {
         // we need to recreate buffers if it was detach (we removed all structures) and attach again
         // skip initializing in first attach after constructor
         if (preBuff_ == nullptr) {

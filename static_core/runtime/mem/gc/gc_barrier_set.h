@@ -139,6 +139,10 @@ private:
     BarrierType postType_;  // Type of POST-Write barrier.
     PandaMap<PandaString, BarrierOperand> preOperands_;
     PandaMap<PandaString, BarrierOperand> postOperands_;
+
+    virtual void WriteBarrier([[maybe_unused]] void *obj, [[maybe_unused]] void *field, [[maybe_unused]] void *newValue)
+    {
+    }
 };
 
 /// BarrierSet with barriers do nothing
@@ -230,10 +234,11 @@ public:
     NO_MOVE_SEMANTIC(GCCMCBarrierSet);
     ~GCCMCBarrierSet() override = default;
 
-    void PreBarrier([[maybe_unused]] void *preValAddr) override
-    {
-        UNREACHABLE();
-    }
+    bool IsSameRegion(void *ref, void *obj);
+
+    bool IsPreBarrierEnabled() override;
+
+    void PreBarrier(void *preValAddr) override;
 
     void PostBarrier(const void *objAddr, size_t offset, void *storedValAddr) override;
 
@@ -249,6 +254,10 @@ private:
     class CMCWriteBarrierHandle;
     /// Function which is called for the read barrier
     ObjFieldProcessFunc readBarrierFunc_;
+    /// Function which is called for the pre write barrier
+    ObjRefProcessFunc preWriteBarrierFunc_;
+
+    void WriteBarrier(void *obj, void *field, void *newValue) override;
 };
 
 }  // namespace ark::mem

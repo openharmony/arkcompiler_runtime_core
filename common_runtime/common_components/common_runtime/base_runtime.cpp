@@ -210,6 +210,11 @@ void BaseRuntime::WriteBarrier(void *obj, void *field, void *ref, Mutator *mutat
                                     *reinterpret_cast<RefField<> *>(field), reinterpret_cast<BaseObject *>(ref));
 }
 
+void BaseRuntime::PreWriteBarrier(void *preVal, Mutator *mutator)
+{
+    Heap::GetBarrier().PreWriteBarrier(mutator, reinterpret_cast<BaseObject *>(preVal));
+}
+
 void *BaseRuntime::ReadBarrier(void *obj, void *field)
 {
     return reinterpret_cast<void *>(Heap::GetBarrier().ReadRefField(reinterpret_cast<BaseObject *>(obj),

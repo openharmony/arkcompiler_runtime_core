@@ -153,7 +153,6 @@ protected:
     void ProcessFinalizers() override;
 
 private:
-    friend class RemarkAndPreforwardVisitor;
     template<bool copy>
     bool TryUpdateRefFieldImpl(BaseObject* obj, RefField<>& ref, BaseObject*& oldRef, BaseObject*& newRef) const;
 
@@ -183,6 +182,7 @@ private:
     void MarkingHeap(const CArrayList<BaseObject *> &collectedRoots);
     void PostMarking();
     void RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack) override;
+    void PreforwardStaticRoots() override;
     void ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack);
     void Preforward();
     void ConcurrentPreforward();

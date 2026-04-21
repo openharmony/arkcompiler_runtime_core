@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_INFO_H
-#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_INFO_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_HEAP_REGION_DESC_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_HEAP_REGION_DESC_H
 
 #include <cstdint>
 #include <cstddef>
@@ -1057,7 +1057,7 @@ private:
 
         RegionLiveDesc liveInfo_ {};
 
-        RegionRSet* regionRSet = nullptr;;
+        RegionRSet* regionRSet = nullptr;
 
         // the writing operation in C++ Bit-Field feature is not atomic, the we wants to
         // change the value, we must use specific interface implenmented by BitFields.
@@ -1394,4 +1394,4 @@ HeapAddress RegionDesc::InlinedRegionMetaData::GetRegionStart() const
 }
 } // namespace common_vm
 
-#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_INFO_H
+#endif // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_REGION_DESC_H

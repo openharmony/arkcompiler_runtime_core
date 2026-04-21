@@ -53,19 +53,19 @@ BaseObject* CopyBarrier::AtomicReadRefField(BaseObject* obj, RefField<true>& fie
     return target;
 }
 
+void YoungCopyBarrier::PreWriteBarrier(Mutator *mutator, BaseObject* rememberedObject) const
+{
+    if (rememberedObject != nullptr) {
+        mutator->RememberObjectInSatbBuffer(rememberedObject);
+        DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+    }
+}
+
 void YoungCopyBarrier::WriteBarrier(Mutator *mutator, BaseObject* obj, RefField<false>& field, BaseObject* ref) const
 {
-    if (!Heap::IsTaggedObject(reinterpret_cast<HeapAddress>(ref))) {
-        return;
-    }
     if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
         UpdateRememberSet(obj, ref);
+        DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
     }
-    ref = (BaseObject*)((uintptr_t)ref & ~(TAG_WEAK));
-    if (UNLIKELY_CC(mutator == nullptr)) {
-        mutator = Mutator::GetMutator();
-    }
-    mutator->RememberObjectInSatbBuffer(ref);
-    DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
 }
 }  // namespace common_vm

@@ -29,7 +29,7 @@
 #include "common_components/heap/space/from_space.h"
 #include "common_interfaces/thread/mutator.h"
 #include "common_components/heap/allocator/fix_heap.h"
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
 #endif

@@ -27,7 +27,7 @@
 #include "common_components/heap/allocator/allocator.h"
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_interfaces/thread/mutator.h"
-#include "common_components/heap/allocator/region_desc.h"
+#include "common_interfaces/heap/region_desc.h"
 #include "common_components/mutator/mutator_manager.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"

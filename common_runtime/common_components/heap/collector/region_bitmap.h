@@ -37,7 +37,7 @@ struct RegionBitmap {
     // 1 bit marks 8 bytes in region, 64 bits per word.
     // word count = region size / (8 * 64) = region size / 512, should be dynamically decided at runtime.
     std::atomic<size_t> wordCnt;
-    std::atomic<uint64_t> markWords[0];
+    std::atomic<uint64_t> markWords[1];
 
     static size_t GetRegionBitmapSize(size_t regionSize)
     {
