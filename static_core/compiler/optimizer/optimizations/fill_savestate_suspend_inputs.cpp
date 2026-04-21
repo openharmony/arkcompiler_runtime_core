@@ -123,7 +123,8 @@ bool FillSaveStateSuspendInputs::ProcessSaveStateSuspend(SaveStateInst *saveStat
                                              << " as bridge input to SaveStateSuspend v" << saveStateSuspend->GetId();
     }
 
-    OptimizeSaveStateConstantInputs(saveStateSuspend);
+    // Can't use OptimizeSaveStateConstantInputs here, because constants may be spilled onto the stack, and
+    // EtsAsyncDispatchImpl won't be able to properly restore them without recording their location in codeinfo.
     UpdateCounters(saveStateSuspend);
 
     COMPILER_LOG(DEBUG, FILL_SS_SUSPEND) << "SaveStateSuspend v" << saveStateSuspend->GetId() << ": added "
