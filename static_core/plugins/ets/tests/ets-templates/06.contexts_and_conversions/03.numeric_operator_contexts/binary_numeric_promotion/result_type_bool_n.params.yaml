@@ -15,4 +15,4 @@
 cases:
   - { type: boolean, val: 'true', rt: byte, rv: 1 as byte, op: '==', expected: "Semantic error ESE0105: Operator '==' cannot be applied to types 'Boolean' and 'Byte'." }
   - { type: Boolean, val: new Boolean(false), rt: short, rv: 1 as short, op: '!=', expected: "Semantic error ESE0105: Operator '!=' cannot be applied to types 'Boolean' and 'Short'." }
-  - { type: string, val: '"99"', rt: char, rv: "c'0'", op: '>', expected: "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type." }
+  - { type: string, val: '"99"', rt: char, rv: "c'0'", op: '>', expected: "Semantic error ESE0105: Operator '>' cannot be applied to types 'String' and 'Char'." }
