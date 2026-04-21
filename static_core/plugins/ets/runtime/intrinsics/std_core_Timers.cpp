@@ -204,7 +204,7 @@ void TimerEntrypoint(void *param)
     // clone job
     auto epInfo = Job::NativeEntrypointInfo {TimerEntrypoint, epParams};
     // NOLINTNEXTLINE(performance-move-const-arg)
-    job = jobMan->CreateJob(job->GetName(), std::move(epInfo), job->GetPriority());
+    job = jobMan->CreateJob(job->GetName(), std::move(epInfo), job->GetPriority(), job->GetType(), job->HasAbortFlag());
     ASSERT(job != nullptr);
     LaunchTimerCallback(epParams, timerEvent, job);
 }
