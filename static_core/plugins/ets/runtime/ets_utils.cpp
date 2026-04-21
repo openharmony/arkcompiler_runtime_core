@@ -30,8 +30,8 @@ namespace ark::ets {
 bool IsEtsGlobalClassName(const std::string &descriptor)
 {
     ASSERT(descriptor.length() >= 2U);  // L...;
-    ASSERT('L' == descriptor[0]);
-    ASSERT(';' == descriptor[descriptor.size() - 1]);
+    ASSERT(descriptor[0] == 'L');
+    ASSERT(descriptor[descriptor.size() - 1] == ';');
 
     constexpr size_t ETSGLOBAL_SEMICOLON_LENGTH = sizeof(ETSGLOBAL_CLASS_NAME);
 
@@ -39,9 +39,9 @@ bool IsEtsGlobalClassName(const std::string &descriptor)
     if (etsGlobalSubstringPos == std::string::npos) {
         return false;
     }
-    const bool etsGlobalClass = (1 == etsGlobalSubstringPos) && descriptor.length() == 1 + ETSGLOBAL_SEMICOLON_LENGTH;
+    const bool etsGlobalClass = (etsGlobalSubstringPos == 1) && descriptor.length() == 1 + ETSGLOBAL_SEMICOLON_LENGTH;
     const bool endsWithETSGLOBAL = descriptor.length() - ETSGLOBAL_SEMICOLON_LENGTH == etsGlobalSubstringPos;
-    const bool etsGlobalClassInPackage = endsWithETSGLOBAL && '/' == descriptor[etsGlobalSubstringPos - 1];
+    const bool etsGlobalClassInPackage = endsWithETSGLOBAL && descriptor[etsGlobalSubstringPos - 1] == '/';
 
     return etsGlobalClass || etsGlobalClassInPackage;
 }

@@ -288,7 +288,8 @@ uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
         return UINT8_C(1);
     }
     auto length = thisStr->GetUtf16Length();
-    for (size_t i = 0; i < length; ++i) {
+    size_t i = 0;
+    while (i < length) {
         uint16_t codeUnit = thisStr->At(i);
         if ((codeUnit & CHAR0X1FFC00) == CHAR0XD800) {
             // Code unit is a leading surrogate
@@ -305,6 +306,7 @@ uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
         } else if ((codeUnit & CHAR0X1FFC00) == CHAR0XDC00) {
             return UINT8_C(0);
         }
+        ++i;
     }
     return UINT8_C(1);
 }
@@ -423,7 +425,7 @@ EtsInt StdCoreStringLastIndexOfString(EtsString *thisStr, EtsString *patternStr,
 
 EtsInt StdCoreStringCodePointToChar(EtsInt codePoint)
 {
-    icu::UnicodeString uniStr((UChar32)codePoint);
+    icu::UnicodeString uniStr(static_cast<UChar32>(codePoint));
     uint32_t ret = bit_cast<uint16_t>(uniStr.charAt(0));
     // if codepoint contains a surrogate pair
     // encode it into int with higher bits being second char

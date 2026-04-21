@@ -571,7 +571,7 @@ TEST(LIBZIPARCHIVE, ZipFile)
         ASSERT_EQ(1, 0) << "GetGlobalFileInfo error.";
         return;
     }
-    for (int i = 0; i < (int)gi.GetNumberOfEntry(); ++i) {
+    for (int i = 0; i < static_cast<int>(gi.GetNumberOfEntry()); ++i) {
         EntryFileStat fileStat {};
         if (GetCurrentFileInfo(zipfile, &fileStat) != 0) {
             CloseArchive(zipfile);
@@ -581,7 +581,7 @@ TEST(LIBZIPARCHIVE, ZipFile)
         GTEST_COUT << "Index:  " << i << ", Uncompressed size: " << fileStat.GetUncompressedSize()
                    << "Compressed size: " << fileStat.GetCompressedSize() << "Compressed(): " << fileStat.IsCompressed()
                    << "entry offset: " << fileStat.GetOffset() << "\n";
-        if ((i + 1) < (int)gi.GetNumberOfEntry()) {
+        if ((i + 1) < static_cast<int>(gi.GetNumberOfEntry())) {
             if (GoToNextFile(zipfile) != 0) {
                 CloseArchive(zipfile);
                 ASSERT_EQ(1, 0) << "GoToNextFile error. Current index i = " << i;
