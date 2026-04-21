@@ -17,6 +17,8 @@
 /*---
 desc: If a key is a union of literal types or an enum type, then all variants must be listed in the object literal.
 tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE0265: All variants of literals listed in the union type must be listed in the object literal"
 ---*/
 
 type TM = Record<"aa" | "bb", number>

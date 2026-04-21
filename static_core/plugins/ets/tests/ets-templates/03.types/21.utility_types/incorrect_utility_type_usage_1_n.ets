@@ -14,12 +14,15 @@ limitations under the License.
 ---*/
 
 {% for c in cases %}
+{% set def = "Syntax error ESY0242: ''" ~ c.type ~ "'' is reserved and cannot be used as a variable/type name" %}
+{% set response = c.out|default(def) %}
 
 /*---
 desc: Cannot use Required, Readonly, Partial, Awaited, NonNullable, Record and ReturnType as interface type name.
 tags: [compile-only, negative]
+expected_out: '{{response}}'
 ---*/
 
-interface {{c}} { }
+interface {{c.type}} { }
 
 {% endfor %}

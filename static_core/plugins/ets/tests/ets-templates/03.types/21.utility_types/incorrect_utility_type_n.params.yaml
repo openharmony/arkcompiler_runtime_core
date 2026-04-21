@@ -14,7 +14,6 @@
 ---
 cases:
   - partial
-  - readonly
   - required
   - awaited
   - nonnullable

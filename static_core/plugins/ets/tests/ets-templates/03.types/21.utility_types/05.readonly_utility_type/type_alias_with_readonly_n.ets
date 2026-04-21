@@ -19,6 +19,7 @@ limitations under the License.
 desc: >-
     Checks for type alias declaration method access and member change for readonly utility type
 tags: [compile-only,negative]
+expected_out: "Semantic error ESE0027: Cannot call readonly type methods."
 ---*/
 
 {{c.decl}}

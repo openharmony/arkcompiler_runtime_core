@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Type T is not compatible (see Type Compatibility) with Required<T>
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Required<A>' cannot be assigned to type 'A'"
 ---*/
 
 abstract class A {

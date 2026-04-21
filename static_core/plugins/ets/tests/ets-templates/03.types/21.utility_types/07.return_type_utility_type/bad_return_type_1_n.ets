@@ -14,10 +14,13 @@ limitations under the License.
 ---*/
 
 {% for t in types %}
-
+{% set rs =
+"Semantic error ESE36530: Type ''<" ~ t ~ ">'' cannot be used as type parameter for ReturnType utilty type"
+%}
 /*---
 desc: ReturnType Utility Type
 tags: [compile-only, negative]
+expected_out: '{{rs}}'
 ---*/
 
 interface IMyInterface {

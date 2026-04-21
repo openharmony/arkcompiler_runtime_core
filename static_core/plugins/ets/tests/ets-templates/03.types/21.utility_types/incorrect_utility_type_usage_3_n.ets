@@ -14,12 +14,15 @@ limitations under the License.
 ---*/
 
 {% for c in cases %}
+{% set def = "Syntax error ESY0242: ''" ~ c.type ~ "'' is reserved and cannot be used as a variable/type name" %}
+{% set response = c.out|default(def) %}
 
 /*---
-desc: Cannot use Required, Readonly, Partial, Awaited, NonNullable, Record and ReturnType as enum type.
+desc: Cannot use Required, Readonly, Partial, Awaited, NonNullable, Record and ReturnType as enum declaration.
 tags: [compile-only, negative]
+expected_out: '{{response}}'
 ---*/
 
-enum {{c}} { Red, Green, Blue }
+enum {{c.type}} { Red, Green, Blue }
 
 {% endfor %}

@@ -13,11 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
+{% for utype in cases %}
+{% set response = "Semantic error ESE0371: Cannot find type ''" ~ utype ~ "''." %}
 /*---
-desc: Utility types Required, Readonly, Partial, Awaited and NonNullable are case-sensitive.
+desc: Utility types Required, Partial, Awaited, Record, ReturnType and NonNullable are case-sensitive.
 tags: [compile-only, negative]
+expected_out:
+    - '{{response}}'
+    - "Semantic error ESE0169: Type '*ERROR_TYPE*' is not generic."
 ---*/
 
 class A {
@@ -25,6 +28,6 @@ class A {
   j: string;
 }
 
-let a: {{c}}<A> = new A();
+let a: {{utype}}<A> = new A;
 
 {% endfor %}

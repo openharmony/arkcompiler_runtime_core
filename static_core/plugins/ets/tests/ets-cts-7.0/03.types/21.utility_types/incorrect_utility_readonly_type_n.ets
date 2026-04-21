@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-{% set def = "Syntax error ESY0242: ''" ~ c.type ~ "'' is reserved and cannot be used as a variable/type name" %}
-{% set response = c.out|default(def) %}
-
 /*---
-desc: Cannot use Required, Readonly, Partial, Awaited, NonNullable, Record and ReturnType as enum declaration.
+desc: Utility type Readonly check
 tags: [compile-only, negative]
-expected_out: '{{response}}'
+expected_out:
+    - "Syntax error ESY0138: Invalid Type."
+    - "Syntax error ESY178094: Type cast syntax '<type>' is not supported, please use 'as' keyword instead"
 ---*/
 
-enum {{c.type}} { Red, Green, Blue }
+class A {
+  i: number;
+  j: string;
+}
 
-{% endfor %}
+let a: readonly<A> = new A;
+
+

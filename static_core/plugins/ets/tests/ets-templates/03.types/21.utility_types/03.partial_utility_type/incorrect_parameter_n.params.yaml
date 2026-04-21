@@ -18,8 +18,20 @@ types:
   - interface
 
 cases:
-  - { argument: "{i: 1, j: 1}", doc: "extra parameter" }
-  - { argument: "{j: false}", doc: "invalid parameter type" }
-  - { argument: "{j: \"some str\"}", doc: "invalid parameter type" }
-  - { argument: "{j: 1.8}", doc: "invalid parameter type" }
-  - { argument: "{i: 1.9}", doc: "invalid variable name" }
+  - argument: "{i: 1, j: 1}"
+    doc: "extra parameter"
+
+  - argument: "{j: false}"
+    doc: "invalid parameter type"
+    out: "Semantic error ESE0319: Type ''Boolean'' is not compatible with type ''Int|undefined'' at property ''j''"
+
+  - argument: "{j: \"I am groot\"}"
+    doc: "invalid parameter type"
+    out: "Semantic error ESE0319: Type ''\"I am groot\"'' is not compatible with type ''Int|undefined'' at property ''j''"
+
+  - argument: "{j: 1.8}"
+    doc: "invalid parameter type"
+    out: "Semantic error ESE0319: Type ''Double'' is not compatible with type ''Int|undefined'' at property ''j''"
+
+  - argument: "{i: 1.9}"
+    doc: "invalid variable name"

@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Using union as T for Readonly<T> is incompatible
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE124644: T in Readonly<T> must be a class or an interface type."
 ---*/
 
 interface I {

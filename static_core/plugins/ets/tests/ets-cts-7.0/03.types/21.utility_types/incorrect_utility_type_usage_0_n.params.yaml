@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,10 +13,13 @@
 
 ---
 cases:
-  - Partial
-  - Readonly
-  - Required
-  - Awaited
-  - NonNullable
-  - Record
-  - ReturnType
+  - type: Partial
+  - type: Readonly
+  - type: Required
+  - type: Awaited
+  - type: NonNullable
+    out: "Syntax error ESY0225: Type alias name cannot be ''NonNullable''."
+  - type: Record
+    out: "Semantic error ESE0350: Class ''Record'' is already defined with different type."
+  - type: ReturnType
+

@@ -13,10 +13,12 @@
 
 ---
 cases:
-  - Partial
-  - Readonly
-  - Required
-  - Awaited
-  - NonNullable
-  - Record
-  - ReturnType
+  - type: Partial
+  - type: Readonly
+  - type: Required
+  - type: Awaited
+  - type: NonNullable
+    out: "Syntax error ESY0145: Cannot be used as user-defined type."
+  - type: Record
+    out: "Semantic error ESE0350: Class ''Record'' is already defined with different type."
+  - type: ReturnType
