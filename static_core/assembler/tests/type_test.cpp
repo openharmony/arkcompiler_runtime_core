@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,8 @@ namespace ark::test {
 TEST(typetests, test1)
 {
     std::string_view descriptor1;
-    EXPECT_DEATH({ ark::pandasm::Type type1 = ark::pandasm::Type::FromDescriptor(descriptor1); }, ".*");
+    ark::pandasm::Type type1 = ark::pandasm::Type::FromDescriptor(descriptor1);
+    ASSERT_FALSE(type1.IsValid());
 
     std::string_view descriptor2 = "X";
     EXPECT_DEATH({ ark::pandasm::Type::FromDescriptor(descriptor2); }, ".*");
@@ -48,6 +49,44 @@ TEST(typetests, test1)
     ark::pandasm::Type type6 = ark::pandasm::Type::FromDescriptor(descriptor6);
     ASSERT_EQ(type6.GetComponentName(), descriptor6Expect);
     ASSERT_EQ(type6.GetRank(), 3);
+}
+
+TEST(typetests, malformed_union_descriptor_canonicalize_returns_empty)
+{
+    std::string_view malformedUnionDescriptor = "{UI}";
+    ASSERT_TRUE(ark::pandasm::Type::CanonicalizeDescriptor(malformedUnionDescriptor).empty());
+
+    std::string_view malformedArrayUnionDescriptor = "{U[I}";
+    ASSERT_TRUE(ark::pandasm::Type::CanonicalizeDescriptor(malformedArrayUnionDescriptor).empty());
+
+    std::string_view malformedNestedUnionDescriptor = "{U{U[I}}";
+    ASSERT_TRUE(ark::pandasm::Type::CanonicalizeDescriptor(malformedNestedUnionDescriptor).empty());
+}
+
+TEST(typetests, malformed_descriptor_returns_invalid_type)
+{
+    std::string_view malformedArrayDescriptor = "[";
+    ark::pandasm::Type malformedArrayType = ark::pandasm::Type::FromDescriptor(malformedArrayDescriptor);
+    ASSERT_FALSE(malformedArrayType.IsValid());
+
+    std::string_view malformedReferenceDescriptor = "L;";
+    ark::pandasm::Type malformedReferenceType = ark::pandasm::Type::FromDescriptor(malformedReferenceDescriptor);
+    ASSERT_FALSE(malformedReferenceType.IsValid());
+}
+
+TEST(typetests, malformed_type_name_returns_invalid_type)
+{
+    ark::pandasm::Type missingBaseType = ark::pandasm::Type::FromName("[]");
+    ASSERT_FALSE(missingBaseType.IsValid());
+    ASSERT_TRUE(missingBaseType.GetDescriptor().empty());
+
+    ark::pandasm::Type missingBaseTypeRankTwo = ark::pandasm::Type::FromName("[][]");
+    ASSERT_FALSE(missingBaseTypeRankTwo.IsValid());
+    ASSERT_TRUE(missingBaseTypeRankTwo.GetDescriptor().empty());
+
+    ark::pandasm::Type malformedSuffix = ark::pandasm::Type::FromName("i32]]");
+    ASSERT_FALSE(malformedSuffix.IsValid());
+    ASSERT_TRUE(malformedSuffix.GetDescriptor().empty());
 }
 
 }  // namespace ark::test

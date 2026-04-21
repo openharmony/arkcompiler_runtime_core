@@ -95,7 +95,11 @@ static size_t ParseUnionBody(const std::string_view data, PandaString &str)
     }
     unionStr.push_back('}');
 
-    str.append(pandasm::Type::CanonicalizeDescriptor(unionStr));
+    auto canonicalizedDescriptor = pandasm::Type::CanonicalizeDescriptor(unionStr);
+    if (canonicalizedDescriptor.empty()) {
+        return std::string_view::npos;
+    }
+    str.append(canonicalizedDescriptor);
     return size + sizeof('}');
 }
 
