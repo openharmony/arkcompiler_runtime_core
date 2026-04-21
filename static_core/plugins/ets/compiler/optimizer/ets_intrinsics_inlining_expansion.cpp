@@ -24,7 +24,7 @@ namespace ark::compiler {
 4. Let value = LoadArray buffer, index
 Returns value
 */
-void Inlining::ExpandIntrinsicEscompatArrayGet(CallInst *callInst)
+void Inlining::ExpandIntrinsicCoreArrayGet(CallInst *callInst)
 {
     int virtualIndex = callInst->GetOpcode() == Opcode::CallResolvedVirtual ? 1 : 0;
     auto bcAddr = callInst->GetPc();
@@ -33,8 +33,8 @@ void Inlining::ExpandIntrinsicEscompatArrayGet(CallInst *callInst)
     auto *saveState = callInst->GetInput(2 + virtualIndex).GetInst()->CastToSaveState();
 
     auto *runtime = GetGraph()->GetRuntime();
-    auto *arrayClass = runtime->GetEscompatArrayClass();
-    auto *actualLengthField = runtime->GetEscompatArrayActualLength(arrayClass);
+    auto *arrayClass = runtime->GetStdCoreArrayClass();
+    auto *actualLengthField = runtime->GetStdCoreArrayActualLength(arrayClass);
     auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto *actualLength = GetGraph()->CreateInstLoadObject(
@@ -63,7 +63,7 @@ void Inlining::ExpandIntrinsicEscompatArrayGet(CallInst *callInst)
 3. Let buffer = LoadObject obj (std.core.Array.buffer)
 4. StoreArray buffer, index, value
 */
-void Inlining::ExpandIntrinsicEscompatArraySet(CallInst *callInst)
+void Inlining::ExpandIntrinsicCoreArraySet(CallInst *callInst)
 {
     auto bcAddr = callInst->GetPc();
     auto *obj = callInst->GetInput(0).GetInst()->CastToNullCheck();
@@ -72,8 +72,8 @@ void Inlining::ExpandIntrinsicEscompatArraySet(CallInst *callInst)
     auto *saveState = callInst->GetInput(3).GetInst()->CastToSaveState();
 
     auto *runtime = GetGraph()->GetRuntime();
-    auto *arrayClass = runtime->GetEscompatArrayClass();
-    auto *actualLengthField = runtime->GetEscompatArrayActualLength(arrayClass);
+    auto *arrayClass = runtime->GetStdCoreArrayClass();
+    auto *actualLengthField = runtime->GetStdCoreArrayActualLength(arrayClass);
     auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto *actualLength = GetGraph()->CreateInstLoadObject(

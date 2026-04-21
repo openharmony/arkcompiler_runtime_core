@@ -173,7 +173,6 @@ static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^d
 static_core/plugins/ets/runtime/intrinsics/*concurrency* ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/arkruntime_AbcFile.cpp             @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof @chernykhsergey
-static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @chernykhsergey ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @chernykhsergey ^slynkodenis ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
@@ -202,8 +201,6 @@ static_core/plugins/ets/runtime/types/ets_promise.h                           ^t
 static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    ^nazarovkonstantin @slynkodenis @shilei123 @vpukhov
 static_core/plugins/ets/runtime/types/ets_weak_reference.h                    @artemu @ipetrov ^shemetovphilip
 static_core/plugins/ets/stdlib/arkruntime/                                    @vpukhov @igelhaus @Prof @chernykhsergey ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 @slynkodenis
-static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
-static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @igelhaus ^nazarovkonstantin @ignatenkooleg @Prof @slynkodenis @benzunfu ^chernykhsergey
@@ -257,7 +254,6 @@ static_core/plugins/ets/tests/ets-templates/15.semantic_rules/                ^P
 static_core/plugins/ets/tests/ets-templates/16.concurrency/                   ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @ziziziiziziz @dmitriitr
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @Prof @igelhaus @fotograf ^amate @sergeyandreev ^lindvladimir_f9b8 @xingshunxiang
 static_core/plugins/ets/tests/ets-templates/18.annotations/                   ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xuxjeeee
-static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
 static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.ets    @konstanting ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5

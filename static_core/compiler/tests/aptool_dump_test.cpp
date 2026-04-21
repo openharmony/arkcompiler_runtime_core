@@ -751,7 +751,7 @@ TEST_F(AptoolDumpTest, DumpsStoredEtsProfile)
     EXPECT_NE(yaml.find("method_signature: \"foo:(f64)\""), std::string::npos) << "Missing foo method";
     EXPECT_NE(yaml.find("method_signature: \"main:()\""), std::string::npos) << "Missing main method";
     EXPECT_NE(yaml.find("method_signature: \"noisyBranch:(f64)\""), std::string::npos) << "Missing noisyBranch method";
-    EXPECT_NE(yaml.find("method_signature: \"runPolymorphic:(escompat.Array,f64)\""), std::string::npos)
+    EXPECT_NE(yaml.find("method_signature: \"runPolymorphic:(std.core.Array,f64)\""), std::string::npos)
         << "Missing runPolymorphic method";
 
     // Verify class descriptor
@@ -939,7 +939,7 @@ TEST_F(AptoolDumpTest, KeepsPandaFileWhenAbsolutePathProvided)
     EXPECT_NE(yaml.find("method_signature: \"foo:(f64)\""), std::string::npos) << "Missing foo method";
     EXPECT_NE(yaml.find("method_signature: \"main:()\""), std::string::npos) << "Missing main method";
     EXPECT_NE(yaml.find("method_signature: \"noisyBranch:(f64)\""), std::string::npos) << "Missing noisyBranch method";
-    EXPECT_NE(yaml.find("method_signature: \"runPolymorphic:(escompat.Array,f64)\""), std::string::npos)
+    EXPECT_NE(yaml.find("method_signature: \"runPolymorphic:(std.core.Array,f64)\""), std::string::npos)
         << "Missing runPolymorphic method";
 
     // Verify profile data structures

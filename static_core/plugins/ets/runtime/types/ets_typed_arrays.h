@@ -22,50 +22,50 @@
 namespace ark::ets {
 
 namespace test {
-class EtsCoreTypedArrayBaseTest;
+class EtsStdCoreTypedArrayBaseTest;
 }  // namespace test
 
-class EtsCoreTypedArrayBase : public EtsObject {
+class EtsStdCoreTypedArrayBase : public EtsObject {
 public:
-    EtsCoreTypedArrayBase() = delete;
-    ~EtsCoreTypedArrayBase() = delete;
+    EtsStdCoreTypedArrayBase() = delete;
+    ~EtsStdCoreTypedArrayBase() = delete;
 
-    NO_COPY_SEMANTIC(EtsCoreTypedArrayBase);
-    NO_MOVE_SEMANTIC(EtsCoreTypedArrayBase);
+    NO_COPY_SEMANTIC(EtsStdCoreTypedArrayBase);
+    NO_MOVE_SEMANTIC(EtsStdCoreTypedArrayBase);
 
     static constexpr size_t GetClassSize()
     {
-        return sizeof(EtsCoreTypedArrayBase);
+        return sizeof(EtsStdCoreTypedArrayBase);
     }
 
     static constexpr size_t GetBufferOffset()
     {
-        return MEMBER_OFFSET(EtsCoreTypedArrayBase, buffer_);
+        return MEMBER_OFFSET(EtsStdCoreTypedArrayBase, buffer_);
     }
 
     static constexpr size_t GetBytesPerElementOffset()
     {
-        return MEMBER_OFFSET(EtsCoreTypedArrayBase, bytesPerElement_);
+        return MEMBER_OFFSET(EtsStdCoreTypedArrayBase, bytesPerElement_);
     }
 
     static constexpr size_t GetByteOffsetOffset()
     {
-        return MEMBER_OFFSET(EtsCoreTypedArrayBase, byteOffset_);
+        return MEMBER_OFFSET(EtsStdCoreTypedArrayBase, byteOffset_);
     }
 
     static constexpr size_t GetByteLengthOffset()
     {
-        return MEMBER_OFFSET(EtsCoreTypedArrayBase, byteLength_);
+        return MEMBER_OFFSET(EtsStdCoreTypedArrayBase, byteLength_);
     }
 
     static constexpr size_t GetNameOffset()
     {
-        return MEMBER_OFFSET(EtsCoreTypedArrayBase, name_);
+        return MEMBER_OFFSET(EtsStdCoreTypedArrayBase, name_);
     }
 
     static constexpr size_t GetLengthIntOffset()
     {
-        return MEMBER_OFFSET(EtsCoreTypedArrayBase, lengthInt_);
+        return MEMBER_OFFSET(EtsStdCoreTypedArrayBase, lengthInt_);
     }
 
     ObjectPointer<EtsObject> GetBuffer() const
@@ -126,21 +126,21 @@ private:
     EtsInt byteOffset_;
     EtsInt byteLength_;
 
-    friend class test::EtsCoreTypedArrayBaseTest;
+    friend class test::EtsStdCoreTypedArrayBaseTest;
 };
 
 template <typename T>
-class EtsCoreTypedArray : public EtsCoreTypedArrayBase {
+class EtsStdCoreTypedArray : public EtsStdCoreTypedArrayBase {
 public:
     using ElementType = T;
 };
 
-class EtsStdCoreInt8Array : public EtsCoreTypedArray<EtsByte> {};
-class EtsStdCoreInt16Array : public EtsCoreTypedArray<EtsShort> {};
-class EtsStdCoreInt32Array : public EtsCoreTypedArray<EtsInt> {};
-class EtsStdCoreBigInt64Array : public EtsCoreTypedArray<EtsLong> {};
-class EtsStdCoreFloat32Array : public EtsCoreTypedArray<EtsFloat> {};
-class EtsStdCoreFloat64Array : public EtsCoreTypedArray<EtsDouble> {};
+class EtsStdCoreInt8Array : public EtsStdCoreTypedArray<EtsByte> {};
+class EtsStdCoreInt16Array : public EtsStdCoreTypedArray<EtsShort> {};
+class EtsStdCoreInt32Array : public EtsStdCoreTypedArray<EtsInt> {};
+class EtsStdCoreBigInt64Array : public EtsStdCoreTypedArray<EtsLong> {};
+class EtsStdCoreFloat32Array : public EtsStdCoreTypedArray<EtsFloat> {};
+class EtsStdCoreFloat64Array : public EtsStdCoreTypedArray<EtsDouble> {};
 
 }  // namespace ark::ets
 

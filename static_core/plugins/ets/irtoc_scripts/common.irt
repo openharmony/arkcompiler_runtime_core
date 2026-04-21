@@ -18,8 +18,8 @@ module EtsConstants
     EXECUTION_CONTEXT_WRAPPER_OFFSET = "cross_values::GetEtsExecutionContextWrapperOffset(graph->GetArch())"
     EXECUTION_CONTEXT_NULL_VALUE_OFFSET = "cross_values::GetEtsExecutionContextNullValueOffset(graph->GetArch())"
     EXECUTION_CONTEXT_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsExecutionContextLocalStorageOffset(graph->GetArch())"
-    ESCOMPAT_ARRAY_DATA_OFFSET = "cross_values::GetEscompatArrayBufferOffset(graph->GetArch())"
-    ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET = "cross_values::GetEscompatArrayActualLengthOffset(graph->GetArch())"
+    STD_CORE_ARRAY_DATA_OFFSET = "cross_values::GetStdCoreArrayBufferOffset(graph->GetArch())"
+    STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET = "cross_values::GetStdCoreArrayActualLengthOffset(graph->GetArch())"
     BOX_PRIMITIVE_VALUE_OFFSET = "cross_values::GetEtsBoxPrimitiveValueOffset(graph->GetArch())"
     ENUM_VALUE_OFFSET = "cross_values::GetEtsBaseEnumValueOffset(graph->GetArch())"
 

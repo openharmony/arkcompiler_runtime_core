@@ -1,5 +1,5 @@
 #31695
-escompat/MathClz32Test.ets
+std/core/MathClz32Test.ets
 
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets

@@ -51,15 +51,15 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/integrate/ark_vm_api.cpp
     ${ETS_EXT_SOURCES}/integrate/ets_ani_expo.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_ArrayBuffer.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypedArrays.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_JSON.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_taskpool.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Map.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Reflect.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Map.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_containers_WeakMap.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Set.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
@@ -125,7 +125,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/tooling/internal_api.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
     ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
-    ${ETS_EXT_SOURCES}/types/ets_escompat_array.cpp
+    ${ETS_EXT_SOURCES}/types/ets_std_core_array.cpp
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_async_context.cpp
@@ -253,8 +253,8 @@ set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)
 set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)
 if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     irtoc_compile(TARGET_NAME irtoc_ets_fastpath
-                  # Workaround for #30178: file order of arrays.irt and escompat_array.irt are changed
-                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/escompat_array.irt
+                  # Workaround for #30178: file order of arrays.irt and std_core_array.irt are changed
+                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/std_core_array.irt
                               ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
                               ${IRTOC_ETS_SCRIPTS}/typed_arrays.irt
                               ${IRTOC_ETS_SCRIPTS}/arrays.irt

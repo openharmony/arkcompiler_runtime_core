@@ -249,7 +249,7 @@ napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info)
     INTEROP_CODE_SCOPE_JS_TO_ETS(execCtx);
     ScopedManagedCodeThread managedScope(execCtx->GetMT());
 
-    EtsClass *arrayClass = PlatformTypes()->escompatArray;
+    EtsClass *arrayClass = PlatformTypes()->coreArray;
     EtsObject *arrayInstance = arrayClass->CreateInstance();
     if (UNLIKELY(arrayInstance == nullptr)) {
         ASSERT(execCtx->GetMT()->HasPendingException());

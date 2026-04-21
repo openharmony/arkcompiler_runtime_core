@@ -66,7 +66,7 @@ PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
     // Cache classes
     GetGlobalRef(env, "std.core.StringBuilder", &stdlibCache->std_core_String_Builder);
     GetGlobalRef(env, "std.core.Console", &stdlibCache->std_core_Console);
-    GetGlobalRef(env, "std.core.Array", &stdlibCache->escompat_Array);
+    GetGlobalRef(env, "std.core.Array", &stdlibCache->std_core_Array);
 
     // Cache methods
     CacheMethod(env, stdlibCache->std_core_Console, "error",
@@ -78,7 +78,7 @@ PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
     CacheMethod(env, stdlibCache->std_core_String_Builder, "append",
                 "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.StringBuilder}",
                 &stdlibCache->std_core_String_Builder_append);
-    CacheMethod(env, stdlibCache->escompat_Array, "pushOne", "Y:i", &stdlibCache->escompat_Array_pushOne);
+    CacheMethod(env, stdlibCache->std_core_Array, "pushOne", "Y:i", &stdlibCache->std_core_Array_pushOne);
 
     // Cache variables
     CacheVariable(env, stdlibCache->std_core, "console", &stdlibCache->std_core_console);

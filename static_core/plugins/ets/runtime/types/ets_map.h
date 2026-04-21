@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MAP_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MAP_H
 
-#include "ets_escompat_array.h"
+#include "ets_std_core_array.h"
 #include "ets_object.h"
 
 namespace ark::ets {
@@ -25,7 +25,7 @@ namespace test {
 class EtsMapTest;
 }  // namespace test
 
-class EtsEscompatMap : public EtsObject {
+class EtsStdCoreMap : public EtsObject {
 private:
     struct PairOfInts {
         EtsInt int1, int2;
@@ -36,11 +36,11 @@ public:
     using MapIdx = EtsInt;
     static constexpr MapIdx MAP_IDX_END = -1;
 
-    EtsEscompatMap() = delete;
-    ~EtsEscompatMap() = delete;
+    EtsStdCoreMap() = delete;
+    ~EtsStdCoreMap() = delete;
 
-    NO_COPY_SEMANTIC(EtsEscompatMap);
-    NO_MOVE_SEMANTIC(EtsEscompatMap);
+    NO_COPY_SEMANTIC(EtsStdCoreMap);
+    NO_MOVE_SEMANTIC(EtsStdCoreMap);
 
     EtsObject *AsObject()
     {
@@ -49,32 +49,32 @@ public:
 
     static constexpr size_t GetDataOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, data_);
+        return MEMBER_OFFSET(EtsStdCoreMap, data_);
     }
 
     static constexpr size_t GetBucketsOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, buckets_);
+        return MEMBER_OFFSET(EtsStdCoreMap, buckets_);
     }
 
     static constexpr size_t GetCapOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, cap_);
+        return MEMBER_OFFSET(EtsStdCoreMap, cap_);
     }
 
     static constexpr size_t GetNumEntriesOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, numEntries_);
+        return MEMBER_OFFSET(EtsStdCoreMap, numEntries_);
     }
 
     static constexpr size_t GetSizeValOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, sizeVal_);
+        return MEMBER_OFFSET(EtsStdCoreMap, sizeVal_);
     }
 
     static constexpr size_t GetInitialCapacityOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, initialCapacity_);
+        return MEMBER_OFFSET(EtsStdCoreMap, initialCapacity_);
     }
 
     EtsInt GetSize()

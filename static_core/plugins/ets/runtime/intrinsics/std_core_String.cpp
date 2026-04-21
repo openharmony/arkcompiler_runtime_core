@@ -27,7 +27,7 @@
 #include "runtime/entrypoints/string_index_of.h"
 #include "runtime/arch/memory_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -523,7 +523,7 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
     return thisStr->EndsWith(suffix, endIndex);
 }
 
-EtsString *StdCoreStringFromCharCode(EtsEscompatArray *charCodes)
+EtsString *StdCoreStringFromCharCode(EtsStdCoreArray *charCodes)
 {
     ASSERT(charCodes != nullptr);
     return helpers::CreateNewStringFromCharCode(charCodes);

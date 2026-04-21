@@ -36,7 +36,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
@@ -545,7 +545,7 @@ napi_value CheckSTypeImpl(napi_env env, napi_callback_info info, CheckFunc &&che
 napi_value STValueIsSTArrayImpl(napi_env env, napi_callback_info info)
 {
     return CheckSTypeImpl(env, info, [](EtsObject *etsObject, EtsExecutionContext *execCtx) {
-        return EtsEscompatArray::IsExactlyEscompatArray(etsObject, execCtx);
+        return EtsStdCoreArray::IsExactlyStdCoreArray(etsObject, execCtx);
     });
 }
 

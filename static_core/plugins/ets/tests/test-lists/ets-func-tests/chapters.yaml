@@ -15,7 +15,6 @@ chapters:
   - all:
     - algorithms
     - arkui
-    - escompat
     - koala-related-benchmarks
     - regression
     - spec
@@ -26,8 +25,6 @@ chapters:
     - algorithms
   - arkui-dir:
     - arkui
-  - escompat-dir:
-    - escompat
   - koala-related-benchmarks-dir:
     - koala-related-benchmarks
   - regression-dir:

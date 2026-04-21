@@ -74,14 +74,14 @@ void InstBuilder::BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool 
     UpdateDefinitionAcc(res);
 }
 
-void InstBuilder::BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+void InstBuilder::BuildCoreArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
     auto *pos = GetArgDefinition(bcInst, 1, accRead);
 
     auto *runtime = GetGraph()->GetRuntime();
-    auto *arrayClass = runtime->GetEscompatArrayClass();
+    auto *arrayClass = runtime->GetStdCoreArrayClass();
     auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto buffer = GetGraph()->CreateInstLoadObject(
@@ -93,7 +93,7 @@ void InstBuilder::BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction
     UpdateDefinitionAcc(result);
 }
 
-void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+void InstBuilder::BuildCoreArraySetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
@@ -101,7 +101,7 @@ void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction
     auto *value = GetArgDefinition(bcInst, 2, accRead);
 
     auto *runtime = GetGraph()->GetRuntime();
-    auto *arrayClass = runtime->GetEscompatArrayClass();
+    auto *arrayClass = runtime->GetStdCoreArrayClass();
     auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto buffer = GetGraph()->CreateInstLoadObject(
@@ -112,13 +112,13 @@ void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction
     AddInstruction(result);
 }
 
-void InstBuilder::BuildEscompatArrayGetBufferIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+void InstBuilder::BuildCoreArrayGetBufferIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
 
     auto *runtime = GetGraph()->GetRuntime();
-    auto *arrayClass = runtime->GetEscompatArrayClass();
+    auto *arrayClass = runtime->GetStdCoreArrayClass();
     auto *bufferField = runtime->GetStdCoreArrayBuffer(arrayClass);
 
     auto buffer = GetGraph()->CreateInstLoadObject(

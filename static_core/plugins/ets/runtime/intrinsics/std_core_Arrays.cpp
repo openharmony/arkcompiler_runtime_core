@@ -320,14 +320,14 @@ extern "C" void StdCoreObjectCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_
     StdCoreCopyToForObjects<true>(src, dst, dstStart, srcStart, srcEnd);
 }
 
-extern "C" void EscompatObjectFastCopyToUnchecked(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart,
-                                                  int32_t srcStart, int32_t srcEnd)
+extern "C" void StdCoreObjectFastCopyToUnchecked(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart,
+                                                 int32_t srcStart, int32_t srcEnd)
 {
     StdCoreCopyToForObjects<false, false>(src, dst, dstStart, srcStart, srcEnd);
 }
 
-extern "C" void EscompatObjectFastCopyToUncheckedWithBarriers(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart,
-                                                              int32_t srcStart, int32_t srcEnd)
+extern "C" void StdCoreObjectFastCopyToUncheckedWithBarriers(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart,
+                                                             int32_t srcStart, int32_t srcEnd)
 {
     StdCoreCopyToForObjects<true, false>(src, dst, dstStart, srcStart, srcEnd);
 }

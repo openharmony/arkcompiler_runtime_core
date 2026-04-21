@@ -12,7 +12,7 @@ language: cpp
 A violation occurs when **hardcoded string literals** representing type names are used for **type checking** or **type comparison** operations, such as:
 - Comparing `type->ToAssemblerName().str()` against string literals
 - Using `strcmp`, `==`, `find`, or similar string operations on type names
-- Pattern matching type names like `"escompat.Record"`, `"escompat.Array"`, `"std.core.Object"`
+- Pattern matching type names like `"std.core.Record"`, `"std.core.Array"`, `"std.core.Object"`
 
 **Why this is wrong:**
 - Type name strings are fragile and break with refactoring
@@ -23,8 +23,8 @@ A violation occurs when **hardcoded string literals** representing type names ar
 **Violation patterns:**
 ```cpp
 // WRONG: String comparison for type checking
-if (type->ToAssemblerName().str() == "escompat.Record") { /* ... */ }
-if (objType->Name() == "escompat.Array") { /* ... */ }
+if (type->ToAssemblerName().str() == "std.core.Record") { /* ... */ }
+if (objType->Name() == "std.core.Array") { /* ... */ }
 ```
 
 ## Example BAD code
@@ -37,7 +37,7 @@ if (type != nullptr && objType->IsETSObjectType() &&
 }
 
 // BAD: String matching for Array type
-if (objType->ToAssemblerName().str() == "escompat.Array") {
+if (objType->ToAssemblerName().str() == "std.core.Array") {
     // Array-specific logic
 }
 ```

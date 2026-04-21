@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,26 +24,26 @@ namespace test {
 class EtsSetTest;
 }  // namespace test
 
-class EtsEscompatSet : public EtsObject {
+class EtsStdCoreSet : public EtsObject {
 public:
-    EtsEscompatSet() = delete;
-    ~EtsEscompatSet() = delete;
+    EtsStdCoreSet() = delete;
+    ~EtsStdCoreSet() = delete;
 
-    NO_COPY_SEMANTIC(EtsEscompatSet);
-    NO_MOVE_SEMANTIC(EtsEscompatSet);
+    NO_COPY_SEMANTIC(EtsStdCoreSet);
+    NO_MOVE_SEMANTIC(EtsStdCoreSet);
 
     static constexpr size_t GetElementsOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatSet, elements_);
+        return MEMBER_OFFSET(EtsStdCoreSet, elements_);
     }
 
-    ObjectPointer<EtsEscompatMap> GetElements()
+    ObjectPointer<EtsStdCoreMap> GetElements()
     {
         return elements_;
     }
 
 private:
-    ObjectPointer<EtsEscompatMap> elements_;
+    ObjectPointer<EtsStdCoreMap> elements_;
 
     friend class test::EtsSetTest;
 };

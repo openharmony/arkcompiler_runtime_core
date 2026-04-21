@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding=utf-8
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -110,8 +110,7 @@ class TestCoverageScript(unittest.TestCase):
         # execute coverage.py
         ohos_ets_api_path = os.path.join(self.static_core_path, "plugins/ets/sdk/api/")
         ohos_ets_arkts_path = os.path.join(self.static_core_path, "plugins/ets/sdk/arkts/")
-        std_path = os.path.join(self.static_core_path, "plugins/ets/stdlib/std/")
-        escompat_path = os.path.join(self.static_core_path, "plugins/ets/stdlib/escompat/")
+        std_path = os.path.join(self.static_core_path, "plugins/ets/stdlib/std")
 
         subprocess.run(
             [
@@ -119,7 +118,7 @@ class TestCoverageScript(unittest.TestCase):
                 f"--es2panda={self.es2panda_path}", f"--ark-link={self.ark_link_path}", "--mode=host-multi",
                 "--abc-link-name=coverage_spec.abc",
                 f"--ets-arkts-path={ohos_ets_arkts_path}", f"--ets-api-path={ohos_ets_api_path}",
-                f"--std-path={std_path}", f"--escompat-path={escompat_path}"
+                f"--std-path={std_path}"
             ],
             check=True
         )

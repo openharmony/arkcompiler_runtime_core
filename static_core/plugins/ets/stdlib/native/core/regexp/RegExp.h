@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REG_EXP_H
-#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REG_EXP_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REG_EXP_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REG_EXP_H
 
 #include <ani.h>
 
@@ -24,4 +24,4 @@ void RegisterRegExpNativeMethods(ani_env *env);
 
 }  // namespace ark::ets::stdlib
 
-#endif  // namespace PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REG_EXP_H
+#endif  // namespace PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REG_EXP_H

@@ -1171,9 +1171,9 @@ function(:CreateStringFromCharCodeTlab,
     }
   end
 
-  char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+  char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::STD_CORE_ARRAY_DATA_OFFSET)
   codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-  codes_count := LoadI(char_codes).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+  codes_count := LoadI(char_codes).Imm(EtsConstants::STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
   # according to the specification numbers greater than 0xFFFF are truncated to the last 16 bits and no validity checks are performed
 

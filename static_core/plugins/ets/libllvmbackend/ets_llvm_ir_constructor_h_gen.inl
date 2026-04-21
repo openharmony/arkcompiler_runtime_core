@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,14 +146,14 @@ bool EmitGetHashCodeByValue(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH, 1U);
 }
 
-bool EmitEscompatArrayIsPlatformArray(Inst *inst)
+bool EmitStdCoreArrayIsPlatformArray(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_IS_PLATFORM_ARRAY_FAST, 1U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STD_CORE_ARRAY_IS_PLATFORM_ARRAY_FAST, 1U);
 }
 
 bool EmitArrayFastCopyToRef(Inst *inst);
 
-bool EmitEscompatArrayReverse(Inst *inst);
+bool EmitStdCoreArrayReverse(Inst *inst);
 
 bool EmitSameValueZero(Inst *inst)
 {

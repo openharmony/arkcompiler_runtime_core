@@ -3,7 +3,6 @@
           "baseUrl": "$ROOT",
           "paths": {
               "std": ["$ROOT/plugins/ets/stdlib/std"],
-              "escompat": ["$ROOT/plugins/ets/stdlib/escompat"],
               "api": ["$ROOT/plugins/ets/sdk/api"],
               "arkts": ["$ROOT/plugins/ets/sdk/arkts"],
               "import_tests": [

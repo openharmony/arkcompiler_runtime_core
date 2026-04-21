@@ -75,7 +75,7 @@ static uint32_t GetBoxedHash(EtsObject *key, EtsClass::BoxedType type)
     }
 }
 
-uint32_t EtsEscompatMap::GetHashCode(EtsObject *key)
+uint32_t EtsStdCoreMap::GetHashCode(EtsObject *key)
 {
     auto *klass = key->GetClass();
     if (klass->IsEtsEnum()) {

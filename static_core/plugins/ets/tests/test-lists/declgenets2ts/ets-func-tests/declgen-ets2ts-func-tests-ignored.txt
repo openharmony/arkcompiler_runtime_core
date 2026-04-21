@@ -15,7 +15,7 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0002.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0003.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0006.ets
-escompat/ArrayFlatMapTest.ets
+std/core/ArrayFlatMapTest.ets
 std/core/json/JsonParseTest.ets
 regression/Issue20610.ets
 regression/verify_generics.ets

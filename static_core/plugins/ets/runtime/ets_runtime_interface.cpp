@@ -174,9 +174,9 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
     return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreStringBuilder;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreArray(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreArray;
 }
 
 bool EtsRuntimeInterface::IsClassStdCoreInt8Array(ClassPtr klass) const
@@ -265,9 +265,9 @@ EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
     return PlatformTypes()->coreStringBuilder->GetRuntimeClass();
 }
 
-EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStdCoreArrayClass() const
 {
-    return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray->GetRuntimeClass();
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreArray->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreTypedArrayBuffer(ClassPtr klass) const
@@ -380,15 +380,15 @@ EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetGetterStringBuilderString
     return PlatformTypes()->coreStringBuilderStringLength;
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayActualLength(ClassPtr klass) const
 {
-    ASSERT(IsClassEscompatArray(klass));
+    ASSERT(IsClassStdCoreArray(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_ACTUAL_LENGTH.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayBuffer(ClassPtr klass) const
 {
-    ASSERT(IsClassEscompatArray(klass));
+    ASSERT(IsClassStdCoreArray(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BUFFER.data()));
 }
 

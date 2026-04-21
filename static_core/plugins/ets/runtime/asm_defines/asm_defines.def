@@ -45,17 +45,17 @@ DEFINE_VALUE(ETS_CLASS_BOXED_TYPE_FLOAT_MASK_VALUE, (unsigned) ark::ets::EtsClas
 DEFINE_VALUE(ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE, (unsigned) ark::ets::EtsClass::BoxedType::DOUBLE)
 DEFINE_VALUE(ETS_CLASS_IS_BIG_INT_FLAG, ark::ets::EtsClass::IS_BIGINT)
 
-DEFINE_VALUE(ESCOMPAT_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatArray::GetBufferOffset())
-DEFINE_VALUE(ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET,
-             ark::ets::EtsEscompatArray::GetActualLengthOffset())
+DEFINE_VALUE(STD_CORE_ARRAY_BUFFER_OFFSET, ark::ets::EtsStdCoreArray::GetBufferOffset())
+DEFINE_VALUE(STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET,
+             ark::ets::EtsStdCoreArray::GetActualLengthOffset())
 
-DEFINE_VALUE(TYPED_ARRAY_CLASS_SIZE, ark::ets::EtsCoreTypedArrayBase::GetClassSize())
-DEFINE_VALUE(TYPED_ARRAY_BUFFER_OFFSET, ark::ets::EtsCoreTypedArrayBase::GetBufferOffset())
-DEFINE_VALUE(TYPED_ARRAY_LENGTH_OFFSET, ark::ets::EtsCoreTypedArrayBase::GetLengthIntOffset())  // the same as TYPED_ARRAY_LENGTH_INT_OFFSET
-DEFINE_VALUE(TYPED_ARRAY_BYTES_PER_ELEMENT_OFFSET, ark::ets::EtsCoreTypedArrayBase::GetBytesPerElementOffset())
-DEFINE_VALUE(TYPED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsCoreTypedArrayBase::GetByteOffsetOffset())
-DEFINE_VALUE(TYPED_ARRAY_BYTE_LENGTH_OFFSET, ark::ets::EtsCoreTypedArrayBase::GetByteLengthOffset())
-DEFINE_VALUE(TYPED_ARRAY_LENGTH_INT_OFFSET, ark::ets::EtsCoreTypedArrayBase::GetLengthIntOffset())
+DEFINE_VALUE(TYPED_ARRAY_CLASS_SIZE, ark::ets::EtsStdCoreTypedArrayBase::GetClassSize())
+DEFINE_VALUE(TYPED_ARRAY_BUFFER_OFFSET, ark::ets::EtsStdCoreTypedArrayBase::GetBufferOffset())
+DEFINE_VALUE(TYPED_ARRAY_LENGTH_OFFSET, ark::ets::EtsStdCoreTypedArrayBase::GetLengthIntOffset())  // the same as TYPED_ARRAY_LENGTH_INT_OFFSET
+DEFINE_VALUE(TYPED_ARRAY_BYTES_PER_ELEMENT_OFFSET, ark::ets::EtsStdCoreTypedArrayBase::GetBytesPerElementOffset())
+DEFINE_VALUE(TYPED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsStdCoreTypedArrayBase::GetByteOffsetOffset())
+DEFINE_VALUE(TYPED_ARRAY_BYTE_LENGTH_OFFSET, ark::ets::EtsStdCoreTypedArrayBase::GetByteLengthOffset())
+DEFINE_VALUE(TYPED_ARRAY_LENGTH_INT_OFFSET, ark::ets::EtsStdCoreTypedArrayBase::GetLengthIntOffset())
 
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_CLASS_SIZE, ark::ets::EtsStdCoreTypedUArrayBase::GetClassSize())
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET, ark::ets::EtsStdCoreTypedUArrayBase::GetBufferOffset())
@@ -71,7 +71,7 @@ DEFINE_VALUE(ARRAY_BUFFER_BYTE_LENGTH_OFFSET, ark::ets::EtsStdCoreArrayBuffer::G
 
 DEFINE_VALUE(PLATFORM_TYPES_ASCII_CHAR_CACHE_SIZE, ark::ets::EtsPlatformTypesIrtocOffsets::GetAsciiCharCacheSize())
 DEFINE_VALUE(PLATFORM_TYPES_ASCII_CHAR_CACHE_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::GetAsciiCharCacheOffset())
-DEFINE_VALUE(PLATFORM_TYPES_ESCOMPAT_ARRAY_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::ESCOMPAT_ARRAY)
+DEFINE_VALUE(PLATFORM_TYPES_STD_CORE_ARRAY_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::CORE_ARRAY)
 DEFINE_VALUE(PLATFORM_TYPES_CORE_LINE_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::CORE_LINE_STRING)
 DEFINE_VALUE(PLATFORM_TYPES_CORE_SLICED_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::CORE_SLICED_STRING)
 DEFINE_VALUE(PLATFORM_TYPES_CORE_TREE_STRING_CLASS_OFFSET, ark::ets::EtsPlatformTypesIrtocOffsets::CORE_TREE_STRING)
@@ -88,14 +88,14 @@ DEFINE_VALUE(ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET, ark::ets::EtsAsyncContext::
 
 DEFINE_VALUE(ETS_PROMISE_VALUE_OFFSET, ark::ets::EtsPromise::ValueOffset())
 
-DEFINE_VALUE(ESCOMPAT_MAP_DATA_OFFSET, ark::ets::EtsEscompatMap::GetDataOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_BUCKETS_OFFSET, ark::ets::EtsEscompatMap::GetBucketsOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_CAP_OFFSET, ark::ets::EtsEscompatMap::GetCapOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_NUM_ENTRIES_OFFSET, ark::ets::EtsEscompatMap::GetNumEntriesOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_SIZE_VAL_OFFSET, ark::ets::EtsEscompatMap::GetSizeValOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_INITIAL_CAPACITY_OFFSET, ark::ets::EtsEscompatMap::GetInitialCapacityOffset())
+DEFINE_VALUE(STD_CORE_MAP_DATA_OFFSET, ark::ets::EtsStdCoreMap::GetDataOffset())
+DEFINE_VALUE(STD_CORE_MAP_BUCKETS_OFFSET, ark::ets::EtsStdCoreMap::GetBucketsOffset())
+DEFINE_VALUE(STD_CORE_MAP_CAP_OFFSET, ark::ets::EtsStdCoreMap::GetCapOffset())
+DEFINE_VALUE(STD_CORE_MAP_NUM_ENTRIES_OFFSET, ark::ets::EtsStdCoreMap::GetNumEntriesOffset())
+DEFINE_VALUE(STD_CORE_MAP_SIZE_VAL_OFFSET, ark::ets::EtsStdCoreMap::GetSizeValOffset())
+DEFINE_VALUE(STD_CORE_MAP_INITIAL_CAPACITY_OFFSET, ark::ets::EtsStdCoreMap::GetInitialCapacityOffset())
 
-DEFINE_VALUE(ESCOMPAT_SET_ELEMENTS_OFFSET, ark::ets::EtsEscompatSet::GetElementsOffset())
+DEFINE_VALUE(STD_CORE_SET_ELEMENTS_OFFSET, ark::ets::EtsStdCoreSet::GetElementsOffset())
 
 DEFINE_VALUE(ETS_BOX_PRIMITIVE_VALUE_OFFSET, ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::GetValueOffset())
 DEFINE_VALUE(ETS_BASE_ENUM_VALUE_OFFSET, ark::ets::EtsBaseEnum::GetValueOffset())

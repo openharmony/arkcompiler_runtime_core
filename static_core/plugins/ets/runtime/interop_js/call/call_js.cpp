@@ -169,7 +169,7 @@ public:
         if (isFixedArray) {
             length = EtsObjectArray::FromEtsObject(ref.GetPtr())->GetLength();
         } else {
-            auto *array = EtsEscompatArray::FromEtsObject(ref.GetPtr());
+            auto *array = EtsStdCoreArray::FromEtsObject(ref.GetPtr());
             EtsInt result = 0;
             if (UNLIKELY(!array->GetLength(executionCtx, &result))) {
                 ASSERT(InteropCtx::SanityETSExceptionPending());
@@ -195,7 +195,7 @@ public:
         if (isFixedArray_) {
             return EtsObjectArray::FromEtsObject(ref_.GetPtr())->Get(index);
         }
-        return EtsEscompatArray::FromEtsObject(ref_.GetPtr())->GetRef(executionCtx, index);
+        return EtsStdCoreArray::FromEtsObject(ref_.GetPtr())->GetRef(executionCtx, index);
     }
 
 private:

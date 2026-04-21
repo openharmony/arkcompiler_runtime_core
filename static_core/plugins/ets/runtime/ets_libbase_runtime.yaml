@@ -113,10 +113,10 @@ coretypes:
   mirror_class: ark::ets::EtsRWLock
 
 - managed_class: std.core.Set
-  mirror_class: ark::ets::EtsEscompatSet
+  mirror_class: ark::ets::EtsStdCoreSet
 
 - managed_class: std.core.Array
-  mirror_class: ark::ets::EtsEscompatArray
+  mirror_class: ark::ets::EtsStdCoreArray
 
 - managed_class: std.core.ArrayBuffer
   mirror_class: ark::ets::EtsStdCoreArrayBuffer
@@ -167,7 +167,7 @@ coretypes:
   mirror_class: ark::ets::EtsStdCoreBigUInt64Array
 
 - managed_class: std.core.Map
-  mirror_class: ark::ets::EtsEscompatMap
+  mirror_class: ark::ets::EtsStdCoreMap
 
 intrinsics_namespace: ark::ets::intrinsics
 
@@ -1765,7 +1765,7 @@ intrinsics:
 #################
 # std.core.Date #
 #################
-  - name: EscompatDateNow
+  - name: StdCoreDateNow
     space: ets
     class_name: std.core.Date
     method_name: now
@@ -1773,9 +1773,9 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: ark::ets::intrinsics::EscompatDateNow
+    impl: ark::ets::intrinsics::StdCoreDateNow
 
-  - name: EscompatDateGetLocalTimezoneOffset
+  - name: StdCoreDateGetLocalTimezoneOffset
     space: ets
     class_name: std.core.Date
     method_name: getLocalTimezoneOffset
@@ -1783,9 +1783,9 @@ intrinsics:
     signature:
       ret: i64
       args: [ i64 ]
-    impl: ark::ets::intrinsics::EscompatDateGetLocalTimezoneOffset
+    impl: ark::ets::intrinsics::StdCoreDateGetLocalTimezoneOffset
 
-  - name: EscompatDateGetTimezoneName
+  - name: StdCoreDateGetTimezoneName
     space: ets
     class_name: std.core.Date
     method_name: getTimezoneName
@@ -1793,12 +1793,12 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ i64 ]
-    impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
+    impl: ark::ets::intrinsics::StdCoreDateGetTimezoneName
 
 ##################
 # std.core.Array #
 ##################
-  - name: EscompatArrayGet
+  - name: StdCoreArrayGet
     space: ets
     class_name: std.core.Array
     method_name: $_get
@@ -1806,9 +1806,9 @@ intrinsics:
     signature:
       ret: Y
       args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayGet
+    impl: ark::ets::intrinsics::EtsStdCoreArrayGet
 
-  - name: EscompatArraySet
+  - name: StdCoreArraySet
     space: ets
     class_name: std.core.Array
     method_name: $_set
@@ -1816,9 +1816,9 @@ intrinsics:
     signature:
       ret: void
       args: [ i32, Y ]
-    impl: ark::ets::intrinsics::EtsEscompatArraySet
+    impl: ark::ets::intrinsics::EtsStdCoreArraySet
 
-  - name: EscompatArrayJoin
+  - name: StdCoreArrayJoin
     space: ets
     class_name: std.core.Array
     method_name: joinInternal
@@ -1829,9 +1829,9 @@ intrinsics:
         - Y[]
         - i32
         - std.core.String
-    impl: ark::ets::intrinsics::EtsEscompatArrayJoinInternal
+    impl: ark::ets::intrinsics::EtsStdCoreArrayJoinInternal
 
-  - name: EscompatInternalArrayIndexOf
+  - name: StdCoreInternalArrayIndexOf
     space: ets
     class_name: std.core.Array
     method_name: indexOfImpl
@@ -1843,9 +1843,9 @@ intrinsics:
         - i32
         - Y
         - i32
-    impl: ark::ets::intrinsics::EtsEscompatArrayInternalIndexOf
+    impl: ark::ets::intrinsics::EtsStdCoreArrayInternalIndexOf
 
-  - name: EscompatArrayInternalLastIndexOf
+  - name: StdCoreArrayInternalLastIndexOf
     space: ets
     class_name: std.core.Array
     method_name: lastIndexOfImpl
@@ -1857,9 +1857,9 @@ intrinsics:
         - i32
         - Y
         - i32
-    impl: ark::ets::intrinsics::EtsEscompatArrayInternalLastIndexOf
+    impl: ark::ets::intrinsics::EtsStdCoreArrayInternalLastIndexOf
 
-  - name: EscompatArrayFillImpl
+  - name: StdCoreArrayFillImpl
     space: ets
     class_name: std.core.Array
     method_name: fillImpl
@@ -1872,9 +1872,9 @@ intrinsics:
         - Y
         - i32
         - i32
-    impl: ark::ets::intrinsics::EtsEscompatArrayFillImpl
+    impl: ark::ets::intrinsics::EtsStdCoreArrayFillImpl
 
-  - name: EscompatArrayGetUnsafe
+  - name: StdCoreArrayGetUnsafe
     space: ets
     class_name: std.core.Array
     method_name: $_get_unsafe
@@ -1882,9 +1882,9 @@ intrinsics:
     signature:
       ret: Y
       args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayGetUnsafe
+    impl: ark::ets::intrinsics::EtsStdCoreArrayGetUnsafe
 
-  - name: EscompatArraySetUnsafe
+  - name: StdCoreArraySetUnsafe
     space: ets
     class_name: std.core.Array
     method_name: $_set_unsafe
@@ -1892,9 +1892,9 @@ intrinsics:
     signature:
       ret: void
       args: [ i32, Y ]
-    impl: ark::ets::intrinsics::EtsEscompatArraySetUnsafe
+    impl: ark::ets::intrinsics::EtsStdCoreArraySetUnsafe
 
-  - name: EscompatArrayUnshiftInternal
+  - name: StdCoreArrayUnshiftInternal
     space: ets
     class_name: std.core.Array
     method_name: unshiftInternal
@@ -1906,9 +1906,9 @@ intrinsics:
         - i32
         - Y[]
         - std.core.Array
-    impl: ark::ets::intrinsics::EtsEscompatArrayUnshiftInternal
+    impl: ark::ets::intrinsics::EtsStdCoreArrayUnshiftInternal
 
-  - name: EscompatArrayReverse
+  - name: StdCoreArrayReverse
     space: ets
     class_name: std.core.Array
     method_name: reverseImpl
@@ -1918,12 +1918,12 @@ intrinsics:
       args:
         - Y[]
         - i32
-    impl: ark::ets::intrinsics::EtsEscompatArrayReverse
+    impl: ark::ets::intrinsics::EtsStdCoreArrayReverse
     codegen_arch: [ arm64, amd64 ]
-    codegen_func: CreateEscompatArrayReverse
-    llvm_codegen_func: EmitEscompatArrayReverse
+    codegen_func: CreateStdCoreArrayReverse
+    llvm_codegen_func: EmitStdCoreArrayReverse
 
-  - name: EscompatArrayIsPlatformArray
+  - name: StdCoreArrayIsPlatformArray
     space: ets
     class_name: std.core.Array
     method_name: isPlatformArray
@@ -1932,14 +1932,14 @@ intrinsics:
       ret: u1
       args:
         - std.core.Object
-    impl: ark::ets::intrinsics::EtsEscompatArrayIsPlatformArray
+    impl: ark::ets::intrinsics::EtsStdCoreArrayIsPlatformArray
     safe_intrinsic: true
-    irtoc_impl: EscompatArrayIsPlatformArrayFastNativePlus
+    irtoc_impl: StdCoreArrayIsPlatformArrayFastNativePlus
     codegen_arch: [ arm64, amd64 ]
-    codegen_func: CreateEscompatArrayIsPlatformArray
-    llvm_codegen_func: EmitEscompatArrayIsPlatformArray
+    codegen_func: CreateStdCoreArrayIsPlatformArray
+    llvm_codegen_func: EmitStdCoreArrayIsPlatformArray
 
-  - name: EscompatArrayGetBuffer
+  - name: StdCoreArrayGetBuffer
     space: ets
     class_name: std.core.Array
     method_name: getBuffer
@@ -1947,7 +1947,7 @@ intrinsics:
     signature:
       ret: Y[]
       args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayGetBuffer
+    impl: ark::ets::intrinsics::EtsStdCoreArrayGetBuffer
     safe_intrinsic: true
 
 ####################
@@ -5405,7 +5405,7 @@ intrinsics:
         - i32
     impl: ark::ets::intrinsics::StdCoreObjectCopyTo
 
-  - name: EscompatObjectFastCopyToUnchecked
+  - name: StdCoreObjectFastCopyToUnchecked
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: copyToFast
@@ -5418,13 +5418,13 @@ intrinsics:
         - i32
         - i32
         - i32
-    impl: ark::ets::intrinsics::EscompatObjectFastCopyToUnchecked
+    impl: ark::ets::intrinsics::StdCoreObjectFastCopyToUnchecked
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateArrayFastCopyToRef
     llvm_codegen_func: EmitArrayFastCopyToRef
     need_param_locations: true
 
-  - name: EscompatObjectFastCopyToUncheckedWithBarriers
+  - name: StdCoreObjectFastCopyToUncheckedWithBarriers
     space: ets
     class_name: std.core.ETSGLOBAL
     method_name: copyToFastWithBarriers
@@ -5437,7 +5437,7 @@ intrinsics:
         - i32
         - i32
         - i32
-    impl: ark::ets::intrinsics::EscompatObjectFastCopyToUncheckedWithBarriers
+    impl: ark::ets::intrinsics::StdCoreObjectFastCopyToUncheckedWithBarriers
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateArrayFastCopyToRef
     llvm_codegen_func: EmitArrayFastCopyToRef
@@ -7071,7 +7071,7 @@ intrinsics:
       ret: i64
       args: []
     impl: ark::ets::intrinsics::GetCoroutineCount
- 
+
 ####################################
 # std.debug.concurrency.AtomicFlag #
 ####################################
@@ -9928,7 +9928,7 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsCondVarCreate
 
-  - name: escompatConcurrencyHelpersCondVarWait
+  - name: stdConcurrencyHelpersCondVarWait
     space: ets
     class_name: std.concurrency.ConcurrencyHelpers
     method_name: condVarWait

@@ -47,7 +47,7 @@ python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/
 Command 3: Generate AST files for host side with multiple files linked
 
 ```
-python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --ark-link=../../../out/bin/ark_link --mode=host-multi --abc-link-name=linked.abc --ets-arkts-path=../../../plugins/ets/sdk/arkts/ --std-path=../../../plugins/ets/stdlib/std/ --escompat-path=../../../plugins/ets/stdlib/escompat/ --ets-api-path=../../../plugins/ets/sdk/api/
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --ark-link=../../../out/bin/ark_link --mode=host-multi --abc-link-name=linked.abc --ets-arkts-path=../../../plugins/ets/sdk/arkts/ --std-path=../../../plugins/ets/stdlib/std/ --ets-api-path=../../../plugins/ets/sdk/api/
 ```
 ### 2. Generate PA Files
 

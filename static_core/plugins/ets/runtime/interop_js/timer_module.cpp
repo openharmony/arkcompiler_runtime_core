@@ -93,7 +93,7 @@ bool TimerModule::Init(ani_env *env)
     ani_module module {};
     auto status = env->FindModule("std.core", &module);
     if (status != ANI_OK) {
-        INTEROP_LOG(ERROR) << "Cannot find ESCOMPAT module";
+        INTEROP_LOG(ERROR) << "Cannot find std.core module";
         return false;
     }
 

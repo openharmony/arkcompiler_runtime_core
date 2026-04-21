@@ -79,7 +79,7 @@ public:
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
-    bool IsClassEscompatArray(ClassPtr klass) const override;
+    bool IsClassStdCoreArray(ClassPtr klass) const override;
     bool IsClassStdCoreInt8Array(ClassPtr klass) const override;
     bool IsClassStdCoreUint8Array(ClassPtr klass) const override;
     bool IsClassStdCoreUint8ClampedArray(ClassPtr klass) const override;
@@ -95,7 +95,7 @@ public:
     bool IsFieldTypedArrayLengthInt(FieldPtr field) const override;
     uint32_t GetClassOffsetObjectsArray(MethodPtr method) const override;
     ClassPtr GetStringBuilderClass() const override;
-    ClassPtr GetEscompatArrayClass() const override;
+    ClassPtr GetStdCoreArrayClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
     MethodPtr GetStringBuilderConstructorWithStringArg() const override;
     MethodPtr GetStringBuilderConstructorWithCharArrayArg() const override;
@@ -112,7 +112,7 @@ public:
     FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
     MethodPtr GetGetterStringBuilderStringLength() const override;
     FieldPtr GetStdCoreArrayBuffer(ClassPtr klass) const override;
-    FieldPtr GetEscompatArrayActualLength(ClassPtr klass) const override;
+    FieldPtr GetStdCoreArrayActualLength(ClassPtr klass) const override;
     FieldPtr GetStdCoreTypedArrayBuffer(ClassPtr klass) const override;
     FieldPtr GetStdCoreTypedArrayByteOffset(ClassPtr klass) const override;
     FieldPtr GetStdCoreUnsignedTypedArrayByteOffsetInt(ClassPtr klass) const override;

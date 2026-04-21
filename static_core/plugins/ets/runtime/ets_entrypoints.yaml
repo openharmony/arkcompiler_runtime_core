@@ -2308,16 +2308,16 @@
     - int32_t                  # begin index
     - int32_t                  # end index
 
-- name: EscompatArrayIsPlatformArrayFast
-  entrypoint: EscompatArrayIsPlatformArrayFast
+- name: StdCoreArrayIsPlatformArrayFast
+  entrypoint: StdCoreArrayIsPlatformArrayFast
   bridge: none
   properties: [irtoc]
   signature:
     - uint8_t             # boolean
     - ark::ObjectHeader*
 
-- name: EscompatArrayReverse
-  entrypoint: EtsEscompatArrayReverse
+- name: StdCoreArrayReverse
+  entrypoint: EtsStdCoreArrayReverse
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2325,8 +2325,8 @@
     - ark::ObjectHeader*
     - int32_t
 
-- name: EscompatArrayReverseSync
-  entrypoint: EscompatArrayReverseSync
+- name: StdCoreArrayReverseSync
+  entrypoint: StdCoreArrayReverseSync
   bridge: none
   properties: [irtoc]
   signature:
@@ -2335,8 +2335,8 @@
     - ark::ObjectHeader*
     - int32_t
 
-- name: EscompatArrayReverseAsync
-  entrypoint: EscompatArrayReverseAsync
+- name: StdCoreArrayReverseAsync
+  entrypoint: StdCoreArrayReverseAsync
   bridge: none
   properties: [irtoc]
   signature:
@@ -2345,8 +2345,8 @@
     - ark::ObjectHeader*
     - int32_t
 
-- name: EscompatArrayReverseHybrid
-  entrypoint: EscompatArrayReverseHybrid
+- name: StdCoreArrayReverseHybrid
+  entrypoint: StdCoreArrayReverseHybrid
   bridge: none
   properties: [irtoc]
   signature:
@@ -2392,7 +2392,7 @@
     - int32_t
 
 - name: ArrayFastCopyToRefEntrypoint
-  entrypoint: EscompatObjectFastCopyToUnchecked
+  entrypoint: StdCoreObjectFastCopyToUnchecked
   bridge: entrypoint
   properties: [intrinsic]
   signature:

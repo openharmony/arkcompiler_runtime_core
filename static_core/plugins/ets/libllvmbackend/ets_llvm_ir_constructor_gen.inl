@@ -603,15 +603,15 @@ static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::Barri
     using EntrypointId = RuntimeInterface::EntrypointId;
     switch (barrierType) {
         case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_HYBRID;
+            return EntrypointId::STD_CORE_ARRAY_REVERSE_HYBRID;
         case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC;
+            return EntrypointId::STD_CORE_ARRAY_REVERSE_ASYNC;
         default:  // STW GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_SYNC;
+            return EntrypointId::STD_CORE_ARRAY_REVERSE_SYNC;
     }
 }
 
-bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
+bool LLVMIrConstructor::EmitStdCoreArrayReverse(Inst *inst)
 {
     auto arch = GetGraph()->GetArch();
     if (arch == Arch::AARCH32) {
@@ -638,7 +638,7 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
     builder_.CreateBr(returnBb);
 
     SetCurrentBasicBlock(slowPathBb);
-    constexpr auto SLOW_PATH_ENTYPOINT_ID = RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_REVERSE;
+    constexpr auto SLOW_PATH_ENTYPOINT_ID = RuntimeInterface::EntrypointId::STD_CORE_ARRAY_REVERSE;
     CreateEntrypointCall(SLOW_PATH_ENTYPOINT_ID, inst, {GetInputValue(inst, 0), arrLength});
     builder_.CreateBr(returnBb);
 

@@ -181,7 +181,7 @@ inline bool CheckClassInitialized(Class *klass)
 inline bool IsStdClass(Class *klass)
 {
     const char *desc = utf::Mutf8AsCString(klass->GetDescriptor());
-    return strstr(desc, "Lstd/") == desc || strstr(desc, "Lescompat/") == desc;
+    return strstr(desc, "Lstd/") == desc;
 }
 
 inline bool IsStdClass(EtsClass *klass)

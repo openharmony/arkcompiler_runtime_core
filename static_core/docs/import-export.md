@@ -56,7 +56,6 @@ Which paths included in this list are stored in a vector that can be retrieved v
     "baseUrl": "/home/sipka/work/arkcompiler/runtime_core/static_core",
     "paths": {
       "std": ["path/to/runtime_core/static_core/plugins/ets/stdlib/std"],
-      "escompat": ["path/to/runtime_core/static_core/plugins/ets/stdlib/escompat"],
       ...
     },
     "dependencies": {

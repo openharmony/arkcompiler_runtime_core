@@ -55,19 +55,19 @@ public:
 
     static std::vector<MirrorFieldInfo> GetMapMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatMap, data_, "data"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMap, buckets_, "buckets"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMap, cap_, "cap"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMap, numEntries_, "numEntries"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMap, sizeVal_, "sizeVal"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMap, initialCapacity_, "initialCapacity")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsStdCoreMap, data_, "data"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreMap, buckets_, "buckets"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreMap, cap_, "cap"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreMap, numEntries_, "numEntries"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreMap, sizeVal_, "sizeVal"),
+                                             MIRROR_FIELD_INFO(EtsStdCoreMap, initialCapacity_, "initialCapacity")};
     }
 
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-// Check both EtsEscompatMap and ark::Class<Map> has the same number of fields and at the same offsets
+// Check both EtsStdCoreMap and ark::Class<Map> has the same number of fields and at the same offsets
 TEST_F(EtsMapTest, MapMemoryLayout)
 {
     EtsClass *mapClass = PlatformTypes(vm_)->coreMap;

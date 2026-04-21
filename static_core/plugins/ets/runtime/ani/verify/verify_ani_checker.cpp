@@ -71,7 +71,7 @@ public:
             return false;
         }
         EtsClass *klass = s.ToInternalType(ref)->GetClass();
-        EtsClass *arrayKlass = PlatformTypes()->escompatArray;
+        EtsClass *arrayKlass = PlatformTypes()->coreArray;
 
         return arrayKlass->IsAssignableFrom(klass);
     }

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,12 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
-class EtsEscompatArray;
+class EtsStdCoreArray;
 }  // namespace ark::ets
 
 namespace ark::ets::intrinsics::helpers {
 
-EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes);
+EtsString *CreateNewStringFromCharCode(EtsStdCoreArray *charCodes);
 EtsString *CreateNewStringFromCharCode(EtsObjectArray *charCodes, size_t actualLength);
 
 }  // namespace ark::ets::intrinsics::helpers

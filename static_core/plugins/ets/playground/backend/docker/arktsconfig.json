@@ -2,8 +2,7 @@
   "compilerOptions": {
     "baseUrl": "/playground",
     "paths": {
-      "std": ["/playground/stdlib/std"],
-      "escompat": ["/playground/stdlib/escompat"]
+      "std": ["/playground/stdlib/std"]
     }
   }
 }

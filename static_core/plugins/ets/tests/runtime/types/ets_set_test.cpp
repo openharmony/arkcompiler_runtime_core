@@ -56,7 +56,7 @@ public:
     static std::vector<MirrorFieldInfo> GetSetMembers()
     {
         return std::vector<MirrorFieldInfo> {
-            MIRROR_FIELD_INFO(EtsEscompatSet, elements_, "elements"),
+            MIRROR_FIELD_INFO(EtsStdCoreSet, elements_, "elements"),
         };
     }
 
@@ -64,7 +64,7 @@ protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-// Check both EtsEscompatSet and ark::Class<Set> has the same number of fields and at the same offsets
+// Check both EtsStdCoreSet and ark::Class<Set> has the same number of fields and at the same offsets
 TEST_F(EtsSetTest, SetMemoryLayout)
 {
     EtsClass *setClass = PlatformTypes(vm_)->coreSet;

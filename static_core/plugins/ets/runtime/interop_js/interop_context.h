@@ -333,7 +333,7 @@ public:
         sharedEtsVmState_->SetInterfaceProxyInstance(interfaceName, proxy);
     }
 
-    EtsObject *CreateETSCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject);
+    EtsObject *CreateETSStdCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject);
 
     static void ThrowETSError(EtsExecutionContext *executionCtx, napi_value val);
     static void ThrowETSError(EtsExecutionContext *executionCtx, const char *msg);

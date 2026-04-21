@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/intrinsics/helpers/json_helper.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "intrinsics.h"
@@ -115,7 +115,7 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
     bool isSuccessful = false;
     buffer_ += "[";
 
-    auto array = EtsHandle<EtsEscompatArray>(executionCtx, EtsEscompatArray::FromEtsObject(value.GetPtr()));
+    auto array = EtsHandle<EtsStdCoreArray>(executionCtx, EtsStdCoreArray::FromEtsObject(value.GetPtr()));
     EtsInt length = 0;
     if (UNLIKELY(!array->GetLength(executionCtx, &length))) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
@@ -425,7 +425,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
     auto executionCtx = EtsExecutionContext::GetCurrent();
 
     EtsHandleScope scope(executionCtx);
-    auto recordObj = EtsHandle<EtsEscompatMap>(executionCtx, reinterpret_cast<EtsEscompatMap *>(value->GetCoreType()));
+    auto recordObj = EtsHandle<EtsStdCoreMap>(executionCtx, reinterpret_cast<EtsStdCoreMap *>(value->GetCoreType()));
     if (recordObj->GetSize() == 0) {
         buffer_ += "{}";
         return true;
@@ -438,8 +438,8 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
     }
 
     auto hasContent = false;
-    EtsEscompatMap::MapIdx recIdx = recordObj->GetFirstIdx(executionCtx);
-    if (recIdx == EtsEscompatMap::MAP_IDX_END) {
+    EtsStdCoreMap::MapIdx recIdx = recordObj->GetFirstIdx(executionCtx);
+    if (recIdx == EtsStdCoreMap::MAP_IDX_END) {
         buffer_ += "{}";
         return true;
     }
@@ -459,7 +459,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
             return false;
         }
         hasContent = true;
-    } while (recIdx != EtsEscompatMap::MAP_IDX_END);
+    } while (recIdx != EtsStdCoreMap::MAP_IDX_END);
     buffer_ += "}";
     PopValue(value);
     return true;
@@ -594,7 +594,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         executionCtx->GetMT()->ManagedCodeBegin();
     } else if (value->IsInstanceOf(platformTypes->coreDate)) {
         isSuccessful = false;
-    } else if (value->IsInstanceOf(platformTypes->escompatArray)) {
+    } else if (value->IsInstanceOf(platformTypes->coreArray)) {
         executionCtx->GetMT()->ManagedCodeEnd();
         {
             ScopedManagedCodeThread v(executionCtx->GetMT());

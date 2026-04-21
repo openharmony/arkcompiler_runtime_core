@@ -414,7 +414,7 @@ function testNspFunctionSignatureMismatch(): void {
     try {
         let big1 = STValue.wrapBigInt(BigInt('12345678'));
         let big2 = STValue.wrapBigInt(BigInt('12345678'));
-        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{escompat.BigInt}:C{escompat.BigInt}', [big1, big2]);
+        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{std.core.BigInt}:C{std.core.BigInt}', [big1, big2]);
         ASSERT_TRUE(b.unwrapToBoolean() === false);
     } catch (e) {
         print('Error code: ', e.code);
@@ -425,7 +425,7 @@ function testNspFunctionSignatureMismatch(): void {
     try {
         let big1 = STValue.wrapBigInt(BigInt('12345678'));
         let big2 = STValue.wrapBigInt(BigInt('12345678'));
-        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{escompat.BigInt}C{escompat.BigInt}C{escompat.BigInt}:C{escompat.BigInt}', [big1, big2]);
+        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{std.core.BigInt}C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}', [big1, big2]);
         ASSERT_TRUE(b.unwrapToBoolean() === false);
     } catch (e) {
         print('Error code: ', e.code);
@@ -436,7 +436,7 @@ function testNspFunctionSignatureMismatch(): void {
     try {
         let big1 = STValue.wrapBigInt(BigInt('12345678'));
         let big2 = STValue.wrapBigInt(BigInt('12345678'));
-        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{escompat.BigInt}C{escompat.BigInt}:', [big1, big2]);
+        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{std.core.BigInt}C{std.core.BigInt}:', [big1, big2]);
         ASSERT_TRUE(b.unwrapToBoolean() === false);
     } catch (e) {
         print('Error code: ', e.code);
@@ -447,7 +447,7 @@ function testNspFunctionSignatureMismatch(): void {
     try {
         let big1 = STValue.wrapBigInt(BigInt('12345678'));
         let big2 = STValue.wrapBigInt(BigInt('12345678'));
-        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{escompat.BigInt}C{escompat.BigInt}:C{escompat.BigInt}C{escompat.BigInt}', [big1, big2]);
+        b = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}C{std.core.BigInt}', [big1, big2]);
         ASSERT_TRUE(b.unwrapToBoolean() === false);
     } catch (e) {
         print('Error code: ', e.code);
@@ -671,7 +671,7 @@ function testDefaultParamInvoke(): void {
     let strValue = STValue.wrapString('xxx');
     let result1 = nsp.namespaceInvokeFunction('testDefaultParam', 'C{std.core.String}:C{std.core.String}', [strValue]);
     ASSERT_TRUE(result1.unwrapToString() === 'Hello_xxx');
-    
+
     let strValue2 = STValue.getUndefined();
     let result2 = nsp.namespaceInvokeFunction('testDefaultParam', 'C{std.core.String}:C{std.core.String}', [strValue2]);
     ASSERT_TRUE(result2.unwrapToString() === 'Hello_World');
@@ -754,7 +754,7 @@ function testSTValueDestruct(): void {
 
     etsVm.getFunction('Lstvalue_invoke/ETSGLOBAL;', 'runFullGC')();
     funJsFullGC();
-    
+
     // NOTE(www) #31863, after this, it's also need to verify that the object held by staWeakObj is undefined.
     ASSERT_TRUE(dyWeakRef.deref() === undefined);
 }
