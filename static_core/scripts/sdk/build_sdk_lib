@@ -360,7 +360,7 @@ function print_help() {
 function enable_ohos_sdk_native() {
     OHOS_SDK_ARCH_NAME=ohos-sdk.tar.gz
     SDK_VERSION_STAGE='Release'
-    OHOS_SDK_VERSION='5.0.2'
+    OHOS_SDK_VERSION='6.1'
     local OHOS_SDK_NATIVE_URL=${OHOS_SDK_NATIVE_URL:-"https://repo.huaweicloud.com/harmonyos/os/${OHOS_SDK_VERSION}-Release/ohos-sdk-windows_linux-public.tar.gz"}
 
     # Search for default OHOS SDK native or download it
