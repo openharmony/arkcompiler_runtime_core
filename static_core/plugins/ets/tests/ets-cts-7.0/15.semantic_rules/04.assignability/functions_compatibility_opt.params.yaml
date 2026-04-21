@@ -21,7 +21,7 @@ cases:
             return 2;
         }
     call: |-
-        let x: (i: int) => int = bar;
+        let x: (i: int, j?: string) => int = bar;
         arktest.assertEQ(x(1), 2);
 
   - decl: |-
@@ -32,7 +32,7 @@ cases:
             return 2;
         }
     call: |-
-        let x: (i: int) => int = bar;
+        let x: (i?: int, j?: string) => int = bar;
         arktest.assertEQ(x(1), 2);
 
   - decl: |-

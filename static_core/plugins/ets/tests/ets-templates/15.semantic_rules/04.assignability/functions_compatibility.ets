@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ function foo4(i: int|string, j?: int): Int {
     return 4;
 }
 
-
 function main() {
     let x: (i: int) => int
     x = foo
@@ -42,6 +41,6 @@ function main() {
     arktest.assertEQ(2, x(1));
     x = foo3
     arktest.assertEQ(3, x('1'));
-    x = foo4
-    arktest.assertEQ(4, x('1'));
+    let y: (i: int|string, j?: int) => Int = foo4
+ 	arktest.assertEQ(4, y('1'));
 }

@@ -42,6 +42,6 @@ function main() {
     arktest.assertEQ(2, x(1));
     x = foo3
     arktest.assertEQ(3, x('1'));
-    x = foo4
-    arktest.assertEQ(4, x('1'));
+    let y: (i: int|string, j?: int) => Int = foo4
+    arktest.assertEQ(4, y('1'));
 }
