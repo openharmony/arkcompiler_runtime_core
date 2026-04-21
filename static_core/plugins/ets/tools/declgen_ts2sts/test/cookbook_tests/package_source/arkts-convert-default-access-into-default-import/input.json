@@ -1,0 +1,5 @@
+[
+    "./lib-a.ts",
+    "./lib-b.ts",
+    "./main.ts"
+]

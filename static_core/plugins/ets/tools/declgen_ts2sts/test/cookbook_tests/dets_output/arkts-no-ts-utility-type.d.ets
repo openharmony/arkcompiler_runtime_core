@@ -1,6 +1,6 @@
 'use static'
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 export type LowercaseGreeting = string;
-export type Greeting = Any;
-export type QuietGreeting = Any;
-export type ShoutyGreeting = Any;
-export type UncomfortableGreeting = Any;
+export type Greeting = string;
+export type QuietGreeting = string;
+export type ShoutyGreeting = string;
+export type UncomfortableGreeting = string;
 export declare function createInstance<T extends Any>(Class: T, ...args: Any[]): Any;
 export type T0 = Any;
 export type T1 = Any;
-export type T3 = Any;
+export type T3 = NonNullable<string | number | undefined>;
 export type T4 = Any;
 export type T5 = Any[];
-export type T6 = Any;
+export type T6 = ReturnType<() => string>;
 export type NoInfer<T> = Any;
 export declare function createStreetLight<C extends string>(colors: C[], defaultColor?: Any): void;
 export type UserPreview = Any;
@@ -38,3 +38,4 @@ export declare class UserIns {
     age: number;
     constructor(name: string, age: number);
 }
+

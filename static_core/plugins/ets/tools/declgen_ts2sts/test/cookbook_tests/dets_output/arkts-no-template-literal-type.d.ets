@@ -1,6 +1,6 @@
 'use static'
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type A = Any;
+export type A = string;
 export declare let v1: A;
-export declare function foo(v1: Any): void;
-export declare function bar<T extends Any>(arg: Any): A;
+export declare function foo(v1: string): void;
+export declare function bar<T extends string>(arg: string): A;
 export type v2 = string;
-export type B = Any;
+export type B = string;

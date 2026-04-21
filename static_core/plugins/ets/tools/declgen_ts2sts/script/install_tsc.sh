@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ ROOT_DIR="${1:-$(pwd)}"
 
 # Clone the repository and checkout the current Git branch
 TYPESCRIPT_REPO="https://gitcode.com/openharmony/third_party_typescript.git"  # Replace with your correct Typescript repository URL
-CURRENT_BRANCH="OpenHarmony-v5.0.1-Release"
+CURRENT_BRANCH="master"
 
 # Define the third_party directory
 THIRD_PARTY_DIR="$ROOT_DIR/third_party"

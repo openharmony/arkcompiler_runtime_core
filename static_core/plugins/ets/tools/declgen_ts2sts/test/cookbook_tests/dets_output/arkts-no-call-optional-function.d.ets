@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 export declare interface CallableInterface {
+    (param: string): boolean;
     method1(): void;
 }
 export declare interface OptionalMethodInterface {
@@ -21,12 +22,15 @@ export declare interface OptionalMethodInterface {
     method3(a: string, b: number): string;
 }
 export declare interface MixedInterface {
+    (param: number): string;
     method2(): void;
 }
 export declare interface CallableInterface1 {
+    (param: string): boolean;
 }
 export declare interface OptionalMethodInterface1 {
 }
 export declare interface NormalInterface {
     method2(): void;
 }
+

@@ -31,7 +31,16 @@ export interface DeclgenCLIOptions {
    * default is [*]
    */
   includePaths?: string[];
-  enableInteropFeatures?: boolean;
+  enableInteropTypesFix?: boolean;
+  removeReservedKeywordIdentifier?: boolean;
+  /**
+   * Enable incremental builds backed by tsc's `.tsbuildinfo`.
+   */
+  incremental?: boolean;
+  /**
+   * Custom path for the generated `.tsbuildinfo` file.
+   */
+  tsBuildInfoFile?: string;
 }
 
 export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
@@ -77,7 +86,13 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       },
       [] as string[]
     );
-    cliParser.option('--interop', 'Enable interop features.');
+    cliParser.option('--interop-types', 'Enable interop types fix.');
+    cliParser.option('--remove-reserved-keyword-identifier', 'Remove reserved keyword identifier.');
+    cliParser.option(
+      '--incremental',
+      'Enable incremental compilation. Reuses tsc .tsbuildinfo across runs to skip unchanged files.'
+    );
+    cliParser.option('--ts-build-info-file <path>', 'Path to the .tsbuildinfo file used for incremental builds.');
 
     return cliParser;
   }
@@ -90,7 +105,10 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       tsconfig: opts.project,
       inputDirs: opts.dir,
       includePaths: opts.include,
-      enableInteropFeatures: opts.interop === true,
+      enableInteropTypesFix: opts.interopTypes,
+      removeReservedKeywordIdentifier: opts.removeReservedKeywordIdentifier,
+      incremental: opts.incremental,
+      tsBuildInfoFile: opts.tsBuildInfoFile
     };
   }
 

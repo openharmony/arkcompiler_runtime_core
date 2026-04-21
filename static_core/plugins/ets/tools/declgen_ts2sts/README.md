@@ -30,7 +30,6 @@ npm run declgen -- <declgen options>
 
 ```
 npm run build
-npm run webpack
 npm run declgen -- -f my_file.ts
 ```
 
@@ -61,4 +60,16 @@ Options:
 
 ```
 npm run test
+```
+
+Test one case:
+
+```bash
+npm run test:cookbook-one -- test <testname> --test-dir <test-dir> --test-out-dir <test-out-path> -t <test-suite>
+```
+
+For example:
+
+```bash
+npm run test:cookbook-one -- test arkts-array-structure -t ts_source --test-dir ./test/cookbook_tests/ --test-out-dir ./build/
 ```
