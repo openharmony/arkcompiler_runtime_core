@@ -230,7 +230,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_type)
     ani_{{ type }} value = GetValidArgValue(env_);
     ASSERT_EQ(
         env_->c_api->Object_SetFieldByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Field", value),
-        ANI_ERROR);
+        ANI_INVALID_TYPE);
     {% if type == "ref" %}
     std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: object";
     {% else %}

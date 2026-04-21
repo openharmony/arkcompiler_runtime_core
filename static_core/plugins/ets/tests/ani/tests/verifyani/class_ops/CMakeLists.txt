@@ -91,6 +91,36 @@ ani_verify_add_generated_tests(ani_verify_test_class_static_field_set
            "ref: Type=Ref,type=ref,field=refField,wrong_field=staticIntField,ets_type=Object,wrong_ets_type=int"
 )
 
+# Generated tests for Class_GetStaticFieldByName APIs
+ani_verify_add_generated_tests(ani_verify_test_class_get_static_field_by_name
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_get_static_field_by_name_test.cpp.j2
+    J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_get_static_field_by_name_test.ets.j2
+    PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,wrong_ret=int,value=true"
+           "byte: Type=Byte,type=byte,ret_type=byte,wrong_ret=int,value=1"
+           "char: Type=Char,type=char,ret_type=char,wrong_ret=int,value=c'a'"
+           "short: Type=Short,type=short,ret_type=short,wrong_ret=int,value=1"
+           "int: Type=Int,type=int,ret_type=int,wrong_ret=byte,value=1234"
+           "long: Type=Long,type=long,ret_type=long,wrong_ret=int,value=1"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.0"
+           "double: Type=Double,type=double,ret_type=double,wrong_ret=int,value=1.0"
+           "ref: Type=Ref,type=ref,ret_type=Object,wrong_ret=int,value="
+)
+
+# Generated tests for Class_SetStaticFieldByName APIs
+ani_verify_add_generated_tests(ani_verify_test_class_set_static_field_by_name
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_set_static_field_by_name_test.cpp.j2
+    J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_set_static_field_by_name_test.ets.j2
+    PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,wrong_ret=int,value=false,cpp_value=ANI_TRUE"
+           "byte: Type=Byte,type=byte,ret_type=byte,wrong_ret=int,value=1,cpp_value=2"
+           "char: Type=Char,type=char,ret_type=char,wrong_ret=int,value=c'a',cpp_value='Z'"
+           "short: Type=Short,type=short,ret_type=short,wrong_ret=int,value=1,cpp_value=2"
+           "int: Type=Int,type=int,ret_type=int,wrong_ret=byte,value=1234,cpp_value=5678"
+           "long: Type=Long,type=long,ret_type=long,wrong_ret=int,value=1,cpp_value=2"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int,value=1.0,cpp_value=2.0F"
+           "double: Type=Double,type=double,ret_type=double,wrong_ret=int,value=1.0,cpp_value=2.0"
+           "ref: Type=Ref,type=ref,ret_type=Object,wrong_ret=int,value=,cpp_value=nullptr"
+)
+
 # Generated tests for Class_CallStaticMethodByName APIs
 ani_verify_add_generated_tests(ani_verify_test_class_call_static_method_by_name
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_class_call_static_method_by_name_test.cpp.j2

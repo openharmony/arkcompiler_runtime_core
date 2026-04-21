@@ -114,7 +114,7 @@ TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_wrong_type)
     ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ wrong_field }}", &field), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, &result), ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

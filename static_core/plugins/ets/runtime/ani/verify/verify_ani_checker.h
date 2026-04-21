@@ -43,9 +43,11 @@
     X(VERIFY_READ_FIELD_BY_NAME,            VerifyReadFieldByName)                \
     X(VERIFY_FIND_FIELD_NAME,               VerifyFindFieldName)                  \
     X(VERIFY_FIND_STATIC_FIELD_NAME,        VerifyFindStaticFieldName)            \
+    X(VERIFY_READ_STATIC_FIELD_BY_NAME,     VerifyReadStaticFieldByName)          \
     X(VERIFY_READ_STATIC_FIELD,             VerifyReadStaticField)                \
     X(VERIFY_WRITE_FIELD,                   VerifyWriteField)                     \
     X(VERIFY_WRITE_FIELD_BY_NAME,           VerifyWriteFieldByName)               \
+    X(VERIFY_WRITE_STATIC_FIELD_BY_NAME,    VerifyWriteStaticFieldByName)         \
     X(VERIFY_WRITE_STATIC_FIELD,            VerifyWriteStaticField)               \
     X(VERIFY_READ_PROPERTY_BY_NAME,         VerifyReadPropertyByName)             \
     X(VERIFY_WRITE_PROPERTY_BY_NAME,        VerifyWritePropertyByName)            \
@@ -468,6 +470,16 @@ public:
     static ANIArg MakeForFindIterator(VClass *vclass, std::string_view argName)
     {
         return ANIArg(ArgValueByClass(vclass), argName, Action::VERIFY_FIND_ITERATOR);
+    }
+
+    static ANIArg MakeForStaticFieldByName(const char *name, std::string_view argName, EtsType staticFieldType,
+                                           AccessMode accessMode)
+    {
+        if (accessMode == AccessMode::READWRITE) {
+            return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_WRITE_STATIC_FIELD_BY_NAME,
+                          staticFieldType);
+        }
+        return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_READ_STATIC_FIELD_BY_NAME, staticFieldType);
     }
 
     static ANIArg MakeForStaticField(VStaticField *vstaticField, std::string_view name, EtsType staticFieldType,

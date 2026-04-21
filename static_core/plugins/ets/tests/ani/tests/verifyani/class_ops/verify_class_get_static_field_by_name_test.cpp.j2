@@ -1,0 +1,245 @@
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <thread>
+
+#include "plugins/ets/tests/ani/ani_gtest/verify_ani_gtest.h"
+
+namespace ark::ets::ani::verify::testing {
+
+class ClassGetStaticFieldByName{{ Type }}Test : public VerifyAniTest {
+public:
+    void SetUp() override
+    {
+        VerifyAniTest::SetUp();
+        ASSERT_EQ(env_->FindClass("ani_verify_test_class_get_static_field_by_name_{{ type }}.Parent", &class_),
+                  ANI_OK);
+    }
+
+protected:
+    ani_class class_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, success)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", &result), ANI_OK);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_env)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(nullptr, class_, "{{ type }}Field", &result),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"class", "ani_class"},
+        {"name", "const char *"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_class)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, nullptr, "{{ type }}Field", &result),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class", "wrong reference"},
+        {"name", "const char *", "wrong class for static field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_name)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, nullptr, &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_result)
+{
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", nullptr),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"name", "const char *"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_all_args)
+{
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"class", "ani_class", "wrong reference"},
+        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_name_not_found)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "notExistField", &result),
+              ANI_NOT_FOUND);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"name", "const char *", "wrong static field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_type)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ wrong_ret }}Field", &result),
+              ANI_INVALID_TYPE);
+{% if type == "ref" %}
+    std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: object";
+{% else %}
+    std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: {{ type }}";
+{% endif %}
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"name", "const char *", expectedErr.c_str()},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, wrong_field_kind)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "instanceField", &result),
+              ANI_NOT_FOUND);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"name", "const char *", "wrong static field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, class_from_local_scope)
+{
+    ani_class cls {};
+    const int nr3 = 3;
+    ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
+    ASSERT_EQ(env_->FindClass("ani_verify_test_class_get_static_field_by_name_{{ type }}.Parent", &cls), ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, cls, "{{ type }}Field", &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class", "wrong reference"},
+        {"name", "const char *", "wrong class for static field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, class_from_escape_local_scope)
+{
+    ani_class cls {};
+    const int nr3 = 3;
+    ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
+    ASSERT_EQ(env_->FindClass("ani_verify_test_class_get_static_field_by_name_{{ type }}.Parent", &cls), ANI_OK);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(cls, reinterpret_cast<ani_ref *>(&class_)), ANI_OK);
+
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", &result), ANI_OK);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, call_on_global_ref)
+{
+    ani_class gclass {};
+    ASSERT_EQ(env_->GlobalReference_Create(class_, reinterpret_cast<ani_ref *>(&gclass)), ANI_OK);
+
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, gclass, "{{ type }}Field", &result), ANI_OK);
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, cross_thread_call_on_global_ref)
+{
+    ani_class gclass {};
+    ASSERT_EQ(env_->GlobalReference_Create(class_, reinterpret_cast<ani_ref *>(&gclass)), ANI_OK);
+
+    std::thread([this, gclass]() {
+        ani_env *env {};
+        ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
+
+        ani_{{ type }} result {};
+        ASSERT_EQ(env->c_api->Class_GetStaticFieldByName_{{ Type }}(env, gclass, "{{ type }}Field", &result), ANI_OK);
+
+        ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
+    }).join();
+}
+
+TEST_F(ClassGetStaticFieldByName{{ Type }}Test, pending_error)
+{
+    ThrowError();
+
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_{{ Type }}(env_, class_, "{{ type }}Field", &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "has unhandled an error"},
+        {"class", "ani_class"},
+        {"name", "const char *"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticFieldByName_{{ Type }}", testLines);
+}
+
+}  // namespace ark::ets::ani::verify::testing
