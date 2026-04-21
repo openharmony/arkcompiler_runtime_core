@@ -18,7 +18,7 @@ cases:
     use: |-
       arktest.assertEQ(x, '1')
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: x'
 
   - decl: |-
       A
@@ -26,55 +26,55 @@ cases:
       let x = new A
       arktest.assertEQ(x.a, 'a')
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: field'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: field'
   - decl: |-
       a1
     use: |-
       arktest.assertEQ(a1, '1')
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: a1'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: a1'
   - decl: |-
       b1
     use: |-
       arktest.assertEQ(b1, 1.0)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: b1'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: b1'
   - decl: |-
       c1
     use: |-
       arktest.assertEQ(c1, c'a')
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: c1'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: c1'
   - decl: |-
       d1
     use: |-
       arktest.assertEQ(d1[0], 0.0f)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: d1'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: d1'
   - decl: |-
       e1
     use: |-
       arktest.assertEQ(e1[0], 1)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: e1'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: e1'
   - decl: |-
       a2
     use: |-
       arktest.assertEQ(a2, 1)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: a2'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: a2'
   - decl: |-
       b2
     use: |-
       arktest.assertEQ(b2, 1.0)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: b2'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: b2'
   - decl: |-
       c2
     use: |-
       arktest.assertEQ(c2[0], '1.0')
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: c2'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: c2'
 
 # attempting to use initialized ambient constants without typing
   - decl: |-
@@ -82,47 +82,47 @@ cases:
     use: |-
       arktest.assertEQ(QuestionOfAll1, 42)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: QuestionOfAll1'
   - decl: |-
       QuestionOfAll2
     use: |-
       arktest.assertEQ(QuestionOfAll2, 0xBAD3)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: QuestionOfAll2'
   - decl: |-
       BigLongLiteral
     use: |-
       arktest.assertEQ(BigLongLiteral, 9223372036854775807)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: BigLongLiteral'
   - decl: |-
       FloatConst1
     use: |-
       arktest.assertEQ(FloatConst1, 3.14f)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: FloatConst1'
   - decl: |-
       FloatConst2
     use: |-
       arktest.assertEQ(FloatConst2, 3.141592)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: FloatConst2'
   - decl: |-
       FloatConst3
     use: |-
       arktest.assertEQ(FloatConst3, 0.5)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: FloatConst3'
   - decl: |-
       Hello
     use: |-
       arktest.assertEQ(Hello, "Hello")
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: Hello'
   - decl: |-
       MultilineSentence
     use: |-
       arktest.assertEQ(MultilineSentence, `This is an example of multi-line string,
         which should be enclosed in backticks (\`)`)
     expected: |-
-      'Semantic error ESE0153: Initializers are not allowed in ambient contexts: x'
+      'Semantic error ESE125125: Initializers are not allowed in ambient contexts: MultilineSentence'

@@ -103,10 +103,6 @@
 #33521
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/02.constant_declarations/const_decl_in_namespace_neg.ets
 
-#33092
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/ambient_n_1.ets
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/ambient_n_3.ets
-
 #30760
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
 
@@ -1218,18 +1214,6 @@
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_0.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_n_0.ets
 13.modules_and_namespaces/11.program_entry_point/function_foo_w_args_n_2.ets
-
-#32456 Initializer in ambient const declaration
-14.ambient_declarations/bad_ambient_declarations_3.ets
-14.ambient_declarations/bad_ambient_declarations_4.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_10.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_11.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_12.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_13.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_14.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_15.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_16.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_17.ets
 
 #29270
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets

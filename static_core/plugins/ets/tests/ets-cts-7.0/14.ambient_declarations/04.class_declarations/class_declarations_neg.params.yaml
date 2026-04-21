@@ -53,21 +53,21 @@ declarations:
           a: number = 1;
       }
     stdout: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: a"
   #7
   - decl: |-
       declare final class B {
           b: number = 1;
       }
     stdout: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: b"
   #8
   - decl: |-
       declare abstract class C {
           c: number = 1;
       }
     stdout: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: c"
   #9
   - decl: |-
       class A {}
@@ -76,7 +76,7 @@ declarations:
           b: number = 1;
       }
     stdout: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: b"
   #10
   - decl: |-
       interface A {}
@@ -85,7 +85,7 @@ declarations:
           b: number = 1;
       }
     stdout: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: b"
   #11
   - decl: |-
       declare class A<T1, T2>

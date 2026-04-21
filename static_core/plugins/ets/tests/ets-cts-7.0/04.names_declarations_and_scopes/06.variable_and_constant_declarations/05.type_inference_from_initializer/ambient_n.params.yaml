@@ -16,19 +16,19 @@ cases:
   - decl: |-
       declare const x1: int = 1
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: x1"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: x1"
 
   - decl: |-
       declare let x2: int = 1
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: x2"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: x2"
 
   - decl: |-
       declare const s1: string = "1"
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: s1"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: s1"
 
   - decl: |-
       declare let s2: string = "1";
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: s2"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: s2"

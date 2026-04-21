@@ -20,7 +20,7 @@ tags: [compile-only, not-a-test]
 ---*/
 
 export declare namespace NS {
-  let i: int = 7
+  let i: int
   function foo(): void
   type X = Array<number>
 }

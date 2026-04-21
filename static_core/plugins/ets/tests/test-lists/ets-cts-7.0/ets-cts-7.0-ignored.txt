@@ -39,10 +39,6 @@
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_2.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/03.validity_of_initializer/initializer_validity_n_3.ets
 
-#33092
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/ambient_n_1.ets
-04.names_declarations_and_scopes/06.variable_and_constant_declarations/05.type_inference_from_initializer/ambient_n_3.ets
-
 #26666 (cts #47 - bad array element type)
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
@@ -490,18 +486,6 @@
 
 #33874
 13.modules_and_namespaces/04.import_directives/05.import_path/bad/import_path_bad_n_3.ets
-
-#32456 Initializer in ambient const declaration
-14.ambient_declarations/bad_ambient_declarations_n_3.ets
-14.ambient_declarations/bad_ambient_declarations_n_4.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_10.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_11.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_12.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_13.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_14.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_15.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_16.ets
-14.ambient_declarations/01.constant_or_variable_declarations/constant_usage_n_17.ets
 
 #33736
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_const_prefix_n.ets

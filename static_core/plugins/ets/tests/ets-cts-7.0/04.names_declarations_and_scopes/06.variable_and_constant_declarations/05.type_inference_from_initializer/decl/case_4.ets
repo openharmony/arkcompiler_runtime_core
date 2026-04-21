@@ -18,4 +18,4 @@ desc: Check type inference from the initialization expression
 tags: [not-a-test, compile-only]
 ---*/
 
-export declare const myC = "declaration string"
+export declare const myC: string

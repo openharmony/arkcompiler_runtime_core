@@ -16,32 +16,32 @@ cases:
   - decl: |-
       declare const x: int = 1;
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: x"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: x"
   - decl: |-
       declare const PI: double = 3.14;
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: PI"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: PI"
   - decl: |-
       declare class A {
         s: string = "should fail"
       }
     expected: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: s"
   # No literals allowed for const declaration type definition, only explicit typing
   - decl: |-
       declare const x = 1;
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: x"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: x"
   - decl: |-
       declare const PI = 3.14;
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: PI"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: PI"
   - decl: |-
       declare class A {
         s = "should fail"
       }
     expected: |-
-      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: s"
   # Ambient functions, methods, and constructors have no body.
   - decl: |-
       declare function fun(x: int): void {}
@@ -117,13 +117,21 @@ cases:
   - decl: |-
       declare const HelloWithType: String = "Hello"
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: HelloWithType"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: HelloWithType"
   - decl: |-
       declare const ConstWithType: int = 42
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: ConstWithType"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: ConstWithType"
   - decl: |-
       class A {}
       declare const a: A = new A;
     expected: |-
-      "Semantic error ESE0153: Initializers are not allowed in ambient contexts: a"
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: a"
+  - decl: |-
+      declare let a;
+    expected: |-
+      "Semantic error ESE1111: Missing type annotation for the 'a'."
+  - decl: |-
+      declare let a = 5;
+    expected: |-
+      "Semantic error ESE125125: Initializers are not allowed in ambient contexts: a"
