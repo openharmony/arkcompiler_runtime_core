@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,14 @@
 
 {%- for c in cases %}
 /*---
-desc: For other numeric operators, the operands of unary and binary numeric expressions are widened to a larger numeric
-      type. The minimum type is int. None of those operators evaluates values of types byte and short without
-      widening.
+desc: >-
+    For other numeric operators, the operands of unary and binary numeric expressions are widened to a larger numeric
+    type. The minimum type is int. None of those operators evaluates values of types byte and short without
+    widening.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0127: No matching call signature for foo(Int)
+    Semantic error ESE0046: Type 'Int' is not compatible with type 'Short' at index 1
 ---*/
 
 function foo(x: short) {
@@ -28,6 +32,6 @@ function main() {
     let b: byte = 1
     let x = {{c}}b
 
-    foo(x); // Should be CTE: TypeError: No matching call signature for foo(Int)
+    foo(x)
 }
 {%- endfor %}

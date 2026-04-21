@@ -17,13 +17,15 @@
 /*---
 desc: {{c.description}}
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
 function main() {
     {%- for declaration in c.declarations %}
     {{declaration}};
     {%- endfor %}
-    
-    {{c.operation}}; // Should be CTE: {{c.expected_error}}
+
+    {{c.operation}}
 }
 {%- endfor %}
