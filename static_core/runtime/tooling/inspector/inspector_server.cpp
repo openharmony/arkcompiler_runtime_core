@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -485,16 +485,15 @@ Expected<std::unique_ptr<UrlBreakpointResponse>, std::string> InspectorServer::S
     const std::string &sessionId, const UrlBreakpointRequest &breakpointRequest,
     const std::function<SetBreakpointHandler> &handler)
 {
+    // Note: Current interaction with IDE only supports 'url', not 'urlRegex'
     std::function<bool(std::string_view)> sourceFileFilter;
     if (const auto &url = breakpointRequest.GetUrl()) {
         sourceFileFilter = GetUrlFileFilter(*url);
-    } else if (const auto &urlRegex = breakpointRequest.GetUrlRegex()) {
-        sourceFileFilter = [regex = std::regex(*urlRegex)](auto fileName) {
-            return std::regex_match(fileName.data(), regex);
-        };
     } else {
-        // Either 'url' or 'urlRegex' must be specified - checked in parser
-        UNREACHABLE();
+        // Url not passed in the parameter
+        std::string msg = "Failed to set breakpoint, url is none";
+        LOG(INFO, DEBUGGER) << msg;
+        return Unexpected(msg);
     }
 
     const auto *condition = breakpointRequest.GetCondition().has_value() ? &*breakpointRequest.GetCondition() : nullptr;
