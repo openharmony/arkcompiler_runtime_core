@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Resume behavior of readable stream", testReadableStreamResumeBehavior);
@@ -31,7 +31,7 @@ function main(): int {
     suite.addAsyncTest("Edge case for readable ended state", testReadableStreamReadableEndedEdgeCase);
     suite.addTest("High watermark async behavior in readable stream", testReadableStreamHighWaterMarkAsyncBehavior);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 function mustNotCall() {
@@ -125,7 +125,7 @@ async function testStreamReadableSetEncodingAndReadableBehavior() {
         readable.push('hello');
         arktest.assertTrue(readable.readable, "readable should be true");
     }, 0);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyRead3 extends stream.Readable {
@@ -231,7 +231,7 @@ async function testReadableStreamReadableEndedEdgeCase() {
     readable.push('a');
     readable.push(null);
     readable.push(null);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyRead5 extends stream.Readable {

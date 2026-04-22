@@ -20,7 +20,7 @@ let firstValue2: int | undefined = 0;
 
 let queueInt: containers.stackless.ArrayConcurrentQueue<int> = new containers.stackless.ArrayConcurrentQueue<int>(200);
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueGetFirstTest');
 
     arrayConcurrentQueueTestsuite.addTest('GetFirstTest001', () => {
@@ -199,7 +199,7 @@ function main(): int {
         arktest.assertEQ(queueInt.getFirst(), 10);
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }
 
 function queueIntGetEndData() {

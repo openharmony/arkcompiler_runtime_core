@@ -89,7 +89,7 @@ function constructorTest006(): void {
     }, expectRangeError);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueConstructorTest');
 
     testSuite.addTest('ConstructorTest001', constructorTest001);
@@ -99,5 +99,5 @@ function main(): int {
     testSuite.addTest('ConstructorTest005', constructorTest005);
     testSuite.addTest('ConstructorTest006', constructorTest006);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

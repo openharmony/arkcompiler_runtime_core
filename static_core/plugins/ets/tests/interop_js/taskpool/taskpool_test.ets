@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,8 @@ function RunTasksWithJsCallTest(): void {
 
     let p1 = taskpool.execute(callback);
     let p2 = taskpool.execute(callback);
-    let result1 = waitForCompletion(() => p1);
-    let result2 = waitForCompletion(() => p2);
+    let result1 = p1.awaitSync();
+    let result2 = p2.awaitSync();
     arktest.assertEQ(result1, 0);
     arktest.assertEQ(result2, 0);
 }
@@ -50,7 +50,7 @@ function RunTasksWithJsAsyncCallTest(): void {
             modified = true;
         });
 
-        waitForCompletion(() => promise1);
+        promise1.awaitSync();
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
@@ -66,7 +66,7 @@ function RunTasksWithJsAsyncCallTest(): void {
     };
 
     let p = taskpool.execute(callback);
-    let result = waitForCompletion(() => p);
+    let result = p.awaitSync();
     arktest.assertEQ(result, 0);
     arktest.assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
     CoroutineExtras.stopTaskpool();
@@ -80,7 +80,7 @@ function additionDelay(delay: number): void {
     }
 }
 
-function testCPUTaskDuration(): void {    
+async function testCPUTaskDuration(): Promise<void> {
     let task: taskpool.Task = new taskpool.Task(additionDelay, 300.0);
     let runner: taskpool.SequenceRunner = new taskpool.SequenceRunner();
 
@@ -89,7 +89,7 @@ function testCPUTaskDuration(): void {
     arktest.assertTrue(task.cpuDuration == 0);
     arktest.assertTrue(task.totalDuration == 0);
 
-    waitForCompletion(() => runner.execute(task)); 
+    await runner.execute(task);
 
     arktest.assertTrue(task.cpuDuration > 0);
     arktest.assertTrue(task.totalDuration > 0);
@@ -98,7 +98,7 @@ function testCPUTaskDuration(): void {
 
 export function main(): int {
     let testSuite = new arktest.ArkTestsuite('taskpool.taskpool_test');
-    testSuite.addTest('testCPUTaskDuration', testCPUTaskDuration);
+    testSuite.addAsyncTest('testCPUTaskDuration', testCPUTaskDuration);
     let res = testSuite.run();
     return res;
 }

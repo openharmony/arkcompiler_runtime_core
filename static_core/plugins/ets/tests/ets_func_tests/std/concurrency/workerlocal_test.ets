@@ -17,20 +17,18 @@
     tags: [no-warmup]
  ---*/
 
-function testInit() {
+async function testInit(): Promise<void> {
     let str = 'workerLocal';
     let wl = new WorkerLocal<string>(() => str);
     arktest.assertEQ(wl.get(), str);
     wl.set('main');
     arktest.assertEQ(wl.get(), 'main');
-    waitForCompletion(async () => {
-        await taskpool.execute(() => {
-            arktest.assertEQ(wl.get(), str);
-            wl.set('subWorker');
-            arktest.assertEQ(wl.get(), 'subWorker');
-            wl.delete();
-            arktest.assertEQ(wl.get(), str);
-        })
+    await taskpool.execute(() => {
+        arktest.assertEQ(wl.get(), str);
+        wl.set('subWorker');
+        arktest.assertEQ(wl.get(), 'subWorker');
+        wl.delete();
+        arktest.assertEQ(wl.get(), str);
     })
     arktest.assertEQ(wl.get(), 'main');
 }
@@ -203,9 +201,9 @@ function testNestedOperations() {
     arktest.assertEQ(innerValue, outerValue + 100);
 }
 
-function main() {
+async function main(): Promise<int> {
     const testSuite = new arktest.ArkTestsuite("WorkerLocalTest");
-    testSuite.addTest('testInit', testInit);
+    testSuite.addAsyncTest('testInit', testInit);
     testSuite.addAsyncTest('testWithoutInit', testWithoutInit);
     testSuite.addTest('testWithMultiInit', testWithMultiInit);
     testSuite.addTest('testWithworkerInit', testWithworkerInit);
@@ -213,6 +211,7 @@ function main() {
     testSuite.addAsyncTest('testConcurrentWrites', testConcurrentWrites);
     testSuite.addAsyncTest('testMultipleInstances', testMultipleInstances);
     testSuite.addTest('testNestedOperations', testNestedOperations);
-    testSuite.run();
+    let failed = await testSuite.runAsync();
     CoroutineExtras.stopTaskpool();
+    return failed;
 }

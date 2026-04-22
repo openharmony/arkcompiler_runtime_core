@@ -120,7 +120,7 @@ async function popWaitersResumeOneByOneTest004(): Promise<void> {
     arktest.assertTrue(queue.isEmpty());
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueuePopTest');
 
     testSuite.addAsyncTest('PopTest001', popTest001);
@@ -128,5 +128,5 @@ function main(): int {
     testSuite.addAsyncTest('PopBlocksUntilPushTest003', popBlocksUntilPushTest003);
     testSuite.addAsyncTest('PopWaitersResumeOneByOneTest004', popWaitersResumeOneByOneTest004);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

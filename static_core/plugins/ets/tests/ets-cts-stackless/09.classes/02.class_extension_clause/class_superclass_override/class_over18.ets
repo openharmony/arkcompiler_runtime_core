@@ -30,9 +30,7 @@ class Child extends Parent {
   }
 }
 
-function main(): void {
-  waitForCompletion(async () => {
-    let child = new Child();
-    arktest.assertEQ(await child.greet(), "Hello from Parent and Hello from Child");
-  });
+async function main() {
+  let child = new Child();
+  arktest.assertEQ(await child.greet(), "Hello from Parent and Hello from Child");
 }

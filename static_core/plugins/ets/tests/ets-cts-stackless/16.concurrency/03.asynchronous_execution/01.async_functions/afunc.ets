@@ -25,7 +25,7 @@ async function startTest() {
     {{c.use|indent}}
 }
 
-function main() {
-    waitForCompletion(startTest)
+async function main() {
+    await startTest()
 }
 {% endfor %}

@@ -216,6 +216,6 @@ async function start() {
     arktest.assertEQ(loop1, 5)
 }
 
-function main(): void {
-    waitForCompletion(start)
+async function main(): Promise<void> {
+    await start()
 }

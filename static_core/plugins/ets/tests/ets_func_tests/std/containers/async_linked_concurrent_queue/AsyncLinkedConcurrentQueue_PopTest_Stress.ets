@@ -110,11 +110,11 @@ async function smallStableMPMCTest002(): Promise<void> {
     arktest.assertTrue(queue.isEmpty());
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueuePopStressTest');
 
     testSuite.addAsyncTest('ThreadsPopStressTest001', threadsPopStressTest001);
     testSuite.addAsyncTest('SmallStableMPMCTest002', smallStableMPMCTest002);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

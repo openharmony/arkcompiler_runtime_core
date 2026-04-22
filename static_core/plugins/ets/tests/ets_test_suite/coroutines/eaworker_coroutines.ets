@@ -88,7 +88,7 @@ function testLaunchThrow(): boolean {
 }
 
 function testFooAsync(): number {
-    return waitForCompletion<number>(fooAsync);
+    return fooAsync().awaitSync();
 }
 
 function testAddAsyncSchedule(): void {
@@ -103,7 +103,7 @@ async function recursiveAsyncFoo(): Promise<number> {
 }
 
 function testRecursiveAsync(): number {
-    return waitForCompletion<number>(recursiveAsyncFoo);
+    return recursiveAsyncFoo().awaitSync();
 }
 
 async function testAsyncThrow(): Promise<boolean> {
@@ -169,12 +169,13 @@ function testACoroutineCallAJCoroutine(): void {
     let ew = new EAWorker();
     ew.start();
     let job1 = ew.run<number>(() => {
-        return waitForCompletion<number>(async (): Promise<number> => {
+        return (async (): Promise<number> => {
             let job2: Job<Promise<number>> = launch(fooAsync)
             let p = job2.Await();
             let result = await p;
             return result;
-        });
+        // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+        })().awaitSync();
     });
     ew.join();
     arktest.assertEQ(EXPECTED_VALUE, job1.Await());

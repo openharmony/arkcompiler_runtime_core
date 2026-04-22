@@ -24,7 +24,7 @@ let queueObj: containers.stackless.ArrayConcurrentQueue<Object> =
 let queueStr: containers.stackless.ArrayConcurrentQueue<String> =
     new containers.stackless.ArrayConcurrentQueue<String>(200);
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueuePushTest');
 
     arrayConcurrentQueueTestsuite.addAsyncTest('SimpleQueuePushPopFrontBackSizeEmptyTest', async () => {
@@ -118,7 +118,7 @@ function main(): int {
         arktest.assertEQ(queue.size, 0);
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }
 
 async function pusherInt(): Promise<void> {

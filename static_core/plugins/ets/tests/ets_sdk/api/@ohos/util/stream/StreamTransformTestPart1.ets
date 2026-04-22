@@ -19,7 +19,7 @@ import buffer from '@ohos.buffer';
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Call Callback twice in Transform.", testTransformCallbackTwice);
@@ -37,7 +37,7 @@ function main(): int {
     suite.addTest("Writable properties of Transform.", testTransformWritableProperties);
     suite.addTest("Readable properties of Transform.", testTransformReadableProperties);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -120,7 +120,7 @@ async function testTransformCallbackTwice() {
     }));
 
     transform.write('test');
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamTransformConstructor001
@@ -230,7 +230,7 @@ async function testTransformReadOperation() {
     transformStream.on('data', (chunk: Object): void => {
         func.unsafeCall(chunk);
     });
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamTransform006
@@ -314,8 +314,8 @@ async function testTransformReadCallback() {
     setTimeout(() => {
         arktest.assertTrue(transform.doReadCalled);
     }, 0);
-    setTimeout(() => {
-        arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    setTimeout(async () => {
+        await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
     }, 10);
 }
 

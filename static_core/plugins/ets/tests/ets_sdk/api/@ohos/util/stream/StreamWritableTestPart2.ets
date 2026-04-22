@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Multiple callbacks", testWritableMultipleCallbacks);
@@ -27,7 +27,7 @@ function main(): int {
     suite.addAsyncTest("Write data error", testWritableWriteError);
     suite.addTest("Unknown encoding error", testWritableUnknownEncoding);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -103,7 +103,7 @@ async function testWritableMultipleCallbacks() {
         arktest.assertEQ(error.name, 'BusinessError');
     }));
     writableStream.write('test');
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable2 extends stream.Writable {
@@ -126,7 +126,7 @@ async function testWritableCallbackRepeatedly() {
         arktest.assertEQ(error.message, 'Callback called multiple times.');
         arktest.assertEQ(error.name, 'BusinessError');
     }));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable3 extends stream.Writable {
@@ -151,7 +151,7 @@ async function testWritableCallbackDuplicate() {
         arktest.assertEQ(error.message, 'Callback called multiple times');
         arktest.assertEQ(error.name, 'BusinessError');
     }));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable4 extends stream.Writable {
@@ -175,7 +175,7 @@ async function testWritableWriteError() {
     writableStream.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.message, 'Write after end.');
     }));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable5 extends stream.Writable {

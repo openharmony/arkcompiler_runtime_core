@@ -222,9 +222,9 @@ class CopyStep(TestPreparationStep):
 
 
 class JitStep(TestPreparationStep):
-    __main_pattern = r"\bfunction\s+(?P<main>main)\b"
+    __main_pattern = r"(?P<async_kw>async\s+)?\bfunction\s+(?P<main>main)\b"
     __param_pattern = r"\s*\(\s*(?P<param>(?P<param_name>\w+)(\s*:\s*\w+))?\s*\)"
-    __return_pattern = r"\s*(:\s*(?P<return_type>\w+)\b)?"
+    __return_pattern = r"\s*(:\s*(?P<return_type>\w+(?:\s*<\s*\w+\s*>)?))?"
     __throws_pattern = r"\s*(?P<throws>throws)?"
     __indent = "    "
 
@@ -268,26 +268,36 @@ class JitStep(TestPreparationStep):
         if match is None:
             return test_path
 
-        is_int_main = match.group("return_type") == "int"
-        return_type = ": int" if is_int_main else ""
-        throws = "throws " if match.group("throws") else ""
-        param_line = param if (param := match.group("param")) is not None else ""
-        param_name = param if (param := match.group("param_name")) is not None else ""
+        result = self.main_regexp.sub(lambda arg: arg.group(0).replace("main", "main_run"), original)
+        result += self.__build_main_wrapper(match)
+        write_2_file(test_path, result)
+        return test_path
 
-        tail = [f"\nfunction main({param_line}){return_type} {throws}{{"]
+    def __build_main_wrapper(self, match: re.Match) -> str:
+        # Treat both sync `: int` and async `: Promise<int>` as int-returning so the repeat
+        # loop accumulates the failed-test count. Any other shape (void, Promise<void>,
+        # boolean, none) skips the accumulator.
+        return_type_raw = match.group("return_type")
+        is_async = bool(match.group("async_kw"))
+        is_int_main = return_type_raw is not None and \
+            re.sub(r"\s+", "", return_type_raw) in ("int", "Promise<int>")
+        async_kw = "async " if is_async else ""
+        await_kw = "await " if is_async else ""
+        return_type = f": {return_type_raw}" if return_type_raw else ""
+        throws = "throws " if match.group("throws") else ""
+        param_line = match.group("param") or ""
+        param_name = match.group("param_name") or ""
+
+        tail = [f"\n{async_kw}function main({param_line}){return_type} {throws}{{"]
         if is_int_main:
             tail.append(f"{self.__indent}let result = 0")
         tail.append(f"{self.__indent}for(let i = 0; i < {self.num_repeats}; i++) {{")
         if is_int_main:
-            tail.append(f"{self.__indent * 2}result += main_run({param_name})")
+            tail.append(f"{self.__indent * 2}result += {await_kw}main_run({param_name})")
         else:
-            tail.append(f"{self.__indent * 2}main_run({param_name})")
+            tail.append(f"{self.__indent * 2}{await_kw}main_run({param_name})")
         tail.append(f"{self.__indent}}}")
         if is_int_main:
             tail.append(f"{self.__indent}return result;")
         tail.append("}")
-
-        result = self.main_regexp.sub(lambda arg: arg.group(0).replace("main", "main_run"), original)
-        result += "\n".join(tail)
-        write_2_file(test_path, result)
-        return test_path
+        return "\n".join(tail)

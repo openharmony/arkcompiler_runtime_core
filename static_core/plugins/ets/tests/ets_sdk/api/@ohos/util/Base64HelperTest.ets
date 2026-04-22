@@ -15,7 +15,7 @@
 
 import {util} from "@ohos.util";
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Base64Helper Test");
 
     testEncodeDecodeBasic();
@@ -32,14 +32,14 @@ function main(): int {
     suite.addTest("Test encode and decode with no options", testNoOptionsEncodeDecode);
     suite.addTest("Test encodeSync and decodeSync with no options", testNoOptionsEncodeDecodeSync);
 
-    waitForCompletion(testEncodeDecodeBasicAsync);
-    waitForCompletion(testEncodeDecodeAsyncBytes);
-    waitForCompletion(testUrlSafeAsync);
-    waitForCompletion(testDecodeWithNoiseAsync);
+    await testEncodeDecodeBasicAsync();
+    await testEncodeDecodeAsyncBytes();
+    await testUrlSafeAsync();
+    await testDecodeWithNoiseAsync();
     suite.addAsyncTest("Test async encode and decode with no options", testNoOptionsEncodeDecodeAsync);
     suite.addAsyncTest("Test async encode and decode Bytes with no options", testNoOptionsEncodeDecodeAsyncBytes);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 function assertUint8ArraysEqual(actual: Uint8Array, expected: Uint8Array): void {

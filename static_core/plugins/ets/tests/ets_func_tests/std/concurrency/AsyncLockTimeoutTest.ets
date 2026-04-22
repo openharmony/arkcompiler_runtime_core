@@ -49,8 +49,8 @@ async function asyncLockTimeoutTest(){
     arktest.assertEQ(count, 2)
 }
 
-function main() {
+async function main(): Promise<int> {
     let asyncLockTestsuite = new arktest.ArkTestsuite('asyncLockTestsuite');
     asyncLockTestsuite.addAsyncTest('asyncLockTimeoutTest',asyncLockTimeoutTest);
-    return asyncLockTestsuite.run();
+    return await asyncLockTestsuite.runAsync();
 }

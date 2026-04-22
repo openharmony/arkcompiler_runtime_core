@@ -21,9 +21,7 @@ class Event {
     }
 
     public wait(): boolean {
-        return waitForCompletion<boolean>(() => {
-            return this.promise;
-        });
+        return this.promise.awaitSync();
     }
 
     public fire(val: boolean = true) {
@@ -45,25 +43,27 @@ async function asyncRWLockSharedReadTest() {
     // First, acquire read lock in main task
     let acquiredInMain = false;
     let job0 = launch() {
-        waitForCompletion(async () => {
+        // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+        (async () => {
         await readLock.lock();
         acquiredInMain = true;
 
         for (let i = 0; i < tasks_counter; ++i) {
             const id = i.toInt();
             jobs[id] = launch() {
-                waitForCompletion(async () => {
+                // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+                (async () => {
                 await readLock.lock();
                 let value = sharedValue;
                 Coroutine.Schedule();
                 arktest.assertEQ(value, 42);
                 readLock.unlock();
-                })
+                })().awaitSync()
             };
         }
 
         readLock.unlock();
-        })
+        })().awaitSync()
     };
 
     job0.Await();
@@ -86,7 +86,8 @@ async function asyncRWLockExclusiveWriteTest() {
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             for (let j = 0; j < workload; ++j) {
                 await writeLock.lock();
                 let temp = count;
@@ -95,7 +96,7 @@ async function asyncRWLockExclusiveWriteTest() {
                 arktest.assertEQ(temp + 1, count);
                 writeLock.unlock();
             }
-            })
+            })().awaitSync()
         };
     }
     for (let job of jobs) {
@@ -118,19 +119,21 @@ async function asyncRWLockReadWriteMutualExclusionTest() {
     let waiter = new Event();
 
     let job0 = launch() {
-        waitForCompletion(async () => {
+        // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+        (async () => {
         await readLock.lock();
         readLockHeld = true;
 
         let job1 = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             writeLockAttempted = true;
             waiter1.fire();
             await writeLock.lock();
             writeAcquired = true;
             Coroutine.Schedule();
             writeLock.unlock();
-            })
+            })().awaitSync()
         };
         waiter1.wait();
         arktest.assertTrue(writeLockAttempted);
@@ -139,7 +142,7 @@ async function asyncRWLockReadWriteMutualExclusionTest() {
         readLock.unlock();
         job1.Await();
         arktest.assertTrue(writeAcquired);
-        })
+        })().awaitSync()
     };
 
     job0.Await();
@@ -179,7 +182,8 @@ async function asyncRWLockWriteWriteExclusionTest() {
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             await writeLock.lock();
             Coroutine.Schedule();
             arktest.assertEQ(flag, false);
@@ -188,7 +192,7 @@ async function asyncRWLockWriteWriteExclusionTest() {
             arktest.assertEQ(flag, true);
             flag = false;
             writeLock.unlock();
-            })
+            })().awaitSync()
         };
     }
 
@@ -211,7 +215,8 @@ async function asyncRWLockMultipleReadersTest() {
     for (let i = 0; i < readers_count; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             await readLock.lock();
             activeReaders[id] = 1;
             Coroutine.Schedule();
@@ -224,7 +229,7 @@ async function asyncRWLockMultipleReadersTest() {
 
             activeReaders[id] = 0;
             readLock.unlock();
-            })
+            })().awaitSync()
         };
     }
 
@@ -249,7 +254,8 @@ async function asyncRWLockMixedStressTest() {
     for (let i = 0; i < reader_count; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             for (let j = 0; j < workload; ++j) {
                 await readLock.lock();
                 let temp = sharedCounter;
@@ -257,14 +263,15 @@ async function asyncRWLockMixedStressTest() {
                 arktest.assertTrue(temp >= 0);
                 readLock.unlock();
             }
-            })
+            })().awaitSync()
         };
     }
 
     for (let i = 0; i < writer_count; ++i) {
         const id = (reader_count + i).toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             for (let j = 0; j < workload; ++j) {
                 await writeLock.lock();
                 let temp = sharedCounter;
@@ -273,7 +280,7 @@ async function asyncRWLockMixedStressTest() {
                 arktest.assertEQ(sharedCounter, temp + 1);
                 writeLock.unlock();
             }
-            })
+            })().awaitSync()
         };
     }
 
@@ -284,7 +291,7 @@ async function asyncRWLockMixedStressTest() {
     arktest.assertEQ(sharedCounter, writer_count * workload);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let asyncRWLockTestsuite = new arktest.ArkTestsuite("asyncRWLockTestsuite");
 
     asyncRWLockTestsuite.addAsyncTest('asyncRWLockSharedReadTest', asyncRWLockSharedReadTest);
@@ -295,5 +302,5 @@ function main(): int {
     asyncRWLockTestsuite.addAsyncTest('asyncRWLockMultipleReadersTest', asyncRWLockMultipleReadersTest);
     asyncRWLockTestsuite.addAsyncTest('asyncRWLockMixedStressTest', asyncRWLockMixedStressTest);
 
-    return asyncRWLockTestsuite.run();
+    return await asyncRWLockTestsuite.runAsync();
 }

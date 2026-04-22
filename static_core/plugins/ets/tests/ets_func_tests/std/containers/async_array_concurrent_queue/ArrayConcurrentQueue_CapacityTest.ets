@@ -17,7 +17,7 @@ const elementsNum: int = 10;
 const testNum: int = 20;
 const stressNum: int = 100;
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueCapacityTest');
 
     arrayConcurrentQueueTestsuite.addTest('CapacityTest001', () => {
@@ -57,5 +57,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, stressNum);
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }

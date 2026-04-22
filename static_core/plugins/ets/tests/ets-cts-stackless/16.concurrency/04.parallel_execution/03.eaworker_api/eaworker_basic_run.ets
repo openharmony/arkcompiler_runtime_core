@@ -30,6 +30,6 @@ async function startTest() {
   ea.quit()
 }
 
-function main() {
-  waitForCompletion(startTest)
+async function main() {
+  await startTest()
 }

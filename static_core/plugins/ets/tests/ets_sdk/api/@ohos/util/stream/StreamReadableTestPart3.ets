@@ -18,14 +18,14 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Pause and Resume in Readable Stream.", testReadablePauseAndResume)
     suite.addAsyncTest("Readable property in Readable.", testReadablePropertyReadable)
     suite.addTest("Set encoding for Readable.", testReadableSetEncoding)
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 function mustNotCall() {
@@ -107,7 +107,7 @@ async function testReadablePropertyReadable() {
     readable.on('end', mustCall((): void => {
         arktest.assertEQ(readable.readable, false);
     }));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableSetEncoding001

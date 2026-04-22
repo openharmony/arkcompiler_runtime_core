@@ -17,14 +17,14 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Pipe data transfer validation.", testPipeDataTransferValidation);
     suite.addAsyncTest("Pipe with readable and writable streams.", testPipeReadableAndWritableStreams);
     suite.addAsyncTest("Pipe large data transfer validation.", testPipeLargeDataTransferValidation);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -113,7 +113,7 @@ async function testPipeDataTransferValidation() {
     let writable = new MyWrite1();
     writable.on('finish', mustCallNoArgs());
     readable.pipe(writable);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite2 = 0;
@@ -151,7 +151,7 @@ async function testPipeReadableAndWritableStreams() {
     let readable = new MyRead2();
     let writable = new MyWrite2();
     readable.pipe(writable);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite3 = 0;
@@ -218,7 +218,7 @@ async function testPipeLargeDataTransferValidation() {
     readable.pipe(writable);
     readable.unpipe(writable);
     readable.pipe(writable);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class TestReadable extends stream.Readable {

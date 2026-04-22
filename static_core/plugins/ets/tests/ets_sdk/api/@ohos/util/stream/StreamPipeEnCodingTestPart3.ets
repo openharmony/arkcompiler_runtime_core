@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Writable stream end method validation (gbk).", testWritableStreamEndEncodingGbk);
@@ -25,7 +25,7 @@ function main(): int {
     suite.addAsyncTest("Set default encoding validation (gb18030).", testWritableStreamSetDefaultEncodingGb18030);
     suite.addAsyncTest("Set default encoding validation (gbk).", testWritableStreamSetDefaultEncodingGbk);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -97,7 +97,7 @@ async function testWritableStreamEndEncodingGbk() {
 
     let writable = new MyWrite1();
     writable.end('你好', 'gbk', mustCall());
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite2 = 0;
@@ -123,7 +123,7 @@ async function testWritableStreamEndEncodingGb2312() {
 
     let writable = new MyWrite2();
     writable.end('你好', 'gb2312', mustCall());
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite3 = 0;
@@ -150,7 +150,7 @@ async function testWritableStreamSetDefaultEncodingGb18030() {
     let writable = new MyWrite3();
     writable.setDefaultEncoding('gb18030');
     writable.write('你好');
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite4 = 0;
@@ -177,5 +177,5 @@ async function testWritableStreamSetDefaultEncodingGbk() {
     let writable = new MyWrite4();
     writable.setDefaultEncoding('gbk');
     writable.write('你好');
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }

@@ -355,6 +355,81 @@ export namespace arktest {
     }
 
     /**
+    * Asserts that an async callback function throws an exception and tests the thrown value.
+    * @param {Function} cb The async callback function to be executed.
+    * @param {Function} [test] A function used to test the thrown value,
+    *     acting as a predicate or returning an error message.
+    * @throws {AssertionError} Thrown when the callback function does not throw a value
+    *     or when the thrown value does not satisfy the test predicate.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    */
+    export async function expectThrowAsync(
+        cb: () => Promise<void>,
+        test?: (v: Error) => boolean | string): Promise<void> {
+        try {
+            await cb()
+        } catch (e) {
+            e = (e instanceof Error) ? e as Error
+                : failingAssertion("An arbitrary object instance was caught!")
+            let res = test?.(e)
+            if (res != undefined && res != true) {
+                failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
+            }
+            return
+        }
+        failingAssertion("Callback expected to throw");
+    }
+
+    /**
+    * Executes the async callback function and checks whether an Error occurs. If an expected value is provided,
+    * also checks whether the thrown error matches the expected value.
+    * @param {Function} fn The async callback function to be executed.
+    * @param {Function} [expect] An optional string message or Error instance used to test the thrown value.
+    * @throws {AssertionError} Thrown when no error occurs or when the thrown error does not match the expected error.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    */
+    export async function expectErrorAsync(fn: () => Promise<void>, expect?: string | Error): Promise<void> {
+        await expectThrowAsync(fn, (e) => {
+            if (!(e instanceof Error)) {
+                return "Expected an instance of Error, got " + Class.of(e).getName()
+            }
+            if (expect === undefined) {
+                return true
+            } else if (typeof expect == "string") {
+                return e.message == expect
+            } else {
+                const expectedError = expect as Error // broken smartcast
+                const eType = Class.of(e)
+                const expectType = Class.of(expectedError)
+                if (eType !== expectType) {
+                    return "Expected " + expectType.getName() + ", got " + eType.getName()
+                }
+                if (e.message != expectedError.message) {
+                    return "Expected '" + expectedError.message + "', got '" + e.message + "'"
+                }
+                return true
+            }
+        })
+    }
+
+    /**
+    * Executes the async callback function and checks that no error occurs.
+    * @param {Function} fn The async callback function to be executed.
+    * @throws {AssertionError} Thrown when an error occurs.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    */
+    export async function expectNoThrowAsync(fn: () => Promise<void>): Promise<void> {
+        try {
+            await fn();
+        } catch (e) {
+            assertCommon(false, "Error is not expected, but has ocurred: " + e);
+        }
+    }
+
+    /**
      * Represents terminal colors.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel

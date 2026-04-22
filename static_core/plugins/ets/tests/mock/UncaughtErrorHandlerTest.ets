@@ -22,7 +22,7 @@ class Event {
     }
 
     public Wait() {
-        waitForCompletion<Number>(() => this.promise);
+        this.promise.awaitSync();
     }
 
     public Fire() {

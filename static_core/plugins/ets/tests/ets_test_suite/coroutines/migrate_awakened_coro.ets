@@ -53,7 +53,7 @@ function testLaunch(): void {
     arktest.assertTrue(wId == 1 || wId == 2);
 
     loadThisWorker(wId);
-    waitForCompletion(awaitee);
+    awaitee().awaitSync();
 
     // migrate to the worker with the least load after await
     if (wId != CoroutineExtras.getWorkerId()) {

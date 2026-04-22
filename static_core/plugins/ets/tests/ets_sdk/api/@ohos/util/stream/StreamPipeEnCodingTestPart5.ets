@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Duplex stream end method validation (gb18030).", testDuplexStreamEndEncodingGb18030);
@@ -25,7 +25,7 @@ function main(): int {
     suite.addAsyncTest("Duplex stream end method validation (gb2312).", testDuplexStreamEndEncodingGb2312);
     suite.addAsyncTest("Set default encoding for duplex stream (gb18030).", testDuplexStreamSetDefaultEncodingGb18030);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -97,7 +97,7 @@ async function testDuplexStreamEndEncodingGb18030() {
 
     let duplex = new MyDuplex1();
     duplex.end('测试', 'gb18030', mustCall());
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyDuplex2 = 0;
@@ -123,7 +123,7 @@ async function testDuplexStreamEndEncodingGbk() {
 
     let duplex = new MyDuplex2();
     duplex.end('测试', 'gbk', mustCall());
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyDuplex3 = 0;
@@ -149,7 +149,7 @@ async function testDuplexStreamEndEncodingGb2312() {
 
     let duplex = new MyDuplex3();
     duplex.end('测试', 'gb2312', mustCall());
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyDuplex4 = 0;
@@ -176,5 +176,5 @@ async function testDuplexStreamSetDefaultEncodingGb18030() {
     let result = duplex.setDefaultEncoding('gb18030');
     duplex.write('你好');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }

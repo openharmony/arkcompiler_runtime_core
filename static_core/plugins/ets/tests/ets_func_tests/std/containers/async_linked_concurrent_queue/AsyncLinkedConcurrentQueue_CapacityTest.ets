@@ -51,7 +51,7 @@ function getCapacityStressTest004(): void {
     arktest.assertEQ(queue.capacity, stressNum);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueCapacityTest');
 
     testSuite.addTest('CapacityTest001', capacityTest001);
@@ -59,5 +59,5 @@ function main(): int {
     testSuite.addAsyncTest('CapacityTest003', capacityTest003);
     testSuite.addTest('GetCapacityStressTest004', getCapacityStressTest004);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

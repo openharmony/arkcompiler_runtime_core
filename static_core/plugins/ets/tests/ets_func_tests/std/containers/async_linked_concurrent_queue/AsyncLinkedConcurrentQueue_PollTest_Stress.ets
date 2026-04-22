@@ -45,10 +45,10 @@ async function threadsPollStressTest001(): Promise<void> {
     arktest.assertEQ(queue.size, 0);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueuePollStressTest');
 
     testSuite.addAsyncTest('ThreadsPollStressTest001', threadsPollStressTest001);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

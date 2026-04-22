@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ class Getter {
     }
 }
 
-function main(): void {
+async function main(): Promise<void> {
     let getter = new Getter();
     let arr: Int[] = [0, 1, 2];
     let foo: fooAsyncLambda = async (): Promise<void> => {
@@ -42,5 +42,5 @@ function main(): void {
         arktest.assertTrue( arr2 instanceof Object)
         arktest.assertTrue( arr2[0] instanceof Int)
     }
-    waitForCompletion(foo);
+    await foo();
 }

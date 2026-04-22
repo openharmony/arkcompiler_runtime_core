@@ -35,17 +35,15 @@ class Child extends Parent {
   }
 
   public async greet(): Promise<string> {
-    return await this.customFetchMessage();
+    await this.customFetchMessage();
   }
 
   public async callParentFarewell(): Promise<string> {
-    return await this.farewell();
+    await this.farewell();
   }
 }
 
-function main(): void {
-  waitForCompletion(async () => {
-    const child = new Child();
-    arktest.assertEQ(await child.callParentFarewell(), "Custom Hello from Child! Goodbye from Parent!");
-  });
+async function main() {
+  const child = new Child();
+  arktest.assertEQ(await child.callParentFarewell(), "Custom Hello from Child! Goodbye from Parent!");
 }

@@ -21,8 +21,8 @@ desc: {{c.desc}}
 
 {{c.logic}}
 
-function main() {
-  waitForCompletion(startTest)
+async function main() {
+  await startTest()
 }
 
 {% endfor %}

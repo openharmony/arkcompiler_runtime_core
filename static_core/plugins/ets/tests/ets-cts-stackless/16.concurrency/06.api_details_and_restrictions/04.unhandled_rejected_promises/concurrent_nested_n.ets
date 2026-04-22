@@ -47,6 +47,6 @@ async function taskB(): Promise<void> {
     console.log('Task B done');
 }
 
-function main(): void {
-    waitForCompletion(() => Promise.all([taskA(), taskB()]))
+async function main() {
+    await Promise.all([taskA(), taskB()])
 }

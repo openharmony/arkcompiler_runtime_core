@@ -51,12 +51,12 @@ async function isEmptyStressTest003(): Promise<void> {
     arktest.assertEQ(queue.isEmpty(), true);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueIsEmptyTest');
 
     testSuite.addTest('IsEmptyTest001', isEmptyTest001);
     testSuite.addAsyncTest('IsEmptyTest002', isEmptyTest002);
     testSuite.addAsyncTest('IsEmptyStressTest003', isEmptyStressTest003);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }
