@@ -68,6 +68,10 @@ class Tool(ToolBase):
     def name(self) -> str:
         return 'Ark AOT Compiler'
 
+    @property
+    def version(self) -> str:
+        return f': --version will be implemented for {self.bin_name} soon'
+
     @staticmethod
     def panda_files(files: Iterable[Path]) -> str:
         if not files:
