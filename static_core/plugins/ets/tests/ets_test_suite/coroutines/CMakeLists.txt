@@ -94,6 +94,7 @@ function(add_ets_coroutines_test)
                 add_ets_test(ets_test_suite_coroutines
                              FILE ${ARG_FILE}
                              ${SKIP_ARM32_COMPILER}
+                             ENABLE_AN_FORCE
                              TEST_NAME "${test_name}_${impl_name}_${options_name}_workers_${workers_count}"
                              OPTIONS ${ARG_OPTIONS} ${impl_option} ${additional_options} ${workers_option} ${list_unhandled_option}
                              MODE ${ARG_MODE}

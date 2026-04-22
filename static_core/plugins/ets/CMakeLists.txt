@@ -175,7 +175,7 @@ add_subdirectory(tools)
 # NOTE(nsizov): change this logic when ets compiler moved into ets plugin
 if(TARGET es2panda)
     compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc" etsstdlib)
-    # NOTE(konstanting): this is a temporary stackless StdLib, will be removed after transition
+    # NOTE(konstanting, #34299): this is a temporary stackless StdLib, will be removed after transition
     compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.stackless.abc" etsstdlib.stackless COMPILER_EXTRA_OPTIONS "--stackless-coros=true")
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
@@ -223,10 +223,30 @@ endif()
 if(PANDA_WITH_COMPILER)
     add_subdirectory(compiler)
     set (COMPILER_OPTIONS "--compiler-check-final=true")
+
+    # NOTE(nkholiavin, #34299): this is a temporary stackless StdLib, will be removed after transition
+    # NOTE(nkholiavin, #34241) dispatch fails in IrBuilder
+    set(STACKLESS_COMPILER_OPTIONS "${COMPILER_OPTIONS} --compiler-regex=(?!std\.containers\.containers\.stackless).*")
+    add_custom_target(ets-compile-stdlib-stackless-default
+        COMMENT "Running ark_aot compilation for stackless etsstdlib with default options"
+        COMMAND ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh
+            --prefix=${PANDA_RUN_PREFIX}
+            --binary-dir=${CMAKE_BINARY_DIR}
+            -compiler-options=${STACKLESS_COMPILER_OPTIONS}
+            -stdlib-abc=plugins/ets/etsstdlib.stackless.abc
+            -paoc-output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.stackless.an
+        DEPENDS ark_aot etsstdlib.stackless
+        VERBATIM
+    )
+
     add_custom_target(ets-compile-stdlib-default
         COMMENT "Running ark_aot compilation for etsstdlib with default options"
-        COMMAND ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh --prefix="${PANDA_RUN_PREFIX}" --binary-dir=${CMAKE_BINARY_DIR} -compiler-options="${COMPILER_OPTIONS}" -paoc-output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.an
-        DEPENDS ark_aot etsstdlib
+        COMMAND ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh
+            --prefix="${PANDA_RUN_PREFIX}"
+            --binary-dir=${CMAKE_BINARY_DIR}
+            -compiler-options="${COMPILER_OPTIONS}"
+            -paoc-output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.an
+        DEPENDS ark_aot etsstdlib ets-compile-stdlib-stackless-default
     )
 endif()
 

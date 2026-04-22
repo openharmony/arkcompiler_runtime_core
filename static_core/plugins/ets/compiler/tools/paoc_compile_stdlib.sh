@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 
 set -eo pipefail
 
+STDLIB_ABC="plugins/ets/etsstdlib.abc"
 PAOC_OUTPUT="etsstdlib.an"
 for ARGUMENT in "$@"; do
 case "$ARGUMENT" in
@@ -40,6 +41,9 @@ case "$ARGUMENT" in
     -paoc-regex=*)
     PAOC_REGEX="--compiler-regex=${ARGUMENT#*=}"
     ;;
+    -stdlib-abc=*)
+    STDLIB_ABC="${ARGUMENT#*=}"
+    ;;
     *)
     echo "Unexpected argument: '${ARGUMENT}'"
     exit 1
@@ -52,7 +56,7 @@ if [ -z "$PANDA_BINARY_ROOT" ]; then
     exit 1
 fi
 
-${PANDA_RUN_PREFIX} ${PANDA_BINARY_ROOT}/bin/ark_aot --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc \
-                    --paoc-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc  \
+${PANDA_RUN_PREFIX} ${PANDA_BINARY_ROOT}/bin/ark_aot --boot-panda-files=${PANDA_BINARY_ROOT}/${STDLIB_ABC} \
+                    --paoc-panda-files=${PANDA_BINARY_ROOT}/${STDLIB_ABC}  \
                     --compiler-ignore-failures=false $PAOC_MODE $PAOC_REGEX --load-runtimes="ets" \
                     $TARGET_ARCH ${OPTIONS}  --paoc-output=${PAOC_OUTPUT}
