@@ -83,5 +83,5 @@ class ComparisonUtils:
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
-        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]\s*|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]\s*'
+        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:-?\d+:\d+\s*[\]\)]\s*|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]\s*'
         return re.sub(pattern, '', error_message)

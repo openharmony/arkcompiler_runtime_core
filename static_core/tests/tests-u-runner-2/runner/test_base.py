@@ -38,8 +38,8 @@ from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
 from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
-from runner.types.step_report import StepReport
-from runner.types.test_env import TestEnv
+from runner.runner_types.step_report import StepReport
+from runner.runner_types.test_env import TestEnv
 from runner.utils import ExpectedField
 
 _LOGGER = Log.get_logger(__file__)

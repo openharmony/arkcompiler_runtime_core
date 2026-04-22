@@ -5,14 +5,17 @@ Universal test runner, version 2, for Open Harmony.
 
 ## Prerequisites
 -   Panda build
--   Python3 version at least 3.8. 3.10 is recommended.
+-   Python3 version at least 3.10.
 -   Make sure to run `sudo static_core/scripts/install-deps-ubuntu -i=test` to create a ~/.venv-panda virtual environment with
 all required python libraries  (`tqdm`, `dataclasses`, `python-dotenv`, etc).
 -   Suites `ets-es-checked` and `ets-ts-subset` requires [node and some packages](#ETS-dependencies)
 
 ## Quick run
 
-It is possible to run tests either using script `runner.sh` or `main.py` directly.
+Test can be run in one of the following ways:
+- using `runner.sh` script 
+- running `main.py` directly
+- activating virtual environment and running `urunner` package entry point
 
 ### Before the first start
 - Create `.urunner.env` in your home directory.
@@ -51,6 +54,40 @@ libraries in your working environment. Then `main.py` will run test(s) for you.
 ```bash
 urunner2>source ~/.venv-panda/bin/activate
 urunner2>python3 main.py <workflow-name> <test-suite-name> [option1... option]
+urunner2>deactivate
+```
+
+### Package
+You can run URunner as a Python package entry point (`urunner`).
+To do so, activate the target virtual environment first, install the runner package
+in editable mode from the runner directory into that environment, and then run:
+
+```bash
+urunner2>source ~/.venv-panda/bin/activate
+urunner2>URUNNER2_PATH=<path-to-tests-u-runner-2>
+urunner2>pip install -e ${URUNNER2_PATH}
+urunner2>urunner <workflow-name> <test-suite-name> [option1... option]
+urunner2>deactivate
+```
+
+`pip install -e` installs the package in editable mode, so code changes in URunner are applied immediately
+without reinstalling the package.
+If package dependencies are added or changed, reinstall (or upgrade) package metadata in the environment:
+`pip install -e ${URUNNER2_PATH} --upgrade`
+
+Runner unit tests (including coverage report) can be executed via `tox`:
+
+```bash
+urunner2>source ~/.venv-panda/bin/activate
+urunner2>tox run -e unittests
+urunner2>deactivate
+```
+
+Runner linters can be executed via `tox`:
+
+```bash
+urunner2>source ~/.venv-panda/bin/activate
+urunner2>tox run -e linters
 urunner2>deactivate
 ```
 

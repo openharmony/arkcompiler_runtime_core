@@ -33,7 +33,7 @@ from runner.enum_types.configuration_kind import (
 from runner.logger import Log
 from runner.options.options_step import Step, StepKind
 from runner.options.root_dir import RootDir
-from runner.types.test_env import TestEnv
+from runner.runner_types.test_env import TestEnv
 from runner.utils import correct_path, detect_architecture, detect_operating_system
 
 _LOGGER = Log.get_logger(__file__)

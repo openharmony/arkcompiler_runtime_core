@@ -22,10 +22,10 @@ from runner.options.config import Config
 from runner.options.options_test_lists import TestListsOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
+from runner.runner_types.test_env import TestEnv
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.tests_flow_registry import TestFlowRegistry
 from runner.suites.work_dir import WorkDir
-from runner.types.test_env import TestEnv
 
 
 def get_test_instance(test_id: str) -> TestStandardFlow:

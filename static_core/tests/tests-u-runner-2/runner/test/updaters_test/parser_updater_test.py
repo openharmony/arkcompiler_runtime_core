@@ -22,7 +22,7 @@ from unittest.mock import MagicMock
 from runner.extensions.updaters.parser.parser_updater import ParserUpdater
 from runner.options.config import Config
 from runner.options.options_step import StepKind
-from runner.types.step_report import StepReport
+from runner.runner_types.step_report import StepReport
 
 
 class ParserUpdaterTest(TestCase):

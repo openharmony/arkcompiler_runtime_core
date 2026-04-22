@@ -20,7 +20,7 @@ from pathlib import Path
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.options.config import Config
-from runner.types.step_report import StepReport
+from runner.runner_types.step_report import StepReport
 from runner.utils import get_class_by_name
 
 

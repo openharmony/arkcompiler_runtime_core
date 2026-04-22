@@ -22,11 +22,11 @@ from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options import IOptions
 from runner.options.options_step import Step
+from runner.runner_types.test_env import TestEnv
 from runner.suites.one_step_runner import OneStepRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import StandardFlowUtils
 from runner.test_base import GTest
-from runner.types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
 

@@ -29,8 +29,8 @@ from runner.enum_types.fail_kind import FailKind, FailureReturnCode
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.logger import Log
 from runner.options.options_step import Step, StepKind
-from runner.types.step_report import StepReport
-from runner.types.test_env import TestEnv
+from runner.runner_types.step_report import StepReport
+from runner.runner_types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
 

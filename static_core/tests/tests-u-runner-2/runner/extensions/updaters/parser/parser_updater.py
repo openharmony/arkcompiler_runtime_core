@@ -21,7 +21,7 @@ from runner import utils
 from runner.extensions.updaters.iupdater import IUpdater
 from runner.logger import Log
 from runner.options.options_step import StepKind
-from runner.types.step_report import StepReport
+from runner.runner_types.step_report import StepReport
 
 _LOGGER = Log.get_logger(__file__)
 

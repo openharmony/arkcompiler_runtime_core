@@ -30,12 +30,12 @@ from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options_step import RawStepData, Step
 from runner.options.step_reqs import ReqKind, StepRequirements
+from runner.runner_types.step_report import StepReport
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
 from runner.test.test_steps_test.test_steps_test import TestStep
 from runner.test.test_utils import compare_dicts, compare_lists, test_cmake_build
-from runner.types.step_report import StepReport
 
 
 class TestStepsTest2(TestCase):
