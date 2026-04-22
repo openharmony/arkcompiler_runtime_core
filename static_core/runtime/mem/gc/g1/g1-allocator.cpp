@@ -207,7 +207,8 @@ void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     if (LIKELY(alignedSize <= GetYoungAllocMaxSize())) {
-        RegionMem regionMem = objectYoungAllocator_->AllocExt(size, align, pinned);
+        RegionMem regionMem = pinned ? objectTenuredAllocator_->AllocExt(size, align, true)
+                                     : objectYoungAllocator_->AllocExt(size, align);
         if (objInit == ObjMemInitPolicy::REQUIRE_INIT && !regionMem.isZeroed) {
             ObjectMemoryInit(regionMem.mem, size);
         }
@@ -306,6 +307,12 @@ template <MTModeT MT_MODE>
 PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetYoungRegions()
 {
     return objectYoungAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>();
+}
+
+template <MTModeT MT_MODE>
+PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetTenuredRegions()
+{
+    return objectTenuredAllocator_->GetAllSpecificRegions<RegionFlag::IS_OLD>();
 }
 
 template <MTModeT MT_MODE>
