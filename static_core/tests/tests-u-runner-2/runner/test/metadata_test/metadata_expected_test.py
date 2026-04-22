@@ -140,3 +140,48 @@ class MetadataTest(unittest.TestCase):
         self.assertIsNotNone(metadata)
         self.assertEqual(metadata.expected_out, {StepKind.RUNTIME.value: ['single line']})
         self.assertIsInstance(metadata.expected_out, dict)
+
+    def test_expected_out_runtime_step(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': {StepKind.RUNTIME.value: ['line1', 'line2']},
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertEqual(metadata.expected_out, {'runtime': ['line1', 'line2']})
+        self.assertNotIn(StepKind.COMPILER.value, metadata.expected_out)
+
+    def test_expected_out_multiple_steps(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': {
+                StepKind.COMPILER.value: ['compile output'],
+                StepKind.RUNTIME.value: ['runtime output'],
+            },
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertEqual(metadata.expected_out[StepKind.COMPILER.value], ['compile output'])
+        self.assertEqual(metadata.expected_out[StepKind.RUNTIME.value], ['runtime output'])
+
+    def test_expected_error_runtime_step(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': {StepKind.RUNTIME.value: ['runtime error']},
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertEqual(metadata.expected_error, {'runtime': ['runtime error']})
+        self.assertNotIn(StepKind.COMPILER.value, metadata.expected_error)
+
+    def test_expected_out_dict_string_value(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': {StepKind.RUNTIME.value: 'single string'},
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertEqual(metadata.expected_out, {'runtime': ['single string']})
+
+    def test_expected_error_multiple_steps(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': {
+                StepKind.COMPILER.value: ['compile error'],
+                StepKind.RUNTIME.value: ['runtime error'],
+            },
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertEqual(metadata.expected_error[StepKind.COMPILER.value], ['compile error'])
+        self.assertEqual(metadata.expected_error[StepKind.RUNTIME.value], ['runtime error'])
