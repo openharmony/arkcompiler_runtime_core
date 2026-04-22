@@ -13,19 +13,26 @@
  * limitations under the License.
  */
 
-{% for n in namespaces %}
+
 /*---
 desc: namespace scope to import but not exported
 files: ['./namespace_to_export.ets']
 ---*/
 
 import { ExternalSpace as Ex } from './namespace_to_export'
-
+{%- for n in namespaces %}
 {{n.decl}}
+{%- endfor %}
 
-function main() {
-    arktest.assertEQ({{n.use}}, {{n.expected}})
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Namespace_to_import");
+
+    {%- for n in namespaces %}
+        testSuite.addTest("scope{{loop.index0}}", () => {
+            arktest.assertEQ( {{n.use}}, {{n.expected}} )
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-
-{% endfor %}
-

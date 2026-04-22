@@ -12,30 +12,37 @@
 # limitations under the License.
 
 namespaces:
+#0
   - use: |-
       Ex.x2
     expected: |-
       1
+#1
   - use: |-
       Ex.y1
     expected: |-
       2
+#2
   - use: |-
       Ex.y2
     expected: |-
       2
+#3
   - use: |-
       Ex.foo()
     expected: |-
       3
+#4
   - use: |-
       Ex.EmbeddedSpace.z1
     expected: |-
       3
+#5
   - use: |-
       Ex.EmbeddedSpace.z2
     expected: |-
       2
+#6
   - use: |-
       Ex.EmbeddedSpace.bar()
     expected: |-

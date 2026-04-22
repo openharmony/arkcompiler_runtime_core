@@ -12,24 +12,28 @@
 # limitations under the License.
 
 modules:
+#0
   - entity: |-
       x 
     use: |-
       x
     expected: |-
       1
+#1
   - entity: |-
       foo 
     use: |-
       foo()
     expected: |-
       0
+#2
   - entity: |-
       C 
     use: |-
       (new C()).y
     expected: |-
       2
+#3
   - entity: |-
       I
     decl: |-
@@ -39,10 +43,10 @@ modules:
       a.zzz()
     expected: |-
       3
+#4
   - entity: |-
       D 
     use: |-
       (new D()).f
     expected: |-
       4
-

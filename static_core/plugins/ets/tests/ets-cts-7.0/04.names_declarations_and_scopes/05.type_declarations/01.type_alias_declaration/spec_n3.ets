@@ -17,6 +17,8 @@
 desc: >-
     A compile-time error occurs if a generic type alias is used without a type argument
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0155: Type alias declaration is generic, but too few type arguments were provided"
 ---*/
 
+//Array<A<T>> expected
 type A<T> = Array<A>

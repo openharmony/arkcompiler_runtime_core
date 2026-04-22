@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-{% for qname in qualified_name %}
+
 /*---
 desc: Qualified name
 ---*/
-
+{%- for qname in qualified_name %}
 class Clazz{{loop.index0}} {
     static staticField: int = 1;
     static staticMethod(): int { return 2; }
@@ -28,8 +28,17 @@ class Clazz{{loop.index0}} {
 
 let instance{{loop.index0}}: Clazz{{loop.index0}};
 instance{{loop.index0}} = new Clazz{{loop.index0}}();
+{%- endfor %}
 
-function main(): void {
-    arktest.assertEQ({{qname}})
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Qualified_names");
+
+    {%- for qname in qualified_name %}
+        testSuite.addTest("qualified_names_{{loop.index0}}", () => {
+            arktest.assertEQ( {{qname}} )
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-{% endfor %}

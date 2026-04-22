@@ -2519,3 +2519,4 @@
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
+04.names_declarations_and_scopes/03.scopes/module_level_scope/module_to_import.ets

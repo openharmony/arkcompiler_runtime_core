@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 desc: >-
     A compile-time error occurs if a generic type alias is used without a type argument
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0155: Type alias declaration is generic, but too few type arguments were provided"
 ---*/
 
+//Array<A<T>> expected
 type A<T> = Array<A>

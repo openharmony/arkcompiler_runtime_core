@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,10 @@
 
  /*---
 desc: >-
-    Other use causes a compile-time error, because the compiler does not have enough information about the defined
-    alias
+    Other use causes a compile-time error, because the compiler does not have 
+    enough information about the defined alias
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0311: Circular type alias reference"
 ---*/
 
 type E = E

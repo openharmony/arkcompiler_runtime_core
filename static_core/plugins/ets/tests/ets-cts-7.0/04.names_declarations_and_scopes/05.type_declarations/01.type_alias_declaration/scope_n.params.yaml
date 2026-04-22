@@ -20,6 +20,7 @@ cases:
       use: |-
           let v: MOD_ALIAS0 = true  // should not be visible here
           let ok = true
+      expected: "Semantic error ESE0371: Cannot find type 'MOD_ALIAS0'."
 
     # use an alias defined and not exported from another unit
 
@@ -29,13 +30,15 @@ cases:
       use: |-
           let v: MOD_ALIAS4 = new EClass()  // should not be visible here
           let ok = v instanceof EClass
+      expected: "Semantic error ESE0371: Cannot find type 'MOD_ALIAS4'."
 
     # use an alias defined and exported from another unit, duplicate
 
     - files: ['./mod/mod_5.ets']
       decl: |-
           import { MOD_ALIAS5 } from './mod/mod_5.ets'
-          type MOD_ALIAS5 = Integer
+          type MOD_ALIAS5 = number
       use: |-
           let v: MOD_ALIAS5 = 1.0  // should not be visible here
           let ok = true
+      expected: "Semantic error ESE0349: Variable 'MOD_ALIAS5' is already defined."
