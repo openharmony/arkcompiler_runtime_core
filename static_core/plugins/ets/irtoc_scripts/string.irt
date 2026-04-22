@@ -2296,15 +2296,22 @@ GenerateStringRepeatTlab(:NativePlus)
 
 def GenerateStringConcat2Tlab(cgmode)
   function("StringConcat2Tlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
-            params: {str1_orig: 'ref', str2_orig: 'ref'},
-            regmap: $full_regmap,
-            regalloc_set: $panda_mask,
-            mode: [cgmode]) {
+           params: {str1_orig: 'ref', str2_orig: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).void.Terminator
       next
     end
+
+    If(str1_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+    If(str2_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
 
     str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
@@ -2388,6 +2395,16 @@ def GenerateStringConcat3Tlab(cgmode)
       Intrinsic(:UNREACHABLE).void.Terminator
       next
     end
+
+    If(str1_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+    If(str2_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+    If(str3_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
 
     str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
@@ -2488,6 +2505,19 @@ def GenerateStringConcat4Tlab(cgmode)
       Intrinsic(:UNREACHABLE).void.Terminator
       next
     end
+
+    If(str1_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+    If(str2_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+    If(str3_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
+    If(str4_orig, 0).EQ {
+      Goto(:SlowPathEntrypoint)
+    }
 
     str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
@@ -2611,6 +2641,13 @@ function(:StringConcat2TlabAllStrings,
     Intrinsic(:UNREACHABLE).void.Terminator
     next
   end
+
+  If(str1, 0).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+  If(str2, 0).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
 
   # Handle empty string cases
   length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32

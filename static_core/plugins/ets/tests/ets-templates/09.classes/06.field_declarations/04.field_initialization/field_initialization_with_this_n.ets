@@ -15,20 +15,21 @@ limitations under the License.
 
 /*---
 desc: >-
-    If the initializer expression uses super or this in any form, then a compile-time warning occurs.
-    If such use occurs then runtime error can occur.
-expected_out: "issue #"
-tags: [negative]
+    If the instance field initializer expression uses this directly, then a compile-time warning occurs.
+expected_out: "Warning W0010: The instance field initializer expression cannot use the this."
 ---*/
 
 class A {
   public x: string = this.bar()
   public bar(): string {
-    console.log(this.x)
-    return "some str"
+    return this.x
   }
 }
 
 function main(): void {
-  let instance: A = new A();
+  try {
+    let instance: A = new A()
+    let z = instance.x
+  } catch (e) {
+  }
 }
