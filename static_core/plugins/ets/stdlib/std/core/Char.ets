@@ -583,8 +583,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      */
     public static isBinDigit(value: char): boolean {
-        let diff: int = value.toInt() - Char.toInt(c'0');
-        return (0 == diff) || (diff == 1);
+        return value == c'0' || value == c'1'
     }
 
     /**
@@ -608,8 +607,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      */
     public static isDecDigit(value: char): boolean {
-        let diff: int = value.toInt() - Char.toInt(c'0');
-        return (0 <= diff) && (diff <= 9);
+        return value >= c'0' && value <= c'9'
     }
 
     /**
@@ -624,7 +622,7 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
-     * isBinDigit() checks whether the char represents a hexadecimal digit.
+     * isHexDigit() checks whether the char represents a hexadecimal digit.
      *
      * @param { char } value a char to check.
      * @returns { boolean }
@@ -633,10 +631,9 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      */
     public static isHexDigit(value: char): boolean {
-        let isDigit = (0 <= value.compareTo(c'0')) && (value.compareTo(c'9') <= 0)
-        let isChar = ((0 <= value.compareTo(c'a')) && (value.compareTo(c'f') <= 0))
-                  || ((0 <= value.compareTo(c'A')) && (value.compareTo(c'F') <= 0))
-        return isDigit || isChar
+        return Char.isDecDigit(value)
+            || (value >= c'a' && value <= c'f')
+            || (value >= c'A' && value <= c'F')
     }
 
     /**
