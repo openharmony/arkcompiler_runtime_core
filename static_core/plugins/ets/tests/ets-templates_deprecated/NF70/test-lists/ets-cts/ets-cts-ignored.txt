@@ -254,9 +254,6 @@
 07.expressions/07.spread_expression/spex_func_75.ets
 07.expressions/07.spread_expression/spex_func_76.ets
 
-#32626
-07.expressions/07.spread_expression/spex_copy_values_8.ets
-
 #32639
 07.expressions/07.spread_expression/spex_readonly_array_source.ets
 07.expressions/07.spread_expression/spex_readonly_n_1.ets

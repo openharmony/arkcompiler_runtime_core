@@ -76,9 +76,6 @@
 07.expressions/07.spread_expression/spex_func_75.ets
 07.expressions/07.spread_expression/spex_func_76.ets
 
-#32626
-07.expressions/07.spread_expression/spex_copy_values_8.ets
-
 #32421
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_0.ets
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_1.ets
