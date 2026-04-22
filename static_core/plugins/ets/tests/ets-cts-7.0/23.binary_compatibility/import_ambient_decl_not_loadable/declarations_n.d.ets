@@ -17,25 +17,7 @@ limitations under the License.
 desc: Ambient declarations
 files: ['./declarations_n.ets']
 tags: [not-a-test, compile-only]
-desc: Ambient declarations
-files: ['./declarations_n.ets']
-tags: [not-a-test, compile-only]
 ---*/
-
-export declare function bar(message: string): number;
-
-export declare class B {
-  x: number;
-  constructor(x: number);
-  foo(f: number): number;
-}
-
-export declare class C {
-  x: string;
-  constructor(x: string);
-  foo(f: string): string;
-}
-
 
 export declare function bar(message: string): number;
 
