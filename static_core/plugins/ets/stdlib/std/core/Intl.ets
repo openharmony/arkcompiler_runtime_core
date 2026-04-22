@@ -2154,7 +2154,7 @@ export class DateTimeFormat {
         "SEK", "SGD", "SHP", "SLL", "SOS", "SRD", "SSP", "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP",
         "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XCD", "XDR",
         "XOF", "XPF", "XSU", "YER", "ZAR", "ZMW", "ZWL")
-    const RefCurrenciesMap = new Map<string, number>()
+    const RefCurrenciesMap: Map<string, number> = new Map<string, number>()
     Currencies.forEach((value, index) => { RefCurrenciesMap.set(value, index) })
 
     export class NumberFormat {

@@ -28,12 +28,12 @@ export interface Iface3 {
 
 export @interface Position {}
 
-export function foo3(a : Array<string>) {
+export function foo3(a : Array<string>): void {
   console.log(a[0])
 }
 export class C {
-  static foo3(a : Array<string>) { console.log(a[0]) }
-  bar(a : Array<string>) { console.log(a[0]) }
+  static foo3(a : Array<string>): void { console.log(a[0]) }
+  bar(a : Array<string>): void { console.log(a[0]) }
 }
 export interface Iface4 {
   foo3(a : Array<string>) : void
@@ -46,7 +46,7 @@ export interface I {
 export interface Iface5 {
   foo5() : void
 }
-export function foo6(iface5 : Iface5) {
+export function foo6(iface5 : Iface5): void {
   console.log(iface5 instanceof Iface5) // true
 }
 

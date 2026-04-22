@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,6 @@ export class Fields {
     uint8Array_: Uint8Array = new Uint8Array();
     uint16Array_: Uint16Array = new Uint16Array();
     uint32Array_: Uint32Array = new Uint32Array();
-    public cb = (a: number = 1, b: number = 2, c: number = 3) => {};
+    public cb: (arg1?: number, arg2?: number, arg3?: number) => void = (a: number = 1, b: number = 2, c: number = 3) => {};
 };
 Fields.staticFloat_ = 1.1f;

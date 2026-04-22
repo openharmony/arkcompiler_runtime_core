@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export let arr = [1, 2, 3]
+export let arr: number[] = [1, 2, 3]
 
-export let w = new BigInt(123)
+export let w: BigInt = new BigInt(123)
 
-export let w1 = new Boolean(true)
+export let w1: Boolean = new Boolean(true)
 
-export let w2 = new String("")
+export let w2: String = new String("")
 
-export let w3 = new Number(123)
+export let w3: Number = new Number(123)
 
-export let w4 = new Byte()
+export let w4: Byte = new Byte()
 
-export let d2 = new Date()
+export let d2: Date = new Date()
 
 export const a: number = 1
 export const b: byte = 1

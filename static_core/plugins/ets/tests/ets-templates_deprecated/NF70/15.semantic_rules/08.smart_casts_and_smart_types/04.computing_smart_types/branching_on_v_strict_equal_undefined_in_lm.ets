@@ -27,7 +27,7 @@ desc: >-
 namespace testNS{{c_id}} {
   {{c.check_variant_decl_data|indent(width=2)}}
 
-  export function runTest() {
+  export function runTest(): void {
     // Function for check that variable of computed smart type after branching on
     // "v === undefined" is undefined type on the positive branch
     let check_as_type_undefined = (v: undefined) => {

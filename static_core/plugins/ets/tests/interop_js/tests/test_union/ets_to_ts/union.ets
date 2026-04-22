@@ -15,7 +15,7 @@
 
 type basicUnion = number | string | boolean;
 
-export function testBasicUnion(value: basicUnion) {
+export function testBasicUnion(value: basicUnion): basicUnion {
   return value;
 }
 
@@ -33,6 +33,6 @@ export class Child2 extends UnionClass {
 
 type childUnion = Child1 | Child2;
 
-export function testChildUnion(arg: childUnion) {
+export function testChildUnion(arg: childUnion): boolean {
   return true;
 }

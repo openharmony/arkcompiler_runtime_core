@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import { main as test111 } from './dir1/dir11/111.ets'
 import { main as test21 } from './dir2/21.ets'
 import { main as test22 } from './dir2/22.ets'
 
-export function main() {
+export function main(): void {
     // CC-OFFNXT(G.AOD.03) for test purposes
     console.log('1.ets')
     test11()

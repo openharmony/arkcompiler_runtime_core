@@ -55,7 +55,7 @@ export class ManyArgsClass {
         this.country = country;
         this.city = city;
     }
-    showInfo(){
+    showInfo(): string {
         return `Name: ${this.name}, age:${this.age}, country: ${this.country}, city: ${this.city}`
     }
 }

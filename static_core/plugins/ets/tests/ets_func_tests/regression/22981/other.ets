@@ -25,7 +25,7 @@
         code: number
     }
 
-    export function applyResult(result: myns.IResult) {
+    export function applyResult(result: myns.IResult): void {
     }
 
     export function publishResult(): myns.IResult {

@@ -22,11 +22,11 @@ export declare class Foo {
 export declare let fooInstance: Foo;
 
 export declare class NumberMap {
-    [key: number]: number
+    [key: number]: number;
 }
 export declare let numberMapInstance: NumberMap;
 export declare class StringMap {
-    [key: string]: number
+    [key: string]: number;
 }
 export declare let stringMapInstance: StringMap;
 export declare function functionArg0(): number;

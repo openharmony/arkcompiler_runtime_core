@@ -14,7 +14,7 @@
  */
 
 
-export function main() {
+export function main(): void {
     let a :number= 25;
     console.log(a);
     process({})
@@ -31,14 +31,14 @@ export namespace NS1{
         @Anno2
         export class C1{
             @Anno1
-            f1(){}
+            f1(): void {}
             
             @Anno1
             field1:string;
             
         }
         const field3:string="";
-        function f2(){}
+        function f2(): void{}
         enum E1{}
         namespace NS3{
             namespace NS5{}
@@ -49,11 +49,11 @@ export namespace NS1{
     }
 }
 export class C1{
- f1(p: number) {
+ f1(p: number): void {
    
     console.log('f1 ' + p);
 }
- f2(p: string) {
+ f2(p: string): void {
     
     console.log('f2 ' + p);
 }

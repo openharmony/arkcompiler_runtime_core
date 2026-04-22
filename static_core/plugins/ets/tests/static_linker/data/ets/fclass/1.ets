@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 import { Cls } from './2'
 
-export function main() {
+export function main(): void {
     let cls = new Cls()
     cls.setName('foo')
     // CC-OFFNXT(G.AOD.03) for test purposes

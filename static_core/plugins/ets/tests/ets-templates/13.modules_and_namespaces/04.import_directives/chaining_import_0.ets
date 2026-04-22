@@ -30,7 +30,7 @@ class TestClass {
         return param + "_world";
     }
 
-    test_member = "test";
+    test_member: string= "test";
 }
 
 class DefClass {

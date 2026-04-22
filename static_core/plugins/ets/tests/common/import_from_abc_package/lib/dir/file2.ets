@@ -17,7 +17,7 @@ import { A } from "./dir2/file3"
 
 export class B {
     field: A = new A();
-    print() {
+    print(): void {
         this.field.print()
     }
 }

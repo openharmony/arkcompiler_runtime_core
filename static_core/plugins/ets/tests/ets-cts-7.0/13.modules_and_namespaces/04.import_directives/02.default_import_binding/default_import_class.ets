@@ -22,7 +22,7 @@ files:
 import DefaultExportedClass from "../../06.exported_declarations/default_exported_declarations/default_export_class"
 
 function main(): void {
-    let test_class = new DefaultExportedClass();
+    let test_class: DefaultExportedClass = new DefaultExportedClass();
 
     arktest.assertEQ(test_class.hello("hello"), "hello_world");
     arktest.assertEQ((test_class.test_member + "_member"), "test_member");

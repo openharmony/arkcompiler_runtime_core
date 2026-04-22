@@ -23,4 +23,4 @@ tags: [not-a-test, compile-only]
 
 export interface I {}
 
-export function f(this: I) {}
+export function f(this: I): void {}

@@ -15,7 +15,7 @@
 
 import hilog from '@ohos.hilog';
 
-export function test_load_hilog() {
+export function test_load_hilog(): void {
     let module = ESValue.load('@ohos.hilog');
     if (module.isUndefined()) {
         throw new Error('module not found');
@@ -29,7 +29,7 @@ export function test_load_hilog() {
     }
 }
 
-export function test_call_hilog_function() {
+export function test_call_hilog_function(): void {
     let val = hilog.info(0, 'tag', 'test2');
     arktest.assertEQ(val, true);
 }

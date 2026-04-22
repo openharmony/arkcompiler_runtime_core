@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
   files: [export_2.ets]
 ---*/
 
-const localBindingId = null;
+const localBindingId: null = null;
 export { localBindingId };
 export { localBindingId as localIdName};
 export * as namespaceBinding from './export_2.ets'

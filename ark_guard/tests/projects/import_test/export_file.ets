@@ -14,18 +14,18 @@
  */
 
 export class A {
-    foo() {
+    foo(): string {
         return 'A';
     }
 } // It is not exported
 export class B {
     public a: A = new A // the field is exported but its type is not
-    foo() {
+    foo(): void {
         // CC-OFFNXT(G.AOD.03) for test purposes
         console.log('B', this.a.foo());
     }
 }
-export function process_field(p: A) {
+export function process_field(p: A): void {
     // CC-OFFNXT(G.AOD.03) for test purposes
     console.log('process_field', p.foo());
 }

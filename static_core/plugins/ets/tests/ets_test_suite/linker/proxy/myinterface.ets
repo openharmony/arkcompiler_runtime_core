@@ -28,7 +28,7 @@ export class MyInterfaceImpl implements MyInterface {
 
 export let instance = new MyInterfaceImpl
 
-export function testMyInterface(proxyObj: reflect.Proxy) {
+export function testMyInterface(proxyObj: reflect.Proxy): void {
     testMyInterfaceImpl(proxyObj as MyInterface)
 }
 

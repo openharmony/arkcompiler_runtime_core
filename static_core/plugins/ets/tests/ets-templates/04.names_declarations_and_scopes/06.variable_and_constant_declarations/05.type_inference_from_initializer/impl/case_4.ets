@@ -18,4 +18,4 @@ desc: Check type inference from the initialization expression
 tags: [not-a-test, compile-only]
 ---*/
 
-export const myC = "implementation string"
+export const myC: string = "implementation string"

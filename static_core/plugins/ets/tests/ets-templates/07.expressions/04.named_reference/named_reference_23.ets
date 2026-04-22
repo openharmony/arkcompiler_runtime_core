@@ -18,7 +18,7 @@ desc: Qualified name references local module members.
 ---*/
 
 namespace MyModule {
-  export const moduleVar = "Module Variable";
+  export const moduleVar: string = "Module Variable";
 }
 
 function main(): void {

@@ -31,7 +31,7 @@ export namespace concurrency.stackless {
  */
 export interface AsyncBaseLock {
     lock(): Promise<void>;
-    unlock();
+    unlock(): void;
 }
 
 /**
@@ -396,7 +396,7 @@ export class AsyncReadLock implements AsyncBaseLock {
      *
      * @syscap SystemCapability.Utils.Lang
      */
-    public unlock() {
+    public unlock(): void {
         this.rwl_.unlock();
     }
 
@@ -430,7 +430,7 @@ export class AsyncWriteLock implements AsyncBaseLock {
      *
      * @syscap SystemCapability.Utils.Lang
      */
-    public unlock() {
+    public unlock(): void {
         this.rwl_.unlock();
     }
 

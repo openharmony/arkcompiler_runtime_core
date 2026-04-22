@@ -40,7 +40,7 @@ export class X {
 }
 
 export class X1 {
-  foo() {}
+  foo(): void {}
 }
 export let cb: (this: X1) => void = (this: X1) => { this.foo() }
 
@@ -49,15 +49,15 @@ export class X2 {
 }
 
 export class C {
-  foo() { console.log("this.s") }
+  foo(): void { console.log("this.s") }
 }
 
 export class C1 {
-  foo1(n : number = 1) { console.log(n) }
+  foo1(n : number = 1): void { console.log(n) }
 }
 
 export class C2 {
-  foo2(...nums: number[]) {}
+  foo2(...nums: number[]): void {}
 }
 
 export class C3 {
@@ -65,7 +65,7 @@ export class C3 {
 }
 
 export class C4 {
-    async foo4() {}
+    async foo4(): Promise<void> {}
 }
 
 export class C5 {
@@ -73,11 +73,11 @@ export class C5 {
 }
 
 export class C6 {
-  static foo6(n : number = 1) { console.log(n) }
+  static foo6(n : number = 1): void { console.log(n) }
 }
 
 export class C7 {
-  static foo7(...nums: number[]) {}
+  static foo7(...nums: number[]): void {}
 }
 
 export class C8 {
@@ -85,7 +85,7 @@ export class C8 {
 }
 
 export class C9 {
-  static async foo9() {}
+  static async foo9(): Promise<void> {}
 }
 
 export class C10 {
@@ -127,31 +127,31 @@ export class D extends B {
 }
 
 export class C12 {
-  foo(i: "some str") {
+  foo(i: "some str"): number {
     return 2;
   }
 }
 
 export class DeviceInfo {
-  DeviceInfo() {}
+  constructor() {}
   static instance?: DeviceInfo;
 }
 
 // TODO: The conversion of ReadonlyArray need to be discussed.
 // The type of readonly T[] is actually ReadonlyArray<T>, which is different from Array<T>.
 export class ReadOnlyClass {
-  foo1(nums: readonly number[]) {}
-  foo2(nums: readonly [number, string]) {}
-  foo3(nums: readonly Array<number>) {}
-  static foo4(nums: readonly Array<number>) {}
-  foo5(...nums: readonly Array<number>) {}
+  foo1(nums: readonly number[]): void {}
+  foo2(nums: readonly [number, string]): void {}
+  foo3(nums: readonly Array<number>): void {}
+  static foo4(nums: readonly Array<number>): void {}
+  foo5(...nums: readonly Array<number>): void {}
   constructor(nums: readonly [number, string]) {}
 }
 
 export class Dog {
   s: string = ''
   n: number = 0;
-  foo1(s?: string, n?: number) {}
+  foo1(s?: string, n?: number): void {}
   constructor(s?: string, n?: number) {
     if (s !== undefined) {
       this.s = s;

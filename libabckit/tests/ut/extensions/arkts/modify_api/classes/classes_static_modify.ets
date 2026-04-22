@@ -17,9 +17,9 @@
 
 export class Class1 {
     @Anno1
-    public field1 = 1;
+    public field1: int = 1;
 
-    public m1() {
+    public m1(): void {
     };
 
     public static create(): Class1 {
@@ -31,7 +31,7 @@ export class Class1 {
 }
 
 export abstract class Class2 {
-    public abstract m2();
+    public abstract m2(): void;
 }
 
 class Class3 extends Class1 {

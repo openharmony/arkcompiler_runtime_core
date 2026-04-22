@@ -24,7 +24,7 @@ name: chaining_import_1
 import type {DefaultExportedClass0 as SomeExportedClass1} from "./chaining_import_0"
 import * as Test1 from "./chaining_import_0"
 
-export const testvar: number = 1
+export const testvar: int = 1
 export SomeExportedClass1
 
 function main() {

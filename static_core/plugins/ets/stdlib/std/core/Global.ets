@@ -295,7 +295,7 @@ export function isInteger(v: number): boolean {
  * @FaAndStageModel
  */
 export function isSafeInteger(v: int): boolean {
-    return v <= Float.MAX_SAFE_INTEGER as int;
+    return v <= Float.MAX_SAFE_INTEGER.toInt();
 }
 
 /**

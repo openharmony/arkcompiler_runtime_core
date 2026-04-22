@@ -33,7 +33,7 @@ namespace {{namespace}} {
         }
     }
 
-    export function runTest() {
+    export function runTest(): void {
         let a: A = new A()
         arktest.assertTrue(a.fieldI instanceof {{c.check_type}}, "{{namespace}} [{{c.type}}->{{c.check_type}}]: expected {{c.check_type}} but was " + (typeof a.fieldI))
         arktest.assertEQ(a.fieldI, {{c.expected_value}})

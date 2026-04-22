@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 
 export class ClassA {
-	foo() {
+	foo(): string {
 		return 'this is 1.2 classA ets';
 	}
 }
 
-export let a = 'this is 1.2 classA ets';
-export function foo() {
+export let a: string = 'this is 1.2 classA ets';
+export function foo(): string {
 	return 'this is 1.2 foo ets';
 }

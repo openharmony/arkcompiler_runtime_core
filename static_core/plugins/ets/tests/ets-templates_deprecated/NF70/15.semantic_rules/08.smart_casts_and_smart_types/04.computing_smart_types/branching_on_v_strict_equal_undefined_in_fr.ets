@@ -48,7 +48,7 @@ namespace testNS{{c_id}} {
     arktest.assertEQ(v, check_values[v_id][0])
   }
 
-  export function runTest() {
+  export function runTest(): void {
     let checks_number: int = 0
     for (let v_id: int = 0; v_id < check_values.length; v_id++) {
       check(check_values[v_id][0],

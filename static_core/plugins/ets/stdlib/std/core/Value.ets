@@ -1062,7 +1062,7 @@ export final class StringValue extends reflect.Value {
  * Represents null value
  */
 export final class NullValue extends reflect.Value {
-    public static readonly INSTANCE = new NullValue()
+    public static readonly INSTANCE: NullValue = new NullValue()
 
     public override getType(): Type {
         return NullType.REF as Type
@@ -1087,7 +1087,7 @@ export final class NullValue extends reflect.Value {
  * Represents undefined value
  */
 export final class UndefinedValue extends reflect.Value {
-    public static readonly INSTANCE = new UndefinedValue()
+    public static readonly INSTANCE: UndefinedValue = new UndefinedValue()
 
     public override getType(): Type {
         return UndefinedType.REF as Type
@@ -1112,7 +1112,7 @@ export final class UndefinedValue extends reflect.Value {
  * Represents void value
  */
 export final class VoidValue extends reflect.Value {
-    public static readonly INSTANCE = new VoidValue()
+    public static readonly INSTANCE: VoidValue = new VoidValue()
 
     public override getType(): Type {
         return VoidType.REF as Type

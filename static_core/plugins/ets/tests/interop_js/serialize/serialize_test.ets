@@ -14,29 +14,29 @@
  */
 
 // CC-OFFNXT(G.FMT.09) project code style
-export function testFunction() {
+export function testFunction(): string {
     return 'testFunction';
 }
 
-export let testArray = ['testArrayElement'];
-export let testInstance = new TestClass();
+export let testArray: string[] = ['testArrayElement'];
+export let testInstance: TestClass = new TestClass();
 
 export class TestClass {
     // CC-OFFNXT(G.FMT.09) project code style
-    static testStaticMethod() {
+    static testStaticMethod(): string {
         return 'testStaticMethod';
     }
     public static staticProp: String = 'staticProp';
 
     public prop: String = 'prop';
     // CC-OFFNXT(G.FMT.09) project code style
-    testMethod() {
+    testMethod(): string {
         return 'testMethod';
     }
 }
 
 // CC-OFFNXT(G.FMT.09) project code style
-export function checkAsync(ptr: bigint) {
+export function checkAsync(ptr: bigint): void {
     let w = new EAWorker(true);
     w.start();
     let cb = (): int => {

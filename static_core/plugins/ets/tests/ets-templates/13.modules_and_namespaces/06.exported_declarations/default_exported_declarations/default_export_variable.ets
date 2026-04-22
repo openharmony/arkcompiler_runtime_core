@@ -20,4 +20,4 @@ tags:
 - not-a-test
 ---*/
 
-export default let test_var = "default_variable";
+export default let test_var: string = "default_variable";

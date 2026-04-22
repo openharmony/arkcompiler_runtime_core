@@ -1940,7 +1940,7 @@ export final class LongType extends Type {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public static readonly VAL = new LongType(ValueTypeDesc.LONG, true)
+    public static readonly VAL: LongType = new LongType(ValueTypeDesc.LONG, true)
     /**
      * Long type reference
      *
@@ -1949,7 +1949,7 @@ export final class LongType extends Type {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public static readonly REF = new LongType(TypeAPI.getTypeDescriptor(new Long()), false)
+    public static readonly REF: LongType = new LongType(TypeAPI.getTypeDescriptor(new Long()), false)
     private static readonly CLASS = Class.of(new Long())
 
     private isValue: boolean

@@ -15,13 +15,13 @@ implementations:
   - >
     export class IterableClass {
       data: string[] = ['Hello World']
-      $_iterator() {
+      $_iterator(): MyIterator {
         return new MyIterator(this)
       }
     }
   - >
     export class IterableClass {
-      [Symbol.iterator]() {
+      [Symbol.iterator](): MyIterator {
         return new MyIterator(this)
       }
       data: string[] = ['Hello World']

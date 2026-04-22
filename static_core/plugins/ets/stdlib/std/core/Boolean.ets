@@ -219,7 +219,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public static readonly TRUE = new Boolean(true);
+    public static readonly TRUE: Boolean = new Boolean(true);
 
     /**
      * Static instance that represents false boolean value
@@ -230,7 +230,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public static readonly FALSE = new Boolean(false);
+    public static readonly FALSE: Boolean = new Boolean(false);
 
     /**
      * Returns the primitive as boolean value

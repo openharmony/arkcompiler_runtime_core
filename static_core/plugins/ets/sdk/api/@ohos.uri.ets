@@ -1033,11 +1033,11 @@ export namespace uri {
       return this.inputUri.charAt(index + 1) == c'/';
     }
 
-    addQueryValue(key: string, value: string) {
+    addQueryValue(key: string, value: string): string {
       return this.buildUriString("query", key + "=" + value);
     }
 
-    addSegment(pathSegment: string) {
+    addSegment(pathSegment: string): string {
       return this.buildUriString("segment", pathSegment);
     }
 
@@ -1194,43 +1194,43 @@ export namespace uri {
       return normalizeUri;
     }
 
-    getScheme() {
+    getScheme(): string {
       return this.scheme;
     }
 
-    getAuthority() {
+    getAuthority(): string {
       return this.authority;
     }
 
-    getSsp() {
+    getSsp(): string {
       return this.schemeSpecificPart;
     }
 
-    getUserinfo() {
+    getUserinfo(): string {
       return this.userInfo;
     }
 
-    getHost() {
+    getHost(): string {
       return this.host;
     }
 
-    getPort() {
+    getPort(): number {
       return this.port;
     }
 
-    getPath() {
+    getPath(): string {
       return this.path;
     }
 
-    getQuery() {
+    getQuery(): string {
       return this.query;
     }
 
-    getFragment() {
+    getFragment(): string {
       return this.fragment;
     }
 
-    clearQuery() {
+    clearQuery(): string {
       return this.buildUriString("clearquery", "");
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ export namespace collections {
      *
      */
     export class BitVector implements Iterable<int> {
-        static readonly BIT_SET_LENGTH = 32;    // ArkTS Specification, Release 1.1.0 <Integer Types and Operations>
+        static readonly BIT_SET_LENGTH: int = 32;    // ArkTS Specification, Release 1.1.0 <Integer Types and Operations>
 
         private buffer: Array<int>;
         private _length: int = 0;

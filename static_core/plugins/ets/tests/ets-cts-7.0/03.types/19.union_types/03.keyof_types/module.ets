@@ -20,16 +20,16 @@ tags: [compile-only, not-a-test]
 
 export class A {}
 export class B extends A {
-  foo = 1
+  foo: int = 1
 }
 export final class C extends B {
-  bar() {}
+  bar(): void {}
 }
 export abstract class AC {
-  abstract foo()
+  abstract foo(): void
   bar: boolean
 }
 export interface I {
-  foo()
+  foo(): void
   bar: char
 }

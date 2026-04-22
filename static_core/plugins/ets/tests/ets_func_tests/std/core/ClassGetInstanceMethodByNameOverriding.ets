@@ -36,14 +36,14 @@ namespace Basic {
         public methodFromBaseButOverloadedInDerived(): void {}
         public methodFromBase(): void {}
         public methodFromBase(i: C): void {}
-        public methodFromBaseButOverriddenInDerived(b: Base) {}
+        public methodFromBaseButOverriddenInDerived(b: Base): void {}
     }
 
     export class Derived extends Base {
-        public methodFromBaseButOverloadedInDerived(i: C) {}
+        public methodFromBaseButOverloadedInDerived(i: C): void {}
         public methodFromDerived(): void {}
         public methodFromDerived(i: C): void {}
-        public methodFromBaseButOverriddenInDerived(b: Derived) {}
+        public methodFromBaseButOverriddenInDerived(b: Derived): void {}
     }
 }
 

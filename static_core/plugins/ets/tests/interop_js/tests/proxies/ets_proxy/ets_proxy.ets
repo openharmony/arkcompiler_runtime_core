@@ -43,7 +43,7 @@ class ProxyClassCalls {
     constructor(cb: JSValue) {
         ESValue.wrap(cb).invoke();
     }
-    static call(cb: JSValue) {
+    static call(cb: JSValue): void {
         ESValue.wrap(cb).invoke();
     }
 };
@@ -111,13 +111,13 @@ class UClass2 { };
 function foo(resolve: (value: Object) => void): void { resolve(new Object()); }
 
 class ReferencesAccess {
-    public getfUClass1() { return this.fUClass1; }
-    public getfUClass2() { return this.fUClass2; }
-    public getfString() { return this.fString; }
-    public getfJSValue() { return this.fJSValue; }
-    public getfPromise() { return this.fPromise; }
-    public getfAString() { return this.fAString; }
-    public getfAUClass1() { return this.fAUClass1; }
+    public getfUClass1(): UClass1 | undefined { return this.fUClass1; }
+    public getfUClass2(): UClass2 | undefined { return this.fUClass2; }
+    public getfString(): String | undefined { return this.fString; }
+    public getfJSValue(): Any | undefined { return this.fJSValue; }
+    public getfPromise(): Promise<Object> | undefined { return this.fPromise; }
+    public getfAString(): FixedArray<String> | undefined { return this.fAString; }
+    public getfAUClass1(): FixedArray<UClass1> | undefined { return this.fAUClass1; }
 
     public setfUClass1(v?: UClass1): void { this.fUClass1 = v; }
     public setfUClass2(v?: UClass2): void { this.fUClass2 = v; }

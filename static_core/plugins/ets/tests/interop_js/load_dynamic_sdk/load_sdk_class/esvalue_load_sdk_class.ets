@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export function test_load_hashmap() {
+export function test_load_hashmap(): void {
     let module = ESValue.load('@ohos.util.hashmap');
     if (module.isUndefined()) {
         throw new Error('module not found');

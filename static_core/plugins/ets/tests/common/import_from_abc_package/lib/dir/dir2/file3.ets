@@ -15,6 +15,6 @@
 
 export class A {
     a: int = 42;
-    print() {
+    print(): void {
     }
 }

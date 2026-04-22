@@ -22,7 +22,7 @@ tags: [no-warmup]
 ---*/
 
 namespace ns {
-  export function foo() {
+  export function foo(): int {
     return v
   }
   let v: int
@@ -31,6 +31,6 @@ namespace ns {
   }
 }
 
-function main() {
+function main(): void {
   arktest.assertEQ(ns.foo(), 1)
 }

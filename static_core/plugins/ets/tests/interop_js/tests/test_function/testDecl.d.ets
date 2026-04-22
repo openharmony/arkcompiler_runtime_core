@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-export declare function foo1(x: string): string
+export declare function foo1(x: string): string;
 
 export declare class X {
-    s: string
-    n: number
-    constructor(...nums: number[])
+    s: string;
+    n: number;
+    constructor(...nums: number[]);
 }
 
 export declare class Y {
-    static fooArgs(...nums: number[]): number
+    static fooArgs(...nums: number[]): number;
 }
 
-export declare function foo2(x: X): string
+export declare function foo2(x: X): string;
 
-export declare function foo3(...args: number[]): es.Array<number>
+export declare function foo3(...args: number[]): es.Array<number>;
 
-export declare function foo4(arg1: number = 1): number
+export declare function foo4(arg1: number = 1): number;
 
-export declare function bar<T>(x: T): T
+export declare function bar<T>(x: T): T;
 
 type StdArray<T> = T[];
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,38 +26,38 @@ export class ExportClass {
 }
 
 export default class SomeClass {
-    foo() {
+    foo(): void {
         // CC-OFFNXT(G.AOD.03) for test purposes
         console.log('SomeClass');
     }
 }
 
-export function f1(p: number) {
+export function f1(p: number): void {
     // CC-OFFNXT(G.AOD.03) for test purposes
     console.log('f1 ' + p);
 }
-export function f2(p: string) {
+export function f2(p: string): void {
     // CC-OFFNXT(G.AOD.03) for test purposes
     console.log('f2 ' + p);
 }
 export overload foo {f1, f2}
 
 namespace Space1 {
-    export function foo() {
+    export function foo(): void {
         // CC-OFFNXT(G.AOD.03) for test purposes
         console.log('Space1');
     }
-    export let variable = 1234
-    export const constant = 1234
+    export let variable: int = 1234
+    export const constant: int = 1234
 }
 export namespace Space2 {
     let tag: string = '';
 
-    export function foo(p: number) {
+    export function foo(p: number): void {
         // CC-OFFNXT(G.AOD.03) for test purposes
         console.log('Space2', tag);
     }
-    export let variable = '1234'
+    export let variable: string = '1234'
     static {
         tag = 'test';
     }
