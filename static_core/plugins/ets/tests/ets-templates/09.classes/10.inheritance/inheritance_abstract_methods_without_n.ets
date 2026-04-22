@@ -24,6 +24,7 @@ assert: >-
     that is a member of the direct superclass or a direct superinterface, D', of C (m distinct from m',
     D distinct from D'), such that m' overrides from D' the declaration of the method m.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0190: B is not abstract and does not override abstract method a(): Int in A"
 ---*/
 
 abstract class A {

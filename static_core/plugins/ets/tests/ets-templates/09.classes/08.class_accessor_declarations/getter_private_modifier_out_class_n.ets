@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Field getter with private modifier. call out class
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0139: Signature age(): Int is not visible here."
 ---*/
 
 class A {

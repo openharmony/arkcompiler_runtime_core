@@ -16,6 +16,7 @@
 /*---
 desc: Field setter with final modifier cannot be overridden.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE1324203: Class member age with type undefined in B cannot override age with type undefined field from class A because the overridden method is final."
 ---*/
 
 class A {

@@ -21,6 +21,7 @@ assert: >-
     or declared with package access in the same package as C. No method declared in C has a signature that is a
     subsignature of the signature of m.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0130: Function foo is already declared."
 ---*/
 
 class A {

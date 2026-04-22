@@ -19,6 +19,7 @@ assert: >-
     For a reference to a static field f declared in class or interface C, it is a compile-time error if.
     The reference appears either in a static variable's initializer of C or in a static initializer of C.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0375: Property 'f' is used before being assigned."
 ---*/
 
 class C {

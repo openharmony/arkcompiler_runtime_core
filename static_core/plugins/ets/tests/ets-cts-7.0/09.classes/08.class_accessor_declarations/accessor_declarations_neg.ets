@@ -20,6 +20,7 @@ desc: >-
     for operations of getting or setting a field value. An accessor can be either
     a getter or a setter.
 tags: [compile-only, negative]
+expected_out: "{{c.exp_out}}"
 ---*/
 
 {{c.decl}}

@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Field setter with private modifier. call out class
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0139: Signature age(value: Int): undefined is not visible here."
 ---*/
 
 class A {

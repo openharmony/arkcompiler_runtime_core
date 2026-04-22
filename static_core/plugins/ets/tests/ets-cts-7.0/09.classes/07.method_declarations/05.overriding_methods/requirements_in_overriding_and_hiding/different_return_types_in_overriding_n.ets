@@ -19,6 +19,7 @@ assert: >-
     If a method declaration d1 with return type R1 overrides or hides the declaration of another method d2 with
     return type R2, then d1 must be return-type-substitutable for d2, or a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: Class member m with type B in C cannot override m with type D field from class A because the overriding return type is not compatible with the other return type."
 ---*/
 
 class A {

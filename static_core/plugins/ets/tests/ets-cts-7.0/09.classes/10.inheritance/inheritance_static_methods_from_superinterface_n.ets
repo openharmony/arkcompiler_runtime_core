@@ -17,6 +17,7 @@ limitations under the License.
 desc: Inheritance static method from superinterfaces.
 assert: A class does not inherit private or static methods from its superinterfaces.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0224: Identifier expected, got 'static'."
 ---*/
 
 interface A {

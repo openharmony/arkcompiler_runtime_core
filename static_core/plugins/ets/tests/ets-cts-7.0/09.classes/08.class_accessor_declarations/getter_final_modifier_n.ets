@@ -16,9 +16,10 @@
 /*---
 desc: Field getter with final modifier cannot be overridden.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE1324203: Class member age with type Int in B cannot override age with type Int field from class A because the overridden method is final."
 ---*/
 
-final class A {
+class A {
   private _age: int = 5;
 
   final get age(): int {
