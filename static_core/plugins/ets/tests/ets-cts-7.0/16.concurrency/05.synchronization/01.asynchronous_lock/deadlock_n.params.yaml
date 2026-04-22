@@ -26,7 +26,7 @@ cases:
         }, AsyncLockMode.EXCLUSIVE, options);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
     expected_error: |-
       "Error: AsyncLock:: Operation timed out"
 
@@ -54,7 +54,7 @@ cases:
         await Promise.all([task1(), task2()]);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
     expected_error: |-
       "Error: AsyncLock:: Operation timed out"
 
@@ -86,6 +86,6 @@ cases:
         ]);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
     expected_error: |-
       "Error: AsyncLock:: Operation timed out"
