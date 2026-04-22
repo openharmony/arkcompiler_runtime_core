@@ -15,15 +15,6 @@
 
 {% for c in cases %}
 
-{% if 'sub_cases_logic' in c %}
-  {% set sub_cases_logic=c.sub_cases_logic %}
-{% else %}
-  {% set sub_cases_logic=[""] %}
-{% endif %}
-{% for scl in sub_cases_logic %}
-
-{% for decl in c.decl_variants %}
-
 {% if 'check_variants' in c %}
   {% set check_variants=c.check_variants %}
 {% else %}
@@ -31,17 +22,9 @@
 {% endif %}
 {% for cv in check_variants %}
 
-{% set logic_data  = "  " ~ (scl|indent(width=2)) %}
-
 {% set ns = namespace() %}
 
-{% set ns.logic_data = logic_data %}
-{% for k, v in cv.items() %}
-  {% set ns.logic_data = ns.logic_data|replace("[" ~ k ~ "]", v) %}
-{% endfor %}
-{% set logic_data=ns.logic_data %}
-
-{% set ns.decl = decl %}
+{% set ns.decl = c.decl %}
 {% for k, v in cv.items() %}
   {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
 {% endfor %}
@@ -62,10 +45,8 @@ expected_out: "{{error}}"
 {{decl}}
 
 function main(): void {
-{{logic_data}}
+
 }
 
-{% endfor %}
-{% endfor %}
 {% endfor %}
 {% endfor %}
