@@ -22,6 +22,7 @@ from typing import cast
 from unittest import TestCase
 from unittest.mock import patch
 
+import main as runner_main
 from runner.init_runner import InitRunner, MandatoryProp, MandatoryProps
 from runner.test.test_utils import random_suffix
 
@@ -141,3 +142,28 @@ class InitCLIRunnerTest(TestCase):
             "--cfg-path": 2
         }
         self.check_help(expected_props=expected_content, expected_help=expected, handle=handle)
+
+    @patch("sys.stdout", new_callable=StringIO)
+    @patch.dict(os.environ, {}, clear=True)
+    @patch("sys.argv", ["runner.sh", "panda-int", "ets-cts", "--help"])
+    def test_runner_help_with_env_file_without_cfg_path(self, handle: StringIO) -> None:
+        runtime_core_path = Path.cwd().parents[2]
+        env_file_path = Path.cwd() / f".urunner.env_{random_suffix()}"
+        expected_cfg_path = runtime_core_path / "static_core" / "tests" / "tests-u-runner-2" / "cfg"
+        props = {
+            "ARKCOMPILER_RUNTIME_CORE_PATH": runtime_core_path.as_posix(),
+            "ARKCOMPILER_ETS_FRONTEND_PATH": Path.cwd().as_posix(),
+            "PANDA_BUILD": Path.cwd().as_posix(),
+            "WORK_DIR": (Path.cwd() / f"work-{random_suffix()}").as_posix(),
+        }
+
+        try:
+            env_file_path.write_text("\n".join(f"{key}={value}" for key, value in props.items()), encoding="utf-8")
+            with patch("runner.init_runner.InitRunner.search_global_env", return_value=env_file_path):
+                with self.assertRaises(SystemExit) as sys_exit:
+                    runner_main.main()
+            self.assertEqual(sys_exit.exception.code, 0)
+            self.assertIn("To explore possible workflow and test suite options", handle.getvalue())
+            self.assertEqual(os.environ.get("CFG_PATH"), expected_cfg_path.as_posix())
+        finally:
+            env_file_path.unlink(missing_ok=True)

@@ -56,6 +56,10 @@ class RunnerEnv:
     @staticmethod
     def expand_mandatory_prop(prop_desc: MandatoryPropDescription, runner_help_mode: bool) -> None:
         if runner_help_mode:
+            if prop_desc.name == URUNNER_CFG_NAME:
+                cfg_path = os.getenv(URUNNER_CFG_NAME)
+                if cfg_path is None:
+                    RunnerEnv.set_default_cfg_path()
             return
 
         var_value = os.getenv(prop_desc.name)
@@ -80,6 +84,14 @@ class RunnerEnv:
             raise InvalidInitialization(f"Mandatory environment variable '{prop_desc.name}' is set \n"
                                         f"to value {var_value} which does not exist.")
         os.environ[prop_desc.name] = expanded.as_posix()
+
+    @staticmethod
+    def set_default_cfg_path() -> None:
+        runtime_core_path = os.getenv(RUNTIME_CORE_ENV_NAME)
+        if runtime_core_path:
+            default_cfg_path = get_default_cfg_path(runtime_core_path).as_posix()
+            expanded_path = Path(default_cfg_path).expanduser().resolve()
+            os.environ[URUNNER_CFG_NAME] = expanded_path.as_posix()
 
     @classmethod
     def get_mandatory_props(cls) -> MandatoryProps:
