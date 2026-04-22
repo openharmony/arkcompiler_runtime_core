@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,10 +28,11 @@ CLANG_FORMAT = "clang-format-14"
 def get_args():
     parser = argparse.ArgumentParser(
         description="Runner for clang-format for panda project.")
-    parser.add_argument(
-        'panda_dir', help='panda sources directory.')
-    parser.add_argument(
-        '--reformat', action="store_true", help='reformat files.')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        'panda_dir', action="store", help='panda sources directory.', nargs='?')
+    group.add_argument(
+        '--reformat', action="store", help='reformat provided files.')
     parser.add_argument(
         '--proc-count', type=int, action='store', dest='proc_count',
         required=False, default="-1",
@@ -40,10 +41,11 @@ def get_args():
 
 
 def run_clang_format(src_path, panda_dir, reformat, msg):
-    check_cmd = [str(os.path.join(panda_dir, 'scripts', 'code_style',
+    if reformat:
+        cmd = [CLANG_FORMAT, '-i']
+    else:
+        cmd = [str(os.path.join(panda_dir, 'scripts', 'code_style',
                                   'run_code_style_tools.sh'))]
-    reformat_cmd = [CLANG_FORMAT, '-i']
-    cmd = reformat_cmd if reformat else check_cmd
     cmd += [src_path]
 
     print(msg)
@@ -127,11 +129,18 @@ if __name__ == "__main__":
     args = get_args()
     files_list = []
 
-    files_list = get_file_list(args.panda_dir)
+    if args.reformat:
+        if os.path.isfile(args.reformat):
+            files_list = [args.reformat]
+        else:
+            files_list = get_file_list(args.reformat)
+    else:
+        files_list = get_file_list(args.panda_dir)
 
     if not files_list:
         sys.exit(
-            "Can't be prepaired source list. Please check panda_dir variable: " + args.panda_dir)
+            "Failed to prepare list of source files to process. Please check script arguments: "
+             + (args.reformat if args.reformat else args.panda_dir))
 
     process_count = get_proc_count(args.proc_count)
     print('clang-format proc_count: ' + str(process_count))

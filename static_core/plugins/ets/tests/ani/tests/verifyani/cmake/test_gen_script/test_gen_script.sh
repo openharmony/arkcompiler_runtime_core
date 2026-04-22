@@ -20,7 +20,6 @@ VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
 
 if [ $# -ge 3 ]; then
     STATIC_ROOT_DIR=$1
-    BUILD_DIR=$2
     shift 2
 
     source "${STATIC_ROOT_DIR}/scripts/python/venv-utils.sh"
@@ -31,7 +30,16 @@ if [ $# -ge 3 ]; then
     deactivate_venv
     echo "${VENV_DIR} deactivate"
 
-    "${STATIC_ROOT_DIR}"/scripts/code_style/code_style_check.py --reformat "${BUILD_DIR}">/dev/null
+    # Find --output_cpp file
+    OUTPUT_CPP=''
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --output_cpp) OUTPUT_CPP=$2; shift 2; break ;;
+            *) shift ;;
+        esac
+    done
+
+    [[ -z ${OUTPUT_CPP} ]] || "${STATIC_ROOT_DIR}"/scripts/code_style/code_style_check.py --reformat "${OUTPUT_CPP}">/dev/null
 else
     echo "Usage $0 <static_root_dir> <panda_build_dir> <use arm32(true/false)>"
 fi
