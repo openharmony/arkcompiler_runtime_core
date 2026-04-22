@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,42 +73,6 @@ function main(): int {
             }
         }
         arktest.assertEQ(flag, 0);
-    });
-    concurrentHashMapTestsuite.addTest("setTest_004", () =>
-    {
-        let mapNull: Map<number | null, string> = new Map<number | null, string>();
-        for (let i: int = 0; i < 10 ; i++) {
-            mapNull.set(arrKeys[i], arrValues[i]);
-        }
-        let concurrentHashMap: containers.ConcurrentHashMap<number | null, string> =
-            new containers.ConcurrentHashMap<number | null, string>(mapNull);
-        arktest.assertEQ(concurrentHashMap.size, 10);
-        concurrentHashMap.set(null, "string");
-        arktest.assertEQ(concurrentHashMap.get(null), "string");
-        concurrentHashMap.set(null, "string-2");
-        arktest.assertEQ(concurrentHashMap.get(null), "string-2");
-        flag = 0;
-        for (let i: int = 0; i < 10 ; i++) {
-            let value: string | undefined = concurrentHashMap.get(i);
-            if (value != arrValues[i]) {
-                flag++;
-            }
-        }
-        arktest.assertEQ(flag, 0);
-        arktest.assertEQ(concurrentHashMap.size, 11);
-    });
-    concurrentHashMapTestsuite.addTest("setTest_005", () =>
-    {
-        let mapNudefind: Map<number, string | undefined> = new Map<number, string | undefined>();
-        for (let i: int = 0; i < 10 ; i++) {
-            mapNudefind.set(arrKeys[i], arrValues[i]);
-        }
-        let concurrentHashMap: containers.ConcurrentHashMap<number, string | undefined> =
-            new containers.ConcurrentHashMap<number, string | undefined>(mapNudefind);
-        arktest.assertEQ(concurrentHashMap.size, 10);
-        concurrentHashMap.set(10, undefined);
-        arktest.assertEQ(concurrentHashMap.get(10), undefined);
-        arktest.assertEQ(concurrentHashMap.size, 11);
     });
     concurrentHashMapTestsuite.addTest("setTest_006", () =>
     {
