@@ -2178,11 +2178,13 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
     const ArgInfo &lastArgInfo = argInfoList.back();
     auto action = lastArgInfo.arg.GetAction();
     ArgsInfo argsInfo {};
-    if (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS) {
+    if (venv != nullptr &&
+        (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS)) {
         auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
         auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
         argsInfo.extArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
-    } else if (action == ANIArg::Action::VERIFY_VVA_ARGS || action == ANIArg::Action::VERIFY_A_ARGS) {
+    } else if (venv != nullptr &&
+               (action == ANIArg::Action::VERIFY_VVA_ARGS || action == ANIArg::Action::VERIFY_A_ARGS)) {
         auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
         argsInfo.extArgInfoList = verifier.GetExtArgInfoListForResolvedArgs(pandaEnv);
     }
