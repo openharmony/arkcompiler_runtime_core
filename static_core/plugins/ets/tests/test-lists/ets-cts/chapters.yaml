@@ -35,7 +35,7 @@ chapters:
     - 20.implementation_details
     - 21.artks_ts_compatibility
     - 22.grammar_summary
-    
+
   # One folder - one chapter
   - chapter02:
     - 02.lexical_elements

@@ -26,7 +26,7 @@ interface I {
 // Valid literal of anonymous class type using interface method
 const i1: I = {}
 
-// Valid literal of anonymous class type using own metod declaration
+// Valid literal of anonymous class type using own method declaration
 const i2: I = {
     method(): number { return 2 }
 }

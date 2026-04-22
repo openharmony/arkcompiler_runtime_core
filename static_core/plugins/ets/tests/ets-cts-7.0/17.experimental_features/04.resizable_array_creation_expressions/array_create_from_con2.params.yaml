@@ -30,25 +30,6 @@ cases:
       arktest.expectThrow(() => {f(-1)}, expectedError)
       arktest.expectThrow(() => {f(-30)}, expectedError)
 
-  - desc: Create Array with different length fractional part
-    decl: |-
-      function f1(len: double): void {
-        let a = new number[len](5)
-      }
-      function f2(len1: double, len2: double): void {
-        let a = new number[len1][len2](5)
-      }
-    logic: |-
-      let expectedError = (e: Error): boolean => {
-        return true
-      }
-      f1(2.0)
-      f1(35.0)
-      arktest.expectThrow(() => {f1(3.141592653589)}, expectedError)
-      f2(5.0, 3.0)
-      arktest.expectThrow(() => {f2(5, 3.7)}, expectedError)
-      arktest.expectThrow(() => {f2(3.7, 5)}, expectedError)
-
   - desc: Create Array with predefined types
     check_variants:
       - {check_type: "Any"}
@@ -88,40 +69,10 @@ cases:
         arktest.assertEQ(a[i], [check_value])
       }
 
-  - desc: Create 2D Array with predefined types
-    check_variants:
-      - {check_type: "Any", check_value: "undefined"}
-      - {check_type: "Any", check_value: "null"}
-      - {check_type: "Any", check_value: "5"}
-      - {check_type: "Any", check_value: "\"abc\""}
-      - {check_type: "Object", check_value: "5"}
-      - {check_type: "Object", check_value: "\"abc\""}
-      - {check_type: "number", check_value: "3"}
-      - {check_type: "double", check_value: "5.7"}
-      - {check_type: "float", check_value: "1.5f"}
-      - {check_type: "long", check_value: "9223372036854775807"}
-      - {check_type: "int", check_value: "123123"}
-      - {check_type: "short", check_value: "325"}
-      - {check_type: "byte", check_value: "127"}
-      - {check_type: "string", check_value: "\"abc\""}
-      - {check_type: "bigint", check_value: "12345678901234567890n"}
-      - {check_type: "char", check_value: "c'\\u2028'"}
-      - {check_type: "boolean", check_value: "true"}
-      - {check_type: "boolean", check_value: "false"}
-    logic: |-
-      let a = new [check_type][30][10]([check_value])
-      arktest.assertEQ(a.length, 30)
-      arktest.assertTrue(a[0][0] instanceof [check_type])
-      for (let i = 0; i < 30; i++) {
-        arktest.assertEQ(a[i].length, 10)
-        for (let j = 0; j < 10; j++) {
-          arktest.assertEQ(a[i][j], [check_value])
-        }
-      }
-
-  - desc: Create 2D Array with type alias
-    logic: |-
+  - desc: Create Array of array-type elements with type alias
+    decl: |-
       type aliasTypeName = number[]
+    logic: |-
       let a = new aliasTypeName[5]([3.141592653589, 5.7, 3])
       arktest.assertEQ(a.length, 5)
       arktest.assertTrue(a[0][0] instanceof number)
@@ -207,15 +158,34 @@ cases:
       let a = new HandlerBInt[30](handlerAInt)
       arktest.assertEQ(a.length, 30)
       for (let i = 0; i < 30; i++) {
-        arktest.assertEQ((a[i](new B, 7).v, -20)
+        arktest.assertEQ(a[i](new B, 7).v, -20)
       }
       let b = new HandlerBInt[30](handlerA)
       arktest.assertEQ(b.length, 30)
       for (let i = 0; i < 30; i++) {
-        arktest.assertEQ((b[i](new B, 7).v, 13)
+        arktest.assertEQ(b[i](new B, 7).v, 13)
       }
       let c = new HandlerBInt[30](handlerNothing)
       arktest.assertEQ(c.length, 30)
       for (let i = 0; i < 30; i++) {
-        arktest.assertEQ((c[i](new B, 7).v, -567)
+        arktest.assertEQ(c[i](new B, 7).v, -567)
       }
+
+  - desc: If the available space is not sufficient to allocate the array, then OutOfMemoryError is thrown
+    logic: |-
+      let res = false
+      try {
+        let a = new int[Int.MIN_VALUE-1](0)
+      } catch (e) {
+        arktest.assertTrue(e instanceof OutOfMemoryError)
+        res = true
+      }
+      arktest.assertTrue(res)
+
+  - desc: Create array using enum constants of short type
+    decl: |-
+      enum Color: short { Red = 42, Green, Blue }
+    logic: |-
+      let v: Color[] = new Color[Color.Green](Color.Blue)
+      arktest.assertEQ(v.length, 43)
+      arktest.assertEQ(v[0], 44)

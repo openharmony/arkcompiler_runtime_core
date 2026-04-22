@@ -16,9 +16,7 @@
 /*---
 desc: >-
     Only an object literal of interface type can contain object literal methods.
-
 ---*/
-
 
 interface ILiteral {
     foo(input: int): int {
@@ -26,8 +24,6 @@ interface ILiteral {
     }
     name: string
 }
-
-
 
 function main() {
     // Declare interface literal and override default implementation

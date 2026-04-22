@@ -23,4 +23,4 @@ tags:
 import  *  as PI from '../../param_interfaces/param_interfaces.ets'
 
 let p: PI.PI4 = {}
-export let a: PI.PI4 = p
+export let a: PI.PI2 = p

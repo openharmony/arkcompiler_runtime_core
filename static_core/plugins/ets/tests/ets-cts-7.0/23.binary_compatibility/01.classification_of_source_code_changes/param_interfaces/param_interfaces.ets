@@ -26,3 +26,6 @@ export interface PI3 extends PI1, PI2 {}
 export interface PI4 extends PI2 {}
 export interface PI5 extends PI3, PI4 {}
 export interface PI6 extends PI1 {}
+
+export class B implements PI2 {}
+export class D implements PI4 {}

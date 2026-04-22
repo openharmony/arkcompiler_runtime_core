@@ -16,16 +16,12 @@
 /*---
 desc: >-
     Only an object literal of interface type can contain object literal methods.
-
 ---*/
-
 
 interface ILiteral {
     foo(input: int): int
     name: string
 }
-
-
 
 function main() {
     // Declare literal method

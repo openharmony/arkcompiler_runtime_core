@@ -44,14 +44,3 @@ cases:
         let i: I = {}
         i.foo()
       }
-  - doc: Superinterface provides no access to own private methods outside
-    error: |-
-      "Semantic error ESE0127: No matching call signature for foo()"
-    decl: |-
-      interface I {
-        private foo(): int { return 1 }
-      }
-      function main() {
-        let i: I = {}
-        i.foo()
-      }

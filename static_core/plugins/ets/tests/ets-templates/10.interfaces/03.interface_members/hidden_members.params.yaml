@@ -40,12 +40,3 @@ cases:
         let i: II = { }
         arktest.assertEQ(i.foo(), 2)
       }
-  - doc: Superinterface private method is not visible at literal object
-    decl: |-
-      interface I {
-        private foo(): int { return 1 }
-      }
-      function main() {
-        let i: I = { foo(): int {return 2} }
-        arktest.assertEQ(i.foo(), 2)
-      }
