@@ -16,9 +16,10 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Type arguments
-expected_out: {{c.stdout}}
 params: class arguments, invariant
 tags: [compile-only, negative]
+expected_out:
+  compiler: {{c.stdout}}
 ---*/
 
 interface I {}

@@ -13,9 +13,21 @@
 
 cases:
    - logic: "let a = new Dog[30](new Animal)"
+     out:
+      - "Semantic error ESE0127: No matching call signature for create(Int, Animal)"
+      - "Semantic error ESE0046: Type 'Animal' is not compatible with type 'Dog' at index 2"
 
    - logic: "let a = new Dog[30](new Cat)"
+     out:
+        - "Semantic error ESE0127: No matching call signature for create(Int, Cat)"
+        - "Semantic error ESE0046: Type 'Cat' is not compatible with type 'Dog' at index 2"
 
    - logic: "let a = new Dog[30]((inx: int) => new Animal)"
+     out:
+        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) => Dog))"
+        - "Semantic error ESE0091: Type 'Animal' is not compatible with the enclosing method's return type 'Dog'"
 
    - logic: "let a = new Dog[30]((inx: int) => new Cat)"
+     out:
+      - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) => Dog))"
+      - "Semantic error ESE0091: Type 'Cat' is not compatible with the enclosing method's return type 'Dog'"

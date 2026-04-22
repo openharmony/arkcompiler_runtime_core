@@ -16,7 +16,9 @@ limitations under the License.
 /*---
 desc: Cannot use array creation expression with type parameter
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0007: Cannot use array creation expression with type parameter."
+expected_out:
+    - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+    - "Semantic error ESE0292: This expression is not constructible."
 ---*/
 
 function instantiateArray<T>(): T[] {

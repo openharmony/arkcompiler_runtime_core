@@ -75,8 +75,11 @@ cases:
       if (a.meth <Y[]> (new X(), v) !== v) {  // Y[] is not I[]
           return 1;
       }
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching call signature for meth(X, Array<I>)"
+      - "Semantic error ESE0046: Type 'Array<I>' is not compatible with type 'Array<Y>' at index 2"
   #7
   - use: |-
       let v: Color[] = [Color.Red]
@@ -126,5 +129,6 @@ cases:
       if (a.meth <I[]> (new X(), v) !== v) {
           return 1;
       }
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"

@@ -41,8 +41,11 @@ types:
     #5
     - use: |-
           let x: never[] = new never[10](never)
-      stdout: |-
-          "Semantic error ESE132307: Class 'never' cannot be used as object"
+      stdout:
+        - "Semantic error ESE132307: Class 'never' cannot be used as object"
+        - "Semantic error ESE0122: Class name can't be the argument of function or method."
+        - "Semantic error ESE0127: No matching call signature for create(Int, never)"
+
     #6
     - use: |-
           let x: never[] = [new never] as never[]

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,49 +15,65 @@
 cases:
 
   - src_type: Boolean
+    init: "true"
     dst_type: Boolean
 
   - src_type: Byte
+    init: 1
     dst_type: Byte
 
   - src_type: Char
+    init: "c'c'"
     dst_type: Char
 
   - src_type: Short
+    init: 2
     dst_type: Short
 
   - src_type: Int
+    init: 2
     dst_type: Int
 
   - src_type: Long
+    init: 2
     dst_type: Long
 
   - src_type: Float
+    init: 2.0f
     dst_type: Float
 
   - src_type: Double
+    init: 2.0
     dst_type: Double
 
   - src_type: Boolean
+    init: "true"
     dst_type: Boolean
 
   - src_type: byte
+    init: 1
     dst_type: byte
 
   - src_type: char
+    init: "c'c'"
     dst_type: char
 
   - src_type: short
+    init: 2
     dst_type: short
 
   - src_type: int
+    init: 2
     dst_type: int
 
   - src_type: long
+    init: 3
     dst_type: long
 
   - src_type: float
+    init: 2.0f
     dst_type: float
 
   - src_type: double
+    init: 2.0
     dst_type: double

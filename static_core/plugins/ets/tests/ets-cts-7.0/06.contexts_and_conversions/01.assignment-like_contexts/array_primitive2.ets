@@ -19,7 +19,7 @@ desc: Assignment contexts allow the assignment for arrays if they are same primi
 
 function main() {
 {% for c in cases %}
-  let src_{{loop.index}}: {{c.src_type}}[] = new {{c.src_type}}[1];
+  let src_{{loop.index}}: {{c.src_type}}[] = new {{c.src_type}}[1]({{c.init}});
   let dst_{{loop.index}}: {{c.dst_type}}[] = src_{{loop.index}};
 {% endfor %}
 }
