@@ -451,6 +451,8 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public native override compareTo(other: String): int;
 
+    private static defaultCollator_ = new Intl.Collator();
+
     /**
      * Comparison between this String and another one based on locale and options.
      *     The result is -1 if this string sorts before the another string,
@@ -466,6 +468,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      */
     public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): int {
+        if (locale == undefined && options == undefined) {
+            return String.defaultCollator_.compare(this, that)
+        }
         return new Intl.Collator(locale, options).compare(this, that)
     }
 

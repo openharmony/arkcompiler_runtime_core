@@ -187,7 +187,7 @@ ani_status CanonicalizeLocaleList(ani_env *env, std::vector<std::string> &seen,
     return ANI_OK;
 }
 
-static icu::LocaleMatcher BuildLocaleMatcher(UErrorCode &success)
+static icu::LocaleMatcher BuildLocaleMatcher()
 {
     UErrorCode error = U_ZERO_ERROR;
 
@@ -204,7 +204,15 @@ static icu::LocaleMatcher BuildLocaleMatcher(UErrorCode &success)
         builder.addSupportedLocale(availableLocales[i]);
     }
 
-    return builder.build(success);
+    auto matcher = builder.build(error);
+    ANI_FATAL_IF(U_FAILURE(error));
+    return matcher;
+}
+
+static const icu::LocaleMatcher &GetCachedLocaleMatcher()
+{
+    static const icu::LocaleMatcher LOCALE_MATCHER = BuildLocaleMatcher();
+    return LOCALE_MATCHER;
 }
 
 icu::Locale GetLocale(ani_env *env, std::string &locTag)
@@ -228,12 +236,7 @@ ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class kla
         }
     }
     auto success = UErrorCode::U_ZERO_ERROR;
-    auto matcher = BuildLocaleMatcher(success);
-    if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Unable to build locale matcher",
-                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
-        return nullptr;
-    }
+    const auto &matcher = GetCachedLocaleMatcher();
     auto it = intl::LanguageTagListIterator(tags);
     auto bestfit = matcher.getBestMatchResult(it, success);
     if (UNLIKELY(U_FAILURE(success))) {
@@ -297,13 +300,7 @@ ani_array StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class kla
 {
     auto tags = ToStringList(env, locales);
 
-    auto success = UErrorCode::U_ZERO_ERROR;
-    auto matcher = BuildLocaleMatcher(success);
-    if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Unable to build locale matcher",
-                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
-        return nullptr;
-    }
+    const auto &matcher = GetCachedLocaleMatcher();
 
     auto result = std::vector<std::string>();
     for (const auto &tag : tags) {
@@ -311,7 +308,7 @@ ani_array StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class kla
             ThrowRangeError(env, "Incorrect locale information provided");
             return nullptr;
         }
-        success = UErrorCode::U_ZERO_ERROR;
+        auto success = UErrorCode::U_ZERO_ERROR;
         auto desired = icu::Locale::forLanguageTag(tag, success);
         auto matched = matcher.getBestMatchResult(desired, success);
         if (UNLIKELY(U_FAILURE(success))) {

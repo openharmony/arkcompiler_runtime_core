@@ -17,6 +17,7 @@ function main(): int {
     const suite = new arktest.ArkTestsuite('Intl.Collator');
 
     suite.addTest('Intl.Collator.compare', testCollatorCompare);
+    suite.addTest('Intl.Collator constructor locales undefined uses default locale', testCollatorUndefinedLocales);
     suite.addTest('Array.sort call Intl.Collator.compare', testArraySortCompare);
     return suite.run();
 }
@@ -69,4 +70,29 @@ function testArraySortCompare(): void {
     let col = new Intl.Collator('de', {sensitivity: 'base'});
     arr.sort(col.compare);
     arktest.assertEQ(arr.join(), 'a,b,c');
+}
+
+/**
+ * When `locales` is omitted or `undefined`, the constructor skips locale resolution and keeps
+ * `locale: Locale.defaultTag()` (see Intl.Collator constructor).
+ */
+function testCollatorUndefinedLocales(): void {
+    const defaultTag = Intl.Locale.defaultTag();
+
+    const omitted = new Intl.Collator();
+    arktest.assertEQ(omitted.resolvedOptions().locale, defaultTag, 'no-arg: resolved locale should be default');
+
+    const explicitUndefined = new Intl.Collator(undefined);
+    arktest.assertEQ(explicitUndefined.resolvedOptions().locale, defaultTag, 'undefined locales: resolved locale');
+
+    const explicitUndefinedTwice = new Intl.Collator(undefined, undefined);
+    arktest.assertEQ(explicitUndefinedTwice.resolvedOptions().locale, defaultTag, 'undefined locales and options');
+
+    const withOptionsOnly = new Intl.Collator(undefined, { sensitivity: 'base' });
+    arktest.assertEQ(withOptionsOnly.resolvedOptions().locale, defaultTag, 'options only: locale stays default');
+    arktest.assertEQ(withOptionsOnly.resolvedOptions().sensitivity, 'base', 'options only: sensitivity applied');
+    arktest.assertEQ(withOptionsOnly.compare('a', 'A'), 0, 'base sensitivity on default locale');
+
+    arktest.assertLT(omitted.compare('a', 'b'), 0);
+    arktest.assertEQ(omitted.compare('x', 'x'), 0);
 }
