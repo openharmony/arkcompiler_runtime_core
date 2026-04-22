@@ -230,7 +230,7 @@ function testOfPrioritySetting(): void {
     e.join();
 }
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite('EAWorker Test Suite');
 
     suite.addTest('testACoroutineEaworker', testACoroutineEaworker);
@@ -240,5 +240,6 @@ function main(): int {
     suite.addAsyncTest('testAJCoroutineCallACoroutine', testAJCoroutineCallACoroutine);
     suite.addTest('testNestedEAWorker', testNestedEAWorker);
     
-    return suite.run();
+    let res = await suite.runAsync();
+    return res;
 }

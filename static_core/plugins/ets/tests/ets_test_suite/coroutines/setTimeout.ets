@@ -305,7 +305,7 @@ function testSameWorkerIdTestLaunch() {
     launch(sameWorkerIdTest);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     
     let testSuite = new arktest.ArkTestsuite('coroutines.setTimeout');
@@ -348,7 +348,7 @@ function main(): int {
      * Instead, the whole program will fail with the uncaught error. This is to be fixed in future.
      * This is because all the setTimeouts are executed as separate coroutines.
      */
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     
     return res;
 }

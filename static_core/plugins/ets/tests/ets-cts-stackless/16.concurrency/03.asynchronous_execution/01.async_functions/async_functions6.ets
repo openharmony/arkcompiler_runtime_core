@@ -28,7 +28,6 @@ async function startTest() {
     let result2: string | number = await testAsync(1);
     arktest.assertEQ(result1, "text");
     arktest.assertEQ(result2, 20);
-    // arktest.assertTrue(false);
 }
 
 function main(): void {

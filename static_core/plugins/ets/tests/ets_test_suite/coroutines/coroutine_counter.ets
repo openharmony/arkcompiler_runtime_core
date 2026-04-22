@@ -56,8 +56,9 @@ async function  payload ()  {
         arktest.assertEQ(start_count , CoroutineExtras.getCoroutineCount())
 }   
 
-function main() {
+async function main(): Promise<int> {
     let testsuite = new arktest.ArkTestsuite("CoroCount");
     testsuite.addAsyncTest('testCoroCount', payload)
-    return testsuite.run();
+    let res = await testsuite.runAsync();
+    return res;
 }

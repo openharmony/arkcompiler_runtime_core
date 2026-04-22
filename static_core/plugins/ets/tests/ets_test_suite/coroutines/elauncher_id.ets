@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,9 @@ async function testElauncherId(): Promise<void> {
     arktest.assertNE(eLauncherId, CoroutineExtras.getWorkerId());
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.elauncher_id');
     testSuite.addAsyncTest('testElauncherId', testElauncherId);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

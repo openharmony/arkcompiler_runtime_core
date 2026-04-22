@@ -68,12 +68,12 @@ function testAwaitSyncOtherThread(): void {
   arktest.assertEQ(val, 100, "awaitSync on other thread should return 100");
 }
 
-function main(): int {
+async function main(): Promise<int> {
   let testSuite = new arktest.ArkTestsuite("coroutines.await_sync");
   testSuite.addTest("testAwaitSyncAlreadyResolved", testAwaitSyncAlreadyResolved);
   testSuite.addTest("testAwaitSyncAsyncResolution", testAwaitSyncAsyncResolution);
   testSuite.addTest("testAwaitSyncRejection", testAwaitSyncRejection);
   testSuite.addTest("testAwaitSyncOtherThread", testAwaitSyncOtherThread);
-  let res = testSuite.run();
+  let res = await testSuite.runAsync();
   return res;
 }

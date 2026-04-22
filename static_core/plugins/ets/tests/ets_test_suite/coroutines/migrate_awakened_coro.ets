@@ -74,9 +74,9 @@ function testAwaitMigration(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.migrate_awakened_coro');
     testSuite.addTest('testAwaitMigration', testAwaitMigration);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

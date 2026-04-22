@@ -64,11 +64,11 @@ async function executionOrderTest(isPending: boolean) {
 }
 
 async function testWithPendingPromise() {
-    executionOrderTest(true);
+    await executionOrderTest(true);
 }
 
 async function testWithResolvedPromise() {
-    executionOrderTest(false);
+    await executionOrderTest(false);
 }
 
 async function testPromiseBeforeAsync() {
@@ -128,13 +128,13 @@ async function testWithAsyncPromiseThen() {
     executionOrder.checkOrder();
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.execution_order');
     testSuite.addAsyncTest('testWithPendingPromise', testWithPendingPromise);
     testSuite.addAsyncTest('testWithResolvedPromise', testWithResolvedPromise);
     testSuite.addAsyncTest('testPromiseBeforeAsync', testPromiseBeforeAsync);
     testSuite.addAsyncTest('testWithPromiseThen', testWithPromiseThen);
     testSuite.addAsyncTest('testWithAsyncPromiseThen', testWithAsyncPromiseThen);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

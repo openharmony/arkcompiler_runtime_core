@@ -48,9 +48,9 @@ function testRaceInTheCCtor(): void {
     }
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.class_load_race');
     testSuite.addTest('testRaceInTheCCtor', testRaceInTheCCtor);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }

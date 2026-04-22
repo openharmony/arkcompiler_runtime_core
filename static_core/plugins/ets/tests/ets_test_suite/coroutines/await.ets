@@ -91,13 +91,13 @@ function testAwaitForObject() {
     checkReturnType(getObject);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.await');
     testSuite.addTest('testAwaitForString', testAwaitForString);
     testSuite.addTest('testAwaitForInt', testAwaitForInt);
     testSuite.addTest('testAwaitForNumber', testAwaitForNumber);
     testSuite.addTest('testAwaitForBoolean', testAwaitForBoolean);
     testSuite.addTest('testAwaitForObject', testAwaitForObject);
-    let res = testSuite.run();
+    let res = await testSuite.runAsync();
     return res;
 }
