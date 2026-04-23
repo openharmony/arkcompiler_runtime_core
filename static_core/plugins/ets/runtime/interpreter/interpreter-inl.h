@@ -205,7 +205,7 @@ public:
         auto asyncCtx = EtsAsyncContext::FromEtsObject(aCtx);
 
         // store resume point id
-        auto resumePointId = reinterpret_cast<int64_t>(this->GetInst().GetNext().GetAddress());
+        auto resumePointId = this->GetBytecodeOffset() + this->GetInst().GetSize();
         asyncCtx->SetAwaitId(resumePointId);
 
         // make sure we have enough space in potentially compiled async context
@@ -240,14 +240,14 @@ public:
 
         // load vregs & resume point id from context
         auto *frame = this->GetFrame();
-        const uint8_t *resumePoint;
+        int32_t resumePoint = 0;
         if (asyncCtx->GetCompiledCode() == 0) {
-            resumePoint = reinterpret_cast<const uint8_t *>(asyncCtx->RestoreInterpreterContext(frame, executionCtx));
+            ASSERT(this->GetBytecodeOffset() < asyncCtx->GetAwaitId());
+            resumePoint = asyncCtx->RestoreInterpreterContext(frame, executionCtx) - this->GetBytecodeOffset();
         } else {
-            resumePoint = this->GetFrame()->GetMethod()->GetInstructions() +
-                          asyncCtx->RestoreCompiledContext(frame, executionCtx);
+            resumePoint = asyncCtx->RestoreCompiledContext(frame, executionCtx);
         }
-        this->template JumpTo<true>(resumePoint);
+        this->template JumpToInst<true>(resumePoint);
     }
 
     template <BytecodeInstruction::Format FORMAT>
