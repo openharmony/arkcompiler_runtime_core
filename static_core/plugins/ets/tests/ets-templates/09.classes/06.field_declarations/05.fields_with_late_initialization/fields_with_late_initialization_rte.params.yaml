@@ -12,6 +12,7 @@
 # limitations under the License.
 
 cases:
+#0
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -56,7 +57,7 @@ cases:
         arktest.expectThrow(() => {
           let a: A = new A()
         }, expectedError)
-
+#1
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -101,7 +102,7 @@ cases:
         arktest.expectThrow(() => {
           let a: A = new A()
         }, expectedError)
-
+#2
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -132,7 +133,7 @@ cases:
         arktest.expectThrow(() => {
           let a: A = new A([check_value])
         }, expectedError)
-
+#3
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -169,7 +170,7 @@ cases:
         arktest.expectThrow(() => {
           arktest.assertTrue(a.field instanceof [check_type])
         }, expectedError)
-
+#4
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -215,7 +216,7 @@ cases:
         arktest.expectThrow(() => {
           let v: [check_type] = lambda()
         }, expectedError)
-
+#5
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -252,7 +253,7 @@ cases:
         arktest.expectThrow(() => {
           foo(a)
         }, expectedError)
-
+#6
   - desc: |-
       >-
         As all other fields, a field with late initialization
@@ -290,11 +291,12 @@ cases:
         arktest.expectThrow(() => {
           foo(lambda)
         }, expectedError)
-
+#7
   - desc: |-
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+    async: true
     check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
@@ -318,53 +320,18 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
+        
+        try { 
+            await a.field
+        } catch(e) {
+            arktest.assertTrue (e instanceof Error)
         }
-        arktest.expectThrow(() => {
-          waitForCompletion(async () => a.field)
-        }, expectedError)
-
+#8
   - desc: |-
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
-    check_variants:
-      - {check_type: "long", cv_decl_data: ""}
-      - {check_type: "int", cv_decl_data: ""}
-      - {check_type: "byte", cv_decl_data: ""}
-      - {check_type: "short", cv_decl_data: ""}
-      - {check_type: "double", cv_decl_data: ""}
-      - {check_type: "number", cv_decl_data: ""}
-      - {check_type: "float", cv_decl_data: ""}
-      - {check_type: "bigint", cv_decl_data: ""}
-      - {check_type: "string", cv_decl_data: ""}
-      - {check_type: "char", cv_decl_data: ""}
-      - {check_type: "boolean", cv_decl_data: ""}
-      - {check_type: "Object", cv_decl_data: ""}
-      - {check_type: "C", cv_decl_data: "class C {}"}
-    decl_variants:
-      - |-
-        [cv_decl_data]
-        class A {
-          field!: Promise<[check_type]>
-          constructor() {
-            waitForCompletion(async () => this.field)
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
-        }
-        arktest.expectThrow(() => {
-          let a: A = new A()
-        }, expectedError)
-
-  - desc: |-
-      >-
-        As all other fields, a field with late initialization
-        must be initialized before it is used for the first time.
+    async: true
     check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
@@ -400,17 +367,18 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
+         
+        try { 
+            await a.field
+        } catch(e) {
+            arktest.assertTrue (e instanceof Error)
         }
-        arktest.expectThrow(() => {
-          waitForCompletion(a.foo)
-        }, expectedError)
-
+#9
   - desc: |-
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+    async: true
     check_variants:
       - {check_type: "long", base_value: "0", cv_decl_data: ""}
       - {check_type: "int", base_value: "0", cv_decl_data: ""}
@@ -455,13 +423,14 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertFalse(a.res)
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.res)
-
+#10
   - desc: |-
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+    async: true
     check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
@@ -494,9 +463,9 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
+        
+        try { 
+            await a.foo().then((): [check_type] => a.field)
+        } catch(e) {
+            arktest.assertTrue (e instanceof Error)
         }
-        arktest.expectThrow(() => {
-          waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
-        }, expectedError)

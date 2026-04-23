@@ -15,16 +15,17 @@
 return_test_cases:
 
   # function
+#0
   - decl: |
       function foo(): void { return }
     use: |
       foo()
-
+#1
   - decl: |
       function foo() { return }
     use: |
       foo()
-
+#2
   - decl: |
       function test(): void {
         return;
@@ -32,75 +33,80 @@ return_test_cases:
       }
     use: |
       test()
-
+#3
   - decl: | # no return statements is equal to 'return undefined' form
       function foo() {}
     use: |
       foo()
-
+#4
   - decl: | # full syntax form
       function foo(): void { return undefined }
     use: |
       foo()
-  
+ #5 
   - decl: | # return with no expression can occur inside func with return type 'undefined'
       function foo(): undefined { return }
     use: |
       foo()
-
+#6
   - decl: | # return with no expression can occur inside func with return type union containing 'undefined'
       function foo(): int | undefined { return }
     use: |
       foo()
-
+#7
   - decl: | # return with no expression can occur inside func with return type union containing 'void'
       function foo(): void | string { return }
     use: |
       foo()
 
   # async function
+#8
   - decl: | # return with no expression can occur inside async func with return type Promise<void>
       async function asyncFunc(): Promise<void> { return }
+    async: true
     use: |
-      waitForCompletion(asyncFunc)
-
+      await asyncFunc()
+#9
   - decl: |
       async function asyncFunc(): Promise<int> { return -8 }
+    async: true
     use: |
-      arktest.assertEQ(waitForCompletion(asyncFunc), -8)
+      arktest.assertEQ(await asyncFunc(), -8)
 
   # lambda
+#10
   - decl: |
       let fn = (): int => { return 42 }
     use:
       arktest.assertEQ(fn(), 42)
-
+#11
   - decl: |
       type TL = () => void
     use: |
       let x: TL = () => { return }
       x()
-
+#12
   - decl: |
       type TL = () => void
     use: |
       ((): void => { return })()
 
   # method
+#13
   - decl: |
       class A {
         foo(): void { return }
       }
     use: |
       new A().foo()
-
+#14
   - decl: |
       class A {
         foo() { return }
       }
     use: |
       new A().foo()
-      
+#15 
   - decl: |
       class A {
         public static x: int
@@ -113,6 +119,7 @@ return_test_cases:
       A.x
 
   # constructor
+#16
   - decl: |
       class A {
         constructor() {
@@ -123,6 +130,7 @@ return_test_cases:
       new A()
 
   # return object expression literal (exercises SetPreferredType on object expr in return statement)
+#17
   - decl: |
       interface DataResult {
         appendText: string

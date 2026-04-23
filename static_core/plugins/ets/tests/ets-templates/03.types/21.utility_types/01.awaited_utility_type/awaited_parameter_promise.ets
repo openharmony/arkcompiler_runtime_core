@@ -21,15 +21,15 @@ desc: >-
 
 async function foo<T, G>(awaited: Awaited<T>, expected: G) {
     arktest.assertEQ(awaited, expected)
-    arktest.assertTrue(awaited instanceof {{c.G}})
+    arktest.assertTrue( awaited instanceof {{c.G}} )
 }
 
 async function bar() {
-    foo<{{c.T}},{{c.G}}>(await Promise.resolve({{c.val}}), {{c.check}})
+    foo<{{c.T}},{{c.G}}>( await Promise.resolve({{c.val}}), {{c.check}} )
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }
 
-{% endfor %}
+{%- endfor %}

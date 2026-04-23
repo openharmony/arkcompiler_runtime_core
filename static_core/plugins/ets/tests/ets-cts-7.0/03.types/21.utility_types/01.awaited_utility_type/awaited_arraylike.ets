@@ -22,15 +22,15 @@ desc: >-
 class MyArray<T> extends Array<T> {}
 
 async function foo(i: Awaited<Promise<MyArray<Promise<number>>>>) {
-  i.push(new Promise<number>((resolve)=> resolve(5.0) ))
-  arktest.assertEQ(await i[0], 5.0)
-  arktest.assertTrue(i instanceof MyArray)
+    i.push( new Promise<number>( (resolve) => resolve(5.0) ) )
+    arktest.assertEQ(await i[0], 5.0)
+    arktest.assertTrue(i instanceof MyArray)
 }
 
 async function bar() {
-  foo(await Promise.resolve(new MyArray<Promise<number>>()))
+    foo( await Promise.resolve( new MyArray<Promise<number>>() ) )
 }
 
-function main() {
-  waitForCompletion(bar)
+async function main(): Promise<void> {
+    await bar()
 }

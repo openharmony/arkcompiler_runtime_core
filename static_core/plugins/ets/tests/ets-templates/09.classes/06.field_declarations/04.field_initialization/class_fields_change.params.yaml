@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 cases:
+#0
   - desc: |-
       Checking for changing the value from class method call.
     check_variants:
@@ -68,7 +69,7 @@ cases:
         a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#1
   - desc: |-
       Checking for changing the value from outside of class.
     check_variants:
@@ -125,7 +126,7 @@ cases:
         lambda()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#2
   - desc: |-
       Checking for changing the value from function call.
     check_variants:
@@ -175,7 +176,7 @@ cases:
         foo(a)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#3
   - desc: |-
       >-
         Checking for changing the value from function call
@@ -230,7 +231,7 @@ cases:
         foo(lambda)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#5
   - desc: |-
       >-
         Checking for changing the value from outside of class
@@ -268,7 +269,7 @@ cases:
         arktest.assertEQ(d.field.name, "dog")
         arktest.assertTrue(c.field instanceof Cat)
         arktest.assertEQ(c.field.name, "cat")
-
+#6
   - desc: |-
       >-
         Checking for changing the value from outside of class
@@ -326,7 +327,7 @@ cases:
         arktest.assertEQ(b.field(new B, 7).v, 13)
         arktest.assertTrue(c.field instanceof HandlerAInt)
         arktest.assertEQ(c.field(new B, 7).v, -20)
-
+#7
   - desc: |-
       >-
         Checking for changing the value from outside of class
@@ -362,7 +363,7 @@ cases:
         arktest.assertTrue(a instanceof Dog)
         arktest.assertTrue(a.field instanceof number)
         arktest.assertEQ(a.field, 3)
-
+#8
   - desc: |-
       >-
         Checking for changing the value from outside of class
@@ -431,7 +432,7 @@ cases:
         lambda()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#9
   - desc: |-
       Checking for changing field by setter.
     check_variants:
@@ -504,9 +505,10 @@ cases:
         a.field = [new_value]
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#10
   - desc: |-
       Checking for changing the value with asynchronous API usage.
+    async: true
     check_variants:
       - {check_type: "long", new_value: "5"}
       - {check_type: "int", new_value: "5"}
@@ -539,12 +541,13 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(() => a.field)
+        let res = await new A().field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
-
+#11
   - desc: |-
       Checking for changing the value with asynchronous API usage.
+    async: true  
     check_variants:
       - {check_type: "long",
         base_value: "4", new_value: "5"}
@@ -591,17 +594,18 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(() => a.field)
+        let res = await new A().field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [base_value])
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        res = waitForCompletion(() => a.field)
+        res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
-
+#12
   - desc: |-
       Checking for changing the value with asynchronous API usage.
+    async: true
     check_variants:
       - {check_type: "long",
         base_value: "4", new_value: "5"}
@@ -646,21 +650,22 @@ cases:
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        let res = waitForCompletion(() => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then((): [check_type] => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#13
   - desc: |-
         Checking for changing the value with asynchronous API usage.
+    async: true
     check_variants:
       - {check_type: "long",
         base_value: "4", new_value: "5"}
@@ -712,19 +717,19 @@ cases:
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        let res = waitForCompletion(() => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then((): [check_type] => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
-
+#14
   - desc: |-
       Checking for changing the value from outside of generic class.
     check_variants:
