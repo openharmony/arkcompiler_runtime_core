@@ -22,6 +22,6 @@ tags:
 ---*/
 
 export declare namespace Ambient {
-  const enum Season {Winter, Spring, Summer, Autumn}
-  export const enum SeasonExp {Winter, Spring, Summer, Autumn}
+  enum Season {Winter, Spring, Summer, Autumn}
+  export enum SeasonExp {Winter, Spring, Summer, Autumn}
 }

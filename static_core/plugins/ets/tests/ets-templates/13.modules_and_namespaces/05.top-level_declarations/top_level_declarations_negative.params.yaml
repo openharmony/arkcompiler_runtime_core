@@ -50,8 +50,8 @@ compileErrorTypes:
 # 16 Errors in rest parameters
   - "function badRest(...x: number, y: string): void {}"
   
-# 17 Incorrect const enum
-  - "const enum BadEnum { A = 'hello', B = 2 }"
+# 17 Incorrect enum
+  - "enum BadEnum { A = 'hello', B = 2 }"
   
 # 18-19 Errors in ambient declarations
   - "declare const x;"

@@ -58,8 +58,8 @@ declarations:
     }
   - >
     export namespace Ambient {
-      const enum Season {Winter, Spring, Summer, Autumn}
-      export const enum SeasonExp {Winter = 1, Spring, Summer, Autumn}
+      enum Season {Winter, Spring, Summer, Autumn}
+      export enum SeasonExp {Winter = 1, Spring, Summer, Autumn}
     }
   - >
     export namespace Ambient {
@@ -77,7 +77,7 @@ declarations:
           a: int
         }
         export enum Color {White = 'w', Blue = 'b', Red = 'r'}
-        export const enum Season {Winter = 1, Spring, Summer, Autumn}
+        export enum Season {Winter = 1, Spring, Summer, Autumn}
         export type Matrix = string[][]
       }
     }

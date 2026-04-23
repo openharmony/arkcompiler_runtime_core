@@ -20,7 +20,7 @@ desc: >-
     - Numeric type equal to or larger than the enumeration base type
     - Union type considering the value type of the enumeration base type
 ---*/
-enum Color { Red, Green = 0x3434343456565656, Blue }
+enum Color:long { Red, Green = 0x3434343456565656, Blue }
 
 {{c.decl}}
 

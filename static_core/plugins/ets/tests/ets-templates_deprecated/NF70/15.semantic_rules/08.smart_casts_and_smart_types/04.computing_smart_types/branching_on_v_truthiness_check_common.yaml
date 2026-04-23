@@ -577,8 +577,8 @@ cases:
       // *EnumP - has values only from positive branch
       // *EnumNP* - has values from negative and positive branches
 
-      enum ImpLongEnumP { V1 = 0x7FFF_FFFF_1, V2 = 2 }
-      enum ImpLongEnumNP { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ImpLongEnumP:long { V1 = 0x7FFF_FFFF_1, V2 = 2 }
+      enum ImpLongEnumNP:long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
       enum ImpIntEnumP { V1 = 1, V2 = 2 }
       enum ImpIntEnumNP { V1 = 1, V2 = 0 }
       enum ImpStrEnumP { V1 = "abc", V2 = "efg" }
@@ -719,7 +719,7 @@ cases:
       // Imp*Enum - has implicit enumeration base type
       // Exp*Enum - has explicit enumeration base type
 
-      enum ImpLongEnum { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ImpLongEnum:long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
       enum ImpIntEnum { V1 = 1, V2 = 0 }
       enum ImpStrEnum { V1 = "abc", V2 = "" }
       enum ExpLongEnum: long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
@@ -866,7 +866,7 @@ cases:
       // Imp*Enum - has implicit enumeration base type
       // Exp*Enum - has explicit enumeration base type
 
-      enum ImpLongEnum { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ImpLongEnum:long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
       enum ImpIntEnum { V1 = 1, V2 = 0 }
       enum ImpStrEnum { V1 = "abc", V2 = "" }
       enum ExpLongEnum: long { V1 = 0x7FFF_FFFF_1, V2 = 0 }

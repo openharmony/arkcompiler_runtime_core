@@ -16,11 +16,11 @@ cases:
   - val:
       - ["Color",  "Color.Red",   "\"0\""]
     defs: |-
-      const enum Color { Red, Green, Blue };
+      enum Color { Red, Green, Blue };
     tags: compile-only, negative
 
   - val:
       - ["Color",  "Color.Red",   p1.toString()]
     defs: |-
-      const enum Color { Red, Green, Blue };
+      enum Color { Red, Green, Blue };
     tags: compile-only, negative

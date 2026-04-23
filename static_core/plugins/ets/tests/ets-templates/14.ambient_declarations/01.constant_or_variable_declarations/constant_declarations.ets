@@ -34,9 +34,9 @@ export const c2: Object[] = [1.0];
 
 export enum Color1 { Red, Green, Blue }
 
-export const enum Color2 { Red = 1 , Green = 2, Blue =  3 }
+export enum Color2 { Red = 1 , Green = 2, Blue =  3 }
 
-export const enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
+export enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
 
 export enum Color4 { Red, Green, Blue }
 

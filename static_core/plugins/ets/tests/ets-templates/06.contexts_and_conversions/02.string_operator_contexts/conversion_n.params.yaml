@@ -18,7 +18,7 @@ cases:
       - ["Color",  "Color.Blue",  "\"2\""]
       - ["Color",  "Color.Green", "\"1\""]
     defs: |-
-      const enum Color { Red, Green, Blue };
+      enum Color { Red, Green, Blue };
     tags: compile-only, negative
 
   - val:
@@ -26,5 +26,5 @@ cases:
       - ["Color",  "Color.Blue",  p2.toString()]
       - ["Color",  "Color.Green", p3.toString()]
     defs: |-
-      const enum Color { Red, Green, Blue };
+      enum Color { Red, Green, Blue };
     tags: compile-only, negative

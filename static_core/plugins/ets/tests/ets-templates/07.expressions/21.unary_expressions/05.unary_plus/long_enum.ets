@@ -21,7 +21,7 @@ desc: >-
 ---*/
 
 
-enum LongEnum {
+enum LongEnum:long {
     Neg = -0x1_1111_1111,
     Pos = 0x1_1111_1111,
     Min = -9223372036854775808,

@@ -292,7 +292,7 @@ cases:
           arktest.assertEQ(res, "789")
 #28    
     - decl: |-
-          const enum Bits{ Zero = 0, One = 1 }
+          enum Bits{ Zero = 0, One = 1 }
           const arr: Bits[] = [Bits.Zero, Bits.One]
       use: |-
           //base enum type
@@ -300,7 +300,7 @@ cases:
           arktest.assertEQ(res, "01")
 #29    
     - decl: |-
-          const enum Bits{ Zero = 0, One = 1 }
+          enum Bits{ Zero = 0, One = 1 }
           const arr: Bits[] = [Bits.Zero, Bits.One]
       use: |-
           //enum explicit type

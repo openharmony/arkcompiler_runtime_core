@@ -513,5 +513,5 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
+        "Semantic error ESE0440: Const enum is not yet supported."
     test_suffix: "ce"

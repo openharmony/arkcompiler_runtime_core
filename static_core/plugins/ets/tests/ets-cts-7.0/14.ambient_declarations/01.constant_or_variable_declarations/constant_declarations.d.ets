@@ -29,9 +29,9 @@ export declare const a2: short, b2: double, c2: Object[];
   
 export declare enum Color1 { Red, Green, Blue }
   
-export declare const enum Color2 { Red = 1 , Green = 2, Blue =  3 }
+export declare enum Color2 { Red = 1 , Green = 2, Blue =  3 }
   
-export declare const enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
+export declare enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
     
 export declare enum Color4 { Red, Green, Blue }
   

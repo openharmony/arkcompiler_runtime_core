@@ -19,25 +19,25 @@ desc: >-
   can be compared using equality operators ==, ===, !=, !==.
 ---*/
 
-const enum NumericEnum {
+enum NumericEnum {
     First = 0,
     Second = 1,
     Third = 0
 }
 
-const enum StringEnum {
+enum StringEnum {
     Alpha = "A",
     Beta = "B",
     Gamma = "A"
 }
 
-const enum AllSame {
+enum AllSame {
     X = 11,
     Y = 11,
     Z = 11
 }
 
-const enum AllSameStr {
+enum AllSameStr {
     X = "ABC",
     Y = "ABC",
     Z = "ABC"

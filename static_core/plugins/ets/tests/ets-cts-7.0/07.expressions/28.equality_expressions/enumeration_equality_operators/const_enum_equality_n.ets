@@ -21,8 +21,8 @@ tags: [compile-only, negative]
 expected_out: 'Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.'
 ---*/
 
-const enum ConstEnum1 { First = 0 }
-const enum ConstEnum2 { First = 0 }
+enum ConstEnum1 { First = 0 }
+enum ConstEnum2 { First = 0 }
 
 function main() {
     let result = ConstEnum1.First == ConstEnum2.First

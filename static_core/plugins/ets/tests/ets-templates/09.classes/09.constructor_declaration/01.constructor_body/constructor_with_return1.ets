@@ -19,7 +19,7 @@ desc: >-
     does not include an expression.
 ---*/
 
-const enum Color {
+enum Color {
     Red,
     Green,
     Blue,

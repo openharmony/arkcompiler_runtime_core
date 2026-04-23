@@ -175,7 +175,7 @@ cases:
       - { type: 'Color', res: 1 }
 
   - decl: |-
-      const enum Color { Red, Green }
+      enum Color { Red, Green }
     expr: '((): Any => Color.Red)()'
     types:
       - { type: 'Any', res: 1 }
@@ -188,7 +188,7 @@ cases:
       - { type: 'Color', res: 1 }
 
   - decl: |-
-      const enum Rating: double { A = 1.0, B = 1.5 }
+      enum Rating: double { A = 1.0, B = 1.5 }
     expr: '((): Any => Rating.B)()'
     types:
       - { type: 'Any', res: 1 }
@@ -201,7 +201,7 @@ cases:
       - { type: 'Rating', res: 1 }
 
   - decl: |-
-      const enum Color { Red = 'r', Green = 'g' }
+      enum Color { Red = 'r', Green = 'g' }
     expr: '((): Any => Color.Red)()'
     types:
       - { type: 'Any', res: 1 }
