@@ -16,18 +16,19 @@
 {% for c in cases %}
 /*---
 desc: >-
-      A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
-      {{c.doc}}
+    A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
+    {{c.doc}}
 tags: [compile-only, negative]
+expected_out:
+    {{c.expected_out}}
 ---*/
 
 interface I {
-  n?: number // Short form. See 10.4.2
+    n?: number // Short form. See 10.4.2
 }
 
 class C implements I {
-  {{c.decl}}
+    {{c.decl|indent}}
 }
 
 {% endfor %}
-

@@ -12,22 +12,44 @@
 # limitations under the License.
 
 ---
-
 cases:
-#0
-  - decl: |-
-     n = 42
-    doc: optional property is implemented as non-optional
-#1
-  - decl: |-
-     readonly n = 42
-    doc: optional property is implemented as readonly
-#2
-  - decl: |-
-     n: int|number|undefined = 42
-    doc: optional property is implemented as extended union
-#3
-  - decl: |-
-     set n(i: number|undefined): void {
-     }
-    doc: setter must not have any return type declared explicitly
+    #0
+    - decl: |-
+          n = 42
+      doc: optional property is implemented as non-optional
+      expected_out:
+          - 'Semantic error ESE985118: Class member n with type Int in C cannot implement n with type undefined|Double
+            property from interface I because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method n(): Int in C not overriding any method'
+          - "Semantic error ESE79074: Property 'n' must be optional in 'C', which is originally declared in 'I'."
+    #1
+    - decl: |-
+          readonly n = 42
+      doc: optional property is implemented as readonly
+      expected_out:
+          - 'Semantic error ESE0215: Class C cannot implement interface I because the declaration type for field n is
+            not compatible with the declaration type required by the interface.'
+          - "Semantic error ESE0337: Cannot implement interface I: property 'n' must have a setter, but the
+            implementation is readonly"
+          - 'Semantic error ESE985118: Class member n with type Int in C cannot implement n with type undefined|Double
+            property from interface I because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method n(): Int in C not overriding any method'
+          - "Semantic error ESE79074: Property 'n' must be optional in 'C', which is originally declared in 'I'."
+    #2
+    - decl: |-
+          n: int|number|undefined = 42
+      doc: optional property is implemented as extended union
+      expected_out:
+          - 'Semantic error ESE985118: Class member n with type Int|Double|undefined in C cannot implement n with type
+            undefined|Double property from interface I because the implementing return type is not compatible with the
+            interface return type.'
+          - 'Semantic error ESE0136: Method n(): Int|Double|undefined in C not overriding any method'
+    #3
+    - decl: |-
+          set n(i: number|undefined): void {
+          }
+      doc: setter must not have any return type declared explicitly
+      expected_out:
+          - 'Syntax error ESY0241: Setter must not have return type even if it is void.'

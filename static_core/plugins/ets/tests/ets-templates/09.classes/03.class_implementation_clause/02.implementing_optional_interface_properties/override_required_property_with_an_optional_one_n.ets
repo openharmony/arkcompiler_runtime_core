@@ -15,14 +15,17 @@
 
 /*---
 desc: >-
-      A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
+    A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE985118: Class member n with type Double|undefined in C cannot implement n with type Double property from interface I because the implementing return type is not compatible with the interface return type.
+    Semantic error ESE0136: Method n(): Double|undefined in C not overriding any method
 ---*/
 
 interface I {
-  n: number
+    n: number
 }
 
 class C implements I {
-  n?: number
+    n?: number
 }

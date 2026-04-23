@@ -15,14 +15,16 @@
 
 /*---
 desc: >-
-      A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
+    A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE79074: Property 'n' must be optional in 'C', which is originally declared in 'I'.
 ---*/
 
 interface I {
-  n?: number
+    n?: number
 }
 
 class C implements I {
-  n: number = 42
+    n: number = 42
 }

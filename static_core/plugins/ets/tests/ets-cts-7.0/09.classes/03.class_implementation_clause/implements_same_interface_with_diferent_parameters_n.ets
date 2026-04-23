@@ -16,9 +16,11 @@
 /*---
 desc: Implement interface with same parameters.
 assert: >-
-      A compile-time error occurs if a class implements two interface types that represent
-      different instantiations of the same generic interface (see Generics).
+    A compile-time error occurs if a class implements two interface types that represent
+    different instantiations of the same generic interface (see Generics).
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0181: Implements generic interface 'A<T>' with different instantiations.
 ---*/
 
 interface A<T> {}

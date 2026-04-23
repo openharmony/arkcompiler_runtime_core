@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-
 {% for c in cases %}
 /*---
 desc: >-
-      A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
-      {{c.doc}}
+    A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
+    {{c.doc}}
 tags: [compile-only, negative]
+expected_out:
+    {{c.expected_out}}
 ---*/
 
 interface I {
@@ -27,7 +28,6 @@ interface I {
 }
 
 class C implements I {
-  {{c.decl | indent}}
+    {{c.decl | indent}}
 }
 {% endfor %}
-

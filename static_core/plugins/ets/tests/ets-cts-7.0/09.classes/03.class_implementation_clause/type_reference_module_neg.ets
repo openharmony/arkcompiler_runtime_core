@@ -17,8 +17,11 @@
 desc: A compile-time error occurs if typeReference fails to name an accessible interface type (see Accessible).
 assert: interface II is not exported from module
 files:
-- ./modules/interfaces.ets
+    - ./modules/interfaces.ets
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0179: Interface expected here.
+    Semantic error ESE0070: 'II' type does not exist.
 ---*/
 
 import * as M from "./modules/interfaces.ets";

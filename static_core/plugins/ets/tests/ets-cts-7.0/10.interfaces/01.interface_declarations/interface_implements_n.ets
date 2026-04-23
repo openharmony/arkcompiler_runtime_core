@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,12 @@
  */
 
 /*---
-desc: >-
-    Static method does not overriding non static one
-tags: [compile-only, negative]
+desc: Implements clause cannot be used in interface declaration
+tags: [compile-only,negative]
 expected_out: |-
-    Semantic error ESE0190: A is not abstract and does not override abstract method x(): Object in I
+    Syntax error ESY0177: Interface declaration cannot have 'implements' clause.
 ---*/
 
-interface I {
-    x(): Object
-}
+interface B {}
 
-class A implements I {
-    static x(): Object { return new Object() }
-}
+interface C implements B {}

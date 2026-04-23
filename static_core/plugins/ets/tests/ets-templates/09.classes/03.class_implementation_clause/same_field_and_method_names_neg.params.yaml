@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,16 +13,19 @@
 
 --- # List of wildcard type arguments
 class_types:
-    - "abstract"
-    - "final"
-    - ""
+    - 'abstract'
+    - 'final'
+    - ''
 
 cases:
-    - doc: "class method and interface field"
-      interface: "foo: int"
-      class: "foo(): int { return 1;}"
+    - doc: 'class method and interface field'
+      interface: 'foo: int'
+      class: 'foo(): int { return 1;}'
+      expected_out: |-
+          Semantic error ESE0215: Class CA cannot implement interface IC because the declaration type for method foo is not compatible with the declaration type required by the interface.
 
-    - doc: "class field and interface method"
-      interface: "foo(): int"
-      class: "foo: int"
-
+    - doc: 'class field and interface method'
+      interface: 'foo(): int'
+      class: 'foo: int'
+      expected_out: |-
+          Semantic error ESE0215: Class CA cannot implement interface IC because the declaration type for field foo is not compatible with the declaration type required by the interface.

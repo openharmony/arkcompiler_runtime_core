@@ -13,45 +13,61 @@
 
 ---
 cases:
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
-        readonly f: int = 1
-      }
-    doc: cannot narrow down the parameter from writable to readonly form
+    - decl: |-
+          interface I {
+            f: int
+          }
+          class C implements I {
+            readonly f: int = 1
+          }
+      doc: cannot narrow down the parameter from writable to readonly form
+      expected_out:
+          - 'Semantic error ESE0215: Class C cannot implement interface I because the declaration type for field f is
+            not compatible with the declaration type required by the interface.'
+          - "Semantic error ESE0337: Cannot implement interface I: property 'f' must have a setter, but the
+            implementation is readonly"
 
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
-        get f(): int { return 1 }
-      }
-    doc: writable parameter requires both getter and setter
+    - decl: |-
+          interface I {
+            f: int
+          }
+          class C implements I {
+            get f(): int { return 1 }
+          }
+      doc: writable parameter requires both getter and setter
+      expected_out:
+          - 'Semantic error ESE0189: C is not abstract and does not implement setter for f property in I'
 
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
-        set f(i: int) {}
-      }
-    doc: writable parameter requires both getter and setter
+    - decl: |-
+          interface I {
+            f: int
+          }
+          class C implements I {
+            set f(i: int) {}
+          }
+      doc: writable parameter requires both getter and setter
+      expected_out:
+          - 'Semantic error ESE0188: C is not abstract and does not implement getter for f property in I'
 
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
-        f: boolean = false
-      }
-    doc: incorrect field type
+    - decl: |-
+          interface I {
+            f: int
+          }
+          class C implements I {
+            f: boolean = false
+          }
+      doc: incorrect field type
+      expected_out:
+          - 'Semantic error ESE985118: Class member f with type Boolean in C cannot implement f with type Int property
+            from interface I because the implementing return type is not compatible with the interface return type.'
+          - 'Semantic error ESE0136: Method f(): Boolean in C not overriding any method'
+          - 'Semantic error ESE0136: Method f(f: Boolean): undefined in C not overriding any method'
 
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {}
-    doc: required property is not initialized
+    - decl: |-
+          interface I {
+            f: int
+          }
+          class C implements I {}
+      doc: required property is not initialized
+      expected_out:
+          - 'Semantic error ESE0188: C is not abstract and does not implement getter for f property in I'

@@ -12,22 +12,36 @@
 # limitations under the License.
 
 ---
-
 cases:
-  - decl: |-
-     n = 42
-    doc: optional property is implemented as non-optional
+    - decl: |-
+          n = 42
+      doc: optional property is implemented as non-optional
+      expected_out:
+          - 'Semantic error ESE985118: Class member n with type Int in C cannot implement n with type Double|undefined
+            property from interface I because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method n(): Int in C not overriding any method'
+          - "Semantic error ESE79074: Property 'n' must be optional in 'C', which is originally declared in 'I'."
 
-  - decl: |-
-     readonly n = 42
+    - decl: |-
+          readonly n = 42
+      doc: optional property is implemented as readonly
+      expected_out:
+          - 'Semantic error ESE0215: Class C cannot implement interface I because the declaration type for field n is
+            not compatible with the declaration type required by the interface.'
+          - "Semantic error ESE0337: Cannot implement interface I: property 'n' must have a setter, but the
+            implementation is readonly"
+          - 'Semantic error ESE985118: Class member n with type Int in C cannot implement n with type Double|undefined
+            property from interface I because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method n(): Int in C not overriding any method'
+          - "Semantic error ESE79074: Property 'n' must be optional in 'C', which is originally declared in 'I'."
 
-    doc: optional property is implemented as readonly
-
-
-
-  - decl: |-
-     n: int|number|undefined = 42
-
-    doc: optional property is implemented as extended union
-
-
+    - decl: |-
+          n: int|number|undefined = 42
+      doc: optional property is implemented as extended union
+      expected_out:
+          - 'Semantic error ESE985118: Class member n with type Int|Double|undefined in C cannot implement n with type
+            Double|undefined property from interface I because the implementing return type is not compatible with the
+            interface return type.'
+          - 'Semantic error ESE0136: Method n(): Int|Double|undefined in C not overriding any method'

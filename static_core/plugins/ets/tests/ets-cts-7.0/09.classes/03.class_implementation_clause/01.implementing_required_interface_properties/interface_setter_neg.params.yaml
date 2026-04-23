@@ -13,36 +13,47 @@
 
 ---
 cases:
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {
-        readonly f: int = 1
-      }
-    doc: use readonly parameter form for writable field is prohibited
+    - decl: |-
+          interface I {
+            set f(i: int)
+          }
+          class C implements I {
+            readonly f: int = 1
+          }
+      doc: use readonly parameter form for writable field is prohibited
+      expected_out:
+          - 'Semantic error ESE0215: Class C cannot implement interface I because the declaration type for field f is
+            not compatible with the declaration type required by the interface.'
+          - "Semantic error ESE0337: Cannot implement interface I: property 'f' must have a setter, but the
+            implementation is readonly"
 
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {
-        get f(): int { return 1 }
-      }
-    doc: cannot implement setter using getter form
+    - decl: |-
+          interface I {
+            set f(i: int)
+          }
+          class C implements I {
+            get f(): int { return 1 }
+          }
+      doc: cannot implement setter using getter form
+      expected_out:
+          - 'Semantic error ESE0189: C is not abstract and does not implement setter for f property in I'
 
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {
-        f: boolean = false
-      }
-    doc: incorrect field type
+    - decl: |-
+          interface I {
+            set f(i: int)
+          }
+          class C implements I {
+            f: boolean = false
+          }
+      doc: incorrect field type
+      expected_out:
+          - 'Semantic error ESE0136: Method f(f: Boolean): undefined in C not overriding any method'
 
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {}
-    doc: required property is not initialized
+    - decl: |-
+          interface I {
+            set f(i: int)
+          }
+          class C implements I {}
+      doc: required property is not initialized
+      expected_out:
+          - 'Semantic error ESE0189: C is not abstract and does not implement setter for f property in I'
