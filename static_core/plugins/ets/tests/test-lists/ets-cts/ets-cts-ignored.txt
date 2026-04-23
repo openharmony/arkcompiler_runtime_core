@@ -704,6 +704,15 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
 
+#34323 No verifier error on abstract method call
+23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/access_method/make_method_abstract_n.ets
+
+#34325 No verifier error on replaced default constructor call
+23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/delete_constructor/delete_constructor_n.ets
+
+#34326 No verifier error on readonly field assignment
+23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/field_of_the_class/make_field_readonly_n.ets
+
 #29270
 23.binary_compatibility/01.classification_of_source_code_changes/class_and_interface_declaration/ambient_decl_not_loadable/interface_usage_n_2.ets
 23.binary_compatibility/01.classification_of_source_code_changes/class_and_interface_declaration/ambient_decl_not_loadable/interface_usage_n_3.ets

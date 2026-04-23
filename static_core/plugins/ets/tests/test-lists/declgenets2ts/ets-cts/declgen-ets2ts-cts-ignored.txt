@@ -2515,6 +2515,9 @@
 17.experimental_features/03.value_array_types/value_array_init.ets
 02.lexical_elements/07.keywords/soft.ets
 02.lexical_elements/07.keywords/soft_reserved_common.ets
+23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/field_of_the_class/private_field_access_n_3.ets
+23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/field_of_the_class/private_field_access_n_5.ets
+23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/field_of_the_class/private_field_access_n_6.ets
 
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL
