@@ -23,7 +23,8 @@ cases:
               res = 2
           }
       params: parameter is override-incompatible
-
+      exp_out: |-
+        Semantic error ESE0136: Method foo(i: HARBOUR): undefined in Derived not overriding any method
 
     - base: |-
           foo(): SHIPYARD {
@@ -34,6 +35,8 @@ cases:
               return HARBOUR.Boat
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0136: Method foo(): HARBOUR in Derived not overriding any method
 
     - base: |-
           foo(): SHIPYARD {
@@ -44,3 +47,5 @@ cases:
               return HARBOUR.Boat
           }
       params: override-incompatible return type
+      exp_out: |-
+        Semantic error ESE0136: Method foo(): HARBOUR in Derived not overriding any method

@@ -26,6 +26,7 @@ desc: >-
     Every type is override-compatible with itself (see Invariance).
 tags: [negative, compile-only]
 params: {{c.params}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 let res: number = 0;
