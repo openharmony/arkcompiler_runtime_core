@@ -136,16 +136,17 @@ private:
     ObjectPointer<EtsLongArray> primValues_;
     ObjectPointer<EtsShortArray> frameOffsets_;
 
-// NOTE: Refactor layout #34102
 #ifdef PANDA_32_BIT_MANAGED_POINTER
     EtsInt pc_;
-#endif
     EtsLong refCount_;
     EtsLong primCount_;
-
     EtsLong awaitId_;
     EtsLong compiledCode_;
-#ifndef PANDA_32_BIT_MANAGED_POINTER
+#else
+    EtsLong refCount_;
+    EtsLong primCount_;
+    EtsLong awaitId_;
+    EtsLong compiledCode_;
     EtsInt pc_;
 #endif
 
