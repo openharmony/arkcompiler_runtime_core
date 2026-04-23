@@ -70,6 +70,37 @@
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
+#34467 No expected ClassCastError on casting with Char and Boolean
+07.expressions/17.cast_expressions/cast_to_char_w_0.ets
+07.expressions/17.cast_expressions/cast_to_char_w_1.ets
+07.expressions/17.cast_expressions/cast_to_char_w_2.ets
+07.expressions/17.cast_expressions/cast_to_char_w_3.ets
+07.expressions/17.cast_expressions/cast_to_char_w_4.ets
+07.expressions/17.cast_expressions/cast_to_char_w_5.ets
+07.expressions/17.cast_expressions/cast_to_char_w_6.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_0.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_1.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_2.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_3.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_4.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_5.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_6.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_7.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_8.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_9.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_10.ets
+07.expressions/17.cast_expressions/cast_to_numeric_w_11.ets
+07.expressions/17.cast_expressions/cast_to_string_w_0.ets
+
+#34468 es2panda reports code generation failure on casting to Boolean
+07.expressions/17.cast_expressions/cast_to_boolean_w_0.ets
+07.expressions/17.cast_expressions/cast_to_boolean_w_1.ets
+07.expressions/17.cast_expressions/cast_to_boolean_w_2.ets
+07.expressions/17.cast_expressions/cast_to_boolean_w_3.ets
+07.expressions/17.cast_expressions/cast_to_boolean_w_4.ets
+07.expressions/17.cast_expressions/cast_to_boolean_w_5.ets
+07.expressions/17.cast_expressions/cast_to_boolean_w_6.ets
+
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 

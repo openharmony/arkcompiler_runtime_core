@@ -1,0 +1,230 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - type: char
+      val: c'A'
+      expected_out: |-
+          Semantic error ESE0046: Type 'Char' is not compatible with type 'Int' at index 1
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - type: Char
+      val: new Char(c'A')
+      expected_out: |-
+          Semantic error ESE0046: Type 'Char' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: boolean
+      val: 'true'
+      expected_out: |-
+          Semantic error ESE0046: Type 'Boolean' is not compatible with type 'Int' at index 1
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - type: Boolean
+      val: new Boolean(false)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Boolean' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: string
+      val: "'r'"
+      expected_out: |-
+          Semantic error ESE0046: Type 'String' is not compatible with type 'Int' at index 1
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - type: string
+      val: "'r'"
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'String' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    # numeric to string enum
+
+    - type: byte
+      val: 1 as byte
+      expected_out: |-
+          Semantic error ESE0046: Type 'Byte' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: Byte
+      val: new Byte(1 as byte)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Byte' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: short
+      val: '1'
+      expected_out: |-
+          Semantic error ESE0046: Type 'Short' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: Short
+      val: new Short(1 as short)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Short' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: int
+      val: '1'
+      expected_out: |-
+          Semantic error ESE0046: Type 'Int' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: Int
+      val: new Int(1)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Int' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: long
+      val: '1 as long'
+      expected_out: |-
+          Semantic error ESE0046: Type 'Long' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: Long
+      val: new Long(1 as long)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Long' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: float
+      val: 1f
+      expected_out: |-
+          Semantic error ESE0046: Type 'Float' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: Float
+      val: new Float(1f)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Float' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: double
+      val: '1.0'
+      expected_out: |-
+          Semantic error ESE0046: Type 'Double' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    - type: Double
+      val: new Double(1.0)
+      expected_out: |-
+          Semantic error ESE0046: Type 'Double' is not compatible with type 'String' at index 1
+      decl: |-
+          enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
+
+    # numeric to numeric enum with the same base type
+
+    - type: int
+      val: '1'
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Int' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - type: byte
+      val: '1 as byte'
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Byte' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: byte { Red = 1, Green = 2, Blue }
+
+    - type: short
+      val: 1 as short
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Short' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: short { Red = 100, Green = 200, Blue }
+
+    - type: long
+      val: 1 as long
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Long' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: long { Red = 100, Green = 200, Blue }
+
+    - type: float
+      val: 1f
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Float' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: float { Red = 0.1f, Green = 0.2f, Blue = 0.3f }
+
+    - type: double
+      val: '1.0'
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Double' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: double { Red = 0.1, Green = 0.2, Blue = 0.3 }
+
+    # numeric to numeric enum with different base types
+
+    - type: long
+      val: 1 as long
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Long' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - type: short
+      val: 1 as short
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Short' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: byte { Red = 1, Green = 2, Blue }
+
+    - type: int
+      val: '1'
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Int' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: short { Red = 100, Green = 200, Blue }
+
+    - type: float
+      val: 1f
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Float' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: long { Red = 100, Green = 200, Blue }
+
+    - type: double
+      val: '1.0'
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Double' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: float { Red = 0.1f, Green = 0.2f, Blue = 0.3f }
+
+    - type: int
+      val: '1'
+      expected_out: |-
+          Semantic error ESE593373: Conversion from 'Int' to 'Enum' is not supported. Please use 'EnumType.fromValue(value)'
+      decl: |-
+          enum Enum: double { Red = 0.1, Green = 0.2, Blue = 0.3 }
