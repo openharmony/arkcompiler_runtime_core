@@ -27,6 +27,7 @@
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
+#include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -111,6 +112,17 @@ public:
         EtsClass *tupleKlass = PlatformTypes()->coreTuple;
 
         return tupleKlass->IsAssignableFrom(klass);
+    }
+
+    static bool IsArrayBuffer(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        EtsClass *arrayBufferKlass = PlatformTypes()->coreArrayBuffer;
+
+        return arrayBufferKlass->IsAssignableFrom(klass);
     }
 
     static bool IsObject(ScopedManagedCodeFix &s, ani_ref ref)
@@ -417,6 +429,9 @@ std::string_view ANIRefTypeToString(ScopedManagedCodeFix &s, ani_ref ref)
         if (ANIRefTypeChecker::IsArray(s, ref)) {
             return "ani_array";
         }
+        if (ANIRefTypeChecker::IsArrayBuffer(s, ref)) {
+            return "ani_arraybuffer";
+        }
         if (ANIRefTypeChecker::IsClass(s, ref)) {
             return "ani_class";
         }
@@ -550,7 +565,10 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_ERROR:                        return "ani_error";
         case ValueType::ANI_ERROR_STORAGE:                return "ani_error *";
         case ValueType::ANI_ARRAY:                        return "ani_array";
+        case ValueType::ANI_ARRAYBUFFER:                  return "ani_arraybuffer";
         case ValueType::ANI_ARRAY_STORAGE:                return "ani_array *";
+        case ValueType::ANI_ARRAYBUFFER_STORAGE:          return "ani_arraybuffer *";
+        case ValueType::VOID_PTR_STORAGE:                 return "void **";
         case ValueType::ANI_FIXED_ARRAY_BOOLEAN_STORAGE:  return "ani_fixedarray_boolean *";
         case ValueType::ANI_FIXED_ARRAY_CHAR_STORAGE:     return "ani_fixedarray_char *";
         case ValueType::ANI_FIXED_ARRAY_BYTE_STORAGE:     return "ani_fixedarray_byte *";
@@ -773,6 +791,14 @@ public:
         return {};
     }
 
+    VerificationResult VerifyArrayBufferLength(size_t length)
+    {
+        if (length > static_cast<size_t>(std::numeric_limits<ani_int>::max())) {
+            return {"wrong arraybuffer length", ANIErrorSeverity::ERROR};
+        }
+        return {};
+    }
+
     VerificationResult VerifyBoolean(ani_boolean value)
     {
         if (value != ANI_TRUE && value != ANI_FALSE) {
@@ -972,6 +998,23 @@ public:
 
         // Save context for subsequent index validation
         currentTupleValue_ = vtupleValue;
+        return {};
+    }
+
+    VerificationResult VerifyArrayBuffer(VArrayBuffer *varraybuffer)
+    {
+        auto err = VerifyRef(varraybuffer);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsArrayBuffer(s, varraybuffer->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, varraybuffer->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+
         return {};
     }
 
@@ -1963,6 +2006,12 @@ static VerificationResult VerifyTupleIndex(Verifier &v, const ANIArg &arg)
     return v.VerifyTupleIndex(arg.GetValueSize(), arg.GetReturnType());
 }
 
+static VerificationResult VerifyArrayBuffer(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAYBUFFER);
+    return v.VerifyArrayBuffer(arg.GetValueArrayBuffer());
+}
+
 static VerificationResult VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_INDEX);
@@ -2227,6 +2276,18 @@ static VerificationResult VerifySizeStorage(Verifier &v, const ANIArg &arg)
     return v.VerifyTypeStorage(arg.GetValueSizeStorage(), "ani_size");
 }
 
+static VerificationResult VerifyVoidPtrStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VOID_PTR_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueVoidPtrStorage(), "void *");
+}
+
+static VerificationResult VerifyArrayBufferStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAYBUFFER_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueArrayBufferStorage(), "ani_arraybuffer");
+}
+
 static VerificationResult VerifySize([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE);
@@ -2237,6 +2298,12 @@ static VerificationResult VerifyBoolean(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOOLEAN);
     return v.VerifyBoolean(arg.GetValueBoolean());
+}
+
+static VerificationResult VerifyArrayBufferLength(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAYBUFFER_LENGTH);
+    return v.VerifyArrayBufferLength(arg.GetValueSize());
 }
 
 static VerificationResult VerifyObjectStorage(Verifier &v, const ANIArg &arg)

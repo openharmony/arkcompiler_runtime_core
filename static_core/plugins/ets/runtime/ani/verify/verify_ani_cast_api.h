@@ -38,6 +38,7 @@ class VStaticField;
 class VVariable;
 class VError;
 class VArray;
+class VArrayBuffer;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
 class VFixedArrayByte;
@@ -224,6 +225,16 @@ struct TypeMapping<VArray **> {
 template <>
 struct TypeMapping<VArray *> {
     using Type = ani_array;
+};
+
+template <>
+struct TypeMapping<VArrayBuffer **> {
+    using Type = ani_arraybuffer *;
+};
+
+template <>
+struct TypeMapping<VArrayBuffer *> {
+    using Type = ani_arraybuffer;
 };
 
 template <>

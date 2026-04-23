@@ -40,6 +40,7 @@
     X(VERIFY_ARRAY,                         VerifyArray)                          \
     X(VERIFY_TUPLE_VALUE,                   VerifyTupleValue)                     \
     X(VERIFY_TUPLE_INDEX,                   VerifyTupleIndex)                     \
+    X(VERIFY_ARRAYBUFFER,                   VerifyArrayBuffer)                    \
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
@@ -84,7 +85,10 @@
     X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
     X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
     X(VERIFY_SIZE_STORAGE,                  VerifySizeStorage)                    \
+    X(VERIFY_VOID_PTR_STORAGE,              VerifyVoidPtrStorage)                 \
+    X(VERIFY_ARRAYBUFFER_STORAGE,           VerifyArrayBufferStorage)             \
     X(VERIFY_BOOLEAN,                       VerifyBoolean)                        \
+    X(VERIFY_ARRAYBUFFER_LENGTH,            VerifyArrayBufferLength)              \
     X(VERIFY_UTF16_BUFFER,                  VerifyUTF16Buffer)                    \
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
@@ -145,6 +149,7 @@
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_ARRAY,                        Array,                     VArray *)                 \
+    X(ANI_ARRAYBUFFER,                  ArrayBuffer,               VArrayBuffer *)           \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
     X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
     X(ANI_VM_STORAGE,                   VmStorage,                 ani_vm **)                \
@@ -166,6 +171,8 @@
     X(ANI_ENUM_ITEM_STORAGE,            EnumItemStorage,           VEnumItem **)             \
     X(ANI_STRING_STORAGE,               StringStorage,             VString **)               \
     X(ANI_SIZE_STORAGE,                 SizeStorage,               ani_size *)               \
+    X(VOID_PTR_STORAGE,                 VoidPtrStorage,            void **)                  \
+    X(ANI_ARRAYBUFFER_STORAGE,          ArrayBufferStorage,        VArrayBuffer **)          \
     X(ANI_UTF8_BUFFER,                  UTF8Buffer,                char *)                   \
     X(ANI_UTF16_BUFFER,                 UTF16Buffer,               uint16_t *)               \
     X(ANI_UTF8_STRING,                  UTF8String,                const char *)             \
@@ -260,6 +267,7 @@ class VVariable;
 class VString;
 class VError;
 class VArray;
+class VArrayBuffer;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
 class VFixedArrayByte;
@@ -588,6 +596,11 @@ public:
         return ANIArg(ArgValueBySize(index), name, Action::VERIFY_TUPLE_INDEX, tupleElementType);
     }
 
+    static ANIArg MakeForArrayBuffer(VArrayBuffer *varraybuffer, std::string_view name)
+    {
+        return ANIArg(ArgValueByArrayBuffer(varraybuffer), name, Action::VERIFY_ARRAYBUFFER);
+    }
+
     static ANIArg MakeForArrayIndex(ani_size index, std::string_view name)
     {
         return ANIArg(ArgValueBySize(index), name, Action::VERIFY_ARRAY_INDEX);
@@ -671,9 +684,24 @@ public:
         return ANIArg(ArgValueBySizeStorage(sizeStorage), name, Action::VERIFY_SIZE_STORAGE);
     }
 
+    static ANIArg MakeForVoidPtrStorage(void **ptrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByVoidPtrStorage(ptrStorage), name, Action::VERIFY_VOID_PTR_STORAGE);
+    }
+
+    static ANIArg MakeForArrayBufferStorage(VArrayBuffer **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByArrayBufferStorage(arrStorage), name, Action::VERIFY_ARRAYBUFFER_STORAGE);
+    }
+
     static ANIArg MakeForBoolean(ani_boolean booleanValue, std::string_view name)
     {
         return ANIArg(ArgValueByBoolean(booleanValue), name, Action::VERIFY_BOOLEAN);
+    }
+
+    static ANIArg MakeForArrayBufferLength(size_t length, std::string_view name)
+    {
+        return ANIArg(ArgValueBySize(length), name, Action::VERIFY_ARRAYBUFFER_LENGTH);
     }
 
     static ANIArg MakeForErrorStorage(VError **errStorage, std::string_view name)

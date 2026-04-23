@@ -102,6 +102,14 @@ public:
     }
 };
 
+class VArrayBuffer final : public VObject {
+public:
+    ani_arraybuffer GetRef()
+    {
+        return static_cast<ani_arraybuffer>(VObject::GetRef());
+    }
+};
+
 class VFixedArray : public VObject {
 public:
     ani_fixedarray GetRef()

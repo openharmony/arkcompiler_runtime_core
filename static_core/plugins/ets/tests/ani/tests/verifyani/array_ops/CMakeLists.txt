@@ -46,3 +46,11 @@ ani_verify_add_gtest(ani_verify_test_array_push
 ani_verify_add_gtest(ani_verify_test_array_pop
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_pop_test.cpp
 )
+
+ani_verify_add_gtest(ani_verify_test_create_arraybuffer
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_create_arraybuffer_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_arraybuffer_get_info
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_arraybuffer_get_info_test.cpp
+)
