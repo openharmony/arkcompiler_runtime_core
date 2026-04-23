@@ -215,7 +215,7 @@ HWTEST(ItemContainer, TestFileFormatVersionValid, testing::ext::TestSize.Level0)
             UNREACHABLE();
         }
         header.magic = File::MAGIC;
-        header.version = {0, 0, 0, 2};
+        header.version = File::STATIC_VERSION;
         header.file_size = sizeof(File::Header);
 
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
