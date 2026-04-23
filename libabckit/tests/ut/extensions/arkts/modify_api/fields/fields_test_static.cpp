@@ -915,4 +915,42 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, NamespaceFieldSetName)
     EXPECT_TRUE(helpers::Match(output, "NamespaceFieldOne\n"));
 }
 
+TEST_F(LibAbcKitModifyApiFieldsStaticTests, SameNameField)
+{
+    auto output = helpers::ExecuteStaticAbc(TEST_ABC_PATH, "fields_static", "main");
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
+
+    std::string moduleName = "fields_static";
+    std::string className("classA");
+    std::string paramName("longField");
+    auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramName);
+    ASSERT_NE(ccf, nullptr);
+    ASSERT_NE(g_implI->classFieldGetName(ccf), nullptr);
+    ASSERT_STREQ(g_implI->abckitStringToString(g_implI->classFieldGetName(ccf)), "longField");
+
+    std::string newParamName("newParam");
+    auto arkClassField = g_implArkI->coreClassFieldToArktsClassField(ccf);
+    bool ret = g_implArkM->classFieldSetName(arkClassField, newParamName.c_str());
+    ASSERT_EQ(ret, true);
+    ASSERT_EQ(helpers::AbckitStringToString(g_implI->classFieldGetName(ccf)), newParamName.c_str());
+
+    std::string outputPath = MODIFY_TEST_ABC_PATH;
+    // Write output: must not crash with UNREACHABLE() anymore.
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::AssertOpenAbc(outputPath.c_str(), &file);
+
+    ASSERT_EQ(GetAbckitCoreClassField(file, moduleName, className, paramName), nullptr);
+
+    auto ccfModify = GetAbckitCoreClassField(file, moduleName, className, newParamName);
+    ASSERT_NE(ccfModify, nullptr);
+    ASSERT_NE(g_implI->classFieldGetName(ccfModify), nullptr);
+    ASSERT_STREQ(g_implI->abckitStringToString(g_implI->classFieldGetName(ccfModify)), "newParam");
+    g_impl->closeFile(file);
+
+    output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "main");
+}
+
 }  // namespace libabckit::test

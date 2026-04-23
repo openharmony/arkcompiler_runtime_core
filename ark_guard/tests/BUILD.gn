@@ -64,6 +64,7 @@ test_ets_files = [
   "ut/obfuscator/code_sample/class/class_demo1",
   "ut/obfuscator/code_sample/class/class_demo2",
   "ut/obfuscator/code_sample/class/class_demo3",
+  "ut/obfuscator/code_sample/class/class_field_name_collision",
   "ut/obfuscator/code_sample/class/class_get_set",
   "ut/obfuscator/code_sample/generics/generics_demo1",
   "ut/obfuscator/code_sample/generics/generics_demo2",

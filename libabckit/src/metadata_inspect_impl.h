@@ -994,9 +994,9 @@ struct AbckitFile {
     std::unordered_map<std::string, AbckitCoreFunction *> nameToExternalFunction;
     std::vector<std::unique_ptr<AbckitCoreFunction>> externalFunctions;
 
-    std::unordered_map<std::string, std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *,
-                                                 AbckitCoreClassField *, AbckitCoreInterfaceField *,
-                                                 AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>>
+    std::unordered_multimap<std::string, std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *,
+                                                      AbckitCoreClassField *, AbckitCoreInterfaceField *,
+                                                      AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>>
         nameToField;
 
     std::unordered_map<std::string, std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *>>

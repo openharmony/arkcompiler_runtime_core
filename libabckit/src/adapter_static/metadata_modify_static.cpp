@@ -446,10 +446,38 @@ bool ClassSetNameStatic(AbckitCoreClass *klass, const char *newName)
 bool ClassFieldSetNameStatic(AbckitCoreClassField *field, const char *newName)
 {
     LIBABCKIT_LOG_FUNC;
+    auto *ownerClass = field->owner;
+    const std::string oldSimpleName = field->GetArkTSImpl()->GetStaticImpl()->name;
 
-    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
-        return false;
+    std::vector<AbckitCoreClassField *> targets;
+    auto collect = [&](AbckitCoreClass *klass) {
+        if (klass == nullptr) {
+            return;
+        }
+        for (auto &f : klass->fields) {
+            if (f == nullptr) {
+                continue;
+            }
+            auto *impl = f->GetArkTSImpl()->GetStaticImpl();
+            if (impl != nullptr && impl->name == oldSimpleName) {
+                targets.push_back(f.get());
+            }
+        }
+    };
+    collect(ownerClass);
+    if (ownerClass != nullptr) {
+        collect(ownerClass->partial.get());
     }
+    if (targets.empty()) {
+        targets.push_back(field);
+    }
+
+    for (auto *sibling : targets) {
+        if (!ModifyNameHelper::FieldRefreshName(sibling, newName)) {
+            return false;
+        }
+    }
+
     if (g_enableInstModifierOptimization) {
         field->owner->owningModule->file->needRefreshInsts = true;
     } else {

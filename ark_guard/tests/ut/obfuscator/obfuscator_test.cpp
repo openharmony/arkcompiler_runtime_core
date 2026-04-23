@@ -1689,3 +1689,33 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_039, TestSize.Level1)
 
     this->VerifyObfuscated();
 }
+
+/*
+ * @tc.name: obfuscator_test_040
+ * @tc.desc: class declares a static field and an instance field sharing the same name.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_040, TestSize.Level1)
+{
+    std::string abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/class/class_field_name_collision.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/class/class_field_name_collision_updated.abc";
+    std::string nameCacheFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/class/class_field_name_collision.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("class_field_name_collision", "main");
+
+    AddModuleElement("class_field_name_collision", "class_field_name_collision");
+    AddElement<abckit_wrapper::Class>("class_field_name_collision.ClassA", "ClassA");
+
+    AddElement<abckit_wrapper::Field>("class_field_name_collision.ClassA.longField", "longField");
+    AddElement<abckit_wrapper::Method>(
+        "class_field_name_collision.ClassA.getInstance:class_field_name_collision.ClassA;i64;",
+        "getInstance");
+    AddElement<abckit_wrapper::Method>("class_field_name_collision.ClassA.getStatic:i64;", "getStatic");
+
+    this->VerifyObfuscated();
+}

@@ -20,6 +20,7 @@
 #include "name_util.h"
 #include "helpers_static.h"
 #include "string_util.h"
+#include "libarkfile/modifiers.h"
 
 using ark::pandasm::Opcode;
 
@@ -350,22 +351,49 @@ void libabckit::InstModifier::ModifyInstField(ark::pandasm::Ins &ins) const
 
     const auto oldName = ins.GetID(0);
     const auto funcName = StringUtil::GetFuncNameWithSquareBrackets(__func__);
-    if (this->file_->nameToField.find(oldName) != this->file_->nameToField.end()) {
-        std::visit(
-            [&](auto *object) {
-                const auto newName =
-                    object->GetOwnerStaticImpl()->name + "." + object->GetArkTSImpl()->GetStaticImpl()->name;
-                if (oldName == newName) {
-                    return;
-                }
 
-                LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "ins old fieldName: " << oldName << std::endl;
-                LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "ins new fieldName: " << newName << std::endl;
-
-                ins.SetID(0, newName);
-            },
-            this->file_->nameToField[oldName]);
+    auto range = this->file_->nameToField.equal_range(oldName);
+    if (range.first == range.second) {
+        return;
     }
+
+    // When a class declares a static and an instance field with the same simple name,
+    // nameToField holds two entries under the same fully-qualified key.
+    const bool insIsStatic = ins.HasFlag(ark::pandasm::InstFlags::STATIC_FIELD_ID);
+    auto chosen = range.first;
+    for (auto it = range.first; it != range.second; ++it) {
+        bool matched = std::visit(
+                           [](auto *object) -> bool {
+                               if (object == nullptr) {
+                                   return false;
+                               }
+                               auto *fieldImpl = object->GetArkTSImpl()->GetStaticImpl();
+                               if (fieldImpl == nullptr || fieldImpl->metadata == nullptr) {
+                                   return false;
+                               }
+                               return (fieldImpl->metadata->GetAccessFlags() & ark::ACC_STATIC) != 0;
+                           },
+                           it->second) == insIsStatic;
+        if (matched) {
+            chosen = it;
+            break;
+        }
+    }
+
+    std::visit(
+        [&](auto *object) {
+            const auto newName =
+                object->GetOwnerStaticImpl()->name + "." + object->GetArkTSImpl()->GetStaticImpl()->name;
+            if (oldName == newName) {
+                return;
+            }
+
+            LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "ins old fieldName: " << oldName << std::endl;
+            LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "ins new fieldName: " << newName << std::endl;
+
+            ins.SetID(0, newName);
+        },
+        chosen->second);
 }
 
 void libabckit::InstModifier::ModifyInstClass(ark::pandasm::Ins &ins) const
@@ -477,10 +505,6 @@ void libabckit::InstModifier::RefreshFunctions(std::unordered_map<std::string, A
 void libabckit::InstModifier::RefreshFields()
 {
     LIBABCKIT_LOG_FUNC;
-
-    // Reserve space to prevent rehash during iteration which would invalidate iterators
-    this->file_->nameToField.reserve(this->file_->nameToField.size() * RESERVE_CAPACITY_FACTOR);
-
     const auto funcName = StringUtil::GetFuncNameWithSquareBrackets(__func__);
     for (auto it = this->file_->nameToField.begin(); it != this->file_->nameToField.end();) {
         std::visit(
