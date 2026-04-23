@@ -531,6 +531,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_MODULE:                       return "ani_module";
         case ValueType::ANI_NAMESPACE:                    return "ani_namespace";
         case ValueType::ANI_TYPE:                         return "ani_ref";
+        case ValueType::ANI_WREF:                         return "ani_wref";
         case ValueType::ANI_CLASS:                        return "ani_class";
         case ValueType::ANI_ENUM:                         return "ani_enum";
         case ValueType::ANI_ENUM_ITEM:                    return "ani_enum_item";
@@ -566,6 +567,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_REF_STORAGE:                  return "ani_ref *";
         case ValueType::ANI_TYPE_STORAGE:                 return "ani_ref *";
         case ValueType::ANI_CLASS_STORAGE:                return "ani_ref *";
+        case ValueType::ANI_WREF_STORAGE:                 return "ani_wref *";
         case ValueType::ANI_OBJECT_STORAGE:               return "ani_object *";
         case ValueType::ANI_ENUM_STORAGE:                 return "ani_enum *";
         case ValueType::ANI_ENUM_ITEM_STORAGE:            return "ani_enum_item *";
@@ -844,12 +846,12 @@ public:
     VerificationResult VerifyNrRefs(ani_size nrRefs)
     {
         if (nrRefs == 0) {
-            return {"wrong value", ANIErrorSeverity::FATAL};
+            return {"wrong value", ANIErrorSeverity::ERROR};
         }
-        if (nrRefs > std::numeric_limits<uint16_t>::max()) {
+        if (nrRefs > std::numeric_limits<uint32_t>::max()) {
             PandaStringStream ss;
             ss << "it is too big";
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -880,6 +882,41 @@ public:
         }
 
         class_ = ANIRefTypeChecker::GetTypeClass(s, vtype->GetRef());
+        return {};
+    }
+
+    VerificationResult VerifyGlobalRef(VRef *vgref)
+    {
+        auto *envVerifier = GetEnvANIVerifier();
+        if (envVerifier->IsValidGlobalVerifiedRef(vgref)) {
+            return {};
+        }
+        if (envVerifier->IsValidRefInCurrentFrame(vgref)) {
+            if (ManagedCodeAccessor::IsUndefined(vgref->GetRef())) {
+                return {};
+            }
+            return {"wrong global reference", ANIErrorSeverity::ERROR};
+        }
+        return {"wrong global reference", ANIErrorSeverity::FATAL};
+    }
+
+    VerificationResult VerifyWRef(ani_wref wref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(wref)) {
+            return {};
+        }
+        if (wref == nullptr) {
+            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+        }
+
+        auto *refStorage = PandaAniEnv::FromAniEnv(venv_->GetEnv())->GetEtsReferenceStorage();
+        auto *etsRef = reinterpret_cast<EtsReference *>(wref);
+        if (!refStorage->IsValidEtsRef(etsRef)) {
+            return {"wrong weak reference", ANIErrorSeverity::FATAL};
+        }
+        if (!etsRef->IsWeak()) {
+            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+        }
         return {};
     }
 
@@ -1119,9 +1156,18 @@ public:
     VerificationResult VerifyDelLocalRef(VRef *vref)
     {
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
-        if (!envANIVerifier->IsValidRefInCurrentFrame(vref)) {
-            return {"it is not local reference", ANIErrorSeverity::FATAL};
+        if (envANIVerifier->IsGlobalRef(vref)) {
+            return {"wrong reference type: global reference", ANIErrorSeverity::FATAL};
         }
+
+        if (envANIVerifier->IsValidStackRef(vref)) {
+            return {"wrong reference type: stack reference", ANIErrorSeverity::FATAL};
+        }
+
+        if (!envANIVerifier->IsValidRefInCurrentFrame(vref)) {
+            return {"wrong reference", ANIErrorSeverity::FATAL};
+        }
+
         if (!envANIVerifier->CanBeDeletedFromCurrentScope(vref)) {
             return {"a local reference can only be deleted in the scope where it was created", ANIErrorSeverity::FATAL};
         }
@@ -2066,6 +2112,18 @@ static VerificationResult VerifyType(Verifier &v, const ANIArg &arg)
     return v.VerifyType(arg.GetValueType());
 }
 
+static VerificationResult VerifyGlobalRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_GLOBAL_REF);
+    return v.VerifyGlobalRef(arg.GetValueRef());
+}
+
+static VerificationResult VerifyWRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WREF);
+    return v.VerifyWRef(arg.GetValueWRef());
+}
+
 static VerificationResult VerifyClass(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CLASS);
@@ -2472,6 +2530,12 @@ static VerificationResult VerifyTypeStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_TYPE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueTypeStorage(), "ani_type");
+}
+
+static VerificationResult VerifyWRefStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WREF_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueWRefStorage(), "ani_wref");
 }
 
 static VerificationResult VerifyStringStorage(Verifier &v, const ANIArg &arg)

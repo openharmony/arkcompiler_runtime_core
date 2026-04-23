@@ -16,6 +16,26 @@ ani_verify_add_gtest(ani_verify_test_reference_delete
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_reference_delete_test.ets
 )
 
+ani_verify_add_gtest(ani_verify_test_global_reference_create
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_global_reference_create_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_global_reference_delete
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_global_reference_delete_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_weak_reference_create
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_weak_reference_create_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_weak_reference_delete
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_weak_reference_delete_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_weak_reference_get_reference
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_weak_reference_get_reference_test.cpp
+)
+
 ani_verify_add_generated_tests(ani_verify_test_get
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_get_test.cpp.j2
     PARAMS "null: Suff=Null"
