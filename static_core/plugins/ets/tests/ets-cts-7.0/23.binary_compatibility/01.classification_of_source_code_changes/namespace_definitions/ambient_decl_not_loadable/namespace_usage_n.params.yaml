@@ -92,7 +92,7 @@ cases:
       const i: int = a
     err:
       - >-
-        ClassCastError: std.core.LineString
+        ClassCastError: std.core.String
         cannot be cast to std.core.Int
     runtime_only: true
   - import: |-

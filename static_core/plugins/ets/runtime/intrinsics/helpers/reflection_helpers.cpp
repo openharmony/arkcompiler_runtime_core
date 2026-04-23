@@ -21,9 +21,9 @@
 
 namespace ark::ets::intrinsics::helpers {
 
-static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, const char *classSignature)
+static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, EtsClass *cls)
 {
-    PandaString message = "Invalid operand type: " + PandaString(classSignature);
+    PandaString message = "Invalid operand type: " + cls->GetName()->GetMutf8();
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
@@ -31,7 +31,7 @@ bool CheckPrimitiveReciever(EtsExecutionContext *executionCtx, EtsObject *arg, E
                             Value *argValue)
 {
     if (!argClass->IsBoxed()) {
-        ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, argClass);
         return false;
     }
 
@@ -64,12 +64,12 @@ bool CheckPrimitiveReciever(EtsExecutionContext *executionCtx, EtsObject *arg, E
             checked = CheckAndUnpackBoxedType<EtsShort>(linkExt, arg, paramClass, argValue, ClassRoot::I16);
             break;
         default:
-            ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
+            ThrowEtsInvalidType(executionCtx, argClass);
             return false;
     }
 
     if (!checked) {
-        ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, argClass);
         return false;
     }
 
@@ -99,7 +99,7 @@ bool CheckReceiverType(EtsExecutionContext *executionCtx, EtsObject *arg, EtsCla
         return CheckPrimitiveReciever(executionCtx, arg, argClass, paramClass, argValue);
     }
 
-    ThrowEtsInvalidType(executionCtx, argClass->GetDescriptor());
+    ThrowEtsInvalidType(executionCtx, argClass);
     return false;
 }
 

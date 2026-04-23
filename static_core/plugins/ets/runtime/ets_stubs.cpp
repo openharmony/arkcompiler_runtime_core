@@ -459,15 +459,15 @@ static void ThrowEtsMethodNotFoundException(EtsExecutionContext *executionCtx, c
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
-static void ThrowEtsInvalidKey(EtsExecutionContext *executionCtx, const char *classSignature)
+static void ThrowEtsInvalidKey(EtsExecutionContext *executionCtx, EtsClass *cls)
 {
-    PandaString message = "Invalid key type: " + PandaString(classSignature);
+    PandaString message = "Invalid key type: " + cls->GetName()->GetMutf8();
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
-static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, const char *classSignature)
+static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, EtsClass *cls)
 {
-    PandaString message = "Invalid operand type: " + PandaString(classSignature);
+    PandaString message = "Invalid operand type: " + cls->GetName()->GetMutf8();
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
@@ -814,7 +814,7 @@ EtsObject *EtsLdbyval(ManagedThread *mThread, EtsObject *thisObj, EtsObject *val
                 }
             });
         }
-        ThrowEtsInvalidKey(executionCtx, valObj->GetClass()->GetDescriptor());
+        ThrowEtsInvalidKey(executionCtx, valObj->GetClass());
         return nullptr;
     }
 }
@@ -877,7 +877,7 @@ bool EtsStbyval(ManagedThread *mThread, EtsObject *obj, EtsObject *key, EtsObjec
             }
         });
     }
-    ThrowEtsInvalidKey(executionCtx, key->GetClass()->GetDescriptor());
+    ThrowEtsInvalidKey(executionCtx, key->GetClass());
     return false;
 }
 
@@ -911,7 +911,7 @@ EtsObject *EtsCall([[maybe_unused]] ManagedThread *mThread, EtsObject *funcObj,
         });
     } else {
         if (!funcObj->GetClass()->IsFunction()) {
-            ThrowEtsInvalidType(executionCtx, funcObj->GetClass()->GetDescriptor());
+            ThrowEtsInvalidType(executionCtx, funcObj->GetClass());
             return nullptr;
         }
         constexpr size_t UNSAFE_CALL_PARAM_COUNT = 2;
@@ -953,7 +953,7 @@ EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, [[maybe_unuse
         });
     } else {
         // Not supported yet, need rethink for overload case
-        ThrowEtsInvalidType(executionCtx, thisObj->GetClass()->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, thisObj->GetClass());
         return nullptr;
     }
 }
@@ -973,7 +973,7 @@ EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, [[maybe_unuse
         });
     } else {
         // Not supported yet, need rethink for overload case
-        ThrowEtsInvalidType(executionCtx, thisObj->GetClass()->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, thisObj->GetClass());
         return nullptr;
     }
 }
@@ -991,7 +991,7 @@ EtsObject *EtsCallNew([[maybe_unused]] ManagedThread *mThread, EtsObject *ctor,
             return xRefObjectOperator.Instantiate(executionCtx, args);
         });
     } else {
-        ThrowEtsInvalidType(executionCtx, ctor->GetClass()->GetDescriptor());
+        ThrowEtsInvalidType(executionCtx, ctor->GetClass());
         return nullptr;
     }
 }

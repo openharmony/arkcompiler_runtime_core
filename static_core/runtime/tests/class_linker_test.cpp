@@ -123,9 +123,6 @@ std::set<std::string> GetClassesForEnumerateClassesTest()
 {
     return {"panda.Object",
             "panda.String",
-            "panda.LineString",
-            "panda.SlicedString",
-            "panda.TreeString",
             "panda.Class",
             "panda.String[]",
             "u1",

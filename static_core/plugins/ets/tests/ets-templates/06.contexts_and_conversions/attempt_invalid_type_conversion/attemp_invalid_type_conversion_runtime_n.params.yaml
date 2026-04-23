@@ -39,7 +39,7 @@ cases:
       let str: string = "42";
     logic: |-
       let num: number = str as number;
-    error: {runtime: "ClassCastError: std.core.LineString cannot be cast to std.core.Double"}
+    error: {runtime: "ClassCastError: std.core.String cannot be cast to std.core.Double"}
 
   - desc: Verify that attempting to cast a number to a string results in a type error.
     decl: |-

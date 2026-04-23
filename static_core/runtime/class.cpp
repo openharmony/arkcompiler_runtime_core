@@ -120,6 +120,9 @@ void Class::SetState(Class::State state)
 
 std::string Class::GetName() const
 {
+    if (IsLineStringClass() || IsSlicedStringClass() || IsTreeStringClass()) {
+        return ClassHelper::GetName(utf::CStringAsMutf8(panda_file::GetStringClassDescriptor(GetSourceLang())));
+    }
     return ClassHelper::GetName(descriptor_);
 }
 

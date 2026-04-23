@@ -15,7 +15,7 @@
 
 function testIU8FromArrayWrongType() {
     let strings: Array<string> = Array.of(new string("hi"), new string("hello"), new string("new"));
-    __noinline__Int8ArrayFromCheckException(strings, 'std.core.LineString');
+    __noinline__Int8ArrayFromCheckException(strings, 'std.core.String');
     let numbers: Object = Array.of(1.0, 2.0, 3.0);
     __noinline__Int8ArrayFromCheckException(numbers, 'std.core.Double');
 }
@@ -459,7 +459,7 @@ function testIU32FromArrayLikeNumber() {
 
 function testF32FromArrayWrongType() {
     let strings: Array<string> = Array.of(new string("hi"), new string("hello"), new string("new"));
-    __noinline__Float32ArrayFromCheckException(strings, 'std.core.LineString');
+    __noinline__Float32ArrayFromCheckException(strings, 'std.core.String');
     let ints: Object = Array.of(1, 2, 3);
     __noinline__Float32ArrayFromCheckException(ints, 'std.core.Int');
 }
@@ -634,7 +634,7 @@ function __noinline__BigInt64ArrayFromFixedArrayCheckException(obj: Object, fact
 
 function testIU64FromArrayWrongType() {
     let strings: Array<string> = Array.of(new string("hi"), new string("hello"), new string("new"));
-    __noinline__BigInt64ArrayFromArrayCheckException(strings, 'std.core.LineString');
+    __noinline__BigInt64ArrayFromArrayCheckException(strings, 'std.core.String');
     let ints: Object = Array.of(1, 2, 3);
     __noinline__BigInt64ArrayFromArrayCheckException(ints, 'std.core.Int');
     let fixstrings: FixedArray<string> = [new string("hi"), new string("hello"), new string("new")];
