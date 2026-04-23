@@ -19,6 +19,8 @@
 #include <optional>
 #include <string>
 
+#include "libarkfile/file_items.h"
+#include "libarkfile/helpers.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
@@ -375,6 +377,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_FUNCTION:                     return "ani_function";
         case ValueType::ANI_FIELD:                        return "ani_field";
         case ValueType::ANI_STATIC_FIELD:                 return "ani_static_field";
+        case ValueType::ANI_VARIABLE:                     return "ani_variable";
         case ValueType::ANI_OBJECT:                       return "ani_object";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
@@ -1245,6 +1248,41 @@ public:
         return {};
     }
 
+    VerificationResult VerifyReadVariable(VVariable *vvariable, EtsType variableType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vvariable)) {
+            return {"wrong variable", ANIErrorSeverity::FATAL};
+        }
+
+        auto err = DoVerifyField(vvariable, impl::VField::ANIFieldType::VARIABLE, variableType);
+        if (err) {
+            return err;
+        }
+        return {};
+    }
+
+    VerificationResult VerifyWriteVariable(VVariable *vvariable, EtsType variableType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vvariable)) {
+            return {"wrong variable", ANIErrorSeverity::FATAL};
+        }
+
+        auto err = DoVerifyField(vvariable, impl::VField::ANIFieldType::VARIABLE, variableType);
+        if (err) {
+            return err;
+        }
+
+        // Note: Issue #34319
+        // At present, the frontend does not preserve `const` as a dedicated bytecode/runtime
+        // flag that ANI can verify.
+        // After the frontend adaptation keeps this information, the const variable check
+        // can work correctly.
+        if (vvariable->GetEtsField()->IsReadonly()) {
+            return {"variable is const", ANIErrorSeverity::FATAL};
+        }
+        return {};
+    }
+
     VerificationResult VerifyMethod(VMethod *vmethod, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
@@ -1741,6 +1779,18 @@ static VerificationResult VerifyWritePropertyByName(Verifier &v, const ANIArg &a
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_PROPERTY_BY_NAME);
     return v.VerifyWritePropertyByName(arg.GetValueUTF8String(), arg.GetReturnType());
+}
+
+static VerificationResult VerifyReadVariable(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_VARIABLE);
+    return v.VerifyReadVariable(arg.GetValueVariable(), arg.GetReturnType());
+}
+
+static VerificationResult VerifyWriteVariable(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_VARIABLE);
+    return v.VerifyWriteVariable(arg.GetValueVariable(), arg.GetReturnType());
 }
 
 static VerificationResult VerifyMethod(Verifier &v, const ANIArg &arg)

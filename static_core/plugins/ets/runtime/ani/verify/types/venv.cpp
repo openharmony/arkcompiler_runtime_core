@@ -112,6 +112,11 @@ VStaticField *VEnv::GetVerifiedStaticField(ani_static_field staticField)
     return GetEnvANIVerifier()->GetVerifiedStaticField(staticField);
 }
 
+VVariable *VEnv::GetVerifiedVariable(ani_variable variable)
+{
+    return GetEnvANIVerifier()->GetVerifiedVariable(variable);
+}
+
 VRef *VEnv::AddGlobalVerifiedRef(ani_ref gref)
 {
     return GetEnvANIVerifier()->AddGlobalVerifiedRef(gref);

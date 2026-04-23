@@ -63,6 +63,11 @@ public:
     ani_static_field GetField() const;
 };
 
+class VVariable : public impl::VField {
+public:
+    ani_variable GetVariable() const;
+};
+
 }  // namespace ark::ets::ani::verify
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_FIELD_H

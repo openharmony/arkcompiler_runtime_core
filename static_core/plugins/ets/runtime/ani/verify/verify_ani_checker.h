@@ -51,6 +51,8 @@
     X(VERIFY_WRITE_STATIC_FIELD,            VerifyWriteStaticField)               \
     X(VERIFY_READ_PROPERTY_BY_NAME,         VerifyReadPropertyByName)             \
     X(VERIFY_WRITE_PROPERTY_BY_NAME,        VerifyWritePropertyByName)            \
+    X(VERIFY_READ_VARIABLE,                 VerifyReadVariable)                   \
+    X(VERIFY_WRITE_VARIABLE,                VerifyWriteVariable)                  \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
     X(VERIFY_FUNCTION,                      VerifyFunction)                       \
@@ -129,6 +131,7 @@
     X(ANI_FUNCTION,                     Function,                  VFunction *)              \
     X(ANI_FIELD,                        Field,                     VField *)                 \
     X(ANI_STATIC_FIELD,                 StaticField,               VStaticField *)           \
+    X(ANI_VARIABLE,                     Variable,                  VVariable *)              \
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_ARRAY,                        Array,                     VArray *)                 \
@@ -238,6 +241,7 @@ class VStaticMethod;
 class VFunction;
 class VField;
 class VStaticField;
+class VVariable;
 class VString;
 class VError;
 class VArray;
@@ -490,6 +494,15 @@ public:
                           staticFieldType);
         }
         return ANIArg(ArgValueByStaticField(vstaticField), name, Action::VERIFY_READ_STATIC_FIELD, staticFieldType);
+    }
+
+    static ANIArg MakeForVariable(VVariable *vvariable, std::string_view name, EtsType variableType,
+                                  AccessMode accessMode)
+    {
+        if (accessMode == AccessMode::READWRITE) {
+            return ANIArg(ArgValueByVariable(vvariable), name, Action::VERIFY_WRITE_VARIABLE, variableType);
+        }
+        return ANIArg(ArgValueByVariable(vvariable), name, Action::VERIFY_READ_VARIABLE, variableType);
     }
 
     static ANIArg MakeForMethod(VMethod *vmethod, std::string_view name, EtsType returnType, bool isConstructor = false)
