@@ -623,6 +623,9 @@ bool Runtime::Destroy()
 
     instance_->StopCoverageListener();
 
+    // Listeners that use RemoveListener (ScopedSuspendAllThreads) must be cleared while mutators can still rendezvous.
+    instance_->GetPandaVM()->StopListeners();
+
     // Note JIT thread (compiler) may access to thread data,
     // so, it should be stopped before thread destroy
     /* @sync 1

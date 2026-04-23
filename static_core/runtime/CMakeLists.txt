@@ -190,6 +190,12 @@ set(SOURCES
     compiler_task_manager_worker.cpp
 )
 
+if(PANDA_TARGET_OHOS)
+    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../platforms/ohos/oom_stats.cpp)
+else()
+    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../platforms/common/oom_stats.cpp)
+endif()
+
 if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     list(APPEND SOURCES
         fibers/arch/arm/get.S

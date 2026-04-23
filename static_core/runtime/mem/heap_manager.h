@@ -278,6 +278,9 @@ private:
     /// Triggers GC if needed
     void TriggerGCIfNeeded();
 
+    /// Notifies allocation-failed listeners if applicable.
+    void NotifyAllocationFailedListeners(size_t size);
+
     void *TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
                         ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned = false);
 

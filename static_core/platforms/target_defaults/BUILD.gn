@@ -18,17 +18,31 @@ ohos_source_set("arktarget_options_static") {
 
   configs = [ "$ark_root:ark_config" ]
 
+  external_deps = []
+
   if (is_ohos && is_standard_system) {
     sources = [ "$ark_root/platforms/ohos/default_target_options.cpp" ]
     if (ark_standalone_build) {
       sources +=
           [ "$ark_root/platforms/ohos/standalone/ohos_device_helpers.cpp" ]
     } else {
-      sources += [ "$ark_root/platforms/ohos/ohos_3/ohos_device_helpers.cpp" ]
-      external_deps = [ "init:libbegetutil" ]
+      sources += [ 
+        "$ark_root/platforms/ohos/ohos_3/ohos_device_helpers.cpp",
+        "$ark_root/platforms/ohos/oom_stats.cpp",
+      ]
+      external_deps += [ "init:libbegetutil" ]
+      if (enable_hisysevent) {
+        external_deps += [ 
+          "hisysevent:libhisysevent",
+          "faultloggerd:dfx_signalhandler",
+        ]
+      }
     }
   } else {
-    sources = [ "$ark_root/platforms/common/default_target_options.cpp" ]
+    sources = [ 
+      "$ark_root/platforms/common/default_target_options.cpp",
+      "$ark_root/platforms/common/oom_stats.cpp",
+    ]
   }
 
   deps = [ "$ark_root/libarkbase:libarktsbase" ]
