@@ -154,7 +154,7 @@ function genericTypeParameterEts<T>(arg: T): String {
 }
 
 function genericTypeReturnValueEts<T>(arg: int, value: T): T {
-    let arr: FixedArray<T> = [value, value, value];
+    let arr: Array<T> = [value, value, value];
     return arr[arg];
 }
 

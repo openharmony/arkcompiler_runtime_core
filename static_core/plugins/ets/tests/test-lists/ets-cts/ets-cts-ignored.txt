@@ -76,10 +76,6 @@
 07.expressions/07.spread_expression/spex_func_75.ets
 07.expressions/07.spread_expression/spex_func_76.ets
 
-#32421
-07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_0.ets
-07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_1.ets
-
 #26666 (cts #47 - bad array element type)
 07.expressions/12.function_call_expression/fixed_array_predefined_0.ets
 07.expressions/12.function_call_expression/fixed_array_predefined_1.ets

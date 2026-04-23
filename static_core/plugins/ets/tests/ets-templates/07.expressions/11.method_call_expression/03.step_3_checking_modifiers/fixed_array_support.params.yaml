@@ -22,6 +22,7 @@ cases:
         }
       use: |-
         arktest.assertEQ(A.met<string>("a")[0], "a")
+      expected_out: '"Semantic error ESE0007: Cannot use array creation expression with type parameter."'
     - decl: |-
         class A<T> {
             met(x: T): FixedArray<T> {
@@ -32,6 +33,7 @@ cases:
       use: |-
         let a = new A<string>()
         arktest.assertEQ(a.met("a")[0], "a")
+      expected_out: '"Semantic error ESE0007: Cannot use array creation expression with type parameter."'
     - decl: |-
         class A<T> {
           met(x: FixedArray<T>): T {
