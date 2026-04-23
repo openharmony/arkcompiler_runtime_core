@@ -72,8 +72,8 @@ async function startTest(){
     arktest.assertTrue(awaited_result instanceof undefined)
 }
 
-function main(){
-    waitForCompletion(startTest)
+async function main(): Promise<void> {
+    await startTest()
 }
 
 {% endfor %}

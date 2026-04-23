@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Using await promise.reject in asynchronous methods
+tags: [no-warmup]
 ---*/
 
 class MethodAwaitReject {
@@ -35,6 +36,6 @@ async function startTest() {
     arktest.assertEQ(result, "Caught error: Rejected!");
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

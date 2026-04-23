@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Use await promise.resolve in asynchronous methods.
+tags: [no-warmup]
 ---*/
 
 class MethodAwaitResolve {
@@ -31,6 +32,6 @@ async function startTest() {
     arktest.assertEQ(result, "Resolved!");
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

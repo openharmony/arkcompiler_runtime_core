@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       SetTimeout in asynchronous functions simulates delay.
+tags: [no-warmup]
 ---*/
 
 async function asyncLoop(): Promise<void> {
@@ -33,6 +34,6 @@ async function startTest() {
   arktest.assertEQ((end - start) >= 1500, true);
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

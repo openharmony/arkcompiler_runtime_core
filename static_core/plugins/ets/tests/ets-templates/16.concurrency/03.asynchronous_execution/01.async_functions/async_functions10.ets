@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       The await chain in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function step1(): Promise<string> {
@@ -37,6 +38,6 @@ async function startTest() {
   arktest.assertEQ(result3, "Step 1 completed, Step 2 completed, Step 3 completed");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

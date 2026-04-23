@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Asynchronous function returns array.
+tags: [no-warmup]
 ---*/
 
 async function functionReturnArray(): Promise<Array<number>> {
@@ -30,6 +31,6 @@ async function startTest() {
   arktest.assertEQ(result[2], resTemp[2]);
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

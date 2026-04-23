@@ -94,12 +94,12 @@ cases:
               }
           )
 
-          const resultFromOtherCoroutine: string = launch<string>() {
-              return waitForCompletion(async () => {
-              const promiseResult: string = await sharedPromise
-              return promiseResult + '_PROCESSED'
+          const resultPromiseFromOtherCoroutine: Promise<string> = launch<Promise<string>>() {
+              return sharedPromise.then<string>((value: string): string => {
+                  return value + '_PROCESSED'
               })
           }.Await()
+          const resultFromOtherCoroutine: string = await resultPromiseFromOtherCoroutine
 
           arktest.assertTrue(resultFromOtherCoroutine == 'COROUTINE_SAFE_PROCESSED')          
 
@@ -120,15 +120,12 @@ cases:
           const originalResult: string = await sharedPromise
           arktest.assertTrue(originalResult == 'BOTH_COROUTINES_SAFE')
 
-          const resultFromOtherCoroutine: string = launch<string>() {
-            return waitForCompletion(async () => {
-              const processedPromise: Promise<string> = sharedPromise.then<string>((value: string): string => {
-                  return value + '_WITH_THEN'
-              })
-              const promiseResult: string = await processedPromise
-              return promiseResult
+          const resultPromiseFromOtherCoroutine: Promise<string> = launch<Promise<string>>() {
+            return sharedPromise.then<string>((value: string): string => {
+                return value + '_WITH_THEN'
             })
           }.Await()
+          const resultFromOtherCoroutine: string = await resultPromiseFromOtherCoroutine
 
           arktest.assertTrue(resultFromOtherCoroutine == 'BOTH_COROUTINES_SAFE_WITH_THEN')          
 
@@ -152,16 +149,14 @@ cases:
 
           const waitForOriginal: Promise<void> = originalPromise.then(() => {})
 
-          const resultFromOtherCoroutine: string = launch<string>() {
-            return waitForCompletion(async () => {
-              await waitForOriginal
-              const otherPromise: Promise<string> = sharedPromise.then<string>((value: string): string => {
-                  return value + '_OTHER_THEN'
-              })
-              const promiseResult: string = await otherPromise
-              return promiseResult
+          const resultPromiseFromOtherCoroutine: Promise<string> = launch<Promise<string>>() {
+            return waitForOriginal.then<Promise<string>>((): Promise<string> => {
+                return sharedPromise.then<string>((value: string): string => {
+                    return value + '_OTHER_THEN'
+                })
             })
           }.Await()
+          const resultFromOtherCoroutine: string = await resultPromiseFromOtherCoroutine
 
           const originalResult: string = await originalPromise
           

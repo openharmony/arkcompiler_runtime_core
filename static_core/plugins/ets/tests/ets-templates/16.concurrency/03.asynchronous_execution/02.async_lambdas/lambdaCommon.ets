@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: Lambda async functions basic syntax checks
+tags: [no-warmup]
 ---*/
 
 {{c.decl}}
@@ -24,7 +25,7 @@ async function runTest() {
     {{c.use|indent}}
 }
 
-function main(){
-    waitForCompletion(runTest);
+async function main(): Promise<void> {
+    await runTest()
 }
 {% endfor %}

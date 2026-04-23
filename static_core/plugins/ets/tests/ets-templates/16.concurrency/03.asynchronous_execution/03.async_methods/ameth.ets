@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: The method async is an implicit coroutine that can be called as a regular method.
+tags: [no-warmup]
 ---*/
 
 {{c.decl}}
@@ -25,8 +26,8 @@ async function startTest() {
 }
 
 
-function main(){
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }
 
 {% endfor %}
