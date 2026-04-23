@@ -15,13 +15,20 @@
 
 /*---
 desc: >-
-    If type arguments cannot be inferred, then a compile-time error occurs.
+    If inferred type argument does not satisfy the type parameter constraint,
+    then a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE8745: Type parameter 'T' can not be inferred for the call to 'bar'. Specify the type argument explicitly."
+expected_out: "Semantic error ESE0127: No matching call signature for f(X)"
 ---*/
 
-function bar <T> (p: number) {}
+class A {}
+
+class C {
+    f<T extends A>(a: T) {}
+}
+
+class X {}
 
 function main() {
-    bar (1)
+    (new C()).f(new X())
 }
