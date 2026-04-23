@@ -61,7 +61,7 @@ TEST_F(VerifyEnumItemGetValueIntTest, wrong_enum_item_null)
 TEST_F(VerifyEnumItemGetValueIntTest, wrong_enum_item_type)
 {
     ani_int result {};
-    ASSERT_EQ(env_->EnumItem_GetValue_Int(reinterpret_cast<ani_enum_item>(enumColorInt_), &result), ANI_ERROR);
+    ASSERT_EQ(env_->EnumItem_GetValue_Int(reinterpret_cast<ani_enum_item>(enumColorInt_), &result), ANI_NOT_FOUND);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enum_item", "ani_enum_item", "wrong reference type: ani_enum"},
