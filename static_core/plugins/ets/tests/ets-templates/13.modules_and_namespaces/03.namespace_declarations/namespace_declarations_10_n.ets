@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - TypeError Function boo is already declared. !!!Pay attention this works in TS!!!
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0130: Function boo is already declared.
 ---*/
 
-{{c.decl}}
+namespace B {
+    function boo(): string {
+        return "Another BOO"
+    }
+}
 
-{% endfor %}
+namespace B {
+    function boo(): string {
+        return "Boo"
+    }
+}

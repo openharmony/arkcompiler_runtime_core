@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - TypeError Expected 1 arguments, got 0. No matching call signature
 tags: [compile-only, negative]
+files:
+    - ./namespace_storage.ets
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0124: Expected 1 arguments, got 0.
+    Semantic error ESE0127: No matching call signature for foo()
 ---*/
 
-{{c.decl}}
+import {Space2 as Space1} from "./namespace_storage"
 
-{% endfor %}
+function main() {
+    Space1.foo()
+}

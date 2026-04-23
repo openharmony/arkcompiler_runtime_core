@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - 'foo1' is not exported in 'NS15'
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0206: 'foo1' is not exported in 'NS15'
 ---*/
 
-{{c.decl}}
+namespace NS15 {
+    function foo1(): string {
+        return "Foo1";
+    }
+    export function foo2(): string {
+        return NS15.foo1()
+    }
+}
 
-{% endfor %}
+function main() {
+    arktest.assertEQ(NS15.foo2(), "Foo1")
+}

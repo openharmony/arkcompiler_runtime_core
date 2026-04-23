@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+    Transit namespace usage. TypeError Namespace 'Transit1' is already defined.
+    TypeError Property 'foo' does not exist on type 'Transit1'
+files:
+    - ./namespace_storage.ets
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0349: Namespace 'Transit1' is already defined.
+    Semantic error ESE0127: No matching call signature for assertEQ(..., "A foo")
+    Semantic error ESE0087: Property 'foo' does not exist on type 'Transit1'
 ---*/
 
-{{c.decl}}
+import {Transit as Transit1} from "./namespace_storage"
 
-{% endfor %}
+export namespace Transit1.B {
+    export let variable1: int = 1;
+}
+
+function main() {
+    arktest.assertEQ(Transit1.B.variable1, 1)
+    arktest.assertEQ(Transit1.foo(), "A foo")
+}

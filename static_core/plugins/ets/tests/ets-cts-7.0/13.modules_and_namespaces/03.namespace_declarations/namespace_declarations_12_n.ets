@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - SyntaxError Namespace 'A' is already defined.
 tags: [compile-only, negative]
+files:
+    - ./namespace_storage2.ets
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0349: Namespace 'A' is already defined.
+    Syntax error ESY0316: Hard keyword 'class' cannot be used as identifier
+    Syntax error ESY0224: Identifier expected, got 'class'.
+    Syntax error ESY0316: Hard keyword 'abstract' cannot be used as identifier
+    Syntax error ESY0224: Identifier expected, got 'abstract'.
 ---*/
 
-{{c.decl}}
+import {A as A} from "./namespace_storage2"
 
-{% endfor %}
+namespace A {
+    function foo(): void {}
+    function bar(): void {}
+}

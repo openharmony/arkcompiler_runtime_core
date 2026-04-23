@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - SyntaxError Unable to merge namespaces 'C', because their modifiers are different.
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    Syntax error ESY0006: Unable to merge namespaces 'C', because their modifiers are different.
 ---*/
 
-{{c.decl}}
+namespace A {
+    function foo(): void {}
+    function bar(): void {}
 
-{% endfor %}
+    namespace C {
+        export function too(): void {}
+    }
+}
+
+namespace A {
+    function goo(): void { bar() } // bar() belongs to the same namespace
+}
+
+namespace A.C {
+    function moo(): void { too() }
+}

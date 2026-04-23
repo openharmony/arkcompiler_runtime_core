@@ -13,87 +13,83 @@
 
 ---
 cases:
-  - doc: Same name for variables
-    decl: |-
-      namespace ns {
-        export let i: int
-        let i: int
-      }
+    - doc: Same name for variables
+      expected_out: |-
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns {
+            export let i: int
+            let i: int
+          }
 
-  - doc: Same name for variables, second one exported
-    decl: |-
-      namespace ns {
-        let i: int
-        export let i: int
-      }
+    - doc: Same name for variables, second one exported
+      expected_out: |-
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns {
+            let i: int
+            export let i: int
+          }
 
-  - doc: Same name used for different types - function and variable
-    decl: |-
-      namespace ns {
-        let i: int
-        export function i(): void {}
-      }
+    - doc: Same name used for different types - function and variable
+      expected_out: |-
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns {
+            let i: int
+            export function i(): void {}
+          }
 
-  - doc: Same name used for different types - function and class
-    decl: |-
-      namespace ns {
-        export function i(): void {}
-        class i {}
-      }
+    - doc: Same name used for different types - function and class
+      expected_out: |-
+          Semantic error ESE0370: Merging declarations is not supported, please keep all definitions of classes, interfaces and enums compact in the codebase!
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns {
+            export function i(): void {}
+            class i {}
+          }
 
-  - doc: Same name used for different types - class and type
-    decl: |-
-      namespace ns {
-        export class i {}
-        type i = Array<string>
-      }
+    - doc: Same name used for different types - class and type
+      expected_out: |-
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns {
+            export class i {}
+            type i = Array<string>
+          }
 
-  - doc: Same name used for different types - type and enum
-    decl: |-
-      namespace ns {
-        export type i = Array<string>
-        enum i {ONE, TWO}
-      }
+    - doc: Same name used for different types - type and enum
+      expected_out: |-
+          Semantic error ESE0370: Merging declarations is not supported, please keep all definitions of classes, interfaces and enums compact in the codebase!
+          Semantic error ESE0351: Variable 'i' has already been declared.
+          Semantic error ESE0365: Variable 'i' is accessed before it's initialization.
+      decl: |-
+          namespace ns {
+            export type i = Array<string>
+            enum i {ONE, TWO}
+          }
 
-  - doc: Same name used for different types - variable and namespace
-    decl: |-
-      namespace ns {
-        export let i: int = 1
-        namespace i {}
-      }
+    - doc: Same name used for different types - variable and namespace
+      expected_out: |-
+          Semantic error ESE0370: Merging declarations is not supported, please keep all definitions of classes, interfaces and enums compact in the codebase!
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns {
+            export let i: int = 1
+            namespace i {}
+          }
 
-  - doc: Same name used for merged namespaces
-    decl: |-
-      namespace ns1 {
-        export let i: int = 1
-        export function foo(): void {}
-      }
-      namespace ns2 { }
-      namespace ns1 {
-        let i: int = 1
-        export function bar(): void {}
-      }
-
-  - doc: Same name used for merged namespaces
-    decl: |-
-      namespace ns1 {
-        export let i: int = 1
-        export function foo(): void {}
-      }
-      namespace ns2 { }
-      namespace ns1 {
-        let i: int = 1
-        export function bar(): void {}
-      }
-
-  - doc: Static initializer used only at the first call to namespace member
-    decl: |-
-      namespace ns1 {
-        export let i: int = 1
-        export function foo(): void {}
-      }
-      namespace ns2 { }
-      namespace ns1 {
-        let i: int = 1
-        export function bar(): void {}
-      }
+    - doc: Same name used for merged namespaces
+      expected_out: |-
+          Semantic error ESE0351: Variable 'i' has already been declared.
+      decl: |-
+          namespace ns1 {
+            export let i: int = 1
+            export function foo(): void {}
+          }
+          namespace ns2 { }
+          namespace ns1 {
+            let i: int = 1
+            export function bar(): void {}
+          }

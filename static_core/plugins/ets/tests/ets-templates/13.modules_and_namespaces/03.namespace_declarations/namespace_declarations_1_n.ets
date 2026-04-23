@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: >-
-    Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-    {{c.doc}}
+desc: ES2PANDA_FAIL - TypeError Property 'nsConst' does not exist on type 'Space2'
 tags: [compile-only, negative]
+files:
+    - ./namespace_storage.ets
 expected_out: |-
-    {{c.expected_out}}
+    Semantic error ESE0087: Property 'nsConst' does not exist on type 'Space2'
+    Semantic error ESE0124: Expected 1 arguments, got 0.
+    Semantic error ESE0127: No matching call signature for foo()
 ---*/
 
-{{c.decl}}
+import {Space2 as mySpace} from "./namespace_storage"
 
-{% endfor %}
+function main() {
+    if (mySpace.nsVar == mySpace.nsConst) {
+        mySpace.foo()
+    }
+}
