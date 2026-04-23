@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,30 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 /*---
-desc: EAWorker can start, run a job and be quit
+desc: Start a coroutine using an async function.
 expected_out:
     runtime:
-        - Test for EAWorker is passed.
+        - Test for coroutine using an async function is passed.
 ---*/
 
-async function startTest() {
-  const ea = new EAWorker()
-  ea.start()
-
-  let result: int = ea.run<int>(() => {
-    return 42
-  }).Await()
-
-  arktest.assertEQ(42, result)
-
-  ea.quit()
-
-  console.log("Test for EAWorker is passed."); //To ensure the async function has completed
+async function cof(a: int): Promise<int> {
+  return a * 2;
 }
 
-async function main(): Promise<void> {
-  await startTest()
+function main(): void {
+  let cof_result = cof(10);
+  cof_result.then((result: int) => {
+    arktest.assertEQ(result, 20);
+    console.log("Test for coroutine using an async function is passed."); //To ensure the async function has completed
+  });
 }

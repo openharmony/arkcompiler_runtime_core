@@ -15,6 +15,9 @@
 
 /*---
 desc: EAWorker can start, run a job and be quit
+expected_out:
+    runtime:
+        - Test for EAWorker is passed.
 ---*/
 
 async function startTest() {
@@ -28,8 +31,10 @@ async function startTest() {
   arktest.assertEQ(42, result)
 
   ea.quit()
+
+  console.log("Test for EAWorker is passed."); //To ensure the async function has completed
 }
 
-function main() {
-  waitForCompletion(startTest)
+async function main(): Promise<void> {
+  await startTest()
 }
