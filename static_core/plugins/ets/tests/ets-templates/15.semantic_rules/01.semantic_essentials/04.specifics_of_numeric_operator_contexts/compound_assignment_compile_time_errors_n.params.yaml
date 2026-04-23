@@ -13,58 +13,64 @@
 
 ---
 cases:
-  - description: "Cannot use compound assignment with boolean and number"
-    declarations:
-      - "let a: boolean = true"
-      - "let b: int = 5"
-    operation: "a += b"
-    expected_error: "Bad operand type, the types of the operands must be numeric type, enum or String."
+    - description: 'Cannot use compound assignment with boolean and number'
+      declarations:
+          - 'let a: boolean = true'
+          - 'let b: int = 5'
+      operation: 'a += b'
+      expected_out:
+          'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'
 
-  - description: "Cannot use compound assignment with null and number"
-    declarations:
-      - "let a: int = 5"
-    operation: "a += null"
-    expected_error: "Bad operand type, the types of the operands must be numeric type, enum or String."
+    - description: 'Cannot use compound assignment with null and number'
+      declarations:
+          - 'let a: int = 5'
+      operation: 'a += null'
+      expected_out:
+          'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'
 
-  - description: "Cannot use compound assignment with undefined and number"
-    declarations:
-      - "let a: int = 5"
-    operation: "a += undefined"
-    expected_error: "Bad operand type, the types of the operands must be numeric type, enum or String."
+    - description: 'Cannot use compound assignment with undefined and number'
+      declarations:
+          - 'let a: int = 5'
+      operation: 'a += undefined'
+      expected_out:
+          'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'
 
-  - description: "Cannot use -= operator with string"
-    declarations:
-      - "let a: string = 'hello'"
-    operation: "a -= 'world'"
-    expected_error: "Bad operand type, the types of the operands must be numeric type."
+    - description: 'Cannot use -= operator with string'
+      declarations:
+          - "let a: string = 'hello'"
+      operation: "a -= 'world'"
+      expected_out: 'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'
 
-  - description: "Cannot use *= operator with boolean"
-    declarations:
-      - "let a: boolean = true"
-    operation: "a *= false"
-    expected_error: "Bad operand type, the types of the operands must be numeric type."
+    - description: 'Cannot use *= operator with boolean'
+      declarations:
+          - 'let a: boolean = true'
+      operation: 'a *= false'
+      expected_out: 'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'
 
-  - description: "Cannot use /= operator with string"
-    declarations:
-      - "let a: string = 'hello'"
-    operation: "a /= 'world'"
-    expected_error: "Bad operand type, the types of the operands must be numeric type."
+    - description: 'Cannot use /= operator with string'
+      declarations:
+          - "let a: string = 'hello'"
+      operation: "a /= 'world'"
+      expected_out: 'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'
 
-  - description: "Cannot use %= operator with boolean"
-    declarations:
-      - "let a: boolean = true"
-    operation: "a %= true"
-    expected_error: "Bad operand type, the types of the operands must be numeric type."
+    - description: 'Cannot use %= operator with boolean'
+      declarations:
+          - 'let a: boolean = true'
+      operation: 'a %= true'
+      expected_out: 'Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.'
 
-  - description: "Cannot use compound assignment with potentially undefined variable"
-    declarations:
-      - "let a: int | undefined = undefined"
-    operation: "a += 5"
-    expected_error: "Bad operand type: multiple types left in the normalized union type (Int|undefined). Unions are not allowed in binary expressions except equality."
+    - description: 'Cannot use compound assignment with potentially undefined variable'
+      declarations:
+          - 'let a: int | undefined = undefined'
+      operation: 'a += 5'
+      expected_out:
+          'Semantic error ESE0106: Bad operand type: multiple types left in the normalized union type (Int|undefined).
+          Unions are not allowed in binary expressions except equality.'
 
-  - description: "Cannot use compound assignment with potentially null variable"
-    declarations:
-      - "let a: int | null = null"
-    operation: "a += 5"
-    expected_error: "Bad operand type: multiple types left in the normalized union type (Int|null). Unions are not allowed in binary expressions except equality."
-      
+    - description: 'Cannot use compound assignment with potentially null variable'
+      declarations:
+          - 'let a: int | null = null'
+      operation: 'a += 5'
+      expected_out:
+          'Semantic error ESE0106: Bad operand type: multiple types left in the normalized union type (Int|null). Unions
+          are not allowed in binary expressions except equality.'
