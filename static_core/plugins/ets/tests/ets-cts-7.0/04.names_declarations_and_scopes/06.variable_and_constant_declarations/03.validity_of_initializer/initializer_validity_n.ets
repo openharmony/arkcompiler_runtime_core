@@ -21,7 +21,7 @@ desc: >-
   declaration of that variable or constant is textually located after the current declaration,
   then a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: 'Invalid initializer'
+expected_out: "{{c.expected_out}}"
 ---*/
 
 

@@ -18,11 +18,13 @@ cases:
       // constant
       const a: number = b // compile-time error
       let b = 1
+    expected_out: "Semantic error ESE0375: Variable 'b' is used before being assigned."
 
   - decl: |-
       // variable
       let c: number = d // compile-time error
       const d = 123
+    expected_out: "Semantic error ESE0375: Variable 'd' is used before being assigned."
 
   # class implementing interface too late
   - decl: |-
@@ -31,6 +33,7 @@ cases:
       class A implements I {}
       const cls: I = a
       const a: A = new A
+    expected_out: "Semantic error ESE0375: Variable 'a' is used before being assigned."
 
   - decl: |-
       // variable
@@ -38,3 +41,4 @@ cases:
       class A implements I {}
       let cls: I = a
       let a: A = new A
+    expected_out: "Semantic error ESE0375: Variable 'a' is used before being assigned."
