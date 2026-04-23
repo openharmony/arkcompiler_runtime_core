@@ -19,7 +19,7 @@ desc: >-
     If the evaluation of a cast expression is known at compile time to always
     succeed or throw ClassCastError at runtime, then a compile-time warning
     is issued.
-expected_out: '{{c.expected}}'
+expected_out: "{{c.expected}}"
 ---*/
 
 {{c.decl}}
