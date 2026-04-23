@@ -15,9 +15,10 @@
 
  /*---
 desc: >-
-    Other use causes a compile-time error, because the compiler does not have enough information about the defined
-    alias
+    Other use causes a compile-time error, because the compiler does not have 
+    enough information about the defined alias
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0311: Circular type alias reference"
 ---*/
 
 type E = E

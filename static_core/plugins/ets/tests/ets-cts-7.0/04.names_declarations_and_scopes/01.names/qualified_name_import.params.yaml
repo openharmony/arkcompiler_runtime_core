@@ -26,15 +26,11 @@ qualified_name_import:
     use: |-
       c.field, 3
   #3
-  - decl: |-
-      const c: C  = new C()
-    use: |-
+  - use: |-
       c.method(), 4
   #interface
   #4
-  - decl: |-
-      const i: I  = { field1: 3, field2: 'str' }
-    use: |-
+  - use: |-
       i.field1, 3
   #5
   - decl: |-

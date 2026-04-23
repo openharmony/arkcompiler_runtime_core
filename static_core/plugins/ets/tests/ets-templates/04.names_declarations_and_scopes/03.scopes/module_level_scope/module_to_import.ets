@@ -13,19 +13,28 @@
  * limitations under the License.
  */
 
-{% for m in modules %}
+
 /*---
 desc: module scope to import but not exported
 files: ['./module_to_export.ets']
 ---*/
-
+{%- for m in modules %}
 import { {{m.entity}} } from './module_to_export'
+{%- endfor %}
 
+{%- for m in modules %}
 {{m.decl}}
+{%- endfor %}
 
-function main() {
-    arktest.assertEQ({{m.use}}, {{m.expected}})
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Modile_to_import");
+
+    {%- for m in modules %}
+        testSuite.addTest("scope{{loop.index0}}", () => {
+            arktest.assertEQ( {{m.use}}, {{m.expected}} )
+        });
+    {%- endfor %}
+  
+    return testSuite.run();
 }
-
-{% endfor %}
-

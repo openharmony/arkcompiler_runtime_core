@@ -19,6 +19,7 @@ desc: >-
     Names of all type aliases must be unique across all types in the current context.
 files: {{c.files}}
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 {{c.decl}}

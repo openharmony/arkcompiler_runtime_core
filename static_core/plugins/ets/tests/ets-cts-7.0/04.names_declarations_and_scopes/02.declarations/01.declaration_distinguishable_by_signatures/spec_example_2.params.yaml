@@ -12,59 +12,60 @@
 # limitations under the License.
 
 cases:
-  - signature1: "foo()"
-    signature2: "foo(x: number)"
+#0
+  - signature1: "foo0()"
+    signature2: "foo0(x: number)"
     use: |
-      arktest.assertEQ(foo(), 1)
-      arktest.assertEQ(foo(2), 2)
-
-  - signature1: "foo()"
-    signature2: "foo(x: number[])"
+      arktest.assertEQ(foo0(), 1)
+      arktest.assertEQ(foo0(2), 2)
+#1
+  - signature1: "foo1()"
+    signature2: "foo1(x: number[])"
     use: |
-      arktest.assertEQ(foo(), 1)
-      arktest.assertEQ(foo([1]), 2)
-
-  - signature1: "foo()"
-    signature2: "foo(x: string)"
+      arktest.assertEQ(foo1(), 1)
+      arktest.assertEQ(foo1([1]), 2)
+#2
+  - signature1: "foo2()"
+    signature2: "foo2(x: string)"
     use: |
-      arktest.assertEQ(foo(), 1)
-      arktest.assertEQ(foo("abc"), 2)
-
-  - signature1: "foo(x: number)"
-    signature2: "foo(x: number[])"
+      arktest.assertEQ(foo2(), 1)
+      arktest.assertEQ(foo2("abc"), 2)
+#3
+  - signature1: "foo3(x: number)"
+    signature2: "foo3(x: number[])"
     use: |
-      arktest.assertEQ(foo(1), 1)
-      arktest.assertEQ(foo([1, 2]), 2)
-
-  - signature1: "foo(x: number)"
-    signature2: "foo(x: string)"
+      arktest.assertEQ(foo3(1), 1)
+      arktest.assertEQ(foo3([1, 2]), 2)
+#4
+  - signature1: "foo4(x: number)"
+    signature2: "foo4(x: string)"
     use: |
-      arktest.assertEQ(foo(1), 1)
-      arktest.assertEQ(foo("abc"), 2)
-
-  - signature1: "foo(x: number[])"
-    signature2: "foo(x: string)"
+      arktest.assertEQ(foo4(1), 1)
+      arktest.assertEQ(foo4("abc"), 2)
+#5
+  - signature1: "foo5(x: number[])"
+    signature2: "foo5(x: string)"
     use: |
-      arktest.assertEQ(foo([1, 2]), 1)
-      arktest.assertEQ(foo("abc"), 2)
-    
-  - signature1: "foo(x: number)"
-    signature2: "foo(y: Any)"
+      arktest.assertEQ(foo5([1, 2]), 1)
+      arktest.assertEQ(foo5("abc"), 2)
+#6    
+  - signature1: "foo6(x: number)"
+    signature2: "foo6(y: Any)"
     use: |
-      arktest.assertEQ(foo(1), 1)
-      arktest.assertEQ(foo(new Object), 2)
-      arktest.assertEQ(foo(null), 2)
-      arktest.assertEQ(foo("abc"), 2)
-      arktest.assertEQ(foo(c'a'), 2)
-    
-  - signature1: "foo(x: number)"
-    signature2: "foo(y: Object)"
+      arktest.assertEQ(foo6(1), 1)
+      arktest.assertEQ(foo6(new Object), 2)
+      arktest.assertEQ(foo6(null), 2)
+      arktest.assertEQ(foo6("abc"), 2)
+      arktest.assertEQ(foo6(c'a'), 2)
+#7 
+  - signature1: "foo7(x: number)"
+    signature2: "foo7(y: Object)"
     use: |
-      arktest.assertEQ(foo(1), 1)
-      arktest.assertEQ(foo(new Object), 2)
-    
-  - signature1: "foo(x: number)"
-    signature2: "foo(y: null)"
+      arktest.assertEQ(foo7(1), 1)
+      arktest.assertEQ(foo7(new Object), 2)
+#8   
+  - signature1: "foo8(x: number)"
+    signature2: "foo8(y: null)"
     use: |
-      arktest.assertEQ(foo(1), 1)
-      arktest.assertEQ(foo(null), 2)
+      arktest.assertEQ(foo8(1), 1)
+      arktest.assertEQ(foo8(null), 2)
