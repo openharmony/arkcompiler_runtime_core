@@ -20,24 +20,54 @@ desc: Null literal.
 function main(): int {
     let suite = new arktest.ArkTestsuite("Null literal");
 
+    const eq = (a: Any, b: Any) => a == b
+    const strictEq = (a: Any, b: Any) => a === b
+    const instanceOf = (a: Any) => a instanceof null
+
     suite.addTest("Implicit type", () => {
         let x = null; // x type is expected to be inferred to Object|null type
-        arktest.assertTrue( x === null )
+        arktest.assertTrue(x == null)
+        arktest.assertTrue(x === null)
+        arktest.assertTrue(x instanceof null)
+        arktest.assertTrue(eq(x, null))
+        arktest.assertTrue(eq(null, x))
+        arktest.assertTrue(strictEq(x, null))
+        arktest.assertTrue(strictEq(null, x))
+        arktest.assertTrue(instanceOf(x))
     });
 
     suite.addTest("Explicit type", () => {
         let x: null = null;
-        arktest.assertTrue( x === null )
+        arktest.assertTrue(x == null)
+        arktest.assertTrue(x === null)
+        arktest.assertTrue(x instanceof null)
+        arktest.assertTrue(eq(x, null))
+        arktest.assertTrue(eq(null, x))
+        arktest.assertTrue(strictEq(x, null))
+        arktest.assertTrue(strictEq(null, x))
+        arktest.assertTrue(instanceOf(x))
     });
 
     suite.addTest("Union type", () => {
-        let x: Object|null = null;
-        arktest.assertTrue( x === null )
+        let x: Object | null = null;
+        arktest.assertTrue(x == null)
+        arktest.assertTrue(x === null)
+        arktest.assertTrue(x instanceof null)
+        arktest.assertTrue(eq(x, null))
+        arktest.assertTrue(eq(null, x))
+        arktest.assertTrue(strictEq(x, null))
+        arktest.assertTrue(strictEq(null, x))
+        arktest.assertTrue(instanceOf(x))
     });
 
     suite.addTest("Standalone literal", () => {
         null //standalone literal
+        arktest.assertTrue(null == null)
+        arktest.assertTrue(null === null)
         arktest.assertTrue(null instanceof null)
+        arktest.assertTrue(eq(null, null))
+        arktest.assertTrue(strictEq(null, null))
+        arktest.assertTrue(instanceOf(null))
     });
 
     return suite.run();

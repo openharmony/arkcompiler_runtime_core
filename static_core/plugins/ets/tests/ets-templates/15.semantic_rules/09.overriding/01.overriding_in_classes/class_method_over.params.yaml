@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -344,3 +344,130 @@ cases:
       arktest.assertEQ(res, 21);
       Derived.foo(tpl1);
       arktest.assertEQ(res, 22);
+
+  - doc: |-
+      No overriding of instance methods if arguments are not contravariant.
+    decl: |-
+      class Base {
+        foo<T>(a: T): int { return 1 }
+        bar(a: Any): int { return 2 }
+      }
+
+      class Derived extends Base {
+        foo(a: Object): int { return 3 }
+        bar(a: Object): int { return 4 }
+      }
+
+      function foo(a: Base) { return a.foo<Object>(new Object()) }
+      function bar(a: Base) { return a.bar(new Object()) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 1)
+      arktest.assertEQ(bar(new Base()), 2)
+      arktest.assertEQ(bar(new Derived()), 2)
+
+  - doc: |-
+      Overriding is possible when derived method parameter is contravariant.
+      Any is a supertype of Object, so bar(a: Object) in Base is overridden by bar(a: Any) in Derived.
+    decl: |-
+      class Base {
+        bar(a: Object): int { return 1 }
+      }
+
+      class Derived extends Base {
+        bar(a: Any): int { return 2 }
+      }
+
+      function bar(a: Base) { return a.bar(new Object()) }
+    use: |-
+      arktest.assertEQ(bar(new Base()), 1)
+      arktest.assertEQ(bar(new Derived()), 2)
+
+  - doc: |-
+      Overriding is possible when derived method return type is covariant.
+      Object is a subtype of Any, so foo(): Any in Base is overridden by foo(): Object in Derived.
+    decl: |-
+      class Base {
+        foo(): Any { return 1 }
+      }
+
+      class Derived extends Base {
+        foo(): Object { return new Object() }
+      }
+
+      function callFoo(a: Base): Any { return a.foo() }
+    use: |-
+      arktest.assertEQ(callFoo(new Base()), 1)
+      arktest.assertTrue(callFoo(new Derived()) instanceof Object)
+
+  - doc: |-
+      No overriding when return types are not covariant. Any is not a subtype of Object.
+    decl: |-
+      class Base {
+        foo(): Object { return new Object() }
+      }
+
+      class Derived extends Base {
+        foo(): Any { return 1 }
+      }
+
+      function callFoo(a: Base): Object { return a.foo() }
+    use: |-
+      arktest.assertTrue(callFoo(new Base()) instanceof Object)
+      arktest.assertTrue(callFoo(new Derived()) instanceof Object)
+
+  - doc: |-
+      No overriding of instance methods if FixedArray element types are not contravariant.
+      FixedArray<Any> param in base is not overridden by FixedArray<Object> param in derived.
+    decl: |-
+      class Base {
+        foo(a: FixedArray<Any>): int { return 1 }
+      }
+
+      class Derived extends Base {
+        foo(a: FixedArray<Object>): int { return 2 }
+      }
+
+      function foo(a: Base) { return a.foo([new Object()]) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 1)
+
+  - doc: |-
+      Overriding is possible when FixedArray element types are contravariant.
+      FixedArray<Any> is a supertype of FixedArray<Object>, so FixedArray<Object> in Base
+      is overridden by FixedArray<Any> in Derived.
+    decl: |-
+      class Base {
+        foo(a: FixedArray<Object>): int { return 1 }
+      }
+
+      class Derived extends Base {
+        foo(a: FixedArray<Any>): int { return 2 }
+      }
+
+      function foo(a: Base) { return a.foo([new Object()]) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 2)
+
+  - doc: |-
+      No overriding of instance methods when mixing Any and Object in multi-parameter methods.
+    decl: |-
+      class Base {
+        foo(a: Any, b: Object): int { return 1 }
+        bar(a: Object, b: Any): int { return 2 }
+      }
+
+      class Derived extends Base {
+        foo(a: Object, b: Any): int { return 3 }
+        bar(a: Any, b: Object): int { return 4 }
+      }
+
+      function foo(a: Base) { return a.foo(1, new Object()) }
+      function bar(a: Base) { return a.bar(new Object(), 1) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 1)
+      arktest.assertEQ(bar(new Base()), 2)
+      arktest.assertEQ(bar(new Derived()), 2)

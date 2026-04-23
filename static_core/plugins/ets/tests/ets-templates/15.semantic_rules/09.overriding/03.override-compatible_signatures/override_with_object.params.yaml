@@ -304,3 +304,67 @@ cases:
           }
       call: new Derived().foo();
       result: 2
+
+    # Any vs Object: override-compatible argument (contravariance)
+    - base: |-
+          foo(i: Object): void {
+              res = 1;
+          }
+      derived: |-
+          override foo(i: Any): void {
+              res = 2;
+          }
+      call: new Derived().foo(new Object());
+      result: 2
+
+    # Any vs Object: override-compatible argument (contravariance)
+    - base: |-
+          foo(i: Object): void {
+              res = 1;
+          }
+      derived: |-
+          override foo(i: Any): void {
+              res = 2;
+          }
+      call: new Derived().foo(1);
+      result: 2
+
+    # Any vs Object: override-compatible return type (covariance)
+    - base: |-
+          foo(): Any {
+              res = 1;
+              return 42;
+          }
+      derived: |-
+          override foo(): Object {
+              res = 2;
+              return new Object();
+          }
+      call: new Derived().foo();
+      result: 2
+
+    # FixedArray<Any/Object>: override-compatible argument (contravariance)
+    - base: |-
+          foo(i: FixedArray<Object>): void {
+              res = 1;
+          }
+      derived: |-
+          override foo(i: FixedArray<Any>): void {
+              res = 2;
+          }
+      call: new Derived().foo([new Object()]);
+      result: 2
+
+    # FixedArray<Any/Object>: override-compatible return type (covariance)
+    - base: |-
+          foo(): FixedArray<Any> {
+              res = 1;
+              return [1, null];
+          }
+      derived: |-
+          override foo(): FixedArray<Object> {
+              res = 2;
+              return [new Object()];
+          }
+      call: new Derived().foo();
+      result: 2

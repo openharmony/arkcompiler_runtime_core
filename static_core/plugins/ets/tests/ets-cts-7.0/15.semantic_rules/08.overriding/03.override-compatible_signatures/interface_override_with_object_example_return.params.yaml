@@ -21,3 +21,5 @@ cases:
     - { type: 'Base[]', expr: '[new A]' }
     - { type: '[ Base, Base ]', expr: '[ new A, new A ]' }
     - { type: 'number', expr: '42.0' }
+    # Object is covariant to Any, so returning Object when base returns Any is compatible
+    - { type: 'Object', expr: 'new Object()' }

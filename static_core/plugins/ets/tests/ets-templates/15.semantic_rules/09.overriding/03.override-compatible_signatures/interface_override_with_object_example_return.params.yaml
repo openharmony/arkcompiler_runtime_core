@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,3 +21,5 @@ cases:
     - { type: 'Base[]', expr: '[new A]' }
     - { type: '[ Base, Base ]', expr: '[ new A, new A ]' }
     - { type: 'number', expr: '42.0' }
+    # Object is covariant to Any, so returning Object when base returns Any is compatible
+    - { type: 'Object', expr: 'new Object()' }

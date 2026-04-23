@@ -17,35 +17,27 @@
 /*---
 assertion: If an overload set is formed from explicit overloads only, then the order 
            of the overload set is the same as the order of the entities listed.
-desc: Overload Resolution for Overload Declarations - explicit function overload.
+desc: Overload Resolution for Overload Declarations - explicit function overload with Any/Object types.
 ---*/
 
-function max2i(a: int, b: int): int {
-    return 100 + (a > b ? a : b);
-}
+function singleArgAny(a: Any): int { return 1 }
 
-function max2d(a: double, b: double): double {
-    return 200 + (a > b ? a : b);
-}
+function singleArgObject(a: Object): int { return 2 }
 
-function maxN(...a: double[]): double {
-    let max: double = a[0];
-    for (let x: number of a) {
-        if (x > max) {
-             max = x;
-        }
-    }
-    return 300 + max;
-}
+function multipleArgsAny(a: double, b: Any, c: string): int { return 1 }
 
-overload maxFn { {{c.list}} };
+function multipleArgsObject(a: double, b: Object, c: string): int { return 2 }
+
+function optionalArgAny(a: double, b?: Any): int { return 1 }
+
+function optionalArgObject(a: double, b?: Object): int { return 2 }
+
+overload foo { {{c.overloadList}} };
 
 function main() {
-    let i: int = 1;
-    let j: int = 2;
-    let pi: number = 3.14;
-
-    arktest.assertEQ({{c.result}}, {{c.call}});
+    {% for call in c.calls %}
+    arktest.assertEQ({{call.call}}, {{call.result}})
+    {% endfor %}
 }
 
 {% endfor %}

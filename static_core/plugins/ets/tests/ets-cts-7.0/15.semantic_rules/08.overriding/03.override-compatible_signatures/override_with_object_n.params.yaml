@@ -165,3 +165,47 @@ cases:
           }
       expected_out: |-
         "Semantic error ESE0141: Class member foo with type Array<Object> in Derived cannot override foo with type Array<Base> field from class Base because the overriding return type is not compatible with the other return type."
+
+    # Any vs Object: override-incompatible argument (Object not contravariant to Any)
+#14
+    - base: |-
+          foo(i: Any): void {}
+      derived: |-
+          override foo(i: Object): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: Object): undefined in Derived not overriding any method"
+
+    # Any vs Object: override-incompatible return type (Any not covariant to Object)
+#15
+    - base: |-
+          foo(): Object {
+              return new Object();
+          }
+      derived: |-
+          override foo(): Any {
+              return 1;
+          }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type Any in Derived cannot override foo with type Object field from class Base because the overriding return type is not compatible with the other return type."
+
+    # FixedArray<Any/Object>: override-incompatible argument (FixedArray<Object> not contravariant to FixedArray<Any>)
+#16
+    - base: |-
+          foo(i: FixedArray<Any>): void {}
+      derived: |-
+          override foo(i: FixedArray<Object>): void {}
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: FixedArray<Object>): undefined in Derived not overriding any method"
+
+    # FixedArray<Any/Object>: override-incompatible return type (FixedArray<Any> not covariant to FixedArray<Object>)
+#17
+    - base: |-
+          foo(): FixedArray<Object> {
+              return [new Object()];
+          }
+      derived: |-
+          override foo(): FixedArray<Any> {
+              return [1, null];
+          }
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type FixedArray<Any> in Derived cannot override foo with type FixedArray<Object> field from class Base because the overriding return type is not compatible with the other return type."

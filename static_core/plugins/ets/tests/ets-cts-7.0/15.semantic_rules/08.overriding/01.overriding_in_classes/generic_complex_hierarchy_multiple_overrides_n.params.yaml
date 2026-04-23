@@ -1,0 +1,205 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: Generic class chain with an inherited contravariant override and a declared exact override.
+    decl: |-
+      class A {}
+      class B extends A {}
+
+      class Root<T extends B> {
+          foo(p: T): void {}
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: A): void {}
+      }
+
+      class Leaf<T extends B> extends Mid<T> {
+          foo(p: T): void {}
+      }
+
+  - desc: Generic class chain with two type parameters and an inherited wider-parameter override.
+    decl: |-
+      class A {}
+      class B extends A {}
+
+      class Root<T, U extends T> {
+          foo(p: U): void {}
+      }
+
+      class Mid<T, U extends T> extends Root<T, U> {
+          foo(p: T): void {}
+      }
+
+      class Leaf<T extends A, U extends T> extends Mid<T, U> {
+          foo(p: U): void {}
+      }
+
+  - desc: Generic class chain where both conflicting overrides remain return-type compatible.
+    decl: |-
+      class A {}
+      class B extends A {}
+      class C extends B {}
+
+      class Root<T extends B> {
+          foo(p: T): A { return new A() }
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: B): B { return new B() }
+      }
+
+      class Leaf<T extends B> extends Mid<T> {
+          foo(p: T): C { return new C() }
+      }
+
+  - desc: Generic class chain with rest parameters on both conflicting overriding methods.
+    decl: |-
+      class A {}
+      class B extends A {}
+      class Tag {}
+
+      class Root<T extends B> {
+          foo(p: T, ...rest: Tag[]): void {}
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: A, ...rest: Tag[]): void {}
+      }
+
+      class Leaf<T extends B> extends Mid<T> {
+          foo(p: T, ...rest: Tag[]): void {}
+      }
+
+  - desc: Mixed class-interface hierarchy with one conflicting method inherited from a class and one from a generic interface.
+    decl: |-
+      class A {}
+      class B extends A {}
+
+      class Root<T extends B> {
+          foo(p: T): void {}
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: T): void {}
+      }
+
+      interface Wide<T extends B> {
+          foo(p: A): void {}
+      }
+
+      class Leaf<T extends B> extends Mid<T> implements Wide<T> {}
+
+  - desc: Mixed hierarchy where the conflicting interface method is inherited through a superinterface.
+    decl: |-
+      class A {}
+      class B extends A {}
+
+      class Root<T extends B> {
+          foo(p: T): void {}
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: T): void {}
+      }
+
+      interface WideBase<T extends B> {
+          foo(p: A): void {}
+      }
+
+      interface Wide<T extends B> extends WideBase<T> {}
+
+      class Leaf<T extends B> extends Mid<T> implements Wide<T> {}
+
+  - desc: Mixed hierarchy with an inherited interface default method and a declared class method in the leaf.
+    decl: |-
+      class A {}
+      class B extends A {}
+
+      class Root<T extends B> {
+          foo(p: T): void {}
+      }
+
+      class Mid<T extends B> extends Root<T> {}
+
+      interface Wide<T extends B> {
+          foo(p: A): void {}
+      }
+
+      class Leaf<T extends B> extends Mid<T> implements Wide<T> {
+          foo(p: T): void {}
+      }
+
+  - desc: Mixed hierarchy with three separate methods in the subclass all overriding the same superclass method.
+    decl: |-
+      class A {}
+      class B extends A {}
+
+      class Root<T extends B> {
+          foo(p: T): void {}
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: B): void {}
+      }
+
+      interface Wide<T extends B> {
+          foo(p: A): void {}
+      }
+
+      class Leaf<T extends B> extends Mid<T> implements Wide<T> {
+          foo(p: T): void {}
+      }
+
+  - desc: Mixed class-interface hierarchy with covariant returns on both conflicting overriding methods.
+    decl: |-
+      class A {}
+      class B extends A {}
+      class C extends B {}
+
+      class Root<T extends B> {
+          foo(p: T): A { return new A() }
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: B): B { return new B() }
+      }
+
+      interface Wide<T extends B> {
+          foo(p: A): C { return new C() }
+      }
+
+      class Leaf<T extends B> extends Mid<T> implements Wide<T> {}
+
+  - desc: Mixed class-interface hierarchy with rest parameters and covariant returns on both conflicting overriding methods.
+    decl: |-
+      class A {}
+      class B extends A {}
+      class C extends B {}
+      class Tag {}
+
+      class Root<T extends B> {
+          foo(p: T, ...rest: Tag[]): A { return new A() }
+      }
+
+      class Mid<T extends B> extends Root<T> {
+          foo(p: B, ...rest: Tag[]): B { return new B() }
+      }
+
+      interface Wide<T extends B> {
+          foo(p: A, ...rest: Tag[]): C { return new C() }
+      }
+
+      class Leaf<T extends B> extends Mid<T> implements Wide<T> {}

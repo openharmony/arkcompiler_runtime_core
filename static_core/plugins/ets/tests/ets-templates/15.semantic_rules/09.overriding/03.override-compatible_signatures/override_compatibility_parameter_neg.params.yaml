@@ -101,3 +101,19 @@ cases:
       params: override-incompatible constraints (covariance)
       expected_out: |-
         "Semantic error ESE150729: Class member foo with type J in Derived cannot override foo with type T field from class Base because the overriding type parameter's constraints are not compatible with type parameter constraints of the overridden method."
+
+    - base: |-
+          class Base {
+              foo<T, U>(t: T, u: U): U {
+                  return u
+              }
+          }
+      derived: |-
+          class Derived extends Base {
+              override foo<X, Y>(x: X, y: Y): X {
+                  return x
+              }
+          }
+      params: override-incompatible constraints (covariance)
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type X in Derived cannot override foo with type U field from class Base because the overriding return type is not compatible with the other return type."

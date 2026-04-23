@@ -71,3 +71,47 @@ cases:
           }
       use: |-
           return
+
+    # No contravariance between input parameter types
+    - decl: |-
+          interface I {
+              foo(a: Any) {}
+          }
+          class C implements I {
+              override foo(a: Object) {}  // CTE: no overriding
+          }
+      use: |-
+          return
+
+    # No contravariance between input parameter types
+    - decl: |-
+          interface I {
+              foo(a: FixedArray<Any>) {}
+          }
+          class C implements I {
+              override foo(a: FixedArray<Object>) {}  // CTE: no overriding
+          }
+      use: |-
+          return
+
+    # No covariance between return types
+    - decl: |-
+          interface I {
+              foo(): Object { return 1 }
+          }
+          class C implements I {
+              override foo(): Any { return 2 }  // CTE: no overriding
+          }
+      use: |-
+          return
+
+    # No covariance between return types
+    - decl: |-
+          interface I {
+              foo(): FixedArray<Object> { return [1] }
+          }
+          class C implements I {
+              override foo(): FixedArray<Any> { return [2] }  // CTE: no overriding
+          }
+      use: |-
+          return

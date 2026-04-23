@@ -185,3 +185,40 @@ cases:
           foo(): Derived { return new Derived() }
         }
         interface I3 extends I1, I2 {}
+
+      # Any vs Object effective type difference in interface overriding
+    - descr: 'Override compatible by Any parameter in subinterface (Any is contravariant to Object)'
+      decl: |
+        interface I1 {
+          foo(p: Object): void {}
+        }
+        interface I2 extends I1 {
+          foo(p: Any): void {}
+        }
+
+    - descr: 'Override compatible by Object return type in subinterface (Object is covariant to Any)'
+      decl: |
+        interface I1 {
+          foo(): Any { return 1 }
+        }
+        interface I2 extends I1 {
+          foo(): Object { return new Object() }
+        }
+
+    - descr: 'Override compatible by FixedArray<Any> parameter in subinterface'
+      decl: |
+        interface I1 {
+          foo(p: FixedArray<Object>): void {}
+        }
+        interface I2 extends I1 {
+          foo(p: FixedArray<Any>): void {}
+        }
+
+    - descr: 'Override compatible by FixedArray<Object> return type in subinterface'
+      decl: |
+        interface I1 {
+          foo(): FixedArray<Any> { return [1, null] }
+        }
+        interface I2 extends I1 {
+          foo(): FixedArray<Object> { return [new Object()] }
+        }

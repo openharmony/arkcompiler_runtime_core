@@ -40,3 +40,31 @@ cases:
       params: override-incompatible return type
       expected_out: |-
         "Semantic error ESE0141: Class member foo with type FixedArray<Base> in Derived cannot override foo with type FixedArray<Derived> field from class Base because the overriding return type is not compatible with the other return type."
+
+    # FIXED ARRAY with Any/Object, PARAMETER - not contravariant
+    - base: |-
+          foo(i: FixedArray<Any>) {
+              res = 1
+          }
+      derived: |-
+          override foo(i: FixedArray<Object>) {
+              res = 2
+          }
+      params: override-incompatible parameter (FixedArray<Object> not contravariant to FixedArray<Any>)
+      expected_out: |-
+        "Semantic error ESE0136: Method foo(i: FixedArray<Object>): undefined in Derived not overriding any method"
+
+    # FIXED ARRAY with Any/Object, RETURN TYPE - not covariant
+    - base: |-
+          foo(): FixedArray<Object> {
+              res = 1
+              return [new Object()]
+          }
+      derived: |-
+          override foo(): FixedArray<Any> {
+              res = 2
+              return [1, null]
+          }
+      params: override-incompatible return type (FixedArray<Any> not covariant to FixedArray<Object>)
+      expected_out: |-
+        "Semantic error ESE0141: Class member foo with type FixedArray<Any> in Derived cannot override foo with type FixedArray<Object> field from class Base because the overriding return type is not compatible with the other return type."
