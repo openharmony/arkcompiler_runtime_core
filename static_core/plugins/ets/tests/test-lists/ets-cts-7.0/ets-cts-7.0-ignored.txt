@@ -52,9 +52,6 @@
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_1.ets
 
-#31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
-20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
-
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/05.array_literal/arr_n_2.ets
 
