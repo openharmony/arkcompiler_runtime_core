@@ -5,5 +5,4 @@ ets-common-tests/intrinsics/copyTo.ets
 ets-common-tests/intrinsics/map_set.ets
 ets-common-tests/intrinsics/stringbuilder_oom.ets
 ets-common-tests/taskpool/CurrentTaskTest.ets
-ets-common-tests/taskpool/common_tasks.ets
 ets-common-tests/taskpool/seqrunner_tasks.ets

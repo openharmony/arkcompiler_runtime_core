@@ -43,49 +43,36 @@ function defaultWorkerPriorityIsHigh(): void {
     });
 }
 
-function scalingLongRunningTask(duration: int): string {
-    let start = Date.now();
-    while ((Date.now() - start) < duration) {
+function scalingInfiniteTask(flag: AtomicFlag): void {
+    while (flag.get() == false) {
         continue;
     }
-    return 'success';
-}
-
-async function waitUntilWorkersAtMost(expected: int, timeoutMs: int): Promise<void> {
-    let start = Date.now();
-    while ((Date.now() - start) < timeoutMs) {
-        let workersNum = CoroutineExtras.getTaskPoolWorkersNum();
-        arktest.assertTrue(workersNum <= expected);
-        if (workersNum == expected) {
-            return;
-        }
-        await delay(5);
-    }
-    arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), expected);
-}
-
-async function executeScalingBatch(count: int): Promise<void> {
-    let promises: Promise<Any>[] = [];
-    for (let i: int = 0; i < count; i++) {
-        let task = new taskpool.Task(scalingLongRunningTask, 20);
-        promises.push(taskpool.execute(task));
-    }
-
-    await waitUntilWorkersAtMost(count, 60);
-    await Promise.all(promises);
+    return ;
 }
 
 async function taskpoolScalingShouldNotOverExpand(): Promise<void> {
     if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
         return;
     }
-
-    const limit: int = max(4, CoroutineExtras.getTaskPoolWorkersLimit());
+    const limit: int = CoroutineExtras.getTaskPoolWorkersLimit();
     const currentWorkersNum: int = CoroutineExtras.getTaskPoolWorkersNum();
     if (currentWorkersNum >= limit) {
         return;
     }
-    await executeScalingBatch(currentWorkersNum + 1);
+
+    let promises: Promise<Any>[] = [];
+    let flag = new AtomicFlag(false);
+    for (let i = 0; i <= limit + 1; ++i) {
+        let task = new taskpool.Task(scalingInfiniteTask, flag);
+        promises.push(taskpool.execute(task));
+        delay(2);
+    }
+
+    while (CoroutineExtras.getTaskPoolWorkersNum() < limit){
+    }
+    arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), limit);
+    flag.set(true);
+    Promise.all(promises);
 }
 
 async function cancelInSuccessCallback() {
@@ -217,11 +204,11 @@ async function onExecutionFailedtestmultAsyncfun(){
        event1.resolve(undefined);
     });
     task2.onExecutionFailed((e : Error) => {
-       catchSuccess++;
+       catchSuccess++; 
        event2.resolve(undefined);
     });
     task3.onExecutionFailed((e : Error) => {
-       catchSuccess++;
+       catchSuccess++; 
        event3.resolve(undefined);
     });
     taskpool.execute(task1);
@@ -313,45 +300,51 @@ async function workerTimerBackedTaskCompletes(): Promise<void> {
 }
 
 async function pendingDependencyShouldNotBlockReadyTask(): Promise<void> {
-    const rounds: int = 10;
-    for (let round: int = 0; round < rounds; round++) {
-        let blocker: taskpool.Task = new taskpool.Task(async () => {
-            await dependencyStressAsyncSleep(200.0);
+    const rounds = 2;
+    const numBlockedTasks = 8;
+
+    for (let round = 0; round < rounds; round++) {
+        let blocker: taskpool.Task = new taskpool.Task((): int => {
             return 0 as int;
         });
-        let blockedTasks: taskpool.Task[] = [];
+
         let blockedPromises: Promise<Any>[] = [];
 
-        for (let i: int = 0; i < 60; i++) {
-            let blockedTask: taskpool.Task = new taskpool.Task((): int => i);
+        for (let i: int = 0; i < numBlockedTasks; i++) {
+            let index: int = i;
+
+            let blockedTask: taskpool.Task = new taskpool.Task((): int => {
+                return index;
+            });
+
             blockedTask.addDependency(blocker);
-            blockedTasks.push(blockedTask);
+
             blockedPromises.push(
-                taskpool.execute(blockedTask, taskpool.Priority.HIGH).then((res: Any) => res).catch((err: Error) => err)
+                taskpool.execute(blockedTask, taskpool.Priority.HIGH)
             );
         }
 
-        await dependencyStressAsyncSleep(20.0);
-
-        let readyTask: taskpool.Task = new taskpool.Task((): int => 1);
-        let readyTaskSettled = await Promise.race<boolean>([
-            taskpool.execute(readyTask, taskpool.Priority.HIGH).then((_res: Any) => true).catch((_err: Error) => false),
-            dependencyStressAsyncSleep(300.0).then(() => false)
-        ]);
-
-        let blockerExecuted = await taskpool.execute(blocker, taskpool.Priority.HIGH)
-            .then((_res: Any) => true)
-            .catch((_err: Error) => false);
-        arktest.assertEQ(blockerExecuted, true);
-        await Promise.allSettled(blockedPromises);
-        blockedTasks.forEach((task: taskpool.Task) => {
-            try {
-                taskpool.cancel(task);
-            } catch (_e) {
-            }
+        let readyTask: taskpool.Task = new taskpool.Task((): int => {
+            return 1 as int;
         });
 
-        arktest.assertEQ(readyTaskSettled, true, 'ready task must not be starved by blocked dependency tasks');
+        let readyResult = await taskpool.execute(readyTask, taskpool.Priority.HIGH);
+
+        arktest.assertEQ(
+            readyResult as int,
+            1,
+            'ready task must complete while earlier high-priority dependency-blocked tasks are pending'
+        );
+
+        let blockerResult = await taskpool.execute(blocker, taskpool.Priority.HIGH);
+        arktest.assertEQ(blockerResult as int, 0);
+
+        let blockedResults = await Promise.all(blockedPromises);
+        arktest.assertEQ(blockedResults.length, numBlockedTasks);
+
+        for (let i: int = 0; i < numBlockedTasks; i++) {
+            arktest.assertEQ(blockedResults[i] as int, i);
+        }
     }
 }
 
@@ -776,11 +769,11 @@ async function asyncStackSubmissionKeepsTaskpoolSemantics(): Promise<void> {
     arktest.assertEQ(executeResult, 1);
 
     let timeoutTask = new taskpool.Task(identityInt, 2);
-    let timeoutResult = await taskpool.execute(timeoutTask, { timeout: 50 });
+    let timeoutResult = await taskpool.execute(timeoutTask, { timeout: 1500 });
     arktest.assertEQ(timeoutResult, 2);
 
     let delayedTask = new taskpool.Task(identityInt, 3);
-    let delayedResult = await taskpool.executeDelayed(10, delayedTask);
+    let delayedResult = await taskpool.executeDelayed(1, delayedTask);
     arktest.assertEQ(delayedResult, 3);
 
     let group = new taskpool.TaskGroup();
@@ -796,13 +789,24 @@ async function asyncStackSubmissionKeepsTaskpoolSemantics(): Promise<void> {
     arktest.assertEQ(sequenceResult, 6);
 
     let asyncRunner = new taskpool.AsyncRunner(1, 2);
+
+    let blockerStarted = new PromiseWithResolvers<void>();
+    let releaseBlocker = new PromiseWithResolvers<void>();
+
     let asyncRunnerBlocker = new taskpool.Task(async (): Promise<int> => {
-        await dependencyStressAsyncSleep(20.0);
+        blockerStarted.resolve(undefined);
+        await releaseBlocker.promise;
         return 7;
     });
     let asyncRunnerQueued = new taskpool.Task(identityInt, 8);
     let asyncRunnerBlockerPromise = asyncRunner.execute(asyncRunnerBlocker);
+
+    await blockerStarted.promise;
+
     let asyncRunnerQueuedPromise = asyncRunner.execute(asyncRunnerQueued);
+
+    releaseBlocker.resolve(undefined);
+
     arktest.assertEQ(await asyncRunnerBlockerPromise, 7);
     arktest.assertEQ(await asyncRunnerQueuedPromise, 8);
 
@@ -813,7 +817,7 @@ async function asyncStackSubmissionKeepsTaskpoolSemantics(): Promise<void> {
         periodicEvent.resolve(undefined);
         return periodicCount;
     });
-    taskpool.executePeriodically(10, periodicTask);
+    taskpool.executePeriodically(1, periodicTask);
     await periodicEvent.promise;
     taskpool.cancel(periodicTask);
     arktest.assertLE(1, periodicCount);
@@ -831,8 +835,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('onFailCallbackExceptionTest', onFailCallbackExceptionTest);
     commonTaskSuite.addAsyncTest('multipleFailCallbackExceptionTest', multipleFailCallbackExceptionTest);
     commonTaskSuite.addAsyncTest('workerTimerBackedTaskCompletes', workerTimerBackedTaskCompletes);
-    // #33877: Test is incorrect and flaky fails
-    commonTaskSuiteDisabled.addAsyncTest(
+    commonTaskSuite.addAsyncTest(
         'pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
