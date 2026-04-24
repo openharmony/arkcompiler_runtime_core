@@ -799,6 +799,11 @@ bool ClassLinker::LinkMethods(Class *klass, ClassInfo *classInfo,
 {
     classInfo->vtableBuilder->UpdateClass(klass);
     ASSERT(classInfo->itableBuilder != nullptr);
+
+    auto dispatches = classInfo->vtableBuilder->GetIfaceMethodDispatches();
+    // non-owning span, vtable builder arena must outlive Resolve
+    classInfo->itableBuilder->SetDispatches(dispatches);
+
     if (!classInfo->itableBuilder->Resolve(klass)) {
         return false;
     }

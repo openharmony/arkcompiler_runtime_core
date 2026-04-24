@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "libarkfile/class_data_accessor-inl.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
+#include "runtime/include/vtable_builder_interface.h"
 
 namespace ark {
 
@@ -32,6 +33,8 @@ public:
                                      bool isInterface) = 0;
 
     [[nodiscard]] virtual bool Resolve(Class *klass) = 0;
+
+    virtual void SetDispatches([[maybe_unused]] Span<const IfaceMethodDispatch> dispatches) {}
 
     virtual void UpdateClass(Class *klass) = 0;
 

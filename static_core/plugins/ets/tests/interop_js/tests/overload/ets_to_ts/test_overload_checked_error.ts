@@ -16,21 +16,12 @@
 const etsVm = globalThis.gtest.etsVm;
 
 function testExtendsOverloadConflict(): void {
-    try {
-        let CSSLogicRule = etsVm.getClass('Ltest_overload_checked_error/CSSLogicRule;');
-    } catch (e) {
-        ASSERT_TRUE(e.message === 'Multiple override Ltest_overload_checked_error/CSSLogicRule;mergeRule Ltest_overload_checked_error/CSSLogicRule;mergeRule')
-    }
+    etsVm.getClass('Ltest_overload_checked_error/CSSLogicRule;');
 }
 
 function testStaInsOverload(): void {
-    try {
-        let cssLogicRuleIns = etsVm.getFunction('Ltest_overload_checked_error/ETSGLOBAL;','createCSSLogicRule');
-        cssLogicRuleIns();
-        ASSERT_TRUE(false);
-    } catch(e) {
-        ASSERT_TRUE(e.message === 'Multiple override Ltest_overload_checked_error/CSSLogicRule;mergeRule Ltest_overload_checked_error/CSSLogicRule;mergeRule')
-    }
+    let cssLogicRuleIns = etsVm.getFunction('Ltest_overload_checked_error/ETSGLOBAL;','createCSSLogicRule');
+    cssLogicRuleIns();
 }
 
 

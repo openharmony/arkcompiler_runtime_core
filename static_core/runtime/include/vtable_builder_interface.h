@@ -53,6 +53,19 @@ private:
     Status status_ {Status::ORDINARY};
 };
 
+// always interface Method*, class Method* not yet materialized during SetupClassInfo
+struct IfaceMethodDispatch {
+    enum class Kind : uint8_t {
+        CLASS_METHOD,
+        COPIED_ORDINARY,
+        COPIED_CONFLICT,
+        AME,
+    };
+    Kind kind {Kind::CLASS_METHOD};
+    Method *method {nullptr};
+    size_t resolveIndex {0};
+};
+
 class VTableBuilder {
 public:
     VTableBuilder() = default;
@@ -76,6 +89,8 @@ public:
     virtual size_t GetVTableSize() const = 0;
 
     virtual Span<const CopiedMethod> GetCopiedMethods() const = 0;
+
+    virtual Span<const IfaceMethodDispatch> GetIfaceMethodDispatches() const = 0;
 
     virtual ~VTableBuilder() = default;
 

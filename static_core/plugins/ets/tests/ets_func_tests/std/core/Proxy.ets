@@ -457,6 +457,9 @@ interface F {
 }
 
 class EF implements E, F {
+    foo(): int {
+        return 1
+    }
     goo(num: number) {
     }
     hoo() {
@@ -466,6 +469,9 @@ class EF implements E, F {
 }
 
 class FE implements F, E {
+    foo(): int {
+        return 1
+    }
     goo(num: number) {
     }
     hoo() {

@@ -22,41 +22,83 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/mem/panda_containers.h"
+#include "runtime/bridge/bridge.h"
 
 namespace ark::ets {
 
-static std::optional<Method *> FindMethodInVTable(Class *klass, Method *imethod, ClassLinkerErrorHandler *errHandler)
+// two-pass mirrors HasClassMethodOverride targetProto shift
+static Method *ResolveClassMethodInVTable(Span<Method *> vtable, ClassLinkerContext *ctx, Method *ifaceMethod,
+                                          Class *klass)
 {
-    auto vtable = klass->GetVTable();
-    auto imethodName = imethod->GetName();
-    auto ctx = klass->GetLoadContext();
-
-    Method *candidate = nullptr;
-
-    for (size_t i = vtable.size(); i != 0;) {
-        i--;
-        auto kmethod = vtable[i];
-        if (LIKELY(kmethod->GetName() != imethodName)) {
+    Method *inherited = nullptr;
+    for (size_t vi = vtable.size(); vi != 0;) {
+        --vi;
+        auto *vm = vtable[vi];
+        if (vm->IsDefaultInterfaceMethod() || vm->GetClass()->IsInterface()) {
             continue;
         }
-        /*
-         * NOTE(knazarov): Private methods should not even appear in vtable.
-         * Should be fixed in #31066. After original issue is fixed, this check should be removed.
-         */
-        if (kmethod->IsPrivate()) {
+        if (vm->GetName() != ifaceMethod->GetName()) {
             continue;
         }
-        if (!ETSProtoIsOverriddenBy(ctx, imethod->GetProtoId(), kmethod->GetProtoId())) {
-            continue;
+        if (vm->GetClass() == klass) {
+            continue;  // pass1 skips own-class, inherited scan only
         }
-        if (candidate != nullptr) {
-            OnVTableConflict(errHandler, ClassLinker::Error::MULTIPLE_IMPLEMENT, "Multiple implementations", kmethod,
-                             candidate);
-            return std::nullopt;
+        if (ETSProtoIsOverriddenBy(ctx, ifaceMethod->GetProtoId(), vm->GetProtoId())) {
+            inherited = vm;
+            break;
         }
-        candidate = kmethod;
     }
-    return candidate;
+
+    auto targetProto = inherited != nullptr ? inherited->GetProtoId() : ifaceMethod->GetProtoId();
+    // own-class methods, checks against inherited proto not original ifaceMethod
+    for (size_t vi = vtable.size(); vi != 0;) {
+        --vi;
+        auto *vm = vtable[vi];
+        if (vm->IsDefaultInterfaceMethod() || vm->GetClass()->IsInterface()) {
+            continue;
+        }
+        if (vm->GetName() != ifaceMethod->GetName()) {
+            continue;
+        }
+        if (vm->GetClass() != klass) {
+            continue;
+        }
+        if (ETSProtoIsOverriddenBy(ctx, targetProto, vm->GetProtoId())) {
+            return vm;
+        }
+    }
+
+    ASSERT(inherited != nullptr);
+    return inherited;
+}
+
+static Method *FindCopiedMethodInVTable(Span<Method *> vtable, ClassLinkerContext *ctx, Method *target)
+{
+    for (size_t vi = vtable.size(); vi != 0;) {
+        --vi;
+        auto *vm = vtable[vi];
+        if (vm->GetName() == target->GetName() && vm->GetClass() == target->GetClass() &&
+            ETSProtoIsOverriddenBy(ctx, target->GetProtoId(), vm->GetProtoId())) {
+            return vm;
+        }
+    }
+    return nullptr;
+}
+
+// stub identity disambiguates CONFLICT from ORDINARY for same iface method
+static Method *FindConflictCopiedMethodInVTable(Span<Method *> vtable, ClassLinkerContext *ctx, Method *target)
+{
+    auto *stub = GetDefaultConflictMethodStub();
+    for (size_t vi = vtable.size(); vi != 0;) {
+        --vi;
+        auto *vm = vtable[vi];
+        if (vm->IsDefaultInterfaceMethod() && vm->GetName() == target->GetName() &&
+            vm->GetClass() == target->GetClass() && vm->GetCompiledEntryPoint() == stub &&
+            ETSProtoIsOverriddenBy(ctx, target->GetProtoId(), vm->GetProtoId())) {
+            return vm;
+        }
+    }
+    return nullptr;
 }
 
 static Span<ITable::Entry> CloneBaseITable(ClassLinker *classLinker, Class *base, size_t size)
@@ -78,28 +120,32 @@ static Span<ITable::Entry> CloneBaseITable(ClassLinker *classLinker, Class *base
     return itable;
 }
 
-static Span<ITable::Entry> LinearizeITable(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces)
+static PandaUnorderedMap<Class *, bool> CollectAllInterfaces(Class *base, Span<Class *> classInterfaces)
 {
-    auto allocator = classLinker->GetAllocator();
-
     PandaUnorderedMap<Class *, bool> interfaces;
 
     if (base != nullptr) {
-        auto superItable = base->GetITable().Get();
-        for (auto item : superItable) {
+        for (auto item : base->GetITable().Get()) {
+            // true means already placed in itable, false means pending
             interfaces.insert({item.GetInterface(), true});
         }
     }
 
     for (auto interface : classInterfaces) {
         ASSERT(interface != nullptr);
-        auto table = interface->GetITable().Get();
         if (interfaces.insert({interface, false}).second) {
-            for (auto item : table) {
+            for (auto item : interface->GetITable().Get()) {
                 interfaces.insert({item.GetInterface(), false});
             }
         }
     }
+    return interfaces;
+}
+
+static Span<ITable::Entry> LinearizeITable(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces)
+{
+    auto allocator = classLinker->GetAllocator();
+    auto interfaces = CollectAllInterfaces(base, classInterfaces);
 
     auto itable = CloneBaseITable(classLinker, base, interfaces.size());
     auto shift = base != nullptr ? base->GetITable().Size() : 0;
@@ -148,7 +194,7 @@ bool EtsITableBuilder::Build(ClassLinker *classLinker, Class *base, Span<Class *
     return true;
 }
 
-// CC-OFFNXT(G.FUN.01-CPP, G.FUD.05) solid logic
+// CopiedMethods already materialized, this only wires itable entries to vtable
 bool EtsITableBuilder::Resolve(Class *klass)
 {
     if (klass->IsInterface()) {
@@ -156,36 +202,69 @@ bool EtsITableBuilder::Resolve(Class *klass)
     }
     UpdateClass(klass);
 
-    auto const baseClass = klass->GetBase();
-    auto const baseITableSize = baseClass == nullptr ? 0 : baseClass->GetITable().Size();
-
-    for (size_t i = itable_.Size(); i > 0; i--) {
-        auto const entryIdx = i - 1;
-        auto const entry = &itable_[entryIdx];
-        auto const baseEntry = entryIdx < baseITableSize ? &baseClass->GetITable()[entryIdx] : nullptr;
-        auto methods = entry->GetInterface()->GetVirtualMethods();
-
-        for (size_t j = 0; j < methods.size(); j++) {
-            auto const imethod = &methods[j];
-            Method *resolved = nullptr;
-            if (baseEntry != nullptr) {
-                auto baseMethod = baseEntry->GetMethods()[j];
-                resolved =
-                    baseMethod->GetClass()->IsInterface() ? nullptr : klass->GetVTable()[baseMethod->GetVTableIndex()];
-            }
-            if (resolved == nullptr) {
-                auto opt = FindMethodInVTable(klass, imethod, errorHandler_);
-                // CC-OFFNXT(G.FUN.01-CPP, C_RULE_ID_FUNCTION_NESTING_LEVEL) solid logic
-                if (!opt.has_value()) {
-                    return false;
-                }
-                resolved = opt.value();
-            }
-            entry->GetMethods()[j] = resolved != nullptr ? resolved : imethod;
-        }
+    if (dispatches_.empty()) {
+        return true;  // inherited entries already correct
     }
 
+    auto vtable = klass->GetVTable();
+    auto *ctx = klass->GetLoadContext();
+
+    size_t dispIdx = 0;
+    for (size_t i = 0; i < itable_.Size(); i++) {
+        auto &entry = itable_[i];
+        auto methods = entry.GetInterface()->GetVirtualMethods();
+        for (size_t j = 0; j < methods.size(); j++) {
+            ASSERT(dispIdx < dispatches_.size());
+            entry.GetMethods()[j] = ResolveMethod(vtable, ctx, klass, dispatches_[dispIdx]);
+            dispIdx++;
+        }
+    }
+    ASSERT(dispIdx == dispatches_.size());
+
     return true;
+}
+
+// index-based resolve with proto-checked fallback when vtable shifted
+Method *EtsITableBuilder::ResolveMethod(Span<Method *> vtable, ClassLinkerContext *ctx, Class *klass,
+                                        const IfaceMethodDispatch &disp)
+{
+    switch (disp.kind) {
+        case IfaceMethodDispatch::Kind::CLASS_METHOD:
+            if (disp.resolveIndex < vtable.size()) {
+                auto *resolved = vtable[disp.resolveIndex];
+                if (resolved->GetName() == disp.method->GetName() && !resolved->IsDefaultInterfaceMethod() &&
+                    !resolved->GetClass()->IsInterface()) {
+                    return resolved;
+                }
+            }
+            return ResolveClassMethodInVTable(vtable, ctx, disp.method, klass);
+        case IfaceMethodDispatch::Kind::COPIED_ORDINARY: {
+            if (disp.resolveIndex < klass->GetCopiedMethods().size()) {
+                auto *resolved = &klass->GetCopiedMethods()[disp.resolveIndex];
+                if (resolved->GetName() == disp.method->GetName() && resolved->GetClass() == disp.method->GetClass()) {
+                    return resolved;
+                }
+            }
+            auto *cm = FindCopiedMethodInVTable(vtable, ctx, disp.method);
+            ASSERT(cm != nullptr);
+            return cm;
+        }
+        case IfaceMethodDispatch::Kind::COPIED_CONFLICT: {
+            if (disp.resolveIndex < klass->GetCopiedMethods().size()) {
+                auto *resolved = &klass->GetCopiedMethods()[disp.resolveIndex];
+                if (resolved->GetName() == disp.method->GetName() && resolved->GetClass() == disp.method->GetClass() &&
+                    resolved->GetCompiledEntryPoint() == GetDefaultConflictMethodStub()) {
+                    return resolved;
+                }
+            }
+            auto *conflict = FindConflictCopiedMethodInVTable(vtable, ctx, disp.method);
+            ASSERT(conflict != nullptr);
+            return conflict;
+        }
+        case IfaceMethodDispatch::Kind::AME:
+            return disp.method;
+    }
+    UNREACHABLE();
 }
 
 void EtsITableBuilder::UpdateClass(Class *klass)

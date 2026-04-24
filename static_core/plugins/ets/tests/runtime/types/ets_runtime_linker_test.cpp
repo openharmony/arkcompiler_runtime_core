@@ -189,8 +189,8 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding1)
     SuppressErrorHandler handler;
     const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
     Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
-    ASSERT_EQ(klass, nullptr);
-    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
+    ASSERT_NE(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "");
 }
 
 TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding2)
@@ -222,8 +222,8 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding2)
     SuppressErrorHandler handler;
     const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
     Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
-    ASSERT_EQ(klass, nullptr);
-    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
+    ASSERT_NE(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "");
 }
 
 TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding3)
@@ -255,8 +255,8 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding3)
     SuppressErrorHandler handler;
     const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
     Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
-    ASSERT_EQ(klass, nullptr);
-    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
+    ASSERT_NE(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "");
 }
 
 TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding4)
@@ -290,8 +290,8 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding4)
     SuppressErrorHandler handler;
     const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
     Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
-    ASSERT_EQ(klass, nullptr);
-    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
+    ASSERT_NE(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "");
 }
 
 TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverload)
@@ -398,8 +398,8 @@ TEST_F(EtsRuntimeLinkerTest, CreateUnionClassOverriding2)
     SuppressErrorHandler handler;
     const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
     Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
-    ASSERT_EQ(klass, nullptr);
-    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
+    ASSERT_NE(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "");
 }
 
 }  // namespace ark::ets::test

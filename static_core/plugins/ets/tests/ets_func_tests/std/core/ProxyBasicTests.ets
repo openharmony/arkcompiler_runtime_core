@@ -175,7 +175,9 @@ interface SIface {
     foo(): double { return 4.2 }
 }
 
-class RS implements RIface, SIface {}
+class RS implements RIface, SIface {
+    foo(): double { return 4.2 }
+}
 
 interface TIface {
     foo(x: Base): double

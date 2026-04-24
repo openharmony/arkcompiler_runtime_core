@@ -31,12 +31,35 @@ private:
 
     [[nodiscard]] bool ProcessProxyClassMethod(const MethodInfo *info) override;
 
-    std::optional<MethodInfo const *> ScanConflictingDefaultMethods(const MethodInfo *info);
+    void ResolveInterfaceMethodsHook(ITable itable, size_t superItableSize) override
+    {
+        ResolveInterfaceMethods(itable, superItableSize);
+    }
+
+    void ResolveInterfaceMethods(ITable itable, size_t superItableSize);
+    void ResolveSingleInterfaceMethod(ITable itable, Class *iface, Method &imethod, ClassLinkerContext *ctx);
+    IfaceMethodDispatch ResolveByElimination(Class *iface, Method &imethod, ClassLinkerContext *ctx, ITable itable);
+
+    struct IfaceMethodCandidate {
+        Method *method {};
+        Class *iface {};
+        uint32_t depth {};
+    };
+    ArenaVector<IfaceMethodCandidate> CollectCandidates(Class *iface, Method &imethod, ClassLinkerContext *ctx,
+                                                        ITable itable);
+    void EliminateCandidates(ArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx);
+    IfaceMethodDispatch ClassifySurvivors(ArenaVector<IfaceMethodCandidate> &survivors, Method *imethod);
+
+    struct ClassOverrideResult {
+        enum class Kind { NONE, SINGLE, CONFLICT };
+        Kind kind = Kind::NONE;
+        size_t vtableIndex = 0;
+    };
+    ClassOverrideResult HasClassMethodOverride(Method &imethod);
+    Method *FindOrCreateConflictCopiedMethod(Method *imethod);
+    size_t GetCopiedMethodIndex(Method *method);
 
     static bool IsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
-
-    static bool IsOverriddenOrOverrides(const ClassLinkerContext *ctx, Method::ProtoId const &p1,
-                                        Method::ProtoId const &p2);
 };
 
 }  // namespace ark
