@@ -14,18 +14,14 @@
  */
 
 /*---
-desc: Readonly field modification.
+desc: Direct readonly field initialization.
 assert: >-
     A variable with the readonly modifier may only be initialized once,
     its value could not be modified after initialization.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0121: Field type annotation expected."
 ---*/
 
 class A {
-  public readonly x: int = 1;
-}
-
-function main(): void {
-    let instance: A = new A();
-    instance.x = 5;
+  public readonly x;
 }

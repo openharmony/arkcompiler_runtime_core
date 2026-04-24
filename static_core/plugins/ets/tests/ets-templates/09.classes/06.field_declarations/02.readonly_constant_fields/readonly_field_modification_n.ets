@@ -14,13 +14,19 @@
  */
 
 /*---
-desc: Direct readonly field initialization.
+desc: Readonly field modification.
 assert: >-
     A variable with the readonly modifier may only be initialized once,
     its value could not be modified after initialization.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE4002: Cannot assign to a readonly field x"
 ---*/
 
 class A {
-  public readonly x;
+  public readonly x: int = 1;
+}
+
+function main(): void {
+    let instance: A = new A();
+    instance.x = 5;
 }
