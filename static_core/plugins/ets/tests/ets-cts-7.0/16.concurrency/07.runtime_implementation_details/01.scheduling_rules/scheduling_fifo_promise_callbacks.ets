@@ -15,6 +15,7 @@
 
  /*---
 desc: Promise callbacks with the same priority are scheduled in FIFO order
+tags: [no-warmup]
 ---*/
 
 async function resolved(): Promise<int> {
@@ -39,7 +40,9 @@ async function startTest(): Promise<void> {
   await c1
   await c2
 
-  arktest.assertTrue(order[0] == 1 && order[1] == 2)
+  arktest.assertEQ(order.length, 2)
+  arktest.assertEQ(order[0], 1)
+  arktest.assertEQ(order[1], 2)
 }
 
 async function main(): Promise<void> {
