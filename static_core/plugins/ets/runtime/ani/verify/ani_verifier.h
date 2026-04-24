@@ -69,6 +69,11 @@ public:
         isWorkaroundNoCrashIfInvalidUsage_ = isWorkaroundNoCrashIfInvalidUsage;
     }
 
+    void SetNativeCallStackUnwinding(bool enable)
+    {
+        nativeCallStackUnwinding_ = enable;
+    }
+
     void SetAbortHook(void (*hook)(void *data, const std::string_view message), void *data)
     {
         abortHook_ = hook;
@@ -133,6 +138,7 @@ private:
     GlobalData verifyObj_;
 
     bool isWorkaroundNoCrashIfInvalidUsage_ {false};
+    bool nativeCallStackUnwinding_ {true};
 
     NO_COPY_SEMANTIC(ANIVerifier);
     NO_MOVE_SEMANTIC(ANIVerifier);

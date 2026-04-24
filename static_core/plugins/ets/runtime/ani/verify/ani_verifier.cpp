@@ -24,6 +24,15 @@
 #include "runtime/include/stack_walker-inl.h"
 #include "runtime/include/mutator.h"
 
+#if defined(PANDA_TARGET_OHOS)
+#include <cstdlib>
+
+extern "C" int backtrace(void **buffer, int);
+extern "C" char **backtrace_symbols(void *const *buffer, int size);
+#else
+#include "libarkbase/os/stacktrace.h"
+#endif
+
 namespace ark::ets::ani::verify {
 
 VRef *ANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
@@ -348,7 +357,68 @@ void ANIVerifier::Report(const std::string_view message, bool isFatal)
 }
 
 namespace {
-PandaStringStream BuildMessageWithStackTrace(const std::string_view message)
+
+#if defined(PANDA_TARGET_OHOS)
+constexpr int NATIVE_BACKTRACE_MAX_FRAMES = 256;
+// Skip backtrace() itself and AppendNativeCallStack frames.
+constexpr int NATIVE_BACKTRACE_SKIP_FRAMES = 2;
+
+void AppendNativeFrame(PandaStringStream &ss, const char *symbol, void *pc, int frameIndex)
+{
+    ss << "    #" << frameIndex << " ";
+    if (symbol != nullptr) {
+        ss << symbol << '\n';
+        return;
+    }
+
+    std::ios_base::fmtflags flags = ss.flags();
+    ss << "pc=0x" << std::hex << reinterpret_cast<uintptr_t>(pc) << '\n';
+    ss.flags(flags);
+}
+
+__attribute__((noinline)) void AppendNativeCallStack(PandaStringStream &ss)
+{
+    void *buffer[NATIVE_BACKTRACE_MAX_FRAMES];
+    int nptrs = backtrace(buffer, NATIVE_BACKTRACE_MAX_FRAMES);
+    if (nptrs <= 0) {
+        ss << "    (native stack empty)\n";
+        return;
+    }
+
+    char **symbols = backtrace_symbols(buffer, nptrs);
+    int frameIndex = 0;
+    for (int i = NATIVE_BACKTRACE_SKIP_FRAMES; i < nptrs; ++i) {
+        // On device, musl formats the native frame including module, symbol and offset.
+        AppendNativeFrame(ss, symbols == nullptr ? nullptr : symbols[i], buffer[i], frameIndex++);
+    }
+    if (symbols != nullptr) {
+        free(symbols);  // NOLINT(cppcoreguidelines-no-malloc)
+    }
+    if (frameIndex == 0) {
+        ss << "    (native stack empty)\n";
+    }
+}
+
+#else  // !PANDA_TARGET_OHOS
+
+void AppendNativeCallStack(PandaStringStream &ss)
+{
+    PandaStringStream stackStream;
+    ark::PrintStack(ark::GetStacktrace(), stackStream);
+    PandaString line;
+    bool hasFrame = false;
+    while (std::getline(stackStream, line)) {
+        hasFrame = true;
+        ss << "    " << line << '\n';
+    }
+    if (!hasFrame) {
+        ss << "    (native stack empty)\n";
+    }
+}
+
+#endif  // PANDA_TARGET_OHOS
+
+PandaStringStream BuildMessageWithStackTrace(const std::string_view message, bool nativeCallStackUnwinding)
 {
     PandaStringStream ss;
     ss << message << "\n";
@@ -366,17 +436,27 @@ PandaStringStream BuildMessageWithStackTrace(const std::string_view message)
             ss << "\n    " << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
         }
-    } else {
+    }
+
+    if (nativeCallStackUnwinding) {
+        if (executionCtx != nullptr) {
+            ss << "\n  Native call stack:\n";
+        } else {
+            ss << "  Called from:\n";
+        }
+        AppendNativeCallStack(ss);
+    } else if (executionCtx == nullptr) {
         ss << "  Called from:\n";
-        ss << "    '[native]'";
+        ss << "    '[native]'\n";
     }
     return ss;
 }
+
 }  // namespace
 
 void ANIVerifier::Error(const std::string_view message)
 {
-    auto ss = BuildMessageWithStackTrace(message);
+    auto ss = BuildMessageWithStackTrace(message, nativeCallStackUnwinding_);
     if (errorHook_ != nullptr) {
         errorHook_(errorHookData_, ss.str());
     } else {
@@ -386,7 +466,7 @@ void ANIVerifier::Error(const std::string_view message)
 
 void ANIVerifier::Abort(const std::string_view message)
 {
-    auto ss = BuildMessageWithStackTrace(message);
+    auto ss = BuildMessageWithStackTrace(message, nativeCallStackUnwinding_);
     if (abortHook_ != nullptr) {
         abortHook_(abortHookData_, ss.str());
     } else {

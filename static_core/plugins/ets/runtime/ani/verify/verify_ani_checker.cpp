@@ -1007,13 +1007,13 @@ public:
             return {"reference is nullptr", ANIErrorSeverity::ERROR};
         }
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
+        if (envANIVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vref))) {
+            return {};
+        }
         if (!envANIVerifier->IsValidRef(vref)) {
             return {"reference not found (may be deleted, out of scope, or corrupted)", ANIErrorSeverity::FATAL};
         }
         if (envANIVerifier->IsValidRef(vref)) {
-            return {};
-        }
-        if (envANIVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vref))) {
             return {};
         }
         return {"wrong reference", ANIErrorSeverity::FATAL};
