@@ -28,6 +28,11 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
+// Forward declaration of EtsPromise
+namespace ark::ets {
+class EtsPromise;
+}  // namespace ark::ets
+
 namespace ark::ets::intrinsics::helpers {
 
 inline constexpr double MIN_RADIX = 2;
@@ -426,6 +431,8 @@ EtsString *FpToString(FpType number, int radix)
 
     return EtsString::CreateFromMUtf8(result.c_str());
 }
+
+void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise);
 
 bool SameValueZero(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b);
 

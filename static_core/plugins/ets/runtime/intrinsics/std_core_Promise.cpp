@@ -16,6 +16,7 @@
 #include "execution/stackless/stackless_job_manager.h"
 #include "intrinsics.h"
 #include "intrinsics/helpers/intrinsic_await_promise_impl.h"
+#include "intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -37,14 +38,6 @@
 #include "runtime/execution/stackless/suspendable_job.h"
 
 namespace ark::ets::intrinsics {
-
-void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)
-{
-    PandaVector<Value> args {Value(outsidePromise->GetCoreType()), Value(internalPromise->GetCoreType())};
-
-    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(ManagedThread::GetCurrent(),
-                                                                                    args.data());
-}
 
 static void EnsureCapacity(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &hpromise)
 {
@@ -96,7 +89,7 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLink
             auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
             EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
             hpromise->Unlock();
-            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+            helpers::SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
             return;
         }
         hpromise->Resolve(executionCtx, hvalue.GetPtr());
@@ -113,7 +106,7 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLink
             EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
             hpromise->ChangeStateToPendingFromLinked();
             hpromise->Unlock();
-            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+            helpers::SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
             return;
         }
         hpromise->Resolve(executionCtx, hvalue.GetPtr());
