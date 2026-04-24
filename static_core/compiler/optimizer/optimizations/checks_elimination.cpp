@@ -624,13 +624,15 @@ void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *inst, InstPair help
     ASSERT(inst->GetOpcode() == Opcode::BoundsCheck);
     auto loopChecksIt =
         std::find_if(boundsChecks_.begin(), boundsChecks_.end(), [=](auto p) { return p.first == loop; });
+    auto *instBb = inst->GetBasicBlock();
     bool dominateLoopBackEdgeOrGraphEnd = true;
     if (loop->IsRoot()) {
-        dominateLoopBackEdgeOrGraphEnd = inst->GetBasicBlock()->IsDominate(GetGraph()->GetEndBlock());
+        auto *endBlock = GetGraph()->GetEndBlock();
+        dominateLoopBackEdgeOrGraphEnd = (endBlock != nullptr) && instBb->IsDominate(endBlock);
     } else {
         // Only checks dominating every back edge are loop-global candidates.
         for (auto backEdge : loop->GetBackEdges()) {
-            if (!inst->GetBasicBlock()->IsDominate(backEdge)) {
+            if (!instBb->IsDominate(backEdge)) {
                 dominateLoopBackEdgeOrGraphEnd = false;
                 break;
             }
