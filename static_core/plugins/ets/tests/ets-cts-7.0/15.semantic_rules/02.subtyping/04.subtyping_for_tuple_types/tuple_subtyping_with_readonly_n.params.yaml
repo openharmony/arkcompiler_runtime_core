@@ -11,20 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
 cases:
-  - val:
-      - ["Color",  "Color.Red",   "0"]
-      - ["Color",  "Color.Blue",  "2"]
-      - ["Color",  "Color.Green", "\"1\""]
-    defs: |-
-      enum Color { Red, Green, Blue };
-    tags: compile-only, negative
-
-  - val:
-      - ["Color",  "Color.Red",   p1]
-      - ["Color",  "Color.Blue",  p2]
-      - ["Color",  "Color.Green", p3.toString()]
-    defs: |-
-      enum Color { Red, Green, Blue };
-    tags: compile-only, negative
+  - decl: |-
+      const a: readonly [string, boolean] = ["hello", true]
+      let b: [string] = a
+    exp_out: "Semantic error ESE0318: Type 'readonly [String, Boolean]' cannot be assigned to type '[String]'"
+  - decl: |-
+      let a: readonly [int, string, boolean] = [1, "hello", true]
+      const b: [int, string] = a
+    exp_out: "Semantic error ESE0318: Type 'readonly [Int, String, Boolean]' cannot be assigned to type '[Int, String]'"

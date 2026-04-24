@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
  /*---
 desc: >-
-    Tuple type T (P1, ..., Pn) is a subtype of type S (P1, ..., Pm),
-    where n >= m, i.e., a tuple type is a subtype of a tuple type with
-    fewer identical constituent types.
-    Check with readonly directive. If the expression type is readonly, then the target type must also be readonly.
+    If the expression type is readonly, then the target type must also be readonly. 
+    Otherwise, a compile-time error occurs.
+tags: [negative, compile-only]
+expected_out: "{{c.exp_out}}"
 ---*/
 
 function main(): void {
-    const a: readonly [string, boolean] = ["hello", true]
-    let b: readonly [string] = a
-    arktest.assertEQ(b[0], "hello")
+    {{ c.decl|indent }}
 }
+
+{% endfor %}
