@@ -184,6 +184,8 @@ export const InvalidFuncParaNames: Set<string> = new Set([
     'constructor',
 ]);
 export const InvalidSDKs: Set<string> = new Set([
-  '@ohos.taskpool'
+  '@ohos.taskpool',
+  '@arkts.collections',
+  '@ohos.worker'
 ]);
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];

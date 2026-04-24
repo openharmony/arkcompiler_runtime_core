@@ -1,4 +1,3 @@
-'use static'
 /*
  * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare interface StringIndexedObject {
-    length: number;
-}
-export declare interface NumberIndexedObject {
-}
-export declare interface MixedIndexObject {
-    version: number;
-    name: string;
+
+@Sendable
+export class testSendable{
 }
 
+@Sendable
+export type SendableFuncType = ()=>void;

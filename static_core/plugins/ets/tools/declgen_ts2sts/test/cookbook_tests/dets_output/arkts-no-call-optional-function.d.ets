@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type CallableInterface = Any;
-export type MixedInterface = Any;
-export type CallableInterface1 = Any;
+export declare interface CallableInterface {
+    method1(): void;
+}
 export declare interface OptionalMethodInterface {
     method2(): void;
-    method3(a: string, b: number): string
+    method3(a: string, b: number): string;
+}
+export declare interface MixedInterface {
+    method2(): void;
+}
+export declare interface CallableInterface1 {
 }
 export declare interface OptionalMethodInterface1 {
 }
