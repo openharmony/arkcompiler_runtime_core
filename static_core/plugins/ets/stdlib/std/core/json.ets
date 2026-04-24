@@ -2245,12 +2245,16 @@ class TypeColor {
 }
 
 class UnifiedJsonParser {
+    private static readonly INVALID_CACHE_INDEX: int = -2
+    private static readonly CACHE_NOT_FOUND: int = -1
     private source: string
     private index: int
     private length: int
     private ch: char
     private reviver?: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement
     private bigIntOpt: int = 0
+    private nextBsIdx: int = UnifiedJsonParser.INVALID_CACHE_INDEX
+    private nextQuoteIdx: int = UnifiedJsonParser.INVALID_CACHE_INDEX
 
     public constructor(source: string, options?: jsonx.ParseOptions) {
         this.source = source
@@ -2325,7 +2329,7 @@ class UnifiedJsonParser {
 
         while (true) {
             this.skipWhitespace()
-            let key = this.parseStringRaw()
+            let key = this.parseStringContent()
 
             this.skipWhitespace()
             if (this.ch != c':') {
@@ -2354,26 +2358,31 @@ class UnifiedJsonParser {
     private parseValueRaw(): JsonRecordType {
         let idx = this.index
         let ch = this.ch
-        if ((ch == c'n' || ch == c't' || ch == c'f') && idx + 4 <= this.length) {
-            let sub = this.source.substring(idx, idx + 4)
-            if (sub === "null") {
-                this.advanceBy(4)
-                return null
-            }
-            if (sub === "true") {
-                this.advanceBy(4)
-                return true
-            }
-            if (sub === "fals" && idx + 5 <= this.length && this.source.charCodeAt(idx + 4) === c'e') {
-                this.advanceBy(5)
-                return false
-            }
+        const len = this.length
+        const src = this.source
+        if (ch == c'n' && idx + 3 < len &&
+            src.charAt(idx + 1) == c'u' && src.charAt(idx + 2) == c'l' && src.charAt(idx + 3) == c'l') {
+            this.advanceBy(4)
+            return null
+        }
+        if (ch == c't' && idx + 3 < len &&
+            src.charAt(idx + 1) == c'r' && src.charAt(idx + 2) == c'u' && src.charAt(idx + 3) == c'e') {
+            this.advanceBy(4)
+            return true
+        }
+        if (ch == c'f' && idx + 4 < len &&
+            src.charAt(idx + 1) == c'a' && src.charAt(idx + 2) == c'l' &&
+            src.charAt(idx + 3) == c's' && src.charAt(idx + 4) == c'e') {
+            this.advanceBy(5)
+            return false
+        }
+        if ((ch == c'n' || ch == c't' || ch == c'f')) {
             throw new JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
         }
 
         switch (this.ch) {
             case c'"':
-                return this.parseStringRaw()
+                return this.parseStringContent()
             case c'{':
                 return this.parseObjectRaw()
             case c'[':
@@ -2484,26 +2493,31 @@ class UnifiedJsonParser {
     private parseValue(): jsonx.JsonElement {
         let idx = this.index
         let ch = this.ch
-        if ((ch == c'n' || ch == c't' || ch == c'f') && idx + 4 <= this.length) {
-            let sub = this.source.substring(idx, idx + 4)
-            if (sub === "null") {
-                this.advanceBy(4)
-                return jsonx.JsonElement.createNull()
-            }
-            if (sub === "true") {
-                this.advanceBy(4)
-                return jsonx.JsonElement.createBoolean(true)
-            }
-            if (sub === "fals" && idx + 5 <= this.length && this.source.charCodeAt(idx + 4) === c'e') {
-                this.advanceBy(5)
-                return jsonx.JsonElement.createBoolean(false)
-            }
+        const len = this.length
+        const src = this.source
+        if (ch == c'n' && idx + 3 < len &&
+            src.charAt(idx + 1) == c'u' && src.charAt(idx + 2) == c'l' && src.charAt(idx + 3) == c'l') {
+            this.advanceBy(4)
+            return jsonx.JsonElement.createNull()
+        }
+        if (ch == c't' && idx + 3 < len &&
+            src.charAt(idx + 1) == c'r' && src.charAt(idx + 2) == c'u' && src.charAt(idx + 3) == c'e') {
+            this.advanceBy(4)
+            return jsonx.JsonElement.createBoolean(true)
+        }
+        if (ch == c'f' && idx + 4 < len &&
+            src.charAt(idx + 1) == c'a' && src.charAt(idx + 2) == c'l' &&
+            src.charAt(idx + 3) == c's' && src.charAt(idx + 4) == c'e') {
+            this.advanceBy(5)
+            return jsonx.JsonElement.createBoolean(false)
+        }
+        if ((ch == c'n' || ch == c't' || ch == c'f')) {
             throw new JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
         }
 
         switch (this.ch) {
             case c'"':
-                return this.parseString()
+                return jsonx.JsonElement.createString(this.parseStringContent())
             case c'{':
                 return this.parseObject()
             case c'[':
@@ -2518,191 +2532,179 @@ class UnifiedJsonParser {
         }
     }
 
-    private parseString(): jsonx.JsonElement {
+    private parseStringContent(): string {
         this.advance()
         let start = this.index
+        const src = this.source
 
-        let closeQuote = this.source.indexOf(c'"', start)
-
-        if (closeQuote == -1) {
+        let qIdx = this.nextQuoteIdx
+        if (qIdx < start) {
+            qIdx = src.indexOf(c'"', start)
+            this.nextQuoteIdx = qIdx < 0 ? -1 : qIdx
+        }
+        if (qIdx < 0) {
             this.index = this.length
-            this.updateCh()
             throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
-        let sub = this.source.substring(start, closeQuote)
-        let backslashPos = sub.indexOf(c'\\')
-
-        if (backslashPos == -1) {
-            this.index = closeQuote + 1
-            this.updateCh()
-            return jsonx.JsonElement.createString(sub)
+        let bsIdx = this.nextBsIdx
+        if (bsIdx != -1 && bsIdx < start) {
+            bsIdx = -2
+        }
+        if (bsIdx == -2) {
+            bsIdx = src.indexOf(c'\\', start)
+            this.nextBsIdx = bsIdx < 0 ? -1 : bsIdx
+        }
+        if (bsIdx < 0 || bsIdx >= qIdx) {
+            this.advanceBy(qIdx + 1 - this.index)
+            return src.substring(start, qIdx)
         }
 
-        this.index = start
-        this.updateCh()
-        return this.parseStringWithEscape(start)
+        this.advanceBy(bsIdx - this.index)
+        return this.parseStringContentWithEscape(start)
     }
 
-    private parseStringWithEscape(start: int): jsonx.JsonElement {
-        let result = new StringBuilder()
-        let src = this.source
-        let len = this.length
-        let idx = this.index
-        let lastCopy = idx
+    private parseStringContentWithEscape(start: int): string {
+        const src = this.source
+        const len = this.length
+        let scanIdx = start
+        let decodedLen = 0
+        let quoteIdx = -1
 
-        while (idx < len) {
-            let c = src.charAt(idx)
-            if (c == c'"') {
-                if (lastCopy < idx) {
-                    result.append(src.substring(lastCopy, idx))
-                }
-                this.index = idx + 1
-                this.updateCh()
-                return jsonx.JsonElement.createString(result.toString())
+        while (scanIdx < len) {
+            const currentCh = src.charAt(scanIdx)
+            if (currentCh == c'"') {
+                quoteIdx = scanIdx
+                break
             }
-            if (c == c'\\') {
-                if (lastCopy < idx) {
-                    result.append(src.substring(lastCopy, idx))
-                }
-                idx++
-                idx = this.parseEscapeFast(result, src, idx, len)
-                lastCopy = idx
+            if (currentCh == c'\\') {
+                scanIdx++
+                const consumed = UnifiedJsonParser.getEscapeLength(src, scanIdx, len)
+                decodedLen++
+                scanIdx += consumed
                 continue
             }
-            idx++
+            decodedLen++
+            scanIdx++
         }
-        this.index = len
-        this.updateCh()
-        throw new JsonParseError(`Unterminated string at ${start}`, start, len)
-    }
 
-    private parseStringRaw(): string {
-        this.advance()
-        let start = this.index
-
-        let closeQuote = this.source.indexOf(c'"', start)
-
-        if (closeQuote == -1) {
+        if (quoteIdx < 0) {
             this.index = this.length
-            this.updateCh()
             throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
-        let sub = this.source.substring(start, closeQuote)
-        let backslashPos = sub.indexOf(c'\\')
-
-        if (backslashPos == -1) {
-            this.index = closeQuote + 1
-            this.updateCh()
-            return sub
-        }
-
-        this.index = start
-        this.updateCh()
-        return this.parseStringWithEscapeRaw(start)
-    }
-
-    private parseStringWithEscapeRaw(start: int): string {
-        let result = new StringBuilder()
-        let src = this.source
-        let len = this.length
-        let idx = this.index
-        let lastCopy = idx
-
-        while (idx < len) {
-            let c = src.charAt(idx)
-            if (c == c'"') {
-                if (lastCopy < idx) {
-                    result.append(src.substring(lastCopy, idx))
-                }
-                this.index = idx + 1
-                this.updateCh()
-                return result.toString()
-            }
-            if (c == c'\\') {
-                if (lastCopy < idx) {
-                    result.append(src.substring(lastCopy, idx))
-                }
-                idx++
-                idx = this.parseEscapeFast(result, src, idx, len)
-                lastCopy = idx
+        let decoded = new ValueArray<char>(decodedLen)
+        let readIdx = start
+        let writeIdx = 0
+        while (readIdx < quoteIdx) {
+            const currentCh = src.charAt(readIdx)
+            if (currentCh == c'\\') {
+                readIdx++
+                const consumed = UnifiedJsonParser.decodeEscape(src, readIdx, len, decoded, writeIdx)
+                writeIdx++
+                readIdx += consumed
                 continue
             }
-            idx++
+            decoded[writeIdx] = currentCh
+            writeIdx++
+            readIdx++
         }
-        this.index = len
-        this.updateCh()
-        throw new JsonParseError(`Unterminated string at ${start}`, start, len)
+
+        this.advanceBy(quoteIdx + 1 - this.index)
+        return new String(decoded)
     }
 
-    private parseEscapeFast(result: StringBuilder, src: string, idx: int, len: int): int {
-        if (idx >= len) {
-            this.index = len
-            this.updateCh()
-            throw new JsonParseError(
-                `Incomplete escape sequence at ${idx}`,
-                idx, idx)
+    private static getEscapeLength(src: string, index: int, length: int): int {
+        if (index >= length) {
+            throw new JsonParseError(`Incomplete escape sequence at ${index}`, index, index)
         }
-        let escChar = src.charAt(idx)
-        idx++
+
+        const escChar = src.charAt(index)
         switch (escChar) {
             case c'"':
-                result.append(c'"')
-                break
             case c'\\':
-                result.append(c'\\')
-                break
             case c'/':
-                result.append(c'/')
-                break
             case c'b':
-                result.append(c'\b')
-                break
             case c'f':
-                result.append(c'\f')
-                break
             case c'n':
-                result.append(c'\n')
-                break
             case c'r':
-                result.append(c'\r')
-                break
             case c't':
-                result.append(c'\t')
-                break
-            case c'u': {
-                if (idx + 4 > len) {
-                    this.index = idx
-                    this.updateCh()
-                    throw new JsonParseError(
-                        `Incomplete Unicode escape sequence at ${this.getPositionDesc()}`,
-                        idx, idx)
-                }
-                let cp: int = 0
-                for (let i = 0; i < 4; i++) {
-                    let d = src.charAt(idx + i)
-                    if (!Char.isHexDigit(d)) {
-                        this.index = idx + i
-                        this.updateCh()
-                        throw new JsonParseError(
-                            `Invalid hexadecimal digit '${d}' at ${this.getPositionDesc()}`,
-                            idx + i, idx + i + 1)
-                    }
-                    cp = cp * 16 + unhex(d)
-                }
-                idx += 4
-                result.append(String.fromCharCode(cp))
-                break
-            }
+                return 1
+            case c'u':
+                return UnifiedJsonParser.parseUnicodeEscape(src, index + 1, length) + 1
             default:
-                this.index = idx
-                this.updateCh()
-                throw new JsonParseError(
-                    `Invalid escape sequence '\\${escChar}' at ${this.getPositionDesc()}`,
-                    idx - 2, idx)
+                throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${index}`,
+                    index - 1, index + 1)
         }
-        return idx
+    }
+
+    private static decodeEscape(src: string, index: int, length: int, decoded: ValueArray<char>, decodedOffset: int): int {
+        if (index >= length) {
+            throw new JsonParseError(`Incomplete escape sequence at ${index}`, index, index)
+        }
+
+        const escChar = src.charAt(index)
+        switch (escChar) {
+            case c'"':
+                decoded[decodedOffset] = c'"'
+                return 1
+            case c'\\':
+                decoded[decodedOffset] = c'\\'
+                return 1
+            case c'/':
+                decoded[decodedOffset] = c'/'
+                return 1
+            case c'b':
+                decoded[decodedOffset] = c'\b'
+                return 1
+            case c'f':
+                decoded[decodedOffset] = c'\f'
+                return 1
+            case c'n':
+                decoded[decodedOffset] = c'\n'
+                return 1
+            case c'r':
+                decoded[decodedOffset] = c'\r'
+                return 1
+            case c't':
+                decoded[decodedOffset] = c'\t'
+                return 1
+            case c'u':
+                return UnifiedJsonParser.parseUnicodeEscape(src, index + 1, length, decoded, decodedOffset) + 1
+            default:
+                throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${index}`,
+                    index - 1, index + 1)
+        }
+    }
+
+    private static parseUnicodeEscape(src: string, index: int, length: int, decoded: ValueArray<char>,
+        decodedOffset: int): int {
+        const codePoint = UnifiedJsonParser.parseUnicodeEscapeCodePoint(src, index, length)
+        decoded[decodedOffset] = codePoint as Char
+        return 4
+    }
+
+    private static parseUnicodeEscape(src: string, index: int, length: int): int {
+        UnifiedJsonParser.parseUnicodeEscapeCodePoint(src, index, length)
+        return 4
+    }
+
+    private static parseUnicodeEscapeCodePoint(src: string, index: int, length: int): int {
+        if (index + 4 > length) {
+            throw new JsonParseError(`Incomplete Unicode escape sequence at ${index}`, index, index)
+        }
+
+        let codePoint: int = 0
+        for (let i = 0; i < 4; i++) {
+            const c = src.charAt(index + i)
+            if (!Char.isHexDigit(c)) {
+                throw new JsonParseError(`Invalid hexadecimal digit '${c}' at ${index + i}`,
+                    index + i, index + i + 1)
+            }
+            codePoint = codePoint * 16 + unhex(c)
+        }
+
+        return codePoint
     }
 
     private parseNumber(): jsonx.JsonElement {
@@ -2820,7 +2822,7 @@ class UnifiedJsonParser {
 
         while (true) {
             this.skipWhitespace()
-            let key = this.parseStringRaw()
+            let key = this.parseStringContent()
 
             this.skipWhitespace()
             if (this.ch != c':') {
@@ -2852,11 +2854,18 @@ class UnifiedJsonParser {
     }
 
     private skipWhitespace(): void {
-        while (this.index < this.length) {
-            if (this.ch != c' ' && this.ch != c'\t' && this.ch != c'\n' && this.ch != c'\r') {
+        let idx = this.index
+        const len = this.length
+        const src = this.source
+        while (idx < len) {
+            let ch = src.charAt(idx)
+            if (ch != c' ' && ch != c'\t' && ch != c'\n' && ch != c'\r') {
                 break
             }
-            this.advance()
+            idx++
+        }
+        if (idx != this.index) {
+            this.advanceBy(idx - this.index)
         }
     }
 
@@ -2877,25 +2886,30 @@ class UnifiedJsonParser {
     private parseValueToJSON(): JSONValue {
         let idx = this.index
         let ch = this.ch
-        if ((ch == c'n' || ch == c't' || ch == c'f') && idx + 4 <= this.length) {
-            let sub = this.source.substring(idx, idx + 4)
-            if (sub === "null") {
-                this.advanceBy(4)
-                return new JSONNull()
-            }
-            if (sub === "true") {
-                this.advanceBy(4)
-                return new JSONTrue()
-            }
-            if (sub === "fals" && idx + 5 <= this.length && this.source.charCodeAt(idx + 4) === c'e') {
-                this.advanceBy(5)
-                return new JSONFalse()
-            }
+        const len = this.length
+        const src = this.source
+        if (ch == c'n' && idx + 3 < len &&
+            src.charAt(idx + 1) == c'u' && src.charAt(idx + 2) == c'l' && src.charAt(idx + 3) == c'l') {
+            this.advanceBy(4)
+            return new JSONNull()
+        }
+        if (ch == c't' && idx + 3 < len &&
+            src.charAt(idx + 1) == c'r' && src.charAt(idx + 2) == c'u' && src.charAt(idx + 3) == c'e') {
+            this.advanceBy(4)
+            return new JSONTrue()
+        }
+        if (ch == c'f' && idx + 4 < len &&
+            src.charAt(idx + 1) == c'a' && src.charAt(idx + 2) == c'l' &&
+            src.charAt(idx + 3) == c's' && src.charAt(idx + 4) == c'e') {
+            this.advanceBy(5)
+            return new JSONFalse()
         }
 
         switch (this.ch) {
             case c'"':
-                return this.parseStringToJSON()
+                let jsonStr = new JSONString()
+                jsonStr.value = this.parseStringContent()
+                return jsonStr
             case c'{':
                 return this.parseObjectToJSON()
             case c'[':
@@ -2908,69 +2922,6 @@ class UnifiedJsonParser {
                 throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
         }
-    }
-
-    private parseStringToJSON(): JSONString {
-        this.advance()
-        let start = this.index
-
-        let closeQuote = this.source.indexOf(c'"', start)
-
-        if (closeQuote == -1) {
-            this.index = this.length
-            this.updateCh()
-            throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
-        }
-
-        let sub = this.source.substring(start, closeQuote)
-        let backslashPos = sub.indexOf(c'\\')
-
-        if (backslashPos == -1) {
-            this.index = closeQuote + 1
-            this.updateCh()
-            let jsonStr = new JSONString()
-            jsonStr.value = sub
-            return jsonStr
-        }
-
-        this.index = start
-        this.updateCh()
-        return this.parseStringWithEscapeToJSON(start)
-    }
-
-    private parseStringWithEscapeToJSON(start: int): JSONString {
-        let result = new StringBuilder()
-        let src = this.source
-        let len = this.length
-        let idx = this.index
-        let lastCopy = idx
-
-        while (idx < len) {
-            let c = src.charAt(idx)
-            if (c == c'"') {
-                if (lastCopy < idx) {
-                    result.append(src.substring(lastCopy, idx))
-                }
-                this.index = idx + 1
-                this.updateCh()
-                let jsonStr = new JSONString()
-                jsonStr.value = result.toString()
-                return jsonStr
-            }
-            if (c == c'\\') {
-                if (lastCopy < idx) {
-                    result.append(src.substring(lastCopy, idx))
-                }
-                idx++
-                idx = this.parseEscapeFast(result, src, idx, len)
-                lastCopy = idx
-                continue
-            }
-            idx++
-        }
-        this.index = len
-        this.updateCh()
-        throw new JsonParseError(`Unterminated string at ${start}`, start, len)
     }
 
     private parseNumberToJSON(): JSONNumber {
@@ -3058,7 +3009,7 @@ class UnifiedJsonParser {
         while (this.ch != c'}') {
             this.skipWhitespace()
 
-            let key = this.parseStringRaw()
+            let key = this.parseStringContent()
 
             this.skipWhitespace()
             if (this.ch != c':') {
