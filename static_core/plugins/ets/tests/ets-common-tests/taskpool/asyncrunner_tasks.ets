@@ -26,15 +26,7 @@ function max(a: int, b: int): int {
 }
 
 function launchImpl(func: () => Any): Promise<Any> {
-    const job: Job<Any> = launch(func);
-    return new Promise<Any>((resolve, reject) => {
-        try {
-            let res = job.Await();
-            resolve(res);
-        } catch (e) {
-            reject(e as Error);
-        }
-    });
+    return launch(func);
 }
 
 async function delay(ms: int) {
@@ -213,10 +205,10 @@ async function cancelExecutingTaskTest() {
 async function cancelExecutedTaskTest() {
     let task = new taskpool.Task(returnAbc);
     let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
-    arktest.expectError(() => {
+    arktest.expectError(() => { waitForCompletion<Any>(async () => {
         await runner.execute(task);
         taskpool.cancel(task);
-    }, new Error('taskpool:: asyncRunner task has been executed'));
+    }); }, new Error('taskpool:: asyncRunner task has been executed'));
     let t1 = new taskpool.Task(sum, 10, 20);
     let res1 = await runner.execute(t1);
     arktest.assertEQ(res1, 30);
@@ -361,9 +353,9 @@ async function testEdgeConstructor(): Promise<void> {
 
 
     // waitingCapacity < 0
-    arktest.expectError(() => { 
-        new taskpool.AsyncRunner("test2", 2, -2); 
-    }, new Error('taskpool:: watingCapacity must be a non-negative number'));
+    arktest.expectError(() => {
+        new taskpool.AsyncRunner("test2", 2, -2);
+    }, new Error('taskpool:: waitingCapacity must be a non-negative number'));
 }
 
 async function testAsyncRunnerExecuteOrder() : Promise<void>{
@@ -372,7 +364,7 @@ async function testAsyncRunnerExecuteOrder() : Promise<void>{
     let isRunning = new Event();
     let result: int[] = [];
     for(let i : int = 0; i < 10; i++){
-        let task = new taskpool.Task(`task_${i}`, () => {
+        let task = new taskpool.Task(`task_${i}`, async () => {
             await delay(30);
             result.push(i);
             count++;

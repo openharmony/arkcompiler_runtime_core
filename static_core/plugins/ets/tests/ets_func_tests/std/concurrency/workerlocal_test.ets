@@ -89,7 +89,7 @@ function testWithMultiInit() {
     }
 }
 
-function testWithworkerInit(){
+async function testWithworkerInit(): Promise<void>{
     let initCount = 0;
     let wl =new WorkerLocal<TestObject>(() =>{
         initCount++;
@@ -97,13 +97,12 @@ function testWithworkerInit(){
     });
     let eaw = new EAWorker();
     eaw.start();
-    let job = eaw.run<void>(()=>{
+    await eaw.run<void>(()=>{
         let v1 = wl.get();
         arktest.assertEQ(v1.a1, 'a0');
         let v2 = wl.get();
         arktest.assertEQ(v2, v1);
     });
-    job.Await();
     arktest.assertEQ(initCount, 1);
     eaw.quit();
 }
@@ -206,7 +205,7 @@ async function main(): Promise<int> {
     testSuite.addAsyncTest('testInit', testInit);
     testSuite.addAsyncTest('testWithoutInit', testWithoutInit);
     testSuite.addTest('testWithMultiInit', testWithMultiInit);
-    testSuite.addTest('testWithworkerInit', testWithworkerInit);
+    testSuite.addAsyncTest('testWithworkerInit', testWithworkerInit);
     testSuite.addAsyncTest('testConcurrentReads', testConcurrentReads);
     testSuite.addAsyncTest('testConcurrentWrites', testConcurrentWrites);
     testSuite.addAsyncTest('testMultipleInstances', testMultipleInstances);

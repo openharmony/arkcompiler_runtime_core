@@ -43,14 +43,8 @@ function testUnhandledRejectionObserverRegistration(): void {
     p2.catch(error => {
 
     });
-}
-
-function Failing(): string {
-    throw Error('get unhandled job rejection');
-}
-
-function catchFailing(): string {
-    throw Error('catch launch rejection');
+    Coroutine.Schedule();
+    StdProcess.off('unhandledPromiseRejection');
 }
 
 function testAllUnhandledJobRejection(): void {
@@ -77,14 +71,6 @@ function testAllUnhandledJobRejection(): void {
     StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer2);
     StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
 
-    let g = launch(Failing);
-
-    try {
-        launch(catchFailing).Await();
-    } catch(e) {
-
-    }
-
     let job1 = new CompletableJob<int>();
     job1.fail(new Error('get unhandled job rejection'));
 
@@ -95,10 +81,14 @@ function testAllUnhandledJobRejection(): void {
     } catch (e) {
 
     }
+
+    CoroutineExtras.dumpUnhandledFailedJobs();
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
 }
 
 async function main(): Promise<int> {
     StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
+    StdProcess.off('unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_event');
     testSuite.addTest('testUnhandledRejectionObserverRegistration', testUnhandledRejectionObserverRegistration);
     testSuite.addTest('testAllUnhandledJobRejection', testAllUnhandledJobRejection);

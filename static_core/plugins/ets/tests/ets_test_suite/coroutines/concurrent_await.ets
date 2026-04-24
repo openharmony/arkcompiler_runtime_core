@@ -15,8 +15,6 @@
 
 import {AtomicFlag} from "std/debug/concurrency"
 import { launch } from "std/concurrency"
-import { Job } from "std/core"
-
 class Event {
     public Wait() {
         while (this.flag.get() != true) {
@@ -38,27 +36,25 @@ function foo() : int {
     return 42;
 }
 
-function bar(p: Job<int>) : int {
-    return p.Await();
+async function bar(p: Promise<int>): Promise<int> {
+    return await p;
 }
 
-function testConcurrentAwait(): void {
+async function testConcurrentAwait(): Promise<void> {
     let p1 = launch(foo);
     for (let i = 0; i < 2; ++i) {
-        let p2 = launch<int>() {
-            return bar(p1)
-        };
+        let p2 = bar(p1);
     }
     // NOTE(panferovi): for more determinism we need to make sure
     // that bar coroutines are waiting for its awakening
     event.Fire();
-    let result = p1.Await();
+    let result = await p1;
     arktest.assertEQ(result, 42);
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.concurrent_await');
-    testSuite.addTest('testConcurrentAwait', testConcurrentAwait);
+    testSuite.addAsyncTest('testConcurrentAwait', testConcurrentAwait);
     let res = await testSuite.runAsync();
     return res;
 }

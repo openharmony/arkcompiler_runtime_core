@@ -62,7 +62,7 @@ class NativeAsyncWorkHelper {
         let p = launch() {
            NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
         }
-        p.Await();
+        await p;
         NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal(completeCb, data, true);
     }
     static native asyncWorkNativeInvoke(nativeCb: long, data: long, needNativeScope: boolean): void;

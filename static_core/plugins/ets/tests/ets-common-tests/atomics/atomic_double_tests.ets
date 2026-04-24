@@ -72,7 +72,7 @@ function concurrentLoadStoreTest() {
         // wait here
     }
     arktest.assertEQ(count, 1);
-    worker.join();
+    worker.quit();
 }
 
 // Checks correctness of visibility
@@ -80,7 +80,7 @@ function concurrentExchangeTest() {
     let atomicDouble = new AtomicDouble(1);
     let count : double = 0;
 
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     worker1.start();
     worker1.run<void>(() => {
         count = 1;
@@ -102,8 +102,8 @@ function concurrentExchangeTest() {
         // wait here
     }
     arktest.assertEQ(count, 2);
-    worker1.join();
-    worker2.join();
+    worker1.quit();
+    worker2.quit();
 }
 
 function concurrentCompareAndSwapTest() {
@@ -131,8 +131,8 @@ function concurrentCompareAndSwapTest() {
         }
     });
 
-    worker1.join().Await();
-    worker2.join().Await();
+    worker1.quit();
+    worker2.quit();
     
     arktest.assertTrue((w1 && !w2) || (!w1 && w2));
 }
@@ -152,8 +152,8 @@ function concurrentFetchAdd() {
     worker1.run<void>(workerBody);
     worker2.run<void>(workerBody);
 
-    worker1.join().Await();
-    worker2.join().Await();
+    worker1.quit();
+    worker2.quit();
     
     arktest.assertEQ(atomicDouble.load(), 20000);
 }
@@ -173,8 +173,8 @@ function concurrentFetchSub() {
     worker1.run<void>(workerBody);
     worker2.run<void>(workerBody);
 
-    worker1.join().Await();
-    worker2.join().Await();
+    worker1.quit();
+    worker2.quit();
     
     arktest.assertEQ(atomicDouble.load(), 0);
 }

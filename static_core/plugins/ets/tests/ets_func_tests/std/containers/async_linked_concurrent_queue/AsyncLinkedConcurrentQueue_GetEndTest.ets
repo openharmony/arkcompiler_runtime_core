@@ -68,7 +68,7 @@ async function getEndConcurrentTest003(): Promise<void> {
         await queue.push(new QueueValue(i));
     }
 
-    observer.Await();
+    await observer;
     arktest.assertFalse(observedDecrease.load());
     arktest.assertEQ(queue.getEnd()!.value, stressNum - 1);
 }

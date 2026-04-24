@@ -10140,18 +10140,18 @@ intrinsics:
 # std.concurrency #
 ###################
 
-  - name: EtsLaunchInternalJobNative
+  - name: EtsLaunchInternalPromiseNative
     space: ets
     class_name: std.concurrency.ETSGLOBAL
-    method_name: launchInternalJobNative
+    method_name: launchInternalPromiseNative
     static: true
     signature:
-      ret: std.core.Job
+      ret: std.core.Promise
       args:
         - std.core.Function0
         - u1
         - i64[]
-    impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
+    impl: ark::ets::intrinsics::EtsLaunchInternalPromiseNative
 
   - name: EtsLaunchOnTheSameWorker
     space: ets

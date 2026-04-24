@@ -60,7 +60,7 @@ function testMessageHandlerCreation() {
     }, eaw);
     
     arktest.assertEQ(handler.getWorker(), eaw);
-    eaw.join();
+    eaw.quit();
 }
 
 function testMessageHandlerWithoutWorker() {
@@ -87,7 +87,7 @@ function testSendEmptyMessage() {
     handler.sendEmptyMessage(MessageType.EMPTY);
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.join();
+    eaw.quit();
 }
 
 function testSendStringMessage() {
@@ -106,7 +106,7 @@ function testSendStringMessage() {
     handler.sendMessage(new concurrency.Message(MessageType.STRING, 'test', handler));
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.join();
+    eaw.quit();
 }
 
 function testSendNumberMessage() {
@@ -125,7 +125,7 @@ function testSendNumberMessage() {
     handler.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler));
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.join();
+    eaw.quit();
 }
 
 function testSendBooleanMessage() {
@@ -144,7 +144,7 @@ function testSendBooleanMessage() {
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.join();
+    eaw.quit();
 }
 
 
@@ -182,7 +182,7 @@ function testHasMessages() {
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
     waiter1.fire();
     waiter2.wait();
-    eaw.join();
+    eaw.quit();
 }
 
 function testMessageCounting() {
@@ -223,7 +223,7 @@ function testMessageCounting() {
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
     
     event.wait();
-    eaw.join();
+    eaw.quit();
 }
 
 
@@ -250,7 +250,7 @@ function testMessageCallback() {
     
     event.wait();
     arktest.assertEQ(callbackExecuted, true);
-    eaw.join();
+    eaw.quit();
 }
 
 
@@ -355,7 +355,7 @@ function testHasMessage2() {
 
     handler.sendMessage(new concurrency.Message(callback, handler));
     waiter.wait();
-    eaw.join();
+    eaw.quit();
 }
 
 function testMessageHandlerMismatch() {
@@ -370,7 +370,7 @@ function testMessageHandlerMismatch() {
 
     let msg = new concurrency.Message(MessageType.STRING, 'test', handler);
     arktest.assertEQ(handler2.sendMessage(msg), false);
-    eaw.join();
+    eaw.quit();
 }
 
 function testDoubleRemoveMessage() {

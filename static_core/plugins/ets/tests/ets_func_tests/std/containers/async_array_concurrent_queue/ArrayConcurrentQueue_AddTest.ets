@@ -46,10 +46,10 @@ async function main(): Promise<int> {
         let job2 = launch(queueIntAddData);
         let job3 = launch(queueIntAddData);
         let job4 = launch(queueIntAddData);
-        job1.Await();
-        job2.Await();
-        job3.Await();
-        job4.Await();
+        await job1;
+        await job2;
+        await job3;
+        await job4;
         arktest.assertFalse(queueIntPopQueue.isEmpty());
         for (let i: int = 0; i < 4; ++i) {
             let result = await queueIntPopQueue.pop();

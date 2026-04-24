@@ -53,26 +53,26 @@ function main(): int {
         arktest.assertEQ(iterValue.next().value, undefined);
     });
     // Multiple Threads Test
-    ConcurrentSetTestsuite.addTest("$_iterator&AddTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("$_iterator&AddTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch(addBack);
         let p2 = launch($_iteratorAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("$_iterator&DeteleTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("$_iterator&DeteleTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(deleteAll);
         let p2 = launch($_iteratorAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("$_iterator&DeteleTest002", () =>
@@ -84,15 +84,15 @@ function main(): int {
         $_iteratorAll();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
-    ConcurrentSetTestsuite.addTest("$_iterator&ClearTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("$_iterator&ClearTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch($_iteratorAll);
         let p2 = launch(clearTest);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
 

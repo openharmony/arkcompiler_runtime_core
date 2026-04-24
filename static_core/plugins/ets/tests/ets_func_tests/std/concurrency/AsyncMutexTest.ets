@@ -19,7 +19,7 @@ async function asyncMutexStressTest() {
     const workload = 5;
 
     let count: int = 0;
-    let jobs = Array.create<Job<void> | undefined>(tasks_counter, undefined);
+    let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
@@ -36,8 +36,8 @@ async function asyncMutexStressTest() {
             })().awaitSync()
         };
     }
-    for (let job of jobs) { 
-        job!.Await();
+    for (let job of jobs) {
+        await job!;
     }
     arktest.assertEQ(count, tasks_counter * workload);
 }
@@ -52,7 +52,7 @@ async function asyncMutexHardUnlockTest() {
     let mutex = new concurrency.stackless.AsyncMutex()
     const tasks_counter = 10;
 
-    let jobs = Array.create<Job<void> | undefined>(tasks_counter, undefined);
+    let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
@@ -64,8 +64,8 @@ async function asyncMutexHardUnlockTest() {
         };
     }
 
-    for (let job of jobs) { 
-        job!.Await();
+    for (let job of jobs) {
+        await job!;
     }
 
     arktest.expectError(() => { mutex.unlock(); }, new IllegalLockStateError());
@@ -77,7 +77,7 @@ async function asyncMutexExclusiveAcquireTest() {
     let flag = false;
 
     const tasks_counter = 5;
-    let jobs = Array.create<Job<void> | undefined>(tasks_counter, undefined);
+    let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
@@ -94,8 +94,8 @@ async function asyncMutexExclusiveAcquireTest() {
             })().awaitSync()
         };
     }
-    for (let job of jobs) { 
-        job!.Await();
+    for (let job of jobs) {
+        await job!;
     }
 }
 

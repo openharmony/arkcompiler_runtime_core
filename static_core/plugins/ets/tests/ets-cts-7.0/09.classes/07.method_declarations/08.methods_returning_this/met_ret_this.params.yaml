@@ -513,7 +513,6 @@ cases:
     - decl: |-
           // calling method returning 'this' from coroutine
           import { launch } from "std/concurrency"
-          import { Job } from "std/concurrency"
           class A {
               fld: int
               foo(): this {
@@ -524,13 +523,13 @@ cases:
                   return this
               }
 
-              bar(): Job<this> {
+              bar(): Promise<this> {
                   return launch(this.foo().foo().foo)
               }
           }
 
           async function test(a: A) {
-              arktest.assertEQ((a.bar().Await()), a)
+              arktest.assertEQ((await a.bar()), a)
               arktest.assertEQ(a.fld, 3)
           }
       async: true

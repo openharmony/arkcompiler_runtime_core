@@ -14,7 +14,7 @@
  */
 
 import { launch } from "std/concurrency"
-import { Job } from "std/core"
+
 
 let pressureFlag: number = 0;
 
@@ -24,11 +24,11 @@ function main(): int {
 
     let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapPressureTest");
 
-    concurrentHashMapTestsuite.addTest("setPressureTest_001", () =>
+    concurrentHashMapTestsuite.addAsyncTest("setPressureTest_001", async () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
-        let jobs = Array.create<Job<void> | undefined>(100, undefined);
+        let jobs = Array.create<Promise<void> | undefined>(100, undefined);
         pressureFlag = 0;
         for (let i: int = 0; i < 100; i++) {
             let num = pressureFlag;
@@ -38,7 +38,7 @@ function main(): int {
             pressureFlag += 1;
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i]!.Await();
+            await jobs[i]!!;
         }
         arktest.assertEQ(concurrentHashMapOne.size, 100);
         for (let i: int = 0; i < 100; i++) {

@@ -39,7 +39,7 @@ function main(): int {
     LinkedBlockingQueueTestsuite.addTest("getEndEmpty", getEndEmptyTest)
     LinkedBlockingQueueTestsuite.addTest("getEndOne", getEndOneTest)
     LinkedBlockingQueueTestsuite.addTest("getEndCapacity", getEndCapacityTest)
-    LinkedBlockingQueueTestsuite.addTest("getEndConcurrent", getEndConcurrentTest)
+    LinkedBlockingQueueTestsuite.addAsyncTest("getEndConcurrent", async () => { await getEndConcurrentTest(); })
     return LinkedBlockingQueueTestsuite.run()
 }
 
@@ -100,20 +100,20 @@ function getEndCapacityTest() {
 const JOB_COUNT = 3
 const PUSH_COUNT_PER_JOB = 5
 const TOTAL_CALLBACKS = JOB_COUNT * PUSH_COUNT_PER_JOB
-function getEndConcurrentTest() {
+async function getEndConcurrentTest() {
     let testBlockingQueue = new containers.LinkedBlockingQueue<int>(TOTAL_CALLBACKS)
     let flag: AtomicFlag = new AtomicFlag(false)
     let lock = new AsyncLock()
     let completed = new AtomicInt(0)
     let allDone = new Event()
-    let jobs: Job<void>[] = []
+    let jobs: Promise<void>[] = []
     for (let i = 0; i < JOB_COUNT; i++) {
         jobs.push(launch() {
             getEndConcurrent(testBlockingQueue, lock, flag, completed, allDone);
         })
     }
     for (let i = 0; i < JOB_COUNT; i++) {
-        jobs[i].Await()
+        await jobs[i]
     }
     allDone.wait()
     if (flag.get()) {

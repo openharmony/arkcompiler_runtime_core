@@ -43,8 +43,10 @@ function asyncCall(): boolean {
 
 // LaunchCallMethod
 function launchCall(): boolean {
-    let p = launch(call);
-    return p.Await();
+    return waitForCompletion<boolean>(async (): Promise<boolean> => {
+        let p = launch(call);
+        return await p;
+    });
 }
 
 // ConcurrentWorkerAndRuntimeDestroy
@@ -125,14 +127,16 @@ function scheduleAJCoroutine(): boolean {
     return counter == 12 && call();
 }
 
-function launchCallWithoutAwait(): Job<boolean> {
-    return launch(call) as Job<boolean>;
+function launchCallWithoutAwait(): Promise<boolean> {
+    return launch(call) as Promise<boolean>;
 }
 
 // recursive launch
 function recursiveLaunch(): boolean {
-    let res : Job<Job<boolean>> = launch(launchCallWithoutAwait) as Job<Job<boolean>>;
-    return res.Await().Await();
+    return waitForCompletion<boolean>(async (): Promise<boolean> => {
+        let res : Promise<Promise<boolean>> = launch(launchCallWithoutAwait) as Promise<Promise<boolean>>;
+        return await (await res);
+    });
 }
 
 async function callAsync(): Promise<boolean> {
@@ -154,17 +158,17 @@ function launchAsyncFunctions(): Promise<boolean> {
 }
 
 function ACoroutineCallAsyncFunctions(): boolean {
-    let res : Job<Promise<boolean>> = launch(launchAsyncFunctions) as Job<Promise<boolean>>
-    return res.Await().awaitSync();
-}
+    let res : Promise<Promise<boolean>> = launch(launchAsyncFunctions) as Promise<Promise<boolean>>
+    return res.awaitSync().awaitSync();
 
-async function asyncFunctionLaunchCall() {
-    return launch(call);
+}
+function asyncFunctionLaunchCall(): Promise<boolean> {
+    return launch(call) as Promise<boolean>;
 }
 
 function asyncFunctionLaunchACoroutine(): boolean {
-    let res : Promise<Job<boolean>> = asyncFunctionLaunchCall();
-    return res.awaitSync().Await();
+    let res : Promise<boolean> = asyncFunctionLaunchCall();
+    return res.awaitSync();
 }
 
 // oom
@@ -193,17 +197,19 @@ function testOOM(): boolean {
 
 
 function test_stack_overflow(): boolean {
-    try {
-        launch(coro_stack_overflow).Await();
-        console.println("No exceptions thrown by coro_stack_overflow() but should be!")
-        return false;
-    } catch (e) {
-        if (!(e instanceof StackOverflowError)) {
-            console.println("Expected StackOverflowError but another exception has been thrown!");
+    return waitForCompletion<boolean>(async (): Promise<boolean> => {
+        try {
+            await launch(coro_stack_overflow);
+            console.println("No exceptions thrown by coro_stack_overflow() but should be!");
             return false;
+        } catch (e) {
+            if (!(e instanceof StackOverflowError)) {
+                console.println("Expected StackOverflowError but another exception has been thrown!");
+                return false;
+            }
+            return true;
         }
-        return true;
-    }
+    });
 }
 
 function stack_eater(): void {
@@ -220,18 +226,20 @@ function coro_error(): Object {
 }
 
 function test_error(): boolean {
-    try {
-        let res = launch(coro_error);
-        res.Await();
-        console.println("No exceptions thrown by coro_error() but should be!")
-        return false;
-    } catch (e) {
-        if (!(e instanceof Error)) {
-            console.println("Expected Error but another exception has been thrown!");
+    return waitForCompletion<boolean>(async (): Promise<boolean> => {
+        try {
+            let res = launch(coro_error);
+            await res;
+            console.println("No exceptions thrown by coro_error() but should be!");
             return false;
+        } catch (e) {
+            if (!(e instanceof Error)) {
+                console.println("Expected Error but another exception has been thrown!");
+                return false;
+            }
+            return true;
         }
-        return true;
-    }
+    });
 }
 
 // throw exceptions

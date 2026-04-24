@@ -15,7 +15,6 @@
 
 package std.core;
 
-import { launch } from "std/concurrency";
 import { InteropSerializeHelper } from "std/interop";
 
 type Task = () => void;
@@ -210,7 +209,8 @@ export class EAWorker {
      * Waits for pending tasks to complete before stopping the worker
      */
     public quit(): void {
-        this.join().Await();
+        let p = this.join();
+        p.awaitSync();
     }
 
     /**
@@ -255,27 +255,27 @@ export class EAWorker {
      *
      * @param { Function } task function to execute
      * @param { ...Any } args argumnents for task to execute with
-     * @returns { Job<R> } Job that represents the task
+     * @returns { Promise<R> } Promise that represents the task
      */
-    public run<R> (task: Function, ...args: FixedArray<Any>): Job<R> {
+    public run<R> (task: Function, ...args: FixedArray<Any>): Promise<R> {
         if (!this.loopStarted.get()) {
             throw new Error('EAWorker:: Cannot run task when worker is not started');
         }
         return this.worker.run<R>(task, ...args);
     }
 
-    public static postToMain<R>(coroFun: Function, launchParams: LaunchParams, ...args: FixedArray<Any>) : Job<R> {
+    public static postToMain<R>(coroFun: Function, launchParams: LaunchParams, ...args: FixedArray<Any>) : Promise<R> {
         return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag);
     }
 
-    public static postToMain<R>(coroFun: Function, ...args: FixedArray<Any>) : Job<R> {
+    public static postToMain<R>(coroFun: Function, ...args: FixedArray<Any>) : Promise<R> {
         return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, false);
     }
     /**
      * Post task to main worker
      * Note: it has no effect if EAWorker was stoped
      */
-    private static postTaskToMain<R>(coroFun: Function, args: FixedArray<Any>, abort: boolean) : Job<R> {
+    private static postTaskToMain<R>(coroFun: Function, args: FixedArray<Any>, abort: boolean) : Promise<R> {
         let wrappedTask = (): R => {
             return coroFun.unsafeCall(...args) as R;
         }
@@ -290,17 +290,17 @@ export class EAWorker {
      * Stop EAWorker
      * This method closes run queue and detaches worker
      * Note: it's required to call join for EAWorker
-     * @returns { Job<R> } Job that represents the task
+     * @returns { Promise<void> } Promise that resolves when the worker has joined
      */
-    public join(): Job<void> {
+    public join(): Promise<void> {
         if (!this.loopStarted.get()) {
              throw new Error('EAWorker:: Cannot stop worker before start');
         }
         let finalTask = () => { EAWorker.getWorkers().delete(this.worker.getWorkerId()); };
-        let joinJob = this.worker.join(finalTask);
+        let joinPromise = this.worker.join(finalTask);
         this.loopStarted.set(false);
         this.loopJoined.set(true);
-        return joinJob;
+        return joinPromise;
     }
 
     /**
@@ -348,13 +348,13 @@ export abstract class InternalWorker {
         this.workerId = workerId;
     }
 
-    run<R>(task: Function, ...args: FixedArray<Any>): Job<R> {
+    run<R>(task: Function, ...args: FixedArray<Any>): Promise<R> {
         return this.runImpl<R>((): R => { return task.unsafeCall(...args) as R; });
     }
 
     abstract start(initialTask: Task): void;
 
-    abstract join(finalTask: Task): Job<void>;
+    abstract join(finalTask: Task): Promise<void>;
 
     abstract handleCreateInteropEnvError(): void;
 
@@ -393,7 +393,7 @@ export abstract class InternalWorker {
         return wrappedTask;
     }
 
-    protected runImpl<R>(task: () => R): Job<R> {
+    protected runImpl<R>(task: () => R): Promise<R> {
         let wGroup: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [this.workerId])};
         return launch(wGroup, this.wrapTask<R>(task))
     }
@@ -433,30 +433,30 @@ class InteropWorker extends InternalWorker {
         }
     }
 
-    public override run<R>(task: Function, ...args: FixedArray<Any>): Job<R> {
+    public override run<R>(task: Function, ...args: FixedArray<Any>): Promise<R> {
         if (this.interopInitialized.get()) {
             return this.runInternal<R>(task, args);
         }
 
-        let completer = new CompletableJob<R>();
-        let pendingTask: Task = () => {
-            try { 
-                let serializeHelper = new InteropSerializeHelper(args);
-                let res = task.unsafeCall(...serializeHelper.deserialize()) as R;
-                completer.finish(res);
-            } catch (e) {
-                completer.fail(e);
+        return new Promise<R>((resolve: (value: R) => void, reject: (error: Error) => void) => {
+            let pendingTask: Task = () => {
+                try {
+                    let serializeHelper = new InteropSerializeHelper(args);
+                    let res = task.unsafeCall(...serializeHelper.deserialize()) as R;
+                    resolve(res);
+                } catch (e) {
+                    reject(e as Error);
+                }
             }
-        }
-        let failJob: ErrorHandlerType = (err: Error) => {
-            completer.fail(err);
-        }
-        let deferredTask = new PendingTaskHandler(failJob, pendingTask);
-        this.pendingTasks.add(deferredTask);
-        return completer;
+            let failJob: ErrorHandlerType = (err: Error) => {
+                reject(err);
+            }
+            let deferredTask = new PendingTaskHandler(failJob, pendingTask);
+            this.pendingTasks.add(deferredTask);
+        });
     }
 
-    private runInternal<R>(task: Function, args: FixedArray<Any>): Job<R> {
+    private runInternal<R>(task: Function, args: FixedArray<Any>): Promise<R> {
         let serializeHelper = new InteropSerializeHelper(args);
         let wrappedTask = (): R => {
             return task.unsafeCall(...serializeHelper.deserialize()) as R;
@@ -464,14 +464,18 @@ class InteropWorker extends InternalWorker {
         return super.runImpl<R>(wrappedTask);
     }
 
-    public join(finalTask: Task): Job<void> {
-        let joinJob = new CompletableJob<void>();
-        let finTask = () => {
-            finalTask();
-            joinJob.finish();
-        }
-        InternalWorker.join(this.workerId, finTask as Object);
-        return joinJob;
+    public join(finalTask: Task): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            let finTask = () => {
+                try {
+                    finalTask();
+                    resolve(undefined);
+                } catch (e) {
+                    reject(e as Error);
+                }
+            }
+            InternalWorker.join(this.workerId, finTask as Object);
+        });
     }
 
     handleCreateInteropEnvError() {
@@ -519,10 +523,10 @@ class StaticWorker extends InternalWorker {
         this.workerId = ExclusiveLauncher.elaunch(initTask, this.getName(), false);
     }
 
-    public join(finalTask: Task): Job<void> {
-        let joinJob = this.runImpl(finalTask);
+    public join(finalTask: Task): Promise<void> {
+        let joinPromise = this.runImpl(finalTask);
         this.joiningEvent.fire();
-        return joinJob;
+        return joinPromise;
     }
 
     handleCreateInteropEnvError() {
@@ -545,7 +549,7 @@ export class MainWorker extends InternalWorker {
         throw new Error('EAWorker:: Main worker cannot be started');
     }
 
-    join(finalTask: Task): Job<void> {
+    join(finalTask: Task): Promise<void> {
         throw new Error('EAWorker:: Main worker cannot be stopped');
     }
 

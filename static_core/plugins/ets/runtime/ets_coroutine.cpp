@@ -170,7 +170,9 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
     if (HasPendingException()) {
         // An exception may occur while boxin primitive return value in GetReturnValueAsObject
         auto *exc = GetException();
-        ClearException();
+        if (!GetJob()->HasAbortFlag()) {
+            ClearException();
+        }
         LOG(INFO, COROUTINES) << "Coroutine " << GetName()
                               << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
         intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc), ToEtsBoolean(false));

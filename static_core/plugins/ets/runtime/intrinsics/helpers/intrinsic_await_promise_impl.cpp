@@ -20,9 +20,9 @@
 #include "plugins/ets/runtime/types/ets_async_context.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/execution/job_execution_context.h"
+#include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "runtime/execution/stackless/stackless_job_manager.h"
 #include "runtime/execution/stackless/suspendable_job.h"
-#include "plugins/ets/runtime/types/ets_async_context-inl.h"
 
 namespace ark::ets::intrinsics::helpers {
 

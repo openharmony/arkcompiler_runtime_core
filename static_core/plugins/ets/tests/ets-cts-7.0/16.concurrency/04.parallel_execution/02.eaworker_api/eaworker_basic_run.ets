@@ -24,9 +24,9 @@ async function startTest() {
   const ea = new EAWorker()
   ea.start()
 
-  let result: int = ea.run<int>(() => {
+  let result: int = await ea.run<int>(() => {
     return 42
-  }).Await()
+  })
 
   arktest.assertEQ(42, result)
 

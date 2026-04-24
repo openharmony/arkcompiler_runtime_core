@@ -22,7 +22,6 @@ tags: [no-warmup]
 ---*/
 
 import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-import { Job } from "std/core"
 
 function computeOnWorker(): int {
     return 99;
@@ -39,21 +38,21 @@ function main(): int {
         workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
     };
 
-    suite.addTest("Resolve from a different worker thread", () => {
-        let job: Job<int> = launch<int>(params, computeOnWorker);
-        let result: int = job.Await();
+    suite.addAsyncTest("Resolve from a different worker thread", async (): Promise<void> => {
+        let job: Promise<int> = launch<int>(params, computeOnWorker);
+        let result: int = await job;
         arktest.assertEQ(result, 99);
     });
 
-    suite.addTest("Reject from a different worker thread", () => {
-        let job: Job<int> = launch<int>(params, failOnWorker);
-        try {
-            job.Await();
-            arktest.assertTrue(false, "Should not reach here");
-        } catch (e) {
-            let err = e as Error;
-            arktest.assertEQ(err.message, "cross-worker rejection");
-        }
+    suite.addAsyncTest("Reject from a different worker thread", async (): Promise<void> => {
+        let job: Promise<int> = launch<int>(params, failOnWorker);
+        let errorMessage: string = "";
+        let result: int = await job.catch((e: Error): int => {
+            errorMessage = e.message;
+            return -1;
+        });
+        arktest.assertEQ(result, -1);
+        arktest.assertEQ(errorMessage, "cross-worker rejection");
     });
 
     return suite.run();

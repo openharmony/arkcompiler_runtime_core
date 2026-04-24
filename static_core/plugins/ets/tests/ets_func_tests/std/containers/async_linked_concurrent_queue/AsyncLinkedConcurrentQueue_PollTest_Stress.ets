@@ -33,14 +33,14 @@ async function threadsPollStressTest001(): Promise<void> {
     for (let i = 0; i < stressNum; i++) {
         queue.add(new QueueValue(i));
     }
-    let jobs = Array.create<Job<void> | undefined>(stressNum, undefined);
+    let jobs = Array.create<Promise<void> | undefined>(stressNum, undefined);
     for (let i = 0; i < stressNum; i++) {
         jobs[i] = launch() {
             queue.poll();
         };
     }
     for (let i = 0; i < stressNum; i++) {
-        jobs[i]!.Await();
+        await jobs[i]!;
     }
     arktest.assertEQ(queue.size, 0);
 }

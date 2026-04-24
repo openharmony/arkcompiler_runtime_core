@@ -57,7 +57,7 @@ function createTestWeakSet(elemId: int): WeakSet<Key> {
     return set
 }
 
-function weakSetElementGarbageCollection(): void {
+async function weakSetElementGarbageCollection(): Promise<void> {
     if (STW_GC) {
         // non-production scenario
         return
@@ -70,17 +70,16 @@ function weakSetElementGarbageCollection(): void {
     const weakSetCreator = launch<WeakSet<Key>>() {
         return createTestWeakSet(ELEM_ID)
     }
-    const weakSet = weakSetCreator.Await()
+    const weakSet = await weakSetCreator
 
     while (reclaimedElemId != ELEM_ID) {
         try {
             const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE)
-            // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
-            // if main coro is executed first, the test will return false
-            Coroutine.Schedule()
             if (gcId > 0) {
                 GC.waitForFinishGC(gcId)
             }
+            // Async tests need a real suspension point here so the finalizer coroutine can run.
+            await launch<void>(() => {})
         } catch (gcEx) {
             arktest.assertTrue(false)
         }
@@ -89,7 +88,7 @@ function weakSetElementGarbageCollection(): void {
 
 function main(): int {
     const suite = new arktest.ArkTestsuite('WeakSet GC tests')
-    suite.addTest('WeakSet element garbage collection', weakSetElementGarbageCollection)
+    suite.addAsyncTest('WeakSet element garbage collection', weakSetElementGarbageCollection)
 
     return suite.run()
 }

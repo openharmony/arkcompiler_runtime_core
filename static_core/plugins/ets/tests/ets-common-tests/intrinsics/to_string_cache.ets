@@ -140,14 +140,14 @@ const workerCount = 10;
 const valueCount = 500;
 const iterCount = valueCount * 3;
 
-function doTest<T>(values: T[], workers: int) {
-    let jobs = new (Job<String> | undefined)[workers](undefined);
+async function doTest<T>(values: T[], workers: int): Promise<void> {
+    let jobs = new (Promise<String> | undefined)[workers](undefined);
     for (let i = 0; i < workers; i++) {
         let state = (i.toLong() * 1234567) | 42;
         // check only in one worker to make others faster
         let check = i == 0;
         let worker = new Worker<T>(values);
-        const work = (w: Worker<T>, s: long, i: int, c: boolean) => { 
+        const work = (w: Worker<T>, s: long, i: int, c: boolean) => {
             return w.work(s, i, c);
         }
         jobs[i] = launch<string>() {
@@ -155,22 +155,22 @@ function doTest<T>(values: T[], workers: int) {
         };
     }
     for (let i = 0; i < workers; i++) {
-        let res = jobs[i]!.Await();
+        let res = await jobs[i]!;
         arktest.assertEQ(res, 'OK');
     }
 }
 
-function testDoubles() {
+async function testDoubles(): Promise<void> {
     // console.println('testDoubles')
     let values = new Double[valueCount](0);
     for (let i = 0; i < valueCount; i++) {
         let exp = (Math.random() * 2 - 1) * (310).toInt()
         values[i] = Math.random() * Math.pow(10, exp);
     }
-    doTest(values, workerCount);
+    await doTest(values, workerCount);
 }
 
-function testDoublesBitcast() {
+async function testDoublesBitcast(): Promise<void> {
     // console.println('testDoublesBitcast');
     let values = new Double[valueCount](0);
     let state = 42 as long;
@@ -178,20 +178,20 @@ function testDoublesBitcast() {
         state = xorshift(state);
         values[i] = Double.bitCastFromLong(state);
     }
-    doTest(values, workerCount);
+    await doTest(values, workerCount);
 }
 
-function testFloats() {
+async function testFloats(): Promise<void> {
     // console.println('testFloats');
     let values = new Float[valueCount](0);
     for (let i = 0; i < valueCount; i++) {
         let exp = (Math.random() * 2 - 1) * (39).toInt()
         values[i] = (Math.random() * Math.pow(10, exp)).toFloat();
     }
-    doTest(values, workerCount);
+    await doTest(values, workerCount);
 }
 
-function testFloatsBitcast() {
+async function testFloatsBitcast(): Promise<void> {
     // console.println('testFloatsBitcast');
     let values = new Float[valueCount](0);
     let state = 42 as long;
@@ -199,10 +199,10 @@ function testFloatsBitcast() {
         state = xorshift(state);
         values[i] = Float.bitCastFromInt(state.toInt());
     }
-    doTest(values, workerCount);
+    await doTest(values, workerCount);
 }
 
-function testLongs() {
+async function testLongs(): Promise<void> {
     // console.println('testLongs');
     let values = new Long[valueCount](0);
     let state = 42 as long;
@@ -210,13 +210,13 @@ function testLongs() {
         state = xorshift(state);
         values[i] = state;
     }
-    doTest(values, workerCount);
+    await doTest(values, workerCount);
 }
 
-function main() {
-    testDoubles();
-    testDoublesBitcast();
-    testFloats();
-    testFloatsBitcast();
-    testLongs();
+async function main(): Promise<void> {
+    await testDoubles();
+    await testDoublesBitcast();
+    await testFloats();
+    await testFloatsBitcast();
+    await testLongs();
 }

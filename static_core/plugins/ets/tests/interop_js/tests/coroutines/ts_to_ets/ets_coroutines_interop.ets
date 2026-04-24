@@ -23,17 +23,21 @@ function Bar(): object {
     return createFooClassFromTs.invoke(JSRuntime.newJSValueInt(42));
 }
 
-function checkInteropNegative(): boolean {
+async function checkInteropNegativeAsync(): Promise<boolean> {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     EtsGlobalInitPlaceholder();
     try {
-        launch(Bar).Await();
+        await launch(Bar);
     } catch (e) {
         if (e instanceof NoInteropContextError) {
             return true;
         }
     }
     return false;
+}
+
+function checkInteropNegative(): boolean {
+    return waitForCompletion<boolean>(checkInteropNegativeAsync);
 }
 
 function checkInteropPositive(): boolean {

@@ -123,7 +123,7 @@ async function main(): Promise<int> {
         }
         let job1 = launch(queueIntFrontData);
         let popPromise = queueIntPopFrontData();
-        job1.Await();
+        await job1;
         await popPromise;
         arktest.assertEQ(queueInt.size, elementsNum - 1);
     });

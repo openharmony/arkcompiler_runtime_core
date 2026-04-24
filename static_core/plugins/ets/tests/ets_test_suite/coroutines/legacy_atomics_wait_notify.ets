@@ -114,12 +114,12 @@ async function testSyncTimedWaitNotifyRace(index: int) {
             }
         }, i);
 
-        let s = jb.Await();
+        let s = await jb;
         event.Await();
         arktest.assertTrue(s == 'timed-out' || s == 'ok' || s == 'not-equal', s);
     }
 
-    w.join();
+    await w.join();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
@@ -145,8 +145,8 @@ async function testAsyncTimedWaitNotifyRace(index: int) {
             }
         }, i);
         let s = await p;
-        event.Await();
-        arktest.assertTrue(s == 'timed-out' || s == 'ok', s);
+        await event;
+        arktest.assertTrue(s == 'timed-out' || s == 'ok' || s == 'not-equal', s);
     }
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);

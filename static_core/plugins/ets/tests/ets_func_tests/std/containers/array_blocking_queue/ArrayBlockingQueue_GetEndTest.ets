@@ -32,7 +32,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.size, elementsNum);
     });
-    ArrayBlockingQueueTestsuite.addTest("GetEndTestInt002", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetEndTestInt002", async () =>
     {
         while (!queueInt.isEmpty()) {
             let el = queueInt.getFirst();
@@ -41,10 +41,10 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 0);
         let p1 = launch(queueIntGetEnddata);
         queueInt.push(elementsNum);
-        p1.Await();
+        await p1;
         arktest.assertEQ(queueInt.size, 1);
     });
-    ArrayBlockingQueueTestsuite.addTest("GetEndTestInt003", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetEndTestInt003", async () =>
     {
         while (!queueInt.isEmpty()) {
             let el = queueInt.getFirst();
@@ -62,10 +62,10 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 0);
         let p1 = launch(queueIntGetEnddata);
         queueInt.push(elementsNum);
-        p1.Await();
+        await p1;
         arktest.assertEQ(queueInt.size, 1);
     });
-    ArrayBlockingQueueTestsuite.addTest("GetEndTestInt004", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetEndTestInt004", async () =>
     {
         while (!queueInt.isEmpty()) {
             let el = queueInt.getFirst();
@@ -86,10 +86,10 @@ function main(): int {
         let a2: int = 20;
         queueInt.push(a1);
         queueInt.push(a2);
-        p1.Await();
+        await p1;
         arktest.assertEQ(queueInt.size, 2);
     });
-    ArrayBlockingQueueTestsuite.addTest("GetEndTestInt005", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetEndTestInt005", async () =>
     {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
@@ -98,13 +98,13 @@ function main(): int {
         let p2 = launch(queueIntAddTwodata);
         let p3 = launch(queueIntGetEndB2data);
         let p4 = launch(queueIntAddTwodata);
-        p1.Await();
-        p2.Await();
-        p3.Await();
-        p4.Await();
+        await p1;
+        await p2;
+        await p3;
+        await p4;
         arktest.assertFalse(queueInt.isEmpty());
     });
-    ArrayBlockingQueueTestsuite.addTest("GetEndTestInt006", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("GetEndTestInt006", async () =>
     {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
@@ -113,10 +113,10 @@ function main(): int {
         let p1 = launch(queueIntGetEnddata);
         let p2 = launch(queueIntGetEnddata);
         queueInt.push(20);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         let p3 = launch(queueIntGetEnddata);
-        p3.Await();
+        await p3;
         arktest.assertEQ(queueInt.getEnd(), 20);
     });
 

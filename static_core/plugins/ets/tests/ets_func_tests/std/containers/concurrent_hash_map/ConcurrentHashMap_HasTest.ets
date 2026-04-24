@@ -59,7 +59,7 @@ function main(): int {
             arktest.assertTrue(concurrentHashMap.has(arrValues[i]));
         }
     });
-    concurrentHashMapHasTestsuite.addTest("twiceTest_003", () =>
+    concurrentHashMapHasTestsuite.addAsyncTest("twiceTest_003", async () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
@@ -67,11 +67,11 @@ function main(): int {
         setAll();
         let p1 = launch(hasAll);
         let p2 = launch(hasAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(Atomics.load(flag, 0) >= 10);
     });
-    concurrentHashMapHasTestsuite.addTest("hasAndTest_001", () =>
+    concurrentHashMapHasTestsuite.addAsyncTest("hasAndTest_001", async () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
@@ -79,11 +79,11 @@ function main(): int {
         setAll();
         let p1 = launch(hasAll);
         let p2 = launch(deleteAllBack);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(Atomics.load(flag, 0) >= 10);
     });
-    concurrentHashMapHasTestsuite.addTest("hasAndTest_002", () =>
+    concurrentHashMapHasTestsuite.addAsyncTest("hasAndTest_002", async () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
@@ -91,15 +91,15 @@ function main(): int {
         setAll();
         let p1 = launch(hasAll);
         let p2 = launch(replaceAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(Atomics.load(flag, 0), 10);
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";
             arktest.assertEQ(concurrentHashMapOne.get(i), newVal);
         }
     });
-    concurrentHashMapHasTestsuite.addTest("hasAndTest_003", () =>
+    concurrentHashMapHasTestsuite.addAsyncTest("hasAndTest_003", async () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
@@ -107,11 +107,11 @@ function main(): int {
         setAll();
         let p1 = launch(hasAll);
         let p2 = launch(isEmptyFun);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(Atomics.load(flag, 0), 10);
     });
-    concurrentHashMapHasTestsuite.addTest("hasAndTest_004", () =>
+    concurrentHashMapHasTestsuite.addAsyncTest("hasAndTest_004", async () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
@@ -119,11 +119,11 @@ function main(): int {
         setAll();
         let p1 = launch(hasAll);
         let p2 = launch(clearAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(Atomics.load(flag, 0) >= 0);
     });
-    concurrentHashMapHasTestsuite.addTest("hasAndTest_005", () =>
+    concurrentHashMapHasTestsuite.addAsyncTest("hasAndTest_005", async () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
@@ -131,8 +131,8 @@ function main(): int {
         setAll();
         let p1 = launch(hasAll);
         let p2 = launch(removeAllBack);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(Atomics.load(flag, 0) >= 0);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(arrValuesTest[i], arrValues[i]);

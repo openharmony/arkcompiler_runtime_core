@@ -23,20 +23,18 @@ function SetTimeoutTest(): void {
 
 function AbortTest(): void {
     const params: LaunchParams = {abortFlag: true,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
-    try {
-        let j = launch(params, Failing);
-        j.Await();
-    } catch (e) {
-    }
+    launch(params, Failing);
+    Coroutine.Schedule();
 }
 
 function NoAbortTest(): void {
     const params: LaunchParams = {abortFlag: false,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
-    try {
-        let j = launch(params, Failing);
-        j.Await();
-    } catch (e) {
-    }
+    let finished = new CompletableJob<void>();
+    launch(params, Failing).catch((_e: Error) => {
+        finished.finish();
+    });
+    Coroutine.Schedule();
+    finished.Await();
 }
 
 export function main(args: FixedArray<string>): int {

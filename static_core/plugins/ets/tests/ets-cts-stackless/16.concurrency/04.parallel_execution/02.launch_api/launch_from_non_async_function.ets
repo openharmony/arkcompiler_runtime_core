@@ -18,9 +18,9 @@ desc: launch is allowed in non-async functions
 ---*/
 
 function runFromNonAsync(): int {
-  return launch<int>() {
+  return waitForCompletion<int>(() => launch<int>() {
     return 5
-  }.Await()
+  })
 }
 
 async function startTest() {

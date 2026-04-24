@@ -32,9 +32,9 @@ async function testCoroStats(): Promise<void> {
         };
     }
     for (let i = 0; i < 10; ++i) {
-        launch<String>() {
+        await launch<String>() {
             return sync_f(5)
-        }.Await();
+        };
     }
     for (let i = 0; i < 10; ++i) {
         async_f(5);

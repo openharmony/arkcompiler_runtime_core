@@ -54,21 +54,21 @@ class C {
  * This test verifies launching lambdas with and without arguments.
  * This function calls launch to execute l0, l1, and l2 functions, and verifies that their return values match expectations.
  */
-function testLaunchLambdas(): void {
+async function testLaunchLambdas(): Promise<void> {
     // Launch l0 function with no arguments
-    const l0Result = launch(l0).Await();
-    
+    const l0Result = await launch(l0);
+
     // Launch l1 function with one string argument 'l1_arg_0'
-    const l1Result = launch<string>() {
+    const l1Result = await launch<string>() {
         return l1('l1_arg_0')
-    }.Await();
+    };
 
     // Launch l2 function with three arguments: string, number, and a custom object
-    const l2ResultJob: Job<string> = launch<string>() {
+    const l2ResultPromise: Promise<string> = launch<string>() {
         return l2('l2_arg_0', 2.73, new MyPayload(3.14))
     };
 
-    const l2Result = l2ResultJob.Await();
+    const l2Result = await l2ResultPromise;
 
     // Assert that the results match the expected values
     arktest.assertEQ(l0Result, 'l0');
@@ -80,23 +80,23 @@ function testLaunchLambdas(): void {
  * This test checks launching regular functions with and without arguments
  * This function calls launch to execute f0, f1, and f2 functions, and verifies their return values.
  */
-function testLaunchFunctions(): void {
+async function testLaunchFunctions(): Promise<void> {
     // Launch f0 function with no arguments
-    const f0ResultJob: Job<string> = launch(f0);
-    const f0Result = f0ResultJob.Await();
+    const f0ResultPromise: Promise<string> = launch(f0);
+    const f0Result = await f0ResultPromise;
 
     // Launch f1 function with one string argument 'f1_arg_0'
-    const f1ResultJob: Job<string> = launch<string>() {
+    const f1ResultPromise: Promise<string> = launch<string>() {
         return f1('f1_arg_0')
     };
-    const f1Result = f1ResultJob.Await();
+    const f1Result = await f1ResultPromise;
 
     // Launch f2 function with three arguments: string, number, and a custom object
-    const f2ResultJob: Job<string> = launch<string>() {
+    const f2ResultPromise: Promise<string> = launch<string>() {
         return f2('f2_arg_0', 2.73, new MyPayload(3.14))
     };
 
-    const f2Result = f2ResultJob.Await();
+    const f2Result = await f2ResultPromise;
 
     // Assert that the results match the expected values
     arktest.assertEQ(f0Result, 'f0');
@@ -108,21 +108,21 @@ function testLaunchFunctions(): void {
  * Tests the behavior of the launch function when launching static methods.
  * This function calls launch to execute C.s0, C.s1, and C.s2 methods, and verifies their return values.
  */
-function testLaunchStatic(): void {
+async function testLaunchStatic(): Promise<void> {
     // Launch C.s0 static method with no arguments
-    const s0Result = launch(C.s0).Await();
+    const s0Result = await launch(C.s0);
 
     // Launch C.s1 static method with one string argument 'C.s1_arg_0'
-    const s1Result = launch<string>() {
+    const s1Result = await launch<string>() {
         return C.s1('C.s1_arg_0')
-    }.Await();
+    };
 
     // Launch C.s2 static method with three arguments: string, number, and a custom object
-    const s2ResultJob: Job<string> = launch<string>() {
+    const s2ResultPromise: Promise<string> = launch<string>() {
         return C.s2('C.s2_arg_0', 2.73, new MyPayload(3.14))
     };
 
-    const s2Result = s2ResultJob.Await();
+    const s2Result = await s2ResultPromise;
 
     // Assert that the results match the expected values
     arktest.assertEQ(s0Result, 's0');
@@ -133,9 +133,9 @@ function testLaunchStatic(): void {
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch');
-    testSuite.addTest('testLaunchLambdas', testLaunchLambdas);
-    testSuite.addTest('testLaunchFunctions', testLaunchFunctions);
-    testSuite.addTest('testLaunchStatic', testLaunchStatic);
+    testSuite.addAsyncTest('testLaunchLambdas', testLaunchLambdas);
+    testSuite.addAsyncTest('testLaunchFunctions', testLaunchFunctions);
+    testSuite.addAsyncTest('testLaunchStatic', testLaunchStatic);
     let res = await testSuite.runAsync();
     return res;
 }

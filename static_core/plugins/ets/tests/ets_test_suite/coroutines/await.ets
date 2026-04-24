@@ -14,7 +14,6 @@
  */
 
 import {launch} from "std/concurrency";
-import {Job} from "std/core";
 
 let flag = false;
 
@@ -50,19 +49,19 @@ function getObject(): Object {
 }
 
 // template function for return types check
-function checkReturnType<T>(fn: () => T): void {
+async function checkReturnType<T>(fn: () => T): Promise<void> {
     // reset flag
     flag = false;
 
     let p = launch(fn);
-    let result = p.Await();
+    let result = await p;
 
     if (!flag) {
         arktest.assertTrue(false, 'Flag is not set!');
         return;
     } else {
         L.log('First await result: ' + result);
-        let result2 = p.Await();
+        let result2 = await p;
         L.log('Second await result: ' + result2);
         if (!(result === result2)) {
             arktest.assertTrue(false, 'await results do not match!');
@@ -71,33 +70,33 @@ function checkReturnType<T>(fn: () => T): void {
     }
 }
 
-function testAwaitForString() {
-    checkReturnType(getString);
+async function testAwaitForString(): Promise<void> {
+    await checkReturnType(getString);
 }
 
-function testAwaitForInt() {
-    checkReturnType(getInt);
+async function testAwaitForInt(): Promise<void> {
+    await checkReturnType(getInt);
 }
 
-function testAwaitForNumber() {
-    checkReturnType(getNumber);
+async function testAwaitForNumber(): Promise<void> {
+    await checkReturnType(getNumber);
 }
 
-function testAwaitForBoolean() {
-    checkReturnType(getBoolean);
+async function testAwaitForBoolean(): Promise<void> {
+    await checkReturnType(getBoolean);
 }
 
-function testAwaitForObject() {
-    checkReturnType(getObject);
+async function testAwaitForObject(): Promise<void> {
+    await checkReturnType(getObject);
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.await');
-    testSuite.addTest('testAwaitForString', testAwaitForString);
-    testSuite.addTest('testAwaitForInt', testAwaitForInt);
-    testSuite.addTest('testAwaitForNumber', testAwaitForNumber);
-    testSuite.addTest('testAwaitForBoolean', testAwaitForBoolean);
-    testSuite.addTest('testAwaitForObject', testAwaitForObject);
+    testSuite.addAsyncTest('testAwaitForString', testAwaitForString);
+    testSuite.addAsyncTest('testAwaitForInt', testAwaitForInt);
+    testSuite.addAsyncTest('testAwaitForNumber', testAwaitForNumber);
+    testSuite.addAsyncTest('testAwaitForBoolean', testAwaitForBoolean);
+    testSuite.addAsyncTest('testAwaitForObject', testAwaitForObject);
     let res = await testSuite.runAsync();
     return res;
 }

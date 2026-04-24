@@ -92,7 +92,7 @@ function main(): int {
         arktest.assertEQ(hasFlag, false);
     });
     // Multiple Threads Test
-    ConcurrentSetTestsuite.addTest("Has&ClearTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Has&ClearTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
@@ -102,8 +102,8 @@ function main(): int {
             hasOne(0)
         }
         let p2 = launch(clearTest);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.has(0), false);
     });
 

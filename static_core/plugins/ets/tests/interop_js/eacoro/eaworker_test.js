@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function runTest() {
+async function runTest() {
     let etsVm = requireNapiPreview('ets_interop_js_napi', true);
 
     const etsVmRes = etsVm.createRuntime({
@@ -30,16 +30,18 @@ function runTest() {
     }
 
     let RunTasksTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunTasksTest');
-    RunTasksTest();
+    await RunTasksTest();
     let RunTasksWithJsCallTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunTasksWithJsCallTest');
-    RunTasksWithJsCallTest();
+    await RunTasksWithJsCallTest();
     let CreateEAWorkerWithoutInterop = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'CreateEAWorkerWithoutInterop');
-    CreateEAWorkerWithoutInterop();
+    await CreateEAWorkerWithoutInterop();
 
     let RunSetTimeoutTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunSetTimeoutTest');
-    RunSetTimeoutTest();
+    await RunSetTimeoutTest();
     let RunNewCoroInSetTimeoutTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunNewCoroInSetTimeoutTest');
-    RunNewCoroInSetTimeoutTest();
+    await RunNewCoroInSetTimeoutTest();
 }
 
-runTest();
+runTest().catch((e) => {
+    throw e;
+});

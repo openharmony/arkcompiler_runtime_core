@@ -15,23 +15,25 @@
 
 import { launch } from "std/concurrency"
 
-function create_7000_coro_test() {
-    const coro_to_create = 7000;
+async function create_7000_coro_test(): Promise<void> {
+    const coro_to_create = 6999;
     let j = new CompletableJob<void>();
+    let jobs = new Array<Promise<void>>();
 
-    let wait_func = () => { j.Await() }
-    let mainWaitJob = launch(wait_func);
-    let awaitIt = () => { mainWaitJob.Await(); }
+    let wait_func = (): void => { j.Await(); }
 
     for (let i = 1; i < coro_to_create; ++ i) {
-        launch(awaitIt);
+        jobs.push(launch(wait_func));
     }
 
     j.finish();
+    for (let job of jobs) {
+        await job;
+    }
 }
 
 function main() {
     let testsuite = new arktest.ArkTestsuite("EAWorker");
-    testsuite.addTest("create_7000_coro_test", create_7000_coro_test)
+    testsuite.addAsyncTest("create_7000_coro_test", create_7000_coro_test)
     return testsuite.run();
 }

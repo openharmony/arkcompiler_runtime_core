@@ -38,7 +38,7 @@ function main(): int {
         queueStrAdd.add("teststring");
         arktest.assertEQ(queueStrAdd.getEnd(), "teststring");
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt006", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("AddTestInt006", async () =>
     {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
@@ -47,13 +47,13 @@ function main(): int {
         let p2 = launch(queueIntAdddata);
         let p3 = launch(queueIntAdddata);
         let p4 = launch(queueIntAdddata);
-        p1.Await();
-        p2.Await();
-        p3.Await();
-        p4.Await();
+        await p1;
+        await p2;
+        await p3;
+        await p4;
         arktest.assertFalse(queueIntPopN.isEmpty());
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt007", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("AddTestInt007", async () =>
     {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
@@ -62,10 +62,10 @@ function main(): int {
             queueInt.add(i);
         }
         let p1 = launch(queueIntFrontF1data);
-        p1.Await();
+        await p1;
         arktest.assertEQ(queueInt.size, elementsNum);
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt008", () =>
+    ArrayBlockingQueueTestsuite.addAsyncTest("AddTestInt008", async () =>
     {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
@@ -74,7 +74,7 @@ function main(): int {
             queueInt.add(i);
         }
         let p1 = launch(queueIntBackB1data);
-        p1.Await();
+        await p1;
         arktest.assertFalse(queueInt.isEmpty());
     });
 

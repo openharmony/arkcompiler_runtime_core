@@ -17,9 +17,7 @@ cases:
       decl: |-
         import { EAWorker } from "std/core"
       logic: |-
-        const eaWorker = new EAWorker();
         const mainWorker = EAWorker.main();
-        eaWorker.start();
         mainWorker.quit();
       expected_error: |-
         "Error: EAWorker:: Main worker cannot be stopped"
@@ -27,9 +25,7 @@ cases:
       decl: |-
         import { EAWorker } from "std/core"
       logic: |-
-        const eaWorker = new EAWorker();
         const mainWorker = EAWorker.main();
-        eaWorker.start();
         mainWorker.start();
       expected_error: |-
         "Error: EAWorker:: Main worker cannot be started"

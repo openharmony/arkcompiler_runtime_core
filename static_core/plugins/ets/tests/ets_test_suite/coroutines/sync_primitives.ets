@@ -37,14 +37,18 @@ class SharedJob<T> {
         SharedJob.completeJob(jobs, this.sharedJob);
     }
 
-    public Await() {
+    public Await(): void {
         this.sharedJob.Await();
     }
 
     private static async completeJob<T>(jobs: Array<T>, sharedJob: CompletableJob<void>) {
         Coroutine.Schedule();
         for (let job of jobs) {
-            (job as Job<void>).Await();
+            if (job instanceof Promise) {
+                await job;
+            } else {
+                (job as CompletableJob<void>).Await();
+            }
         }
         sharedJob.finish();
     }
@@ -53,14 +57,14 @@ class SharedJob<T> {
 }
 
 function runConcurrently(callback: callbackT, coroutines: number) {
-    let jobs = new Array<Job<void>>(coroutines.toInt());
+    let jobs = new Array<Promise<void>>(coroutines.toInt());
     for (let i = 0; i < coroutines; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
             return callback(id)
         };
     }
-    return new SharedJob<Job<void>>(jobs);
+    return new SharedJob<Promise<void>>(jobs);
 }
 
 // The test checks exclusive access to the critical section
@@ -139,7 +143,7 @@ function illegalLockStateTest() {
 }
 
 // The test checks whether read-write locks are mutually exclusive
-function readWriteMutualExclusionTest() {
+async function readWriteMutualExclusionTest(): Promise<void> {
     let rwLock = new RWLock();
     let readLock = rwLock.readLock();
     let writeLock = rwLock.writeLock();
@@ -162,7 +166,7 @@ function readWriteMutualExclusionTest() {
     arktest.assertFalse(writeAcquired);
 
     readLock.unlock();
-    job.Await();
+    await job;
     arktest.assertTrue(writeAcquired);
 }
 
@@ -180,7 +184,7 @@ async function main(): Promise<int> {
     testSuite.addTest('exclusiveRWLockTest', exclusiveRWLockTest);
     testSuite.addTest('sharedLockTest', sharedLockTest);
     testSuite.addTest('illegalLockStateTest', illegalLockStateTest);
-    testSuite.addTest('readWriteMutualExclusionTest', readWriteMutualExclusionTest);
+    testSuite.addAsyncTest('readWriteMutualExclusionTest', async () => { await readWriteMutualExclusionTest(); });
 
     let res = await testSuite.runAsync();
     return res;

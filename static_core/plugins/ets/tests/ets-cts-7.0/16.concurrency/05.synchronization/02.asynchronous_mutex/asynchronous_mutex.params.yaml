@@ -71,7 +71,7 @@ cases:
         await ea2.run<undefined>(async () => {
           await lock.lock()
           try {
-            isLocked = false
+            isLocked = false 
             Coroutine.Schedule()
           } finally {
             lock.unlock()

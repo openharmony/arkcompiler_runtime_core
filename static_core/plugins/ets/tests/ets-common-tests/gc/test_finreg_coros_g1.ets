@@ -44,42 +44,56 @@ function register(finreg: FinalizationRegistry<undefined>) {
     finreg.register(new Object(), undefined);
 }
 
-function doInWorker(func: () => void): Job<void> {
+function doInWorker(func: () => void): Promise<void> {
     let params = new LaunchParams();
     params.workerGroupId = WorkerGroup.generateGroupId(WorkerDomain.GENERAL);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    let job = launch(params) {
+    let promise = launch(params) {
         func();
     };
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
-    return job;
+    return promise;
 }
 
 /**
  * The test creates FinRegs in different domains, triggers GC in the main coro.
  * GC in the main coro must finalize FinRegs in the main and worker domains.
  */
-function cleanupInMainTest() {
+async function cleanupInMainTest(): Promise<void> {
     let cleanupInMainHappened = new AtomicFlag(false);
     let cleanupInWorkerHappened = new AtomicFlag(false);
     let cleanupInEAWorkerHappened = new AtomicFlag(false);
+    let cleanupCount = 0;
+    let cleanupFinishedResolve: (() => void) | undefined;
+    let cleanupFinished = new Promise<void>((resolve) => {
+        cleanupFinishedResolve = () => { resolve(undefined); };
+    });
+    let onCleanup = () => {
+        cleanupCount++;
+        if (cleanupCount == 2) {
+            cleanupFinishedResolve!();
+        }
+    };
     mainFinReg = new FinalizationRegistry<undefined>(() => {
         cleanupInMainHappened.set(true);
+        onCleanup();
     });
-    doInWorker(() => {
+    await doInWorker(() => {
         workerFinReg = new FinalizationRegistry<undefined>(() => {
             cleanupInWorkerHappened.set(true);
+            onCleanup();
         });
-    }).Await();
-    eaWorker1.run<void>((): void => {
+    });
+    await eaWorker1.run<void>((): void => {
         eaFinReg = new FinalizationRegistry<undefined>(() => {
             cleanupInEAWorkerHappened.set(true);
         });
-    }).Await();
+    });
     register(mainFinReg!);
     register(workerFinReg!);
     register(eaFinReg!);
     startGCWithCleanup(GC.Cause.YOUNG);
+    await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), true);
     arktest.assertEQ(cleanupInWorkerHappened.get(), true);
     arktest.assertEQ(cleanupInEAWorkerHappened.get(), false);
@@ -89,35 +103,35 @@ function cleanupInMainTest() {
  * The test creates FinRegs in different domains, triggers GC in a worker coro.
  * GC in the worker coro must finalize the FinReg in the worker domain.
  */
-function cleanupInWorkerTest() {
+async function cleanupInWorkerTest(): Promise<void> {
     let cleanupInMainHappened = new AtomicFlag(false);
     let cleanupInWorkerHappened = new AtomicFlag(false);
     let cleanupInEAWorkerHappened = new AtomicFlag(false);
     mainFinReg = new FinalizationRegistry<undefined>(() => {
         cleanupInMainHappened.set(true);
     });
+    let cleanupFinishedResolve: (() => void) | undefined;
     let cleanupFinished = new Promise<void>((resolve) => {
-        doInWorker(() => {
-            workerFinReg = new FinalizationRegistry<undefined>(() => {
-                cleanupInWorkerHappened.set(true);
-                resolve(undefined);
-            });
-        }).Await();
+        cleanupFinishedResolve = () => { resolve(undefined); };
     });
-    eaWorker1.run<void>((): void => {
+    await doInWorker(() => {
+        workerFinReg = new FinalizationRegistry<undefined>(() => {
+            cleanupInWorkerHappened.set(true);
+            cleanupFinishedResolve!();
+        });
+    });
+    await eaWorker1.run<void>((): void => {
         eaFinReg = new FinalizationRegistry<undefined>(() => {
             cleanupInEAWorkerHappened.set(true);
         });
-    }).Await();
+    });
     register(mainFinReg!);
     register(workerFinReg!);
     register(eaFinReg!);
-    doInWorker(() => {
+    await doInWorker(() => {
         startGCWithCleanup(GC.Cause.YOUNG);
-    }).Await();
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    })
+    });
+    await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), false);
     arktest.assertEQ(cleanupInWorkerHappened.get(), true);
     arktest.assertEQ(cleanupInEAWorkerHappened.get(), false);
@@ -127,35 +141,35 @@ function cleanupInWorkerTest() {
  * The test creates FinRegs in different domains, triggers GC in a EA coro.
  * GC in the EA coro must finalize the FinReg in the same EA worker.
  */
-function cleanupInEAWorkerTest() {
+async function cleanupInEAWorkerTest(): Promise<void> {
     let cleanupInMainHappened = new AtomicFlag(false);
     let cleanupInWorkerHappened = new AtomicFlag(false);
     let cleanupInEAWorkerHappened = new AtomicFlag(false);
     mainFinReg = new FinalizationRegistry<undefined>(() => {
         cleanupInMainHappened.set(true);
     });
-    doInWorker(() => {
+    await doInWorker(() => {
         workerFinReg = new FinalizationRegistry<undefined>(() => {
             cleanupInWorkerHappened.set(true);
         });
-    }).Await();
+    });
+    let cleanupFinishedResolve: (() => void) | undefined;
     let cleanupFinished = new Promise<void>((resolve) => {
-        eaWorker1.run<void>((): void => {
-            eaFinReg = new FinalizationRegistry<undefined>(() => {
-                cleanupInEAWorkerHappened.set(true);
-                resolve(undefined);
-            });
-        }).Await();
+        cleanupFinishedResolve = () => { resolve(undefined); };
+    });
+    await eaWorker1.run<void>((): void => {
+        eaFinReg = new FinalizationRegistry<undefined>(() => {
+            cleanupInEAWorkerHappened.set(true);
+            cleanupFinishedResolve!();
+        });
     });
     register(mainFinReg!);
     register(workerFinReg!);
     register(eaFinReg!);
-    eaWorker1.run<void>((): void => {
+    await eaWorker1.run<void>((): void => {
         startGCWithCleanup(GC.Cause.YOUNG);
-    }).Await();
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    })
+    });
+    await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), false);
     arktest.assertEQ(cleanupInWorkerHappened.get(), false);
     arktest.assertEQ(cleanupInEAWorkerHappened.get(), true);
@@ -166,44 +180,46 @@ function cleanupInEAWorkerTest() {
  * GC in the first EA coro must finalize the FinReg in the same EA worker and
  * don't touch the FinReg in another EA coro.
  */
-function cleanupInSameEAWorkerTest() {
+async function cleanupInSameEAWorkerTest(): Promise<void> {
     let cleanup1Happened = new AtomicFlag(false);
     let cleanup2Happened = new AtomicFlag(false);
+    let cleanupFinishedResolve: (() => void) | undefined;
     let cleanupFinished = new Promise<void>((resolve) => {
-        eaWorker1.run<void>((): void => {
-            eaFinReg = new FinalizationRegistry<undefined>(() => {
-                cleanup1Happened.set(true);
-                resolve(undefined);
-            });
-        }).Await();
+        cleanupFinishedResolve = () => { resolve(undefined); };
     });
-    eaWorker2.run<void>((): void => {
+    await eaWorker1.run<void>((): void => {
+        eaFinReg = new FinalizationRegistry<undefined>(() => {
+            cleanup1Happened.set(true);
+            cleanupFinishedResolve!();
+        });
+    });
+    await eaWorker2.run<void>((): void => {
         eaFinReg2 = new FinalizationRegistry<undefined>(() => {
             cleanup2Happened.set(true);
         });
-    }).Await();
+    });
     register(eaFinReg!);
     register(eaFinReg2!);
-    eaWorker1.run<void>((): void => {
+    await eaWorker1.run<void>((): void => {
         startGCWithCleanup(GC.Cause.YOUNG);
-    }).Await();
-    eaWorker2.run<void>((): void => {
+    });
+    await eaWorker2.run<void>((): void => {
         Coroutine.Schedule();
-    }).Await();
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    })
+    });
+    await cleanupFinished;
     arktest.assertEQ(cleanup1Happened.get(), true);
     arktest.assertEQ(cleanup2Happened.get(), false);
 }
 
-function surviveGCTest() {
+async function surviveGCTest(): Promise<void> {
+    let cleanupFinishedResolve: (() => void) | undefined;
     let cleanupFinished = new Promise<void>((resolve) => {
-        eaWorker1.run<void>((): void => {
-            eaFinReg = new FinalizationRegistry<undefined>(() => {
-                resolve(undefined);
-            });
-        }).Await();
+        cleanupFinishedResolve = () => { resolve(undefined); };
+    });
+    await eaWorker1.run<void>((): void => {
+        eaFinReg = new FinalizationRegistry<undefined>(() => {
+            cleanupFinishedResolve!();
+        });
     });
     register(eaFinReg!);
     // This GC must enqueue FinRegNode and don't clean up it.
@@ -211,12 +227,10 @@ function surviveGCTest() {
     // This GC must not collect FinRegNode.
     startGCWithCleanup(GC.Cause.FULL);
     // This GC should cleanup FinRegNode
-    eaWorker1.run<void>((): void => {
+    await eaWorker1.run<void>((): void => {
         startGCWithCleanup(GC.Cause.FULL);
-    }).Await();
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    })
+    });
+    await cleanupFinished;
 }
 
 function main() {
@@ -224,14 +238,14 @@ function main() {
     eaWorker2.start();
     try {
         let testsuite = new FinRegTestSuite();
-        testsuite.addTest('cleanupInMainTest', cleanupInMainTest);
-        testsuite.addTest('cleanupInWorkerTest', cleanupInWorkerTest);
-        testsuite.addTest('cleanupInEAWorkerTest', cleanupInEAWorkerTest);
-        testsuite.addTest('cleanupInSameEAWorkerTest', cleanupInSameEAWorkerTest);
-        testsuite.addTest('surviveGCTest', surviveGCTest);
+        testsuite.addAsyncTest('cleanupInMainTest', cleanupInMainTest);
+        testsuite.addAsyncTest('cleanupInWorkerTest', cleanupInWorkerTest);
+        testsuite.addAsyncTest('cleanupInEAWorkerTest', cleanupInEAWorkerTest);
+        testsuite.addAsyncTest('cleanupInSameEAWorkerTest', cleanupInSameEAWorkerTest);
+        testsuite.addAsyncTest('surviveGCTest', surviveGCTest);
         return testsuite.run();
     } finally {
-        eaWorker1.join();
-        eaWorker2.join();
+        eaWorker1.quit();
+        eaWorker2.quit();
     }
 }

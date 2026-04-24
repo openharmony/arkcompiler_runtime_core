@@ -21,24 +21,23 @@ cases:
       const mainWorkerId = CoroutineExtras.getWorkerId();
       const eaWorker = new EAWorker();
       eaWorker.start();
-      const eaWorkerId = eaWorker.run<int>(CoroutineExtras.getWorkerId).Await();
-      
+      const eaWorkerId = waitForCompletion<int>(() => eaWorker.run<int>(CoroutineExtras.getWorkerId));
+
       arktest.assertNE(eaWorkerId, mainWorkerId, "EAWorker id equal to Main worker id");
       eaWorker.quit();
   - desc: Checking launched EACoroutine id.
     decl: |-
       import { CoroutineExtras } from "std/debug/concurrency"
       import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-      import { Job, EAWorker } from "std/core"
+      import { EAWorker } from "std/core"
     logic: |-
       const eaWorker = new EAWorker();
       eaWorker.start();
-      const eaWorkerId = eaWorker.run<int>(CoroutineExtras.getWorkerId).Await();
+      const eaWorkerId = waitForCompletion<int>(() => eaWorker.run<int>(CoroutineExtras.getWorkerId));
       const params: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
-      let job: Job<int> = launch<int>(params, CoroutineExtras.getWorkerId);
-      const launchedWorkerId = job.Await();
+      const launchedWorkerId = waitForCompletion<int>(() => launch<int>(params, CoroutineExtras.getWorkerId));
       
       arktest.assertEQ(launchedWorkerId, eaWorkerId, "Launched worker id is not EA");
       eaWorker.quit();

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function RunTasksTest(): void {
+async function RunTasksTest(): Promise<void> {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
     w.start();
@@ -27,13 +27,13 @@ function RunTasksTest(): void {
         arktest.assertNE(runId, mainId);
         return runId;
     });
-    w.join();
-    let runId1 = p1.Await();
-    let runId2 = p2.Await();
+    let runId1 = await p1;
+    let runId2 = await p2;
+    w.quit();
     arktest.assertEQ(runId1, runId2);
 }
 
-function RunTasksWithJsCallTest(): void {
+async function RunTasksWithJsCallTest(): Promise<void> {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
     w.start();
@@ -53,17 +53,17 @@ function RunTasksWithJsCallTest(): void {
 
     let p1 = w.run<int>(callback);
     let p2 = w.run<int>(callback);
-    w.join();
-    let result1 = p1.Await();
-    let result2 = p2.Await();
+    let result1 = await p1;
+    let result2 = await p2;
+    w.quit();
     arktest.assertEQ(result1, 0);
     arktest.assertEQ(result2, 0);
 }
 
-function RunTasksWithJsAsyncCallTest(): void {
+async function RunTasksWithJsAsyncCallTest(): Promise<void> {
     let w = new EAWorker(true);
     w.start();
-    let callback = ():int => {
+    let callback = async (): Promise<int> => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
         let modified = false;
         let method = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait');
@@ -88,12 +88,12 @@ function RunTasksWithJsAsyncCallTest(): void {
     };
 
     let p = w.run<int>(callback);
-    w.join();
-    let result = p.Await();
+    let result = await p;
+    w.quit();
     arktest.assertEQ(result, 0);
 }
 
-function CreateEAWorkerWithoutInterop(): void {
+async function CreateEAWorkerWithoutInterop(): Promise<void> {
     let eaw = new EAWorker();
     eaw.start();
     let res = false;
@@ -102,55 +102,59 @@ function CreateEAWorkerWithoutInterop(): void {
             let module = JSRuntime.loadModule('./eaworker_test_helpers_js');
             let val = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         };
-        eaw.run<void>(callback).Await();
+        await eaw.run<void>(callback);
     } catch(e) {
         res = true;
-        eaw.join();
+        eaw.quit();
     }
+    await eaw.join();
     arktest.assertEQ(res, true);
 }
 
-async function asyncCall(task: () => void) {
+async function asyncCall(task: () => void): Promise<void> {
     task();
 }
 
-function RunSetTimeoutTest(): void {
-    let job = new CompletableJob<void>();
-
+async function RunSetTimeoutTest(): Promise<void> {
     let w = new EAWorker(true);
     w.start();
+    let resolver: ((val: Any) => void) | null = null;
+    let done = new Promise<Any>((resolve) => {
+        resolver = resolve;
+    });
     let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {});
 
-        let p2 = p1.then<Any, Any>((value: Any) => {
+        p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
-                job.finish();
+                resolver!(undefined);
             }, 10);
-
         });
     });
-    w.join();
-
-    job.Await();
+    await p;
+    await done;
+    w.quit();
 }
 
-function RunNewCoroInSetTimeoutTest(): void {
-    let job = new CompletableJob<void>();
-
+async function RunNewCoroInSetTimeoutTest(): Promise<void> {
     let w = new EAWorker(true);
     w.start();
+    let resolver: ((val: Any) => void) | null = null;
+    let done = new Promise<Any>((resolve) => {
+        resolver = resolve;
+    });
     let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {
         });
-        let p2 = p1.then<Any, Any>((value: Any) => {
+        p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 let p3 = asyncCall(()=>{
-                    job.finish();
+                    resolver!(undefined);
                 });
             }, 10);
         });
     });
-    w.join();
-
-    job.Await();
+    await p;
+    await done;
+    w.quit();
 }

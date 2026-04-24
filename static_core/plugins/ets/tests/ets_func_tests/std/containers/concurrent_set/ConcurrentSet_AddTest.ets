@@ -69,59 +69,59 @@ function main(): int {
         arktest.assertEQ(res, 1);
     });
     // Multiple Threads Test
-    ConcurrentSetTestsuite.addTest("Add&ToStringTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Add&ToStringTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         let p1 = launch(addAll);
         let p2 = launch(toStringTest);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         let str: string = ConcurrentSetTestOne.toString();
         arktest.assertTrue(str != strAllOne || str == strAllOne);
     });
-    ConcurrentSetTestsuite.addTest("Add&AddTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Add&AddTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         let p = launch(addAll);
-        p.Await();
+        await p;
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("Add&HasTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Add&HasTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         let p1 = launch(addAll);
         let p2 = launch(hasAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         for (let i: int = 0; i < 10; i++) {
             arktest.assertEQ(ConcurrentSetTestOne.has(i), true);
         }
     });
-    ConcurrentSetTestsuite.addTest("Add&HasSizeTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Add&HasSizeTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         let p1 = launch(addAll);
         let p2 = launch(getSize);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("Add&DeteleTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Add&DeteleTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch(addBack);
         let p2 = launch(deleteAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(ConcurrentSetTestOne.size < 6);
     });
-    ConcurrentSetTestsuite.addTest("Add&ClearTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Add&ClearTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
@@ -129,8 +129,8 @@ function main(): int {
             addOneTest(2)
         };
         let p2 = launch(clearTest);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(ConcurrentSetTestOne.size < 2);
     });
 

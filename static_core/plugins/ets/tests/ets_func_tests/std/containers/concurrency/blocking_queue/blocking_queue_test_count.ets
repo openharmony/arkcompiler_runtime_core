@@ -15,17 +15,17 @@
 
 type BlockingQueueI = containers.BlockingQueue<int>;
 type BQConstructorI = (capacity: int)=>BlockingQueueI;
-type TestFunction = (constr: BQConstructorI) => void;
+type TestFunction = (constr: BQConstructorI) => Promise<void>;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push(arr[i].Await());
+		res.push((await arr[i]) as T);
 	return res;
 }
 
@@ -48,11 +48,11 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-function testPopAndPushCount(constr: BQConstructorI): void {
+async function testPopAndPushCount(constr: BQConstructorI): Promise<void> {
 	let queue = constr(200);
 	const EXTRA = -1;
-	let pushers: Job<void>[] = [];
-	let poppers: Job<FixedArray<int>>[] = [];
+	let pushers: Promise<void>[] = [];
+	let poppers: Promise<FixedArray<int>>[] = [];
 
 	const PUSH_COUNT = 100;
 	const JOB_COUNT = 10;
@@ -79,9 +79,9 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 		addLaunch(poppers, popFunction);
 	}
 
-	awaitAll<void>(pushers);
+	await awaitAll<void>(pushers);
 	let finalCounter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
-	let resCounters = awaitAll<FixedArray<int>>(poppers);
+	let resCounters = await awaitAll<FixedArray<int>>(poppers);
 
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		sumArrInto(finalCounter, resCounters[i]);
@@ -112,7 +112,7 @@ function main(): int {
 		for (let i = 0; i < tests.length; ++ i) {
 			let name = tests[i][0];
 			let testF = tests[i][1];
-			arktestsuite.addTest(name, ()=>testF(constr));
+			arktestsuite.addAsyncTest(name, async () => { await testF(constr); });
 		}
 	}
 
@@ -122,4 +122,3 @@ function main(): int {
 		return codeABQ;
 	return codeLBQ;
 }
-

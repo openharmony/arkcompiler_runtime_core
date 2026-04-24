@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push(arr[i].Await());
+		res.push((await arr[i]) as T);
 	return res;
 }
 
@@ -38,7 +38,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-function testConcurrentSizeAndSR1() {
+async function testConcurrentSizeAndSR1(): Promise<void> {
 	let map = new CHMap();
 
 	const JOB_COUNT = 10;
@@ -58,15 +58,15 @@ function testConcurrentSizeAndSR1() {
 		}
 	}
 	let sizeJob = launch(sizeF);
-	let srJobs: Job<void>[] = [];
+	let srJobs: Promise<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);
-	awaitAll(srJobs);
+	await awaitAll(srJobs);
 	running = false;
-	sizeJob.Await();
+	await sizeJob;
 }
 
-function testConcurrentSizeAndSRI() {
+async function testConcurrentSizeAndSRI(): Promise<void> {
 	let map = new CHMap();
 
 	const JOB_COUNT = 10;
@@ -86,20 +86,19 @@ function testConcurrentSizeAndSRI() {
 		}
 	}
 	let sizeJob = launch(sizeF);
-	let srJobs: Job<void>[] = [];
+	let srJobs: Promise<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);
-	awaitAll(srJobs);
+	await awaitAll(srJobs);
 	running = false;
-	sizeJob.Await();
+	await sizeJob;
 }
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
 	
-	CHMTestSuitecase.addTest("testConcurrentSizeAndSR1", testConcurrentSizeAndSR1);
-	CHMTestSuitecase.addTest("testConcurrentSizeAndSRI", testConcurrentSizeAndSRI);
+	CHMTestSuitecase.addAsyncTest("testConcurrentSizeAndSR1", async () => { await testConcurrentSizeAndSR1(); });
+	CHMTestSuitecase.addAsyncTest("testConcurrentSizeAndSRI", async () => { await testConcurrentSizeAndSRI(); });
 
     return CHMTestSuitecase.run();
 }
-

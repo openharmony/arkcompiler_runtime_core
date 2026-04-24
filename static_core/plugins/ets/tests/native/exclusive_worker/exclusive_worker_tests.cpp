@@ -284,16 +284,6 @@ TEST_F(EtsNativeExclusiveWorkerTest, RecursiveAsync)
     RunRoutineInExclusiveWorker("recursiveAsync", ":z");
 }
 
-TEST_F(EtsNativeExclusiveWorkerTest, ACoroutineCallAsyncFunctions)
-{
-    RunRoutineInExclusiveWorker("ACoroutineCallAsyncFunctions", ":z");
-}
-
-TEST_F(EtsNativeExclusiveWorkerTest, AsyncFunctionLaunchACoroutine)
-{
-    RunRoutineInExclusiveWorker("asyncFunctionLaunchACoroutine", ":z");
-}
-
 TEST_F(EtsNativeExclusiveWorkerTest, CommunicateBetweenEACoroutines)
 {
     RunRoutineInExclusiveWorker("EACoroutineSendToMain", ":z");

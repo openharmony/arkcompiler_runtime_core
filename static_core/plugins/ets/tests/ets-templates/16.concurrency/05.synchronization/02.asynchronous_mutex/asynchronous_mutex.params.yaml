@@ -57,26 +57,24 @@ cases:
 
         const ea1 = new EAWorker();
         ea1.start();
-        await ea1.run<undefined>(async () => {
-          await lock.lock()
-          try {
-            arktest.assertTrue(isLocked)
-          } finally {
-            lock.unlock()
-          }
-        })
+        await ea1.run<undefined>(() => {
+          waitForCompletion(async () => {
+            await lock.lock();
+            arktest.assertTrue(isLocked);
+            lock.unlock();
+          })
+        });
       
         const ea2 = new EAWorker();
         ea2.start();
-        await ea2.run<undefined>(async () => {
-          await lock.lock()
-          try {
-            isLocked = false
-            Coroutine.Schedule()
-          } finally {
-            lock.unlock()
-          }
-        })
+        await ea2.run<undefined>(() => {
+          waitForCompletion(async () => {
+            await lock.lock();
+            isLocked = false;
+            Coroutine.Schedule();
+            lock.unlock();
+          })
+        });
 
         ea1.quit();
         ea2.quit();
