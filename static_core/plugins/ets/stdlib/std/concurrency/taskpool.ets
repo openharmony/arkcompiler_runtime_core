@@ -678,6 +678,10 @@ export namespace taskpool {
             return ((Chrono.nanoNow() - this.startTime) / Chrono.NS_PER_MS).toInt();
         }
 
+        getTaskInfoDuration(): int {
+            return this.startTime == InternalTask.NOT_STARTED_TIME ? 0 : this.getDuration();
+        }
+
         execute(currentWorker : GlobalQueueWorker | undefined = undefined): Any {
             initWorkerPoolSync();
             removePendingDependencyTask(this.task);
@@ -1000,6 +1004,7 @@ export namespace taskpool {
         onFailCallback?: CallbackFunctionWithError;
         onSuccessCallback?: CallbackFunction;
         private task: Task;
+        private static readonly NOT_STARTED_TIME: long = 0;
     }
     
     class PromiseDeferred {
@@ -2332,6 +2337,7 @@ export namespace taskpool {
             } else if (state == 4) {
                 taskInfo.state = State.DELAYED;
             }
+            taskInfo.duration = InternalTask.of(task).getTaskInfoDuration();
             taskInfos.push(taskInfo);
         }
         // Collect delay and canceled tasks info
@@ -2349,6 +2355,7 @@ export namespace taskpool {
             } else if (state == State.DELAYED.valueOf()) {
                 taskInfo.state = State.DELAYED;
             }
+            taskInfo.duration = InternalTask.of(task).getTaskInfoDuration();
             taskInfos.push(taskInfo);
         });
         // Collect worker threads info

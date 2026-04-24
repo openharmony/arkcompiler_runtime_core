@@ -111,6 +111,31 @@ function getcurrentTask() {
     });
 }
 
+async function testTaskInfoDuration() {
+    let event1 = new Event();
+    let event2 = new Event();
+    let task = new taskpool.Task(() => {
+        let startTime = Date.now();
+        while (Date.now() - startTime < 100) {}
+        event2.fire();
+        event1.wait();
+    });
+    taskpool.execute(task);
+    event2.wait();
+    let info = taskpool.getTaskPoolInfo();
+    arktest.assertNE(info.taskInfos.length, 0);
+    let found = false;
+    for (let i = 0; i < info.taskInfos.length; i++) {
+        if (info.taskInfos[i].taskId === task.taskId) {
+            found = true;
+            arktest.assertLT(0, info.taskInfos[i].duration as int);
+            break;
+        }
+    }
+    event1.fire();
+    arktest.assertEQ(found, true);
+}
+
 async function onExecutionFailedtestAsyncfun(){
     let catchSuccess : int = 0;
     let event = new Event();
@@ -339,6 +364,7 @@ function main(): int {
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addAsyncTest('cancelInSuccessCallback', cancelInSuccessCallback);
     commonTaskSuite.addTest('getcurrentTask', getcurrentTask);
+    commonTaskSuite.addAsyncTest('testTaskInfoDuration', testTaskInfoDuration);
     commonTaskSuite.addAsyncTest('onExecutionFailedtestAsyncfun', onExecutionFailedtestAsyncfun);
     commonTaskSuite.addAsyncTest('onExecutionFailedtestmultAsyncfun', onExecutionFailedtestmultAsyncfun);
     commonTaskSuite.addAsyncTest('onFailCallbackExceptionTest', onFailCallbackExceptionTest);
