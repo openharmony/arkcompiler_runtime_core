@@ -15,6 +15,34 @@
 
 package std.core;
 
+
+/**
+ * PromiseWithResolvers class instance allows developer to explicitly resolve or reject promise.
+ * @property { Promise<T> } promise The promise object
+ * @property { Function } resolve The resolver function
+ * @property { Function } reject The rejecter function
+ */
+export class PromiseWithResolvers<T> {
+    public constructor() {
+        let resolveLocal: ((value: T | PromiseLike<T>) => void) | undefined = undefined;
+        let rejectLocal: ((error: Error) => void) | undefined = undefined;
+        let p = new Promise<T>((res, rej) => {
+            resolveLocal = res;
+            rejectLocal = rej;
+        });
+        if (resolveLocal === undefined || rejectLocal === undefined) {
+            throw new Error("Couldn't assign resolvers");
+        }
+        this.promise = p;
+        this.resolve = resolveLocal!;
+        this.reject = rejectLocal!;
+    }
+
+    public readonly promise: Promise<T>
+    public readonly resolve: (value: T | PromiseLike<T>) => void;
+    public readonly reject: (error: Error) => void;
+}
+
 /**
  * Interface for objects with 'then' method.
  */

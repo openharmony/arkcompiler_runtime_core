@@ -45,7 +45,6 @@ panda_ets_add_gtest(
         get_test_class.cpp
         ets_async_context_test.cpp
         ets_promise_test.cpp
-        ets_job_test.cpp
         ets_class_test.cpp
         ets_union_test.cpp
         ets_string_from_char_code_test.cpp

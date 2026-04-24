@@ -15,84 +15,9 @@
 
 package std.core;
 
-enum JobStatus { RUNNING = 0, FINISHED = 1, FAILED = 2 }
-
-/**
- * Object of Job class is used to represent a task
- * that was launched using std.concurrency.launch function.
- */
-export class Job<T> {
-
-    protected constructor() {}
-
-
-    /**
-     * This method causes current coroutine to wait for completion of
-     * the job, and returns awaited object in case of successful completion.
-     *
-     * @returns unwrapped value.
-     */
-    public native Await(): T
-
-    private val: T
-    private mutex: Mutex = new Mutex()
-    private event: Event = new Event()
-    private status : int = JobStatus.RUNNING
-}
-
-/**
- * Object of CompletableJob class is inherited from Job class.
- * It allows to finish or fail the task by developer explicitly.
- */
-export final class CompletableJob<T> extends Job<T>
-{
-
-    public constructor() {}
-
-    /**
-     * This method causes current coroutine to wait for completion of
-     * the job, and returns awaited object in case of successful completion.
-     *
-     * @returns unwrapped value.
-     */
-    public Await() : T {
-        return super.Await();
+// The Job class holds the helper methods that return various prameters of the current job (e.g. its worker thread ID)   
+class Job {
+    static getId(): long {
+        return 0;
     }
-
-    /**
-     * This method is used to finish the job with undefined value.
-     */
-    public finish(): void {
-        this.finishImpl(undefined);
-    }
-
-    /**
-     * This method is used to finish the job with a value.
-     * It can be called from any coroutine.
-     *
-     * @param value value to finish the job with.
-     */
-    public finish<T>(value: T): void {
-        this.finishImpl<T>(value);
-    }
-
-    /**
-     * This method is used to fail the job with empty Error.
-     */
-    public fail(): void {
-        this.failImpl(new Error());
-    }
-
-    /**
-     * This method is used to fail the job with some specific error.
-     * It can be called from any coroutine.
-     *
-     * @param error value to fail the job with.
-     */
-    public fail(error: Error): void {
-        this.failImpl(error);
-    }
-
-    private native finishImpl<U>(value: U): void
-    private native failImpl(error: Any): void
 }

@@ -93,7 +93,6 @@ private:
     EtsObject *BoxReturnValue(Value returnValue);
     EtsObject *GetCompletionObject(mem::Reference *retValueRef);
     EtsObject *TakePendingException(Job *job);
-    void CompleteJob(EtsJob *completedJob, EtsObject *retObject, Job *job);
     void CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job);
 
     EtsExecutionContext executionCtx_;

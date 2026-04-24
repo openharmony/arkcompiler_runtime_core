@@ -382,11 +382,6 @@ export namespace StdProcess {
     *
     */
     export function on(type: "unhandledPromiseRejection" | "uncaughtError", listener: EventListener): void {
-        if (type == string("unhandledJobRejection")) {
-            listener = listener as RejectedObjectListener;
-            setFailedJobHandler(listener);
-            return;
-        }
         if (type == "unhandledPromiseRejection") {
             listener = listener as RejectedObjectListener;
             setRejectedPromiseHandler(listener);
@@ -407,14 +402,6 @@ export namespace StdProcess {
     * @returns { boolean } indicating if the event has been removed successfully
     */
     export function off(type: "unhandledPromiseRejection" | "uncaughtError", listener?: RejectedObjectListener): boolean {
-        if (type == string("unhandledJobRejection")) {
-            if (listener) {
-                failedJobHandler.unregister(listener);
-            } else {
-                failedJobHandler.reset();
-            }
-            return true;
-        }
         if (type == "unhandledPromiseRejection") {
             if (listener) {
                 rejectedPromiseHandler.unregister(listener);
@@ -497,17 +484,6 @@ export namespace StdProcess {
 
     /**
     * This method updates handler that is applied to
-    * unhandled failed jobs at the program exit
-    *
-    * @param { RejectedObjectListener } listener user-provided handler
-    *
-    */
-    function setFailedJobHandler(listener: RejectedObjectListener): void {
-        failedJobHandler.register(listener);
-    }
-
-    /**
-    * This method updates handler that is applied to
     * unhandled rejected promises at the program exit
     *
     * @param { RejectedObjectListener } listener user-provided handler
@@ -526,14 +502,6 @@ export namespace StdProcess {
     function setErrorHandler(listener: UncaughtErrorListener) : void {
         errorHandler.reset(listener);
     }
-
-    const THROW_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => {
-        throw reason;
-    }
-    const WARN_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => {
-        console.error("Unhandled Job fail:", reason);
-    }
-    const NONE_JOB_HANDLER_CALLBACK: (reason: Error, job: Object) => void = (reason: Error, job: Object) => {}
 
     const THROW_PROMISE_HANDLER_CALLBACK: (reason: Error, promise: Object) => void = (reason: Error, promise: Object) => {
         throw reason;
@@ -588,29 +556,6 @@ export namespace StdProcess {
         return NONE_PROMISE_HANDLER_CALLBACK;
     }
 
-    function getDefaultJobHandler(defaultHandlerMode: int): (reason: Error, job: Object) => void
-    {
-        if (defaultHandlerMode == DefaultHandlerMode.Throw) {
-            return THROW_JOB_HANDLER_CALLBACK;
-        }
-        if (defaultHandlerMode == DefaultHandlerMode.Warn) {
-            return WARN_JOB_HANDLER_CALLBACK;
-        }
-        return NONE_JOB_HANDLER_CALLBACK;
-    }
-
-    function callJobHandler(objAndReason: Object[], defaultHandlerMode: int): void
-    {
-        let reason = objAndReason[0] as Error;
-        let obj = objAndReason[1];
-        if (failedJobHandler.size == 0) {
-            let jobHandler = getDefaultJobHandler(defaultHandlerMode);
-            jobHandler(reason, obj);
-            return;
-        }
-        failedJobHandler.apply(reason, obj);
-    }
-
     function callPromiseHandler(objAndReason: Object[], defaultHandlerMode: int): void
     {
         let reason = objAndReason[0] as Error;
@@ -621,19 +566,6 @@ export namespace StdProcess {
             return;
         }
         rejectedPromiseHandler.apply(reason, obj);
-    }
-
-    /**
-    * This method applies default or user-provided handler to
-    * all unhandled failed job results
-    *
-    * @param { Object[][] } objs array of pairs of fail results and failed jobs
-    *
-    */
-    function listUnhandledJobs(objs: Object[][], defaultHandlerMode: int): void {
-        for (let objAndReason of objs) {
-            callJobHandler(objAndReason, defaultHandlerMode);
-        }
     }
 
     /**
@@ -671,7 +603,6 @@ export namespace StdProcess {
      */
     native function reportUncaughtError(error: Error): void;
 
-    let failedJobHandler: RejectedHandler = new RejectedHandler();
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
     let errorHandler: ProcessErrorHandler = new ProcessErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
 }

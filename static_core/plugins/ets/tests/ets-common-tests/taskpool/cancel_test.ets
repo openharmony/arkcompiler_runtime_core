@@ -15,32 +15,6 @@
 
 import { CoroutineExtras } from 'std/debug/concurrency';
 
-class Event {
-    constructor() {
-        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
-            this.resolveFn = resolve;
-        })
-        this.job = new CompletableJob<boolean>();
-        this.promise.then((result: boolean) => {
-            this.job.finish(result);
-        }).catch((e: Error) => {
-            this.job.fail(e);
-        });
-    }
-
-    public wait(): boolean {
-        return this.job.Await();
-    }
-
-    public fire(val: boolean = true) {
-        this.resolveFn!(val);
-    }
-
-    private promise: Promise<boolean>;
-    private resolveFn: ((val: boolean) => void) | null = null;
-    private job: CompletableJob<boolean>;
-}
-
 function sleep(duration: int): Promise<void> {
     return new Promise<void>((resolve) => {
         setTimeout(() => {
@@ -50,10 +24,10 @@ function sleep(duration: int): Promise<void> {
 }
 
 async function cancelByTaskIdTest(){
-    let event = new Event();
-    let event2 = new Event();
+    let event = new PromiseWithResolvers<void>();
+    let event2 = new PromiseWithResolvers<void>();
     let taskFunc = async (duration: int): Promise<string> => {
-        event.fire();
+        event.resolve(undefined);
         while (!taskpool.Task.isCanceled()) {
             await sleep(10);
         }
@@ -62,7 +36,7 @@ async function cancelByTaskIdTest(){
 
     let task = new taskpool.Task(taskFunc, 200);
     let p = taskpool.execute(task)
-    event.wait();
+    await event.promise;
     taskpool.cancel(task.taskId);
     arktest.assertEQ(await p, 'canceled');
 }

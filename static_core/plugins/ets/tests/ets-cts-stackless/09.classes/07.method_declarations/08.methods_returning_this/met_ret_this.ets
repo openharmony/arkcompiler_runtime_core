@@ -23,7 +23,7 @@ tags: []
 
 {{c.decl}}
 
-function main() {
+async function main() {
     {{c.use|indent}}
 }
 {% endfor %}

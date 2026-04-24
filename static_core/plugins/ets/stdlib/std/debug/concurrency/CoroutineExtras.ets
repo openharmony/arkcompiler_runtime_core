@@ -68,8 +68,6 @@ export final class CoroutineExtras {
     public static native retriggerTaskPoolBlockedExpandMonitorDebug(): void;
     // get taskpool workers limit based on the device
     public static native getTaskPoolWorkersLimit(): int;
-    // dump currently stored unhandled failed jobs
-    public static native dumpUnhandledFailedJobs(): void;
     //get the  current state of the coroutine usage counter 
     public static native getCoroutineCount() : long;
 }

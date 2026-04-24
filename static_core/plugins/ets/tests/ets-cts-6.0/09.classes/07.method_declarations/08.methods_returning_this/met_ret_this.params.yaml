@@ -544,14 +544,14 @@ cases:
                   return this
               }
 
-              bar(): Job<this> {
+              bar(): Promise<this> {
                   return launch(this.foo().foo().foo)
               }
           }
       use: |-
           let a = new A
           waitForCompletion(async ()=>{
-              arktest.assertEQ((a.bar().Await()), a)
+              arktest.assertEQ((await a.bar()), a)
               arktest.assertEQ(a.fld, 3)
           })
 

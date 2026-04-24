@@ -13,31 +13,6 @@
  * limitations under the License.
  */
 
-class Event {
-    constructor() {
-        this.promise = new Promise<boolean>((resolve: (val: boolean) => void ) => {
-            this.resolveFn = resolve;
-        })
-        this.job = new CompletableJob<boolean>();
-        this.promise.then((result: boolean) => {
-            this.job.finish(result);
-        }).catch((e: Error) => {
-            this.job.fail(e);
-        });
-    }
-
-    public wait(): boolean {
-        return this.job.Await();
-    }
-
-    public fire(val: boolean = true) {
-        this.resolveFn!(val);
-    }
-
-    private promise: Promise<boolean>;
-    private resolveFn: ((val: boolean) => void) | null = null;
-    private job: CompletableJob<boolean>;
-}
 
 function returnAbc(): string {
     return (() => 'a')() + (() => 'b')() + (() => 'c')();
@@ -227,21 +202,21 @@ function cancelNonStartedGroupTest() {
     );
 }
 
-function waitWaiterSignal(event : Event) {
-    event.wait();
+async function waitWaiterSignal(p : Promise<void>): Promise<void> {
+    await p;
     taskpool.Task.checkCancellation();
 }
 
 async function cancelExecutingGroupTest() {
     let g = new taskpool.TaskGroup();
-    let waiter = new Event();
-    let task = new taskpool.Task(waitWaiterSignal, waiter);
+    let waiter = new PromiseWithResolvers<void>();
+    let task = new taskpool.Task(waitWaiterSignal, waiter.promise);
     g.addTask(task);
     g.addTask(returnDef);
     let p = taskpool.execute(g);
     try {
         taskpool.cancel(g);
-        waiter.fire();
+        waiter.resolve(undefined);
     } catch (e) {
         arktest.assertEQ(e.message, 'taskpool:: taskGroup is not executed or has been executed');
         return;

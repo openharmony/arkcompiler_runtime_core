@@ -23,7 +23,7 @@ tags: [no-warmup]
 
 import { CoroutineExtras } from "std/debug/concurrency"
 import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-import { Job, EAWorker } from "std/core"
+import { EAWorker } from "std/core"
 
 const MAIN_WORKER_ID: int = 0;
 
@@ -31,13 +31,13 @@ function getWorkerId(): int {
     return CoroutineExtras.getWorkerId();
 }
 
-function main(): void {
+async function main(): Promise<void> {
     const mainWorkerId: int = getWorkerId();
 
     // Create and start an EA worker
     const ea = new EAWorker();
     ea.start();
-    const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
+    const eaWorkerId: int = await ea.run<int>(getWorkerId);
 
     // Verify EA worker ID is different from main
     arktest.assertNE(eaWorkerId, mainWorkerId, 
@@ -53,8 +53,8 @@ function main(): void {
         workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, hint)
     };
 
-    let job: Job<int> = launch<int>(params, getWorkerId);
-    const launchedWorkerId: int = job.Await();
+    let promise: Promise<int> = launch<int>(params, getWorkerId);
+    const launchedWorkerId: int = await promise;
 
     // Verify coroutine executed on EA worker
     arktest.assertEQ(launchedWorkerId, eaWorkerId, 

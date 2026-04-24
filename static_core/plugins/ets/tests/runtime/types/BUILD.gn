@@ -53,7 +53,6 @@ ark_runtime_unittest("ets_internal_objects_tests") {
     "ets_std_core_array_test.cpp",
     "ets_finalizable_weak_ref_test.cpp",
     "ets_finalization_registry_test.cpp",
-    "ets_job_test.cpp",
     "ets_map_test.cpp",
     "ets_promise_test.cpp",
     "ets_reflect_test.cpp",

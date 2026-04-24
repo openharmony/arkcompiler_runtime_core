@@ -23,7 +23,6 @@
 namespace ark::ets {
 
 class PandaEtsVM;
-class EtsJob;
 class EtsPromise;
 class EtsExecutionContext;
 
@@ -36,15 +35,6 @@ public:
     NO_COPY_SEMANTIC(UnhandledObjectManager);
     NO_MOVE_SEMANTIC(UnhandledObjectManager);
     ~UnhandledObjectManager() = default;
-
-    /// @brief Adds failed job to an internal storage
-    void AddFailedJob(EtsJob *job);
-
-    /// @brief Removes failed job from internal storage
-    void RemoveFailedJob(EtsJob *job);
-
-    /// @brief Invokes managed method to apply custom handler on stored failed jobs
-    void ListFailedJobs(EtsExecutionContext *executionCtx);
 
     /// @brief Adds rejected promise to an internal storage
     void AddRejectedPromise(EtsPromise *promise, EtsExecutionContext *adderExecutionCtx);
@@ -79,7 +69,6 @@ public:
     void InvokeErrorHandler(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> exception);
 
 private:
-    PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);
     PandaUnorderedMap<JobWorkerThread::Id, PandaUnorderedSet<EtsObject *>> rejectedPromises_ GUARDED_BY(mutex_);
     // NOTE: The current implementation doesn't handle the case where a promise is
     // rejected in one worker and handled in another. This is considered undefined behavior.
@@ -87,7 +76,6 @@ private:
     mutable os::memory::Mutex mutex_;
     PandaEtsVM *vm_;
 
-    const DefaultHandlerMode jobHandlerMode_;
     const DefaultHandlerMode promiseHandlerMode_;
 };
 }  // namespace ark::ets

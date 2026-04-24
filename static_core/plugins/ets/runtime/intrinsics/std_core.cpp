@@ -490,12 +490,4 @@ extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
     return ToEtsBoolean(false);
 }
 
-extern "C" void StdSystemDumpUhandledFailedJobs()
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    ScopedNativeCodeThread snct(coro);
-    coro->ProcessUnhandledFailedJobs();
-}
-
 }  // namespace ark::ets::intrinsics

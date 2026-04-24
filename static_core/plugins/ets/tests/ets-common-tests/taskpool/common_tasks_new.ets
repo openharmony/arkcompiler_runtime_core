@@ -31,32 +31,6 @@ function defaultWorkerPriorityIsHigh(): void {
     });
 }
 
-class Event {
-    constructor() {
-        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
-            this.resolveFn = resolve;
-        })
-        this.job = new CompletableJob<boolean>();
-        this.promise.then((result: boolean) => {
-            this.job.finish(result);
-        }).catch((e: Error) => {
-            this.job.fail(e);
-        });
-    }
-
-    public wait(): boolean {
-        return this.job.Await();
-    }
-
-    public fire(val: boolean = true) {
-        this.resolveFn!(val);
-    }
-
-    private promise: Promise<boolean>;
-    private resolveFn: ((val: boolean) => void) | null = null;
-    private job: CompletableJob<boolean>;
-}
-
 async function cancelInSuccessCallback() {
     let syncSuccessCallbackCalled: boolean = false;
     let asyncSuccessCallbackCalled: boolean = false;
@@ -128,16 +102,16 @@ async function getcurrentTask() {
 }
 
 async function testTaskInfoDuration() {
-    let event1 = new Event();
-    let event2 = new Event();
-    let task = new taskpool.Task(() => {
+    let event1 = new PromiseWithResolvers<void>();
+    let event2 = new PromiseWithResolvers<void>();
+    let task = new taskpool.Task(async () => {
         let startTime = Date.now();
         while (Date.now() - startTime < 100) {}
-        event2.fire();
-        event1.wait();
+        event2.resolve(undefined);
+        await event1.promise;
     });
     taskpool.execute(task);
-    event2.wait();
+    await event2.promise;
     let info = taskpool.getTaskPoolInfo();
     arktest.assertNE(info.taskInfos.length, 0);
     let found = false;
@@ -148,32 +122,32 @@ async function testTaskInfoDuration() {
             break;
         }
     }
-    event1.fire();
+    event1.resolve(undefined);
     arktest.assertEQ(found, true);
 }
 
 async function onExecutionFailedtestAsyncfun() {
-    let catchSuccess: int = 0;
-    let event = new Event();
-    let funca = async(): Any => {
+    let catchSuccess : int = 0;
+    let event = new PromiseWithResolvers<void>();
+    let funca = async() : Any => {
         throw new Error('Error');
     }
     let task = new taskpool.Task(funca);
     task.onExecutionFailed((e : Error) => {
        catchSuccess++;
-       event.fire();
+       event.resolve(undefined);
     });
     taskpool.execute(task);
-    event.wait();
+    await event.promise;
     arktest.assertEQ(catchSuccess, 1);
 }
 
 async function onExecutionFailedtestmultAsyncfun(){
-    let catchSuccess: int = 0;
-    let event1 = new Event();
-    let event2 = new Event();
-    let event3 = new Event();
-    let funca = async(): Any => {
+    let catchSuccess : int = 0;
+    let event1 = new PromiseWithResolvers<void>();
+    let event2 = new PromiseWithResolvers<void>();
+    let event3 = new PromiseWithResolvers<void>();
+    let funca = async() : Any => {
         throw new Error('Error');
     }
     let task1 = new taskpool.Task(funca);
@@ -183,29 +157,28 @@ async function onExecutionFailedtestmultAsyncfun(){
     task2.addDependency(task1);
     task1.onExecutionFailed((e : Error) => {
        catchSuccess++;
-       event1.fire();
+       event1.resolve(undefined);
     });
     task2.onExecutionFailed((e : Error) => {
        catchSuccess++;
-       event2.fire();
+       event2.resolve(undefined);
     });
     task3.onExecutionFailed((e : Error) => {
        catchSuccess++;
-       event3.fire();
+       event3.resolve(undefined);
     });
     taskpool.execute(task1);
     taskpool.execute(task2);
     taskpool.execute(task3);
-    event1.wait();
-    event2.wait();
-    event3.wait();
+    await event1.promise;
+    await event2.promise;
+    await event3.promise;
     arktest.assertEQ(catchSuccess,3);
 }
 
 async function onFailCallbackExceptionTest() {
     let callbackCalled: boolean = false;
     let errorCaught: boolean = false;
-    let event = new Event();
     let errorFunc = async() : Promise<void> => {
         throw new Error('Original Error');
     }
@@ -320,7 +293,7 @@ async function onEnqueuedNestedExecuteTest() {
     let innerResult: string = '';
     let callbackCalled: boolean = false;
     let failed: boolean = false;
-    let event = new Event();
+    let event = new PromiseWithResolvers<void>();
     let outerTask = new taskpool.Task(returnAbc);
 
     outerTask.onEnqueued(() => {
@@ -328,17 +301,17 @@ async function onEnqueuedNestedExecuteTest() {
         let innerTask = new taskpool.Task(returnAbc);
         taskpool.execute(innerTask).then((res: Any) => {
             innerResult = res as string;
-            event.fire();
+            event.resolve(undefined);
         }).catch((e: Error) => {
             failed = true;
-            event.fire();
+            event.resolve(undefined);
         });
     });
 
     let outerResult = await taskpool.execute(outerTask);
     arktest.assertEQ(outerResult, 'abc');
     arktest.assertEQ(callbackCalled, true);
-    event.wait();
+    await event.promise;
     arktest.assertEQ(failed, false);
     arktest.assertEQ(innerResult, 'abc');
 }
@@ -349,7 +322,7 @@ async function onEnqueuedNestedRunnerExecuteTest() {
     let completedCount: int = 0;
     let sequenceResult: string = '';
     let asyncResult: string = '';
-    let event = new Event();
+    let event = new PromiseWithResolvers<void>();
     let outerTask = new taskpool.Task(returnAbc);
 
     outerTask.onEnqueued(() => {
@@ -361,7 +334,7 @@ async function onEnqueuedNestedRunnerExecuteTest() {
         let markDone = () => {
             completedCount++;
             if (completedCount == 2) {
-                event.fire();
+                event.resolve(undefined);
             }
         }
 
@@ -385,7 +358,7 @@ async function onEnqueuedNestedRunnerExecuteTest() {
     let outerResult = await taskpool.execute(outerTask);
     arktest.assertEQ(outerResult, 'abc');
     arktest.assertEQ(callbackCalled, true);
-    event.wait();
+    await event.promise;
     arktest.assertEQ(failed, false);
     arktest.assertEQ(sequenceResult, 'abc');
     arktest.assertEQ(asyncResult, 'abc');
@@ -393,8 +366,8 @@ async function onEnqueuedNestedRunnerExecuteTest() {
 
 async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
     let completedCount: int = 0;
-    let event = new Event();
-    let emptyFunc = () => {}
+    let event = new PromiseWithResolvers<void>();
+    let emptyFunc = () => {};
 
     let asyncRunner: taskpool.AsyncRunner = new taskpool.AsyncRunner('async', 3, 3);
     let mainTask: taskpool.Task = new taskpool.Task(emptyFunc);
@@ -404,7 +377,7 @@ async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
         asyncRunner.execute(innerTask).then(() => {
             completedCount++;
             if (completedCount == 2) {
-                event.fire();
+                event.resolve(undefined);
             }
         });
     });
@@ -412,11 +385,11 @@ async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
     asyncRunner.execute(mainTask).then(() => {
         completedCount++;
         if (completedCount == 2) {
-            event.fire();
+            event.resolve(undefined);
         }
     });
 
-    event.wait();
+    await event.promise;
     arktest.assertEQ(completedCount, 2);
 }
 

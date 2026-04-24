@@ -22,7 +22,6 @@
 #include "mem/refstorage/reference.h"
 #include "runtime/include/object_header.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/include/panda_vm.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -77,58 +76,12 @@ void EtsCoroutine::RequestCompletion(Value returnValue)
         return;
     }
     auto *storage = GetVM()->GetGlobalObjectStorage();
-    auto *completionObj = EtsObject::FromCoreType(storage->Get(completionObjRef));
+    [[maybe_unused]] auto *completionObj = EtsObject::FromCoreType(storage->Get(completionObjRef));
 
-    if (completionObj->IsInstanceOf(PlatformTypes(this)->corePromise)) {
-        RequestPromiseCompletion(completionObjRef, returnValue);
-    } else if (completionObj->IsInstanceOf(PlatformTypes(this)->coreJob)) {
-        RequestJobCompletion(completionObjRef, returnValue);
-    } else {
-        UNREACHABLE();
-    }
-}
+    ASSERT(completionObj != nullptr);
+    ASSERT(completionObj->IsInstanceOf(PlatformTypes(this)->corePromise));
 
-void EtsCoroutine::RequestJobCompletion(mem::Reference *jobRef, Value returnValue)
-{
-    auto *storage = GetVM()->GetGlobalObjectStorage();
-    auto *job = EtsJob::FromCoreType(storage->Get(jobRef));
-    storage->Remove(jobRef);
-    if (job == nullptr) {
-        LOG(DEBUG, COROUTINES)
-            << "Coroutine \"" << GetName()
-            << "\" has completed, but the associated job has been already collected by the GC. Exception thrown: "
-            << HasPendingException();
-        Coroutine::RequestCompletion(returnValue);
-        return;
-    }
-    [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
-    EtsHandle<EtsJob> hjob(GetExecutionCtx(), job);
-    EtsObject *retObject = nullptr;
-    if (!HasPendingException()) {
-        panda_file::Type returnType = GetReturnType();
-        retObject = GetReturnValueAsObject(returnType, returnValue);
-        if (retObject != nullptr) {
-            LOG_IF(returnType.IsVoid(), DEBUG, COROUTINES) << "Coroutine \"" << GetName() << "\" has completed";
-            LOG_IF(returnType.IsPrimitive(), DEBUG, COROUTINES)
-                << "Coroutine \"" << GetName() << "\" has completed with return value 0x" << std::hex
-                << returnValue.GetAs<uint64_t>();
-            LOG_IF(returnType.IsReference(), DEBUG, COROUTINES)
-                << "Coroutine \"" << GetName() << "\" has completed with return value = ObjectPtr<"
-                << returnValue.GetAs<ObjectHeader *>() << ">";
-        }
-    }
-    if (HasPendingException()) {
-        // An exception may occur while boxin primitive return value in GetReturnValueAsObject
-        auto *exc = GetException();
-        if (!GetJob()->HasAbortFlag()) {
-            ClearException();
-        }
-        LOG(INFO, COROUTINES) << "Coroutine \"" << GetName()
-                              << "\" completed with an exception: " << exc->ClassAddr<Class>()->GetName();
-        EtsJob::EtsJobFail(hjob.GetPtr(), EtsObject::FromCoreType(exc));
-        return;
-    }
-    EtsJob::EtsJobFinish(hjob.GetPtr(), retObject);
+    RequestPromiseCompletion(completionObjRef, returnValue);
 }
 
 void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue)
@@ -277,13 +230,7 @@ void EtsCoroutine::HandleUncaughtException()
 
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
 {
-    ProcessUnhandledFailedJobs();
     executionCtx_.ProcessUnhandledRejectedPromises(true);
-}
-
-void EtsCoroutine::ProcessUnhandledFailedJobs()
-{
-    executionCtx_.ProcessUnhandledFailedJobs();
 }
 
 bool EtsCoroutine::IsContextSwitchRisky() const

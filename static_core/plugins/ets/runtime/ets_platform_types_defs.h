@@ -123,7 +123,6 @@
     /* Concurrency */                                                                                                 \
     TP("Larkruntime/AsyncContext;", arkruntimeAsyncContext)                                                           \
     TP("Lstd/core/Promise;", corePromise)                                                                             \
-    TP("Lstd/core/Job;", coreJob)                                                                                     \
     IM("Lstd/core/Promise;", "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V",                                 \
        corePromiseSubscribeOnAnotherPromise)                                                                          \
     TP("Lstd/core/PromiseRef;", corePromiseRef)                                                                       \
@@ -218,7 +217,6 @@
        coreReflectProxyInvokeGet)                                                                                     \
     /* Process */                                                                                                     \
     TP("Lstd/core/StdProcess;", coreStdProcess)                                                                       \
-    SM("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;I:V", coreStdProcessListUnhandledJobs)          \
     SM("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;I:V", coreStdProcessListUnhandledPromises)  \
     SM("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V", coreStdProcessHandleUncaughtError)      \
     /* JSON */                                                                                                        \
