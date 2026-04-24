@@ -17,7 +17,7 @@
 desc: >-
     If type arguments cannot be inferred, then a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "type argument cannot be inferred"
+expected_out: "Semantic error ESE8745: Type parameter 'T' can not be inferred for the call to 'bar'. Specify the type argument explicitly."
 ---*/
 
 function bar <T> (p: number) {}

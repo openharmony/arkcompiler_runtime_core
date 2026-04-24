@@ -38,12 +38,6 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined4.ets
 
-#33178
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/cannot_infer_type_arg_n.ets
-
-#30718
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_n_4.ets
-
 #33818
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_1.ets
