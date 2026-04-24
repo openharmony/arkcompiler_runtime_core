@@ -86,3 +86,22 @@ function testBranchLocalBlockMergeOutOfBounds(): int {
     }
     return 1;
 }
+
+//! CHECKER      Root-level BoundsCheck stays local when graph has no end block
+//! RUN_PAOC     options: "--compiler-regex='.*rootNoEndBlock.*' --compiler-inlining=false"
+//! METHOD       "bounds_check_deopt.ETSGLOBAL::__noinline__rootNoEndBlock"
+//! PASS_BEFORE  "ChecksElimination"
+//! INST_COUNT   "BoundsCheck", 1
+//! PASS_AFTER   "ChecksElimination"
+//! INST_COUNT   "BoundsCheck", 1
+//! INST_NOT     "DeoptimizeIf"
+function __noinline__rootNoEndBlock(arr: ValueArray<int>): int {
+    // BoundsCheck is in the root-level block; the infinite loop only removes normal exit.
+    let first: int = arr[0];
+    while (true) {
+        if (first == -1) {
+            first = 0;
+        }
+    }
+    return first;
+}

@@ -5394,6 +5394,37 @@ TEST_F(ChecksEliminationTest, LoopCoveredBoundsChecksAcrossBlocks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
+TEST_F(ChecksEliminationTest, RootLoopWithoutEndBlock)
+{
+    // Build an infinite-loop graph: it has no normal exit path.
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(2U, 0U).ref();  // array
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(5U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(6U, Opcode::NullCheck).ref().Inputs(2U, 5U);
+            INST(7U, Opcode::LenArray).s32().Inputs(6U);
+            INST(8U, Opcode::BoundsCheck).s32().Inputs(7U, 0U, 5U);
+            INST(9U, Opcode::LoadArray).s32().Inputs(6U, 8U);
+        }
+        BASIC_BLOCK(3U, 3U)
+        {
+            // infinite loop
+        }
+    }
+
+    ASSERT_FALSE(GetGraph()->HasEndBlock());
+
+    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    ASSERT_FALSE(GetGraph()->RunPass<ChecksElimination>());
+    ASSERT_FALSE(GetGraph()->HasEndBlock());
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
+}
+
 // CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void ChecksEliminationTest::BuildGraphRootMergeBranchLocalBoundsChecks()
 {
