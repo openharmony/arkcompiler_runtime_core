@@ -14,12 +14,10 @@
  */
 
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
-#include <string>
 
 #include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
@@ -50,8 +48,7 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
     if (klass->IsArrayClass()) {
         auto type = klass->GetComponentType()->GetType().GetId();
         if (type != panda_file::Type::TypeId::REFERENCE) {
-            ctx->Fatal(INTEROP_UNSUPPORTED_PRIMITIVE_ARRAY_TYPE,
-                       std::string("Unhandled primitive array: ") + utf::Mutf8AsCString(klass->GetDescriptor()));
+            ctx->Fatal(std::string("Unhandled primitive array: ") + utf::Mutf8AsCString(klass->GetDescriptor()));
         }
         return std::make_unique<JSRefConvertReftypeArray>(klass);
     }
@@ -101,9 +98,9 @@ JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
     auto conv = JSRefConvertCreateImpl(ctx, klass);
     if (UNLIKELY(conv == nullptr)) {
         if (!executionCtx->GetMT()->HasPendingException()) {
-            ctx->ThrowETSError(executionCtx, INTEROP_UNSUPPORTED_TYPE_CONVERSION,
-                               std::string("Seamless conversion for class ") +
-                                   utf::Mutf8AsCString(klass->GetDescriptor()) + std::string(" is not supported"));
+            ctx->ThrowETSError(executionCtx, std::string("Seamless conversion for class ") +
+                                                 utf::Mutf8AsCString(klass->GetDescriptor()) +
+                                                 std::string(" is not supported"));
         }
         return nullptr;
     }

@@ -374,7 +374,7 @@ export final class ESValue {
     public invokeMethod(method: string, ...args: FixedArray<Any>): ESValue {
         let callable = this.getPropertySafe(method);
         if (callable.isUndefined()) {
-            throw Error("failed to get property");
+            throw Error(`Method '${method}' not found`);
         }
         let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         for (let i = 0; i < args.length; i++) {

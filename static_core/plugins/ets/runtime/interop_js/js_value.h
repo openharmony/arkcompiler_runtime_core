@@ -16,8 +16,6 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_
 
-#include "ets_exceptions.h"
-#include "interop_js/interop_error.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
@@ -28,7 +26,6 @@
 #include "runtime/include/coretypes/class.h"
 #include "libarkbase/utils/small_vector.h"
 #include <node_api.h>
-#include <string>
 
 namespace ark::ets::interop::js {
 
@@ -311,10 +308,7 @@ private:
         // check if the ctx is the same as the one that created the reference
         if (sharedRef->GetCtx()->GetJSEnv() != env) {
             // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
-            InteropCtx::ThrowETSError(
-                EtsExecutionContext::GetCurrent(), INTEROP_INVALID_INTEROP_CONTEXT,
-                "InteropFatal, interop object must be used in the same interopCtx as it was created.");
-            return nullptr;
+            InteropFatal("InteropFatal, interop object must be used in the same interopCtx as it was created.");
         }
 
         return sharedRef->GetJsRef();

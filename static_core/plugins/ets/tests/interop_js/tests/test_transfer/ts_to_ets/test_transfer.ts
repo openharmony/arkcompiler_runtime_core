@@ -195,9 +195,7 @@ function testNoSeamlessForClass(func, arg, className): void {
     try {
         func(arg);
     } catch (err) {
-        print(err.toString());
-        print(err.code);
-        res = err.toString().includes(errStrPre + className + errStrPost);
+        res = err.toString() === errStrPre + className + errStrPost;
     }
     ASSERT_TRUE(res);
 }

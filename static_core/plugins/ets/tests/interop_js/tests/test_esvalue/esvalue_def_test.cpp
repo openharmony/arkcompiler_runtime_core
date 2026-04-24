@@ -517,4 +517,9 @@ TEST_F(EtsESValueJsToEtsTest, testDateOperations)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testDateToISOString"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testDateGetMethods"));
 }
+
+TEST_F(EtsESValueJsToEtsTest, testArrayOutOfBound)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testArrayOutOfBound"));
+}
 }  // namespace ark::ets::interop::js::testing

@@ -36,8 +36,8 @@ class EtsClassWrapper;
 
 using LazyEtsMethodWrapperLink = TypedPointer<EtsMethodSet, EtsMethodWrapper>;
 using EtsMethodWrappersCache = WrappersCache<EtsMethodSet *, EtsMethodWrapper>;
-using EtsMethodAndClassWrapper = std::tuple<EtsMethod *, const char *, int, EtsClassWrapper *>;
-using FindMethodFunc = std::function<std::tuple<EtsMethod *, const char *, int, EtsClassWrapper *>(void *, size_t)>;
+using EtsMethodAndClassWrapper = std::tuple<EtsMethod *, const char *, EtsClassWrapper *>;
+using FindMethodFunc = std::function<std::tuple<EtsMethod *, const char *, EtsClassWrapper *>(void *, size_t)>;
 
 class EtsMethodWrapper {
 public:

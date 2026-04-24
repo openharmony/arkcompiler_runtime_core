@@ -18,7 +18,6 @@
 #include <js_native_api_types.h>
 #include <iostream>
 #include <ostream>
-#include <string>
 #include <vector>
 
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -32,7 +31,6 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "plugins/ets/runtime/interop_js/interop_error.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -119,7 +117,7 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
 
     napi_env env = ctx->GetJSEnv();
     if (IsUndefined(env, jsValue)) {
-        InteropCtx::ThrowJSTypeError(env, INTEROP_UNDEFINED_VALUE, "Value is undefined");
+        InteropCtx::ThrowJSTypeError(env, "Value is undefined");
     }
 
     // Check if object has SharedReference
@@ -137,14 +135,12 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
     if (LIKELY(HasBuiltin()) && LIKELY(jsBuiltinMatcher_ != nullptr)) {
         auto res = jsBuiltinMatcher_(ctx, jsValue, false);
         if (res == nullptr && !ctx->SanityJSExceptionPending() && !ctx->SanityETSExceptionPending()) {
-            InteropCtx::ThrowJSTypeError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
-                                         std::string("Value is not assignable to ") + etsClass_->GetDescriptor());
+            InteropCtx::ThrowJSTypeError(env, std::string("Value is not assignable to ") + etsClass_->GetDescriptor());
         }
         return res;
     }
 
-    InteropCtx::ThrowJSTypeError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
-                                 std::string("Value is not assignable to ") + etsClass_->GetDescriptor());
+    InteropCtx::ThrowJSTypeError(env, std::string("Value is not assignable to ") + etsClass_->GetDescriptor());
     return nullptr;
 }
 
@@ -164,16 +160,14 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
             return nullptr;
         }
         if (UNLIKELY(!sharedRef->HasETSFlag())) {
-            InteropCtx::ThrowJSTypeError(env, INTEROP_TYPE_NOT_ASSIGNABLE,
-                                         std::string("JS object in context of EtsProxy of class ") +
-                                             etsClass_->GetDescriptor());
+            InteropCtx::ThrowJSTypeError(env, std::string("JS object in context of EtsProxy of class ") +
+                                                  etsClass_->GetDescriptor());
             return nullptr;
         }
         return etsObject;
     }
     if (UNLIKELY(IsNullOrUndefined(env, jsValue))) {
-        ctx->ThrowJSTypeError(env, INTEROP_CANNOT_CONVERT_NULL_OR_UNDEFINED_TO_OBJECT,
-                              "ets this in instance method cannot be null or undefined");
+        ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
     }
     return nullptr;
 }
@@ -242,7 +236,7 @@ napi_value JSRefConvertJSProxy::WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
 
 EtsObject *JSRefConvertJSProxy::UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
 {
-    ctx->Fatal(INTEROP_TYPE_NOT_ASSIGNABLE, "Unwrap called on JSProxy class");
+    ctx->Fatal("Unwrap called on JSProxy class");
     return nullptr;
 }
 
@@ -268,7 +262,7 @@ public:
     {
         auto realConverter = JSRefConvertResolve(ctx, etsObject->GetClass()->GetRuntimeClass());
         if (realConverter == nullptr) {
-            InteropFatal(INTEROP_TYPE_NOT_ASSIGNABLE, "Cannot get ref converter for object");
+            InteropFatal("Cannot get ref converter for object");
         }
         return realConverter->Wrap(ctx, etsObject);
     }
@@ -287,9 +281,9 @@ public:
             auto *ret = objectConverter->Unwrap(ctx, jsValue);
             ASSERT(ret != nullptr);
             if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
-                ctx->ThrowJSTypeError(ctx->GetJSEnv(), INTEROP_TYPE_NOT_ASSIGNABLE,
-                                      "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
-                                          " is not assignable to " + klass_->GetName());
+                ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " +
+                                                           ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                           " is not assignable to " + klass_->GetName());
                 return nullptr;
             }
             return ret;
@@ -298,9 +292,8 @@ public:
         napi_value result;
         NAPI_CHECK_FATAL(napi_get_ets_implements(env, jsValue, &result));
         if (GetValueType<true>(env, result) != napi_string) {
-            ctx->ThrowJSTypeError(ctx->GetJSEnv(), INTEROP_TYPE_NOT_ASSIGNABLE,
-                                  std::string("object is not a type of Interface: ") +
-                                      utf::Mutf8AsCString(klass_->GetDescriptor()));
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), std::string("object is not a type of Interface: ") +
+                                                       utf::Mutf8AsCString(klass_->GetDescriptor()));
             return nullptr;
         }
         auto interfaceName = GetString(env, result);
@@ -312,7 +305,7 @@ public:
         }
         EtsHandle<EtsObject> etsObject(executionCtx, EtsObject::Create(proxy->GetProxyClass()));
         if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
-            ctx->ThrowJSTypeError(ctx->GetJSEnv(), INTEROP_PROXY_CREATION_FAILED,
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(),
                                   "Interface Proxy EtsObject create failed, interfaceList: " + interfaceName);
             return nullptr;
         }
@@ -375,9 +368,8 @@ public:
         auto resObject = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
         ret = EtsObject::FromCoreType(resObject.GetAs<ObjectHeader *>());
         if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(GetKlass()))) {
-            ctx->ThrowJSTypeError(ctx->GetJSEnv(), INTEROP_TYPE_NOT_ASSIGNABLE,
-                                  "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
-                                      " is not assignable to " + GetKlass()->GetName());
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                       " is not a assignable to " + GetKlass()->GetName());
             return nullptr;
         }
         return ret;
@@ -490,8 +482,7 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     const OverloadsMap *overloads)
 {
     auto fatalNoMethod = [](Class *klass, const char *methodName, const char *signature) {
-        InteropCtx::Fatal(INTEROP_METHOD_NOT_FOUND,
-                          std::string("No method ") + methodName + " " + signature + " in " + klass->GetName());
+        InteropCtx::Fatal(std::string("No method ") + methodName + " " + signature + " in " + klass->GetName());
     };
 
     auto klass = etsClass_->GetRuntimeClass();
@@ -872,12 +863,10 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 
     // NOTE(vpukhov): fatal no-public-fields check when std adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {
-        INTEROP_LOG(ERROR) << "built-in class " << etsClass->GetDescriptor() << " has field properties"
-                           << ". Error code: " << std::to_string(INTEROP_BUILTIN_CLASS_CONSTRAINT_VIOLATION);
+        INTEROP_LOG(ERROR) << "built-in class " << etsClass->GetDescriptor() << " has field properties";
     }
     if (_this->HasBuiltin() && etsClass->IsFinal() && !etsClass->GetRuntimeClass()->IsAnyClass()) {
-        INTEROP_LOG(FATAL) << "built-in class " << etsClass->GetDescriptor()
-                           << " is final. Error code: " << std::to_string(INTEROP_BUILTIN_CLASS_CONSTRAINT_VIOLATION);
+        INTEROP_LOG(FATAL) << "built-in class " << etsClass->GetDescriptor() << " is final";
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     if (!_this->SetupJsProxyWrapper(ctx, etsClass)) {
@@ -1017,7 +1006,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
         ASSERT(storage != nullptr);
         ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
         if (sharedRef == nullptr) {
-            InteropFatal(INTEROP_SHARED_REFERENCE_NOT_FOUND, "MimicGetHandler sharedRef is empty");
+            InteropFatal("MimicGetHandler sharedRef is empty");
         }
 
         auto *etsThis = sharedRef->GetEtsObject();
@@ -1055,7 +1044,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
     ASSERT(storage != nullptr);
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
     if (sharedRef == nullptr) {
-        InteropFatal(INTEROP_SHARED_REFERENCE_NOT_FOUND, "MimicSetHandler sharedRef is empty");
+        InteropFatal("MimicSetHandler sharedRef is empty");
     }
 
     auto *etsThis = sharedRef->GetEtsObject();
@@ -1079,7 +1068,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
         method = cls->GetInstanceMethod(SET_INDEX_METHOD, nullptr);
     }
     if (method == nullptr) {
-        InteropCtx::ThrowJSError(env, INTEROP_METHOD_NOT_FOUND, "there is no setter method on target object.");
+        InteropCtx::ThrowJSError(env, "there is no setter method on target object.");
         return nullptr;
     }
     CallETSInstance(executionCtx, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
@@ -1127,7 +1116,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     }
 
     if (!etsClassWrapper->etsCtorLink_.IsResolved() && etsClassWrapper->etsCtorLink_.GetUnresolved() == nullptr) {
-        InteropCtx::ThrowJSError(env, INTEROP_METHOD_NOT_FOUND,
+        InteropCtx::ThrowJSError(env,
                                  etsClassWrapper->GetEtsClass()->GetRuntimeClass()->GetName() + " has no constructor");
         return nullptr;
     }
@@ -1166,8 +1155,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
         instanceClass = etsClass_;
     } else {
         if (UNLIKELY(jsproxyWrapper_ == nullptr)) {
-            ctx->ThrowJSTypeError(env, INTEROP_PROXY_NOT_EXTENSIBLE,
-                                  std::string("Proxy for ") + etsClass_->GetDescriptor() + " is not extensible");
+            ctx->ThrowJSTypeError(env, std::string("Proxy for ") + etsClass_->GetDescriptor() + " is not extensible");
             return false;
         }
         instanceClass = jsproxyWrapper_->GetProxyClass();

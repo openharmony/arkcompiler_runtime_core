@@ -29,6 +29,7 @@ let jsFunc = module.getProperty('jsFunc');
 let jsFuncWithParam = module.getProperty('jsFuncWithParam');
 let jsArray = module.getProperty('jsArray');
 let jsArray1 = module.getProperty('jsArray1');
+let strArray = module.getProperty('strArray');
 let jsObjectA = module.getProperty('A');
 let jsObjectB = module.getProperty('B');
 let jsObjWithFunc = module.getProperty('objWithFunc');
@@ -605,7 +606,7 @@ function testInvokeMethodThrowsOnNonExistent(): boolean {
         jsObject.invokeMethod('nonExistentMethod');
         return false;
     } catch (e) {
-        return e.message.includes('failed to get property');
+        return e.message.includes('not found');
     }
 }
 
@@ -1376,4 +1377,9 @@ function testDateGetMethods(): boolean {
     let month = testDate.invokeMethod('getMonth').toNumber();
     let date = testDate.invokeMethod('getDate').toNumber();
     return year === 2025 && month === 2 && date === 15;
+}
+
+function testArrayOutOfBound(): boolean {
+    let str = strArray.getProperty(-1);
+    return str.isUndefined();
 }

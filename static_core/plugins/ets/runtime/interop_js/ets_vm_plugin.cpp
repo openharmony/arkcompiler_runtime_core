@@ -14,7 +14,6 @@
  */
 
 #include <node_api.h>
-#include <string>
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm_api.h"
@@ -23,7 +22,6 @@
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "plugins/ets/runtime/interop_js/interop_error.h"
 
 #include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "compiler_options.h"
@@ -57,8 +55,7 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
     if (jsArgc != 2U && jsArgc != 1U) {
-        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
-                                 "GetEtsFunction: bad args, actual args count: " + std::to_string(jsArgc));
+        InteropCtx::ThrowJSError(env, "GetEtsFunction: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
 
@@ -71,14 +68,13 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
     if (jsArgc == 2U) {
         napi_value jsPackageName = jsArgv[0];
         if (GetValueType(env, jsPackageName) != napi_string) {
-            InteropCtx::ThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH,
-                                     "GetEtsFunction: package name is not a string");
+            InteropCtx::ThrowJSError(env, "GetEtsFunction: package name is not a string");
         }
         packageName = GetString(env, jsPackageName);
     }
 
     if (GetValueType(env, jsFunctionName) != napi_string) {
-        InteropCtx::ThrowJSError(env, INTEROP_ARGUMENT_TYPE_MISMATCH, "GetEtsFunction: function name is not a string");
+        InteropCtx::ThrowJSError(env, "GetEtsFunction: function name is not a string");
         return nullptr;
     }
 
@@ -101,8 +97,7 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 1) {
-        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
-                                 "GetEtsClass: bad args, actual args count: " + std::to_string(jsArgc));
+        InteropCtx::ThrowJSError(env, "GetEtsClass: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
 
@@ -122,8 +117,7 @@ static napi_value GetEtsInstance(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 1) {
-        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
-                                 "GetEtsInstance: bad args, actual args count: " + std::to_string(jsArgc));
+        InteropCtx::ThrowJSError(env, "GetEtsInstance: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
     napi_value jsClassDescriptor {};
@@ -139,8 +133,7 @@ static napi_value GetEtsModule(napi_env env, napi_callback_info info)
     std::array<napi_value, 1> argv {};
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
     if (argc != 1) {
-        InteropCtx::ThrowJSError(env, INTEROP_BAD_ARGUMENTS_COUNT,
-                                 "GetEtsModule: expects exactly one argument (module name)");
+        InteropCtx::ThrowJSError(env, "GetEtsModule: expects exactly one argument (module name)");
         return nullptr;
     }
 
@@ -162,8 +155,7 @@ static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_
             napi_value option;
             NAPI_ASSERT_OK(napi_get_element(env, options, i, &option));
             if (napi_coerce_to_string(env, option, &option) != napi_ok) {
-                LogError("Option values must be coercible to string. Error code: " +
-                         std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+                LogError("Option values must be coercible to string");
                 return std::nullopt;
             }
             argStrings.push_back(GetString(env, option));
@@ -185,8 +177,7 @@ static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_
             NAPI_ASSERT_OK(napi_get_element(env, propNames, i, &key));
             NAPI_ASSERT_OK(napi_get_property(env, options, key, &value));
             if (napi_coerce_to_string(env, value, &value) != napi_ok) {
-                LogError("Option values must be coercible to string. Error code: " +
-                         std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+                LogError("Option values must be coercible to string");
                 return std::nullopt;
             }
             argStrings.push_back("--" + GetString(env, key) + "=" + GetString(env, value));
@@ -211,15 +202,13 @@ static bool AddOptions(logger::Options *loggerOptions, ark::RuntimeOptions *runt
     }
 
     if (!paParser.Parse(fakeArgv.size(), fakeArgv.data())) {
-        LogError("Parse options failed. Optional arguments:\n" + paParser.GetHelpString() +
-                 "\nError code: " + std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+        LogError("Parse options failed. Optional arguments:\n" + paParser.GetHelpString());
         return false;
     }
 
     auto runtimeOptionsErr = runtimeOptions->Validate();
     if (runtimeOptionsErr) {
-        LogError("Parse options failed: " + runtimeOptionsErr.value().GetMessage() +
-                 ". Error code: " + std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+        LogError("Parse options failed: " + runtimeOptionsErr.value().GetMessage());
         return false;
     }
     ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
@@ -249,14 +238,13 @@ static bool AddOptions(logger::Options *loggerOptions, ark::RuntimeOptions *runt
     NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
 
     if (argc != DEFAULT_ARGC) {
-        LogError("CreateRuntimeLegacy: bad args number. Error code: " + std::to_string(INTEROP_BAD_ARGUMENTS_COUNT));
+        LogError("CreateRuntimeLegacy: bad args number");
         return napiFalse;
     }
 
     napi_value options = argv[0];
     if (GetValueTypeNoScope(env, options) != napi_object) {
-        LogError("CreateRuntimeLegacy: argument is not an object. Error code: " +
-                 std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+        LogError("CreateRuntimeLegacy: argument is not an object");
         return napiFalse;
     }
 
@@ -295,21 +283,19 @@ static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
     NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
 
     if (argc != DEFAULT_ARGC) {
-        LogError("CreateRuntimeViaAni: bad args number. Error code: " + std::to_string(INTEROP_BAD_ARGUMENTS_COUNT));
+        LogError("CreateRuntimeViaAni: bad args number");
         return napiFalse;
     }
 
     napi_value options = argv[0];
     if (GetValueTypeNoScope(env, options) != napi_object) {
-        LogError("CreateRuntimeViaAni: argument is not an object. Error code: " +
-                 std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+        LogError("CreateRuntimeViaAni: argument is not an object");
         return napiFalse;
     }
 
     auto argStrings = GetArgStrings(env, options, false);
     if (argStrings == std::nullopt) {
-        LogError("CreateRuntimeViaAni: cannot parse options. Error code: " +
-                 std::to_string(INTEROP_INVALID_ARGUMENT_VALUE));
+        LogError("CreateRuntimeViaAni: cannot parse options");
         return napiFalse;
     }
 
@@ -330,7 +316,7 @@ static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
     ani_vm *panda;
     ani_status aniStatus = ANI_CreateVM(&aniOptions, ANI_VERSION_1, &panda);
     if (aniStatus != ANI_OK) {
-        LogError("CreateRuntimeViaAni: ANI_CreateVM failed. Error code: " + std::to_string(INTEROP_ANI_CALL_FAILED));
+        LogError("CreateRuntimeViaAni: ANI_CreateVM failed");
     }
 
     napi_value napiRes;
