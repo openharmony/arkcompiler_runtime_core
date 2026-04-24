@@ -55,6 +55,7 @@ tooling/
 - `pt_scoped_managed_code.h` - RAII wrapper for managed code scope management
 - `thread_sampling_info.h` - Data structures for thread sampling
 - `memory_allocation_dumper.h` - Memory allocation tracking and dumping
+- `tools.h` - VM level tools aggregation, stores instances of `Sampler` and `CoverageListener`
 
 ## Building
 

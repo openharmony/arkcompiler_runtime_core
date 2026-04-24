@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_IMPL_H_
-#define PANDA_INTERPRETER_IMPL_H_
 
-#include <cstdint>
+import { attach, fns } from './utils'
 
-#include "runtime/include/managed_thread.h"
-#include "runtime/interpreter/frame.h"
+function main() {
+    loadLibrary('ets_debug_session_attach_lib')
 
-namespace ark::interpreter {
+    arktest.assertEQ(fns.sum(1, 2), 3)
+    arktest.assertEQ(attach.countEventsForMethod('sum'), 0)
 
-void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh = false);
+    arktest.assertEQ(attach.attachDebugSession(), attach.DebugSessionAttachErrorCode.OK)
 
-// This function is allowed to be used only by `AttachDebugSession`.
-void SwitchToDebugMode(ManagedThread *thread);
-
-}  // namespace ark::interpreter
-
-#endif  // PANDA_INTERPRETER_IMPL_H_
+    arktest.assertEQ(fns.sum(2, 3), 5)
+    arktest.assertLT(0, attach.countEventsForMethod('sum'))
+}

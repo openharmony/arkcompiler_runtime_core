@@ -413,6 +413,10 @@ macro(:dispatch) do |table, pc|
   tail_call(addr)
 end
 
+macro(:load_dispatch_table) do
+  LoadI(%tr).Imm(Constants::MANAGED_THREAD_DISPATCH_TABLE_OFFSET).ptr
+end
+
 macro(:call_runtime) do |sym, *args|
   Call(*args).Method(sym)
 end
@@ -617,6 +621,8 @@ macro(:instrument_branches) do |imm, acc_type, method_ptr|
   inc_pc := advance_pc_var(pc, i32tou64(imm))
   If(imm, 0).LE {
     safepoint(acc_type, true)
+    # Update dispatch table on backward branches
+    tmp_table := load_dispatch_table()
 
     hc := LoadI(method_ptr).Imm(Constants::GET_HOTNESS_COUNTER_OFFSET).i16;
 
@@ -639,6 +645,7 @@ macro(:instrument_branches) do |imm, acc_type, method_ptr|
     tmp_pc := Phi(inc_pc, fake_pc, inc_pc).ptr
   }
 
+  table_sf := Phi(table, tmp_table).ptr
   acc_sf := Phi(acc, tmp_acc).send(acc_type)
   acc_tag_sf := Phi(acc_tag, tmp_acc_tag).i64
   frame_sf := Phi(%frame, tmp_frame).ptr
@@ -808,6 +815,7 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
     acc_tag_native := restore_acc_tag().i64
 
     pc_native := advance_pc_imm(%pc, size)
+    new_table := load_dispatch_table()
   } Else {
     pc_int := get_instructions(callee)
     num_vregs := u32toword(get_numvregs(callee))
@@ -845,6 +853,7 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
     end
   }
   load_to_acc_reg(Phi(acc_native, acc).send(acc.type), Phi(acc_tag_native, acc_tag.i64).i64)
+  table := Phi(new_table, table).ptr
   frame := Phi(%frame, new_frame).ptr
   if Options.arm64?
     moffset := Phi(%moffset, new_moffset).word
@@ -872,6 +881,7 @@ end
 
 macro(:generic_return) do |copy_lambda|
   frame_flags := LoadI(%frame).Imm(Constants::FRAME_FLAGS_OFFSET).word
+  table := load_dispatch_table()
   If(And(frame_flags, "Frame::IS_STACKLESS").word, 0).NE.Likely {
     if !@compile_for_llvm
       Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
@@ -904,6 +914,7 @@ macro(:handle_throw) do |vs|
   }
   pc := find_catch_block()
   frame := frame_eh
+  table := load_dispatch_table()
   if Options.arm64?
     moffset := moffset_eh
     method_ptr := method_ptr_eh
@@ -981,6 +992,7 @@ end
 macro(:handle_jmp_imm) do |pc, imm|
   next_pc := instrument_branches(imm, acc.type, get_method_ptr())
   load_to_acc_reg(acc_sf, acc_tag_sf)
+  table := table_sf
   frame := frame_sf
   if Options.arm64?
     moffset := moffset_sf
@@ -1843,6 +1855,7 @@ end
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).i32, Phi(acc_tag_sf, acc_tag).i64)
+      table := Phi(table_sf, table).ptr
       frame := Phi(frame_sf, %frame).ptr
       if Options.arm64?
         moffset := Phi(moffset_sf, %moffset).word
@@ -1866,6 +1879,7 @@ end
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).i32, Phi(acc_tag_sf, acc_tag).i64)
+      table := Phi(table_sf, table).ptr
       frame := Phi(frame_sf, %frame).ptr
       if Options.arm64?
         moffset := Phi(moffset_sf, %moffset).word
@@ -1905,6 +1919,7 @@ end
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).ref, Phi(acc_tag_sf, acc_tag).i64)
+      table := Phi(table_sf, table).ptr
       frame := Phi(frame_sf, %frame).ptr
       if Options.arm64?
         moffset := Phi(moffset_sf, %moffset).word
@@ -1928,6 +1943,7 @@ end
         pc2 := advance_pc_imm(pc, size)
       }
       load_to_acc_reg(Phi(acc_sf, acc).ref, Phi(acc_tag_sf, acc_tag).i64)
+      table := Phi(table_sf, table).ptr
       frame := Phi(frame_sf, %frame).ptr
       if Options.arm64?
         moffset := Phi(moffset_sf, %moffset).word
@@ -3366,7 +3382,7 @@ function(:HANDLE_FAST_EXCEPTION,
     Intrinsic(:UNREACHABLE).Terminator.void
     next
   end
-  table := %dispatch
+  table := load_dispatch_table()
   pc := %pc
 
   #assert pending exception
@@ -3388,4 +3404,20 @@ function(:HANDLE_FAST_EXCEPTION,
   LiveOut(%tr).DstReg(regmap[:tr]).ptr
 
   dispatch(table, pc)
+end
+
+function(:HANDLE_FAST_DEBUG_SWITCH,
+         regmap: handler_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:Interpreter],
+         validate: InterpreterValidation) do
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  save_acc_var(%acc.u64, %acc_tag.u64)
+  call_runtime("DebugSwitchFromIrtocEntrypoint", %tr, %pc, %frame).void
+  Intrinsic(:INTERPRETER_RETURN).ptr.Terminator
 end

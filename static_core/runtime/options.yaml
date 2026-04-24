@@ -123,6 +123,11 @@ options:
   default: false
   description: Is debugger enabled on runtime create
 
+- name: debugger-attach-allowed
+  type: bool
+  default: false
+  description: Is debugger attach after application start allowed
+
 - name: sampling-profiler-create
   type: bool
   default: false

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 
-#include "runtime/tooling/coverage_listener.h"
 #include "runtime/tooling/tools.h"
+
+#include "runtime/deoptimization.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
+#include "runtime/include/thread_scopes.h"
+#include "runtime/interpreter/interpreter_impl.h"
+#include "runtime/tooling/coverage_listener.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
 
 namespace ark::tooling {
@@ -73,6 +79,7 @@ void Tools::StopSamplingProfiler()
     ASSERT(sampler_ != nullptr);
     sampler_->Stop();
 }
+
 void Tools::DestroySamplingProfiler()
 {
     ASSERT(sampler_ != nullptr);
@@ -103,4 +110,74 @@ void Tools::DestroyCoverageListener()
     delete coverageListener_;
     coverageListener_ = nullptr;
 }
+
+bool Tools::IsDebugSessionAttachAllowed() const
+{
+    return Runtime::GetCurrent()->GetOptions().IsDebuggerAttachAllowed();
+}
+
+static void DeoptimizeAllCompiledMethods(Runtime *runtime, ManagedThread *thread)
+{
+    PandaSet<Method *> compiledMethods;
+    runtime->GetClassLinker()->EnumerateClasses([&](Class *klass) {
+        ASSERT(klass != nullptr);
+        for (auto &method : klass->GetMethodsWithCopied()) {
+            // Note special handling for proxy methods
+            if (method.HasCompiledCode() && !method.IsIntrinsic() && !method.IsNative() && !method.IsProxy()) {
+                compiledMethods.insert(&method);
+            }
+        }
+        return true;
+    });
+    if (!compiledMethods.empty()) {
+        ScopedManagedCodeThread smct(thread);
+        InvalidateCompiledEntryPoint(compiledMethods, false);
+    }
+}
+
+DebugSessionAttachErrorCode Tools::AttachDebugSession()
+{
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    ASSERT(!ManagedThread::IsManagedScope());
+
+    auto *runtime = Runtime::GetCurrent();
+    if (UNLIKELY(runtime->IsDebugMode())) {
+        return DebugSessionAttachErrorCode::ALREADY_ATTACHED;
+    }
+    if (UNLIKELY(!IsDebugSessionAttachAllowed())) {
+        return DebugSessionAttachErrorCode::NOT_ALLOWED;
+    }
+
+    // NOTE(dslynko): support JIT: suspend and disable it during attach
+    if (UNLIKELY(runtime->IsJitEnabled())) {
+        return DebugSessionAttachErrorCode::NOT_ALLOWED;
+    }
+
+    // 1. Enable debug mode globally.
+    runtime->SetDebugMode(true);
+
+    // 2. Clear all JIT and AOT compiled methods and trigger deoptimization
+    // for compiled frames corresponding to those methods.
+    if (LIKELY(runtime->GetClassLinker()->GetAotManager()->HasAotFiles())) {
+        DeoptimizeAllCompiledMethods(runtime, thread);
+    }
+
+    // 3. Create the debug session.
+    const auto session = runtime->StartDebugSession();
+    if (UNLIKELY(!session)) {
+        return DebugSessionAttachErrorCode::INVALID;
+    }
+
+    // 4. Suspend all threads and switch each to use debug dispatch table.
+    auto *vm = thread->GetVM();
+    ScopedSuspendAllThreads ssat(vm->GetRendezvous());
+    vm->GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
+        interpreter::SwitchToDebugMode(thread);
+        return true;
+    });
+
+    return DebugSessionAttachErrorCode::OK;
+}
+
 }  // namespace ark::tooling

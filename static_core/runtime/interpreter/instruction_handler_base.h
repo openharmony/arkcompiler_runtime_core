@@ -344,12 +344,14 @@ protected:
         return method->DecrementHotnessCounter<false>(this->GetBytecodeOffset() + offset, &this->GetAcc(), true);
     }
 
+    template <bool IS_DEBUG>
     ALWAYS_INLINE bool InstrumentBranches(int32_t offset)
     {
         // Offset may be 0 in case of infinite empty loops (see issue #5301)
         if (offset > 0) {
             return false;
         }
+        this->SetDispatchTable(this->GetThread()->template GetCurrentDispatchTable<IS_DEBUG>());
         SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetThread()->GetInternalId(), true));
         if (this->GetThread()->TestAllFlags()) {
             this->GetFrame()->SetAcc(this->GetAcc());

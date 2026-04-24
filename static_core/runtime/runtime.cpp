@@ -72,6 +72,7 @@
 #include "runtime/tooling/coverage_listener.h"
 #include "runtime/tooling/debugger.h"
 #include "runtime/tooling/memory_allocation_dumper.h"
+#include "runtime/tooling/sampler/sample_writer.h"
 #include "runtime/include/file_manager.h"
 #include "runtime/methodtrace/trace.h"
 #include "libarkbase/trace/trace.h"
@@ -178,8 +179,7 @@ mem::MemStatsType *RuntimeInternalAllocator::memStatsS_ = nullptr;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 mem::InternalAllocatorPtr RuntimeInternalAllocator::internalAllocatorS_ = nullptr;
 
-Runtime::DebugSession::DebugSession(Runtime &runtime)
-    : runtime_(runtime), isJitEnabled_(runtime.IsJitEnabled()), lock_(runtime.debugSessionUniquenessMutex_)
+Runtime::DebugSession::DebugSession(Runtime &runtime) : runtime_(runtime), isJitEnabled_(runtime.IsJitEnabled())
 {
     ASSERT(runtime_.isDebugMode_);
     runtime_.ForceDisableJit();
@@ -738,9 +738,10 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
-    isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
+    // Atomic with relaxed order reason: ordering constraints are not required
+    isJitEnabled_.store(!this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit(), std::memory_order_relaxed);
 #else
-    isJitEnabled_ = false;
+    ForceDisableJit();
 #endif
     isProfilerEnabled_ = Runtime::GetOptions().IsProfilerEnabled();
     saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();

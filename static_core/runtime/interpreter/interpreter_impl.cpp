@@ -33,6 +33,15 @@ extern "C" void ExecuteImplFast_LLVM(void *, void *, void *, void *);    // NOLI
 extern "C" void ExecuteImplFastEH_LLVM(void *, void *, void *, void *);  // NOLINT(readability-identifier-naming)
 #endif
 
+extern "C" void DebugSwitchFromIrtocEntrypoint(ark::ManagedThread *thread, const uint8_t *pc, ark::Frame *frame)
+{
+    if (frame->IsDynamic()) {
+        ark::interpreter::ExecuteImplDebug<ark::interpreter::RuntimeInterface, true>(thread, pc, frame, false);
+    } else {
+        ark::interpreter::ExecuteImplDebug<ark::interpreter::RuntimeInterface, false>(thread, pc, frame, false);
+    }
+}
+
 namespace ark::interpreter {
 
 enum InterpreterType { CPP = 0, IRTOC, LLVM };
@@ -86,14 +95,20 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
 void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, const uint8_t *pc, Frame *frame,
                      bool jumpToEh)
 {
+    const void *const *prevDispatchTable = thread->GetCurrentDispatchTable<false>();
+    const void *const *prevDebugDispatchTable = thread->GetDebugDispatchTable();
     if (interpreterType == InterpreterType::LLVM) {
 #ifdef PANDA_LLVM_INTERPRETER
         LOG(DEBUG, RUNTIME) << "Setting up LLVM Irtoc dispatch table";
-        auto dispathTable = SetupLLVMDispatchTableImpl();
+        ASSERT(!Runtime::GetCurrent()->IsDebugMode() && "Debug mode execution must be done in CPP interpreter");
+        auto dispatchTable = SetupLLVMDispatchTableImpl();
+        thread->SetCurrentDispatchTable<false>(static_cast<const void *const *>(dispatchTable));
+        auto *debugDispatchTable = SetupLLVMDebugDispatchTableImpl();
+        thread->SetDebugDispatchTable(static_cast<const void *const *>(debugDispatchTable));
         if (jumpToEh) {
-            ExecuteImplFastEH_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+            ExecuteImplFastEH_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispatchTable);
         } else {
-            ExecuteImplFast_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+            ExecuteImplFast_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispatchTable);
         }
 #else
         LOG(FATAL, RUNTIME) << "--interpreter-type=llvm is not supported in this configuration";
@@ -101,11 +116,15 @@ void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, con
     } else if (interpreterType == InterpreterType::IRTOC) {
 #ifdef PANDA_WITH_IRTOC
         LOG(DEBUG, RUNTIME) << "Setting up Irtoc dispatch table";
-        auto dispathTable = SetupDispatchTableImpl();
+        ASSERT(!Runtime::GetCurrent()->IsDebugMode() && "Debug mode execution must be done in CPP interpreter");
+        auto dispatchTable = SetupDispatchTableImpl();
+        thread->SetCurrentDispatchTable<false>(static_cast<const void *const *>(dispatchTable));
+        auto *debugDispatchTable = SetupDebugDispatchTableImpl();
+        thread->SetDebugDispatchTable(static_cast<const void *const *>(debugDispatchTable));
         if (jumpToEh) {
-            ExecuteImplFastEH(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+            ExecuteImplFastEH(thread, const_cast<uint8_t *>(pc), frame, dispatchTable);
         } else {
-            ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+            ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispatchTable);
         }
 #else
         LOG(FATAL, RUNTIME) << "--interpreter-type=irtoc is not supported in this configuration";
@@ -121,6 +140,10 @@ void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, con
             ExecuteImplInner<RuntimeInterface, false>(thread, pc, frame, jumpToEh);
         }
     }
+    // Handle switch to debug mode which could happen during method invocation
+    thread->SetDebugDispatchTable(prevDebugDispatchTable);
+    thread->SetCurrentDispatchTable<false>(Runtime::GetCurrent()->IsDebugMode() ? prevDebugDispatchTable
+                                                                                : prevDispatchTable);
 }
 
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh)
@@ -132,8 +155,10 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     interpreterType = GetInterpreterTypeFromRuntimeOptions(frame);
     if (interpreterType > InterpreterType::CPP) {
         if (Runtime::GetCurrent()->IsDebugMode()) {
-            LOG(FATAL, RUNTIME) << "--debug-mode=true option is supported only with --interpreter-type=cpp";
-            return;
+            // Debug mode was enabled at runtime.
+            // Fall back to the CPP debug interpreter which supports all debug
+            // events (BytecodePcChanged, MethodEntry/Exit, ExceptionThrow/Catch).
+            interpreterType = InterpreterType::CPP;
         }
         auto gcType = thread->GetVM()->GetGC()->GetType();
 #if defined(ARK_USE_COMMON_RUNTIME)
@@ -207,6 +232,17 @@ void EnsureDebugMethodsInstantiation(void *handler)
 {
     static_cast<InstructionHandlerBase<RuntimeInterface, false> *>(handler)->DebugDump();
     static_cast<InstructionHandlerBase<RuntimeInterface, true> *>(handler)->DebugDump();
+}
+
+void SwitchToDebugMode(ManagedThread *thread)
+{
+    ASSERT(thread != nullptr);
+    ASSERT(thread->IsSuspended());
+
+    auto *debugDT = thread->GetDebugDispatchTable();
+    if (debugDT != nullptr) {
+        thread->SetCurrentDispatchTable<false>(debugDT);
+    }
 }
 
 }  // namespace ark::interpreter

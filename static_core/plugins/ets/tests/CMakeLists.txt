@@ -290,18 +290,19 @@ function(compile_aot_ets_code PAOC_MODE ETS_ABC OUTPUT_AN TARGET ABC_TARGET)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
 
+    string(REPLACE ";" "," ETS_ABC_LIST "${ETS_ABC}")
     set(AOT_RUNTIME_ARGUMENTS
         --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         --compiler-ignore-failures=false
-        --paoc-panda-files=${ETS_ABC}
+        --paoc-panda-files=${ETS_ABC_LIST}
         --paoc-output=${OUTPUT_AN}
         --paoc-mode=${PAOC_MODE}
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
 
     add_custom_target(${TARGET}
-        COMMENT "Compile ark AOT(${PAOC_MODE}) for ets file: ${ETS_ABC}"
+        COMMENT "Compile ark AOT(${PAOC_MODE}) for ets file: ${ETS_ABC_LIST}"
         COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark_aot> ${AOT_RUNTIME_ARGUMENTS}
         DEPENDS ark_aot etsstdlib ${ABC_TARGET}
     )
@@ -309,34 +310,51 @@ endfunction()
 
 add_custom_target(ets_run_aot_ets_code_tests)
 
-function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
-    if (CMAKE_CROSSCOMPILING)
-        return()
-    endif()
-
+function(run_aot_ets_code_impl PAOC_MODE WORK_DIR TARGET)
     set(noValueArgs ENABLE_AN_FORCE)
-    set(oneValueArgs OPT_LEVEL)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS )
+    set(oneValueArgs ENTRYPOINT OPT_LEVEL)
+    set(multiValueArgs SOURCES ARKTS_CONFIGS COMPILER_EXTRA_OPTIONS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "${noValueArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
-    set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.abc)
-    set(ABC_TARGET ${TARGET}-ets-es2panda)
-    compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET}
-                     OPT_LEVEL ${ARG_OPT_LEVEL}
-                     COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
-    )
+    list(LENGTH ARG_SOURCES SOURCES_COUNT)
+    if (${SOURCES_COUNT} EQUAL 1)
+        list(GET ARG_SOURCES 0 ETS_SRC)
+        get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
+        set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.abc)
+        set(ABC_FILES ${OUTPUT_ABC})
+        set(ABC_TARGET ${TARGET}-ets-es2panda)
+        compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET}
+                         OPT_LEVEL ${ARG_OPT_LEVEL}
+                         COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
+        if(NOT ARG_ENTRYPOINT)
+            get_filename_component(ARG_ENTRYPOINT ${ETS_SRC} NAME_WE)
+        endif()
+    else()
+        set(ABC_TARGET ${TARGET}-abc)
+        compile_ets_sources(${WORK_DIR} ${ABC_TARGET} ABC_FILES "${ARG_SOURCES}"
+                            ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
+                            OPT_LEVEL ${ARG_OPT_LEVEL}
+                            COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+        )
+        list(GET ARG_SOURCES 0 ENTRY_SOURCE)
+        list(GET ABC_FILES 0 OUTPUT_ABC)
+        get_filename_component(SRC_FNAME ${ENTRY_SOURCE} NAME)
+        if(NOT ARG_ENTRYPOINT)
+            get_filename_component(ARG_ENTRYPOINT ${ENTRY_SOURCE} NAME_WE)
+        endif()
+    endif()
 
+    string(REPLACE ";" ":" PANDA_FILES "${ABC_FILES}")
     set(OUTPUT_AN ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.an)
     set(TARGET_AOT ${TARGET}-${PAOC_MODE}-files)
-    compile_aot_ets_code(${PAOC_MODE} ${OUTPUT_ABC} ${OUTPUT_AN} ${TARGET_AOT} ${ABC_TARGET} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
-
-    if(NOT ARG_ENTRYPOINT)
-        get_filename_component(ARG_ENTRYPOINT ${ETS_SRC} NAME_WE)
-    endif()
+    compile_aot_ets_code(${PAOC_MODE} "${ABC_FILES}" ${OUTPUT_AN} ${TARGET_AOT} ${ABC_TARGET}
+        RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+    )
 
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${BOOT_PANDA_FILES}
+        --panda-files=${PANDA_FILES}
         --load-runtimes=ets
         --aot-file=${OUTPUT_AN}
         ${ARG_RUNTIME_EXTRA_OPTIONS}
@@ -359,6 +377,38 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     endif()
 
     add_dependencies(ets_run_aot_ets_code_tests ${TARGET})
+endfunction()
+
+function(run_aot_ets_code PAOC_MODE)
+    if (CMAKE_CROSSCOMPILING)
+        return()
+    endif()
+
+    if ("SOURCES" IN_LIST ARGN)
+        list(GET ARGN 0 TARGET)
+        list(GET ARGN 1 WORK_DIR)
+        list(SUBLIST ARGN 2 -1 FORWARD_ARGS)
+        run_aot_ets_code_impl(${PAOC_MODE} ${WORK_DIR} ${TARGET} ${FORWARD_ARGS})
+        return()
+    endif()
+
+    list(GET ARGN 0 ETS_SRC)
+    list(GET ARGN 1 WORK_DIR)
+    list(GET ARGN 2 TARGET)
+    list(SUBLIST ARGN 3 -1 PARSE_ARGS)
+
+    set(noValueArgs ENABLE_AN_FORCE)
+    set(oneValueArgs ENTRYPOINT OPT_LEVEL)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS COMPILER_EXTRA_OPTIONS)
+    cmake_parse_arguments(ARG "${noValueArgs}" "${oneValueArgs}" "${multiValueArgs}" ${PARSE_ARGS})
+
+    run_aot_ets_code_impl(${PAOC_MODE} ${WORK_DIR} ${TARGET}
+        SOURCES ${ETS_SRC}
+        ENTRYPOINT ${ARG_ENTRYPOINT}
+        OPT_LEVEL ${ARG_OPT_LEVEL}
+        RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS}
+        COMPILER_EXTRA_OPTIONS ${ARG_COMPILER_EXTRA_OPTIONS}
+    )
 endfunction()
 
 add_dependencies(ets_tests ets_run_aot_ets_code_tests)

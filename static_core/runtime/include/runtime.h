@@ -95,7 +95,6 @@ public:
     private:
         Runtime &runtime_;
         bool isJitEnabled_;
-        os::memory::LockHolder<os::memory::Mutex> lock_;
         PandaUniquePtr<tooling::DebugInterface> debugger_;
 
         NO_COPY_SEMANTIC(DebugSession);
@@ -220,22 +219,14 @@ public:
 
     bool IsDebugMode() const
     {
-        return isDebugMode_;
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return isDebugMode_.load(std::memory_order_relaxed);
     }
 
     void SetDebugMode(bool isDebugMode)
     {
-        isDebugMode_ = isDebugMode;
-    }
-
-    bool IsDebuggerConnected() const
-    {
-        return isDebuggerConnected_;
-    }
-
-    void SetDebuggerConnected(bool dbgConnectedState)
-    {
-        isDebuggerConnected_ = dbgConnectedState;
+        // Atomic with relaxed order reason: ordering constraints are not required
+        isDebugMode_.store(isDebugMode, std::memory_order_relaxed);
     }
 
     bool IsProfileableFromShell() const
@@ -406,12 +397,14 @@ public:
 
     bool IsJitEnabled() const
     {
-        return isJitEnabled_;
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return isJitEnabled_.load(std::memory_order_relaxed);
     }
 
     bool IsProfilerEnabled() const
     {
-        return isProfilerEnabled_ || isJitEnabled_;
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return isProfilerEnabled_ || isJitEnabled_.load(std::memory_order_relaxed);
     }
 
     bool IsProfileBranches() const
@@ -421,12 +414,14 @@ public:
 
     void ForceEnableJit()
     {
-        isJitEnabled_ = true;
+        // Atomic with relaxed order reason: ordering constraints are not required
+        isJitEnabled_.store(true, std::memory_order_relaxed);
     }
 
     void ForceDisableJit()
     {
-        isJitEnabled_ = false;
+        // Atomic with relaxed order reason: ordering constraints are not required
+        isJitEnabled_.store(false, std::memory_order_relaxed);
     }
 
 #ifndef PANDA_TARGET_WINDOWS
@@ -557,11 +552,9 @@ private:
 #endif
 
     // For IDE is real connected.
-    bool isDebugMode_ {false};
-    bool isDebuggerConnected_ {false};
+    std::atomic<bool> isDebugMode_ {false};
     bool isProfileableFromShell_ {false};
     os::memory::Mutex debugSessionCreationMutex_ {};
-    os::memory::Mutex debugSessionUniquenessMutex_ {};
     DebugSessionHandle debugSession_ {};
 
     // Additional VMInfo
@@ -585,7 +578,7 @@ private:
     bool checksStack_ {true};
     bool checksNullptr_ {true};
     bool isStacktrace_ {false};
-    bool isJitEnabled_ {false};
+    std::atomic<bool> isJitEnabled_ {false};
     bool isProfilerEnabled_ {false};
     bool isProfileBranches_ {false};
 

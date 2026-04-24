@@ -422,6 +422,8 @@ private:
                           Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
                           ClassLinkerExtension *ext, ClassInfo classInfo);
 
+    bool CanLinkAotEntrypoints() const;
+
     mem::InternalAllocatorPtr allocator_;
 
     PandaVector<const panda_file::File *> bootPandaFiles_ GUARDED_BY(bootPandaFilesLock_);
