@@ -501,8 +501,3 @@ if (ark_standalone_build) {
     ]
   }
 }
-
-# NOTE(ipetrov): Temporary target common runtime
-group("common_runtime_package") {
-  deps = [ "//arkcompiler/runtime_core/common_runtime:libcommon_runtime" ]
-}

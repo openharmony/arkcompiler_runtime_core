@@ -1,0 +1,179 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H
+
+#include <atomic>
+#include <functional>
+#include "common_interfaces/objects/base_state_word.h"
+namespace common_vm {
+class BaseObject;
+
+// NOLINTBEGIN(cppcoreguidelines-pro-type-union-access)
+
+template <bool IS_ATOMIC = false>
+class RefField {
+public:
+    static constexpr uint64_t TAG_WEAK = 0x01ULL;
+
+    struct BitFieldLayout {
+        MAddress address : 48;
+        MAddress isTagged : 1;
+        MAddress tagID : 1;
+        MAddress padding : 14;
+    };
+
+    // size in bytes
+    static constexpr size_t GetSize()
+    {
+        return sizeof(RefFieldValue);
+    }
+
+    BaseObject *GetTargetObject(std::memory_order order = std::memory_order_relaxed) const
+    {
+        if (IS_ATOMIC) {
+            // Atomic with parameterized order reason: atomic load with memory order passed as parameter
+            MAddress value = __atomic_load_n(&fieldVal, order);
+            return reinterpret_cast<BaseObject *>(RefField<>(value).GetAddress() & (~TAG_WEAK));
+        }
+        return reinterpret_cast<BaseObject *>(this->GetAddress() & (~TAG_WEAK));
+    }
+
+    MAddress GetFieldValue(std::memory_order order = std::memory_order_relaxed) const
+    {
+        if (IS_ATOMIC) {
+            // Atomic with parameterized order reason: atomic load with memory order passed as parameter
+            MAddress value = __atomic_load_n(&fieldVal, order);
+            return value;
+        }
+        return fieldVal;
+    }
+
+    void SetTargetObject(const BaseObject *obj, std::memory_order order = std::memory_order_relaxed)
+    {
+        RefField<> newField(obj);
+        MAddress newVal = newField.GetFieldValue();
+        RefFieldValue oldVal = fieldVal;
+        (void)oldVal;
+
+        if (IS_ATOMIC) {
+            // Atomic with parameterized order reason: atomic store with memory order passed as parameter
+            __atomic_store_n(&fieldVal, static_cast<RefFieldValue>(newVal), order);
+        } else {
+            fieldVal = static_cast<RefFieldValue>(newVal);
+        }
+    }
+
+    void SetFieldValue(MAddress newVal, std::memory_order order = std::memory_order_relaxed)
+    {
+        RefFieldValue oldVal = fieldVal;
+        (void)oldVal;
+
+        if (IS_ATOMIC) {
+            // Atomic with parameterized order reason: atomic store with memory order passed as parameter
+            __atomic_store_n(&fieldVal, static_cast<RefFieldValue>(newVal), order);
+        } else {
+            fieldVal = static_cast<RefFieldValue>(newVal);
+        }
+    }
+
+    bool CompareExchange(MAddress expectedValue, MAddress newValue,
+                         std::memory_order succOrder = std::memory_order_relaxed,
+                         std::memory_order failOrder = std::memory_order_relaxed)
+    {
+        // Atomic with parameterized order reason: atomic compare-exchange with memory orders passed as parameters
+        return __atomic_compare_exchange(&fieldVal, &expectedValue, &newValue, false, succOrder, failOrder);
+    }
+
+    bool CompareExchange(const BaseObject *expectedObj, const BaseObject *newObj,
+                         std::memory_order succOrder = std::memory_order_relaxed,
+                         std::memory_order failOrder = std::memory_order_relaxed)
+    {
+        return CompareExchange(reinterpret_cast<MAddress>(expectedObj), reinterpret_cast<MAddress>(newObj), succOrder,
+                               failOrder);
+    }
+
+    MAddress Exchange(MAddress newRef, std::memory_order order = std::memory_order_relaxed)
+    {
+        MAddress ret = 0;
+        // Atomic with parameterized order reason: atomic exchange with memory order passed as parameter
+        __atomic_exchange(&fieldVal, &newRef, &ret, order);
+        return static_cast<MAddress>(ret);
+    }
+
+    MAddress Exchange(const BaseObject *obj, std::memory_order order = std::memory_order_relaxed)
+    {
+        return Exchange(reinterpret_cast<MAddress>(obj), order);
+    }
+
+    MAddress GetAddress() const
+    {
+        return layout.address;
+    }
+
+    bool IsWeak() const
+    {
+        return (layout.address & TAG_WEAK);
+    }
+
+    bool IsTagged() const
+    {
+        return false;
+    }
+
+    uint16_t GetTagID() const
+    {
+        return layout.tagID;
+    }
+
+    ~RefField() = default;
+    explicit RefField(MAddress val) : fieldVal(val) {}
+    RefField(const RefField &ref) : fieldVal(ref.fieldVal) {}
+    explicit RefField(const BaseObject *obj) : fieldVal(0)
+    {
+        layout.address = reinterpret_cast<MAddress>(obj);
+    }
+    RefField(const BaseObject *obj, bool forWeak) : fieldVal(0)
+    {
+        MAddress tag = forWeak ? TAG_WEAK : 0;
+        layout.address = reinterpret_cast<MAddress>(obj) | tag;
+    }
+    RefField(const BaseObject *obj, uint16_t tagged, uint16_t tagid) : fieldVal(0)
+    {
+        layout.address = reinterpret_cast<MAddress>(obj);
+        layout.isTagged = tagged;
+        layout.tagID = tagid;
+        layout.padding = 0;
+    }
+
+    RefField(RefField &&ref) : fieldVal(ref.fieldVal) {}
+    RefField() = delete;
+    RefField &operator=(const RefField &) = delete;
+    RefField &operator=(const RefField &&) = delete;
+
+private:
+    using RefFieldValue = MAddress;
+
+    union {
+        BitFieldLayout layout;
+        RefFieldValue fieldVal;
+    };
+};
+
+// NOLINTEND(cppcoreguidelines-pro-type-union-access)
+
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H

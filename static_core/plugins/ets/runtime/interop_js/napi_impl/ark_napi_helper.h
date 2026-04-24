@@ -24,7 +24,7 @@ namespace ark::ets::interop::js {
 using common_vm::BaseObject;
 using common_vm::TaggedType;
 
-class PUBLIC_API ArkNapiHelper {
+class PANDA_PUBLIC_API ArkNapiHelper {
 public:
     static inline TaggedType GetTaggedType([[maybe_unused]] napi_value napiValue)
     {

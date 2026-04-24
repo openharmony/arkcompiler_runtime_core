@@ -381,8 +381,8 @@ static bool CheckForEquality(const FlatStringInfo &flat1, const FlatStringInfo &
 
 bool EtsString::StringsAreEqualWithCache(String *str1, String *str2)
 {
-    DCHECK_CC(str1 != nullptr);
-    DCHECK_CC(str2 != nullptr);
+    DCHECK(str1 != nullptr);
+    DCHECK(str2 != nullptr);
 
     uint32_t str1Len = str1->GetLength();
     if (str1Len != str2->GetLength()) {

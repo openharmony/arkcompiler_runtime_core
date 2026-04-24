@@ -24,9 +24,9 @@ class StaticTypeConverter : public common_vm::StaticTypeConverterInterface {
 public:
     static void Initialize();
 
-    common_vm::BoxedValue PUBLIC_API WrapBoxed(common_vm::BaseType value) override;
+    common_vm::BoxedValue PANDA_PUBLIC_API WrapBoxed(common_vm::BaseType value) override;
 
-    common_vm::BaseType PUBLIC_API UnwrapBoxed(common_vm::BoxedValue value) override;
+    common_vm::BaseType PANDA_PUBLIC_API UnwrapBoxed(common_vm::BoxedValue value) override;
 
 private:
     static StaticTypeConverter stcTypeConverter_;

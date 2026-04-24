@@ -1,0 +1,60 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include "common_interfaces/base/common.h"
+#include "common_interfaces/objects/ref_field.h"
+
+namespace common_vm {
+class BaseObject;
+class Mutator;
+using CommonRootVisitor = void (*)(void *root);
+using RefFieldVisitor = std::function<void(RefField<> &)>;
+using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
+
+void VisitRoots(const RefFieldVisitor &visitor);
+void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
+void VisitSTWRoots(const RefFieldVisitor &visitor);
+void VisitConcurrentRoots(const RefFieldVisitor &visitor);
+
+// GlobalRoots are subsets of roots which are shared in all mutator threads.
+void VisitGlobalRoots(const RefFieldVisitor &visitor);
+void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc, bool isYoung);
+void VisitPreforwardRoots(const RefFieldVisitor &visitor);
+
+void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator);
+void UnmarkAllXRefs();
+void SweepUnmarkedXRefs();
+void AddXRefToRoots();
+void RemoveXRefFromRoots();
+
+using VisitStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
+using UpdateStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
+using SweepStaticRootsHookFunc = void (*)(const WeakRefFieldVisitor &visitor);
+using UnmarkAllXRefsHookFunc = void (*)();
+using SweepUnmarkedXRefsHookFunc = void (*)();
+
+PANDA_PUBLIC_API void RegisterVisitStaticRootsHook(VisitStaticRootsHookFunc func);
+PANDA_PUBLIC_API void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
+PANDA_PUBLIC_API void RegisterSweepStaticRootsHook(SweepStaticRootsHookFunc func);
+PANDA_PUBLIC_API void RegisterUnmarkAllXRefsHook(UnmarkAllXRefsHookFunc func);
+PANDA_PUBLIC_API void RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsHookFunc func);
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
