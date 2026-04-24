@@ -107,7 +107,9 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     }
     )";
 
-    ASSERT_TRUE(ParseToGraph(source, "async_foo"));
+    ASSERT_TRUE(Parse(source));
+    GetGraph()->SetIsAsync(true);
+    ASSERT_NE(BuildGraph("async_foo", GetGraph()), nullptr);
 
 #ifdef COMPILER_DEBUG_CHECKS
     GetGraph()->SetInliningComplete();
@@ -122,6 +124,7 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     auto saveStateSuspend = FindFirstInst(GetGraph(), Opcode::SaveStateSuspend);
     ASSERT_NE(dispatch, nullptr);
     ASSERT_NE(saveStateSuspend, nullptr);
+    ASSERT_EQ(GetGraph()->GetDispatchInst(), dispatch);
     auto saveStateSuspendInst = saveStateSuspend->CastToSaveStateSuspend();
 
     auto dispatchBlock = dispatch->GetBasicBlock();
@@ -131,13 +134,16 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
 
     auto prologueBlock = dispatchBlock->GetPredecessor(0U);
     ASSERT_EQ(prologueBlock, GetGraph()->GetStartBlock()->GetSuccessor(0U)->GetSuccessor(0U));  // skip try begin
+    ASSERT_NE(prologueBlock->GetTryId(), INVALID_ID);
     ASSERT_EQ(prologueBlock->GetTrueSuccessor(), dispatchBlock);
     ASSERT_EQ(prologueBlock->GetLastInst()->GetOpcode(), Opcode::IfImm);
     ASSERT_TRUE(prologueBlock->GetLastInst()->CastToIfImm()->IsUnlikely());
     ASSERT_EQ(CountInstInBlock(prologueBlock, Opcode::CallStatic), 1U);
     ASSERT_EQ(dispatch->GetInput(0U).GetInst(), FindFirstInst(prologueBlock, Opcode::CallStatic));
+    ASSERT_EQ(dispatchBlock->GetTryId(), prologueBlock->GetTryId());
 
     auto continuationBlock = prologueBlock->GetFalseSuccessor();
+    ASSERT_EQ(continuationBlock->GetTryId(), prologueBlock->GetTryId());
     ASSERT_EQ(saveStateSuspend->GetBasicBlock(), continuationBlock);
     ASSERT_EQ(continuationBlock->GetLastInst()->GetOpcode(), Opcode::Return);
     ASSERT_NE(saveStateSuspendInst->GetAsyncContext(), nullptr);

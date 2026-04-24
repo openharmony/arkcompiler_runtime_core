@@ -163,6 +163,7 @@ private:
     template <bool NEED_SS_DEOPT>
     bool BuildInstructionsForBB(InstBuilder &instBuilder, BasicBlock *bb, const uint8_t *instructionsBuf);
     void ProcessThrowableInstructions(InstBuilder &instBuilder, Inst *throwableInst);
+    void SplitDispatch();
     bool BuildIrImpl(InstBuilder &instBuilder, size_t vregsCount);
     bool BuildIr(size_t vregsCount);
 

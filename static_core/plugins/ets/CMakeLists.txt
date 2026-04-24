@@ -225,14 +225,12 @@ if(PANDA_WITH_COMPILER)
     set (COMPILER_OPTIONS "--compiler-check-final=true")
 
     # NOTE(nkholiavin, #34299): this is a temporary stackless StdLib, will be removed after transition
-    # NOTE(nkholiavin, #34241) dispatch fails in IrBuilder
-    set(STACKLESS_COMPILER_OPTIONS "${COMPILER_OPTIONS} --compiler-regex=(?!std\.containers\.containers\.stackless).*")
     add_custom_target(ets-compile-stdlib-stackless-default
         COMMENT "Running ark_aot compilation for stackless etsstdlib with default options"
         COMMAND ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh
             --prefix=${PANDA_RUN_PREFIX}
             --binary-dir=${CMAKE_BINARY_DIR}
-            -compiler-options=${STACKLESS_COMPILER_OPTIONS}
+            -compiler-options=${COMPILER_OPTIONS}
             -stdlib-abc=plugins/ets/etsstdlib.stackless.abc
             -paoc-output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.stackless.an
         DEPENDS ark_aot etsstdlib.stackless

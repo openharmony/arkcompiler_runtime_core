@@ -25,6 +25,7 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/hotness_propagation.h"
+#include "optimizer/analysis/rpo.h"
 #include "libarkfile/method_data_accessor-inl.h"
 
 #ifdef ENABLE_LIBABCKIT
@@ -72,12 +73,15 @@ bool IrBuilder::RunImpl()
         GetGraph()->GetPassManager()->GetStatistics()->AddPbcInstNum(pbcInstNum);
     }
 
-    COMPILER_LOG(INFO, IR_BUILDER) << "IR successfully built: " << GetGraph()->GetVectorBlocks().size()
-                                   << " basic blocks, " << GetGraph()->GetCurrentInstructionId() << " instructions";
-
     if (!GetGraph()->IsAbcKit()) {
         HotnessPropagation(GetGraph()).Run();
     }
+    if (GetGraph()->IsAsync()) {
+        SplitDispatch();
+    }
+
+    COMPILER_LOG(INFO, IR_BUILDER) << "IR successfully built: " << GetGraph()->GetVectorBlocks().size()
+                                   << " basic blocks, " << GetGraph()->GetCurrentInstructionId() << " instructions";
 
     return true;
 }
@@ -120,6 +124,50 @@ bool IrBuilder::BuildIr(size_t vregsCount)
 
     auto instBuilder = InstBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
     return BuildIrImpl(instBuilder, vregsCount);  // releases instBuilder's internal markers on ~InstBuilder
+}
+
+void IrBuilder::SplitDispatch()
+{
+    ASSERT(GetGraph()->IsAsync());
+
+    auto *dispatch = GetGraph()->GetDispatchInst();
+    // Async methods may not emit Dispatch at all, for example when there are no await suspension points.
+    if (dispatch == nullptr) {
+        return;
+    }
+
+    ASSERT(dispatch->GetOpcode() == Opcode::Dispatch);
+    auto *prologueBlock = dispatch->GetBasicBlock();
+    ASSERT(prologueBlock->IsTry());
+
+    // Add Compare and IfImm guards for the Dispatch to check async context, then split the block
+    // into a dedicated Dispatch block and a fallthrough block without dispatching.
+    auto *asyncContext = dispatch->GetInput(0U).GetInst();
+    auto *compare =
+        GetGraph()->CreateInstCompare(DataType::BOOL, dispatch->GetPc(), asyncContext, GetGraph()->GetOrCreateNullPtr(),
+                                      DataType::REFERENCE, ConditionCode::CC_NE);
+    auto *ifImm = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, dispatch->GetPc(), compare, 0U, DataType::BOOL,
+                                              ConditionCode::CC_NE);
+    ifImm->SetUnlikely();
+    dispatch->InsertBefore(compare);
+    dispatch->InsertBefore(ifImm);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+    compare->SetCurrentMethod(dispatch->GetCurrentMethod());
+    ifImm->SetCurrentMethod(dispatch->GetCurrentMethod());
+#endif
+
+    // First split moves continuation instructions after Dispatch into a separate block.
+    // Second split moves Dispatch itself after IfImm into the dedicated dispatch block.
+    auto *continuationBlock = prologueBlock->SplitBlockAfterInstruction(dispatch, false);
+    auto *dispatchBlock = prologueBlock->SplitBlockAfterInstruction(ifImm, false);
+    ASSERT(dispatchBlock->GetFirstInst() == dispatch && dispatchBlock->GetLastInst() == dispatch);
+
+    prologueBlock->AddSucc(dispatchBlock);
+    prologueBlock->AddSucc(continuationBlock);
+    dispatchBlock->AddSucc(GetGraph()->GetEndBlock());
+
+    InvalidateBlocksOrderAnalyzes(GetGraph());
+    GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
 }
 
 void IrBuilder::SetMemoryBarrierFlag()
@@ -390,12 +438,6 @@ void IrBuilder::BuildBasicBlocks(const BytecodeInstructions &instructions)
             CreateBlock(pc);
             fallthrough = false;
         }
-        // Create a new basic block for continuing normal execution after the async-context check.
-        if (inst.HasFlag(BytecodeInstruction::DISPATCH)) {
-            auto nextPc = instructions.GetPc(inst.GetNext());
-            ASSERT(nextPc < instructions.GetSize());
-            CreateBlock(nextPc);
-        }
         auto offset = InstBuilder::GetInstructionJumpOffset(&inst);
         if (offset != INVALID_OFFSET) {
             auto targetPc = static_cast<uint64_t>(static_cast<int64_t>(pc) + offset);
@@ -507,12 +549,6 @@ void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
         } else if (info.deadInstructions) {
             // We are processing dead instructions now, skipping them until we meet the next block.
             continue;
-        }
-        // Create separate block for Dispatch instruction and connect it with end block, since dispatch is terminator.
-        if (inst.HasFlag(BytecodeInstruction::DISPATCH)) {
-            auto dispatchBlock = GetGraph()->CreateEmptyBlock(currBb);
-            dispatchBlock->AddSucc(GetGraph()->GetEndBlock());
-            currBb->AddSucc(dispatchBlock);
         }
         if (auto jmpTargetBlock = GetBlockToJump(&inst, pc); jmpTargetBlock != nullptr) {
             currBb->AddSucc(jmpTargetBlock);

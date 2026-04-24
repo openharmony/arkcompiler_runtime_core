@@ -716,6 +716,15 @@ public:
     }
     Inst *GetOrCreateUniqueObjectInst();
 
+    Inst *GetDispatchInst() const
+    {
+        return dispatchInst_;
+    }
+    void SetDispatchInst(Inst *inst)
+    {
+        dispatchInst_ = inst;
+    }
+
     /// Find constant in the list, return nullptr if not found
     ConstantInst *FindConstant(DataType::Type type, uint64_t value);
     /// Find constant in the list or create new one and insert at the end
@@ -1508,6 +1517,7 @@ private:
     ConstantInst *firstConstInst_ {nullptr};
     Inst *nullptrInst_ {nullptr};
     Inst *uniqueObjectInst_ {nullptr};
+    Inst *dispatchInst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
     RuntimeInterface::MethodPtr method_ {nullptr};
 
