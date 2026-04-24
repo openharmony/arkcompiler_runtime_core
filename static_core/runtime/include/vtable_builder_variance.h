@@ -36,30 +36,41 @@ private:
         ResolveInterfaceMethods(itable, superItableSize);
     }
 
-    void ResolveInterfaceMethods(ITable itable, size_t superItableSize);
-    void ResolveSingleInterfaceMethod(ITable itable, Class *iface, Method &imethod, ClassLinkerContext *ctx);
-    IfaceMethodDispatch ResolveByElimination(Class *iface, Method &imethod, ClassLinkerContext *ctx, ITable itable);
-
     struct IfaceMethodCandidate {
         Method *method {};
         Class *iface {};
         uint32_t depth {};
     };
-    ArenaVector<IfaceMethodCandidate> CollectCandidates(Class *iface, Method &imethod, ClassLinkerContext *ctx,
-                                                        ITable itable);
-    void EliminateCandidates(ArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx);
-    IfaceMethodDispatch ClassifySurvivors(ArenaVector<IfaceMethodCandidate> &survivors, Method *imethod);
 
     struct ClassOverrideResult {
         enum class Kind { NONE, SINGLE, CONFLICT };
         Kind kind = Kind::NONE;
         size_t vtableIndex = 0;
     };
+
+    void ResolveInterfaceMethods(ITable itable, size_t superItableSize);
+    void ResolveSingleInterfaceMethod(ITable itable, size_t itableIndex, Class *iface, size_t methodIndex,
+                                      Method &imethod, ClassLinkerContext *ctx, ClassOverrideResult classOverride);
+    IfaceMethodDispatch ResolveByElimination(Class *iface, Method &imethod, ClassLinkerContext *ctx, ITable itable);
+
+    ArenaVector<IfaceMethodCandidate> CollectCandidates(Class *iface, Method &imethod, ClassLinkerContext *ctx,
+                                                        ITable itable);
+
+    void EliminateCandidates(ArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx);
+    IfaceMethodDispatch ClassifySurvivors(ArenaVector<IfaceMethodCandidate> &survivors, Method *imethod);
     ClassOverrideResult HasClassMethodOverride(Method &imethod);
+    void RebuildOwnMethodNameHashes();
+    bool OwnMethodsShadowInterface(ITable itable);
     Method *FindOrCreateConflictCopiedMethod(Method *imethod);
     size_t GetCopiedMethodIndex(Method *method);
 
     static bool IsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
+    ClassOverrideResult GetInheritedClassOverride(Method *inherited) const;
+
+    ArenaUnorderedSet<uint32_t> ownMethodNameHashes_ {allocator_.Adapter()};
+    ArenaUnorderedMap<uint32_t, ArenaVector<IfaceMethodCandidate> *> interfaceMethodCandidatesByName_ {
+        allocator_.Adapter()};
+    bool useInterfaceMethodCandidateIndex_ {false};
 };
 
 }  // namespace ark

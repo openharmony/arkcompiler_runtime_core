@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <utility>
 
+#include "libarkfile/proto_data_accessor.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/vtable_builder_variance-inl.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -27,34 +28,26 @@ namespace ark::ets {
 
 bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
 
-class EtsVTableCompatibleSignatures {
-public:
-    explicit EtsVTableCompatibleSignatures(const ClassLinkerContext *ctx) : ctx_(ctx) {}
-
-    bool operator()(const Method::ProtoId &base, const Method::ProtoId &derv) const
+struct EtsVTableCompatibleSignatures {
+    bool operator()(const ClassLinkerContext *ctx, const Method::ProtoId &base, const Method::ProtoId &derv) const
     {
-        return ETSProtoIsOverriddenBy(ctx_, base, derv);
+        return ETSProtoIsOverriddenBy(ctx, base, derv);
     }
-
-private:
-    const ClassLinkerContext *ctx_;
 };
 
 struct EtsVTableOverridePred {
     bool operator()(const MethodInfo *base, const MethodInfo *derv) const
     {
-        if (base->IsPublic() || base->IsProtected()) {
+        if (LIKELY(base->IsPublic() || base->IsProtected())) {
             return true;
         }
-
-        if (base->IsPrivate()) {
+        if (UNLIKELY(base->IsPrivate())) {
             return false;
         }
-
         return IsInSamePackage(*base, *derv);
     }
 
-    bool IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2) const;
+    static bool IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2);
 };
 
 using EtsVTableBuilder = VarianceVTableBuilder<EtsVTableCompatibleSignatures, EtsVTableOverridePred>;

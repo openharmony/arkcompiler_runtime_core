@@ -182,10 +182,16 @@ inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super)
         return !sub->IsPrimitive();
     }
     if (super->IsObjectClass()) {
-        // Primitives and reference classes without base
         return sub->GetBase() != nullptr;
     }
     if (super->IsInterface()) {
+        if (sub->IsInterface()) {
+            for (auto &base : sub->GetInterfaces()) {
+                if (base == super) {
+                    return true;
+                }
+            }
+        }
         return sub->Implements(super);
     }
     if (sub->IsArrayClass()) {

@@ -53,6 +53,7 @@ public:
           protoId_(method->GetProtoId().GetEntityId()),
           accessFlags_(method->GetAccessFlags()),
           isBase_(isBase),
+          isInterfaceMethod_(method->GetClass()->IsInterface()),
           classId_(method->GetClass()->GetFileId()),
           method_(method),
           ctx_(method->GetClass()->GetLoadContext()),
@@ -113,7 +114,7 @@ public:
     bool IsInterfaceMethod() const
     {
         if (method_ != nullptr) {
-            return method_->GetClass()->IsInterface();
+            return isInterfaceMethod_;
         }
 
         panda_file::ClassDataAccessor cda(*pf_, classId_);
@@ -144,6 +145,7 @@ private:
     panda_file::File::EntityId protoId_;
     uint32_t accessFlags_;
     bool isBase_ {false};
+    bool isInterfaceMethod_ {false};
 
     panda_file::File::EntityId classId_;
     Method *method_ {nullptr};
@@ -349,6 +351,11 @@ public:
         return {dispatches_.data(), dispatches_.size()};
     }
 
+    ArenaAllocator *GetAllocator() override
+    {
+        return &allocator_;
+    }
+
 protected:
     explicit VTableBuilderBase(ClassLinkerErrorHandler *errHandler) : errorHandler_(errHandler) {}
 
@@ -369,8 +376,11 @@ protected:
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_INTERNAL};
     VTableInfo vtable_ {&allocator_};
     size_t numVmethods_ {0};
+    size_t baseVTableSize_ {0};
     ArenaVector<CopiedMethod> orderedCopiedMethods_ {allocator_.Adapter()};
     ArenaVector<IfaceMethodDispatch> dispatches_ {allocator_.Adapter()};
+    ArenaVector<MethodInfo const *> baseMethodInfoByIndex_ {allocator_.Adapter()};
+    bool vtableAppendedOnly_ {true};
     ClassLinkerErrorHandler *errorHandler_;
 
 private:

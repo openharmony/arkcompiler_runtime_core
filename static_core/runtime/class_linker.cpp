@@ -849,8 +849,8 @@ bool ClassLinker::LinkMethods(Class *klass, ClassInfo *classInfo,
     ASSERT(classInfo->itableBuilder != nullptr);
 
     auto dispatches = classInfo->vtableBuilder->GetIfaceMethodDispatches();
-    // non-owning span, vtable builder arena must outlive Resolve
     classInfo->itableBuilder->SetDispatches(dispatches);
+    classInfo->itableBuilder->SetAllocator(classInfo->vtableBuilder->GetAllocator());
 
     if (!classInfo->itableBuilder->Resolve(klass)) {
         return false;
@@ -1049,6 +1049,7 @@ static bool TryInsertClassLoading(panda_file::File::EntityId &classId, const pan
     return true;
 }
 
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 static bool IsContextCanBeLoaded(LanguageContext ctx, ClassLinkerContext *context, const uint8_t *descriptor,
                                  ClassLinkerErrorHandler *errorHandler)
 {

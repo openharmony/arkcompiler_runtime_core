@@ -16,6 +16,7 @@
 #define PANDA_RUNTIME_ITABLE_BUILDER_H_
 
 #include "libarkbase/macros.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -35,6 +36,8 @@ public:
     [[nodiscard]] virtual bool Resolve(Class *klass) = 0;
 
     virtual void SetDispatches([[maybe_unused]] Span<const IfaceMethodDispatch> dispatches) {}
+
+    virtual void SetAllocator([[maybe_unused]] ArenaAllocator *allocator) {}
 
     virtual void UpdateClass(Class *klass) = 0;
 
