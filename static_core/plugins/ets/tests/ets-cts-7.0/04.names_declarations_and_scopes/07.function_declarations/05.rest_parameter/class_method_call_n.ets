@@ -16,6 +16,7 @@
 /*---
 desc: bad class method call Rest parameters with array type.
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0227: Unexpected token ')'."
 ---*/
 
 class RestClass {

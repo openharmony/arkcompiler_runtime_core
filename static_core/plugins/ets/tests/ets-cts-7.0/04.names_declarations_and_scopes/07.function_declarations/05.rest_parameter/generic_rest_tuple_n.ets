@@ -16,6 +16,7 @@
 /*---
 desc: static Rest function spread with generic tuple
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0127: No matching call signature for restMethod(...)"
 ---*/
 
 class TH<A, B, C> {

@@ -16,6 +16,7 @@
 /*---
 desc: Rest function with record literals as param
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0193: Rest parameter should be either array or tuple type."
 ---*/
 
 type TEntity = Record<number, string>

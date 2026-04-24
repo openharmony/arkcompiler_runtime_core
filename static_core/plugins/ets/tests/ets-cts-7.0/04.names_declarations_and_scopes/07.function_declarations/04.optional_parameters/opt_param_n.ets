@@ -18,6 +18,7 @@
 desc: >-
     A compile-time error occurs in p?: T if T is not a reference type.
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 {{c.decl}}

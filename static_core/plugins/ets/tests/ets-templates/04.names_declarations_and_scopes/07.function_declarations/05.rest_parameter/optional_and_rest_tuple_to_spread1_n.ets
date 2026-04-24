@@ -14,10 +14,14 @@
  */
 
 /*---
-desc: Rest parameters with object spread.
+desc: Rest function spread with optional and rest tuple
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0127: No matching call signature for goo(Array<Int|String>)"
 ---*/
 
-function main(): void {
-  function invalidRestParameterType(...numbers: number) {}
+function goo(opt?: [number, string], ...tail: [number, string]) {
+}
+
+function main() {
+    goo([1, '2'])
 }
