@@ -33,6 +33,8 @@
     X(VERIFY_NR_REFS,                       VerifyNrRefs)                         \
     X(VERIFY_REF,                           VerifyRef)                            \
     X(VERIFY_CLASS,                         VerifyClass)                          \
+    X(VERIFY_ENUM,                          VerifyEnum)                           \
+    X(VERIFY_ENUM_ITEM,                     VerifyEnumItem)                       \
     X(VERIFY_STRING,                        VerifyString)                         \
     X(VERIFY_ERROR,                         VerifyError)                          \
     X(VERIFY_ARRAY,                         VerifyArray)                          \
@@ -74,6 +76,8 @@
     X(VERIFY_LONG_STORAGE,                  VerifyLongStorage)                    \
     X(VERIFY_FLOAT_STORAGE,                 VerifyFloatStorage)                   \
     X(VERIFY_DOUBLE_STORAGE,                VerifyDoubleStorage)                  \
+    X(VERIFY_ENUM_STORAGE,                  VerifyEnumStorage)                    \
+    X(VERIFY_ENUM_ITEM_STORAGE,             VerifyEnumItemStorage)                \
     X(VERIFY_REF_STORAGE,                   VerifyRefStorage)                     \
     X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
     X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
@@ -83,6 +87,7 @@
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
     X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
+    X(VERIFY_ENUM_DESCRIPTOR,               VerifyEnumDescriptor)                 \
     X(VERIFY_METHOD_NAME,                   VerifyMethodName)                     \
     X(VERIFY_STATIC_METHOD_NAME,            VerifyStaticMethodName)               \
     X(VERIFY_FIND_METHOD_SIGNATURE,         VerifyFindMethodSignature)            \
@@ -125,6 +130,8 @@
     X(ANI_DOUBLE,                       Double,                    ani_double)               \
     X(ANI_REF,                          Ref,                       VRef *)                   \
     X(ANI_CLASS,                        Class,                     VClass *)                 \
+    X(ANI_ENUM,                         Enum,                      VEnum *)                  \
+    X(ANI_ENUM_ITEM,                    EnumItem,                  VEnumItem *)              \
     X(ANI_OBJECT,                       Object,                    VObject *)                \
     X(ANI_METHOD,                       Method,                    VMethod *)                \
     X(ANI_STATIC_METHOD,                StaticMethod,              VStaticMethod *)          \
@@ -152,6 +159,8 @@
     X(ANI_DOUBLE_STORAGE,               DoubleStorage,             ani_double *)             \
     X(ANI_REF_STORAGE,                  RefStorage,                VRef **)                  \
     X(ANI_OBJECT_STORAGE,               ObjectStorage,             VObject **)               \
+    X(ANI_ENUM_STORAGE,                 EnumStorage,               VEnum **)                 \
+    X(ANI_ENUM_ITEM_STORAGE,            EnumItemStorage,           VEnumItem **)             \
     X(ANI_STRING_STORAGE,               StringStorage,             VString **)               \
     X(ANI_SIZE_STORAGE,                 SizeStorage,               ani_size *)               \
     X(ANI_UTF8_BUFFER,                  UTF8Buffer,                char *)                   \
@@ -236,6 +245,8 @@ class VEnv;
 class VRef;
 class VObject;
 class VClass;
+class VEnum;
+class VEnumItem;
 class VMethod;
 class VStaticMethod;
 class VFunction;
@@ -339,6 +350,16 @@ public:
         return ANIArg(ArgValueByClass(vclass), name, Action::VERIFY_CLASS);
     }
 
+    static ANIArg MakeForEnum(VEnum *venum, std::string_view name)
+    {
+        return ANIArg(ArgValueByEnum(venum), name, Action::VERIFY_ENUM);
+    }
+
+    static ANIArg MakeForEnumItem(VEnumItem *venumItem, std::string_view name)
+    {
+        return ANIArg(ArgValueByEnumItem(venumItem), name, Action::VERIFY_ENUM_ITEM);
+    }
+
     static ANIArg MakeForString(VString *str, std::string_view name)
     {
         return ANIArg(ArgValueByString(str), name, Action::VERIFY_STRING);
@@ -357,6 +378,11 @@ public:
     static ANIArg MakeForUTF8String(const char *ptr, std::string_view name)
     {
         return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_UTF8_STRING);
+    }
+
+    static ANIArg MakeForEnumDescriptor(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_ENUM_DESCRIPTOR);
     }
 
     static ANIArg MakeForMethodName(const char *ptr, std::string_view name)
@@ -609,6 +635,16 @@ public:
     static ANIArg MakeForObjectStorage(VObject **valueStorage, std::string_view name)
     {
         return ANIArg(ArgValueByObjectStorage(valueStorage), name, Action::VERIFY_OBJECT_STORAGE);
+    }
+
+    static ANIArg MakeForEnumStorage(VEnum **enumStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByEnumStorage(enumStorage), name, Action::VERIFY_ENUM_STORAGE);
+    }
+
+    static ANIArg MakeForEnumItemStorage(VEnumItem **enumItemStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByEnumItemStorage(enumItemStorage), name, Action::VERIFY_ENUM_ITEM_STORAGE);
     }
 
     static ANIArg MakeForStringStorage(VString **strStorage, std::string_view name)
