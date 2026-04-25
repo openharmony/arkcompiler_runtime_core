@@ -183,6 +183,7 @@ public:
     bool IsIdle();
 
     bool ProcessAsyncWork() NO_THREAD_SAFETY_ANALYSIS override;
+    bool HasPendingLocalJobs() NO_THREAD_SAFETY_ANALYSIS override;
     void OnNewCoroutineStartup(Coroutine *co) override;
 
     /// @brief Update worker local object in coroutines

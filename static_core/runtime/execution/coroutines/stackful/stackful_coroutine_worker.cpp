@@ -259,6 +259,22 @@ bool StackfulCoroutineWorker::ProcessAsyncWork()
     return asyncWorkExists;
 }
 
+bool StackfulCoroutineWorker::HasPendingLocalJobs()
+{
+    os::memory::ScopedLock lock(waitersLock_, runnablesLock_);
+    if (!waiters_.empty()) {
+        return true;
+    }
+
+    bool hasPendingLocalJobs = false;
+    runnables_.IterateOverElements([&hasPendingLocalJobs](Coroutine *co) {
+        if (!hasPendingLocalJobs && co->GetType() != Coroutine::Type::SCHEDULER) {
+            hasPendingLocalJobs = true;
+        }
+    });
+    return hasPendingLocalJobs;
+}
+
 void StackfulCoroutineWorker::OnNewCoroutineStartup(Coroutine *co)
 {
     CoroutineWorker::OnNewCoroutineStartup(co);

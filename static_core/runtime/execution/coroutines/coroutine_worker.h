@@ -45,6 +45,11 @@ public:
         return false;
     }
 
+    virtual bool HasPendingLocalJobs()
+    {
+        return false;
+    }
+
 #if defined(ARK_USE_COMMON_RUNTIME)
     common_vm::Mutator *GetMutator()
     {

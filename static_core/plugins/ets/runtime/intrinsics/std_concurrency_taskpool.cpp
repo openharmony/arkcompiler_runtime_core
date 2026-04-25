@@ -19,6 +19,8 @@
 #include "libarkbase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
+#include "runtime/execution/coroutines/coroutine_worker.h"
+#include "runtime/execution/job_execution_context.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/runtime.h"
 
@@ -92,6 +94,15 @@ extern "C" EtsInt GetTaskPoolWorkersLimit()
 {
     int32_t cpuCount = std::thread::hardware_concurrency();
     return cpuCount > 1 ? cpuCount - 1 : 1;  // 1: default number
+}
+
+extern "C" EtsBoolean CurrentWorkerHasPendingLocalJobs()
+{
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *worker = static_cast<CoroutineWorker *>(executionCtx->GetWorker());
+    ASSERT(worker != nullptr);
+    return ark::ets::ToEtsBoolean(worker->HasPendingLocalJobs());
 }
 
 }  // namespace ark::ets::intrinsics::taskpool
