@@ -180,7 +180,9 @@ void StackfulCoroutineManager::OnWorkerShutdown(JobWorkerThread *worker)
     --activeWorkersCount_;
     auto &workerStats = StackfulCoroutineWorker::FromJobWorkerThread(worker)->GetPerfStats();
     workerStats.Disable();
-    finalizedWorkerStats_.emplace_back(std::move(workerStats));
+    if (stats_.IsEnabled()) {
+        finalizedWorkerStats_.emplace_back(std::move(workerStats));
+    }
     JobManager::OnWorkerShutdown(worker);
     Runtime::GetCurrent()->GetInternalAllocator()->Delete(worker);
     workersCv_.Signal();
