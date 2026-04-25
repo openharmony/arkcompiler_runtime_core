@@ -21,9 +21,7 @@ class Event {
     }
 
     public wait(): boolean {
-        return waitForCompletion<boolean>(() => {
-            return this.promise;
-        });
+        return this.promise.awaitSync();
     }
 
     public fire(val: boolean = true) {

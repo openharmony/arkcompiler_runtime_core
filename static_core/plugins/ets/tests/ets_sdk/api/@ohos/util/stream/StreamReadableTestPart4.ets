@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Readable does not implement DoRead.", testReadableErrorOnUnimplementedDoRead);
@@ -34,7 +34,7 @@ function main(): int {
     suite.addTest("Reads a buffer of a specified size from the buffer008.", testReadableEncodingPropertyDefaultUtf8);
     suite.addTest("Reads a buffer of a specified size from the buffer009.", testReadablePushAndReadDefaultUtf8);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -78,7 +78,7 @@ async function testReadableErrorOnUnimplementedDoRead() {
     }));
     readable.on('close', mustCall());
     readable.read();
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableread001

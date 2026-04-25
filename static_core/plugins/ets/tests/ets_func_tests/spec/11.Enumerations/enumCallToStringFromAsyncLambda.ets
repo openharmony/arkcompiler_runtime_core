@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ function getString(arg: string): string {
     return arg;
 }
 
-function main(): void {
+async function main(): Promise<void> {
     let expected_big_string = "mqpfcmvzctncgcjdjhxcghwcgnrxvxtuxnifrlumwpoukpezhupzbavqxkdwqkfviobuhjcnlajrjiarvboeatxpwuvbqwnbsngvxaux \
         gtyustiddvloyzddxuhafybdxkhovuswyzwtlzdvwwywilbqerbcvgfhbzowtvrmzagszlptlooopxdyrrzlpvjpgcnoldubdnhytftejlk \
         xiolxnojsoxmqwmxnttwaseebvtaqdtlizrxenpgxaipgmkvxmzakqsekqsypyccmgnwtvmltvepyeqjarfwgyxovoblgowqmwxcqjfoedttg \
@@ -71,7 +71,7 @@ function main(): void {
         return Promise.resolve<string>(getString(arg));
     };
 
-    let big_string_from_enum: string = waitForCompletion(stringPromise);
+    let big_string_from_enum: string = await stringPromise();
 
     arktest.assertEQ(expected_big_string, big_string_from_enum)
 }

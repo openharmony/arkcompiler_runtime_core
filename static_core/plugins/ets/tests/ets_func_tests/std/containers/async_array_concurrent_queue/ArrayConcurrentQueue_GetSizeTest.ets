@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueGetSizeTest');
 
     arrayConcurrentQueueTestsuite.addAsyncTest('GetSizeTestInt003', async () => {
@@ -31,5 +31,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, elementsNum * 2);
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }

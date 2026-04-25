@@ -19,7 +19,7 @@ import buffer from '@ohos.buffer';
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Data event of Transform.", testTransformDataEvent);
@@ -29,7 +29,7 @@ function main(): int {
     suite.addTest("Multiple listeners of Transform.", testTransformMultipleListeners);
     suite.addTest("Flush operation of Transform.", testTransformFlushOperation);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -137,7 +137,7 @@ async function testTransformCorkUncork() {
     transformStream.on('finish', (): void => {
         func(null);
     });
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_TestTransform3 = 0;
@@ -164,8 +164,8 @@ async function testTransformErrorEvent() {
     let transformStream = new TestTransform3();
     transformStream.on('error', mustCall());
     transformStream.write('test');
-    setTimeout(() => {
-        arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    setTimeout(async () => {
+        await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
     }, 10);
 }
 

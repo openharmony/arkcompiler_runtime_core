@@ -58,19 +58,21 @@ async function asyncCondVarNotifyOneTest() {
         let afterWait = new AtomicBoolean(false);
         let afterSet = new AtomicBoolean(false);
         let job1 = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             await event.Wait();
             arktest.assertTrue(afterSet.load());
             afterWait.store(true);
-            })
+            })().awaitSync()
         };
         let job2 = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             Coroutine.Schedule();
             arktest.assertFalse(afterWait.load());
             afterSet.store(true);
             await event.SetOne();
-            })
+            })().awaitSync()
         };
         job1.Await();
         job2.Await();
@@ -88,18 +90,20 @@ async function asyncCondVarNotifyAllTest() {
         for (let i = 0; i < tasks_counter; ++i) {
             const id = i.toInt();
             jobs[id] = launch() {
-                waitForCompletion(async () => {
+                // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+                (async () => {
                 await event.Wait();
                 counter.fetchAdd(1);
-                })
+                })().awaitSync()
             };
         }
         arktest.assertEQ(counter.load(), 0);
         let setAll = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             Coroutine.Schedule();
             await event.SetAll();
-            })
+            })().awaitSync()
         };
         setAll.Await();
         for (let job of jobs) { 
@@ -114,18 +118,19 @@ async function asyncCondVarTestNotifyWithoutWaiters() {
     let mutex_ = new concurrency.stackless.AsyncMutex();
     let flagCV_ = new concurrency.stackless.AsyncCondVar();
     launch() {
-        waitForCompletion(async () => {
+        // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+        (async () => {
         for (let i = 0; i < workload; ++i) {
             await mutex_.lock();
             flagCV_.notifyOne(mutex_);
             flagCV_.notifyAll(mutex_);
             mutex_.unlock();
         }
-        })
+        })().awaitSync()
     }.Await();
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let asyncCondVarTestsuite = new arktest.ArkTestsuite("asyncCondVarTestsuite");
     let asyncCondVarTestsuiteDisabled = new arktest.ArkTestsuite("asyncCondVarTestsuite.DISABLED");
 
@@ -134,5 +139,5 @@ function main(): int {
     asyncCondVarTestsuiteDisabled.addAsyncTest('asyncCondVarTestNotifyWithoutWaiters', asyncCondVarTestNotifyWithoutWaiters);
     asyncCondVarTestsuiteDisabled.addAsyncTest('asyncCondVarNotifyAllTest', asyncCondVarNotifyAllTest);
 
-    return asyncCondVarTestsuite.run();
+    return await asyncCondVarTestsuite.runAsync();
 }

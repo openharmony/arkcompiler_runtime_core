@@ -25,7 +25,7 @@ class Parent {
   }
 
   public async greet(): Promise<string> {
-    return await this.fetchMessage();
+    await this.fetchMessage();
   }
 }
 
@@ -35,13 +35,11 @@ class Child extends Parent {
   }
 
   public async callParentGreet(): Promise<string> {
-    return await this.greet();
+    await this.greet();
   }
 }
 
-function main(): void {
-  waitForCompletion(async () => {
-    const child = new Child();
-    arktest.assertEQ(await child.callParentGreet(), "Hello from Child!");
-  });
+async function main() {
+  const child = new Child();
+  arktest.assertEQ(await child.callParentGreet(), "Hello from Child!");
 }

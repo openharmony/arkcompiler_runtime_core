@@ -35,6 +35,6 @@ async function outer(): Promise<void> {
     await inner();
 }
 
-function main(): void {
-    waitForCompletion(outer);
+async function main(): Promise<void> {
+    await outer();
 }

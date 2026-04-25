@@ -42,7 +42,7 @@ async function failingForFinally(): Promise<void> {
     throw new Error("rejected");
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let suite = new arktest.ArkTestsuite("Promise callbacks");
 
     suite.addAsyncTest(".then() transforms the resolved value", async (): Promise<void> => {
@@ -81,5 +81,5 @@ function main(): int {
         arktest.assertEQ(result, "abcd");
     });
 
-    return suite.run();
+    return await suite.runAsync();
 }

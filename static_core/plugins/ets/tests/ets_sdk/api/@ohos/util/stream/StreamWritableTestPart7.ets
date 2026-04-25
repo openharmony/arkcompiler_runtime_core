@@ -284,7 +284,7 @@ async function testWritableDoWriteOrder() {
         arktest.assertEQ(error.message, 'Write after end.');
     }
     writableStream.on('error', mustCall(func2));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable10 extends stream.Writable {
@@ -496,5 +496,5 @@ async function testWritableWriteUintArrayData() {
     let writableStream = new MyWritable18();
     let uint8Array = new Uint8Array([11, 22, 33, 44, 55, 66]);
     writableStream.write(uint8Array);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }

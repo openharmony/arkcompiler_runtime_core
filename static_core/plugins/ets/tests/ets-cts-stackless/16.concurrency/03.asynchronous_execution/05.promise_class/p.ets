@@ -24,7 +24,7 @@ async function runTest() {
     {{c.use|indent}}
 }
 
-function main(){
-    waitForCompletion(runTest);
+async function main(){
+    await runTest();
 }
 {% endfor %}

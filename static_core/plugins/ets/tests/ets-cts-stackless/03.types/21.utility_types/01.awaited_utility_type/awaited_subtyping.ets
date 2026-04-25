@@ -29,6 +29,6 @@ async function bar <T extends Derived> (p: Awaited<T>) {
   foo(p)
 }
 
-function main() {
-  waitForCompletion(() => bar<Derived>(new E()))
+async function main() {
+  await bar<Derived>(new E())
 }

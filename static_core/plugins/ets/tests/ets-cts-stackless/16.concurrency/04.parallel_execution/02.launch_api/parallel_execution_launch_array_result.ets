@@ -28,6 +28,6 @@ async function startTest() {
   arktest.assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
 }
 
-function main() {
-  waitForCompletion(startTest)
+async function main() {
+  await startTest()
 }

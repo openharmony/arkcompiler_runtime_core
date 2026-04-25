@@ -23,7 +23,8 @@ async function asyncMutexStressTest() {
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             for (let i = 0; i < workload; ++i) {
                 await mutex.lock();
                 let temp = count;
@@ -32,7 +33,7 @@ async function asyncMutexStressTest() {
                 arktest.assertEQ(temp + 1, count);
                 mutex.unlock();
             }
-            })
+            })().awaitSync()
         };
     }
     for (let job of jobs) { 
@@ -55,10 +56,11 @@ async function asyncMutexHardUnlockTest() {
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             await mutex.lock();
             mutex.unlock();
-            })
+            })().awaitSync()
         };
     }
 
@@ -79,7 +81,8 @@ async function asyncMutexExclusiveAcquireTest() {
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
         jobs[id] = launch() {
-            waitForCompletion(async () => {
+            // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+            (async () => {
             await mutex.lock();
             Coroutine.Schedule();
             arktest.assertEQ(flag, false);
@@ -88,7 +91,7 @@ async function asyncMutexExclusiveAcquireTest() {
             arktest.assertEQ(flag, true);
             flag = false;
             mutex.unlock();
-            })
+            })().awaitSync()
         };
     }
     for (let job of jobs) { 
@@ -96,7 +99,7 @@ async function asyncMutexExclusiveAcquireTest() {
     }
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let asyncMutexTestsuite = new arktest.ArkTestsuite("asyncMutexTestsuite");
     let asyncMutexTestsuiteDisabled = new arktest.ArkTestsuite("asyncMutexTestsuite.DISABLED");
 
@@ -105,5 +108,5 @@ function main(): int {
     asyncMutexTestsuite.addAsyncTest('asyncMutexSimpleUnlockTest', asyncMutexSimpleUnlockTest);
     asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexHardUnlockTest', asyncMutexHardUnlockTest);
     asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexExclusiveAcquireTest', asyncMutexExclusiveAcquireTest);
-    return asyncMutexTestsuite.run();
+    return await asyncMutexTestsuite.runAsync();
 }

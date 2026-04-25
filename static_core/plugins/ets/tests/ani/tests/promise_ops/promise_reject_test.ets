@@ -17,7 +17,7 @@ file_name: ani_test_promise_ops_reject
 ---*/
 
 function checkReject(promise: Promise<String>, rejection: Error): boolean {
-    return waitForCompletion(() => checkRejectAsync(promise, rejection));
+    return checkRejectAsync(promise, rejection).awaitSync();
 }
 
 async function checkRejectAsync(promise: Promise<String>, rejection: Error): Promise<boolean> {

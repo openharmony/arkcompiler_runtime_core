@@ -62,11 +62,11 @@ async function pushBlocksWhenFullTest002(): Promise<void> {
     arktest.assertTrue(queue.isEmpty());
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueuePushStressTest');
 
     testSuite.addAsyncTest('ThreadsPushStressTest001', threadsPushStressTest001);
     testSuite.addAsyncTest('PushBlocksWhenFullTest002', pushBlocksWhenFullTest002);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

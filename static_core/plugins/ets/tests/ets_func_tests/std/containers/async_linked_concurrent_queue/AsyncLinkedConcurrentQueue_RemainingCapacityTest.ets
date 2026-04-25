@@ -78,7 +78,7 @@ async function remainingCapacityMixedOperationsTest004(): Promise<void> {
     arktest.assertEQ(queue.remainingCapacity(), elementsNum);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueRemainingCapacityTest');
 
     testSuite.addTest('RemainingCapacityTest001', remainingCapacityTest001);
@@ -86,5 +86,5 @@ function main(): int {
     testSuite.addTest('RemainingCapacityStressTest003', remainingCapacityStressTest003);
     testSuite.addAsyncTest('RemainingCapacityMixedOperationsTest004', remainingCapacityMixedOperationsTest004);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

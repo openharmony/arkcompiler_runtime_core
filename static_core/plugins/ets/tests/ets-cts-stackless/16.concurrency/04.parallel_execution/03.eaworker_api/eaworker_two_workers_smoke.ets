@@ -33,18 +33,19 @@ async function startTest() {
   ea2.start()
 
   let job1 = ea1.run<undefined>(() => {
-    waitForCompletion(async () => {
+    (async () => {
       await readLock.lock()
       readRun = true
       i++
       arktest.assertEQ(1, i)
       i--
       readLock.unlock()
-    })
+    // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+    })().awaitSync()
   })
 
   let job2 = ea2.run<undefined>(() => {
-    waitForCompletion(async () => {
+    (async () => {
       await writeLock.lock()
       writeRun = true
       i++
@@ -52,7 +53,8 @@ async function startTest() {
       i--
       Coroutine.Schedule()
       writeLock.unlock()
-    })
+    // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+    })().awaitSync()
   })
 
   job1.Await()
@@ -65,6 +67,6 @@ async function startTest() {
   ea2.quit()
 }
 
-function main() {
-  waitForCompletion(startTest)
+async function main() {
+  await startTest()
 }

@@ -75,7 +75,7 @@ async function addAndPushAndPopTest004(): Promise<void> {
     arktest.assertEQ(queue.isEmpty(), true);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueAddTest');
 
     testSuite.addTest('AddTest001', addTest001);
@@ -83,5 +83,5 @@ function main(): int {
     testSuite.addAsyncTest('AddAndPushAndPollTest003', addAndPushAndPollTest003);
     testSuite.addAsyncTest('AddAndPushAndPopTest004', addAndPushAndPopTest004);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

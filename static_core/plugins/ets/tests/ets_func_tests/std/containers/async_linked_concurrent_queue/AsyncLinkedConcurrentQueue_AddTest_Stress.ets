@@ -61,10 +61,10 @@ async function threadsAddStressTest001(): Promise<void> {
     arktest.assertTrue(queue.isEmpty());
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueAddStressTest');
 
     testSuite.addAsyncTest('ThreadsAddStressTest001', threadsAddStressTest001);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

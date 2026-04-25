@@ -24,9 +24,7 @@ class Event {
     }
 
     public wait(): boolean {
-        return waitForCompletion<boolean>(() => {
-            return this.promise;
-        });
+        return this.promise.awaitSync();
     }
 
     public fire(val: boolean = true) {
@@ -383,7 +381,7 @@ function testDoubleRemoveMessage() {
     let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
 
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
-        waitForCompletion(async ()=>{await waiter;})
+        (async ()=>{await waiter;})().awaitSync()
     }, worker);
 
     let message = new concurrency.Message(1, handler);

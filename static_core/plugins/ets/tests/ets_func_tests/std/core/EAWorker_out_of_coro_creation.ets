@@ -48,9 +48,9 @@ async function out_of_coro_test() {
     eaw2.quit();
 }
 
-function main() {
+async function main(): Promise<int> {
     let testsuite = new arktest.ArkTestsuite("EAWorker");
     testsuite.addAsyncTest("out_of_coro_test", out_of_coro_test)
-    return testsuite.run();
+    return await testsuite.runAsync();
 }
 

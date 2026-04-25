@@ -19,7 +19,7 @@ import buffer from '@ohos.buffer';
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Readable resume and pause functionality", testReadableResumeAndPause);
@@ -46,7 +46,7 @@ function main(): int {
     suite.addAsyncTest("Readable ended property validation (after finish)", testReadableEndedAfterFinish);
     suite.addTest("Readable property validation (pause and resume)", testReadablePauseAndResumeState);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -119,7 +119,7 @@ async function testReadableResumeAndPause() {
         }, 20);
     });
     arktest.assertTrue(dataCalled);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableResumePause002
@@ -141,7 +141,7 @@ async function testReadableResumeTriggersEvent() {
         readable.push('test');
     }, 0);
     arktest.assertTrue(readable.readable, "readable should be true");
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableResumePause004
@@ -194,7 +194,7 @@ async function testReadableErrorHandling() {
     readable.on('error', mustCall((): void => {
         arktest.assertFalse(readable.readable, "readable should be false");
     }));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties004
@@ -388,7 +388,7 @@ async function testReadableEndedAfterFinish() {
     readable.on('finished', mustCall((): void => {
         arktest.assertTrue(readable.readableEnded, "readableEnded should be true");
     }, 0));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyRead12 extends stream.Readable {

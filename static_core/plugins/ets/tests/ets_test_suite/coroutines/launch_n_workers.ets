@@ -39,7 +39,7 @@ function compare_worker_ids_async(chain_len: int): int {
     L.log('Testing async function chain');
 
     let id_main: int = CoroutineExtras.getWorkerId();
-    let result = waitForCompletion(() => async_function_chain(id_main, chain_len));
+    let result = async_function_chain(id_main, chain_len).awaitSync();
     if (result == 0) {
         L.log('Successfully ran the async function chain')
     } else {

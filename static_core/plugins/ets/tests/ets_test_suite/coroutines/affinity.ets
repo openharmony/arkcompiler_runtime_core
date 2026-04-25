@@ -64,7 +64,7 @@ function check_sync_id_nonmain(number_of_coros: int): int {
 function check_default_policy(): int {
     L.log('Testing the DEFAULT affinity type');
 
-    if (waitForCompletion(check_async_id) != 0) {
+    if (check_async_id().awaitSync() != 0) {
         L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }
@@ -75,7 +75,7 @@ function check_nonmain_policy(): int {
     L.log('Testing the NON_MAIN affinity type');
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
 
-    if (waitForCompletion(check_async_id) != 0) {
+    if (check_async_id().awaitSync() != 0) {
         L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }

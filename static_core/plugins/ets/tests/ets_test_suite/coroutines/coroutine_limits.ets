@@ -36,7 +36,7 @@ function asyncLimitTest() {
             limit.coroCount++;
             await aFunc!();
         }
-        waitForCompletion(aFunc!);
+        aFunc!().awaitSync();
     };
     startTest(asyncLimit);
 }

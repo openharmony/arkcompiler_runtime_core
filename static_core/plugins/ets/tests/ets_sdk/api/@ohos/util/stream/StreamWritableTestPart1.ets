@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Create a writable stream", testWritableCreation);
@@ -31,7 +31,7 @@ function main(): int {
     suite.addTest("Write on Error Sequence without end", testWritableOnErrorSequence);
     suite.addTest("Write on Error Sequence with end", testWritableOnErrorSequenceWithEnd);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -130,7 +130,7 @@ async function testWritableAttributeState() {
     writableStream.on('error', mustCall());
     writableStream.write('test');
     arktest.assertEQ(writableStream.writable, false);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable2 extends stream.Writable {
@@ -153,7 +153,7 @@ async function testWritableWriteData() {
             arktest.assertEQ(error, null);
         }
     });
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWritable3 = 0;
@@ -179,7 +179,7 @@ async function testWritableDoWriteNotCalled() {
     arktest.assertEQ(writableStream.writable, true);
     writableStream.end();
     arktest.assertEQ(writableStream.writable, false);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable4 extends stream.Writable {
@@ -202,7 +202,7 @@ async function testWritableWriteDataFailed() {
     writable.write('hello', 'utf8', mustCallNoArgs((): void => {
         callbackCalled = true;
     }));
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 class MyWritable5 extends stream.Writable {

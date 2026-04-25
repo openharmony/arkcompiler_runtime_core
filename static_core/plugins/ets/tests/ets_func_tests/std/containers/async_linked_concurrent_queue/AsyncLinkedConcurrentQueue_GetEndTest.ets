@@ -73,12 +73,12 @@ async function getEndConcurrentTest003(): Promise<void> {
     arktest.assertEQ(queue.getEnd()!.value, stressNum - 1);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueGetEndTest');
 
     testSuite.addTest('GetEndTest001', getEndTest001);
     testSuite.addAsyncTest('GetEndTest002', getEndTest002);
     testSuite.addAsyncTest('GetEndConcurrentTest003', getEndConcurrentTest003);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

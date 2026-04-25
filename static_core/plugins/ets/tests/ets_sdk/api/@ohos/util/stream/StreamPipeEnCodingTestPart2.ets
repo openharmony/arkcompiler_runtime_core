@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Writable stream encoding validation (gb18030).", testWritableStreamWriteEncodingGb18030);
@@ -25,7 +25,7 @@ function main(): int {
     suite.addAsyncTest("Writable stream encoding validation (gb2312).", testWritableStreamWriteEncodingGb2312);
     suite.addAsyncTest("Writable stream end method validation (gb18030).", testWritableStreamEndEncodingGb18030);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -98,7 +98,7 @@ async function testWritableStreamWriteEncodingGb18030() {
     let writable = new MyWrite1();
     let result = writable.write('测试', 'gb18030');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite2 = 0;
@@ -125,7 +125,7 @@ async function testWritableStreamWriteEncodingGbk() {
     let writable = new MyWrite2();
     let result = writable.write('你好', 'gbk');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite3 = 0;
@@ -152,7 +152,7 @@ async function testWritableStreamWriteEncodingGb2312() {
     let writable = new MyWrite3();
     let result = writable.write('你好', 'gb2312');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyWrite4 = 0;
@@ -178,5 +178,5 @@ async function testWritableStreamEndEncodingGb18030() {
 
     let writable = new MyWrite4();
     writable.end('测试', 'gb18030', mustCall());
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }

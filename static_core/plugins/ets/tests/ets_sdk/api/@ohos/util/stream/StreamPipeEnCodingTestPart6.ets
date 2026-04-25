@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Set default encoding for duplex stream (gbk).", testDuplexStreamSetDefaultEncodingGbk);
@@ -25,7 +25,7 @@ function main(): int {
     suite.addAsyncTest("Transform stream encoding validation (gb18030).", testTransformStreamWriteEncodingGb18030);
     suite.addAsyncTest("Transform stream encoding validation (gbk).", testTransformStreamWriteEncodingGbk);
 
-    return suite.run();
+    return await suite.runAsync();
 }
 
 async function mustCallCheckAll() {
@@ -97,7 +97,7 @@ async function testDuplexStreamSetDefaultEncodingGbk() {
     let result = duplex.setDefaultEncoding('gbk');
     duplex.write('你好');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyDuplex2 = 0;
@@ -124,7 +124,7 @@ async function testDuplexStreamSetDefaultEncodingGb2312() {
     let result = duplex.setDefaultEncoding('gb2312');
     duplex.write('你好');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyTransform3 = 0;
@@ -152,7 +152,7 @@ async function testTransformStreamWriteEncodingGb18030() {
     let transform = new MyTransform3();
     transform.write('你好123', 'gb18030');
     transform.end();
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }
 
 let callCount_MyTransform4 = 0;
@@ -180,5 +180,5 @@ async function testTransformStreamWriteEncodingGbk() {
     let transform = new MyTransform4();
     transform.write('你好123', 'gbk');
     transform.end();
-    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
+    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
 }

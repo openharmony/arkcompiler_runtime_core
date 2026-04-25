@@ -19,7 +19,7 @@ const stressNum: int = 100;
 let sharedQueueInt: containers.stackless.ArrayConcurrentQueue<int> =
     new containers.stackless.ArrayConcurrentQueue<int>(stressNum);
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueuePollTest');
 
     arrayConcurrentQueueTestsuite.addTest('PollTest001', () => {
@@ -77,7 +77,7 @@ function main(): int {
         arktest.assertEQ(queue.poll(), undefined);
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }
 
 function sharedQueuePollData() {

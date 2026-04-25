@@ -13,6 +13,25 @@
  * limitations under the License.
  */
 
+class Event {
+    constructor() {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+            this.resolveFn = resolve;
+        })
+    }
+
+    public wait(): boolean {
+        return this.promise.awaitSync();
+    }
+
+    public fire(val: boolean = true) {
+        this.resolveFn!(val);
+    }
+
+    private promise: Promise<boolean>;
+    private resolveFn: ((val: boolean) => void) | null = null;
+}
+
 function main(): int {
     let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueGetEndTest")
     LinkedBlockingQueueTestsuite.addTest("getEndFill", getEndFillTest)
@@ -80,34 +99,40 @@ function getEndCapacityTest() {
 
 const JOB_COUNT = 3
 const PUSH_COUNT_PER_JOB = 5
+const TOTAL_CALLBACKS = JOB_COUNT * PUSH_COUNT_PER_JOB
 function getEndConcurrentTest() {
-    let testBlockingQueue = new containers.LinkedBlockingQueue<int>(JOB_COUNT * PUSH_COUNT_PER_JOB)
+    let testBlockingQueue = new containers.LinkedBlockingQueue<int>(TOTAL_CALLBACKS)
     let flag: AtomicFlag = new AtomicFlag(false)
     let lock = new AsyncLock()
+    let completed = new AtomicInt(0)
+    let allDone = new Event()
     let jobs: Job<void>[] = []
     for (let i = 0; i < JOB_COUNT; i++) {
         jobs.push(launch() {
-            getEndConcurrent(testBlockingQueue, lock, flag);
+            getEndConcurrent(testBlockingQueue, lock, flag, completed, allDone);
         })
     }
     for (let i = 0; i < JOB_COUNT; i++) {
         jobs[i].Await()
     }
+    allDone.wait()
     if (flag.get()) {
         throw new Error("assert testBQ == val failed in getEndConcurrentTest")
     }
 }
 
-function getEndConcurrent(testBQ: containers.LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
-    let arrPromise = Array.create<Promise<void>>(PUSH_COUNT_PER_JOB, Promise.resolve())
+function getEndConcurrent(testBQ: containers.LinkedBlockingQueue<int>, lock: AsyncLock,
+                          flag: AtomicFlag, completed: AtomicInt, allDone: Event) {
     for (let i: int = 0; i < PUSH_COUNT_PER_JOB; i++) {
         let val = i
-        arrPromise[i] = lock.lockAsync(() => {
+        lock.lockAsync(() => {
             testBQ.push(val)
             if (testBQ.getEnd() != val) {
                 flag.set(true)
             }
+            if (completed.fetchAdd(1) + 1 == TOTAL_CALLBACKS) {
+                allDone.fire()
+            }
         })
     }
-    waitForCompletion(() => Promise.all(arrPromise))
 }

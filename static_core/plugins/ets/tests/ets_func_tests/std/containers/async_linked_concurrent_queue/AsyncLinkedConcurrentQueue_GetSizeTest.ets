@@ -56,12 +56,12 @@ async function getSizeStressTest003(): Promise<void> {
     arktest.assertEQ(queue.size, 0);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueSizeTest');
 
     testSuite.addTest('SizeTest001', sizeTest001);
     testSuite.addAsyncTest('SizeTest002', sizeTest002);
     testSuite.addAsyncTest('GetSizeStressTest003', getSizeStressTest003);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

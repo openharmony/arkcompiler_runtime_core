@@ -16,7 +16,7 @@
 let currentValue: int = 0;
 const numbers: int[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueConstructorTest');
 
     arrayConcurrentQueueTestsuite.addTest('ConstructorTestInt001', () => {
@@ -42,5 +42,5 @@ function main(): int {
         }
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }

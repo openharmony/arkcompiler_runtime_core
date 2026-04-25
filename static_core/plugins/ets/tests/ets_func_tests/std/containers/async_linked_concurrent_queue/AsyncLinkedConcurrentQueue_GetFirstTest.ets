@@ -94,7 +94,7 @@ async function getFirstConcurrentTest004(): Promise<void> {
     arktest.assertEQ(queue.size, 0);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('LinkedConcurrentQueueGetFirstTest');
 
     testSuite.addTest('GetFirstTest001', getFirstTest001);
@@ -102,5 +102,5 @@ function main(): int {
     testSuite.addAsyncTest('GetFirstStressTest003', getFirstStressTest003);
     testSuite.addAsyncTest('GetFirstConcurrentTest004', getFirstConcurrentTest004);
 
-    return testSuite.run();
+    return await testSuite.runAsync();
 }

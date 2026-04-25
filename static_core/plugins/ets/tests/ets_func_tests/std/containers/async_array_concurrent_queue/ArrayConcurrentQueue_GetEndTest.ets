@@ -16,7 +16,7 @@
 const elementsNum: int = 100;
 let queueInt: containers.stackless.ArrayConcurrentQueue<int> = new containers.stackless.ArrayConcurrentQueue<int>(200);
 
-function main(): int {
+async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueueGetEndTest');
 
     arrayConcurrentQueueTestsuite.addAsyncTest('GetEndTestInt001', async () => {
@@ -112,7 +112,7 @@ function main(): int {
         arktest.assertEQ(queueInt.getEnd(), 20);
     });
 
-    return arrayConcurrentQueueTestsuite.run();
+    return await arrayConcurrentQueueTestsuite.runAsync();
 }
 
 function queueIntGetEndData() {
