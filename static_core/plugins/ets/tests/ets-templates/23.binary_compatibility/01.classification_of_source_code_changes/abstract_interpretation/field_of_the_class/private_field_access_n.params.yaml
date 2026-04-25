@@ -1,0 +1,81 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: |-
+        Private field access.
+    call: |-
+        let c1 = new LIB.C1;
+        c1.pf;
+
+  - desc: |-
+        Access private field as parameter.
+    decl: |-
+        function foo(pi1: PI.PI1): PI.PI2 {
+            let pi2: PI.PI2 = {}
+            return pi2
+        }
+    call: |-
+        let c1 = new LIB.C1;
+        foo(c1.pf)
+
+  - desc: |-
+        Return private field value.
+    decl: |-
+        function foo(): PI.PI1 {
+            let c1 = new LIB.C1;
+            return c1.pf;
+        }
+
+  - desc: |-
+        Private field in generic function.
+    decl: |-
+        class C2 extends LIB.C1 {}
+
+        function foo<T extends LIB.C1>(t: T) {
+            return t.pf
+        }
+    call: |-
+        foo<C2>(new C2);
+
+  - desc: |-
+        Private field safe access.
+    call: |-
+        let c1 = new LIB.C1;
+        c1?.pf;
+
+  - desc: |-
+        Private field access in child.
+    decl: |-
+        class D1 extends LIB.C1 {
+            foo() {
+                return this.pf
+            }
+        }
+    call: |-
+        let d1 = new D1;
+        d1.foo();
+
+  - desc: |-
+        Private field access in generic child.
+    decl: |-
+        class C2 extends LIB.C1 {}
+
+        class D1 <T extends LIB.C1> {
+            foo(t: T) {
+                return t.pf
+            }
+        }
+    call: |-
+        let d1 = new D1<C2>;
+        d1.foo(new C2);
