@@ -1,0 +1,265 @@
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "plugins/ets/tests/ani/tests/verifyani/tuplevalue/verify_tuplevalue_test_utils.h"
+
+// NOLINTBEGIN(readability-magic-numbers)
+
+namespace ark::ets::ani::verify::testing {
+
+class TupleValueGetItem{{ Type }}Test : public VerifyAniTupleValueTestBase {
+protected:
+    static constexpr std::string_view MODULE_NAME = "ani_verify_test_tuplevalue_get_item_{{ type }}";
+    static constexpr ani_size VALID_INDEX = 0U;
+    static constexpr ani_size OUT_OF_RANGE_INDEX = 3U;
+{% if type != "ref" %}
+    static constexpr ani_{{ type }} EXPECTED_VALUE = {{ expected_cpp_value }};
+{% endif %}
+
+    ani_tuple_value GetValidTuple()
+    {
+        return GetTupleWithCheck(MODULE_NAME, "get{{ Type }}Tuple");
+    }
+};
+
+TEST_F(TupleValueGetItem{{ Type }}Test, wrong_env)
+{
+    ani_tuple_value tupleValue = GetValidTuple();
+    ani_{{ type }} result {};
+
+    ASSERT_EQ(env_->c_api->TupleValue_GetItem_{{ Type }}(nullptr, tupleValue, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"tuple_value", "ani_tuple_value"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, wrong_tuple)
+{
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(nullptr, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, expired_local_scope_tuple)
+{
+    ani_tuple_value tupleValue = GetTupleFromExpiredLocalScope(MODULE_NAME, "get{{ Type }}Tuple");
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, null_input_tuple)
+{
+    ani_tuple_value tupleValue {};
+    ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&tupleValue)), ANI_OK);
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: null"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, undefined_input_tuple)
+{
+    ani_tuple_value tupleValue {};
+    ASSERT_EQ(env_->GetUndefined(reinterpret_cast<ani_ref *>(&tupleValue)), ANI_OK);
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, object_input_tuple)
+{
+    ani_object object {};
+    CreateObject(&object);
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(reinterpret_cast<ani_tuple_value>(object), VALID_INDEX,
+                                                         &result),
+              ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, string_input_tuple)
+{
+    ani_string string {};
+    CreateString("tuple-value", &string);
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(reinterpret_cast<ani_tuple_value>(string), VALID_INDEX,
+                                                         &result),
+              ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, error_input_tuple)
+{
+    ani_error aniError {};
+    CreateError(&aniError);
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(reinterpret_cast<ani_tuple_value>(aniError), VALID_INDEX,
+                                                         &result),
+              ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, array_input_tuple)
+{
+    ani_array array {};
+    CreateArray(3U, &array);
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(reinterpret_cast<ani_tuple_value>(array), VALID_INDEX,
+                                                         &result),
+              ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, wrong_result)
+{
+    ani_tuple_value tupleValue = GetValidTuple();
+
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, nullptr), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, wrong_type)
+{
+    ani_tuple_value tupleValue = GetTupleWithCheck(MODULE_NAME, "getWrong{{ Type }}Tuple");
+    ani_{{ type }} result {};
+
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value"},
+        {"index", "ani_size", "wrong tuple element type at this index"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, wrong_all_args)
+{
+    ASSERT_EQ(env_->c_api->TupleValue_GetItem_{{ Type }}(nullptr, nullptr, VALID_INDEX, nullptr), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, throw_error)
+{
+    ani_tuple_value tupleValue = GetValidTuple();
+    ThrowError();
+
+    ani_{{ type }} result {};
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "has unhandled an error"},
+        {"tuple_value", "ani_tuple_value"},
+        {"index", "ani_size"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, index_out_of_range)
+{
+    ani_tuple_value tupleValue = GetValidTuple();
+    ani_{{ type }} result {};
+
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, OUT_OF_RANGE_INDEX, &result),
+              ANI_OUT_OF_RANGE);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"tuple_value", "ani_tuple_value"},
+        {"index", "ani_size", "out of range"},
+        {"result", "ani_{{ type }} *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
+}
+
+TEST_F(TupleValueGetItem{{ Type }}Test, success)
+{
+    ani_tuple_value tupleValue = GetValidTuple();
+    ani_{{ type }} result {};
+
+    ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_OK);
+{% if type == "ref" %}
+    AssertStringRefEqual(result, "alpha");
+{% else %}
+    AssertAniValueEqual(result, EXPECTED_VALUE);
+{% endif %}
+}
+
+}  // namespace ark::ets::ani::verify::testing
+
+// NOLINTEND(readability-magic-numbers)

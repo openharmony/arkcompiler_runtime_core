@@ -25,6 +25,7 @@ class VEnv;
 class VRef;
 class VModule;
 class VObject;
+class VTupleValue;
 class VClass;
 class VEnum;
 class VEnumItem;
@@ -118,6 +119,11 @@ struct TypeMapping<VObject **> {
 template <>
 struct TypeMapping<VObject *> {
     using Type = ani_object;
+};
+
+template <>
+struct TypeMapping<VTupleValue *> {
+    using Type = ani_tuple_value;
 };
 
 template <>
