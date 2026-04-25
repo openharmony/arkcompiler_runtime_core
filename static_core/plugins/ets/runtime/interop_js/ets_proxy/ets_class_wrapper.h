@@ -40,13 +40,21 @@ using EtsClassWrappersCache = WrappersCache<EtsClass *, EtsClassWrapper>;
 class EtsClassWrapper {
 public:
     // clang-format off
-    static constexpr auto FIELD_ATTR         = static_cast<napi_property_attributes>(napi_writable | napi_enumerable);
-    static constexpr auto METHOD_ATTR        = napi_default;
+    // Data descriptors (value-based fields): writable + enumerable
+    static constexpr auto FIELD_ATTR                = static_cast<napi_property_attributes>(napi_writable |
+                                                                                             napi_enumerable);
+    static constexpr auto METHOD_ATTR               = napi_default;
     // NOLINTBEGIN(hicpp-signed-bitwise)
-    static constexpr auto STATIC_FIELD_ATTR  = static_cast<napi_property_attributes>(napi_writable | napi_enumerable |\
-                                                                       napi_static);
+    static constexpr auto STATIC_FIELD_ATTR         = static_cast<napi_property_attributes>(napi_writable |
+                                                                                             napi_enumerable |
+                                                                                             napi_static);
+    // Accessor descriptors (getter/setter-based fields): napi_writable is intentionally excluded,
+    // as it is invalid when getter/setter are present (per NAPI/ECMAScript spec).
+    static constexpr auto FIELD_ACCESSOR_ATTR        = napi_enumerable;
+    static constexpr auto STATIC_FIELD_ACCESSOR_ATTR = static_cast<napi_property_attributes>(napi_enumerable |
+                                                                                              napi_static);
     // NOLINTEND(hicpp-signed-bitwise)
-    static constexpr auto STATIC_METHOD_ATTR = napi_static;
+    static constexpr auto STATIC_METHOD_ATTR        = napi_static;
     // clang-format on
 
     struct OverloadEntry {
@@ -139,7 +147,6 @@ private:
     std::vector<napi_property_descriptor> BuildJSProperties(napi_env &env, Span<Field *> fields,
                                                             Span<EtsMethodSet *> methods);
 
-    void DefinePropertiesBatch(napi_env env, napi_value jsCtor, Span<const napi_property_descriptor> jsProps);
     static napi_value GetGlobalSymbolIterator(napi_env &env);
 
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
