@@ -18,7 +18,7 @@ desc: A compile-time error occurs if typeReference fails to name an accessible i
 assert: B is not an interface
 tags: [compile-only,negative]
 expected_out: |-
-    TODO
+    [implements_class_n.ets:26:20] Semantic error ESE0179: Interface expected here.
 ---*/
 
 abstract class B {}
