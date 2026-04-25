@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,16 @@ TEST_F(FindClassTest, invalid_arguments)
 
     ASSERT_EQ(env_->FindClass("", &cls), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->FindClass("\t", &cls), ANI_NOT_FOUND);
+}
+
+TEST_F(FindClassTest, malformed_fuzz_descriptors)
+{
+    ani_class cls {};
+
+    ASSERT_EQ(env_->FindClass("X{i}", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("X{A{i}}", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("A{X{i}}", &cls), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->FindClass("A{X{A{i}}}", &cls), ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(FindClassTest, class_is_not_namespace)

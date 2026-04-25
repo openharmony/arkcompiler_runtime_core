@@ -49,7 +49,13 @@ std::string GetDescriptorImpl(const std::string &componentName, bool ignorePrimi
     }
 
     auto compTypeRaw = Type::FromName(componentName);
+    if (!compTypeRaw.IsValid()) {
+        return {};
+    }
     auto compType = Type(compTypeRaw.GetNameWithoutRank(), 0);
+    if (!compType.IsValid()) {
+        return {};
+    }
     auto res = std::string(compTypeRaw.GetRank(), '[');
     if (compType.IsUnion()) {
         return res + compType.GetDescriptor();
@@ -59,6 +65,10 @@ std::string GetDescriptorImpl(const std::string &componentName, bool ignorePrimi
 
 std::string Type::GetDescriptor(bool ignorePrimitive) const
 {
+    if (!IsValid()) {
+        return {};
+    }
+
     std::string res = std::string(rank_, '[');
     if ((componentNames_.size() == 1)) {
         return res + GetDescriptorImpl(componentNames_[0], ignorePrimitive);
@@ -73,12 +83,24 @@ std::string Type::GetDescriptor(bool ignorePrimitive) const
 
 void Type::Canonicalize()
 {
-    if (!IsUnion()) {
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    constexpr size_t minUnionComponentCount = 2;
+    if (!IsUnion() || componentNames_.size() < minUnionComponentCount) {
         return;
     }
     for (auto &componentName : componentNames_) {
         Type rawCompType = Type::FromName(componentName);
+        if (!rawCompType.IsValid()) {
+            componentNames_.clear();
+            name_.clear();
+            return;
+        }
         Type compType = Type(rawCompType.GetNameWithoutRank(), 0);
+        if (!compType.IsValid()) {
+            componentNames_.clear();
+            name_.clear();
+            return;
+        }
         componentName = Type(compType.GetName(), rawCompType.GetRank()).GetName();
     }
 
@@ -92,6 +114,9 @@ void Type::Canonicalize()
 std::string Type::CanonicalizeDescriptor(std::string_view descriptor)
 {
     auto type = Type::FromDescriptor(descriptor);
+    if (!type.IsValid()) {
+        return {};
+    }
     type.Canonicalize();
     return type.GetDescriptor();
 }
@@ -149,9 +174,18 @@ static std::pair<std::string_view, size_t> FromDescriptorComponent(std::string_v
         {"Z", "u1"},  {"B", "i8"},  {"H", "u8"},  {"S", "i16"}, {"C", "u16"},  {"I", "i32"}, {"U", "u32"},
         {"F", "f32"}, {"D", "f64"}, {"J", "i64"}, {"Q", "u64"}, {"V", "void"}, {"A", "any"}};
 
-    bool isRefType = descriptor[0] == 'L';
+    if (descriptor.empty()) {
+        LOG(WARNING, ASSEMBLER) << "Descriptor component is empty";
+        return {"", 0};
+    }
+
+    bool isRefType = descriptor.front() == 'L';
     if (isRefType) {
         auto len = descriptor.find(';');
+        if (len == std::string_view::npos || len == 1) {
+            LOG(WARNING, ASSEMBLER) << "Invalid reference descriptor [" << descriptor << "].";
+            return {"", 0};
+        }
         return {descriptor.substr(1, len - 1), len + 1};
     }
 
@@ -166,23 +200,41 @@ static std::pair<std::string_view, size_t> FromDescriptorComponent(std::string_v
 
 static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descriptor)
 {
-    bool isUnionType = descriptor[0] == '{';
+    if (descriptor.empty()) {
+        LOG(WARNING, ASSEMBLER) << "Descriptor is empty";
+        return {"", 0};
+    }
+
+    bool isUnionType = descriptor.front() == '{';
     if (!isUnionType) {
         auto [name, len] = FromDescriptorComponent(descriptor);
         return {std::string(name), len};
     }
 
+    if (descriptor.size() < Type::UNION_PREFIX_LEN || descriptor.substr(0, Type::UNION_PREFIX_LEN) != "{U") {
+        LOG(WARNING, ASSEMBLER) << "Invalid union descriptor [" << descriptor << "].";
+        return {"", 0};
+    }
+
     std::string name = "{U";
     size_t unionLen = 3;
     descriptor.remove_prefix(Type::UNION_PREFIX_LEN);
-    while (descriptor[0] != '}') {
+    while (!descriptor.empty() && descriptor.front() != '}') {
         size_t rank = 0;
-        while (descriptor[rank] == '[') {
+        while (rank < descriptor.size() && descriptor[rank] == '[') {
             ++rank;
         }
         unionLen += rank;
         descriptor.remove_prefix(rank);
+        if (descriptor.empty()) {
+            LOG(WARNING, ASSEMBLER) << "Invalid union descriptor: missing component after array rank.";
+            return {"", 0};
+        }
         auto [componentDesc, len] = FromDescriptorImpl(descriptor);
+        if (len == 0 || len > descriptor.size()) {
+            LOG(WARNING, ASSEMBLER) << "Invalid union descriptor [" << descriptor << "].";
+            return {"", 0};
+        }
         unionLen += len;
         name += componentDesc;
         while (rank-- > 0) {
@@ -190,6 +242,10 @@ static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descri
         }
         name += ",";
         descriptor.remove_prefix(len);
+    }
+    if (descriptor.empty() || descriptor.front() != '}') {
+        LOG(WARNING, ASSEMBLER) << "Invalid union descriptor: missing closing brace.";
+        return {"", 0};
     }
     name.pop_back();  // remove the extra comma
     name += "}";
@@ -200,13 +256,20 @@ static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descri
 Type Type::FromDescriptor(std::string_view descriptor)
 {
     size_t i = 0;
-    while (descriptor[i] == '[') {
+    while (i < descriptor.size() && descriptor[i] == '[') {
         ++i;
+    }
+    if (i == descriptor.size()) {
+        LOG(WARNING, ASSEMBLER) << "Invalid descriptor [" << descriptor << "].";
+        return Type();
     }
 
     size_t rank = i;
     descriptor.remove_prefix(rank);
-    auto [name, _] = FromDescriptorImpl(descriptor);
+    auto [name, len] = FromDescriptorImpl(descriptor);
+    if (len == 0) {
+        return Type();
+    }
     return Type(name, rank);
 }
 
@@ -216,8 +279,17 @@ Type Type::FromName(std::string_view name, bool ignorePrimitive)
     size_t size = name.size();
     size_t i = 0;
 
-    while (name[size - i - 1] == ']') {
+    if (name.empty()) {
+        LOG(WARNING, ASSEMBLER) << "Type name is empty";
+        return Type();
+    }
+
+    while (i + Type::RANK_STEP <= size && name[size - i - 1] == ']' && name[size - i - Type::RANK_STEP] == '[') {
         i += Type::RANK_STEP;
+    }
+    if (i >= size || name[size - i - 1] == '[' || name[size - i - 1] == ']') {
+        LOG(WARNING, ASSEMBLER) << "Invalid type name [" << name << "].";
+        return Type();
     }
 
     name.remove_suffix(i);

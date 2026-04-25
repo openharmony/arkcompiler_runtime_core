@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "libarkfile/file_items.h"
 #include "isa.h"
 #include "libarkbase/macros.h"
+#include <algorithm>
 
 namespace ark::pandasm {
 
@@ -61,17 +62,33 @@ public:
 
     size_t SkipUnion(std::string_view name)
     {
-        auto unionLength = 2;
-        while (name[unionLength++] != '}') {
-            if (name[unionLength] == '{') {
-                unionLength += SkipUnion(name.substr(unionLength));
-            }
+        if (name.size() < UNION_PREFIX_LEN + 1 || name.substr(0, UNION_PREFIX_LEN) != "{U") {
+            return std::string_view::npos;
         }
-        return unionLength;
+
+        size_t unionLength = UNION_PREFIX_LEN;
+        while (unionLength < name.size()) {
+            if (name[unionLength] == '}') {
+                return unionLength + 1;
+            }
+            if (name[unionLength] == '{') {
+                auto nestedUnionLength = SkipUnion(name.substr(unionLength));
+                if (nestedUnionLength == std::string_view::npos) {
+                    return std::string_view::npos;
+                }
+                unionLength += nestedUnionLength;
+                continue;
+            }
+            ++unionLength;
+        }
+        return std::string_view::npos;
     }
 
     std::pair<std::string, size_t> GetComponentName(std::string_view name)
     {
+        if (name.empty()) {
+            return {"", std::string_view::npos};
+        }
         if (name[0] != '{') {
             auto delimPos = name.find(',');
             if (delimPos != std::string::npos) {
@@ -81,6 +98,9 @@ public:
         }
 
         auto unionLen = SkipUnion(name);
+        if (unionLen == std::string_view::npos || unionLen > name.length()) {
+            return {"", std::string_view::npos};
+        }
         while ((name.length() > unionLen) && (name[unionLen] == '[')) {
             unionLen += Type::RANK_STEP;
         }
@@ -90,24 +110,39 @@ public:
     void FillComponentNames(std::string_view componentNamesStr)
     {
         if (!IsUnion()) {
+            if (componentNamesStr.empty()) {
+                return;
+            }
             componentNames_.emplace_back(componentNamesStr);
+            return;
+        }
+        if (componentNamesStr.size() <= Type::UNION_PREFIX_LEN) {
             return;
         }
         componentNamesStr.remove_prefix(Type::UNION_PREFIX_LEN);
         componentNamesStr.remove_suffix(1);
         while (!componentNamesStr.empty()) {
             auto [component, length] = GetComponentName(componentNamesStr);
+            if (length == std::string_view::npos || component.empty()) {
+                componentNames_.clear();
+                return;
+            }
             componentNames_.push_back(component);
             if (componentNamesStr.length() == length || componentNamesStr[length] != ',') {
                 break;
             }
             componentNamesStr.remove_prefix(length + 1);
         }
-        ASSERT(componentNames_.size() > 1);
+        if (componentNames_.size() <= 1) {
+            componentNames_.clear();
+        }
     }
 
     std::string GetNameWithoutRank() const
     {
+        if (name_.empty()) {
+            return {};
+        }
         auto idx = name_.length() - 1;
         while (name_[idx] == ']') {
             idx -= Type::RANK_STEP;
@@ -134,6 +169,9 @@ public:
      */
     std::string GetComponentName() const
     {
+        if (componentNames_.empty()) {
+            return {};
+        }
         if (componentNames_.size() == 1) {
             return componentNames_[0];
         }
@@ -177,7 +215,9 @@ public:
 
     bool IsValid() const
     {
-        return !componentNames_.empty();
+        return !componentNames_.empty() &&
+               std::all_of(componentNames_.cbegin(), componentNames_.cend(),
+                           [](const auto &componentName) { return !componentName.empty(); });
     }
 
     bool IsArray() const
@@ -244,7 +284,8 @@ public:
 
     bool IsUnion() const
     {
-        return (name_.substr(0, Type::UNION_PREFIX_LEN) == "{U") && (name_.back() == '}');
+        return name_.size() > Type::UNION_PREFIX_LEN && (name_.substr(0, Type::UNION_PREFIX_LEN) == "{U") &&
+               (name_.back() == '}');
     }
 
     PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(std::string_view name, bool ignorePrimitive = false);
