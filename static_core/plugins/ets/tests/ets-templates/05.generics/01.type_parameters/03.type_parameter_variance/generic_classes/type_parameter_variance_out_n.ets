@@ -17,8 +17,10 @@
 
 /*---
 desc: Test of covariant _out_ type parameter modifier.
-tags: [compile-only]
+tags: [negative]
 expected_out: {{c.stdout}}
+expected_error:
+  runtime: "Unhandled exception: std.core.ClassCastError"
 ---*/
 
 class A<out T> {

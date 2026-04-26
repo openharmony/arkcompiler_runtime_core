@@ -18,38 +18,45 @@ cases:
       let func: () => void = () => {};
     logic: |-
       let num: number = func as number;
+    error: {runtime: "ClassCastError: attemp_invalid_type_conversion_runtime_n_0.%lambda-lambda_invoke-0 cannot be cast to std.core.Double"}
 
   - desc: Verify that attempting to cast a boolean to a number results in a type error.
     decl: |-
       let bool: boolean = true;
     logic: |-
       let num: number = bool as number;
+    error: {runtime: "ClassCastError: std.core.Boolean cannot be cast to std.core.Double"}
 
   - desc: Verify that attempting to cast null to a number results in a type error.
     decl: |-
       let n: null = null;
     logic: |-
       let num: number = n as number;
+    error: {runtime: "ClassCastError: std.core.Null cannot be cast to std.core.Double"}
 
   - desc: Verify that attempting to cast a string to a number results in a type error.
     decl: |-
       let str: string = "42";
     logic: |-
       let num: number = str as number;
+    error: {runtime: "ClassCastError: std.core.LineString cannot be cast to std.core.Double"}
 
   - desc: Verify that attempting to cast a number to a string results in a type error.
     decl: |-
       let num: number = 42;
     logic: |-
       let str: string = num as string;
+    error: {runtime: "ClassCastError: std.core.Double cannot be cast to std.core.String"}
 
   - desc: Verify that attempting to cast a class instance to a number results in a type error.
     decl: |-
       let undef: undefined = undefined;
     logic: |-
       let str: string = undef as string;
+    error: {runtime: "ClassCastError: undefined cannot be cast to std.core.String"}
 
   - desc: Verify that attempting to cast an array to a string results in a type error.
     logic: |-
       let arr: number[] = [1, 2, 3];
       let str: string = arr as string;
+    error: {runtime: "ClassCastError: std.core.Array cannot be cast to std.core.String"}

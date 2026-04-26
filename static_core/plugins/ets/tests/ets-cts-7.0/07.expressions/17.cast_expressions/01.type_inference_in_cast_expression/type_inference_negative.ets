@@ -18,11 +18,13 @@
 desc: >-
     Type inference in cast expressions
 tags: [compile-only, negative]
-expected_out: {{c.exp_out}}
+expected_out: "{{ c.exp_out }}"
 ---*/
 
+{{c.decl}}
+
 function main(): void {
-    {{c.decl}}
+    
     let a = {{c.val}} as {{c.type}}
 }
 {% endfor %}

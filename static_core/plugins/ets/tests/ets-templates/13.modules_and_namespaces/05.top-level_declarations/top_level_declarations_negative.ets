@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-{% for type in compileErrorTypes %}
+{% for c in cases %}
 
 /*---
 desc: A few bad top-level declarations
 tags: [compile-only, negative]
+expected_out: "{{c.exp_out}}"
 ---*/
 
-export default {{type}}
+export default {{c.type}}
 
 {% endfor %}

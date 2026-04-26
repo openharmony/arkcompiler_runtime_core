@@ -18,4 +18,3 @@ cases:
         i as C
   - decl: |-
         a as B
-

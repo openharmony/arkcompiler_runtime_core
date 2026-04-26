@@ -17,7 +17,9 @@
 
 /*---
 desc: Supertype relation
-tags: [compile-only]
+tags: [negative]
+expected_error:
+  runtime: "[TID 120f94] E/runtime: Cannot initialize class 'cast_to_class_n_{{loop.index-1}}.ETSGLOBAL'"
 ---*/
 
 interface I {}

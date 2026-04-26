@@ -17,7 +17,7 @@
 
 /*---
 desc: Test of covariant _out_ type parameter modifier. 
-tags: [compile-only]
+{% if c.warn %}expected_out: "{{ c.warn }}"{% endif %}
 ---*/
 
 interface I<out T> {

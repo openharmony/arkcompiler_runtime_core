@@ -17,7 +17,8 @@
 
 /*---
 desc: {{c.desc}}
-tags: [compile-only]
+tags: [negative]
+expected_error: {{ c.error }}
 ---*/
 
 {{c.decl}}
