@@ -15,10 +15,10 @@ limitations under the License.
 
 /*---
 desc: >-
-    If the initializer expression uses super or this in any form, then a compile-time warning occurs.
-    If such use occurs then runtime error can occur.
-expected_out: "issue #34133"
-tags: [negative]
+    If the instance field initializer expression uses super directly, then a compile-time warning occurs.
+expected_out:
+  - "Warning W0010: The instance field initializer expression cannot use the this."
+  - "Warning W0010: The instance field initializer expression cannot use the super."
 ---*/
 
 class A {
@@ -32,6 +32,9 @@ class C extends A{
 }
 
 function main(): void {
-    let instance: C = new C();
-    console.log(instance.y)
+  try {
+    let instance: C = new C()
+    let z = instance.y
+  } catch (e) {
+  }
 }

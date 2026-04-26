@@ -468,6 +468,12 @@ static coretypes::String *StringConcat4(coretypes::String *str1, coretypes::Stri
 
 EtsString *StdCoreStringConcat2(EtsString *str1, EtsString *str2)
 {
+    if (UNLIKELY(str1 == nullptr || str2 == nullptr)) {
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
+        return nullptr;
+    }
     auto s1 = str1->GetCoreType();
     auto s2 = str2->GetCoreType();
     return reinterpret_cast<EtsString *>(StringConcat2(s1, s2));
@@ -475,6 +481,12 @@ EtsString *StdCoreStringConcat2(EtsString *str1, EtsString *str2)
 
 EtsString *StdCoreStringConcat3(EtsString *str1, EtsString *str2, EtsString *str3)
 {
+    if (UNLIKELY(str1 == nullptr || str2 == nullptr || str3 == nullptr)) {
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
+        return nullptr;
+    }
     auto s1 = str1->GetCoreType();
     auto s2 = str2->GetCoreType();
     auto s3 = str3->GetCoreType();
@@ -483,6 +495,12 @@ EtsString *StdCoreStringConcat3(EtsString *str1, EtsString *str2, EtsString *str
 
 EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str3, EtsString *str4)
 {
+    if (UNLIKELY(str1 == nullptr || str2 == nullptr || str3 == nullptr || str4 == nullptr)) {
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
+        return nullptr;
+    }
     auto s1 = str1->GetCoreType();
     auto s2 = str2->GetCoreType();
     auto s3 = str3->GetCoreType();

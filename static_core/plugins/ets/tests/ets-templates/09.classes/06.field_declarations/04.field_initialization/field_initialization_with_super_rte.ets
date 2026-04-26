@@ -15,10 +15,8 @@ limitations under the License.
 
 /*---
 desc: >-
-    If the instance field initializer expression uses super directly, then a compile-time warning occurs.
-expected_out:
-  - "Warning W0010: The instance field initializer expression cannot use the this."
-  - "Warning W0010: The instance field initializer expression cannot use the super."
+    If execution reaches field initialization that uses super and reads an
+    uninitialized field, a runtime error can occur.
 ---*/
 
 class A {
@@ -27,14 +25,15 @@ class A {
     return this.x
   }
 }
+
 class C extends A{
   public y: string = super.bar()
 }
 
 function main(): void {
   try {
-    let instance: C = new C()
-    let z = instance.y
+    let instance: C = new C();
+    console.log(instance.y)
   } catch (e) {
   }
 }

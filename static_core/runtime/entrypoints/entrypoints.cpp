@@ -2091,6 +2091,10 @@ extern "C" ObjectHeader *CoreStringBuilderString(ObjectHeader *sb, void *s)
 
 extern "C" coretypes::String *CoreStringConcat2(coretypes::String *str1, coretypes::String *str2)
 {
+    if (UNLIKELY(str1 == nullptr || str2 == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     auto ctx = vm->GetLanguageContext();
     return coretypes::String::Concat(str1, str2, ctx, vm);
@@ -2099,6 +2103,10 @@ extern "C" coretypes::String *CoreStringConcat2(coretypes::String *str1, coretyp
 extern "C" coretypes::String *CoreStringConcat3(coretypes::String *str1, coretypes::String *str2,
                                                 coretypes::String *str3)
 {
+    if (UNLIKELY(str1 == nullptr || str2 == nullptr || str3 == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     auto ctx = vm->GetLanguageContext();
     auto thread = ManagedThread::GetCurrent();
@@ -2116,6 +2124,10 @@ extern "C" coretypes::String *CoreStringConcat3(coretypes::String *str1, coretyp
 extern "C" coretypes::String *CoreStringConcat4(coretypes::String *str1, coretypes::String *str2,
                                                 coretypes::String *str3, coretypes::String *str4)
 {
+    if (UNLIKELY(str1 == nullptr || str2 == nullptr || str3 == nullptr || str4 == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     auto ctx = vm->GetLanguageContext();
     auto thread = ManagedThread::GetCurrent();
