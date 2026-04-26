@@ -16,10 +16,32 @@
 import * as ts from 'typescript';
 import { TraverserConstructor } from './Traverser';
 import { Compiler } from '../compiler/Compiler';
+import { resolvePath } from '../compiler/VirtualFileHost';
+
+export interface TransformTargetInfo {
+  fileName: string;
+  affected: boolean;
+}
 
 export interface StageContext<S = unknown> {
   compiler: Compiler;
   prevState: S;
+  transformTargetInfos: Map<string, TransformTargetInfo>;
+}
+
+export function buildInitialStageContext(compiler: Compiler, transformTargets?: readonly string[]): StageContext<undefined> {
+  const transformedFiles = transformTargets ? transformTargets.map((file) => resolvePath(file)) : compiler.rootFileNames;
+
+  const transformTargetInfos = new Map<string, TransformTargetInfo>();
+  for (const file of transformedFiles) {
+    transformTargetInfos.set(file, { fileName: file, affected: true });
+  }
+
+  return {
+    compiler,
+    prevState: undefined,
+    transformTargetInfos
+  };
 }
 
 /**
@@ -64,12 +86,15 @@ export abstract class TransformationStage<I, Q, S> extends Stage<I, Q> {
   execute(stageContext: StageContext<I>): StageContext<Q> {
     const compiler = stageContext.compiler;
     const program = stageContext.compiler.program;
-    const sourceFiles = program
-      .getRootFileNames()
-      .map((file) => {
-        return compiler.getSourceFile(file);
-      })
-      .filter((file): file is ts.SourceFile => file !== undefined);
+    const sourceFiles: ts.SourceFile[] = [];
+    stageContext.transformTargetInfos.forEach((info) => {
+      if (info.affected) {
+        const sourceFile = compiler.getSourceFile(info.fileName);
+        if (sourceFile) {
+          sourceFiles.push(sourceFile);
+        }
+      }
+    });
 
     const publicState = stageContext.prevState;
     const uniqueStateMap = new Map<string, S>();

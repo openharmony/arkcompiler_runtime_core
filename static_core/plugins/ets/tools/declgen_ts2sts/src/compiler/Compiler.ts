@@ -54,8 +54,9 @@ export class Compiler {
   compilerProgram?: ts.Program;
   private builderProgram?: ts.EmitAndSemanticDiagnosticsBuilderProgram;
   private affectedFiles?: Set<string>;
-  private rootFileNames: readonly string[];
+  public rootFileNames: readonly string[];
   private compileFileNames: string[];
+  private libFileNames: string[];
   private compilerOptions: ts.CompilerOptions;
   private compilerHost: ts.CompilerHost;
   private fileHost: VirtualFileHost;
@@ -65,12 +66,14 @@ export class Compiler {
 
   constructor(
     rootFileNames: readonly string[],
+    libFileNames: readonly string[],
     compilerOptions: ts.CompilerOptions,
     customResolveModuleNames?: ModuleNameResolver
   ) {
     this.rootFileNames = rootFileNames;
     this.rootDir = this.computeCommonSourceDirectory(rootFileNames);
-    this.compileFileNames = rootFileNames.map((file) => resolvePath(file));
+    this.rootFileNames = rootFileNames.map((file) => resolvePath(file));
+    this.libFileNames = libFileNames.map((file) => resolvePath(file));
     this.compilerOptions = compilerOptions;
     this.fileHost = new VirtualFileHost(compilerOptions);
     this.compilerHost = this.fileHost.getCompilerHost();
@@ -81,8 +84,9 @@ export class Compiler {
     }
     for (const lib of PREDEFINED_GLOBAL_LIBS) {
       this.fileHost.cache(lib.content, lib.meta);
-      this.compileFileNames.push(lib.meta.filePath);
+      this.libFileNames.push(lib.meta.filePath);
     }
+    this.compileFileNames = [...this.rootFileNames, ...this.libFileNames];
   }
 
   private computeCommonSourceDirectory(rootNames: readonly string[]): string {
@@ -128,14 +132,19 @@ export class Compiler {
 
   compile(): void {
     if (this.compilerOptions.incremental) {
+      // In incremental mode, diagnostics are collected from the builder so
+      // that unchanged files reuse their cached semantic diagnostics from
+      // `.tsbuildinfo`. Calling `getPreEmitDiagnostics` here would force a
+      // full re-check on every file and defeat the incremental savings.
       this.compileIncremental();
-    } else {
-      this.compilerProgram = ts.createProgram(
-        this.compileFileNames,
-        this.compilerOptions ?? defaultCompilerOptions(),
-        this.compilerHost
-      );
+      return;
     }
+
+    this.compilerProgram = ts.createProgram(
+      this.compileFileNames,
+      this.compilerOptions ?? defaultCompilerOptions(),
+      this.compilerHost
+    );
     const diagnostics = ts.getPreEmitDiagnostics(this.compilerProgram!);
     logTscDiagnostics(diagnostics, LogLevel.ERROR);
   }
@@ -167,21 +176,29 @@ export class Compiler {
 
     this.compilerProgram = this.builderProgram.getProgram();
 
-    // Compute the set of affected files compared to the previous build.
-    // If there is no prior state, treat all files as affected.
-    if (!oldProgram) {
-      this.affectedFiles = undefined;
-      return;
-    }
+    // Collect diagnostics through the builder API instead of
+    // `getPreEmitDiagnostics` so that unchanged files reuse the cached
+    // semantic diagnostics from `.tsbuildinfo` (these files won't be
+    // re-checked). Syntactic / options / global diagnostics are always
+    // recomputed because they are cheap.
+    const diagnostics: ts.Diagnostic[] = [
+      ...this.builderProgram.getConfigFileParsingDiagnostics(),
+      ...this.builderProgram.getOptionsDiagnostics(),
+      ...this.builderProgram.getSyntacticDiagnostics(),
+      ...this.builderProgram.getGlobalDiagnostics()
+    ];
 
+    // If there is no prior `.tsbuildinfo`, every file is treated as affected.
+    const hasPriorState = !!oldProgram;
     const affected = new Set<string>();
-    let allAffected = false;
-    // Drain the affected file queue without producing diagnostics output.
+    let allAffected = !hasPriorState;
+
     while (true) {
       const next = this.builderProgram.getSemanticDiagnosticsOfNextAffectedFile();
       if (!next) {
         break;
       }
+      diagnostics.push(...next.result);
       const target = next.affected as ts.SourceFile | ts.Program;
       if ((target as ts.SourceFile).fileName !== undefined) {
         affected.add(resolvePath((target as ts.SourceFile).fileName));
@@ -191,6 +208,7 @@ export class Compiler {
       }
     }
     this.affectedFiles = allAffected ? undefined : affected;
+    logTscDiagnostics(diagnostics, LogLevel.ERROR);
   }
 
   /**
