@@ -22,6 +22,9 @@
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/include/stack_walker-inl.h"
 #include "libarkbase/utils/bit_utils.h"
+#ifdef HOOK_ENABLE
+#include "memory_trace.h"
+#endif
 
 namespace ark::mem {
 
@@ -136,6 +139,11 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
     Reference *ref = nullptr;
     if (type == Reference::ObjectType::GLOBAL || type == Reference::ObjectType::WEAK) {
         ref = static_cast<Reference *>(globalStorage_->Add(object, type));
+
+#ifdef HOOK_ENABLE
+        restraceExt(RES_ARK_GLOBAL_HANDLE, (void *)ref, sizeof(Reference), TAG_RES_ARK_GLOBAL_HANDLE, true,
+                    type == Reference::ObjectType::WEAK);
+#endif
     } else {
         auto *lastBlock = localStorage_->back();
         ASSERT(lastBlock != nullptr);
@@ -157,6 +165,16 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
             curBlock = lastBlock;
         }
         ref = curBlock->AddRef(object, type);
+#ifdef HOOK_ENABLE
+        if (localStorage_->size() == 1) {
+            auto *runtime = Runtime::GetCurrent();
+            if (runtime != nullptr && runtime->IsInitialized()) {
+                LOG(INFO, GC) << "restraceExt NewRef: " << ref << " when localStorage_.size() is 1";
+                restraceExt(RES_ARK_LOCAL_HANDLE, (void *)ref, sizeof(Reference), TAG_RES_ARK_LOCAL_HANDLE, true,
+                            false);
+            }
+        }
+#endif
     }
     LOG(DEBUG, GC) << "Add reference to object: " << object << " type: " << static_cast<int>(type) << " ref: " << ref;
     return ref;
@@ -180,6 +198,10 @@ void ReferenceStorage::RemoveRef(const Reference *ref)
         // When the global or weak global ref is created by another thread, we can't suppose current thread is in
         // MANAGED_CODE state.
         LOG(DEBUG, GC) << "Remove global reference: " << ref << " obj: " << globalStorage_->Get(ref);
+#ifdef HOOK_ENABLE
+        restraceExt(RES_ARK_GLOBAL_HANDLE, (void *)ref, sizeof(Reference), TAG_RES_ARK_GLOBAL_HANDLE, false,
+                    objectType == Reference::ObjectType::WEAK);
+#endif
         globalStorage_->Remove(ref);
     } else if (objectType == Reference::ObjectType::LOCAL) {
         ASSERT_THREAD_STATE();
@@ -189,6 +211,17 @@ void ReferenceStorage::RemoveRef(const Reference *ref)
 
         LOG(DEBUG, GC) << "Remove local reference: " << ref << " obj: " << FindLocalObject(ref);
         block->Remove(ref);
+
+#ifdef HOOK_ENABLE
+        if (localStorage_ != nullptr && localStorage_->size() > 0 && block->IsBlockInFrame((*localStorage_)[0])) {
+            auto *runtime = Runtime::GetCurrent();
+            if (runtime != nullptr && runtime->IsInitialized()) {
+                LOG(INFO, GC) << "restraceExt RemoveRef: " << ref;
+                restraceExt(RES_ARK_LOCAL_HANDLE, (void *)ref, sizeof(Reference), TAG_RES_ARK_LOCAL_HANDLE, false,
+                            false);
+            }
+        }
+#endif
     } else if (objectType == Reference::ObjectType::STACK) {
         LOG(ERROR, GC) << "Cannot remove stack type: " << ref;
     } else {
