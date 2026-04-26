@@ -86,16 +86,15 @@ async function testBoolean() {
     arktest.assertEQ(result1, 6);
 }
 
-async function main(): Promise<void> {
+async function main(): Promise<int> {
     
-    await testDotChainAndCast();
+    let suite = new arktest.ArkTestsuite('Await expressions')
+    suite.addAsyncTest('DotChainAndCast_await', testDotChainAndCast)
+    suite.addAsyncTest('Instanceof_await', testInstanceof)
+    suite.addAsyncTest('NullCoalesce_await', testNullCoalesce)
+    suite.addAsyncTest('Arithmetic_await', testArithmetic)
+    suite.addAsyncTest('Boolean_await', testBoolean)
 
-    await testInstanceof();
-
-    await testNullCoalesce();
-
-    await testArithmetic();
-
-    await testBoolean();
+    return await suite.runAsync()
 
 }
