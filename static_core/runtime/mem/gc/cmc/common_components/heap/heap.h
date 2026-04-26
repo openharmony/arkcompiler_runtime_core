@@ -97,6 +97,8 @@ public:
 
     virtual bool IsGcStarted() const = 0;
     virtual void WaitForGCFinish() = 0;
+    virtual void WaitForGCCompletionCount(uint64_t targetCount) = 0;
+    virtual uint64_t GetGcCompletedCount() const = 0;
     virtual void MarkGCStart() = 0;
     virtual void MarkGCFinish() = 0;
 
@@ -148,6 +150,28 @@ public:
     virtual size_t GetSurvivedSize() const = 0;
 
     virtual size_t GetRemainHeapSize() const = 0;
+
+    // Byte-level heap footprint: sum of (allocPtr - regionStart) across all regions in all spaces.
+    // more precise than GetAllocatedSize() which uses page-level (256KB) granularity for full regions
+    virtual size_t GetFootprintBytes() const = 0;
+
+    // Returns the amount of free heap memory (in bytes)
+    size_t GetFreeHeapSize() const
+    {
+        return GetMaxCapacity() - GetFootprintBytes();
+    }
+
+    // Returns the amount of heap memory currently in use (in bytes)
+    size_t GetUsedHeapSize() const
+    {
+        return GetFootprintBytes();
+    }
+
+    // Returns the maximum heap size (in bytes) reserved by the runtime
+    size_t GetReservedHeapSize() const
+    {
+        return GetMaxCapacity();
+    }
 
     virtual size_t GetAccumulatedAllocateSize() const = 0;
     virtual size_t GetAccumulatedFreeSize() const = 0;

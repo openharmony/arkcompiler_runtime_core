@@ -58,6 +58,11 @@ public:
         return largeRegionList_.GetAllocatedSize() + recentLargeRegionList_.GetAllocatedSize();
     }
 
+    size_t CountAllocatedBytes() const
+    {
+        return largeRegionList_.GetAllocatedSize(false) + recentLargeRegionList_.GetAllocatedSize(false);
+    }
+
     void ClearAllGCInfo()
     {
         ClearGCInfo(largeRegionList_);

@@ -119,7 +119,7 @@ bool CMCGCAdapter<LanguageConfig>::Trigger([[maybe_unused]] PandaUniquePtr<GCTas
 template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::IsPostponeGCSupported() const
 {
-    return true;
+    return false;
 }
 
 template <class LanguageConfig>

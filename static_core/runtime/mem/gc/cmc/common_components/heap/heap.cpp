@@ -89,10 +89,21 @@ public:
         return collectorResources_.WaitForGCFinish();
     }
 
+    void WaitForGCCompletionCount(uint64_t targetCount) override
+    {
+        collectorResources_.WaitForGCCompletionCount(targetCount);
+    }
+
+    uint64_t GetGcCompletedCount() const override
+    {
+        return collectorResources_.GetGcCompletedCount();
+    }
+
     void MarkGCStart() override
     {
         return collectorResources_.MarkGCStart();
     }
+
     void MarkGCFinish() override
     {
         return collectorResources_.MarkGCFinish();
@@ -147,6 +158,7 @@ public:
     size_t GetCurrentCapacity() const override;
     size_t GetUsedPageSize() const override;
     size_t GetAllocatedSize() const override;
+    size_t GetFootprintBytes() const override;
     size_t GetSurvivedSize() const override;
     size_t GetRemainHeapSize() const override;
     size_t GetAccumulatedAllocateSize() const override;
@@ -423,6 +435,11 @@ size_t HeapImpl::GetUsedPageSize() const
 size_t HeapImpl::GetAllocatedSize() const
 {
     return theSpace_->GetAllocatedBytes();
+}
+
+size_t HeapImpl::GetFootprintBytes() const
+{
+    return theSpace_->GetFootprintBytes();
 }
 
 size_t HeapImpl::GetRemainHeapSize() const

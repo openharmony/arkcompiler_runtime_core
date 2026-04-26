@@ -248,9 +248,39 @@ void BaseRuntime::WaitForGCFinish()
     Heap::GetHeap().WaitForGCFinish();
 }
 
+void BaseRuntime::WaitForGCCompletionCount(uint64_t targetCount)
+{
+    Heap::GetHeap().WaitForGCCompletionCount(targetCount);
+}
+
 void BaseRuntime::StopGCWork()
 {
     Heap::GetHeap().StopGCWork();
+}
+
+uint64_t BaseRuntime::GetGcCompletedCount()
+{
+    return Heap::GetHeap().GetGcCompletedCount();
+}
+
+size_t BaseRuntime::GetFreeHeapSize()
+{
+    return Heap::GetHeap().GetFreeHeapSize();
+}
+
+size_t BaseRuntime::GetUsedHeapSize()
+{
+    return Heap::GetHeap().GetUsedHeapSize();
+}
+
+size_t BaseRuntime::GetReservedHeapSize()
+{
+    return Heap::GetHeap().GetReservedHeapSize();
+}
+
+bool BaseRuntime::IsGcStarted()
+{
+    return Heap::GetHeap().IsGcStarted();
 }
 
 void BaseRuntime::EnterGCCriticalSection()

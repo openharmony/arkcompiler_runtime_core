@@ -64,6 +64,7 @@ void CollectorResources::Init()
     // Atomic with seq_cst order reason: initialization of finishedGcIndex_ with requirement for sequentially
     // consistent order where threads observe all modifications in the same order
     finishedGcIndex_.store(0, std::memory_order_seq_cst);
+    gcCompletedCount_.store(0, std::memory_order_seq_cst);
     StartGCThreads();
     finalizerProcessor_.Start();
     gcStats_.Init();
@@ -233,6 +234,10 @@ void CollectorResources::NotifyGCFinished(uint64_t gcIndex)
     // Atomic with relaxed order reason: data race with isGcStarted_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     isGcStarted_.store(false, std::memory_order_relaxed);
+    // Atomic with release order reason: acquire/release atomic flags ensures
+    // that after the new counter value is read all memory changes made before
+    // the counter update in another thread would be actual and visible now
+    gcCompletedCount_.fetch_add(1U, std::memory_order_release);
     if (gcIndex >= GCTask::TASK_INDEX_SYNC_GC_MIN) {  // sync gc, need set taskIndex
         // Atomic with release order reason: data race with finishedGcIndex_ with dependecies on writes before
         // the store which should become visible to waiting mutators
@@ -259,6 +264,19 @@ void CollectorResources::MarkGCStart()
 void CollectorResources::MarkGCFinish(uint64_t gcIndex)
 {
     NotifyGCFinished(gcIndex);
+}
+
+void CollectorResources::WaitForGCCompletionCount(uint64_t targetCount)
+{
+    ark::os::memory::LockHolder lock(gcFinishedCondMutex_);
+    std::function<bool()> pred = [this, targetCount] {
+        // Atomic with relaxed order reason: gcCompletedCount_ only needs uniqueness, not synchronization with other
+        return gcCompletedCount_.load(std::memory_order_relaxed) >= targetCount ||
+               finishedGcIndex_ == GCTask::TASK_INDEX_GC_EXIT;
+    };
+    while (!pred()) {
+        gcFinishedCondVar_.Wait(&gcFinishedCondMutex_);
+    }
 }
 
 void CollectorResources::WaitForGCFinish()

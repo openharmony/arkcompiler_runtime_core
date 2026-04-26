@@ -279,6 +279,8 @@ protected:
     void MergeWeakStack(WeakStack &weakStack);
     void UpdateNativeThreshold(GCParam &gcParam);
 
+    void UpdateGCCompletionStats(GCStats &gcStats);
+
     Allocator &theAllocator_;
 
     // A collectorResources provides the resources that the tracing collector need,
@@ -348,6 +350,7 @@ protected:
 
     // concurrent marking.
     void TracingImpl(GlobalMarkStack &globalMarkStack, bool parallel, bool Remark);
+    void TracingSerial(GlobalMarkStack &globalMarkStack);
 
 private:
     void MarkRememberSetImpl(BaseObject *object, LocalCollectStack &markStack);

@@ -72,6 +72,11 @@ public:
         return tlToRegionList_.GetAllocatedSize(false) + fullToRegionList_.GetAllocatedSize();
     }
 
+    size_t CountAllocatedBytes() const
+    {
+        return tlToRegionList_.GetAllocatedSize(false) + fullToRegionList_.GetAllocatedSize(false);
+    }
+
     size_t GetSurvivedSize() const
     {
         return tlToRegionList_.GetAllocatedSize(false) + fullToRegionList_.GetAllocatedSize();

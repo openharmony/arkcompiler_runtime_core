@@ -95,6 +95,16 @@ public:
         return nonMovableSpaceSize;
     }
 
+    size_t CountAllocatedBytes() const
+    {
+        size_t total = polySizeRegionList_.GetAllocatedSize(false) + recentPolySizeRegionList_.GetAllocatedSize(false);
+        for (size_t i = 0; i < NONMOVABLE_OBJECT_SIZE_COUNT; ++i) {
+            total += recentMonoSizeRegionList_[i]->GetAllocatedSize(false);
+            total += monoSizeRegionList_[i]->GetAllocatedSize(false);
+        }
+        return total;
+    }
+
     void PrepareMarking()
     {
         RegionDesc *region = recentPolySizeRegionList_.GetHeadRegion();

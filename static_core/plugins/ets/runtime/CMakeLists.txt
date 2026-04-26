@@ -13,6 +13,12 @@
 
 set(ETS_EXT_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/runtime)
 
+if(ARK_USE_COMMON_RUNTIME)
+    set(ETS_GC_INTRINSICS_SRC ${ETS_EXT_SOURCES}/intrinsics/std_core_common_gc.cpp)
+else()
+    set(ETS_GC_INTRINSICS_SRC ${ETS_EXT_SOURCES}/intrinsics/std_core_default_gc.cpp)
+endif()
+
 set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/dfx/heap_helpers.cpp
     ${ETS_EXT_SOURCES}/ani/ani_interaction_api.cpp
@@ -83,6 +89,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StringBuilder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/gc_task_tracker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
+    ${ETS_GC_INTRINSICS_SRC}
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AsyncContext.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp

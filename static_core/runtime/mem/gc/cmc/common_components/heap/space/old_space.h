@@ -65,6 +65,12 @@ public:
                oldRegionList_.GetAllocatedSize();
     }
 
+    size_t CountAllocatedBytes() const
+    {
+        return tlOldRegionList_.GetAllocatedSize(false) + recentFullOldRegionList_.GetAllocatedSize(false) +
+               oldRegionList_.GetAllocatedSize(false);
+    }
+
     size_t GetUsedUnitCount() const
     {
         return tlOldRegionList_.GetRegionCount() + recentFullOldRegionList_.GetRegionCount() +
