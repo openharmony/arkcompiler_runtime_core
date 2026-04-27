@@ -67,7 +67,6 @@
 #include "runtime/mem/heap_manager.h"
 #include "runtime/mem/memory_manager.h"
 #include "runtime/mem/internal_allocator-inl.h"
-#include "runtime/mem/gc/gc-hung/gc_hung.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/profilesaver/profile_saver.h"
 #include "runtime/tooling/coverage_listener.h"
@@ -1153,12 +1152,6 @@ bool Runtime::Initialize()
         StartMemAllocDumper(ConvertToString(options_.GetMemAllocDumpFile()));
     }
 
-#ifdef PANDA_TARGET_MOBILE
-    mem::GcHung::InitPreFork(true);
-#else
-    mem::GcHung::InitPreFork(false);
-#endif  // PANDA_TARGET_MOBILE
-
     isInitialized_ = true;
     return true;
 }
@@ -1718,7 +1711,7 @@ void Runtime::DumpForSigQuit(std::ostream &os)
     os << "\n";
 }
 
-void Runtime::InitNonZygoteOrPostFork(bool isSystemServer, [[maybe_unused]] const char *isa,
+void Runtime::InitNonZygoteOrPostFork([[maybe_unused]] bool isSystemServer, [[maybe_unused]] const char *isa,
                                       const std::function<void()> &initHook, [[maybe_unused]] bool profileSystemServer)
 {
     isZygote_ = false;
@@ -1734,8 +1727,6 @@ void Runtime::InitNonZygoteOrPostFork(bool isSystemServer, [[maybe_unused]] cons
     pandaVm_->PreStartup();
 
     initHook();
-
-    mem::GcHung::InitPostFork(isSystemServer);
 }
 
 void Runtime::PreZygoteFork()
