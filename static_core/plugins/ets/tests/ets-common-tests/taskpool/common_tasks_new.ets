@@ -19,6 +19,18 @@ function returnAbc(): string {
     return (() => 'a')() + (() => 'b')() + (() => 'c')();
 }
 
+function defaultWorkerPriorityIsHigh(): void {
+    if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        return;
+    }
+
+    let info = taskpool.getTaskPoolInfo();
+    arktest.assertNE(info.threadInfos.length, 0);
+    info.threadInfos.forEach((threadInfo: taskpool.ThreadInfo) => {
+        arktest.assertEQ(threadInfo.priority, taskpool.Priority.HIGH);
+    });
+}
+
 class Event {
     constructor() {
         this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
@@ -391,6 +403,7 @@ async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
 async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
+    commonTaskSuite.addTest('DefaultWorkerPriorityIsHigh', defaultWorkerPriorityIsHigh);
     commonTaskSuite.addAsyncTest('cancelInSuccessCallback', cancelInSuccessCallback);
     commonTaskSuite.addTest('getcurrentTask', getcurrentTask);
     commonTaskSuite.addAsyncTest('testTaskInfoDuration', testTaskInfoDuration);
@@ -406,6 +419,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('asyncRunnerExecuteInOnEnqueuedNoDeadlock', asyncRunnerExecuteInOnEnqueuedNoDeadlock);
 
     let res = await commonTaskSuite.runAsync();
+    
     CoroutineExtras.stopTaskpool();
     return res;
 }

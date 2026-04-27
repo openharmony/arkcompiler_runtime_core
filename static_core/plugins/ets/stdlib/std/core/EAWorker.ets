@@ -64,7 +64,7 @@ class ExclusiveLauncher {
  */
 export class EAWorker {
     private worker: InternalWorker;
-    private priority: WorkerPriority = WorkerPriority.PRIORITY_DEFAULT;
+    private priority: WorkerPriority = WorkerPriority.PRIORITY_HIGH;
     private loopStarted = new AtomicFlag(false);
     private loopJoined = new AtomicFlag(false);
     private initialTask: Task = () => {};

@@ -223,7 +223,7 @@ async function testNestedEAWorker(): Promise<void> {
 
 function testOfPrioritySetting(): void {
     let e = new EAWorker();
-    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_DEFAULT);
+    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
     e.setPriority(WorkerPriority.PRIORITY_HIGH);
     arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
     e.start();

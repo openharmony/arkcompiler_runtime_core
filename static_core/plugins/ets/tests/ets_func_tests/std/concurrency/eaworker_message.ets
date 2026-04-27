@@ -233,7 +233,7 @@ async function testMain() {
 
     arktest.assertEQ(mainWorker.getName(), "main");
     arktest.assertEQ(mainWorker.getWorkerId(), workerId);
-    arktest.assertEQ(mainWorker.getPriority(), WorkerPriority.PRIORITY_DEFAULT);
+    arktest.assertEQ(mainWorker.getPriority(), WorkerPriority.PRIORITY_HIGH);
     arktest.assertEQ(mainWorker.isAlive(), true);
 
     arktest.expectError(() => {
