@@ -1,0 +1,150 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Integer-to-float precision corner cases.
+# float32 has 24-bit significand -> integers > 2^24 (16777216) can lose precision.
+# float64 has 53-bit significand -> integers > 2^53 (9007199254740992) can lose precision.
+# IEEE 754 round-to-nearest: even value at boundary rounds to even.
+
+--- # int vs float: values at and beyond float24 precision boundary
+precision_eq:
+  # --- int vs float: exact representable (within 2^24) ---
+  - {left: "16777214", left_type: "int", right: "16777214.0f", right_type: "float", op: "==", result: "true",
+     desc: "16777214 (2^24 - 2) is exactly representable in float32"}
+  - {left: "16777215", left_type: "int", right: "16777215.0f", right_type: "float", op: "==", result: "true",
+     desc: "16777215 (2^24 - 1) is exactly representable in float32, max safe integer"}
+  - {left: "16777216", left_type: "int", right: "16777216.0f", right_type: "float", op: "==", result: "true",
+     desc: "16777216 (2^24) is exactly representable in float32"}
+
+  # --- int vs float: precision loss beyond 2^24 ---
+  # 16777217 rounds to 16777216.0 in float32 (round-to-nearest-even)
+  - {left: "16777217", left_type: "int", right: "16777216.0f", right_type: "float", op: "==", result: "true",
+     desc: "16777217 rounds to 16777216.0f in float32 (precision loss): int widened to float equals 16777216.0f"}
+  # The int 16777217 is widened to float, which rounds to 16777216.0, so it equals 16777216.0f
+  - {left: "16777217", left_type: "int", right: "16777218.0f", right_type: "float", op: "==", result: "false",
+     desc: "16777217 rounds to 16777216.0f not 16777218.0f"}
+  - {left: "16777219", left_type: "int", right: "16777220.0f", right_type: "float", op: "==", result: "true",
+     desc: "16777219 rounds to 16777220.0f in float32 (round-to-nearest-even)"}
+
+  # --- int vs float: negative boundary ---
+  - {left: "-16777215", left_type: "int", right: "-16777215.0f", right_type: "float", op: "==", result: "true",
+     desc: "-16777215 is exactly representable in float32"}
+  - {left: "-16777217", left_type: "int", right: "-16777216.0f", right_type: "float", op: "==", result: "true",
+     desc: "-16777217 rounds to -16777216.0f in float32 (precision loss)"}
+
+  # --- int vs float: int MAX_VALUE (2^31-1) boundary ---
+  # float32 spacing at 2^31 is 256, so int 2147483647 rounds to 2147483648.0f
+  - {left: "2147483647", left_type: "int", right: "2147483648.0f", right_type: "float", op: "==", result: "true",
+     desc: "int MAX_VALUE (2^31-1) rounds to 2147483648.0f in float32 (precision loss)"}
+  - {left: "2147483647", left_type: "int", right: "2147483392.0f", right_type: "float", op: "==", result: "false",
+     desc: "int MAX_VALUE rounds to 2147483648.0f not 2147483392.0f"}
+  # int MIN_VALUE (-2^31) is a power of 2, exactly representable
+  - {left: "-2147483648", left_type: "int", right: "-2147483648.0f", right_type: "float", op: "==", result: "true",
+     desc: "int MIN_VALUE (-2^31) is exactly representable in float32 (power of 2)"}
+
+  # --- long vs float: precision loss ---
+  # long values are also widened to float via i64tof32
+  - {left: "16777217", left_type: "long", right: "16777216.0f", right_type: "float", op: "==", result: "true",
+     desc: "long 16777217 rounds to 16777216.0f in float32"}
+  - {left: "16777219", left_type: "long", right: "16777220.0f", right_type: "float", op: "==", result: "true",
+     desc: "long 16777219 rounds to 16777220.0f in float32"}
+  - {left: "16777215", left_type: "long", right: "16777215.0f", right_type: "float", op: "===", result: "true",
+     desc: "long 16777215 is exactly representable in float32"}
+  # long MAX_VALUE (2^63-1) rounds to 2^63 in float32 (power of 2)
+  - {left: "9223372036854775807", left_type: "long", right: "9223372036854775808.0f", right_type: "float", op: "==", result: "true",
+     desc: "long MAX_VALUE (2^63-1) rounds to 2^63.0f in float32 (precision loss)"}
+  # long MIN_VALUE (-2^63) is a power of 2, exactly representable in float32
+  - {left: "-9223372036854775808", left_type: "long", right: "-9223372036854775808.0f", right_type: "float", op: "==", result: "true",
+     desc: "long MIN_VALUE (-2^63) is exactly representable in float32 (power of 2)"}
+
+  # --- long vs double: values at and beyond double53 precision boundary ---
+  # int range [-2^31, 2^31-1] is always exactly representable in double
+  - {left: "2147483647", left_type: "long", right: "2147483647.0", right_type: "double", op: "==", result: "true",
+     desc: "Int.MAX_VALUE as long is exactly representable in double"}
+  - {left: "-2147483648", left_type: "long", right: "-2147483648.0", right_type: "double", op: "==", result: "true",
+     desc: "Int.MIN_VALUE as long is exactly representable in double"}
+
+  # 2^53 = 9007199254740992 is exactly representable
+  - {left: "9007199254740992", left_type: "long", right: "9007199254740992.0", right_type: "double", op: "==", result: "true",
+     desc: "2^53 as long is exactly representable in double"}
+  # 2^53 - 1 = 9007199254740991 is exactly representable
+  - {left: "9007199254740991", left_type: "long", right: "9007199254740991.0", right_type: "double", op: "===", result: "true",
+     desc: "2^53 - 1 as long is exactly representable in double (max safe integer)"}
+  # 2^53 + 1 = 9007199254740993 rounds to 9007199254740992.0 in double
+  - {left: "9007199254740993", left_type: "long", right: "9007199254740992.0", right_type: "double", op: "==", result: "true",
+     desc: "2^53 + 1 rounds to 2^53.0 in double (precision loss)"}
+  # 2^53 + 3 = 9007199254740995 rounds to 9007199254740996.0 in double (round-to-nearest-even)
+  - {left: "9007199254740995", left_type: "long", right: "9007199254740996.0", right_type: "double", op: "==", result: "true",
+     desc: "2^53 + 3 rounds to (2^53 + 4).0 in double (round-to-nearest-even)"}
+
+  # --- long vs double: negative boundary ---
+  - {left: "-9007199254740993", left_type: "long", right: "-9007199254740992.0", right_type: "double", op: "==", result: "true",
+     desc: "-(2^53 + 1) rounds to -(2^53).0 in double"}
+  - {left: "-9007199254740991", left_type: "long", right: "-9007199254740991.0", right_type: "double", op: "===", result: "true",
+     desc: "-(2^53 - 1) is exactly representable in double"}
+
+  # --- long vs double: long MAX_VALUE (2^63-1) boundary ---
+  # double spacing at 2^63 is 2048, so long 2^63-1 rounds to 2^63.0 in double
+  - {left: "9223372036854775807", left_type: "long", right: "9223372036854775808.0", right_type: "double", op: "==", result: "true",
+     desc: "long MAX_VALUE (2^63-1) rounds to 2^63.0 in double (precision loss)"}
+  - {left: "9223372036854775807", left_type: "long", right: "9223372036854773760.0", right_type: "double", op: "==", result: "false",
+     desc: "long MAX_VALUE rounds to 2^63.0 not 9223372036854773760.0"}
+  # long MIN_VALUE (-2^63) is a power of 2, exactly representable in double
+  - {left: "-9223372036854775808", left_type: "long", right: "-9223372036854775808.0", right_type: "double", op: "==", result: "true",
+     desc: "long MIN_VALUE (-2^63) is exactly representable in double (power of 2)"}
+
+  # --- float NaN comparisons ---
+  - {left: "Float.NaN", left_type: "float", right: "Float.NaN", right_type: "float", op: "==", result: "false",
+     desc: "Float.NaN == Float.NaN is false (IEEE 754)"}
+  - {left: "Float.NaN", left_type: "float", right: "Float.NaN", right_type: "float", op: "!=", result: "true",
+     desc: "Float.NaN != Float.NaN is true (IEEE 754)"}
+  - {left: "Float.NaN", left_type: "float", right: "1.0f", right_type: "float", op: "==", result: "false",
+     desc: "Float.NaN == 1.0f is false"}
+  - {left: "Float.NaN", left_type: "float", right: "0.0f", right_type: "float", op: "===", result: "false",
+     desc: "Float.NaN === 0.0f is false"}
+
+  # --- double NaN comparisons ---
+  - {left: "Double.NaN", left_type: "double", right: "Double.NaN", right_type: "double", op: "==", result: "false",
+     desc: "Double.NaN == Double.NaN is false (IEEE 754)"}
+  - {left: "Double.NaN", left_type: "double", right: "Double.NaN", right_type: "double", op: "!==", result: "true",
+     desc: "Double.NaN !== Double.NaN is true"}
+  - {left: "Double.NaN", left_type: "double", right: "0.0", right_type: "double", op: "==", result: "false",
+     desc: "Double.NaN == 0.0 is false"}
+
+  # --- positive/negative zero ---
+  - {left: "+0.0f", left_type: "float", right: "-0.0f", right_type: "float", op: "==", result: "true",
+     desc: "+0.0f == -0.0f is true (IEEE 754)"}
+  - {left: "-0.0f", left_type: "float", right: "+0.0f", right_type: "float", op: "===", result: "true",
+     desc: "-0.0f === +0.0f is true (IEEE 754)"}
+  - {left: "+0.0", left_type: "double", right: "-0.0", right_type: "double", op: "==", result: "true",
+     desc: "+0.0 == -0.0 is true (IEEE 754)"}
+  - {left: "-0.0", left_type: "double", right: "+0.0", right_type: "double", op: "===", result: "true",
+     desc: "-0.0 === +0.0 is true (IEEE 754)"}
+
+  # --- int == float: 0 boundary ---
+  - {left: "0", left_type: "int", right: "+0.0f", right_type: "float", op: "==", result: "true",
+     desc: "int 0 == +0.0f is true"}
+  - {left: "0", left_type: "int", right: "-0.0f", right_type: "float", op: "==", result: "true",
+     desc: "int 0 == -0.0f is true (IEEE 754 positive zero equals negative zero)"}
+  - {left: "0", left_type: "long", right: "-0.0", right_type: "double", op: "==", result: "true",
+     desc: "long 0 == -0.0 is true"}
+
+  # --- float infinity comparisons ---
+  - {left: "Float.POSITIVE_INFINITY", left_type: "float", right: "Float.POSITIVE_INFINITY", right_type: "float", op: "==", result: "true",
+     desc: "Float.POSITIVE_INFINITY == Float.POSITIVE_INFINITY is true"}
+  - {left: "Float.NEGATIVE_INFINITY", left_type: "float", right: "Float.NEGATIVE_INFINITY", right_type: "float", op: "===", result: "true",
+     desc: "Float.NEGATIVE_INFINITY === Float.NEGATIVE_INFINITY is true"}
+  - {left: "Float.POSITIVE_INFINITY", left_type: "float", right: "Float.NEGATIVE_INFINITY", right_type: "float", op: "==", result: "false",
+     desc: "Float.POSITIVE_INFINITY == Float.NEGATIVE_INFINITY is false"}
+  - {left: "Float.NaN", left_type: "float", right: "Float.POSITIVE_INFINITY", right_type: "float", op: "==", result: "false",
+     desc: "Float.NaN == Float.POSITIVE_INFINITY is false"}

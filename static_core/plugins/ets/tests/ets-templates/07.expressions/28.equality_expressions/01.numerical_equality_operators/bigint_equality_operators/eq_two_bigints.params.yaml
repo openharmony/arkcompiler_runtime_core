@@ -19,94 +19,115 @@ cases:
           - new BigInt(0)
           - new BigInt(-0.0)
           - new BigInt(-(new BigInt(0)))
+          - new BigInt("0")
     - values:
           - 1n
           - new BigInt(1)
           - new BigInt(0.1e1f)
           - new BigInt(+1n)
+          - new BigInt("1")
     - values:
           - -1n
           - new BigInt(-1)
           - new BigInt(-1n)
+          - new BigInt("-1")
     # from int
     - values:
           - 2147483647n # Int.MAX_VALUE
           - new BigInt(2147483647)
           - new BigInt(new BigInt(2147483647))
+          - new BigInt("2147483647")
     - values:
           - 2147483646n # Int.MAX_VALUE - 1
           - new BigInt(2147483646)
           - new BigInt(2147483646n)
+          - new BigInt("2147483646")
     - values:
           - 2147483645n # Int.MAX_VALUE - 2
           - new BigInt(2147483645)
           - new BigInt(2147483645n)
+          - new BigInt("2147483645")
     - values:
           - -2147483648n # Int.MIN_VALUE
           - new BigInt(-2147483648)
           - new BigInt(-2147483648n)
+          - new BigInt("-2147483648")
     - values:
           - -2147483647n # Int.MIN_VALUE + 1
           - new BigInt(-2147483647)
           - new BigInt(-2147483647n)
+          - new BigInt("-2147483647")
     - values:
           - -2147483646n # Int.MIN_VALUE + 2
           - new BigInt(-2147483646)
           - new BigInt(-2147483646n)
+          - new BigInt("-2147483646")
     # from long
     - values:
           - 9223372036854775807n # Long.MAX_VALUE
           - new BigInt(9223372036854775807)
           - new BigInt(9223372036854775807n)
+          - new BigInt("9223372036854775807")
     - values:
           - 9223372036854775806n # Long.MAX_VALUE - 1
           - new BigInt(9223372036854775806)
           - new BigInt(9223372036854775806n)
+          - new BigInt("9223372036854775806")
     - values:
           - -9223372036854775808n # Long.MIN_VALUE
           - new BigInt(-9223372036854775808)
           - new BigInt(-9223372036854775808n)
+          - new BigInt("-9223372036854775808")
     - values:
           - -9223372036854775807n # Long.MIN_VALUE + 1
           - new BigInt(-9223372036854775807)
           - new BigInt(-9223372036854775807n)
+          - new BigInt("-9223372036854775807")
     # from float
     - values:
           - 16777215n # max safe integer in float
           - new BigInt(16777215.0f)
           - new BigInt(16777215)
           - new BigInt(16777215n)
+          - new BigInt("16777215")
     - values:
           - -16777215n # min safe integer in float
           - new BigInt(-167772.15e2f)
           - new BigInt(-16777215)
           - new BigInt(-16777215n)
+          - new BigInt("-16777215")
     # from double
     - values:
           - 9007199254740991n # max safe integer in double
           - new BigInt(9007199254.740991e6)
           - new BigInt(9007199254740991)
           - new BigInt(9007199254740991n)
+          - new BigInt("9007199254740991")
     - values:
           - 9007199254740990n # max safe integer in double - 1
           - new BigInt(new BigInt(9007199254740990.0))
           - new BigInt(9007199254740990)
           - new BigInt(9007199254740990n)
+          - new BigInt("9007199254740990")
     - values:
           - -9007199254740991n # min safe integer in double
           - new BigInt(-9007199254740991)
           - new BigInt(-9007199254740991n)
+          - new BigInt("-9007199254740991")
     - values:
           - -9007199254740989n # min safe integer in double + 2
           - new BigInt(-0.9007199254740989e16)
           - new BigInt(-9007199254740989)
           - new BigInt(-9007199254740989n)
+          - new BigInt("-9007199254740989")
     # from bigint
     - values:
           - 94876543875610289630123456n
           - new BigInt(94876543875610289630123456n)
           - new BigInt(new BigInt(94876543875610289630123456n))
+          - new BigInt("94876543875610289630123456")
     - values:
           - -10101010101010101010101n
           - new BigInt(-10101010101010101010101n)
           - new BigInt(-(new BigInt(10101010101010101010101n)))
+          - new BigInt("-10101010101010101010101")

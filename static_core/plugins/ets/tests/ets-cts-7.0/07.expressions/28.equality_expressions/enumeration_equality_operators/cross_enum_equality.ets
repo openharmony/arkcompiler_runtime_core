@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for c in cases %}
 
 /*---
-desc: Typeof throws CTE on overloaded function or method.
-tags: [negative, compile-only]
+desc: >-
+    Cross-enum equality: {{c.desc}}
 ---*/
 
 {{c.decl}}
 
-function main() {
-    let t = typeof {{c.exp}}
+function main(): void {
+    {{c.use|indent}}
 }
 
-{%- endfor %}
+{% endfor %}

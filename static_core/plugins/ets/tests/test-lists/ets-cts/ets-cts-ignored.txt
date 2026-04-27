@@ -122,6 +122,16 @@
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
+#34456 Frontend bug: == and != between different enum types give ESE0114, but spec says enum equality compares by underlying value regardless of type
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_8.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_9.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_10.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_11.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_12.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_13.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_14.ets
+07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_15.ets
+
 #30340 &&= ||= ??= still not supported in code
 07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_13.ets
@@ -548,6 +558,26 @@
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
+
+#34354 Compiler sign-extension bug: const char >= 32768 sign-extended to negative int/long during constant folding with union types
+17.experimental_features/01.type_char/02.char_operations/cmp_ref_16.ets
+17.experimental_features/01.type_char/02.char_operations/cmp_ref_25.ets
+17.experimental_features/01.type_char/02.char_operations/cmp_ref_32.ets
+17.experimental_features/01.type_char/02.char_operations/cmp_ref_38.ets
+
+#34455 ets.equals/ets.strictequals returns false for comparison between char and any numeric with same value (spec requires true)
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_8.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_9.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_10.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_11.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_14.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_15.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_17.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_18.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_20.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_21.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_23.ets
+17.experimental_features/01.type_char/02.char_operations/char_erased_equality_25.ets
 
 #34221
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets

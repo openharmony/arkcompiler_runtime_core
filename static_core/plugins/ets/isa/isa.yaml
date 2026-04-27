@@ -89,7 +89,7 @@ groups:
       - x_none
     pseudo:
       if v1 == v2 then
-        acc = 1
+        acc = !isnan(v1)
       else if is_nullish(v1) or is_nullish(v2) then
         acc = is_nullish(v1) and is_nullish(v2)
       else
@@ -118,7 +118,7 @@ groups:
       - x_none
     pseudo:
       if v1 == v2 then
-        acc = 1
+        acc = !isnan(v1)
       else if is_nullish(v1) or is_nullish(v2) then
         acc = 0
       else

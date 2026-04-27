@@ -1,0 +1,123 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You can obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - desc: byte compile-time vs erased runtime
+      res: byte
+      vals:
+          - { type: byte, expr: Byte.MIN_VALUE }
+          - { type: byte, expr: Byte.MAX_VALUE }
+
+    - desc: short compile-time vs erased runtime
+      res: short
+      vals:
+          - { type: short, expr: Short.MIN_VALUE }
+          - { type: short, expr: Short.MAX_VALUE }
+
+    - desc: int compile-time vs erased runtime
+      res: int
+      vals:
+          - { type: int, expr: Int.MIN_VALUE }
+          - { type: int, expr: Int.MAX_VALUE }
+
+    - desc: long compile-time vs erased runtime
+      res: long
+      vals:
+          - { type: long, expr: Long.MIN_VALUE }
+          - { type: long, expr: Long.MAX_VALUE }
+
+    - desc: float compile-time vs erased runtime
+      res: float
+      vals:
+          - { type: float, expr: Float.MIN_VALUE }
+          - { type: float, expr: Float.MAX_VALUE }
+
+    - desc: double/number compile-time vs erased runtime
+      res: number
+      vals:
+          - { type: double, expr: Double.MIN_VALUE }
+          - { type: double, expr: Double.MAX_VALUE }
+
+    - desc: char compile-time vs erased runtime
+      res: char
+      vals:
+          - { type: char, expr: 'Char.MIN_VALUE as char' }
+          - { type: char, expr: 'Char.MAX_VALUE as char' }
+
+    - desc: boolean compile-time vs erased runtime
+      res: boolean
+      vals:
+          - { type: boolean, expr: 'true' }
+          - { type: boolean, expr: 'false' }
+
+    - desc: string compile-time vs erased runtime
+      res: string
+      vals:
+          - { type: string, expr: '"hello"' }
+          - { type: string, expr: '""' }
+
+    - desc: bigint compile-time vs erased runtime
+      res: bigint
+      vals:
+          - { type: bigint, expr: '123n' }
+          - { type: bigint, expr: '99999999999999n' }
+
+    - desc: undefined compile-time vs erased runtime
+      res: undefined
+      vals:
+          - { type: undefined, expr: 'undefined' }
+
+    - desc: null compile-time vs erased runtime
+      res: object
+      vals:
+          - { type: 'null', expr: 'null' }
+
+    - desc: function compile-time vs erased runtime
+      res: function
+      decl: |-
+          function fooFn(p: int): int { return p }
+      vals:
+          - { type: '(() => void)', expr: '() => {}' }
+          - { type: '((p: int) => int)', expr: 'fooFn' }
+
+    - desc: class instance compile-time vs erased runtime
+      res: object
+      decl: |-
+          class MyClass {}
+      vals:
+          - { type: MyClass, expr: 'new MyClass()' }
+
+    - desc: array compile-time vs erased runtime
+      res: object
+      vals:
+          - { type: 'int[]', expr: '[1, 2, 3]' }
+
+    - desc: enum numeric compile-time vs erased runtime
+      res: int
+      decl: |-
+          enum EN { A, B, C }
+      vals:
+          - { type: EN, expr: EN.A }
+
+    - desc: enum string compile-time vs erased runtime
+      res: string
+      decl: |-
+          enum ES { A = "a", B = "b" }
+      vals:
+          - { type: ES, expr: ES.A }
+
+    - desc: number type alias compile-time vs erased runtime
+      res: number
+      vals:
+          - { type: number, expr: '3.14' }

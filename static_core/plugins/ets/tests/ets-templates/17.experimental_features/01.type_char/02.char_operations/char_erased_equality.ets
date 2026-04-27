@@ -12,19 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for v in  vals %}
+{%- for v in vals %}
 /*---
 desc: >-
-    ArkTS provides a number of operators to act on character values:
-    Comparison operators that produce a value of type boolean.
+    Equality of char against Any-typed operand via ets.equals or
+    ets.strictequals bytecodes. Uses actual runtime types per spec
+    7_expressions: char == numeric with same value is true.
 ---*/
 
-function main() {
-    const v1: char = {{v.v1}}
-    const v2: char = {{v.v2}}
+function check(c: char, v: Any): boolean {
+    return c {{ v.op }} v
+}
 
-    {%- for c in v.cases %}
-    arktest.assertEQ( (v1 {{c.op}} v2), {{c.r}} )
-    {%- endfor %}
+function main() {
+    const c: char = {{ v.v1 }}
+    const val: Any = {{ v.v2 }}
+    arktest.assertEQ(check(c, val), {{ v.expected }})
 }
 {%- endfor %}

@@ -1,0 +1,162 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+vals:
+    # --- same char via Any (pass) ---
+    - op: "=="
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      expected: 'true'
+
+    - op: "==="
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      expected: 'true'
+
+    - op: "=="
+      v1: c'\u0000'
+      v2: c'\u0000'
+      expected: 'true'
+
+    - op: "==="
+      v1: c'\u0000'
+      v2: c'\u0000'
+      expected: 'true'
+
+    - op: "=="
+      v1: c'a'
+      v2: c'a'
+      expected: 'true'
+
+    - op: "==="
+      v1: c'a'
+      v2: c'a'
+      expected: 'true'
+
+    # --- diff char via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: c'b'
+      expected: 'false'
+
+    - op: "!=="
+      v1: c'a'
+      v2: c'b'
+      expected: 'true'
+
+    # --- char vs int same value via Any (runtime bug: returns false, spec requires true) ---
+    - op: "=="
+      v1: c'\uFFFF'
+      v2: 65535
+      expected: 'true'
+
+    - op: "==="
+      v1: c'\uFFFF'
+      v2: 65535
+      expected: 'true'
+
+    - op: "=="
+      v1: c'a'
+      v2: 97
+      expected: 'true'
+
+    - op: "=="
+      v1: c'\u0000'
+      v2: 0
+      expected: 'true'
+
+    # --- char vs int diff value via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: 98
+      expected: 'false'
+
+    - op: "!="
+      v1: c'a'
+      v2: 98
+      expected: 'true'
+
+    # --- char vs long same value via Any (runtime bug) ---
+    - op: "=="
+      v1: c'\uFFFF'
+      v2: 65535 as long
+      expected: 'true'
+
+    - op: "=="
+      v1: c'a'
+      v2: 97 as long
+      expected: 'true'
+
+    # --- char vs long diff value via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: 98 as long
+      expected: 'false'
+
+    # --- char vs float same value via Any (runtime bug) ---
+    - op: "=="
+      v1: c'\uFFFF'
+      v2: 65535.0f
+      expected: 'true'
+
+    - op: "=="
+      v1: c'a'
+      v2: 97.0f
+      expected: 'true'
+
+    # --- char vs float diff value via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: 98.0f
+      expected: 'false'
+
+    # --- char vs double same value via Any (runtime bug) ---
+    - op: "=="
+      v1: c'\uFFFF'
+      v2: 65535.0
+      expected: 'true'
+
+    - op: "=="
+      v1: c'a'
+      v2: 97.0
+      expected: 'true'
+
+    # --- char vs double diff value via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: 98.0
+      expected: 'false'
+
+    # --- char vs byte same value via Any (runtime bug) ---
+    - op: "=="
+      v1: c'a'
+      v2: 97 as byte
+      expected: 'true'
+
+    # --- char vs byte diff value via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: 98 as byte
+      expected: 'false'
+
+    # --- char vs short same value via Any (runtime bug) ---
+    - op: "=="
+      v1: c'a'
+      v2: 97 as short
+      expected: 'true'
+
+    # --- char vs short diff value via Any (pass) ---
+    - op: "=="
+      v1: c'a'
+      v2: 98 as short
+      expected: 'false'

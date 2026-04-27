@@ -12,7 +12,9 @@
 # limitations under the License.
 ---
 vals:
-    - v1: c'\u0000'
+    # --- const char == char (jeq) ---
+    - kw: "const"
+      v1: c'\u0000'
       v2: c'\u0000'
       cases:
           - { op: '==', r: 'true' }
@@ -20,7 +22,8 @@ vals:
           - { op: '!=', r: 'false' }
           - { op: '!==', r: 'false' }
 
-    - v1: c'\uFFFF'
+    - kw: "const"
+      v1: c'\uFFFF'
       v2: c'\uFFFF'
       cases:
           - { op: '==', r: 'true' }
@@ -28,7 +31,8 @@ vals:
           - { op: '!=', r: 'false' }
           - { op: '!==', r: 'false' }
 
-    - v1: c'\u000F'
+    - kw: "const"
+      v1: c'\u000F'
       v2: c'\uF000'
       cases:
           - { op: '==', r: 'false' }
@@ -36,10 +40,398 @@ vals:
           - { op: '!=', r: 'true' }
           - { op: '!==', r: 'true' }
 
-    - v1: c'\u0100'
+    - kw: "const"
+      v1: c'\u0100'
       v2: c'\u00FF'
       cases:
           - { op: '==', r: 'false' }
           - { op: '===', r: 'false' }
           - { op: '!=', r: 'true' }
           - { op: '!==', r: 'true' }
+
+    # --- let char == char (jeq) ---
+    - kw: "let"
+      v1: c'\u0000'
+      v2: c'\u0000'
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+          - { op: '!=', r: 'false' }
+          - { op: '!==', r: 'false' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+          - { op: '!=', r: 'false' }
+          - { op: '!==', r: 'false' }
+
+    - kw: "let"
+      v1: c'\u000F'
+      v2: c'\uF000'
+      cases:
+          - { op: '==', r: 'false' }
+          - { op: '===', r: 'false' }
+          - { op: '!=', r: 'true' }
+          - { op: '!==', r: 'true' }
+
+    - kw: "let"
+      v1: c'\u0100'
+      v2: c'\u00FF'
+      cases:
+          - { op: '==', r: 'false' }
+          - { op: '===', r: 'false' }
+          - { op: '!=', r: 'true' }
+          - { op: '!==', r: 'true' }
+
+    # --- const char == (char | undefined) (checkcast Char + jeq) ---
+    - kw: "const"
+      v1: c'\u0000'
+      v2: c'\u0000'
+      t2: "char | undefined"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      t2: "char | undefined"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: c'b'
+      t2: "char | undefined"
+      cases:
+          - { op: '==', r: 'false' }
+          - { op: '!=', r: 'true' }
+
+    # --- let char == (char | undefined) ---
+    - kw: "let"
+      v1: c'\u0000'
+      v2: c'\u0000'
+      t2: "char | undefined"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      t2: "char | undefined"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: c'b'
+      t2: "char | undefined"
+      cases:
+          - { op: '==', r: 'false' }
+          - { op: '!=', r: 'true' }
+
+    # --- const char == (char | int) (checkcast + jeq via widening) ---
+    - kw: "const"
+      v1: c'a'
+      v2: 97
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "const"
+      v1: c'\u0000'
+      v2: 0
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: 65535
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: c'a'
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: 98
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'false' }
+          - { op: '!=', r: 'true' }
+          - { op: '!==', r: 'true' }
+
+    # --- let char == (char | int) ---
+    - kw: "let"
+      v1: c'a'
+      v2: 97
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "let"
+      v1: c'\u0000'
+      v2: 0
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: 65535
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: c'a'
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: 98
+      t2: "char | int"
+      cases:
+          - { op: '==', r: 'false' }
+          - { op: '!=', r: 'true' }
+          - { op: '!==', r: 'true' }
+
+    # --- const char == (char | long) (checkcast + cmp.64) ---
+    - kw: "const"
+      v1: c'a'
+      v2: 97 as long
+      t2: "char | long"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: 65535 as long
+      t2: "char | long"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: 98 as long
+      t2: "char | long"
+      cases:
+          - { op: '==', r: 'false' }
+
+    # --- let char == (char | long) ---
+    - kw: "let"
+      v1: c'a'
+      v2: 97 as long
+      t2: "char | long"
+      cases:
+          - { op: '==', r: 'true' }
+          - { op: '===', r: 'true' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: 65535 as long
+      t2: "char | long"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: 98 as long
+      t2: "char | long"
+      cases:
+          - { op: '==', r: 'false' }
+
+    # --- const char == (char | float) (checkcast + fcmpl) ---
+    - kw: "const"
+      v1: c'a'
+      v2: 97.0f
+      t2: "char | float"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: 98.0f
+      t2: "char | float"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: 65535.0f
+      t2: "char | float"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- let char == (char | float) ---
+    - kw: "let"
+      v1: c'a'
+      v2: 97.0f
+      t2: "char | float"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: 98.0f
+      t2: "char | float"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: 65535.0f
+      t2: "char | float"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- const char == (char | double) (checkcast + fcmpl.64) ---
+    - kw: "const"
+      v1: c'a'
+      v2: 97.0
+      t2: "char | double"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: 98.0
+      t2: "char | double"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: 65535.0
+      t2: "char | double"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- let char == (char | double) ---
+    - kw: "let"
+      v1: c'a'
+      v2: 97.0
+      t2: "char | double"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: 98.0
+      t2: "char | double"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: 65535.0
+      t2: "char | double"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- const char == (char | byte) (checkcast + jeq) ---
+    - kw: "const"
+      v1: c'a'
+      v2: 97 as byte
+      t2: "char | byte"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: 98 as byte
+      t2: "char | byte"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      t2: "char | byte"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- let char == (char | byte) ---
+    - kw: "let"
+      v1: c'a'
+      v2: 97 as byte
+      t2: "char | byte"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: 98 as byte
+      t2: "char | byte"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      t2: "char | byte"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- const char == (char | short) (checkcast + jeq) ---
+    - kw: "const"
+      v1: c'a'
+      v2: 97 as short
+      t2: "char | short"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "const"
+      v1: c'a'
+      v2: 98 as short
+      t2: "char | short"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "const"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      t2: "char | short"
+      cases:
+          - { op: '==', r: 'true' }
+
+    # --- let char == (char | short) ---
+    - kw: "let"
+      v1: c'a'
+      v2: 97 as short
+      t2: "char | short"
+      cases:
+          - { op: '==', r: 'true' }
+
+    - kw: "let"
+      v1: c'a'
+      v2: 98 as short
+      t2: "char | short"
+      cases:
+          - { op: '==', r: 'false' }
+
+    - kw: "let"
+      v1: c'\uFFFF'
+      v2: c'\uFFFF'
+      t2: "char | short"
+      cases:
+          - { op: '==', r: 'true' }

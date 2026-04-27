@@ -23,6 +23,7 @@ cases:
     - { name: 'int', decl: 'const c:int = 123', desc: 'int type' }
     - { name: 'long', decl: 'const c:long = 123', desc: 'long type' }
     - { name: 'float', decl: 'const c:float = 123.1f', desc: 'float type' }
+    - { name: 'char', decl: "const c:char = c'a'", desc: 'char type' }
     - { name: 'number', decl: 'const c:double = 123.8', desc: 'numeric type' }
     - { name: 'object', decl: 'const c:C = new C', desc: 'any class or interface' }
     - { name: 'object', decl: 'const c:I = new C', desc: 'any class or interface' }
@@ -40,5 +41,6 @@ cases:
     - { name: 'object', decl: 'const c:C|null = null', desc: 'T|null - T is a class (but not Object), interface or array' }
     - { name: 'string', decl: 'const c:string = "Just a test"', desc: 'string' }
     - { name: 'undefined', decl: 'const c = undefined', desc: 'undefined' }
+    - { name: 'undefined', decl: 'const c: void = undefined', desc: 'void type' }
     - { name: 'object', decl: 'const c = null', desc: 'null' }
     - { name: 'function', decl: 'function c() {}', desc: 'any function type' }

@@ -1,0 +1,142 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Cross-enum equality tests. Per spec (7_expressions.rst:6739-6740):
+#   "Both operands are of enumeration types and have the same numeric value
+#    or the same string value."
+# The spec does not require same enumeration type.
+#
+# === and !== compile and work correctly. == and != hit frontend ESE0114 bug.
+# Indices 0-7 pass, indices 8-15 fail (listed in ets-cts-ignored.txt).
+
+---
+cases:
+    # --- strict equality (=== / !==): compile and pass ---
+
+    - desc: "numeric enums, same value 0, Color.Red === Status.OK"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Status { OK = 0, Error = 1 }
+      use: |-
+          arktest.assertTrue(Color.Red === Status.OK)
+
+    - desc: "numeric enums, same value 0, Color.Red === Direction.North"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Direction { North = 0, South = 1 }
+      use: |-
+          arktest.assertTrue(Color.Red === Direction.North)
+
+    - desc: "numeric enums, different values, Color.Red !== Status.Error"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Status { OK = 0, Error = 1 }
+      use: |-
+          arktest.assertTrue(Color.Red !== Status.Error)
+          arktest.assertFalse(Color.Red === Status.Error)
+
+    - desc: "numeric enums, same value 1, Color.Green === Status.Error"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Status { OK = 0, Error = 1 }
+      use: |-
+          arktest.assertTrue(Color.Green === Status.Error)
+
+    - desc: "numeric enums, same value 1, Color.Green === Direction.South"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Direction { North = 0, South = 1 }
+      use: |-
+          arktest.assertTrue(Color.Green === Direction.South)
+
+    - desc: "string enums, same string A, Letters.Alpha === Tags.X"
+      decl: |-
+          enum Letters { Alpha = "A", Beta = "B" }
+          enum Tags { X = "A", Y = "B" }
+      use: |-
+          arktest.assertTrue(Letters.Alpha === Tags.X)
+
+    - desc: "string enums, same string B, Letters.Beta === Tags.Y"
+      decl: |-
+          enum Letters { Alpha = "A", Beta = "B" }
+          enum Tags { X = "A", Y = "B" }
+      use: |-
+          arktest.assertTrue(Letters.Beta === Tags.Y)
+
+    - desc: "string enums, different strings, Letters.Alpha !== Tags.Y"
+      decl: |-
+          enum Letters { Alpha = "A", Beta = "B" }
+          enum Tags { X = "A", Y = "B" }
+      use: |-
+          arktest.assertTrue(Letters.Alpha !== Tags.Y)
+          arktest.assertFalse(Letters.Alpha === Tags.Y)
+
+    # --- loose equality (== / !=): ESE0114 frontend bug, in ignored list ---
+
+    - desc: "numeric enums, same value 0, Color.Red == Status.OK"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Status { OK = 0, Error = 1 }
+      use: |-
+          arktest.assertTrue(Color.Red == Status.OK)
+
+    - desc: "numeric enums, same value 0, Color.Red == Direction.North"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Direction { North = 0, South = 1 }
+      use: |-
+          arktest.assertTrue(Color.Red == Direction.North)
+
+    - desc: "numeric enums, different values, Color.Red != Status.Error"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Status { OK = 0, Error = 1 }
+      use: |-
+          arktest.assertTrue(Color.Red != Status.Error)
+          arktest.assertFalse(Color.Red == Status.Error)
+
+    - desc: "numeric enums, same value 1, Color.Green == Status.Error"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Status { OK = 0, Error = 1 }
+      use: |-
+          arktest.assertTrue(Color.Green == Status.Error)
+
+    - desc: "numeric enums, same value 1, Color.Green == Direction.South"
+      decl: |-
+          enum Color { Red, Green, Blue }
+          enum Direction { North = 0, South = 1 }
+      use: |-
+          arktest.assertTrue(Color.Green == Direction.South)
+
+    - desc: "string enums, same string A, Letters.Alpha == Tags.X"
+      decl: |-
+          enum Letters { Alpha = "A", Beta = "B" }
+          enum Tags { X = "A", Y = "B" }
+      use: |-
+          arktest.assertTrue(Letters.Alpha == Tags.X)
+
+    - desc: "string enums, same string B, Letters.Beta == Tags.Y"
+      decl: |-
+          enum Letters { Alpha = "A", Beta = "B" }
+          enum Tags { X = "A", Y = "B" }
+      use: |-
+          arktest.assertTrue(Letters.Beta == Tags.Y)
+
+    - desc: "string enums, different strings, Letters.Alpha != Tags.Y"
+      decl: |-
+          enum Letters { Alpha = "A", Beta = "B" }
+          enum Tags { X = "A", Y = "B" }
+      use: |-
+          arktest.assertTrue(Letters.Alpha != Tags.Y)
+          arktest.assertFalse(Letters.Alpha == Tags.Y)

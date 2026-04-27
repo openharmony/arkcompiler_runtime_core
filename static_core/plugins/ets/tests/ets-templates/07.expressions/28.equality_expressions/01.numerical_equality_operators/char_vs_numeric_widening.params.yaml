@@ -1,0 +1,78 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# char widened to match each numeric type, then compared via jeq/cmp.64/fcmpl/fcmpl.64
+# Conversion -> Bytecode mapping:
+#   char == byte/short/int  -> char widen to int, jeq
+#   char == long            -> char widen to long, cmp.64 + jeqz
+#   char == float           -> char widen to float (i32tof32), fcmpl
+#   char == double          -> char widen to double (i32tof64), fcmpl.64
+# char range [0, 65535] always fits losslessly in all wider types.
+
+--- # char == int (widened to int, jeq)
+char_numeric_eq:
+  # --- char == int: same value ---
+  - {left: "c'\\u0000'", left_type: "char", right: "0", right_type: "int", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'a'", left_type: "char", right: "97", right_type: "int", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'z'", left_type: "char", right: "122", right_type: "int", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'\\uFFFF'", left_type: "char", right: "65535", right_type: "int", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'\\u0100'", left_type: "char", right: "256", right_type: "int", op: "==", result: "true", widening: "char->int (jeq)"}
+  # --- char == int: different value ---
+  - {left: "c'a'", left_type: "char", right: "98", right_type: "int", op: "==", result: "false", widening: "char->int (jeq)"}
+  - {left: "c'\\u0000'", left_type: "char", right: "1", right_type: "int", op: "==", result: "false", widening: "char->int (jeq)"}
+  - {left: "c'\\uFFFF'", left_type: "char", right: "65534", right_type: "int", op: "==", result: "false", widening: "char->int (jeq)"}
+  # --- char === int ---
+  - {left: "c'a'", left_type: "char", right: "97", right_type: "int", op: "===", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'a'", left_type: "char", right: "98", right_type: "int", op: "!==", result: "true", widening: "char->int (jeq)"}
+  # --- reversed: int == char ---
+  - {left: "97", left_type: "int", right: "c'a'", right_type: "char", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "0", left_type: "int", right: "c'\\u0000'", right_type: "char", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "65535", left_type: "int", right: "c'\\uFFFF'", right_type: "char", op: "===", result: "true", widening: "char->int (jeq)"}
+
+  # --- char == byte ---
+  - {left: "c'\\u0000'", left_type: "char", right: "0", right_type: "byte", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'\\u007F'", left_type: "char", right: "127", right_type: "byte", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'\\u0001'", left_type: "char", right: "1", right_type: "byte", op: "===", result: "true", widening: "char->int (jeq)"}
+  # --- char == short ---
+  - {left: "c'\\u0000'", left_type: "char", right: "0", right_type: "short", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'\\u7FFF'", left_type: "char", right: "32767", right_type: "short", op: "==", result: "true", widening: "char->int (jeq)"}
+  - {left: "c'\\u00FF'", left_type: "char", right: "255", right_type: "short", op: "===", result: "true", widening: "char->int (jeq)"}
+
+  # --- char == long (widened to long, cmp.64 + jeqz) ---
+  - {left: "c'\\u0000'", left_type: "char", right: "0", right_type: "long", op: "==", result: "true", widening: "char->long (cmp.64)"}
+  - {left: "c'a'", left_type: "char", right: "97", right_type: "long", op: "==", result: "true", widening: "char->long (cmp.64)"}
+  - {left: "c'\\uFFFF'", left_type: "char", right: "65535", right_type: "long", op: "===", result: "true", widening: "char->long (cmp.64)"}
+  - {left: "c'a'", left_type: "char", right: "98", right_type: "long", op: "==", result: "false", widening: "char->long (cmp.64)"}
+  - {left: "97", left_type: "long", right: "c'a'", right_type: "char", op: "==", result: "true", widening: "char->long (cmp.64)"}
+
+  # --- char == float (widened to float, i32tof32 + fcmpl) ---
+  # char range [0, 65535] always fits losslessly in float32 (up to 2^24)
+  - {left: "c'\\u0000'", left_type: "char", right: "0.0f", right_type: "float", op: "==", result: "true", widening: "char->float (i32tof32)"}
+  - {left: "c'a'", left_type: "char", right: "97.0f", right_type: "float", op: "==", result: "true", widening: "char->float (i32tof32)"}
+  - {left: "c'\\uFFFF'", left_type: "char", right: "65535.0f", right_type: "float", op: "===", result: "true", widening: "char->float (i32tof32)"}
+  - {left: "c'a'", left_type: "char", right: "98.0f", right_type: "float", op: "==", result: "false", widening: "char->float (i32tof32)"}
+  - {left: "97.0f", left_type: "float", right: "c'a'", right_type: "char", op: "==", result: "true", widening: "char->float (i32tof32)"}
+  # char == float: mismatched value
+  - {left: "c'a'", left_type: "char", right: "96.0f", right_type: "float", op: "!=", result: "true", widening: "char->float (i32tof32)"}
+  - {left: "c'a'", left_type: "char", right: "97.5f", right_type: "float", op: "!==", result: "true", widening: "char->float (i32tof32)"}
+
+  # --- char == double (widened to double, i32tof64 + fcmpl.64) ---
+  # char range [0, 65535] always fits losslessly in float64
+  - {left: "c'\\u0000'", left_type: "char", right: "0.0", right_type: "double", op: "==", result: "true", widening: "char->double (i32tof64)"}
+  - {left: "c'a'", left_type: "char", right: "97.0", right_type: "double", op: "==", result: "true", widening: "char->double (i32tof64)"}
+  - {left: "c'\\uFFFF'", left_type: "char", right: "65535.0", right_type: "double", op: "===", result: "true", widening: "char->double (i32tof64)"}
+  - {left: "c'a'", left_type: "char", right: "96.0", right_type: "double", op: "==", result: "false", widening: "char->double (i32tof64)"}
+  - {left: "97.0", left_type: "double", right: "c'a'", right_type: "char", op: "==", result: "true", widening: "char->double (i32tof64)"}
+  # char == double: mismatched value
+  - {left: "c'a'", left_type: "char", right: "96.0", right_type: "double", op: "!=", result: "true", widening: "char->double (i32tof64)"}
+  - {left: "c'a'", left_type: "char", right: "97.5", right_type: "double", op: "!==", result: "true", widening: "char->double (i32tof64)"}

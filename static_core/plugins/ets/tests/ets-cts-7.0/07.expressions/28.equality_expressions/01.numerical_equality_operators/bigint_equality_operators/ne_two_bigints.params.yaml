@@ -20,54 +20,79 @@ cases:
           - new BigInt(0)
           - new BigInt(-0.0)
           - new BigInt(-(new BigInt(0)))
+          - new BigInt("0")
     - a: -1n
       values:
           - 1n
           - new BigInt(1)
           - new BigInt(0.1e1f)
           - new BigInt(+1n)
+          - new BigInt("1")
     # from int
     - a: 2147483646n
       values:
           - 2147483647n # Int.MAX_VALUE
           - new BigInt(2147483647)
           - new BigInt(new BigInt(2147483647))
+          - new BigInt("2147483647")
     - a: 2147483648n
       values:
           - 2147483647n # Int.MAX_VALUE
           - new BigInt(2147483647)
           - new BigInt(new BigInt(2147483647))
+          - new BigInt("2147483647")
     - a: -2147483647n
       values:
           - -2147483648n # Int.MIN_VALUE
           - new BigInt(-2147483648)
           - new BigInt(-2147483648n)
+          - new BigInt("-2147483648")
     - a: -2147483649n
       values:
           - -2147483648n # Int.MIN_VALUE
           - new BigInt(-2147483648)
           - new BigInt(-2147483648n)
+          - new BigInt("-2147483648")
     # from long
+    - a: 4294967295n # 2^32 - 1
+      values:
+          # 2^32
+          - 4294967296n
+          - new BigInt(4294967296)
+          - new BigInt(4294967296n)
+          - new BigInt("4294967296")
+          # 2^64
+          - 18446744073709551616n
+          - new BigInt(18446744073709551616n)
+          - new BigInt("18446744073709551616")
+          - -4294967296n
+          - new BigInt(-4294967296)
+          - new BigInt(-4294967296n)
+          - new BigInt("-4294967296")
     - a: 9223372036854775808n
       values:
           - 9223372036854775807n # Long.MAX_VALUE
           - new BigInt(9223372036854775807)
           - new BigInt(9223372036854775807n)
+          - new BigInt("9223372036854775807")
     - a: 9223372036854775806n
       values:
           - 9223372036854775807n # Long.MAX_VALUE
           - new BigInt(9223372036854775807)
           - new BigInt(9223372036854775807n)
+          - new BigInt("9223372036854775807")
     - a: -9223372036854775807n
       values:
           - -9223372036854775808n # Long.MIN_VALUE
           - new BigInt(-9223372036854775808)
           - new BigInt(-9223372036854775808n)
+          - new BigInt("-9223372036854775808")
     - a: -9223372036854775809n
       values:
           - -9223372036854775808n # Long.MIN_VALUE
           - new BigInt(-9223372036854775808)
           - new BigInt(-9223372036854775808n)
+          - new BigInt("-9223372036854775808")
     # from float
     - a: 16777216n
       values:
@@ -75,12 +100,14 @@ cases:
           - new BigInt(16777215.0f)
           - new BigInt(16777215)
           - new BigInt(16777215n)
+          - new BigInt("16777215")
     - a: 16777214n
       values:
           - 16777215n # max safe integer in float
           - new BigInt(16777215.0f)
           - new BigInt(16777215)
           - new BigInt(16777215n)
+          - new BigInt("16777215")
     # from double
     - a: 9007199254740992n
       values:
@@ -88,35 +115,42 @@ cases:
           - new BigInt(9007199254.740991e6)
           - new BigInt(9007199254740991)
           - new BigInt(9007199254740991n)
+          - new BigInt("9007199254740991")
     - a: 9007199254740990n
       values:
           - 9007199254740991n # max safe integer in double
           - new BigInt(9007199254.740991e6)
           - new BigInt(9007199254740991)
           - new BigInt(9007199254740991n)
+          - new BigInt("9007199254740991")
     - a: -9007199254740990n
       values:
           - -9007199254740991n # min safe integer in double
           - new BigInt(-9007199254740991)
           - new BigInt(-9007199254740991n)
+          - new BigInt("-9007199254740991")
     - a: -9007199254740992n
       values:
           - -9007199254740991n # min safe integer in double
           - new BigInt(-9007199254740991)
           - new BigInt(-9007199254740991n)
+          - new BigInt("-9007199254740991")
     # from bigint
     - a: 94876543875610289630123457n
       values:
           - 94876543875610289630123456n
           - new BigInt(94876543875610289630123456n)
           - new BigInt(new BigInt(94876543875610289630123456n))
+          - new BigInt("94876543875610289630123456")
     - a: 94876543875610289630123455n
       values:
           - 94876543875610289630123456n
           - new BigInt(94876543875610289630123456n)
           - new BigInt(new BigInt(94876543875610289630123456n))
+          - new BigInt("94876543875610289630123456")
     - a: -1010101010101010101010101010101010102n
       values:
           - -1010101010101010101010101010101010101n
           - new BigInt(-1010101010101010101010101010101010101n)
           - new BigInt(-(new BigInt(1010101010101010101010101010101010101n)))
+          - new BigInt("-1010101010101010101010101010101010101")
