@@ -27,3 +27,33 @@ cases:
     val1: "123456789"
     val2: "0"
     expected: "1"
+
+  - description: "BigInt zero base"
+    val1: "0"
+    val2: "5"
+    expected: "0"
+
+  - description: "BigInt one base"
+    val1: "1"
+    val2: "100"
+    expected: "1"
+
+  - description: "BigInt exponent one"
+    val1: "42"
+    val2: "1"
+    expected: "42"
+
+  - description: "BigInt 0n ** 0n equals 1n"
+    val1: "0"
+    val2: "0"
+    expected: "1"
+
+  - description: "BigInt negative base even exponent"
+    val1: "-2"
+    val2: "4"
+    expected: "16"
+
+  - description: "BigInt negative base odd exponent"
+    val1: "-3"
+    val2: "3"
+    expected: "-27"

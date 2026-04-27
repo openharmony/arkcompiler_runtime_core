@@ -35,11 +35,11 @@ operations:
   - {
       value1: 11, type1: "byte", 
       value2: 122, type2: "long", 
-      operation: "**", 
-      result_type: "long"
+      operation: "**",
+      result_type: "double"
     }
   - {
-      value1: 44, type1: "short", 
+      value1: 44, type1: "short",
       value2: 73, type2: "short", 
       operation: "*", 
       result_type: "int"
@@ -59,11 +59,11 @@ operations:
   - {
       value1: 44932, type1: "int", 
       value2: 7345, type2: "int", 
-      operation: "**", 
-      result_type: "int"
+      operation: "**",
+      result_type: "double"
     }
   - {
-      value1: 492, type1: "int", 
+      value1: 492, type1: "int",
       value2: 75, type2: "long", 
       operation: "*", 
       result_type: "long"

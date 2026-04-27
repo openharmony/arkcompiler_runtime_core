@@ -115,9 +115,6 @@
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
-#33627
-07.expressions/22.binary_expressions/numeric_type_exp.ets
-
 #30340 &&= ||= ??= still not supported in code
 07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_13.ets
