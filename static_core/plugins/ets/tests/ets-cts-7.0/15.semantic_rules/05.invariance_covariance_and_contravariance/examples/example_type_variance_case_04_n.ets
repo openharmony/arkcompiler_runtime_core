@@ -14,8 +14,9 @@
  */
 
 /*---
-desc: Ensuring that method_one in subclasses allows contravariant parameter types with interface.
+desc: Ensuring that methodOne in subclasses does not allow covariant parameter types with interface.
 tags: [compile-only, negative]
+expected_out: 'Semantic error ESE0136: Method methodOne(p: Derived): IBase in Derived not overriding any method'
 ---*/
 
 interface IBase {
@@ -34,12 +35,4 @@ class Derived extends Base {
   }
 }
 
-function main(): void {
-  let a = new Base();
-  let b = new Derived();
 
-  let resultA = a.methodOne(a);
-  let resultB = b.methodOne(b);
-
-  arktest.assertEQ(resultA, resultB);
-}

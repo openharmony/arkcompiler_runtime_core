@@ -14,8 +14,9 @@
  */
 
 /*---
-desc: Ensuring that method_one in subclasses does not allow contravariant parameter types with base class.
+desc: Ensuring that methodOne in subclasses does not allow covariant parameter types with base class.
 tags: [compile-only, negative]
+expected_out: 'Semantic error ESE0136: Method methodOne(p: Derived): Base in Derived not overriding any method'
 ---*/
 
 class Base {
@@ -30,12 +31,4 @@ class Derived extends Base {
   }
 }
 
-function main(): void {
-  let a = new Base();
-  let b = new Derived();
 
-  let resultA = a.methodOne(a);
-  let resultB = b.methodOne(b);
-
-  arktest.assertEQ(resultA, resultB);
-}
