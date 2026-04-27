@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ assert: >-
     A variable with the readonly modifier may only be initialized once,
     its value could not be modified after initialization.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0121: Field type annotation expected."
 ---*/
 
 class A {
