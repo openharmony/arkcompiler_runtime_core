@@ -17,27 +17,38 @@
 
 namespace ark::ets::intrinsics {
 
-void AsyncWorkNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)
+void AsyncWorkNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr)
 {
     ani_env *env = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
     auto *nativeCb = reinterpret_cast<void (*)(ani_env *, void *)>(nativeCbPtr);
-    if (static_cast<bool>(needNativeScope)) {
-        ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
-        nativeCb(env, reinterpret_cast<void *>(dataPtr));
-        return;
+
+    ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
+
+    constexpr ani_size MAX_LOCAL_REF = 4096;
+    if (env->CreateLocalScope(MAX_LOCAL_REF) != ANI_OK) {
+        LOG(FATAL, RUNTIME) << "AsyncWorkNativeInvoke CreateLocalScope failed";
     }
+
     nativeCb(env, reinterpret_cast<void *>(dataPtr));
+
+    env->DestroyLocalScope();
 }
 
-void EventNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)
+void EventNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr)
 {
     auto *nativeCb = reinterpret_cast<void (*)(void *)>(nativeCbPtr);
-    if (static_cast<bool>(needNativeScope)) {
-        ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
-        nativeCb(reinterpret_cast<void *>(dataPtr));
-        return;
+    PandaAniEnv *env = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
+
+    ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
+
+    constexpr ani_size MAX_LOCAL_REF = 4096;
+    if (env->CreateLocalScope(MAX_LOCAL_REF) != ANI_OK) {
+        LOG(FATAL, RUNTIME) << "EventNativeInvoke CreateLocalScope failed";
     }
+
     nativeCb(reinterpret_cast<void *>(dataPtr));
+
+    env->DestroyLocalScope();
 }
 
 }  // namespace ark::ets::intrinsics

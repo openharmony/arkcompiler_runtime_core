@@ -60,14 +60,14 @@ class NativeAsyncWorkHelper {
     }
     static async queueInternal(executeCb: long, completeCb: long, data: long) {
         let p = launch() {
-           NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data, true);
+           NativeAsyncWorkHelper.asyncWorkNativeInvoke(executeCb, data);
         }
         await p;
-        NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal(completeCb, data, true);
+        NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal(completeCb, data);
     }
-    static native asyncWorkNativeInvoke(nativeCb: long, data: long, needNativeScope: boolean): void;
-    static asyncWorkNativeInvokeInternal(nativeCb: long, data: long, needNativeScope: boolean) {
-        NativeAsyncWorkHelper.asyncWorkNativeInvoke(nativeCb, data, needNativeScope);
+    static native asyncWorkNativeInvoke(nativeCb: long, data: long): void;
+    static asyncWorkNativeInvokeInternal(nativeCb: long, data: long) {
+        NativeAsyncWorkHelper.asyncWorkNativeInvoke(nativeCb, data);
     }
 
     static sendEvent(workerId: int, executeCb: long, data: long, timeout: long): void {
@@ -81,17 +81,17 @@ class NativeAsyncWorkHelper {
         if (timeout > 0) {
             setTimeout(() => {
                 launch(launchParams) {
-                    NativeAsyncWorkHelper.eventNativeInvoke(executeCb, data, true);
+                    NativeAsyncWorkHelper.eventNativeInvoke(executeCb, data);
                 };
             }, timeout.toInt());
         } else {
             launch(launchParams) {
-                NativeAsyncWorkHelper.eventNativeInvoke(executeCb, data, true);
+                NativeAsyncWorkHelper.eventNativeInvoke(executeCb, data);
             };
         }
     }
-    static eventNativeInvokeInternal(nativeCb: long, data: long, needNativeScope: boolean) {
-        NativeAsyncWorkHelper.eventNativeInvoke(nativeCb, data, needNativeScope);
+    static eventNativeInvokeInternal(nativeCb: long, data: long) {
+        NativeAsyncWorkHelper.eventNativeInvoke(nativeCb, data);
     }
-    static native eventNativeInvoke(nativeCb: long, data: long, needNativeScope: boolean): void;
+    static native eventNativeInvoke(nativeCb: long, data: long): void;
 }
