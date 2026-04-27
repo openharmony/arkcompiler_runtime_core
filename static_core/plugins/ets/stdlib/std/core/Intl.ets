@@ -1444,6 +1444,7 @@ export class DateTimeFormat {
         // Using single entry keeps memory footprint minimal while covering most use cases
         private static lastParsedTag: string | undefined = undefined;
         private static lastParsedResult: ParsedLocaleData | undefined = undefined;
+        private static localeCacheMutex: Object = ConcurrencyHelpers.mutexCreate();
 
         /**
          * Get cached locale data for a given tag
@@ -1451,10 +1452,13 @@ export class DateTimeFormat {
          * @returns Cached ParsedLocaleData or undefined if not found
          */
         private static getCachedLocale(tag: string): ParsedLocaleData | undefined {
-            if (Locale.lastParsedTag == tag && Locale.lastParsedResult != undefined) {
-                return Locale.lastParsedResult
-            }
-            return undefined
+            let result: ParsedLocaleData | undefined = undefined;
+            ConcurrencyHelpers.lockGuard(Locale.localeCacheMutex, () => {
+                if (Locale.lastParsedTag == tag && Locale.lastParsedResult != undefined) {
+                    result = Locale.lastParsedResult;
+                }
+            });
+            return result;
         }
 
         /**
@@ -1463,8 +1467,10 @@ export class DateTimeFormat {
          * @param data The parsed locale data to cache
          */
         private static setCachedLocale(tag: string, data: ParsedLocaleData): void {
-            Locale.lastParsedTag = tag
-            Locale.lastParsedResult = data
+            ConcurrencyHelpers.lockGuard(Locale.localeCacheMutex, () => {
+                Locale.lastParsedTag = tag;
+                Locale.lastParsedResult = data;
+            });
         }
 
         private _baseName?: string;

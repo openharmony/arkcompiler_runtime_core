@@ -437,11 +437,11 @@ export class AsyncLock {
     }
 
     private static generateAnonymousLockName() {
-        return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId++);
+        return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId.fetchAdd(1));
     }
 
     public readonly name: string;
-    private static LastAnonymousId: int = 0;
+    private static LastAnonymousId: AtomicInt = new AtomicInt(0);
     private static readonly PENDING_QUEUE_COMPACT_THRESHOLD: int = 64;
     private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;

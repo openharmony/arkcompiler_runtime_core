@@ -19,6 +19,8 @@
 
 package std.core;
 
+import { AtomicLong } from "std/concurrency";
+
 /**
  * A namespace that provides reflection and proxy functionality.
  * @namespace reflect
@@ -90,8 +92,9 @@ export class Proxy {
 
     /**
      * A counter used to ensure unique proxy class names.
+     * Thread-safe atomic counter to prevent duplicate names in concurrent proxy creation.
      */
-    private static uniqueNameCounter: long = -1
+    private static uniqueNameCounter: AtomicLong = new AtomicLong(0)
 
     /**
      * Parameters of proxy constructor.
@@ -170,7 +173,7 @@ export class Proxy {
     private static native hasProxyFlag(klass: Class): boolean
 
     private static createUniqueName(): string {
-        return Proxy.PROXY_PREFIX.concat((++Proxy.uniqueNameCounter).toString())
+        return Proxy.PROXY_PREFIX.concat(Proxy.uniqueNameCounter.fetchAdd(1).toString())
     }
 
     /**
