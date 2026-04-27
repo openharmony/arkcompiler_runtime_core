@@ -359,7 +359,7 @@ async function onEnqueuedNestedRunnerExecuteTest() {
     arktest.assertEQ(asyncResult, 'abc');
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addAsyncTest('cancelInSuccessCallback', cancelInSuccessCallback);
@@ -375,7 +375,7 @@ function main(): int {
     commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
 
-    let res = commonTaskSuite.run();
+    let res = await commonTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }

@@ -396,7 +396,7 @@ function seqRunnerPriorityChangeTest() {
     }, new Error('seqRunner:: The priority can not be changed.'));
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
     let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
     seqRunnerSuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
@@ -416,7 +416,7 @@ function main(): int {
     seqRunnerSuite.addAsyncTest('sameNameSharedRunnerTest', sameNameSharedRunnerTest);
     seqRunnerSuite.addAsyncTest('cancelSequenceRunnerWaittingTask', cancelSequenceRunnerWaittingTask);
     seqRunnerSuite.addTest('SeqRunnerPriorityChangeTest', seqRunnerPriorityChangeTest);
-    let res = seqRunnerSuite.run();
+    let res = await seqRunnerSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }

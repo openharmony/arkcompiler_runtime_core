@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,7 @@ async function taskpoolFuncTestSumAndMulti() {
     arktest.assertEQ(result4, 400);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let funcTaskSuite = new arktest.ArkTestsuite('taskpool.FuncTask');
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt', taskpoolFuncTestSumInt);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestAnd', taskpoolFuncTestAnd);
@@ -132,7 +132,7 @@ function main(): int {
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt2', taskpoolFuncTestSumInt2);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt2SameArguments', taskpoolFuncTestSumInt2SameArguments);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumAndMulti', taskpoolFuncTestSumAndMulti);
-    let res = funcTaskSuite.run();
+    let res = await funcTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }

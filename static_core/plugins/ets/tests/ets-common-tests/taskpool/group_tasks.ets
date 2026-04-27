@@ -438,7 +438,7 @@ async function groupTaskFailedNoSuccessCallbackTest() {
     arktest.assertTrue(failCallbackFlag2)
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let taskGroupTestsuite = new arktest.ArkTestsuite('taskpool.TaskGroup');
     taskGroupTestsuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
     taskGroupTestsuite.addAsyncTest('ExecutePeriodicallyTest', executePeriodicallyTest);
@@ -458,7 +458,7 @@ function main(): int {
     taskGroupTestsuite.addTest('AddDependencyForGroupTaskTest', addDependencyForGroupTaskTest);
     taskGroupTestsuite.addTest('AddTaskWithDifferentParamsTest', addTaskWithDifferentParamsTest);
     taskGroupTestsuite.addAsyncTest('GroupTaskFailedNoSuccessCallbackTest', groupTaskFailedNoSuccessCallbackTest);
-    let res = taskGroupTestsuite.run();
+    let res = await taskGroupTestsuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }

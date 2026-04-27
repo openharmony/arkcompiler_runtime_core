@@ -73,8 +73,8 @@ function heavyComputation(): Int {
     return i
 }
 
-function main() {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite('Function Atomics skipped_cyclic_barrier tests')
     suite.addAsyncTest('Function testMain', testMain)
-    return suite.run()
+    return await suite.runAsync()
 }

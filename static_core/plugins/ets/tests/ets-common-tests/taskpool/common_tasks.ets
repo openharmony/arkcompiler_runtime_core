@@ -1618,7 +1618,7 @@ async function currentTaskTest(): Promise<void> {
     arktest.assertEQ(errSuccessCount.load(), 9);
 }
 
-function main(): int {
+async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addAsyncTest('CurrentTaskTest', currentTaskTest);
@@ -1679,7 +1679,7 @@ function main(): int {
     commonTaskSuite.addAsyncTest('executeDelayedOneTaskThreetimes',executeDelayedOneTaskThreetimes);
     commonTaskSuite.addAsyncTest('cancelAsyncRunnerWaittingTask', cancelAsyncRunnerWaittingTask);
     commonTaskSuite.addAsyncTest('cancelExecuteDelayedTaskBeforeExecute', cancelExecuteDelayedTaskBeforeExecute);
-    let res = commonTaskSuite.run();
+    let res = await commonTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
 }
