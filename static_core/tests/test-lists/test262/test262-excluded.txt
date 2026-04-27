@@ -10435,6 +10435,7 @@ language/statements/try/cptn-finally-from-catch.js
 language/statements/try/cptn-finally-skip-catch.js
 language/statements/try/cptn-finally-wo-catch.js
 language/statements/try/cptn-try.js
+language/statements/try/early-catch-duplicates.js
 language/statements/variable/12.2.1-10-s.js
 language/statements/variable/12.2.1-16-s.js
 language/statements/variable/12.2.1-17-s.js
