@@ -28,9 +28,7 @@ void InitCommonRuntime()
     auto *baseRuntime = ark::common_vm::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     auto param = ark::common_vm::BaseRuntime::GetDefaultParam();
-    // Single pass compaction should be enabled explicitly
-    param.gcParam.singlePassCompactionEnabled =
-        runtimeOptions.WasSetG1SinglePassCompactionEnabled() && runtimeOptions.IsG1SinglePassCompactionEnabled();
+    param.gcParam.singlePassCompactionEnabled = runtimeOptions.IsG1SinglePassCompactionEnabled();
     baseRuntime->Init(param);
 }
 
