@@ -14,8 +14,7 @@
  */
 {%- for c in cases %}
 /*---
-desc: A compile-time error occurs if type T is not preserved by Type Erasure
-tags: []
+desc: instanceof operator works correctly with types preserved by Type Erasure
 ---*/
 {{c.decl}}
 

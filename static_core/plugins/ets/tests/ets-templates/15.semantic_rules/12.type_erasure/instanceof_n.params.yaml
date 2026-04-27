@@ -13,13 +13,14 @@
 
 ---
 cases:
-    # Array
+    #00-01 Array
     - decl: |-
           let x: Array<string> = ['']
       use: |-
           arktest.assertTrue(
               ((): Object => x)() instanceof Array<string> // CTE expected
           )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
     - decl: |-
           let x: string[] = ['']
@@ -27,21 +28,25 @@ cases:
           arktest.assertTrue(
               ((): Object => x)() instanceof string[] // CTE expected
           )
-    # FixedArray
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
+    
+    #02 FixedArray
     - decl: |-
         let x: FixedArray<string> = ['']
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof FixedArray // CTE expected
         )
+      expected_out: "Semantic error ESE0277: FixedArray<T> must have only one type parameter."
 
-    # union with Array
+    #03-05 union with Array
     - decl: |-
         let x: Array<number>|Record<string, number> = [1.0]
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof Array<number>|Record<string, number> // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
     - decl: |-
         let x: Array<number>|Record<string, number> = [1.0]
@@ -49,6 +54,7 @@ cases:
         arktest.assertTrue(
             ((): Object => x)() instanceof Array<number>|Record // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
     - decl: |-
         let x: Array<number>|Record<string, number> = [1.0]
@@ -56,14 +62,16 @@ cases:
         arktest.assertTrue(
             ((): Object => x)() instanceof Array|Record<string, number> // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Record' when used in instanceof expression."
 
-  # union with FixedArray
+    #06-07 union with FixedArray
     - decl: |-
         let x: FixedArray<int>|Promise<long>|Array<string> = ['']
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof FixedArray<int>|Promise<long>|Array<string> // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
     - decl: |-
         let x: FixedArray<int>|Promise<long>|Array<string> = ['']
@@ -71,23 +79,26 @@ cases:
         arktest.assertTrue(
             ((): Object => x)() instanceof FixedArray|Promise|Array // CTE expected
         )
+      expected_out: "Semantic error ESE0277: FixedArray<T> must have only one type parameter."
 
-  # union with various elements
+    #08-10 union with various elements
     - decl: |-
         class A<T> {}
         let x: Promise<number>|string[][]|undefined|A<string>|Record<string, number> = undefined
       use: |-
         arktest.assertTrue(
-            ((): Object => x)() instanceof Promise<number>|string[][]|undefined|A<string>|Record<string, number> // CTE expected
+            ((): Any => x)() instanceof Promise<number>|string[][]|undefined|A<string>|Record<string, number> // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Promise' when used in instanceof expression."
 
     - decl: |-
         class A<T> {}
         let x: Promise<number>|string[][]|undefined|A<string>|Record<string, number> = undefined
       use: |-
         arktest.assertTrue(
-            ((): Object => x)() instanceof Promise|string[][]|undefined|A|Record // CTE expected
+            ((): Any => x)() instanceof Promise|string[][]|undefined|A|Record // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
     - decl: |-
         class A<T> {}
@@ -96,40 +107,44 @@ cases:
         arktest.assertTrue(
             ((): Object => x)() instanceof Promise<number>|Array|undefined|A|Record // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Promise' when used in instanceof expression."
 
-  # tuple
+    #11-12 tuple
     - decl: |-
         let x: [Promise<number>|undefined, Array<string>|Array<number>] = [undefined, ['']]
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof [Promise<number>|undefined, Array<string>|Array<number>] // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
         
-
     - decl: |-
         let x: [Array<number>, FixedArray<string>|Array<number>] = [[1.0], [1.0]]
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof [Array<number>, FixedArray<string>|Array<number>] // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
-  # string literal types erased
+    #13-14 string literal types erased
     - decl: |-
         let x: 'a'|'b'|'c' = 'a'
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof 'a' // CTE, string literal is erased
         )
+      expected_out: "Semantic error ESE38251: Type '\\\"a\\\"' cannot be used on the right hand side of an 'instanceof' expression"
     
-
+    
     - decl: |-
         let x: 'a'|'b'|int|Error = 1
       use: |-
         arktest.assertTrue(
             ((): Object => x)() instanceof 'a'|'b'|int|Error // CTE, string literals are erased
         )
+      expected_out: "Semantic error ESE38251: Type '(\\\"a\\\" | \\\"b\\\" | int | Error)' cannot be used on the right hand side of an 'instanceof' expression"
 
-  # function's type arguments erased
+    #15 function's type arguments erased
     - decl: |-
         function foo<T, U, V, X>(p1: T, p2: U, p3: V, p4: X): T {
             return p1
@@ -139,25 +154,29 @@ cases:
         arktest.assertTrue(
             x instanceof ((p1: Array<int>, p2: Array<long>, p3: Array<string>, p4: Array<Object>) => Array<int>) // CTE expected
         )
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
 
-    # generic function
+    #16-17 generic function
     - decl: |-
           function test<T>(p: Object) {
               return p instanceof T
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           function test<T extends Error>(p: Object) {
               return p instanceof T
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
-    # generic class
+    #18-19 generic class
     - decl: |-
           class A<T> {
               test(p: Object) {
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           class A<T extends Error> {
@@ -165,14 +184,16 @@ cases:
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
-    # generic class method
+    #20-21 generic class method
     - decl: |-
           class A {
               test<T>(p: Object) {
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           class A {
@@ -180,14 +201,16 @@ cases:
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
-    # generic interface
+    #22-23 generic interface
     - decl: |-
           interface I<T> {
               test(p: Object) {
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           interface I<T extends Error> {
@@ -195,8 +218,9 @@ cases:
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
-    # generic class, covariant type parameter
+    #24-25 generic class, covariant type parameter
     - decl: |-
           class X {}
           class Y extends X {}
@@ -205,13 +229,14 @@ cases:
               constructor(p: T) {
                   this.fld = p
               }
-              test() {
+              test(p: Object) {
                   return p instanceof T
               }
           }
       use: |-
           let x = new A<X>(new X)
           console.log(x.fld instanceof Any)
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           class A<out T extends Error> {
@@ -219,12 +244,14 @@ cases:
                   return p instanceof T
               }
           }
+      expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
-    # generic function
+    #26-29 generic function
     - decl: |-
           function test<T, U>(p: Object) {
               return p instanceof (p: T) => U
           }
+      expected_out: "Semantic error ESE38251: Type '((p: T)=> U)' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           class A {
@@ -232,11 +259,13 @@ cases:
                   return p instanceof A<number>
               }
           }
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression."
 
     - decl: |-
           function test<T>(p: Object) {
               return p instanceof (p: T) => void
           }
+      expected_out: "Semantic error ESE38251: Type '((p: T)=> void)' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-
           class A {
@@ -244,3 +273,4 @@ cases:
                   return p instanceof A<T>
               }
           }
+      expected_out: "Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression."
