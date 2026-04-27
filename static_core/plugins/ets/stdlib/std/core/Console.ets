@@ -381,14 +381,24 @@ export final class Console {
         if (vals.length == 0) {
             return
         }
-        if (!vals[0]) {
-            // replace false evaluated condition with no `vals` length changes
-            let sb = new StringBuilder("Assertion failed")
-            if (vals.length > 1) {
-                sb.append(c':')
+        
+        let shouldAssert = vals[0] instanceof boolean && vals[0] == true
+        
+        if (!shouldAssert) {
+            if (vals.length == 1) {
+                vals[0] = "Assertion failed"
+                this.error(...vals)
+            } else {
+                let second = vals[1]
+                if (second instanceof String) {
+                    vals.shift()
+                    vals[0] = "Assertion failed: " + (second as String)
+                    this.error(...vals)
+                } else {
+                    vals[0] = "Assertion failed:"
+                    this.error(...vals)
+                }
             }
-            vals[0] = sb
-            this.error(...vals)
         }
     }
 

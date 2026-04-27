@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,4 +22,10 @@ console.assert("1")
 console.assert("count: %d", "str")
 console.assert("str")
 console.assert()
+console.assert(false)
+console.assert("test")
+console.assert(100, 'number 100.5')
+console.assert(-99.9, 'number -99.9')
+console.assert(false, 'console %s work', "didn't")
 console.assert(undefined)
+console.assert(true)
