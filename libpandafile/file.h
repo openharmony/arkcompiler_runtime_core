@@ -59,7 +59,7 @@ public:
     static constexpr size_t MAGIC_SIZE = 8;
     static constexpr size_t VERSION_SIZE = 4;
     static const std::array<uint8_t, MAGIC_SIZE> MAGIC;
-    static constexpr std::array<uint8_t, VERSION_SIZE> STATIC_VERSION = {0, 0, 0, 7};
+    static constexpr std::array<uint8_t, VERSION_SIZE> STATIC_VERSION = {0, 1, 0, 7};
 
     struct Header {
         std::array<uint8_t, MAGIC_SIZE> magic;

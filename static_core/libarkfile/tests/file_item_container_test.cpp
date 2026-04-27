@@ -153,7 +153,7 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::fill(reinterpret_cast<uint8_t *>(&header), reinterpret_cast<uint8_t *>(&header) + sizeof(header), 0);
         header.magic = File::MAGIC;
-        header.version = {0, 0, 0, 7};
+        header.version = {0, 1, 0, 7};
         header.fileSize = sizeof(File::Header);
         auto pChecksumData = reinterpret_cast<uint8_t *>(&header.version);
         auto checksum = adler32(1, pChecksumData, sizeof(header) - offsetof(File::Header, version));
@@ -244,7 +244,7 @@ TEST(ItemContainer, TestClasses)
 
     ASSERT_NE(pandaFile, nullptr);
 
-    EXPECT_THAT(pandaFile->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 7));
+    EXPECT_THAT(pandaFile->GetHeader()->version, ::testing::ElementsAre(0, 1, 0, 7));
     EXPECT_EQ(pandaFile->GetHeader()->fileSize, memWriter.GetData().size());
     EXPECT_EQ(pandaFile->GetHeader()->foreignOff, 0U);
     EXPECT_EQ(pandaFile->GetHeader()->foreignSize, 0U);
