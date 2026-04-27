@@ -18,8 +18,7 @@ cases:
       - {check_type: "bigint"}
       - {check_type: "string"}
       - {check_type: "Object"}
-    decl_variants:
-      - |-
+    decl: |-
         class A {
           static field: [check_type]
         }
@@ -28,8 +27,7 @@ cases:
 
   - desc: |-
       Checking on static field has no initializer.
-    decl_variants:
-      - |-
+    decl: |-
         class C {}
         class A {
           static field: C
@@ -44,8 +42,7 @@ cases:
     check_variants:
       - {check_value_type: "Cat", out: "Semantic error ESE0318: Type 'Cat' cannot be assigned to type 'Dog'"}
       - {check_value_type: "Animal", out: "Semantic error ESE0318: Type 'Animal' cannot be assigned to type 'Dog'"}
-    decl_variants:
-      - |-
+    decl: |-
         class Animal {}
         class Dog extends Animal {}
         class Cat extends Animal {}
@@ -63,8 +60,7 @@ cases:
       - {check_value: "handlerB", out: "Semantic error ESE0318: Type '((p1: B) => A)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
       - {check_value: "handlerBIntInt", out: "Semantic error ESE0318: Type '((p1: B, p2: Int, p3: Int) => B)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
       - {check_value: "handlerNothing", out: "Semantic error ESE0318: Type '(() => C)' cannot be assigned to type '((p1: B, p2: Int) => B)'"}
-    decl_variants:
-      - |-
+    decl: |-
         class A {}
         class B extends A {}
         class C extends A {}
@@ -100,8 +96,7 @@ cases:
       >-
         Error: TS2302:
         Static members cannot reference class type parameters
-    decl_variants:
-      - |-
+    decl: |-
         class A<T> {
           static field: T
         }
