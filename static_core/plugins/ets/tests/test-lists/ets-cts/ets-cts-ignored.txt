@@ -118,7 +118,6 @@
 
 #33776 es2panda aborts on ensure-not-nullish expression over array indexing expression
 07.expressions/19.ensure-not-nullish_expression/warn2_4.ets
-07.expressions/19.ensure-not-nullish_expression/warn2_6.ets
 
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
@@ -247,9 +246,6 @@
 
 #33800
 10.interfaces/02.superinterfaces_and_subinterfaces/extend_clause_with_not_accessible_type_n.ets
-
-#31862 verifier error on conflicting default implementations in interfaces
-10.interfaces/03.interface_members/hidden_members_1.ets
 
 #33639
 11.enumerations/enum_decl_25.ets
@@ -422,7 +418,6 @@
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_initializer_n.ets
 
 # 33423
-14.ambient_declarations/08.accessor_declarations/accessor_declarations.ets
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_receiver.ets
 
 #33189
@@ -512,15 +507,9 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_9.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/inherited_and_declared_methods_override_same_superclass_n.ets
 
-#16840
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_overriding.ets
-
 #30206
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_12.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_13.ets
-
-#16840
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method.ets
 
 #34295 No CTE for incorrect overriding
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_7.ets
@@ -564,7 +553,6 @@
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_5.ets
 
-
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
@@ -601,10 +589,8 @@
 
 #32038   Interface has methods
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_4.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_5.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_2.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_3.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_4.ets
 
 #31862 Conflicting default implementations
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/inheritance2a_3.ets
@@ -700,6 +686,12 @@
 #34225
 23.binary_compatibility/01.classification_of_source_code_changes/enums/remove_enum_constants_2/remove_enum_constants_2.ets
 23.binary_compatibility/01.classification_of_source_code_changes/enums/rename_enum_constants_2/rename_enum_constants_2.ets
+
+#34472
+24.build_system/metadata/base_tests/simultaneous_three_files/test_import.ets
+
+#34473
+24.build_system/metadata/base_tests/two_libs_simultaneous/test_import.ets
 
 #34386
 24.build_system/metadata/base_tests/two_libs_simultaneous_no_rootdir/test_import.ets
