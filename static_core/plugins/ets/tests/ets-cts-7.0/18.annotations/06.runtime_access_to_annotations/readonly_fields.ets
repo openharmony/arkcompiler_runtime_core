@@ -13,30 +13,33 @@
 * limitations under the License.
 */
 
-{% for case in cases %}
+{% for p in policies %}
+{% for c in cases %}
 
 /*---
 desc: >-
     For an annotation with retention policy (see Retention Annotation) BYTECODE or RUNTIME 
     an abstract class with the name of the annotation is implicitly declared. 
     All fields of this class are readonly. If a field is of an array type, the array type is also readonly
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE4002: Cannot assign to a readonly field f"
 ---*/
 
-@Retention({{ case.decl }})
+const initVal = {{c.init}}
+const editVal = {{c.editVal}}
+
+@Retention({{ p.option }})
 @interface ClassAnnotation {
-    name: string
-    attrs: number[]
-    isActual: boolean
-} 
-
-@ClassAnnotation({name: "testName", attrs: [1, 2.0], isActual = true})
-class MyClass {}
-
-function main() {
-    let my: ClassAnnotation = new MyClass()
-    arktest.assertEQ(my.name, "testName")
-    arktest.assertEQ(my.attrs[1], 2.0)
-    arktest.assertTrue(my.isActual)
+  f: {{c.type}}
 }
 
+@ClassAnnotation({ f: initVal })
+class C {}
+
+function main() {
+    let i = new C()
+    i.f{{c.array_index}} = editVal
+}
+
+{% endfor %}
 {% endfor %}

@@ -33,8 +33,10 @@ desc: >-
 class MyClass {}
 
 function main() {
-    let my: ClassAnnotation
-    //let my: Type = Type.from<MyClass>()
+    let my: ClassAnnotation = new MyClass()
+    arktest.assertEQ(my.name, "testName")
+    arktest.assertEQ(my.attrs[1], 2.0)
+    arktest.assertTrue(my.isActual)
 }
 
 {% endfor %}

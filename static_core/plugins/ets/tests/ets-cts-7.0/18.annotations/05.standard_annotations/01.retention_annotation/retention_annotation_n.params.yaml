@@ -17,29 +17,117 @@ cases:
       @Retention({policy: "RUNTIME"})
     use: |-
       class SomeClass {}
+    error: |-
+      Semantic error ESE1122645: Annotation '@Retention' can only be applied to annotation declarations.
   - decl: |-
       @Retention("RUNTIME")
     use: |-
       function foo(): void {}
+    error: |-
+      Semantic error ESE1122645: Annotation '@Retention' can only be applied to annotation declarations.
   - decl: |-
       @Retention({policy: "BYTECODE"})
     use: |-
       interface SomeInterface {}
+    error: |-
+      Semantic error ESE1122645: Annotation '@Retention' can only be applied to annotation declarations.
   - decl: |-
       class SomeClass {
           @Retention("BYTECODE")
     use: |-
           let l: int = 1;
           }
+    error: |-
+      Syntax error ESY0028: Annotations are not allowed on this type of declaration.
   - decl: |-
       @Retention({policy: "WRONG_POLICY"})
     use: |-
       @interface SomeAnnotation {}
+    error: |-
+      Semantic error ESE0004: Invalid value for 'policy' field. The policy must be one of the following:'SOURCE', 'BYTECODE', or 'RUNTIME'.
   - decl: |-
       @Retention("WRONG_POLICY")
     use: |-
       @interface SomeAnnotation {}
+    error: |-
+      Semantic error ESE0004: Invalid value for 'policy' field. The policy must be one of the following:'SOURCE', 'BYTECODE', or 'RUNTIME'.
+  - decl: |-
+      @Retention("runtime")
+    use: |-
+      @interface SomeAnnotation {}
+    error: |-
+      Semantic error ESE0004: Invalid value for 'policy' field. The policy must be one of the following:'SOURCE', 'BYTECODE', or 'RUNTIME'.
+  - decl: |-
+      @Retention("bytecode")
+    use: |-
+      @interface SomeAnnotation {}
+    error: |-
+      Semantic error ESE0004: Invalid value for 'policy' field. The policy must be one of the following:'SOURCE', 'BYTECODE', or 'RUNTIME'.
+  - decl: |-
+      @Retention("source")
+    use: |-
+      @interface SomeAnnotation {}
+    error: |-
+      Semantic error ESE0004: Invalid value for 'policy' field. The policy must be one of the following:'SOURCE', 'BYTECODE', or 'RUNTIME'.
   - decl: |-
       @Retention()
     use: |-
       @interface SomeAnnotation {}
+    error: |-
+      Semantic error ESE0044: The required field 'policy' must be specified. Fields without default values cannot be omitted.
+  - decl: |-
+      @Retention("BYTECODE")
+      @interface I {
+        f: string = "str"
+      }
+    use: |-
+      let a = new I()
+    error: |-
+      TBD: abstract class cannot be initialized
+  - decl: |-
+      @Retention("BYTECODE")
+      @interface I {
+        f: string = "str"
+      }
+    use: |-
+      type T = Type.from<I>
+      class C implements T {}
+    error: |-
+      TBD: abstract class requires extends key
+  - decl: |-
+      @Retention("BYTECODE")
+      @interface I {
+        f: string = "str"
+      }
+    use: |-
+      type T = Type.from<I>
+      class C extends T {}
+    error: |-
+      Semantic error ESE0176: The super type of 'C' class is not extensible
+  - decl: |-
+      @Retention("RUNTIME")
+      @interface I {
+        f: string = "str"
+      }
+      @Retention("BYTECODE")
+      @interface I {
+        f: string = "str"
+      }
+    error: |-
+      Semantic error ESE0351: Variable 'I' has already been declared.
+  - decl: |-
+      @Retention("RUNTIME")
+      @Retention("RUNTIME")
+      @interface I {
+        f: string = "str"
+      }
+    error: |-
+      TBD: Duplicated '@Retention' annotation
+  - decl: |-
+      @Retention("RUNTIME")
+      @Retention("BYTECODE")
+      @interface I {
+        f: string = "str"
+      }
+    error: |-
+      TBD: Semantic error ESE1122645: Annotation '@Retention' can only be applied to @interface annotation declaration.

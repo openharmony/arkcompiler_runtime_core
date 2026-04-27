@@ -13,30 +13,39 @@
 * limitations under the License.
 */
 
-{% for case in cases %}
+{% for p in policies %}
 
 /*---
 desc: >-
     For an annotation with retention policy (see Retention Annotation) BYTECODE or RUNTIME 
-    an abstract class with the name of the annotation is implicitly declared. 
-    All fields of this class are readonly. If a field is of an array type, the array type is also readonly
+    an abstract class with the name of the annotation is implicitly declared.
+    The only way to get instance of an implicitly declared abstract class is to call the reflection library.
 ---*/
 
-@Retention({{ case.decl }})
+@Retention({{ p.decl }})
 @interface ClassAnnotation {
-    name: string
-    attrs: number[]
-    isActual: boolean
+    name: string = "Bob"
 } 
 
-@ClassAnnotation({name: "testName", attrs: [1, 2.0], isActual = true})
-class MyClass {}
+@ClassAnnotation({name: "Odenkirk"})
+class C {}
+
+type t = Type.from<ClassAnnotation>
+
+@ClassAnnotation({name: "Test"})
+type d = Type.from<ClassAnnotation>
+
+function foo(i: ClassAnnotation) {
+  return i.name
+}
 
 function main() {
-    let my: ClassAnnotation = new MyClass()
-    arktest.assertEQ(my.name, "testName")
-    arktest.assertEQ(my.attrs[1], 2.0)
-    arktest.assertTrue(my.isActual)
+    let i: ClassAnnotation = new C()
+    arktest.assertEQ(foo(i), "Odenkirk")
+    let j: t = {}
+    arktest.assertEQ(foo(j), "Bob")
+    let k: d = {}
+    arktest.assertEQ(foo(k), "Test")
 }
 
 {% endfor %}

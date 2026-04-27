@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+* Copyright (c) 2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -13,15 +13,21 @@
 * limitations under the License.
 */
 
-{% for case in cases %}
-
 /*---
-desc: Retention is a standard annotation that is used to annotate declaration of other annotations
-tags: [compile-only, negative]
-expected_out: "{{case.error}}"
+desc: Default retention annotation syntax - 'BYTECODE' is used by default
 ---*/
 
-{{ case.decl }}
-{{ case.use }}
+@interface ClassAnnotation {
+  f: string = "check"
+}
 
-{% endfor %}
+@ClassAnnotation( {f: "Test"} )
+class C {
+  g: int = 7
+}
+
+function main() {
+  let i: C = new C()
+  arktest.assertEQ(i.f, "Test")
+  arktest.assertEQ(i.g, 7)
+}
