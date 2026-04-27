@@ -26,6 +26,7 @@
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/venv-inl.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
@@ -186,15 +187,32 @@ static ani_status ResolveVerifiedStaticMethodByName(VEnv *venv, VClass *vclass, 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status GetVersion(VEnv *venv, uint32_t *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForU32Storage(result, "result")
+    );
+    // clang-format on
+
     return GetInteractionAPI(venv)->GetVersion(venv->GetEnv(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status GetVM(VEnv *venv, ani_vm **result)
+NO_UB_SANITIZE static ani_status GetVM(VEnv *venv, VVm **result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->GetVM(venv->GetEnv(), result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForVmStorage(result, "result")
+    );
+    // clang-format on
+
+    ani_vm *vm {};
+    ani_status status = GetInteractionAPI(venv)->GetVM(venv->GetEnv(), &vm);
+    if (status == ANI_OK) {
+        *result = VVm::GetInstance();
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -272,32 +290,69 @@ NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, VMetho
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetType(VEnv *venv, ani_object object, ani_type *result)
+NO_UB_SANITIZE static ani_status Object_GetType(VEnv *venv, VObject *vobject, VType **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), object, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForTypeStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_type typeResult {};
+    ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), vobject->GetRef(), &typeResult);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, typeResult, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_InstanceOf(VEnv *venv, ani_object object, ani_type type, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Object_InstanceOf(VEnv *venv, VObject *vobject, VType *vtype, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_InstanceOf(venv->GetEnv(), object, type, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForType(vtype, "type"),
+        ANIArg::MakeForBooleanStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Object_InstanceOf(venv->GetEnv(), vobject->GetRef(), vtype->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Type_GetSuperClass(VEnv *venv, ani_type type, ani_class *result)
+NO_UB_SANITIZE static ani_status Type_GetSuperClass(VEnv *venv, VType *vtype, VClass **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Type_GetSuperClass(venv->GetEnv(), type, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForType(vtype, "type"),
+        ANIArg::MakeForClassStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_class superClass {};
+    ani_status status = GetInteractionAPI(venv)->Type_GetSuperClass(venv->GetEnv(), vtype->GetRef(), &superClass);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, superClass, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Type_IsAssignableFrom(VEnv *venv, ani_type fromType, ani_type toType,
+NO_UB_SANITIZE static ani_status Type_IsAssignableFrom(VEnv *venv, VType *vfromType, VType *vtoType,
                                                        ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Type_IsAssignableFrom(venv->GetEnv(), fromType, toType, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForType(vfromType, "from_type"),
+        ANIArg::MakeForType(vtoType, "to_type"),
+        ANIArg::MakeForBooleanStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Type_IsAssignableFrom(venv->GetEnv(), vfromType->GetRef(), vtoType->GetRef(),
+                                                          result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -549,7 +604,12 @@ NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(VEnv *venv, VRef *vref,
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status ThrowError(VEnv *venv, VError *verr)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForError(verr, "error")
+    );
+    // clang-format on
     return GetInteractionAPI(venv)->ThrowError(venv->GetEnv(), verr->GetRef());
 }
 

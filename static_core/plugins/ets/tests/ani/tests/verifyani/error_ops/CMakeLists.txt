@@ -15,6 +15,10 @@ ani_verify_add_gtest(ani_verify_test_describe_error
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_describe_error_test.cpp
 )
 
+ani_verify_add_gtest(ani_verify_test_throw_error
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_throw_error_test.cpp
+)
+
 ani_verify_add_gtest(ani_verify_test_exist_unhandled_error
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_exist_unhandled_error_test.cpp
 )

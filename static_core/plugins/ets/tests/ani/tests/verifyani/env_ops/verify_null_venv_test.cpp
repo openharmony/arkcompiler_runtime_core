@@ -29,6 +29,7 @@ TEST_F(NullVenvTest, call_from_unattached_thread)
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "current native thread is not attached"},
+        {"result", "uint32_t *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetVersion", testLines);
 }

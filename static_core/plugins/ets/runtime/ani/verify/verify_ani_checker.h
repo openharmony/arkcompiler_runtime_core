@@ -34,6 +34,7 @@
     X(VERIFY_REF,                           VerifyRef)                            \
     X(VERIFY_MODULE,                        VerifyModule)                         \
     X(VERIFY_NAMESPACE,                     VerifyNamespace)                      \
+    X(VERIFY_TYPE,                          VerifyType)                           \
     X(VERIFY_CLASS,                         VerifyClass)                          \
     X(VERIFY_ENUM,                          VerifyEnum)                           \
     X(VERIFY_ENUM_ITEM,                     VerifyEnumItem)                       \
@@ -84,11 +85,14 @@
     X(VERIFY_ENUM_STORAGE,                  VerifyEnumStorage)                    \
     X(VERIFY_ENUM_ITEM_STORAGE,             VerifyEnumItemStorage)                \
     X(VERIFY_REF_STORAGE,                   VerifyRefStorage)                     \
+    X(VERIFY_TYPE_STORAGE,                  VerifyTypeStorage)                    \
     X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
+    X(VERIFY_CLASS_STORAGE,                 VerifyClassStorage)                   \
     X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
     X(VERIFY_SIZE_STORAGE,                  VerifySizeStorage)                    \
     X(VERIFY_VOID_PTR_STORAGE,              VerifyVoidPtrStorage)                 \
     X(VERIFY_ARRAYBUFFER_STORAGE,           VerifyArrayBufferStorage)             \
+    X(VERIFY_U32_STORAGE,                   VerifyU32Storage)                     \
     X(VERIFY_BOOLEAN,                       VerifyBoolean)                        \
     X(VERIFY_ARRAYBUFFER_LENGTH,            VerifyArrayBufferLength)              \
     X(VERIFY_NATIVE_FUNCTIONS,              VerifyNativeFunctions)                \
@@ -142,6 +146,7 @@
     X(ANI_REF,                          Ref,                       VRef *)                   \
     X(ANI_MODULE,                       Module,                    VModule *)                \
     X(ANI_NAMESPACE,                    Namespace,                 VNamespace *)             \
+    X(ANI_TYPE,                         Type,                      VType *)                  \
     X(ANI_CLASS,                        Class,                     VClass *)                 \
     X(ANI_ENUM,                         Enum,                      VEnum *)                  \
     X(ANI_ENUM_ITEM,                    EnumItem,                  VEnumItem *)              \
@@ -160,7 +165,7 @@
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
     X(ANI_NATIVE_FUNCTIONS,             NativeFunctions,           const ani_native_function *) \
     X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
-    X(ANI_VM_STORAGE,                   VmStorage,                 ani_vm **)                \
+    X(ANI_VM_STORAGE,                   VmStorage,                 VVm **)                   \
     X(ANI_METHOD_STORAGE,               MethodStorage,             VMethod **)               \
     X(ANI_STATIC_METHOD_STORAGE,        StaticMethodStorage,       VStaticMethod **)         \
     X(ANI_FIELD_STORAGE,                FieldStorage,              VField **)                \
@@ -174,6 +179,8 @@
     X(ANI_FLOAT_STORAGE,                FloatStorage,              ani_float *)              \
     X(ANI_DOUBLE_STORAGE,               DoubleStorage,             ani_double *)             \
     X(ANI_REF_STORAGE,                  RefStorage,                VRef **)                  \
+    X(ANI_TYPE_STORAGE,                 TypeStorage,               VType **)                 \
+    X(ANI_CLASS_STORAGE,                ClassStorage,              VClass **)                \
     X(ANI_OBJECT_STORAGE,               ObjectStorage,             VObject **)               \
     X(ANI_ENUM_STORAGE,                 EnumStorage,               VEnum **)                 \
     X(ANI_ENUM_ITEM_STORAGE,            EnumItemStorage,           VEnumItem **)             \
@@ -181,6 +188,7 @@
     X(ANI_SIZE_STORAGE,                 SizeStorage,               ani_size *)               \
     X(VOID_PTR_STORAGE,                 VoidPtrStorage,            void **)                  \
     X(ANI_ARRAYBUFFER_STORAGE,          ArrayBufferStorage,        VArrayBuffer **)          \
+    X(UINT32_STORAGE,                   U32Storage,                uint32_t *)               \
     X(ANI_UTF8_BUFFER,                  UTF8Buffer,                char *)                   \
     X(ANI_UTF16_BUFFER,                 UTF16Buffer,               uint16_t *)               \
     X(ANI_UTF8_STRING,                  UTF8String,                const char *)             \
@@ -266,6 +274,7 @@ class VRef;
 class VModule;
 class VNamespace;
 class VObject;
+class VType;
 class VTupleValue;
 class VClass;
 class VEnum;
@@ -377,6 +386,11 @@ public:
     static ANIArg MakeForNamespace(VNamespace *vnamespace, std::string_view name)
     {
         return ANIArg(ArgValueByNamespace(vnamespace), name, Action::VERIFY_NAMESPACE);
+    }
+
+    static ANIArg MakeForType(VType *vtype, std::string_view name)
+    {
+        return ANIArg(ArgValueByType(vtype), name, Action::VERIFY_TYPE);
     }
 
     static ANIArg MakeForClass(VClass *vclass, std::string_view name)
@@ -716,6 +730,16 @@ public:
         return ANIArg(ArgValueByArrayBufferStorage(arrStorage), name, Action::VERIFY_ARRAYBUFFER_STORAGE);
     }
 
+    static ANIArg MakeForU32Storage(uint32_t *u32Storage, std::string_view name)
+    {
+        return ANIArg(ArgValueByU32Storage(u32Storage), name, Action::VERIFY_U32_STORAGE);
+    }
+
+    static ANIArg MakeForVmStorage(VVm **vmStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByVmStorage(vmStorage), name, Action::VERIFY_VM_STORAGE);
+    }
+
     static ANIArg MakeForBoolean(ani_boolean booleanValue, std::string_view name)
     {
         return ANIArg(ArgValueByBoolean(booleanValue), name, Action::VERIFY_BOOLEAN);
@@ -801,6 +825,16 @@ public:
     static ANIArg MakeForResolverStorage(VResolver **valueStorage, std::string_view name)
     {
         return ANIArg(ArgValueByResolverStorage(valueStorage), name, Action::VERIFY_RESOLVER_STORAGE);
+    }
+
+    static ANIArg MakeForTypeStorage(VType **valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByTypeStorage(valueStorage), name, Action::VERIFY_TYPE_STORAGE);
+    }
+
+    static ANIArg MakeForClassStorage(VClass **valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByClassStorage(valueStorage), name, Action::VERIFY_CLASS_STORAGE);
     }
 
     static ANIArg MakeForPromiseStorage(VObject **valueStorage, std::string_view name)
