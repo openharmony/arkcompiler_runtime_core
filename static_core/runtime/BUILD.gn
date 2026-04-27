@@ -172,6 +172,7 @@ _libarkruntime_calculated_sources = [
   "class.cpp",
   "class_helper.cpp",
   "class_initializer.cpp",
+  "class_index.cpp",
   "class_linker.cpp",
   "class_linker_extension.cpp",
   "class_lock.cpp",

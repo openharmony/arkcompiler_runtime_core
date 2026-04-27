@@ -19,6 +19,7 @@
 #include "compiler_options.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <filesystem>
@@ -841,6 +842,17 @@ bool Runtime::LoadBootPandaFiles(panda_file::File::OpenMode openMode)
 #endif  // PANDA_PRODUCT_BUILD
             return false;
         }
+    }
+
+    if (options_.IsUseBootClassIndex()) {
+        LOG(INFO, RUNTIME) << "Build boot class index...";
+
+        using Clock = std::chrono::steady_clock;
+        auto start = Clock::now();
+        GetClassLinker()->BuildBootClassIndex();
+        auto duration = Clock::now() - start;
+        LOG(INFO, RUNTIME) << "Build boot class index in "
+                           << std::chrono::duration_cast<std::chrono::microseconds>(duration).count() << "us";
     }
 
     return true;

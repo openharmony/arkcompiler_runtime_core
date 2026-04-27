@@ -43,6 +43,7 @@ public:
         // Just for internal allocator
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
+        options.SetUseBootClassIndex(true);
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
         // NOLINTNEXTLINE(readability-magic-numbers)
@@ -191,6 +192,59 @@ TEST_F(ClassLinkerTest, TestEnumerateClasses)
     });
 
     EXPECT_EQ(loadedClasses, classes);
+}
+
+TEST_F(ClassLinkerTest, BootClassIndexClassIdLookup)
+{
+    pandasm::Parser p;
+
+    auto source = R"(
+        .record R {}
+    )";
+
+    auto res = p.Parse(source);
+    ASSERT_TRUE(res);
+    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+    auto *pfPtr = pf.get();
+    auto classId = panda_file::File::EntityId(pfPtr->GetClasses()[0]);
+
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
+
+    classLinker->AddPandaFile(std::move(pf));
+    classLinker->BuildBootClassIndex();
+
+    PandaString descriptor;
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *klass = ext->GetClass(*pfPtr, classId, ext->GetBootContext());
+    ASSERT_NE(klass, nullptr);
+    EXPECT_STREQ(utf::Mutf8AsCString(klass->GetDescriptor()),
+                 utf::Mutf8AsCString(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor)));
+}
+
+TEST_F(ClassLinkerTest, BootClassIndexDropsCacheOnLateBootFile)
+{
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
+
+    pandasm::Parser p;
+    auto res = p.Parse(R"(
+        .record Indexed {}
+    )");
+    ASSERT_TRUE(res);
+    classLinker->AddPandaFile(pandasm::AsmEmitter::Emit(res.Value()));
+    classLinker->BuildBootClassIndex();
+
+    res = p.Parse(R"(
+        .record Late {}
+    )");
+    ASSERT_TRUE(res);
+    classLinker->AddPandaFile(pandasm::AsmEmitter::Emit(res.Value()));
+
+    PandaString descriptor;
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *lateDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8("Late"), &descriptor);
+    ASSERT_NE(ext->GetClass(lateDescriptor), nullptr);
 }
 
 static void TestPrimitiveClassRoot(const ClassLinkerExtension &classLinkerExt, ClassRoot classRoot,
@@ -657,6 +711,8 @@ TEST_F(ClassLinkerTest, ResolveExternalClass)
 
         classLinker->AddPandaFile(std::move(pf));
     }
+
+    classLinker->BuildBootClassIndex();
 
     PandaString descriptor;
 

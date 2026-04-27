@@ -70,8 +70,8 @@ void ClassLinker::AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, Cla
     if (context == nullptr || context->IsBootContext()) {
         os::memory::LockHolder lock {bootPandaFilesLock_};
         bootPandaFiles_.push_back(file);
-        if (Runtime::GetOptions().IsUseBootClassFilter()) {
-            AddBootClassFilter(file);
+        if (!bootClassIndex_.Empty()) {
+            bootClassIndex_.Clear(allocator_);
         }
     }
 
@@ -159,6 +159,7 @@ void ClassLinker::FreeClass(Class *classPtr)
 
 ClassLinker::~ClassLinker()
 {
+    bootClassIndex_.Clear(allocator_);
     for (auto &copiedName : copiedNames_) {
         allocator_->Free(reinterpret_cast<void *>(const_cast<uint8_t *>(copiedName)));
     }
@@ -169,8 +170,7 @@ ClassLinker::ClassLinker(mem::InternalAllocatorPtr allocator,
     : allocator_(allocator),
       aotManager_(MakePandaUnique<AotManager>()),
       copiedNames_(allocator->Adapter()),
-      isTraceEnabled_(Runtime::GetOptions().IsEnableClassLinkerTrace()),
-      bootClassFilter_(NUM_BOOT_CLASSES, FILTER_RATE)
+      isTraceEnabled_(Runtime::GetOptions().IsEnableClassLinkerTrace())
 {
     for (auto &ext : extensions) {
         extensions_[ark::panda_file::GetLangArrIndex(ext->GetLanguage())] = std::move(ext);
@@ -225,11 +225,58 @@ bool ClassLinker::InitializeRoots(ManagedThread *thread)
     return true;
 }
 
+void ClassLinker::BuildBootClassIndex()
+{
+    os::memory::LockHolder lock {bootPandaFilesLock_};
+    BuildBootClassIndexLocked();
+}
+
+void ClassLinker::BuildBootClassIndexLocked()
+{
+    ClassIndex::Builder builder;
+
+    for (uint32_t fileIdx = 0; fileIdx < bootPandaFiles_.size(); fileIdx++) {
+        const panda_file::File *pf = bootPandaFiles_[fileIdx];
+        LOG(DEBUG, CLASS_LINKER) << "boot panda file " << fileIdx << ": " << pf->GetFilename();
+        auto classes = pf->GetClasses();
+
+        for (uint32_t offset : classes) {
+            panda_file::File::EntityId entityId {offset};
+            if (pf->IsExternal(entityId)) {
+                continue;
+            }
+            panda_file::File::StringData className = pf->GetStringData(entityId);
+            builder.Add(className.data, std::make_pair(fileIdx, offset));
+        }
+    }
+
+    builder.Build(bootClassIndex_, allocator_);
+}
+
 using ClassEntry = std::pair<panda_file::File::EntityId, const panda_file::File *>;
 using PandaFiles = PandaVector<const panda_file::File *>;
 
-static ClassEntry FindClassInPandaFiles(const uint8_t *descriptor, const PandaFiles &pandaFiles)
+static ClassEntry FindClassInBootPandaFiles(const uint8_t *descriptor, const PandaFiles &pandaFiles,
+                                            const ClassIndex &classIndex)
 {
+    if (!classIndex.Empty()) {
+        auto idx = classIndex.Find(descriptor);
+        if (idx == ClassIndex::INVALID_INDEX) {
+            // name not in hash list
+            return {};
+        }
+
+        auto *pf = pandaFiles[idx.first];
+        panda_file::File::EntityId classId {idx.second};
+
+        auto className = pf->GetStringData(classId);
+        if (utf::CompareMUtf8ToMUtf8(descriptor, className.data) == 0) {
+            return {classId, pf};
+        }
+        // hash matched but className mismatch, fallback to normal search
+    }
+
+    // search in all files
     for (auto *pf : pandaFiles) {
         auto classId = pf->GetClassId(descriptor);
         if (classId.IsValid() && !pf->IsExternal(classId)) {
@@ -1001,10 +1048,9 @@ static bool TryInsertClassLoading(panda_file::File::EntityId &classId, const pan
     return true;
 }
 
-static bool IsContextCanBeLoaded(ClassLinkerContext *context, panda_file::ClassDataAccessor &classDataAccessor,
-                                 const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)
+static bool IsContextCanBeLoaded(LanguageContext ctx, ClassLinkerContext *context, const uint8_t *descriptor,
+                                 ClassLinkerErrorHandler *errorHandler)
 {
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
     if (ctx.GetLanguage() != context->GetSourceLang()) {
         LanguageContext currentCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
         PandaStringStream ss;
@@ -1049,7 +1095,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     ASSERT(context != nullptr);
     panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
-    if (!IsContextCanBeLoaded(context, classDataAccessor, descriptor, errorHandler)) {
+    if (!IsContextCanBeLoaded(ctx, context, descriptor, errorHandler)) {
         return nullptr;
     }
 
@@ -1629,16 +1675,12 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
     }
 
     if (context->IsBootContext()) {
-        if (LookupInFilter(descriptor, errorHandler) == FilterResult::IMPOSSIBLY_HAS) {
-            return nullptr;
-        }
-
         panda_file::File::EntityId classId;
         const panda_file::File *pandaFile {nullptr};
         {
             {
                 os::memory::LockHolder lock {bootPandaFilesLock_};
-                std::tie(classId, pandaFile) = FindClassInPandaFiles(descriptor, bootPandaFiles_);
+                std::tie(classId, pandaFile) = FindClassInBootPandaFiles(descriptor, bootPandaFiles_, bootClassIndex_);
             }
 
             if (!classId.IsValid()) {
@@ -1698,15 +1740,11 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
     }
 
     if (context->IsBootContext()) {
-        if (LookupInFilter(descriptor, errorHandler) == FilterResult::IMPOSSIBLY_HAS) {
-            return nullptr;
-        }
-
         const panda_file::File *pfPtr = nullptr;
         panda_file::File::EntityId extId;
         {
             os::memory::LockHolder lock {bootPandaFilesLock_};
-            std::tie(extId, pfPtr) = FindClassInPandaFiles(descriptor, bootPandaFiles_);
+            std::tie(extId, pfPtr) = FindClassInBootPandaFiles(descriptor, bootPandaFiles_, bootClassIndex_);
         }
 
         if (!extId.IsValid()) {
@@ -2051,42 +2089,4 @@ void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const comp
     });
 }
 
-void ClassLinker::AddBootClassFilter(const panda_file::File *bootPandaFile)
-{
-    os::memory::LockHolder lock {bootClassFilterLock_};
-    auto classes = bootPandaFile->GetClasses();
-    LOG(DEBUG, CLASS_LINKER) << "number of class in [" << bootPandaFile->GetFilename() << "] is " << classes.size();
-
-    for (unsigned int classe : classes) {
-        auto classId = panda_file::File::EntityId(classe);
-        const uint8_t *className = bootPandaFile->GetStringData(classId).data;
-        bootClassFilter_.Add(className);
-    }
-}
-
-ClassLinker::FilterResult ClassLinker::LookupInFilter(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)
-{
-    if (!Runtime::GetOptions().IsUseBootClassFilter()) {
-        return FilterResult::DISABLED;
-    }
-
-    bool found = true;
-    {
-        os::memory::LockHolder lock {bootClassFilterLock_};
-        found = bootClassFilter_.PossiblyContains(descriptor);
-    }
-
-    if (!found) {
-        if (errorHandler == nullptr) {
-            return FilterResult::IMPOSSIBLY_HAS;
-        }
-
-        PandaStringStream s;
-        s << "Cannot find class " << descriptor << " in boot class bloom filter";
-        OnError(errorHandler, Error::CLASS_NOT_FOUND, s.str());
-        return FilterResult::IMPOSSIBLY_HAS;
-    }
-
-    return FilterResult::POSSIBLY_HAS;
-}
 }  // namespace ark

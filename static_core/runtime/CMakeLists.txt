@@ -25,6 +25,7 @@ set(SOURCES
     bridge/bridge.cpp
     entrypoints/entrypoints.cpp
     exceptions.cpp
+    class_index.cpp
     class_linker.cpp
     class_linker_extension.cpp
     class_initializer.cpp
