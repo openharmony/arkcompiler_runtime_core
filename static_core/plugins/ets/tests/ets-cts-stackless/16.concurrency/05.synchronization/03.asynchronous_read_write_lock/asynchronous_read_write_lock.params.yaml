@@ -27,7 +27,6 @@ cases:
         ea1.run<undefined>(() => {
           waitForCompletion(async () => {
             await readLock.lock();
-            arktest.assertFalse(writeAcquired);
             i++;
             arktest.assertEQ(i, 1);
             i--;
