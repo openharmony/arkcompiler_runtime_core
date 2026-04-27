@@ -141,9 +141,6 @@
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
-#33717
-07.expressions/32.assignment/03.left_hand_side_expressions/lhs_class_this_via_extension_n.ets
-
 #34392 CTE on implicit char to string conversion
 07.expressions/34.string_interpolation_expressions/char_interpolation.ets
 
