@@ -24,15 +24,14 @@ function foo<T>(p: FixedArray<T>): T {
     return p[0]
 }
 
-function foo1<T>(p: T): FixedArray<T> {
-    // Note new FixedArray<T> would throw CTE per spec 17.2
-    let res: FixedArray<T> = [p]
-    return res
+function foo1<T>(p: FixedArray<T>): FixedArray<T> {
+    return p
 }
 
 function foo1_caller(): FixedArray<{{t.type}}> {
     let p: {{t.type}} = {{t.init}}
-    return foo1<{{t.type}}>(p)
+    let fa: FixedArray<{{t.type}}> = [p]
+    return foo1<{{t.type}}>(fa)
 }
 
 function test_param() {

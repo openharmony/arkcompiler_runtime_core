@@ -19,10 +19,8 @@ desc: Verify instantiation of the FixedArray with the predefined value type.
 
 class A<T> {
     // class method with desired return type
-    foo_a(): FixedArray<T> {
-        // Note new FixedArray<T> would throw CTE per spec 17.2
-        let res: FixedArray<T> = []
-        return res
+    foo_a(p: FixedArray<T>): FixedArray<T> {
+        return p
     }
 }
 
@@ -38,49 +36,57 @@ function foo_double(p: A<double>) { return p instanceof A }
 function test_double() {
     let param = new A<double>
     arktest.assertTrue(foo_double(param), "expect successfully invoking a function (double)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (double)")
+    let fa: FixedArray<double> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (double)")
 }
 
 function test_float() {
     let param = new A<float>
     arktest.assertTrue(foo_float(param), "expect successfully invoking a function (float)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (float)")
+    let fa: FixedArray<float> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (float)")
 }
 
 function test_long() {
     let param = new A<long>
     arktest.assertTrue(foo_long(param), "expect successfully invoking a function (long)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (long)")
+    let fa: FixedArray<long> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (long)")
 }
 
 function test_int() {
     let param = new A<int>
     arktest.assertTrue(foo_int(param), "expect successfully invoking a function (int)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (int)")
+    let fa: FixedArray<int> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (int)")
 }
 
 function test_short() {
     let param = new A<short>
     arktest.assertTrue(foo_short(param), "expect successfully invoking a function (short)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (short)")
+    let fa: FixedArray<short> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (short)")
 }
 
 function test_byte() {
     let param = new A<byte>
     arktest.assertTrue(foo_byte(param), "expect successfully invoking a function (byte)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (byte)")
+    let fa: FixedArray<byte> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (byte)")
 }
 
 function test_boolean() {
     let param = new A<boolean>
     arktest.assertTrue(foo_boolean(param), "expect successfully invoking a function (boolean)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (boolean)")
+    let fa: FixedArray<boolean> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (boolean)")
 }
 
 function test_char() {
     let param = new A<char>
     arktest.assertTrue(foo_char(param), "expect successfully invoking a function (char)")
-    arktest.assertTrue(param.foo_a() instanceof FixedArray, "expect successfully invoking a class method (char)")
+    let fa: FixedArray<char> = []
+    arktest.assertEQ(param.foo_a(fa).length, 0, "expect successfully invoking a class method (char)")
 }
 
 function main() {
