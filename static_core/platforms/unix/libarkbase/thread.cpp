@@ -39,6 +39,7 @@
 
 namespace ark::os::thread {
 [[maybe_unused]] constexpr size_t NO_GUARD_SIZE = 0;
+static constexpr uint32_t THREAD_NAME_MAX_LENGTH = 15;
 
 ThreadId GetCurrentThreadId()
 {
@@ -125,10 +126,26 @@ int GetPriority(int threadId)
 int SetThreadName(NativeHandleType pthreadHandle, const char *name)
 {
     ASSERT(pthreadHandle != 0);
+    if (name == nullptr) {
+        name = "";
+    }
+
+    const char *realName = name;
+    std::array<char, THREAD_NAME_MAX_LENGTH + 1> threadName = {0};
+    // strlen(name) > 15, Intercept the first 15 characters.
+    if (strnlen(name, THREAD_NAME_MAX_LENGTH + 1) > THREAD_NAME_MAX_LENGTH) {
+        auto strRes = strncpy_s(threadName.data(), THREAD_NAME_MAX_LENGTH + 1, name, THREAD_NAME_MAX_LENGTH);
+        if (UNLIKELY(strRes != EOK)) {
+            LOG(ERROR, RUNTIME) << "Intercepting the character string failed, error is " << strRes;
+        }
+
+        realName = threadName.data();
+    }
+
 #if defined(PANDA_TARGET_MACOS)
-    return pthread_setname_np(name);
+    return pthread_setname_np(realName);
 #else
-    return pthread_setname_np(pthreadHandle, name);
+    return pthread_setname_np(pthreadHandle, realName);
 #endif
 }
 

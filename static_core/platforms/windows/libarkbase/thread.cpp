@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,12 @@
 #include <handleapi.h>
 #include <process.h>
 #include <processthreadsapi.h>
+#include <securec.h>
 #include <thread>
 
 namespace ark::os::thread {
+static constexpr uint32_t THREAD_NAME_MAX_LENGTH = 15;
+
 ThreadId GetCurrentThreadId()
 {
     // The function is provided by mingw
@@ -99,8 +102,24 @@ int GetPriority(DWORD threadId)
 int SetThreadName(NativeHandleType pthreadHandle, const char *name)
 {
     ASSERT(pthreadHandle != 0);
+    if (name == nullptr) {
+        name = "";
+    }
+
+    const char *realName = name;
     pthread_t thread = reinterpret_cast<pthread_t>(pthreadHandle);
-    return pthread_setname_np(thread, name);
+    std::array<char, THREAD_NAME_MAX_LENGTH + 1> threadName = {0};
+    // strlen(name) > 15, Intercept the first 15 characters.
+    if (strnlen(name, THREAD_NAME_MAX_LENGTH + 1) > THREAD_NAME_MAX_LENGTH) {
+        auto strRes = strncpy_s(threadName.data(), THREAD_NAME_MAX_LENGTH + 1, name, THREAD_NAME_MAX_LENGTH);
+        if (UNLIKELY(strRes != EOK)) {
+            LOG(ERROR, RUNTIME) << "Intercepting the character string failed, error is " << strRes;
+        }
+
+        realName = threadName.data();
+    }
+
+    return pthread_setname_np(thread, realName);
 }
 
 NativeHandleType GetNativeHandle()
