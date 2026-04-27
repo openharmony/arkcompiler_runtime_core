@@ -81,9 +81,9 @@ public:
     {
         return throwable_;
     }
-    Type AsyncContext() const
+    Type Promise() const
     {
-        return asyncCtx_;
+        return promise_;
     }
 
     Variables::Var NewVar()
@@ -136,7 +136,7 @@ private:
     Type string_;
     Type class_;
     Type throwable_;
-    Type asyncCtx_;
+    Type promise_;
     Variables variables_;
 
     void ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass);

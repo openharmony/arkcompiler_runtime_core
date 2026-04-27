@@ -21,9 +21,18 @@
 //! RUN_PAOC      options: "--compiler-regex='.*awaitInsideLoop.*'"
 //! METHOD        "stackless_await_in_loop.ETSGLOBAL::awaitInsideLoop"
 //! PASS_AFTER    "IrBuilder"
-//! INST          "Try"
-//! INST_NEXT     "Dispatch"
+//! INST          "Intrinsic.CompilerEtsAsyncContextCurrent"
+//! INST          "Intrinsic.CompilerEtsAwaitResolution"
+//! INST          "Intrinsic.CompilerEtsAsyncUnpack"
+//! INST          "Intrinsic.CompilerEtsAsyncResolve"
+//! INST          "Dispatch"
 //! INST_COUNT    "Dispatch", 1
+//! ASM_METHOD    "stackless_await_in_loop.ETSGLOBAL::awaitInsideLoop"
+//! ASM_INST      "Intrinsic.CompilerEtsAsyncContextCurrent"
+//! ASM_INST      "CallEntrypoint: EtsAsyncContextGetCurrent"
+//! ASM_INST      "CallEntrypoint: EtsCompilerAwaitResolution"
+//! ASM_INST      "CallEntrypoint: EtsAsyncUnpack"
+//! ASM_INST      "CallEntrypoint: EtsAsyncResolve"
 
 let keepWaiting: boolean = true;
 

@@ -577,10 +577,25 @@ messages:
     level: error
     message: Unexpected `ets.async.dispatch` instruction outside of async function.
 
-  SuspendInstOutsideAsyncFunction:
+  AwaitInstOutsideAsyncFunction:
     number: 73
     level: error
-    message: Unexpected `ets.async.suspend` instruction outside of async function.
+    message: Unexpected `ets.async.await` instruction outside of async function.
+
+  UnpackInstOutsideAsyncFunction:
+    number: 74
+    level: error
+    message: Unexpected `ets.async.unpack` instruction outside of async function.
+
+  AsyncResolveInstOutsideAsyncFunction:
+    number: 75
+    level: error
+    message: Unexpected `ets.async.resolve` instruction outside of async function.
+
+  AsyncRejectInstOutsideAsyncFunction:
+    number: 76
+    level: error
+    message: Unexpected `ets.async.reject` instruction outside of async function.
 
   CflowInvalidJumpOutsideMethodBody:
     number: 1000

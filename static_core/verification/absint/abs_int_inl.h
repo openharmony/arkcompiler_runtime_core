@@ -3820,23 +3820,23 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsAsyncSuspend()
+    bool HandleEtsAsyncAwait()
     {
         LOG_INST();
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(vs, GetTypeSystem()->AsyncContext())) {
+        if (!CheckRegType(vs, GetTypeSystem()->Promise())) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
         if (!context_.HasAsyncAnnotation()) {
-            SHOW_MSG(SuspendInstOutsideAsyncFunction)
-            LOG_VERIFIER_SUSPEND_INST_OUTSIDE_ASYNC_FUNCTION();
+            SHOW_MSG(AwaitInstOutsideAsyncFunction)
+            LOG_VERIFIER_AWAIT_INST_OUTSIDE_ASYNC_FUNCTION();
             END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(SuspendInstOutsideAsyncFunction, ERROR);
+            SET_STATUS_FOR_MSG(AwaitInstOutsideAsyncFunction, ERROR);
             return false;
         }
 
@@ -3850,19 +3850,91 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(vs, GetTypeSystem()->AsyncContext())) {
-            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
-            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
-            return false;
-        }
 
         if (!context_.HasAsyncAnnotation()) {
             SHOW_MSG(DispatchInstOutsideAsyncFunction)
             LOG_VERIFIER_DISPATCH_INST_OUTSIDE_ASYNC_FUNCTION();
             END_SHOW_MSG();
             SET_STATUS_FOR_MSG(DispatchInstOutsideAsyncFunction, ERROR);
+            return false;
+        }
+
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsAsyncUnpack()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
+        Sync();
+        if (!CheckRegType(vs, GetTypeSystem()->Promise())) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        if (!context_.HasAsyncAnnotation()) {
+            SHOW_MSG(UnpackInstOutsideAsyncFunction)
+            LOG_VERIFIER_UNPACK_INST_OUTSIDE_ASYNC_FUNCTION();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(UnpackInstOutsideAsyncFunction, ERROR);
+            return false;
+        }
+
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsAsyncResolve()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
+        Sync();
+        if (!CheckRegType(vs, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        if (!context_.HasAsyncAnnotation()) {
+            SHOW_MSG(AsyncResolveInstOutsideAsyncFunction)
+            LOG_VERIFIER_ASYNC_RESOLVE_INST_OUTSIDE_ASYNC_FUNCTION();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(AsyncResolveInstOutsideAsyncFunction, ERROR);
+            return false;
+        }
+
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsAsyncReject()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
+        Sync();
+        if (!CheckRegType(vs, GetTypeSystem()->Throwable())) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        if (!context_.HasAsyncAnnotation()) {
+            SHOW_MSG(AsyncRejectInstOutsideAsyncFunction)
+            LOG_VERIFIER_ASYNC_REJECT_INST_OUTSIDE_ASYNC_FUNCTION();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(AsyncRejectInstOutsideAsyncFunction, ERROR);
             return false;
         }
 

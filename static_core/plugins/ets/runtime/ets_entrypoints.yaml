@@ -2843,8 +2843,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStacklessInitAsyncContext
-  entrypoint: EtsStacklessInitAsyncContextEntrypoint
+- name: EtsCompilerAwaitResolution
+  entrypoint: EtsCompilerAwaitResolutionEntrypoint
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2853,3 +2853,34 @@
     - uint32_t              # ref count
     - uint32_t              # prim count
     - uint32_t              # native PC
+
+- name: EtsAsyncContextGetCurrent
+  entrypoint: EtsAsyncContextGetCurrentEntrypoint
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*    # current async context
+
+- name: EtsAsyncUnpack
+  entrypoint: EtsAsyncUnpackEntrypoint
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*    # awaited value
+    - ark::ObjectHeader*    # promise to unpack
+
+- name: EtsAsyncResolve
+  entrypoint: EtsAsyncResolveEntrypoint
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*    # resolved promise
+    - ark::ObjectHeader*    # value
+
+- name: EtsAsyncReject
+  entrypoint: EtsAsyncRejectEntrypoint
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*    # rejected promise
+    - ark::ObjectHeader*    # error

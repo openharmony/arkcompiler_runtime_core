@@ -192,7 +192,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     }
 %   elsif i.properties.include?('suspend')
     if (handler.GetFrame()->IsStackless()) {
-        handler.template HandleSuspendStackless<BytecodeInstruction::Format::PREF_V8>();
+        handler.template HandleAwaitStackless<BytecodeInstruction::Format::PREF_V8>();
         ASSERT(frame->GetMethod()->GetPandaFile()->GetHeader()->quickenedFlag
             || handler.IsPrimaryOpcodeValid());
         DISPATCH(state.GetDispatchTable(), handler.GetExceptionOpcode());

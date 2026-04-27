@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_AWAIT_PROMISE_IMPL_H
-#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_AWAIT_PROMISE_IMPL_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_PROMISE_IMPL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_PROMISE_IMPL_H
 
 #include <cstdint>
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -25,6 +25,10 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount = -1, int32
 
 EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise);
 
+void EtsPromiseResolveImpl(EtsPromise *promise, EtsObject *value);
+
+void EtsPromiseRejectImpl(EtsPromise *promise, EtsObject *error);
+
 }  // namespace ark::ets::intrinsics::helpers
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_AWAIT_PROMISE_IMPL_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSIC_PROMISE_IMPL_H

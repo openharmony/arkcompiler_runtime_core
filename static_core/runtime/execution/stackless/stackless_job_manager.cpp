@@ -488,9 +488,10 @@ void StacklessJobManager::WaitForMutatorJobsCompletion()
                 return;
             }
             programCompletionEvent_.SetNotHappened();
-            programCompletionEvent_.Lock();
         }
-        GetCurrentWorker()->WaitForEvent(&programCompletionEvent_);
+        static constexpr uint32_t SHORT_SLEEP_MS = 1;
+        // NOTE(panferovi): ambitious fix (issue: #34486)
+        os::thread::NativeSleep(SHORT_SLEEP_MS);
         LOG(DEBUG, COROUTINES) << "StacklessJobManager::WaitForMutatorJobsCompletion(): possibly "
                                   "spurious wakeup from wait...";
     }

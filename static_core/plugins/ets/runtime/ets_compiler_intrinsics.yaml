@@ -18,6 +18,12 @@ coretypes:
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
 
+- managed_class: arkruntime.AsyncContext
+  mirror_class: ark::ets::EtsAsyncContext
+
+- managed_class: std.core.Promise
+  mirror_class: ark::ets::EtsPromise
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -120,6 +126,56 @@ intrinsics:
     set_flags: [ no_nullptr ]
     clear_flags: [ heap_inv, acc_write ]
     peephole_func: PeepholeNullcheck
+
+  - name: CompilerEtsAsyncContextCurrent
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: arkruntime.AsyncContext
+      args: []
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateAsyncContextCurrent
+
+  - name: CompilerEtsAwaitResolution
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: arkruntime.AsyncContext
+      args: [ std.core.Promise ]
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateAwaitResolution
+
+  - name: CompilerEtsAsyncUnpack
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Promise ]
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateAsyncUnpack
+
+  - name: CompilerEtsAsyncResolve
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.Promise
+      args: [ ref ]
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateAsyncResolve
+
+  - name: CompilerEtsAsyncReject
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.Promise
+      args: [ ref ]
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateAsyncReject
 
   - name: CompilerEtsStringFromCharCodeSingleNoCache
     space: ets

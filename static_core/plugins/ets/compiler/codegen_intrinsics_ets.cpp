@@ -965,13 +965,37 @@ void Codegen::CreateArrayCopyWithin(IntrinsicInst *inst, [[maybe_unused]] Reg ds
                  src[FOURTH_OPERAND]);
 }
 
-void Codegen::CreateAsyncContextInit(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
+void Codegen::CreateAsyncContextCurrent(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 1U && inst->GetSaveState() != nullptr);
+    CallRuntime(inst, EntrypointId::ETS_ASYNC_CONTEXT_GET_CURRENT, dst, {});
+}
+
+void Codegen::CreateAwaitResolution(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
 {
     auto promise = src[FIRST_OPERAND];
     auto pc = GetEncoder()->GetCursorOffset() - GetStartCodeOffset();
-    CallRuntime(inst, EntrypointId::ETS_STACKLESS_INIT_ASYNC_CONTEXT, dst, {}, promise,
+    CallRuntime(inst, EntrypointId::ETS_COMPILER_AWAIT_RESOLUTION, dst, {}, promise,
                 TypedImm(GetGraph()->GetMaxRefCountAtSuspend()), TypedImm(GetGraph()->GetMaxPrimCountAtSuspend()),
                 TypedImm(pc));
+}
+
+void Codegen::CreateAsyncUnpack(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 2U && inst->GetSaveState() != nullptr);
+    CallRuntime(inst, EntrypointId::ETS_ASYNC_UNPACK, dst, {}, src[FIRST_OPERAND]);
+}
+
+void Codegen::CreateAsyncResolve(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 2U && inst->GetSaveState() != nullptr);
+    CallRuntime(inst, EntrypointId::ETS_ASYNC_RESOLVE, dst, {}, src[FIRST_OPERAND]);
+}
+
+void Codegen::CreateAsyncReject(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 2U && inst->GetSaveState() != nullptr);
+    CallRuntime(inst, EntrypointId::ETS_ASYNC_REJECT, dst, {}, src[FIRST_OPERAND]);
 }
 
 }  // namespace ark::compiler

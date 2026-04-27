@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_await_promise_impl.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_promise_impl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_promise.h"

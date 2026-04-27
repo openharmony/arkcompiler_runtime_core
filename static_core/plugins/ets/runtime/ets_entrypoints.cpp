@@ -31,7 +31,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_string_case_conversion.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
-#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_await_promise_impl.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_promise_impl.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -249,14 +249,14 @@ extern "C" bool EtsIstrueEntrypoint(ManagedThread *thread, ObjectHeader *obj)
     return EtsIstrue(EtsExecutionContext::FromMT(thread), eobj);
 }
 
-extern "C" void EtsEnsureCapacityForAsyncContextEntrypoint(EtsExecutionContextWrapper *wrapper,
-                                                           ObjectHeader *asyncContextObj, uint32_t frameSize)
+extern "C" EtsObject *EtsEnsureCapacityForAsyncContextEntrypoint(EtsExecutionContextWrapper *wrapper,
+                                                                 ObjectHeader *asyncContextObj, uint32_t frameSize)
 {
     auto *asyncCtx = EtsAsyncContext::FromCoreType(asyncContextObj);
     ASSERT(asyncCtx != nullptr);
     auto *executionCtx = wrapper->GetExecutionCtx();
     ASSERT(executionCtx != nullptr);
-    EtsAsyncContext::EnsureCapacityForInterpreterFrame(asyncCtx, executionCtx, frameSize);
+    return EtsAsyncContext::EnsureCapacityForInterpreterFrame(asyncCtx, executionCtx, frameSize);
 }
 
 extern "C" uint32_t EtsRestoreCompiledAsyncContextEntrypoint(EtsExecutionContextWrapper *wrapper, Frame *frame,
@@ -498,10 +498,84 @@ extern "C" EtsBoolean EtsDefaultLocaleAllowsFastLatinCaseConversion()
     return ToEtsBoolean(ark::ets::intrinsics::caseconversion::DefaultLocaleAllowsFastLatinCaseConversion());
 }
 
-extern "C" EtsObject *EtsStacklessInitAsyncContextEntrypoint(EtsPromise *promise, uint32_t refCount, uint32_t primCount,
-                                                             uint32_t pc)
+extern "C" EtsObject *EtsCompilerAwaitResolutionEntrypoint(EtsPromise *promise, uint32_t refCount, uint32_t primCount,
+                                                           uint32_t pc)
 {
     return ark::ets::intrinsics::helpers::EtsAwaitPromiseImpl(promise, refCount, primCount, pc);
+}
+
+extern "C" EtsObject *EtsAsyncContextGetCurrentEntrypoint()
+{
+    return ark::ets::EtsAsyncContext::GetCurrent(EtsExecutionContext::GetCurrent());
+}
+
+extern "C" EtsObject *EtsAwaitResolutionEntrypoint(EtsPromise *promise)
+{
+    return ark::ets::intrinsics::helpers::EtsAwaitPromiseImpl(promise, -1, -1, -1);
+}
+
+extern "C" EtsObject *EtsAsyncUnpackEntrypoint(EtsPromise *promise)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+
+    if (UNLIKELY(promise == nullptr)) {
+        auto ctx = executionCtx->GetMT()->GetLanguageContext();
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
+        return nullptr;
+    }
+
+    if (UNLIKELY(promise->IsPending())) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreInvalidAsyncOperationError,
+                          "Cannot unpack pending promise");
+        return nullptr;
+    }
+
+    if (promise->IsResolved()) {
+        return promise->GetValue(executionCtx);
+    }
+
+    ASSERT(promise->IsRejected());
+    executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(promise, executionCtx);
+    executionCtx->GetMT()->SetException(promise->GetValue(executionCtx)->GetCoreType());
+    return nullptr;
+}
+
+extern "C" EtsObject *EtsAsyncResolveEntrypoint(EtsObject *value)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *asyncCtx = EtsAsyncContext::GetCurrent(executionCtx);
+
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> hvalue(executionCtx, value);
+
+    auto *promise = asyncCtx != nullptr ? asyncCtx->GetReturnValue(executionCtx) : EtsPromise::Create(executionCtx);
+    if (UNLIKELY(promise == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    intrinsics::helpers::EtsPromiseResolveImpl(hpromise.GetPtr(), hvalue.GetPtr());
+    return hpromise.GetPtr();
+}
+
+extern "C" EtsObject *EtsAsyncRejectEntrypoint(EtsObject *error)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *asyncCtx = EtsAsyncContext::GetCurrent(executionCtx);
+
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> herror(executionCtx, error);
+
+    auto *promise = asyncCtx != nullptr ? asyncCtx->GetReturnValue(executionCtx) : EtsPromise::Create(executionCtx);
+    if (UNLIKELY(promise == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    intrinsics::helpers::EtsPromiseRejectImpl(hpromise.GetPtr(), herror.GetPtr());
+    return hpromise.GetPtr();
 }
 
 }  // namespace ark::ets

@@ -1645,7 +1645,8 @@ void EscapeAnalysis::VisitSaveStateDeoptimize(Inst *inst)
 
 void EscapeAnalysis::VisitSaveStateSuspend(Inst *inst)
 {
-    FillVirtualInputs(inst);
+    // we must preserve vregs at suspension point
+    Materialize(inst);
 }
 
 void EscapeAnalysis::VisitSafePoint(Inst *inst)

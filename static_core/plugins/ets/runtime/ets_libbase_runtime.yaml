@@ -5835,69 +5835,6 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryFinishCleanup
 
-###########################
-# arkruntime.AsyncContext #
-###########################
-  - name: StdAsyncContextInit
-    space: ets
-    class_name: arkruntime.AsyncContext
-    method_name: init
-    static: true
-    signature:
-      ret: arkruntime.AsyncContext
-      args: []
-    impl: ark::ets::intrinsics::EtsAsyncContextInit
-
-  - name: StdAsyncContextCurrent
-    space: ets
-    class_name: arkruntime.AsyncContext
-    method_name: current
-    static: true
-    signature:
-      ret: arkruntime.AsyncContext
-      args: []
-    impl: ark::ets::intrinsics::EtsAsyncContextCurrent
-
-  - name: StdAsyncContextResolve
-    space: ets
-    class_name: arkruntime.AsyncContext
-    method_name: resolve
-    static: false
-    signature:
-      ret: std.core.Promise
-      args: [ Y ]
-    impl: ark::ets::intrinsics::EtsAsyncContextResolve
-
-  - name: StdAsyncContextReject
-    space: ets
-    class_name: arkruntime.AsyncContext
-    method_name: reject
-    static: false
-    signature:
-      ret: std.core.Promise
-      args: [std.core.Error]
-    impl: ark::ets::intrinsics::EtsAsyncContextReject
-
-  - name: StdAsyncContextResult
-    space: ets
-    class_name: arkruntime.AsyncContext
-    method_name: result
-    static: false
-    signature:
-      ret: Y
-      args: []
-    impl: ark::ets::intrinsics::EtsAsyncContextResult
-
-  - name: StdAsyncContextAwaitResult
-    space: ets
-    class_name: arkruntime.AsyncContext
-    method_name: awaitResult
-    static: false
-    signature:
-      ret: Y
-      args: []
-    impl: ark::ets::intrinsics::EtsAsyncContextAwaitResult
-
 ########################
 # std.core.Job #
 ########################
@@ -5974,7 +5911,7 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsAwaitPromise
     codegen_arch: [amd64, arm64]
-    codegen_func: CreateAsyncContextInit
+    codegen_func: CreateAwaitResolution
 
   - name: StdPromiseAwaitSync
     space: ets

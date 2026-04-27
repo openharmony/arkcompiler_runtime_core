@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "intrinsic_await_promise_impl.h"
-#include "ets_handle.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_promise_impl.h"
+#include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_async_context.h"
+#include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/execution/job_execution_context.h"
-#include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "runtime/execution/stackless/stackless_job_manager.h"
 #include "runtime/execution/stackless/suspendable_job.h"
 
@@ -188,6 +189,57 @@ EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise)
     LOG(DEBUG, COROUTINES) << "Promise::awaitSync: blocking await finished.";
 
     return HandleSettledPromise(etsCtx, promiseHandle);
+}
+
+static void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)
+{
+    PandaVector<Value> args {Value(outsidePromise->GetCoreType()), Value(internalPromise->GetCoreType())};
+
+    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(ManagedThread::GetCurrent(),
+                                                                                    args.data());
+}
+
+void EtsPromiseResolveImpl(EtsPromise *promise, EtsObject *value)
+{
+    ASSERT(promise != nullptr);
+
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    EtsHandle<EtsObject> hvalue(executionCtx, value);
+    hpromise->Lock();
+
+    if (!hpromise->IsPending()) {
+        hpromise->Unlock();
+        return;
+    }
+
+    if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
+        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+        EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
+        hpromise->Unlock();
+        SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+        return;
+    }
+    hpromise->Resolve(executionCtx, hvalue.GetPtr());
+    hpromise->Unlock();
+}
+
+void EtsPromiseRejectImpl(EtsPromise *promise, EtsObject *error)
+{
+    ASSERT(promise != nullptr);
+
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
+    EtsHandle<EtsObject> herror(executionCtx, error);
+    EtsMutex::LockHolder lh(hpromise);
+
+    if (!hpromise->IsPending()) {
+        return;
+    }
+
+    hpromise->Reject(executionCtx, herror.GetPtr());
 }
 
 }  // namespace ark::ets::intrinsics::helpers

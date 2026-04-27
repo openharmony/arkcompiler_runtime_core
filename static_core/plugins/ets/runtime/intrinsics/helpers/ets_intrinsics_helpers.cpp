@@ -37,14 +37,6 @@
 
 namespace ark::ets::intrinsics::helpers {
 
-void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)
-{
-    std::array args {Value(outsidePromise->GetCoreType()), Value(internalPromise->GetCoreType())};
-
-    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(ManagedThread::GetCurrent(),
-                                                                                    args.data());
-}
-
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define RETURN_IF_CONVERSION_END(p, end, result) \
     if ((p) == (end)) {                          \

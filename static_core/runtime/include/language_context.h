@@ -76,11 +76,6 @@ public:
         return nullptr;
     }
 
-    virtual const uint8_t *GetAsyncContextClassDescriptor() const
-    {
-        return nullptr;
-    }
-
     virtual const uint8_t *GetPromiseClassDescriptor() const
     {
         return nullptr;
@@ -395,11 +390,6 @@ public:
     const uint8_t *GetAsyncAnnotationDescriptor() const
     {
         return base_->GetAsyncAnnotationDescriptor();
-    }
-
-    const uint8_t *GetAsyncContextClassDescriptor() const
-    {
-        return base_->GetAsyncContextClassDescriptor();
     }
 
     const uint8_t *GetPromiseClassDescriptor() const
