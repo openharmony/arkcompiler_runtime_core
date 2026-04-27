@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -23,12 +23,12 @@ desc: >-
 ---*/
 
 class A {}
-class B extends A{}
+class B extends A {}
 function foo<T, S extends T>(): void {};
 
 function main(): void {
-    foo<A, A>()
-    foo<A, B>()
-    foo<B, B>()
+    arktest.assertTrue(foo<A, A>() instanceof void, "instanceof foo<A, A>()")
+    arktest.assertTrue(foo<A, B>() instanceof void, "instanceof foo<A, B>()")
+    arktest.assertTrue(foo<B, B>() instanceof void, "instanceof foo<B, B>()")
 }
 

@@ -16,11 +16,12 @@
 
 /*---
 desc: If a key is a union of literal types or an enum type, then all variants must be listed in the object literal.
-tags: []
 ---*/
 
 function main() {
     const k1 = 'aa'
     const k2 = 'bb'
     let map: Record<'aa' | 'bb', number> = { k1: 1, k2: 2 }
+    arktest.assertEQ(map['aa'], 1, "expect 1")
+    arktest.assertEQ(map['bb'], 2, "expect 2")
 }

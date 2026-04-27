@@ -28,7 +28,6 @@ namespace spaceone {
 function main() {
     let x: spaceone.TX = 'Test'
     let y: spaceone.nested.NX = 'Test'
+    arktest.assertEQ(x, 'Test', "expect x is 'Test'")
+    arktest.assertEQ(y, 'Test', "expect y is 'Test'")
 }
-
-
-

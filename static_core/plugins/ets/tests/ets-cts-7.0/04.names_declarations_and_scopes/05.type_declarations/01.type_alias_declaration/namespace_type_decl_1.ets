@@ -25,8 +25,5 @@ namespace spacetwo {
 }
 function main() {
     let x: spacetwo.TX2 = 'Test'
+    arktest.assertEQ(x, 'Test', "expect x is 'Test'")
 }
-
-
-
-

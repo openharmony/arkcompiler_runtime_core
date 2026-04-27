@@ -23,12 +23,12 @@ desc: >-
 ---*/
 
 class A {}
-class B extends A{}
+class B extends A {}
 function foo<T, S extends T>(): void {};
 
 function main(): void {
-    foo<A, A>()
-    foo<A, B>()
-    foo<B, B>()
+    arktest.assertTrue(foo<A, A>() instanceof void, "instanceof foo<A, A>()")
+    arktest.assertTrue(foo<A, B>() instanceof void, "instanceof foo<A, B>()")
+    arktest.assertTrue(foo<B, B>() instanceof void, "instanceof foo<B, B>()")
 }
 

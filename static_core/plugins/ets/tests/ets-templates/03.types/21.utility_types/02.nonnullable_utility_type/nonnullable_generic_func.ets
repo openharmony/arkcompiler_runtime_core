@@ -23,12 +23,15 @@ function skipTypeInference<T>(x: T): NonNullable<T> {
 
 function main() {
 
-    let sn: NonNullable<string|null>  = skipTypeInference<string|null>("str")
+    let sn: NonNullable<string|null> = skipTypeInference<string|null>("str")
     let s: string = sn
+    arktest.assertTrue(s instanceof string, "expect instance of string")
 
-    let bn: NonNullable<boolean|undefined>  = skipTypeInference<boolean|undefined>(true)
+    let bn: NonNullable<boolean|undefined> = skipTypeInference<boolean|undefined>(true)
     let b: boolean = bn
+    arktest.assertTrue(b instanceof boolean, "expect instance of boolean")
 
-    let nnu: NonNullable<number|null|undefined>  = skipTypeInference<number|null|undefined>(42)
+    let nnu: NonNullable<number|null|undefined> = skipTypeInference<number|null|undefined>(42)
     let n: number = nnu
+    arktest.assertTrue(n instanceof number, "expect instance of number")
 }

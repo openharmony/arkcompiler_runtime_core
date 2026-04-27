@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -28,7 +28,10 @@ interface D<T, S extends T> {}
 
 function main(): void {
     let i1: D<A, A> = {}
+    arktest.assertTrue(i1 instanceof D, "instanceof i1")
     let i2: D<A, B> = {}
+    arktest.assertTrue(i2 instanceof D, "instanceof i2")
     let i3: D<B, B> = {}
+    arktest.assertTrue(i3 instanceof D, "instanceof i3")
 }
 

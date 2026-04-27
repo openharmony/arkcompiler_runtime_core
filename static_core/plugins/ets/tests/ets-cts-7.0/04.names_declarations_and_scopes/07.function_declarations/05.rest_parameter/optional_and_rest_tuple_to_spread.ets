@@ -15,10 +15,10 @@
 
 /*---
 desc: Rest function spread with optional and rest tuple
-
 ---*/
 
 function goo(opt?: [number, string], ...tail: [number, string]) {
+    arktest.assertEQ(opt?.[0], 1, "expect 1")
 }
 
 function main() {

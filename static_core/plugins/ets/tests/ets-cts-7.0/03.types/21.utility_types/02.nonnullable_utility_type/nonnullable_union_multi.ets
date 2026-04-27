@@ -19,11 +19,20 @@ desc: NonNullable with union of multiple non-null types yields string|number
 
 type SN = string|number|null|undefined
 
+function is_string(p: Any): boolean {
+    return p instanceof string
+}
+
+function is_number(p: Any): boolean {
+    return p instanceof number
+}
+
 function main() {
     let snnu: NonNullable<SN> = "hello"
     let sn: string|number = snnu
+    arktest.assertTrue(is_string(sn), "expect instance of string")
 
     let snnu2: NonNullable<SN> = 42
     let sn2: string|number = snnu2
-
+    arktest.assertTrue(is_number(sn2), "expect instance of number")
 }

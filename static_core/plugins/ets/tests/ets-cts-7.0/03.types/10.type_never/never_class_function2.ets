@@ -26,5 +26,8 @@ function main() {
     try {
         f();
     } catch (e) {
+        arktest.assertTrue(e instanceof Error, "expect instance of Error")
+        return
     }
+    arktest.assertTrue(false, "expect this code not to execute")
 }

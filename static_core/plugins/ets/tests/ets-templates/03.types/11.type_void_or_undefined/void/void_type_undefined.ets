@@ -22,5 +22,5 @@ function foo(): void {
 }
 
 function main(): void {
-    foo()
+    arktest.assertTrue(foo() instanceof undefined, "expect instance of undefined")
 }

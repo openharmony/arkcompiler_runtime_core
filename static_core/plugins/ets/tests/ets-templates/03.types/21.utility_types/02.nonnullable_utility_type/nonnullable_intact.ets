@@ -27,19 +27,23 @@ function main() {
     let s: string = "world"
     snn = s
     s = snn
+    arktest.assertTrue(s instanceof string, "expect instance of string")
 
     let nnn: NonNullable<number> = 42
     let n: number = 24
     nnn = n
     n = nnn
+    arktest.assertTrue(n instanceof number, "expect instance of number")
 
     let onn: NonNullable<Object> = new Object
     let o: Object = new Object
     onn = o
     o = onn
+    arktest.assertTrue(o instanceof Object, "expect instance of Object")
 
     let cnn: NonNullable<C> = new C
     let c: C = new C
     cnn = c
     c = cnn
+    arktest.assertTrue(c instanceof C, "expect instance of C")
 }

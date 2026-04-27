@@ -35,17 +35,17 @@ function bytesToFloat(bytes: Uint8Array): number {
 function main(): void {
   const bytes1 = new Uint8Array([0x40, 0x49, 0x0F, 0xDB]);
   const result1 = bytesToFloat(bytes1);
-  console.log(`Test Case 1: ${result1}`);
+  arktest.assertEQ(result1, -40331460896358400, "Test Case 1");
 
   const bytes2 = new Uint8Array([0x3F, 0x80, 0x00, 0x00]);
   const result2 = bytesToFloat(bytes2);
-  console.log(`Test Case 2: ${result2}`);
+  arktest.assertEQ(result2, 4.600602988224807e-41, "Test Case 2");
 
   const bytes3 = new Uint8Array([0xBF, 0x80, 0x00, 0x00]);
   const result3 = bytesToFloat(bytes3);
-  console.log(`Test Case 3: ${result3}`);
+  arktest.assertEQ(result3, 4.618539608568165e-41, "Test Case 3");
 
   const bytes4 = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
   const result4 = bytesToFloat(bytes4);
-  console.log(`Test Case 4: ${result4}`);
+  arktest.assertEQ(result4, 0, "Test Case 4");
 }

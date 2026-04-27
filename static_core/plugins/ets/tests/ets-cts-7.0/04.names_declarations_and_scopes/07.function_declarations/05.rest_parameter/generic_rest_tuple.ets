@@ -19,14 +19,17 @@ desc: Rest function spread with generic tuple
 
 
 function genericRestFunction<A, B, C>(...tuple: [A, B, C]) {
+    arktest.assertEQ(tuple[0], 1, "expect 1 in genericRestFunction")
 }
 
 class TH<A,B,C> {
     genericRestMethod(...tuple: [A, B, C]) {
+        arktest.assertEQ(tuple[0], 1, "expect 1 in genericRestMethod")
         genericRestFunction<A, B, C>(...tuple)
     }
 
     static restMethod<A, B, C>(...v: [A, B, C]) {
+      arktest.assertEQ(v[0], 1, "expect 1 in restMethod")
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 /*---
  desc: Declare type inside namespace
-
  ---*/
 
 interface MyInterface {
@@ -37,8 +36,7 @@ namespace spacethree {
 }
 function main() {
     let x: spacetwo.TX2 = 'Test'
+    arktest.assertTrue(x instanceof spacetwo.TX2, "expect instanceof spacetwo.TX2")
     let y: spacethree.MyClass = new spacethree.MyClass
+    arktest.assertTrue(y instanceof spacethree.MyClass, "expect instanceof spacethree.MyClass")
 }
-
-
-

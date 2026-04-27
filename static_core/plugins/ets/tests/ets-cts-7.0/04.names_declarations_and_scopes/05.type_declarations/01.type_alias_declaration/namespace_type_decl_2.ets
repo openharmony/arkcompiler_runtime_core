@@ -15,7 +15,6 @@
 
 /*---
  desc: Declare type inside namespace
-
  ---*/
 
 interface MyInterface {
@@ -37,8 +36,7 @@ namespace spacethree {
 }
 function main() {
     let x: spacetwo.TX2 = 'Test'
+    arktest.assertTrue(x instanceof spacetwo.TX2, "expect instanceof spacetwo.TX2")
     let y: spacethree.MyClass = new spacethree.MyClass
+    arktest.assertTrue(y instanceof spacethree.MyClass, "expect instanceof spacethree.MyClass")
 }
-
-
-

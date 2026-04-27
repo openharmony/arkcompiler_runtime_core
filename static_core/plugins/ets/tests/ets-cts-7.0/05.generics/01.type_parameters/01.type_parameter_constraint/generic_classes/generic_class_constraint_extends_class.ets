@@ -37,10 +37,9 @@ class F<T extends Object> {
 }
 
 function main(): void {
-    new D<A>
-    new D<B>
-    new E<A>
-    new E<B>
-    new E<C>
+    arktest.assertTrue(new D<A> instanceof D, "expected instance of D<A>")
+    arktest.assertTrue(new D<B> instanceof D, "expected instance of D<B>")
+    arktest.assertTrue(new E<A> instanceof E, "expected instance of E<A>")
+    arktest.assertTrue(new E<B> instanceof E, "expected instance of E<B>")
+    arktest.assertTrue(new E<C> instanceof E, "expected instance of E<C>")
 }
-

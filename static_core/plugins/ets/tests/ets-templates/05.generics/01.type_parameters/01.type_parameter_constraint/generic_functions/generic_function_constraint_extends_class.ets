@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -29,10 +29,9 @@ function foo<T extends A>() {}
 function bar<T extends A | C>() {}
 
 function main(): void {
-    foo<A>()
-    foo<B>()
-    bar<A>()
-    bar<B>()
-    bar<C>()
+    arktest.assertTrue(foo<A>() instanceof Any, "instanceof foo<A>()")
+    arktest.assertTrue(foo<B>() instanceof Any, "instanceof foo<B>()")
+    arktest.assertTrue(bar<A>() instanceof Any, "instanceof bar<A>()")
+    arktest.assertTrue(bar<B>() instanceof Any, "instanceof bar<B>()")
+    arktest.assertTrue(bar<C>() instanceof Any, "instanceof bar<C>()")
 }
-

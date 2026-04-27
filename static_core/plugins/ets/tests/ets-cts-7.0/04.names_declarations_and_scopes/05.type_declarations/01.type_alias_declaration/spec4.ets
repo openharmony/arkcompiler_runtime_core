@@ -22,4 +22,6 @@ desc: >-
 type A<T> = Array<A<T>> // ok, A<T> is used as a type argument
 
 function main(): void {
+    let x: A<int> = []
+    arktest.assertTrue(x instanceof Array, "expect instance of Array")
 }

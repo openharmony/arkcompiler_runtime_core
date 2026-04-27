@@ -21,4 +21,9 @@ class A {}
 let foo: (this: A) => void
 let bar: () => void
 
-function main(): void {}
+function main(): void {
+  foo = (this: A) => { }
+  arktest.assertTrue(foo instanceof Object, "expect foo is instance of Object")
+  bar = () => { }
+  arktest.assertTrue(bar instanceof Object, "expect bar is instance of Object")
+}
