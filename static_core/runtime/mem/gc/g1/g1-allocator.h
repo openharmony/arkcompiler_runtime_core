@@ -68,6 +68,7 @@ public:
     size_t GetMaxYoungRegionsCount();
 
     PandaVector<Region *> GetYoungRegions();
+    PandaVector<Region *> GetTenuredRegions();
 
     PandaVector<Region *> GetMovableRegions();
 

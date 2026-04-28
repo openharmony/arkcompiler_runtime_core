@@ -2238,6 +2238,18 @@ TEST_F(G1AllocatePinnedObjectTest, AllocatePinnedRegularStringToExistPinnedRegio
     ASSERT_NE(sizeRegionBefore, sizeRegionAfter);
 }
 
+TEST_F(G1AllocatePinnedObjectTest, FindPinnedRegionInTenuredSpace)
+{
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    auto *str = ObjectAllocator::AllocString(0, true);
+    ASSERT_NE(str, nullptr);
+    Region *region = ObjectToRegion(str);
+    ASSERT_TRUE(region->HasFlag(RegionFlag::IS_OLD));
+    PandaVector<Region *> tenuredRegions = GetAllocator()->GetTenuredRegions();
+    auto it = std::find(tenuredRegions.begin(), tenuredRegions.end(), region);
+    ASSERT_NE(tenuredRegions.end(), it);
+}
+
 TEST_F(G1AllocatePinnedObjectTest, AllocateRegularStringToExistPinnedRegion)
 {
     auto *g1Allocator =
