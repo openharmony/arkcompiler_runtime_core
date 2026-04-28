@@ -819,37 +819,6 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
     NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
 }
 
-void EtsClassWrapper::DefinePropertiesBatch(napi_env env, napi_value jsCtor,
-                                            Span<const napi_property_descriptor> jsProps)
-{
-    napi_value jsProto;
-    NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &jsProto));
-
-    std::vector<napi_property_descriptor> staticProps;
-    std::vector<napi_property_descriptor> instanceProps;
-
-    staticProps.reserve(jsProps.size());
-    instanceProps.reserve(jsProps.size());
-
-    for (const auto &prop : jsProps) {
-        if ((prop.attributes & napi_static) != 0) {
-            staticProps.push_back(prop);
-        } else {
-            instanceProps.push_back(prop);
-        }
-    }
-
-    constexpr size_t BATCH_SIZE = 512;
-    for (size_t i = 0; i < staticProps.size(); i += BATCH_SIZE) {
-        size_t count = std::min(BATCH_SIZE, staticProps.size() - i);
-        NAPI_CHECK_FATAL(napi_define_properties(env, jsCtor, count, &staticProps[i]));
-    }
-    for (size_t i = 0; i < instanceProps.size(); i += BATCH_SIZE) {
-        size_t count = std::min(BATCH_SIZE, instanceProps.size() - i);
-        NAPI_CHECK_FATAL(napi_define_properties(env, jsProto, count, &instanceProps[i]));
-    }
-}
-
 /*static*/
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
 std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsClass *etsClass, const char *jsBuiltinName,
@@ -954,15 +923,29 @@ bool EtsClassWrapper::SetupJsProxyWrapper(InteropCtx *ctx, EtsClass *etsClass)
 void EtsClassWrapper::DefineJSClass(napi_env env, const std::vector<napi_property_descriptor> &jsProps,
                                     napi_value *jsCtor)
 {
-    constexpr size_t MAX_PROPS_IN_DEFINE_CLASS = 1024;
-    if (jsProps.size() <= MAX_PROPS_IN_DEFINE_CLASS) {
-        NAPI_CHECK_FATAL(napi_define_class(env, etsClass_->GetDescriptor(), NAPI_AUTO_LENGTH,
-                                           EtsClassWrapper::JSCtorCallback, this, jsProps.size(), jsProps.data(),
-                                           jsCtor));
-    } else {
-        NAPI_CHECK_FATAL(napi_define_class(env, etsClass_->GetDescriptor(), NAPI_AUTO_LENGTH,
-                                           EtsClassWrapper::JSCtorCallback, this, 0, nullptr, jsCtor));
-        this->DefinePropertiesBatch(env, *jsCtor, Span<const napi_property_descriptor>(jsProps.data(), jsProps.size()));
+    std::vector<napi_property_descriptor> instanceProps;
+    std::vector<napi_property_descriptor> staticProps;
+
+    for (const auto &prop : jsProps) {
+        if ((prop.attributes & napi_static) != 0) {
+            staticProps.push_back(prop);
+        } else {
+            instanceProps.push_back(prop);
+        }
+    }
+
+    NAPI_CHECK_FATAL(napi_define_class(env, etsClass_->GetDescriptor(), NAPI_AUTO_LENGTH,
+                                       EtsClassWrapper::JSCtorCallback, this, instanceProps.size(),
+                                       instanceProps.data(), jsCtor));
+
+    napi_valuetype valueType;
+    if (napi_typeof(env, *jsCtor, &valueType) != napi_ok || valueType == napi_undefined) {
+        INTEROP_LOG(FATAL) << "Failed to define JS class for ETS proxy: " << etsClass_->GetDescriptor();
+        return;
+    }
+
+    if (!staticProps.empty()) {
+        NAPI_CHECK_FATAL(napi_define_properties(env, *jsCtor, staticProps.size(), staticProps.data()));
     }
 }
 

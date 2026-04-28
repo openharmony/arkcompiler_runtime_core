@@ -225,16 +225,20 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
     Field *field = wrapper->GetField();
     napi_property_descriptor prop {};
     prop.utf8name = utf::Mutf8AsCString(field->GetName().data);
-    prop.attributes = IS_STATIC ? EtsClassWrapper::STATIC_FIELD_ATTR : EtsClassWrapper::FIELD_ATTR;
     prop.data = wrapper;
 
     // NOTE(vpukhov): apply the same rule to instance fields?
     ASSERT(!IS_STATIC || wrapper->GetOwner()->GetEtsClass()->GetRuntimeClass() == field->GetClass());
 
+    // Accessor descriptors must NOT include napi_writable (per NAPI/ECMAScript spec).
+    // Use dedicated FIELD_ACCESSOR_ATTR / STATIC_FIELD_ACCESSOR_ATTR constants instead
+    // of the value-based FIELD_ATTR / STATIC_FIELD_ATTR which carry napi_writable.
     auto setupAccessors = [&prop](auto accessorTag) {
         using Accessor = typename decltype(accessorTag)::type;
         prop.getter = EtsFieldGetter<Accessor, IS_STATIC>;
         prop.setter = EtsFieldSetter<Accessor, IS_STATIC>;
+        prop.attributes =
+            IS_STATIC ? EtsClassWrapper::STATIC_FIELD_ACCESSOR_ATTR : EtsClassWrapper::FIELD_ACCESSOR_ATTR;
         return prop;
     };
 
