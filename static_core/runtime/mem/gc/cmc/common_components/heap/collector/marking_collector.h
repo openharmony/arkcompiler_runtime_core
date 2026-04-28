@@ -201,7 +201,7 @@ public:
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     virtual void MarkingObjectXRef(BaseObject *obj, ParallelLocalMarkStack &workStack)
     {
-        LOG_COMMON(FATAL) << "Unresolved fatal";
+        LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
 #endif
@@ -331,13 +331,13 @@ protected:
     virtual void ProcessFinalizers() {}
     virtual void RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack)
     {
-        LOG_COMMON(FATAL) << "Unresolved fatal";
+        LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
 
     virtual void PreforwardStaticRoots()
     {
-        LOG_COMMON(FATAL) << "Unresolved fatal";
+        LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
 

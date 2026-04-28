@@ -143,7 +143,7 @@ bool IsValidUTF8(const std::vector<uint8_t> &data)
             }
             break;
         default:  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "this branch is unreachable";
+            LOG(FATAL, COMMON) << "this branch is unreachable";
             UNREACHABLE();
             break;
     }
@@ -194,7 +194,7 @@ Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modify, bool isWriteB
     }
     if (d1 < LO_SURROGATE_MIN || d1 > LO_SURROGATE_MAX) {
         // Bad sequence
-        LOG_COMMON(FATAL) << "this branch is unreachable";
+        LOG(FATAL, COMMON) << "this branch is unreachable";
         UNREACHABLE();
     }
 

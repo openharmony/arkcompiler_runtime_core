@@ -32,19 +32,21 @@ void YoungSpace::DumpRegionStats() const
     size_t allocRecentFullSize = recentFullRegionList_.GetAllocatedSize();
 
     size_t units = tlUnits + recentFullUnits;
-    VLOG(DEBUG, "\tyoung space units: %zu (%zu B)", units, units * RegionDesc::UNIT_SIZE);
-    VLOG(DEBUG, "\t  tl-regions %zu: %zu units (%zu B, alloc %zu)", tlRegions, tlUnits, tlSize, allocTLSize);
-    VLOG(DEBUG, "\t  recent-full regions %zu: %zu units (%zu B, alloc %zu)", recentFullRegions, recentFullUnits,
-         recentFullSize, allocRecentFullSize);
+    LOG(DEBUG, GC) << "\tyoung space units: " << units << " (" << units * RegionDesc::UNIT_SIZE << " B)";
+    LOG(DEBUG, GC) << "\t  tl-regions " << tlRegions << ": " << tlUnits << " units (" << tlSize << " B, alloc "
+                   << allocTLSize << ")";
+    LOG(DEBUG, GC) << "\t  recent-full regions " << recentFullRegions << ": " << recentFullUnits << " units ("
+                   << recentFullSize << " B, alloc " << allocRecentFullSize << ")";
 }
 
 RegionDesc *YoungSpace::AllocateThreadLocalRegion(bool expectPhysicalMem)
 {
     RegionDesc *region = regionManager_.TakeRegion(expectPhysicalMem, true);
-    ASSERT_LOGF(!IsGcThread(), "GC thread cannot take tlRegion");
+    ASSERT_PRINT(!IsGcThread(), "GC thread cannot take tlRegion");
     if (region != nullptr) {
-        DLOG(REGION, "alloc thread local young region @0x%zx+%zu type %u", region->GetRegionStart(),
-             region->GetRegionAllocatedSize(), region->GetRegionType());
+        LOG(DEBUG, GC) << "alloc thread local young region @0x" << std::hex << region->GetRegionStart() << "+"
+                       << std::dec << region->GetRegionAllocatedSize() << " type "
+                       << static_cast<size_t>(region->GetRegionType());
         InitRegionPhaseLine(region);
         tlRegionList_.PrependRegion(region, RegionDesc::RegionType::THREAD_LOCAL_REGION);
     }

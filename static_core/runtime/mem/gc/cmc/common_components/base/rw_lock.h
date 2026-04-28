@@ -77,7 +77,7 @@ public:
         // other lock/unlock operations
         int count = lockCount_.fetch_sub(1, std::memory_order_acq_rel);
         if (count < 0) {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "Unresolved fatal";
+            LOG(FATAL, COMMON) << "Unresolved fatal";
             UNREACHABLE();
         }
     }

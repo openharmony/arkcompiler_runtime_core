@@ -92,14 +92,14 @@ public:
         if (region == RegionDesc::NullRegion()) {
             return;
         }
-        ASSERT_LOGF(region->IsThreadLocalRegion() || region->IsToRegion() || region->IsOldRegion(),
-                    "unexpected region type");
+        ASSERT_PRINT(region->IsThreadLocalRegion() || region->IsToRegion() || region->IsOldRegion(),
+                     "unexpected region type");
 
         if constexpr (type == AllocBufferType::YOUNG) {
-            ASSERT_LOGF(!IsGcThread(), "unexpected gc thread for old space");
+            ASSERT_PRINT(!IsGcThread(), "unexpected gc thread for young space");
             youngSpace_.HandleFullThreadLocalRegion(region);
         } else if constexpr (type == AllocBufferType::OLD) {
-            ASSERT_LOGF(!IsGcThread(), "unexpected gc thread for old space");
+            ASSERT_PRINT(!IsGcThread(), "unexpected gc thread for old space");
             oldSpace_.HandleFullThreadLocalRegion(region);
         } else if constexpr (type == AllocBufferType::TO) {
             toSpace_.HandleFullThreadLocalRegion(region);
@@ -458,14 +458,14 @@ public:
     static bool IsNewObjectSinceMarking(const BaseObject *object)
     {
         RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(object));
-        ASSERT_LOGF(region != nullptr, "region is nullptr");
+        ASSERT_PRINT(region != nullptr, "region is nullptr");
         return region->IsNewObjectSinceMarking(object);
     }
 
     static bool IsYoungSpaceObject(const BaseObject *object)
     {
         RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(object));
-        ASSERT_LOGF(region != nullptr, "region is nullptr");
+        ASSERT_PRINT(region != nullptr, "region is nullptr");
         return region->IsInYoungSpace();
     }
 

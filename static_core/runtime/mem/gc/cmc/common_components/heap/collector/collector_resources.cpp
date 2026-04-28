@@ -21,6 +21,9 @@
 #include "common_components/common/run_type.h"
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/mutator/mutator_manager.h"
+
+#include "libarkbase/utils/logger.h"
+
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
@@ -31,19 +34,19 @@ void *CollectorResources::GCMainThreadEntry(void *arg)
 {
 #ifdef __APPLE__
     int ret = pthread_setname_np("OS_GC_Thread");
-    LOGE_IF(UNLIKELY(ret != 0)) << "pthread setname in CollectorResources::StartGCThreads() return " << ret
-                                << " rather than 0";
+    LOG_IF(UNLIKELY(ret != 0), ERROR, GC)
+        << "pthread setname in CollectorResources::StartGCThreads() return " << ret << " rather than 0";
 #elif defined(__linux__) || defined(PANDA_TARGET_OHOS)
     int ret = prctl(PR_SET_NAME, "OS_GC_Thread");
-    LOGE_IF(UNLIKELY(ret != 0)) << "pthread setname in CollectorResources::StartGCThreads() return " << ret
-                                << " rather than 0";
+    LOG_IF(UNLIKELY(ret != 0), ERROR, GC)
+        << "pthread setname in CollectorResources::StartGCThreads() return " << ret << " rather than 0";
 #endif
 
-    ASSERT_LOGF(arg != nullptr, "GCMainThreadEntry arg=nullptr");
+    ASSERT_PRINT(arg != nullptr, "GCMainThreadEntry arg=nullptr");
     // set current thread as a gc thread.
     ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
 
-    VLOG(DEBUG, "CollectorResources Thread begin.");
+    LOG(DEBUG, GC) << "CollectorResources Thread begin.";
 
 #ifdef ENABLE_QOS
     OHOS::QOS::SetQosForOtherThread(OHOS::QOS::QosLevel::QOS_USER_INITIATED, GetTid());
@@ -53,7 +56,7 @@ void *CollectorResources::GCMainThreadEntry(void *arg)
     CollectorResources *collectorResources = reinterpret_cast<CollectorResources *>(arg);
     collectorResources->RunTaskLoop();
 
-    VLOG(DEBUG, "CollectorResources Thread end.");
+    LOG(DEBUG, GC) << "CollectorResources Thread end.";
     return nullptr;
 }
 
@@ -75,10 +78,10 @@ void CollectorResources::Fini()
 {
     if (hasRelease == false) {
         StopGCWork();
-        ASSERT_LOGF(!finalizerProcessor_.IsRunning(), "Invalid finalizerProcessor status");
+        ASSERT_PRINT(!finalizerProcessor_.IsRunning(), "Invalid finalizerProcessor status");
         // Atomic with relaxed order reason: data race with gcThreadRunning_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        ASSERT_LOGF(!gcThreadRunning_.load(std::memory_order_relaxed), "Invalid GC thread status");
+        ASSERT_PRINT(!gcThreadRunning_.load(std::memory_order_relaxed), "Invalid GC thread status");
         taskQueue_->Finish();
         delete taskQueue_;
         taskQueue_ = nullptr;
@@ -131,7 +134,7 @@ void CollectorResources::StopGCThreads()
         // Enter saferegion to avoid blocking gc stw
         ScopedEnterSaferegion enterSaferegion(true);
         int ret = ::pthread_join(gcMainThread_, nullptr);
-        LOGE_IF(UNLIKELY(ret != 0)) << "::pthread_join() in StopGCThreads() return " << ret;
+        LOG_IF(UNLIKELY(ret != 0), ERROR, GC) << "::pthread_join() in StopGCThreads() return " << ret;
     }
     // wait the thread pool stopped.
     if (gcThreadPool_ != nullptr) {
@@ -165,7 +168,7 @@ void CollectorResources::PostIgnoredGcRequest(GCReason reason)
 void CollectorResources::RequestAsyncGC(GCReason reason, GCType gcType)
 {
     // The gc request must be none blocked
-    ASSERT_LOGF(!g_gcRequests[reason].IsSyncGC(), "trigger from unsafe context must be none blocked");
+    ASSERT_PRINT(!g_gcRequests[reason].IsSyncGC(), "trigger from unsafe context must be none blocked");
     GCRunner gcTask(GCTask::GCTaskType::GC_TASK_INVOKE_GC, reason, gcType);
     // we use async enqueue because this doesn't have locks, lowering the risk
     // of timeouts when entering safe region due to thread scheduling
@@ -216,7 +219,7 @@ void CollectorResources::RequestGC(GCReason reason, bool async, GCType gcType)
     uint64_t curTime = TimeUtil::NanoSeconds();
     request.SetPrevRequestTime(curTime);
     if (collectorProxy_.ShouldIgnoreRequest(request) || (reason == GCReason::GC_REASON_NATIVE && IsNativeGCInvoked())) {
-        DLOG(ALLOC, "ignore gc request");
+        LOG(DEBUG, GC) << "ignore gc request";
         PostIgnoredGcRequest(reason);
     } else if (async) {
         if (reason == GCReason::GC_REASON_NATIVE) {
@@ -297,7 +300,7 @@ void CollectorResources::WaitForGCFinish()
     }
     uint64_t stopTime = TimeUtil::MicroSeconds();
     uint64_t diffTime = stopTime - startTime;
-    VLOG(DEBUG, "WaitForGCFinish cost %zu us", diffTime);
+    LOG(DEBUG, GC) << "WaitForGCFinish cost " << diffTime << " us";
 }
 
 void CollectorResources::StartGCThreads()
@@ -305,30 +308,30 @@ void CollectorResources::StartGCThreads()
     bool expected = false;
     // Atomic with acquire order reason: data race with gcThreadRunning_ with dependecies on reads after the load
     if (gcThreadRunning_.compare_exchange_strong(expected, true, std::memory_order_acquire) == false) {
-        LOG_COMMON(FATAL) << "[GC] CollectorResources Thread already begin.";
+        LOG(FATAL, COMMON) << "[GC] CollectorResources Thread already begin.";
         UNREACHABLE();
     }
     DCHECK(gcThreadPool_ == nullptr);
     gcThreadPool_ = Taskpool::GetCurrentTaskpool();
     gcThreadPool_->Initialize();
-    LOGF_CHECK(gcThreadPool_ != nullptr) << "new GCThreadPool failed";
+    LOG_IF(UNLIKELY(gcThreadPool_ == nullptr), FATAL, GC) << "new GCThreadPool failed";
     uint32_t helperThreads = gcThreadPool_->GetTotalThreadNum();
     if (helperThreads > 0) {
         --helperThreads;  // gc task is exclusive, so keep one thread left
     }
     // 1 is for gc main thread.
     gcThreadCount_ = helperThreads + 1;
-    VLOG(DEBUG, "total gc thread count %d, helper thread count %d", gcThreadCount_, helperThreads);
 
+    LOG(DEBUG, GC) << "total gc thread count " << gcThreadCount_ << ", helper thread count " << helperThreads;
     // create the collector thread.
     if (::pthread_create(&gcMainThread_, nullptr, CollectorResources::GCMainThreadEntry, this) != 0) {
-        ASSERT_LOGF(0, "pthread_create failed!");
+        ASSERT_PRINT(0, "pthread_create failed!");
     }
     // set thread name.
 #ifdef __WIN64
     int ret = pthread_setname_np(gcMainThread_, "OS_GC_Thread");
-    LOGE_IF(UNLIKELY(ret != 0)) << "pthread_setname_np() in CollectorResources::StartGCThreads() return " << ret
-                                << " rather than 0";
+    LOG_IF(UNLIKELY(ret != 0), ERROR, GC)
+        << "pthread_setname_np() in CollectorResources::StartGCThreads() return " << ret << " rather than 0";
 #endif
 }
 

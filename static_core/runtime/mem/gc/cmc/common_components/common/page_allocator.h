@@ -28,6 +28,7 @@
 #include "common_components/log/log.h"
 
 #include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/logger.h"
 
 namespace common_vm {
 // when there is a need to use PageAllocator to manage
@@ -145,7 +146,7 @@ public:
                 InitPage(*cur);
                 ++totalPages_;
                 nonFull_ = cur;
-                VLOG(DEBUG, "\ttotal pages mapped: %u, slot_size: %u", totalPages_, slotSize_);
+                LOG(DEBUG, GC) << "\ttotal pages mapped: " << totalPages_ << ", slot_size: " << slotSize_;
             }
 
             result = nonFull_->Allocate();
@@ -157,7 +158,8 @@ public:
             }
         }
         if (result != nullptr) {
-            LOGF_CHECK(memset_s(result, slotSize_, 0, slotSize_) == EOK) << "memset_s fail";
+            LOG_IF(UNLIKELY(memset_s(result, slotSize_, 0, slotSize_) != EOK), FATAL, MM_OBJECT_EVENTS)
+                << "memset_s fail";
         }
         return result;
     }
@@ -178,7 +180,7 @@ public:
             RemoveFromList(nonFull_, *current);
             DestroyPage(*current);
             --totalPages_;
-            VLOG(DEBUG, "\ttotal pages mapped: %u, slot_size: %u", totalPages_, slotSize_);
+            LOG(DEBUG, GC) << "\ttotal pages mapped: " << totalPages_ << ", slot_size: " << slotSize_;
         }
     }
 
@@ -192,9 +194,10 @@ private:
     // return the page to os
     static inline void DestroyPage(Page &page)
     {
-        LOGF_CHECK(page.free_ == page.total_)
+        LOG_IF(UNLIKELY(page.free_ != page.total_), FATAL, MM_OBJECT_EVENTS)
             << "\t destroy page in use: total = " << page.total_ << ", free = " << page.free_;
-        DLOG(ALLOC, "\t destroy page %p total = %u, free = %u", &page, page.total_, page.free_);
+        LOG(DEBUG, GC) << "\t destroy page " << &page << " total = " << page.total_ << ", free = " << page.free_;
+
         PagePool::Instance().ReturnPage(reinterpret_cast<uint8_t *>(&page));
     }
 
@@ -206,7 +209,8 @@ private:
         constexpr uint32_t offset = AlignUp<uint32_t>(sizeof(Page), AllocatorUtils::ALLOC_ALIGNMENT);
         page.free_ = (AllocatorUtils::ALLOC_PAGE_SIZE - offset) / slotAlignment_;
         page.total_ = page.free_;
-        LOGF_CHECK(page.free_ >= 1) << "use the wrong allocator! slot size = " << slotAlignment_;
+        LOG_IF(UNLIKELY(page.free_ < 1), FATAL, MM_OBJECT_EVENTS)
+            << "use the wrong allocator! slot size = " << slotAlignment_;
 
         char *start {reinterpret_cast<char *>(&page)};
         char *slot {start + offset};
@@ -225,9 +229,9 @@ private:
             prevSlot = cur;
         }
 
-        DLOG(ALLOC,
-             "new page start = %p, end = %p, slot header = %p, total slots = %u, slot size = %u, sizeof(Page) = %u",
-             start, end, page.header, page.total_, slotAlignment_, sizeof(Page));
+        LOG(DEBUG, GC) << "new page start = " << start << ", end = " << end << ", slot header = " << page.header
+                       << ", total slots = " << page.total_ << ", slot size = " << slotAlignment_
+                       << ", sizeof(Page) = " << sizeof(Page);
     }
 
     // linked-list management

@@ -26,6 +26,8 @@
 #include "common_components/base/sys_call.h"
 #include "common_components/log/log.h"
 
+#include "libarkbase/utils/logger.h"
+
 #include "securec.h"
 
 namespace common_vm {
@@ -45,7 +47,7 @@ MemoryMap *MemoryMap::MapMemory(size_t reqSize, size_t initSize, const Option &o
     // beginning.
     mappedAddr = VirtualAlloc(NULL, reqSize, MEM_RESERVE, PAGE_READWRITE);
 #else
-    DLOG(ALLOC, "MemoryMap::MapMemory size %zu", reqSize);
+    LOG(DEBUG, GC) << "MemoryMap::MapMemory size " << reqSize;
     mappedAddr = mmap(opt.reqBase, reqSize, PROT_NONE, opt.flags, -1, 0);
 #endif
 
@@ -61,17 +63,18 @@ MemoryMap *MemoryMap::MapMemory(size_t reqSize, size_t initSize, const Option &o
         size_t protSize = opt.protAll ? reqSize : initSize;
         if (!ProtectMemInternal(mappedAddr, protSize, opt.prot)) {
             failure = true;
-            LOG_COMMON(ERROR) << "MemoryMap::MapMemory mprotect failed";
+            LOG(ERROR, COMMON) << "MemoryMap::MapMemory mprotect failed";
             ALLOCUTIL_MEM_UNMAP(mappedAddr, reqSize);
         }
     } else {
         failure = true;
     }
-    LOGF_CHECK(!failure) << "MemoryMap::MapMemory failed reqSize: " << reqSize << " initSize: " << initSize;
+    LOG_IF(UNLIKELY(failure), FATAL, MM_OBJECT_EVENTS)
+        << "MemoryMap::MapMemory failed reqSize: " << reqSize << " initSize: " << initSize;
 
-    DLOG(ALLOC, "MemoryMap::MapMemory size %zu successful at %p", reqSize, mappedAddr);
+    LOG(DEBUG, GC) << "MemoryMap::MapMemory size " << reqSize << " successful at " << mappedAddr;
     MemoryMap *memMap = new (std::nothrow) MemoryMap(mappedAddr, initSize, reqSize);
-    LOGF_CHECK(memMap != nullptr) << "new MemoryMap failed";
+    LOG_IF(UNLIKELY(memMap == nullptr), FATAL, MM_OBJECT_EVENTS) << "new MemoryMap failed";
 
     os::PrctlSetVMA(mappedAddr, reqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
     return memMap;
@@ -97,7 +100,7 @@ MemoryMap *MemoryMap::MapMemoryAlignInner4G(uint64_t reqSize, uint64_t initSize,
     // beginning.
     mappedAddr = VirtualAlloc(NULL, needReqSize, MEM_RESERVE, PAGE_READWRITE);
 #else
-    DLOG(ALLOC, "MemMap::MapMemory size %zu", needReqSize);
+    LOG(DEBUG, GC) << "MemMap::MapMemory size " << needReqSize;
     mappedAddr = mmap(opt.reqBase, needReqSize, PROT_NONE, opt.flags, -1, 0);
 #endif
 
@@ -142,17 +145,18 @@ MemoryMap *MemoryMap::MapMemoryAlignInner4G(uint64_t reqSize, uint64_t initSize,
         size_t protSize = opt.protAll ? reqSize : initSize;
         if (!ProtectMemInternal(mappedAddr, protSize, opt.prot)) {
             failure = true;
-            LOG_COMMON(ERROR) << "MemMap::MapMemory mprotect failed";
+            LOG(ERROR, COMMON) << "MemMap::MapMemory mprotect failed";
             ALLOCUTIL_MEM_UNMAP(mappedAddr, reqSize);
         }
     } else {
         failure = true;
     }
-    LOGF_CHECK(!failure) << "MemMap::MapMemory failed reqSize: " << reqSize << " initSize: " << initSize;
+    LOG_IF(UNLIKELY(failure), FATAL, MM_OBJECT_EVENTS)
+        << "MemMap::MapMemory failed reqSize: " << reqSize << " initSize: " << initSize;
 
-    DLOG(ALLOC, "MemMap::MapMemory size %zu successful at %p", reqSize, mappedAddr);
+    LOG(DEBUG, GC) << "MemMap::MapMemory size " << reqSize << " successful at " << mappedAddr;
     MemoryMap *memMap = new (std::nothrow) MemoryMap(mappedAddr, initSize, reqSize);
-    LOGF_CHECK(memMap != nullptr) << "new MemMap failed";
+    LOG_IF(UNLIKELY(memMap == nullptr), FATAL, MM_OBJECT_EVENTS) << "new MemMap failed";
 
     os::PrctlSetVMA(mappedAddr, needReqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
     return memMap;
@@ -161,7 +165,7 @@ MemoryMap *MemoryMap::MapMemoryAlignInner4G(uint64_t reqSize, uint64_t initSize,
 #ifdef _WIN64
 void MemoryMap::CommitMemory(void *addr, size_t size)
 {
-    LOGE_IF(UNLIKELY(!VirtualAlloc(addr, size, MEM_COMMIT, PAGE_READWRITE)))
+    LOG_IF(UNLIKELY(!VirtualAlloc(addr, size, MEM_COMMIT, PAGE_READWRITE)), ERROR, MEMORYPOOL)
         << "VirtualAlloc commit failed in GetPage, errno: " << GetLastError();
 }
 #endif
@@ -175,7 +179,7 @@ MemoryMap::MemoryMap(void *baseAddr, size_t initSize, size_t mappedSize)
 
 bool MemoryMap::ProtectMemInternal(void *addr, size_t size, int prot)
 {
-    DLOG(ALLOC, "MemoryMap::ProtectMem %p, size %zu, prot %d", addr, size, prot);
+    LOG(DEBUG, GC) << "MemoryMap::ProtectMem " << addr << ", size " << size << ", prot " << prot;
 #ifdef _WIN64
     return true;
 #else

@@ -75,10 +75,10 @@ void HeuristicGCPolicy::TryHeuristicGC()
     size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
     if (allocated >= threshold) {
         if (collector.GetGCStats().shouldRequestYoung) {
-            DLOG(ALLOC, "request heu gc: young %zu, threshold %zu", allocated, threshold);
+            LOG(DEBUG, GC) << "request heu gc: young " << allocated << ", threshold " << threshold;
             collector.RequestGC(GC_REASON_YOUNG, true, GC_TYPE_YOUNG);
         } else {
-            DLOG(ALLOC, "request heu gc: allocated %zu, threshold %zu", allocated, threshold);
+            LOG(DEBUG, GC) << "request heu gc: allocated " << allocated << ", threshold " << threshold;
             collector.RequestGC(GC_REASON_HEU, true, GC_TYPE_FULL);
         }
     }
@@ -97,8 +97,8 @@ void HeuristicGCPolicy::TryIdleGC()
     size_t expectHeapSize = std::max(static_cast<size_t>(aliveSizeAfterGC_ * IDLE_SPACE_SIZE_MIN_INC_RATIO),
                                      aliveSizeAfterGC_ + IDLE_SPACE_SIZE_MIN_INC_STEP_FULL);
     if (allocated >= expectHeapSize) {
-        DLOG(ALLOC, "request idle gc: allocated %zu, expectHeapSize %zu, aliveSizeAfterGC %zu", allocated,
-             expectHeapSize, aliveSizeAfterGC_);
+        LOG(DEBUG, GC) << "request idle gc: allocated " << allocated << ", expectHeapSize " << expectHeapSize
+                       << ", aliveSizeAfterGC " << aliveSizeAfterGC_;
         Heap::GetHeap().GetCollector().RequestGC(GC_REASON_IDLE, true, GC_TYPE_FULL);
     }
 }
@@ -248,8 +248,8 @@ bool HeuristicGCPolicy::CheckAndTriggerHintGC(MemoryReduceDegree degree)
     size_t expectHeapSize =
         std::max(static_cast<size_t>(aliveSizeAfterGC_ * IDLE_MIN_INC_RATIO), aliveSizeAfterGC_ + stepAfterLastGC);
     if (expectHeapSize < allocated) {
-        DLOG(ALLOC, "request heu gc by hint: allocated %zu, expectHeapSize %zu, aliveSizeAfterGC %zu", allocated,
-             expectHeapSize, aliveSizeAfterGC_);
+        LOG(DEBUG, GC) << "request heu gc by hint: allocated " << allocated << ", expectHeapSize " << expectHeapSize
+                       << ", aliveSizeAfterGC " << aliveSizeAfterGC_;
         Heap::GetHeap().GetCollector().RequestGC(GC_REASON_HINT, true, GC_TYPE_FULL);
         return true;
     }

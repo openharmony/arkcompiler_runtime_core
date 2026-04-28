@@ -365,7 +365,7 @@ public:
 
     void DumpGCInfos() const
     {
-        DLOG(ENUM, "dump mutator gc info thread id: %d", tid);
+        LOG(DEBUG, GC) << "dump mutator gc info thread id: " << tid;
         gcInfos_.DumpGCInfos();
     }
 #endif

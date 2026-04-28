@@ -16,6 +16,8 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H
 
+#include "libarkbase/utils/logger.h"
+
 #include <atomic>
 #include <errno.h>
 
@@ -34,8 +36,8 @@ public:
         size_t cardSize = cardCnt * sizeof(CardElement);
         void *ptr = malloc(CARD_TABLE_DATA_OFFSET + cardSize);
         if (ptr == nullptr) {
-            LOG_COMMON(FATAL) << "malloc failed, regionSize=" << regionSize << ", cardSize=" << cardSize
-                              << ", errnor=" << errno;
+            LOG(FATAL, COMMON) << "malloc failed, regionSize=" << regionSize << ", cardSize=" << cardSize
+                               << ", errnor=" << errno;
             UNREACHABLE();
         }
         RegionRSet *rset = new (ptr) RegionRSet(cardCnt);
@@ -69,7 +71,9 @@ public:
 
     void ClearCardTable()
     {
-        LOGF_CHECK(memset_s(GetCardTable(), cardCnt_ * sizeof(CardElement), 0, cardCnt_ * sizeof(CardElement)) == EOK)
+        LOG_IF(UNLIKELY(memset_s(GetCardTable(), cardCnt_ * sizeof(CardElement), 0, cardCnt_ * sizeof(CardElement)) !=
+                        EOK),
+               FATAL, GC)
             << "memset_s fail, cardCnt=" << cardCnt_;
     }
 

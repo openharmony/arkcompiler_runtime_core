@@ -113,7 +113,7 @@ Mutator *MutatorManager::CreateRuntimeMutator(ThreadType threadType)
     } else {
         mutator = new (std::nothrow) Mutator();
     }
-    LOGF_CHECK(mutator != nullptr) << "create mutator out of native memory";
+    LOG_IF(UNLIKELY(mutator == nullptr), FATAL, GC) << "create mutator out of native memory";
     MutatorManagementRLock();
     mutator->InitTid();
     MutatorManager::Instance().BindMutator(*mutator);
@@ -131,7 +131,7 @@ Mutator *MutatorManager::CreateRuntimeMutator(ThreadType threadType)
 void MutatorManager::DestroyRuntimeMutator(ThreadType threadType)
 {
     Mutator *mutator = ThreadLocal::GetMutator();
-    LOGF_CHECK(mutator != nullptr) << "Fini UpdateThreads with null mutator";
+    LOG_IF(UNLIKELY(mutator == nullptr), FATAL, GC) << "Fini UpdateThreads with null mutator";
 
     MutatorManagementRLock();
     (void)mutator->LeaveSaferegion();
@@ -152,7 +152,7 @@ void MutatorManager::Init()
 {
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS) || defined(__APPLE__)
     safepointPageManager_ = new (std::nothrow) SafepointPageManager();
-    LOGF_CHECK(safepointPageManager_ != nullptr) << "new safepointPageManager failed";
+    LOG_IF(UNLIKELY(safepointPageManager_ == nullptr), FATAL, GC) << "new safepointPageManager failed";
     safepointPageManager_->Init();
 #endif
     SetSuspensionMutatorCount(0);
@@ -172,7 +172,7 @@ void MutatorManager::AcquireMutatorManagementWLock()
         acquired = TryAcquireMutatorManagementWLock();
         uint64_t now = TimeUtil::NanoSeconds();
         if (!acquired && ((now - start) / SECOND_TO_NANO_SECOND > WAIT_LOCK_TIMEOUT)) {
-            LOG_COMMON(FATAL) << "Wait mutator list lock timeout";
+            LOG(FATAL, COMMON) << "Wait mutator list lock timeout";
             UNREACHABLE();
         }
     }
@@ -402,8 +402,8 @@ void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
     Heap::GetHeap().InstallBarrier(phase);
     Heap::GetHeap().SetGCPhase(phase);
 
-    VLOG(DEBUG, "transition gc phase: %s(%u) -> %s(%u)", Collector::GetGCPhaseName(prevPhase), prevPhase,
-         Collector::GetGCPhaseName(phase), phase);
+    LOG(DEBUG, GC) << "transition gc phase: " << Collector::GetGCPhaseName(prevPhase) << "(" << prevPhase << ") -> "
+                   << Collector::GetGCPhaseName(phase) << "(" << phase << ")";
 
     std::list<Mutator *> undoneMutators;
     // Broadcast mutator phase transition signal to all mutators
@@ -427,7 +427,7 @@ void MutatorManager::DumpMutators(uint32_t timeoutTimes)
     size_t visitedSaferegion = 0;
     int firstNotStoppedTid = -1;
     index += sprintf_s(buf, sizeof(buf), "not stopped: ");
-    LOGF_CHECK(index != -1) << "Dump mutators state failed";
+    LOG_IF(UNLIKELY(index == -1), FATAL, GC) << "Dump mutators state failed";
     size_t mutatorCount = 0;
     VisitAllMutators([&](const Mutator &mut) {
         mutatorCount++;
@@ -439,20 +439,22 @@ void MutatorManager::DumpMutators(uint32_t timeoutTimes)
                 firstNotStoppedTid = static_cast<int>(mut.GetTid());
             }
             int ret = sprintf_s(buf + index, sizeof(buf) - index, "%u ", mut.GetTid());
-            LOGF_CHECK(ret != -1) << "Dump mutators state failed";
+            LOG_IF(UNLIKELY(ret == -1), FATAL, GC) << "Dump mutators state failed";
             index += ret;
         } else {
             ++visitedSaferegion;
         }
         ++visitedCount;
     });
-    LOG_COMMON(ERROR) << "MutatorList size: " << mutatorCount;
+    LOG(ERROR, COMMON) << "MutatorList size: " << mutatorCount;
 
-    LOGF_CHECK(sprintf_s(buf + index, sizeof(buf) - index, ", total: %u, visited: %zu/%zu", GetSuspensionMutatorCount(),
-                         visitedSaferegion, visitedCount) != -1)
+    LOG_IF(UNLIKELY(sprintf_s(buf + index, sizeof(buf) - index, ", total: %u, visited: %zu/%zu",
+                              GetSuspensionMutatorCount(), visitedSaferegion, visitedCount) == -1),
+           FATAL, GC)
         << "Dump mutators state failed";
-    LOGF_CHECK(timeoutTimes <= MAX_TIMEOUT_TIMES) << "Waiting mutators entering saferegion timeout status info:" << buf;
-    LOG_COMMON(ERROR) << "STW status info: " << buf;
+    LOG_IF(UNLIKELY(timeoutTimes > MAX_TIMEOUT_TIMES), FATAL, GC)
+        << "Waiting mutators entering saferegion timeout status info:" << buf;
+    LOG(ERROR, COMMON) << "STW status info: " << buf;
 }
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
@@ -464,7 +466,7 @@ void MutatorManager::DumpForDebug()
         count++;
     };
     VisitAllMutators(func);
-    LOG_COMMON(INFO) << "MutatorList size : " << count;
+    LOG(INFO, COMMON) << "MutatorList size : " << count;
 }
 
 void MutatorManager::DumpAllGcInfos()

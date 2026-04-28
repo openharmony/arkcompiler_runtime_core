@@ -14,12 +14,13 @@
  */
 #include "common_components/heap/ark_collector/enum_barrier.h"
 #include "common_components/heap/heap.h"
-#include "common_components/log/log.h"
 
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_interfaces/thread/mutator.h"
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
+
+#include "libarkbase/utils/logger.h"
 
 namespace common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
@@ -39,7 +40,7 @@ void EnumBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject
 {
     if (rememberedObject != nullptr) {
         mutator->RememberObjectInSatbBuffer(rememberedObject);
-        DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+        LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
     }
 }
 
@@ -47,7 +48,7 @@ void EnumBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false
 {
     if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
         UpdateRememberSet(obj, ref);
-        DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
+        LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": -> " << ref;
     }
 }
 
@@ -56,7 +57,8 @@ BaseObject *EnumBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &fie
     BaseObject *target = nullptr;
     RefField<false> oldField(field.GetFieldValue(order));
     target = ReadRefField(obj, oldField);
-    DLOG(EBARRIER, "atomic read obj %p ref@%p: %#zx -> %p", obj, &field, oldField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "atomic read obj " << obj << " ref@" << &field << ": 0x" << std::hex << oldField.GetFieldValue()
+                   << std::dec << " -> " << target;
     return target;
 }
 

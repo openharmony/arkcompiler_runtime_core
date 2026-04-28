@@ -20,7 +20,7 @@
 namespace common_vm {
 bool GCRunner::Execute(void *owner)
 {
-    ASSERT_LOGF(owner != nullptr, "task queue owner ptr should not be null!");
+    ASSERT_PRINT(owner != nullptr, "task queue owner ptr should not be null!");
     CollectorProxy *collectorProxy = reinterpret_cast<CollectorProxy *>(owner);
 
     switch (taskType_) {
@@ -34,23 +34,23 @@ bool GCRunner::Execute(void *owner)
             break;
         }
         case GCTask::GCTaskType::GC_TASK_DUMP_HEAP: {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "Don't know how to dump heap";
+            LOG(FATAL, COMMON) << "Don't know how to dump heap";
             UNREACHABLE();
             break;
         }
         case GCTask::GCTaskType::GC_TASK_DUMP_HEAP_IDE: {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "Don't know how to dump heap OOM";
+            LOG(FATAL, COMMON) << "Don't know how to dump heap OOM";
             UNREACHABLE();
             break;
         }
 
         case GCTask::GCTaskType::GC_TASK_DUMP_HEAP_OOM: {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "Don't know how to dump heap OOM";
+            LOG(FATAL, COMMON) << "Don't know how to dump heap OOM";
             UNREACHABLE();
             break;
         }
         default:
-            LOG_COMMON(ERROR) << "[GC] Error task type: " << static_cast<uint32_t>(taskType_) << " ignored!";
+            LOG(ERROR, COMMON) << "[GC] Error task type: " << static_cast<uint32_t>(taskType_) << " ignored!";
             break;
     }
     return true;

@@ -51,13 +51,13 @@ void RegionalHeap::DumpAllRegionSummary(const char *msg) const
     oss << msg << "Current allocated: " << Pretty(from + to + young + old + other) << ". (from: " << Pretty(from)
         << "(exempt: " << Pretty(exempt) << "), to: " << Pretty(to) << ", young: " << Pretty(young)
         << ", old: " << Pretty(old) << ", other: " << Pretty(other) << ")";
-    VLOG(DEBUG, oss.str().c_str());
+    LOG(DEBUG, GC) << oss.str();
 }
 
 // used to dump a detailed information of all regions.
 void RegionalHeap::DumpAllRegionStats(const char *msg) const
 {
-    VLOG(DEBUG, msg);
+    LOG(DEBUG, GC) << msg;
     youngSpace_.DumpRegionStats();
     oldSpace_.DumpRegionStats();
     fromSpace_.DumpRegionStats();
@@ -68,7 +68,7 @@ void RegionalHeap::DumpAllRegionStats(const char *msg) const
     regionManager_.DumpRegionStats();
 
     size_t usedUnits = GetUsedUnitCount();
-    VLOG(DEBUG, "\tused units: %zu (%zu B)", usedUnits, usedUnits * RegionDesc::UNIT_SIZE);
+    LOG(DEBUG, GC) << "\tused units: " << usedUnits << " (" << usedUnits * RegionDesc::UNIT_SIZE << " B)";
 }
 
 HeapAddress RegionalHeap::TryAllocateOnce(size_t allocSize, AllocType allocType)
@@ -102,7 +102,7 @@ bool RegionalHeap::ShouldRetryAllocation(size_t &tryTimes) const
         return true;
     } else if (tryTimes == static_cast<size_t>(TryAllocationThreshold::TRIGGER_OOM)) {
         if (!Heap::GetHeap().IsGcStarted()) {
-            VLOG(INFO, "gc is triggered for OOM");
+            LOG(INFO, GC) << "gc is triggered for OOM";
             Heap::GetHeap().GetCollector().RequestGC(GC_REASON_OOM, false, GC_TYPE_FULL);
         } else {
             ScopedEnterSaferegion enterSaferegion(false);
@@ -219,9 +219,11 @@ HeapAddress RegionalHeap::AllocateNoGC(size_t size, AllocType allocType)
 
 void RegionalHeap::CopyRegion(RegionDesc *region)
 {
-    LOGF_CHECK(region->IsFromRegion()) << "region type " << static_cast<uint8_t>(region->GetRegionType());
-    DLOG(COPY, "try forward region %p @0x%zx+%zu type %u, live bytes %u", region, region->GetRegionStart(),
-         region->GetRegionAllocatedSize(), region->GetRegionType(), region->GetLiveByteCount());
+    LOG_IF(UNLIKELY(!region->IsFromRegion()), FATAL, MM_OBJECT_EVENTS)
+        << "region type " << static_cast<size_t>(region->GetRegionType());
+    LOG(DEBUG, GC) << "try forward region " << region << " @0x" << std::hex << region->GetRegionStart() << "+"
+                   << std::dec << region->GetRegionAllocatedSize() << " type "
+                   << static_cast<size_t>(region->GetRegionType()) << ", live bytes " << region->GetLiveByteCount();
 
     if (region->GetLiveByteCount() == 0) {
         return;
@@ -231,10 +233,11 @@ void RegionalHeap::CopyRegion(RegionDesc *region)
     bool forwarded =
         region->VisitLiveObjectsUntilFalse([&collector](BaseObject *obj) { return collector.ForwardObject(obj); });
     if (!forwarded) {
-        DLOG(COPY, "failure to forward region %p @0x%zx+%zu units[%zu+%zu, %zu) type %u, %u live bytes", region,
-             region->GetRegionStart(), region->GetRegionAllocatedSize(), region->GetUnitIdx(), region->GetUnitCount(),
-             region->GetUnitIdx() + region->GetUnitCount(), region->GetRegionType(), region->GetLiveByteCount());
-
+        LOG(DEBUG, GC) << "failure to forward region " << region << " @0x" << std::hex << region->GetRegionStart()
+                       << "+" << std::dec << region->GetRegionAllocatedSize() << " units[" << region->GetUnitIdx()
+                       << "+" << region->GetUnitCount() << ", " << region->GetUnitIdx() + region->GetUnitCount()
+                       << ") type " << static_cast<size_t>(region->GetRegionType()) << ", "
+                       << region->GetLiveByteCount() << " live bytes";
         fromSpace_.DeleteFromRegion(region);
         // since this region is possibly partially-forwarded, treat it as to-region.
         toSpace_.AddFullRegion(region);
@@ -250,7 +253,7 @@ void RegionalHeap::Init(const RuntimeParam &param)
 #ifndef PANDA_TARGET_32
     static constexpr uint64_t MAX_SUPPORT_CAPACITY = 4ULL * GB;
     // 2: double heap size
-    LOGF_CHECK((heapSize / 2) <= MAX_SUPPORT_CAPACITY) << "Max support capacity 4G";
+    LOG_IF(UNLIKELY((heapSize / 2) > MAX_SUPPORT_CAPACITY), FATAL, MM_OBJECT_EVENTS) << "Max support capacity 4G";
 #endif
 
     size_t totalSize = RegionManager::GetHeapMemorySize(heapSize);
@@ -259,7 +262,7 @@ void RegionalHeap::Init(const RuntimeParam &param)
     // asan's memory alias technique needs a shareable page
     opt.flags &= ~MAP_PRIVATE;
     opt.flags |= MAP_SHARED;
-    DLOG(SANITIZER, "mmap flags set to 0x%x", opt.flags);
+    LOG(DEBUG, GC) << "mmap flags set to 0x" << std::hex << opt.flags << std::dec;
 #endif
     // this must succeed otherwise it won't return
     map_ = MemoryMap::MapMemoryAlignInner4G(totalSize, totalSize, opt);
@@ -280,8 +283,9 @@ void RegionalHeap::Init(const RuntimeParam &param)
     reservedStart_ = regionManager_.GetRegionHeapStart();
     reservedEnd_ = reinterpret_cast<HeapAddress>(map_->GetMappedEndAddr());
 #if defined(COMMON_DUMP_ADDRESS)
-    VLOG(DEBUG, "region metadata@%zx, heap @[0x%zx+%zu, 0x%zx)", metadata, reservedStart, reservedEnd - reservedStart,
-         reservedEnd);
+    LOG(DEBUG, GC) << "region metadata@0x" << std::hex << metadata << std::dec << ", heap @[0x" << std::hex
+                   << reservedStart << "+" << std::dec << (reservedEnd - reservedStart) << ", 0x" << std::hex
+                   << reservedEnd << std::dec << ")";
 #endif
     Heap::OnHeapCreated(reservedStart_);
     Heap::OnHeapExtended(reservedEnd_);
@@ -292,7 +296,7 @@ AllocationBuffer *AllocationBuffer::GetOrCreateAllocBuffer()
     auto *buffer = AllocationBuffer::GetAllocBuffer();
     if (buffer == nullptr) {
         buffer = new (std::nothrow) AllocationBuffer();
-        LOGF_CHECK(buffer != nullptr) << "new region alloc buffer fail";
+        LOG_IF(UNLIKELY(buffer == nullptr), FATAL, MM_OBJECT_EVENTS) << "new region alloc buffer fail";
         buffer->Init();
         ThreadLocal::SetAllocBuffer(buffer);
     }
@@ -369,7 +373,7 @@ HeapAddress AllocationBuffer::ToSpaceAllocate(size_t totalSize)
         addr = tlToRegion_->Alloc(totalSize);
     }
 
-    DLOG(ALLOC, "alloc to 0x%zx(%zu)", addr, totalSize);
+    LOG(DEBUG, GC) << "alloc to 0x" << std::hex << addr << std::dec << "(" << totalSize << ")";
     return addr;
 }
 
@@ -378,8 +382,8 @@ HeapAddress AllocationBuffer::Allocate(size_t totalSize, AllocType allocType)
     // a hoisted specific fast path which can be inlined
     HeapAddress addr = 0;
 
-    ASSERT_LOGF(allocType == AllocType::MOVEABLE_OBJECT || allocType == AllocType::MOVEABLE_OLD_OBJECT,
-                "unexpected alloc type");
+    ASSERT_PRINT(allocType == AllocType::MOVEABLE_OBJECT || allocType == AllocType::MOVEABLE_OLD_OBJECT,
+                 "unexpected alloc type");
 
     if (allocType == AllocType::MOVEABLE_OBJECT) {
         if (LIKELY(tlRegion_ != RegionDesc::NullRegion())) {
@@ -395,7 +399,7 @@ HeapAddress AllocationBuffer::Allocate(size_t totalSize, AllocType allocType)
         addr = AllocateImpl(totalSize, allocType);
     }
 
-    DLOG(ALLOC, "alloc 0x%zx(%zu)", addr, totalSize);
+    LOG(DEBUG, GC) << "alloc 0x" << std::hex << addr << std::dec << "(" << totalSize << ")";
     return addr;
 }
 

@@ -78,9 +78,10 @@ constexpr size_t HUGE_PAGE_UNIT_NUM = (2048 * KB) / RegionDesc::UNIT_SIZE;
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
 void RegionDesc::DumpRegionDesc(LogType type) const
 {
-    DLOG(type, "Region index: %zu, type: %s, address: 0x%zx(start=0x%zx)-0x%zx, allocated(B) %zu, live(B) %zu",
-         GetUnitIdx(), GetTypeName(), GetRegionBase(), GetRegionStart(), GetRegionEnd(), GetRegionAllocatedSize(),
-         GetLiveByteCount());
+    LOG(DEBUG, GC) << "Region index: " << GetUnitIdx() << ", type: " << GetTypeName() << ", address: 0x" << std::hex
+                   << GetRegionBase() << "(start=0x" << std::hex << GetRegionStart() << ")-0x" << std::hex
+                   << GetRegionEnd() << ", allocated(B) " << std::dec << GetRegionAllocatedSize() << ", live(B) "
+                   << GetLiveByteCount();
 }
 
 const char *RegionDesc::GetTypeName() const
@@ -261,7 +262,7 @@ static const char *RegionDescRegionTypeToString(RegionDesc::RegionType type)
         [static_cast<uint8_t>(RegionDesc::RegionType::RECENT_LARGE_REGION)] = "RECENT_LARGE_REGION",
         [static_cast<uint8_t>(RegionDesc::RegionType::LARGE_REGION)] = "LARGE_REGION",
     };
-    ASSERT_LOGF(type < RegionDesc::RegionType::END_OF_REGION_TYPE, "Invalid region type");
+    ASSERT_PRINT(type < RegionDesc::RegionType::END_OF_REGION_TYPE, "Invalid region type");
     return enumStr[static_cast<uint8_t>(type)];
 }
 
@@ -277,10 +278,11 @@ void RegionList::PrependRegionLocked(RegionDesc *region, RegionDesc::RegionType 
         return;
     }
 
-    DLOG(REGION, "%s (%zu, %zu)+(%zu, %zu) prepend region %p(base=%#zx)@%#zx+%zu type %u->%u", listName_, regionCount_,
-         unitCount_, 1llu, region->GetUnitCount(), region, region->GetRegionBase(), region->GetRegionStart(),
-         region->GetRegionAllocatedSize(), region->GetRegionType(), type);
-
+    LOG(DEBUG, GC) << listName_ << " (" << regionCount_ << ", " << unitCount_ << ")+(" << 1llu << ", "
+                   << region->GetUnitCount() << ") prepend region " << region << "(base="
+                   << "0x" << std::hex << region->GetRegionBase() << ")@0x" << std::hex << region->GetRegionStart()
+                   << "+" << std::dec << region->GetRegionAllocatedSize() << " type "
+                   << static_cast<size_t>(region->GetRegionType()) << "->" << static_cast<size_t>(type);
     region->SetRegionType(type);
 
     size_t totalRegionSize = region->GetRegionEnd() - region->GetRegionBase();
@@ -291,7 +293,7 @@ void RegionList::PrependRegionLocked(RegionDesc *region, RegionDesc::RegionType 
     IncCounts(1, region->GetUnitCount());
     region->SetNextRegion(listHead_);
     if (listHead_ == nullptr) {
-        ASSERT_LOGF(listTail_ == nullptr, "PrependRegion listTail is not null");
+        ASSERT_PRINT(listTail_ == nullptr, "PrependRegion listTail is not null");
         listTail_ = region;
     } else {
         listHead_->SetPrevRegion(region);
@@ -301,7 +303,7 @@ void RegionList::PrependRegionLocked(RegionDesc *region, RegionDesc::RegionType 
 
 void RegionList::DeleteRegionLocked(RegionDesc *del)
 {
-    ASSERT_LOGF(listHead_ != nullptr && listTail_ != nullptr, "illegal region list");
+    ASSERT_PRINT(listHead_ != nullptr && listTail_ != nullptr, "illegal region list");
 
     RegionDesc *pre = del->GetPrevRegion();
     RegionDesc *next = del->GetNextRegion();
@@ -309,14 +311,14 @@ void RegionList::DeleteRegionLocked(RegionDesc *del)
     del->SetNextRegion(nullptr);
     del->SetPrevRegion(nullptr);
 
-    DLOG(REGION, "%s (%zu, %zu)-(%zu, %zu) delete region %p(start=%p),@%#zx+%zu type %u", listName_, regionCount_,
-         unitCount_, 1llu, del->GetUnitCount(), del, del->GetRegionBase(), del->GetRegionStart(),
-         del->GetRegionAllocatedSize(), del->GetRegionType());
-
+    LOG(DEBUG, GC) << listName_ << " (" << regionCount_ << ", " << unitCount_ << ")-(" << 1llu << ", "
+                   << del->GetUnitCount() << ") delete region " << del << "(start=" << del->GetRegionBase() << "),@0x"
+                   << std::hex << del->GetRegionStart() << "+" << std::dec << del->GetRegionAllocatedSize() << " type "
+                   << static_cast<size_t>(del->GetRegionType());
     DecCounts(1, del->GetUnitCount());
 
     if (listHead_ == del) {  // delete head
-        ASSERT_LOGF(pre == nullptr, "Delete Region pre is not null");
+        ASSERT_PRINT(pre == nullptr, "Delete Region pre is not null");
         listHead_ = next;
         if (listHead_ == nullptr) {  // now empty
             listTail_ = nullptr;
@@ -327,7 +329,7 @@ void RegionList::DeleteRegionLocked(RegionDesc *del)
     }
 
     if (listTail_ == del) {  // delete tail
-        ASSERT_LOGF(next == nullptr, "Delete Region next is not null");
+        LOG_IF(UNLIKELY(!(next == nullptr)), FATAL, GC) << "Delete Region next is not null";
         listTail_ = pre;
         if (listTail_ == nullptr) {  // now empty
             listHead_ = nullptr;
@@ -340,20 +342,22 @@ void RegionList::DeleteRegionLocked(RegionDesc *del)
 
 void RegionList::DumpRegionSummary() const
 {
-    VLOG(DEBUG, "\t%s %zu: %zu units (%zu B, alloc %zu)", listName_, regionCount_, unitCount_, GetAllocatedSize(true),
-         GetAllocatedSize(false));
+    LOG(DEBUG, GC) << "\t" << listName_ << " " << regionCount_ << ": " << unitCount_ << " units ("
+                   << GetAllocatedSize(true) << " B, alloc " << GetAllocatedSize(false) << ")";
 }
 
 #ifndef NDEBUG
 void RegionList::DumpRegionList(const char *msg)
 {
-    DLOG(REGION, "dump region list %s", msg);
+    LOG(DEBUG, GC) << "dump region list " << msg;
     ark::os::memory::LockHolder lock(listMutex_);
     for (RegionDesc *region = listHead_; region != nullptr; region = region->GetNextRegion()) {
-        DLOG(REGION, "region %p @0x%zx(start=0x%zx)+%zu units [%zu+%zu, %zu) type %u prev %p next %p", region,
-             region->GetRegionBase(), region->GetRegionStart(), region->GetRegionAllocatedSize(), region->GetUnitIdx(),
-             region->GetUnitCount(), region->GetUnitIdx() + region->GetUnitCount(), region->GetRegionType(),
-             region->GetPrevRegion(), region->GetNextRegion());
+        LOG(DEBUG, GC) << "region " << region << " @0x" << std::hex << region->GetRegionBase() << "(start=0x"
+                       << region->GetRegionStart() << ")+" << std::dec << region->GetRegionAllocatedSize() << " units ["
+                       << region->GetUnitIdx() << "+" << region->GetUnitCount() << ", "
+                       << region->GetUnitIdx() + region->GetUnitCount() << ") type "
+                       << static_cast<size_t>(region->GetRegionType()) << " prev " << region->GetPrevRegion()
+                       << " next " << region->GetNextRegion();
     }
 }
 #endif
@@ -381,7 +385,8 @@ size_t FreeRegionManager::ReleaseGarbageRegions(size_t targetCachedSize)
 {
     size_t dirtyBytes = dirtyUnitTree_.GetTotalCount() * RegionDesc::UNIT_SIZE;
     if (dirtyBytes <= targetCachedSize) {
-        VLOG(DEBUG, "release heap garbage memory 0 bytes, cache %zu(%zu) bytes", dirtyBytes, targetCachedSize);
+        LOG(DEBUG, GC) << "release heap garbage memory 0 bytes, cache " << dirtyBytes << "(" << targetCachedSize
+                       << ") bytes";
         return 0;
     }
 
@@ -397,14 +402,14 @@ size_t FreeRegionManager::ReleaseGarbageRegions(size_t targetCachedSize)
         dirtyUnitTree_.ReleaseRootNode();
 
         ark::os::memory::LockHolder lock2(releasedUnitTreeMutex_);
-        LOGF_CHECK(releasedUnitTree_.MergeInsert(idx, num, true))
+        LOG_IF(UNLIKELY(!releasedUnitTree_.MergeInsert(idx, num, true)), FATAL, MM_OBJECT_EVENTS)
             << "tid " << GetTid() << ": failed to release garbage units[" << idx << "+" << num << ", " << (idx + num)
             << ")";
         releasedBytes += (num * RegionDesc::UNIT_SIZE);
         dirtyBytes = dirtyUnitTree_.GetTotalCount() * RegionDesc::UNIT_SIZE;
     }
-    VLOG(DEBUG, "release heap garbage memory %zu bytes, cache %zu(%zu) bytes", releasedBytes, dirtyBytes,
-         targetCachedSize);
+    LOG(DEBUG, GC) << "release heap garbage memory " << releasedBytes << " bytes, cache " << dirtyBytes << "("
+                   << targetCachedSize << ") bytes";
     return releasedBytes;
 }
 
@@ -434,14 +439,15 @@ void RegionManager::Initialize(size_t nRegion, uintptr_t regionInfoAddr)
     RegionDesc::Initialize(nRegion, regionInfoStart_, regionHeapStart_);
     freeRegionManager_.Initialize(nRegion);
 
-    DLOG(REPORT, "region info @0x%zx+%zu, heap [0x%zx, 0x%zx), unit count %zu", regionInfoAddr, metadataSize,
-         regionHeapStart_, regionHeapEnd_, nRegion);
+    LOG(DEBUG, GC) << "region info @0x" << std::hex << regionInfoAddr << "+" << std::dec << metadataSize << ", heap [0x"
+                   << std::hex << regionHeapStart_ << ", 0x" << std::hex << regionHeapEnd_ << "), unit count "
+                   << std::dec << nRegion;
 #ifdef USE_HWASAN
     ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(regionInfoAddr),
                                 metadataSize + nRegion * RegionDesc::UNIT_SIZE);
     const uintptr_t p_addr = regionInfoAddr;
     const uintptr_t p_size = metadataSize + nRegion * RegionDesc::UNIT_SIZE;
-    LOG_COMMON(DEBUG) << std::hex << "set [" << p_addr << std::hex << ", " << p_addr + p_size << ") unpoisoned\n";
+    LOG(DEBUG, COMMON) << std::hex << "set [" << p_addr << std::hex << ", " << p_addr + p_size << ") unpoisoned\n";
 #endif
 }
 
@@ -452,9 +458,10 @@ void RegionManager::ReclaimRegion(RegionDesc *region)
     if (num >= HUGE_PAGE_UNIT_NUM) {
         UntagHugePage(region, num);
     }
-    DLOG(REGION, "reclaim region %p(base=%#zx)@%#zx+%zu type %u", region, region->GetRegionBase(),
-         region->GetRegionStart(), region->GetRegionAllocatedSize(), region->GetRegionType());
-
+    LOG(DEBUG, GC) << "reclaim region " << region << "(base="
+                   << "0x" << std::hex << region->GetRegionBase() << ")@0x" << std::hex << region->GetRegionStart()
+                   << "+" << std::dec << region->GetRegionAllocatedSize() << " type "
+                   << static_cast<size_t>(region->GetRegionType());
     region->InitFreeUnits();
     freeRegionManager_.AddGarbageUnits(unitIndex, num);
 }
@@ -467,9 +474,8 @@ size_t RegionManager::ReleaseRegion(RegionDesc *region)
     if (num >= HUGE_PAGE_UNIT_NUM) {
         UntagHugePage(region, num);
     }
-    DLOG(REGION, "release region %p @%#zx+%zu type %u", region, region->GetRegionStart(),
-         region->GetRegionAllocatedSize(), region->GetRegionType());
-
+    LOG(DEBUG, GC) << "release region " << region << " @0x" << std::hex << region->GetRegionStart() << "+" << std::dec
+                   << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
     region->InitFreeUnits();
     RegionDesc::ReleaseUnits(unitIndex, num);
     freeRegionManager_.AddReleaseUnits(unitIndex, num);
@@ -517,19 +523,22 @@ RegionDesc *RegionManager::TakeRegion(size_t num, RegionDesc::UnitRole type, boo
 
     RegionDesc *head = garbageRegionList_.TakeHeadRegion();
     if (head != nullptr) {
-        DLOG(REGION, "take garbage region %p@%#zx+%zu", head, head->GetRegionStart(), head->GetRegionSize());
+        LOG(DEBUG, GC) << "take garbage region " << head << "@0x" << std::hex << head->GetRegionStart() << "+"
+                       << std::dec << head->GetRegionSize();
         if (head->GetUnitCount() == num) {
             auto idx = head->GetUnitIdx();
 #ifdef USE_HWASAN
             const uintptr_t pAddr = RegionDesc::GetUnitAddress(idx);
             ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(pAddr), size);
-            LOG_COMMON(DEBUG) << std::hex << "set [" << pAddr << std::hex << ", " << pAddr + size << ") unpoisoned\n";
+            LOG(DEBUG, COMMON) << std::hex << "set [" << pAddr << std::hex << ", " << pAddr + size << ") unpoisoned\n";
 #endif
             RegionDesc::ClearUnits(idx, num);
-            DLOG(REGION, "reuse garbage region %p@%#zx+%zu", head, head->GetRegionStart(), head->GetRegionSize());
+            LOG(DEBUG, GC) << "reuse garbage region " << head << "@0x" << std::hex << head->GetRegionStart() << "+"
+                           << std::dec << head->GetRegionSize();
             return RegionDesc::ResetRegion(idx, num, type);
         } else {
-            DLOG(REGION, "reclaim garbage region %p@%#zx+%zu", head, head->GetRegionStart(), head->GetRegionSize());
+            LOG(DEBUG, GC) << "reclaim garbage region " << head << "@0x" << std::hex << head->GetRegionStart() << "+"
+                           << std::dec << head->GetRegionSize();
             ReclaimRegion(head);
         }
     }
@@ -569,8 +578,9 @@ RegionDesc *RegionManager::TakeRegion(size_t num, RegionDesc::UnitRole type, boo
                                     num * RegionDesc::UNIT_SIZE);
 #endif
             (void)idx;  // eliminate compilation warning
-            DLOG(REGION, "take inactive units [%zu+%zu, %zu) at [0x%zx, 0x%zx)", idx, num, idx + num,
-                 RegionDesc::GetUnitAddress(idx), RegionDesc::GetUnitAddress(idx + num));
+            LOG(DEBUG, GC) << "take inactive units [" << idx << "+" << num << ", " << idx + num << ") at [0x"
+                           << std::hex << RegionDesc::GetUnitAddress(idx) << ", 0x"
+                           << RegionDesc::GetUnitAddress(idx + num) << std::dec << ")";
             if (num >= HUGE_PAGE_UNIT_NUM) {
                 TagHugePage(region, num);
             }
@@ -609,15 +619,15 @@ void RegionManager::DumpRegionStats() const
     size_t totalUnits = totalSize / RegionDesc::UNIT_SIZE;
     size_t activeSize = inactiveZone_ - regionHeapStart_;
     size_t activeUnits = activeSize / RegionDesc::UNIT_SIZE;
-    VLOG(DEBUG, "\ttotal units: %zu (%zu B)", totalUnits, totalSize);
-    VLOG(DEBUG, "\tactive units: %zu (%zu B)", activeUnits, activeSize);
+    LOG(DEBUG, GC) << "\ttotal units: " << totalUnits << " (" << totalSize << " B)";
+    LOG(DEBUG, GC) << "\tactive units: " << activeUnits << " (" << activeSize << " B)";
 
     garbageRegionList_.DumpRegionSummary();
 
     size_t releasedUnits = freeRegionManager_.GetReleasedUnitCount();
     size_t dirtyUnits = freeRegionManager_.GetDirtyUnitCount();
-    VLOG(DEBUG, "\treleased units: %zu (%zu B)", releasedUnits, releasedUnits * RegionDesc::UNIT_SIZE);
-    VLOG(DEBUG, "\tdirty units: %zu (%zu B)", dirtyUnits, dirtyUnits * RegionDesc::UNIT_SIZE);
+    LOG(DEBUG, GC) << "\treleased units: " << releasedUnits << " (" << releasedUnits * RegionDesc::UNIT_SIZE << " B)";
+    LOG(DEBUG, GC) << "\tdirty units: " << dirtyUnits << " (" << dirtyUnits * RegionDesc::UNIT_SIZE << " B)";
 }
 
 void RegionManager::RequestForRegion(size_t size)
@@ -637,7 +647,7 @@ void RegionManager::RequestForRegion(size_t size)
     double allocRate = std::max(static_cast<double>(BaseRuntime::GetInstance()->GetHeapParam().allocationRate) * MB /
                                     SECOND_TO_NANO_SECOND,
                                 heuAllocRate);
-    ASSERT_LOGF(allocRate > 0.00001, "allocRate is zero");  // If it is less than 0.00001, it is considered as 0
+    ASSERT_PRINT(allocRate > 0.00001, "allocRate is zero");  // If it is less than 0.00001, it is considered as 0
     size_t waitTime = static_cast<size_t>(size / allocRate);
     uint64_t now = TimeUtil::NanoSeconds();
     // Atomic with relaxed order reason: data race with prevRegionAllocTime_ with no synchronization or ordering
@@ -653,7 +663,7 @@ void RegionManager::RequestForRegion(size_t size)
     // constraints imposed on other reads or writes
     uint64_t sleepTime = std::min<uint64_t>(BaseRuntime::GetInstance()->GetHeapParam().allocationWaitTime,
                                             prevRegionAllocTime_.load(std::memory_order_relaxed) + waitTime - now);
-    DLOG(ALLOC, "wait %zu ns to alloc %zu(B)", sleepTime, size);
+    LOG(DEBUG, GC) << "wait " << sleepTime << " ns to alloc " << size << "(B)";
     ark::os::thread::NativeSleepUS(std::chrono::microseconds(sleepTime / NS_PER_US));
     // Atomic with relaxed order reason: data race with prevRegionAllocTime_ with no synchronization or ordering
     // constraints imposed on other reads or writes

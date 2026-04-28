@@ -27,7 +27,7 @@ void FixHeapWorker::CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &l
 void FixHeapWorker::FixOldRegion(RegionDesc *region)
 {
     auto visitFunc = [this](BaseObject *object) {
-        DLOG(FIX, "fix: old obj %p<%p>(%zu)", object, object->GetTypeInfo(), object->GetSize());
+        LOG(DEBUG, GC) << "fix: old obj " << object << "<" << object->GetTypeInfo() << ">(" << object->GetSize() << ")";
         collector_->FixObjectRefFields(object);
     };
     region->VisitRememberSet(visitFunc);
@@ -36,7 +36,7 @@ void FixHeapWorker::FixOldRegion(RegionDesc *region)
 void FixHeapWorker::FixRecentOldRegion(RegionDesc *region)
 {
     auto visitFunc = [this](BaseObject *object) {
-        DLOG(FIX, "fix: old obj %p<%p>(%zu)", object, object->GetTypeInfo(), object->GetSize());
+        LOG(DEBUG, GC) << "fix: old obj " << object << "<" << object->GetTypeInfo() << ">(" << object->GetSize() << ")";
         collector_->FixObjectRefFields(object);
     };
     region->VisitRememberSetBeforeCopy(visitFunc);
@@ -68,7 +68,8 @@ void FixHeapWorker::FixRegion(RegionDesc *region)
             } else if constexpr (type == FixHeapWorker::IGNORED) {
                 /* Ignore */
             }
-            DLOG(FIX, "fix: skip dead obj %p<%p>(%zu)", object, object->GetTypeInfo(), object->GetSize());
+            LOG(DEBUG, GC) << "fix: skip dead obj " << object << "<" << object->GetTypeInfo() << ">("
+                           << object->GetSize() << ")";
         }
     });
 }
@@ -93,7 +94,8 @@ void FixHeapWorker::FixRecentRegion(RegionDesc *region)
             } else if constexpr (type == FixHeapWorker::IGNORED) {
                 /* Ignore */
             }
-            DLOG(FIX, "skip dead obj %p<%p>(%zu)", object, object->GetTypeInfo(), object->GetSize());
+            LOG(DEBUG, GC) << "skip dead obj " << object << "<" << object->GetTypeInfo() << ">(" << object->GetSize()
+                           << ")";
         }
     });
 }
@@ -159,9 +161,9 @@ void PostFixHeapWorker::PostClearTask()
     for (auto [region, object, cellCount] : result_.monoSizeNonMovableGarbages) {
         region->CollectNonMovableGarbage(object, cellCount);
     }
-    DLOG(FIX, "Fix heap worker processed %d Regions, %d monoSizeNonMovableGarbages, %d polySizeNonMovableGarbages",
-         result_.numProcessedRegions, result_.monoSizeNonMovableGarbages.size(),
-         result_.polySizeNonMovableGarbages.size());
+    LOG(DEBUG, GC) << "Fix heap worker processed " << result_.numProcessedRegions << " Regions, "
+                   << result_.monoSizeNonMovableGarbages.size() << " monoSizeNonMovableGarbages, "
+                   << result_.polySizeNonMovableGarbages.size() << " polySizeNonMovableGarbages";
 }
 
 bool PostFixHeapWorker::Run([[maybe_unused]] uint32_t threadIndex)

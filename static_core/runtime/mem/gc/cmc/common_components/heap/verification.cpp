@@ -76,7 +76,7 @@ std::string HexDump(const void *address, size_t length)
         size_t bytesToRead = std::min(wordSize, length - i);
         auto ret = memcpy_s(&word, sizeof(uint64_t), ptr + i, bytesToRead);
         if (ret != EOK) {
-            LOG_COMMON(FATAL) << "memcpy_s failed: ret = " << ret;
+            LOG(FATAL, COMMON) << "memcpy_s failed: ret = " << ret;
             break;
         }
         oss << "0x" << std::setw(wordSize * hexDigitsPerByte) << word << std::endl;
@@ -133,34 +133,41 @@ void IsValidRef(const BaseObject *obj, const RefField<> &ref)
     // Maybe we need to check ref later
     // ...
 
-    CHECKF(Heap::IsTaggedObject(ref.GetFieldValue())) << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-                                                      << "Ref: " << GetRefInfo(ref) << std::endl;
+    LOG_IF(!(Heap::IsTaggedObject(ref.GetFieldValue())), FATAL, COMMON)
+        << "Check failed: Heap::IsTaggedObject(ref.GetFieldValue())" << CONTEXT << "Object: " << GetObjectInfo(obj)
+        << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
 
     // check referenee
     auto refObj = ref.GetTargetObject();
 
-    CHECKF(Heap::IsHeapAddress(refObj)) << CONTEXT << std::hex << "Object address: 0x"
-                                        << reinterpret_cast<MAddress>(refObj) << ","
-                                        << "Heap range: [0x" << Heap::heapStartAddr_ << ", 0x" << Heap::heapCurrentEnd_
-                                        << "]";
+    LOG_IF(!(Heap::IsHeapAddress(refObj)), FATAL, COMMON)
+        << "Check failed: Heap::IsHeapAddress(refObj)" << CONTEXT << std::hex << "Object address: 0x"
+        << reinterpret_cast<MAddress>(refObj) << ","
+        << "Heap range: [0x" << Heap::heapStartAddr_ << ", 0x" << Heap::heapCurrentEnd_ << "]";
 
     auto region = RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(refObj));
-    CHECKF(region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION)
-        << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+    LOG_IF(!(region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION), FATAL, COMMON)
+        << "Check failed: region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION" << CONTEXT
+        << "Object: " << GetObjectInfo(obj) << std::endl
         << "Ref: " << GetRefInfo(ref) << std::endl;
-    CHECKF(region->GetRegionType() != RegionDesc::RegionType::FREE_REGION)
-        << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-        << "Ref: " << GetRefInfo(ref) << std::endl;
-
-    CHECKF(!refObj->IsForwarding() && !refObj->IsForwarded())
-        << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+    LOG_IF(!(region->GetRegionType() != RegionDesc::RegionType::FREE_REGION), FATAL, COMMON)
+        << "Check failed: region->GetRegionType() != RegionDesc::RegionType::FREE_REGION" << CONTEXT
+        << "Object: " << GetObjectInfo(obj) << std::endl
         << "Ref: " << GetRefInfo(ref) << std::endl;
 
-    CHECKF(refObj->IsValidObject() != 0) << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-                                         << "Ref: " << GetRefInfo(ref) << std::endl;
+    LOG_IF(!(!refObj->IsForwarding() && !refObj->IsForwarded()), FATAL, COMMON)
+        << "Check failed: !refObj->IsForwarding() && !refObj->IsForwarded()" << CONTEXT
+        << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
 
-    CHECKF(refObj->GetSize() != 0) << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-                                   << "Ref: " << GetRefInfo(ref) << std::endl;
+    LOG_IF(!(refObj->IsValidObject() != 0), FATAL, COMMON)
+        << "Check failed: refObj->IsValidObject() != 0" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
+
+    LOG_IF(!(refObj->GetSize() != 0), FATAL, COMMON)
+        << "Check failed: refObj->GetSize() != 0" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
 }
 
 class VerifyVisitor {
@@ -212,27 +219,35 @@ public:
         // We expect root objects to be already forwarded: assert(!region->isFromRegion())
         if (obj == nullptr) {
             if constexpr (IsSTWRootVerify) {
-                CHECKF(!region->IsFromRegion()) << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-                                                << "Ref: " << GetRefInfo(ref) << std::endl;
+                LOG_IF(!(!region->IsFromRegion()), FATAL, COMMON) << "Check failed: !region->IsFromRegion()" << CONTEXT
+                                                                  << "Object: " << GetObjectInfo(obj) << std::endl
+                                                                  << "Ref: " << GetRefInfo(ref) << std::endl;
 
                 return;
             } else {
-                CHECKF(!region->IsInToSpace()) << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-                                               << "Ref: " << GetRefInfo(ref) << std::endl;
+                LOG_IF(!(!region->IsInToSpace()), FATAL, COMMON) << "Check failed: !region->IsInToSpace()" << CONTEXT
+                                                                 << "Object: " << GetObjectInfo(obj) << std::endl
+                                                                 << "Ref: " << GetRefInfo(ref) << std::endl;
 
                 return;
             }
         }
 
         if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-            CHECKF(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
-                   RegionalHeap::IsNewObjectSinceMarking(refObj) || !RegionalHeap::IsYoungSpaceObject(refObj))
+            LOG_IF(!(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
+                     RegionalHeap::IsNewObjectSinceMarking(refObj) || !RegionalHeap::IsYoungSpaceObject(refObj)),
+                   FATAL, COMMON)
+                << "Check failed: RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) || "
+                << "RegionalHeap::IsNewObjectSinceMarking(refObj) || !RegionalHeap::IsYoungSpaceObject(refObj)"
                 << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
                 << "Ref: " << GetRefInfo(ref) << std::endl;
         } else {
-            CHECKF(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
-                   RegionalHeap::IsNewObjectSinceMarking(refObj))
-                << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+            LOG_IF(!(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
+                     RegionalHeap::IsNewObjectSinceMarking(refObj)),
+                   FATAL, COMMON)
+                << "Check failed: RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) || "
+                << "RegionalHeap::IsNewObjectSinceMarking(refObj)" << CONTEXT << "Object: " << GetObjectInfo(obj)
+                << std::endl
                 << "Ref: " << GetRefInfo(ref) << std::endl;
         }
     }
@@ -245,8 +260,9 @@ public:
         // check objects in from-space, only alive objects are forwarded
         auto refObj = ref.GetTargetObject();
         if (RegionalHeap::IsMarkedObject(refObj) || RegionalHeap::IsResurrectedObject(refObj)) {
-            CHECKF(refObj->IsForwarded()) << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
-                                          << "Ref: " << GetRefInfo(ref) << std::endl;
+            LOG_IF(!(refObj->IsForwarded()), FATAL, COMMON)
+                << "Check failed: refObj->IsForwarded()" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+                << "Ref: " << GetRefInfo(ref) << std::endl;
 
             auto toObj = refObj->GetForwardingPointer();
             IsValidRef(obj, RefField<>(toObj));
@@ -261,8 +277,9 @@ public:
         IsValidRef(obj, ref);
 
         auto refRegion = RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(ref.GetTargetObject()));
-        CHECKF(refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION)
-            << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+        LOG_IF(!(refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION), FATAL, COMMON)
+            << "Check failed: refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION" << CONTEXT
+            << "Object: " << GetObjectInfo(obj) << std::endl
             << "Ref: " << GetRefInfo(ref) << std::endl;
     }
 };
@@ -404,8 +421,9 @@ private:
 
 void WVerify::VerifyAfterMarkInternal(RegionalHeap &space)
 {
-    CHECKF(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_POST_MARK)
-        << CONTEXT << "Mark verification should be called after PostMarking()";
+    LOG_IF(!(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_POST_MARK), FATAL, COMMON)
+        << "Check failed: Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_POST_MARK" << CONTEXT
+        << "Mark verification should be called after PostMarking()";
 
     auto iter = VerifyIterator(space);
     auto verifySTWRoots = AfterMarkVisitor();
@@ -414,10 +432,10 @@ void WVerify::VerifyAfterMarkInternal(RegionalHeap &space)
     auto verifyConcurrentRoots = AfterMarkVisitor<false>();
     iter.IterateRemarked<VisitConcurrentRoots>(verifyConcurrentRoots, markSet);
 
-    LOG_COMMON(DEBUG) << "[WVerify]: VerifyAfterMark (STWRoots) verified ref count: "
-                      << verifySTWRoots.VerifyRefCount();
-    LOG_COMMON(DEBUG) << "[WVerify]: VerifyAfterMark (ConcurrentRoots) verified ref count: "
-                      << verifyConcurrentRoots.VerifyRefCount();
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterMark (STWRoots) verified ref count: "
+                       << verifySTWRoots.VerifyRefCount();
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterMark (ConcurrentRoots) verified ref count: "
+                       << verifyConcurrentRoots.VerifyRefCount();
 }
 
 void WVerify::VerifyAfterMark(ArkCollector &collector)
@@ -437,14 +455,15 @@ void WVerify::VerifyAfterMark(ArkCollector &collector)
 
 void WVerify::VerifyAfterForwardInternal(RegionalHeap &space)
 {
-    CHECKF(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_COPY)
-        << CONTEXT << "Forward verification should be called after ForwardFromSpace()";
+    LOG_IF(!(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_COPY), FATAL, COMMON)
+        << "Check failed: Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_COPY" << CONTEXT
+        << "Forward verification should be called after ForwardFromSpace()";
 
     auto iter = VerifyIterator(space);
     auto visitor = AfterForwardVisitor();
     iter.IterateFromSpace(visitor);
 
-    LOG_COMMON(DEBUG) << "[WVerify]: VerifyAfterForward verified ref count: " << visitor.VerifyRefCount();
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterForward verified ref count: " << visitor.VerifyRefCount();
 }
 
 void WVerify::VerifyAfterForward(ArkCollector &collector)
@@ -464,8 +483,9 @@ void WVerify::VerifyAfterForward(ArkCollector &collector)
 
 void WVerify::VerifyAfterFixInternal(RegionalHeap &space)
 {
-    CHECKF(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_FIX)
-        << CONTEXT << "Fix verification should be called after Fix()";
+    LOG_IF(!(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_FIX), FATAL, COMMON)
+        << "Check failed: Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_FIX" << CONTEXT
+        << "Fix verification should be called after Fix()";
 
     auto iter = VerifyIterator(space);
     auto visitor = AfterFixVisitor();
@@ -473,7 +493,7 @@ void WVerify::VerifyAfterFixInternal(RegionalHeap &space)
     std::unordered_set<BaseObject *> markSet;
     iter.IterateRemarked(visitor, markSet);
 
-    LOG_COMMON(DEBUG) << "[WVerify]: VerifyAfterFix verified ref count: " << visitor.VerifyRefCount();
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterFix verified ref count: " << visitor.VerifyRefCount();
 }
 
 void WVerify::VerifyAfterFix(ArkCollector &collector)

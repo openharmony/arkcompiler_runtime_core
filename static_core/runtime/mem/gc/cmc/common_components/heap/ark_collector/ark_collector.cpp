@@ -22,9 +22,13 @@
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/regional_heap.h"
 
+#include "libarkbase/utils/logger.h"
+
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
+
+#include <iomanip>
 
 namespace common_vm {
 bool ArkCollector::IsUnmovableFromObject(BaseObject *obj) const
@@ -45,8 +49,9 @@ bool ArkCollector::MarkObject(BaseObject *obj) const
     if (!marked) {
         [[maybe_unused]] RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
         DCHECK(!region->IsGarbageRegion());
-        DLOG(TRACE, "mark obj %p<%p> in region %p(%u)@%#zx, live %u", obj, obj->GetTypeInfo(), region,
-             region->GetRegionType(), region->GetRegionStart(), region->GetLiveByteCount());
+        LOG(DEBUG, GC) << "mark obj " << obj << "<" << obj->GetTypeInfo() << "> in region " << region << "("
+                       << static_cast<size_t>(region->GetRegionType()) << ")@0x" << std::hex << region->GetRegionStart()
+                       << ", live " << std::dec << region->GetLiveByteCount();
     }
     return marked;
 }
@@ -70,25 +75,28 @@ bool ArkCollector::TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &field, Bas
         RefField<> tmpField(toObj, oldRef.IsWeak());
         if (field.CompareExchange(oldRef.GetFieldValue(), tmpField.GetFieldValue())) {  // LCOV_EXCL_BR_LINE
             if (obj != nullptr) {                                                       // LCOV_EXCL_BR_LINE
-                DLOG(TRACE, "update obj %p<%p>(%zu)+%zu ref-field@%p: %#zx -> %#zx", obj, obj->GetTypeInfo(),
-                     obj->GetSize(), BaseObject::FieldOffset(obj, &field), &field, oldRef.GetFieldValue(),
-                     tmpField.GetFieldValue());
-                LOG_MM_OBJ_EVENTS(DEBUG) << "BARRIER ref in obj " << obj << " field@" << &field << ": " << fromObj
-                                         << " -> " << toObj;
+                LOG(DEBUG, GC) << "update obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")+"
+                               << BaseObject::FieldOffset(obj, &field) << " ref-field@" << &field << ": 0x" << std::hex
+                               << oldRef.GetFieldValue() << " -> 0x" << tmpField.GetFieldValue() << std::dec;
+                LOG(DEBUG, MM_OBJECT_EVENTS)
+                    << "[CMC] "
+                    << "BARRIER ref in obj " << obj << " field@" << &field << ": " << fromObj << " -> " << toObj;
             } else {  // LCOV_EXCL_BR_LINE
-                DLOG(TRACE, "update ref@%p: 0x%zx -> %p", &field, oldRef.GetFieldValue(), toObj);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "BARRIER ref @" << &field << ": " << fromObj << " -> " << toObj;
+                LOG(DEBUG, GC) << "update ref@" << &field << ": 0x" << std::hex << oldRef.GetFieldValue() << " -> "
+                               << std::dec << toObj;
+                LOG(DEBUG, MM_OBJECT_EVENTS) << "[CMC] "
+                                             << "BARRIER ref @" << &field << ": " << fromObj << " -> " << toObj;
             }
             return true;
         } else {                   // LCOV_EXCL_BR_LINE
             if (obj != nullptr) {  // LCOV_EXCL_BR_LINE
-                DLOG(TRACE,
-                     "update obj %p<%p>(%zu)+%zu but cas failed ref-field@%p: %#zx(%#zx) -> %#zx but cas failed ", obj,
-                     obj->GetTypeInfo(), obj->GetSize(), BaseObject::FieldOffset(obj, &field), &field,
-                     oldRef.GetFieldValue(), field.GetFieldValue(), tmpField.GetFieldValue());
+                LOG(DEBUG, GC) << "update obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")+"
+                               << BaseObject::FieldOffset(obj, &field) << " but cas failed ref-field@" << &field
+                               << ": 0x" << std::hex << oldRef.GetFieldValue() << "(0x" << field.GetFieldValue()
+                               << ") -> 0x" << tmpField.GetFieldValue() << std::dec << " but cas failed ";
             } else {  // LCOV_EXCL_BR_LINE
-                DLOG(TRACE, "update but cas failed ref@%p: 0x%zx(%zx) -> %p", &field, oldRef.GetFieldValue(),
-                     field.GetFieldValue(), toObj);
+                LOG(DEBUG, GC) << "update but cas failed ref@" << &field << ": 0x" << std::hex << oldRef.GetFieldValue()
+                               << "(" << field.GetFieldValue() << std::dec << ") -> " << toObj;
             }
             return true;
         }
@@ -127,8 +135,8 @@ static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMar
     auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>((void *)targetObj));
     // cannot skip objects in EXEMPTED_FROM_REGION, because its rset is incomplete
     if (gcReason == GC_REASON_YOUNG && !targetRegion->IsInYoungSpace()) {
-        DLOG(TRACE, "marking: skip non-young object %p@%p, target object: %p<%p>(%zu)", obj, &field, targetObj,
-             targetObj->GetTypeInfo(), targetObj->GetSize());
+        LOG(DEBUG, GC) << "marking: skip non-young object " << obj << "@" << &field << ", target object: " << targetObj
+                       << "<" << targetObj->GetTypeInfo() << ">(" << targetObj->GetSize() << ")";
         return;
     }
     common_vm::MarkingRefField(obj, targetObj, field, markStack, targetRegion);
@@ -139,17 +147,17 @@ static void MarkingRefField(BaseObject *obj, BaseObject *targetObj, RefField<> &
                             ParallelLocalMarkStack &markStack, RegionDesc *targetRegion)
 {
     if (targetRegion->IsNewObjectSinceMarking(targetObj)) {
-        DLOG(TRACE, "marking: skip new obj %p<%p>(%zu)", targetObj, targetObj->GetTypeInfo(), targetObj->GetSize());
+        LOG(DEBUG, GC) << "marking: skip new obj " << targetObj << "<" << targetObj->GetTypeInfo() << ">("
+                       << targetObj->GetSize() << ")";
         return;
     }
 
     if (targetRegion->MarkObject(targetObj)) {
-        DLOG(TRACE, "marking: obj has been marked %p", targetObj);
+        LOG(DEBUG, GC) << "marking: obj has been marked " << targetObj;
         return;
     }
-
-    DLOG(TRACE, "marking obj %p ref@%p: %p<%p>(%zu)", obj, &field, targetObj, targetObj->GetTypeInfo(),
-         targetObj->GetSize());
+    LOG(DEBUG, GC) << "marking obj " << obj << " ref@" << &field << ": " << targetObj << "<" << targetObj->GetTypeInfo()
+                   << ">(" << targetObj->GetSize() << ")";
     markStack.Push(targetObj);
 }
 
@@ -170,7 +178,8 @@ static void MarkWeakRefField(BaseObject *obj, RefField<> &field, WeakStack &weak
     }
     // field is tagged object, should be in heap
     DCHECK(Heap::IsHeapAddress(targetObj));
-    DLOG(TRACE, "marking: skip weak obj when full gc, object: %p@%p, targetObj: %p", obj, &field, targetObj);
+    LOG(DEBUG, GC) << "marking: skip weak obj when full gc, object: " << obj << "@" << &field
+                   << ", targetObj: " << targetObj;
     // weak ref is cleared after roots pre-forward, so there might be a to-version weak ref which also need to be
     // cleared, offset recorded here will help us find it
     weakStack.emplace_back(&field, reinterpret_cast<uintptr_t>(&field) - reinterpret_cast<uintptr_t>(obj));
@@ -207,9 +216,11 @@ void ArkCollector::MarkingXRef(RefField<> &field, ParallelLocalMarkStack &workSt
     // field is tagged object, should be in heap
     DCHECK(Heap::IsHeapAddress(targetObj));
 
-    DLOG(TRACE, "trace obj %p <%p>(%zu)", targetObj, targetObj->GetTypeInfo(), targetObj->GetSize());
+    LOG(DEBUG, GC) << "trace obj " << targetObj << " <" << targetObj->GetTypeInfo() << ">(" << targetObj->GetSize()
+                   << ")";
     if (region->IsNewObjectSinceForward(targetObj)) {
-        DLOG(TRACE, "trace: skip new obj %p<%p>(%zu)", targetObj, targetObj->GetTypeInfo(), targetObj->GetSize());
+        LOG(DEBUG, GC) << "trace: skip new obj " << targetObj << "<" << targetObj->GetTypeInfo() << ">("
+                       << targetObj->GetSize() << ")";
         return;
     }
     DCHECK(!field.IsWeak());
@@ -246,10 +257,8 @@ void ArkCollector::FixRefField(BaseObject *obj, RefField<> &field) const
         RegionDesc::InlinedRegionMetaData *objRegion =
             RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(obj));
         if (!objRegion->IsInRecentSpace() && objRegion->MarkRSetCardTable(obj)) {
-            DLOG(TRACE,
-                 "fix phase update point-out remember set of region %p, obj "
-                 "%p, ref: <%p>",
-                 objRegion, obj, targetObj->GetTypeInfo());
+            LOG(DEBUG, GC) << "fix phase update point-out remember set of region " << objRegion << ", obj " << obj
+                           << ", ref: <" << targetObj->GetTypeInfo() << ">";
         }
         return;
     } else if (!isFrom) {
@@ -264,16 +273,18 @@ void ArkCollector::FixRefField(BaseObject *obj, RefField<> &field) const
     CHECK(latest->IsValidObject());
     RefField<> newField(latest, oldField.IsWeak());
     if (field.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-        DLOG(FIX, "fix obj %p+%zu ref@%p: %#zx => %p<%p>(%zu)", obj, obj->GetSize(), &field, oldField.GetFieldValue(),
-             latest, latest->GetTypeInfo(), latest->GetSize());
-        LOG_MM_OBJ_EVENTS(DEBUG) << "FIX ref in obj " << obj << " field@" << &field << ": " << targetObj << " -> "
-                                 << latest;
+        LOG(DEBUG, GC) << "fix obj " << obj << "+" << obj->GetSize() << " ref@" << &field << ": 0x" << std::hex
+                       << oldField.GetFieldValue() << " => " << std::dec << latest << "<" << latest->GetTypeInfo()
+                       << ">(" << latest->GetSize() << ")";
+        LOG(DEBUG, MM_OBJECT_EVENTS) << "[CMC] "
+                                     << "FIX ref in obj " << obj << " field@" << &field << ": " << targetObj << " -> "
+                                     << latest;
     }
 }
 
 void ArkCollector::FixObjectRefFields(BaseObject *obj) const
 {
-    DLOG(FIX, "fix obj %p<%p>(%zu)", obj, obj->GetTypeInfo(), obj->GetSize());
+    LOG(DEBUG, GC) << "fix obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")";
     auto refFunc = [this, obj](RefField<> &field) { FixRefField(obj, field); };
     obj->ForEachRefField(refFunc, refFunc);
 }
@@ -289,7 +300,7 @@ public:
     {
         RefField<> oldField(refField);
         BaseObject *oldObj = oldField.GetTargetObject();
-        DLOG(FIX, "visit raw-ref @%p: %p", &refField, oldObj);
+        LOG(DEBUG, GC) << "visit raw-ref @" << &refField << ": " << oldObj;
 
         auto regionType =
             RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(oldObj))
@@ -303,8 +314,9 @@ public:
             RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "REMARK ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, MM_OBJECT_EVENTS) << "[CMC] "
+                                             << "REMARK ref @" << &refField << ": " << oldObj << " -> " << toVersion;
             }
             MarkToObject(oldObj, toVersion);
         } else {
@@ -349,7 +361,7 @@ public:
     {
         RefField<> oldField(refField);
         BaseObject *oldObj = oldField.GetTargetObject();
-        DLOG(FIX, "visit raw-ref @%p: %p", &refField, oldObj);
+        LOG(DEBUG, GC) << "visit raw-ref @" << &refField << ": " << oldObj;
 
         auto regionType =
             RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(oldObj))
@@ -366,7 +378,7 @@ public:
         RefField<> newField(toVersion);
         // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
         if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-            DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
+            LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
         }
         MarkToObject(toVersion);
     }
@@ -478,16 +490,17 @@ void ArkCollector::PreforwardConcurrentRoots()
     RefFieldVisitor visitor = [this](RefField<> &refField) {
         RefField<> oldField(refField);
         BaseObject *oldObj = oldField.GetTargetObject();
-        DLOG(FIX, "visit raw-ref @%p: %p", &refField, oldObj);
+        LOG(DEBUG, GC) << "visit raw-ref @" << &refField << ": " << oldObj;
         if (IsFromObject(oldObj)) {
             BaseObject *toVersion = TryForwardObject(oldObj);
-            ASSERT_LOGF(toVersion != nullptr, "TryForwardObject failed");
+            ASSERT_PRINT(toVersion != nullptr, "TryForwardObject failed");
             RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD concurrent ref @" << &refField << ": " << oldObj << " -> "
-                                         << toVersion;
+                LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, MM_OBJECT_EVENTS)
+                    << "[CMC] "
+                    << "PREFORWARD concurrent ref @" << &refField << ": " << oldObj << " -> " << toVersion;
             }
         }
     };
@@ -513,7 +526,7 @@ void ArkCollector::PreforwardStaticWeakRoots()
 
 void ArkCollector::PreforwardConcurrencyModelRoots()
 {
-    LOG_COMMON(FATAL) << "Unresolved fatal";
+    LOG(FATAL, COMMON) << "Unresolved fatal";
     UNREACHABLE();
 }
 
@@ -549,8 +562,8 @@ void EnumRootsBuffer::UpdateBufferSize()
         bufferSize_ = std::max(buffer_.capacity(), bufferSize_);
     }
     if (buffer_.capacity() > UINT16_MAX) {
-        LOG_COMMON(INFO) << "too many roots, allocated buffer too large: " << buffer_.size() << ", allocate "
-                         << (static_cast<double>(buffer_.capacity()) / MB);
+        LOG(INFO, COMMON) << "too many roots, allocated buffer too large: " << buffer_.size() << ", allocate "
+                          << (static_cast<double>(buffer_.capacity()) / MB);
     }
 }
 
@@ -622,7 +635,7 @@ WeakRefFieldVisitor ArkCollector::GetWeakRefFieldVisitor()
             }
         }
 
-        DLOG(FIX, "visit weak raw-ref @%p: %p", &refField, oldObj);
+        LOG(DEBUG, GC) << "visit weak raw-ref @" << &refField << ": " << oldObj;
         if (IsFromObject(oldObj)) {
             BaseObject *toVersion = TryForwardObject(oldObj);
             CHECK(toVersion != nullptr);
@@ -630,9 +643,10 @@ WeakRefFieldVisitor ArkCollector::GetWeakRefFieldVisitor()
             // CAS failure means some mutator or gc thread writes a new ref (must be
             // a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                DLOG(FIX, "fix weak raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD weak ref @" << &refField << ": " << oldObj << " -> "
-                                         << toVersion;
+                LOG(DEBUG, GC) << "fix weak raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, MM_OBJECT_EVENTS)
+                    << "[CMC] "
+                    << "PREFORWARD weak ref @" << &refField << ": " << oldObj << " -> " << toVersion;
             }
         }
         return true;
@@ -651,8 +665,10 @@ RefFieldVisitor ArkCollector::GetPrefowardRefFieldVisitor()
             // CAS failure means some mutator or gc thread writes a new ref (must be
             // a to-object), no need to retry.
             if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                DLOG(FIX, "fix raw-ref @%p: %p -> %p", &refField, oldObj, toVersion);
-                LOG_MM_OBJ_EVENTS(DEBUG) << "PREFORWARD ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, MM_OBJECT_EVENTS)
+                    << "[CMC] "
+                    << "PREFORWARD ref @" << &refField << ": " << oldObj << " -> " << toVersion;
             }
         }
     };
@@ -663,7 +679,7 @@ void ArkCollector::PreforwardFlip()
     auto remarkAndForwardGlobalRoot = [this]() {
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
         SetGCThreadQosPriority(common_vm::PriorityMode::STW);
-        ASSERT_LOGF(GetThreadPool() != nullptr, "thread pool is null");
+        ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
         TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
         Remark();
         PostMarking();
@@ -699,7 +715,7 @@ void ArkCollector::Preforward()
     TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
 
     [[maybe_unused]] Taskpool *threadPool = GetThreadPool();
-    ASSERT_LOGF(threadPool != nullptr, "thread pool is null");
+    ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
 
     // copy and fix finalizer roots.
     // Only one root task, no need to post task.
@@ -1520,7 +1536,8 @@ BaseObject *ArkCollector::CopyObjectImpl(BaseObject *obj)
         // 1. object has already been forwarded
         if (obj->IsForwarded()) {
             auto toObj = GetForwardingPointer(obj);
-            DLOG(COPY, "skip forwarded obj %p -> %p<%p>(%zu)", obj, toObj, toObj->GetTypeInfo(), toObj->GetSize());
+            LOG(DEBUG, GC) << "skip forwarded obj " << obj << " -> " << toObj << "<" << toObj->GetTypeInfo() << ">("
+                           << toObj->GetSize() << ")";
             return toObj;
         }
 
@@ -1536,7 +1553,7 @@ BaseObject *ArkCollector::CopyObjectImpl(BaseObject *obj)
             return CopyObjectAfterExclusive(obj);
         }
     } while (true);
-    LOG_COMMON(FATAL) << "forwardObject exit in wrong path";
+    LOG(FATAL, COMMON) << "forwardObject exit in wrong path";
     UNREACHABLE();
     return nullptr;
 }
@@ -1546,8 +1563,8 @@ BaseObject *ArkCollector::CopyObjectAfterExclusive(BaseObject *obj)
     size_t size = RegionalHeap::GetAllocSize(*obj);
     // 8: size of free object, but free object can not be copied.
     if (size == 8) {
-        LOG_COMMON(FATAL) << "forward free obj: " << obj
-                          << "is survived: " << (IsSurvivedObject(obj) ? "true" : "false");
+        LOG(FATAL, COMMON) << "forward free obj: " << obj
+                           << "is survived: " << (IsSurvivedObject(obj) ? "true" : "false");
     }
     BaseObject *toObj = reinterpret_cast<RegionalHeap &>(theAllocator_).RouteObject(obj, size);
     if (toObj == nullptr) {
@@ -1555,11 +1572,12 @@ BaseObject *ArkCollector::CopyObjectAfterExclusive(BaseObject *obj)
         obj->UnlockExclusive(BaseStateWord::ForwardState::NORMAL);
         return toObj;
     }
-    DLOG(COPY, "copy obj %p<%p>(%zu) to %p", obj, obj->GetTypeInfo(), size, toObj);
-    LOG_MM_OBJ_EVENTS(DEBUG) << "MOVE object " << obj << " -> " << toObj;
+    LOG(DEBUG, GC) << "copy obj " << obj << "<" << obj->GetTypeInfo() << ">(" << size << ") to " << toObj;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "[CMC] "
+                                 << "MOVE object " << obj << " -> " << toObj;
     CopyObject(*obj, *toObj, size);
 
-    ASSERT_LOGF(IsToObject(toObj), "Copy object to invalid region");
+    ASSERT_PRINT(IsToObject(toObj), "Copy object to invalid region");
     toObj->SetForwardState(BaseStateWord::ForwardState::NORMAL);
 
     // Atomic with release order reason: ensure copied object content is visible before setting forwarding state
@@ -1597,10 +1615,14 @@ void ArkCollector::CollectSmallSpace()
 
     stats.liveBytesAfterGC = space.GetAllocatedBytes();
 
-    VLOG(DEBUG, "collect %zu B: small %zu - %zu B, non-movable %zu - %zu B, large %zu - %zu B. garbage ratio %.2f%%",
-         stats.collectedBytes, stats.fromSpaceSize, stats.smallGarbageSize, stats.nonMovableSpaceSize,
-         stats.nonMovableGarbageSize, stats.largeSpaceSize, stats.largeGarbageSize,
-         stats.garbageRatio * 100);  // The base of the percentage is 100
+    [[maybe_unused]] constexpr int logPercentagePrecision = 2;
+    [[maybe_unused]] constexpr size_t logBasePercentage = 100UL;
+    LOG(DEBUG, GC) << "collect " << stats.collectedBytes << " B: small " << stats.fromSpaceSize << " - "
+                   << stats.smallGarbageSize << " B, non-movable " << stats.nonMovableSpaceSize << " - "
+                   << stats.nonMovableGarbageSize << " B, large " << stats.largeSpaceSize << " - "
+                   << stats.largeGarbageSize << " B. garbage ratio " << std::fixed
+                   << std::setprecision(logPercentagePrecision) << stats.garbageRatio * logBasePercentage
+                   << "%";  // The base of the percentage is 100
     OHOS_HITRACE(
         HITRACE_LEVEL_COMMERCIAL, "CMCGC::CollectSmallSpace END",
         ("collect:" + std::to_string(stats.collectedBytes) + "B;small:" + std::to_string(stats.fromSpaceSize) + "-" +
@@ -1615,7 +1637,7 @@ void ArkCollector::CollectSmallSpace()
 void ArkCollector::SetGCThreadQosPriority(common_vm::PriorityMode mode)
 {
 #ifdef ENABLE_QOS
-    LOG_COMMON(DEBUG) << "SetGCThreadQosPriority gettid " << gettid();
+    LOG(DEBUG, COMMON) << "SetGCThreadQosPriority gettid " << gettid();
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::SetGCThreadQosPriority", "");
     switch (mode) {
         case PriorityMode::STW: {

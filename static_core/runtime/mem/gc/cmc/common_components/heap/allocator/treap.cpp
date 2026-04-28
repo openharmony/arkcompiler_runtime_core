@@ -37,7 +37,7 @@ bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDe
     do {
         if (current == nullptr) {
             current = new (nodeAllocator_.Allocate()) TreapNode(idx, num, refreshRegionDesc);
-            CTREE_ASSERT(current != nullptr, "fail to allocate a new node");
+            ASSERT_PRINT(current != nullptr, "fail to allocate a new node");
             *pCurrent = current;
             IncTotalCount(num);
             break;
@@ -61,7 +61,7 @@ bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDe
             current = current->r;
         } else {
             // something clashes
-            CTREE_ASSERT(false, "merge insertion failed");
+            ASSERT_PRINT(false, "merge insertion failed");
             return false;
         }
     } while (true);
@@ -71,7 +71,7 @@ bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDe
         pCurrent = pnStack.Top();
         pnStack.Pop();
         current = *pCurrent;
-        CTREE_ASSERT(current, "merge insertion bubbling failed case 1");
+        ASSERT_PRINT(current, "merge insertion bubbling failed case 1");
         if (m < current->GetIndex()) {
             // (idx, num) was inserted into n's left subtree, do rotate l, if needed
             if (current->GetCount() < current->l->GetCount()) {
@@ -89,7 +89,7 @@ bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDe
                 break;
             }
         } else {
-            CTREE_ASSERT(false, "merge insertion bubbling failed: case 2");
+            ASSERT_PRINT(false, "merge insertion bubbling failed: case 2");
             return false;
         }
     }
@@ -103,28 +103,28 @@ void Treap::DumpTree(const char *msg) const
         return;
     }
 
-    VLOG(DEBUG, "dump %s %p in graphviz .dot:", msg, this);
-    VLOG(DEBUG, "digraph tree%p {", this);
+    LOG(DEBUG, GC) << "dump " << msg << " " << this << " in graphviz .dot:";
+    LOG(DEBUG, GC) << "digraph tree" << this << " {";
     Treap::Iterator it(*const_cast<Treap *>(this));
     auto node = it.Next();
     while (node != nullptr) {
-        VLOG(DEBUG, "c-tree %p N%p [label=\"%p:%u+%u=%u\"]", this, node, node, node->GetIndex(), node->GetCount(),
-             node->GetIndex() + node->GetCount());
+        LOG(DEBUG, GC) << "c-tree " << this << " N" << node << " [label=\"" << node << ":" << node->GetIndex() << "+"
+                       << node->GetCount() << "=" << node->GetIndex() + node->GetCount() << "\"]";
 
         if (node->l != nullptr) {
-            VLOG(DEBUG, "c-tree %p N%p -> N%p", this, node, node->l);
+            LOG(DEBUG, GC) << "c-tree " << this << " N" << node << " -> N" << node->l;
         }
 
-        VLOG(DEBUG, "c-tree %p N%p -> D%p [style=invis]", this, node, node);
-        VLOG(DEBUG, "c-tree %p D%p [width=0, style=invis]", this, node);
+        LOG(DEBUG, GC) << "c-tree " << this << " N" << node << " -> D" << node << " [style=invis]";
+        LOG(DEBUG, GC) << "c-tree " << this << " D" << node << " [width=0, style=invis]";
 
         if (node->r != nullptr) {
-            VLOG(DEBUG, "c-tree %p N%p -> N%p", this, node, node->r);
+            LOG(DEBUG, GC) << "c-tree " << this << " N" << node << " -> N" << node->r;
         }
 
         node = it.Next();
     }
-    VLOG(DEBUG, "}");
+    LOG(DEBUG, GC) << "}";
 }
 #endif
 

@@ -17,7 +17,8 @@
 #include "common_interfaces/base_runtime.h"
 #include "common_components/base/time_utils.h"
 #include "common_components/heap/heap.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 
 #include <cmath>
 #include <iomanip>
@@ -129,7 +130,7 @@ void GCStats::Dump() const
         << " LOS objects, " << freePercent << "% free, " << FormatMemory(allocatedNow) << "/" << FormatMemory(totalHeap)
         << ", "
         << "phase: STW_TOTAL paused: " << FormatTimeMs(TotalSTWTime()) << " total: " << FormatTimeMs(totalTimeNs);
-    LOG_GC(INFO) << oss.str();
+    LOG(INFO, GC) << oss.str();
 
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::GCStatsDump",
                  ("collectedObjects:" + std::to_string(collectedObjects) +

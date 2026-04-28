@@ -18,7 +18,8 @@
 
 #include "common_components/common/page_pool.h"
 #include "common_components/common/mark_work_stack.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 
 namespace common_vm {
 // snapshot at the beginning buffer
@@ -49,7 +50,8 @@ public:
         void Clear()
         {
             size_t size = reinterpret_cast<uintptr_t>(top_) - reinterpret_cast<uintptr_t>(container_);
-            LOGF_CHECK((memset_s(container_, sizeof(container_), 0, size) == EOK)) << "memset fail\n";
+            LOG_IF(UNLIKELY(memset_s(container_, sizeof(container_), 0, size) != EOK), FATAL, MM_OBJECT_EVENTS)
+                << "memset fail\n";
             top_ = container_;
         }
         void Push(const BaseObject *obj)
@@ -61,7 +63,7 @@ public:
         template <typename T>
         void GetObjects(T &stack)
         {
-            ASSERT_LOGF(top_ <= &container_[CONTAINER_CAPACITY_], "invalid node");
+            ASSERT_PRINT(top_ <= &container_[CONTAINER_CAPACITY_], "invalid node");
             ark::os::memory::LockHolder lg(syncLock_);
             BaseObject **head = container_;
             while (head != top_) {
@@ -219,14 +221,14 @@ public:
             node = list;
             TreapNode *cur = list->next_;
             node->next_ = nullptr;
-            LOGF_CHECK(node->IsEmpty()) << "Get an unempty node from new page";
+            LOG_IF(UNLIKELY(!node->IsEmpty()), FATAL, MM_OBJECT_EVENTS) << "Get an unempty node from new page";
             while (cur != nullptr) {
                 TreapNode *next = cur->next_;
                 freeNodes_.Push(cur);
                 cur = next;
             }
         } else {
-            LOGF_CHECK(node->IsEmpty()) << "get an unempty node from free nodes";
+            LOG_IF(UNLIKELY(!node->IsEmpty()), FATAL, MM_OBJECT_EVENTS) << "get an unempty node from free nodes";
         }
     }
 

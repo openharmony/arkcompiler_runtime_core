@@ -404,7 +404,7 @@ void HeapImpl::InstallBarrier(const GCPhase phase)
         // constraints imposed on other reads or writes, barrier is installed under STW or handshake
         currentBarrier_.store(&remarkBarrier_, std::memory_order_relaxed);
     }
-    DLOG(GCPHASE, "install barrier for gc phase %u", phase);
+    LOG(DEBUG, GC) << "install barrier for gc phase " << phase;
 }
 
 GCPhase HeapImpl::GetGCPhase() const

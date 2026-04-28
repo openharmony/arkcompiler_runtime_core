@@ -43,13 +43,13 @@ void HeapBitmapManager::InitializeHeapBitmap()
 #ifdef _WIN64
     void *startAddress = VirtualAlloc(NULL, allHeapBitmapSize_, MEM_RESERVE, PAGE_READWRITE);
     if (startAddress == NULL) {  // LCOV_EXCL_BR_LINE
-        LOG_COMMON(FATAL) << "failed to initialize HeapBitmapManager";
+        LOG(FATAL, COMMON) << "failed to initialize HeapBitmapManager";
         UNREACHABLE();
     }
 #else
     void *startAddress = mmap(nullptr, allHeapBitmapSize_, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (startAddress == MAP_FAILED) {  // LCOV_EXCL_BR_LINE
-        LOG_COMMON(FATAL) << "failed to initialize HeapBitmapManager";
+        LOG(FATAL, COMMON) << "failed to initialize HeapBitmapManager";
         UNREACHABLE();
     } else {
 #ifndef __APPLE__
@@ -69,11 +69,11 @@ void HeapBitmapManager::DestroyHeapBitmap()
 {
 #ifdef _WIN64
     if (!VirtualFree(reinterpret_cast<void *>(heapBitmapStart_), 0, MEM_RELEASE)) {
-        LOG_COMMON(ERROR) << "VirtualFree error for HeapBitmapManager";
+        LOG(ERROR, COMMON) << "VirtualFree error for HeapBitmapManager";
     }
 #else
     if (munmap(reinterpret_cast<void *>(heapBitmapStart_), allHeapBitmapSize_) != 0) {
-        LOG_COMMON(ERROR) << "munmap error for HeapBitmapManager";
+        LOG(ERROR, COMMON) << "munmap error for HeapBitmapManager";
     }
 #endif
     initialized = false;

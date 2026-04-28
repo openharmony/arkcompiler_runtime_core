@@ -53,9 +53,9 @@ size_t LargeSpace::CollectLargeGarbage()
             continue;
         }
         if (!collector.IsSurvivedObject(obj) && !region->IsNewObjectSinceMarking(obj)) {
-            DLOG(REGION, "reclaim large region %p@0x%zx+%zu type %u", region, region->GetRegionStart(),
-                 region->GetRegionAllocatedSize(), region->GetRegionType());
-
+            LOG(DEBUG, GC) << "reclaim large region " << region << "@0x" << std::hex << region->GetRegionStart() << "+"
+                           << std::dec << region->GetRegionAllocatedSize() << " type "
+                           << static_cast<size_t>(region->GetRegionType());
             RegionDesc *del = region;
             region = region->GetNextRegion();
             largeRegionList_.DeleteRegion(del);
@@ -65,8 +65,9 @@ size_t LargeSpace::CollectLargeGarbage()
                 garbageSize += regionManager_.CollectRegion(del);
             }
         } else {
-            DLOG(REGION, "clear mark-bit for large region %p@0x%zx+%zu type %u", region, region->GetRegionStart(),
-                 region->GetRegionAllocatedSize(), region->GetRegionType());
+            LOG(DEBUG, GC) << "clear mark-bit for large region " << region << "@0x" << std::hex
+                           << region->GetRegionStart() << "+" << std::dec << region->GetRegionAllocatedSize()
+                           << " type " << static_cast<size_t>(region->GetRegionType());
             region = region->GetNextRegion();
         }
     }
@@ -89,8 +90,8 @@ uintptr_t LargeSpace::Alloc(size_t size, bool allowGC)
         return 0;
     }
     InitRegionPhaseLine(region);
-    DLOG(REGION, "alloc large region @0x%zx+%zu type %u", region->GetRegionStart(), region->GetRegionSize(),
-         region->GetRegionType());
+    LOG(DEBUG, GC) << "alloc large region @0x" << std::hex << region->GetRegionStart() << "+" << std::dec
+                   << region->GetRegionSize() << " type " << static_cast<size_t>(region->GetRegionType());
     uintptr_t addr = region->Alloc(size);
     DCHECK(addr > 0);
     recentLargeRegionList_.PrependRegion(region, RegionDesc::RegionType::RECENT_LARGE_REGION);

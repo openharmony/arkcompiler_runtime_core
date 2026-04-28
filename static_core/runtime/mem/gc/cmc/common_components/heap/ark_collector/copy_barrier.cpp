@@ -52,7 +52,8 @@ BaseObject *CopyBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &fie
 {
     RefField<false> tmpField(field.GetFieldValue(order));
     BaseObject *target = ReadRefField(nullptr, tmpField);
-    DLOG(FBARRIER, "atomic read obj %p ref-field@%p: %#zx -> %p", obj, &field, tmpField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "atomic read obj " << obj << " ref-field@" << &field << ": " << std::hex << "0x"
+                   << tmpField.GetFieldValue() << " -> " << target;
     return target;
 }
 
@@ -60,7 +61,7 @@ void YoungCopyBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedO
 {
     if (rememberedObject != nullptr) {
         mutator->RememberObjectInSatbBuffer(rememberedObject);
-        DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+        LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
     }
 }
 
@@ -68,7 +69,7 @@ void YoungCopyBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<
 {
     if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
         UpdateRememberSet(obj, ref);
-        DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
+        LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": -> " << ref;
     }
 }
 }  // namespace common_vm

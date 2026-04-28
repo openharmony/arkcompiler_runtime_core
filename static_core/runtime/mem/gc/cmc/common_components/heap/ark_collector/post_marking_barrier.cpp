@@ -46,7 +46,8 @@ BaseObject *PostMarkingBarrier::AtomicReadRefField(BaseObject *obj, RefField<tru
     RefField<false> oldField(field.GetFieldValue(order));
 
     target = ReadRefField(nullptr, oldField);
-    DLOG(TBARRIER, "katomic read obj %p ref@%p: %#zx -> %p", obj, &field, oldField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "katomic read obj " << obj << " ref@" << &field << ": " << std::hex << "0x"
+                   << oldField.GetFieldValue() << " -> " << target;
     return target;
 }
 }  // namespace common_vm

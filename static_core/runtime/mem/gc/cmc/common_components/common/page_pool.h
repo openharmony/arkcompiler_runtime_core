@@ -34,6 +34,7 @@
 #endif
 
 #include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/logger.h"
 
 namespace common_vm {
 // a page pool maintain a pool of free pages, serve page allocation and free
@@ -59,10 +60,10 @@ public:
     {
         freePagesTree_.Fini();
 #ifdef _WIN64
-        LOGE_IF(!VirtualFree(base_, 0, MEM_RELEASE))
+        LOG_IF(UNLIKELY(!VirtualFree(base_, 0, MEM_RELEASE)), ERROR, MEMORYPOOL)
             << "VirtualFree failed in PagePool destruction, errno: " << GetLastError();
 #else
-        LOGE_IF(munmap(base_, totalPageCount_ * COMMON_PAGE_SIZE) != EOK)
+        LOG_IF(UNLIKELY(munmap(base_, totalPageCount_ * COMMON_PAGE_SIZE) != EOK), ERROR, MEMORYPOOL)
             << "munmap failed in PagePool destruction, errno: " << errno;
 #endif
     }
@@ -72,13 +73,14 @@ public:
         uint32_t idx = 0;
         size_t count = (bytes + COMMON_PAGE_SIZE - 1) / COMMON_PAGE_SIZE;
         size_t pageSize = RoundUp(bytes, COMMON_PAGE_SIZE);
-        LOGF_CHECK(count < std::numeric_limits<uint32_t>::max()) << "native memory out of memory!";
+        LOG_IF(UNLIKELY(count >= std::numeric_limits<uint32_t>::max()), FATAL, MM_OBJECT_EVENTS)
+            << "native memory out of memory!";
         {
             ark::os::memory::LockHolder lg(freePagesMutex_);
             if (freePagesTree_.TakeUnits(static_cast<uint32_t>(count), idx, false)) {
                 auto *ret = base_ + static_cast<size_t>(idx) * COMMON_PAGE_SIZE;
 #ifdef _WIN64
-                LOGE_IF(UNLIKELY(!VirtualAlloc(ret, pageSize, MEM_COMMIT, PAGE_READWRITE)))
+                LOG_IF(UNLIKELY(!VirtualAlloc(ret, pageSize, MEM_COMMIT, PAGE_READWRITE)), ERROR, MEMORYPOOL)
                     << "VirtualAlloc commit failed in GetPage, errno: " << GetLastError();
 #endif
                 return ret;
@@ -87,7 +89,8 @@ public:
                 size_t current = usedZone_;
                 usedZone_ += pageSize;
 #ifdef _WIN64
-                LOGE_IF(UNLIKELY(!VirtualAlloc(base_ + current, pageSize, MEM_COMMIT, PAGE_READWRITE)))
+                LOG_IF(UNLIKELY(!VirtualAlloc(base_ + current, pageSize, MEM_COMMIT, PAGE_READWRITE)), ERROR,
+                       MEMORYPOOL)
                     << "VirtualAlloc commit failed in GetPage, errno: " << GetLastError();
 #endif
                 return base_ + current;
@@ -102,18 +105,19 @@ public:
         size_t num = (bytes + COMMON_PAGE_SIZE - 1) / COMMON_PAGE_SIZE;
         if (page < base_ || page >= end) {
 #ifdef _WIN64
-            LOGE_IF(UNLIKELY(!VirtualFree(page, 0, MEM_RELEASE)))
+            LOG_IF(UNLIKELY(!VirtualFree(page, 0, MEM_RELEASE)), ERROR, MEMORYPOOL)
                 << "VirtualFree failed in ReturnPage, errno: " << GetLastError();
 #else
-            LOGE_IF(UNLIKELY(munmap(page, num * COMMON_PAGE_SIZE) != EOK))
+            LOG_IF(UNLIKELY(munmap(page, num * COMMON_PAGE_SIZE) != EOK), ERROR, MEMORYPOOL)
                 << "munmap failed in ReturnPage, errno: " << errno;
 #endif
             return;
         }
-        LOGF_CHECK(num < std::numeric_limits<uint32_t>::max()) << "native memory out of memory!";
+        LOG_IF(UNLIKELY(num >= std::numeric_limits<uint32_t>::max()), FATAL, MM_OBJECT_EVENTS)
+            << "native memory out of memory!";
         uint32_t idx = static_cast<uint32_t>((page - base_) / COMMON_PAGE_SIZE);
 #if defined(_WIN64)
-        LOGE_IF(UNLIKELY(!VirtualFree(page, num * COMMON_PAGE_SIZE, MEM_DECOMMIT)))
+        LOG_IF(UNLIKELY(!VirtualFree(page, num * COMMON_PAGE_SIZE, MEM_DECOMMIT)), ERROR, MEMORYPOOL)
             << "VirtualFree failed in ReturnPage, errno: " << GetLastError();
 #elif defined(__APPLE__)
         MemorySet(reinterpret_cast<uintptr_t>(page), num * COMMON_PAGE_SIZE, 0, num * COMMON_PAGE_SIZE);
@@ -122,7 +126,7 @@ public:
         (void)madvise(page, num * COMMON_PAGE_SIZE, MADV_DONTNEED);
 #endif
         ark::os::memory::LockHolder lg(freePagesMutex_);
-        LOGF_CHECK(freePagesTree_.MergeInsert(idx, static_cast<uint32_t>(num), false))
+        LOG_IF(UNLIKELY(!freePagesTree_.MergeInsert(idx, static_cast<uint32_t>(num), false)), FATAL, MM_OBJECT_EVENTS)
             << "tid " << GetTid() << ": failed to return pages to freePagesTree [" << idx << "+" << num << ", "
             << (idx + num) << ")";
     }
@@ -138,13 +142,14 @@ protected:
 #ifdef _WIN64
         void *result = VirtualAlloc(NULL, size, isCommit ? MEM_COMMIT : MEM_RESERVE, PAGE_READWRITE);
         if (result == NULL) {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "allocate create page failed! Out of Memory!";
+            LOG(FATAL, COMMON) << "allocate create page failed! Out of Memory!";
             UNREACHABLE();
         }
         (void)memName;
 #else
         void *result = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);
-        LOGF_CHECK(result != MAP_FAILED) << "allocate create page failed! Out of Memory!";
+        LOG_IF(UNLIKELY(result == MAP_FAILED), FATAL, MM_OBJECT_EVENTS)
+            << "allocate create page failed! Out of Memory!";
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS)
         (void)madvise(result, size, MADV_NOHUGEPAGE);
 #endif

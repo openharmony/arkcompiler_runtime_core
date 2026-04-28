@@ -61,7 +61,7 @@ bool Mutator::TransitionGCPhase(bool bySelf)
             // Atomic with acquire order reason: data race with mutatorPhase_ with dependecies on reads after the load
             bool result = mutatorPhase_.load(std::memory_order_acquire) == Heap::GetHeap().GetGCPhase();
             if (!bySelf && !result) {  // why check bySelf?
-                LOG_COMMON(FATAL) << "Unresolved fatal";
+                LOG(FATAL, COMMON) << "Unresolved fatal";
                 UNREACHABLE();
             }
             return result;
@@ -179,7 +179,7 @@ Mutator::~Mutator()
 Mutator *Mutator::NewMutator()
 {
     Mutator *mutator = new (std::nothrow) Mutator();
-    LOGF_CHECK(mutator != nullptr) << "new Mutator failed";
+    LOG_IF(UNLIKELY(mutator == nullptr), FATAL, GC) << "new Mutator failed";
     return mutator;
 }
 
@@ -238,9 +238,9 @@ void Mutator::UpdateBarrierEntrypoint(common_vm::GCPhase phase) {}
 void Mutator::DumpMutator() const
 {
     // Atomic with relaxed order reason: logging only, no synchronization or ordering constraints
-    LOG_COMMON(ERROR) << "mutator " << this << ": inSaferegion " << inSaferegion_.load(std::memory_order_relaxed)
-                      << ", tid " << tid_ << ", gc phase: " << mutatorPhase_.load(std::memory_order_relaxed)
-                      << ", suspension request " << suspensionFlag_.load(std::memory_order_relaxed);
+    LOG(ERROR, COMMON) << "mutator " << this << ": inSaferegion " << inSaferegion_.load(std::memory_order_relaxed)
+                       << ", tid " << tid_ << ", gc phase: " << mutatorPhase_.load(std::memory_order_relaxed)
+                       << ", suspension request " << suspensionFlag_.load(std::memory_order_relaxed);
 }
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
@@ -366,7 +366,7 @@ void Mutator::BindMutator()
     DCHECK(curr == nullptr || !curr->IsInRunningState());
 
     if (!TryBindMutator()) {
-        LOG_COMMON(FATAL) << "BindMutator fail";
+        LOG(FATAL, COMMON) << "BindMutator fail";
         return;
     }
 }

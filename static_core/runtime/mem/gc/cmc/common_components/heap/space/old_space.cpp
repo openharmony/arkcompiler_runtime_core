@@ -28,16 +28,17 @@ void OldSpace::DumpRegionStats() const
     size_t oldSize = oldUnits * RegionDesc::UNIT_SIZE;
     size_t allocFromSize = GetAllocatedSize();
 
-    VLOG(DEBUG, "\told-regions %zu: %zu units (%zu B, alloc %zu)", oldRegions, oldUnits, oldSize, allocFromSize);
+    LOG(DEBUG, GC) << "\told-regions " << oldRegions << ": " << oldUnits << " units (" << oldSize << " B, alloc "
+                   << allocFromSize << ")";
 }
 
 RegionDesc *OldSpace::AllocateThreadLocalRegion(bool expectPhysicalMem)
 {
     RegionDesc *region = regionManager_.TakeRegion(expectPhysicalMem, true);
-    ASSERT_LOGF(!IsGcThread(), "GC thread cannot take tlOldRegion");
+    ASSERT_PRINT(!IsGcThread(), "GC thread cannot take tlOldRegion");
     if (region != nullptr) {
-        DLOG(REGION, "alloc thread local old region @0x%zx+%zu type %u", region->GetRegionStart(),
-             region->GetRegionAllocatedSize(), region->GetRegionType());
+        LOG(DEBUG, GC) << "alloc thread local old region @0x" << std::hex << region->GetRegionStart() << "+" << std::dec
+                       << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
         InitRegionPhaseLine(region);
         tlOldRegionList_.PrependRegion(region, RegionDesc::RegionType::THREAD_LOCAL_OLD_REGION);
     }

@@ -119,7 +119,7 @@ uintptr_t NonMovableSpace::Alloc(size_t size, bool allowGC)
 {
     uintptr_t addr = 0;
     if (!allowGC || size > NONMOVABLE_OBJECT_SIZE_THRESHOLD) {
-        DLOG(ALLOC, "alloc non-movable obj 0x%zx(%zu)", addr, size);
+        LOG(DEBUG, GC) << "alloc non-movable obj 0x" << std::hex << addr << std::dec << "(" << size << ")";
         return AllocInPolySizeList(size);
     }
     CHECK(size % sizeof(uint64_t) == 0);
@@ -139,8 +139,8 @@ uintptr_t NonMovableSpace::Alloc(size_t size, bool allowGC)
         if (region == nullptr) {
             return 0;
         }
-        DLOG(REGION, "alloc non-movable region @0x%zx+%zu type %u", region->GetRegionStart(),
-             region->GetRegionAllocatedSize(), region->GetRegionType());
+        LOG(DEBUG, GC) << "alloc non-movable region @0x" << std::hex << region->GetRegionStart() << std::dec << "+"
+                       << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
         DCHECK(cellCount == static_cast<size_t>(static_cast<uint8_t>(cellCount)));
         region->SetRegionCellCount(static_cast<uint8_t>(cellCount));
         InitRegionPhaseLine(region);
@@ -148,7 +148,7 @@ uintptr_t NonMovableSpace::Alloc(size_t size, bool allowGC)
         list->PrependRegionLocked(region, RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION);
         addr = region->Alloc(size);
     }
-    DLOG(ALLOC, "alloc non-movable obj 0x%zx(%zu)", addr, size);
+    LOG(DEBUG, GC) << "alloc non-movable obj 0x" << std::hex << addr << std::dec << "(" << size << ")";
     return addr;
 }
 
@@ -167,8 +167,8 @@ uintptr_t NonMovableSpace::AllocInPolySizeList(size_t size, bool allowGC)
         if (region == nullptr) {
             return 0;
         }
-        DLOG(REGION, "alloc non-movable region @0x%zx+%zu type %u", region->GetRegionStart(),
-             region->GetRegionAllocatedSize(), region->GetRegionType());
+        LOG(DEBUG, GC) << "alloc non-movable region @0x" << std::hex << region->GetRegionStart() << std::dec << "+"
+                       << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
 
         InitRegionPhaseLine(region);
         // To make sure the allocedSize are consistent, it must prepend region first then alloc object.
@@ -177,7 +177,7 @@ uintptr_t NonMovableSpace::AllocInPolySizeList(size_t size, bool allowGC)
         addr = region->Alloc(size);
     }
 
-    DLOG(ALLOC, "alloc non-movable obj 0x%zx(%zu)", addr, size);
+    LOG(DEBUG, GC) << "alloc non-movable obj 0x" << std::hex << addr << std::dec << "(" << size << ")";
     return addr;
 }
 
@@ -188,8 +188,8 @@ uintptr_t NonMovableSpace::AllocFullRegion()
 
     InitRegionPhaseLine(region);
 
-    DLOG(REGION, "alloc non-movable region @0x%zx+%zu type %u", region->GetRegionStart(),
-         region->GetRegionAllocatedSize(), region->GetRegionType());
+    LOG(DEBUG, GC) << "alloc non-movable region @0x" << std::hex << region->GetRegionStart() << std::dec << "+"
+                   << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
 
     recentPolySizeRegionList_.PrependRegion(region, RegionDesc::RegionType::RECENT_POLYSIZE_NONMOVABLE_REGION);
 

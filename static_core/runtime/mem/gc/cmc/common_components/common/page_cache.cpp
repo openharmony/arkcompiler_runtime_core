@@ -78,7 +78,7 @@ Span *PageCache::MapObjectToSpan(void *obj)
     if (ret != idSpanMap_.end()) {
         return ret->second;
     } else {
-        LOGF_CHECK(false) << "MapObjectToSpan false";
+        LOG(FATAL, MM_OBJECT_EVENTS) << "MapObjectToSpan false";
         return nullptr;
     }
 }

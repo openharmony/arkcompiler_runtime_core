@@ -20,19 +20,22 @@
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
+
 #include "securec.h"
 
 namespace common_vm {
 
 void Barrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const
 {
-    DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+    LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
 }
 
 void Barrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
 {
-    DLOG(BARRIER, "write obj %p ref-field@%p: %p => %p", obj, &field, field.GetTargetObject(), ref);
+    LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": " << field.GetTargetObject() << " => "
+                   << ref;
 }
 
 BaseObject *Barrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
@@ -51,7 +54,8 @@ BaseObject *Barrier::AtomicReadRefField(BaseObject *obj, RefField<true> &field, 
 {
     RefField<false> tmpField(field.GetFieldValue(order));
     HeapAddress target = tmpField.GetFieldValue();
-    DLOG(BARRIER, "atomic read obj %p ref@%p: %#zx -> %p", obj, &field, tmpField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "atomic read obj " << obj << " ref@" << &field << ": 0x" << std::hex << tmpField.GetFieldValue()
+                   << std::dec << " -> " << target;
     return (BaseObject *)target;
 }
 

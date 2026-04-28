@@ -24,14 +24,20 @@
 namespace common_vm {
 Address AllocateYoungInAllocBuffer(uintptr_t buffer, size_t size)
 {
-    CHECKF(buffer != 0);
+    if (buffer == 0) {
+        LOG(FATAL, COMMON) << "Check failed: "
+                           << "buffer != 0";
+    }
     AllocationBuffer *allocBuffer = reinterpret_cast<AllocationBuffer *>(buffer);
     return allocBuffer->FastAllocateInTlab<AllocBufferType::YOUNG>(size);
 }
 
 Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size)
 {
-    CHECKF(buffer != 0);
+    if (buffer == 0) {
+        LOG(FATAL, COMMON) << "Check failed: "
+                           << "buffer != 0";
+    }
     AllocationBuffer *allocBuffer = reinterpret_cast<AllocationBuffer *>(buffer);
     return allocBuffer->FastAllocateInTlab<common_vm::AllocBufferType::OLD>(size);
 }

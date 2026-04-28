@@ -33,11 +33,11 @@ void ToSpace::DumpRegionStats() const
     size_t allocfullToSize = fullToRegionList_.GetAllocatedSize();
 
     size_t units = tlToUnits + fullToUnits;
-    VLOG(DEBUG, "\tto space units: %zu (%zu B)", units, units * RegionDesc::UNIT_SIZE);
-    VLOG(DEBUG, "\t  thread-local to-regions %zu: %zu units (%zu B, alloc %zu)", tlToRegions, tlToUnits, tlToSize,
-         allocTLToSize);
-    VLOG(DEBUG, "\t  full to-regions %zu: %zu units (%zu B, alloc %zu)", fullToRegions, fullToUnits, fullToSize,
-         allocfullToSize);
+    LOG(DEBUG, GC) << "\tto space units: " << units << " (" << units * RegionDesc::UNIT_SIZE << " B)";
+    LOG(DEBUG, GC) << "\t  thread-local to-regions " << tlToRegions << ": " << tlToUnits << " units (" << tlToSize
+                   << " B, alloc " << allocTLToSize << ")";
+    LOG(DEBUG, GC) << "\t  full to-regions " << fullToRegions << ": " << fullToUnits << " units (" << fullToSize
+                   << " B, alloc " << allocfullToSize << ")";
 }
 
 void ToSpace::GetPromotedTo(OldSpace &mspace)
@@ -54,8 +54,8 @@ RegionDesc *ToSpace::AllocateThreadLocalRegion(bool expectPhysicalMem)
 {
     RegionDesc *region = regionManager_.TakeRegion(expectPhysicalMem, false, true);
     if (region != nullptr) {
-        DLOG(REGION, "alloc thread local to region @0x%zx+%zu type %u", region->GetRegionStart(),
-             region->GetRegionAllocatedSize(), region->GetRegionType());
+        LOG(DEBUG, GC) << "alloc thread local to region @0x" << std::hex << region->GetRegionStart() << "+" << std::dec
+                       << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
         tlToRegionList_.PrependRegion(region, RegionDesc::RegionType::TO_REGION);
     }
     return region;

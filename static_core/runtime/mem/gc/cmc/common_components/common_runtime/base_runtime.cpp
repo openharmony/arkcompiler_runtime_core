@@ -23,7 +23,11 @@
 #include "common_components/heap/heap_manager.h"
 #include "common_components/mutator/mutator_manager.h"
 #include "common_interfaces/thread/mutator_state_transition.h"
+
 #include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/logger.h"
+
+#include <iomanip>
 
 namespace common_vm {
 
@@ -53,7 +57,7 @@ template <typename T>
 inline T *NewAndInit()
 {
     T *temp = new (std::nothrow) T();
-    LOGF_CHECK(temp != nullptr) << "NewAndInit failed";
+    LOG_IF(UNLIKELY(temp == nullptr), FATAL, RUNTIME) << "NewAndInit failed";
     temp->Init();
     return temp;
 }
@@ -62,7 +66,7 @@ template <typename T, typename A>
 inline T *NewAndInit(A arg)
 {
     T *temp = new (std::nothrow) T();
-    LOGF_CHECK(temp != nullptr) << "NewAndInit failed";
+    LOG_IF(UNLIKELY(temp == nullptr), FATAL, RUNTIME) << "NewAndInit failed";
     temp->Init(arg);
     return temp;
 }
@@ -98,12 +102,11 @@ void BaseRuntime::Init(const RuntimeParam &param)
 {
     ark::os::memory::LockHolder lock(vmCreationLock_);
     if (initialized_) {
-        LOG_COMMON(FATAL) << "BaseRuntime has been initialized and don't need init again.";
+        LOG(FATAL, COMMON) << "BaseRuntime has been initialized and don't need init again.";
         return;
     }
 
     param_ = param;
-    Log::Initialize(param_.logOptions);
     size_t pagePoolSize = param_.heapParam.heapSize;
 #if defined(PANDA_TARGET_32)
     pagePoolSize = pagePoolSize / 128;  // 128 means divided.
@@ -111,19 +114,27 @@ void BaseRuntime::Init(const RuntimeParam &param)
     PagePool::Instance().Init(pagePoolSize * KB / COMMON_PAGE_SIZE);
     mutatorManager_ = NewAndInit<MutatorManager>();
     heapManager_ = NewAndInit<HeapManager>(param_);
-    VLOG(DEBUG, "Arkcommon runtime started.");
+
+    [[maybe_unused]] constexpr int logFloatingPointPrecision = 2;
+    LOG(DEBUG, GC) << "Arkcommon runtime started.";
     // Record runtime parameter to report. heap growth value needs to plus 1.
-    VLOG(DEBUG,
-         "Runtime parameter:\n\tHeap size: %zu(KB)\n\tRegion size: %zu(KB)\n\tExemption threshold: %.2f\n\t"
-         "Heap utilization: %.2f\n\tHeap growth: %.2f\n\tAllocation rate: %.2f(MB/s)\n\tAlloction wait time: %zuns\n\t"
-         "GC Threshold: %zu(KB)\n\tGarbage threshold: %.2f\n\tGC interval: %zums\n\tBackup GC interval: %zus\n\t"
-         "Log level: %d\n\tThread stack size: %zu(KB)\n\tArkcommon stack size: %zu(KB)\n\t"
-         "Processor number: %d",
-         pagePoolSize, param_.heapParam.regionSize, param_.heapParam.exemptionThreshold,
-         param_.heapParam.heapUtilization, 1 + param_.heapParam.heapGrowth, param_.heapParam.allocationRate,
-         param_.heapParam.allocationWaitTime, param_.gcParam.gcThreshold / KB, param_.gcParam.garbageThreshold,
-         param_.gcParam.gcInterval / MILLI_SECOND_TO_NANO_SECOND,
-         param_.gcParam.backupGCInterval / SECOND_TO_NANO_SECOND);
+    LOG(DEBUG, GC) << "Runtime parameter:\n\tHeap size: " << pagePoolSize
+                   << "(KB)\n\tRegion size: " << param_.heapParam.regionSize
+                   << "(KB)\n\tExemption threshold: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param_.heapParam.exemptionThreshold << "\n\t"
+                   << "Heap utilization: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param_.heapParam.heapUtilization << "\n\tHeap growth: " << std::fixed
+                   << std::setprecision(logFloatingPointPrecision) << 1 + param_.heapParam.heapGrowth
+                   << "\n\tAllocation rate: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param_.heapParam.allocationRate << "(MB/s)\n\t"
+                   << "Alloction wait time: " << param_.heapParam.allocationWaitTime << "ns\n\t"
+                   << "GC Threshold: " << param_.gcParam.gcThreshold / KB << "(KB)\n\tGarbage threshold: " << std::fixed
+                   << std::setprecision(logFloatingPointPrecision) << param_.gcParam.garbageThreshold
+                   << "\n\tGC interval: " << param_.gcParam.gcInterval / MILLI_SECOND_TO_NANO_SECOND
+                   << "ms\n\tBackup GC interval: " << param_.gcParam.backupGCInterval / SECOND_TO_NANO_SECOND << "s\n\t"
+                   << "Log level: " << 0 << "\n\tThread stack size: " << 0 << "(KB)\n\tArkcommon stack size: " << 0
+                   << "(KB)\n\t"
+                   << "Processor number: " << 0;
 
     initialized_ = true;
 }
@@ -132,7 +143,7 @@ void BaseRuntime::Fini()
 {
     ark::os::memory::LockHolder lock(vmCreationLock_);
     if (!initialized_) {
-        LOG_COMMON(FATAL) << "BaseRuntime has been initialized and don't need init again.";
+        LOG(FATAL, COMMON) << "BaseRuntime has been initialized and don't need init again.";
         return;
     }
 
@@ -144,7 +155,7 @@ void BaseRuntime::Fini()
         PagePool::Instance().Fini();
     }
 
-    VLOG(DEBUG, "Arkcommon runtime shutdown.");
+    LOG(DEBUG, GC) << "Arkcommon runtime shutdown.";
     initialized_ = false;
 }
 
@@ -236,8 +247,8 @@ void *BaseRuntime::AtomicReadBarrier(void *obj, void *field, std::memory_order o
 void BaseRuntime::RequestGC(GCReason reason, bool async, GCType gcType)
 {
     if (reason < GC_REASON_BEGIN || reason > GC_REASON_END || gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {
-        VLOG(ERROR, "Invalid gc reason or gc type, gc reason: %s, gc type: %s", GCReasonToString(reason),
-             GCTypeToString(gcType));
+        LOG(ERROR, GC) << "Invalid gc reason or gc type, gc reason: " << GCReasonToString(reason)
+                       << ", gc type: " << GCTypeToString(gcType);
         return;
     }
     HeapManager::RequestGC(reason, async, gcType);
