@@ -21,7 +21,7 @@ from unittest.mock import MagicMock
 from runner.common_exceptions import InvalidConfiguration
 from runner.extensions.updaters.iupdater import IUpdater, get_updater_class
 from runner.options.config import Config
-from runner.types.step_report import StepReport
+from runner.runner_types.step_report import StepReport
 
 
 class ConcreteUpdater(IUpdater):

@@ -30,9 +30,9 @@ from runner.logger import Log
 from runner.options.config import Config
 from runner.options.options_step import StepKind
 from runner.runner_file_based import RunnerFileBased
+from runner.runner_types.test_env import TestEnv
 from runner.suites.tests_flow_registry import TestFlowRegistry
 from runner.test_base import Test
-from runner.types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
 

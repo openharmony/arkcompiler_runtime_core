@@ -44,10 +44,10 @@ from runner.options.options import IOptions
 from runner.options.options_collections import CollectionsOptions
 from runner.options.options_step import StepKind
 from runner.options.root_dir import RootDir
+from runner.runner_types.test_env import TestEnv
 from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
-from runner.types.test_env import TestEnv
 from runner.utils import (
     ani_name_rule,
     correct_path,

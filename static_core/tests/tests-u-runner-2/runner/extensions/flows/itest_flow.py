@@ -19,7 +19,7 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from runner.types.step_report import StepReport
+from runner.runner_types.step_report import StepReport
 
 
 class ITestFlow(ABC):

@@ -22,7 +22,7 @@ from typing import cast
 from unittest import TestCase
 from unittest.mock import patch
 
-import main as runner_main
+from runner import main as runner_main
 from runner.init_runner import InitRunner, MandatoryProp, MandatoryProps
 from runner.test.test_utils import random_suffix
 

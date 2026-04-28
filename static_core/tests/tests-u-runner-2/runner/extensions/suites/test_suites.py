@@ -15,8 +15,8 @@
 # limitations under the License.
 
 from runner.extensions.suites.test_suite_registry import ITestSuite, suite_registry
+from runner.runner_types.test_env import TestEnv
 from runner.suites.test_suite import GTestSuite, TestSuite
-from runner.types.test_env import TestEnv
 
 
 @suite_registry.register("ets")

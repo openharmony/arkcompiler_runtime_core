@@ -28,11 +28,11 @@ from runner.environment import MandatoryPropDescription, RunnerEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options_step import StepKind
+from runner.runner_types.step_report import StepReport
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
 from runner.test.test_utils import test_cmake_build
-from runner.types.step_report import StepReport
 
 
 @dataclass

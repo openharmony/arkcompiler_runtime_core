@@ -19,9 +19,9 @@ from typing import ClassVar
 
 from runner.options.options_step import StepKind
 from runner.options.options_step_utils import StepFields
+from runner.runner_types.step_report import StepReport
 from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import TestStandardFlow
-from runner.types.step_report import StepReport
 from runner.utils import ExpectedField
 
 

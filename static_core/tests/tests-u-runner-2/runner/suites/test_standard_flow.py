@@ -41,12 +41,12 @@ from runner.options.macros import Macros
 from runner.options.options import IOptions
 from runner.options.options_step import Step, StepKind
 from runner.options.options_step_utils import StepFields
+from runner.runner_types.step_report import StepReport
+from runner.runner_types.test_env import TestEnv
 from runner.suites.comparison_utils import ComparisonUtils
 from runner.suites.one_step_runner import OneStepRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
-from runner.types.step_report import StepReport
-from runner.types.test_env import TestEnv
 from runner.utils import get_validator_class
 
 if TYPE_CHECKING:

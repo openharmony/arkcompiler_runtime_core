@@ -32,12 +32,12 @@ from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options import IOptions
 from runner.options.options_step import StepKind
+from runner.runner_types.test_env import TestEnv
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.tests_flow_registry import TestFlowRegistry
 from runner.suites.work_dir import WorkDir
 from runner.test import test_utils
 from runner.test.test_utils import clear_after_test
-from runner.types.test_env import TestEnv
 
 
 class KeyValueType(NamedTuple):

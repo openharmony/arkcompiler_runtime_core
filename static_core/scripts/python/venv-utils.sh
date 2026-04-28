@@ -44,11 +44,6 @@ function activate_venv()
     if [[ -d "${VENV_DIR}" ]]; then
         source "${VENV_DIR}/bin/activate"
         echo "${VENV_DIR} activated"
-
-        # tmp fix for CI to install required modules for init pipeline
-        if ! python -c "import pydantic" >/dev/null 2>&1; then
-            python -m pip install "pydantic==2.12.5" "pydantic-core==2.41.5"
-        fi
     fi
 }
 

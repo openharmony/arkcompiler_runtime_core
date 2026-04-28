@@ -35,11 +35,11 @@ from runner.reports.standard_view import StandardView
 from runner.reports.summary import Summary
 from runner.reports.xml_view import XmlView
 from runner.runner_base import Runner
+from runner.runner_types.test_env import TestEnv
 from runner.suites.gtest_flow import GTestFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
-from runner.types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
 
