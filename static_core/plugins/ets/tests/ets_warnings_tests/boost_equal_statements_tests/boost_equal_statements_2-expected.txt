@@ -6,5 +6,6 @@
 [boost_equal_statements_2.ets:25:25] Warning W65001: The equality expression is always false.
 [boost_equal_statements_2.ets:27:9] Warning W0004: Boost Equality Statement. Change sides of binary expression.
 [boost_equal_statements_2.ets:27:9] Warning W65001: The equality expression is always false.
+[boost_equal_statements_2.ets:33:21] Warning W65000: The equality expression is always true.
 [boost_equal_statements_2.ets:35:13] Warning W0004: Boost Equality Statement. Change sides of binary expression.
 [boost_equal_statements_2.ets:35:13] Warning W65001: The equality expression is always false.
