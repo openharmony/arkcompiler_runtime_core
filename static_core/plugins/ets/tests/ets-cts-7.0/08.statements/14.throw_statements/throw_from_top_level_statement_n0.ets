@@ -25,9 +25,9 @@ function assignMeAndThrow(): int {
     throw new TLSErr
 }
 
-
 let tls: int = assignMeAndThrow()
 
 function main(): void {
+    arktest.assertTrue(false, "this code is not expected to execute")
     throw new Unreachable
 }

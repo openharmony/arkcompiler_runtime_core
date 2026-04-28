@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 /*---
 desc: several methods returning this, overload, call several times, positive.
-tags: []
 ---*/
+
 class C {
     foo(): this {
         return this
@@ -29,4 +29,5 @@ class C {
 function main(): void {
     let x: C = new C()
     x = x.foo().foo2(1, new object).foo().foo2(2, new object).foo().foo2(3, new object)
+    arktest.assertTrue(x instanceof C, "expect instance of C")
 }

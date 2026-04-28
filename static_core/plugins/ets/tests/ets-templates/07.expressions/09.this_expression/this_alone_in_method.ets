@@ -15,7 +15,6 @@
 
 /*---
 desc: Alone this expression
-
 ---*/
 
 class A {
@@ -26,4 +25,5 @@ class A {
 
 function main(): void {
   let a: A = new A();
+  arktest.assertTrue(a instanceof A, "expect instance of A")
 }

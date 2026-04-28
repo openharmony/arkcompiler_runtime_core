@@ -15,8 +15,8 @@
 
 /*---
 desc: methods returning this, interface implements, positive.
-tags: []
 ---*/
+
 interface I {
     foo(): this
 }
@@ -30,4 +30,5 @@ class C implements I {
 function main(): void {
     let x: C = new C()
     x = x.foo()
+    arktest.assertTrue(x instanceof I, "expect instance of I")
 }

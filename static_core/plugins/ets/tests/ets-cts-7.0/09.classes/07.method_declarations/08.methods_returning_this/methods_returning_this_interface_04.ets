@@ -15,8 +15,8 @@
 
 /*---
 desc: methods returning this, implements multiple interfaces with the different methods that return this, positive.
-tags: []
 ---*/
+
 interface I {
     foo1(): this {
         return this
@@ -35,9 +35,12 @@ class C implements I, II {
 function main(): void {
     let x: C = new C()
     x = x.foo2()
+    arktest.assertTrue(x instanceof II, "expect x instance of II")
     x = x.foo1()
+    arktest.assertTrue(x instanceof I, "expect x instance of I")
     let y: C = new C()
     y = y.foo1()
+    arktest.assertTrue(y instanceof I, "expect y instance of I")
     y = y.foo2()
+    arktest.assertTrue(y instanceof II, "expect y instance of II")
 }
-

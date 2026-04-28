@@ -34,5 +34,5 @@ class B extends A { }
 function main(): void {
   let instance: B = new B();
   instance.age = 5;
-  instance.getAge() == 5;
+  arktest.assertEQ(instance.getAge(), 5, "expect value 5");
 }

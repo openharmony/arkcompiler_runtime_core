@@ -38,4 +38,5 @@ final class B extends A {
 
 function main(): void {
     let instance: B = new B(2);
+    arktest.assertTrue(instance instanceof A, "expect instance of A")
 }

@@ -23,4 +23,5 @@ function main() {
     let FO = (flag: boolean) => () => flag ? 'Hello World' : 12.0
     let F1 = FO(true)
     let x: TU = F1()
+    arktest.assertTrue(x instanceof TU, "expect instance of TU")
 }

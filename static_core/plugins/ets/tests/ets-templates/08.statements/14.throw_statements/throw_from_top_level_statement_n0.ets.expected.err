@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,3 @@
 # limitations under the License.
 #
 Unhandled exception: throw_from_top_level_statement_n0.TLSErr
-Error
-        at throw_from_top_level_statement_n0.TLSErr.<ctor> (throw_from_top_level_statement_n0.ets:23:0)
-        at throw_from_top_level_statement_n0.ETSGLOBAL.assignMeAndThrow (throw_from_top_level_statement_n0.ets:26:0)
-        at throw_from_top_level_statement_n0.ETSGLOBAL.<cctor> (throw_from_top_level_statement_n0.ets:30:0)

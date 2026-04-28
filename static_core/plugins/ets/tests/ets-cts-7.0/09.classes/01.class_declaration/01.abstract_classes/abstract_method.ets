@@ -21,4 +21,11 @@ abstract class A {
   abstract m(): void;
 }
 
-function main(): void {}
+class B extends A {
+  override m(): void {}
+}
+
+function main(): void {
+  let b: B = new B
+  arktest.assertTrue(b instanceof A, "expect instance of A")
+}

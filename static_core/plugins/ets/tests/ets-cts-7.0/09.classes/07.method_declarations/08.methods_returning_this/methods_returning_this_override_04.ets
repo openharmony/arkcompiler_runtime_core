@@ -15,8 +15,8 @@
 
 /*---
 desc: methods returning this, non-override, positive.
-tags: []
 ---*/
+
 class C {
     foo(): this {
         return this
@@ -28,4 +28,5 @@ class D extends C {
 
 function main(): void {
     let y: D = new D().foo()
+    arktest.assertTrue(y instanceof D, "expect instance of D")
 }

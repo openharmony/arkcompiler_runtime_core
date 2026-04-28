@@ -15,8 +15,8 @@
 
 /*---
 desc: methods returning this, declare class, positive.
-tags: []
 ---*/
+
 abstract class C {
      foo(): this {
         return this
@@ -34,8 +34,12 @@ class E extends C {
 
 function main(): void {
     let a: C = new D().foo()
+    arktest.assertTrue(a instanceof C, "expect a instance of C")
     let b: D = new D().foo()
+    arktest.assertTrue(b instanceof C, "expect b instance of C")
 
     let x: C = new E().foo()
+    arktest.assertTrue(x instanceof C, "expect x instance of C")
     let y: E = new E().foo()
+    arktest.assertTrue(y instanceof C, "expect y instance of C")
 }

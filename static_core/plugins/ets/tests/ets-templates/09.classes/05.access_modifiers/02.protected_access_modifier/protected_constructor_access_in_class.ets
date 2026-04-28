@@ -36,4 +36,5 @@ final class A {
 
 function main(): void {
     let instance: A = new A(2);
+    arktest.assertTrue(instance instanceof A, "expect instance of A")
 }

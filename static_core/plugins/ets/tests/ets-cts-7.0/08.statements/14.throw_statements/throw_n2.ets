@@ -29,4 +29,5 @@ let t1 = 1, t2 = 2
 
 function main() {
     if (t1 != t2) throw getEx();
+    arktest.assertTrue(false, "this code is not expected to execute")
 }

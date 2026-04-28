@@ -29,8 +29,8 @@ class Clazz {
 class Shapes {}
 
 function main() {
-
   let clazz = new Clazz;
+  arktest.assertTrue(clazz instanceof Clazz, "expect instance of Clazz")
   let s = new Shapes;
-  
+  arktest.assertTrue(s instanceof Shapes, "expect instance of Shapes")
 }

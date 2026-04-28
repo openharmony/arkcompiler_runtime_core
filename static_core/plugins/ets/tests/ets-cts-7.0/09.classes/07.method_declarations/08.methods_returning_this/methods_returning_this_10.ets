@@ -15,8 +15,8 @@
 
 /*---
 desc: several methods returning this, overload, call several times, positive.
-tags: []
 ---*/
+
 class C {
     foo(): this {
         return this
@@ -29,4 +29,5 @@ class C {
 function main(): void {
     let x: C = new C()
     x = x.foo().foo2(1, new object).foo().foo2(2, new object).foo().foo2(3, new object)
+    arktest.assertTrue(x instanceof C, "expect instance of C")
 }

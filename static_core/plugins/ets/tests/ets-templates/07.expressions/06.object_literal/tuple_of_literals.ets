@@ -29,6 +29,7 @@ interface IIntf {
 type TTuple = [AClass, IIntf]
 
 function main() {
-
     let x: TTuple = [{name: 'Alice'}, {age: 16}]
+    arktest.assertTrue(x[0] instanceof AClass, "expect instance of AClass")
+    arktest.assertTrue(x[1] instanceof IIntf, "expect instance of IIntf")
 }

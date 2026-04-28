@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,5 +19,9 @@ desc: Subclasses of an abstract class can be non-abstract or in turn abstract.
 
 abstract class A {}
 abstract class B extends A {}
+class C extends B {}
 
-function main(): void {}
+function main(): void {
+  let c: C = new C
+  arktest.assertTrue(c instanceof A, "expect instance of A")
+}

@@ -24,4 +24,5 @@ get age(): int { return pAge; }
 
 function main(): void {
     let localAge = age
+    arktest.assertEQ(localAge, 16, "expect localAge 16")
 }
