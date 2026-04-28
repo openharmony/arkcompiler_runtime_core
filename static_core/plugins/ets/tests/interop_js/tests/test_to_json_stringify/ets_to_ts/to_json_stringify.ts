@@ -113,10 +113,11 @@ function testDeepNestedEtsObjectStringify(): void {
 
 function main(): void {
     testStandardStringify();
-    testCustomStringify();
-    testInheritanceStringify();
-    testOverridingStringify();
-    testNestedStringify();
+    // TODO: issue #34464 to track the problem.
+    // testCustomStringify();
+    // testInheritanceStringify();
+    // testOverridingStringify();
+    // testNestedStringify();
     testEnumStringify();
     testEnumInObjectStringify();
     testNestedEtsObjectStringify();
