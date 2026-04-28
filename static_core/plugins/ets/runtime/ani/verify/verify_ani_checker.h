@@ -53,6 +53,7 @@
     X(VERIFY_READ_FIELD_BY_NAME,            VerifyReadFieldByName)                \
     X(VERIFY_FIND_FIELD_NAME,               VerifyFindFieldName)                  \
     X(VERIFY_FIND_STATIC_FIELD_NAME,        VerifyFindStaticFieldName)            \
+    X(VERIFY_FIND_VARIABLE_NAME,            VerifyFindVariableName)               \
     X(VERIFY_READ_STATIC_FIELD_BY_NAME,     VerifyReadStaticFieldByName)          \
     X(VERIFY_READ_STATIC_FIELD,             VerifyReadStaticField)                \
     X(VERIFY_WRITE_FIELD,                   VerifyWriteField)                     \
@@ -74,8 +75,10 @@
     X(VERIFY_ENV_STORAGE,                   VerifyEnvStorage)                     \
     X(VERIFY_METHOD_STORAGE,                VerifyMethodStorage)                  \
     X(VERIFY_STATIC_METHOD_STORAGE,         VerifyStaticMethodStorage)            \
+    X(VERIFY_FUNCTION_STORAGE,              VerifyFunctionStorage)                \
     X(VERIFY_FIELD_STORAGE,                 VerifyFieldStorage)                   \
     X(VERIFY_STATIC_FIELD_STORAGE,          VerifyStaticFieldStorage)             \
+    X(VERIFY_VARIABLE_STORAGE,              VerifyVariableStorage)                \
     X(VERIFY_BOOLEAN_STORAGE,               VerifyBooleanStorage)                 \
     X(VERIFY_CHAR_STORAGE,                  VerifyCharStorage)                    \
     X(VERIFY_BYTE_STORAGE,                  VerifyByteStorage)                    \
@@ -110,6 +113,8 @@
     X(VERIFY_STATIC_METHOD_NAME,            VerifyStaticMethodName)               \
     X(VERIFY_FIND_METHOD_SIGNATURE,         VerifyFindMethodSignature)            \
     X(VERIFY_FIND_STATIC_METHOD_SIGNATURE,  VerifyFindStaticMethodSignature)      \
+    X(VERIFY_FIND_FUNCTION_NAME,            VerifyFindFunctionName)               \
+    X(VERIFY_FIND_FUNCTION_SIGNATURE,       VerifyFindFunctionSignature)          \
     X(VERIFY_FIND_SETTER_NAME,              VerifyFindSetterName)                 \
     X(VERIFY_FIND_GETTER_NAME,              VerifyFindGetterName)                 \
     X(VERIFY_FIND_INDEXABLE_GETTER_SIG,     VerifyFindIndexableGetterSignature)   \
@@ -172,8 +177,10 @@
     X(ANI_VM_STORAGE,                   VmStorage,                 VVm **)                   \
     X(ANI_METHOD_STORAGE,               MethodStorage,             VMethod **)               \
     X(ANI_STATIC_METHOD_STORAGE,        StaticMethodStorage,       VStaticMethod **)         \
+    X(ANI_FUNCTION_STORAGE,             FunctionStorage,           VFunction **)             \
     X(ANI_FIELD_STORAGE,                FieldStorage,              VField **)                \
     X(ANI_STATIC_FIELD_STORAGE,         StaticFieldStorage,        VStaticField **)          \
+    X(ANI_VARIABLE_STORAGE,             VariableStorage,           VVariable **)             \
     X(ANI_BOOLEAN_STORAGE,              BooleanStorage,            ani_boolean *)            \
     X(ANI_CHAR_STORAGE,                 CharStorage,               ani_char *)               \
     X(ANI_BYTE_STORAGE,                 ByteStorage,               ani_byte *)               \
@@ -350,6 +357,11 @@ public:
         return ANIArg(ArgValueByStaticMethodStorage(staticMethodStorage), name, Action::VERIFY_STATIC_METHOD_STORAGE);
     }
 
+    static ANIArg MakeForFunctionStorage(VFunction **functionStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFunctionStorage(functionStorage), name, Action::VERIFY_FUNCTION_STORAGE);
+    }
+
     static ANIArg MakeForFieldStorage(VField **fieldStorage, std::string_view name)
     {
         return ANIArg(ArgValueByFieldStorage(fieldStorage), name, Action::VERIFY_FIELD_STORAGE);
@@ -358,6 +370,11 @@ public:
     static ANIArg MakeForStaticFieldStorage(VStaticField **staticFieldStorage, std::string_view name)
     {
         return ANIArg(ArgValueByStaticFieldStorage(staticFieldStorage), name, Action::VERIFY_STATIC_FIELD_STORAGE);
+    }
+
+    static ANIArg MakeForVariableStorage(VVariable **variableStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByVariableStorage(variableStorage), name, Action::VERIFY_VARIABLE_STORAGE);
     }
 
     static ANIArg MakeForOptions(const ani_options *options, std::string_view name)
@@ -530,6 +547,11 @@ public:
         return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_FIND_STATIC_FIELD_NAME);
     }
 
+    static ANIArg MakeForFindVariableName(const char *name, std::string_view argName)
+    {
+        return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_FIND_VARIABLE_NAME);
+    }
+
     static ANIArg MakeForFindMethodSignature(const char *signature, std::string_view argName)
     {
         return ANIArg(ArgValueByUTF8String(signature), argName, Action::VERIFY_FIND_METHOD_SIGNATURE);
@@ -538,6 +560,16 @@ public:
     static ANIArg MakeForFindStaticMethodSignature(const char *signature, std::string_view argName)
     {
         return ANIArg(ArgValueByUTF8String(signature), argName, Action::VERIFY_FIND_STATIC_METHOD_SIGNATURE);
+    }
+
+    static ANIArg MakeForFindFunctionName(const char *name, std::string_view argName)
+    {
+        return ANIArg(ArgValueByUTF8String(name), argName, Action::VERIFY_FIND_FUNCTION_NAME);
+    }
+
+    static ANIArg MakeForFindFunctionSignature(const char *signature, std::string_view argName)
+    {
+        return ANIArg(ArgValueByUTF8String(signature), argName, Action::VERIFY_FIND_FUNCTION_SIGNATURE);
     }
 
     static ANIArg MakeForFindSetterName(const char *name, std::string_view argName)

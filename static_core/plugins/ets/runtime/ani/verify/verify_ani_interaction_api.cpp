@@ -369,7 +369,6 @@ NO_UB_SANITIZE static ani_status FindModule(VEnv *venv, const char *moduleDescri
 NO_UB_SANITIZE static ani_status FindNamespace(VEnv *venv, const char *namespaceDescriptor, VNamespace **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-
     ani_namespace result {};
     ani_status status = GetInteractionAPI(venv)->FindNamespace(venv->GetEnv(), namespaceDescriptor, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -407,7 +406,16 @@ NO_UB_SANITIZE static ani_status FindEnum(VEnv *venv, const char *enumDescriptor
 NO_UB_SANITIZE static ani_status Module_FindFunction(VEnv *venv, VModule *vmodule, const char *name,
                                                      const char *signature, VFunction **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForModule(vmodule, "module"),
+        ANIArg::MakeForFindFunctionName(name, "name"),
+        ANIArg::MakeForFindFunctionSignature(signature, "signature"),
+        ANIArg::MakeForFunctionStorage(vresult, "result"),
+    );
+    // clang-format on
+
     ani_function result {};
     ani_status status =
         GetInteractionAPI(venv)->Module_FindFunction(venv->GetEnv(), vmodule->GetRef(), name, signature, &result);
@@ -421,7 +429,15 @@ NO_UB_SANITIZE static ani_status Module_FindFunction(VEnv *venv, VModule *vmodul
 NO_UB_SANITIZE static ani_status Module_FindVariable(VEnv *venv, VModule *vmodule, const char *name,
                                                      VVariable **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForModule(vmodule, "module"),
+        ANIArg::MakeForFindVariableName(name, "name"),
+        ANIArg::MakeForVariableStorage(vresult, "result"),
+    );
+    // clang-format on
+
     ani_variable result {};
     ani_status status = GetInteractionAPI(venv)->Module_FindVariable(venv->GetEnv(), vmodule->GetRef(), name, &result);
     if (LIKELY(status == ANI_OK)) {
@@ -434,12 +450,20 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(VEnv *venv, VModule *vmodul
 NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, VNamespace *vnamespace, const char *name,
                                                         const char *signature, VFunction **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForNamespace(vnamespace, "ns"),
+        ANIArg::MakeForFindFunctionName(name, "name"),
+        ANIArg::MakeForFindFunctionSignature(signature, "signature"),
+        ANIArg::MakeForFunctionStorage(vresult, "result"),
+    );
+    // clang-format on
 
     ani_function result {};
     ani_status status =
         GetInteractionAPI(venv)->Namespace_FindFunction(venv->GetEnv(), vnamespace->GetRef(), name, signature, &result);
-    if (LIKELY((status) == ANI_OK)) {
+    if (LIKELY(status == ANI_OK)) {
         *vresult = venv->GetVerifiedFunction(result);
     }
     return status;
@@ -449,7 +473,15 @@ NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, VNamespace *
 NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, VNamespace *vnamespace, const char *name,
                                                         VVariable **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForNamespace(vnamespace, "ns"),
+        ANIArg::MakeForFindVariableName(name, "name"),
+        ANIArg::MakeForVariableStorage(vresult, "result"),
+    );
+    // clang-format on
+
     ani_variable result {};
     ani_status status =
         GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), vnamespace->GetRef(), name, &result);

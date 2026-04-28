@@ -84,8 +84,13 @@ private:
     {
         someRef_ = ref;
 
+        ani_module module {};
+        auto status = env->FindModule("ani_verify_test_reference_{{ suff }}", &module);
+        if (status != ANI_OK) {
+            return status;
+        }
         ani_function fn;
-        auto status = env->Module_FindFunction(module_, "checkRefFromAnotherFrame", nullptr, &fn);
+        status = env->Module_FindFunction(module, "checkRefFromAnotherFrame", nullptr, &fn);
         if (status != ANI_OK) {
             return status;
         }
