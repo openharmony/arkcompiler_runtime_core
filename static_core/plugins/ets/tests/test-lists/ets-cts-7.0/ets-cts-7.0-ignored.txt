@@ -424,9 +424,6 @@
 14.ambient_declarations/08.accessor_declarations/accessor_declarations.ets
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_receiver.ets
 
-#33339
-14.ambient_declarations/08.accessor_declarations/accessor_declarations_n.d.ets
-
 #33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 
