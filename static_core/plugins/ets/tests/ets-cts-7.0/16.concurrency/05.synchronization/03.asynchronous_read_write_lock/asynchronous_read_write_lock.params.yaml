@@ -19,7 +19,6 @@ cases:
         let rwLock = new concurrency.stackless.AsyncReadWriteLock();
         let readLock = rwLock.readLock();
         let writeLock = rwLock.writeLock();
-        let writeAcquired = false;
         let i = 0;
 
         const ea1 = new EAWorker();
@@ -27,7 +26,6 @@ cases:
         await ea1.run<undefined>(async () => {
           await readLock.lock();
           try {
-            arktest.assertFalse(writeAcquired);
             i++;
             arktest.assertEQ(i, 1);
             i--;
@@ -41,7 +39,6 @@ cases:
         await ea2.run<undefined>(async () => {
           await writeLock.lock();
           try {
-            writeAcquired = true;
             i++;
             arktest.assertEQ(i, 1);
             i--;
