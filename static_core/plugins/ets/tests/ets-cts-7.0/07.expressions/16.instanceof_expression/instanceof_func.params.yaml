@@ -62,13 +62,13 @@ cases:
       - { type: '(x?: Parent, y?: Child, z?: GrandChild) => GrandChild', res: 'false' } # Different structure: 3O != 1M+2O
 
 #20
-  - func_type: '(x: bigint, y: char = c''a'') => void' # Structure: 1M+1O (default makes param optional)
-    func: '(x: bigint, y: char = c''a'') => {}'
+  - func_type: '(x: bigint, y?: char) => void' # Structure: 1M+1O
+    func: '(x: bigint, y?: char) => {}'
     rhs_types:
       - { type: '(x: bigint, y?: char) => void', res: 'true' } # Same structure 1M+1O
-      - { type: '(x: bigint, y: char) => void', res: 'false' } # Different structure: 2M != 1M+1O
-      - { type: '(x: bigint) => void', res: 'false' } # Different structure: 1M != 1M+1O
-      - { type: '(x: bigint, y: Any = c''a'') => void', res: 'true' } # Same structure 1M+1O, param type erased
+      - { type: '(x: bigint, y?: char | undefined) => void', res: 'true' } # Same structure 1M+1O, explicit undefined
+      - { type: '(x: bigint, y?: char) => Any', res: 'true' } # Same structure 1M+1O, return type erased
+      - { type: '(x: bigint, y?: Any) => void', res: 'true' } # Same structure 1M+1O, param type erased
 
 #24
   - func_type: '(x: boolean, ...y: Object[]) => Object' # Structure: 1M+rest
@@ -95,4 +95,3 @@ cases:
       - { type: '((x: Tuple) => Tuple)', res: 'true' } # Same structure 1M, types erased
       - { type: '((x: Tuple) => Array)', res: 'true' } # Same structure 1M, types erased
       - { type: '((x: Array) => Array)', res: 'true' } # Same structure 1M, types erased
-
