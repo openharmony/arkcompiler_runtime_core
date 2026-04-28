@@ -216,12 +216,6 @@
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_5.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_6.ets
 
-#28527
-09.classes/09.constructor_declaration/cons_parameters_gen_20.ets
-
-#32614 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
-09.classes/09.constructor_declaration/cons_parameters_gen_24.ets
-
 #33500 es2panda aborts when implicit super() calls a superconstructor with rest parameter
 09.classes/09.constructor_declaration/01.constructor_body/implicit_superclass_constructor_call4.ets
 
@@ -259,9 +253,6 @@
 11.enumerations/enum_decl_27.ets
 11.enumerations/enum_decl_28.ets
 11.enumerations/enum_decl_29.ets
-11.enumerations/enum_cte_n_leibt_1_0.ets
-11.enumerations/enum_cte_n_leibt_2_0.ets
-11.enumerations/enum_cte_n_leibt_4_0.ets
 
 #33640
 11.enumerations/enum_cte_n_leibt_0_0.ets
@@ -480,19 +471,6 @@
 
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_2.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_6.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_9.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_13.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_16.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_20.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_25.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_positive_30.ets
-
-#31865 verifier error on conflicting method implementations
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_generics_0.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_generics_1.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_generics_2.ets
-15.semantic_rules/08.overriding/overriding_conflict/deep_inheritance_overriding_generics_3.ets
 
 #16840
 15.semantic_rules/08.overriding/02.overriding_in_interfaces/methods_overriding.ets
@@ -505,21 +483,10 @@
 15.semantic_rules/08.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method.ets
 
 #31862 verifier error on conflicting default implementations in interfaces
-15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_4.ets
 15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
 
 #31167 RTE if class overrides overloaded method in superinterface
-15.semantic_rules/09.overloading/first_match/first_match_1c_1i_7.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_1i_8.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_2i_8.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_2i_9.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_3i_5.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_3i_7.ets
 15.semantic_rules/09.overloading/first_match/first_match_1c_3i_8.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_ii_8.ets
-15.semantic_rules/09.overloading/first_match/first_match_1c_ii_9.ets
-15.semantic_rules/09.overloading/first_match/first_match_2c_2i_7.ets
-15.semantic_rules/09.overloading/first_match/first_match_2c_2i_8.ets
 
 #32340 Methods from direct superclass or superinterface not added to explicit overload set
 15.semantic_rules/10.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_negative_1.ets
@@ -531,9 +498,6 @@
 
 #32946 no warning issued if overloaded entity can never be selected for a call
 15.semantic_rules/10.overload_resolution/07.overload_set_warning/overload_set_warning.ets
-
-#31862 verifier error on conflicting default implementations in interfaces
-15.semantic_rules/10.overload_resolution/09.overloading_and_overriding/override_interface_method.ets
 
 #30547
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_6.ets
@@ -573,12 +537,8 @@
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_4.ets
 
 #31862 Conflicting default implementations
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_3.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/inheritance2a_3.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/inheritance2c_3.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/inheritance1a_3.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/overriding2a_3.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/overriding2c_3.ets
 
 #32044 Incorrect overload resolution, explicit overload is not inherited
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_cls_num_4.ets
