@@ -23,7 +23,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 // regions for non movable objects
 class NonMovableSpace : public RegionalSpace {
 public:
@@ -168,6 +168,6 @@ private:
     RegionList *monoSizeRegionList_[NONMOVABLE_OBJECT_SIZE_COUNT];
     RegionList *recentMonoSizeRegionList_[NONMOVABLE_OBJECT_SIZE_COUNT];
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H

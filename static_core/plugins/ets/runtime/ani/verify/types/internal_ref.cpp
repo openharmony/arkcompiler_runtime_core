@@ -21,14 +21,14 @@ namespace ark::ets::ani::verify {
 
 VRef *InternalRef::CastToVRef(InternalRef *iref)
 {
-    ASSERT(((common_vm::ToUintPtr(iref) & TYPE_MASK) != TYPE_VREF) || ManagedCodeAccessor::IsUndefined(iref->ref_));
-    return reinterpret_cast<VRef *>((common_vm::ToUintPtr(iref) | TYPE_VREF));
+    ASSERT(((ark::mem::ToUintPtr(iref) & TYPE_MASK) != TYPE_VREF) || ManagedCodeAccessor::IsUndefined(iref->ref_));
+    return reinterpret_cast<VRef *>((ark::mem::ToUintPtr(iref) | TYPE_VREF));
 }
 
 InternalRef *InternalRef::CastFromVRef(VRef *vref)
 {
-    ASSERT((common_vm::ToUintPtr(vref) & TYPE_MASK) == TYPE_VREF);
-    return reinterpret_cast<InternalRef *>((common_vm::ToUintPtr(vref) & ~TYPE_MASK));
+    ASSERT((ark::mem::ToUintPtr(vref) & TYPE_MASK) == TYPE_VREF);
+    return reinterpret_cast<InternalRef *>((ark::mem::ToUintPtr(vref) & ~TYPE_MASK));
 }
 
 bool InternalRef::IsUndefinedStackRef(VRef *vref)
@@ -41,7 +41,7 @@ bool InternalRef::IsStackVRef(VRef *vref)
     if (IsUndefinedStackRef(vref)) {
         return true;
     }
-    return (common_vm::ToUintPtr(vref) & TYPE_MASK) != TYPE_VREF;
+    return (ark::mem::ToUintPtr(vref) & TYPE_MASK) != TYPE_VREF;
 }
 
 }  // namespace ark::ets::ani::verify

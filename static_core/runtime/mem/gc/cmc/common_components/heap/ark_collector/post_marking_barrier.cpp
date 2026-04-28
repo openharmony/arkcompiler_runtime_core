@@ -21,7 +21,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 BaseObject *PostMarkingBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
 {
     RefField<> tmpField(field);
@@ -50,4 +50,4 @@ BaseObject *PostMarkingBarrier::AtomicReadRefField(BaseObject *obj, RefField<tru
                    << oldField.GetFieldValue() << " -> " << target;
     return target;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

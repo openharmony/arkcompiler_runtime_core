@@ -30,7 +30,7 @@
 #include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 enum CollectorType {
     NO_COLLECTOR = 0,  // No Collector
     PROXY_COLLECTOR,   // Proxy of Collector
@@ -138,6 +138,6 @@ private:
     std::vector<GCListener *> gcListeners_;
     ark::os::memory::Mutex gcListenersLock_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H

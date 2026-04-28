@@ -21,20 +21,22 @@
 #include <codecvt>
 #include <locale>
 
-namespace common_vm {
+namespace ark::mem {
 size_t UtfUtils::DebuggerConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
                                                   size_t utf8Len, size_t start, bool modify, bool isWriteBuffer)
 {
-    return utf_helper::DebuggerConvertRegionUtf16ToUtf8(utf16In, utf8Out, utf16Len, utf8Len, start, modify,
-                                                        isWriteBuffer);
+    return ::ark::mem::utf_helper::DebuggerConvertRegionUtf16ToUtf8(utf16In, utf8Out, utf16Len, utf8Len, start, modify,
+                                                                    isWriteBuffer);
 }
 
 size_t UtfUtils::ConvertRegionUtf16ToLatin1(const uint16_t *utf16In, uint8_t *latin1Out, size_t utf16Len,
                                             size_t latin1Len)
 {
-    return utf_helper::ConvertRegionUtf16ToLatin1(utf16In, latin1Out, utf16Len, latin1Len);
+    return ::ark::mem::utf_helper::ConvertRegionUtf16ToLatin1(utf16In, latin1Out, utf16Len, latin1Len);
 }
+}  // namespace ark::mem
 
+namespace ark::mem {
 // static
 template <typename T1, typename T2>
 uint32_t BaseString::CalculateDataConcatHashCode(const T1 *dataFirst, size_t sizeFirst, const T2 *dataSecond,
@@ -59,9 +61,12 @@ template uint32_t BaseString::CalculateDataConcatHashCode<uint16_t, uint8_t>(con
                                                                              size_t sizeFirst,
                                                                              const uint8_t *dataSecond,
                                                                              size_t sizeSecond);
+}  // namespace ark::mem
+
+namespace ark::common_vm {
 
 template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) project code style
-bool IsSubStringAtSpan(common_vm::Span<T1> &lhsSp, common_vm::Span<T2> &rhsSp, uint32_t offset)
+bool IsSubStringAtSpan(ark::common_vm::Span<T1> &lhsSp, ark::common_vm::Span<T2> &rhsSp, uint32_t offset)
 {
     size_t rhsSize = rhsSp.size();
     DCHECK(rhsSize + offset <= lhsSp.size());
@@ -75,15 +80,18 @@ bool IsSubStringAtSpan(common_vm::Span<T1> &lhsSp, common_vm::Span<T2> &rhsSp, u
     return true;
 }
 
-template bool IsSubStringAtSpan<const uint8_t, const uint8_t>(common_vm::Span<const uint8_t> &lhsSp,
-                                                              common_vm::Span<const uint8_t> &rhsSp, uint32_t offset);
-template bool IsSubStringAtSpan<const uint16_t, const uint16_t>(common_vm::Span<const uint16_t> &lhsSp,
-                                                                common_vm::Span<const uint16_t> &rhsSp,
+template bool IsSubStringAtSpan<const uint8_t, const uint8_t>(ark::common_vm::Span<const uint8_t> &lhsSp,
+                                                              ark::common_vm::Span<const uint8_t> &rhsSp,
+                                                              uint32_t offset);
+template bool IsSubStringAtSpan<const uint16_t, const uint16_t>(ark::common_vm::Span<const uint16_t> &lhsSp,
+                                                                ark::common_vm::Span<const uint16_t> &rhsSp,
                                                                 uint32_t offset);
-template bool IsSubStringAtSpan<const uint8_t, const uint16_t>(common_vm::Span<const uint8_t> &lhsSp,
-                                                               common_vm::Span<const uint16_t> &rhsSp, uint32_t offset);
-template bool IsSubStringAtSpan<const uint16_t, const uint8_t>(common_vm::Span<const uint16_t> &lhsSp,
-                                                               common_vm::Span<const uint8_t> &rhsSp, uint32_t offset);
+template bool IsSubStringAtSpan<const uint8_t, const uint16_t>(ark::common_vm::Span<const uint8_t> &lhsSp,
+                                                               ark::common_vm::Span<const uint16_t> &rhsSp,
+                                                               uint32_t offset);
+template bool IsSubStringAtSpan<const uint16_t, const uint8_t>(ark::common_vm::Span<const uint16_t> &lhsSp,
+                                                               ark::common_vm::Span<const uint8_t> &rhsSp,
+                                                               uint32_t offset);
 
 std::u16string Utf16ToU16String(const uint16_t *utf16Data, uint32_t dataLen)
 {
@@ -99,4 +107,4 @@ std::u16string Utf8ToU16String(const uint8_t *utf8Data, uint32_t dataLen)
     std::u16string u16str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.from_bytes(str);
     return u16str;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

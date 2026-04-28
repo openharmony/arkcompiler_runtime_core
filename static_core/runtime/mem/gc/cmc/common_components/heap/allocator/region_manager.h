@@ -30,7 +30,7 @@
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/slot_list.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class MarkingCollector;
 class CompactCollector;
 class RegionManager;
@@ -220,6 +220,6 @@ private:
 
     friend class VerifyIterator;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_MANAGER_H

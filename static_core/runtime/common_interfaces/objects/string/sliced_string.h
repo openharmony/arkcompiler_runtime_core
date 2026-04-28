@@ -21,9 +21,10 @@
 #include <vector>
 
 #include "common_interfaces/objects/string/base_string.h"
-#include "common_interfaces/base/bit_field.h"
+#include "libarkbase/utils/bit_field.h"
 
-namespace common_vm {
+namespace ark::mem {
+using ark::BitField;
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
@@ -129,7 +130,7 @@ public:
     template <bool VERIFY = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
 
 // NOLINTEND(cppcoreguidelines-special-member-functions)

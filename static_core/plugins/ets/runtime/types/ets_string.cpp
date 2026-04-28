@@ -358,25 +358,25 @@ static bool CheckForEquality(const FlatStringInfo &flat1, const FlatStringInfo &
     auto len2 = static_cast<int32_t>(flat2.GetLength());
 
     if (flat1.IsUtf8()) {
-        common_vm::Span<const uint8_t> span1(flat1.GetDataUtf8(), len1);
+        ark::common_vm::Span<const uint8_t> span1(flat1.GetDataUtf8(), len1);
         // utf8, utf8
         if (flat2.IsUtf8()) {
-            common_vm::Span<const uint8_t> span2(flat2.GetDataUtf8(), len2);
-            return common_vm::BaseString::StringsAreEquals(span1, span2);
+            ark::common_vm::Span<const uint8_t> span2(flat2.GetDataUtf8(), len2);
+            return ark::mem::BaseString::StringsAreEquals(span1, span2);
         }
         // utf8, utf16
-        common_vm::Span<const uint16_t> span2(flat2.GetDataUtf16(), len2);
-        return common_vm::BaseString::StringsAreEquals(span1, span2);
+        ark::common_vm::Span<const uint16_t> span2(flat2.GetDataUtf16(), len2);
+        return ark::mem::BaseString::StringsAreEquals(span1, span2);
     }
-    common_vm::Span<const uint16_t> span1(flat1.GetDataUtf16(), len1);
+    ark::common_vm::Span<const uint16_t> span1(flat1.GetDataUtf16(), len1);
     // utf16, utf16
     if (flat2.IsUtf16()) {
-        common_vm::Span<const uint16_t> span2(flat2.GetDataUtf16(), len2);
-        return common_vm::BaseString::StringsAreEquals(span1, span2);
+        ark::common_vm::Span<const uint16_t> span2(flat2.GetDataUtf16(), len2);
+        return ark::mem::BaseString::StringsAreEquals(span1, span2);
     }
     // utf16, utf8
-    common_vm::Span<const uint8_t> span2(flat2.GetDataUtf8(), len2);
-    return common_vm::BaseString::StringsAreEquals(span1, span2);
+    ark::common_vm::Span<const uint8_t> span2(flat2.GetDataUtf8(), len2);
+    return ark::mem::BaseString::StringsAreEquals(span1, span2);
 }
 
 bool EtsString::StringsAreEqualWithCache(String *str1, String *str2)

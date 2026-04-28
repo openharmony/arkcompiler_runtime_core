@@ -19,7 +19,7 @@
 #include "common_components/heap/allocator/alloc_buffer_manager.h"
 #include "common_components/heap/heap.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // Allocator abstract class
 class Allocator {
 public:
@@ -107,6 +107,6 @@ private:
     bool InitAyncAllocation();
     bool asyncAllocationInitSwitch_ = true;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif

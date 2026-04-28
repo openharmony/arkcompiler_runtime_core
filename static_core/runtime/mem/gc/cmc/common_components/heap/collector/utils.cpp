@@ -15,7 +15,7 @@
 
 #include "common_components/heap/collector/utils.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 void ArrayTaskDispatcher::Dispatch(Taskpool *pool, int nThread)
 {
@@ -64,4 +64,4 @@ void ArrayTaskDispatcher::JoinAndWait()
     }
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

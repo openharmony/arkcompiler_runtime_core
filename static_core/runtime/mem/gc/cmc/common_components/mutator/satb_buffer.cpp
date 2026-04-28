@@ -18,7 +18,7 @@
 
 #include "common_components/base/immortal_wrapper.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 static ImmortalWrapper<SatbBuffer> g_instance;
 
 SatbBuffer &SatbBuffer::Instance() noexcept
@@ -45,4 +45,4 @@ bool SatbBuffer::ShouldEnqueue(const BaseObject *obj)
     }
     return !RegionalHeap::EnqueueObject(obj);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

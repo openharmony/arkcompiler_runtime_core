@@ -29,7 +29,7 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 using SteadyTimePoint = std::chrono::steady_clock::time_point;
 class TaskQueue {
 public:
@@ -66,5 +66,5 @@ private:
     ark::os::memory::Mutex mtx_;
     ark::os::memory::ConditionVariable cv_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASK_QUEUE_H

@@ -30,7 +30,7 @@
 
 #include "securec.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 using namespace std;
 
 // not thread safe, do not call from multiple threads
@@ -76,7 +76,7 @@ MemoryMap *MemoryMap::MapMemory(size_t reqSize, size_t initSize, const Option &o
     MemoryMap *memMap = new (std::nothrow) MemoryMap(mappedAddr, initSize, reqSize);
     LOG_IF(UNLIKELY(memMap == nullptr), FATAL, MM_OBJECT_EVENTS) << "new MemoryMap failed";
 
-    os::PrctlSetVMA(mappedAddr, reqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
+    ::ark::mem::os::PrctlSetVMA(mappedAddr, reqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
     return memMap;
 }
 
@@ -158,7 +158,7 @@ MemoryMap *MemoryMap::MapMemoryAlignInner4G(uint64_t reqSize, uint64_t initSize,
     MemoryMap *memMap = new (std::nothrow) MemoryMap(mappedAddr, initSize, reqSize);
     LOG_IF(UNLIKELY(memMap == nullptr), FATAL, MM_OBJECT_EVENTS) << "new MemMap failed";
 
-    os::PrctlSetVMA(mappedAddr, needReqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
+    ::ark::mem::os::PrctlSetVMA(mappedAddr, needReqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
     return memMap;
 }
 
@@ -194,4 +194,4 @@ MemoryMap::~MemoryMap()
     memCurrEndAddr_ = nullptr;
     memMappedEndAddr_ = nullptr;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

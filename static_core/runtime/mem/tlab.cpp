@@ -120,9 +120,9 @@ bool TLAB::IsLive(const ObjectHeader *obj)
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-static_assert(TLAB::TLABStartAddrOffset() == common_vm::TLAB::TLABStartAddrOffset());
-static_assert(TLAB::TLABFreePointerOffset() == common_vm::TLAB::TLABAllocPtrOffset());
-static_assert(TLAB::TLABEndAddrOffset() == common_vm::TLAB::TLABEndAddrOffset());
+static_assert(TLAB::TLABStartAddrOffset() == ark::common_vm::TLAB::TLABStartAddrOffset());
+static_assert(TLAB::TLABFreePointerOffset() == ark::common_vm::TLAB::TLABAllocPtrOffset());
+static_assert(TLAB::TLABEndAddrOffset() == ark::common_vm::TLAB::TLABEndAddrOffset());
 #endif
 
 // tlab cur addr and tlab end addr are neighbours in TLAB structure

@@ -242,7 +242,7 @@ void EtsReferenceProcessor::ProcessReferencesAfterCopy()
     weakReferences_.FlushSets();
     while (!weakReferences_.IsEmpty()) {
         auto *weakRefObj = weakReferences_.Extract();
-        auto weakRef = reinterpret_cast<common_vm::BaseObject *>(weakRefObj);
+        auto weakRef = reinterpret_cast<ark::common_vm::BaseObject *>(weakRefObj);
         if (weakRef->IsForwarded()) {
             weakReferences_.Insert(reinterpret_cast<ObjectHeader *>(weakRef->GetForwardingPointer()));
         } else {

@@ -20,7 +20,7 @@
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/common/scoped_object_access.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class RegionManager;
 
 // This class is and should be accessed only for region allocation. we do not rely on it to check region status.
@@ -148,5 +148,5 @@ private:
     ark::os::memory::Mutex dirtyUnitTreeMutex_;
     Treap dirtyUnitTree_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_FREE_REGION_MANAGER_H

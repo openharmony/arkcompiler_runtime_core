@@ -16,7 +16,7 @@
 
 #include "common_components/base/time_utils.h"
 #include "common_components/heap/collector/gc_stats.h"
-namespace common_vm {
+namespace ark::common_vm {
 namespace {
 // Set a safe initial value so that the first GC is able to trigger.
 uint64_t g_initHeuTriggerTimestamp = TimeUtil::NanoSeconds() - LONG_MIN_HEU_GC_INTERVAL_NS;
@@ -77,4 +77,4 @@ GCRequest g_gcRequests[] = {
     {GC_REASON_BACKGROUND, "backgound", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
     {GC_REASON_HINT, "hint", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
     {GC_REASON_IDLE, "idle", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp}};
-}  // namespace common_vm
+}  // namespace ark::common_vm

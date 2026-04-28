@@ -18,7 +18,7 @@
 
 #include "common_components/mutator/mutator_manager.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 template <class STWFunction>
 void MutatorManager::FlipMutators(STWParam &param, STWFunction &&stwFunction, FlipFunction *flipFunction)
 {
@@ -61,6 +61,6 @@ void MutatorManager::FlipMutators(STWParam &param, STWFunction &&stwFunction, Fl
     }
     MutatorManagementWUnlock();
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H

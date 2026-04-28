@@ -18,7 +18,7 @@
 
 #include "ark_collector/ark_collector.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 class WVerify {
 public:
@@ -36,6 +36,6 @@ private:
     static void DisableReadBarrierDFXInternal(RegionalHeap &space);
 };
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // VERIFICATION_H

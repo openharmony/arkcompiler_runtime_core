@@ -18,7 +18,7 @@
 #include <malloc.h>
 #include <sysinfoapi.h>
 
-namespace common_vm {
+namespace ark::common_vm {
 uint32_t NumberOfCpuCore()
 {
     SYSTEM_INFO info;
@@ -34,4 +34,4 @@ size_t PhysicalSize()
     DWORDLONG physSize = status.ullTotalPhys;
     return physSize;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

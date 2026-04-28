@@ -23,7 +23,7 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class PANDA_PUBLIC_API Taskpool {
 public:
     PANDA_PUBLIC_API static Taskpool *GetCurrentTaskpool();
@@ -87,5 +87,5 @@ private:
     volatile int isInitialized_ = 0;
     ark::os::memory::Mutex mutex_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASKPOOL_H

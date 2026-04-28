@@ -19,7 +19,7 @@
 #include "qos.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 Runner::Runner(uint32_t threadNum, const std::function<void(ark::os::thread::NativeHandleType)> prologueHook,
                const std::function<void(ark::os::thread::NativeHandleType)> epilogueHook)
     : totalThreadNum_(threadNum), prologueHook_(prologueHook), epilogueHook_(epilogueHook)
@@ -131,4 +131,4 @@ void Runner::Run(uint32_t threadId)
     }
     EpilogueHook(thread);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

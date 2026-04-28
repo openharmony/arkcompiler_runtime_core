@@ -53,39 +53,39 @@ template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::GCReason reason = common_vm::GCReason::GC_REASON_INVALID;
-    common_vm::GCType type = common_vm::GCType::GC_TYPE_FULL;
+    ark::common_vm::GCReason reason = ark::common_vm::GCReason::GC_REASON_INVALID;
+    ark::common_vm::GCType type = ark::common_vm::GCType::GC_TYPE_FULL;
     switch (task.reason) {
         case GCTaskCause::YOUNG_GC_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_YOUNG;
-            type = common_vm::GCType::GC_TYPE_YOUNG;
+            reason = ark::common_vm::GCReason::GC_REASON_YOUNG;
+            type = ark::common_vm::GCType::GC_TYPE_YOUNG;
             break;
         case GCTaskCause::PYGOTE_FORK_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_USER;
+            reason = ark::common_vm::GCReason::GC_REASON_USER;
             break;
         case GCTaskCause::STARTUP_COMPLETE_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_HINT;
+            reason = ark::common_vm::GCReason::GC_REASON_HINT;
             break;
         case GCTaskCause::NATIVE_ALLOC_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_NATIVE;
+            reason = ark::common_vm::GCReason::GC_REASON_NATIVE;
             break;
         case GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE:
         case GCTaskCause::MIXED:
-            reason = common_vm::GCReason::GC_REASON_HEU;
+            reason = ark::common_vm::GCReason::GC_REASON_HEU;
             break;
         case GCTaskCause::EXPLICIT_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_FORCE;
+            reason = ark::common_vm::GCReason::GC_REASON_FORCE;
             break;
         case GCTaskCause::OOM_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_OOM;
+            reason = ark::common_vm::GCReason::GC_REASON_OOM;
             break;
         case GCTaskCause::CROSSREF_CAUSE:
-            reason = common_vm::GCReason::GC_REASON_BACKUP;
+            reason = ark::common_vm::GCReason::GC_REASON_BACKUP;
             break;
         default:
             UNREACHABLE();
     }
-    common_vm::BaseRuntime::RequestGC(reason, false, type);
+    ark::common_vm::BaseRuntime::RequestGC(reason, false, type);
 #endif  // ARK_USE_COMMON_RUNTIME
     return false;
 }
@@ -94,8 +94,8 @@ template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::InitGCBits([[maybe_unused]] ObjectHeader *objHeader)
 {
     constexpr ClassHelper::ClassWordSize STATIC_OBJECT_MASK = static_cast<ClassHelper::ClassWordSize>(
-        static_cast<uint64_t>(common_vm::LanguageType::STATIC)
-        << (common_vm::BaseStateWord::BASECLASS_WIDTH + common_vm::BaseStateWord::PADDING_WIDTH));
+        static_cast<uint64_t>(ark::mem::LanguageType::STATIC)
+        << (ark::mem::BaseStateWord::BASECLASS_WIDTH + ark::mem::BaseStateWord::PADDING_WIDTH));
     auto *classWord =
         reinterpret_cast<ClassHelper::ClassWordSize *>(ToUintPtr(objHeader) + ObjectHeader::GetClassOffset());
     *classWord |= STATIC_OBJECT_MASK;
@@ -111,7 +111,8 @@ template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::Trigger([[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::BaseRuntime::RequestGC(common_vm::GCReason::GC_REASON_OOM, false, common_vm::GCType::GC_TYPE_FULL);
+    ark::common_vm::BaseRuntime::RequestGC(ark::common_vm::GCReason::GC_REASON_OOM, false,
+                                           ark::common_vm::GCType::GC_TYPE_FULL);
 #endif  // ARK_USE_COMMON_RUNTIME
     return false;
 }
@@ -126,7 +127,7 @@ template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::StopGC()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::BaseRuntime::StopGCWork();
+    ark::common_vm::BaseRuntime::StopGCWork();
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

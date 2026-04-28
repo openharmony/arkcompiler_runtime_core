@@ -17,7 +17,7 @@
 #define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 
 #include "common_interfaces/objects/base_object.h"
-namespace common_vm {
+namespace ark::mem {
 template <typename T>
 class ReadOnlyHandle {
 public:
@@ -92,6 +92,6 @@ public:
 private:
     uintptr_t address_;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif  // COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H

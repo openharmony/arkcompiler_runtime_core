@@ -18,7 +18,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 void YoungSpace::DumpRegionStats() const
 {
     size_t tlRegions = tlRegionList_.GetRegionCount();
@@ -52,4 +52,4 @@ RegionDesc *YoungSpace::AllocateThreadLocalRegion(bool expectPhysicalMem)
     }
     return region;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

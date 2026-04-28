@@ -19,7 +19,7 @@
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common_vm {
+namespace ark::mem {
 class PANDA_PUBLIC_API VMInterface {
 public:
     virtual void VisitGlobalRoots(const RefFieldVisitor &visitor) = 0;
@@ -39,6 +39,6 @@ public:
     VMInterface() = default;
     virtual ~VMInterface() = default;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif

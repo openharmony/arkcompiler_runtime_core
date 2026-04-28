@@ -20,20 +20,20 @@
 #include <cstdint>
 #include <limits>
 
-namespace common_vm {
+namespace ark::common_vm {
 class BaseObject;
 }
 
 // commonly agreed type interfaces for a managed runtime:
 //    they're opaque across modules, but we still want it provides a degree
 //    of type safety.
-namespace common_vm {
+namespace ark::common_vm {
 // Those are mostly managed pointer types for GC
 using HeapAddress = uint64_t;  // Managed address
 constexpr uintptr_t NULL_ADDRESS = 0;
 
 // object model related types
-using common_vm::BaseObject;
+using ark::common_vm::BaseObject;
 
 // basic types for managed world: modify them together
 using MIndex = uint64_t;  // index of array
@@ -46,6 +46,6 @@ enum class AllocType {
     MOVEABLE_OLD_OBJECT,
     NONMOVABLE_OBJECT,
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_TYPE_DEF_H

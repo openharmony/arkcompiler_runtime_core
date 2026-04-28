@@ -21,7 +21,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 void LargeSpace::AssembleGarbageCandidates()
 {
     largeRegionList_.MergeRegionList(recentLargeRegionList_, RegionDesc::RegionType::LARGE_REGION);
@@ -98,4 +98,4 @@ uintptr_t LargeSpace::Alloc(size_t size, bool allowGC)
     return addr;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

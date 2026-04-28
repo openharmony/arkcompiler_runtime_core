@@ -18,7 +18,7 @@
 
 #include "common_interfaces/heap/region_desc.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class RegionList {
 public:
     RegionList(const char *name) : listName_(name) {}
@@ -253,5 +253,5 @@ public:
 private:
     bool active_ = false;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_LIST_H

@@ -16,7 +16,7 @@
 
 #include "common_interfaces/heap/region_desc.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 bool Treap::MergeInsertInternal(uint32_t idx, uint32_t num, bool refreshRegionDesc)
 {
     //     +-------------+       +--------------+
@@ -141,4 +141,4 @@ void Treap::TreapNode::ReleaseMemory()
     uint32_t cnt = GetCount();
     RegionDesc::ReleaseUnits(idx, cnt);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

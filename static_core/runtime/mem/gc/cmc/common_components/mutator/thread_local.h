@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-namespace common_vm {
+namespace ark::common_vm {
 class AllocationBuffer;
 class Mutator;
 
@@ -116,6 +116,6 @@ public:
         GetThreadLocalData()->schedule = reinterpret_cast<uint8_t *>(schedule);
     }
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_THREAD_LOCAL_H

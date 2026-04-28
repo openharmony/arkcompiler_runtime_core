@@ -19,7 +19,7 @@
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/heap/space/regional_space.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 // regions for large-sized objects.
 class LargeSpace : public RegionalSpace {
@@ -97,5 +97,5 @@ private:
     // record large regions in here first and move those to largeRegionList_ when gc starts.
     RegionList recentLargeRegionList_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_LARGE_SPACE_H

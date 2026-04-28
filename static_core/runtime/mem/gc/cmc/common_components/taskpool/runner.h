@@ -27,7 +27,7 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 static constexpr uint32_t MIN_TASKPOOL_THREAD_NUM = 3;
 static constexpr uint32_t MAX_TASKPOOL_THREAD_NUM = 5;
 static constexpr uint32_t DEFAULT_TASKPOOL_THREAD_NUM = 0;
@@ -103,5 +103,5 @@ private:
     std::function<void(ark::os::thread::NativeHandleType)> prologueHook_;
     std::function<void(ark::os::thread::NativeHandleType)> epilogueHook_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_RUNNER_H

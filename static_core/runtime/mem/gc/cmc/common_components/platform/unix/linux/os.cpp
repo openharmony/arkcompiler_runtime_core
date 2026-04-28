@@ -25,9 +25,9 @@
 #define PR_SET_VMA_ANON_NAME 0
 #endif
 
-namespace common_vm::os {
+namespace ark::mem::os {
 int PrctlSetVMA(const void *p, const size_t size, const char *tag)
 {
     return prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, p, size, tag);
 }
-}  // namespace common_vm::os
+}  // namespace ark::mem::os

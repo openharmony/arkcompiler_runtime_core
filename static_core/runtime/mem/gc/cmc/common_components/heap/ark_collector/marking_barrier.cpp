@@ -21,9 +21,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-#include "libarkbase/utils/logger.h"
-
-namespace common_vm {
+namespace ark::common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
 // so we don't expect reading barrier have the ability to modify the referent field.
 BaseObject *MarkingBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
@@ -63,4 +61,4 @@ BaseObject *MarkingBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &
     return target;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

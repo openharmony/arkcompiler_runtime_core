@@ -25,7 +25,7 @@
 
 #include "securec.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class SafepointPageManager {
 public:
     SafepointPageManager() {}
@@ -75,6 +75,6 @@ private:
     uint8_t *unreadablePage_ = nullptr;
     uint8_t *unreadablePageForRawData_ = nullptr;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SAFEPOINT_PAGE_MANAGER_H

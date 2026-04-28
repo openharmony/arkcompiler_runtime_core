@@ -25,7 +25,7 @@
 #include "sys/syscall.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 #ifndef SYS_futex
 #define SYS_futex __NR_futex
 #endif
@@ -61,4 +61,4 @@ int GetPid()
     return syscall(SYS_getpid);
 #endif
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

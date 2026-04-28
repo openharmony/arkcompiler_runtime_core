@@ -20,7 +20,10 @@
 #include <type_traits>
 #include <vector>
 
-namespace common_vm::objects_traits {
+namespace ark::mem::objects_traits {
+
+using ark::common_vm::BaseObject;
+using ark::common_vm::ObjectType;
 
 template <typename U>
 constexpr bool IS_HEAP_OBJECT_V = std::is_base_of_v<BaseObject, std::remove_pointer_t<U>>;
@@ -68,6 +71,6 @@ using RebindAllocT = typename std::allocator_traits<Alloc>::template rebind_allo
 template <typename Vec, typename NewT>
 using VectorWithSameAllocT = std::vector<NewT, RebindAllocT<GetAllocatorTypeT<Vec>, NewT>>;
 
-}  // namespace common_vm::objects_traits
+}  // namespace ark::mem::objects_traits
 
 #endif  // COMMON_INTERFACES_OBJECTS_TRAITS_H

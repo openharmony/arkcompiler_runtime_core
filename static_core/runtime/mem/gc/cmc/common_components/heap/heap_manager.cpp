@@ -19,7 +19,7 @@
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/heap/allocator/regional_heap.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 HeapManager::HeapManager() {}
 void HeapManager::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
 {
@@ -60,4 +60,4 @@ void HeapManager::MarkJitFortMemInstalled(void *vm, void *obj)
     RegionalHeap &regionalHeap = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     regionalHeap.MarkJitFortMemInstalled(vm, reinterpret_cast<BaseObject *>(obj));
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

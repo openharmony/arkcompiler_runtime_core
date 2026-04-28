@@ -21,7 +21,7 @@
 #include "common_components/base/globals.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // Minimum time between async GC (heuristic, native).
 constexpr uint64_t MIN_ASYNC_GC_INTERVAL_NS = SECOND_TO_NANO_SECOND;
 constexpr uint64_t LONG_MIN_HEU_GC_INTERVAL_NS = 200 * MILLI_SECOND_TO_NANO_SECOND;
@@ -58,6 +58,6 @@ struct GCRequest {
 
 // Defined in gcRequest.cpp
 extern GCRequest g_gcRequests[];
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_GC_DEBUGGER_H

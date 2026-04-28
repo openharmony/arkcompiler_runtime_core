@@ -34,7 +34,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 // regions for small-sized movable objects, which may be moved during gc.
 class YoungSpace : public RegionalSpace {
 public:
@@ -135,5 +135,5 @@ private:
     // recentFullRegionList is a list of regions which become full .
     RegionList recentFullRegionList_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_YOUNG_SPACE_H

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@ add_custom_target(code-style-check
     )
 
 add_custom_target(clang-force-format
-    COMMAND ${PANDA_ROOT}/scripts/code_style/code_style_check.py ${PANDA_ROOT} --reformat
+    COMMAND ${PANDA_ROOT}/scripts/code_style/code_style_check.py --reformat ${PANDA_ROOT}
     USES_TERMINAL
     )
 

@@ -26,7 +26,7 @@
 #include "common_components/heap/allocator/alloc_util.h"
 #include "common_components/common/type_def.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class MemoryMap {
 public:
 #ifdef _WIN64
@@ -111,6 +111,6 @@ private:
     // MemoryMap is created via factory method
     MemoryMap(void *baseAddr, size_t initSize, size_t mappedSize);
 };  // class MemoryMap
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_MEM_MAP_H

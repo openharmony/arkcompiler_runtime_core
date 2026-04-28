@@ -24,7 +24,7 @@
 #include "common_interfaces/thread/mutator-inl.h"
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 bool g_enableGCTimeoutCheck = true;
 
 bool IsRuntimeThread()
@@ -62,7 +62,7 @@ void MutatorManager::UnbindMutator(Mutator &mutator) const
 bool MutatorManager::BindMutatorOnly(Mutator *mutator) const
 {
     // watch dog thread may call this function and copy barrier may occur, so bind mutator here.
-    common_vm::ThreadLocalData *tlData = common_vm::ThreadLocal::GetThreadLocalData();
+    ThreadLocalData *tlData = ThreadLocal::GetThreadLocalData();
     DCHECK(tlData != nullptr);
     if (tlData->mutator == nullptr) {
         tlData->mutator = mutator;
@@ -343,7 +343,7 @@ void MutatorManager::WaitUntilAllStopped()
 
         auto time =
             ((remainMutatorsSize / STW_TIMEOUTS_THREADS_BASE_COUNT) * STW_TIMEOUTS_BASE_MS) + STW_TIMEOUTS_BASE_MS;
-        if (UNLIKELY(common_vm::g_enableGCTimeoutCheck && TimeUtil::MilliSeconds() - beginTime > time)) {
+        if (UNLIKELY(g_enableGCTimeoutCheck && TimeUtil::MilliSeconds() - beginTime > time)) {
             timeoutTimes++;
             beginTime = TimeUtil::MilliSeconds();
             DumpMutators(timeoutTimes);
@@ -476,4 +476,4 @@ void MutatorManager::DumpAllGcInfos()
 }
 #endif
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

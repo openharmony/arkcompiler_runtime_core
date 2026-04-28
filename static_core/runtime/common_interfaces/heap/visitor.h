@@ -21,8 +21,7 @@
 #include <functional>
 #include "common_interfaces/objects/ref_field.h"
 
-namespace common_vm {
-class BaseObject;
+namespace ark::mem {
 // For ArkTS1.2，It is just example.
 // using GCRootVisitor = std::function<void(BaseObject *object)>;
 using RefFieldVisitor = std::function<void(RefField<> &)>;
@@ -30,5 +29,5 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
 // For ArkTS1.1
 // using WeakRootVisitor = std::function<BaseObject *(BaseObject *p)>;
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H

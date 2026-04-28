@@ -20,7 +20,7 @@
 #include <iterator>
 
 #include "common_interfaces/base/common.h"
-namespace common_vm {
+namespace ark::common_vm {
 
 /// Similar to std::span that will come in C++20.
 template <class T>
@@ -255,6 +255,6 @@ Span<std::byte> AsWritableBytes(Span<T> s) noexcept
     return {reinterpret_cast<std::byte *>(s.Data()), s.SizeBytes()};
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_SPAN_H

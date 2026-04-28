@@ -20,7 +20,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class AtomicSpinLock {
 public:
     AtomicSpinLock() {}
@@ -50,6 +50,6 @@ private:
 
     NO_COPY_SEMANTIC(AtomicSpinLock);
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ATOMIC_SPINLOCK_H

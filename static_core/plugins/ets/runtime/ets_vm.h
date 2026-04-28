@@ -430,7 +430,7 @@ private:
     void InitializeANI(const RuntimeOptions &options);
 
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
-                        common_vm::VMInterface *vmIface);
+                        ark::mem::VMInterface *vmIface);
 
     // Time to turn off GC for cold startup on PostFork
     static constexpr uint64_t DISABLE_GC_DURATION_MS = 2ULL * 1000;
@@ -470,7 +470,7 @@ private:
     RunEventLoopFunction runEventLoop_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
     PandaUniquePtr<StdlibCache> stdLibCache_ {nullptr};
-    std::unique_ptr<common_vm::VMInterface> vmIface_;
+    std::unique_ptr<ark::mem::VMInterface> vmIface_;
 
     size_t preForkWorkerCount_ = 0;
 

@@ -124,7 +124,7 @@ bool Mutator::TestAllFlags() const
 #if !defined(ARK_USE_COMMON_RUNTIME)
     return (fms_.asStruct.flags) != initialMutatorFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
 #else
-    return common_vm::Mutator::HasSuspendRequest();
+    return ark::common_vm::Mutator::HasSuspendRequest();
 #endif
 }
 
@@ -158,7 +158,7 @@ enum MutatorStatus Mutator::GetStatus() const
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     return static_cast<enum MutatorStatus>(fms_.asAtomic.status.load(std::memory_order_acquire));
 #else
-    if (common_vm::Mutator::IsInRunningState()) {
+    if (ark::common_vm::Mutator::IsInRunningState()) {
         return MutatorStatus::RUNNING;
     }
     return MutatorStatus::NATIVE;
@@ -221,10 +221,10 @@ void Mutator::UpdateStatus(enum MutatorStatus status)
     }
 #else
     if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
-        common_vm::Mutator::TransferToNativeIfInRunning();
+        ark::common_vm::Mutator::TransferToNativeIfInRunning();
         GetMutatorLock()->Unlock();
     } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
-        common_vm::Mutator::TransferToRunningIfInNative();
+        ark::common_vm::Mutator::TransferToRunningIfInNative();
         GetMutatorLock()->ReadLock();
     }
 #endif
@@ -306,7 +306,7 @@ void Mutator::SafepointPoll()
         Safepoint();
     }
 #else
-    common_vm::Mutator::CheckSafepointIfSuspended();
+    ark::common_vm::Mutator::CheckSafepointIfSuspended();
 #endif
 }
 
@@ -369,7 +369,7 @@ void Mutator::WaitSuspension()
     }
     UpdateStatus(oldStatus);
 #else
-    common_vm::Mutator::WaitSuspension();
+    ark::common_vm::Mutator::WaitSuspension();
 #endif
 }
 
@@ -418,7 +418,7 @@ void Mutator::InitBuffers()
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-void Mutator::VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor)
+void Mutator::VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
@@ -426,32 +426,36 @@ void Mutator::VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor)
     auto *managedThread = ManagedThread::CastFromMutator(this);
     rootManager.VisitRootsForThread(managedThread, [&visitor](mem::GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitor(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
+        visitor(reinterpret_cast<ark::mem::RefField<> &>(*root.GetObjectPointer()));
     });
 }
 
-void Mutator::UpdateBarrierEntrypoint(common_vm::GCPhase phase)
+void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase)
 {
     auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
     auto *gc = static_cast<mem::CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
     auto *managedThread = ManagedThread::CastFromMutator(this);
-    if (phase >= common_vm::GCPhase::GC_PHASE_ENUM && phase < common_vm::GCPhase::GC_PHASE_FINAL_MARK) {
+    if (phase >= ark::common_vm::GCPhase::GC_PHASE_ENUM && phase < ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK) {
         gc->EnablePreWriteBarrier(managedThread);
-    } else if (phase >= common_vm::GCPhase::GC_PHASE_FINAL_MARK && phase < common_vm::GCPhase::GC_PHASE_PRECOPY) {
+    } else if (phase >= ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK &&
+               phase < ark::common_vm::GCPhase::GC_PHASE_PRECOPY) {
         gc->DisablePreWriteBarrier(managedThread);
-    } else if (phase >= common_vm::GCPhase::GC_PHASE_PRECOPY && phase < common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
+    } else if (phase >= ark::common_vm::GCPhase::GC_PHASE_PRECOPY &&
+               phase < ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
         gc->EnableReadBarrier(managedThread);
-    } else if (phase == common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
+    } else if (phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
         gc->EnablePreWriteBarrier(managedThread);
-    } else if (phase == common_vm::GCPhase::GC_PHASE_IDLE) {
+    } else if (phase == ark::common_vm::GCPhase::GC_PHASE_IDLE) {
         gc->DisableReadBarrier(managedThread);
     }
     // Check if a new phase has been added
-    ASSERT(phase == common_vm::GCPhase::GC_PHASE_ENUM || phase == common_vm::GCPhase::GC_PHASE_MARK ||
-           phase == common_vm::GCPhase::GC_PHASE_PRECOPY || phase == common_vm::GCPhase::GC_PHASE_COPY ||
-           phase == common_vm::GCPhase::GC_PHASE_FIX || phase == common_vm::GCPhase::GC_PHASE_IDLE ||
-           phase == common_vm::GCPhase::GC_PHASE_POST_MARK || phase == common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
-           phase == common_vm::GCPhase::GC_PHASE_REMARK_SATB || phase == common_vm::GCPhase::GC_PHASE_YOUNG_COPY);
+    ASSERT(phase == ark::common_vm::GCPhase::GC_PHASE_ENUM || phase == ark::common_vm::GCPhase::GC_PHASE_MARK ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_PRECOPY || phase == ark::common_vm::GCPhase::GC_PHASE_COPY ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_FIX || phase == ark::common_vm::GCPhase::GC_PHASE_IDLE ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_POST_MARK ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_REMARK_SATB ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY);
 }
 #endif
 
@@ -468,7 +472,7 @@ void Mutator::MakeTSANHappyForThreadState()
 
 void Mutator::BindMutator()
 {
-    common_vm::Mutator::BindMutator();
+    ark::common_vm::Mutator::BindMutator();
 }
 
 void Mutator::UnbindMutator()
@@ -476,7 +480,7 @@ void Mutator::UnbindMutator()
     if (this != GetCurrent()) {
         return;
     }
-    common_vm::Mutator::UnbindMutator();
+    ark::common_vm::Mutator::UnbindMutator();
 }
 
 #endif  // ARK_USE_COMMON_RUNTIME

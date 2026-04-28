@@ -17,7 +17,7 @@
 
 #include "common_components/heap/collector/collector_proxy.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 bool GCRunner::Execute(void *owner)
 {
     ASSERT_PRINT(owner != nullptr, "task queue owner ptr should not be null!");
@@ -55,4 +55,4 @@ bool GCRunner::Execute(void *owner)
     }
     return true;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

@@ -18,7 +18,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::mem {
 /*
  * @struct HeapParam
  * @brief Data structure for Arkcommon heap configuration parameters,\n
@@ -180,6 +180,6 @@ struct RuntimeParam {
     struct HeapParam heapParam;
     struct GCParam gcParam;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_PARAM_H

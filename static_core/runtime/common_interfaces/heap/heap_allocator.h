@@ -22,7 +22,8 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/mem/tlab.h"
 
-namespace common_vm {
+namespace ark::common_vm {
+using ::ark::mem::LanguageType;
 using Address32 = uint32_t;
 using Address = uint64_t;
 
@@ -44,5 +45,5 @@ public:
     static TLAB *CreateTLAB();
     static size_t GetTLABMaxAllocSize();
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_ALLOCATOR_H

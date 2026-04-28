@@ -17,7 +17,7 @@
 #define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
 #include "common_interfaces/objects/base_type.h"
 
-namespace common_vm {
+namespace ark::mem {
 // Type Converter implemented for static vm.
 class StaticTypeConverterInterface {
 public:
@@ -27,5 +27,5 @@ public:
     // convert BoxedValue to BaseType
     virtual BaseType UnwrapBoxed(BoxedValue value) = 0;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H

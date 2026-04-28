@@ -23,7 +23,7 @@
 #include <cmath>
 #include <iomanip>
 
-namespace common_vm {
+namespace ark::common_vm {
 size_t g_gcCount = 0;
 uint64_t g_gcTotalTimeUs = 0;
 size_t g_gcCollectedTotalBytes = 0;
@@ -139,4 +139,4 @@ void GCStats::Dump() const
                   ";total GC time:" + FormatTimeMs(totalTimeNs))
                      .c_str());
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

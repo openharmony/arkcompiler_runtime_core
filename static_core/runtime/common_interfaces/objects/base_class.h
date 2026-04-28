@@ -16,9 +16,10 @@
 #ifndef COMMON_INTERFACE_OBJECTS_BASE_CLASS_H
 #define COMMON_INTERFACE_OBJECTS_BASE_CLASS_H
 #include <cstdint>
-#include "common_interfaces/base/bit_field.h"
+#include "libarkbase/globals.h"
+#include "libarkbase/utils/bit_field.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class BaseObject;
 
 enum class ObjectType : uint8_t {
@@ -35,6 +36,8 @@ enum class ObjectType : uint8_t {
     STRING_LAST = TREE_STRING,
 };
 
+using ark::BitField;
+
 class BaseClass {
 public:
     BaseClass() = delete;
@@ -44,8 +47,8 @@ public:
 
     using HeaderType = uint64_t;
 
-    static constexpr size_t TYPE_BITFIELD_NUM = common_vm::BITS_PER_BYTE * sizeof(ObjectType);
-    using ObjectTypeBits = common_vm::BitField<ObjectType, 0, TYPE_BITFIELD_NUM>;  // 8
+    static constexpr size_t TYPE_BITFIELD_NUM = BITS_PER_BYTE * sizeof(ObjectType);
+    using ObjectTypeBits = BitField<ObjectType, 0, TYPE_BITFIELD_NUM>;  // 8
 
     ObjectType GetObjectType() const
     {
@@ -92,5 +95,10 @@ protected:
     uint64_t bitfield_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
+
+namespace ark::mem {
+using ::ark::common_vm::ObjectType;
+}  // namespace ark::mem
+
 #endif  // COMMON_INTERFACE_OBJECTS_BASE_CLASS_H

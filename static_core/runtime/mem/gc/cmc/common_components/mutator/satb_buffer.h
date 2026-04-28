@@ -21,7 +21,7 @@
 
 #include "libarkbase/utils/logger.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // snapshot at the beginning buffer
 // mainly used to buffer modified field of mutator write
 class SatbBuffer {
@@ -347,6 +347,6 @@ private:
     LockedList<TreapNode> freeNodes_;
     LockedList<TreapNode> retiredNodes_;  // has been filled by mutator, ready for scan
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_SATB_BUFFER_H

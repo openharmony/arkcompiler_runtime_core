@@ -20,7 +20,7 @@
 #include "common_components/heap/collector/task_queue.h"
 #include "common_components/taskpool/taskpool.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class CollectorProxy;
 // CollectorResources provides the resources that a functional collector need,
 // such as gc thread/threadPool, gc task queue...
@@ -188,6 +188,6 @@ private:
     GCStats gcStats_;
     bool hasRelease = false;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H

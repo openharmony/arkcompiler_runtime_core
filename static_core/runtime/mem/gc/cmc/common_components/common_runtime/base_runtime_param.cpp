@@ -17,7 +17,7 @@
 
 #include "common_components/platform/cpu.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 size_t BaseRuntimeParam::InitHeapSize()
 {
     constexpr auto DEFAULT_HEAP_SIZE_PERCENTAGE = 0.6;
@@ -48,4 +48,4 @@ RuntimeParam BaseRuntimeParam::DefaultRuntimeParam()
 
     return param;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

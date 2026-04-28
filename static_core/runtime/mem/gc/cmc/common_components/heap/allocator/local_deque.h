@@ -31,7 +31,7 @@ static void DequeAssert([[maybe_unused]] bool condition, [[maybe_unused]] const 
     }
 }
 
-namespace common_vm {
+namespace ark::common_vm {
 // Designed for single-use, single-purpose operations
 // Supports both queue-like and stack-like operations
 // Memory is efficiently cleared in O(1) time by simply resetting pointers
@@ -255,6 +255,6 @@ private:
     HeapAddress endAddr_ = 0;
     MemoryMap *memMap_ = nullptr;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H

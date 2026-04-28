@@ -17,7 +17,7 @@
 
 #include "common_components/heap/ark_collector/ark_collector.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 void FixHeapWorker::CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &list, FixRegionType type)
 {
@@ -200,4 +200,4 @@ void PostFixHeapWorker::CollectEmptyRegions()
     stats.nonMovableGarbageSize += garbageSize;
 }
 
-};  // namespace common_vm
+};  // namespace ark::common_vm

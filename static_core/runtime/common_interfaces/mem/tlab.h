@@ -21,7 +21,7 @@
 #include <cstdint>
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 class TLAB {
 public:
@@ -58,5 +58,6 @@ public:
     uintptr_t endAddr_ = 0;
     uintptr_t allocPtr_ = 0;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
+
 #endif  // COMMON_INTERFACES_MEM_TLAB_H

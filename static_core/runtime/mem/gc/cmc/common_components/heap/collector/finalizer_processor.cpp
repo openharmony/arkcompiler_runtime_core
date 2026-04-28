@@ -21,7 +21,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 constexpr uint32_t DEFAULT_FINALIZER_TIMEOUT_MS = 2000;
 
 template <typename FuncType, typename... Args>
@@ -308,4 +308,4 @@ void FinalizerProcessor::FeedHungryBuffers()
     // constraints imposed on other reads or writes
     shouldFeedHungryBuffers_.store(false, std::memory_order_relaxed);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

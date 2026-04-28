@@ -265,8 +265,8 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
 extern "C" void *ReadBarrierFuncEntrypoint(ObjectPointerType *fieldPtr)
 {
     if constexpr (GCCMCBarrierSet::USE_READ_BARRIERS) {
-        auto field = reinterpret_cast<common_vm::RefField<false> &>(*fieldPtr);
-        return common_vm::BaseRuntime::ReadBarrier(field.GetTargetObject(), fieldPtr);
+        auto field = reinterpret_cast<ark::mem::RefField<false> &>(*fieldPtr);
+        return ark::common_vm::BaseRuntime::ReadBarrier(field.GetTargetObject(), fieldPtr);
     }
     return nullptr;
 }
@@ -274,7 +274,7 @@ extern "C" void *ReadBarrierFuncEntrypoint(ObjectPointerType *fieldPtr)
 extern "C" void PreWriteBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType preVal)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::BaseRuntime::PreWriteBarrier(reinterpret_cast<void *>(preVal), Mutator::GetCurrent());
+    ark::common_vm::BaseRuntime::PreWriteBarrier(reinterpret_cast<void *>(preVal), Mutator::GetCurrent());
 #endif
 }
 
@@ -297,8 +297,8 @@ GCCMCBarrierSet::GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
 bool GCCMCBarrierSet::IsSameRegion([[maybe_unused]] void *field, [[maybe_unused]] void *obj)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto fieldRegion = ToUintPtr(field) & ~common_vm::RegionDesc::DEFAULT_REGION_UNIT_MASK;
-    auto objRegion = ToUintPtr(obj) & ~common_vm::RegionDesc::DEFAULT_REGION_UNIT_MASK;
+    auto fieldRegion = ToUintPtr(field) & ~ark::mem::RegionDesc::DEFAULT_REGION_UNIT_MASK;
+    auto objRegion = ToUintPtr(obj) & ~ark::mem::RegionDesc::DEFAULT_REGION_UNIT_MASK;
     if (objRegion == fieldRegion) {
         return true;
     }
@@ -357,7 +357,8 @@ bool GCCMCBarrierSet::IsReadBarrierEnabled()
 void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
 {
     if constexpr (USE_READ_BARRIERS) {
-        return common_vm::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
+        return ark::common_vm::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr),
+                                                        ToVoidPtr(ToUintPtr(objAddr) + offset));
     }
     return nullptr;
 }
@@ -368,11 +369,11 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
         auto *readBarrier = Mutator::GetCurrent()->GetReadBarrierEntrypoint();
         if (readBarrier != nullptr) {
             reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(refAddr));
-            auto field = reinterpret_cast<common_vm::RefField<false> &>(*refAddr);
+            auto field = reinterpret_cast<ark::mem::RefField<false> &>(*refAddr);
             return field.GetTargetObject();
         }
     }
-    auto field = reinterpret_cast<common_vm::RefField<false> &>(*refAddr);
+    auto field = reinterpret_cast<ark::mem::RefField<false> &>(*refAddr);
     return field.GetTargetObject();
 }
 
@@ -386,7 +387,7 @@ void GCCMCBarrierSet::WriteBarrier([[maybe_unused]] void *obj, [[maybe_unused]] 
     if (IsSameRegion(field, newValue)) {
         return;
     }
-    common_vm::BaseRuntime::WriteBarrier(obj, field, newValue, Mutator::GetCurrent());
+    ark::common_vm::BaseRuntime::WriteBarrier(obj, field, newValue, Mutator::GetCurrent());
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

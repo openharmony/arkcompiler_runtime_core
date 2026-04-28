@@ -18,7 +18,7 @@
 #include "common_components/heap/allocator/alloc_buffer.h"
 #include "common_components/base/globals.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 thread_local ThreadLocalData threadLocalData;
 ThreadLocalData *ThreadLocal::GetThreadLocalData()
@@ -33,4 +33,4 @@ void ThreadLocal::ClearAllocBufferRegion()
         buffer->ClearRegions();
     }
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

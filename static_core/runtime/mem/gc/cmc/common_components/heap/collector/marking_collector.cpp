@@ -24,12 +24,12 @@
 #include "common_interfaces/base/runtime_param.h"
 #include "common_components/heap/collector/utils.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 const size_t MarkingCollector::MAX_MARKING_WORK_SIZE = 16;  // fork task if bigger
 const size_t MarkingCollector::MIN_MARKING_WORK_SIZE = 8;   // forbid forking task if smaller
 
 template <bool ProcessXRef>
-class ConcurrentMarkingTask : public common_vm::Task {
+class ConcurrentMarkingTask : public Task {
 public:
     ConcurrentMarkingTask(uint32_t id, MarkingCollector &tc, ParallelMarkingMonitor &monitor,
                           GlobalMarkStack &globalMarkStack)
@@ -653,15 +653,16 @@ void MarkingCollector::RunGarbageCollection(uint64_t gcIndex, GCReason reason, G
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
     auto currentThreshold = Heap::GetHeap().GetCollector().GetGCStats().GetThreshold();
     LOG(DEBUG, GC) << "Begin GC log. GCReason: " << gcReasonName << ", GCType: " << GCTypeToString(gcType)
-                   << ", Current allocated " << Pretty(currentAllocatedSize) << ", Current threshold "
-                   << Pretty(currentThreshold) << ", gcIndex=" << gcIndex;
+                   << ", Current allocated " << ::ark::mem::Pretty(currentAllocatedSize) << ", Current threshold "
+                   << ::ark::mem::Pretty(currentThreshold) << ", gcIndex=" << gcIndex;
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::RunGarbageCollection",
                  ("GCReason:" + gcReasonName + ";GCType:" + GCTypeToString(gcType) +
                   ";Sensitive:" + std::to_string(static_cast<int>(Heap::GetHeap().GetSensitiveStatus())) +
                   ";Startup:" + std::to_string(static_cast<int>(Heap::GetHeap().GetStartupStatus())) +
-                  ";Current Allocated:" + Pretty(currentAllocatedSize) + ";Current Threshold:" +
-                  Pretty(currentThreshold) + ";Current Native:" + Pretty(Heap::GetHeap().GetNotifiedNativeSize()) +
-                  ";NativeThreshold:" + Pretty(Heap::GetHeap().GetNativeHeapThreshold()))
+                  ";Current Allocated:" + ::ark::mem::Pretty(currentAllocatedSize) +
+                  ";Current Threshold:" + ::ark::mem::Pretty(currentThreshold) +
+                  ";Current Native:" + ::ark::mem::Pretty(Heap::GetHeap().GetNotifiedNativeSize()) +
+                  ";NativeThreshold:" + ::ark::mem::Pretty(Heap::GetHeap().GetNativeHeapThreshold()))
                      .c_str());
     // prevent other threads stop-the-world during GC.
     // this may be removed in the future.
@@ -695,7 +696,7 @@ void MarkingCollector::UpdateGCCompletionStats(GCStats &gcStats)
     {
         std::ostringstream oss;
         const int prec = 3;
-        oss << "total gc time: " << Pretty(gcTimeNs / NS_PER_US) << " us, collection rate ";
+        oss << "total gc time: " << ::ark::mem::Pretty(gcTimeNs / NS_PER_US) << " us, collection rate ";
         oss << std::setprecision(prec) << rate << " MB/s";
         LOG(DEBUG, GC) << oss.str();
     }
@@ -740,4 +741,4 @@ void MarkingCollector::ExemptFromSpace()
     space.ExemptFromSpace();
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

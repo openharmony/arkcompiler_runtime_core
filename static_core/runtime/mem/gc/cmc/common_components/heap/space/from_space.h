@@ -32,7 +32,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 class RegionalHeap;
 class OldSpace;
 class Taskpool;
@@ -160,5 +160,5 @@ private:
 
     double exemptedRegionThreshold_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_FROM_SPACE_H

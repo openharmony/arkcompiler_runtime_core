@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace common_vm {
+namespace ark::common_vm {
 constexpr uint32_t ALLOC_UTIL_PAGE_SIZE = 4096;
 #define ALLOCUTIL_PAGE_RND_UP(x) \
     (((static_cast<uintptr_t>(x)) + ALLOC_UTIL_PAGE_SIZE - 1) & (~(ALLOC_UTIL_PAGE_SIZE - 1)))
@@ -50,6 +50,6 @@ constexpr T AllocUtilRndUp(T x, size_t n)
     return AllocUtilRndDown(x + n - 1, n);
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_UTILS_H

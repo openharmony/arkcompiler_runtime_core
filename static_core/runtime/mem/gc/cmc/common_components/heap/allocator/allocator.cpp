@@ -23,7 +23,7 @@
 
 #include "common_interfaces/objects/base_object.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 using namespace std;
 Allocator::Allocator()
 {
@@ -87,4 +87,4 @@ Allocator *Allocator::CreateAllocator()
     LOG_IF(UNLIKELY(heapSpace == nullptr), FATAL, MM_OBJECT_EVENTS) << "New RegionalHeap failed";
     return heapSpace;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

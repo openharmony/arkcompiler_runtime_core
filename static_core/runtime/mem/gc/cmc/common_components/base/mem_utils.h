@@ -16,11 +16,11 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_BASE_MEM_UTILS_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_MEM_UTILS_H
 
-namespace common_vm {
+namespace ark::common_vm {
 // memset_s wrapper for the situation that memset size is greater than SECUREC_MEM_MAX_LEN(2GB).
 void MemorySet(uintptr_t dest, size_t destMax, int c, size_t count);
 // memcpy_s wrapper for the situation that memcpy size is greater than SECUREC_MEM_MAX_LEN(2GB).
 void MemoryCopy(uintptr_t dest, size_t destMax, const uintptr_t src, size_t count);
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_MEM_UTILS_H

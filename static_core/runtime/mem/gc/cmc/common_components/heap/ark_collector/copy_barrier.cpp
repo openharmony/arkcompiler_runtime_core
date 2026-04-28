@@ -22,7 +22,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 BaseObject *CopyBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
 {
     do {
@@ -72,4 +72,4 @@ void YoungCopyBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<
         LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": -> " << ref;
     }
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

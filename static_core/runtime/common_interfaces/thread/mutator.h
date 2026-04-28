@@ -40,7 +40,7 @@ namespace ark {
 class Coroutine;
 }
 
-namespace common_vm {
+namespace ark::common_vm {
 class Mutator;
 struct ThreadLocalData;
 
@@ -289,7 +289,7 @@ public:
     bool TransitionGCPhase(bool bySelf);
 
     virtual void VisitMutatorRoots(const RefFieldVisitor &visitor);
-    virtual void UpdateBarrierEntrypoint(common_vm::GCPhase phase);
+    virtual void UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase);
 
     void DumpMutator() const;
 
@@ -396,7 +396,7 @@ public:
         return MEMBER_OFFSET(Mutator, safepointActive_);
     }
 
-    // Register an externally constructed mutator (e.g. when ark::Mutator inherits common_vm::Mutator)
+    // Register an externally constructed mutator (e.g. when ark::Mutator inherits ark::common_vm::Mutator)
     static void RegisterNewMutator(Mutator *mutator);
     // Transfer to Running no matter in Running or Native.
     inline void TransferToRunning();
@@ -506,7 +506,7 @@ void PreRunManagedCode(Mutator *mutator, int layers, ThreadLocalData *threadData
 
 ThreadLocalData *GetThreadLocalData();
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,

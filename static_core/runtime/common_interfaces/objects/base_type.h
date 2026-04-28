@@ -28,7 +28,7 @@ class JSTaggedValue;
 }  // namespace panda::ecmascript
 
 using JSTaggedValue = panda::ecmascript::JSTaggedValue;
-namespace common_vm {
+namespace ark::mem {
 
 using TaggedType = uint64_t;
 struct BaseUndefined {};
@@ -47,5 +47,5 @@ using BaseType =
 // base type for static vm
 using BoxedValue = BaseObject *;
 
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_TYPE_H

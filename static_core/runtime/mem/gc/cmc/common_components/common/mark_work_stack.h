@@ -18,7 +18,7 @@
 
 #include "common_components/base/time_utils.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 template <class T>
 class MarkStackBuffer {
     constexpr static size_t MAX = 64;
@@ -257,5 +257,5 @@ private:
     MarkStackBuffer<T> *t_ = nullptr;
     size_t s_ = 0;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_NEW_MARK_STACK_H

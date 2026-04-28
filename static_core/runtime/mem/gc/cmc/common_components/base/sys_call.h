@@ -27,7 +27,7 @@
 #include "linux/futex.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS)
 int Futex(const volatile int *uaddr, int op, int val);
 #endif
@@ -47,6 +47,6 @@ int GetPid();
 #define COMMON_PRCTL(base_address, allocated_size, mmtag) \
     (void)prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, base_address, allocated_size, mmtag)
 #endif
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_SYSCALL_H

@@ -19,7 +19,7 @@
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/ark_collector/idle_barrier.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // PreforwardBarrier is the barrier for concurrent copying gc in fixup stage
 class PreforwardBarrier : public IdleBarrier {
 public:
@@ -30,6 +30,6 @@ public:
 
     BaseObject *AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const override;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H

@@ -21,7 +21,7 @@
 #include "common_components/base/c_string.h"
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 namespace TimeUtil {
 // returns the monotonic time since epoch starting point in milliseconds
 uint64_t MilliSeconds();
@@ -43,6 +43,6 @@ CString GetDigitDate();
 // returns the current date in ISO yyyy-mm-dd hh:mm::ss.ms format
 PANDA_PUBLIC_API CString GetTimestamp();
 }  // namespace TimeUtil
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_TIME_UTILS_H

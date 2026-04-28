@@ -453,7 +453,7 @@ extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[ma
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    return common_vm::BaseRuntime::ReadBarrier(obj, field);
+    return ark::common_vm::BaseRuntime::ReadBarrier(obj, field);
 #else
     UNREACHABLE();
     return nullptr;  // No-op
@@ -464,7 +464,7 @@ extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    return common_vm::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
+    return ark::common_vm::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
 #else
     UNREACHABLE();
     return nullptr;  // No-op

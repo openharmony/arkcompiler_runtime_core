@@ -35,7 +35,7 @@
 #include <sysinfoapi.h>
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 
 void NonMovableSpace::AssembleGarbageCandidates()
 {
@@ -212,4 +212,4 @@ void NonMovableSpace::MarkRememberSet(const std::function<void(BaseObject *)> &f
     }
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

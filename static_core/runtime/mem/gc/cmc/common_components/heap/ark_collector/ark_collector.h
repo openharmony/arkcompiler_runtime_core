@@ -23,7 +23,7 @@
 #include "common_components/heap/collector/marking_collector.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 enum class GCMode : uint8_t { CMC = 0, CONCURRENT_MARK = 1, STW = 2 };
 
@@ -113,7 +113,7 @@ public:
         return obj->GetForwardingPointer();
     }
 
-    void SetGCThreadQosPriority(common_vm::PriorityMode mode);
+    void SetGCThreadQosPriority(PriorityMode mode);
 
     BaseObject *CopyObjectImpl(BaseObject *obj);
     BaseObject *CopyObjectAfterExclusive(BaseObject *obj) override;
@@ -169,8 +169,8 @@ private:
     template <EnumRootsPolicy policy>
     CArrayList<BaseObject *> EnumRoots();
 
-    template <void (&rootsVisitFunc)(const common_vm::RefFieldVisitor &)>
-    void EnumRootsImpl(const common_vm::RefFieldVisitor &visitor)
+    template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
+    void EnumRootsImpl(const ark::mem::RefFieldVisitor &visitor)
     {
         // assemble garbage candidates.
         reinterpret_cast<RegionalHeap &>(theAllocator_).AssembleGarbageCandidates();
@@ -181,7 +181,7 @@ private:
 
         rootsVisitFunc(visitor);
     }
-    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(STWParam &param, const common_vm::RefFieldVisitor &visitor);
+    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(STWParam &param, const ark::mem::RefFieldVisitor &visitor);
 
     void MarkingHeap(const CArrayList<BaseObject *> &collectedRoots);
     void PostMarking();
@@ -206,7 +206,7 @@ private:
 
     template <EnumRootsPolicy policy>
     void PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack);
-    template <void (&rootsVisitFunc)(const common_vm::RefFieldVisitor &)>
+    template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
     void PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots);
     void PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots);
     void PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots);
@@ -236,6 +236,6 @@ private:
 
     GCMode gcMode_ = GCMode::CMC;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H

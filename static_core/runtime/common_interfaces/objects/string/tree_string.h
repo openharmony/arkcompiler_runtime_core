@@ -20,7 +20,7 @@
 
 #include "common_interfaces/objects/string/base_string.h"
 
-namespace common_vm {
+namespace ark::mem {
 /*
  +--------------------------------+ <-- offset 0
  |      BaseObject fields         |
@@ -99,7 +99,7 @@ public:
     template <bool VERIFY = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 
 // NOLINTEND(cppcoreguidelines-special-member-functions)

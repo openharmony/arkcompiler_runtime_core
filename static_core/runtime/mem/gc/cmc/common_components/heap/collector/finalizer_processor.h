@@ -26,7 +26,7 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 template <typename T>
 using ManagedList = std::list<T, StdContainerAllocator<T, FINALIZER_PROCESSOR>>;
 
@@ -157,6 +157,6 @@ private:
     pthread_t threadHandle_ = 0;  // thread handle to thread
     Mutator *fpMutator_ = nullptr;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_FINALIZER_PROCESSOR_H

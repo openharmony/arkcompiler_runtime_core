@@ -20,23 +20,25 @@
 #include "common_interfaces/objects/static_object_accessor_interface.h"
 
 namespace ark::ets {
-class StaticObjectAccessor : public common_vm::StaticObjectAccessorInterface {
+class StaticObjectAccessor : public ark::mem::StaticObjectAccessorInterface {
 public:
-    bool HasProperty(common_vm::Mutator *mutator, const common_vm::BaseObject *obj, const char *name) override;
+    bool HasProperty(ark::common_vm::Mutator *mutator, const ark::common_vm::BaseObject *obj,
+                     const char *name) override;
 
-    common_vm::BoxedValue GetProperty(common_vm::Mutator *mutator, const common_vm::BaseObject *obj,
-                                      const char *name) override;
+    ark::mem::BoxedValue GetProperty(ark::common_vm::Mutator *mutator, const ark::common_vm::BaseObject *obj,
+                                     const char *name) override;
 
-    bool SetProperty(common_vm::Mutator *mutator, common_vm::BaseObject *obj, const char *name,
-                     common_vm::BoxedValue value) override;
+    bool SetProperty(ark::common_vm::Mutator *mutator, ark::common_vm::BaseObject *obj, const char *name,
+                     ark::mem::BoxedValue value) override;
 
-    bool HasElementByIdx(common_vm::Mutator *mutator, const common_vm::BaseObject *obj, const uint32_t index) override;
+    bool HasElementByIdx(ark::common_vm::Mutator *mutator, const ark::common_vm::BaseObject *obj,
+                         const uint32_t index) override;
 
-    common_vm::BoxedValue GetElementByIdx(common_vm::Mutator *mutator, const common_vm::BaseObject *obj,
-                                          const uint32_t index) override;
+    ark::mem::BoxedValue GetElementByIdx(ark::common_vm::Mutator *mutator, const ark::common_vm::BaseObject *obj,
+                                         const uint32_t index) override;
 
-    bool SetElementByIdx(common_vm::Mutator *mutator, common_vm::BaseObject *obj, uint32_t index,
-                         const common_vm::BoxedValue value) override;
+    bool SetElementByIdx(ark::common_vm::Mutator *mutator, ark::common_vm::BaseObject *obj, uint32_t index,
+                         const ark::mem::BoxedValue value) override;
 
 private:
     static StaticObjectAccessor stcObjAccessor_;

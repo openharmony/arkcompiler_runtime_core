@@ -15,7 +15,7 @@
 
 #include "common_interfaces/objects/base_object.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 BaseObjectOperator BaseObject::operator_;
 
 void BaseObject::RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp)
@@ -27,4 +27,4 @@ void BaseObject::RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp)
 {
     operator_.staticObjOp_ = staticObjOp;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

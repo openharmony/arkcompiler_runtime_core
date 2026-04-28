@@ -15,9 +15,9 @@
 
 #include "common_components/platform/os.h"
 
-namespace common_vm::os {
+namespace ark::mem::os {
 int PrctlSetVMA(const void *, const size_t, const char *)
 {
     return -1;
 }
-}  // namespace common_vm::os
+}  // namespace ark::mem::os

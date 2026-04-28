@@ -38,7 +38,7 @@ static ark::PandaVM *GetPandaVM()
     return runtime->GetPandaVM();
 }
 
-static void VisitAllRoots(const common_vm::RefFieldVisitor &visitorFunc)
+static void VisitAllRoots(const ark::mem::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -48,11 +48,11 @@ static void VisitAllRoots(const common_vm::RefFieldVisitor &visitorFunc)
     RootManager<EtsLanguageConfig> rootManager(vm);
     rootManager.VisitNonHeapRoots([&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<ark::mem::RefField<> &>(*root.GetObjectPointer()));
     });
 }
 
-static void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitorFunc)
+static void VisitGlobalRoots(const ark::mem::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -63,13 +63,13 @@ static void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitorFunc)
 
     auto callback = [&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<ark::mem::RefField<> &>(*root.GetObjectPointer()));
     };
     rootManager.VisitAotStringRoots(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
     rootManager.VisitVmRoots(callback);
 }
 
-static void UpdateAndSweep(const common_vm::WeakRefFieldVisitor &visitorFunc)
+static void UpdateAndSweep(const ark::mem::WeakRefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -80,12 +80,12 @@ static void UpdateAndSweep(const common_vm::WeakRefFieldVisitor &visitorFunc)
 
     rootManager.UpdateAndSweep([&visitorFunc](ObjectHeader **ref) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        return visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*ref)) ? ObjectStatus::ALIVE_OBJECT
-                                                                            : ObjectStatus::DEAD_OBJECT;
+        return visitorFunc(reinterpret_cast<ark::mem::RefField<> &>(*ref)) ? ObjectStatus::ALIVE_OBJECT
+                                                                           : ObjectStatus::DEAD_OBJECT;
     });
 }
 
-static void VisitConcurrentRoots(const common_vm::RefFieldVisitor &visitorFunc)
+static void VisitConcurrentRoots(const ark::mem::RefFieldVisitor &visitorFunc)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     auto *vm = GetPandaVM();
@@ -96,7 +96,7 @@ static void VisitConcurrentRoots(const common_vm::RefFieldVisitor &visitorFunc)
 
     auto callback = [&visitorFunc](GCRoot root) {
         static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitorFunc(reinterpret_cast<common_vm::RefField<> &>(*root.GetObjectPointer()));
+        visitorFunc(reinterpret_cast<ark::mem::RefField<> &>(*root.GetObjectPointer()));
     };
     rootManager.VisitClassRoots(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
     rootManager.VisitClassLinkerContextRoots(callback);
@@ -119,34 +119,34 @@ static void ProcessReferencesAfterCopy()
     referenceProcessor->ProcessReferencesAfterCopy();
 }
 
-class StaticVMInterface : public common_vm::VMInterface {
+class StaticVMInterface : public ark::mem::VMInterface {
 public:
     StaticVMInterface()
     {
-        common_vm::BaseRuntime::GetInstance()->RegisterVM(this);
+        ark::common_vm::BaseRuntime::GetInstance()->RegisterVM(this);
     }
 
     ~StaticVMInterface() override
     {
-        common_vm::BaseRuntime::GetInstance()->UnregisterVM(this);
+        ark::common_vm::BaseRuntime::GetInstance()->UnregisterVM(this);
     }
 
-    void VisitAllRoots(const common_vm::RefFieldVisitor &visitor) override
+    void VisitAllRoots(const ark::mem::RefFieldVisitor &visitor) override
     {
         ark::mem::ets::VisitAllRoots(visitor);
     }
 
-    void VisitGlobalRoots(const common_vm::RefFieldVisitor &visitor) override
+    void VisitGlobalRoots(const ark::mem::RefFieldVisitor &visitor) override
     {
         ark::mem::ets::VisitGlobalRoots(visitor);
     }
 
-    void VisitConcurrentRoots(const common_vm::RefFieldVisitor &visitor) override
+    void VisitConcurrentRoots(const ark::mem::RefFieldVisitor &visitor) override
     {
         ark::mem::ets::VisitConcurrentRoots(visitor);
     }
 
-    void UpdateAndSweep(const common_vm::WeakRefFieldVisitor &visitor) override
+    void UpdateAndSweep(const ark::mem::WeakRefFieldVisitor &visitor) override
     {
         ark::mem::ets::UpdateAndSweep(visitor);
     }
@@ -161,10 +161,10 @@ public:
         ark::mem::ets::ProcessReferencesAfterCopy();
     }
 
-    void VisitPreforwardRoots([[maybe_unused]] const common_vm::RefFieldVisitor &visitor) override {}
+    void VisitPreforwardRoots([[maybe_unused]] const ark::mem::RefFieldVisitor &visitor) override {}
 };
 
-common_vm::VMInterface *RegisterCmcGcCallbacks()
+ark::mem::VMInterface *RegisterCmcGcCallbacks()
 {
     ark::mem::StaticObjectOperator::Initialize();
     return new StaticVMInterface();

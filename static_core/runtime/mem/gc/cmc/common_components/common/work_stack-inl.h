@@ -20,7 +20,7 @@
 
 #include <errno.h>
 
-namespace common_vm {
+namespace ark::common_vm {
 
 template <typename T, size_t capacity>
 bool StackBase<T, capacity>::IsEmpty() const
@@ -171,5 +171,5 @@ bool LocalStackImpl<T, capacity, PushToGlobalNotify>::PopOutStackFromGlobal()
     return false;
 }
 }  // namespace __work_stack_internal_impl
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H

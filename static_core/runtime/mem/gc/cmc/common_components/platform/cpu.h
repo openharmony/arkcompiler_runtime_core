@@ -19,9 +19,9 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace common_vm {
+namespace ark::common_vm {
 uint32_t NumberOfCpuCore();
 size_t PhysicalSize();
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_OS_H

@@ -14,9 +14,7 @@
  */
 #include "common_components/common/run_type.h"
 
-#include "libarkbase/utils/logger.h"
-
-namespace common_vm {
+namespace ark::common_vm {
 // REMEMBER TO CHANGE NUM_OF_RUN_TYPES WHEN YOU ADD/REMOVE CONFIGS
 // this stores a config for each kind of run (represented by an index)
 const RunType RunType::TYPES[NUM_OF_RUN_TYPES] = {
@@ -126,4 +124,4 @@ void RunType::InitRunTypeMap()
     ASSERT_PRINT(RUNTYPE_SIZE_TO_RUN_IDX(RUN_ALLOC_LARGE_SIZE) + 1 == RunType::NUM_OF_RUN_TYPES,
                  "run config inconsistent: large size");
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

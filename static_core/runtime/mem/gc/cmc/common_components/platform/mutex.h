@@ -30,7 +30,7 @@
 #define FATAL_IF_ERROR(f, rc) static_cast<void>(0)
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 class Mutex {
 public:
     explicit Mutex(bool isInit = true);
@@ -161,5 +161,5 @@ inline void ConditionVariable::Wait(Mutex *mutex)
     FATAL_IF_ERROR("pthread_cond_wait", rc);
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_COMPONENTS_PLATFORM_MUTEX_H

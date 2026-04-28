@@ -14,7 +14,7 @@
  */
 #include "common_components/heap/collector/collector_proxy.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 void CollectorProxy::Init(const RuntimeParam &param)
 {
     arkCollector_.Init(param);
@@ -48,4 +48,4 @@ void CollectorProxy::RunGarbageCollection(uint64_t gcIndex, GCReason reason, GCT
     currentCollector_->MarkGCStart();
     currentCollector_->RunGarbageCollection(gcIndex, reason, gcType);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

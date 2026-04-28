@@ -97,7 +97,7 @@ protected:
         StaticTypeConverter stcTypeConverter;
         auto *coro = EtsCoroutine::GetCurrent();
         EtsObject *boxed = EtsBoxPrimitive<T>::Create(EtsExecutionContext::FromMT(coro), value);
-        common_vm::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common_vm::BoxedValue>(boxed));
+        ark::mem::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<ark::mem::BoxedValue>(boxed));
         if constexpr (std::is_same_v<T, EtsBoolean>) {
             EXPECT_TRUE(std::holds_alternative<bool>(result));
             EXPECT_EQ(std::get<bool>(result), value);
@@ -149,36 +149,36 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test0)
 {
     StaticTypeConverter stcTypeConverter;
     {
-        common_vm::BaseType value = std::monostate {};
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = std::monostate {};
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(result, nullptr);
     }
     {
-        common_vm::BaseType value = true;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = true;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<bool> *>(result)->GetValue(), std::get<bool>(value));
     }
     {
-        common_vm::BaseType value = false;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = false;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<bool> *>(result)->GetValue(), std::get<bool>(value));
     }
     {
         int16_t tarValue = 32767;
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<int16_t> *>(result)->GetValue(), std::get<int16_t>(value));
     }
     {
         uint16_t tarValue = 65535;
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<uint16_t> *>(result)->GetValue(), std::get<uint16_t>(value));
     }
     {
         uint16_t tarValue = 'A';
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<uint16_t> *>(result)->GetValue(), std::get<uint16_t>(value));
     }
 }
@@ -188,26 +188,26 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test1)
     StaticTypeConverter stcTypeConverter;
     {
         int32_t tarValue = 2147483647;
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<int32_t> *>(result)->GetValue(), std::get<int32_t>(value));
     }
     {
         float tarValue = 3.14F;
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<float> *>(result)->GetValue(), std::get<float>(value));
     }
     {
         double tarValue = 2.71828;
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<double> *>(result)->GetValue(), std::get<double>(value));
     }
     {
         int64_t tarValue = 9223372036854775807LL;
-        common_vm::BaseType value = tarValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = tarValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsBoxPrimitive<int64_t> *>(result)->GetValue(), std::get<int64_t>(value));
     }
 }
@@ -216,24 +216,24 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test2)
 {
     StaticTypeConverter stcTypeConverter;
     {
-        common_vm::BaseType value = common_vm::BaseUndefined {};
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = ark::mem::BaseUndefined {};
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(result, nullptr);
     }
     {
-        common_vm::BaseType value = common_vm::BaseNull {};
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = ark::mem::BaseNull {};
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
         EXPECT_EQ(reinterpret_cast<EtsObject *>(result),
                   EtsObject::FromCoreType(EtsExecutionContext::FromMT(GetCoroutine())->GetNullValue()));
     }
     {
-        common_vm::BaseBigInt bigIntValue;
+        ark::mem::BaseBigInt bigIntValue;
         uint32_t tarLength = 3;
         bigIntValue.length = tarLength;
         bigIntValue.sign = true;
         bigIntValue.data = {0x12345678, 0x9ABCDEF0, 0x13579BDF};
-        common_vm::BaseType value = bigIntValue;
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        ark::mem::BaseType value = bigIntValue;
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
 
         auto bigInt = EtsBigInt::FromEtsObject(reinterpret_cast<EtsObject *>(result));
 
@@ -246,10 +246,10 @@ TEST_F(StaticTypeConverterTest, WrapBoxed_Test2)
         }
     }
     {
-        std::shared_ptr<common_vm::BaseObject> sharedObj = std::make_shared<common_vm::BaseObject>();
-        common_vm::BaseType value = sharedObj.get();
-        common_vm::BoxedValue result = stcTypeConverter.WrapBoxed(value);
-        EXPECT_EQ(result, std::get<common_vm::BaseObject *>(value));
+        std::shared_ptr<ark::common_vm::BaseObject> sharedObj = std::make_shared<ark::common_vm::BaseObject>();
+        ark::mem::BaseType value = sharedObj.get();
+        ark::mem::BoxedValue result = stcTypeConverter.WrapBoxed(value);
+        EXPECT_EQ(result, std::get<ark::common_vm::BaseObject *>(value));
     }
 }
 
@@ -325,9 +325,9 @@ TEST_F(StaticTypeConverterTest, UnwrapBaseBigInt)
 
     StaticTypeConverter stcTypeConverter;
     auto boxed = reinterpret_cast<EtsObject *>(bigInt);
-    common_vm::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common_vm::BoxedValue>(boxed));
-    EXPECT_TRUE(std::holds_alternative<common_vm::BaseBigInt>(result));
-    const common_vm::BaseBigInt &baseBigInt = std::get<common_vm::BaseBigInt>(result);
+    ark::mem::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<ark::mem::BoxedValue>(boxed));
+    EXPECT_TRUE(std::holds_alternative<ark::mem::BaseBigInt>(result));
+    const ark::mem::BaseBigInt &baseBigInt = std::get<ark::mem::BaseBigInt>(result);
 
     EXPECT_EQ(baseBigInt.length, LENGTH);
     EXPECT_EQ(baseBigInt.sign, sign);
@@ -342,15 +342,15 @@ TEST_F(StaticTypeConverterTest, UnwrapBoxedNull)
     StaticTypeConverter stcTypeConverter;
     auto *coro = EtsCoroutine::GetCurrent();
     auto *nullObj = EtsExecutionContext::FromMT(coro)->GetNullValue();
-    auto result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common_vm::BoxedValue>(nullObj));
-    ASSERT_TRUE(std::holds_alternative<common_vm::BaseNull>(result));
+    auto result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<ark::mem::BoxedValue>(nullObj));
+    ASSERT_TRUE(std::holds_alternative<ark::mem::BaseNull>(result));
 }
 
 TEST_F(StaticTypeConverterTest, UnwrapBoxedUndefined)
 {
     StaticTypeConverter stcTypeConverter;
     auto result = stcTypeConverter.UnwrapBoxed(nullptr);
-    ASSERT_TRUE(std::holds_alternative<common_vm::BaseUndefined>(result));
+    ASSERT_TRUE(std::holds_alternative<ark::mem::BaseUndefined>(result));
 }
 
 TEST_F(StaticTypeConverterTest, UnwrapBoxedObject)
@@ -358,9 +358,9 @@ TEST_F(StaticTypeConverterTest, UnwrapBoxedObject)
     EtsClass *klass = GetTestClass("A");
     EtsObject *testObj = EtsObject::Create(klass);
     StaticTypeConverter stcTypeConverter;
-    common_vm::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<common_vm::BoxedValue>(testObj));
-    ASSERT_TRUE(std::holds_alternative<common_vm::BaseObject *>(result));
-    EXPECT_EQ(std::get<common_vm::BoxedValue>(result), reinterpret_cast<common_vm::BoxedValue>(testObj));
+    ark::mem::BaseType result = stcTypeConverter.UnwrapBoxed(reinterpret_cast<ark::mem::BoxedValue>(testObj));
+    ASSERT_TRUE(std::holds_alternative<ark::common_vm::BaseObject *>(result));
+    EXPECT_EQ(std::get<ark::mem::BoxedValue>(result), reinterpret_cast<ark::mem::BoxedValue>(testObj));
 }
 // NOLINTEND(readability-identifier-naming, readability-magic-numbers)
 }  // namespace ark::ets::test

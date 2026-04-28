@@ -37,16 +37,16 @@ static inline size_t ClampToSizeT(EtsLong n)
 
 // Convert ETS cause int to (GCReason, GCType) pair
 // ETS Cause enum: YOUNG=0, THRESHOLD=1, FULL=2
-static std::pair<common_vm::GCReason, common_vm::GCType> GCParamsFromCause(EtsInt cause)
+static std::pair<ark::common_vm::GCReason, ark::common_vm::GCType> GCParamsFromCause(EtsInt cause)
 {
     if (cause == 0_I) {
-        return {common_vm::GC_REASON_YOUNG, common_vm::GC_TYPE_YOUNG};
+        return {ark::common_vm::GC_REASON_YOUNG, ark::common_vm::GC_TYPE_YOUNG};
     } else if (cause == 1_I) {
-        return {common_vm::GC_REASON_USER, common_vm::GC_TYPE_FULL};
+        return {ark::common_vm::GC_REASON_USER, ark::common_vm::GC_TYPE_FULL};
     } else if (cause == 2_I) {
-        return {common_vm::GC_REASON_OOM, common_vm::GC_TYPE_FULL};
+        return {ark::common_vm::GC_REASON_OOM, ark::common_vm::GC_TYPE_FULL};
     }
-    return {common_vm::GC_REASON_INVALID, common_vm::GC_TYPE_END};
+    return {ark::common_vm::GC_REASON_INVALID, ark::common_vm::GC_TYPE_END};
 }
 
 /**
@@ -69,18 +69,18 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, [[maybe_unuse
         return -1;
     }
     auto [reason, gcType] = GCParamsFromCause(cause);
-    if (reason == common_vm::GC_REASON_INVALID) {
+    if (reason == ark::common_vm::GC_REASON_INVALID) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
         ASSERT(executionCtx != nullptr);
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError, "Invalid GC cause");
         return -1;
     }
     // target guarantees waitForFinishGC waits for at least +1 GC cycle
-    uint64_t target = common_vm::BaseRuntime::GetGcCompletedCount() + 1U;
+    uint64_t target = ark::common_vm::BaseRuntime::GetGcCompletedCount() + 1U;
     // false allows to call RequestGCAndWait.
     // Sync or async current gcTask will be detected
     // inside RequestGCAndWait by reason
-    common_vm::BaseRuntime::RequestGC(reason, false, gcType, true);
+    ark::common_vm::BaseRuntime::RequestGC(reason, false, gcType, true);
     return static_cast<EtsLong>(target);
 }
 
@@ -100,29 +100,29 @@ extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
         return;  // Nothing to wait
     }
     uint64_t target = static_cast<uint64_t>(gcId);
-    auto *mutator = common_vm::Mutator::GetMutator();
+    auto *mutator = ark::common_vm::Mutator::GetMutator();
     // Enter saferegion: thread will not access heap objects, GC is able to move them
     mutator->EnterSaferegion(false);
     // Block on condition variable until gcCompletedCount >= target, or return early on
     // GC shutdown (TASK_INDEX_GC_EXIT sentinel) — no more cycles will fire
-    common_vm::BaseRuntime::WaitForGCCompletionCount(target);
+    ark::common_vm::BaseRuntime::WaitForGCCompletionCount(target);
     // Exit saferegion: GC cannot move objects anymore
     mutator->LeaveSaferegion();
 }
 
 extern "C" EtsLong StdGetFreeHeapSize()
 {
-    return static_cast<EtsLong>(common_vm::BaseRuntime::GetFreeHeapSize());
+    return static_cast<EtsLong>(ark::common_vm::BaseRuntime::GetFreeHeapSize());
 }
 
 extern "C" EtsLong StdGetUsedHeapSize()
 {
-    return static_cast<EtsLong>(common_vm::BaseRuntime::GetUsedHeapSize());
+    return static_cast<EtsLong>(ark::common_vm::BaseRuntime::GetUsedHeapSize());
 }
 
 extern "C" EtsLong StdGetReservedHeapSize()
 {
-    return static_cast<EtsLong>(common_vm::BaseRuntime::GetReservedHeapSize());
+    return static_cast<EtsLong>(ark::common_vm::BaseRuntime::GetReservedHeapSize());
 }
 
 extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
@@ -134,7 +134,7 @@ extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
                           "The value must be non negative");
         return;
     }
-    common_vm::BaseRuntime::NotifyNativeAllocation(ClampToSizeT(size));
+    ark::common_vm::BaseRuntime::NotifyNativeAllocation(ClampToSizeT(size));
 }
 
 extern "C" void StdGCRegisterNativeFree(EtsLong size)
@@ -146,7 +146,7 @@ extern "C" void StdGCRegisterNativeFree(EtsLong size)
                           "The value must be non negative");
         return;
     }
-    common_vm::BaseRuntime::NotifyNativeFree(ClampToSizeT(size));
+    ark::common_vm::BaseRuntime::NotifyNativeFree(ClampToSizeT(size));
 }
 
 }  // namespace ark::ets::intrinsics

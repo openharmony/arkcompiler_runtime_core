@@ -20,9 +20,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-#include "libarkbase/utils/logger.h"
-
-namespace common_vm {
+namespace ark::common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
 // so we don't expect reading barrier have the ability to modify the referent field.
 BaseObject *EnumBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
@@ -62,4 +60,4 @@ BaseObject *EnumBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &fie
     return target;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

@@ -22,7 +22,7 @@
 #include "common_interfaces/base/common.h"
 #include <securec.h>
 
-namespace common_vm {
+namespace ark::common_vm {
 class CString {
 public:
     CString();
@@ -144,5 +144,5 @@ private:
     size_t capacity_ = C_STRING_MIN_SIZE;
     size_t length_ = 0;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_C_STRING_H

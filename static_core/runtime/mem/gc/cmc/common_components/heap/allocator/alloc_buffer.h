@@ -23,7 +23,7 @@
 #include "common_components/common/mark_work_stack.h"
 #include "common_interfaces/mem/tlab.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 enum class AllocBufferType : uint8_t {
     YOUNG = 0,  // for young space
@@ -177,6 +177,6 @@ private:
 };
 
 static_assert(AllocationBuffer::GetTLRegionOffset() == 0);
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOC_BUFFER_H

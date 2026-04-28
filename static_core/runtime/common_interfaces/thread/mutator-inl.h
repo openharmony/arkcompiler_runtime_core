@@ -20,7 +20,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 inline void Mutator::DoEnterSaferegion()
 {
     // set current mutator in saferegion.
@@ -65,5 +65,5 @@ bool Mutator::TransferToNativeIfInRunning()
     return EnterSaferegion(false);
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_INL_H

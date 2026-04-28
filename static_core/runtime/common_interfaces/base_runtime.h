@@ -28,7 +28,12 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
+using ::ark::mem::GCParam;
+using ::ark::mem::HeapParam;
+using ::ark::mem::RuntimeParam;
+using ::ark::mem::VMInterface;
+
 class BaseObject;
 class HeapManager;
 class Mutator;
@@ -208,5 +213,5 @@ private:
     std::unordered_set<VMInterface *> vmIfaces_;
     ark::os::memory::RWLock vmIfacesLock_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H

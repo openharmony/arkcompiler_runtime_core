@@ -20,11 +20,18 @@
 #include <stack>
 #include <vector>
 #include "common_components/taskpool/task.h"
-namespace common_vm {
+namespace ark::common_vm {
 
 class ArkCollector;
 class MarkingCollector;
+}  // namespace ark::common_vm
+
+namespace ark::mem {
 class RegionDesc;
+}  // namespace ark::mem
+
+namespace ark::common_vm {
+using ark::mem::RegionDesc;
 class RegionList;
 class BaseObject;
 
@@ -56,7 +63,7 @@ struct FixHeapTask final {
 using FixHeapTaskList = std::vector<FixHeapTask>;
 
 /// Worker class for parallel heap fixing operations
-class FixHeapWorker : public common_vm::Task {
+class FixHeapWorker : public Task {
 public:
     /// Result structure containing the collected garbages and stats of heap fixing operations
     struct Result {
@@ -105,7 +112,7 @@ private:
 };
 
 /// Worker class for collecting garbages units after heap fixing operations
-class PostFixHeapWorker : public common_vm::Task {
+class PostFixHeapWorker : public Task {
 public:
     PostFixHeapWorker(FixHeapWorker::Result &result, TaskPackMonitor &monitor) noexcept
 
@@ -130,5 +137,5 @@ private:
     FixHeapWorker::Result &result_;
 };
 
-};  // namespace common_vm
+};  // namespace ark::common_vm
 #endif

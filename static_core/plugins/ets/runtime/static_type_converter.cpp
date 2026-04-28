@@ -33,7 +33,7 @@ static bool EtsToBoolean(EtsBoolean value)
     return static_cast<bool>(value);
 }
 
-common_vm::BoxedValue StaticTypeConverter::WrapBoxed(common_vm::BaseType value)
+ark::mem::BoxedValue StaticTypeConverter::WrapBoxed(ark::mem::BaseType value)
 {
     EtsObject *etsObject = nullptr;
     auto *executionCtx = EtsExecutionContext::GetCurrent();
@@ -43,7 +43,7 @@ common_vm::BoxedValue StaticTypeConverter::WrapBoxed(common_vm::BaseType value)
     std::visit(
         [&](auto &&arg) -> void {
             using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, std::monostate> || std::is_same_v<T, common_vm::BaseUndefined>) {
+            if constexpr (std::is_same_v<T, std::monostate> || std::is_same_v<T, ark::mem::BaseUndefined>) {
                 etsObject = nullptr;
             } else if constexpr (std::is_same_v<T, bool>) {
                 etsObject = EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, arg);
@@ -59,9 +59,9 @@ common_vm::BoxedValue StaticTypeConverter::WrapBoxed(common_vm::BaseType value)
                 etsObject = EtsBoxPrimitive<EtsFloat>::Create(executionCtx, static_cast<EtsFloat>(arg));
             } else if constexpr (std::is_same_v<T, EtsDouble>) {
                 etsObject = EtsBoxPrimitive<EtsDouble>::Create(executionCtx, static_cast<EtsDouble>(arg));
-            } else if constexpr (std::is_same_v<T, common_vm::BaseNull>) {
+            } else if constexpr (std::is_same_v<T, ark::mem::BaseNull>) {
                 etsObject = EtsObject::FromCoreType(executionCtx->GetNullValue());
-            } else if constexpr (std::is_same_v<T, common_vm::BaseBigInt>) {
+            } else if constexpr (std::is_same_v<T, ark::mem::BaseBigInt>) {
                 uint32_t len = arg.length;
                 bool sign = arg.sign;
                 auto etsIntArray = EtsIntArray::Create(len);
@@ -74,21 +74,21 @@ common_vm::BoxedValue StaticTypeConverter::WrapBoxed(common_vm::BaseType value)
                 bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(arrHandle.GetPtr()));
                 bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), arg.data.empty() ? 0 : sign == 0 ? 1 : -1);
                 etsObject = reinterpret_cast<EtsObject *>(bigInt);
-            } else if constexpr (std::is_same_v<T, common_vm::BaseObject *>) {
+            } else if constexpr (std::is_same_v<T, ark::common_vm::BaseObject *>) {
                 etsObject = reinterpret_cast<EtsObject *>(arg);
             } else {
                 UNREACHABLE();
             }
         },
         value);
-    return reinterpret_cast<common_vm::BoxedValue>(etsObject);
+    return reinterpret_cast<ark::mem::BoxedValue>(etsObject);
 }
 
 // NOLINTBEGIN(readability-else-after-return)
-common_vm::BaseType StaticTypeConverter::UnwrapBoxed(common_vm::BoxedValue value)
+ark::mem::BaseType StaticTypeConverter::UnwrapBoxed(ark::mem::BoxedValue value)
 {
     if (value == nullptr) {
-        return common_vm::BaseUndefined {};
+        return ark::mem::BaseUndefined {};
     }
 
     auto *etsObj = reinterpret_cast<EtsObject *>(value);
@@ -114,7 +114,7 @@ common_vm::BaseType StaticTypeConverter::UnwrapBoxed(common_vm::BoxedValue value
     } else if (cls == ptypes->coreChar) {
         return EtsBoxPrimitive<EtsChar>::Unbox(etsObj);
     } else if (cls == ptypes->coreBigInt) {
-        common_vm::BaseBigInt baseBigInt;
+        ark::mem::BaseBigInt baseBigInt;
         auto bigInt = EtsBigInt::FromEtsObject(etsObj);
         auto etsValue = bigInt->GetBytes();
         auto etsValueSign = bigInt->GetSign();
@@ -125,9 +125,9 @@ common_vm::BaseType StaticTypeConverter::UnwrapBoxed(common_vm::BoxedValue value
         }
         return baseBigInt;
     } else if (etsObj->GetCoreType() == executionCtx->GetNullValue()) {
-        return common_vm::BaseNull {};
+        return ark::mem::BaseNull {};
     }
-    return reinterpret_cast<common_vm::BoxedValue>(etsObj);
+    return reinterpret_cast<ark::mem::BoxedValue>(etsObj);
 }
 // NOLINTEND(readability-else-after-return)
 }  // namespace ark::ets

@@ -20,7 +20,7 @@
 #include "common_components/heap/collector/gc_request.h"
 #include "common_interfaces/base/runtime_param.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class BaseObject;
 // replace this for Heap.
 class HeapManager {
@@ -44,5 +44,5 @@ public:
     static void StartRuntimeThreads();
     static void StopRuntimeThreads();
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H

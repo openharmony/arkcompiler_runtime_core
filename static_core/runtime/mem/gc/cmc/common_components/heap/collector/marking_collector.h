@@ -27,7 +27,7 @@
 #include "common_components/heap/collector/copy_data_manager.h"
 #include "common_components/mutator/mutator_manager.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 template <typename T>
 using CArrayList = std::vector<T>;
@@ -192,8 +192,8 @@ public:
         }
 
     private:
-        common_vm::RefFieldVisitor visitor_;
-        common_vm::RefFieldVisitor weakVisitor_;
+        ark::mem::RefFieldVisitor visitor_;
+        ark::mem::RefFieldVisitor weakVisitor_;
         std::shared_ptr<BaseObject *> closure_;
     };
     virtual MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack,
@@ -414,6 +414,6 @@ private:
     std::vector<StackType> stacks_;
 };
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H

@@ -23,9 +23,14 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/objects/base_object_operator.h"
 #include "common_interfaces/objects/base_state_word.h"
-namespace common_vm {
+namespace ark::common_vm {
 
 using MemoryOrder = std::memory_order;
+using ::ark::mem::BaseStateWord;
+using ::ark::mem::LanguageType;
+using ::ark::mem::MAddress;
+using ::ark::mem::RefField;
+using ::ark::mem::TypeInfo;
 
 class BaseObject {
 public:
@@ -183,7 +188,7 @@ public:
     void SetFullBaseClassWithoutBarrier(BaseClass *cls)
     {
         state_ = BaseStateWord {0};
-        state_.SetFullBaseClassAddress(reinterpret_cast<common_vm::StateWordType>(cls));
+        state_.SetFullBaseClassAddress(reinterpret_cast<ark::mem::StateWordType>(cls));
     }
 
     BaseClass *GetBaseClass() const
@@ -225,5 +230,10 @@ using RawRefVisitor = std::function<void(ObjectRef &)>;
 using RootVisitor = RawRefVisitor;
 using StackPtrVisitor = RawRefVisitor;
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
+
+namespace ark::mem {
+using ::ark::common_vm::BaseObject;
+}  // namespace ark::mem
+
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H

@@ -19,7 +19,7 @@
 #include <new>
 #include <utility>
 
-namespace common_vm {
+namespace ark::common_vm {
 // Utility class ensuring ordered destruction of static global objects to prevent dependency-related issues during
 // program termination.
 template <class Type>
@@ -46,5 +46,5 @@ public:
 private:
     alignas(Type) unsigned char buffer_[sizeof(Type)] = {0};
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_IMMORTAL_WRAPPER_H
