@@ -45,7 +45,7 @@ public:
     {
     }
     NO_COPY_SEMANTIC(SuspendableJob);
-    DEFAULT_MOVE_SEMANTIC(SuspendableJob);
+    NO_MOVE_SEMANTIC(SuspendableJob);
     ~SuspendableJob() override = default;
 
     mem::Reference *GetSuspensionContext()

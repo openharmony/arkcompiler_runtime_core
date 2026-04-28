@@ -63,7 +63,9 @@ void StacklessJobWorkerThread::ExecuteJobsUntilHappened(JobEvent *awaitee)
 
 void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
 {
+    Job::GetCurrent()->SetStatus(Job::Status::BLOCKED);
     WaitForEvent(awaitee, false, false);
+    Job::GetCurrent()->SetStatus(Job::Status::RUNNING);
 }
 
 void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee, bool executeJobs, bool signalFinalization)

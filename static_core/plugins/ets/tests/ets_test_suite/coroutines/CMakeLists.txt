@@ -441,22 +441,6 @@ add_ets_coroutines_test(FILE await_standalone_promise.ets
                         MODE "INT" "JIT" "AOT"
 )
 
-add_ets_coroutines_test(FILE await_sync.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
-add_ets_coroutines_test(FILE await_sync.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKLESS"
-                        OPTION_SETS_STACKLESS "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
 add_ets_coroutines_test(FILE stats.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -595,4 +579,5 @@ add_ets_coroutines_test(FILE legacy_atomics_wait_notify.ets
 )
 
 add_subdirectory(dfx)
+add_subdirectory(await_sync)
 add_subdirectory(no_suitable_worker)

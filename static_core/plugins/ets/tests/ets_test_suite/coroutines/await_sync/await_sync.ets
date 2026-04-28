@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+export native function isBlocked(jobId: long): boolean;
+
 async function asyncResolve42(): Promise<int> {
   return 42;
 }
@@ -46,7 +48,7 @@ function testAwaitSyncRejection(): void {
 
 function syncSleep(ms: int): void {
   let start = Date.now();
-  while (Date.now() - start < ms) {
+  while(Date.now() - start < ms) {
     // do nothing
   }
 }
@@ -59,21 +61,24 @@ function testAwaitSyncOtherThread(): void {
   let lParams: LaunchParams = {
       workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL),
       abortFlag: false
-  }; 
+  };
+  let jobId = Job.getId();
   launch(lParams) {
-    syncSleep(100);
+    while (!isBlocked(jobId)) {
+        syncSleep(1);
+    };
     resolver!(100);
   }
   let val = p.awaitSync() as int;
   arktest.assertEQ(val, 100, "awaitSync on other thread should return 100");
 }
 
-async function main(): Promise<int> {
+function main(): int {
   let testSuite = new arktest.ArkTestsuite("coroutines.await_sync");
   testSuite.addTest("testAwaitSyncAlreadyResolved", testAwaitSyncAlreadyResolved);
   testSuite.addTest("testAwaitSyncAsyncResolution", testAwaitSyncAsyncResolution);
   testSuite.addTest("testAwaitSyncRejection", testAwaitSyncRejection);
   testSuite.addTest("testAwaitSyncOtherThread", testAwaitSyncOtherThread);
-  let res = await testSuite.runAsync();
+  let res = testSuite.run();
   return res;
 }

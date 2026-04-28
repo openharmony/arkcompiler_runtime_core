@@ -118,12 +118,14 @@ inline bool Job::IsMigrationAllowed() const
 
 inline Job::Status Job::GetStatus() const
 {
-    return status_;
+    // Atomic with relaxed order reason: no order requirement
+    return status_.load(std::memory_order_relaxed);
 }
 
 inline void Job::SetStatus(Status newStatus)
 {
-    status_ = newStatus;
+    // Atomic with relaxed order reason: no order requirement
+    status_.store(newStatus, std::memory_order_relaxed);
 }
 
 inline JobExecutionContext *Job::GetExecutionContext() const

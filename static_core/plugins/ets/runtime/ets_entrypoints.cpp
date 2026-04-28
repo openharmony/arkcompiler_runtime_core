@@ -127,7 +127,7 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     auto *mutex = EtsMutex::Create(executionCtx);
     promiseHandle->SetMutex(executionCtx, mutex);
     auto *event = EtsEventWithDependencies::Create(executionCtx);
-    promiseHandle->SetEvent(executionCtx, event);
+    promiseHandle->SetEvent<CoroutineMode::STACKLESS>(executionCtx, event);
     bool successfulLaunch = Launch(executionCtx, method, promiseHandle, std::move(values));
     if (UNLIKELY(!successfulLaunch)) {
         HandlePendingException();

@@ -700,6 +700,15 @@ export final class Promise<out T> implements PromiseLike<T> {
     /**
      * Await promise in synchronous mode
      *
+     * Since `await` can only be used inside async functions,
+     * `awaitSync` is used to wait for a promise inside a synchronous function.
+     * However, `awaitSync` blocks execution on the current worker, preventing
+     * other jobs assigned to that worker from making progress until the promise
+     * is resolved and the `awaitSync` call completes.
+     * As a result, it can degrade application performance.
+     * Additionally, if the awaited promise depends on a job scheduled on the
+     * same worker, a deadlock will occur.
+     *
      * @returns { T } promise completion value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel

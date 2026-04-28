@@ -219,8 +219,29 @@ public:
           abortFlag_(abortFlag)
     {
     }
+
     NO_COPY_SEMANTIC(Job);
-    DEFAULT_MOVE_SEMANTIC(Job);
+
+    Job(Job &&other)
+        : name_(std::move(other.name_)),
+          id_(other.id_),
+          entrypoint_(std::move(other.entrypoint_)),
+          priority_(other.priority_),
+          type_(other.type_),
+          abortFlag_(other.abortFlag_),
+          affinityMask_(other.affinityMask_),
+          // Atomic with relaxed order reason: no order requirement
+          status_(other.status_.load(std::memory_order_relaxed)),
+          executionCtx_(other.executionCtx_),
+          asyncStackID_(other.asyncStackID_)
+    {
+        other.executionCtx_ = nullptr;
+        other.asyncStackID_ = 0U;
+        // Atomic with relaxed order reason: no order requirement
+        other.status_.store(Status::CREATED, std::memory_order_relaxed);
+    }
+    Job &operator=(Job &&other) = delete;
+
     virtual ~Job() = default;
 
 protected:
@@ -239,7 +260,7 @@ private:
     /// abort flag means that the job could abort the program in an uncaugh exeption occured
     bool abortFlag_;
     AffinityMask affinityMask_ = AffinityMask::Empty();
-    Status status_ {Status::CREATED};
+    std::atomic<Status> status_ {Status::CREATED};
 
     /// current execution context
     JobExecutionContext *executionCtx_ = nullptr;

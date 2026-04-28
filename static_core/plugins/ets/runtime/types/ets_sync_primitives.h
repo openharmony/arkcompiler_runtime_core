@@ -510,8 +510,7 @@ private:
  * - For stackful: Fire() is called (inherits from EtsEvent)
  * - Both methods unblock all waiting jobs and clean up the dependency events
  */
-// NOTE(panferovi): make protected inheritance since stackful will support suspend/dispatch bytecodes
-class EtsEventWithDependencies : public EtsEvent {
+class EtsEventWithDependencies : protected EtsEvent {
 public:
     void AddDependency(JobEvent *dependency);
 

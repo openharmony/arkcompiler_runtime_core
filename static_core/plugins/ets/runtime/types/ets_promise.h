@@ -183,7 +183,10 @@ public:
         }
     }
 
-    void SetEvent(EtsExecutionContext *executionCtx, EtsEventWithDependencies *event)
+    template <CoroutineMode MODE>
+    void SetEvent(
+        EtsExecutionContext *executionCtx,
+        typename std::conditional_t<MODE == CoroutineMode::STACKFUL, EtsEvent *, EtsEventWithDependencies *> event)
     {
         ASSERT(event != nullptr);
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
@@ -279,7 +282,7 @@ private:
 
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsMutex> mutex_;
-    ObjectPointer<EtsEventWithDependencies> event_;
+    ObjectPointer<EtsEvent> event_;
     ObjectPointer<EtsObjectArray>
         callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
     ObjectPointer<EtsIntArray> workerDomainQueue_;  // the queue of callbacks' launch mode

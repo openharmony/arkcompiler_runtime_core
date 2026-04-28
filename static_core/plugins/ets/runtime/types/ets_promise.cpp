@@ -37,7 +37,7 @@ EtsPromise *EtsPromise::Create(EtsExecutionContext *executionCtx)
     auto *mutex = EtsMutex::Create(executionCtx);
     hPromise->SetMutex(executionCtx, mutex);
     auto *event = EtsEventWithDependencies::Create(executionCtx);
-    hPromise->SetEvent(executionCtx, event);
+    hPromise->SetEvent<CoroutineMode::STACKLESS>(executionCtx, event);
     return hPromise.GetPtr();
 }
 
