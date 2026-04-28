@@ -415,6 +415,13 @@ class TestStandardFlow(ITestFlow, Test):
                 flags[index] = "--dump-dynamic-ast"
             if 'module' in self.metadata.es2panda_options:
                 flags.insert(0, "--module")
+            if 'emit-declaration' in self.metadata.es2panda_options:
+                flags.insert(0, "--emit-declaration")
+            if 'emit-metadata' in self.metadata.es2panda_options:
+                flags.insert(0, "--emit-metadata")
+            if 'simultaneous' in self.metadata.es2panda_options:
+                flags.pop()
+                flags.append("--simultaneous")
         if step.step_kind == StepKind.RUNTIME and self.metadata.ark_options:
             prepend_options = self.__add_options(self.metadata.ark_options)
             flags = prepend_options + flags

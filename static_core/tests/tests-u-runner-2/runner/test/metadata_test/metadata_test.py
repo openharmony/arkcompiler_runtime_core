@@ -208,3 +208,39 @@ class MetadataTest(unittest.TestCase):
                 'tags': tag,
                 'negative_steps': negative_steps
             }, Path(__file__))
+
+    def test_es2panda_options_valid(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'es2panda_options': ['emit-declaration', 'emit-metadata'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertListEqual(metadata.es2panda_options, ['emit-declaration', 'emit-metadata'])
+
+    def test_es2panda_options_simultaneous(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'es2panda_options': ['emit-declaration', 'simultaneous'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIn('simultaneous', metadata.es2panda_options)
+        self.assertIn('emit-declaration', metadata.es2panda_options)
+
+    def test_es2panda_options_empty_list(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'es2panda_options': [],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertListEqual(metadata.es2panda_options, [])
+
+    def test_es2panda_options_default(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({}, Path(__file__))
+        self.assertListEqual(metadata.es2panda_options, [])
+
+    def test_arktsconfig_non_existing(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            TestMetadata.create_filled_metadata({
+                'arktsconfig': 'non-existing-config.json',
+            }, Path(__file__))
+
+    def test_arktsconfig_default(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({}, Path(__file__))
+        self.assertIsNone(metadata.arktsconfig)

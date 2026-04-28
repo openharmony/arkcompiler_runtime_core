@@ -235,6 +235,52 @@ class ExpectedMetadataTest(unittest.TestCase):
         self.assertFalse(passed)
         self.assertEqual(expected_err_val_msg, error_val_msg)
 
+    def test_expected_stdout_runtime_step(self) -> None:
+        runtime_step = create_step(StepKind.RUNTIME)
+        expected_out = {StepKind.RUNTIME.value: ["line1", "line2"]}
+        expected_error: ExpectedField = {}
+        expected_out_val_msg = "Comparison with expected output/error has passed\n"
+        report_stdout = "line1\nline2"
+        test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
+        passed, output_val_msg = test_result.compare_with_stdout(report_stdout, runtime_step)
+
+        self.assertTrue(passed)
+        self.assertEqual(expected_out_val_msg, output_val_msg)
+
+    def test_expected_stdout_runtime_step_not_found(self) -> None:
+        runtime_step = create_step(StepKind.RUNTIME)
+        expected_out = {StepKind.COMPILER.value: ["line1", "line2"]}
+        expected_error: ExpectedField = {}
+        report_stdout = "line1\nline2"
+        test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
+        passed, output_val_msg = test_result.compare_with_stdout(report_stdout, runtime_step)
+
+        self.assertTrue(passed)
+        self.assertEqual("", output_val_msg)
+
+    def test_expected_stderr_runtime_step(self) -> None:
+        runtime_step = create_step(StepKind.RUNTIME)
+        expected_out: ExpectedField = {}
+        expected_error = {StepKind.RUNTIME.value: ["error1", "error2"]}
+        expected_err_val_msg = "Comparison with expected output/error has passed\n"
+        report_stderr = "error1\nerror2"
+        test_result = get_test_instance("", report_stderr, expected_out, expected_error)
+        passed, error_val_msg = test_result.compare_with_stderr(report_stderr, runtime_step)
+
+        self.assertTrue(passed)
+        self.assertEqual(expected_err_val_msg, error_val_msg)
+
+    def test_expected_stderr_runtime_step_not_found(self) -> None:
+        runtime_step = create_step(StepKind.RUNTIME)
+        expected_out: ExpectedField = {}
+        expected_error = {StepKind.COMPILER.value: ["error1"]}
+        report_stderr = "error1"
+        test_result = get_test_instance("", report_stderr, expected_out, expected_error)
+        passed, error_val_msg = test_result.compare_with_stderr(report_stderr, runtime_step)
+
+        self.assertFalse(passed)
+        self.assertEqual("There is no expected stderr to compare with", error_val_msg)
+
     def test_compare_both_fail(self) -> None:
         expected_out = {StepKind.COMPILER.value: ["default: 1", "default: 2"]}
         expected_error = {StepKind.COMPILER.value: ["error: expected"]}

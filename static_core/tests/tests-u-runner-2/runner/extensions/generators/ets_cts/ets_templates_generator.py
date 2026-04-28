@@ -16,15 +16,19 @@
 #
 import fnmatch
 import glob
+import json
 import os
 import shutil
 from functools import cached_property
 from pathlib import Path
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.extensions.generators.ets_cts.benchmark import Benchmark
 from runner.extensions.generators.igenerator import IGenerator
 from runner.logger import Log
+from runner.macro_utils import Macro, has_macro, replace_macro
 from runner.options.config import Config
+from runner.options.macros import Macros
 from runner.suites.test_metadata import TestMetadata
 
 _LOGGER = Log.get_logger(__file__)
@@ -106,6 +110,39 @@ class EtsTemplatesGenerator(IGenerator):
                 output = self._target / test_full_name
                 shutil.copy(expected_file, output.parent)
 
+    # pylint: disable=too-many-locals
+    def _copy_arktsconfig_file(self, path: Path, generated_tests: list[str]) -> None:
+        copied_arktsconfigs: list[Path] = []
+        metadata = TestMetadata()
+        for test in generated_tests:
+            try:
+                metadata = TestMetadata.get_metadata(Path(test))
+            except InvalidConfiguration:
+                metadata = TestMetadata.get_metadata(path)
+            if metadata.arktsconfig:
+                if metadata.arktsconfig in copied_arktsconfigs:
+                    continue
+                test_full_name = os.path.relpath(path, self._source)
+                _LOGGER.default(f"Copying arktsconfig file for test: {test_full_name}")
+                output = self._target / test_full_name
+                with open(metadata.arktsconfig, encoding="utf-8") as json_handler:
+                    data = json.load(json_handler)
+                    json_string = json.dumps(data, indent=2)
+                    if has_macro(json_string):
+                        work_dir = Macros.expand_macros_in_path("${WORK_DIR}", self._config)
+                        build_dir = Macros.expand_macros_in_path("${PANDA_BUILD}", self._config)
+                        suite_name = Macros.correct_macro("${parameters.test_suite.suite-name}", self._config)
+                        if work_dir:
+                            json_string = replace_macro(json_string, Macro("WORK_DIR"), work_dir)
+                        if build_dir:
+                            json_string = replace_macro(json_string, Macro("PANDA_BUILD"), build_dir)
+                        if suite_name and isinstance(suite_name, str):
+                            json_string = replace_macro(json_string, Macro("SUITE_NAME"), suite_name)
+                        data = json.loads(json_string)
+                    out_json = output.parent / metadata.arktsconfig.name
+                    with open(out_json, "w", encoding="utf-8"):
+                        out_json.write_text(json_string, encoding="utf-8")
+
     def _strip_test_template_suffix(self, path: Path) -> Path | None:
         if path.exists():
             return path
@@ -166,6 +203,7 @@ class EtsTemplatesGenerator(IGenerator):
         self.generated_tests.extend(generated_tests)
 
         self._copy_expected_file(path)
+        self._copy_arktsconfig_file(path, generated_tests)
 
         if self.test_file is not None or self.filter != DEFAULT_FILTER:
             d_ets_files, seen_d_ets = self._collect_d_ets(test_full_name, seen_d_ets)

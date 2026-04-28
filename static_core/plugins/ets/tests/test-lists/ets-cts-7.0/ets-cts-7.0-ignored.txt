@@ -630,3 +630,12 @@
 #34225
 23.binary_compatibility/01.classification_of_source_code_changes/enums/remove_enum_constants_2/remove_enum_constants_2.ets
 23.binary_compatibility/01.classification_of_source_code_changes/enums/rename_enum_constants_2/rename_enum_constants_2.ets
+
+#34386
+24.build_system/metadata/base_tests/two_libs_simultaneous_no_rootdir/test_import.ets
+
+#34384
+24.build_system/metadata/base_tests/all_combined/main.ets
+24.build_system/metadata/base_tests/diamond_dependency/test_import.ets
+24.build_system/metadata/base_tests/generic_interface/test_import.ets
+24.build_system/metadata/base_tests/nullable_types/test_import.ets

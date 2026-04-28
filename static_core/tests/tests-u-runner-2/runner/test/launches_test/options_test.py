@@ -185,6 +185,93 @@ class OptionsTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111113")
+    def test_expand_last_call_emit_declaration(self) -> None:
+        test_env, test_root = self.prepare()
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+        test.metadata.es2panda_options = ['emit-declaration']
+        try:
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        expanded_step = test.configure_step_last_call(step)
+                        self.assertIn("--emit-declaration", expanded_step.args)
+
+        finally:
+            clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111114")
+    def test_expand_last_call_emit_metadata(self) -> None:
+        test_env, test_root = self.prepare()
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+        test.metadata.es2panda_options = ['emit-metadata']
+        try:
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        expanded_step = test.configure_step_last_call(step)
+                        self.assertIn("--emit-metadata", expanded_step.args)
+
+        finally:
+            clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111115")
+    def test_expand_last_call_simultaneous(self) -> None:
+        test_env, test_root = self.prepare()
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+        test.metadata.es2panda_options = ['simultaneous']
+        try:
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        expanded_step = test.configure_step_last_call(step)
+                        self.assertIn("--simultaneous", expanded_step.args)
+
+        finally:
+            clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
     @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--is-panda", "False"])
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
