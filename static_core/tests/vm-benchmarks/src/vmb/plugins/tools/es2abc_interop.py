@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,7 @@ from typing import Union
 from pathlib import Path
 from vmb.tool import ToolBase
 from vmb.unit import BenchUnit
+from vmb.target import Target
 
 log = logging.getLogger('vmb')
 
@@ -30,7 +31,9 @@ class Tool(ToolBase):
     def __init__(self, *args):
         super().__init__(*args)
         self.panda_root = self.ensure_dir_env('PANDA_BUILD')
-        self.es2abc = self.ensure_file(self.panda_root, 'bin/interop_js/es2abc')
+        if self.target == Target.OHOS:
+            self.panda_root = self.ensure_dir(self.panda_root, "clang_x64")
+        self.es2abc = self.ensure_file(self.panda_root, 'arkcompiler', 'ets_frontend', 'es2abc')
         self.cmd = f'{self.es2abc} --module --merge-abc ' \
                    '--extension={lang} {src} --output={out}'
 

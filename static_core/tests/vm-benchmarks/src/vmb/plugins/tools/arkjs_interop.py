@@ -28,10 +28,16 @@ class Tool(ToolBase):
         if Target.HOST == self.target:
             self.panda_root = self.ensure_dir_env('PANDA_BUILD')
             ark_js = ToolBase.ensure_file(
-                self.panda_root, 'bin', 'interop_js', 'ark_js_napi_cli')
+                self.panda_root, 'arkcompiler', 'runtime_core', 'ark_js_napi_cli')
             self.etsstdlib = ToolBase.ensure_file(
-                self.panda_root, 'plugins', 'ets', 'etsstdlib.abc')
-            ark_lib = f'{self.panda_root}/lib/interop_js/:{self.panda_root}/lib/'
+                self.panda_root, 'gen', 'arkcompiler', 'runtime_core',
+                'static_core', 'plugins', 'ets', 'etsstdlib.abc')
+            ark_lib = ':'.join([f'{self.panda_root}/arkcompiler/runtime_core',
+                                f'{self.panda_root}/arkcompiler/ets_runtime',
+                                f'{self.panda_root}/arkui/napi',
+                                f'{self.panda_root}/thirdparty/bounds_checking_function',
+                                f'{self.panda_root}/thirdparty/libuv',
+                                f'{self.panda_root}/thirdparty/icu'])
             stub_file = ""
         elif self.target in (Target.DEVICE, Target.OHOS):
             ark_js = f'{self.dev_dir.as_posix()}/ark_js_napi_cli'

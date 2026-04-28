@@ -13,6 +13,8 @@ First letter signifies context in which measurement cycle runs,
 calling methods from context signified by second letter.
 
 Each type could only be run in separate launch of `vmb`.
+Dynamic runs are performed using binaries from `ark.py` hybrid build.
+However, `s2s` mode requires usual `cmake` build from `static_core`.
 
 Note: `lib*` prefix is reserved for 'imported' code,
 this should not be mixed with 'included' or 'benchmark' files.
@@ -22,30 +24,29 @@ All other file and directory names are arbitrary.
 
 ```sh
 # Build vmb if needed
-pushd $PANDA_ROOT/tests/vm-benchmarks
+pushd $PANDA_ROOT/arkcompiler/runtime_core/static_core/tests/vm-benchmarks
 make vmb
 popd
 
-# Set required env vars
-# assuming ArkjsVM and PANDA are built with interop support
-export PANDA_BUILD=$PANDA_ROOT/build
-export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
+# Assuming ArkJSVM and ArkVM were built by `ark.py` with interop support
+export PANDA_BUILD=$PANDA_ROOT/out/x64.release/
 
 # This is just a short cut and has no special meaning.
 # Free arguments to `vmb` could be any set of paths (files and/or directories)
-TESTS=$PANDA_ROOT/plugins/ets/tests/benchmarks/interop_js
+TESTS=$PANDA_ROOT/arkcompiler/runtime_core/static_core/plugins/ets/tests/benchmarks/interop_js
 
 # Run Dynamic-To-Static benches:
-vmb all -p interop_d2s -T d2s -L js -l js --exclude-list=$TESTS/known-fails-d2s.txt --timeout=60 $TESTS
+vmb all -p interop_d2s -T d2s -L js -l js --exclude-list=$TESTS/exclude-interop-d2s.txt --timeout=60 $TESTS
 
 # Run Static-To-Dynamic benches:
-vmb all -p interop_s2d -T s2d -A --exclude-list=$TESTS/known-fails-s2d.txt --timeout=60 $TESTS
+vmb all -p interop_s2d -T s2d -A --exclude-list=$TESTS/exclude-interop-s2d.txt --timeout=60 $TESTS
 
 # Run Dynamic-To-Dynamic benches:
-vmb all -p interop_d2d -T d2d -L js -l js --exclude-list=$TESTS/known-fails-d2d.txt --timeout=60 $TESTS
+vmb all -p interop_d2d -T d2d -L js -l js --exclude-list=$TESTS/exclude-interop-d2d.txt --timeout=60 $TESTS
 
-# Run Static-To-Static benches:
-vmb all -p arkts_host -T s2s -A --exclude-list=$TESTS/known-fails-s2s.txt --timeout=60 $TESTS
+# Run Static-To-Static benches, `cmake` build required:
+export PANDA_BUILD=$PANDA_ROOT/arkcompiler/runtime_core/static_core/build/
+vmb all -p arkts_host -T s2s -A --exclude-list=$TESTS/exclude-interop-s2s.txt --timeout=60 $TESTS
 ```
 
 ## Other options
@@ -70,14 +71,13 @@ vmb all -p interop_s2d \
   --tests=testToString_hex \
   --tags=s2d \
   --skip-tags=promise \
-  --ark-custom-option=--gc-trigger-type=heap-trigger \
-  --ark-custom-option=--compiler-enable-jit=true \
-  --ark-custom-option=--run-gc-in-place=false \
-  --ark-custom-option=--log-components=ets_interop_js \
-  --ark-custom-option=--load-runtimes=ets \
-  --exclude-list=$TESTS/known-fails-s2d.txt \
+  --arkjs_interop-custom-option=--gc-trigger-type=heap-trigger \
+  --arkjs_interop-custom-option=--compiler-enable-jit=true \
+  --arkjs_interop-custom-option=--run-gc-in-place=false \
+  --arkjs_interop-custom-option=--log-components=ets_interop_js \
+  --arkjs_interop-custom-option=--load-runtimes=ets \
+  --exclude-list=$TESTS/exclude-interop-s2d.txt \
   $TESTS
-
 ```
 
 ## How to compare results
