@@ -251,72 +251,6 @@ export class JSON {
 
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
-    private static scanEscapeInfo(str: String): FixedArray<int> {
-        const len = str.getLength()
-        let needsEscaping = false
-        let hasSurrogates = false
-        let extraLength = 0
-        for (let i = 0; i < len; ++i) {
-            const ch = str.charAt(i)
-            const code = ch.toInt()
-            
-            // Check for ASCII characters that need escaping
-            if (code < 128) {
-                switch (ch) {
-                    case c'"':
-                    case c'\\':
-                        needsEscaping = true
-                        extraLength += 1  // \" or \\
-                        break
-                    case c'\b':
-                    case c'\f':
-                    case c'\n':
-                    case c'\r':
-                    case c'\t':
-                        needsEscaping = true
-                        extraLength += 1  // \b, \f, \n, \r, \t
-                        break
-                    default:
-                        if (code < 0x20 || code == 0x7F) {
-                            needsEscaping = true
-                            extraLength += 5  // \uXXXX
-                        }
-                        break
-                }
-            }
-            
-            // Check for surrogate characters
-            if (code >= 0xD800 && code <= 0xDFFF) {
-                hasSurrogates = true
-                if (Char.isHighSurrogate(ch)) {
-                    if (i + 1 < len && Char.isLowSurrogate(str.charAt(i + 1))) {
-                        // Valid surrogate pair - skip the low surrogate in next iteration
-                        i++
-                        // No extra length needed
-                    } else {
-                        // Lone high surrogate -> \uXXXX
-                        needsEscaping = true
-                        extraLength += 5
-                    }
-                } else if (Char.isLowSurrogate(ch)) {
-                    // Lone low surrogate -> \uXXXX
-                    needsEscaping = true
-                    extraLength += 5
-                }
-            }
-        }
-        const result = new FixedArray<int>(3)
-        result[0] = needsEscaping ? 1 : 0
-        result[1] = hasSurrogates ? 1 : 0
-        result[2] = extraLength
-        return result
-    }
-
-    private static needsEscaping(str: String): boolean {
-        const info = JSON.scanEscapeInfo(str)
-        return info[0] != 0
-    }
-
     /**
      * Converts String to JSON format
      *
@@ -325,98 +259,162 @@ export class JSON {
      * @returns String - JSON representation of byte
      */
     public static stringify(d: String): String {
-        // Scan once to get escaping requirements
-        const info = JSON.scanEscapeInfo(d)
-        const needsEscaping = info[0]
-        const hasSurrogates = info[1]
-        
-        // Fast path: if string contains no characters that need escaping, simply quote it.
-        if (!needsEscaping) {
-            let sb = new StringBuilder('"')
-            sb.append(d)
-            sb.append('"')
-            return sb.toString()
+        const len = d.getLength()
+
+        if (len == 0) {
+            return '""'
         }
-        
-        let sb = new StringBuilder('"')
-        let len = d.getLength()
-        const escapeTable = EscapeStringBuilder.escapeTable
 
-        if (!hasSurrogates) {
-            // No surrogate characters - use chunk copying
-            let begin = 0
-            for (let i = 0; i < len; ++i) {
-                const ch = d.charAt(i)
-                const code = ch.toInt()
-                if (code < 128) {
-                    const escaped = escapeTable[code]
-                     if (escaped !== undefined && escaped.length > 0) {
-                        if (begin < i) {
-                            sb.append(d.substring(begin, i))
-                        }
-                        sb.append(escaped)
-                        begin = i + 1
-                    }
+        let needsEscaping = false
+        let hasSurrogates = false
+        let finalSize = len + 2
+
+        for (let i = 0; i < len; i++) {
+            const code = d.charCodeAt(i)
+            if (code < 128) {
+                if (code == c'"' || code == c'\\' || code == c'\b' || code == c'\f' ||
+                    code == c'\n' || code == c'\r' || code == c'\t') {
+                    needsEscaping = true
+                    finalSize += 1
+                } else if (code < 0x20 || code == 0x7F) {
+                    needsEscaping = true
+                    finalSize += 5
                 }
-            }
-            if (begin < len) {
-                sb.append(d.substring(begin))
-            }
-        } else {
-            // String contains surrogate characters - use original logic with surrogate handling
-            let prevChar: char = c'\0'
-            for (let i = 0; i < len; ++i) {
-                let currChar = d.charAt(i)
-                const code = currChar.toInt()
-
-                if (Char.isHighSurrogate(currChar)) {
-                    if (i != 0 && Char.isHighSurrogate(prevChar)) {
-                        JSON.appendCharHex(sb, prevChar)
-                    }
-                } else if (Char.isLowSurrogate(currChar)) {
-                    if (i != 0 && Char.isHighSurrogate(prevChar)) {
-                        sb.append(prevChar)
-                        sb.append(currChar)
+            } else if (code >= 0xD800 && code <= 0xDFFF) {
+                if (code >= 0xD800 && code <= 0xDBFF) {
+                    if (i + 1 >= len || d.charCodeAt(i + 1) < 0xDC00 || d.charCodeAt(i + 1) > 0xDFFF) {
+                        hasSurrogates = true
+                        needsEscaping = true
+                        finalSize += 5  // \uXXXX
                     } else {
-                        JSON.appendCharHex(sb, currChar)
+                        hasSurrogates = true
+                        i++
                     }
                 } else {
-                    if (i != 0 && Char.isHighSurrogate(prevChar)) {
-                        JSON.appendCharHex(sb, prevChar)
-                    }
-
-                    // Handle ASCII characters via escape table
-                    if (code < 128) {
-                        const escaped = escapeTable[code]
-                        if (escaped !== undefined && escaped.length > 0) {
-                            sb.append(escaped)
-                        } else {
-                            sb.append(currChar)
-                        }
-                    } else {
-                        // Non-ASCII, non-surrogate character
-                        sb.append(currChar)
-                    }
-                }
-
-                prevChar = currChar
-            }
-
-            if (len > 0) {
-                if (Char.isHighSurrogate(prevChar)) {
-                    JSON.appendCharHex(sb, prevChar)
+                    hasSurrogates = true
+                    needsEscaping = true
+                    finalSize += 5
                 }
             }
         }
 
-        sb.append('"')
-        return sb.toString()
-    }
+        if (!needsEscaping && !hasSurrogates) {
+            return '"' + d + '"'
+        }
 
-    private static appendCharHex(buffer: StringBuilder, chr: char): StringBuilder {
-        const hex = chr.toInt().toString(16).padStart(4, '0')
-        buffer.append('\\u').append(hex)
-        return buffer
+        let chars = new ValueArray<char>(finalSize)
+        let charIndex = 0
+        chars[charIndex++] = c'"'
+
+        let begin = 0
+        for (let i = 0; i < len; ) {
+            const ch = d.charAt(i)
+            const code = ch.toInt()
+
+            if (begin < i) {
+                for (let j = begin; j < i; j++) {
+                    chars[charIndex++] = d.charAt(j)
+                }
+            }
+
+            if (code < 128) {
+                switch (ch) {
+                    case c'"':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'"'
+                        begin = i + 1
+                        break
+                    case c'\\':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'\\'
+                        begin = i + 1
+                        break
+                    case c'\b':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'b'
+                        begin = i + 1
+                        break
+                    case c'\f':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'f'
+                        begin = i + 1
+                        break
+                    case c'\n':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'n'
+                        begin = i + 1
+                        break
+                    case c'\r':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'r'
+                        begin = i + 1
+                        break
+                    case c'\t':
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c't'
+                        begin = i + 1
+                        break
+                    default:
+                        if (code < 0x20 || code == 0x7F) {
+                            const hex = code.toString(16).padStart(4, '0')
+                            chars[charIndex++] = c'\\'
+                            chars[charIndex++] = c'u'
+                            chars[charIndex++] = hex.charAt(0)
+                            chars[charIndex++] = hex.charAt(1)
+                            chars[charIndex++] = hex.charAt(2)
+                            chars[charIndex++] = hex.charAt(3)
+                            begin = i + 1
+                        } else {
+                            begin = i
+                        }
+                        break
+                }
+                i++
+            }
+            // Check for surrogate characters
+            else if (code >= 0xD800 && code <= 0xDFFF) {
+                if (Char.isHighSurrogate(ch)) {
+                    if (i + 1 < len && Char.isLowSurrogate(d.charAt(i + 1))) {
+                        chars[charIndex++] = ch
+                        chars[charIndex++] = d.charAt(i + 1)
+                        i += 2
+                    } else {
+                        const hex = code.toString(16).padStart(4, '0')
+                        chars[charIndex++] = c'\\'
+                        chars[charIndex++] = c'u'
+                        chars[charIndex++] = hex.charAt(0)
+                        chars[charIndex++] = hex.charAt(1)
+                        chars[charIndex++] = hex.charAt(2)
+                        chars[charIndex++] = hex.charAt(3)
+                        i++
+                    }
+                } else if (Char.isLowSurrogate(ch)) {
+                    const hex = code.toString(16).padStart(4, '0')
+                    chars[charIndex++] = c'\\'
+                    chars[charIndex++] = c'u'
+                    chars[charIndex++] = hex.charAt(0)
+                    chars[charIndex++] = hex.charAt(1)
+                    chars[charIndex++] = hex.charAt(2)
+                    chars[charIndex++] = hex.charAt(3)
+                    i++
+                } else {
+                    i++
+                }
+                begin = i
+            }
+            else {
+                i++
+            }
+        }
+
+        if (begin < len) {
+            for (let j = begin; j < len; j++) {
+                chars[charIndex++] = d.charAt(j)
+            }
+        }
+
+        chars[charIndex++] = c'"'
+        return new String(chars)
     }
 
     //--------------------------
@@ -1323,13 +1321,150 @@ class JSONWriter {
         return this.buffer.toString()
     }
 
+    private writeStringDirect(str: String): void {
+        let len = str.getLength()
+        let needsEscape = false
+        for (let i = 0; i < len; i++) {
+            let code = str.charCodeAt(i)
+            if (code < 32 || code == 34 || code == 92 || code == 127 ||
+                (code >= 0xD800 && code <= 0xDFFF)) {
+                needsEscape = true
+                break
+            }
+        }
+
+        if (!needsEscape) {
+            this.buffer.append('"')
+            this.buffer.append(str)
+            this.buffer.append('"')
+            return
+        }
+
+        this.buffer.append('"')
+
+        let begin = 0
+        let i = 0
+
+        while (i < len) {
+            const ch = str.charAt(i)
+            const code = ch.toInt()
+
+            if (code < 128) {
+                switch (ch) {
+                    case c'"':
+                        // Copy characters before escape
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\"')
+                        begin = i + 1
+                        break
+                    case c'\\':
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\\\')
+                        begin = i + 1
+                        break
+                    case c'\b':
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\b')
+                        begin = i + 1
+                        break
+                    case c'\f':
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\f')
+                        begin = i + 1
+                        break
+                    case c'\n':
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\n')
+                        begin = i + 1
+                        break
+                    case c'\r':
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\r')
+                        begin = i + 1
+                        break
+                    case c'\t':
+                        if (begin < i) {
+                            this.buffer.append(str.substring(begin, i))
+                        }
+                        this.buffer.append('\\t')
+                        begin = i + 1
+                        break
+                    default:
+                        if (code < 0x20 || code == 0x7F) {
+                            // Control character -> \uXXXX
+                            if (begin < i) {
+                                this.buffer.append(str.substring(begin, i))
+                            }
+                            this.buffer.append('\\u')
+                            this.buffer.append(code.toString(16).padStart(4, '0'))
+                            begin = i + 1
+                        }
+                        break
+                }
+                i++
+            } else if (code >= 0xD800 && code <= 0xDFFF) {
+                // Surrogate pair handling
+                if (code >= 0xD800 && code <= 0xDBFF) {
+                    // High surrogate
+                    if (i + 1 < len) {
+                        const nextCode = str.charCodeAt(i + 1).toInt()
+                        if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) {
+                            // Valid surrogate pair - copy both
+                            i += 2
+                        } else {
+                            // Lone high surrogate -> \uXXXX
+                            if (begin < i) {
+                                this.buffer.append(str.substring(begin, i))
+                            }
+                            this.buffer.append('\\u')
+                            this.buffer.append(code.toString(16).padStart(4, '0'))
+                            begin = i
+                            i++
+                        }
+                    } else {
+                        i++
+                    }
+                } else {
+                    // Low surrogate (0xDC00-0xDFFF) - lone
+                    if (begin < i) {
+                        this.buffer.append(str.substring(begin, i))
+                    }
+                    this.buffer.append('\\u')
+                    this.buffer.append(code.toString(16).padStart(4, '0'))
+                    begin = i + 1
+                    i++
+                }
+            } else {
+                i++
+            }
+        }
+
+        if (begin < len) {
+            this.buffer.append(str.substring(begin, len))
+        }
+
+        this.buffer.append('"')
+    }
+
     private writeObject(obj: Any): void {
         if (obj === null) {
             this.buffer.append('null')
         } else if (obj === undefined) {
             this.buffer.append('')
         } else if (obj instanceof String) {
-            this.buffer.append(JSON.stringify(obj as String))
+            this.writeStringDirect(obj as String)
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
@@ -1403,7 +1538,7 @@ class JSONWriter {
         if (valueOfMethod !== undefined) {
             const value: Object = valueOfMethod.invoke(obj) as Object
             if (value instanceof String) {
-                this.buffer.append('\"').append(value).append("\"")
+                this.writeStringDirect(value as String)
             } else {
                 this.buffer.append(value)
             }
@@ -3675,3 +3810,4 @@ function createStringFromJSONValue(json: JSONValue): String {
     }
     throw new JSONTypeError('Cannot create String from JSON', {cause: json as Object} as ErrorOptions)
 }
+
