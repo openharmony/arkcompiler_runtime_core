@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+* Copyright (c) 2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -14,14 +14,21 @@
 */
 
 {% for case in cases %}
+{% for o in options %}
 
 /*---
-desc: Retention is a standard annotation that is used to annotate declaration of other annotations
+desc: >-
+    An abstract class is not declared for annotations with the "SOURCE" retention policy
 tags: [compile-only, negative]
-expected_out: "{{case.error}}"
+expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
 ---*/
 
-{{ case.decl }}
-{{ case.use }}
+@Retention({{ case.decl }})
+@interface ClassAnnotation {
+    name: number
+}
 
+{{o.decl}}
+
+{% endfor %}
 {% endfor %}
