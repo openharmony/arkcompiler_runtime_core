@@ -77,6 +77,7 @@ class EtsTemplatesGenerator(IGenerator):
         if self.test_file and fnmatch.fnmatchcase(self.test_file, self.filter):
             test_source = self._test_root / self.test_file
         self.__dfs(test_source, set())
+        self.__copy_new_lib_files_recursive(self._source)
 
         _LOGGER.default(f"Generation finished! Generated {len(self.generated_tests)} test files")
         return self.generated_tests
@@ -234,3 +235,21 @@ class EtsTemplatesGenerator(IGenerator):
             self.__generate_test(path, set())
 
             return
+
+    def __copy_new_lib_files_recursive(self, test_path: Path) -> None:
+        """Recursively copy .new.ets files from source to gen directory."""
+        if test_path.is_dir():
+            for child in sorted(test_path.iterdir()):
+                self.__copy_new_lib_files_recursive(child)
+            return
+        if test_path.is_file() and test_path.suffixes[-2:] == [".new", ".ets"]:
+            # Skip templated .new.ets files (with .params.yaml) - they are
+            # rendered by the Benchmark template engine, not copied as-is.
+            params_file = test_path.with_suffix("").with_suffix(".params.yaml")
+            if params_file.exists():
+                return
+            test_full_name = os.path.relpath(test_path, self._source)
+            output = self._target / test_full_name
+            if not output.exists():
+                output.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(test_path, output)

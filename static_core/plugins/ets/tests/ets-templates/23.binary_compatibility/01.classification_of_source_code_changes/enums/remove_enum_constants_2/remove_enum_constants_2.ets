@@ -16,8 +16,10 @@
 /*---
 desc: Removing enum constants may affect binary compatibility.
 tags: [negative]
-negative_steps: [runtime-with-new-libs.ark]
+negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
 expected_error:
+    verify-new-libs: |-
+        E/verifier: Error: method void remove_enum_constants_2.ETSGLOBAL::main() failed to verify
     runtime-with-new-libs.ark:
         - "E/verifier: Cannot link class: Cannot find field 'Red' in class 'remove_enum_constants_2.libr.Color'"
         - "E/verifier: Verifier error 55: Cache miss for field at offset"
