@@ -235,14 +235,6 @@
 #31862 verifier error on conflicting default implementations in interfaces
 10.interfaces/03.interface_members/hidden_members_1.ets
 
-#33880 methods with the same name as Object public method
-10.interfaces/03.interface_members/object_public_methods_n_0.ets
-10.interfaces/03.interface_members/object_public_methods_n_1.ets
-10.interfaces/03.interface_members/object_public_methods_n_2.ets
-10.interfaces/03.interface_members/object_public_methods_n_3.ets
-10.interfaces/03.interface_members/object_public_methods_n_4.ets
-10.interfaces/03.interface_members/object_public_methods_n_5.ets
-
 #33639
 11.enumerations/enum_decl_25.ets
 11.enumerations/enum_decl_26.ets
