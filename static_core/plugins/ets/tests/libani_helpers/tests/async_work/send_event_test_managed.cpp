@@ -54,9 +54,9 @@ private:
 
 static void NativeCall(ani_env *env, ani_int id)
 {
-    auto event = AsyncEvent();
+    auto event = MakePandaShared<AsyncEvent>();
 
-    auto dataSend = std::tie(event, id);
+    auto dataSend = std::pair(event, id);
     auto status = SendEvent(
         env, id,
         [](void *data) {
@@ -70,22 +70,22 @@ static void NativeCall(ani_env *env, ani_int id)
 
             auto workerId = GetWorkerId(envCurr);
 
-            auto *val = reinterpret_cast<std::tuple<AsyncEvent &, int &> *>(data);
+            auto *val = reinterpret_cast<std::pair<std::shared_ptr<AsyncEvent>, int> *>(data);
             auto idCurr = std::get<1>(*val);
 
             ASSERT_EQ(idCurr, workerId);
 
-            auto &ev = std::get<0>(*val);
-            ev.Fire();
+            auto ev = std::get<0>(*val);
+            ev->Fire();
         },
         reinterpret_cast<void *>(&dataSend));
     ASSERT_EQ(status, WorkStatus::OK);
 
-    event.Wait();
+    event->Wait();
 }
 
 // NOTE(dslynko, #27940): enable this test after fixing flaky failures
-TEST_F(SendEventManagedTest, DISABLED_SendEvent)
+TEST_F(SendEventManagedTest, SendEvent)
 {
     ani_module module = nullptr;
     ASSERT_EQ(env_->FindModule("send_event_test_managed", &module), ANI_OK);
