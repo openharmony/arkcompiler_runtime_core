@@ -56,7 +56,7 @@ function compare_worker_ids(): int {
     L.log('Testing launch in a separate worker');
 
     let id_main: int = CoroutineExtras.getWorkerId();
-    let id_coro: int = (launch(return_worker_id).Await()) as int;
+    let id_coro: int = waitForCompletion(() => launch (return_worker_id));
     if (id_main != id_coro) {
         L.log('Successfully ran coro in a separate worker. Main WID: ' + id_main + ', Coro WID: ' + id_coro);
         return 0;
@@ -84,20 +84,16 @@ function run_batch_launch(batch_size: int, iters: int): int {
     return 0;
 }
 
-function await_chain(n: int): NullableType {
+async function await_chain(n: int): Promise<NullableType> {
     if (n > 0) {
-        launch<NullableType>() {
-            return await_chain(n-1)
-        }.Await();
+        await launch<NullableType>(() => await_chain(n-1));
     }
     return null;
 }
 
-function run_await_chain(len: int): int {
+async function run_await_chain(len: int): Promise<int> {
     L.log('Testing await chain of ' + len + ' items');
-    launch<NullableType>() {
-        return await_chain(len)
-    };
+    launch<NullableType>(() => await_chain(len));
     return 0;
 }
 
@@ -105,11 +101,11 @@ function simple(): NullableType {
     return null;
 }
 
-function run_batch_await(batch_size: int): int {
+async function run_batch_await(batch_size: int): Promise<int> {
     L.log('Testing batch await of ' + batch_size + ' coroutines');
     for (let i = 0; i < batch_size; ++i) {
         let j = launch(simple);
-        j.Await();
+        await j;
     }
     return 0;
 }
@@ -128,23 +124,23 @@ function testCompareWorkerIds(): void {
     }
 }
 
-function testRunBatchLaunch(): void {
+async function testRunBatchLaunch(): Promise<void> {
     // Test 3. Run a batch of coroutines without await so they would be distributed to different workers
     if (run_batch_launch(100, 500) != 0) {
         arktest.assertTrue(false, 'batch launch test failed');
     }
 }
 
-function testRunAwaitChain(): void {
+async function testRunAwaitChain(): Promise<void> {
     // Test 4. Run a chain of several coroutines that await each other. Coroutines will run on different workers.
-    if (run_await_chain(50) != 0) {
+    if (await run_await_chain(50) != 0) {
         arktest.assertTrue(false, 'await chain test failed');
     }
 }
 
-function testRunBatchAwait(): void {
+async function testRunBatchAwait(): Promise<void> {
     // Test 5. Run coroutines on different workers and await them.
-    if (run_batch_await(100) != 0) {
+    if (await run_batch_await(100) != 0) {
         arktest.assertTrue(false, 'batch await test failed');
     }
 }
@@ -153,9 +149,9 @@ async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
     testSuite.addTest('testCompareWorkerIdsAsync', testCompareWorkerIdsAsync);
     testSuite.addTest('testCompareWorkerIds', testCompareWorkerIds);
-    testSuite.addTest('testRunBatchLaunch', testRunBatchLaunch);
-    testSuite.addTest('testRunAwaitChain', testRunAwaitChain);
-    testSuite.addTest('testRunBatchAwait', testRunBatchAwait);
+    testSuite.addAsyncTest('testRunBatchLaunch', testRunBatchLaunch);
+    testSuite.addAsyncTest('testRunAwaitChain', testRunAwaitChain);
+    testSuite.addAsyncTest('testRunBatchAwait', testRunBatchAwait);
     let res = await testSuite.runAsync();
     return res;
 }

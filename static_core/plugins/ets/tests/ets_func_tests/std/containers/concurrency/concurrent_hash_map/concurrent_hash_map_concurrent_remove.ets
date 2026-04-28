@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push(arr[i].Await());
+		res.push((await arr[i]) as T);
 	return res;
 }
 
@@ -38,7 +38,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-function testConcurrentRemove() {
+async function testConcurrentRemove(): Promise<void> {
 	const SET_COUNT = 100;
 	const JOB_COUNT = 7;
 
@@ -47,17 +47,17 @@ function testConcurrentRemove() {
 		for (let i = start; i < end; ++ i)
 			arktest.assertEQ(map.remove(i), i);
 	}
-	let removeJobs: Job<void>[] = [];
+	let removeJobs: Promise<void>[] = [];
 	for (let i = 0; i < SET_COUNT * JOB_COUNT; ++ i)
 		map.set(i, i);
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(removeJobs, makeRemoveF(i * SET_COUNT, (i + 1) * SET_COUNT));
-	awaitAll(removeJobs);
+	await awaitAll(removeJobs);
 	for (let i = 0; i < SET_COUNT * JOB_COUNT; ++ i)
 		arktest.assertFalse(map.has(i));
 }
 
-function testConcurrentRemove2() {
+async function testConcurrentRemove2(): Promise<void> {
 	const SET_COUNT = 100;
 	const JOB_COUNT = 10;
 
@@ -74,20 +74,20 @@ function testConcurrentRemove2() {
 		return arr;
 	}
 
-	let removeJobs: Job<FixedArray<int>>[] = [];
+	let removeJobs: Promise<FixedArray<int>>[] = [];
 	for (let i = 0; i < SET_COUNT; ++ i)
 		map.set(i, i);
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(removeJobs, removeF);
 
-	let arrs = awaitAll(removeJobs);
+	let arrs = await awaitAll(removeJobs);
 	let accum = arrs[0];
 	for (let i = 1; i < JOB_COUNT; ++ i )
 		sumArrInto(accum, arrs[i]);
 	assertEQAll(accum, 1);
 }
 
-function testConcurrentRemoveAndSet() {
+async function testConcurrentRemoveAndSet(): Promise<void> {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 100;
 
@@ -104,22 +104,21 @@ function testConcurrentRemoveAndSet() {
 				arktest.assertEQ(val, i);
 		}
 	}
-	let setJobs: Job<void>[] = [];
-	let removeJobs: Job<void>[] = [];
+	let setJobs: Promise<void>[] = [];
+	let removeJobs: Promise<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(setJobs, setF);
 		addLaunch(removeJobs, removeF);
 	}
-	awaitAll(setJobs);
-	awaitAll(removeJobs);
+	await awaitAll(setJobs);
+	await awaitAll(removeJobs);
 }
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentRemove", testConcurrentRemove);
-	CHMTestSuitecase.addTest("testConcurrentRemove2", testConcurrentRemove2);
-	CHMTestSuitecase.addTest("testConcurrentRemoveAndSet", testConcurrentRemoveAndSet);
+	CHMTestSuitecase.addAsyncTest("testConcurrentRemove", async () => { await testConcurrentRemove(); });
+	CHMTestSuitecase.addAsyncTest("testConcurrentRemove2", async () => { await testConcurrentRemove2(); });
+	CHMTestSuitecase.addAsyncTest("testConcurrentRemoveAndSet", async () => { await testConcurrentRemoveAndSet(); });
 
     return CHMTestSuitecase.run();
 }
-

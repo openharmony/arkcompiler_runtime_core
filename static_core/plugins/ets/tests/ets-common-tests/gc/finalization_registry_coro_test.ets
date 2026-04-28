@@ -50,11 +50,11 @@ function removeFromRegistry(finreg: FinalizationRegistry<String> | null, token: 
 	finreg!.unregister(token);
 }
 
-// ==============================  GetSize tests ==================  
+// ==============================  GetSize tests ==================
 
-let promise_array: Array<Job<void>> = new Array<Job<void>>;
+let promise_array: Array<Promise<void>> = new Array<Promise<void>>;
 
-function getSizeTests(finreg: FinalizationRegistry<String> | null) {
+async function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 
 	for (let i = 0; i < promise_count; i++) {
 		promise_array.push(launch() {
@@ -63,17 +63,17 @@ function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 	}
 
 	for (let i = 0; i < promise_array.length; i++) {
-		promise_array[i]!.Await();
+		await promise_array[i];
 	}
 
  arktest.assertEQ(3 * promise_count, finreg!.getSize(), "Size of the finreg is not true");
 }
 
-// ========================= Unregister tests =========================================== 
+// ========================= Unregister tests ===========================================
 
-let unreg_array: Array<Job<void>> = new Array<Job<void>>;
+let unreg_array: Array<Promise<void>> = new Array<Promise<void>>;
 
-function unregisterTests(finreg: FinalizationRegistry<String> | null) {
+async function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 
 	finreg!.unregister(token);
  arktest.assertEQ(0, finreg!.getSize(), "Start size of unregister is invalid");
@@ -94,18 +94,18 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 		return finreg.unregister(s);
 	};
 
-	launch() {
+	await launch() {
 		unregister(finreg!, token1)
-	}.Await();
-	launch() {
+	};
+	await launch() {
 		unregister(finreg!, token2)
-	}.Await();
-	launch() {
+	};
+	await launch() {
 		unregister(finreg!, token3)
-	}.Await();
-	launch() {
+	};
+	await launch() {
 		unregister(finreg!, token4)
-	}.Await();
+	};
 
  arktest.assertEQ(0, finreg!.getSize(), "Size of unregister is invalid");
 
@@ -122,15 +122,25 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 	}
 
 	for (let i = 0; i < unreg_array.length; ++i) {
-		unreg_array[i].Await();
+		await unreg_array[i];
 	}
  arktest.assertEQ(0, finreg!.getSize(), "unregister  test failed");
 }
 
 // ===============================  CtorTests ==============================
 
-let regs_promise: Array<Promise<FinalizationRegistry<String>>> = new Array<Promise<FinalizationRegistry<String>>>;;
+let regs_promise: Array<Promise<void>> = new Array<Promise<void>>;
+let ctor_regs: Array<FinalizationRegistry<String>> = new Array<FinalizationRegistry<String>>;
 let cntr = 0;
+const ctor_cleanup_count = promise_count * 2;
+let ctor_cleanup_resolve: (() => void) | null = null;
+
+function onCtorCleanup(): void {
+	cntr++;
+	if (cntr == ctor_cleanup_count) {
+		ctor_cleanup_resolve!();
+	}
+}
 
 
 function createCoro(idx: int): FinalizationRegistry<String> {
@@ -141,19 +151,25 @@ function createCoro(idx: int): FinalizationRegistry<String> {
 }
 
 
-async function createCoroA(idx: int, noToken: boolean): Promise<FinalizationRegistry<String>> {
-    let finreg = new FinalizationRegistry<String>((s: String): void => { cntr++; });
-	let o = new Object();
+async function createCoroA(idx: int, noToken: boolean): Promise<void> {
+    let finreg = new FinalizationRegistry<String>((s: String): void => { onCtorCleanup(); });
     if (noToken) {
-        finreg.register(o, "<<< :Async1: >>> " + idx);
+        finreg.register(new Object(), "<<< :Async1: >>> " + idx);
     } else {
-        finreg.register(o, "<<< :Async2: >>> " + idx, o);
+		let token = new Object();
+        finreg.register(new Object(), "<<< :Async2: >>> " + idx, token);
     }
-	return finreg;
+	ctor_regs.push(finreg);
 }
 
 
 async function ctorTests() {
+    cntr = 0;
+    regs_promise = new Array<Promise<void>>;
+    ctor_regs = new Array<FinalizationRegistry<String>>;
+	let cleanupFinished = new Promise<void>((resolve) => {
+		ctor_cleanup_resolve = () => { resolve(undefined); };
+	});
 
     for (let i = 0; i < promise_count; i++) {
         regs_promise.push(createCoroA(i, true));
@@ -164,18 +180,23 @@ async function ctorTests() {
 		await regs_promise[i];
 	}
 
-	await doFullGCAsync();
+	regs_promise = new Array<Promise<void>>;
 	doFullGC();
-	Coroutine.Schedule();
+	await cleanupFinished;
+	ctor_regs = new Array<FinalizationRegistry<String>>;
+	ctor_cleanup_resolve = null;
 
 }
 
-function main(): void {
+async function runAllTests() {
     registry = new FinalizationRegistry<String>((string: String): void => { });
-	getSizeTests(registry!);
-	unregisterTests(registry!);
+	await getSizeTests(registry!);
+	await unregisterTests(registry!);
 
-	waitForCompletion(ctorTests);
- arktest.assertEQ(cntr, promise_count * 2, "Counter of ctors is not valid");
+	await ctorTests();
+	arktest.assertEQ(cntr, ctor_cleanup_count, "Counter of ctors is not valid");
+}
 
+async function main(): Promise<void> {
+	await runAllTests();
 }

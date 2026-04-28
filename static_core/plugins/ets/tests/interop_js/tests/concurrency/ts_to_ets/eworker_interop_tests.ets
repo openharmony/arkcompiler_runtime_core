@@ -15,7 +15,7 @@
 
 let eaw = new EAWorker(true);
 
-function testProcessInput() {
+async function testProcessInput(): Promise<void> {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
@@ -26,11 +26,11 @@ function testProcessInput() {
         return res;
     };
 
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertTrue(res);
 }
 
-function testCreateArray() {
+async function testCreateArray(): Promise<void> {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let createArrayDy = module.getProperty('createArray');
@@ -41,11 +41,11 @@ function testCreateArray() {
                     (res2.getProperty(0).toString() === 'a') &&
                     (res3.getProperty(0).toBoolean() === true);
     };
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertTrue(res);
 }
 
-function testGetUser() {
+async function testGetUser(): Promise<void> {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let getUserDy = module.getProperty('getUser');
@@ -56,7 +56,7 @@ function testGetUser() {
         return res1.getProperty('id').toNumber() === 123 &&
                     res2.getProperty('role').toString() === 'admin';
     };
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertTrue(res);
 }
 
@@ -64,7 +64,7 @@ class NewTestClass {
   prop: number = 1;
 }
 
-function testUnion() {
+async function testUnion(): Promise<void> {
   let result = false;
   try {
     let callback = () => {
@@ -80,12 +80,12 @@ function testUnion() {
         let testInstance = TestClass.instantiate();
         dynamicObj.setProperty('unionProp', testInstance);
         arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('name').toString() === 'aaa');
-        
+
         dynamicObj.setProperty('unionProp', ESValue.wrap(new NewTestClass()));
         arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
         result = true;
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
   } catch (error) {
     console.error(error.toString());
     arktest.assertFalse(result);
@@ -93,17 +93,17 @@ function testUnion() {
   arktest.assertTrue(result);
 }
 
-function testBaseClass() {
+async function testBaseClass(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers')
         let obj = module.getProperty('Base').instantiate().invokeMethod('getCurrent')
         arktest.assertTrue(obj.typeOf() === 'object')
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testChildClass() {
+async function testChildClass(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers')
         let obj = module.getProperty('Child').instantiate().invokeMethod('getSuper')
@@ -111,77 +111,77 @@ function testChildClass() {
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
         arktest.assertTrue(obj.getProperty('childVal').toNumber() === 2)
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testBaseFunc() {
+async function testBaseFunc(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers')
         let obj = module.getProperty('baseFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testChildFunc() {
+async function testChildFunc(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('childFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testFooBaseObjInvoke() {
+async function testFooBaseObjInvoke(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testFooBaseObjInvokeMethod() {
+async function testFooBaseObjInvokeMethod(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testFooChildObjInvoke() {
+async function testFooChildObjInvoke(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testFooChildObjInvokeMethod() {
+async function testFooChildObjInvokeMethod(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testArrowFuncInvoke() {
+async function testArrowFuncInvoke(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let result = module.getProperty('arrowFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
-function testOptionalParams() {
+async function testOptionalParams(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         arktest.assertTrue(module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
@@ -192,7 +192,7 @@ function testOptionalParams() {
         arktest.assertTrue(module.getProperty('fun2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false)).toBoolean());
         arktest.assertTrue(module.getProperty('fun3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
     }
-    eaw.run<void>(callback).Await();
+    await eaw.run<void>(callback);
 }
 
 
@@ -201,7 +201,7 @@ const ErrorMessage: string = 'Panda: throw new error in ets!';
 const CustomErrorMessage: string = 'Panda: Something went wrong!';
 const CustomErrorCode: number = 1001;
 
-function testError() {
+async function testError(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let err = module.getProperty('err');
@@ -209,11 +209,11 @@ function testError() {
         res = (err.getProperty('message').toString() == ErrMsg);
         return res;
     }
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertTrue(res);
 }
 
-function testThrowError() {
+async function testThrowError(): Promise<void> {
     let callback = () => {
     let module = ESValue.load('concurrency_helpers');
     let res: boolean;
@@ -225,11 +225,11 @@ function testThrowError() {
         }
         return res;
     }
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertTrue(res);
 }
 
-function testCustomThrowError() {
+async function testCustomThrowError(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let res: boolean;
@@ -242,12 +242,12 @@ function testCustomThrowError() {
         }
         return res;
     }
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertTrue(res);
 }
 
-function testEAWorkerNestedExecute() {
-    let callback = ():boolean => {
+async function testEAWorkerNestedExecute(): Promise<void> {
+    let callback = async (): Promise<boolean> => {
         let innerWorker = new EAWorker(true);
         innerWorker.start();
         let module = ESValue.load('concurrency_helpers');
@@ -265,16 +265,16 @@ function testEAWorkerNestedExecute() {
             let res3 = processInputDy.invoke(ESValue.wrapBoolean(true)); // false
             return res1.toNumber() === 10 && res2.toString() === 'HELLO' && !res3.toBoolean();
         }
-        let resInner = innerWorker.run<boolean>(callbackInner).Await() as boolean;
-        innerWorker.join();
+        let resInner = await innerWorker.run<boolean>(callbackInner) as boolean;
+        innerWorker.quit();
         arktest.assertTrue(resInner);
         return res && resInner;
     };
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertEQ(res, true);
 }
 
-function testEAWorkerInteropLoop() {
+async function testEAWorkerInteropLoop(): Promise<void> {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
@@ -288,7 +288,7 @@ function testEAWorkerInteropLoop() {
         }
         return true;
     }
-    let res = eaw.run<boolean>(callback).Await() as boolean;
+    let res = await eaw.run<boolean>(callback) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -302,38 +302,38 @@ function testFunc(serializeTestObj: ESValue) {
     return true;
 }
 
-function testEAWorkerSerialize() {
+async function testEAWorkerSerialize(): Promise<void> {
     let module = ESValue.load('concurrency_helpers');
     let serializeTestObj = module.getProperty('serializeTestObj');
-    let res = eaw.run<boolean>(testFunc, serializeTestObj).Await() as boolean;
+    let res = await eaw.run<boolean>(testFunc, serializeTestObj) as boolean;
     arktest.assertEQ(res, true);
 }
 
-function testEAWorkerSerializeClassInstantiate() {
+async function testEAWorkerSerializeClassInstantiate(): Promise<void> {
     let module = ESValue.load('concurrency_helpers');
     let SerializeTest = module.getProperty('SerializeTest');
     let serializeTestObj = SerializeTest.instantiate('SerializeTest', 1, ['1', '2', '3']);
-    let res = eaw.run<boolean>(testFunc, serializeTestObj).Await() as boolean;
+    let res = await eaw.run<boolean>(testFunc, serializeTestObj) as boolean;
     arktest.assertEQ(res, true);
 }
 
-function testEAWorkerSerializeUndefined() {
+async function testEAWorkerSerializeUndefined(): Promise<void> {
     let module = ESValue.load('concurrency_helpers');
     let serializeObj = module.getProperty('serializeUndefined');
     let callback = (value: ESValue) => {
         return value.isUndefined();
     }
-    let res = eaw.run<boolean>(callback, serializeObj).Await() as boolean;
+    let res = await eaw.run<boolean>(callback, serializeObj) as boolean;
     arktest.assertEQ(res, true);
 }
 
-function testEAWorkerSerializeNull() {
+async function testEAWorkerSerializeNull(): Promise<void> {
     let module = ESValue.load('concurrency_helpers');
     let serializeObj = module.getProperty('serializeNull');
     let callback = (value: ESValue) => {
         return value.isNull();
     }
-    let res = eaw.run<boolean>(callback, serializeObj).Await() as boolean;
+    let res = await eaw.run<boolean>(callback, serializeObj) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -446,39 +446,39 @@ function testEAWorkerCommmunicateWithMessage()
 
     waiter.Wait();
     arktest.assertEQ(messageGot, true);
-    eaw2.join();
+    eaw2.quit();
 }
 
 function eworkerInteropTest() {
     eaw.start();
     let eworkerInteropSuite = new arktest.ArkTestsuite('eworker.InteropTest');
-    eworkerInteropSuite.addTest('testProcessInput', testProcessInput);
-    eworkerInteropSuite.addTest('testCreateArray', testCreateArray);
-    eworkerInteropSuite.addTest('testGetUser', testGetUser);
-    eworkerInteropSuite.addTest('testUnion', testUnion);
-    eworkerInteropSuite.addTest('testBaseClass', testBaseClass);
-    eworkerInteropSuite.addTest('testChildClass', testChildClass);
-    eworkerInteropSuite.addTest('testBaseFunc', testBaseFunc);
-    eworkerInteropSuite.addTest('testChildFunc', testChildFunc);
-    eworkerInteropSuite.addTest('testFooBaseObjInvoke', testFooBaseObjInvoke);
-    eworkerInteropSuite.addTest('testFooBaseObjInvokeMethod', testFooBaseObjInvokeMethod);
-    eworkerInteropSuite.addTest('testFooChildObjInvoke', testFooChildObjInvoke);
-    eworkerInteropSuite.addTest('testFooChildObjInvokeMethod', testFooChildObjInvokeMethod);
-    eworkerInteropSuite.addTest('testArrowFuncInvoke', testArrowFuncInvoke);
-    eworkerInteropSuite.addTest('testOptionalParams', testOptionalParams);
-    eworkerInteropSuite.addTest('testError', testError);
-    eworkerInteropSuite.addTest('testThrowError', testThrowError);
-    eworkerInteropSuite.addTest('testCustomThrowError', testCustomThrowError);
-    eworkerInteropSuite.addTest('testEAWorkerNestedExecute', testEAWorkerNestedExecute);
-    eworkerInteropSuite.addTest('testEAWorkerInteropLoop', testEAWorkerInteropLoop);
-    eworkerInteropSuite.addTest('testEAWorkerSerialize', testEAWorkerSerialize);
-    eworkerInteropSuite.addTest('testEAWorkerSerializeClassInstantiate', testEAWorkerSerializeClassInstantiate);
-    eworkerInteropSuite.addTest('testEAWorkerSerializeUndefined', testEAWorkerSerializeUndefined);
-    eworkerInteropSuite.addTest('testEAWorkerSerializeNull', testEAWorkerSerializeNull);
+    eworkerInteropSuite.addAsyncTest('testProcessInput', testProcessInput);
+    eworkerInteropSuite.addAsyncTest('testCreateArray', testCreateArray);
+    eworkerInteropSuite.addAsyncTest('testGetUser', testGetUser);
+    eworkerInteropSuite.addAsyncTest('testUnion', testUnion);
+    eworkerInteropSuite.addAsyncTest('testBaseClass', testBaseClass);
+    eworkerInteropSuite.addAsyncTest('testChildClass', testChildClass);
+    eworkerInteropSuite.addAsyncTest('testBaseFunc', testBaseFunc);
+    eworkerInteropSuite.addAsyncTest('testChildFunc', testChildFunc);
+    eworkerInteropSuite.addAsyncTest('testFooBaseObjInvoke', testFooBaseObjInvoke);
+    eworkerInteropSuite.addAsyncTest('testFooBaseObjInvokeMethod', testFooBaseObjInvokeMethod);
+    eworkerInteropSuite.addAsyncTest('testFooChildObjInvoke', testFooChildObjInvoke);
+    eworkerInteropSuite.addAsyncTest('testFooChildObjInvokeMethod', testFooChildObjInvokeMethod);
+    eworkerInteropSuite.addAsyncTest('testArrowFuncInvoke', testArrowFuncInvoke);
+    eworkerInteropSuite.addAsyncTest('testOptionalParams', testOptionalParams);
+    eworkerInteropSuite.addAsyncTest('testError', testError);
+    eworkerInteropSuite.addAsyncTest('testThrowError', testThrowError);
+    eworkerInteropSuite.addAsyncTest('testCustomThrowError', testCustomThrowError);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerNestedExecute', testEAWorkerNestedExecute);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerInteropLoop', testEAWorkerInteropLoop);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerSerialize', testEAWorkerSerialize);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerSerializeClassInstantiate', testEAWorkerSerializeClassInstantiate);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerSerializeUndefined', testEAWorkerSerializeUndefined);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerSerializeNull', testEAWorkerSerializeNull);
     eworkerInteropSuite.addTest('testEAWorkerMessageCancellation', testEAWorkerMessageCancellation);
     eworkerInteropSuite.addTest('testRemoveMessageHandlerTest', removeMessageHandlerTest);
     eworkerInteropSuite.addTest('testEAWorkerCommmunicateWithMessage', testEAWorkerCommmunicateWithMessage);
     const res = eworkerInteropSuite.run();
-    eaw.join();
+    eaw.quit();
     return res == 0;
 }

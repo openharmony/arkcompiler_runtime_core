@@ -18,9 +18,9 @@ desc: launch runs a job and returns its result through Await
 ---*/
 
 async function startTest() {
-  let result: int = launch<int>() { 
+  let result: int = await launch<int>() { 
     return 42
-  }.Await()
+  }
 
   arktest.assertEQ(42, result)
 }

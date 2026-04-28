@@ -53,26 +53,26 @@ function main(): int {
         arktest.assertEQ(iterKey.next().value, undefined);
     });
     // Multiple Threads Test
-    ConcurrentSetTestsuite.addTest("Keys&AddTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Keys&AddTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch(addBack);
         let p2 = launch(keysAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("Key&DeteleTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Key&DeteleTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(deleteAll);
         let p2 = launch(keysAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("Key&DeteleTest002", () =>
@@ -84,25 +84,25 @@ function main(): int {
         keysAll();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
-    ConcurrentSetTestsuite.addTest("Key&ClearTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Key&ClearTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(keysAll);
         let p2 = launch(clearTest);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
-    ConcurrentSetTestsuite.addTest("Key&ClearTest002", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Key&ClearTest002", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p = launch(keysAll);
         clearTest();
-        p.Await();
+        await p;
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
 

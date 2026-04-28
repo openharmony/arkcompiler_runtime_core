@@ -103,9 +103,9 @@ function popperStr(): Array<String> {
     return arr;
 }
 
-function concurrentPushPopTestInt() {
+async function concurrentPushPopTestInt(): Promise<void> {
     let p1 = launch(pusherInt);
-    p1.Await();
+    await p1;
     let arrayToCheck = popperInt();
     for (let i = 0; i < elementsNum; i++) {
         arktest.assertEQ(testArrayInt[i], arrayToCheck[i]);
@@ -113,9 +113,9 @@ function concurrentPushPopTestInt() {
     arktest.assertEQ(queueInt.size, 0);
 }
 
-function concurrentPushPopTestObj() {
+async function concurrentPushPopTestObj(): Promise<void> {
     let p1 = launch(pusherObj);
-    p1.Await();
+    await p1;
     let arrayToCheck = popperObj();
     for (let i = 0; i < elementsNum; i++) {
         arktest.assertEQ(testArrayObj[i], arrayToCheck[i]);
@@ -123,9 +123,9 @@ function concurrentPushPopTestObj() {
     arktest.assertEQ(queueObj.size, 0);
 }
 
-function concurrentPushPopTestStr() {
+async function concurrentPushPopTestStr(): Promise<void> {
     let p1 = launch(pusherStr);
-    p1.Await();
+    await p1;
     let arrayToCheck = popperStr();
     for (let i = 0; i < elementsNum; i++) {
         arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);
@@ -151,9 +151,11 @@ function simpleQueuePushPopFrontBackSizeEmptyTest() {
     arktest.assertEQ(queueInt.size, 0);
 }
 
-function main() {
-    simpleQueuePushPopFrontBackSizeEmptyTest();
-    concurrentPushPopTestInt(); // Concurrent test for Int type
-    concurrentPushPopTestObj(); // Concurrent test for Object type
-    concurrentPushPopTestStr(); // Concurrent test for String type
+function main(): int {
+    let suite = new arktest.ArkTestsuite("BlockingQueueTest");
+    suite.addTest("simpleQueuePushPopFrontBackSizeEmptyTest", simpleQueuePushPopFrontBackSizeEmptyTest);
+    suite.addAsyncTest("concurrentPushPopTestInt", async () => { await concurrentPushPopTestInt(); });
+    suite.addAsyncTest("concurrentPushPopTestObj", async () => { await concurrentPushPopTestObj(); });
+    suite.addAsyncTest("concurrentPushPopTestStr", async () => { await concurrentPushPopTestStr(); });
+    return suite.run();
 }

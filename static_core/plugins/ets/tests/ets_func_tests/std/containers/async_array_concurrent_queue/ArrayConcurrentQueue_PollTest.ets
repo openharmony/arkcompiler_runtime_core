@@ -59,13 +59,13 @@ async function main(): Promise<int> {
         for (let i = 0; i < stressNum; i++) {
             sharedQueueInt.add(i);
         }
-        let jobs: Job<void>[] = new Array<Job<void>>(100);
+        let jobs: Promise<void>[] = new Array<Promise<void>>(100);
         let jobIndex = 0;
         for (let i = 0; i < stressNum; i++) {
             jobs[jobIndex++] = launch(sharedQueuePollData);
         }
         for (let i: int = 0; i < 100; i++) {
-            jobs[i].Await();
+            await jobs[i];
         }
         arktest.assertEQ(sharedQueueInt.size, 0);
     });

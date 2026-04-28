@@ -57,8 +57,8 @@ async function startTest() {
     })().awaitSync()
   })
 
-  job1.Await()
-  job2.Await()
+  await job1
+  await job2
 
   arktest.assertTrue(readRun)
   arktest.assertTrue(writeRun)

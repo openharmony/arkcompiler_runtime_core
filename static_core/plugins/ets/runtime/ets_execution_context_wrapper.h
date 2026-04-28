@@ -18,6 +18,10 @@
 #include "runtime/execution/job_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 
+namespace ark {
+class CompletionEvent;
+}  // namespace ark
+
 namespace ark::ets {
 
 // NOTE(konstanting): The stackless execution context.
@@ -60,15 +64,19 @@ public:
 
     void CacheBuiltinClasses() override;
 
-    void OnJobCompletion(Value result) override;
-
-    void ListUnhandledEventsOnProgramExit() override;
+    void OnJobCompletion(Value returnValue) override;
 
 protected:
     // we would like everyone to use the factory to create a EtsExecutionContextWrapper
     explicit EtsExecutionContextWrapper(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Job *job);
 
 private:
+    EtsObject *BoxReturnValue(Value returnValue);
+    EtsObject *GetCompletionObject(mem::Reference *retValueRef);
+    EtsObject *TakePendingException(Job *job);
+    void CompleteJob(EtsJob *completedJob, EtsObject *retObject, Job *job);
+    void CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job);
+
     EtsExecutionContext executionCtx_;
 
     // Allocator calls our protected ctor

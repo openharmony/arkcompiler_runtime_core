@@ -127,10 +127,10 @@ async function main(): Promise<int> {
             let queueItem = queueInt.getFirst();
             arktest.assertEQ(queueItem, await queueInt.pop());
         }
-        let job1 = launch(queueIntGetFirstData);
+        let promise1 = launch(queueIntGetFirstData);
         let frontNum: int = 10;
         await queueInt.push(frontNum);
-        job1.Await();
+        await promise1;
         arktest.assertEQ(queueInt.size, 1);
     });
 
@@ -147,10 +147,10 @@ async function main(): Promise<int> {
             arktest.assertEQ(queueItem, await queueInt.pop());
         }
         arktest.assertEQ(queueInt.size, 0);
-        let job1 = launch(queueIntGetFirstData);
+        let promise1 = launch(queueIntGetFirstData);
         let frontNum: int = 10;
         await queueInt.push(frontNum);
-        job1.Await();
+        await promise1;
         arktest.assertEQ(queueInt.size, 1);
     });
 
@@ -158,12 +158,12 @@ async function main(): Promise<int> {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
-        let job1 = launch(queueIntGetFirstValue1Data);
+        let promise1 = launch(queueIntGetFirstValue1Data);
         await queueInt.push(10);
         await queueInt.push(20);
-        job1.Await();
-        let job2 = launch(queueIntGetEndBatch1Data);
-        job2.Await();
+        await promise1;
+        let promise2 = launch(queueIntGetEndBatch1Data);
+        await promise2;
         arktest.assertEQ(queueInt.size, 2);
     });
 
@@ -175,11 +175,11 @@ async function main(): Promise<int> {
         }
         arktest.assertTrue(queueInt.isEmpty());
         let promise = queueIntAddTwoData();
-        let job1 = launch(queueIntGetFirstValue1Data);
-        let job2 = launch(queueIntGetFirstValue2Data);
+        let promise1 = launch(queueIntGetFirstValue1Data);
+        let promise2 = launch(queueIntGetFirstValue2Data);
         await promise;
-        job1.Await();
-        job2.Await();
+        await promise1;
+        await promise2;
         arktest.assertTrue(firstValue1 == 10 || firstValue1 == undefined);
         arktest.assertTrue(firstValue2 == 10 || firstValue2 == undefined);
         arktest.assertFalse(queueInt.isEmpty());
@@ -191,11 +191,11 @@ async function main(): Promise<int> {
         }
         await queueInt.push(10);
         await queueInt.push(30);
-        let job1 = launch(queueIntGetFirstData);
+        let promise1 = launch(queueIntGetFirstData);
         await queueInt.push(20);
-        job1.Await();
-        let job2 = launch(queueIntGetFirstData);
-        job2.Await();
+        await promise1;
+        let promise2 = launch(queueIntGetFirstData);
+        await promise2;
         arktest.assertEQ(queueInt.getFirst(), 10);
     });
 

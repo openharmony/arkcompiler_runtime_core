@@ -15,17 +15,17 @@
 
 type BlockingQueueI = containers.BlockingQueue<int>;
 type BQConstructorI = (capacity: int)=>BlockingQueueI;
-type TestFunction = (constr: BQConstructorI) => void;
+type TestFunction = (constr: BQConstructorI) => Promise<void>;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push(arr[i].Await());
+		res.push((await arr[i]) as T);
 	return res;
 }
 
@@ -48,7 +48,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-function testGetFirstConcurent(constr: BQConstructorI) {
+async function testGetFirstConcurent(constr: BQConstructorI): Promise<void> {
 	let queue = constr(50);
 	const PUSH_COUNT = 100;
 	const JOB_COUNT = 4;
@@ -67,17 +67,17 @@ function testGetFirstConcurent(constr: BQConstructorI) {
 		}
 	}
 
-	let setJobs = new Array<Job<void>>();
-	let getJobs = new Array<Job<void>>();
+	let setJobs = new Array<Promise<void>>();
+	let getJobs = new Array<Promise<void>>();
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(setJobs, pushAndPopF);
 		addLaunch(getJobs, getF);
 	}
-	awaitAll(setJobs);
-	awaitAll(getJobs);
+	await awaitAll(setJobs);
+	await awaitAll(getJobs);
 }
 
-function testGetEndConcurent(constr: BQConstructorI) {
+async function testGetEndConcurent(constr: BQConstructorI): Promise<void> {
 	let queue = constr(50);
 	let queueBQ = queue as BlockingQueue;
 	const PUSH_COUNT = 100;
@@ -97,14 +97,14 @@ function testGetEndConcurent(constr: BQConstructorI) {
 		}
 	}
 
-	let setJobs = new Array<Job<void>>();
-	let getJobs = new Array<Job<void>>();
+	let setJobs = new Array<Promise<void>>();
+	let getJobs = new Array<Promise<void>>();
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(setJobs, pushAndPopF);
 		addLaunch(getJobs, getF);
 	}
-	awaitAll(setJobs);
-	awaitAll(getJobs);
+	await awaitAll(setJobs);
+	await awaitAll(getJobs);
 }
 
 function main(): int {
@@ -130,7 +130,7 @@ function main(): int {
 		for (let i = 0; i < tests.length; ++ i) {
 			let name = tests[i][0];
 			let testF = tests[i][1];
-			arktestsuite.addTest(name, ()=>testF(constr));
+			arktestsuite.addAsyncTest(name, async () => { await testF(constr); });
 		}
 	}
 
@@ -140,4 +140,3 @@ function main(): int {
 		return codeABQ;
 	return codeLBQ;
 }
-

@@ -16,7 +16,6 @@
 import {CoroutineExtras, AtomicFlag} from "std/debug/concurrency"
 import {StdDebug} from "std/debug"
 import { launch } from "std/concurrency"
-import { Job } from "std/core"
 
 type L = StdDebug.Logger
 
@@ -44,9 +43,9 @@ function checker(id_main: int): Int {
     return (id_main != id_current) ? 0 : 1;
 }
 
-function check_sync_id_nonmain(number_of_coros: int): int {
+async function check_sync_id_nonmain(number_of_coros: int): Promise<int> {
     let id_current: int = CoroutineExtras.getWorkerId();
-    let promises: (Job<Int> | undefined)[] = new (Job<Int> | undefined)[number_of_coros](undefined);
+    let promises: (Promise<Int> | undefined)[] = new (Promise<Int> | undefined)[number_of_coros](undefined);
 
     for (let i = 0; i < number_of_coros; ++i) {
         promises[i] = launch<Int>() {
@@ -56,7 +55,7 @@ function check_sync_id_nonmain(number_of_coros: int): int {
     continue_execution.set(true);
     let result: int = 0;
     for (let i = 0; i < number_of_coros; ++i) {
-        result += (promises[i]!).Await();
+        result += await (promises[i]!);
     }
     return result == 0 ? result : 1;
 }
@@ -71,7 +70,7 @@ function check_default_policy(): int {
     return 0;
 }
 
-function check_nonmain_policy(): int {
+async function check_nonmain_policy(): Promise<int> {
     L.log('Testing the NON_MAIN affinity type');
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
 
@@ -79,7 +78,7 @@ function check_nonmain_policy(): int {
         L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }
-    if (check_sync_id_nonmain(15) != 0) {
+    if (await check_sync_id_nonmain(15) != 0) {
         L.logError('regular coroutine worker ID is the same as MAIN worker ID');
         return 1;
     }
@@ -93,12 +92,12 @@ function testAsyncDefaultPolicy(): void {
     }
 }
 
-function testAsyncNonMainPolicy(): void {
+async function testAsyncNonMainPolicy(): Promise<void> {
     /**
      * Test 2. Check that POLICY_NON_MAIN does not affect async functions,
      * while regular coroutines will execute on non-MAIN workers.
      */
-    if (check_nonmain_policy() != 0) {
+    if (await check_nonmain_policy() != 0) {
         arktest.assertTrue(false, 'test for the NON_MAIN affinity type failed');
     }
 }
@@ -116,8 +115,7 @@ async function main(): Promise<int> {
     // Call L's enableLogging method to enable logs.
     let testSuite = new arktest.ArkTestsuite('coroutines.affinity');
     testSuite.addTest('testAsyncDefaultPolicy', testAsyncDefaultPolicy);
-    testSuite.addTest('testAsyncNonMainPolicy', testAsyncNonMainPolicy);
+    testSuite.addAsyncTest('testAsyncNonMainPolicy', testAsyncNonMainPolicy);
     let res = await testSuite.runAsync();
     return res;
 }
-

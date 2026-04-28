@@ -33,7 +33,7 @@ async function threadsAddStressTest001(): Promise<void> {
     }
     let successCount = new AtomicInt(0);
     let failureCount = new AtomicInt(0);
-    let jobs = Array.create<Job<void> | undefined>(stressNum, undefined);
+    let jobs = Array.create<Promise<void> | undefined>(stressNum, undefined);
     for (let i = 0; i < stressNum; i++) {
         jobs[i] = launch() {
             if (queue.add(new QueueValue(i))) {
@@ -44,7 +44,7 @@ async function threadsAddStressTest001(): Promise<void> {
         };
     }
     for (let i = 0; i < stressNum; i++) {
-        jobs[i]!.Await();
+        await jobs[i]!;
     }
     arktest.assertEQ(successCount.load(), queueCapacity);
     arktest.assertEQ(failureCount.load(), stressNum - queueCapacity);

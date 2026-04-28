@@ -15,10 +15,9 @@
 
 type L = StdDebug.Logger
 
-const kTotal = 6;
+const kTotal = 7;
 const asynclock = new AsyncLock();
 let current = 0;
-let event = new CompletableJob<void>();
 
 async function AsyncFailing(): Promise<string> {
     throw Error('AsyncFailing');
@@ -28,39 +27,12 @@ function Failing(): string {
     throw Error('Failing');
 }
 
-function WaitAll(): void {
-    event.Await();
-}
-
 // Called before or on the program completion
 function PromiseHandler(reason: Error, obj: Object): void {
     // should be no-throw
     asynclock.lockAsync((): void => {
         current++;
-        if (current == kTotal) {
-            event.finish();
-        } else if (current > kTotal) {
-            console.error('More rejections than expected');
-            let procManager = new StdProcess.ProcessManager();
-            procManager.exit(1);
-        }
-    },  AsyncLockMode.EXCLUSIVE);
-}
-
-let callWaitAll: boolean = true;
-
-// called on program completion. Intended that job handlers aren't concurrent with each other
-function JobHandler(reason: Error, obj: Object): void {
-    if (callWaitAll) {
-        callWaitAll = false;
-        launch(WaitAll);
-    }
-    // should be no-throw
-    asynclock.lockAsync((): void => {
-        current++;
-        if (current == kTotal) {
-            event.finish();
-        } else if (current > kTotal) {
+        if (current > kTotal) {
             console.error('More rejections than expected');
             let procManager = new StdProcess.ProcessManager();
             procManager.exit(1);
@@ -69,11 +41,6 @@ function JobHandler(reason: Error, obj: Object): void {
 }
 
 function testUnhandledRejection(): void {
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertEQ(reason.message, 'Failing');
-        JobHandler(reason, obj);
-    });
     StdProcess.on('unhandledPromiseRejection',  (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
         PromiseHandler(reason, obj);

@@ -40,8 +40,8 @@ function testNamedEAWorker() {
     arktest.assertEQ(eaw1.getName(), 'EAWorker');
     arktest.assertEQ(eaw2.getName(), 'custom name');
     arktest.assertNE(eaw1.getWorkerId(), eaw2.getWorkerId());
-    eaw1.join();
-    eaw2.join();
+    eaw1.quit();
+    eaw2.quit();
 }
 
 function testTaskEAWorker() {
@@ -54,7 +54,7 @@ function testTaskEAWorker() {
     eaw.start();
     waiter.wait();
     arktest.assertEQ(checkString, 'abc');
-    eaw.join();
+    eaw.quit();
 }
 
 const sleep = (ms: int): Promise<int> => {
@@ -80,7 +80,7 @@ async function testIsAliveAndQuit(): Promise<void> {
     arktest.assertTrue(eaw3.isAlive());
     eaw1.quit();
     eaw2.quit();
-    eaw3.join();
+    eaw3.quit();
     let maxChecks = 10;
     let sleepTime = 10;
     for (let i = 0; i < maxChecks; i++) {
@@ -103,7 +103,7 @@ function testMainQuit() {
         eawMain.quit();
     }, new Error('EAWorker:: Main worker cannot be stopped'));
     arktest.expectError(() => {
-        eawMain.join();
+        eawMain.quit();
     }, new Error('EAWorker:: Main worker cannot be stopped'));
 }
 
@@ -121,17 +121,17 @@ function testQuit() {
     arktest.assertEQ(checkPoints, 2);
 }
 
-function testCurrent() {
+async function testCurrent() {
     let eaw = new EAWorker();
     eaw.start();
     let waiter = new Event();
-    eaw.run<void>(() => {
+    await eaw.run<void>(() => {
         arktest.assertEQ(eaw.getWorkerId(), EAWorker.current()!.getWorkerId());
         arktest.assertEQ(eaw, EAWorker.current());
         waiter.fire();
-    }).Await()
+    });
     waiter.wait();
-    eaw.join();
+    eaw.quit();
 }
 
 function testUncaughtExceptionHandler() {
@@ -147,7 +147,7 @@ function testUncaughtExceptionHandler() {
         throw expectError;
     });
     waiter.wait();
-    eaw1.join();
+    eaw1.quit();
 }
 
 function testPostTask() {
@@ -168,7 +168,7 @@ function testPostTask() {
     })
 
     waiter2.wait();
-    eawNoMain.join();
+    eawNoMain.quit();
     arktest.assertEQ(checkCount, 2);
 }
 
@@ -181,8 +181,8 @@ function testPriority() {
     eaw2.setPriority(WorkerPriority.PRIORITY_LOW);
     arktest.assertEQ(eaw1.getPriority(), WorkerPriority.PRIORITY_HIGH);
     arktest.assertEQ(eaw2.getPriority(), WorkerPriority.PRIORITY_LOW);
-    eaw1.join();
-    eaw2.join();
+    eaw1.quit();
+    eaw2.quit();
 }
 
 function testCommunication() {
@@ -219,17 +219,17 @@ function testCommunication() {
 
     waiter.wait();
     arktest.assertEQ(messageGot, true);
-    eaw1.join();
-    eaw2.join();
+    eaw1.quit();
+    eaw2.quit();
 }
 
-function testMain() {
+async function testMain() {
     let mainWorker = EAWorker.main();
     let workerId = CoroutineExtras.getWorkerId();
-    mainWorker.run<void>(()=>{
+    await mainWorker.run<void>(()=>{
         let id = CoroutineExtras.getWorkerId();
         arktest.assertEQ(id, workerId);
-    }).Await();
+    });
 
     arktest.assertEQ(mainWorker.getName(), "main");
     arktest.assertEQ(mainWorker.getWorkerId(), workerId);
@@ -245,7 +245,7 @@ function testMain() {
     }, new Error('EAWorker:: Main worker cannot be stopped'));
 
     arktest.expectError(() => {
-        mainWorker.join();
+        mainWorker.quit();
     }, new Error('EAWorker:: Main worker cannot be stopped'));
 
     arktest.expectError(() => {
@@ -293,7 +293,7 @@ function testStartAfterQuit() {
 function testStartafterJoin() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
-         eaw.join();
+         eaw.quit();
     }, new Error('EAWorker:: Cannot stop worker before start'));
     eaw.start();
     eaw.quit();
@@ -334,7 +334,7 @@ function messageSendToTargetConcurrentTest() {
 
     let message = new concurrency.Message(emptyMessage, handler);
     const numCoroutines = 10;
-    let allJobs: Array<Job<void>> = new Array<Job<void>>();
+    let allJobs: Array<Promise<void>> = new Array<Promise<void>>();
 
     for (let i = 0; i < numCoroutines; i++) {
         let index = i;
@@ -354,14 +354,14 @@ function messageSendToTargetConcurrentTest() {
     }
 
     for (let i = 0; i < allJobs.length; i++) {
-        allJobs[i].Await();
+        allJobs[i].awaitResolution();
     }
 
     event.wait();
     arktest.assertEQ(successCount.size, 1);
     arktest.assertEQ(failCount.size, numCoroutines - 1);
     arktest.assertEQ(messageCount, 1);
-    eaw.join();
+    eaw.quit();
 }
 
 function main() {
@@ -371,12 +371,12 @@ function main() {
     suite.addAsyncTest('testIsAliveAndQuit', testIsAliveAndQuit);
     suite.addTest('testMainQuit', testMainQuit);
     suite.addTest('testQuit', testQuit);
-    suite.addTest('testCurrent', testCurrent);
+    suite.addAsyncTest('testCurrent', testCurrent);
     suite.addTest('testUncaughtExceptionHandler', testUncaughtExceptionHandler);
     suite.addTest('testPostTask', testPostTask);
     suite.addTest('testPriority', testPriority);
     suite.addTest('testCommunication', testCommunication);
-    suite.addTest('testMainWorker', testMain);
+    suite.addAsyncTest('testMainWorker', testMain);
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
     suite.addTest('testStartafterJoin', testStartafterJoin);
     suite.addTest('testRunAfterQuit', testRunAfterQuit);

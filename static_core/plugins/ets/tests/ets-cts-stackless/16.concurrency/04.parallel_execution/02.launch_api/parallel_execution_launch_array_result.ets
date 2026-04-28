@@ -18,9 +18,9 @@ desc: launch returns array result through Await
 ---*/
 
 async function foo(): Promise<int[]> {
-  return launch<int[]>() { 
+  return await launch<int[]>() { 
     return [1, 2, 3]
-  }.Await()
+  }
 }
 
 async function startTest() {

@@ -89,7 +89,7 @@ async function getFirstConcurrentTest004(): Promise<void> {
         Coroutine.Schedule();
     }
 
-    observer.Await();
+    await observer;
     arktest.assertFalse(observedDecrease.load());
     arktest.assertEQ(queue.size, 0);
 }

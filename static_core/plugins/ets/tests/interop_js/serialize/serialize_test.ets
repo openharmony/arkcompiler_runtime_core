@@ -51,7 +51,7 @@ export function checkAsync(ptr: bigint): void {
         return 0;
     }
     let p = w.run<int>(cb);
-    w.join();
-    let result = p.Await();
+    let result = waitForCompletion<int>(() => p);
+    w.quit();
     arktest.assertEQ(result, 0);
 }

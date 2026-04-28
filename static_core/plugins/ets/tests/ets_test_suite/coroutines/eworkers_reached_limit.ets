@@ -27,7 +27,7 @@ function testEworkersReachedLimit() {
         errorWasCatched = true;
     }
     eaWorkers.forEach((eaWorker: EAWorker) => {
-        eaWorker.join();
+        eaWorker.quit();
     });
     arktest.assertTrue(errorWasCatched);
 }

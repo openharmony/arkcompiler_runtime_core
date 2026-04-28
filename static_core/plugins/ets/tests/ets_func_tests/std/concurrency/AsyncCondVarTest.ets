@@ -54,7 +54,7 @@ class Event {
 async function asyncCondVarNotifyOneTest() {
     let event = new Event();
     for (let i = 0; i < 3; ++i) {
-        event.ResetFlag();
+        await event.ResetFlag();
         let afterWait = new AtomicBoolean(false);
         let afterSet = new AtomicBoolean(false);
         let job1 = launch() {
@@ -74,8 +74,8 @@ async function asyncCondVarNotifyOneTest() {
             await event.SetOne();
             })().awaitSync()
         };
-        job1.Await();
-        job2.Await();
+        await job1;
+        await job2;
         arktest.assertTrue(afterWait.load());
     }
 }
@@ -83,10 +83,10 @@ async function asyncCondVarNotifyOneTest() {
 async function asyncCondVarNotifyAllTest() {
     let event = new Event();
     for (let i = 0; i < 3; ++i) {
-        event.ResetFlag();
+        await event.ResetFlag();
         let counter = new AtomicInt(0);
         const tasks_counter = 10;
-        let jobs = Array.create<Job<void> | undefined>(tasks_counter, undefined);
+        let jobs = Array.create<Promise<void> | undefined>(tasks_counter, undefined);
         for (let i = 0; i < tasks_counter; ++i) {
             const id = i.toInt();
             jobs[id] = launch() {
@@ -105,9 +105,9 @@ async function asyncCondVarNotifyAllTest() {
             await event.SetAll();
             })().awaitSync()
         };
-        setAll.Await();
-        for (let job of jobs) { 
-           job!.Await();
+        await setAll;
+        for (let job of jobs) {
+           await job!;
         }
         arktest.assertEQ(counter.load(), tasks_counter);
     }
@@ -117,8 +117,7 @@ async function asyncCondVarTestNotifyWithoutWaiters() {
     let workload = 1000;
     let mutex_ = new concurrency.stackless.AsyncMutex();
     let flagCV_ = new concurrency.stackless.AsyncCondVar();
-    launch() {
-        // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
+    await launch() {
         (async () => {
         for (let i = 0; i < workload; ++i) {
             await mutex_.lock();
@@ -127,7 +126,7 @@ async function asyncCondVarTestNotifyWithoutWaiters() {
             mutex_.unlock();
         }
         })().awaitSync()
-    }.Await();
+    };
 }
 
 async function main(): Promise<int> {

@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push(arr[i].Await());
+		res.push((await arr[i]) as T);
 	return res;
 }
 
@@ -38,7 +38,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-function testConcurrentSet() {
+async function testConcurrentSet(): Promise<void> {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 70;
 
@@ -47,18 +47,18 @@ function testConcurrentSet() {
 		for (let i = start; i < end; ++ i)
 			map.set(i, i);
 	}
-	let setJobs: Job<void>[] = [];
+	let setJobs: Promise<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		let start = SET_COUNT * i;
 		addLaunch(setJobs, makeSetF(start, start + SET_COUNT));
 	}
-	awaitAll(setJobs);
+	await awaitAll(setJobs);
 	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i) {
 		arktest.assertEQ(map.get(i), i);
 	}
 }
 
-function testConcurrentSet2() {
+async function testConcurrentSet2(): Promise<void> {
 	const JOB_COUNT = 10;
 	const SET_COUNT = 100;
 
@@ -67,11 +67,11 @@ function testConcurrentSet2() {
 		for (let i = 0; i < SET_COUNT; ++ i)
 			map.set(i, seed * SET_COUNT + i);
 	}
-	let setJobs: Job<void>[] = [];
+	let setJobs: Promise<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(setJobs, makeSetF(i));
 	}
-	awaitAll(setJobs);
+	await awaitAll(setJobs);
 	for (let i = 0; i < SET_COUNT; ++ i) {
 		let val = map.get(i);
 		arktest.assertNE(val, undefined);
@@ -81,9 +81,8 @@ function testConcurrentSet2() {
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentSet", testConcurrentSet);
-	CHMTestSuitecase.addTest("testConcurrentSet2", testConcurrentSet2);
+	CHMTestSuitecase.addAsyncTest("testConcurrentSet", async () => { await testConcurrentSet(); });
+	CHMTestSuitecase.addAsyncTest("testConcurrentSet2", async () => { await testConcurrentSet2(); });
 
     return CHMTestSuitecase.run();
 }
-

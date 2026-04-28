@@ -22,8 +22,7 @@ tags: [no-warmup]
 ---*/
 
 import { CoroutineExtras } from "std/debug/concurrency"
-import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-import { Job } from "std/core"
+import { launch, waitForCompletion, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
 
 const MAIN_WORKER_ID: int = 0;
 
@@ -45,8 +44,7 @@ function main(): void {
     };
 
     // Launch coroutine and verify it runs on main worker
-    let job: Job<int> = launch<int>(params, getWorkerId);
-    const launchedWorkerId: int = job.Await();
+    const launchedWorkerId: int = waitForCompletion<int>(() => launch<int>(params, getWorkerId));
 
     arktest.assertEQ(launchedWorkerId, mainWorkerId, 
         "MAIN domain with hint {{c.desc}} should still execute on main worker");

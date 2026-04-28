@@ -27,12 +27,17 @@
 
 import { launch } from 'std/concurrency'
 
-function main(): int {
+async function promiseLaunchTest(): Promise<void> {
     for (let i = 0; i < 100; i++) {
-        let r = launch() {
+        let r = launch<int>() {
             return 42 + 42
         }
-        arktest.assertEQ((r.Await()), 84.0);
+        arktest.assertEQ(await r, 84);
     }
-    return 0;
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite('ets_promise_launch');
+    suite.addAsyncTest('promiseLaunchTest', promiseLaunchTest);
+    return suite.run();
 }

@@ -20,8 +20,8 @@ tags: [no-warmup]
 ---*/
 
 import { CoroutineExtras } from "std/debug/concurrency"
-import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-import { Job, EAWorker } from "std/core"
+import { launch, waitForCompletion, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
+import { EAWorker } from "std/core"
 
 const MAIN_WORKER_ID: int = 0;
 

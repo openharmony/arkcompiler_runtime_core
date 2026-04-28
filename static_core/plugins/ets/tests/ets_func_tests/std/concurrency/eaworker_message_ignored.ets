@@ -59,7 +59,7 @@ function testWrapTaskErrorHandling() {
     waiter.wait();
     arktest.assertTrue(errorCaught);
     arktest.expectError(() => {
-        eaw.join();
+        eaw.quit();
     }, 'Unable to launch coroutine: no suitable worker was found');
 }
 

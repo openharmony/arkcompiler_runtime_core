@@ -32,11 +32,11 @@ function coroError(): Object {
     throw new Error();
 }
 
-function launchStackOverflow(): boolean {
+async function launchStackOverflow(): Promise<boolean> {
     let overflow: boolean = false;
 
     try {
-        launch(coroStackOverflow).Await();
+        await launch(coroStackOverflow);
         L.log('No errors thrown by coroStackOverflow() but should be!')
         overflow = false;
     } catch (e) {
@@ -51,11 +51,11 @@ function launchStackOverflow(): boolean {
     return overflow;
 }
 
-function launchError(): boolean {
+async function launchError(): Promise<boolean> {
     let hasError: boolean = false;
 
     try {
-        launch(coroError).Await();
+        await launch(coroError);
         L.log('No errors thrown by coroError() but should be!')
         hasError = false;
     } catch (e) {
@@ -70,20 +70,20 @@ function launchError(): boolean {
     return hasError;
 }
 
-function testLaunchStackOverflow() {
-    let res: boolean = launchStackOverflow();
+async function testLaunchStackOverflow(): Promise<void> {
+    let res: boolean = await launchStackOverflow();
     arktest.assertEQ(res, true);
 }
 
-function testLaunchError() {
-    let res: boolean = launchError();
+async function testLaunchError(): Promise<void> {
+    let res: boolean = await launchError();
     arktest.assertEQ(res, true);
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
-    testSuite.addTest('testLaunchStackOverflow', testLaunchStackOverflow);
-    testSuite.addTest('testLaunchError', testLaunchError);
+    testSuite.addAsyncTest('testLaunchStackOverflow', testLaunchStackOverflow);
+    testSuite.addAsyncTest('testLaunchError', testLaunchError);
     let res = await testSuite.runAsync();
     return res;
 }

@@ -39,7 +39,7 @@ export class LaunchParams {
  *
  * @internal
  */
-export function launch<R>(launchParams: LaunchParams, coroFun: () => R): Job<R> {
+export function launch<R>(launchParams: LaunchParams, coroFun: () => R): Promise<R> {
   return launchInternal<R>(coroFun, launchParams);
 }
 
@@ -53,7 +53,7 @@ export function launch<R>(launchParams: LaunchParams, coroFun: () => R): Job<R> 
  *
  * @internal
  */
-export function launch<R>(coroFun: () => R): Job<R> {
+export function launch<R>(coroFun: () => R): Promise<R> {
   return launchInternal<R>(coroFun);
 }
 
@@ -144,11 +144,11 @@ export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     return job.Await();
 }
 
-native function launchInternalJobNative<R>(coroFun: () => R, abortFlag: boolean, gid: ValueArray<long>): Job<R>;
-
-function launchInternal<R>(coroFun: () => R, launchParams?: LaunchParams): Job<R> {
+function launchInternal<R>(coroFun: () => R, launchParams?: LaunchParams): Promise<R> {
   if (launchParams) {
-    return launchInternalJobNative<R>(coroFun, launchParams.abortFlag, stub.toValueArray(launchParams.workerGroupId));
+    return launchInternalPromiseNative<R>(coroFun, launchParams.abortFlag, stub.toValueArray(launchParams.workerGroupId));
   }
-  return launchInternalJobNative<R>(coroFun, false, stub.toValueArray(WorkerGroup.ANY_ID));
+  return launchInternalPromiseNative<R>(coroFun, false, stub.toValueArray(WorkerGroup.ANY_ID));
 }
+
+native function launchInternalPromiseNative<R>(coroFun: () => R, abortFlag: boolean, gid: ValueArray<long>): Promise<R>;

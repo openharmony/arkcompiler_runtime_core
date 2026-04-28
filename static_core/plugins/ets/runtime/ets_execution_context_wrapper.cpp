@@ -14,20 +14,22 @@
  */
 
 #include "plugins/ets/runtime/ets_execution_context_wrapper.h"
+#include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_await_promise_impl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_job.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
+#include "runtime/execution/job-inl.h"
 #include "runtime/execution/job_execution_context.h"
-#include "runtime/execution/job_worker_thread.h"
-#include "runtime/execution/job_manager.h"
 #include "runtime/execution/job_events.h"
+#include "runtime/execution/job_manager.h"
+#include "runtime/execution/job_worker_thread.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/thread_scopes.h"
-
 namespace ark::ets {
-
-static EtsObject *GetReturnValueAsObject(EtsExecutionContext *executionCtx, panda_file::Type returnType,
-                                         Value returnValue);
 
 EtsExecutionContextWrapper::EtsExecutionContextWrapper(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                                                        Job *job)
@@ -65,76 +67,124 @@ void EtsExecutionContextWrapper::CacheBuiltinClasses()
     executionCtx_.CacheBuiltinClasses();
 }
 
-void EtsExecutionContextWrapper::OnJobCompletion(Value result)
+EtsObject *EtsExecutionContextWrapper::BoxReturnValue(Value returnValue)
 {
-    auto *completionEvt = GetJob()->GetCompletionEvent();
-    if (completionEvt == nullptr) {
-        return;
+    panda_file::Type returnType = GetJob()->GetManagedEntrypoint()->GetReturnType();
+    auto *ctx = GetExecutionCtx();
+    switch (returnType.GetId()) {
+        case panda_file::Type::TypeId::VOID:
+            return nullptr;  // a representation of ets "undefined"
+        case panda_file::Type::TypeId::U1:
+            return EtsBoxPrimitive<EtsBoolean>::Create(ctx, returnValue.GetAs<EtsBoolean>());
+        case panda_file::Type::TypeId::I8:
+            return EtsBoxPrimitive<EtsByte>::Create(ctx, returnValue.GetAs<EtsByte>());
+        case panda_file::Type::TypeId::I16:
+            return EtsBoxPrimitive<EtsShort>::Create(ctx, returnValue.GetAs<EtsShort>());
+        case panda_file::Type::TypeId::U16:
+            return EtsBoxPrimitive<EtsChar>::Create(ctx, returnValue.GetAs<EtsChar>());
+        case panda_file::Type::TypeId::I32:
+            return EtsBoxPrimitive<EtsInt>::Create(ctx, returnValue.GetAs<EtsInt>());
+        case panda_file::Type::TypeId::F32:
+            return EtsBoxPrimitive<EtsFloat>::Create(ctx, returnValue.GetAs<EtsFloat>());
+        case panda_file::Type::TypeId::F64:
+            return EtsBoxPrimitive<EtsDouble>::Create(ctx, returnValue.GetAs<EtsDouble>());
+        case panda_file::Type::TypeId::I64:
+            return EtsBoxPrimitive<EtsLong>::Create(ctx, returnValue.GetAs<EtsLong>());
+        case panda_file::Type::TypeId::REFERENCE:
+            return EtsObject::FromCoreType(returnValue.GetAs<ObjectHeader *>());
+        default:
+            LOG(FATAL, COROUTINES) << "Unsupported return type: " << returnType;
+            return nullptr;
     }
-    auto *retValueRef = completionEvt->ReleaseReturnValueObject();
-    if (retValueRef == nullptr) {
-        JobExecutionContext::OnJobCompletion(result);
-        return;
-    }
+}
 
-    EtsObject *retObject = nullptr;
-    if (!HasPendingException()) {
-        panda_file::Type returnType = GetJob()->GetManagedEntrypoint()->GetReturnType();
-        retObject = GetReturnValueAsObject(GetExecutionCtx(), returnType, result);
-    }
-
+EtsObject *EtsExecutionContextWrapper::GetCompletionObject(mem::Reference *retValueRef)
+{
     auto *storage = executionCtx_.GetPandaVM()->GetGlobalObjectStorage();
-    auto *completedJob = EtsJob::FromCoreType(storage->Get(retValueRef));
+    auto *completionObj = EtsObject::FromCoreType(storage->Get(retValueRef));
     storage->Remove(retValueRef);
-    ASSERT(completedJob != nullptr);
-    ASSERT(completedJob->GetClass() == PlatformTypes(GetExecutionCtx())->coreJob);
+    return completionObj;
+}
 
-    // An exception may occur while boxin primitive return value in GetReturnValueAsObject
+EtsObject *EtsExecutionContextWrapper::TakePendingException(Job *job)
+{
+    auto *exc = GetException();
+    if (!job->HasAbortFlag()) {
+        ClearException();
+    }
+    return EtsObject::FromCoreType(exc);
+}
+
+void EtsExecutionContextWrapper::CompleteJob(EtsJob *completedJob, EtsObject *retObject, Job *job)
+{
     if (HasPendingException()) {
-        auto *exc = GetException();
-        if (!GetJob()->HasAbortFlag()) {
-            ClearException();
-        }
-        EtsJob::EtsJobFail(completedJob, EtsObject::FromCoreType(exc));
+        EtsJob::EtsJobFail(completedJob, TakePendingException(job));
         return;
     }
     EtsJob::EtsJobFinish(completedJob, retObject);
 }
 
-void EtsExecutionContextWrapper::ListUnhandledEventsOnProgramExit()
+void EtsExecutionContextWrapper::CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job)
 {
-    executionCtx_.ProcessUnhandledRejectedPromises(true);
+    auto *platformTypes = PlatformTypes(GetExecutionCtx());
+    if (retObject != nullptr && retObject->IsInstanceOf(platformTypes->corePromise)) {
+        retObject = intrinsics::helpers::EtsAwaitPromiseImpl(EtsPromise::FromEtsObject(retObject));
+    }
+    [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
+    EtsHandle<EtsPromise> completedPromiseHandle(GetExecutionCtx(), completedPromise);
+    EtsHandle<EtsObject> retObjectHandle(GetExecutionCtx(), retObject);
+    if (HasPendingException()) {
+        auto *exc = TakePendingException(job);
+        EtsMutex::LockHolder lh(completedPromiseHandle);
+        if (!completedPromiseHandle->IsPending()) {
+            return;
+        }
+        completedPromiseHandle->Reject(GetExecutionCtx(), exc);
+        return;
+    }
+    EtsMutex::LockHolder lh(completedPromiseHandle);
+    if (!completedPromiseHandle->IsPending()) {
+        return;
+    }
+    completedPromiseHandle->Resolve(GetExecutionCtx(), retObjectHandle.GetPtr());
 }
 
-static EtsObject *GetReturnValueAsObject(EtsExecutionContext *executionCtx, panda_file::Type returnType,
-                                         Value returnValue)
+void EtsExecutionContextWrapper::OnJobCompletion(Value returnValue)
 {
-    switch (returnType.GetId()) {
-        case panda_file::Type::TypeId::VOID:
-            return nullptr;  // a representation of ets "undefined"
-        case panda_file::Type::TypeId::U1:
-            return EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, returnValue.GetAs<EtsBoolean>());
-        case panda_file::Type::TypeId::I8:
-            return EtsBoxPrimitive<EtsByte>::Create(executionCtx, returnValue.GetAs<EtsByte>());
-        case panda_file::Type::TypeId::I16:
-            return EtsBoxPrimitive<EtsShort>::Create(executionCtx, returnValue.GetAs<EtsShort>());
-        case panda_file::Type::TypeId::U16:
-            return EtsBoxPrimitive<EtsChar>::Create(executionCtx, returnValue.GetAs<EtsChar>());
-        case panda_file::Type::TypeId::I32:
-            return EtsBoxPrimitive<EtsInt>::Create(executionCtx, returnValue.GetAs<EtsInt>());
-        case panda_file::Type::TypeId::F32:
-            return EtsBoxPrimitive<EtsFloat>::Create(executionCtx, returnValue.GetAs<EtsFloat>());
-        case panda_file::Type::TypeId::F64:
-            return EtsBoxPrimitive<EtsDouble>::Create(executionCtx, returnValue.GetAs<EtsDouble>());
-        case panda_file::Type::TypeId::I64:
-            return EtsBoxPrimitive<EtsLong>::Create(executionCtx, returnValue.GetAs<EtsLong>());
-        case panda_file::Type::TypeId::REFERENCE:
-            return EtsObject::FromCoreType(returnValue.GetAs<ObjectHeader *>());
-        default:
-            LOG(FATAL, EXECUTION) << "Unsupported return type: " << returnType;
-            break;
+    auto *job = GetJob();
+    ASSERT(job != nullptr);
+    if (!job->HasManagedEntrypoint()) {
+        return;
     }
-    return nullptr;
+
+    auto *completionEvt = job->GetCompletionEvent();
+    if (completionEvt == nullptr) {
+        return;
+    }
+    auto *retValueRef = completionEvt->ReleaseReturnValueObject();
+    if (retValueRef == nullptr) {
+        JobExecutionContext::OnJobCompletion(returnValue);
+        return;
+    }
+
+    auto *retObject = HasPendingException() ? nullptr : BoxReturnValue(returnValue);
+    auto *completionObj = GetCompletionObject(retValueRef);
+    auto *platformTypes = PlatformTypes(GetExecutionCtx());
+    if (completionObj->IsInstanceOf(platformTypes->coreJob)) {
+        [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
+        EtsHandle<EtsJob> completedJob(GetExecutionCtx(), EtsJob::FromEtsObject(completionObj));
+        CompleteJob(completedJob.GetPtr(), retObject, job);
+        return;
+    }
+
+    if (completionObj->IsInstanceOf(platformTypes->corePromise)) {
+        [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
+        EtsHandle<EtsPromise> completedPromise(GetExecutionCtx(), EtsPromise::FromEtsObject(completionObj));
+        CompletePromise(completedPromise.GetPtr(), retObject, job);
+        return;
+    }
+
+    UNREACHABLE();
 }
 
 }  // namespace ark::ets

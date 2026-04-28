@@ -3008,19 +3008,7 @@ export namespace taskpool {
      * @param priority task execution priority
      */
     function launchImpl(task: Task, priority?: Priority): Promise<Any> {
-        const job: Job<Any> = launch(
-            InternalTask.of(task).execute
-        );
-        let promise = new Promise<Any>((resolve, reject) => {
-            try {
-                let res = job.Await();
-                resolve(res);
-            } catch(e) {
-                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                reject(e as Error);
-            }
-        });
-        return promise;
+        return launch(InternalTask.of(task).execute);
     }
 
     native function isUsingLaunch(): boolean;

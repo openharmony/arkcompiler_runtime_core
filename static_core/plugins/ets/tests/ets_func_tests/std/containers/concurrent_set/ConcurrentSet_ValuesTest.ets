@@ -73,26 +73,26 @@ function main(): int {
         arktest.assertEQ(iterValues.next().value, undefined);
     });
     // Multiple Threads Test
-    ConcurrentSetTestsuite.addTest("Values&AddTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Values&AddTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch(addBack);
         let p2 = launch(valuesAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("Values&DeteleTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Values&DeteleTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(deleteAll);
         let p2 = launch(valuesAll);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("Values&DeteleTest002", () =>
@@ -104,15 +104,15 @@ function main(): int {
         valuesAll();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
-    ConcurrentSetTestsuite.addTest("Values&ClearTest001", () =>
+    ConcurrentSetTestsuite.addAsyncTest("Values&ClearTest001", async () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(valuesAll);
         let p2 = launch(clearTest);
-        p1.Await();
-        p2.Await();
+        await p1;
+        await p2;
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
 

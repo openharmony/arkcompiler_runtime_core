@@ -36,7 +36,7 @@ async function main(): Promise<int> {
         arktest.assertEQ(queueInt.size, 0);
         let job1 = launch(queueIntGetEndData);
         await queueInt.push(elementsNum);
-        job1.Await();
+        await job1;
         arktest.assertEQ(queueInt.size, 1);
     });
 
@@ -57,7 +57,7 @@ async function main(): Promise<int> {
         arktest.assertEQ(queueInt.size, 0);
         let job1 = launch(queueIntGetEndData);
         await queueInt.push(elementsNum);
-        job1.Await();
+        await job1;
         arktest.assertEQ(queueInt.size, 1);
     });
 
@@ -81,7 +81,7 @@ async function main(): Promise<int> {
         let secondValue: int = 20;
         await queueInt.push(firstValue);
         await queueInt.push(secondValue);
-        job1.Await();
+        await job1;
         arktest.assertEQ(queueInt.size, 2);
     });
 
@@ -90,10 +90,10 @@ async function main(): Promise<int> {
         let job2 = launch(queueIntAddTwoData);
         let job3 = launch(queueIntGetEndBatch2Data);
         let job4 = launch(queueIntAddTwoData);
-        job1.Await();
-        job2.Await();
-        job3.Await();
-        job4.Await();
+        await job1;
+        await job2;
+        await job3;
+        await job4;
         arktest.assertFalse(queueInt.isEmpty());
     });
 
@@ -105,10 +105,10 @@ async function main(): Promise<int> {
         let job1 = launch(queueIntGetEndData);
         let job2 = launch(queueIntGetEndData);
         queueInt.push(20);
-        job1.Await();
-        job2.Await();
+        await job1;
+        await job2;
         let job3 = launch(queueIntGetEndData);
-        job3.Await();
+        await job3;
         arktest.assertEQ(queueInt.getEnd(), 20);
     });
 

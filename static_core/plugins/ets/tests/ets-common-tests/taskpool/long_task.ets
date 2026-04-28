@@ -17,21 +17,13 @@ function sumFunc(): int {
     return (() => 10)() + (() => 20)();
 }
 
-async function sum(a: int, b: int): int {
+async function sum(a: int, b: int): Promise<int> {
     await new Promise<int>( res=>{ setTimeout(res, 200, 0) });
     return a + b;
 }
 
 function launchImpl(func: () => Any): Promise<Any> {
-    const job: Job<Any> = launch(func);
-    return new Promise<Any>((resolve, reject) => {
-        try {
-            let res = job.Await();
-            resolve(res);
-        } catch(e) {
-            reject(e as Error);
-        }
-    });
+    return launch(func);
 }
 
 async function testDelayFunc(): Promise<Any> {

@@ -14,7 +14,7 @@
  */
 
 import { launch } from "std/concurrency"
-import { Job } from "std/core"
+
 
 const elementsNum: int = 10;
 const testNum: int = 20;
@@ -46,42 +46,42 @@ function main(): int {
         arktest.assertEQ(queueInt.add(testNum), false);
         arktest.assertEQ(queueInt.size, elementsNum);
     });
-    LinkedBlockingQueueTestsuite.addTest("ThreadsAddTest001", () =>
+    LinkedBlockingQueueTestsuite.addAsyncTest("ThreadsAddTest001", async () =>
     {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let jobs = Array.create<Job<void> | undefined>(5, undefined);
+        let jobs = Array.create<Promise<void> | undefined>(5, undefined);
         for (let i = 0; i < 5; i++) {
             jobs[i] = launch(queueAddData);
         }
         for (let i: int = 0; i < 5; i++) {
-            jobs[i]!.Await();
+            await jobs[i]!;
         }
         arktest.assertEQ(mQueueInt.getFirst(), testNum);
     });
-    LinkedBlockingQueueTestsuite.addTest("TheadsAddAndPopTest001", () =>
+    LinkedBlockingQueueTestsuite.addAsyncTest("TheadsAddAndPopTest001", async () =>
     {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let jobs = Array.create<Job<void> | undefined>(6, undefined);
+        let jobs = Array.create<Promise<void> | undefined>(6, undefined);
         let p = 0;
         for (let i = 0; i < 3; i++) {
             jobs[p++] = launch(queueAddData);
             jobs[p++] = launch(queuePopData);
         }
         for (let i: int = 0; i < 6; i++) {
-            jobs[i]!.Await();
+            await jobs[i]!;
         }
         arktest.assertTrue(mQueueInt.size <= 3);
     });
-    LinkedBlockingQueueTestsuite.addTest("TheadsAddAndGetFirstTest003", () =>
+    LinkedBlockingQueueTestsuite.addAsyncTest("TheadsAddAndGetFirstTest003", async () =>
     {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let jobs = Array.create<Job<void> | undefined>(10, undefined);
+        let jobs = Array.create<Promise<void> | undefined>(10, undefined);
         let p = 0;
         for (let i = 0; i < 5; i++) {
             jobs[p++] = launch(queueAddData);
@@ -90,7 +90,7 @@ function main(): int {
             jobs[p++] = launch(queueGetFirstData);
         }
         for (let i: int = 0; i < 10; i++) {
-            jobs[i]!.Await();
+            await jobs[i]!;
         }
         arktest.assertEQ(mQueueInt.getFirst(), testNum);
     });

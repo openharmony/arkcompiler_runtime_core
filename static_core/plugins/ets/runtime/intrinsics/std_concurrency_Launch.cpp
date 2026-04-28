@@ -127,10 +127,11 @@ CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id gro
 }
 
 extern "C" {
-EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsBoolean abortFlag, EtsLongArray *groupId)
+EtsPromise *EtsLaunchInternalPromiseNative(EtsObject *func, EtsBoolean abortFlag, EtsLongArray *groupId)
 {
     ASSERT(groupId->GetLength() == 2U);
-    return Launch<EtsJob>(func, abortFlag != 0U, JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)}));
+    return Launch<EtsPromise>(func, abortFlag != 0U,
+                              JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)}));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)

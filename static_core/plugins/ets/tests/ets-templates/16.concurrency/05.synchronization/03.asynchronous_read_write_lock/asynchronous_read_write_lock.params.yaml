@@ -33,7 +33,7 @@ cases:
             readLock.unlock();
           }
         })
-      
+
         const ea2 = new EAWorker();
         ea2.start();
         await ea2.run<undefined>(async () => {

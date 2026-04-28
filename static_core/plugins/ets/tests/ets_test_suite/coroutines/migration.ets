@@ -83,14 +83,14 @@ function testLaunch(): void {
     }
 }
 
-function checkLaunchMigration(): void {
+async function checkLaunchMigration(): Promise<void> {
     // scheduled on worker 1 or 2
-    launch(testLaunch).Await();
+    await launch (testLaunch);
 }
 
-function testMigration(): void {
+async function testMigration(): Promise<void> {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    checkLaunchMigration();
+    await checkLaunchMigration();
     let res: boolean = isLaunchMigrated.get();
     isLaunchMigrated.set(true); // to finish waiting coroutines
     arktest.assertEQ(res, true);
@@ -99,7 +99,7 @@ function testMigration(): void {
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.migration');
-    testSuite.addTest('testMigration', testMigration);
+    testSuite.addAsyncTest('testMigration', testMigration);
     let res = await testSuite.runAsync();
     return res;
 }
