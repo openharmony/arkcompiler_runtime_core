@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,16 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Intl. NumberFormat $_invoke call constructor with fault locales");
+    const suite = new arktest.ArkTestsuite('Intl. NumberFormat $_invoke call constructor with fault locales');
     // Tests from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
-    suite.addTest("testNumberFormatConstructorNew0008", testNumberFormatConstructorNew0008);
+    suite.addTest('testNumberFormatConstructorNew0008', testNumberFormatConstructorNew0008);
     return suite.run();
 }
 
 function testNumberFormatConstructorNew0008() {
     // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
     arktest.expectError((): void => {
-        let locales = ["zh", "en-US", "de", "test"];
+        let locales = ['zh', 'en-US', 'de', 'test'];
         Intl.NumberFormat.$_invoke(locales);
     });
 }

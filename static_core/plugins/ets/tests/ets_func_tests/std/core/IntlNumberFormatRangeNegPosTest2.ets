@@ -17,11 +17,11 @@ const success: int = 0;
 const fail: int = 1;
 
 function main(): int {
-    arktest.assertEQ( languageCodes.length, countryCodes.length,  "Error! Size of languageCodes should be the same as countryCodes")
+    arktest.assertEQ( languageCodes.length, countryCodes.length,  'Error! Size of languageCodes should be the same as countryCodes')
 
     let failures: int = 0;
-    failures += check(FormatRangeNegBigIntPosNumberUnion(), "Intl NumberFormat.formatRange -BigInt +number. Called union-types args");
-    failures += check(FormatRangeNegBigIntPosBigIntUnion(), "Intl NumberFormat.formatRange -BigInt +BigInt. Called union-types args");
+    failures += check(FormatRangeNegBigIntPosNumberUnion(), 'Intl NumberFormat.formatRange -BigInt +number. Called union-types args');
+    failures += check(FormatRangeNegBigIntPosBigIntUnion(), 'Intl NumberFormat.formatRange -BigInt +BigInt. Called union-types args');
     return failures;
 }
 
@@ -29,12 +29,12 @@ function check(result: number, message: string): int {
     if (result == 0) {
         return success;
     }
-    console.println("FAILED: " + message + "\n");
+    console.println('FAILED: ' + message + '\n');
     return fail;
 }
 
-const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru", "fa"];
-const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU", "IR"];
+const languageCodes: string[] = [ 'en', 'fr', 'ca', 'el', 'no', 'it', 'zh', 'ja', 'de', 'ru', 'fa'];
+const countryCodes: string[] = [ 'US', 'FR', 'ES', 'GR', 'NO',  '',   'CN', 'JP', 'GE', 'RU', 'IR'];
 const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
@@ -155,7 +155,7 @@ function CheckFormatRangeUnion(locale: string, funcName: string, start: number |
     try {
         nf = new Intl.NumberFormat(locale);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf = new Intl.NumberFormat(" + locale + ")\"");
+        console.log(funcName + '. Crashed call \'nf = new Intl.NumberFormat(' + locale + ')\'');
         return fail;
     }
 
@@ -163,28 +163,28 @@ function CheckFormatRangeUnion(locale: string, funcName: string, start: number |
     try {
         str = nf.formatRange(start, end);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf.formatRange\". " + locale );
+        console.log(funcName + '. Crashed call \'nf.formatRange\'. ' + locale );
         return fail;
     }
 
-    if (str == "") {
-        console.log(funcName + ". Got empty str result. " + locale);
+    if (str == '') {
+        console.log(funcName + '. Got empty str result. ' + locale);
         return fail;
     }
 
     if (expected != str) {
         let arr = new Array<Number>(str.length, (index:int) => str.codePointAt(index)!);
-        console.log(funcName + ". Got: \"" + str + "\" Codes: " + arr.join(","));
+        console.log(funcName + '. Got: \'' + str + '\' Codes: ' + arr.join(','));
         arr = new Array<Number>(expected.length, (index:int) => expected.codePointAt(index)!);
-        console.log(funcName + ". Exp: Codes: " + arr.join(","));
-        console.log(funcName + ". Detected on " + locale);
+        console.log(funcName + '. Exp: Codes: ' + arr.join(','));
+        console.log(funcName + '. Detected on ' + locale);
         return fail;
     }
     return success;
 }
 
 function FormatRangeNegBigIntPosNumberUnion(): int {
-    const funcName = "FormatRangeNegBigIntPosNumberUnion";
+    const funcName = 'FormatRangeNegBigIntPosNumberUnion';
     const start = negativeBigIntsAsStrings();
     const end = positiveNumbersAsStrings();
     const sep = separatorsBetweenNegAndPosAsStrings();
@@ -192,8 +192,8 @@ function FormatRangeNegBigIntPosNumberUnion(): int {
     const endValue = numberValues[1];
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
+        if (countryCodes[i] != '') {
+            locale = locale + '-' + countryCodes[i];
         }
         const expected = start[i] + sep[i] + end[i];
         if (CheckFormatRangeUnion(locale, funcName, startValue, endValue, expected) == fail) {
@@ -204,7 +204,7 @@ function FormatRangeNegBigIntPosNumberUnion(): int {
 }
 
 function FormatRangeNegBigIntPosBigIntUnion(): int {
-    const funcName = "FormatRangeNegBigIntPosBigIntUnion";
+    const funcName = 'FormatRangeNegBigIntPosBigIntUnion';
     const start = negativeBigIntsAsStrings();
     const end = positiveBigIntsAsStrings();
     const sep = separatorsBetweenNegAndPosAsStrings();
@@ -212,8 +212,8 @@ function FormatRangeNegBigIntPosBigIntUnion(): int {
     const endValue = bigIntValues[1];
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
+        if (countryCodes[i] != '') {
+            locale = locale + '-' + countryCodes[i];
         }
         const expected = start[i] + sep[i] + end[i];
         if (CheckFormatRangeUnion(locale, funcName, startValue, endValue, expected) == fail) {

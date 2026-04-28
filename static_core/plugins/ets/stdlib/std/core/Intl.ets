@@ -17,27 +17,27 @@ package std.core;
 
 export namespace Intl {
     export type BCP47LanguageTag = string
-    export type DisplayNamesFallback = "code" | "none"
-    export type DisplayNamesLanguageDisplay = "dialect" | "standard"
-    export type DisplayNamesType = "language" | "region" | "script" | "calendar" | "dateTimeField" | "currency"
-    export type ES2018NumberFormatPartType = "literal" | "nan" | "infinity" | "percent" | "integer" | "group" | "decimal" | "fraction" | "plusSign" | "minusSign" | "percentSign" | "currency" | "code" | "symbol" | "name"
-    export type ES2020NumberFormatPartType = "compact" | "exponentInteger" | "exponentMinusSign" | "exponentSeparator" | "unit" | "unknown"
-    export type LDMLPluralRule = "zero" | "one" | "two" | "few" | "many" | "other"
-    export type ListFormatLocaleMatcher = "lookup" | "best fit"
-    export type ListFormatStyle = "long" | "short" | "narrow"
-    export type ListFormatType = "conjunction" | "disjunction" | "unit"
-    export type LocaleCollationCaseFirst = "upper" | "lower" | "false"
-    export type LocaleHourCycleKey = "h12" | "h23" | "h11" | "h24"
+    export type DisplayNamesFallback = 'code' | 'none'
+    export type DisplayNamesLanguageDisplay = 'dialect' | 'standard'
+    export type DisplayNamesType = 'language' | 'region' | 'script' | 'calendar' | 'dateTimeField' | 'currency'
+    export type ES2018NumberFormatPartType = 'literal' | 'nan' | 'infinity' | 'percent' | 'integer' | 'group' | 'decimal' | 'fraction' | 'plusSign' | 'minusSign' | 'percentSign' | 'currency' | 'code' | 'symbol' | 'name'
+    export type ES2020NumberFormatPartType = 'compact' | 'exponentInteger' | 'exponentMinusSign' | 'exponentSeparator' | 'unit' | 'unknown'
+    export type LDMLPluralRule = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other'
+    export type ListFormatLocaleMatcher = 'lookup' | 'best fit'
+    export type ListFormatStyle = 'long' | 'short' | 'narrow'
+    export type ListFormatType = 'conjunction' | 'disjunction' | 'unit'
+    export type LocaleCollationCaseFirst = 'upper' | 'lower' | 'false'
+    export type LocaleHourCycleKey = 'h12' | 'h23' | 'h11' | 'h24'
     export type NumberFormatPartTypes = ES2018NumberFormatPartType | ES2020NumberFormatPartType;
-    export type PluralRuleType = "cardinal" | "ordinal"
-    export type RelativeTimeFormatLocaleMatcher = "lookup" | "best fit"
-    export type RelativeTimeFormatNumeric = "always" | "auto"
-    export type RelativeTimeFormatStyle = "long" | "short" | "narrow";
-    export type RelativeTimeFormatUnit = "year" | "years" | "quarter" | "quarters" | "month" | "months" | "week" | "weeks" | "day" | "days" | "hour" | "hours" | "minute" | "minutes"| "second" | "seconds"
-    export type RelativeTimeFormatUnitSingular =  "year" | "quarter" | "month" | "week" | "day" | "hour" | "minute" | "second"
+    export type PluralRuleType = 'cardinal' | 'ordinal'
+    export type RelativeTimeFormatLocaleMatcher = 'lookup' | 'best fit'
+    export type RelativeTimeFormatNumeric = 'always' | 'auto'
+    export type RelativeTimeFormatStyle = 'long' | 'short' | 'narrow';
+    export type RelativeTimeFormatUnit = 'year' | 'years' | 'quarter' | 'quarters' | 'month' | 'months' | 'week' | 'weeks' | 'day' | 'days' | 'hour' | 'hours' | 'minute' | 'minutes'| 'second' | 'seconds'
+    export type RelativeTimeFormatUnitSingular =  'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second'
     export type UnicodeBCP47LocaleIdentifier = string;
-    export type DateTimeFormatPartTypes = "day" | "dayPeriod" | "era" | "fractionalSecond" | "hour" | "literal" | "minute" | "month" | "second" | "timeZoneName" | "unknown" | "weekday" | "year";
-    export type DateTimeRangeFormatPartSource = "startRange" | "endRange" | "shared"
+    export type DateTimeFormatPartTypes = 'day' | 'dayPeriod' | 'era' | 'fractionalSecond' | 'hour' | 'literal' | 'minute' | 'month' | 'second' | 'timeZoneName' | 'unknown' | 'weekday' | 'year';
+    export type DateTimeRangeFormatPartSource = 'startRange' | 'endRange' | 'shared'
     export type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[]
 
     class LocaleMatch {
@@ -87,14 +87,14 @@ export namespace Intl {
                 return []
             }
 
-            const langTags = new string[locales.length]("")
+            const langTags = new string[locales.length]('')
             for (let i = 0; i < locales.length; i++) {
                 const locale = locales[i] as string | Intl.Locale
                 langTags[i] = locale instanceof string ? locale : locale.toString()
             }
             return langTags
         } else {
-            throw new TypeError("'locales' parameter has invalid type")
+            throw new TypeError('\'locales\' parameter has invalid type')
         }
     }
 
@@ -126,8 +126,8 @@ export namespace Intl {
         *
         * @param x input string to compare
         * @param y input string to compare
-        * @return 1 if x "more" than y
-        * @return -1 if y "more" than x
+        * @return 1 if x 'more' than y
+        * @return -1 if y 'more' than x
         * @return 0 if x equal y
         */
         public compare(x: string, y: string): int {
@@ -163,7 +163,7 @@ export namespace Intl {
             }
 
             switch (this.options.sensitivity) {
-                case "base": {
+                case 'base': {
                     xToCompare = xToCompare.toLowerCase()
                     yToCompare = yToCompare.toLowerCase()
 
@@ -171,17 +171,17 @@ export namespace Intl {
                     yToCompare = this.removeAccents(yToCompare)
                 }
                 break;
-                case "accent": {
+                case 'accent': {
                     xToCompare = xToCompare.toLowerCase()
                     yToCompare = yToCompare.toLowerCase()
                 }
                 break;
-                case "case": {
+                case 'case': {
                     xToCompare = this.removeAccents(xToCompare)
                     yToCompare = this.removeAccents(yToCompare)
                 }
                 break;
-                case "variant":
+                case 'variant':
                 break;
             }
 
@@ -189,11 +189,11 @@ export namespace Intl {
                 return 0
             }
 
-            if (this.options.usage == "search") {
+            if (this.options.usage == 'search') {
                 return 1
             }
 
-            const IgnoreSensitivityValues : ReadonlyArray<string> = Array.of<string>("base",  "accent")
+            const IgnoreSensitivityValues : ReadonlyArray<string> = Array.of<string>('base',  'accent')
             return this.compareByCollation(this.options.collation, this.options.locale, xToCompare, yToCompare,
                                            this.options.caseFirst)
         }
@@ -205,13 +205,13 @@ export namespace Intl {
         * @param options options
         */
         public constructor(locales?: string | string[], options?: CollatorOptions) {
-            this.options = {caseFirst: "false", collation: "default", ignorePunctuation: false,
+            this.options = {caseFirst: 'false', collation: 'default', ignorePunctuation: false,
             locale: Locale.defaultTag(),
             numeric: false,
-            sensitivity: "variant",
-            usage: "sort"}
+            sensitivity: 'variant',
+            usage: 'sort'}
 
-            this.options.collation = "default"
+            this.options.collation = 'default'
             if (locales != undefined) {
                 try {
                     let l = Collator.supportedLocalesOf(locales, options)
@@ -224,7 +224,7 @@ export namespace Intl {
                     }
                 }
                 catch(e) {
-                    throw new RangeError("Incorrect locales " + locales);
+                    throw new RangeError('Incorrect locales ' + locales);
                 }
             }
 
@@ -233,8 +233,8 @@ export namespace Intl {
                 this.options.caseFirst = (options.caseFirst == undefined) ? this.options.caseFirst : options.caseFirst!
                 this.options.ignorePunctuation = (options.ignorePunctuation == undefined) ? false : options.ignorePunctuation!
                 this.options.numeric = (options.numeric == undefined) ? this.options.numeric : options.numeric!
-                this.options.sensitivity = (options.sensitivity == undefined) ? "variant" : options.sensitivity!
-                this.options.usage = (options.usage == undefined) ? "sort" : options.usage!
+                this.options.sensitivity = (options.sensitivity == undefined) ? 'variant' : options.sensitivity!
+                this.options.usage = (options.usage == undefined) ? 'sort' : options.usage!
                 this.options.collation = (options.collation == undefined) ? this.options.collation : options.collation!
             }
         }
@@ -257,7 +257,7 @@ export namespace Intl {
             if (options != undefined) {
                 Collator.checkOptions(options!)
             }
-            let lookup = (options != undefined) ? options.localeMatcher == "lookup" : false
+            let lookup = (options != undefined) ? options.localeMatcher == 'lookup' : false
             try {
                 return lookup ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
             }
@@ -266,31 +266,31 @@ export namespace Intl {
                     throw e
                 }
                 else {
-                    throw new RangeError("Incorrect locales " + locales)
+                    throw new RangeError('Incorrect locales ' + locales)
                 }
             }
         }
 
 
         private static errorMessage(name: string, value: string) : string {
-            return "Value \"" + value + "\" out of range for Intl.Collator options property \"" + name + "\""
+            return 'Value \"' + value + '\" out of range for Intl.Collator options property \"' + name + '\"'
         }
 
         private static checkOptions(options: CollatorOptions) {
             if ((options.caseFirst != undefined) && !Collator.CaseFirstValues.includes(options.caseFirst!)) {
-                throw new RangeError(Collator.errorMessage("caseFirst", options.caseFirst!))
+                throw new RangeError(Collator.errorMessage('caseFirst', options.caseFirst!))
             }
 
             if ((options.sensitivity != undefined) && !Collator.SensitivityValues.includes(options.sensitivity!)) {
-                throw new RangeError(Collator.errorMessage("sensitivity", options.sensitivity!))
+                throw new RangeError(Collator.errorMessage('sensitivity', options.sensitivity!))
             }
 
             if ((options.usage != undefined) && !Collator.UsageValues.includes(options.usage!)) {
-                throw new RangeError(Collator.errorMessage("usage", options.usage!))
+                throw new RangeError(Collator.errorMessage('usage', options.usage!))
             }
 
             if ((options.localeMatcher != undefined) && !Collator.LocaleMatcherValues.includes(options.localeMatcher!)) {
-                throw new RangeError(Collator.errorMessage("localeMatcher", options.localeMatcher!))
+                throw new RangeError(Collator.errorMessage('localeMatcher', options.localeMatcher!))
             }
         }
 
@@ -302,35 +302,35 @@ export namespace Intl {
         /**
         * Returns icu-collator compare result for 2 input strings  x and y in case with non-default collation for given lang
         * @param data string array contains collation, lang, x, y
-        * @return icu-collator 2 strings compare result: 1 (x "more" than y), -1 (y "more" than x) or 0 (equals)
+        * @return icu-collator 2 strings compare result: 1 (x 'more' than y), -1 (y 'more' than x) or 0 (equals)
         */
         private native compareByCollation(collation : string, lang: string, str1: string, str2: string, caseFirst: string) : int
 
-        private static readonly SensitivityValues : ReadonlyArray<string> = Array.of<string>("base",  "accent", "case", "variant")
-        private static readonly UsageValues : ReadonlyArray<string> = Array.of<string>("sort", "search")
-        private static readonly CaseFirstValues : ReadonlyArray<string> = Array.of<string>("upper", "lower", "false")
-        private static readonly LocaleMatcherValues : ReadonlyArray<string>  = Array.of<string>("lookup", "best fit")
+        private static readonly SensitivityValues : ReadonlyArray<string> = Array.of<string>('base',  'accent', 'case', 'variant')
+        private static readonly UsageValues : ReadonlyArray<string> = Array.of<string>('sort', 'search')
+        private static readonly CaseFirstValues : ReadonlyArray<string> = Array.of<string>('upper', 'lower', 'false')
+        private static readonly LocaleMatcherValues : ReadonlyArray<string>  = Array.of<string>('lookup', 'best fit')
     }
 
     // Intl.DateTimeFormat
 
     export interface ResolvedDateTimeFormatOptions {
         calendar: string;
-        dateStyle?: "full" | "long" | "medium" | "short";
+        dateStyle?: 'full' | 'long' | 'medium' | 'short';
         day?: string;
-        dayPeriod?: "narrow" | "short" | "long";
+        dayPeriod?: 'narrow' | 'short' | 'long';
         era?: string;
-        formatMatcher?: "basic" | "best fit" | "best fit";
+        formatMatcher?: 'basic' | 'best fit' | 'best fit';
         fractionalSecondDigits?: int;
         hour12?: boolean;
         hour?: string;
-        hourCycle?: "h11" | "h12" | "h23" | "h24";
+        hourCycle?: 'h11' | 'h12' | 'h23' | 'h24';
         locale: string;
         minute?: string;
         month?: string;
         numberingSystem: string;
         second?: string;
-        timeStyle?: "full" | "long" | "medium" | "short";
+        timeStyle?: 'full' | 'long' | 'medium' | 'short';
         timeZone: string;
         timeZoneName?: string;
         weekday?: string;
@@ -346,102 +346,102 @@ export namespace Intl {
         source: DateTimeRangeFormatPartSource
     }
 
-    type HourCycle = "h11" | "h12" | "h23" | "h24"
-    type DateStyle = "full" | "long" | "medium" | "short"
-    type TimeStyle = "full" | "long" | "medium" | "short"
-    type TimeZoneName = "short" | "long" | "shortOffset" | "longOffset" | "shortGeneric" | "longGeneric"
-    type DayPeriod = "narrow" | "short" | "long"
-    type FormatMatcher = "basic" | "best fit"
+    type HourCycle = 'h11' | 'h12' | 'h23' | 'h24'
+    type DateStyle = 'full' | 'long' | 'medium' | 'short'
+    type TimeStyle = 'full' | 'long' | 'medium' | 'short'
+    type TimeZoneName = 'short' | 'long' | 'shortOffset' | 'longOffset' | 'shortGeneric' | 'longGeneric'
+    type DayPeriod = 'narrow' | 'short' | 'long'
+    type FormatMatcher = 'basic' | 'best fit'
 
     export interface DateTimeFormatOptions {
         calendar?: string
-        localeMatcher?: "lookup" | "best fit"
+        localeMatcher?: 'lookup' | 'best fit'
         dateStyle?: DateStyle
-        day?: "numeric" | "2-digit"
-        dayPeriod?: "narrow" | "short" | "long"
-        era?: "long" | "short" | "narrow"
-        formatMatcher?: "basic" | "best fit"
+        day?: 'numeric' | '2-digit'
+        dayPeriod?: 'narrow' | 'short' | 'long'
+        era?: 'long' | 'short' | 'narrow'
+        formatMatcher?: 'basic' | 'best fit'
         // NOTE(cheezzario) 'number' literal types are not supported #23963
         // fractionalSecondDigits?: 1 | 2 | 3
         fractionalSecondDigits?: int
         hour12?: boolean
-        hour?: "numeric" | "2-digit"
-        hourCycle?: "h11" | "h12" | "h23" | "h24"
-        minute?: "numeric" | "2-digit"
-        month?: "numeric" | "2-digit" | "long" | "short" | "narrow"
+        hour?: 'numeric' | '2-digit'
+        hourCycle?: 'h11' | 'h12' | 'h23' | 'h24'
+        minute?: 'numeric' | '2-digit'
+        month?: 'numeric' | '2-digit' | 'long' | 'short' | 'narrow'
         numberingSystem?: string
-        second?: "numeric" | "2-digit"
+        second?: 'numeric' | '2-digit'
         timeStyle?: TimeStyle
         timeZone?: string
         timeZoneName?: TimeZoneName
-        weekday?: "long" | "short" | "narrow"
-        year?: "numeric" | "2-digit"
+        weekday?: 'long' | 'short' | 'narrow'
+        year?: 'numeric' | '2-digit'
     }
 
     class DateTimeFormatOptionsImpl implements DateTimeFormatOptions {
         set calendar(val: string | undefined) {this.calendar_ = val}
         get calendar(): string | undefined { return this.calendar_ }
-        set localeMatcher(val: "lookup" | "best fit" | undefined) { this.localeMatcher_ = val}
-        get localeMatcher(): "lookup" | "best fit" | undefined { return this.localeMatcher_}
+        set localeMatcher(val: 'lookup' | 'best fit' | undefined) { this.localeMatcher_ = val}
+        get localeMatcher(): 'lookup' | 'best fit' | undefined { return this.localeMatcher_}
         set dateStyle(val: DateStyle | undefined) { this.dateStyle_ = val }
         get dateStyle(): DateStyle | undefined { return this.dateStyle_}
-        set day(val: "numeric" | "2-digit" | undefined) { this.day_ = val }
-        get day(): "numeric" | "2-digit" | undefined { return this.day_ }
-        set dayPeriod(val: "narrow" | "short" | "long" | undefined) { this.dayPeriod_ = val}
-        get dayPeriod() : "narrow" | "short" | "long" | undefined { return this.dayPeriod_}
-        set era(val: "long" | "short" | "narrow" | undefined) { this.era_ = val}
-        get era(): "long" | "short" | "narrow" | undefined { return this.era_}
-        set formatMatcher(val : "basic" | "best fit" | undefined) { this.formatMatcher_ = val}
-        get formatMatcher(): "basic" | "best fit" | undefined { return this.formatMatcher_}
+        set day(val: 'numeric' | '2-digit' | undefined) { this.day_ = val }
+        get day(): 'numeric' | '2-digit' | undefined { return this.day_ }
+        set dayPeriod(val: 'narrow' | 'short' | 'long' | undefined) { this.dayPeriod_ = val}
+        get dayPeriod() : 'narrow' | 'short' | 'long' | undefined { return this.dayPeriod_}
+        set era(val: 'long' | 'short' | 'narrow' | undefined) { this.era_ = val}
+        get era(): 'long' | 'short' | 'narrow' | undefined { return this.era_}
+        set formatMatcher(val : 'basic' | 'best fit' | undefined) { this.formatMatcher_ = val}
+        get formatMatcher(): 'basic' | 'best fit' | undefined { return this.formatMatcher_}
         // NOTE(cheezzario) 'number' literal types are not supported #23963
         // fractionalSecondDigits?: 1 | 2 | 3
         set fractionalSecondDigits(val: int | undefined) {this.fractionalSecondDigits_ = val}
         get fractionalSecondDigits(): int | undefined { return this.fractionalSecondDigits_}
         set hour12(val: boolean | undefined) {this.hour12_ = val}
         get hour12(): boolean | undefined { return this.hour12_}
-        set hour(val: "numeric" | "2-digit" | undefined) { this.hour_ = val}
-        get hour(): "numeric" | "2-digit" | undefined { return this.hour_}
-        set hourCycle(val: "h11" | "h12" | "h23" | "h24" | undefined) { this.hourCycle_ = val}
-        get hourCycle(): "h11" | "h12" | "h23" | "h24" | undefined { return this.hourCycle_}
-        set minute(val: "numeric" | "2-digit" | undefined) { this.minute_ = val}
-        get minute(): "numeric" | "2-digit" | undefined { return this.minute_}
-        set month(val: "numeric" | "2-digit" | "long" | "short" | "narrow" | undefined) { this.month_ = val}
-        get month(): "numeric" | "2-digit" | "long" | "short" | "narrow" | undefined { return this.month_}
+        set hour(val: 'numeric' | '2-digit' | undefined) { this.hour_ = val}
+        get hour(): 'numeric' | '2-digit' | undefined { return this.hour_}
+        set hourCycle(val: 'h11' | 'h12' | 'h23' | 'h24' | undefined) { this.hourCycle_ = val}
+        get hourCycle(): 'h11' | 'h12' | 'h23' | 'h24' | undefined { return this.hourCycle_}
+        set minute(val: 'numeric' | '2-digit' | undefined) { this.minute_ = val}
+        get minute(): 'numeric' | '2-digit' | undefined { return this.minute_}
+        set month(val: 'numeric' | '2-digit' | 'long' | 'short' | 'narrow' | undefined) { this.month_ = val}
+        get month(): 'numeric' | '2-digit' | 'long' | 'short' | 'narrow' | undefined { return this.month_}
         set numberingSystem(val: string | undefined) { this.numberingSystem_ = val}
         get numberingSystem(): string | undefined { return this.numberingSystem_}
-        set second(val: "numeric" | "2-digit" | undefined) { this.second_ = val}
-        get second(): "numeric" | "2-digit" | undefined { return this.second_}
+        set second(val: 'numeric' | '2-digit' | undefined) { this.second_ = val}
+        get second(): 'numeric' | '2-digit' | undefined { return this.second_}
         set timeStyle(val: TimeStyle | undefined) { this.timeStyle_ = val}
         get timeStyle(): TimeStyle | undefined {return this.timeStyle_}
         set timeZone(val: string | undefined) { this.timeZone_ = val}
         get timeZone(): string | undefined { return this.timeZone_}
         set timeZoneName(val: TimeZoneName | undefined) { this.timeZoneName_ = val}
         get timeZoneName(): TimeZoneName | undefined { return this.timeZoneName_}
-        set weekday(val: "long" | "short" | "narrow" | undefined) { this.weekday_ = val}
-        get weekday(): "long" | "short" | "narrow" | undefined { return this.weekday_}
-        set year(val: "numeric" | "2-digit" | undefined) { this.year_ = val}
-        get year(): "numeric" | "2-digit" | undefined { return this.year_}
+        set weekday(val: 'long' | 'short' | 'narrow' | undefined) { this.weekday_ = val}
+        get weekday(): 'long' | 'short' | 'narrow' | undefined { return this.weekday_}
+        set year(val: 'numeric' | '2-digit' | undefined) { this.year_ = val}
+        get year(): 'numeric' | '2-digit' | undefined { return this.year_}
 
         private calendar_?: string
-        private localeMatcher_?: "lookup" | "best fit"
+        private localeMatcher_?: 'lookup' | 'best fit'
         private dateStyle_?: DateStyle
-        private day_?: "numeric" | "2-digit"
-        private dayPeriod_?: "narrow" | "short" | "long"
-        private era_?: "long" | "short" | "narrow"
-        private formatMatcher_?: "basic" | "best fit"
+        private day_?: 'numeric' | '2-digit'
+        private dayPeriod_?: 'narrow' | 'short' | 'long'
+        private era_?: 'long' | 'short' | 'narrow'
+        private formatMatcher_?: 'basic' | 'best fit'
         private fractionalSecondDigits_?: int
         private hour12_?: boolean
-        private hour_?: "numeric" | "2-digit"
-        private hourCycle_?: "h11" | "h12" | "h23" | "h24"
-        private minute_?: "numeric" | "2-digit"
-        private month_?: "numeric" | "2-digit" | "long" | "short" | "narrow"
+        private hour_?: 'numeric' | '2-digit'
+        private hourCycle_?: 'h11' | 'h12' | 'h23' | 'h24'
+        private minute_?: 'numeric' | '2-digit'
+        private month_?: 'numeric' | '2-digit' | 'long' | 'short' | 'narrow'
         private numberingSystem_?: string
-        private second_?: "numeric" | "2-digit"
+        private second_?: 'numeric' | '2-digit'
         private timeStyle_?: TimeStyle
         private timeZone_?: string
         private timeZoneName_?: TimeZoneName
-        private weekday_?: "long" | "short" | "narrow"
-        private year_?: "numeric" | "2-digit"
+        private weekday_?: 'long' | 'short' | 'narrow'
+        private year_?: 'numeric' | '2-digit'
 
         constructor() {}
 
@@ -474,8 +474,8 @@ export namespace Intl {
         private _value: String
 
         constructor() {
-            this._type = "literal"
-            this._value = ""
+            this._type = 'literal'
+            this._value = ''
         }
 
         constructor(type: DateTimeFormatPartTypes, value: string) {
@@ -504,7 +504,7 @@ export namespace Intl {
         private  _source: DateTimeRangeFormatPartSource
 
         constructor() {
-            this._source = "shared"
+            this._source = 'shared'
         }
 
         constructor(type: DateTimeFormatPartTypes, value: string, source: DateTimeRangeFormatPartSource) {
@@ -723,12 +723,12 @@ export class DateTimeFormat {
             if (locales === undefined) {
                 this.locale = Locale.defaultTag()
             } else {
-                const lookupLocale = options?.localeMatcher == "lookup"
+                const lookupLocale = options?.localeMatcher == 'lookup'
                 this.locale = lookupLocale ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
             }
 
             if (options === undefined || DateTimeFormat.isEmpty(options)) {
-                this.options = { year: "numeric", month: "numeric", day: "numeric" } as DateTimeFormatOptionsImpl
+                this.options = { year: 'numeric', month: 'numeric', day: 'numeric' } as DateTimeFormatOptionsImpl
             } else {
                 this.options = this.getResolvedOptions(options!) as DateTimeFormatOptionsImpl
             }
@@ -783,7 +783,7 @@ export class DateTimeFormat {
 
             resolvedOptions.locale = this.locale
 
-            resolvedOptions.hour12 = resolvedOptions.hourCycle == "h11" || resolvedOptions.hourCycle == "h12"
+            resolvedOptions.hour12 = resolvedOptions.hourCycle == 'h11' || resolvedOptions.hourCycle == 'h12'
 
             resolvedOptions.dateStyle = this.options.dateStyle
             resolvedOptions.day = this.options.day
@@ -806,7 +806,7 @@ export class DateTimeFormat {
             const langTags = intlLocalesToLanguageTags(locales)
 
             if (options) {
-                return (options.localeMatcher == "best fit")
+                return (options.localeMatcher == 'best fit')
                         ? intlBestFitLocales(langTags)
                         : intlLookUpLocales(langTags)
             }
@@ -846,9 +846,9 @@ export class DateTimeFormat {
             }
 
             if (needDefaults) {
-                ret.year = "numeric"
-                ret.month = "numeric"
-                ret.day = "numeric"
+                ret.year = 'numeric'
+                ret.month = 'numeric'
+                ret.day = 'numeric'
             }
 
             if (options.hour12 !== undefined) {
@@ -856,13 +856,13 @@ export class DateTimeFormat {
 
                 const hour12: boolean = options.hour12!
                 if (hour12) {
-                    if (hourCycle == "h23") {
-                        hourCycle = "h11"
-                    } else if (hourCycle == "h24") {
-                        hourCycle = "h12"
+                    if (hourCycle == 'h23') {
+                        hourCycle = 'h11'
+                    } else if (hourCycle == 'h24') {
+                        hourCycle = 'h12'
                     }
                 } else {
-                    hourCycle = "h23"
+                    hourCycle = 'h23'
                 }
 
                 ret.hourCycle = hourCycle
@@ -875,19 +875,19 @@ export class DateTimeFormat {
             const hourCycle = this.options.hourCycle
             if (hourCycle) {
                 switch (hourCycle) {
-                    case "h11":
-                        return "K"
-                    case "h12":
-                        return "h"
-                    case "h23":
-                        return "H"
-                    case "h24":
-                        return "k"
+                    case 'h11':
+                        return 'K'
+                    case 'h12':
+                        return 'h'
+                    case 'h23':
+                        return 'H'
+                    case 'h24':
+                        return 'k'
                     default:
-                        throw new RangeError("Invalid hour cycle: " + hourCycle)
+                        throw new RangeError('Invalid hour cycle: ' + hourCycle)
                 }
             } else {
-                return "j"
+                return 'j'
             }
         }
 
@@ -914,11 +914,11 @@ export class DateTimeFormat {
             const year = this.options.year
             if (year) {
                 switch (year) {
-                    case "numeric":
-                        pattern.append("yyyy")
+                    case 'numeric':
+                        pattern.append('yyyy')
                         break
-                    case "2-digit":
-                        pattern.append("yy")
+                    case '2-digit':
+                        pattern.append('yy')
                         break
                 }
             }
@@ -928,20 +928,20 @@ export class DateTimeFormat {
             const month = this.options.month
             if (month) {
                 switch (month) {
-                    case "numeric":
-                        pattern.append("M")
+                    case 'numeric':
+                        pattern.append('M')
                         break
-                    case "narrow":
-                        pattern.append("MMMMM")
+                    case 'narrow':
+                        pattern.append('MMMMM')
                         break
-                    case "long":
-                        pattern.append("MMMM")
+                    case 'long':
+                        pattern.append('MMMM')
                         break
-                    case "short":
-                        pattern.append("MMM")
+                    case 'short':
+                        pattern.append('MMM')
                         break
-                    case "2-digit":
-                        pattern.append("MM")
+                    case '2-digit':
+                        pattern.append('MM')
                         break
                 }
             }
@@ -951,14 +951,14 @@ export class DateTimeFormat {
             const weekday = this.options.weekday
             if (weekday) {
                 switch (weekday) {
-                    case "long":
-                        pattern.append("EEEE")
+                    case 'long':
+                        pattern.append('EEEE')
                         break
-                    case "short":
-                        pattern.append("EEE")
+                    case 'short':
+                        pattern.append('EEE')
                         break
-                    case "narrow":
-                        pattern.append("EEEEE")
+                    case 'narrow':
+                        pattern.append('EEEEE')
                         break
                 }
             }
@@ -968,11 +968,11 @@ export class DateTimeFormat {
             const day = this.options.day
             if (day) {
                 switch (day) {
-                    case "numeric":
-                        pattern.append("d")
+                    case 'numeric':
+                        pattern.append('d')
                         break
-                    case "2-digit":
-                        pattern.append("dd")
+                    case '2-digit':
+                        pattern.append('dd')
                         break
                 }
             }
@@ -981,7 +981,7 @@ export class DateTimeFormat {
         private appendDayPeriodPattern(pattern: StringBuilder): void {
             const dayPeriod = this.options.dayPeriod
             if (dayPeriod) {
-                pattern.append("B")
+                pattern.append('B')
             }
         }
 
@@ -989,14 +989,14 @@ export class DateTimeFormat {
             const optEra = this.options.era
             if (optEra) {
                 switch (optEra) {
-                    case "long":
-                        pattern.append("GGGG")
+                    case 'long':
+                        pattern.append('GGGG')
                         break
-                    case "short":
-                        pattern.append("GGG")
+                    case 'short':
+                        pattern.append('GGG')
                         break
-                    case "narrow":
-                        pattern.append("GGGGG")
+                    case 'narrow':
+                        pattern.append('GGGGG')
                         break
                 }
             }
@@ -1019,10 +1019,10 @@ export class DateTimeFormat {
             if (optHour) {
                 const hourSymbol = this.getHourSymbol()
                 switch (optHour) {
-                    case "2-digit":
+                    case '2-digit':
                         pattern.append(hourSymbol.repeat(2))
                         break
-                    case "numeric":
+                    case 'numeric':
                         pattern.append(hourSymbol)
                         break
                 }
@@ -1033,11 +1033,11 @@ export class DateTimeFormat {
             const optMinute = this.options.minute
             if (optMinute) {
                 switch (optMinute) {
-                    case "2-digit":
-                        pattern.append("mm")
+                    case '2-digit':
+                        pattern.append('mm')
                         break
-                    case "numeric":
-                        pattern.append("m")
+                    case 'numeric':
+                        pattern.append('m')
                         break
                 }
             }
@@ -1047,11 +1047,11 @@ export class DateTimeFormat {
             const optSecond = this.options.second
             if (optSecond) {
                 switch (optSecond) {
-                    case "2-digit":
-                        pattern.append("ss")
+                    case '2-digit':
+                        pattern.append('ss')
                         break
-                    case "numeric":
-                        pattern.append("s")
+                    case 'numeric':
+                        pattern.append('s')
                         break
                 }
             }
@@ -1061,9 +1061,9 @@ export class DateTimeFormat {
             const optFractionalSecond = this.options.fractionalSecondDigits
             if (optFractionalSecond) {
                 if (optFractionalSecond < 1 || optFractionalSecond > 3) {
-                    throw new RangeError("invalid digits value: " + optFractionalSecond)
+                    throw new RangeError('invalid digits value: ' + optFractionalSecond)
                 }
-                pattern.append("S".repeat(optFractionalSecond.toInt()))
+                pattern.append('S'.repeat(optFractionalSecond.toInt()))
             }
         }
 
@@ -1071,23 +1071,23 @@ export class DateTimeFormat {
             const optTimeZoneName = this.options.timeZoneName
             if (optTimeZoneName) {
                 switch (optTimeZoneName) {
-                    case "short":
-                        pattern.append("z");
+                    case 'short':
+                        pattern.append('z');
                         break
-                    case "long":
-                        pattern.append("zzzz")
+                    case 'long':
+                        pattern.append('zzzz')
                         break
-                    case "shortGeneric":
-                        pattern.append("v")
+                    case 'shortGeneric':
+                        pattern.append('v')
                         break
-                    case "shortOffset":
-                        pattern.append("O")
+                    case 'shortOffset':
+                        pattern.append('O')
                         break
-                    case "longGeneric":
-                        pattern.append("vvvv")
+                    case 'longGeneric':
+                        pattern.append('vvvv')
                         break
-                    case "longOffset":
-                        pattern.append("OOOO")
+                    case 'longOffset':
+                        pattern.append('OOOO')
                         break
                 }
             }
@@ -1095,21 +1095,21 @@ export class DateTimeFormat {
 
         private generateCacheKey(): string {
             const sb = new StringBuilder();
-            sb.append(this.locale ?? "").append(";");
+            sb.append(this.locale ?? '').append(';');
             if (this.pattern !== undefined && this.pattern.length > 0) {
-                sb.append(this.pattern).append(";");
+                sb.append(this.pattern).append(';');
             } else {
-                const dateStyle = this.options.dateStyle ?? "";
-                const timeStyle = this.options.timeStyle ?? "";
-                sb.append("style/").append(dateStyle).append("/").append(timeStyle).append(";");
+                const dateStyle = this.options.dateStyle ?? '';
+                const timeStyle = this.options.timeStyle ?? '';
+                sb.append('style/').append(dateStyle).append('/').append(timeStyle).append(';');
             }
 
-            sb.append(this.options.calendar ?? "").append(";");
-            sb.append(this.options.hourCycle ?? "").append(";");
-            sb.append(this.options.numberingSystem ?? "").append(";");
-            sb.append(this.options.timeZone ?? "").append(";");
-            sb.append(this.options.timeZoneName ?? "").append(";");
-            sb.append(this.options.formatMatcher ?? "");
+            sb.append(this.options.calendar ?? '').append(';');
+            sb.append(this.options.hourCycle ?? '').append(';');
+            sb.append(this.options.numberingSystem ?? '').append(';');
+            sb.append(this.options.timeZone ?? '').append(';');
+            sb.append(this.options.timeZoneName ?? '').append(';');
+            sb.append(this.options.formatMatcher ?? '');
 
             return sb.toString();
         }
@@ -1123,7 +1123,7 @@ export class DateTimeFormat {
     export interface DisplayNamesOptions {
         /** How to handle code fallbacks when no display name is available */
         fallback?: DisplayNamesFallback;
-        /** How to display language names (only applies when type is "language") */
+        /** How to display language names (only applies when type is 'language') */
         languageDisplay?: DisplayNamesLanguageDisplay;
         /** Strategy for locale matching */
         localeMatcher?: RelativeTimeFormatLocaleMatcher;
@@ -1147,7 +1147,7 @@ export class DateTimeFormat {
     export interface ResolvedDisplayNamesOptions {
         /** Current fallback setting */
         fallback: DisplayNamesFallback;
-        /** Current language display setting (only present when type is "language") */
+        /** Current language display setting (only present when type is 'language') */
         languageDisplay?: DisplayNamesLanguageDisplay;
         /** Resolved locale identifier */
         locale: UnicodeBCP47LocaleIdentifier;
@@ -1190,11 +1190,11 @@ export class DateTimeFormat {
             options?: DisplayNamesOptions
         ) {
             if (options === undefined) {
-                throw new TypeError("Options parameter is required");
+                throw new TypeError('Options parameter is required');
             }
 
             if (options.type === undefined) {
-                throw new TypeError("Option 'type' is required");
+                throw new TypeError('Option \'type\' is required');
             }
 
             // Set default values and process options
@@ -1209,7 +1209,7 @@ export class DateTimeFormat {
             }
 
             if (locales !== undefined) {
-                const lookupLocale = options != null && options!.localeMatcher == "lookup"
+                const lookupLocale = options != null && options!.localeMatcher == 'lookup'
                 this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
             } else {
                 this.locale = Locale.defaultTag();
@@ -1226,7 +1226,7 @@ export class DateTimeFormat {
          */
         public of(code: string): string | undefined {
             if (code.isEmpty()) {
-                throw new RangeError("Code cannot be empty");
+                throw new RangeError('Code cannot be empty');
             }
             try {
                 const result = DisplayNames.ofNative(
@@ -1285,7 +1285,7 @@ export class DateTimeFormat {
             } else if (locales instanceof Locale) {
                 return DisplayNames.bestFitLocales(Array.of(locales).map((loc: Locale) => loc.toString()))
             } else {
-                throw new TypeError("'locales' parameter has invalid type")
+                throw new TypeError('"locales" parameter has invalid type')
             }
         }
 
@@ -1303,7 +1303,7 @@ export class DateTimeFormat {
     }
 
     export interface FormatToPartsResult {
-        type: "element" | "literal"
+        type: 'element' | 'literal'
         value: string
     }
 
@@ -1313,8 +1313,8 @@ export class DateTimeFormat {
         private type: ListFormatType
 
         public constructor(locales?: string | string[], options?: ListFormatOptions) {
-            this.style = options?.style ?? "long"
-            this.type = options?.type ?? "conjunction"
+            this.style = options?.style ?? 'long'
+            this.type = options?.type ?? 'conjunction'
             this.locale = this.resolveLocale(locales, options?.localeMatcher)
         }
 
@@ -1330,11 +1330,11 @@ export class DateTimeFormat {
             }
             const squashed = ListFormat.formatToPartsNative(arr, this.locale, this.style, this.type) as string[]
             if (squashed.length % 2 != 0) {
-                throw Error("ListFormat.formatToPartsNative incorrect result")
+                throw Error('ListFormat.formatToPartsNative incorrect result')
             }
             const result = new Array<FormatToPartsResult>(squashed.length / 2, (i) => {
                 return {
-                    type: squashed[i * 2] as "element" | "literal",
+                    type: squashed[i * 2] as 'element' | 'literal',
                     value: squashed[i * 2 + 1]
                 } as FormatToPartsResult
             })
@@ -1342,14 +1342,14 @@ export class DateTimeFormat {
         }
 
         public static supportedLocalesOf(locales: string | string[], options?: ListFormatLocaleMatcher): string[] {
-            return options === "lookup" ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
+            return options === 'lookup' ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
         }
 
         private resolveLocale(locales?: string | string[], localeMatcher?: ListFormatLocaleMatcher): string {
             if (locales === undefined) {
                 return Locale.defaultTag()
             }
-            return localeMatcher === "lookup" ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
+            return localeMatcher === 'lookup' ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
         }
 
         private static iterableToArray(list: Iterable<string>): string[] {
@@ -1362,7 +1362,7 @@ export class DateTimeFormat {
                     arr.push(item)
                 }
             }
-            const result = new string[arr.length]("")
+            const result = new string[arr.length]('')
             for (let i = 0; i < arr.length; i++) {
                 result[i] = arr[i]
             }
@@ -1584,7 +1584,7 @@ export class DateTimeFormat {
 
                 this.language = (tag.language != undefined) ? tag.language : defaultLanguage
                 this.baseName = (tag.baseName != undefined) ? tag.baseName : defaultLanguage
-                this.calendar = (tag.calendar != undefined) ? tag.calendar : ""
+                this.calendar = (tag.calendar != undefined) ? tag.calendar : ''
                 this.caseFirst = (tag.caseFirst != undefined) ? tag.caseFirst : undefined
                 this.numeric = (tag.numeric != undefined) ? tag.numeric : false
                 this.collation = tag.collation
@@ -1616,7 +1616,7 @@ export class DateTimeFormat {
                 } else if (this.baseName == undefined && defaultLanguage != undefined) {
                     this.baseName = defaultLanguage
                 }
-                this.calendar = (options.calendar != undefined) ? options.calendar : ""
+                this.calendar = (options.calendar != undefined) ? options.calendar : ''
                 this.caseFirst = (options.caseFirst != undefined) ? options.caseFirst : undefined
                 this.numeric = (options.numeric != undefined) ? options.numeric : false
                 this.collation = (options.collation != undefined) ? options.collation : this.collation
@@ -1659,12 +1659,12 @@ export class DateTimeFormat {
         private fillBaseName() {
             let sb = new StringBuilder()
             sb.append(this.language as string)
-            if (this.script != undefined && this.script != "" && this.script != " ") {
-                sb.append("-")
+            if (this.script != undefined && this.script != '' && this.script != ' ') {
+                sb.append('-')
                 sb.append(this.script as string)
             }
-            if (this.region != undefined && this.region != "" && this.region != " ") {
-                sb.append("-")
+            if (this.region != undefined && this.region != '' && this.region != ' ') {
+                sb.append('-')
                 sb.append(this.region as string)
             }
             this.baseName = sb.toString()
@@ -1678,7 +1678,7 @@ export class DateTimeFormat {
         */
         public maximize() : Locale {
             let res = new Locale(this)
-            let info = this.maximizeInfo(this.language as string).split(",")
+            let info = this.maximizeInfo(this.language as string).split(',')
             res.region = info[0]
             res.script = info.length > 1 ? info[1] : res.script
             this.fillBaseName()
@@ -1708,27 +1708,27 @@ export class DateTimeFormat {
             return this.tag
         }
 
-        private tag: BCP47LanguageTag = ""
+        private tag: BCP47LanguageTag = ''
 
         private uFlags() : BCP47LanguageTag {
             let sb = new StringBuilder()
             if ((this.numeric != undefined && this.numeric as boolean == true)) {
-                sb.append("-u-kn")
+                sb.append('-u-kn')
             }
-            if (this.caseFirst != undefined && this.caseFirst != "") {
-                sb.append("-u-kf-" + this.caseFirst as string)
+            if (this.caseFirst != undefined && this.caseFirst != '') {
+                sb.append('-u-kf-' + this.caseFirst as string)
             }
-            if (this.calendar != undefined && this.calendar != "") {
-                sb.append("-u-ca-" + this.calendar as string)
+            if (this.calendar != undefined && this.calendar != '') {
+                sb.append('-u-ca-' + this.calendar as string)
             }
-            if (this.collation != undefined && this.collation != "") {
-                sb.append("-u-co-" + this.collation as string)
+            if (this.collation != undefined && this.collation != '') {
+                sb.append('-u-co-' + this.collation as string)
             }
-            if (this.hourCycle != undefined && this.hourCycle != "" && (this.hourCycle instanceof LocaleHourCycleKey)) {
-                sb.append("-u-hc-" + this.hourCycle as string)
+            if (this.hourCycle != undefined && this.hourCycle != '' && (this.hourCycle instanceof LocaleHourCycleKey)) {
+                sb.append('-u-hc-' + this.hourCycle as string)
             }
-            if (this.numberingSystem != undefined && this.numberingSystem != "") {
-                sb.append("-u-nu-" + this.numberingSystem as string)
+            if (this.numberingSystem != undefined && this.numberingSystem != '') {
+                sb.append('-u-nu-' + this.numberingSystem as string)
             }
             return sb.toString()
         }
@@ -1742,27 +1742,27 @@ export class DateTimeFormat {
         }
 
         private errOptionMessage(val : string, name : string) : string {
-            return "Value " + val + " out of range for locale options property " + name
+            return 'Value ' + val + ' out of range for locale options property ' + name
         }
 
-        private errMsg = "Incorrect locale information provided"
+        private errMsg = 'Incorrect locale information provided'
         private checkOptions(options: LocaleOptions) {
             if  ((options.calendar != undefined && !Locale.calendarValues.includes(options.calendar!)) ||
                 (options.caseFirst != undefined && !Locale.caseFirstValues.includes(options.caseFirst!)) ||
                 (options.collation != undefined && !Locale.collationValues.includes(options.collation!)) ||
                 (options.hourCycle != undefined && !Locale.hourCycleValues.includes(options.hourCycle!)) ||
-                (options.numberingSystem != undefined && (options.numberingSystem! == "" ||
+                (options.numberingSystem != undefined && (options.numberingSystem! == '' ||
                                 !this.numberingSystemList().includes(options.numberingSystem!))) ||
-                (options.region != undefined && (options.region! == "" || !this.regionList().includes((options.region! as String).toUpperCase()))) ||
-                (options.script != undefined && (options.script! == "" || !this.scriptList().includes(options.script!)))
+                (options.region != undefined && (options.region! == '' || !this.regionList().includes((options.region! as String).toUpperCase()))) ||
+                (options.script != undefined && (options.script! == '' || !this.scriptList().includes(options.script!)))
             ) {
                 throw new RangeError(this.errMsg)
             }
         }
 
         private parseTag(): boolean {
-            if (this.tag == "") {
-                throw new RangeError("First argument to Intl.Locale constructor can't be empty or missing")
+            if (this.tag == '') {
+                throw new RangeError('First argument to Intl.Locale constructor can\'t be empty or missing')
             }
 
             // Check if we have a cached result for this tag
@@ -1787,8 +1787,8 @@ export class DateTimeFormat {
             }
 
             let argsStr : string = this.parseTagImpl(this.tag)
-            let args: string[] = argsStr.split(" ")
-            const getValue = (val: string): string | undefined => (val === "") ? undefined : val
+            let args: string[] = argsStr.split(' ')
+            const getValue = (val: string): string | undefined => (val === '') ? undefined : val
             this.language = args[LocaleInfoKeys.LANG]
             this.script = getValue(args[LocaleInfoKeys.SCRIPT])
             this.region = getValue(args[LocaleInfoKeys.COUNTRY])
@@ -1796,12 +1796,12 @@ export class DateTimeFormat {
             this.collation = getValue(args[LocaleInfoKeys.U_CO])
             this.numberingSystem = getValue(args[LocaleInfoKeys.U_NU])
             this.hourCycle = getValue(args[LocaleInfoKeys.U_HC])
-            this.numeric = (args[LocaleInfoKeys.U_KN] == "true") ? true : false
+            this.numeric = (args[LocaleInfoKeys.U_KN] == 'true') ? true : false
             this.caseFirst = getValue(args[LocaleInfoKeys.U_KF])
 
-            if (this.tag.includes("-u")) {
+            if (this.tag.includes('-u')) {
                if (this.language != undefined && !this.langList().includes(this.language as string)) {
-                    throw new RangeError("Incorrect locale information provided")
+                    throw new RangeError('Incorrect locale information provided')
                }
             }
             this.fillBaseName()
@@ -1833,51 +1833,51 @@ export class DateTimeFormat {
         }
 
         private static readonly calendarValues: ReadonlyArray<string> = Array.of<string> (
-            "buddhist",
-            "chinese",
-            "coptic",
-            "dangi",
-            "ethioaa",
-            "ethiopic",
-            "gregory",
-            "hebrew",
-            "indian",
-            "islamic",
-            "islamic-umalqura",
-            "islamic-tbla",
-            "islamic-civil",
-            "islamic-rgsa",
-            "iso8601",
-            "japanese",
-            "persian",
-            "roc",
-            "islamicc"
+            'buddhist',
+            'chinese',
+            'coptic',
+            'dangi',
+            'ethioaa',
+            'ethiopic',
+            'gregory',
+            'hebrew',
+            'indian',
+            'islamic',
+            'islamic-umalqura',
+            'islamic-tbla',
+            'islamic-civil',
+            'islamic-rgsa',
+            'iso8601',
+            'japanese',
+            'persian',
+            'roc',
+            'islamicc'
         )
 
-        private static readonly caseFirstValues: ReadonlyArray<string> = Array.of<string>("upper", "lower", "false")
+        private static readonly caseFirstValues: ReadonlyArray<string> = Array.of<string>('upper', 'lower', 'false')
 
-        private static readonly hourCycleValues: ReadonlyArray<string> = Array.of<string>("h12", "h23", "h11", "h24")
+        private static readonly hourCycleValues: ReadonlyArray<string> = Array.of<string>('h12', 'h23', 'h11', 'h24')
 
         private static readonly collationValues: ReadonlyArray<string> = Array.of<string>(
-            "big5han",
-            "compat",
-            "dict",
-            "direct",
-            "ducet",
-            "emoji",
-            "eor",
-            "gb2312",
-            "phonebk",
-            "phonetic",
-            "pinyin",
-            "reformed",
-            "search",
-            "searchjl",
-            "standard",
-            "stroke",
-            "trad",
-            "unihan",
-            "zhuyin"
+            'big5han',
+            'compat',
+            'dict',
+            'direct',
+            'ducet',
+            'emoji',
+            'eor',
+            'gb2312',
+            'phonebk',
+            'phonetic',
+            'pinyin',
+            'reformed',
+            'search',
+            'searchjl',
+            'standard',
+            'stroke',
+            'trad',
+            'unihan',
+            'zhuyin'
         )
     }
 
@@ -1886,12 +1886,12 @@ export class DateTimeFormat {
     export class NumberRangeFormatPart {
         type: NumberFormatPartTypes;
         value: string;
-        source: "startRange" | "endRange" | "shared"
+        source: 'startRange' | 'endRange' | 'shared'
 
         public constructor(
             type: NumberFormatPartTypes,
             value: string,
-            source: "startRange" | "endRange" | "shared")
+            source: 'startRange' | 'endRange' | 'shared')
         {
             this.type = type;
             this.value = value;
@@ -1915,41 +1915,41 @@ export class DateTimeFormat {
     }
 
     export interface NumberFormatOptions {
-        compactDisplay?: "short" | "long";
+        compactDisplay?: 'short' | 'long';
         currency?: string;
-        currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
-        currencySign?: "standard" | "accounting"
-        localeMatcher?: "lookup" | "best fit"
+        currencyDisplay?: 'code' | 'symbol' | 'narrowSymbol' | 'name'
+        currencySign?: 'standard' | 'accounting'
+        localeMatcher?: 'lookup' | 'best fit'
         maximumFractionDigits?: int
         maximumSignificantDigits?: int
         minimumFractionDigits?: int
         minimumIntegerDigits?: int
         minimumSignificantDigits?: int
-        notation?: "standard" | "scientific" | "engineering" | "compact"
-        signDisplay?: "auto" | "never" | "always" | "exceptZero"
-        style?: "decimal" | "percent" | "currency" | "unit"
+        notation?: 'standard' | 'scientific' | 'engineering' | 'compact'
+        signDisplay?: 'auto' | 'never' | 'always' | 'exceptZero'
+        style?: 'decimal' | 'percent' | 'currency' | 'unit'
         unit?: string
-        unitDisplay?: "short" | "long" | "narrow"
+        unitDisplay?: 'short' | 'long' | 'narrow'
         useGrouping?: boolean;
     }
 
     export interface ResolvedNumberFormatOptions {
-        compactDisplay?: "short" | "long"
-        currencySign?: "standard" | "accounting"
+        compactDisplay?: 'short' | 'long'
+        currencySign?: 'standard' | 'accounting'
         currency?: string
-        currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
+        currencyDisplay?: 'code' | 'symbol' | 'narrowSymbol' | 'name'
         locale: Intl.BCP47LanguageTag;
         maximumFractionDigits: int
         maximumSignificantDigits?: int
         minimumFractionDigits: int
         minimumIntegerDigits: int
         minimumSignificantDigits?: int
-        notation?: "standard" | "scientific" | "engineering" | "compact"
+        notation?: 'standard' | 'scientific' | 'engineering' | 'compact'
         numberingSystem: string
-        signDisplay?: "auto" | "never" | "always" | "exceptZero"
-        style: "decimal" | "percent" | "currency" | "unit"
+        signDisplay?: 'auto' | 'never' | 'always' | 'exceptZero'
+        style: 'decimal' | 'percent' | 'currency' | 'unit'
         unit?: string
-        unitDisplay?: "short" | "long" | "narrow"
+        unitDisplay?: 'short' | 'long' | 'narrow'
         useGrouping: boolean
     }
 
@@ -1962,37 +1962,37 @@ export class DateTimeFormat {
         public useGroupingStr: string;
         public isCompact: boolean;
 
-        public _compactDisplay?: "short" | "long";
-        public _currencySign?: "standard" | "accounting";
+        public _compactDisplay?: 'short' | 'long';
+        public _currencySign?: 'standard' | 'accounting';
         public _currency?: string;
-        public _currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name";
+        public _currencyDisplay?: 'code' | 'symbol' | 'narrowSymbol' | 'name';
         public _locale: Intl.BCP47LanguageTag;
         public _maximumFractionDigits: int;
         public _maximumSignificantDigits?: int;
         public _minimumFractionDigits: int;
         public _minimumIntegerDigits: int;
         public _minimumSignificantDigits?: int;
-        public _notation?: "standard" | "scientific" | "engineering" | "compact";
+        public _notation?: 'standard' | 'scientific' | 'engineering' | 'compact';
         public _numberingSystem: string;
-        public _signDisplay?: "auto" | "never" | "always" | "exceptZero";
-        public _style: "decimal" | "percent" | "currency" | "unit";
+        public _signDisplay?: 'auto' | 'never' | 'always' | 'exceptZero';
+        public _style: 'decimal' | 'percent' | 'currency' | 'unit';
         public _unit?: string;
-        public _unitDisplay?: "short" | "long" | "narrow";
+        public _unitDisplay?: 'short' | 'long' | 'narrow';
         public _useGrouping: boolean;
 
-        set compactDisplay(value: "short" | "long" | undefined) {
+        set compactDisplay(value: 'short' | 'long' | undefined) {
             this._compactDisplay = value;
         }
 
-        get compactDisplay(): "short" | "long" | undefined {
+        get compactDisplay(): 'short' | 'long' | undefined {
             return this._compactDisplay;
         }
 
-        set currencySign(value: "standard" | "accounting" | undefined) {
+        set currencySign(value: 'standard' | 'accounting' | undefined) {
             this._currencySign = value;
         }
 
-        get currencySign(): "standard" | "accounting" | undefined {
+        get currencySign(): 'standard' | 'accounting' | undefined {
             return this._currencySign;
         }
 
@@ -2004,11 +2004,11 @@ export class DateTimeFormat {
             return this._currency;
         }
 
-        set currencyDisplay(value: "code" | "symbol" | "narrowSymbol" | "name" | undefined) {
+        set currencyDisplay(value: 'code' | 'symbol' | 'narrowSymbol' | 'name' | undefined) {
             this._currencyDisplay = value;
         }
 
-        get currencyDisplay(): "code" | "symbol" | "narrowSymbol" | "name" | undefined {
+        get currencyDisplay(): 'code' | 'symbol' | 'narrowSymbol' | 'name' | undefined {
             return this._currencyDisplay;
         }
 
@@ -2060,11 +2060,11 @@ export class DateTimeFormat {
             return this._minimumSignificantDigits;
         }
 
-        set notation(value: "standard" | "scientific" | "engineering" | "compact" | undefined) {
+        set notation(value: 'standard' | 'scientific' | 'engineering' | 'compact' | undefined) {
             this._notation = value;
         }
 
-        get notation(): "standard" | "scientific" | "engineering" | "compact" | undefined {
+        get notation(): 'standard' | 'scientific' | 'engineering' | 'compact' | undefined {
             return this._notation;
         }
 
@@ -2076,19 +2076,19 @@ export class DateTimeFormat {
             return this._numberingSystem;
         }
 
-        set signDisplay(value: "auto" | "never" | "always" | "exceptZero" | undefined) {
+        set signDisplay(value: 'auto' | 'never' | 'always' | 'exceptZero' | undefined) {
             this._signDisplay = value;
         }
 
-        get signDisplay(): "auto" | "never" | "always" | "exceptZero" | undefined {
+        get signDisplay(): 'auto' | 'never' | 'always' | 'exceptZero' | undefined {
             return this._signDisplay;
         }
 
-        set style(value: "decimal" | "percent" | "currency" | "unit") {
+        set style(value: 'decimal' | 'percent' | 'currency' | 'unit') {
             this._style = value;
         }
 
-        get style(): "decimal" | "percent" | "currency" | "unit" {
+        get style(): 'decimal' | 'percent' | 'currency' | 'unit' {
             return this._style;
         }
 
@@ -2100,11 +2100,11 @@ export class DateTimeFormat {
             return this._unit;
         }
 
-        set unitDisplay(value: "short" | "long" | "narrow" | undefined) {
+        set unitDisplay(value: 'short' | 'long' | 'narrow' | undefined) {
             this._unitDisplay = value;
         }
 
-        get unitDisplay(): "short" | "long" | "narrow" | undefined {
+        get unitDisplay(): 'short' | 'long' | 'narrow' | undefined {
             return this._unitDisplay;
         }
 
@@ -2144,17 +2144,17 @@ export class DateTimeFormat {
         }
     }
 
-    const Currencies: ReadonlyArray<string> = Array.of<string>("AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD",
-        "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BTN", "BWP", "BYN",
-        "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD",
-        "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL",
-        "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "IQD", "IRR", "ISK", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF",
-        "KPW", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK",
-        "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR",
-        "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SDG",
-        "SEK", "SGD", "SHP", "SLL", "SOS", "SRD", "SSP", "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP",
-        "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XCD", "XDR",
-        "XOF", "XPF", "XSU", "YER", "ZAR", "ZMW", "ZWL")
+    const Currencies: ReadonlyArray<string> = Array.of<string>('AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD',
+        'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN',
+        'BZD', 'CAD', 'CDF', 'CHF', 'CLP', 'CNY', 'COP', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD',
+        'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL',
+        'HRK', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF',
+        'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK',
+        'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR',
+        'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG',
+        'SEK', 'SGD', 'SHP', 'SLL', 'SOS', 'SRD', 'SSP', 'STN', 'SVC', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP',
+        'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'UYU', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XDR',
+        'XOF', 'XPF', 'XSU', 'YER', 'ZAR', 'ZMW', 'ZWL')
     const RefCurrenciesMap: Map<string, number> = new Map<string, number>()
     Currencies.forEach((value, index) => { RefCurrenciesMap.set(value, index) })
 
@@ -2173,7 +2173,7 @@ export class DateTimeFormat {
 
             if (locales == undefined) {
                 if (options != undefined) {
-                    throw new Error("Incorrect locale information provided")
+                    throw new Error('Incorrect locale information provided')
                 }
             } else {
                 let loc: Array<string>
@@ -2182,13 +2182,13 @@ export class DateTimeFormat {
                 } else {
                     loc = Array.from<string>(locales! as string[])
                 }
-                if (loc.includes("") && options != undefined) {
-                    throw new Error("Incorrect locale information provided")
+                if (loc.includes('') && options != undefined) {
+                    throw new Error('Incorrect locale information provided')
                 }
             }
 
-            let locMatcher = options?.localeMatcher ?? "best fit"
-            this.options.locale = locMatcher == "lookup" ? intlLookUpLocale(locales ?? "") : intlBestFitLocale(locales ?? "")
+            let locMatcher = options?.localeMatcher ?? 'best fit'
+            this.options.locale = locMatcher == 'lookup' ? intlLookUpLocale(locales ?? '') : intlBestFitLocale(locales ?? '')
             if (options != undefined) {
                 const localOptions: Intl.NumberFormatOptions = options!; // It's used to reduce amount of calls options!
                 NumberFormat.checkOptions(localOptions)
@@ -2196,7 +2196,7 @@ export class DateTimeFormat {
                     this.options.style = localOptions.style!
 
                     // Handle percent style
-                    if (this.options.style == "percent") {
+                    if (this.options.style == 'percent') {
                         if (localOptions.maximumFractionDigits == undefined) {
                             this.options.maximumFractionDigits = 0
                         }
@@ -2209,12 +2209,12 @@ export class DateTimeFormat {
                     }
 
                     // Handle currency style
-                    if (this.options.style == "currency") {
+                    if (this.options.style == 'currency') {
                         if (localOptions.currencySign == undefined) {
-                            this.options.currencySign = "standard";
+                            this.options.currencySign = 'standard';
                         }
                         if (localOptions.currencyDisplay == undefined) {
-                            this.options.currencyDisplay = "symbol";
+                            this.options.currencyDisplay = 'symbol';
                         }
                         if (localOptions.minimumFractionDigits == undefined) {
                            this.options.minimumFractionDigits = this.currencyDigits(localOptions.currency);
@@ -2225,15 +2225,15 @@ export class DateTimeFormat {
                     }
 
                     // Handle unit style
-                    if (this.options.style == "unit") {
+                    if (this.options.style == 'unit') {
                         if (localOptions.unitDisplay == undefined) {
-                            this.options.unitDisplay = "short";
+                            this.options.unitDisplay = 'short';
                         }
                     }
                 }
 
                 // Handle notation compact
-                // roundingPriority is "auto" by default
+                // roundingPriority is 'auto' by default
                 const minFrac = localOptions.minimumFractionDigits
                 const maxFrac = localOptions.maximumFractionDigits
                 const minSign = localOptions.minimumSignificantDigits
@@ -2263,15 +2263,15 @@ export class DateTimeFormat {
 
                 // Additional handle useGrouping (begin)
                 if (localOptions.useGrouping == undefined) {
-                    this.options.useGroupingStr = this.options.isCompact ? "min2" : ""
+                    this.options.useGroupingStr = this.options.isCompact ? 'min2' : ''
                 } else if (this.options.useGrouping) {
-                    this.options.useGroupingStr = "true"
+                    this.options.useGroupingStr = 'true'
                 } else if (!this.options.useGrouping) {
-                    this.options.useGroupingStr = "false"
+                    this.options.useGroupingStr = 'false'
                 }
             } else {
                 // Additional handle useGrouping (end)
-                this.options.useGroupingStr = ""
+                this.options.useGroupingStr = ''
             }
 
             // Handle numberingSystem
@@ -2279,68 +2279,68 @@ export class DateTimeFormat {
 
             this.options.minFracStr = Number.toString(this.options.minimumFractionDigits)
             this.options.maxFracStr = Number.toString(this.options.maximumFractionDigits)
-            this.options.minSignStr = this.options.minimumSignificantDigits != undefined ? Number.toString(this.options.minimumSignificantDigits!) : ""
-            this.options.maxSignStr = this.options.maximumSignificantDigits != undefined ? Number.toString(this.options.maximumSignificantDigits!) : ""
+            this.options.minSignStr = this.options.minimumSignificantDigits != undefined ? Number.toString(this.options.minimumSignificantDigits!) : ''
+            this.options.maxSignStr = this.options.maximumSignificantDigits != undefined ? Number.toString(this.options.maximumSignificantDigits!) : ''
             this.options.minIntStr = Number.toString(this.options.minimumIntegerDigits)
         }
 
         private static checkOptions(options: NumberFormatOptions) {
             if (options.currency != undefined) {
                 if (!RefCurrenciesMap.has(options.currency!.toUpperCase())) {
-                    throw new RangeError("Invalid currency")
+                    throw new RangeError('Invalid currency')
                 }
             }
 
             if (options.unit != undefined) {
                 if (!NumberFormat.isUnitCorrect(options.unit!)) {
-                    throw new RangeError("Invalid unit")
+                    throw new RangeError('Invalid unit')
                 }
             }
 
             if (options.style != undefined) {
-                if ((options.style! == "unit") && (options.unit == undefined)) {
-                    throw new RangeError("Style is unit but unit is undefined")
+                if ((options.style! == 'unit') && (options.unit == undefined)) {
+                    throw new RangeError('Style is unit but unit is undefined')
                 }
-                if ((options.style! == "currency") && (options.currency == undefined)) {
-                    throw new RangeError("Style is currency but currency is undefined")
+                if ((options.style! == 'currency') && (options.currency == undefined)) {
+                    throw new RangeError('Style is currency but currency is undefined')
                 }
             }
 
             if (options.maximumFractionDigits != undefined) {
                 if (!(options.maximumFractionDigits! >= 0 && options.maximumFractionDigits! <= 100)) {
-                    throw new RangeError("Invalid maximumFractionDigits")
+                    throw new RangeError('Invalid maximumFractionDigits')
                 }
                 if (options.minimumFractionDigits != undefined) {
                     if (options.maximumFractionDigits! < options.minimumFractionDigits!) {
-                        throw new RangeError("Invalid maximumFractionDigits")
+                        throw new RangeError('Invalid maximumFractionDigits')
                     }
                 }
             }
             if ((options.minimumFractionDigits != undefined)
                 && !(options.minimumFractionDigits! >= 0 && options.minimumFractionDigits! <= 100)) {
-                throw new RangeError("Invalid minimumFractionDigits")
+                throw new RangeError('Invalid minimumFractionDigits')
             }
 
             if (options.maximumSignificantDigits != undefined) {
                 if (!(options.maximumSignificantDigits! >= 1 && options.maximumSignificantDigits! <= 21)) {
-                    throw new RangeError("Invalid maximumSignificantDigits")
+                    throw new RangeError('Invalid maximumSignificantDigits')
                 }
                 if (options.minimumFractionDigits != undefined) {
                     if ((options.minimumSignificantDigits != undefined) && options.maximumSignificantDigits! < options.minimumSignificantDigits!) {
-                        throw new RangeError("Invalid maximumSignificantDigits")
+                        throw new RangeError('Invalid maximumSignificantDigits')
                     }
                 }
             }
             if ((options.minimumSignificantDigits != undefined) && !(options.minimumSignificantDigits! >= 1 && options.minimumSignificantDigits! <= 21)) {
-                throw new RangeError("Invalid minimumSignificantDigits")
+                throw new RangeError('Invalid minimumSignificantDigits')
             }
 
             if ((options.minimumIntegerDigits != undefined) && !(options.minimumIntegerDigits! >= 1 && options.minimumIntegerDigits! <= 21)) {
-                throw new RangeError("Invalid minimumIntegerDigits")
+                throw new RangeError('Invalid minimumIntegerDigits')
             }
 
-            if (options.notation == "compact" && options.compactDisplay == undefined) {
-                throw new RangeError("Notaion is compact but compactDisplay is undefined")
+            if (options.notation == 'compact' && options.compactDisplay == undefined) {
+                throw new RangeError('Notaion is compact but compactDisplay is undefined')
             }
         }
 
@@ -2349,7 +2349,7 @@ export class DateTimeFormat {
         *
         * @param options options
         *
-        * @returns boolean true means notation is "compact". Otherwise, false
+        * @returns boolean true means notation is 'compact'. Otherwise, false
         */
         private static assignOptionsDefault(options?: NumberFormatOptions): ResolvedNumberFormatOptionsImpl {
             let newOptions = new ResolvedNumberFormatOptionsImpl
@@ -2376,16 +2376,16 @@ export class DateTimeFormat {
                     newOptions._minimumSignificantDigits = 1
                 }
             }
-            newOptions._notation = options?.notation ?? "standard"
-            if (newOptions._notation == "compact") {
-                newOptions._compactDisplay = options?.compactDisplay ?? "short"
+            newOptions._notation = options?.notation ?? 'standard'
+            if (newOptions._notation == 'compact') {
+                newOptions._compactDisplay = options?.compactDisplay ?? 'short'
                 newOptions.isCompact = true
             } else {
                 newOptions.isCompact = false
             }
-            newOptions._numberingSystem = "latn"
-            newOptions._signDisplay = options?.signDisplay ?? "auto"
-            newOptions._style = options?.style ?? "decimal"
+            newOptions._numberingSystem = 'latn'
+            newOptions._signDisplay = options?.signDisplay ?? 'auto'
+            newOptions._style = options?.style ?? 'decimal'
             newOptions._unit = options?.unit ?? undefined
             newOptions._unitDisplay = options?.unitDisplay ?? undefined
             newOptions._useGrouping = (options == undefined) ? true : (options!.useGrouping ?? true)
@@ -2459,13 +2459,13 @@ export class DateTimeFormat {
             if (start instanceof BigInt) {
                 isStartBigInt = true;
             } else if (isNaN(start as number)) {
-                throw new TypeError("Invalid start: NaN");
+                throw new TypeError('Invalid start: NaN');
             }
             let isEndBigInt: boolean = false;
             if (end instanceof BigInt) {
                 isEndBigInt = true;
             } else if (isNaN(end as number)) {
-                throw new TypeError("Invalid end: NaN");
+                throw new TypeError('Invalid end: NaN');
             }
 
             if (!isStartBigInt && !isEndBigInt) {
@@ -2493,13 +2493,13 @@ export class DateTimeFormat {
             if (start instanceof BigInt) {
                 isStartBigInt = true;
             } else if (isNaN(start as number)) {
-                throw new TypeError("Invalid start: NaN");
+                throw new TypeError('Invalid start: NaN');
             }
             let isEndBigInt: boolean = false;
             if (end instanceof BigInt) {
                 isEndBigInt = true;
             } else if (isNaN(end as number)) {
-                throw new TypeError("Invalid end: NaN");
+                throw new TypeError('Invalid end: NaN');
             }
 
             if (!isStartBigInt && !isEndBigInt) {
@@ -2549,17 +2549,17 @@ export class DateTimeFormat {
             if (options != undefined) {
                 NumberFormat.checkOptions(options!)
             }
-            let locMatcher = options?.localeMatcher ?? "best fit"
+            let locMatcher = options?.localeMatcher ?? 'best fit'
             let loc: Array<string>
             if (locales! instanceof string)
                 loc = Array.of<string>(locales! as string)
             else {
                 loc = Array.from<string>(locales! as string[])
             }
-            if (loc.includes("")) {
-                throw new Error("Incorrect locale information provided")
+            if (loc.includes('')) {
+                throw new Error('Incorrect locale information provided')
             }
-            return locMatcher == "best fit" ? intlBestFitLocales(loc) : intlLookUpLocales(loc)
+            return locMatcher == 'best fit' ? intlBestFitLocales(loc) : intlLookUpLocales(loc)
         }
 
         private readonly options: ResolvedNumberFormatOptionsImpl
@@ -2585,7 +2585,7 @@ export class DateTimeFormat {
     // Intl.PluralRules
 
     export interface PluralRulesOptions {
-        localeMatcher?: "lookup" | "best fit" | undefined
+        localeMatcher?: 'lookup' | 'best fit' | undefined
         type?: PluralRuleType | undefined
         minimumIntegerDigits?: int | undefined
         minimumFractionDigits?: int | undefined
@@ -2596,7 +2596,7 @@ export class DateTimeFormat {
 
     export interface ResolvedPluralRulesOptions {
         locale: string
-        localeMatcher: "lookup" | "best fit"
+        localeMatcher: 'lookup' | 'best fit'
         type: PluralRuleType
         minimumIntegerDigits: int
         minimumFractionDigits: int
@@ -2607,7 +2607,7 @@ export class DateTimeFormat {
     }
 
     export interface SupportedLocalesOfOptions {
-        localeMatcher?: "lookup" | "best fit" | undefined
+        localeMatcher?: 'lookup' | 'best fit' | undefined
     }
 
     export interface PluralRulesSelectOptions {
@@ -2636,8 +2636,8 @@ export class DateTimeFormat {
         get maximumSignificantDigits(): int { return this.maximumSignificantDigits_ }
         set maximumSignificantDigits(val: int) { this.maximumSignificantDigits_ = val}
 
-        private locale_: string = ""
-        private type_: string = ""
+        private locale_: string = ''
+        private type_: string = ''
         private minimumIntegerDigits_: int = 0
         private minimumFractionDigits_: int = 0
         private maximumFractionDigits_: int = 0
@@ -2649,9 +2649,9 @@ export class DateTimeFormat {
         private options : ResolvedPluralRulesOptions
 
         public constructor(locales?: string | FixedArray<string>, options?: PluralRulesOptions) {
-            const localeMatcher = options?.localeMatcher ?? "best fit"
+            const localeMatcher = options?.localeMatcher ?? 'best fit'
             const locale = this.resolveLocale(localeMatcher, locales)
-            const type: PluralRuleType = options?.type ?? "cardinal"
+            const type: PluralRuleType = options?.type ?? 'cardinal'
             const categories = PluralRules.getPluralCategories(locale, type) as FixedArray<LDMLPluralRule>
             this.options = {
                 locale: locale,
@@ -2669,12 +2669,12 @@ export class DateTimeFormat {
             }
         }
 
-        private resolveLocale(localeMatcher: "lookup" | "best fit", locales?: string | FixedArray<string>): string {
+        private resolveLocale(localeMatcher: 'lookup' | 'best fit', locales?: string | FixedArray<string>): string {
             if (locales === undefined) {
                 return Locale.defaultTag()
             }
             const arr = locales instanceof FixedArray<string> ? Array.from(locales) : [locales]
-            return localeMatcher === "lookup" ? intlLookUpLocale(arr) : intlBestFitLocale(arr)
+            return localeMatcher === 'lookup' ? intlLookUpLocale(arr) : intlBestFitLocale(arr)
         }
 
         public resolvedOptions(): ResolvedPluralRulesOptions {
@@ -2696,7 +2696,7 @@ export class DateTimeFormat {
 
         public static supportedLocalesOf(locales: string | FixedArray<string> | Array<string>, options?: SupportedLocalesOfOptions | PluralRulesOptions): string[] {
             const arr = PluralRules.toArray(locales)
-            return options?.localeMatcher === "lookup" ? intlLookUpLocales(arr) : intlBestFitLocales(arr)
+            return options?.localeMatcher === 'lookup' ? intlLookUpLocales(arr) : intlBestFitLocales(arr)
         }
 
         private static toArray(locales: string | FixedArray<string> | Array<string>): string[] {
@@ -2792,9 +2792,9 @@ export class DateTimeFormat {
             } else {
                 this.locale = undefined
             }
-            this.options = new ResolvedRelativeTimeFormatOptionsImpl(this.getLocale(), "latn")
-            this.options.numeric = options?.numeric ?? "always"
-            this.options.style = options?.style ?? "long"
+            this.options = new ResolvedRelativeTimeFormatOptionsImpl(this.getLocale(), 'latn')
+            this.options.numeric = options?.numeric ?? 'always'
+            this.options.style = options?.style ?? 'long'
         }
 
         public static $_invoke(locales?: string | string[], options?: RelativeTimeFormatOptions): RelativeTimeFormat {
@@ -2818,7 +2818,7 @@ export class DateTimeFormat {
         static supportedLocalesOf(locales: string | string[], options?: RelativeTimeFormatOptions): string[] {
             return RelativeTimeFormat.supportedLocalesOfImpl(
                 (locales instanceof string) ? [locales] : locales,
-                options ?? { numeric: "always", style: "long" } as RelativeTimeFormatOptions
+                options ?? { numeric: 'always', style: 'long' } as RelativeTimeFormatOptions
             )
         }
 
@@ -2826,7 +2826,7 @@ export class DateTimeFormat {
         private native getLocale(): string
 
         private static supportedLocalesOfImpl(locales: string[], options: RelativeTimeFormatOptions): string[] {
-            return options.localeMatcher === "lookup" ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
+            return options.localeMatcher === 'lookup' ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
         }
     }
 
@@ -2849,7 +2849,7 @@ export class DateTimeFormat {
         * Default constructor initializing with empty values
         */
         public constructor() {
-            this.cluster = "";
+            this.cluster = '';
             this.isWordLike = false;
             this.index = 0;
         }
@@ -2878,9 +2878,9 @@ export class DateTimeFormat {
     class SegmentDataImpl implements SegmentData {
         // Private backing fields
         private _index: int = 0;
-        private _input: string = "";
+        private _input: string = '';
         private _isWordLike?: boolean;
-        private _segment: string = "";
+        private _segment: string = '';
 
         /**
         * Constructor with optional parameters
@@ -2891,8 +2891,8 @@ export class DateTimeFormat {
         */
         constructor(index?: int, input?: string, segment?: string, isWordLike?: boolean) {
             this._index = index ?? 0;
-            this._input = input ?? "";
-            this._segment = segment ?? "";
+            this._input = input ?? '';
+            this._segment = segment ?? '';
             this._isWordLike = isWordLike;
         }
 
@@ -2989,7 +2989,7 @@ export class DateTimeFormat {
         ) {
             const picked = {localeMatcher: options?.localeMatcher}
                 as PickLocaleMatchSegmenterOptions;
-            const supported = Segmenter.supportedLocalesOf(locales ?? "", picked);
+            const supported = Segmenter.supportedLocalesOf(locales ?? '', picked);
             this._locale = supported.length > 0 ? supported[0] : Locale.defaultTag();
             this._granularity = options?.granularity ?? 'grapheme';
         }
@@ -3023,11 +3023,11 @@ export class DateTimeFormat {
         */
         private segmentWith(doc: string, granularity: 'grapheme' | 'word' | 'sentence'): Cluster[] {
             switch (granularity) {
-            case "word":
+            case 'word':
                 return Array.from<Cluster>(Segmenter.wordClusters(doc, this._locale))
-            case "sentence":
+            case 'sentence':
                 return Array.from<Cluster>(Segmenter.sentenceClusters(doc, this._locale))
-            case "grapheme":
+            case 'grapheme':
             default:
                 return Array.from<Cluster>(Segmenter.graphemeClusters(doc, this._locale))
             }
@@ -3092,7 +3092,7 @@ export class DateTimeFormat {
                 clusterData.index,
                 input,
                 clusterData.cluster,
-                granularity == "word"
+                granularity == 'word'
                             ? clusterData.isWordLike
                             : undefined
             )

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,19 @@
  */
 
 function main(): int {
-    let suite = new arktest.ArkTestsuite("Intl. NumberFormat numberingSystem ");
-    suite.addTest("testNumberingSystem ", testNumberingSystem);
+    let suite = new arktest.ArkTestsuite('Intl. NumberFormat numberingSystem ');
+    suite.addTest('testNumberingSystem ', testNumberingSystem);
     return suite.run();
 }
 
 function testNumberingSystem() {
-    const locales: string[] = [ "en-US", "zh", "ar-SA"];
-    const expected: string[] = [ "latn", "latn", "arab"];
+    const locales: string[] = [ 'en-US', 'zh', 'ar-SA'];
+    const expected: string[] = [ 'latn', 'latn', 'arab'];
     let i: int = 0;
     for (const l of locales) {
         const nf = new Intl.NumberFormat(l);
         const result = nf.resolvedOptions().numberingSystem;
-        arktest.assertEQ(expected[i], result, "#" + i + " test-case for " + l);
+        arktest.assertEQ(expected[i], result, '#' + i + ' test-case for ' + l);
         i++
     }
 }
