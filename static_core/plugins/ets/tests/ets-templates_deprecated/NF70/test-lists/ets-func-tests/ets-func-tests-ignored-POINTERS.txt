@@ -1,6 +1,3 @@
-#33473
-ets_func_tests/std/concurrency/AsyncMutexTest.ets
-
 #33581
 ets_func_tests/std/concurrency/AsyncLockTimeoutTest.ets
 

@@ -131,12 +131,10 @@ async function asyncCondVarTestNotifyWithoutWaiters() {
 
 async function main(): Promise<int> {
     let asyncCondVarTestsuite = new arktest.ArkTestsuite("asyncCondVarTestsuite");
-    let asyncCondVarTestsuiteDisabled = new arktest.ArkTestsuite("asyncCondVarTestsuite.DISABLED");
 
-    // NOTE(ypigunova): include testcase, when bug will be fixed #33591
-    asyncCondVarTestsuiteDisabled.addAsyncTest('asyncCondVarNotifyOneTest', asyncCondVarNotifyOneTest);
-    asyncCondVarTestsuiteDisabled.addAsyncTest('asyncCondVarTestNotifyWithoutWaiters', asyncCondVarTestNotifyWithoutWaiters);
-    asyncCondVarTestsuiteDisabled.addAsyncTest('asyncCondVarNotifyAllTest', asyncCondVarNotifyAllTest);
+    asyncCondVarTestsuite.addAsyncTest('asyncCondVarNotifyOneTest', asyncCondVarNotifyOneTest);
+    asyncCondVarTestsuite.addAsyncTest('asyncCondVarTestNotifyWithoutWaiters', asyncCondVarTestNotifyWithoutWaiters);
+    asyncCondVarTestsuite.addAsyncTest('asyncCondVarNotifyAllTest', asyncCondVarNotifyAllTest);
 
     return await asyncCondVarTestsuite.runAsync();
 }
