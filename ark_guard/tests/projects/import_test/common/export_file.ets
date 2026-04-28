@@ -76,7 +76,7 @@ class ClassType1 {
     }
 }
 
-class ClassType2{
+export class ClassType2{
     test(): String {
         return 'Hello World';
     }

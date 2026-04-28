@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-enum CNTR {one, two, three}
+export enum CNTR {one, two, three}
 
 export type COUNTER = CNTR

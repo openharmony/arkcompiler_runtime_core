@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@interface Anno2{}
+export @interface Anno2{}
 export namespace NS1{
     export namespace NS2{
     @interface Anno1{}

@@ -31,7 +31,7 @@ declare interface I0 {
 declare interface I1 {
     I1Method?(a: number): number;
 }
-declare class Base {
+export declare class Base {
     public get a(): number;
     public set a(value: number);
     public constructor(a: number);
@@ -68,10 +68,10 @@ export declare class CC2 {
 export declare class CC3 {
     constructor();
 }
-declare class CC4 {
+export declare class CC4 {
     constructor();
 }
-declare class CC5 {
+export declare class CC5 {
     constructor();
 }
 export declare class CP1 {
@@ -123,7 +123,7 @@ declare interface IP4 {
 }
 export declare interface IP5 {
 }
-declare class Want {
+export declare class Want {
     constructor();
 }
 export type ValueType = number | string | boolean | image.PixelMap | Want | ArrayBuffer | object | null | undefined;

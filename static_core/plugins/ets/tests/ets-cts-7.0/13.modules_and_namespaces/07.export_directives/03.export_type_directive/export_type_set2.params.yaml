@@ -35,7 +35,7 @@ cases:
     expected_out: "Warning W0000: Duplicated export aliases for 'D'."
   - description: '3. Repited Export type. Class.'
     data:
-      - 'class D {}'
+      - 'export class D {}'
     export_ex:
       - 'type S = D'
       - 'type A = D'

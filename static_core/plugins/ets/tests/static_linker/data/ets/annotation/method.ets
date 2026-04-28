@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@interface ClassAuthor {
+export @interface ClassAuthor {
     authorName: string
 }
 

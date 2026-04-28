@@ -14,8 +14,8 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export type directive, ClassA is exported as ClassB twice, therefore must fail
-tags: [compile-only, negative]
+desc: Export type directive, ClassA is exported as ClassB and must have its own export directive
+tags: [compile-only, positive]
 files:
 - ./class_a_as_b_twice.ets
 ---*/

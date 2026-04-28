@@ -27,7 +27,7 @@ class TestClass {
     testMethod(): void {}
 }
 
-class AliasClass {
+export class AliasClass {
     aliasClassMethod(): void {
         console.print('alias_class_method');
     }
