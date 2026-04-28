@@ -169,9 +169,10 @@ public:
     int32_t IndexOf(String *pattern, const LanguageContext &ctx, int pos = 0);
     int32_t LastIndexOf(String *pattern, const LanguageContext &ctx, int pos = INT32_MAX);
 
-    static int32_t IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx, int pos);
+    static int32_t IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx,
+                           ManagedThread *mThread, int pos);
     static int32_t LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx,
-                               int pos);
+                               ManagedThread *mThread, int pos);
 
     static int32_t Compare(VMHandle<String> &left, VMHandle<String> &right, const LanguageContext &ctx);
 
@@ -503,6 +504,11 @@ public:
             ark::mem::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
     }
 
+    const uint16_t *GetDataUtf16() const
+    {
+        return const_cast<String *>(this)->GetDataUtf16();
+    }
+
     uint16_t *GetTreeStringDataUtf16(PandaVector<uint16_t> &buf)
     {
         ASSERT_PRINT(IsTreeString(), "TreeString: only treeString can use utf16 interface");
@@ -523,6 +529,11 @@ public:
         std::vector<uint8_t> tmpBuf;
         return const_cast<uint8_t *>(
             ark::mem::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
+    }
+
+    const uint8_t *GetDataUtf8() const
+    {
+        return const_cast<String *>(this)->GetDataUtf8();
     }
 
     uint8_t *GetTreeStringDataUtf8(PandaVector<uint8_t> &buf)

@@ -1976,7 +1976,7 @@ def GenerateStringIndexOfStringPlain(string_compressed, key_compressed, cgmode =
     si := Phi(i, ii).word
     j1 := AddI(si).Imm(str_char_width).word
     # j1 is the offset in the string, last_si is the last offset of the overlaying key in the string.
-    last_si := SubI(Add(j1, key_end_offset).word).Imm(str_char_width).word
+    last_si := Add(si, key_end_offset).word
     # for (int k = 1; j < end && string[j] == key[k]; j++, k++) {}
     k1 := key_char_width
   Label(:KeyRestLoop)

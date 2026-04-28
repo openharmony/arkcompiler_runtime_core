@@ -29,7 +29,8 @@
 #include "libarkbase/utils/hash.h"
 #include "libarkbase/utils/span.h"
 #include "runtime/arch/memory_helpers.h"
-#include "runtime/coretypes/algorithm/knuth_morris_pratt.h"
+#include "runtime/coretypes/algorithm/safepointed_knuth_morris_pratt.h"
+#include "runtime/coretypes/algorithm/naive_index_of.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/runtime.h"
 #include "runtime/handle_base-inl.h"
@@ -535,75 +536,25 @@ String *String::CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHa
     return String::Cast(treeStr);
 }
 
-template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
-int32_t GetIndexOf(ark::common_vm::Span<const T1> lhs, ark::common_vm::Span<const T2> rhs, int pos, int max)
+template <typename Str>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
+int32_t GetIndexOf(Str &subj, Str &pattern, ManagedThread *mThread, int pos)
 {
+    ASSERT(subj.GetLength() >= pattern.GetLength());
+    auto max = static_cast<int32_t>(subj.GetLength() - pattern.GetLength());
     ASSERT(pos >= 0 && max >= pos);
-    return rhs.size() < String::KMP_MIN_PATTERN_LENGTH || max == pos
-               ? ark::mem::BaseString::IndexOf(lhs, rhs, pos, max)
-               : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.IndexOf(Span {lhs.begin(), lhs.end()}, pos);
+    return pattern.GetLength() < String::KMP_MIN_PATTERN_LENGTH || max == pos
+               ? algo::NaiveIndexOf(subj, pattern, mThread, pos, max)
+               : algo::KmpIndexOf(subj, pattern, mThread, pos);
 }
 
-template <typename Str>
-int32_t FastIndexOf(Str &lhs, Str &rhs, int pos)
+template <typename Str>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
+int32_t GetLastIndexOf(Str &subj, Str &pattern, ManagedThread *mThread, int pos)
 {
-    auto lhsCount = lhs.GetLength();
-    auto rhsCount = rhs.GetLength();
-    ASSERT(lhsCount >= rhsCount);
-
-    auto max = static_cast<int32_t>(lhsCount - rhsCount);
-    if (rhs.IsUtf8() && lhs.IsUtf8()) {
-        ark::common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        ark::common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return GetIndexOf(lhsSp, rhsSp, pos, max);
-    } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        ark::common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        ark::common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return GetIndexOf(lhsSp, rhsSp, pos, max);
-    } else if (rhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        ark::common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        ark::common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return GetIndexOf(lhsSp, rhsSp, pos, max);
-    } else {  // NOLINT(readability-else-after-return)
-        ark::common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        ark::common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return GetIndexOf(lhsSp, rhsSp, pos, max);
-    }
-}
-
-template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
-int32_t GetLastIndexOf(ark::common_vm::Span<const T1> lhs, ark::common_vm::Span<const T2> rhs, int pos)
-{
-    ASSERT(pos >= 0 && lhs.size() >= pos + rhs.size() && (lhs.size() != rhs.size() || pos == 0));
-    return rhs.size() < String::KMP_MIN_PATTERN_LENGTH || pos == 0
-               ? ark::mem::BaseString::LastIndexOf(lhs, rhs, pos)
-               : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.LastIndexOf(Span {lhs.begin(), lhs.end()}, pos);
-}
-
-template <typename Str>
-int32_t FastLastIndexOf(Str &lhs, Str &rhs, int pos)
-{
-    auto lhsCount = lhs.GetLength();
-    auto rhsCount = rhs.GetLength();
-    ASSERT(lhsCount >= rhsCount);
-
-    if (rhs.IsUtf8() && lhs.IsUtf8()) {
-        ark::common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        ark::common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return GetLastIndexOf(lhsSp, rhsSp, pos);
-    } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        ark::common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        ark::common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return GetLastIndexOf(lhsSp, rhsSp, pos);
-    } else if (rhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        ark::common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        ark::common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return GetLastIndexOf(lhsSp, rhsSp, pos);
-    } else {  // NOLINT(readability-else-after-return)
-        ark::common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        ark::common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return GetLastIndexOf(lhsSp, rhsSp, pos);
-    }
+    ASSERT(pos >= 0 && subj.GetLength() >= pos + pattern.GetLength() &&
+           (subj.GetLength() != pattern.GetLength() || pos == 0));
+    return pattern.GetLength() < String::KMP_MIN_PATTERN_LENGTH || pos == 0
+               ? algo::NaiveLastIndexOf(subj, pattern, mThread, pos)
+               : algo::KmpLastIndexOf(subj, pattern, mThread, pos);
 }
 
 int32_t String::IndexOf(String *pattern, const LanguageContext &ctx, int32_t pos)
@@ -621,15 +572,15 @@ int32_t String::IndexOf(String *pattern, const LanguageContext &ctx, int32_t pos
         return -1;
     }
 
+    auto *thread = ManagedThread::GetCurrent();
     if (this->IsLineString() && pattern->IsLineString()) {
-        return FastIndexOf(*this, *pattern, pos);
+        return GetIndexOf(*this, *pattern, thread, pos);
     }
 
-    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> receiver(thread, this);
     VMHandle<coretypes::String> search(thread, pattern);
-    return String::IndexOf(receiver, search, ctx, pos);
+    return String::IndexOf(receiver, search, ctx, thread, pos);
 }
 
 int32_t String::LastIndexOf(String *pattern, const LanguageContext &ctx, int32_t pos)
@@ -647,19 +598,20 @@ int32_t String::LastIndexOf(String *pattern, const LanguageContext &ctx, int32_t
         return pos;
     }
 
+    auto *thread = ManagedThread::GetCurrent();
     if (this->IsLineString() && pattern->IsLineString()) {
-        return FastLastIndexOf(*this, *pattern, pos);
+        return GetLastIndexOf(*this, *pattern, thread, pos);
     }
 
-    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> receiver(thread, this);
     VMHandle<coretypes::String> search(thread, pattern);
-    return String::LastIndexOf(receiver, search, ctx, pos);
+    return String::LastIndexOf(receiver, search, ctx, thread, pos);
 }
 
 /* static */
-int32_t String::IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx, int pos)
+int32_t String::IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx,
+                        ManagedThread *mThread, int pos)
 {
     auto *lhstring = receiver.GetPtr();
     auto *rhstring = search.GetPtr();
@@ -667,18 +619,19 @@ int32_t String::IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, co
         return -1;
     }
 
-    auto *thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    ASSERT(mThread == ManagedThread::GetCurrent());
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(mThread);
     FlatStringInfo lhs = FlatStringInfo::FlattenAllString(receiver, ctx);
-    VMHandle<String> string(thread, lhs.GetString());
+    VMHandle<String> string(mThread, lhs.GetString());
     FlatStringInfo rhs = FlatStringInfo::FlattenAllString(search, ctx);
     lhs.SetString(string.GetPtr());
 
-    return FastIndexOf(lhs, rhs, pos);
+    return GetIndexOf(lhs, rhs, mThread, pos);
 }
 
 /* static */
-int32_t String::LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx, int pos)
+int32_t String::LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx,
+                            ManagedThread *mThread, int pos)
 {
     auto *lhstring = receiver.GetPtr();
     auto *rhstring = search.GetPtr();
@@ -686,14 +639,14 @@ int32_t String::LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search
         return -1;
     }
 
-    auto thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    ASSERT(mThread == ManagedThread::GetCurrent());
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(mThread);
     FlatStringInfo lhs = FlatStringInfo::FlattenAllString(receiver, ctx);
-    VMHandle<String> string(thread, lhs.GetString());
+    VMHandle<String> string(mThread, lhs.GetString());
     FlatStringInfo rhs = FlatStringInfo::FlattenAllString(search, ctx);
     lhs.SetString(string.GetPtr());
 
-    return FastLastIndexOf(lhs, rhs, pos);
+    return GetLastIndexOf(lhs, rhs, mThread, pos);
 }
 
 /* static */
