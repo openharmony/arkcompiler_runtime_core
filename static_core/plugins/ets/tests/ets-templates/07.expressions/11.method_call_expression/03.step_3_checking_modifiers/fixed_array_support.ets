@@ -18,6 +18,10 @@ limitations under the License.
 desc: >-
     If the method call has the form typeReference.identifier, then the method
     must be declared static; a compile-time error occurs otherwise.
+{%- if c.expected_out %}
+tags: [compile-only, negative]
+expected_out: [{{c.expected_out}}]
+{%- endif %}
 ---*/
 
 {{c.decl}}
