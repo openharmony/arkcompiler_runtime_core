@@ -359,6 +359,35 @@ async function onEnqueuedNestedRunnerExecuteTest() {
     arktest.assertEQ(asyncResult, 'abc');
 }
 
+async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
+    let completedCount: int = 0;
+    let event = new Event();
+    let emptyFunc = () => {};
+
+    let asyncRunner: taskpool.AsyncRunner = new taskpool.AsyncRunner('async', 3, 3);
+    let mainTask: taskpool.Task = new taskpool.Task(emptyFunc);
+
+    mainTask.onEnqueued(() => {
+        let innerTask: taskpool.Task = new taskpool.Task(emptyFunc);
+        asyncRunner.execute(innerTask).then(() => {
+            completedCount++;
+            if (completedCount == 2) {
+                event.fire();
+            }
+        });
+    });
+
+    asyncRunner.execute(mainTask).then(() => {
+        completedCount++;
+        if (completedCount == 2) {
+            event.fire();
+        }
+    });
+
+    event.wait();
+    arktest.assertEQ(completedCount, 2);
+}
+
 async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -374,6 +403,7 @@ async function main(): Promise<int> {
         'pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
+    commonTaskSuite.addAsyncTest('asyncRunnerExecuteInOnEnqueuedNoDeadlock', asyncRunnerExecuteInOnEnqueuedNoDeadlock);
 
     let res = await commonTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
