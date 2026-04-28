@@ -20,9 +20,11 @@
 #include "file_writer.h"
 #include "pgo.h"
 
+#include <array>
 #include <list>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -34,6 +36,8 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
+    using BytecodeVersion = std::array<uint8_t, File::VERSION_SIZE>;
+
     explicit ItemContainer();
     ~ItemContainer() = default;
     NO_COPY_SEMANTIC(ItemContainer);
@@ -117,6 +121,11 @@ public:
     bool Write(Writer *writer);
 
     std::map<std::string, size_t> GetStat();
+
+    void SetBytecodeVersion(BytecodeVersion version)
+    {
+        bytecode_version_ = version;
+    }
 
     void DumpItemsStat(std::ostream &os) const;
 
@@ -640,6 +649,7 @@ private:
 
     BaseItem *end_;
     size_t indexed_item_count_ {0};
+    std::optional<BytecodeVersion> bytecode_version_;
 };
 
 }  // namespace panda::panda_file

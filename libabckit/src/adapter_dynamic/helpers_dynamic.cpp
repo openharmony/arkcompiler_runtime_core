@@ -26,8 +26,10 @@
 #include <codecvt>
 #include <locale>
 #endif
+#include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
@@ -270,7 +272,14 @@ const panda_file::File *EmitDynamicProgram(AbckitFile *file, pandasm::Program *p
         const panda_file::File *res {nullptr};
         if (!getFile) {
             std::map<std::string, size_t> *statp = nullptr;
-            if (!pandasm::AsmEmitter::Emit(std::string(path), *program, statp, mapsp)) {
+            std::optional<panda_file::ItemContainer::BytecodeVersion> bytecodeVersionOpt;
+            if (file->version != nullptr) {
+                panda_file::ItemContainer::BytecodeVersion bv {};
+                std::copy_n(file->version, bv.size(), bv.begin());
+                bytecodeVersionOpt = bv;
+            }
+            if (!pandasm::AsmEmitter::Emit(std::string(path), *program, statp, mapsp, true, nullptr,
+                                           bytecodeVersionOpt)) {
                 LIBABCKIT_LOG_NO_FUNC(DEBUG)
                     << "[EmitDynamicProgram] FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
                 statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);

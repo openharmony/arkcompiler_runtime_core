@@ -30,8 +30,10 @@
 #include "static_core/abc2program/abc2program_driver.h"
 #include "static_core/assembler/assembly-emitter.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <unordered_set>
@@ -1700,8 +1702,14 @@ void WriteAbcStatic(AbckitFile *file, const char *path, size_t len)
     auto emitDebugInfo = false;
     std::map<std::string, size_t> *statp = nullptr;
     ark::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = nullptr;
+    std::optional<panda_file::ItemContainer::BytecodeVersion> bytecodeVersionOpt;
+    if (file->version != nullptr) {
+        panda_file::ItemContainer::BytecodeVersion bv {};
+        std::copy_n(file->version, bv.size(), bv.begin());
+        bytecodeVersionOpt = bv;
+    }
 
-    if (!pandasm::AsmEmitter::Emit(spath, *program, statp, mapsp, emitDebugInfo)) {
+    if (!pandasm::AsmEmitter::Emit(spath, *program, statp, mapsp, emitDebugInfo, nullptr, bytecodeVersionOpt)) {
         LIBABCKIT_LOG(ERROR) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return;

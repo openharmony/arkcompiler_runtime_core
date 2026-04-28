@@ -17,6 +17,7 @@
 #define ASSEMBLER_ASSEMBLY_EMITTER_H
 
 #include <memory>
+#include <optional>
 #include <type_traits>
 #include <vector>
 #include <unordered_map>
@@ -62,12 +63,23 @@ public:
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
                                       panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr, uint8_t api = 0,
                                       std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
+    PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, const Program &program,
+                                      std::map<std::string, size_t> *stat, PandaFileToPandaAsmMaps *maps,
+                                      bool debug_info, panda::panda_file::pgo::ProfileOptimizer *profile_opt,
+                                      std::optional<panda_file::ItemContainer::BytecodeVersion> bytecodeVersion);
 
     PANDA_PUBLIC_API static bool Emit(const std::string &filename, const Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
                                       panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr, uint8_t api = 0,
                                       std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
+    PANDA_PUBLIC_API static bool Emit(const std::string &filename, const Program &program,
+                                      std::map<std::string, size_t> *stat, PandaFileToPandaAsmMaps *maps,
+                                      bool debug_info, panda::panda_file::pgo::ProfileOptimizer *profile_opt,
+                                      std::optional<panda_file::ItemContainer::BytecodeVersion> bytecodeVersion);
+
     // The function releases the data in progs in advance for the sake of the peak memory at compiler time.
     static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
                              const EmitterConfig &emitterConfig = EmitterConfig {},
