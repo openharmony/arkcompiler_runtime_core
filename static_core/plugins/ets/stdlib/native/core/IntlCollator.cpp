@@ -34,24 +34,30 @@
 namespace ark::ets::stdlib::intl {
 
 // https://stackoverflow.com/questions/2992066/code-to-strip-diacritical-marks-using-icu
+static icu::Transliterator *GetAccentsTransliterator()
+{
+    // thread_local: Transliterator is not thread-safe, so each thread gets its own instance.
+    // Created once per thread instead of once per call (avoids expensive rule parsing).
+    thread_local icu::Transliterator *instance = nullptr;
+    if (instance == nullptr) {
+        UErrorCode s = U_ZERO_ERROR;
+        instance = icu::Transliterator::createInstance("NFD; [:M:] Remove; NFC", UTRANS_FORWARD, s);
+    }
+    return instance;
+}
+
 std::string RemoveAccents(ani_env *env, const std::string &str)
 {
-    // UTF-8 std::string -> UTF-16 UnicodeString
     icu::UnicodeString source = icu::UnicodeString::fromUTF8(icu::StringPiece(str));
 
-    // Transliterate UTF-16 UnicodeString
-    UErrorCode status = U_ZERO_ERROR;
-    icu::Transliterator *accentsConverter =
-        icu::Transliterator::createInstance("NFD; [:M:] Remove; NFC", UTRANS_FORWARD, status);
-    accentsConverter->transliterate(source);
-    delete accentsConverter;
-    if (UNLIKELY(U_FAILURE(status))) {
+    icu::Transliterator *accentsConverter = GetAccentsTransliterator();
+    if (UNLIKELY(accentsConverter == nullptr)) {
         ThrowNewError(env, "std.core.RuntimeError", "Removing accents failed, transliterate failed",
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return std::string();
     }
+    accentsConverter->transliterate(source);
 
-    // UTF-16 UnicodeString -> UTF-8 std::string
     std::string result;
     source.toUTF8String(result);
 

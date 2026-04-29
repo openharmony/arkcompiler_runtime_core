@@ -212,18 +212,20 @@ export namespace Intl {
             usage: "sort"}
 
             this.options.collation = "default"
-            try {
-                let l = Collator.supportedLocalesOf((locales == undefined) ? "" : locales, options)
-                if (l.length > 0) {
-                    this.options.locale = l[0]
-                    let locale = new Intl.Locale(l[0])
-                    this.options.collation = locale.collation != undefined ? locale.collation! : this.options.collation
-                    this.options.numeric = locale.numeric != undefined ? locale.numeric! : this.options.numeric
-                    this.options.caseFirst = locale.caseFirst != undefined ? locale.caseFirst! : this.options.caseFirst
+            if (locales != undefined) {
+                try {
+                    let l = Collator.supportedLocalesOf(locales, options)
+                    if (l.length > 0) {
+                        this.options.locale = l[0]
+                        let locale = new Intl.Locale(l[0])
+                        this.options.collation = locale.collation != undefined ? locale.collation! : this.options.collation
+                        this.options.numeric = locale.numeric != undefined ? locale.numeric! : this.options.numeric
+                        this.options.caseFirst = locale.caseFirst != undefined ? locale.caseFirst! : this.options.caseFirst
+                    }
                 }
-            }
-            catch(e) {
-                throw new RangeError("Incorrect locales " + locales);
+                catch(e) {
+                    throw new RangeError("Incorrect locales " + locales);
+                }
             }
 
             if (options != undefined) {
