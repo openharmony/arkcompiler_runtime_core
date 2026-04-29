@@ -1,0 +1,162 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/ark_config.gni")
+
+declare_args() {
+  # Keep behavior aligned with CMake default in this repo:
+  # by default, skip version gate to allow verifying older ABC versions.
+  static_abc_verifier_skip_version_check = true
+
+  # Deep structural verification relies on libarkfile accessors and extra sources.
+  # Keep OFF by default to preserve the lightweight, self-contained build.
+  static_abc_verifier_use_arkfile = false
+
+  # JNI build is intentionally OFF by default. It requires a JDK/JNI environment
+  # and is typically built as part of platform-specific workflows.
+  static_abc_verifier_build_jni = false
+
+  # Extra include directories for JNI headers (e.g. jni.h). Safe to set even when
+  # static_abc_verifier_build_jni is false.
+  static_abc_verifier_jni_include_dirs = []
+}
+
+static_abc_verifier_core_sources = [
+  "src/abc_file.cpp",
+  "src/verifier.cpp",
+  "src/verify_api.cpp",
+]
+
+static_abc_verifier_defines = []
+static_abc_verifier_deps = []
+static_abc_verifier_external_deps = []
+
+if (static_abc_verifier_skip_version_check) {
+  static_abc_verifier_defines += [ "STATIC_ABC_VERIFIER_SKIP_VERSION_CHECK" ]
+}
+
+if (static_abc_verifier_use_arkfile) {
+  static_abc_verifier_core_sources += [ "src/verifier_deep.cpp" ]
+  static_abc_verifier_defines += [ "STATIC_ABC_VERIFIER_USE_ARKFILE" ]
+
+  # These are required by verifier_deep.cpp when linking against ArkFile.
+  static_abc_verifier_defines += [
+    "PANDA_TARGET_UNIX",
+    "PANDA_TARGET_LINUX",
+    "PANDA_TARGET_64",
+  ]
+
+  static_abc_verifier_deps += [
+    "$ark_root/libpandafile:libarkfile",
+    "$ark_root/libpandabase:libarkbase",
+    "$ark_root/libziparchive:libarkziparchive",
+  ]
+  static_abc_verifier_external_deps += [ sdk_libc_secshared_dep ]
+}
+
+config("static_abc_verifier_public_config") {
+  include_dirs = [ "$ark_root/verifier/static_abc_verifier/src" ]
+  defines = static_abc_verifier_defines
+}
+
+static_abc_verifier_configs = [
+  "$ark_root:ark_config",
+  ":static_abc_verifier_public_config",
+]
+
+ohos_static_library("static_abc_verifier_static") {
+  sources = static_abc_verifier_core_sources
+  include_dirs = [ "$ark_root/verifier/static_abc_verifier/src" ]
+
+  configs = static_abc_verifier_configs
+  public_configs = [ ":static_abc_verifier_public_config" ]
+
+  deps = static_abc_verifier_deps
+  external_deps = static_abc_verifier_external_deps
+
+  if (is_mingw || is_win) {
+    output_extension = "lib"
+  } else {
+    output_extension = "a"
+  }
+
+  complete_static_lib = true
+  output_name = "staticabcverifier"
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+ohos_shared_library("static_abc_verifier_shared") {
+  sources = static_abc_verifier_core_sources
+  include_dirs = [ "$ark_root/verifier/static_abc_verifier/src" ]
+
+  configs = static_abc_verifier_configs
+  public_configs = [ ":static_abc_verifier_public_config" ]
+
+  deps = static_abc_verifier_deps
+  external_deps = static_abc_verifier_external_deps
+
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
+
+  output_name = "staticabcverifier"
+
+  install_enable = true
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+ohos_executable("static_abc_verifier") {
+  sources = [ "src/main.cpp" ]
+  deps = [ ":static_abc_verifier_static" ]
+
+  configs = static_abc_verifier_configs
+  install_enable = true
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+if (static_abc_verifier_build_jni) {
+  # NOTE: JNI include discovery is environment-specific. Provide a build target
+  # that can be wired up by downstream GN args (e.g. jni_include_dirs) when needed.
+  ohos_shared_library("static_abc_verifier_jni") {
+    sources = [ "jni/static_abc_verifier_jni.cpp" ] + static_abc_verifier_core_sources
+    include_dirs = [
+      "$ark_root/verifier/static_abc_verifier/src",
+    ] + static_abc_verifier_jni_include_dirs
+
+    configs = static_abc_verifier_configs
+    public_configs = [ ":static_abc_verifier_public_config" ]
+
+    deps = static_abc_verifier_deps
+    external_deps = static_abc_verifier_external_deps
+
+    if (is_mingw || is_win) {
+      output_extension = "dll"
+    } else {
+      output_extension = "so"
+    }
+
+    output_name = "staticabcverifier_jni"
+
+    install_enable = false
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}
+

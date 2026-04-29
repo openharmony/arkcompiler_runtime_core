@@ -1,0 +1,2 @@
+# Local toolchain cache (bootstrap Maven when `mvn` is not installed)
+.tools/
