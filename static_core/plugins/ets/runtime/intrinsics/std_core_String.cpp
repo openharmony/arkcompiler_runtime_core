@@ -386,14 +386,22 @@ EtsInt StdCoreStringLastIndexOf(EtsString *s, uint16_t ch, EtsInt fromIndex)
 
 EtsInt StdCoreStringIndexOfString(EtsString *thisStr, EtsString *patternStr, EtsInt fromIndex)
 {
-    ASSERT(thisStr != nullptr && patternStr != nullptr);
+    ASSERT(thisStr != nullptr);
+    if (UNLIKELY(patternStr == nullptr)) {
+        ThrowNullPointerException();
+        return EtsInt {};
+    }
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     return thisStr->GetCoreType()->IndexOf(patternStr->GetCoreType(), ctx, fromIndex);
 }
 
 EtsInt StdCoreStringLastIndexOfString(EtsString *thisStr, EtsString *patternStr, EtsInt fromIndex)
 {
-    ASSERT(thisStr != nullptr && patternStr != nullptr);
+    ASSERT(thisStr != nullptr);
+    if (UNLIKELY(patternStr == nullptr)) {
+        ThrowNullPointerException();
+        return EtsInt {};
+    }
     // "abc".lastIndexOf("ab", -10) will return 0
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     return thisStr->GetCoreType()->LastIndexOf(patternStr->GetCoreType(), ctx, std::max(fromIndex, 0));

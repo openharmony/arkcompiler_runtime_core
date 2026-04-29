@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -427,6 +427,24 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
     return true;
 }
 
+llvm::Value *LLVMIrConstructor::CreateStringIndexOfString(Inst *inst, RuntimeInterface::EntrypointId entrypointId)
+{
+    ASSERT(inst->GetInputsCount() == 4U && inst->RequireState());
+    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
+    auto *str = GetInputValue(inst, 0);
+    auto *key = GetInputValue(inst, 1);
+    auto *pos = GetInputValue(inst, 2);
+    auto *zero = GetBuilder()->getInt32(0);
+    return CreateFastPathCall(inst, entrypointId, {str, key, pos, zero, zero});
+}
+
+bool LLVMIrConstructor::EmitStringIndexOfString(Inst *inst)
+{
+    const auto entrypointId = RuntimeInterface::EntrypointId::STRING_INDEX_OF_STRING;
+    ValueMapAdd(inst, CreateStringIndexOfString(inst, entrypointId));
+    return true;
+}
+
 bool LLVMIrConstructor::EmitStringLastIndexOf(Inst *inst)
 {
     auto arch = GetGraph()->GetArch();
@@ -479,6 +497,13 @@ bool LLVMIrConstructor::EmitStringLastIndexOf(Inst *inst)
     charIndex->addIncoming(charIndex2, chkEmptyBb);
     charIndex->addIncoming(charIndex3, callBb);
     ValueMapAdd(inst, charIndex);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringLastIndexOfString(Inst *inst)
+{
+    const auto entrypointId = RuntimeInterface::EntrypointId::STRING_LAST_INDEX_OF_STRING;
+    ValueMapAdd(inst, CreateStringIndexOfString(inst, entrypointId));
     return true;
 }
 

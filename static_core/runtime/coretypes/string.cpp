@@ -535,20 +535,11 @@ String *String::CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHa
     return String::Cast(treeStr);
 }
 
-namespace {
-// The prefix-function is stored in the state and takes O(|pattern|) space. For patterns below this length, the shift
-// of KMP is too short to compensate for the time required to allocate/deallocate the prefix-function.
-//
-// Performance measurement on the device demonstrates that `KMP_MIN_PATTERN_LENGTH` it the correct threshold.
-constexpr int32_t KMP_MIN_PATTERN_LENGTH = 10;
-
-}  // namespace
-
 template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
 int32_t GetIndexOf(common_vm::Span<const T1> lhs, common_vm::Span<const T2> rhs, int pos, int max)
 {
     ASSERT(pos >= 0 && max >= pos);
-    return rhs.size() < KMP_MIN_PATTERN_LENGTH || max == pos
+    return rhs.size() < String::KMP_MIN_PATTERN_LENGTH || max == pos
                ? common_vm::BaseString::IndexOf(lhs, rhs, pos, max)
                : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.IndexOf(Span {lhs.begin(), lhs.end()}, pos);
 }
@@ -584,7 +575,7 @@ template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, 
 int32_t GetLastIndexOf(common_vm::Span<const T1> lhs, common_vm::Span<const T2> rhs, int pos)
 {
     ASSERT(pos >= 0 && lhs.size() >= pos + rhs.size() && (lhs.size() != rhs.size() || pos == 0));
-    return rhs.size() < KMP_MIN_PATTERN_LENGTH || pos == 0
+    return rhs.size() < String::KMP_MIN_PATTERN_LENGTH || pos == 0
                ? common_vm::BaseString::LastIndexOf(lhs, rhs, pos)
                : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.LastIndexOf(Span {lhs.begin(), lhs.end()}, pos);
 }

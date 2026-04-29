@@ -580,6 +580,23 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
     enc->BindLabel(charNotFoundLabel);
 }
 
+void Codegen::CreateStringIndexOfLastIndexOfString(IntrinsicInst *inst, RuntimeInterface::EntrypointId entrypointId,
+                                                   Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 4U && inst->RequireState());
+    ASSERT(IsCompressedStringsEnabled());
+    auto subject = src[Codegen::FIRST_OPERAND];
+    auto pattern = src[SECOND_OPERAND];
+    auto startIndex = src[THIRD_OPERAND];
+    auto unused = TypedImm(0);
+    CallFastPath(inst, entrypointId, dst, {}, subject, pattern, startIndex, unused, unused);
+}
+
+void Codegen::CreateStringIndexOfString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    CreateStringIndexOfLastIndexOfString(inst, RuntimeInterface::EntrypointId::STRING_INDEX_OF_STRING, dst, src);
+}
+
 void Codegen::CreateStringLastIndexOf(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
@@ -616,6 +633,11 @@ void Codegen::CreateStringLastIndexOf(IntrinsicInst *inst, Reg dst, SRCREGS src)
     enc->BindLabel(notFoundLabel);
     enc->EncodeMov(dst, Imm(-1));
     enc->BindLabel(retLabel);
+}
+
+void Codegen::CreateStringLastIndexOfString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    CreateStringIndexOfLastIndexOfString(inst, RuntimeInterface::EntrypointId::STRING_LAST_INDEX_OF_STRING, dst, src);
 }
 
 void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src)

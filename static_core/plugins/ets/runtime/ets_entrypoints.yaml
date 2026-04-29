@@ -985,6 +985,134 @@
     - uint32_t            # string data size
     - uint16_t            # char to look up
 
+- name: StringIndexOfString
+  entrypoint: StringIndexOfString
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t                 # index of char in the string if any (result)
+    - ark::coretypes::String* # subject ptr
+    - ark::coretypes::String* # pattern ptr
+    - int32_t                 # index of char to start from
+    - int32_t                 # unused (always zero)
+    - int32_t                 # unused (always zero)
+
+- name: StringIndexOfStringSlowPath
+  entrypoint: StdCoreStringIndexOfString
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t                 # index of char in the string if any (result)
+    - ark::coretypes::String* # subject ptr
+    - ark::coretypes::String* # pattern ptr
+    - int32_t                 # index of char to start from
+
+- name: StringIndexOfStringOddSaved
+  entrypoint: StdCoreStringIndexOfString
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - int32_t                 # index of char in the string if any (result)
+    - ark::coretypes::String* # subject ptr
+    - ark::coretypes::String* # pattern ptr
+    - int32_t                 # index of char to start from
+
+- name: StringIndexOfUncompressedStringUncompressedNativePlus
+  entrypoint: StringIndexOfUncompressedStringUncompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfUncompressedStringUncompressed
+  entrypoint: StringIndexOfUncompressedStringUncompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfUncompressedStringCompressedNativePlus
+  entrypoint: StringIndexOfUncompressedStringCompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfUncompressedStringCompressed
+  entrypoint: StringIndexOfUncompressedStringCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfCompressedStringUncompressedNativePlus
+  entrypoint: StringIndexOfCompressedStringUncompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfCompressedStringUncompressed
+  entrypoint: StringIndexOfCompressedStringUncompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfCompressedStringCompressedNativePlus
+  entrypoint: StringIndexOfCompressedStringCompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringIndexOfCompressedStringCompressed
+  entrypoint: StringIndexOfCompressedStringCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
 - name: StringLastIndexOf
   entrypoint: StringLastIndexOf
   bridge: none
@@ -1074,6 +1202,135 @@
     - void*               # u8 string data ptr
     - uint32_t            # start index
     - uint8_t             # char to look up
+
+- name: StringLastIndexOfString
+  entrypoint: StringLastIndexOfString
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t                 # last index of char in the string if any (result)
+    - ark::coretypes::String* # subject ptr
+    - ark::coretypes::String* # pattern ptr
+    - int32_t                 # index of char to start from
+    - int32_t                 # unused (always zero)
+    - int32_t                 # unused (always zero)
+
+- name: StringLastIndexOfStringSlowPath
+  entrypoint: StdCoreStringLastIndexOfString
+  bridge: slow_path
+
+  properties: [intrinsic]
+  signature:
+    - int32_t                 # last index of char in the string if any (result)
+    - ark::coretypes::String* # subject ptr
+    - ark::coretypes::String* # pattern ptr
+    - int32_t                 # index of char to start from
+
+- name: StringLastIndexOfStringOddSaved
+  entrypoint: StdCoreStringLastIndexOfString
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - int32_t                 # last index of char in the string if any (result)
+    - ark::coretypes::String* # subject ptr
+    - ark::coretypes::String* # pattern ptr
+    - int32_t                 # index of char to start from
+
+- name: StringLastIndexOfUncompressedStringUncompressedNativePlus
+  entrypoint: StringLastIndexOfUncompressedStringUncompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfUncompressedStringUncompressed
+  entrypoint: StringLastIndexOfUncompressedStringUncompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfUncompressedStringCompressedNativePlus
+  entrypoint: StringLastIndexOfUncompressedStringCompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfUncompressedStringCompressed
+  entrypoint: StringLastIndexOfUncompressedStringCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u16 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfCompressedStringUncompressedNativePlus
+  entrypoint: StringLastIndexOfCompressedStringUncompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfCompressedStringUncompressed
+  entrypoint: StringLastIndexOfCompressedStringUncompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u16 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfCompressedStringCompressedNativePlus
+  entrypoint: StringLastIndexOfCompressedStringCompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
+
+- name: StringLastIndexOfCompressedStringCompressed
+  entrypoint: StringLastIndexOfCompressedStringCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t              # last index of char in the string if any (result)
+    - void*                # u8 string data ptr
+    - uint32_t             # string length (in chars)
+    - void*                # u8 key data ptr
+    - uint32_t             # key length (in chars)
+    - uint32_t             # start index
 
 - name: EtsStringEquals
   entrypoint: EtsStringEquals

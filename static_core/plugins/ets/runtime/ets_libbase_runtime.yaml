@@ -1192,6 +1192,11 @@ intrinsics:
       ret: i32
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfString
+    irtoc_impl: StringIndexOfStringNativePlus
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateStringIndexOfString
+    llvm_codegen_func: EmitStringIndexOfString
+    need_param_locations: true
 
   - name: StdCoreStringLastIndexOf
     space: ets
@@ -1217,6 +1222,11 @@ intrinsics:
       ret: i32
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringLastIndexOfString
+    irtoc_impl: StringLastIndexOfStringNativePlus
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateStringLastIndexOfString
+    llvm_codegen_func: EmitStringLastIndexOfString
+    need_param_locations: true
 
   - name: StdCoreStringSubstring
     space: ets

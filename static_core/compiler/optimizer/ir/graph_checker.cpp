@@ -307,7 +307,7 @@ void GraphChecker::CheckUserOfInt32([[maybe_unused]] BasicBlock *block, Inst *in
         return;
     }
     auto arch = GetGraph()->GetArch();
-    // Unsigned Load in AARCH64 zerod all high bits
+    // Unsigned Load in AARCH64 zeroed all high bits
 #ifndef NDEBUG
     if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64 &&
         GetGraph()->IsLowLevelInstructionsEnabled()) {

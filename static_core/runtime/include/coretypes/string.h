@@ -32,6 +32,12 @@ class String : public ObjectHeader {
 public:
     static constexpr uint32_t STRING_LENGTH_SHIFT = common_vm::BaseString::LengthBits::START_BIT;
 
+    // The prefix-function is stored in the state and takes O(|pattern|) space. For patterns below this length, the
+    // shift of KMP is too short to compensate for the time required to allocate/deallocate the prefix-function.
+    //
+    // Performance measurement on the device demonstrates that `KMP_MIN_PATTERN_LENGTH` it the correct threshold.
+    static constexpr int32_t KMP_MIN_PATTERN_LENGTH = 10;
+
     static void SetCompressedStringsEnabled(bool val)
     {
         LineString::SetCompressedStringsEnabled(val);

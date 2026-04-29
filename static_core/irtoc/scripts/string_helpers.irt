@@ -36,6 +36,7 @@ scoped_macro(:unpack_length) do |length, compression, length_shift|
     end
 end  # unpack_length
 
+# `length` is allowed to be u32 if Options.arch == :arm64. On :x86_64, `length` must be passed only as u64.
 scoped_macro(:unpack_length_with_compression) do |length, length_shift|
   char_length := get_string_length(length, length_shift)
   uncompressed := is_string_uncompressed_u64(length)
@@ -83,18 +84,25 @@ scoped_macro(:get_tree_data_ptr) do |tree_str, cache_miss_label|
   }
   strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
   strCached := LoadArray(stringCache, strIndex).SetNeedReadBarrier(true).ref
-  data_ptr := AddI(Cast(strCached).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
+  data_ptr := AddI(reftoptr(strCached)).Imm(Constants::STRING_DATA_OFFSET).ptr
 end
 
 
+# `length_packed` is allowed to be u32 if Options.arch == :arm64. On :x86_64, `length_packed` must be passed
+# only as u64.
 scoped_macro(:get_sliced_data_ptr) do |sliced_str, length_packed|
   # According to the specification the parent string must always be LineString.
   parent := LoadI(sliced_str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedReadBarrier(true).ref
   uncompressed := is_string_uncompressed_u64(length_packed)
   startIndex := LoadI(sliced_str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
-  startIndex := ShrI(startIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u64
+  if Options.arch == :x86_64
+    startIndex := ShrI(Cast(startIndex).u64).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u64
+  else
+    # Unsigned Load in arm64 zeroed all high bits and allows using a u32 operand in a u64 instruction.
+    startIndex := ShrI(startIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u64
+  end
   offset := Shl(startIndex, uncompressed).u64
-  data_ptr := AddI(Cast(parent).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
+  data_ptr := AddI(reftoptr(parent)).Imm(Constants::STRING_DATA_OFFSET).ptr
   data_ptr := Add(data_ptr, offset).ptr
 end
 
