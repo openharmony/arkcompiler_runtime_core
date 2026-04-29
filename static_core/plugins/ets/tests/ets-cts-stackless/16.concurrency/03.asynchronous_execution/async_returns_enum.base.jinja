@@ -54,8 +54,8 @@ async function startTest(){
     arktest.assertEQ(awaited_result, {{c.test_value}})
 }
 
-function main(){
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }
 
  {% endfor %}

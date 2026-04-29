@@ -47,8 +47,8 @@ async function startTest() {
     arktest.assertEQ(result.length, length, `Array of Promises length must be ${length}`);
 }
 
-function main() {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }
 {% endfor %}
 {% endfor %}

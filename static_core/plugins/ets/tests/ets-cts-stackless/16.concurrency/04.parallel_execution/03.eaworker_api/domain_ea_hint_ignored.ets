@@ -61,6 +61,6 @@ async function main(): Promise<void> {
         "Hint {{c.desc}}: non-EA IDs should be ignored, should execute on EA worker");
 
     // Cleanup
-    ea.quit();
+    await ea.join();
 }
 {% endfor %}

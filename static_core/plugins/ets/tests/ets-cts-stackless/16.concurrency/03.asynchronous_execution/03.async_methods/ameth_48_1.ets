@@ -43,6 +43,6 @@ async function startTest(): Promise<void> {
     arktest.assertTrue(false)
 }
 
-function main(): void {
-   startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }

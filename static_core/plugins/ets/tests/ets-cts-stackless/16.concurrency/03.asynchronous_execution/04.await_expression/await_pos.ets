@@ -21,7 +21,7 @@ tags: [no-warmup]
 
 {{c.decl}}
 
-function main() {
+async function main() {
     {{c.use|indent}}
 }
 {% endfor %}

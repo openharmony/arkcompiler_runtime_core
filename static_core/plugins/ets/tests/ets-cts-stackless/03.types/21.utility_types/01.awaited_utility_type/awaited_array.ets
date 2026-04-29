@@ -29,6 +29,6 @@ async function bar() {
   foo(await Promise.resolve(new Array<Promise<number>>()))
 }
 
-function main() {
-  bar().catch(arktest.crashProgram)
+async function main() {
+  await bar()
 }

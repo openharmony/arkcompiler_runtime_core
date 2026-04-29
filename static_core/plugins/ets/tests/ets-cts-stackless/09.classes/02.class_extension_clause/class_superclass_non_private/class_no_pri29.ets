@@ -25,7 +25,7 @@ class Parent {
   }
 
   public async greet(): Promise<string> {
-    await this.fetchMessage();
+    return await this.fetchMessage();
   }
 }
 
@@ -35,7 +35,7 @@ class Child extends Parent {
   }
 
   public async callParentGreet(): Promise<string> {
-    await this.greet();
+    return await this.greet();
   }
 }
 

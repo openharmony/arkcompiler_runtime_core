@@ -116,27 +116,13 @@ EtsObject *EtsExecutionContextWrapper::TakePendingException(Job *job)
 
 void EtsExecutionContextWrapper::CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job)
 {
-    auto *platformTypes = PlatformTypes(GetExecutionCtx());
-    if (retObject != nullptr && retObject->IsInstanceOf(platformTypes->corePromise)) {
-        retObject = intrinsics::helpers::EtsAwaitPromiseImpl(EtsPromise::FromEtsObject(retObject));
-    }
-    [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
-    EtsHandle<EtsPromise> completedPromiseHandle(GetExecutionCtx(), completedPromise);
-    EtsHandle<EtsObject> retObjectHandle(GetExecutionCtx(), retObject);
     if (HasPendingException()) {
         auto *exc = TakePendingException(job);
-        EtsMutex::LockHolder lh(completedPromiseHandle);
-        if (!completedPromiseHandle->IsPending()) {
-            return;
-        }
-        completedPromiseHandle->Reject(GetExecutionCtx(), exc);
+        intrinsics::helpers::EtsPromiseRejectImpl(GetExecutionCtx(), completedPromise, exc);
         return;
     }
-    EtsMutex::LockHolder lh(completedPromiseHandle);
-    if (!completedPromiseHandle->IsPending()) {
-        return;
-    }
-    completedPromiseHandle->Resolve(GetExecutionCtx(), retObjectHandle.GetPtr());
+
+    intrinsics::helpers::EtsPromiseResolveImpl(GetExecutionCtx(), completedPromise, retObject);
 }
 
 void EtsExecutionContextWrapper::OnJobCompletion(Value returnValue)

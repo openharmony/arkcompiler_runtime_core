@@ -200,11 +200,11 @@ static void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromis
                                                                                     args.data());
 }
 
-void EtsPromiseResolveImpl(EtsPromise *promise, EtsObject *value)
+void EtsPromiseResolveImpl(EtsExecutionContext *executionCtx, EtsPromise *promise, EtsObject *value)
 {
+    ASSERT(executionCtx != nullptr);
     ASSERT(promise != nullptr);
 
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     EtsHandle<EtsPromise> hpromise(executionCtx, promise);
     EtsHandle<EtsObject> hvalue(executionCtx, value);
@@ -216,21 +216,21 @@ void EtsPromiseResolveImpl(EtsPromise *promise, EtsObject *value)
     }
 
     if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
-        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-        EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
         hpromise->Unlock();
-        SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+        SubscribePromiseOnResultObject(hpromise.GetPtr(), internalPromise);
         return;
     }
+
     hpromise->Resolve(executionCtx, hvalue.GetPtr());
     hpromise->Unlock();
 }
 
-void EtsPromiseRejectImpl(EtsPromise *promise, EtsObject *error)
+void EtsPromiseRejectImpl(EtsExecutionContext *executionCtx, EtsPromise *promise, EtsObject *error)
 {
+    ASSERT(executionCtx != nullptr);
     ASSERT(promise != nullptr);
 
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     EtsHandle<EtsPromise> hpromise(executionCtx, promise);
     EtsHandle<EtsObject> herror(executionCtx, error);

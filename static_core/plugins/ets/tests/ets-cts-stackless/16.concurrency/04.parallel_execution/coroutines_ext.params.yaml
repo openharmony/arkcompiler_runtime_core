@@ -32,7 +32,7 @@ cases:
         }
         return Promise.resolve(sum);
       };
-      waitForCompletion(async ()=>{
+      await (async ()=>{
         const result: int = await complexLambda(3);
         arktest.assertEQ(result, 6);
-      })
+      })();

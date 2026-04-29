@@ -28,6 +28,6 @@ async function bar() {
   foo(await Promise.resolve([Promise.resolve(1.7)] as FixedArray<Promise<number>>))
 }
 
-function main() {
-  bar().catch(arktest.crashProgram)
+async function main() {
+  await bar()
 }

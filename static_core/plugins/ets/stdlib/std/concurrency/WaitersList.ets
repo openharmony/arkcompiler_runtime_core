@@ -44,11 +44,14 @@ class WaitersList {
     * caller should await on this promise
     */
     public async suspend(): Promise<void> {
-        let pResolver : CallbackT | undefined = undefined;
-        let promise = new Promise<void>((resolve) => {
-            pResolver = resolve;
+        // NOTE(alimovilya. #34831) workaround
+        let pResolver : CallbackT = (x: undefined) => {};
+        let promise = new Promise<void>((resolve, reject) => {
+            pResolver = (x: undefined) => {
+                resolve(undefined)
+            };
         })
-        let node = new Node(pResolver!);
+        let node = new Node(pResolver);
         node.next = this.tail_.load();
         let tmp = node.next;
         while (this.tail_.compareAndSwap(node.next, node) != tmp) {

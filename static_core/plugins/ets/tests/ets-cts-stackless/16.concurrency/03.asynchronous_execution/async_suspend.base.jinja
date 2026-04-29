@@ -53,8 +53,8 @@ desc: Async {{declaration_type}}s are coroutines ({{declaration_type}}s which ca
 
 {{ generate_async(declaration_type, params) }}
 
-function main() {
-    const result = waitForCompletion({{ 'new AsyncMethodReturnClass().resume' if declaration_type=='method' else 'resume' }});
+async function main() {
+    const result = await {{ 'new AsyncMethodReturnClass().resume()' if declaration_type=='method' else 'resume()' }};
     arktest.assertEQ(result, "{{c.expected_result}}")
 }
 

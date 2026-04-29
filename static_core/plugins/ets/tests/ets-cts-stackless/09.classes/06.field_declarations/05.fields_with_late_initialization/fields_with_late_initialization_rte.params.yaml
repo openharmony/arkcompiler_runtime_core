@@ -295,6 +295,7 @@ cases:
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+    async_main: true
     check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
@@ -318,12 +319,14 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
+        let thrown = false
+        try {
+          await a.field
+        } catch(e) {
+          arktest.assertTrue(e instanceof Error)
+          thrown = true
         }
-        arktest.expectThrow(() => {
-          waitForCompletion(async () => a.field)
-        }, expectedError)
+        arktest.assertTrue(thrown)
 
   - desc: |-
       >-
@@ -349,7 +352,7 @@ cases:
         class A {
           field!: Promise<[check_type]>
           constructor() {
-            waitForCompletion(async () => this.field)
+            (async () => this.field)().awaitSync()
           }
         }
     sub_cases_logic:
@@ -404,13 +407,14 @@ cases:
             return (e instanceof Error)
         }
         arktest.expectThrow(() => {
-          waitForCompletion(a.foo)
+          a.foo().awaitSync()
         }, expectedError)
 
   - desc: |-
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+    async_main: true
     check_variants:
       - {check_type: "long", base_value: "0", cv_decl_data: ""}
       - {check_type: "int", base_value: "0", cv_decl_data: ""}
@@ -455,13 +459,14 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertFalse(a.res)
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.res)
 
   - desc: |-
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+    async_main: true
     check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
@@ -494,9 +499,11 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
+        let thrown = false
+        try {
+          await a.foo().then((): [check_type] => a.field)
+        } catch(e) {
+          arktest.assertTrue(e instanceof Error)
+          thrown = true
         }
-        arktest.expectThrow(() => {
-          waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
-        }, expectedError)
+        arktest.assertTrue(thrown)

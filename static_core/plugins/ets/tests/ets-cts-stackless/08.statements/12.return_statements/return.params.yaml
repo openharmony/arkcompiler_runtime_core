@@ -62,12 +62,12 @@ return_test_cases:
   - decl: | # return with no expression can occur inside async func with return type Promise<void>
       async function asyncFunc(): Promise<void> { return }
     use: |
-      waitForCompletion(asyncFunc)
+      await asyncFunc()
 
   - decl: |
       async function asyncFunc(): Promise<int> { return -8 }
     use: |
-      arktest.assertEQ(waitForCompletion(asyncFunc), -8)
+      arktest.assertEQ(await asyncFunc(), -8)
 
   # lambda
   - decl: |

@@ -25,8 +25,8 @@ async function startTest() {
 }
 
 
-function main(){
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest();
 }
 
 {% endfor %}

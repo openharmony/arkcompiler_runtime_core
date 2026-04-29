@@ -81,8 +81,8 @@ async function startTest(){
     await {{ call_async(declaration_type, params) }}
 }
 
-function main(){
-    startTest().catch(arktest.crashProgram)
+async function main(){
+    await startTest()
 }
 
 {% endfor %}

@@ -27,6 +27,6 @@ async function boo() {
   foo(await Promise.resolve(9.7))
 }
 
-function main() {
-  boo().catch(arktest.crashProgram)
+async function main() {
+  await boo()
 }

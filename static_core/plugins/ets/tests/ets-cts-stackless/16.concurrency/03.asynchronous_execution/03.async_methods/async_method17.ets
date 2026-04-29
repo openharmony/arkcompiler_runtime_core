@@ -46,6 +46,6 @@ async function startTest() {
       arktest.assertEQ(result[1], 42.0);
 }
 
-function main(): void {
-      startTest().catch(arktest.crashProgram);
+async function main() {
+      await startTest()
 }

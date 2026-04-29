@@ -17,14 +17,14 @@
 desc: launch is allowed in non-async functions
 ---*/
 
-function runFromNonAsync(): int {
-  return waitForCompletion<int>(() => launch<int>() {
+function runFromNonAsync(): Promise<int> {
+  return launch<int>() {
     return 5
-  })
+  }
 }
 
 async function startTest() {
-  let result = runFromNonAsync()
+  let result = await runFromNonAsync()
   arktest.assertEQ(5, result)
 }
 

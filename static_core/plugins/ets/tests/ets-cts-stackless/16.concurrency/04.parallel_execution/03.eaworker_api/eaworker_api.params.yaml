@@ -24,7 +24,7 @@ cases:
       const eaWorkerId = await eaWorker.run<int>(CoroutineExtras.getWorkerId);
       
       arktest.assertNE(eaWorkerId, mainWorkerId, "EAWorker id equal to Main worker id");
-      eaWorker.quit();
+      await eaWorker.join();
   - desc: Checking launched EACoroutine id.
     decl: |-
       import { CoroutineExtras } from "std/debug/concurrency"
@@ -41,4 +41,4 @@ cases:
       const launchedWorkerId = await promise;
       
       arktest.assertEQ(launchedWorkerId, eaWorkerId, "Launched worker id is not EA");
-      eaWorker.quit();
+      await eaWorker.join();

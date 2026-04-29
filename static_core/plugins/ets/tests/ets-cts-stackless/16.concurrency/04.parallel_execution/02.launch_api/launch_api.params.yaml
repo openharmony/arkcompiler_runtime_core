@@ -71,19 +71,19 @@ cases:
           "Cross-domain (Main->EA): coroutine should NOT execute on main worker");
 
       // Cleanup
-      ea.quit();
+      await ea.join();
 
   - desc: >-
       Verify that a coroutine can be launched from General domain 
       into Main domain and it executes on the main worker.
     decl: |-
-      function launchToMainFromGeneral(): int {
+      async function launchToMainFromGeneral(): Promise<int> {
           // This function runs in General domain
           // Launch a coroutine to Main domain
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          return waitForCompletion<int>(() => launch<int>(mainParams, getWorkerId));
+          return await launch<int>(mainParams, getWorkerId);
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
@@ -96,7 +96,7 @@ cases:
       };
 
       // From General domain, launch to Main domain and get the worker ID
-      const resultWorkerId: int = await launch<int>(generalParams, launchToMainFromGeneral);
+      const resultWorkerId: int = await launch(generalParams, launchToMainFromGeneral);
 
       // Verify: coroutine launched from General to Main should run on main worker
       arktest.assertEQ(resultWorkerId, mainWorkerId, 
@@ -108,13 +108,13 @@ cases:
     decl: |-
       let targetEaWorkerId: int = -1;
 
-      function launchToEaFromGeneral(): int {
+      async function launchToEaFromGeneral(): Promise<int> {
           // This function runs in General domain
           // Launch a coroutine to EA domain with hint to specific EA worker
           const eaParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [targetEaWorkerId])
           };
-          return waitForCompletion<int>(() => launch<int>(eaParams, getWorkerId));
+          return await launch<int>(eaParams, getWorkerId);
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
@@ -136,7 +136,7 @@ cases:
       };
 
       // From General domain, launch to EA domain and get the worker ID
-      const resultWorkerId: int = await launch<int>(generalParams, launchToEaFromGeneral);
+      const resultWorkerId: int = await launch(generalParams, launchToEaFromGeneral);
 
       // Verify: coroutine launched from General to EA should run on EA worker
       arktest.assertEQ(resultWorkerId, targetEaWorkerId, 
@@ -145,19 +145,19 @@ cases:
           "Cross-domain (General->EA): coroutine should NOT execute on main worker");
 
       // Cleanup
-      ea.quit();
+      await ea.join();
 
   - desc: >-
       Verify that a coroutine can be launched from EA domain 
       into Main domain and it executes on the main worker.
     decl: |-
-      function launchToMainFromEa(): int {
+      async function launchToMainFromEa(): Promise<int> {
           // This function runs in EA domain
           // Launch a coroutine to Main domain
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          return waitForCompletion<int>(() => launch<int>(mainParams, getWorkerId));
+          return await launch<int>(mainParams, getWorkerId);
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
@@ -183,7 +183,7 @@ cases:
           "Cross-domain (EA->Main): coroutine should NOT execute on EA worker");
 
       // Cleanup
-      ea.quit();
+      await ea.join();
 
   - desc: >-
       Verify that a coroutine can be launched from EA domain 
@@ -192,13 +192,13 @@ cases:
       const TEST_ITERATIONS: int = 10;
       let eaWorkerIdGlobal: int = -1;
 
-      function launchToGeneralFromEa(): int {
+      async function launchToGeneralFromEa(): Promise<int> {
           // This function runs in EA domain
           // Launch a coroutine to General domain
           const generalParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
           };
-          return waitForCompletion<int>(() => launch<int>(generalParams, getWorkerId));
+          return await launch<int>(generalParams, getWorkerId);
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
@@ -227,4 +227,4 @@ cases:
       }
 
       // Cleanup
-      ea.quit();
+      await ea.join();
