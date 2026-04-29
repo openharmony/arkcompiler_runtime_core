@@ -55,6 +55,15 @@ cases:
           field1 = new B
           field2 = foo(() => this.field1)
         }
+    logic_data: |-
+      let c: A = new A()
+      arktest.assertEQ(c.field1, c.field2)
+
+  - desc: |-
+      >-
+        Initialize field by calling external function, passing 'this' as an argument.
+        The field accessed via 'this' is not yet initialized, causing ClassCastError.
+    decl_variants:
       - |-
         class B {}
         function foo (f: () => B) { return f() }
@@ -63,8 +72,11 @@ cases:
           field2 = new B
         }
     logic_data: |-
-      let c: A = new A()
-      arktest.assertEQ(c.field1, c.field2)
+      try {
+        let c: A = new A()
+      } catch(e) {
+        arktest.assertTrue(e instanceof ClassCastError)
+      }
 
   - desc: |-
       >-
