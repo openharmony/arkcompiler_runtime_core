@@ -27,6 +27,7 @@ class VModule;
 class VNamespace;
 class VObject;
 class VType;
+class VFnObject;
 class VTupleValue;
 class VClass;
 class VEnum;
@@ -97,6 +98,11 @@ struct TypeMapping<VModule *> {
 template <>
 struct TypeMapping<VNamespace *> {
     using Type = ani_namespace;
+};
+
+template <>
+struct TypeMapping<VFnObject *> {
+    using Type = ani_fn_object;
 };
 
 template <>

@@ -29,7 +29,7 @@ TEST_F(TypeGetSuperClassTest, wrong_env)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"type", "ani_ref"},
-        {"result", "ani_ref *"},
+        {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 
@@ -43,7 +43,7 @@ TEST_F(TypeGetSuperClassTest, wrong_type_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref", "wrong reference"},
-        {"result", "ani_ref *"},
+        {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 }
@@ -58,7 +58,7 @@ TEST_F(TypeGetSuperClassTest, wrong_type_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref", "wrong reference type: undefined"},
-        {"result", "ani_ref *"},
+        {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 
@@ -74,7 +74,7 @@ TEST_F(TypeGetSuperClassTest, wrong_result_ptr)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_class'"},
+        {"result", "ani_class *", "wrong pointer for storing 'ani_class'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 
@@ -107,7 +107,7 @@ TEST_F(TypeGetSuperClassTest, throw_error)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"type", "ani_ref"},
-        {"result", "ani_ref *"},
+        {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 
