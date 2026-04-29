@@ -28,8 +28,7 @@ cases:
           // can't spread a custom array
           let r: MyArray = [...a]
       expected_out: |-
-          Semantic error ESE0318: Type 'Array<*ERROR_TYPE*>' cannot be assigned to type 'MyArray'
-          Semantic error ESE0049: Spread expression can be applied only to array or tuple type, but 'MyArray' is provided
+          Semantic error ESE0318: Type 'Array<String>' cannot be assigned to type 'MyArray'
 
     - decl: |-
           class MyArray<T> extends Array<T> {
@@ -45,8 +44,7 @@ cases:
           // can't spread a custom array
           let r: MyArray<Object> = [...a]
       expected_out: |-
-          Semantic error ESE0318: Type 'Array<*ERROR_TYPE*>' cannot be assigned to type 'MyArray<Object>'
-          Semantic error ESE0049: Spread expression can be applied only to array or tuple type, but 'MyArray<String>' is provided
+          Semantic error ESE0318: Type 'Array<String>' cannot be assigned to type 'MyArray<Object>'
 
     - decl: |-
           class MyArray extends Array<string> {}
