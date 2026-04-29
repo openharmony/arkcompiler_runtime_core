@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -27,8 +27,7 @@ class B extends A{}
 class D<T, S extends T> {}
 
 function main(): void {
-    new D<A, A>
-    new D<A, B>
-    new D<B, B>
+    arktest.assertTrue(new D<A, A> instanceof D, "expected instance of D<A, A>")
+    arktest.assertTrue(new D<A, B> instanceof D, "expected instance of D<A, B>")
+    arktest.assertTrue(new D<B, B> instanceof D, "expected instance of D<B, B>")
 }
-

@@ -19,4 +19,7 @@ desc: Object type
 
 let x: Object;
 
-function main(): void {}
+function main(): void {
+    x = new Object
+    arktest.assertTrue(x instanceof Object, "expect instance of Object")
+}

@@ -23,7 +23,9 @@ class Base {}
 class Derived extends Base {}
 class E extends Derived {}
 
-async function foo <T extends Base> (p: Awaited<T>) {}
+async function foo <T extends Base> (p: Awaited<T>) {
+    arktest.assertTrue(p instanceof Object, "expect instance of Object")
+}
 
 async function bar <T extends Derived> (p: Awaited<T>) {
     foo(p)

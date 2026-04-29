@@ -33,5 +33,5 @@ function foo(i: Required<ACOPT>) {
 }
 
 function main() {
-  foo( {i: 1.9, j: "some str"} )
+  arktest.assertEQ(foo( {i: 1.9, j: "some str"} ), 3, "expect result 3")
 }

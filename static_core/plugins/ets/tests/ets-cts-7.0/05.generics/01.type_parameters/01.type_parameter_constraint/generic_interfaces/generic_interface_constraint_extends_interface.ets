@@ -34,9 +34,13 @@ interface F<T extends Object> {
 
 function main(): void {
     let i1: D<A> = {}
+    arktest.assertTrue(i1 instanceof D, "instanceof i1")
     let i2: D<B> = {}
+    arktest.assertTrue(i2 instanceof D, "instanceof i2")
     let i3: E<A> = {}
+    arktest.assertTrue(i3 instanceof E, "instanceof i3")
     let i4: E<B> = {}
+    arktest.assertTrue(i4 instanceof E, "instanceof i4")
     let i5: E<C> = {}
+    arktest.assertTrue(i5 instanceof E, "instanceof i5")
 }
-

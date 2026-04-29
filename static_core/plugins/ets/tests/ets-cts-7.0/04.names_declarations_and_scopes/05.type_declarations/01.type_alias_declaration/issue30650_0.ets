@@ -13,10 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 /*---
  desc: Declare Recursive Type
-
  ---*/
 
  type None = undefined
@@ -25,6 +23,5 @@ limitations under the License.
  function main() {
      let x: RT<string, string> = ['1', '2', ['1', '2', undefined] as RT<string, string>]
      let y = x[2]!
-     console.log(y[1])
+     arktest.assertEQ(y[1], '2', "expect '2'")
  }
-

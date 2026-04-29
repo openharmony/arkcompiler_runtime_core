@@ -18,16 +18,22 @@ desc: Line separators
 ---*/
 
 // PLEASE DO NOT EDIT!
-// THIS FILE IS CONSTRUCTED WITH LINE SEPARATORS FROM 2.2.2
-// function main(): void {
+// THIS FILE IS CONSTRUCTED BY HEX EDITOR WITH LINE SEPARATORS FROM 2.2.2
+// function test(): int {
 // \U+000A
 // \U+000D
-// \U+000D \U+000A
-// \U+2028
-// \U+2029
+// \U+000Dlet a: int = 0\U+000A
+// a = a + 1\U+2028
+// return a\U+2029
 //}
 
 function main(): void {
 
-
+arktest.assertEQ(test(), 1)
   }
+
+
+function test(): int {
+
+let a: int = 0
+a = a + 1 return a }

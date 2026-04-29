@@ -25,4 +25,7 @@ function f(): int {
     return 0;
 }
 
-function main(): void {}
+function main(): void {
+    arktest.assertEQ(f(0), 0, "expect f(0) return 0")
+    arktest.assertEQ(f(), 0, "expect f() return 0")
+}

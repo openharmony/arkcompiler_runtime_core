@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,8 @@ function main(): void {
     const bytes = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
     try {
         const result = bytesToLong(bytes);
-        console.log(result.toString());
+        arktest.assertEQ(result.toString(), "578437695752307201", "unexpected result value");
     } catch (error) {
-        console.error(error);
+        arktest.assertTrue(false, "unexpected error " + error);
     }
 }

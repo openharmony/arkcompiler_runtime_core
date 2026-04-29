@@ -27,4 +27,5 @@ type t = keyof A
 function main() {
    let a: t = "field"
    a = "method"
+   arktest.assertTrue(a instanceof t, "expect instance of t")
 }

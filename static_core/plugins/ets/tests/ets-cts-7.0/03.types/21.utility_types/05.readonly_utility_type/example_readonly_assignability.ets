@@ -27,4 +27,5 @@ class A {
 function main() {
   let x = new A()
   let y: Readonly<A> = x // OK
+  arktest.assertTrue(y instanceof A, "expect instance of A")
 }

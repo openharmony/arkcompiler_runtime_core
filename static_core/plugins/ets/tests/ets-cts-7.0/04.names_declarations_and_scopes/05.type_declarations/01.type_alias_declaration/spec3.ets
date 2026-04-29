@@ -22,4 +22,6 @@ desc: >-
 type A<T> = string | Array<A<T>> // ok, A<T> is used as a type argument
 
 function main(): void {
+    let x: A<int> = 'Test'
+    arktest.assertEQ(x, 'Test', "expect x is 'Test'")
 }

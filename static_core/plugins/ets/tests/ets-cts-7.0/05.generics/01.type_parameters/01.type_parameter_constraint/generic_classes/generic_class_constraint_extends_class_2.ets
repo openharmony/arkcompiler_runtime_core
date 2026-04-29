@@ -27,8 +27,7 @@ class B extends A{}
 class D<T, S extends T> {}
 
 function main(): void {
-    new D<A, A>
-    new D<A, B>
-    new D<B, B>
+    arktest.assertTrue(new D<A, A> instanceof D, "expected instance of D<A, A>")
+    arktest.assertTrue(new D<A, B> instanceof D, "expected instance of D<A, B>")
+    arktest.assertTrue(new D<B, B> instanceof D, "expected instance of D<B, B>")
 }
-

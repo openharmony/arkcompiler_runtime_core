@@ -21,4 +21,9 @@ class A {}
 type a = A | Any
 
 function main(): void {
+  let v: a = new A
+  arktest.assertTrue(v instanceof a, "expect instanceof a (A)")
+  let v1: Any = [1]
+  v = v1
+  arktest.assertTrue(v instanceof a, "expect instanceof a (Any)")
 }

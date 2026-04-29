@@ -32,5 +32,7 @@ function body() {
 
 function main() {
     let oa: TOuterStringAlias = our
+    arktest.assertTrue(oa instanceof TOuterStringAlias, "expect TOuterStringAlias")
     let ba = body()
+    arktest.assertTrue(ba instanceof TStringAlias, "expect TStringAlias")
 }

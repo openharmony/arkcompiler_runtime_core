@@ -22,4 +22,6 @@ desc: >-
 type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>
 
 function main(): void {
+    let x: NodeValue<int> = 1
+    arktest.assertEQ(x, 1, "expect x is 1")
 }

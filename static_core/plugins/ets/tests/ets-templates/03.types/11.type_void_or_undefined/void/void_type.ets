@@ -27,4 +27,6 @@ type FunctionWithNoParametersType = () => void
 
 let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
 
-function main(): void {}
+function main(): void {
+    arktest.assertTrue(funcTypeVariable instanceof FunctionWithNoParametersType, "expect instance of FunctionWithNoParametersType")
+}

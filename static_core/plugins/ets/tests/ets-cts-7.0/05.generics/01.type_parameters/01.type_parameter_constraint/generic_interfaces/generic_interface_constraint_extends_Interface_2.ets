@@ -28,7 +28,10 @@ interface D<T, S extends T> {}
 
 function main(): void {
     let i1: D<A, A> = {}
+    arktest.assertTrue(i1 instanceof D, "instanceof i1")
     let i2: D<A, B> = {}
+    arktest.assertTrue(i2 instanceof D, "instanceof i2")
     let i3: D<B, B> = {}
+    arktest.assertTrue(i3 instanceof D, "instanceof i3")
 }
 

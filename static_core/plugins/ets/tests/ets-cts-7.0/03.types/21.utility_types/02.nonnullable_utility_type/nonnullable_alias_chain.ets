@@ -28,4 +28,8 @@ function main() {
     // check type via assignment
     let b: "hello"|"world" = bnn
     let c: "hello"|"world" = cnn
+
+    // check type via instanceof
+    arktest.assertTrue(b instanceof B, "expect instance of B")
+    arktest.assertTrue(c instanceof C, "expect instance of C")
 }

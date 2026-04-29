@@ -23,11 +23,13 @@ function main() {
 
     let crnn: NonNullable<Color|null> = Color.R
     let cr: Color = crnn
+    arktest.assertTrue(cr instanceof Color, "expect cr is instance of Color")
 
     let cgnn: NonNullable<Color|undefined> = Color.G
     let cg: Color = crnn
+    arktest.assertTrue(cg instanceof Color, "expect cg is instance of Color")
 
     let cbnn: NonNullable<Color|null|undefined> = Color.B
     let cb: Color = cbnn
+    arktest.assertTrue(cb instanceof Color, "expect cb is instance of Color")
 }
-

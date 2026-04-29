@@ -22,7 +22,11 @@ type T = [string, number]
 function main() {
     let t: NonNullable<T|null> = ["hello", 42]
     let tt: T = t
+    arktest.assertTrue(tt[0] instanceof string, "expect tt[0] instance of string")
+    arktest.assertTrue(tt[1] instanceof number, "expect tt[1] instance of number")
 
     let t2: NonNullable<[boolean, string]|null|undefined> = [true, "world"]
     let tt2: [boolean, string] = t2
+    arktest.assertTrue(tt2[0] instanceof boolean, "expect tt2[0] instance of boolean")
+    arktest.assertTrue(tt2[1] instanceof string, "expect tt2[1] instance of string")
 }
