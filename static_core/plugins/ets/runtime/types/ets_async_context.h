@@ -23,6 +23,10 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 
+namespace ark {
+class Frame;
+}  // namespace ark
+
 namespace ark::ets {
 
 class EtsExecutionContext;
@@ -70,6 +74,13 @@ public:
     void AddReference(EtsExecutionContext *executionCtx, uint32_t idx, EtsObject *ref);
     void AddPrimitive(EtsExecutionContext *executionCtx, uint32_t idx, EtsLong primitive);
     EtsShort GetVregOffset(EtsExecutionContext *executionCtx, uint32_t idx) const;
+
+    // static because may trigger GC
+    static EtsAsyncContext *EnsureCapacityForInterpreterFrame(EtsAsyncContext *compiledAsyncCtx,
+                                                              EtsExecutionContext *executionCtx, uint32_t frameSize);
+    void SaveInterpreterContext(ark::Frame *frame, EtsExecutionContext *executionCtx);
+    EtsLong RestoreInterpreterContext(ark::Frame *frame, EtsExecutionContext *executionCtx);
+    uint32_t RestoreCompiledContext(ark::Frame *frame, EtsExecutionContext *executionCtx);
 
     EtsObject *AsObject()
     {

@@ -57,17 +57,9 @@ EtsAsyncDispatchStub:
     CFI_RESTORE(lr)
     CFI_ADJUST_CFA_OFFSET(-16)
 
-    // Check whether runtime returned a native resume address.
-    cmp x0, #0
-    // If there is no resume target, leave through the normal return path.
-    beq .Ldispatch_exit
-
     // Jump directly to resume address (x0)
     br x0
 
-.Ldispatch_exit:
-    // Return to the original caller when there is nothing to resume.
-    ret
     // Finish unwind information for the dispatch stub.
     CFI_ENDPROC
 

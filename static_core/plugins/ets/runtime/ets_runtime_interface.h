@@ -63,6 +63,10 @@ public:
     {
         return ark::cross_values::GetEtsExecutionContextNullValueOffset(arch);
     }
+    size_t GetAsyncContextCompiledCodeOffset(Arch arch) const override
+    {
+        return ark::cross_values::GetEtsAsyncContextCompiledCodeOffset(arch);
+    }
     uint64_t GetUniqueObject() const override;
     InteropCallKind GetInteropCallKind(MethodPtr methodPtr) const override;
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;

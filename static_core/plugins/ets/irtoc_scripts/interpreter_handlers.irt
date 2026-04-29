@@ -221,26 +221,38 @@ macro(:ets_async_return_from_suspend) do |return_value|
 end
 
 macro(:handle_ets_async_suspend) do |v, size|
-  async_ctx := vreg_value(v).ref
+  async_ctx_usual := vreg_value(v).ref
 
-  If(async_ctx, 0).EQ.Unlikely {
+  If(async_ctx_usual, 0).EQ.Unlikely {
     call_runtime("ThrowNullPointerExceptionFromInterpreter").void
     move_to_exception
   }
 
   resume_point_id := Cast(AddI(pc).Imm(size).ptr).i64
-  ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET, resume_point_id)
+  ets_async_ctx_store_i64(async_ctx_usual, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET, resume_point_id)
 
   method := get_method_ptr()
   frame_size := Cast(ets_async_logical_frame_size(method).i64).i32
 
+  compiled_code := ets_async_ctx_load_i64(async_ctx_usual, EtsConstants::ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET).i64
+  If(compiled_code, 0).NE.Unlikely {
+    call_runtime("EtsEnsureCapacityForAsyncContextEntrypoint", %tr, async_ctx_usual, frame_size).void
+    If(exception_val(), 0).NE.Unlikely {
+      move_to_exception
+    }
+    # may have triggerred GC, need to read again
+    async_ctx_resized := vreg_value(v).ref
+    ets_async_ctx_store_i64(async_ctx_resized, EtsConstants::ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET, Cast(0).i64)
+  }
+
+  async_ctx := Phi(async_ctx_usual, async_ctx_resized).ref
   ref_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_VALUES_OFFSET).ref
   prim_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_VALUES_OFFSET).ref
   frame_offsets := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_FRAME_OFFSETS_OFFSET).ref
 
   i0 := Cast(0).i32
   ref_count0 := Cast(0).i32
-  Label(:SuspendRefLoop)
+Label(:SuspendRefLoop)
   i := Phi(i0, i1).i32
   ref_count := Phi(ref_count0, ref_count1).i32
   If(i, frame_size).GE {
@@ -261,11 +273,11 @@ macro(:handle_ets_async_suspend) do |v, size|
 
   i1 := AddI(i).Imm(1).i32
   Goto(:SuspendRefLoop)
-  Label(:SuspendRefExit)
+Label(:SuspendRefExit)
 
   j0 := Cast(0).i32
   prim_count0 := Cast(0).i32
-  Label(:SuspendPrimLoop)
+Label(:SuspendPrimLoop)
   j := Phi(j0, j1).i32
   prim_count := Phi(prim_count0, prim_count1).i32
   If(j, frame_size).GE {
@@ -287,12 +299,13 @@ macro(:handle_ets_async_suspend) do |v, size|
 
   j1 := AddI(j).Imm(1).i32
   Goto(:SuspendPrimLoop)
-  Label(:SuspendPrimExit)
+Label(:SuspendPrimExit)
 
   ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET, Cast(ref_count).i64)
   ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET, Cast(prim_count).i64)
   ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET, Cast(0).i64)
 
+Label(:SuspendReturn)
   return_value := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_RETURN_VALUE_OFFSET).ref
   ets_async_return_from_suspend(return_value)
 end
@@ -302,52 +315,66 @@ macro(:handle_ets_async_dispatch) do |v, size|
 
   If(async_ctx, 0).EQ {
     pc_null := AddI(pc).Imm(size).ptr
-  } Else {
-    ref_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_VALUES_OFFSET).ref
-    prim_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_VALUES_OFFSET).ref
-    frame_offsets := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_FRAME_OFFSETS_OFFSET).ref
-    ref_count := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET).i64).i32
-    prim_count := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET).i64).i32
-
-    i0 := Cast(0).i32
-    Label(:DispatchRefLoop)
-    i := Phi(i0, i1).i32
-    If(i, ref_count).GE {
-      Goto(:DispatchRefExit)
-    }
-
-    frame_offset := LoadArray(frame_offsets, i).i16
-    vreg_ptr := frame_vreg_ptr(%frame, Cast(frame_offset).word)
-    ref := LoadArray(ref_values, i).SetNeedReadBarrier(true).ref
-    set_object(vreg_ptr, ref)
-    StoreArray(ref_values, i, ets_nullvalue).SetNeedWriteBarrier(true).ref
-
-    i1 := AddI(i).Imm(1).i32
-    Goto(:DispatchRefLoop)
-    Label(:DispatchRefExit)
-
-    j0 := Cast(0).i32
-    Label(:DispatchPrimLoop)
-    j := Phi(j0, j1).i32
-    If(j, prim_count).GE {
-      Goto(:DispatchPrimExit)
-    }
-
-    prim_frame_idx := Add(ref_count, j).i32
-    frame_offset := LoadArray(frame_offsets, prim_frame_idx).i16
-    vreg_ptr := frame_vreg_ptr(%frame, Cast(frame_offset).word)
-    prim := LoadArray(prim_values, j).i64
-    set_primitive(vreg_ptr, prim)
-
-    j1 := AddI(j).Imm(1).i32
-    Goto(:DispatchPrimLoop)
-    Label(:DispatchPrimExit)
-
-    ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET, Cast(0).i64)
-    ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET, Cast(0).i64)
-
-    pc_normal := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET).i64).ptr
+    Goto(:DispatchJoin)
   }
 
-  pc := Phi(pc_null, pc_normal).ptr
+  compiled_code := ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET).i64
+  If(compiled_code, 0).NE.Unlikely {
+    Goto(:DispatchSlowPath)
+  }
+
+  ref_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_VALUES_OFFSET).ref
+  prim_values := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_VALUES_OFFSET).ref
+  frame_offsets := ets_async_ctx_load_ref(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_FRAME_OFFSETS_OFFSET).ref
+  ref_count := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET).i64).i32
+  prim_count := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET).i64).i32
+
+  i0 := Cast(0).i32
+Label(:DispatchRefLoop)
+  i := Phi(i0, i1).i32
+  If(i, ref_count).GE {
+    Goto(:DispatchRefExit)
+  }
+
+  frame_offset := LoadArray(frame_offsets, i).i16
+  vreg_ptr := frame_vreg_ptr(%frame, Cast(frame_offset).word)
+  ref := LoadArray(ref_values, i).SetNeedReadBarrier(true).ref
+  set_object(vreg_ptr, ref)
+  StoreArray(ref_values, i, ets_nullvalue).SetNeedWriteBarrier(true).ref
+
+  i1 := AddI(i).Imm(1).i32
+  Goto(:DispatchRefLoop)
+Label(:DispatchRefExit)
+
+  j0 := Cast(0).i32
+Label(:DispatchPrimLoop)
+  j := Phi(j0, j1).i32
+  If(j, prim_count).GE {
+    Goto(:DispatchPrimExit)
+  }
+
+  prim_frame_idx := Add(ref_count, j).i32
+  frame_offset := LoadArray(frame_offsets, prim_frame_idx).i16
+  vreg_ptr := frame_vreg_ptr(%frame, Cast(frame_offset).word)
+  prim := LoadArray(prim_values, j).i64
+  set_primitive(vreg_ptr, prim)
+
+  j1 := AddI(j).Imm(1).i32
+  Goto(:DispatchPrimLoop)
+Label(:DispatchPrimExit)
+
+  ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET, Cast(0).i64)
+  ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET, Cast(0).i64)
+
+  pc_fast := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET).i64).ptr
+  Goto(:DispatchJoin)
+
+Label(:DispatchSlowPath)
+  restored_pc := call_runtime("EtsRestoreCompiledAsyncContextEntrypoint", %tr, %frame, async_ctx).u32
+  method := get_method_ptr()
+  instructions := LoadI(method).Imm(Constants::METHOD_INSTRUCTIONS_OFFSET).Volatile.ptr
+  pc_slow := Add(instructions, restored_pc).ptr
+
+Label(:DispatchJoin)
+  pc := Phi(pc_null, pc_fast, pc_slow).ptr
 end

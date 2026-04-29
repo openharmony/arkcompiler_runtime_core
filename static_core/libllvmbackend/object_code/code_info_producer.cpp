@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,15 +174,15 @@ void CodeInfoProducer::BuildSingleRegMap(compiler::CodeInfoBuilder *builder, con
                                          int32_t methodIdIndex, int32_t vregsCount, uint64_t stackSize) const
 {
     int32_t vregsTotal = record.getLocation(methodIdIndex + INLINE_VREG_COUNT).getSmallConstant();
-    std::vector<int> ordered;
-    ordered.resize(vregsTotal, -1);
+    std::vector<int> ordered(vregsTotal, -1);
     for (auto i = 0; i < vregsCount * VREG_RECORD_SIZE; i += VREG_RECORD_SIZE) {
         int32_t vregIndex = record.getLocation(methodIdIndex + INLINE_VREGS + i + VREG_IDX).getSmallConstant();
-        ordered.at(vregIndex) = i;
+        ordered[vregIndex] = i;
     }
 
     CFrameLayout fl(arch_, 0);
-    for (auto idx : ordered) {
+    for (int32_t vregIndex = 0; vregIndex < vregsTotal; vregIndex++) {
+        const auto idx = ordered[vregIndex];
         if (idx == -1) {
             builder->AddVReg(compiler::VRegInfo());
             continue;
@@ -190,7 +190,7 @@ void CodeInfoProducer::BuildSingleRegMap(compiler::CodeInfoBuilder *builder, con
         auto typeVal = record.getLocation(methodIdIndex + INLINE_VREGS + idx + VREG_TYPE).getSmallConstant();
         auto vregType = static_cast<compiler::VRegInfo::Type>(typeVal);
         const auto &loc = record.getLocation(methodIdIndex + INLINE_VREGS + idx + VREG_VALUE);
-        bool isAcc = ((idx / 3) == (vregsTotal - 1));
+        bool isAcc = vregIndex == (vregsTotal - 1);
         auto vregVregType = (isAcc ? compiler::VRegInfo::VRegType::ACC : compiler::VRegInfo::VRegType::VREG);
         if (loc.getKind() == LLVMStackMap::LocationKind::Constant) {
             int32_t constVal = loc.getSmallConstant();  // sign extend required for VRegInfo::Type::INT64

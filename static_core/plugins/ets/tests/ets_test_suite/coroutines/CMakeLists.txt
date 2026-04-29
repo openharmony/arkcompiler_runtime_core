@@ -193,7 +193,7 @@ add_ets_coroutines_test(FILE launch_instruction.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT" "AOT"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_ets_coroutines_test(FILE launch_launch.ets
@@ -249,7 +249,7 @@ if (NOT PANDA_TARGET_ARM32)
                             IMPL "STACKLESS"
                             OPTION_SETS_STACKLESS "DEFAULT"
                             WORKERS "AUTO"
-                            MODE "INT" "AOT"
+                            MODE "INT" "JIT" "AOT"
     )
 
     add_ets_coroutines_test(FILE class_load_race.ets
@@ -392,7 +392,7 @@ add_ets_coroutines_test(FILE launch_return.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_ets_coroutines_test(FILE launch_yield.ets
@@ -416,7 +416,7 @@ add_ets_coroutines_test(FILE launch_yield.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT" "AOT"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_ets_coroutines_test(FILE affinity.ets
@@ -441,7 +441,7 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_ets_coroutines_test(FILE await_standalone_promise.ets
@@ -465,7 +465,7 @@ add_ets_coroutines_test(FILE await_sync.ets
                         IMPL "STACKLESS"
                         OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
-                        MODE "INT" "AOT"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_ets_coroutines_test(FILE stats.ets

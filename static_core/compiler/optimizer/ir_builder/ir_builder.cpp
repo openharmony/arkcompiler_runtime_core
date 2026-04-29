@@ -140,6 +140,9 @@ void IrBuilder::SplitDispatch()
     auto *prologueBlock = dispatch->GetBasicBlock();
     ASSERT(prologueBlock->IsTry());
 
+    auto *saveState = dispatch->GetSaveState();
+    ASSERT(saveState != nullptr);
+
     // Add Compare and IfImm guards for the Dispatch to check async context, then split the block
     // into a dedicated Dispatch block and a fallthrough block without dispatching.
     auto *asyncContext = dispatch->GetInput(0U).GetInst();
@@ -149,8 +152,8 @@ void IrBuilder::SplitDispatch()
     auto *ifImm = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, dispatch->GetPc(), compare, 0U, DataType::BOOL,
                                               ConditionCode::CC_NE);
     ifImm->SetUnlikely();
-    dispatch->InsertBefore(compare);
-    dispatch->InsertBefore(ifImm);
+    saveState->InsertBefore(compare);
+    saveState->InsertBefore(ifImm);
 #ifdef PANDA_COMPILER_DEBUG_INFO
     compare->SetCurrentMethod(dispatch->GetCurrentMethod());
     ifImm->SetCurrentMethod(dispatch->GetCurrentMethod());
@@ -160,7 +163,7 @@ void IrBuilder::SplitDispatch()
     // Second split moves Dispatch itself after IfImm into the dedicated dispatch block.
     auto *continuationBlock = prologueBlock->SplitBlockAfterInstruction(dispatch, false);
     auto *dispatchBlock = prologueBlock->SplitBlockAfterInstruction(ifImm, false);
-    ASSERT(dispatchBlock->GetFirstInst() == dispatch && dispatchBlock->GetLastInst() == dispatch);
+    ASSERT(dispatchBlock->GetFirstInst() == saveState && dispatchBlock->GetLastInst() == dispatch);
 
     prologueBlock->AddSucc(dispatchBlock);
     prologueBlock->AddSucc(continuationBlock);

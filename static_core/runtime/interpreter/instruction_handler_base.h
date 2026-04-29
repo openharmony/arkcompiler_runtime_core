@@ -337,7 +337,7 @@ protected:
     ALWAYS_INLINE bool UpdateHotnessOSR(Method *method, int offset)
     {
         ASSERT(ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR);
-        if (this->GetFrame()->IsDeoptimized() || !Runtime::GetOptions().IsCompilerEnableOsr()) {
+        if (!this->GetFrame()->CanOsr()) {
             method->DecrementHotnessCounter<false>(0, nullptr);
             return false;
         }

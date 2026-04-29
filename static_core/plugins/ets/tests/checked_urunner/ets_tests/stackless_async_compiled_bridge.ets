@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-// NOTE: Enable disabled checkers #34101
 //! DEFINE_FRONTEND_OPTIONS  DEFAULT ARGS
 //! RUN_FRONTEND            options: "--stackless-coros=true"
 
-//! DISABLED_CHECKER      Check stackless async compiled bridge in JIT
-//! SKIP_IF      @architecture != "x64"
+//! CHECKER      Check stackless async compiled bridge in JIT
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true,
-//!              options: "--compiler-regex='stackless_async_compiled_bridge.*(Check|start)' --compiler-ignore-failures=false",
+//!              options: "--compiler-regex='stackless_async_compiled_bridge.*(Check|start)' " +
+//!                       "--compiler-ignore-failures=false --coroutine-impl=stackless",
 //!              entry: "stackless_async_compiled_bridge.ETSGLOBAL::main"
 //! METHOD       "stackless_async_compiled_bridge.ETSGLOBAL::resumeCheck"
 //! PASS_AFTER   "IrBuilder"
@@ -49,8 +49,9 @@
 //! ASM_INST     "CallEntrypoint: EtsStacklessInitAsyncContext"
 
 //! CHECKER      Check stackless async compiled bridge in AOT
-//! SKIP_IF      @architecture != "x64"
-//! RUN_PAOC     options: "--compiler-regex='stackless_async_compiled_bridge.*(Check|start)' --compiler-ignore-failures=false"
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PAOC     options: "--compiler-regex='stackless_async_compiled_bridge.*(Check|start)' " +
+//!                       "--compiler-ignore-failures=false"
 //! METHOD       "stackless_async_compiled_bridge.ETSGLOBAL::resumeCheck"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Dispatch"
@@ -76,6 +77,8 @@
 //! ASM_METHOD   "stackless_async_compiled_bridge.ETSGLOBAL::start"
 //! ASM_INST     "Intrinsic.StdPromiseAwait"
 //! ASM_INST     "CallEntrypoint: EtsStacklessInitAsyncContext"
+//! RUN          options: "--compiler-enable-jit=false --coroutine-impl=stackless",
+//!              entry: "stackless_async_compiled_bridge.ETSGLOBAL::main"
 
 class Dummy {
     value: int

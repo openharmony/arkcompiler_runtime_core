@@ -18,6 +18,8 @@
 
 #include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
+#include "runtime/interpreter/frame.h"
+#include "compiler/code_info/code_info.h"
 
 namespace ark::ets {
 

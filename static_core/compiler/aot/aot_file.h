@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ class RuntimeInterface;
 class AotFile {
 public:
     static constexpr std::array MAGIC = {'.', 'a', 'n', '\0'};
-    static constexpr std::array VERSION = {'0', '0', '6', '\0'};
+    static constexpr std::array VERSION = {'0', '0', '7', '\0'};
 
     enum AotSlotType {
         PLT_SLOT = 1,
