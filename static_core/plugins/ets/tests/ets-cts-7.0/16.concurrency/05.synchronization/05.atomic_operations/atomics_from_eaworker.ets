@@ -49,7 +49,7 @@ async function startTest(): Promise<void> {
   eaWorker.quit()
 }
 
-function main(): void {
-  waitForCompletion(startTest)
+async function main(): Promise<void> {
+  await startTest()
 }
 {%- endfor %}
