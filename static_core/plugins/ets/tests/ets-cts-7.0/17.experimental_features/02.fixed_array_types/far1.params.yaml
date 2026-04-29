@@ -134,3 +134,18 @@ cases:
           arktest.assertEQ((arr[0][0] & arr[0][1] | arr[1][0] & arr[1][1]), false)
           arr[0][1] = true
           arktest.assertEQ((arr[0][0] & arr[0][1] | arr[1][0] & arr[1][1]), true)
+
+    - decl: |-
+        let x: FixedArray<Any>
+      use: |-
+        x = [1, 2, null]
+        let obj: Object = toObj(x)
+        arktest.assertFalse(obj instanceof FixedArray<Object>)
+        arktest.assertTrue(obj instanceof FixedArray<Any>)
+
+    - decl: |-
+        let x: FixedArray<Object>
+      use: |-
+        x = [1, "2", 3.4]
+        let obj: FixedArray<Any> = toObj(x) as FixedArray<Any>
+        arktest.expectThrow(() => { obj[0] = null }, v => v instanceof ArrayStoreError)

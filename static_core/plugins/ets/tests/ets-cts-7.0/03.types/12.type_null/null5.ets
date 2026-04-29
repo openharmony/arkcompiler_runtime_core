@@ -22,4 +22,6 @@ desc: The null type's single value is also null.
 function main(): void {
     let a: Object | null = null;
     arktest.assertTrue(a instanceof null)
+    const instanceOf = (a: Any) => a instanceof null
+    arktest.assertTrue(instanceOf(a))
 }

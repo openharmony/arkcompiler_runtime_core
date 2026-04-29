@@ -35,6 +35,14 @@ function foo4(a: number[]): string {
     return 'foo4';
 }
 
+function foo5(a: FixedArray<Any>): string {
+    return 'foo5';
+}
+
+function foo6(a: FixedArray<Object>): string {
+    return 'foo6';
+}
+
 overload foo { {{c.list}} };
 
 function main() {

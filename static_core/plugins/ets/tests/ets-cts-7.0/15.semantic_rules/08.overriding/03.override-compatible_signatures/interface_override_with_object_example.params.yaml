@@ -20,3 +20,6 @@ cases:
     - { derived: 'Object', base: 'E1' }
     - { derived: 'Object', base: 'Base[]' }
     - { derived: 'Object', base: '[Base, Base]' }
+    # Any vs Object effective type difference: Any is contravariant to Object
+    - { derived: 'Any', base: 'Object' }
+    - { derived: 'Any', base: 'Derived' }

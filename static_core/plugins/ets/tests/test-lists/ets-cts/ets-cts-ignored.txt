@@ -29,6 +29,21 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 
+#34389 es2panda aborts on complex type alias expression with generics
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_29.ets
+
+#34390 es2panda segfault when a type parameter default is provided for generic type parameter
+05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
+05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default_n_0.ets
+05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default_n_1.ets
+
+#34391 No CTE on circular dependency in type alias
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_0.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_1.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_2.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_3.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_4.ets
+
 #26666 (cts #47 - bad array element type)
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
@@ -122,6 +137,14 @@
 
 #33717
 07.expressions/32.assignment/03.left_hand_side_expressions/lhs_class_this_via_extension_n.ets
+
+#34392 CTE on implicit char to string conversion
+07.expressions/34.string_interpolation_expressions/char_interpolation.ets
+
+#34393 es2panda aborts on bigint expression in string interpolation expression
+07.expressions/34.string_interpolation_expressions/bigint_interpolation_conditional.ets
+07.expressions/34.string_interpolation_expressions/bigint_interpolation_enum.ets
+07.expressions/34.string_interpolation_expressions/bigint_interpolation_local.ets
 
 #33994 Unexpected CTE on constant expression with cast operation on numeric literals
 07.expressions/36.constant_expression/check_enum/constant_cast_expression.ets
@@ -479,6 +502,19 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_1.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_3.ets
 
+#34401 No CTE when more than one method in subclass overrides the same method of superclass
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_0.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_1.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_2.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_3.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_4.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_5.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_6.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_7.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_8.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_9.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/inherited_and_declared_methods_override_same_superclass_n.ets
+
 #16840
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_overriding.ets
 
@@ -488,6 +524,10 @@
 
 #16840
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method.ets
+
+#34295 No CTE for incorrect overriding
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_7.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_15.ets
 
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/10.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
@@ -517,6 +557,18 @@
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
+
+#34221
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
+
+#34222
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
+
+#34223
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_null_und.ets
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_any.ets
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_object.ets
 
 #34018
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_22.ets

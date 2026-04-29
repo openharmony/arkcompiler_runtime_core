@@ -108,3 +108,37 @@ cases:
           new Derived().bar()
           arktest.assertEQ(res, 4)
       params: override-compatible return type (covariance)
+
+    # FIXED ARRAY with Any/Object, PARAMETER (contravariance)
+    - base: |-
+          foo(i: FixedArray<Object>) {
+              res = 1
+          }
+      derived: |-
+          foo(i: FixedArray<Any>) {
+              res = 2
+          }
+      call: |-
+          new Derived().foo([new Object()])
+          arktest.assertEQ(res, 2)
+          new Base().foo([new Object()])
+          arktest.assertEQ(res, 1)
+      params: override-compatible parameter (contravariance) FixedArray<Any> is supertype of FixedArray<Object>
+
+    # FIXED ARRAY with Any/Object, RETURN TYPE (covariance)
+    - base: |-
+          foo(): FixedArray<Any> {
+              res = 1
+              return [1, null]
+          }
+      derived: |-
+          foo(): FixedArray<Object> {
+              res = 2
+              return [new Object()]
+          }
+      call: |-
+          new Base().foo()
+          arktest.assertEQ(res, 1)
+          new Derived().foo()
+          arktest.assertEQ(res, 2)
+      params: override-compatible return type (covariance) FixedArray<Object> is subtype of FixedArray<Any>

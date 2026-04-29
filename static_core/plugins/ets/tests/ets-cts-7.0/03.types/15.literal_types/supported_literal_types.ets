@@ -24,6 +24,8 @@ desc: >-
 function main(): void {
     let a: {{v.value}} = {{v.value}}
     arktest.assertTrue( a instanceof {{v.assert}} )
+    const instanceOf = (a: Any) => a instanceof {{v.assert}}
+    arktest.assertTrue(instanceOf(a))
     arktest.assertEQ( a, {{v.value}} )
 }
 

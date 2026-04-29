@@ -304,6 +304,22 @@ cases:
         let ok = xx instanceof AliasMe;
 
     - defs: |-
+        type A<T> = FixedArray<B<T> | T>
+        type B<T> = Array<A<T> | T | string>
+
+        function func1(): A<number> {
+            return [1.0] as A<number>
+        }
+
+        function func2(): FixedArray<B<number> | string> {
+            return [] as FixedArray<B<number> | string>
+        }
+      use: |-
+        let a = func1()
+        let b = func2()
+        let ok = a.length == 1 && b.length == 0
+
+    - defs: |-
         type Func<I, T> = (p: I) => T
       use: |-
         let xx: Func<String, Number> = (p: String): Number => p.length

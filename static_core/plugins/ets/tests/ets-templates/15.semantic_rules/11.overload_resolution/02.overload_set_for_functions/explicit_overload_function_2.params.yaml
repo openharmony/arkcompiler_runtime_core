@@ -1,0 +1,66 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # Any-first ordering for all overload sets - Any matches everything
+  - overloadList: 'singleArgAny, singleArgObject'
+    calls:
+      - { call: 'foo(null)', result: 1 }
+      - { call: 'foo(undefined)', result: 1 }
+      - { call: 'foo(new Object())', result: 1 }
+      - { call: 'foo("")', result: 1 }
+      - { call: 'foo(1)', result: 1 }
+
+  - overloadList: 'multipleArgsAny, multipleArgsObject'
+    calls:
+      - { call: 'foo(1.5, null, "")', result: 1 }
+      - { call: 'foo(1.5, undefined, "")', result: 1 }
+      - { call: 'foo(1.5, new Object(), "")', result: 1 }
+      - { call: 'foo(1.5, "", "")', result: 1 }
+      - { call: 'foo(1.5, 1, "")', result: 1 }
+
+  - overloadList: 'optionalArgAny, optionalArgObject'
+    calls:
+      - { call: 'foo(1.5)', result: 1 }
+      - { call: 'foo(1.5, null)', result: 1 }
+      - { call: 'foo(1.5, undefined)', result: 1 }
+      - { call: 'foo(1.5, new Object())', result: 1 }
+      - { call: 'foo(1.5, "")', result: 1 }
+      - { call: 'foo(1.5, 1)', result: 1 }
+
+  # Object-first ordering for all overload sets - Object matches reference types, Any catches the rest
+  - overloadList: 'singleArgObject, singleArgAny'
+    calls:
+      - { call: 'foo(null)', result: 1 }
+      - { call: 'foo(undefined)', result: 1 }
+      - { call: 'foo(new Object())', result: 2 }
+      - { call: 'foo("")', result: 2 }
+      - { call: 'foo(1)', result: 2 }
+
+  - overloadList: 'multipleArgsObject, multipleArgsAny'
+    calls:
+      - { call: 'foo(1.5, null, "")', result: 1 }
+      - { call: 'foo(1.5, undefined, "")', result: 1 }
+      - { call: 'foo(1.5, new Object(), "")', result: 2 }
+      - { call: 'foo(1.5, "", "")', result: 2 }
+      - { call: 'foo(1.5, 1, "")', result: 2 }
+
+  - overloadList: 'optionalArgObject, optionalArgAny'
+    calls:
+      - { call: 'foo(1.5)', result: 2 }
+      - { call: 'foo(1.5, null)', result: 1 }
+      - { call: 'foo(1.5, undefined)', result: 2 }
+      - { call: 'foo(1.5, new Object())', result: 2 }
+      - { call: 'foo(1.5, "")', result: 2 }
+      - { call: 'foo(1.5, 1)', result: 2 }

@@ -13,19 +13,25 @@
 
 ---
 cases:
-  - { list: 'foo1, foo2, foo3, foo4', call: '1, 2',     result: 'foo1' }
-  - { list: 'foo1, foo2, foo3, foo4', call: '2, 3.4',   result: 'foo2' }
-  - { list: 'foo1, foo2, foo3, foo4', call: '5.6, 7.8', result: 'foo2' }
+  - { list: 'foo1, foo2, foo3, foo4', call: '1, 2',         result: 'foo1' }
+  - { list: 'foo1, foo2, foo3, foo4', call: '2, 3.4',       result: 'foo2' }
+  - { list: 'foo1, foo2, foo3, foo4', call: '5.6, 7.8',     result: 'foo2' }
 
-  - { list: 'foo2, foo3, foo4, foo1', call: '1, 2',     result: 'foo2' }
-  - { list: 'foo2, foo3, foo4, foo1', call: '2, 3.4',   result: 'foo2' }
-  - { list: 'foo2, foo3, foo4, foo1', call: '5.6, 7.8', result: 'foo2' }
+  - { list: 'foo2, foo3, foo4, foo1', call: '1, 2',         result: 'foo2' }
+  - { list: 'foo2, foo3, foo4, foo1', call: '2, 3.4',       result: 'foo2' }
+  - { list: 'foo2, foo3, foo4, foo1', call: '5.6, 7.8',     result: 'foo2' }
 
-  - { list: 'foo3, foo4, foo1, foo2', call: '1, 2',     result: 'foo3' }
-  - { list: 'foo3, foo4, foo1, foo2', call: '2, 3.4',   result: 'foo4' }
-  - { list: 'foo3, foo4, foo1, foo2', call: '5.6, 7.8', result: 'foo4' }
+  - { list: 'foo3, foo4, foo1, foo2', call: '1, 2',         result: 'foo3' }
+  - { list: 'foo3, foo4, foo1, foo2', call: '2, 3.4',       result: 'foo4' }
+  - { list: 'foo3, foo4, foo1, foo2', call: '5.6, 7.8',     result: 'foo4' }
 
-  - { list: 'foo4, foo1, foo2, foo3', call: '1, 2',     result: 'foo4' }
-  - { list: 'foo4, foo1, foo2, foo3', call: '2, 3.4',   result: 'foo4' }
-  - { list: 'foo4, foo1, foo2, foo3', call: '5.6, 7.8', result: 'foo4' }
+  - { list: 'foo4, foo1, foo2, foo3', call: '1, 2',         result: 'foo4' }
+  - { list: 'foo4, foo1, foo2, foo3', call: '2, 3.4',       result: 'foo4' }
+  - { list: 'foo4, foo1, foo2, foo3', call: '5.6, 7.8',     result: 'foo4' }
 
+  - { list: 'foo5, foo6',             call: '1, 2',         result: 'foo5' }
+  - { list: 'foo5, foo6',             call: '1, null',      result: 'foo5' }
+  - { list: 'foo5, foo6',             call: '1, undefined', result: 'foo5' }
+  - { list: 'foo6, foo5',             call: '1, 2',         result: 'foo6' }
+  - { list: 'foo6, foo5',             call: '1, null',      result: 'foo5' }
+  - { list: 'foo6, foo5',             call: '1, undefined', result: 'foo5' }
