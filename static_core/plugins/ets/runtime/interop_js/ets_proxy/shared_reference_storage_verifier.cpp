@@ -14,8 +14,6 @@
  */
 
 #include <cstring>
-#include <string>
-#include "interop_js/interop_error.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage_verifier.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -60,9 +58,7 @@ size_t SharedReferenceStorageVerifier::TraverseAllItems(const SharedReferenceSto
     for (size_t index = 1U; index < capacity; ++index) {
         failCount += VerifyOneItem(storage, index, status, vm);
     }
-    LOG_IF(failCount > 0, ERROR, ETS_INTEROP_JS)
-        << "REF_VERIFIER: Shared reference verify total fails: " << failCount
-        << ". Error code: " << std::to_string(INTEROP_SHARED_REFERENCE_INTEGRITY_FAILED);
+    LOG_IF(failCount > 0, ERROR, ETS_INTEROP_JS) << "REF_VERIFIER: Shared reference verify total fails: " << failCount;
     return failCount;
 }
 
@@ -136,8 +132,7 @@ size_t SharedReferenceStorageVerifier::CheckJsObjectReindex(const SharedReferenc
 #endif
     if (item != storage->GetReference(const_cast<InteropCtx *>(item->GetCtx())->GetJSEnv(), result)) {
         LOG_REF_VERIFIER << "Shared Reference corruption found! JS object address cannot reindex at " << std::hex
-                         << item << "," << index
-                         << ". Error code: " << std::to_string(INTEROP_SHARED_REFERENCE_INTEGRITY_FAILED);
+                         << item << "," << index;
         failCount++;
     }
     return failCount;
@@ -149,8 +144,7 @@ size_t SharedReferenceStorageVerifier::CheckEtsObjectReindex(const SharedReferen
     int32_t idx = item->GetEtsObject()->GetInteropIndex(vm);
     if (const_cast<InteropCtx *>(item->GetCtx())->GetSharedRefStorage()->GetItemByIndex(idx) != item) {
         LOG_REF_VERIFIER << "Shared Reference corruption found! Ets object address cannot reindex at " << std::hex
-                         << item << "," << index
-                         << ". Error code: " << std::to_string(INTEROP_SHARED_REFERENCE_INTEGRITY_FAILED);
+                         << item << "," << index;
         failCount++;
     }
     return failCount;
@@ -168,8 +162,7 @@ size_t SharedReferenceStorageVerifier::CheckJsObjectAddress(const SharedReferenc
     size_t failCount = 0;
     if (!JsObjectContainObject(item)) {
         LOG_REF_VERIFIER << "Shared Reference corruption found! Js object address is invalid at " << std::hex << item
-                         << "," << index
-                         << ". Error code: " << std::to_string(INTEROP_SHARED_REFERENCE_INTEGRITY_FAILED);
+                         << "," << index;
         failCount++;
     }
     return failCount;
@@ -181,8 +174,7 @@ size_t SharedReferenceStorageVerifier::CheckEtsObjectAddress(const SharedReferen
     ObjectHeader *obj = item->GetEtsObject()->GetCoreType();
     if (!const_cast<InteropCtx *>(item->GetCtx())->GetPandaEtsVM()->GetHeapManager()->ContainObject(obj)) {
         LOG_REF_VERIFIER << "Shared Reference corruption found! Ets object address is invalid at " << std::hex << item
-                         << "," << index
-                         << ". Error code: " << std::to_string(INTEROP_SHARED_REFERENCE_INTEGRITY_FAILED);
+                         << "," << index;
         failCount++;
     }
     return failCount;

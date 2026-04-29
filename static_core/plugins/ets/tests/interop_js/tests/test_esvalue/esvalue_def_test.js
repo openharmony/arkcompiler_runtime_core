@@ -32,6 +32,7 @@ export let B = {
 };
 export let jsArray = ['foo', 1, true];
 export let jsArray1 = ['foo', 1, true];
+export let strArray = ['abc', 'def', 'ghi'];
 export let objWithFunc = {
     'func': function () {
         return 'hello';
