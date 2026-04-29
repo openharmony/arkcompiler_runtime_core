@@ -17,7 +17,7 @@
 desc: >-
     Circular dependency in Awaited should return an error
 tags: [compile-only, negative]
-expected_out: "Type alias 'D' circularly references itself."
+expected_out: "Semantic error ESE0311: Circular type alias reference"
 ---*/
 
 type D = Awaited<Promise<E>>
