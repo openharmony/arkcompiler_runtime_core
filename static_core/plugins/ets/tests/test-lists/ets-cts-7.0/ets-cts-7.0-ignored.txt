@@ -533,9 +533,6 @@
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/overriding1c_3.ets
 
 
-#33192 function with the same name as global doesn't work as receiver
-17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_4.ets
-
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets
 
