@@ -101,13 +101,12 @@ class FieldMetadataCache {
     static getMetadata(cls: Class): Array<FieldMetadata> {
         const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
             const fields = reflect.getInstanceFieldsRecursive(c);
-            const metadata = new Array<FieldMetadata>(fields.length);
-            for (let i = 0; i < fields.length; i++) {
+            const metadata = new Array<FieldMetadata>(fields.length, (i) => {
                 const field = fields[i];
                 const ignore = JSONAPI.getJSONStringifyIgnore(field);
                 const rename = JSONAPI.getJSONRename(field);
-                metadata[i] = new FieldMetadata(field, ignore, rename);
-            }
+                return new FieldMetadata(field, ignore, rename);
+            });
             return new ClassMetadata(metadata);
         });
         return classMeta.metadata;
@@ -116,13 +115,12 @@ class FieldMetadataCache {
     static getMetadataByName(cls: Class, name: string): FieldMetadata | undefined {
         const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
             const fields = reflect.getInstanceFieldsRecursive(c);
-            const metadata = new Array<FieldMetadata>(fields.length);
-            for (let i = 0; i < fields.length; i++) {
+            const metadata = new Array<FieldMetadata>(fields.length, (i) => {
                 const field = fields[i];
                 const ignore = JSONAPI.getJSONStringifyIgnore(field);
                 const rename = JSONAPI.getJSONRename(field);
-                metadata[i] = new FieldMetadata(field, ignore, rename);
-            }
+                return new FieldMetadata(field, ignore, rename);
+            });
             return new ClassMetadata(metadata);
         });
         return classMeta.nameMap.get(name);

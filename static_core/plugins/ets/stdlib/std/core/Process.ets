@@ -488,7 +488,7 @@ export namespace StdProcess {
             maxBuffer = min(options.maxBuffer as int, MAX_BUFFER_SIZE);
         }
 
-        let ret: Array<int> = new Array<int>(3);
+        let ret: Array<int> = Array.create<int>(3, 0);
         ret[0] = timeout
         ret[1] = killSignal
         ret[2] = maxBuffer

@@ -19,8 +19,8 @@ export function getConstArray(): Array<string> {
     return constArray;
 }
 
-export function customLengthArray(length: int): Array<string> {
-    return new Array<string>(length);
+export function customLengthArray(length: int): Array<string | undefined> {
+    return Array.create<string | undefined>(length, undefined);
 }
 
 export function testArrayValByIndex(arr: Array<string>, idx: int, val: string): boolean {

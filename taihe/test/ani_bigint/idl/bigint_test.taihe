@@ -14,7 +14,7 @@
  */
 @!sts_inject("""
 function bigIntToArrayInt64(a : BigInt) : long[] {
-    let array : Array<long> = new Array<long>(0);
+    let array : Array<long> = new Array<long>();
     let tmp : BigInt = a;
     if (tmp === 0n) {
         array.push(0);

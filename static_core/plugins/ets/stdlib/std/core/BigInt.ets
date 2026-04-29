@@ -1589,7 +1589,7 @@ export final class BigInt {
             shift = BigInt.parseInt(s, expPosition + 1, len)
             len = expPosition
         }
-        let digits = new Array<Int>(0)
+        let digits = new Array<Int>()
         for (let i = 0; i < len; i++) {
             if (s.charAt(i) == c'_') {
                 continue

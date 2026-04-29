@@ -60,16 +60,16 @@ function testOSMutex() {
             m.Unlock();
         }
     }
-    let workers = new Array<EAWorker>(NUM_WORKERS);
+    let workers = Array.create<EAWorker | undefined>(NUM_WORKERS, undefined);
     for (let i = 0; i < NUM_WORKERS; i++) {
         workers[i] = new EAWorker();
-        workers[i].start();
+        workers[i]!.start();
     }
     for (let i = 0; i < NUM_WORKERS; i++) {
-        workers[i].run<void>(work);
+        workers[i]!.run<void>(work);
     }
     for (let i = 0; i < NUM_WORKERS; i++) {
-        workers[i].quit();
+        workers[i]!.quit();
     }
     arktest.assertEQ(counter, NUM * NUM_WORKERS, counter.toString());
 }

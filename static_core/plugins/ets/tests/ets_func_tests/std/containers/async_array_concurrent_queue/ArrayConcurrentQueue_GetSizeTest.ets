@@ -20,13 +20,13 @@ async function main(): Promise<int> {
         const elementsNum: int = 100;
         let queueInt: containers.stackless.ArrayConcurrentQueue<int> =
             new containers.stackless.ArrayConcurrentQueue<int>(elementsNum * 2);
-        let promises: Promise<void>[] = new Array<Promise<void>>(elementsNum);
+        let promises: (Promise<void> | undefined)[] = Array.create<Promise<void> | undefined>(elementsNum, undefined);
         for (let i: int = 0; i < elementsNum; ++i) {
             promises[i] = queueInt.push(i);
             arktest.assertTrue(queueInt.add(i));
         }
         for (let i: int = 0; i < elementsNum; i++) {
-            await promises[i];
+            await promises[i]!;
         }
         arktest.assertEQ(queueInt.size, elementsNum * 2);
     });

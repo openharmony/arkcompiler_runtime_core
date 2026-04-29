@@ -389,10 +389,9 @@ export final class String extends Object implements Comparable<String>, Iterable
     public getChars(begin: int, end: int): char[] {
         // #24515: Need to remove the following function call after primitive type refactoring
         let ret : ValueArray<char> = this.getCharsImpl(begin, end);
-        let tmpForceBox : Array<char> = new Array<char>(ret.length);
-        for (let i = 0; i < tmpForceBox.length; i++) {
-            tmpForceBox[i] = ret[i]
-        }
+        let tmpForceBox : Array<char> = new Array<char>(ret.length, (i) => {
+            return ret[i]
+        });
         return tmpForceBox;
     }
 
@@ -414,10 +413,9 @@ export final class String extends Object implements Comparable<String>, Iterable
     public getBytes(begin: int, end: int): byte[] {
         // #24515: Need to remove the following function call after primitive type refactoring
         let ret : FixedArray<byte> = arkruntime.stub.toFixedArray(this.getBytesImpl(begin, end));
-        let tmpForceBox: Array<byte> = new Array<byte>(ret.length);
-        for (let i = 0; i < tmpForceBox.length; i++) {
-            tmpForceBox[i] = ret[i]
-        }
+        let tmpForceBox: Array<byte> = new Array<byte>(ret.length, (i) => {
+            return ret[i]
+        });
         return tmpForceBox;
     }
 

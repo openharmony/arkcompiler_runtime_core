@@ -1332,13 +1332,12 @@ export class DateTimeFormat {
             if (squashed.length % 2 != 0) {
                 throw Error("ListFormat.formatToPartsNative incorrect result")
             }
-            const result = new Array<FormatToPartsResult>(squashed.length / 2)
-            for (let i = 0; i < result.length; i++) {
-                result[i] = {
+            const result = new Array<FormatToPartsResult>(squashed.length / 2, (i) => {
+                return {
                     type: squashed[i * 2] as "element" | "literal",
                     value: squashed[i * 2 + 1]
                 } as FormatToPartsResult
-            }
+            })
             return result
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ export type DequeforEachCb<T> = (value: T, index: int, deque: Deque<T>) => void;
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 8;
     private capacity: int = this.DEFAULT_CAPACITY;
-    private buffer: Array<T>;
+    private buffer: Array<T | undefined>;
     private front: int = 0;
     private rear: int = 0;
 
@@ -64,7 +64,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      */
     public getFirst(): T {
         this.checkEmptyContainer();
-        return this.buffer[this.front];
+        return this.buffer[this.front] as T;
     }
 
     /**
@@ -74,7 +74,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      */
     public getLast(): T {
         this.checkEmptyContainer();
-        return this.buffer[(this.rear - 1 + this.capacity) % this.capacity];
+        return this.buffer[(this.rear - 1 + this.capacity) % this.capacity] as T;
     }
 
     /**
@@ -85,7 +85,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     public popFirst(): T {
         this.checkEmptyContainer();
 
-        let firstElement: T = this.buffer[this.front];
+        let firstElement: T = this.buffer[this.front] as T;
         this.front = (this.front + 1) % this.capacity;
 
         return firstElement;
@@ -100,7 +100,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
         this.checkEmptyContainer();
 
         this.rear = (this.rear - 1 + this.capacity) % this.capacity;
-        let element: T = this.buffer[this.rear];
+        let element: T = this.buffer[this.rear] as T;
 
         return element;
     }
@@ -110,7 +110,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      */
     public constructor() {
         this.capacity = this.DEFAULT_CAPACITY;
-        this.buffer = new Array<T>(this.capacity);
+        this.buffer = Array.create<T | undefined>(this.capacity, undefined);
     }
 
     /**
@@ -140,7 +140,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     public forEach(callbackfn: DequeforEachCb<T>): void {
         let i: int = this.front, k = 0;
         while (i != this.rear) {
-            callbackfn(this.buffer[i], k++, this);
+            callbackfn(this.buffer[i] as T, k++, this);
             i = (i + 1) % this.capacity;
         }
     }
@@ -208,7 +208,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private increaseCapacity(): void {
         let newCap: int = min(this.capacity * 2, Int.MAX_VALUE);
 
-        let newBuffer = new Array<T>(newCap);
+        let newBuffer = Array.create<T | undefined>(newCap, undefined);
 
         let i: int = this.front, k = 0;
         while (i != this.rear) {
@@ -239,7 +239,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
         }
         this.checkIndex(index);
 
-        return this.buffer[this.getRealIndex(index)];
+        return this.buffer[this.getRealIndex(index)] as T;
     }
 
     /**
@@ -278,10 +278,10 @@ class DequeValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Deque<T>
     private idx: int = 0;
     private capacity: int
-    private buffer: Array<T>;
+    private buffer: Array<T | undefined>;
     private rear: int = 0;
 
-    constructor(parent: Deque<T>, front: int, rear: int, capacity: int, buffer: Array<T>) {
+    constructor(parent: Deque<T>, front: int, rear: int, capacity: int, buffer: Array<T | undefined>) {
         this.parent = parent
         this.idx = front;
         this.rear = rear
@@ -294,7 +294,7 @@ class DequeValuesIterator_T<T> implements IterableIterator<T> {
             return new IteratorResult<T>()
         }
 
-        let val = new IteratorResult<T>(this.buffer[this.idx]);
+        let val = new IteratorResult<T>(this.buffer[this.idx] as T);
         this.idx = (this.idx + 1) % this.capacity;
 
         return val;

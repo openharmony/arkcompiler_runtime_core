@@ -15,9 +15,9 @@
 
 const elementsNum: int = 100;
 
-let testArrayInt: int[] = new Array<int>(elementsNum);
-let testArrayObj: Object[] = new Array<Object>(elementsNum);
-let testArrayStr: String[] = new Array<String>(elementsNum);
+let testArrayInt: int[] = Array.create<int>(elementsNum, 0);
+let testArrayObj: Object[] = new Array<Object>(elementsNum, () => new Object());
+let testArrayStr: String[] = Array.create<String>(elementsNum, '');
 let queueInt: containers.stackless.ArrayConcurrentQueue<int> = new containers.stackless.ArrayConcurrentQueue<int>(200);
 let queueObj: containers.stackless.ArrayConcurrentQueue<Object> =
     new containers.stackless.ArrayConcurrentQueue<Object>(200);
@@ -28,7 +28,7 @@ async function main(): Promise<int> {
     let arrayConcurrentQueueTestsuite = new arktest.ArkTestsuite('ArrayConcurrentQueuePushTest');
 
     arrayConcurrentQueueTestsuite.addAsyncTest('SimpleQueuePushPopFrontBackSizeEmptyTest', async () => {
-        let array: int[] = new Array<int>(elementsNum);
+        let array: int[] = Array.create<int>(elementsNum, 0);
         for (let i: int = 0; i < array.length; ++i) {
             let queueItem = (random() * 10000).toInt();
             array[i] = queueItem;
@@ -80,20 +80,20 @@ async function main(): Promise<int> {
         let queue: containers.stackless.ArrayConcurrentQueue<int> =
             new containers.stackless.ArrayConcurrentQueue<int>(queueSize);
         let queueItem = 1;
-        let promisesPush: Promise<void>[] = new Array<Promise<void>>(queueSize / 2);
+        let promisesPush = Array.create<Promise<void> | undefined>(queueSize / 2, undefined);
         for (let i: int = 0; i < queueSize / 2; ++i) {
             promisesPush[i] = queue.push(queueItem);
         }
         for (let i: int = 0; i < queueSize / 2; ++i) {
             arktest.assertTrue(queue.add(queueItem));
         }
-        let promisesPop: Promise<int>[] = new Array<Promise<int>>(queueSize / 2);
+        let promisesPop = Array.create<Promise<int> | undefined>(queueSize / 2, undefined);
         for (let i: int = 0; i < queueSize / 2; ++i) {
             promisesPop[i] = queue.pop();
         }
         for (let i: int = 0; i < queueSize / 2; i++) {
-            await promisesPush[i];
-            await promisesPop[i];
+            await promisesPush[i]!;
+            await promisesPop[i]!;
         }
         arktest.assertEQ(queue.size, queueSize / 2);
     });
@@ -103,17 +103,17 @@ async function main(): Promise<int> {
         let queue: containers.stackless.ArrayConcurrentQueue<int> =
             new containers.stackless.ArrayConcurrentQueue<int>(queueSize);
         let queueItem = 1;
-        let promisesPush: Promise<void>[] = new Array<Promise<void>>(queueSize);
+        let promisesPush = Array.create<Promise<void> | undefined>(queueSize, undefined);
         for (let i: int = 0; i < queueSize; ++i) {
             promisesPush[i] = queue.push(queueItem);
         }
-        let promisesPop: Promise<int>[] = new Array<Promise<int>>(queueSize);
+        let promisesPop = Array.create<Promise<int> | undefined>(queueSize, undefined);
         for (let i: int = 0; i < queueSize; ++i) {
             promisesPop[i] = queue.pop();
         }
         for (let i: int = 0; i < queueSize; i++) {
-            await promisesPush[i];
-            await promisesPop[i];
+            await promisesPush[i]!;
+            await promisesPop[i]!;
         }
         arktest.assertEQ(queue.size, 0);
     });
@@ -152,7 +152,7 @@ async function pusherStr() {
 }
 
 async function popperInt(): Promise<int[]> {
-    let result: int[] = new Array<int>(elementsNum);
+    let result: int[] = Array.create<int>(elementsNum, 0);
     for (let i = 0; i < elementsNum; i++) {
         result[i] = await queueInt.pop();
     }
@@ -160,7 +160,7 @@ async function popperInt(): Promise<int[]> {
 }
 
 async function popperObj(): Promise<Object[]> {
-    let result: Object[] = new Array<Object>(elementsNum);
+    let result: Object[] = new Array<Object>(elementsNum, () => new Object());
     for (let i = 0; i < elementsNum; i++) {
         result[i] = await queueObj.pop();
     }
@@ -168,7 +168,7 @@ async function popperObj(): Promise<Object[]> {
 }
 
 async function popperStr(): Promise<String[]> {
-    let result: String[] = new Array<String>(elementsNum);
+    let result: String[] = Array.create<String>(elementsNum, '');
     for (let i = 0; i < elementsNum; i++) {
         result[i] = await queueStr.pop();
     }

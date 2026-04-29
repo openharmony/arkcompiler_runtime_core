@@ -65,14 +65,12 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public constructor() {
         this.capacity = this.DEFAULT_CAPACITY;
-        this.buffer = new Array<T>(this.capacity);
-        this.buffer.length = 0;
+        this.buffer = new Array<T>();
     }
 
     private constructor(cap: int) {
         this.capacity = cap;
-        this.buffer = new Array<T>(this.capacity);
-        this.buffer.length = 0;
+        this.buffer = new Array<T>();
     }
 
     /**
@@ -113,8 +111,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         } else {
             this.increaseCap((this.capacity * 1.5).toInt());
 
-            let newBuffer: Array<T> = new Array<T>(this.capacity);
-            newBuffer.length = 0;
+            let newBuffer: Array<T> = new Array<T>();
             for (let i: int = 0; i < index; i++) {
                 newBuffer.push(this.buffer[i]);
             }
@@ -280,8 +277,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public clear(): void {
         this.capacity = this.DEFAULT_CAPACITY;
-        this.buffer = new Array<T>(this.capacity);
-        this.buffer.length = 0;
+        this.buffer = new Array<T>();
     }
 
     /**
@@ -372,10 +368,9 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * Trims the capacity of the ArrayList to fit just the current size.
      */
     public trimToCurrentLength(): void {
-        let newBuffer: Array<T> = new Array<T>(this.length);
-        for (let i: int = 0; i < this.length; i++) {
-            newBuffer[i] = this.buffer[i];
-        }
+        let newBuffer: Array<T> = new Array<T>(this.length, (i) => {
+            return this.buffer[i];
+        });
         this.capacity = this.length;
 
         this.buffer = newBuffer;
@@ -391,8 +386,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     }
 
     private increaseCap(cap: int): void {
-        let newBuffer: Array<T> = new Array<T>(cap);
-        newBuffer.length = 0;
+        let newBuffer: Array<T> = new Array<T>();
 
         for (let i: int = 0; i < this.length; i++) {
             newBuffer.push(this.buffer[i]);

@@ -133,7 +133,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public constructor(arrayLen: int) {
+    private constructor(arrayLen: int) {
         this.buffer = new FixedArray<Any>(arrayLen)
         this.actualLength = arrayLen
     }

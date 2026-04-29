@@ -14730,8 +14730,8 @@ function stringified_insertion_sort<T>(arr: FixedArray<T>, arrStr: FixedArray<bu
 function stringified_perform_merge<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>, startIndex: int, midIndex: int, endIndex: int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left: (T | undefined)[] = new Array<T | undefined>(len1);
-    let right: (T | undefined)[] = new Array<T | undefined>(len2);
+    let left: (T | undefined)[] = Array.create<T | undefined>(len1, undefined);
+    let right: (T | undefined)[] = Array.create<T | undefined>(len2, undefined);
     let leftStr : FixedArray<buffStr> = new FixedArray<buffStr>(len1)
     let rightStr : FixedArray<buffStr> = new FixedArray<buffStr>(len2)
     for (let i = 0; i < len1; i++) {
