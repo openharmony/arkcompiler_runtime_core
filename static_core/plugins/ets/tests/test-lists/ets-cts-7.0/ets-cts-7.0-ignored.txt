@@ -16,6 +16,11 @@
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
 
+#34603
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_46.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_47.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_48.ets
+
 #34391 No CTE on circular dependency in type alias
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_0.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_1.ets
@@ -458,6 +463,9 @@
 
 #34098
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/same_names.ets
+
+#34442 
+17.experimental_features/13.adding_functionality_to_existing_types/04.lambda_expressions_with_receiver/lambda_expressions_with_receiver_25.ets 
 
 #33744
 17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets

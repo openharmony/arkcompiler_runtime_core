@@ -15,49 +15,62 @@
 cases:
     - defs: |-
           type 123 = int;
+      expected_out: "Syntax error ESY0227: Unexpected token '123'."
 
     - defs: |-
           type .X = Long;
+      expected_out: "Syntax error ESY0318: Class cannot be used as object."
 
     - defs: |-
           type null = byte;
+      expected_out: "Syntax error ESY0227: Unexpected token 'null'."
 
     - defs: |-
           type this = Object;
+      expected_out: "Syntax error ESY0227: Unexpected token 'this'."
 
     - defs: |-
           type int = Int;
+      expected_out: "Syntax error ESY0227: Unexpected token 'int'."
 
     - defs: |-
           interface Weight {}
           class Body implements Weight {}
           type Weight = Double;
+      expected_out: "Semantic error ESE0351: Variable 'Weight' has already been declared."
 
     - defs: |-
           type self = this;
+      expected_out: "Syntax error ESY0044: A 'this' type is available only as return type in a non-static method of a class or struct and extension functions."
 
     - defs: |-
           class A<T, V> {}
           type Box<T> = A<Boolean, T>;
       use: |-
           let v: Box<Int> = new A<Int, Int>();
+      expected_out: "Semantic error ESE0318: Type 'A<Int,Int>' cannot be assigned to type 'A<Boolean,Int>'"
 
     - defs: |-
           type E = E
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
           type E = string | E
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
           type A<T> = Array<A>
+      expected_out: "Semantic error ESE0155: Type alias declaration is generic, but too few type arguments were provided"
 
     - defs: |-
           type A<T> = A<T>
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
           type A = C
           type B = A
           type C = B
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     # recursive cases
     - defs: |-
@@ -70,10 +83,12 @@ cases:
           type RF = (p: RF) => RF
       use: |-
           let v1: RF = (p: RF): RF => { return p }
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
         { class ClassNestedInBlock{} }
         type TAlias = ClassNestedInBlock;
+      expected_out: "Syntax error ESY0040: Illegal start of CLASS expression."
 
     - defs: |-
           enum Axis { X, Y, Z };
@@ -81,28 +96,35 @@ cases:
       use: |-
           let v: Fields = new Axis[6];
           let ok = v.length == 6;
+      expected_out: "Semantic error ESE0124: Expected 3 arguments, got 0."
 
     - defs: |-
         type TStringAlias? = String | undefined
+      expected_out: "Syntax error ESY0230: Expected '=', got '?'."
 
     - defs: |-
         @interface ClassAuthor {}
         type A = ClassAuthor
+      expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
 
     - defs: |-
         @interface ClassAuthor {}
         type A = ClassAuthor | String
+      expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
 
     - defs: |-
         type A = class MyClassDec {}
+      expected_out: "Syntax error ESY0138: Invalid Type."
 
     - defs: |-
         class AliasMe {}
         type Alias = AliasMe<X> // CTE:  TypeError: Type 'AliasMe' is not generic.
+      expected_out: "Semantic error ESE0169: Type 'AliasMe' is not generic."
 
     - defs: |-
         class AliasMe<X> {}
         type Alias = AliasMe<X> // CTE: TypeError: Cannot find type 'X'.
+      expected_out: "Semantic error ESE0371: Cannot find type 'X'."
 
     - defs: |-
         type A<T, U> = T | A<U, T>[]
@@ -115,18 +137,21 @@ cases:
         type Alias<T extends FinitaLaComedia> = T
       use: |-
         let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
+      expected_out: "Semantic error ESE0228: Type argument 'Double' should be a subtype of 'FinitaLaComedia' constraint"
 
     - defs: |-
         class FinitaLaComedia {}
         type Alias<T = FinitaLaComedia> = T
       use: |-
         let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
+      expected_out: "Semantic error ESE0318: Type '\\\"1\\\"' cannot be assigned to type 'Double'"
 
     - defs: |-
         class FinitaLaComedia {}
         type Alias<T = FinitaLaComedia> = T
       use: |-
         let x: Alias = 1  //CTE: TypeError: Type 'Int' cannot be assigned to type 'FinitaLaComedia'
+      expected_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'FinitaLaComedia'"
 
     - defs: |-
         type Alias<T extends string> = T
@@ -134,6 +159,7 @@ cases:
       use: |-
         let xx: Alias<Number> = 1
         let ok = xx == 1;
+      expected_out: "Semantic error ESE0228: Type argument 'Double' should be a subtype of 'String' constraint"
 
     - defs: |-
         final class FinitaLaComedia {}
@@ -142,6 +168,7 @@ cases:
       use: |-
         let xx: Alias<Number> = 1
         let ok = xx == 1;
+      expected_out: "Semantic error ESE0228: Type argument 'Double' should be a subtype of 'FinitaLaComedia' constraint"
 
     - defs: |-
         final class FinitaLaComedia {}
@@ -150,6 +177,7 @@ cases:
       use: |-
         let xx: Alias<String> = "Divine"
         let ok = xx instanceof String && xx instanceof Alias<String>;
+      expected_out: "Semantic error ESE0228: Type argument 'String' should be a subtype of 'FinitaLaComedia' constraint"
 
     - defs: |-
         type TSStyleAlias<T> = { value: T } // SyntaxError: Using object literals to declare types in place is not supported
@@ -215,17 +243,20 @@ cases:
         type NESA<X> = [X, ...X[]] // Syntax Error: Invalid Type
       use: |-
         let xx: NESA<String>
+      expected_out: "Syntax error ESY0138: Invalid Type."
 
     - defs: |-
         type ELP = | string  // Syntax Error: Invalid Type
       use: |-
         let xx: ELP
+      expected_out: "Syntax error ESY0138: Invalid Type."
 
     - defs: |-
         type C<T> = T
         type A = C<A>
       use: |-
-        let aa: A  
+        let aa: A
+      expected_out: "Semantic error ESE0311: Circular type alias reference"
 
     - defs: |-
         class TLX<T extends {}> {}
@@ -236,12 +267,14 @@ cases:
       use: |-
         let v: LongArray[] = new Long[1][1];
         let ok = v.length == 1;
+      expected_out: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Array<Array<Long>>'"
 
     - defs: |-
         type Matrix3D = Byte[][][];
       use: |-
         let v: Matrix3D = new Byte[1][1][1];
         let ok = v.length == 1;
+      expected_out: "Semantic error ESE0318: Type 'Byte' cannot be assigned to type 'Array<Array<Array<Byte>>>'"
 
     - defs: |-
         type NumArray1 = Number[]
@@ -249,3 +282,28 @@ cases:
       use: |-
         let v: NumArray2[] = new Number[1][1][1]
         let ok = v.length == 1
+      expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Array<Array<Array<Double>>>'"
+
+    #46-48 type alias shadowing
+    - defs: |- 
+        type k = int
+      use: |-
+        {
+          let k = 4
+          let b: k = k
+        }
+      expected_out: "Semantic error ESE0371: Cannot find type 'k'."
+
+    - defs: |- 
+        type k = int
+        function foo(k: string) { let b: k = 5 }
+      expected_out: "Semantic error ESE0371: Cannot find type 'k'."
+
+    - defs: |- 
+        type k = int
+      use: |-
+        {
+          const k = "test"
+          let b: k = 5
+        }
+      expected_out: "Semantic error ESE0371: Cannot find type 'k'."

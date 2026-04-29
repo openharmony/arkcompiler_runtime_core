@@ -16,8 +16,9 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
-    as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
+    Lambda expression with receiver defines an instance of a function type with receiver.
+    It looks almost the same as an ordinary lambda expression, except that the first parameter is mandatory,
+    and the keyword `this` is used as its name.
 ---*/
 
 {{c.decl}}

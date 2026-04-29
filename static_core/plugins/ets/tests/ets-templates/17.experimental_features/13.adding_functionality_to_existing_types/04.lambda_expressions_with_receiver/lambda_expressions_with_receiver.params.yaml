@@ -150,3 +150,85 @@ cases:
     use: |
       let n: Function = (): void => {}
       f(n)
+
+  # Array
+  - decl: |
+      let f = (this: Array<float>): float => { return this[1] }
+    use: |
+      let a: Array<float> = [-0.5f, 7.3f] 
+      arktest.assertEQ(f(a), a[1])
+
+  # Array: iterate receiver
+  - decl: |
+      let f = (this: Array<string>): string => {
+        let res = ""
+        for (let el of this) {
+          res += el
+        }
+      return res
+      }
+    use: |
+      let a: Array<string> = ["t", "e", "s", "t"]
+      arktest.assertEQ(f(a), "test")
+
+  # ValueArray
+  - decl: |
+      let f = (this: ValueArray<float>): float => { return this.length }
+    use: |
+      let a: ValueArray<float> = [-0.5f, 7.3f]
+      arktest.assertEQ(f(a), 2)
+
+  # $_iterator as lambda with receiver for Array<int>
+  - decl: |
+      class ArrayIntIterator implements Iterator<int> {
+        index: int = 0
+        base: Array<int>
+        constructor(base: Array<int>) {
+          this.base = base
+        }
+        next(): IteratorResult<int> {
+          return new IteratorResult<int>(this.index >= this.base.length,
+            this.index >= this.base.length ? undefined : this.base[this.index++])
+        }
+      }
+      let $_iterator = (this: Array<int>): Iterator<int> => {
+        return new ArrayIntIterator(this)
+      }
+    use: |
+      let sum = 0
+      let arr: Array<int> = [10, 20, 30]
+      let it = arr.$_iterator()
+      let res = it.next()
+      while (!res.done) {
+        sum += res.value!.toInt()
+        res = it.next()
+      }
+      arktest.assertEQ(sum, 60)
+
+  # $_iterator as lambda with receiver for ValueArray<float>
+  - decl: |
+      class VAIterator implements Iterator<float> {
+        index: int = 0
+        base: ValueArray<float>
+        constructor(base: ValueArray<float>) {
+          this.base = base
+        }
+        next(): IteratorResult<float> {
+          return new IteratorResult<float>(this.index >= this.base.length,
+            this.index >= this.base.length ? undefined : this.base[this.index++])
+        }
+      }
+      let $_iterator = (this: ValueArray<float>): Iterator<float> => {
+        return new VAIterator(this)
+      }
+    use: |
+      let a: ValueArray<float> = [1.0f, 2.0f, 3.0f]
+
+      let it_func = $_iterator(a)
+      sum = 0.0f
+      res = it_func.next()
+      while (!res.done) {
+        sum += res.value as float
+        res = it_func.next()
+      }
+      arktest.assertEQ(sum, 6.0f)
