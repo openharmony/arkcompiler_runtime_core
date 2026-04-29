@@ -26,6 +26,16 @@ macro(:get_string_length) do |length, length_shift|
     ShrI(length).Imm(length_shift).u64
 end  # get_string_length
 
+###
+# Currently, string length field contains two special bits:
+#   - Bit 0: 1-compressed / 0-uncompressed
+#   - Bit 1: 1-string is in string table / 0-string is not in string table
+# Thus a string is considered to be empty if its packed length <= 3
+scoped_macro(:is_packed_string_length_zero) do |len|
+    StaticAssertEQ(Constants::STRING_PACKED_LENGTH_ZERO, 3)
+    zero := Compare(len, Constants::STRING_PACKED_LENGTH_ZERO).LE.b
+end
+
 # TODO `unpack_length_with_compression` is the replacement for this when the support for strings without
 # compression is removed from the code of all the string-related intrinsics.
 scoped_macro(:unpack_length) do |length, compression, length_shift|

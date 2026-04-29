@@ -2156,6 +2156,13 @@ extern "C" uint8_t CoreStringEqualsEntrypoint(coretypes::String *str1, coretypes
 
 extern "C" int32_t CoreStringCompareTo(coretypes::String *str1, coretypes::String *str2)
 {
+    // 'str1' is supposed to be 'this', which can't be nullptr by design,
+    // thus here we check 'str2' only.
+    if (UNLIKELY(str2 == nullptr)) {
+        ThrowNullPointerException();
+        return 0;
+    }
+
     /* corner cases */
     if (str1->GetLength() == 0) {
         return -str2->GetLength();

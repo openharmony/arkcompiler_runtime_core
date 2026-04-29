@@ -47,6 +47,7 @@ set(intrinsics_tests
     string_lastindexof
     string_length
     string_normalize
+    string_nullptr
     string_repeat
     string_slice
     string_startswith

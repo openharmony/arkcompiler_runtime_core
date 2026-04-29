@@ -401,6 +401,12 @@ def GenerateStringCompareTo(cgmode)
       next
     end
 
+    # 'str1_orig' is supposed to be 'this', which can't be nullptr by design,
+    # so here we check 'str2_orig' only.
+    If(reftoptr(str2_orig), nullptr).EQ.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
     if cgmode == :NativePlus
         str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
         str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))

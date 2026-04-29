@@ -744,26 +744,6 @@
     - ark::ObjectHeader*  # prefix to check
     - int32_t             # index to start from
 
-- name: StringStartsWithBase
-  entrypoint: StringStartsWithBase
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean (result)
-    - ark::ObjectHeader*  # string to check
-    - ark::ObjectHeader*  # prefix to check
-    - int32_t             # index to start from
-
-- name: StringStartsWithBaseNativePlus
-  entrypoint: StringStartsWithBaseNativePlus
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean (result)
-    - ark::ObjectHeader*  # string to check
-    - ark::ObjectHeader*  # prefix to check
-    - int32_t             # index to start from
-
 - name: StringEndsWith
   entrypoint: StringEndsWith
   bridge: none

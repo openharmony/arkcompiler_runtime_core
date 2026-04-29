@@ -1,0 +1,65 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#! CHECKER      String.fromCharCode String INT
+#! RUN          options: "--compiler-enable-jit=false", entry: "ets_string_fromcharcode_npe.ETSGLOBAL::main", result: 1
+
+#! CHECKER      String.fromCharCode String JIT
+#! RUN          force_jit: true, options: "--compiler-regex='.*ets_string_fromcharcode_npe.ETSGLOBAL::main.*'", entry: "ets_string_fromcharcode_npe.ETSGLOBAL::main", result: 1
+
+.language eTS
+
+.record arkruntime.annotation.Module <external>
+
+.record ets_string_fromcharcode_npe.ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public> {
+}
+
+.record std.core.Array <external>
+
+.record std.core.Error <external>
+
+.record std.core.NullPointerError <external>
+
+.record std.core.Object <external>
+
+.record std.core.String <external>
+
+.function void ets_string_fromcharcode_npe.ETSGLOBAL._cctor_() <cctor, static> {
+	return.void
+}
+
+.function i32 ets_string_fromcharcode_npe.ETSGLOBAL.main() <static, access.function=public> {
+#	mov.null v6
+try_begin_label_0:
+    lda.null
+    sta.obj v6
+	call.short std.core.String.fromCharCode:(std.core.Array), v6
+try_end_label_0:
+	jmp jump_label_5
+handler_begin_label_0_0:
+	sta.obj v2
+	lda.obj v2
+	isinstance std.core.NullPointerError
+	jeqz jump_label_5
+	movi v0, 0x1
+	lda v0
+	return
+jump_label_5:
+	movi v1, 0x2
+	lda v1
+	return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, handler_begin_label_0_0
+}
+
+.function std.core.String std.core.String.fromCharCode(std.core.Array a0) <external, varargs, static, access.function=public>

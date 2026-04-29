@@ -321,11 +321,25 @@ EtsString *StdCoreStringToLowerCase(EtsString *thisStr)
 
 EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *langTag)
 {
+    // 'thisStr' is supposed to be 'this', which can't be nullptr by design,
+    // thus here we check 'langTag' only.
+    if (UNLIKELY(langTag == nullptr)) {
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, EtsExecutionContext::GetCurrent()->GetMT());
+        return static_cast<EtsString *>(nullptr);
+    }
     return caseconversion::StringToLocaleUpperCase(thisStr, langTag);
 }
 
 EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag)
 {
+    // 'thisStr' is supposed to be 'this', which can't be nullptr by design,
+    // thus here we check 'langTag' only.
+    if (UNLIKELY(langTag == nullptr)) {
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, EtsExecutionContext::GetCurrent()->GetMT());
+        return static_cast<EtsString *>(nullptr);
+    }
     return caseconversion::StringToLocaleLowerCase(thisStr, langTag);
 }
 
@@ -519,6 +533,12 @@ EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str
 EtsInt StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
 {
     auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    // 'str1' is supposed to be 'this', which can't be nullptr by design,
+    // thus here we check 'str2' only.
+    if (UNLIKELY(str2 == nullptr)) {
+        ThrowNullPointerException(ctx, EtsExecutionContext::GetCurrent()->GetMT());
+        return 0;
+    }
     return str1->GetCoreType()->Compare(str2->GetCoreType(), ctx);
 }
 
@@ -540,18 +560,33 @@ EtsString *StdCoreStringTrim(EtsString *thisStr)
 EtsBoolean StdCoreStringStartsWith(EtsString *thisStr, EtsString *prefix, EtsInt fromIndex)
 {
     ASSERT(thisStr != nullptr);
+    // 'thisStr' is supposed to be 'this', which can't be nullptr by design,
+    // thus here we check 'prefix' only.
+    if (UNLIKELY(prefix == nullptr)) {
+        ThrowNullPointerException();
+        return ToEtsBoolean(false);
+    }
     return thisStr->StartsWith(prefix, fromIndex);
 }
 
 EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt endIndex)
 {
     ASSERT(thisStr != nullptr);
+    // 'thisStr' is supposed to be 'this', which can't be nullptr by design,
+    // thus here we check 'suffix' only.
+    if (UNLIKELY(suffix == nullptr)) {
+        ThrowNullPointerException();
+        return ToEtsBoolean(false);
+    }
     return thisStr->EndsWith(suffix, endIndex);
 }
 
 EtsString *StdCoreStringFromCharCode(EtsStdCoreArray *charCodes)
 {
-    ASSERT(charCodes != nullptr);
+    if (UNLIKELY(charCodes == nullptr)) {
+        ThrowNullPointerException();
+        return static_cast<EtsString *>(nullptr);
+    }
     return helpers::CreateNewStringFromCharCode(charCodes);
 }
 
