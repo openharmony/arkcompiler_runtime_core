@@ -189,8 +189,15 @@ public:
         /* Loads added to eliminations_ above are not checked versus phis -> no double instruction elimination */
         UpdatePhis(inst);
 
-        /* Otherwise set the value of instruction to itself and update MUST_ALIASes */
-        heaps_[GetEquivClass(inst)].first.at(inst->GetBasicBlock())[inst] = {inst, inst, true, false};
+        /* Otherwise set the value of instruction to itself and mark MAY_ALIASes as read */
+        auto &blockHeap = heaps_[GetEquivClass(inst)].first.at(inst->GetBasicBlock());
+        for (auto &entry : blockHeap) {
+            aliasCalls_++;
+            if (aa_.CheckInstAlias(inst, entry.first) != NO_ALIAS) {
+                entry.second.read = true;
+            }
+        }
+        blockHeap[inst] = {inst, inst, true, false};
     }
 
     bool HasBaseObject(Inst *inst)

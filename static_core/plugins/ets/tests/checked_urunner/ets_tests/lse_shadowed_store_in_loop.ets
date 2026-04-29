@@ -16,41 +16,44 @@
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash
 //! RUN          force_jit: true,
 //!              options: "--compiler-regex='.*testLoopStore.*' " +
-//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef'",
+//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef," +
+//!                                                      "lse_shadowed_store_in_loop.Filler::fill'",
 //!              entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
 //! INST_NOT     /CallStatic\.Inlined.*leakRef/
 //! INST         /CallStatic.*leakRef/
-//! INST_COUNT   /StoreObject.*Container\.x/, 3
+//! INST_COUNT   /StoreObject.*Container\.x/, 4
 //! PASS_AFTER   "LSE"
-//! INST_COUNT   /StoreObject.*Container\.x/, 2
+//! INST_COUNT   /StoreObject.*Container\.x/, 3
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash (AOT)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*testLoopStore.*' " +
-//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef'"
+//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef," +
+//!                                                      "lse_shadowed_store_in_loop.Filler::fill'"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
 //! INST_NOT     /CallStatic\.Inlined.*leakRef/
 //! INST         /CallStatic.*leakRef/
-//! INST_COUNT   /StoreObject.*Container\.x/, 3
+//! INST_COUNT   /StoreObject.*Container\.x/, 4
 //! PASS_AFTER   "LSE"
-//! INST_COUNT   /StoreObject.*Container\.x/, 2
+//! INST_COUNT   /StoreObject.*Container\.x/, 3
 //! RUN          entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash (AOT-PGO)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 //! RUN_PGO_PAOC options: "--compiler-regex='.*testLoopStore.*' " +
-//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef'"
+//!                       "--compiler-inlining-blacklist='lse_shadowed_store_in_loop.ETSGLOBAL::leakRef," +
+//!                                                      "lse_shadowed_store_in_loop.Filler::fill'"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
 //! INST_NOT     /CallStatic\.Inlined.*leakRef/
 //! INST         /CallStatic.*leakRef/
-//! INST_COUNT   /StoreObject.*Container\.x/, 3
+//! INST_COUNT   /StoreObject.*Container\.x/, 4
 //! PASS_AFTER   "LSE"
-//! INST_COUNT   /StoreObject.*Container\.x/, 2
+//! INST_COUNT   /StoreObject.*Container\.x/, 3
 //! RUN          entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 
 class A {
@@ -67,11 +70,24 @@ class Container {
 
 function leakRef(c: Container) {}
 
-function testLoopStore(iters: int, cProvider: () => Container): Container {
+class Filler {
+    x: A
+
+    constructor(x: A) {
+        this.x = x
+    }
+
+    fill(c: Container) {
+        c.x = this.x
+    }
+}
+
+function testLoopStore(iters: int, filler: Filler): Container {
     let c = new Container()
     leakRef(c)  // Make sure c is not removed by PEA
     for (let i = 0; i < iters; i++) {
-        const newC = cProvider()
+        const newC = new Container()
+        filler.fill(newC)
         c.x = new A(iters)  // LSE removes this shadowed store; don't crash!
         c.x = newC.x        // LSE keeps this shadowing store
         c.x!.value++
@@ -80,7 +96,5 @@ function testLoopStore(iters: int, cProvider: () => Container): Container {
 }
 
 function main(): void {
-    const c = new Container()
-    c.x = new A(2)
-    arktest.assertEQ(testLoopStore(10, () => c).x!.value, 12)
+    arktest.assertEQ(testLoopStore(10, new Filler(new A(2))).x!.value, 12)
 }
