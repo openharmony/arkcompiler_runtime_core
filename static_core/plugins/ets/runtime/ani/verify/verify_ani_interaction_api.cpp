@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/venv-inl.h"
+#include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
@@ -7653,18 +7654,36 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(VEnv *venv, ani_wref
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status CreateArrayBuffer(VEnv *venv, size_t length, void **dataResult,
-                                                   ani_arraybuffer *arraybufferResult)
+                                                   VArrayBuffer **varraybufferResult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->CreateArrayBuffer(venv->GetEnv(), length, dataResult, arraybufferResult);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArrayBufferLength(length, "length"),
+        ANIArg::MakeForVoidPtrStorage(dataResult, "data_result"),
+        ANIArg::MakeForArrayBufferStorage(varraybufferResult, "arraybuffer_result")
+    );
+    // clang-format on
+    ani_arraybuffer result {};
+    ani_status status = GetInteractionAPI(venv)->CreateArrayBuffer(venv->GetEnv(), length, dataResult, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, varraybufferResult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(VEnv *venv, ani_arraybuffer arraybuffer, void **dataResult,
+NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(VEnv *venv, VArrayBuffer *varraybuffer, void **dataResult,
                                                      size_t *lengthResult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->ArrayBuffer_GetInfo(venv->GetEnv(), arraybuffer, dataResult, lengthResult);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArrayBuffer(varraybuffer, "arraybuffer"),
+        ANIArg::MakeForVoidPtrStorage(dataResult, "data_result"),
+        ANIArg::MakeForSizeStorage(lengthResult, "length_result")
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->ArrayBuffer_GetInfo(venv->GetEnv(), varraybuffer->GetRef(), dataResult,
+                                                        lengthResult);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
