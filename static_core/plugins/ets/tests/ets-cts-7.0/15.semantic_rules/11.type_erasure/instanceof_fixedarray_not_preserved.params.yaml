@@ -1,0 +1,68 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Spec contradiction tests: FixedArray<T> where T does not include undefined.
+#
+# Per spec hints:
+#   x instanceof FixedArray<number> must be CTE
+#   x instanceof FixedArray<number | undefined> is OK
+#
+# At runtime, FixedArray's element type implicitly includes undefined, so
+# FixedArray<number> is NOT preserved up to undefined: its runtime form is
+# FixedArray<number | undefined> which != FixedArray<number>.
+# Only FixedArray<T | undefined> is preserved because undefined is already present.
+#
+# Implementation bug: IsTypeRetainedAfterErasure returns true for FixedArray
+# regardless of element type, not checking "preserved up to undefined".
+
+---
+cases:
+    # FixedArray<number>: T=number does not include undefined → NOT preserved up to undefined → CTE
+    - decl: |-
+          let x: FixedArray<number> = [1.0, 2.0]
+      use: >-
+          ((): Object => x)() instanceof FixedArray<number>
+      expected_out: |-
+            Type parameter is erased
+
+    # FixedArray<int>: same issue
+    - decl: |-
+          let x: FixedArray<int> = [1, 2, 3]
+      use: >-
+          ((): Object => x)() instanceof FixedArray<int>
+      expected_out: |-
+            Type parameter is erased
+
+    # FixedArray<string>: same issue
+    - decl: |-
+          let x: FixedArray<string> = ["a", "b"]
+      use: >-
+          ((): Object => x)() instanceof FixedArray<string>
+      expected_out: |-
+            Type parameter is erased
+
+    # Union of FixedArray with non-undefined element types: all constituents not preserved → CTE
+    - decl: |-
+          let x: Object = [1.0]
+      use: >-
+          x instanceof FixedArray<number> | FixedArray<string>
+      expected_out: |-
+            Type parameter is erased
+
+    # Nested FixedArray: inner FixedArray<int> not preserved up to undefined
+    - decl: |-
+          let x: FixedArray<FixedArray<int>> = [[1, 2], [3, 4]]
+      use: >-
+          ((): Object => x)() instanceof FixedArray<FixedArray<int>>
+      expected_out: |-
+            Type parameter is erased
