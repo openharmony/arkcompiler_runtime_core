@@ -900,7 +900,7 @@ public:
         if (!ANIRefTypeChecker::IsEnumItem(s, venumItem->GetRef())) {
             PandaStringStream ss;
             ss << "wrong reference type: " << ANIRefTypeToString(s, venumItem->GetRef());
-            return {ss.str(), ANIErrorSeverity::FATAL};
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }

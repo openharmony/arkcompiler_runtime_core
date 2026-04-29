@@ -22,6 +22,17 @@ public:
     static constexpr int32_t LOOP_COUNT = 3;
 };
 
+static ani_object CreateObject(ani_env *env)
+{
+    ani_class cls {};
+    EXPECT_EQ(env->FindClass("std.core.Object", &cls), ANI_OK);
+    ani_method ctor {};
+    EXPECT_EQ(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor), ANI_OK);
+    ani_object obj {};
+    EXPECT_EQ(env->Object_New(cls, ctor, &obj), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    return obj;
+}
+
 TEST_F(EnumItemGetIndexTest, get_enum_item_index)
 {
     std::string itemName;
@@ -60,6 +71,13 @@ TEST_F(EnumItemGetIndexTest, invalid_arg_enum)
     ASSERT_EQ(env_->EnumItem_GetIndex(nullptr, &res), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->EnumItem_GetIndex(red, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->c_api->EnumItem_GetIndex(nullptr, red, &res), ANI_INVALID_ARGS);
+}
+
+TEST_F(EnumItemGetIndexTest, invalid_type_enum_item)
+{
+    ani_object obj = CreateObject(env_);
+    ani_size result {};
+    ASSERT_EQ(env_->EnumItem_GetIndex(static_cast<ani_enum_item>(obj), &result), ANI_INVALID_TYPE);
 }
 
 TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_1)

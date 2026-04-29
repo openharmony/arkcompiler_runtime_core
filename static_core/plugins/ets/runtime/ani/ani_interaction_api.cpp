@@ -6031,6 +6031,7 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(ani_env *env, ani_enum_item e
     EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> internalEnumItem(executionCtx, s.ToInternalType(enum_item));
     EtsHandle<EtsClass> enumClass(executionCtx, internalEnumItem->GetClass());
+    ANI_CHECK_RETURN_IF_NE(enumClass->IsEtsEnum(), true, ANI_INVALID_TYPE);
     EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
