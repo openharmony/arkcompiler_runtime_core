@@ -119,7 +119,7 @@ cases:
   
 # 32 Promise errors
   - type: "async function badPromise(): Promise<number> { return 'string'; }"
-    exp_out: "Semantic error ESE0091: Type '\\\"string\\\"' is not compatible with the enclosing method's return type 'Promise<Double> | Double'"
+    exp_out: "Semantic error ESE0091: Type '\\\"string\\\"' is not compatible with the enclosing method's return type 'Promise<Double>'"
   
 # 33-34 Invalid enum values
   - type: "enum BadEnum { A = computedValue }"

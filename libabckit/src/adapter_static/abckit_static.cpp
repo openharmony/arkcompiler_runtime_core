@@ -54,12 +54,13 @@ constexpr std::string_view INTERFACE_SET_MARKER = "%%set-";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view OBJECT_CLASS = "std.core.Object";
-constexpr std::string_view ANY_CLASS = "Y";
 constexpr std::string_view OBJECT_LITERAL_NAME = "$ObjectLiteral";
 constexpr std::string_view ASYNC_ORIGINAL_RETURN = "std.core.Promise;";
 constexpr std::string_view PARTIAL_PREFIX = "%%partial-";
 constexpr std::string_view LAZY_IMPORT = "%%lazyImport";
 constexpr std::string_view DELIMITER = ".";
+constexpr char DEL_COLON = ':';
+constexpr char DEL_SEMICOLON = ';';
 const std::unordered_set<std::string> GLOBAL_CLASS_NAMES = {"ETSGLOBAL", "_GLOBAL"};
 constexpr auto BASE_ENUM_UNION =
     "{Ustd.core.Byte,std.core.Double,std.core.Float,std.core.Int,std.core.Long,std.core.Short,std.core.String}";
@@ -483,26 +484,26 @@ static std::unique_ptr<AbckitCoreType> CreateInstance(
 static std::string FindOriginalFunctionName(const std::string &asyncFunctionName,
                                             const std::unordered_map<std::string, AbckitCoreFunction *> &nameToFunction)
 {
-    // format: prefix.%%async-funcName:params;returnType;
+    // format: prefix.%%async-funcName:params;returnType; or prefix.%%async-funcName:returnType;
+    ASSERT(!asyncFunctionName.empty());
+    ASSERT(asyncFunctionName.back() == DEL_SEMICOLON);
+
     auto pos1 = asyncFunctionName.find(ASYNC_PREFIX);
-    auto pos2 = asyncFunctionName.rfind(ANY_CLASS);
+    auto pos2 = asyncFunctionName.rfind(DEL_SEMICOLON, asyncFunctionName.size() - 2);
     auto size = ASYNC_PREFIX.size();
+
+    if (pos2 == std::string::npos) {
+        pos2 = asyncFunctionName.rfind(DEL_COLON);
+    }
 
     if (pos1 == std::string::npos || pos2 == std::string::npos) {
         return asyncFunctionName;
     }
 
     std::string baseNameWithParams =
-        asyncFunctionName.substr(0, pos1) + asyncFunctionName.substr(pos1 + size, pos2 - pos1 - size);
+        asyncFunctionName.substr(0, pos1) +
+        asyncFunctionName.substr(pos1 + size, pos2 + 1 - pos1 - size);  // +1 to not delete the delimiter
 
-    std::vector<std::string> possibleReturnTypes = {"void;", "std.core.Promise;"};
-
-    for (const auto &returnType : possibleReturnTypes) {
-        std::string candidateName = baseNameWithParams + returnType;
-        if (nameToFunction.find(candidateName) != nameToFunction.end()) {
-            return candidateName;
-        }
-    }
     return baseNameWithParams + std::string {ASYNC_ORIGINAL_RETURN};
 }
 

@@ -182,7 +182,7 @@ async function testTaskInfoDuration() {
 async function onExecutionFailedtestAsyncfun() {
     let catchSuccess : int = 0;
     let event = new PromiseWithResolvers<void>();
-    let funca = async() : Any => {
+    let funca = async() : Promise<Any> => {
         throw new Error('Error');
     }
     let task = new taskpool.Task(funca);
@@ -200,7 +200,7 @@ async function onExecutionFailedtestmultAsyncfun(){
     let event1 = new PromiseWithResolvers<void>();
     let event2 = new PromiseWithResolvers<void>();
     let event3 = new PromiseWithResolvers<void>();
-    let funca = async() : Any => {
+    let funca = async() : Promise<Any> => {
         throw new Error('Error');
     }
     let task1 = new taskpool.Task(funca);
