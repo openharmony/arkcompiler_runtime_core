@@ -14,13 +14,12 @@
  */
 
 /*---
-desc: Rest function spread with optional and rest tuple
+desc: Nested functions are not allowed
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0135: Nested functions are not allowed."
 ---*/
 
-function goo(opt?: [number, string], ...tail: [number, string]) {
-}
-
-function main() {
-    goo([1, '2'])
+function main(): void {
+   function invalidRestParameter(tmp: number, ...tmp1: number[], tmp2: number) {}
+   function invalidRestParameterType(...numbers: number) {}
 }

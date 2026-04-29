@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{%- for c in cases %}
 /*---
 desc: >-
     A rest parameter allows to make a function or method that take an unbounded
     number of arguments. A rest parameter is marked with ... symbol before parameter
     name.
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 function {{c.sig}} {
@@ -27,7 +28,5 @@ function {{c.sig}} {
 }
 
 function main() {
-
-    
 }
-{% endfor %}
+{%- endfor %}

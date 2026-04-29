@@ -25,12 +25,12 @@ desc: >-
 
 function main(): int {
     
-    let testSuite = new arktest.ArkTestsuite("Param_list");
+    let testSuite = new arktest.ArkTestsuite("Function_parameters_list");
 
     {%- for fd in function_decls %}
-        testSuite.addTest("func_call{{loop.index0}}", () => {
-            {{fd.call|indent}}
-        });
+        testSuite.addTest("function_call{{loop.index}}", () => {
+            {{fd.call}}
+         });
     {%- endfor %}
   
     return testSuite.run();

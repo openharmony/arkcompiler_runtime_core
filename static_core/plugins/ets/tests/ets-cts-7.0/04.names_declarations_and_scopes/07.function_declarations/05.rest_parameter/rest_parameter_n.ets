@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{%- for c in cases %}
 /*---
 desc: >-
     A rest parameter allows to make a function or method that take an unbounded
     number of arguments. A rest parameter is marked with ... symbol before parameter
     name.
 tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 function {{c.sig}} {
@@ -27,7 +28,5 @@ function {{c.sig}} {
 }
 
 function main() {
-
-    
 }
-{% endfor %}
+{%- endfor %}

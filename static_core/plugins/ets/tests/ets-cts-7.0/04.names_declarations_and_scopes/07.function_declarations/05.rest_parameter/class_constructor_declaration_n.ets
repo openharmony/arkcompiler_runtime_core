@@ -16,6 +16,7 @@
 /*---
 desc: class constructor Rest parameters spread
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0127: No matching construct signature for class_constructor_declaration_n.RestClass([Double, Double], [Double, Double])"
 ---*/
 
 class RestClass {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,12 @@
  */
 
 /*---
-desc: Rest parameters with default values.
+desc: Nested functions are not allowed
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0135: Nested functions are not allowed."
 ---*/
 
 function main(): void {
-  function invalidRestParameterType(...numbers: number) {}
+   function invalidRestParameter(tmp: number, ...tmp1: number[], tmp2: number) {}
+   function invalidRestParameterType(...numbers: number) {}
 }

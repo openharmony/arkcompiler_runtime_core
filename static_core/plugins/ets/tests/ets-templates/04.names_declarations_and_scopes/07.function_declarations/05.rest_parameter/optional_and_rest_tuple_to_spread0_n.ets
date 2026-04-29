@@ -14,14 +14,14 @@
  */
 
 /*---
-desc: bad class method call Rest parameters with array type.
+desc: Rest function spread with optional and rest tuple
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0127: No matching call signature for goo()"
 ---*/
 
-function sums(...numbers: number[]): number {
-    
+function goo(opt?: [number, string], ...tail: [number, string]) {
 }
 
 function main() {
-    RestClass.sums(...)
+    goo()
 }

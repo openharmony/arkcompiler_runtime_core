@@ -13,25 +13,38 @@
  * limitations under the License.
  */
 
-{% for t in types %}
-{% for op in operators %}
 /*---
 desc: >-
     A char type operand is widened to one of the following:
         - Type int if the other operand is of types byte, char or int; or
         - Type of the other operand.
-    char {{op[0]}} {{t[0]}}
 ---*/
-function foo(a: char, b: {{t[0]}}, c: boolean): void {
+
+{%- for t in types %}
+{% set outer_loop_index = loop.index %}
+{%- for op in operators %}
+function foo{{outer_loop_index}}_{{loop.index}}(a: char, b: {{t[0]}}, c: boolean): void {
     arktest.assertEQ((a {{op[0]}} b), c)
     arktest.assertEQ((b {{op[0]}} a), c)
 }
+{%- endfor %}
+{%- endfor %}
 
-function main(): void {
-  let a: char = c'\u0001'
-  let b: {{t[0]}} = {{t[1]}}
-  foo(a, b, {{op[1]}})
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Char_conversions");
+
+    {% for t in types %}
+    {% set outer_loop_index = loop.index %}
+    {% for op in operators %} 
+        testSuite.addTest("conversion_{{outer_loop_index}}_{{loop.index}}", () => {
+            let a: char = c'\u0001'
+            let b: {{t[0]}} = {{t[1]}}
+            foo{{outer_loop_index}}_{{loop.index}}(a, b, {{op[1]}})
+        }); 
+    {%- endfor %}
+    {%- endfor %}
+
+    return testSuite.run();
+
 }
-
-{% endfor %}
-{% endfor %}

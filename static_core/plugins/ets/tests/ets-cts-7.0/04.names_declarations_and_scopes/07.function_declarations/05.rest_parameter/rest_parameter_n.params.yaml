@@ -18,77 +18,91 @@ cases:
       foo(y: boolean, ...p: int[], x: int): int[]
     def: |-
       return p;
+    expected: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
 
   - sig: |-
       foo(...q: int[], ...p: int[]): int
     def: |-
       return q.length + p.length;
+    expected: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
 
   - sig: |-
       foo(...q: int[], p: int[]): int
     def: |-
       return q.length + p.length;
+    expected: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
 
   # 3. not array
   - sig: |-
       foo(...p: Object): Object
     def: |-
       return new Object();
+    expected: "Syntax error ESY0193: Rest parameter should be either array or tuple type."
 
   - sig: |-
       foo(...p: int): int
     def: |-
       return 1;
+    expected: "Syntax error ESY0193: Rest parameter should be either array or tuple type."
 
   # 5. missing type
   - sig: |-
       foo(a: int, ...p:): int
     def: |-
       return a;
+    expected: "Syntax error ESY0138: Invalid Type."
 
   - sig: |-
       foo(a: int, ...p): int
     def: |-
       return a;
+    expected: "Syntax error ESY0193: Rest parameter should be either array or tuple type."
 
   # 7. same name parameters
   - sig: |-
       foo(p: char, ...p: int[]): char
     def: |-
       return p;
+    expected: "Semantic error ESE0351: Variable 'p' has already been declared."
 
   # 8. optional param
   - sig: |-
       foo(...numbers?: int[]): number
     def: |-
       return numbers.length;
+    expected: "Syntax error ESY0192: Rest parameter cannot have the default value."
 
   # 9. optional param
   - sig: |-
       foo(...numbers: int[] = []): number
     def: |-
       return numbers.length;
+    expected: "Syntax error ESY0192: Rest parameter cannot have the default value."
 
   # 10. optional param
   - sig: |-
       foo(...numbers: int|undefined[] = []): number
     def: |-
       return numbers.length;
+    expected: "Syntax error ESY0192: Rest parameter cannot have the default value."
 
   # 11. param and optional rest param
   - sig: |-
       foo(param0: int, ...numbers?: int[]): number
     def: |-
       return numbers.length;
+    expected: "Syntax error ESY0192: Rest parameter cannot have the default value."
 
   # 12. optional param and optional rest param
   - sig: |-
       foo(param0?: int, ...numbers?: int[]): number
     def: |-
       return numbers.length;
+    expected: "Syntax error ESY0192: Rest parameter cannot have the default value."
 
   # 13. optional param and optional rest param
   - sig: |-
       foo(param0?: int, ...numbers: int[] = [0, 1, 2, 3]): number
     def: |-
       return numbers.length;
+    expected: "Syntax error ESY0192: Rest parameter cannot have the default value."

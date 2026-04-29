@@ -23,7 +23,7 @@ function_decls:
     # value type array params, void return
 #1
     - decl: |-
-          function foo1(a: long[], b: double[], c: char[]): void {}
+          function foo1(a: long[], b: double[], c: char[]): void {} 
       call: |-
           let a: long[] = new long[0](0)
           let b: double[] = new double[0](0)
@@ -97,7 +97,7 @@ function_decls:
           }
       call: |-
           let v: Long = foo10<Long>(new Long())
-          arktest.assertTrue( v instanceof Long)
+          arktest.assertTrue( v instanceof Long )
 #11
     - decl: |-
           function foo11<T, U, V>(a: T, b: U, c: V): V {

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 ---
 cases:
     # optional with default value
+#0
     - decl: |-
           // primitive default
           function pair(x: number, y: number = 7.0): number {
@@ -22,7 +23,7 @@ cases:
       call: |-
           arktest.assertEQ(3.0, pair(1.0, 2.0))
           arktest.assertEQ(8.0, pair(1.0))
-
+#1
     - decl: |-
           // check primitive defaults
           function foo(a: byte = 1, b: short = 2, c: int = 3, d: long = 4, e: float = 5.0f, f: double = 6.0, g: boolean = true, h: char = c'W') {
@@ -36,35 +37,35 @@ cases:
               arktest.assertEQ( h, c'W' )
           }
       call: foo()
-
+#2
     - decl: |-
           // omitting different arguments
-          function foo(a: int = 1, b: int = 2, c: int = 3): int {
+          function foo2(a: int = 1, b: int = 2, c: int = 3): int {
               return a + b + c
           }
       call: |-
-          arktest.assertEQ( foo(11, 12, 13), 36 )
-          arktest.assertEQ( foo(11), 16 )
-          arktest.assertEQ( foo(), 6 )
-
+          arktest.assertEQ( foo2(11, 12, 13), 36 )
+          arktest.assertEQ( foo2(11), 16 )
+          arktest.assertEQ( foo2(), 6 )
+#3
     - decl: |-
           // expression as default value
           let z = 9, y = 8, x = 7
-          function foo(a: int = z + y * x) {
+          function foo3(a: int = z + y * x) {
               arktest.assertEQ( a, 65 )
           }
-      call: foo()
-
+      call: foo3()
+#4
     - decl: |-
           // expressions as default values
-          let z: Object[] = [new Boolean(true)], y = "string", x: Object|null = null
-          function foo(a: Object = z, b: string[] = [y], c: Object|null = x) {
-              arktest.assertTrue( a === z )
+          let z4: Object[] = [new Boolean(true)], y4 = "string", x4: Object|null = null
+          function foo4(a: Object = z4, b: string[] = [y4], c: Object|null = x4) {
+              arktest.assertTrue( a === z4 )
               arktest.assertTrue( b.length == 1 && b[0] == "string" )
               arktest.assertTrue( c === null )
           }
-      call: foo()
-
+      call: foo4()
+#5
     - decl: |-
           // check that expression is not computed if argument is provided
           let counter = 0
@@ -81,21 +82,21 @@ cases:
               }
           }
 
-          function foo(a: number = new A(33.0).res(42.0)): number {
+          function foo5(a: number = new A(33.0).res(42.0)): number {
               return a;
           }
       call: |-
-          arktest.assertEQ( foo(3.0), 3.0 )
+          arktest.assertEQ( foo5(3.0), 3.0 )
           arktest.assertEQ( counter, 0 )
-
+#6
     - decl: |-
           // check that expression is computed if argument is not provided
-          let counter = 0
-          class A {
+          let counter6 = 0
+          class A6 {
               fld: number
 
               constructor(p: number) {
-                  counter++;
+                  counter6++;
                   this.fld = p;
               }
 
@@ -104,156 +105,158 @@ cases:
               }
           }
 
-          function foo(a: number = new A(33.0).res(42.0)): number {
+          function foo6(a: number = new A6(33.0).res(42.0)): number {
               return a;
           }
       call: |-
-          arktest.assertEQ( foo(), 75.0 )
-          arktest.assertTrue( counter > 0 )
-
+          arktest.assertEQ( foo6(), 75.0 )
+          arktest.assertTrue( counter6 > 0 )
+#7
     - decl: |-
           // IIFE as default value
-          function foo(a: number = ((p: number): number => { return 2.0 * p })(42.0)): number {
+          function foo7(a: number = ((p: number): number => { return 2.0 * p })(42.0)): number {
               return a;
           }
       call: |-
-          arktest.assertEQ( foo(33.0), 33.0 )
-          arktest.assertEQ( foo(), 84.0 )
+          arktest.assertEQ( foo7(33.0), 33.0 )
+          arktest.assertEQ( foo7(), 84.0 )
 
     # optional with null
+#8
     - decl: |-
           // expect NPE if argument omitted
-          function foo(a: int, b?: Int): int {
+          function foo8(a: int, b?: Int): int {
               return a + b!
           }
       call: |-
-          arktest.assertEQ( foo(1, 2), 3 )
+          arktest.assertEQ( foo8(1, 2), 3 )
           let expectedException = (e: Error): boolean => { return (e instanceof NullPointerError) }
-          arktest.expectThrow(() => { foo(1) }, expectedException)
-
+          arktest.expectThrow(() => { foo8(1) }, expectedException)
+#9
     - decl: |-
           type XYZ=number
-          function foo(p?: XYZ) {}  // primitive with alias
-      call: foo(1.55)
-
+          function foo9(p?: XYZ) {}  // primitive with alias
+      call: foo9(1.55)
+#10
     - decl: |-
           // check type of argument with default
-          function foo(a?: Object) {
+          function foo10(a?: Object) {
               arktest.assertTrue( a instanceof Object|undefined )
           }
       call: |-
-          foo(new Object())
-          foo()
-
+          foo10(new Object())
+          foo10()
+#11
     - decl: |-
           // check type of argument with default
-          function foo(a: Object|null = null) {
+          function foo11(a: Object|null = null) {
               arktest.assertTrue( a instanceof Object|null )
           }
       call: |-
-          foo(new Object())
-          foo(null)
-          foo()
-
+          foo11(new Object())
+          foo11(null)
+          foo11()
+#12
     - decl: |-
           // check that argument with undefined-default can be assigned a not undefined value
           type f = (p: number) => number[]
-          function foo(a?: f) {
+          function foo12(a?: f) {
               arktest.assertTrue( a === undefined )
               a = (t: number): number[] => { return [t]; }
               let x = a!(42.0)
               arktest.assertTrue( x instanceof Array && x[0] instanceof number && x[0] == 42.0 )
           }
-      call: foo()
-
+      call: foo12()
+#13
     - decl: |-
           // check that argument with undefined-default optional can be assigned an undefined value
-          type f = (p: number) => number[]
-          function foo(a?: f) {
+          type f13 = (p: number) => number[]
+          function foo13(a?: f13) {
               let x = a!(42.0)
               arktest.assertTrue( x instanceof Array && x[0] instanceof number && x[0] == 42.0 )
               a = undefined
               arktest.assertTrue( a === undefined )
           }
       call: |-
-          foo((t: number): number[] => { return [t]; })
-
+          foo13((t: number): number[] => { return [t]; })
+#14
     - decl: |-
           // check that argument with undefined-default optional can be assigned an undefined value
-          function foo(s?: string) {
+          function foo14(s?: string) {
               arktest.assertEQ( s, 'abc' )
               s = undefined
               arktest.assertTrue( s === undefined )
           }
-      call: foo('abc')
-
+      call: foo14('abc')
+#15
     - decl: |-
           // check nullable type with undefined-default optional
-          function foo(s?: string|null): string|null|undefined {
+          function foo15(s?: string|null): string|null|undefined {
               return s === null ? 'null' : s
           }
       call: |-
-          arktest.assertEQ( foo(''), '' )
-          arktest.assertEQ( foo('abc'), 'abc' )
-          arktest.assertEQ( foo(), undefined )
-          arktest.assertEQ( foo(null), 'null' )
+          arktest.assertEQ( foo15(''), '' )
+          arktest.assertEQ( foo15('abc'), 'abc' )
+          arktest.assertEQ( foo15(), undefined )
+          arktest.assertEQ( foo15(null), 'null' )
 
     # mixed optionality
+#16
     - decl: |-
-          function foo(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
+          function foo16(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
               return a + b + (c === undefined ? 'undefined' : c) + d
           }
       call: |-
-          arktest.assertEQ( foo(''), 'anundefineding' )
-          arktest.assertEQ( foo('c', 'lean', ''), 'cleaning' )
-          arktest.assertEQ( foo('ark', ' ', 'compile', 'r'), 'ark compiler' )
+          arktest.assertEQ( foo16(''), 'anundefineding' )
+          arktest.assertEQ( foo16('c', 'lean', ''), 'cleaning' )
+          arktest.assertEQ( foo16('ark', ' ', 'compile', 'r'), 'ark compiler' )
           // TODO: function call with empty placeholders for optional parameters are not supported yet
-          //assertEQ( foo('underst', , 'd'), 'understanding' )
-
+          //assertEQ( foo16('underst', , 'd'), 'understanding' )
+#17
     - decl: |-
-          function foo(p?: int): int {
+          function foo17(p?: int): int {
               return p === undefined ? 0 : 2 * p;
           }
       call: |-
-          arktest.assertEQ(0, foo())
-          arktest.assertEQ(2, foo(1))
-
+          arktest.assertEQ(0, foo17())
+          arktest.assertEQ(2, foo17(1))
+#18
     - decl: |-
-          function foo(i: int, j: int, k?: boolean): boolean {
+          function foo18(i: int, j: int, k?: boolean): boolean {
               return !k;
           }
       call: |-
-         arktest.assertTrue(foo(1, 2))
-         arktest.assertFalse(foo(2, 1, true))
-
+         arktest.assertTrue(foo18(1, 2))
+         arktest.assertFalse(foo18(2, 1, true))
+#19
     - decl: |-
-          function foo(e?: string): string | undefined {
+          function foo19(e?: string): string | undefined {
               return e
           }
       call: |-
-         arktest.assertEQ(undefined, foo())
-         arktest.assertEQ('test', foo('test'))
-
+         arktest.assertEQ(undefined, foo19())
+         arktest.assertEQ('test', foo19('test'))
+#20
     - decl: |-
           enum Color {Red, Green, Blue}
-          function foo(c?: Color) {}
-      call: foo(Color.Blue)
-
+          function foo20(c?: Color) {}
+      call: foo20(Color.Blue)
+#21
     - decl: |-
-          enum Color {Red, Green, Blue}
-          type XYZ=Color
-          function foo(c?: XYZ) {}
-      call: foo(Color.Blue)
-
+          enum Color21 {Red, Green, Blue}
+          type XYZ21=Color21
+          function foo21(c?: XYZ21) {}
+      call: foo21(Color21.Blue)
+#22
     - decl: |-
-        type OptL = () => int
-        function test(i: int, ov: OptL = () => 0): int {
+        type OptL22 = () => int
+        function test22(i: int, ov: OptL22 = () => 0): int {
             return ov()
         }
       call: |-
-        arktest.assertEQ(0, test(1))
-        arktest.assertEQ(42, test(2, () => 42))
-
+        arktest.assertEQ(0, test22(1))
+        arktest.assertEQ(42, test22(2, () => 42))
+#23
     - decl: |-
         interface DefaultMethodDecl {
           test(x: number, y: number = 7.0): number {
@@ -266,105 +269,101 @@ cases:
         const test = new OptionalMethodOwner
         arktest.assertEQ(3.0, test.test(1.0, 2.0))
         arktest.assertEQ(8.0, test.test(1.0))
-
+#24
     - decl: |-
-        class OptionalMethodOwner {
+        class OptionalMethodOwner24 {
           test(x: number, y: number = 7.0): number {
               return x + y;
           }
         }
       call: |-
-        const test = new OptionalMethodOwner
+        const test = new OptionalMethodOwner24
         arktest.assertEQ(3.0, test.test(1.0, 2.0))
         arktest.assertEQ(8.0, test.test(1.0))
-
+#25
     - decl: |-
-        class OptionalStaticMethodOwner {
+        class OptionalStaticMethodOwner25 {
           static test(x: number, y: number = 7.0): number {
               return x + y;
           }
         }
-
       call: |-
-        arktest.assertEQ(3.0, OptionalStaticMethodOwner.test(1.0, 2.0))
-        arktest.assertEQ(8.0, OptionalStaticMethodOwner.test(1.0))
-
+        arktest.assertEQ(3.0, OptionalStaticMethodOwner25.test(1.0, 2.0))
+        arktest.assertEQ(8.0, OptionalStaticMethodOwner25.test(1.0))
+#26
     - decl: |-
-        type OptL = () => int
-        class OptionalMethodOwner {
-          test(i: int, ov: OptL = () => 0): int {
+        type OptL26 = () => int
+        class OptionalMethodOwner26{
+          test(i: int, ov: OptL26 = () => 0): int {
               return ov()
           }
         }
-
       call: |-
-        const test = new OptionalMethodOwner
+        const test = new OptionalMethodOwner26
         arktest.assertEQ(0, test.test(1))
         arktest.assertEQ(42, test.test(2, () => 42))
-
+#27
     - decl: |-
-        type OptL = () => int
-        class OptionalMethodOwner {
-          static test(i: int, ov: OptL = () => 0): int {
+        type OptL27 = () => int
+        class OptionalMethodOwner27 {
+          static test(i: int, ov: OptL27 = () => 0): int {
               return ov()
           }
         }
-
       call: |-
-        arktest.assertEQ(0, OptionalMethodOwner.test(1))
-        arktest.assertEQ(42, OptionalMethodOwner.test(2, () => 42))
-
+        arktest.assertEQ(0, OptionalMethodOwner27.test(1))
+        arktest.assertEQ(42, OptionalMethodOwner27.test(2, () => 42))
+#28
     - decl: |-
-        type OptL = (input?: int) => int
+        type OptL28 = (input?: int) => int
       call: |-
-        let lc: OptL = (input: int = 42) => input
+        let lc: OptL28 = (input: int = 42) => input
         arktest.assertEQ(12, lc(12))
         arktest.assertEQ(42, lc())
-
+#29
     - decl: |-
-        type OptL = (input?: int) => int
+        type OptL29 = (input?: int) => int
       call: |-
         let lc: (input?: int) => int = (input: int = 42) => input
         arktest.assertEQ(12, lc(12))
         arktest.assertEQ(42, lc())
-
+#30
     - decl: |-
-        type OptL = (input?: int) => int
+        type OptL30 = (input?: int) => int
       call: |-
           let lc: (input: int | undefined) => int = (input: int = 42) => input
           arktest.assertEQ(12, lc(12))
           arktest.assertEQ(42, lc())
-
+#31
     - decl: |-
-        function foo(a?: number, ...rest: string[]): boolean {
+        function foo31(a?: number, ...rest: string[]): boolean {
           return a === undefined && rest.length === 0
         }
       call: |-
-        arktest.assertTrue(foo())
-
+        arktest.assertTrue(foo31())
+#32
     - decl: |-
-        function foo(a?: number, ...rest: readonly string[]): boolean {
+        function foo32(a?: number, ...rest: readonly string[]): boolean {
           return a === undefined && rest.length === 0
         }
       call: |-
-        arktest.assertTrue(foo())
-
+        arktest.assertTrue(foo32())
+#33
     - decl: |-
-        function foo(a?: number, ...rest: Array<String>): boolean {
+        function foo33(a?: number, ...rest: Array<String>): boolean {
           return a === undefined && rest.length === 0
         }
       call: |-
-        arktest.assertTrue(foo())
-
+        arktest.assertTrue(foo33())
+#34
     - decl: |-
-        function foo(a?: number, ...rest: Array<String>): boolean {
+        function foo34(a?: number, ...rest: Array<String>): boolean {
           return a === undefined && rest.length === 0
         }
       call: |-
-        const call: (...rest: Array<string>) => boolean = foo
+        const call: (...rest: Array<string>) => boolean = foo34
         arktest.assertTrue(call())
-
-
+#35
     - decl: |-
         class AFoo {
           static foo(a?: number, ...rest: string[]): boolean {
@@ -373,55 +372,57 @@ cases:
         }
       call: |-
         arktest.assertTrue(AFoo.foo())
-
-    - decl: |-
-      call: |-
+#36
+    - call: |-
         let res = ((a?: number, ...rest:  string[]): boolean => { return true })()
         arktest.assertTrue(res)
-
+#37
     - decl: |-
-        function foo(a: int[] = [1], b: string[] = ['1']): string {
+        function foo37(a: int[] = [1], b: string[] = ['1']): string {
             return '' + a[0] + b[0]
         }
       call: |-
-        arktest.assertEQ(foo([5], ['6']), '56')
-        arktest.assertEQ(foo([5]), '51')
-        arktest.assertEQ(foo(), '11')
-        arktest.assertEQ(foo([5], undefined), '51')
-        arktest.assertEQ(foo(undefined, ['6']), '16')
-        arktest.assertEQ(foo(undefined, undefined), '11')
+        arktest.assertEQ(foo37([5], ['6']), '56')
+        arktest.assertEQ(foo37([5]), '51')
+        arktest.assertEQ(foo37(), '11')
+        arktest.assertEQ(foo37([5], undefined), '51')
+        arktest.assertEQ(foo37(undefined, ['6']), '16')
+        arktest.assertEQ(foo37(undefined, undefined), '11')
 
     # allowed call method with undefined for optional parameters
+#38
     - decl: |-
-        class C {
+        class Cv {
             private private_field: number = 1
             foo(a: number = 1, b: number = this.private_field) {
                 return '' + a + b
             }
         }
       call: |-
-        const c = new C
+        const c = new Cv
         arktest.assertEQ(c.foo(5, undefined), '51')
         arktest.assertEQ(c.foo(undefined, 6), '16')
         arktest.assertEQ(c.foo(undefined, undefined), '11')
 
     # allowed call lambda with undefined for optional parameters
+#39
     - decl: |-
-        let fn = (a: number = 1, b: number = 1) => {return '' + a + b}
+        let fn39 = (a: number = 1, b: number = 1) => {return '' + a + b}
       call: |-
-        arktest.assertEQ(fn(5, undefined), '51')
-        arktest.assertEQ(fn(undefined, 6), '16')
-        arktest.assertEQ(fn(undefined, undefined), '11')
+        arktest.assertEQ(fn39(5, undefined), '51')
+        arktest.assertEQ(fn39(undefined, 6), '16')
+        arktest.assertEQ(fn39(undefined, undefined), '11')
 
     # allowed call constructor with undefined for optional parameters
+#40
     - decl: |-
-        class C {
+        class C40 {
             field: string
             constructor(a: number = 1, b: number = 1) {
                 this.field = '' + a + b
             }
         }
       call: |-
-        arktest.assertEQ(new C(5, undefined).field, '51')
-        arktest.assertEQ(new C(undefined, 6).field, '16')
-        arktest.assertEQ(new C(undefined, undefined).field, '11')
+        arktest.assertEQ(new C40(5, undefined).field, '51')
+        arktest.assertEQ(new C40(undefined, 6).field, '16')
+        arktest.assertEQ(new C40(undefined, undefined).field, '11')
