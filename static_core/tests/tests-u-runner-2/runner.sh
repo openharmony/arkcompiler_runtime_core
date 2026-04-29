@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,13 +22,14 @@ if [[ -z "${1}" ]]; then
 fi
 
 SCRIPT_DIR=$(realpath "$(dirname "${0}")")
-ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
+ROOT_DIR=$(realpath "${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}" )
 
 RUNNER="${ROOT_DIR}/tests/tests-u-runner-2/main.py"
 
 source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 
 activate_venv
+check_venv "${ROOT_DIR}" "scripts/dep-lists/requirements-venv-python3"
 set +e
 
 echo "${RUNNER_OPTIONS}"

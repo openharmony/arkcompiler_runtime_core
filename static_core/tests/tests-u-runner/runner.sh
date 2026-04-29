@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,6 +28,7 @@ RUNNER="${ROOT_DIR}/tests/tests-u-runner/main.py"
 
 source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 activate_venv
+check_venv "${ROOT_DIR}" "scripts/dep-lists/requirements-venv-python3"
 set +e
 
 echo "RUNNER_OPTIONS=" "$RUNNER_OPTIONS"

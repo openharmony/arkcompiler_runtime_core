@@ -53,3 +53,10 @@ function deactivate_venv()
         deactivate
     fi
 }
+
+function check_venv() {
+    local static_core_dir=$1
+    local reqs=${static_core_dir}/$2
+    local check_venv_sh="${static_core_dir}/scripts/python/check-venv.sh"
+    ${check_venv_sh} "${reqs}" || exit 1
+}
