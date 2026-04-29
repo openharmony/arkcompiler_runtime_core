@@ -395,9 +395,6 @@
 #33476
 13.modules_and_namespaces/09.multifile_module/multifile_module_mismatched_export_n.ets
 
-#33874
-13.modules_and_namespaces/04.import_directives/05.import_path/bad/import_path_bad_n_3.ets
-
 #33736
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_const_prefix_n.ets
 
