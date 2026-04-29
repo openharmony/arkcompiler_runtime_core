@@ -82,6 +82,9 @@ static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, Ets
     if (cls == ptypes->coreFloat) {
         return getValue(helpers::TypeIdentity<EtsFloat>());
     }
+    if (cls == ptypes->coreChar) {
+        return getValue(helpers::TypeIdentity<EtsChar>());
+    }
     return std::nullopt;
 }
 
@@ -193,12 +196,6 @@ bool EtsValueTypedEquals(EtsExecutionContext *executionCtx, EtsObject *obj1, Ets
     }
     if (cls1 == ptypes->coreBoolean) {
         return cls2 == ptypes->coreBoolean && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
-    }
-    if (cls1 == ptypes->coreChar || cls2 == ptypes->coreChar) {
-        if (cls1 == cls2) {
-            return CompareBoxedPrimitive<EtsChar>(obj1, obj2);
-        }
-        return false;
     }
     if (UNLIKELY(cls1->IsBigInt())) {
         return cls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
@@ -428,9 +425,6 @@ bool EtsGetIstrue(EtsExecutionContext *executionCtx, EtsObject *obj)
     auto ptypes = PlatformTypes(executionCtx);
     if (cls == ptypes->coreBoolean) {
         return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
-    }
-    if (cls == ptypes->coreChar) {
-        return EtsBoxPrimitive<EtsChar>::FromCoreType(obj)->GetValue() != 0;
     }
 
     ASSERT(DbgIsBoxedClass(cls) || cls->GetRuntimeClass()->IsXRefClass());
