@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Try-catch-finally in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function tryCatchFinally(): Promise<void> {
@@ -31,6 +32,6 @@ async function startTest() {
     }
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

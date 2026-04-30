@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Promise.race in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function raceExample(): Promise<string> {
@@ -33,6 +34,6 @@ async function startTest() {
     arktest.assertEQ(result === "Promise 1 resolved", true);
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

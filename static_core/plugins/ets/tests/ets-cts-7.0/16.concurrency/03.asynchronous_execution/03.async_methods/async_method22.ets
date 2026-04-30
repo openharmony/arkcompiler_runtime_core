@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Using conditional statements in asynchronous methods.
+tags: [no-warmup]
 ---*/
 
 class MethodWithCondition {
@@ -36,6 +37,6 @@ async function startTest() {
     arktest.assertEQ(result1, "Flag is false!");
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

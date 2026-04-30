@@ -15,6 +15,7 @@
 
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function testAsyncError(): Promise<string> {
@@ -29,6 +30,6 @@ async function startTest() {
     }
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

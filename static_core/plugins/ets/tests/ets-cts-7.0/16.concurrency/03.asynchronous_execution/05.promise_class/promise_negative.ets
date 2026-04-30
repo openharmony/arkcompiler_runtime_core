@@ -16,7 +16,7 @@
 {% for c in cases %}
 /*---
 desc: The class Promise<T> represents the values returned by launch expressions.
-tags: [compile-only]
+tags: [compile-only, no-warmup]
 ---*/
 
 {{c.decl}}
@@ -25,7 +25,7 @@ async function runTest() {
     {{c.use|indent}}
 }
 
-function main(){
-    waitForCompletion(runTest);
+async function main(): Promise<void> {
+    await runTest()
 }
 {% endfor %}

@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       An asynchronous function returns a union type.
+tags: [no-warmup]
 ---*/
 
 async function testAsync(a: number): Promise<string | number> {
@@ -30,6 +31,6 @@ async function startTest() {
     arktest.assertEQ(result2, 20);
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Asynchronous function returns object.
+tags: [no-warmup]
 ---*/
 
 class Person {
@@ -37,6 +38,6 @@ async function startTest() {
   arktest.assertEQ(result.age === 25, true);
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

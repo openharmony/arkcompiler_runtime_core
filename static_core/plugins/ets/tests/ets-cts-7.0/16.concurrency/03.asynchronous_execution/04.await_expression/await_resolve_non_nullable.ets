@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: Test to wait for NonNullable Promise<{{c.type}}> resolve.
+tags: [no-warmup]
 ---*/
 
 type X = {{c.type}} | null | undefined
@@ -35,7 +36,7 @@ async function startTest(){
     arktest.assertEQ(awaitedResult, awaitValue, `Awaited result should be ${awaitValue}`);
 }
 
-function main() {
-    waitForCompletion(startTest); 
+async function main(): Promise<void> {
+    await startTest()
 }
 {% endfor %}

@@ -40,8 +40,8 @@ async function startTest() {
     arktest.assertEQ(result, expectedValue, `Promise Chaining result should be ${expectedValue}`);
 }
 
-function main() {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }
 {% endfor %}
 {% endfor %}

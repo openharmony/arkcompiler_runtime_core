@@ -370,14 +370,14 @@ cases:
               constructor(p: T) {
                   this.fld = foo<T>(p)
               }
-              meth(): Awaited<T> {
-                  return waitForCompletion<Awaited<T>>(async (): Promise<Awaited<T>> => { return await this.fld })
+              async meth(): Promise<Awaited<T>> {
+                  return await this.fld
               }
           }
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          arktest.assertTrue(a.meth() == "abc")
+          arktest.assertTrue((await a.meth()) == "abc")
 
     - decl: |-
           function bar<T>(p: T): T {
@@ -394,14 +394,14 @@ cases:
               constructor(p: T) {
                   this.fld = foo<T>(p)
               }
-              meth(): Awaited<T> {
-                  return waitForCompletion<Awaited<T>>(async (): Promise<Awaited<T>> => { return await this.fld })
+              async meth(): Promise<Awaited<T>> {
+                  return await this.fld
               }
           }
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          arktest.assertTrue(a.meth() == "abc")
+          arktest.assertTrue((await a.meth()) == "abc")
 
     - decl: |-
           class A {
