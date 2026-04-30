@@ -3015,7 +3015,7 @@ export namespace taskpool {
      * @param priority task execution priority
      */
     function launchImpl(task: Task, priority?: Priority): Promise<Any> {
-        return launch(InternalTask.of(task).execute);
+        return launch(() => InternalTask.of(task).execute);
     }
 
     native function isUsingLaunch(): boolean;

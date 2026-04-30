@@ -361,7 +361,7 @@ cases:
           return a === undefined && rest.length === 0
         }
       call: |-
-        const call: (...rest: Array<string>) => boolean = foo34
+        const call: (a?: number, ...rest: Array<string>) => boolean = foo34
         arktest.assertTrue(call())
 #35
     - decl: |-
