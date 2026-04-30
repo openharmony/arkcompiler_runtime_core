@@ -35,6 +35,4 @@ export namespace test4 {
     export abstract class B extends A {
         abstract m(): string
     }
-
-    export class C extends B { }
 }

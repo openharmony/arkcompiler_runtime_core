@@ -187,13 +187,16 @@ namespace test5 {
 }
 
 export namespace test6 {
+    class C6 extends dep.test6.C3 implements dep.test6.I2 { }
+    class C10 extends dep.test6.C3 implements dep.test6.I1 { }
+
     export function run(): void {
         const a1 = new dep.test6.A1();
 
         arktest.assertEQ((new dep.test6.C4() as dep.test6.I1).m(a1), "C1");
         arktest.assertEQ((new dep.test6.C5() as dep.test6.I1).m(a1), "C2");
 
-        const c6 = new dep.test6.C6();
+        const c6 = new C6();
         arktest.expectThrow(() => { (c6 as dep.test6.C3).m(a1); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (c6 as dep.test6.I2).m(a1); }, (e) => e instanceof LinkerAbstractMethodError);
 
@@ -201,7 +204,7 @@ export namespace test6 {
 
         arktest.assertEQ((new dep.test6.C9() as dep.test6.I1).m(a1), "C1");
 
-        const c10 = new dep.test6.C10();
+        const c10 = new C10();
         arktest.expectThrow(() => { (c10 as dep.test6.C3).m(a1); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (c10 as dep.test6.I1).m(a1); }, (e) => e instanceof LinkerAbstractMethodError);
     }

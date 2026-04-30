@@ -16,42 +16,51 @@
 import * as dep from "@dep/x"
 
 export namespace test1 {
+    class A implements dep.test1.I2 { }
     export function run(): void {
-        const a = new dep.test1.A();
+        const a = new A();
         arktest.expectThrow(() => { (a as dep.test1.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
 export namespace test2 {
+    class A implements dep.test2.I2 { }
+    class B extends A { }
     export function run(): void {
-        const b = new dep.test2.B();
+        const b = new B();
         arktest.expectThrow(() => { (b as dep.test2.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
-export namespace test3 {
+export namespace test3a {
+    class A implements dep.test3a.I2 { }
+    class B extends A implements dep.test3a.I3 { }
     export function run(): void {
-        const b = new dep.test3.B();
-        arktest.expectThrow(() => { (b as dep.test3.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+        const b = new B();
+        arktest.expectThrow(() => { (b as dep.test3a.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
-export namespace test4 {
+export namespace test4a {
+    class A implements dep.test4a.I2 { }
+    class B extends A implements dep.test4a.I3 { }
     export function run(): void {
-        const b = new dep.test4.B();
-        arktest.expectThrow(() => { (b as dep.test4.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+        const b = new B();
+        arktest.expectThrow(() => { (b as dep.test4a.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
-export namespace test5 {
+export namespace test5a {
+    class A implements dep.test5a.I4 { }
+    class B extends A { }
     export function run(): void {
-        const b = new dep.test5.B();
-        arktest.expectThrow(() => { (b as dep.test5.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+        const b = new B();
+        arktest.expectThrow(() => { (b as dep.test5a.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
 test1.run();
 test2.run();
-test3.run();
-test4.run();
-test5.run();
+test3a.run();
+test4a.run();
+test5a.run();

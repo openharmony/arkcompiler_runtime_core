@@ -45,56 +45,103 @@ export namespace test2 {
     }
 }
 
-export namespace test3 {
+export namespace test3a {
+    class C implements dep.test3a.I1, dep.test3a.I2 { }
     export function run(): void {
-        const c = new dep.test3.C();
-        arktest.expectThrow(() => { (c as dep.test3.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
-        arktest.assertEQ((c as dep.test3.I2).m(), "I2");
+        const c = new C();
+        arktest.expectThrow(() => { (c as dep.test3a.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
-namespace test4 {
-    interface I0 {
-        m(): string { return "I0" }
+export namespace test3b {
+    class C implements dep.test3b.I1, dep.test3b.I2 { }
+    export function run(): void {
+        const c = new C();
+        arktest.assertEQ((c as dep.test3b.I2).m(), "I2");
     }
+}
 
-    interface I1 extends I0 {
-        m(): string { return "I1" }
-    }
-
-    interface I2 extends I0 {
-        m(): string { return "I2" }
-    }
-
-    interface I3 extends I1, I2 {
-        m(): string { return "I3" }
-    }
-
+namespace test4a {
+    interface I0 { m(): string { return "I0" } }
+    interface I1 extends I0 { m(): string { return "I1" } }
+    interface I3 extends I1 { m(): string { return "I3" } }
     class C implements I3 { }
-
     export function run(): void {
         const c = new C();
         arktest.assertEQ((c as I0).m(), "I3");
+    }
+}
+
+namespace test4b {
+    interface I0 { m(): string { return "I0" } }
+    interface I1 extends I0 { m(): string { return "I1" } }
+    interface I3 extends I1 { m(): string { return "I3" } }
+    class C implements I3 { }
+    export function run(): void {
+        const c = new C();
         arktest.assertEQ((c as I1).m(), "I3");
+    }
+}
+
+namespace test4c {
+    interface I0 { m(): string { return "I0" } }
+    interface I2 extends I0 { m(): string { return "I2" } }
+    interface I3 extends I2 { m(): string { return "I3" } }
+    class C implements I3 { }
+    export function run(): void {
+        const c = new C();
         arktest.assertEQ((c as I2).m(), "I3");
+    }
+}
+
+namespace test4d {
+    interface I0 { m(): string { return "I0" } }
+    interface I1 extends I0 { m(): string { return "I1" } }
+    interface I3 extends I1 { m(): string { return "I3" } }
+    class C implements I3 { }
+    export function run(): void {
+        const c = new C();
         arktest.assertEQ((c as I3).m(), "I3");
     }
 }
 
-export namespace test5 {
+export namespace test5a {
+    class C implements dep.test5a.I3 { }
     export function run(): void {
-        const c = new dep.test5.C();
-        arktest.expectThrow(() => { (c as dep.test5.I0).m(); }, (e) => e instanceof LinkerMethodConflictError);
-        arktest.assertEQ((c as dep.test5.I1).m(), "I1");
-        arktest.assertEQ((c as dep.test5.I2).m(), "I2");
+        const c = new C();
+        arktest.expectThrow(() => { (c as dep.test5a.I0).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
-export namespace test6 {
+export namespace test5b {
+    class C implements dep.test5b.I3 { }
     export function run(): void {
-        const c = new dep.test6.C();
-        arktest.expectThrow(() => { (c as dep.test6.I0).m(); }, (e) => e instanceof LinkerMethodConflictError);
-        arktest.assertEQ((c as dep.test6.I2).m(), "I2");
+        const c = new C();
+        arktest.assertEQ((c as dep.test5b.I1).m(), "I1");
+    }
+}
+
+export namespace test5c {
+    class C implements dep.test5c.I3 { }
+    export function run(): void {
+        const c = new C();
+        arktest.assertEQ((c as dep.test5c.I2).m(), "I2");
+    }
+}
+
+export namespace test6a {
+    class C implements dep.test6a.I1, dep.test6a.I2 { }
+    export function run(): void {
+        const c = new C();
+        arktest.expectThrow(() => { (c as dep.test6a.I0).m(); }, (e) => e instanceof LinkerMethodConflictError);
+    }
+}
+
+export namespace test6b {
+    class C implements dep.test6b.I1, dep.test6b.I2 { }
+    export function run(): void {
+        const c = new C();
+        arktest.assertEQ((c as dep.test6b.I2).m(), "I2");
     }
 }
 
@@ -123,8 +170,15 @@ namespace test7 {
 
 test1.run();
 test2.run();
-test3.run();
-test4.run();
-test5.run();
-test6.run();
+test3a.run();
+test3b.run();
+test4a.run();
+test4b.run();
+test4c.run();
+test4d.run();
+test5a.run();
+test5b.run();
+test5c.run();
+test6a.run();
+test6b.run();
 test7.run();

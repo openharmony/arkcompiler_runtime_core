@@ -20,10 +20,9 @@ export namespace test1 {
     export abstract class A implements I1 {
         abstract m(): string
     }
-    export class B extends A { }
 }
 
-export namespace test4 {
+export namespace test4a {
     export interface I1 {
         m(): string
     }
@@ -33,5 +32,16 @@ export namespace test4 {
     export abstract class A implements I1 {
         abstract m(): string
     }
-    export class B extends A implements I2 { }
+}
+
+export namespace test4b {
+    export interface I1 {
+        m(): string
+    }
+    export interface I2 {
+        m(): string { return "I2" }
+    }
+    export abstract class A implements I1 {
+        abstract m(): string
+    }
 }

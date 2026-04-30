@@ -29,54 +29,59 @@ export namespace test2 {
     }
 }
 
-export namespace test3 {
+export namespace test3a {
     export interface I1 {
-        m(): string
+        m(): string { throw new Error() }
     }
+    export interface I2 { }
+}
 
+export namespace test3b {
+    export interface I1 { }
     export interface I2 {
         m(): string { throw new Error() }
     }
-
-    export class C implements I1, I2 {
-        m(): string { throw new Error() }
-    }
 }
 
-export namespace test5 {
+export namespace test5a {
     export interface I0 {
         m(): string { throw new Error() }
     }
-
-    export interface I1 extends I0 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I2 extends I0 {
-        m(): string { throw new Error() }
-    }
-
+    export interface I1 extends I0 { }
+    export interface I2 extends I0 { }
     export interface I3 extends I1, I2 { }
-
-    export class C implements I3 {
-        m(): string { throw new Error() }
-    }
 }
 
-export namespace test6 {
-    export interface I0 {
+export namespace test5b {
+    export interface I0 { }
+    export interface I1 extends I0 {
         m(): string { throw new Error() }
     }
+    export interface I2 extends I0 { }
+    export interface I3 extends I1, I2 { }
+}
 
-    export interface I1 extends I0 {
-        m(): string
-    }
-
+export namespace test5c {
+    export interface I0 { }
+    export interface I1 extends I0 { }
     export interface I2 extends I0 {
         m(): string { throw new Error() }
     }
+    export interface I3 extends I1, I2 { }
+}
 
-    export class C implements I1, I2 {
+export namespace test6a {
+    export interface I0 {
+        m(): string { throw new Error() }
+    }
+    export interface I1 extends I0 { }
+    export interface I2 extends I0 { }
+}
+
+export namespace test6b {
+    export interface I0 { }
+    export interface I1 extends I0 { }
+    export interface I2 extends I0 {
         m(): string { throw new Error() }
     }
 }

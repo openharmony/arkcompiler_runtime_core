@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export namespace test5 {
+export namespace test5_i1 {
     export interface I1 {
         m(): string { return "I1" }
     }
@@ -33,6 +33,48 @@ export namespace test5 {
     export interface I5 extends I4 {
         m(): string { return "I5" }
     }
+}
 
-    export class C implements I3, I5 { }
+export namespace test5_i3 {
+    export interface I1 {
+        m(): string { return "I1" }
+    }
+
+    export interface I2 extends I1 {
+        m(): string
+    }
+
+    export interface I3 extends I2 {
+        m(): string { return "I3" }
+    }
+
+    export interface I4 extends I1 {
+        m(): string
+    }
+
+    export interface I5 extends I4 {
+        m(): string { return "I5" }
+    }
+}
+
+export namespace test5_i5 {
+    export interface I1 {
+        m(): string { return "I1" }
+    }
+
+    export interface I2 extends I1 {
+        m(): string
+    }
+
+    export interface I3 extends I2 {
+        m(): string { return "I3" }
+    }
+
+    export interface I4 extends I1 {
+        m(): string
+    }
+
+    export interface I5 extends I4 {
+        m(): string { return "I5" }
+    }
 }

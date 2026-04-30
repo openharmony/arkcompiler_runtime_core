@@ -53,8 +53,11 @@ namespace test2 {
 }
 
 export namespace test3 {
+    class A implements dep.test3.I2 { }
+    class B extends A { }
+
     export function run(): void {
-        const b = new dep.test3.B();
+        const b = new B();
         arktest.expectThrow(() => { (b as dep.test3.I1).m(new Object()); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }

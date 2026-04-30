@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export namespace test4 {
+export namespace test4a {
     export class A1 { }
     export class B1 { }
 
@@ -21,15 +21,33 @@ export namespace test4 {
         m(x: A1, y: B1): string { throw new Error() }
     }
 
+    export interface I2 extends I1 { }
+
+    export interface I3 extends I1 { }
+}
+
+export namespace test4b {
+    export class A1 { }
+    export class B1 { }
+
+    export interface I1 { }
+
     export interface I2 extends I1 {
         m(x: Object, y: B1): string { throw new Error() }
     }
 
+    export interface I3 extends I1 { }
+}
+
+export namespace test4c {
+    export class A1 { }
+    export class B1 { }
+
+    export interface I1 { }
+
+    export interface I2 extends I1 { }
+
     export interface I3 extends I1 {
         m(x: A1, y: Object): string { throw new Error() }
-    }
-
-    export class C implements I2, I3 {
-        m(x: A1, y: B1): string { throw new Error() }
     }
 }

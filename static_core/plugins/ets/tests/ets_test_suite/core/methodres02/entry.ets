@@ -53,32 +53,39 @@ namespace test2 {
     }
 }
 
-namespace test3 {
-    class A1 { }
-    class A2 extends A1 { }
-
-    interface I1 {
-        m(x: A1): string { return "I1" }
-    }
-
-    interface I2 extends I1 {
-        m(x: Object): string { return "I2" }
-    }
-
-    interface I3 extends I1 {
-        m(x: A2): string { return "I3" }
-    }
-
-    interface I4 extends I2, I3 { }
-
-    class C1 implements I4 { }
+export namespace test3a {
+    export class C1 implements dep.test3a.I4 { }
 
     export function run(): void {
         const c = new C1();
-        arktest.assertEQ((c as I1).m(new A1()), "I2");
-        arktest.assertEQ((c as I2).m(new A1()), "I2");
-        arktest.assertEQ((c as I3).m(new A2()), "I3");
-        arktest.assertEQ((c as I4).m(new A1()), "I2");
+        arktest.assertEQ((c as dep.test3a.I1).m(new dep.test3a.A1()), "I2");
+    }
+}
+
+export namespace test3b {
+    export class C1 implements dep.test3b.I4 { }
+
+    export function run(): void {
+        const c = new C1();
+        arktest.assertEQ((c as dep.test3b.I2).m(new dep.test3b.A1()), "I2");
+    }
+}
+
+export namespace test3c {
+    export class C1 implements dep.test3c.I4 { }
+
+    export function run(): void {
+        const c = new C1();
+        arktest.assertEQ((c as dep.test3c.I3).m(new dep.test3c.A2()), "I3");
+    }
+}
+
+export namespace test3d {
+    export class C1 implements dep.test3d.I4 { }
+
+    export function run(): void {
+        const c = new C1();
+        arktest.assertEQ((c as dep.test3d.I4).m(new dep.test3d.A1()), "I2");
     }
 }
 
@@ -121,15 +128,20 @@ namespace test5 {
 }
 
 export namespace test6 {
+    export class C1 implements dep.test6.I2 { }
+
     export function run(): void {
-        const c = new dep.test6.C1();
+        const c = new C1();
         arktest.expectThrow(() => { (c as dep.test6.I1).m(new Object()); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
 test1.run();
 test2.run();
-test3.run();
+test3a.run();
+test3b.run();
+test3c.run();
+test3d.run();
 test4.run();
 test5.run();
 test6.run();

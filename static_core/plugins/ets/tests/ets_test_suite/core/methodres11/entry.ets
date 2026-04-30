@@ -15,48 +15,82 @@
 
 import * as dep from "@dep/x"
 
-export namespace test1 {
+export namespace test1a {
+    class A implements dep.test1a.I2 { }
+    class B extends A implements dep.test1a.I3 { }
+
     export function run(): void {
-        const b = new dep.test1.B();
-        arktest.expectThrow(() => { (b as dep.test1.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
-        arktest.assertEQ((b as dep.test1.I2).m(), "I2");
-        arktest.assertEQ((b as dep.test1.I3).m(), "I3");
+        const b = new B();
+        arktest.expectThrow(() => { (b as dep.test1a.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+    }
+}
+
+export namespace test1b {
+    class A implements dep.test1b.I2 { }
+    class B extends A implements dep.test1b.I3 { }
+
+    export function run(): void {
+        const b = new B();
+        arktest.assertEQ((b as dep.test1b.I2).m(), "I2");
+    }
+}
+
+export namespace test1c {
+    class A implements dep.test1c.I2 { }
+    class B extends A implements dep.test1c.I3 { }
+
+    export function run(): void {
+        const b = new B();
+        arktest.assertEQ((b as dep.test1c.I3).m(), "I3");
     }
 }
 
 export namespace test2 {
+    class A implements dep.test2.I2 { }
+
     export function run(): void {
-        const a = new dep.test2.A();
+        const a = new A();
         arktest.expectThrow(() => { (a as dep.test2.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (a as dep.test2.I2).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
 export namespace test3 {
+    class A implements dep.test3.I2 { }
+    class B extends A { }
+
     export function run(): void {
-        const b = new dep.test3.B();
+        const b = new B();
         arktest.expectThrow(() => { (b as dep.test3.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (b as dep.test3.I2).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
 export namespace test4 {
+    class A implements dep.test4.I2 { }
+    class B extends A implements dep.test4.I3 { }
+
     export function run(): void {
-        const b = new dep.test4.B();
+        const b = new B();
         arktest.expectThrow(() => { (b as dep.test4.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
 export namespace test5 {
+    class A implements dep.test5.I4 { }
+    class B extends A { }
+
     export function run(): void {
-        const a = new dep.test5.A();
+        const a = new A();
         arktest.expectThrow(() => { (a as dep.test5.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
-        const b = new dep.test5.B();
+        const b = new B();
         arktest.expectThrow(() => { (b as dep.test5.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
-test1.run();
+test1a.run();
+test1b.run();
+test1c.run();
 test2.run();
 test3.run();
 test4.run();

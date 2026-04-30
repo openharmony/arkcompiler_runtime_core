@@ -101,34 +101,28 @@ namespace test4 {
     }
 }
 
-namespace test5 {
-    interface I1 {
-        m(): string { return "I1" }
-    }
-
-    interface I2 extends I1 {
-        m(): string { return "I2" }
-    }
-
-    interface I3 extends I1 {
-        m(): string { return "I3" }
-    }
-
-    class C1 implements I2, I3 { }
-
-    class D extends C1 {
-        m(): string { return "D" }
-    }
-
-    class E extends D {
-        m(): string { return "E" }
-    }
-
+namespace test5_i1 {
+    interface I1 { m(): string { return "I1" } }
+    interface I2 extends I1 { m(): string { return "I2" } }
+    class C1 implements I2 { }
+    class D extends C1 { m(): string { return "D" } }
+    class E extends D { m(): string { return "E" } }
     export function run(): void {
         const e = new E();
         arktest.assertEQ(e.m(), "E");
         arktest.assertEQ((e as I1).m(), "E");
         arktest.assertEQ((e as I2).m(), "E");
+    }
+}
+
+namespace test5_i3 {
+    interface I1 { m(): string { return "I1" } }
+    interface I3 extends I1 { m(): string { return "I3" } }
+    class C1 implements I3 { }
+    class D extends C1 { m(): string { return "D" } }
+    class E extends D { m(): string { return "E" } }
+    export function run(): void {
+        const e = new E();
         arktest.assertEQ((e as I3).m(), "E");
     }
 }
@@ -155,5 +149,6 @@ test1.run();
 test2.run();
 test3.run();
 test4.run();
-test5.run();
+test5_i1.run();
+test5_i3.run();
 test6.run();

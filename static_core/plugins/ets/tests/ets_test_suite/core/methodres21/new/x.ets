@@ -33,6 +33,4 @@ export namespace test5 {
         m(x: Object): string
         m(x: A1): string { return "I1a" }
     }
-
-    export class C1 implements I1 { }
 }

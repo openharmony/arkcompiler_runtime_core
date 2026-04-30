@@ -17,9 +17,5 @@ export namespace test3 {
     export interface I1 {
         m(x: Object): string { throw new Error() }
     }
-    interface I2 extends I1 {
-        m(x: string): string { throw new Error() }
-    }
-    class A implements I2 { }
-    export class B extends A { }
+    export interface I2 extends I1 { }
 }

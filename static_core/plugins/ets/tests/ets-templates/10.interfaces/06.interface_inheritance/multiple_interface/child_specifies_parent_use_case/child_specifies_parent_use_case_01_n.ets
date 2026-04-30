@@ -14,10 +14,7 @@
  */
 
 /*---
-desc: Verify that a child interface must provide implementation when both parents have default methods.
-tags: [compile-only, negative]
-expected_out: >-
-    Semantic error ESE0187: Method 'greet' is declared in ParentWithDefault1 and ParentWithDefault2 interfaces.
+desc: Child interface inherits members from the interfaces it extends.
 ---*/
 
 interface ParentWithDefault1 {
@@ -33,3 +30,11 @@ interface ParentWithDefault2 {
 }
 
 interface ChildWithConflict extends ParentWithDefault1, ParentWithDefault2 {}
+
+class ConcreteChild implements ChildWithConflict {}
+
+function main(): void {
+    let c = new ConcreteChild();
+    arktest.assertTrue((c as ParentWithDefault1).greet() == "Hello from ParentWithDefault1");
+    arktest.assertTrue((c as ParentWithDefault2).greet() == "Hello from ParentWithDefault2");
+}

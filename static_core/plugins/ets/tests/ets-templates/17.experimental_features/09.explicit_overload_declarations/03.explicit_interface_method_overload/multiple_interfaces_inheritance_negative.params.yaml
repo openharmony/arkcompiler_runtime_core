@@ -43,3 +43,5 @@ cases:
       class A implements I, J {} // CTE: ambiguous foo
     call: |-
       let a = new A();
+      arktest.assertTrue((a as I).foo(1.1 as number) == 1);
+      arktest.assertTrue((a as J).foo(1.1 as number) == 2)

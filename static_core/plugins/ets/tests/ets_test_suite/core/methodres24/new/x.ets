@@ -24,39 +24,61 @@ export namespace test1 {
     export interface I3 extends I2 {
         m(x: A1): string { return "I3" }
     }
-    export class C implements I3 { }
 }
 
-export namespace test2 {
+export namespace test2_i1 {
     export class A1 { }
-    export interface I1 {
-        m(x: A1): string { return "I1" }
-    }
-    export interface I2 extends I1 {
-        m(x: Object): string { return "I2" }
-    }
-    export interface I3 extends I1 {
-        m(x: A1): string { return "I3" }
-    }
-    export class C implements I2, I3 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I1 { m(x: A1): string { return "I3" } }
 }
 
-export namespace test3 {
+export namespace test2_i2 {
     export class A1 { }
-    export interface I1 {
-        m(x: A1): string { return "I1" }
-    }
-    export interface I2 extends I1 {
-        m(x: Object): string { return "I2" }
-    }
-    export interface I3 extends I2 {
-        m(x: A1): string { return "I3" }
-    }
-    export interface I4 extends I1 {
-        m(x: Object): string { return "I4" }
-    }
-    export interface I5 extends I1 {
-        m(x: A1): string { return "I5" }
-    }
-    export class C implements I3, I4, I5 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I1 { m(x: A1): string { return "I3" } }
+}
+
+export namespace test2_i3 {
+    export class A1 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I1 { m(x: A1): string { return "I3" } }
+}
+
+export namespace test3_i1 {
+    export class A1 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I2 { m(x: A1): string { return "I3" } }
+    export interface I4 extends I1 { m(x: Object): string { return "I4" } }
+    export interface I5 extends I1 { m(x: A1): string { return "I5" } }
+}
+
+export namespace test3_i3 {
+    export class A1 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I2 { m(x: A1): string { return "I3" } }
+    export interface I4 extends I1 { m(x: Object): string { return "I4" } }
+    export interface I5 extends I1 { m(x: A1): string { return "I5" } }
+}
+
+export namespace test3_i4 {
+    export class A1 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I2 { m(x: A1): string { return "I3" } }
+    export interface I4 extends I1 { m(x: Object): string { return "I4" } }
+    export interface I5 extends I1 { m(x: A1): string { return "I5" } }
+}
+
+export namespace test3_i5 {
+    export class A1 { }
+    export interface I1 { m(x: A1): string { return "I1" } }
+    export interface I2 extends I1 { m(x: Object): string { return "I2" } }
+    export interface I3 extends I2 { m(x: A1): string { return "I3" } }
+    export interface I4 extends I1 { m(x: Object): string { return "I4" } }
+    export interface I5 extends I1 { m(x: A1): string { return "I5" } }
 }

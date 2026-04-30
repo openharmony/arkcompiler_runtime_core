@@ -27,7 +27,10 @@ cases:
         foo(): this { return this } 
       }
       class C1 implements I1, I2 {}
-    call: "let c1 = new C1()"
+    call: |-
+      let c1 = new C1();
+      (c1 as I1).foo().foo();
+      (c1 as I2).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
 
   - hierarchy: |-
@@ -52,7 +55,10 @@ cases:
         foo(): A2 { return new A2() } 
       }
       class C2 extends C1 implements I3 {}
-    call: "let c2 = new C2()"
+    call: |-
+      let c2 = new C2();
+      (c2 as I1).foo();
+      (c2 as I2).foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
 
   - hierarchy: |-
@@ -79,7 +85,10 @@ cases:
         foo(): this { return this } 
       }
       class C2 extends C1 implements I4, I5 {}
-    call: "let c2 = new C2()"
+    call: |-
+      let c2 = new C2();
+      (c2 as I1).foo().foo();
+      (c2 as I2).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
 
   - descr: "Conflicting implementations in interfaces I3, I5"
@@ -97,7 +106,10 @@ cases:
         foo(): this { return this } 
       }
       class C2 extends C1 implements I4, I5 {}
-    call: "let c2 = new C2()"
+    call: |-
+      let c2 = new C2();
+      (c2 as I3).foo().foo();
+      (c2 as I5).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I3 and I5 interfaces."
 
   - descr: "Conflicting implementations in interfaces I4, I5"
@@ -115,7 +127,10 @@ cases:
         foo(): this { return this } 
       }
       class C2 extends C1 implements I4, I5 {}
-    call: "let c2 = new C2()"
+    call: |-
+      let c2 = new C2();
+      (c2 as I4).foo().foo();
+      (c2 as I5).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I4 and I5 interfaces."
 
   - hierarchy: |-
@@ -152,7 +167,10 @@ cases:
       } 
       interface I8 extends I6, I7 {}
       class C3 extends C2 implements I8 {}
-    call: "let c3 = new C3()"
+    call: |-
+      let c3 = new C3();
+      (c3 as I1).foo().foo();
+      (c3 as I2).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I3 and I5 interfaces."
 
   - descr: "Conflicting implementations in interfaces I3, I5"
@@ -178,7 +196,10 @@ cases:
       } 
       interface I8 extends I6, I7 {}
       class C3 extends C2 implements I8 {}
-    call: "let c3 = new C3()"
+    call: |-
+      let c3 = new C3();
+      (c3 as I3).foo().foo();
+      (c3 as I5).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I3 and I5 interfaces."
 
   - descr: "Conflicting implementations in interfaces I4, I5"
@@ -202,7 +223,10 @@ cases:
       } 
       interface I8 extends I6, I7 {}
       class C3 extends C2 implements I8 {}
-    call: "let c3 = new C3()"
+    call: |-
+      let c3 = new C3();
+      (c3 as I4).foo().foo();
+      (c3 as I5).foo().foo()
     expected_out: "Semantic error ESE0187: Method 'foo' is declared in I4 and I5 interfaces."
 
   - descr: "Conflicting implementations in interfaces I6, I7"
@@ -226,5 +250,7 @@ cases:
       } 
       interface I8 extends I6, I7 {}
       class C3 extends C2 implements I8 {}
-    call: "let c3 = new C3()"
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I6 and I7 interfaces."
+    call: |-
+      let c3 = new C3();
+      (c3 as I6).foo().foo();
+      (c3 as I7).foo().foo()

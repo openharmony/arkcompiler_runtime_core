@@ -19,8 +19,6 @@
 desc: >-
     Test for some overridden method conflict.
     Special case is: {{ case.descr }}
-tags: [compile-only, negative] 
-expected_out: "{{ case.expected_out }}"
 ---*/
 
 {{ case.decl }}      

@@ -13,22 +13,32 @@
  * limitations under the License.
  */
 
-export namespace test1 {
+export namespace test1a {
     export interface I1 {
-        m(): string
+        m(): string { throw new Error() }
     }
+
+    export interface I2 extends I1 { }
+
+    export interface I3 extends I1 { }
+}
+
+export namespace test1b {
+    export interface I1 { }
 
     export interface I2 extends I1 {
         m(): string { throw new Error() }
     }
 
+    export interface I3 extends I1 { }
+}
+
+export namespace test1c {
+    export interface I1 { }
+
+    export interface I2 extends I1 { }
+
     export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export class A implements I2 { }
-
-    export class B extends A implements I3 {
         m(): string { throw new Error() }
     }
 }
@@ -38,11 +48,7 @@ export namespace test2 {
         m(): string { throw new Error() }
     }
 
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export class A implements I2 { }
+    export interface I2 extends I1 { }
 }
 
 export namespace test3 {
@@ -50,51 +56,27 @@ export namespace test3 {
         m(): string { throw new Error() }
     }
 
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export class A implements I2 { }
-
-    export class B extends A { }
+    export interface I2 extends I1 { }
 }
 
 export namespace test4 {
     export interface I1 {
-        m(): string
-    }
-
-    export interface I2 extends I1 {
         m(): string { throw new Error() }
     }
 
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
+    export interface I2 extends I1 { }
 
-    export class A implements I2 { }
-
-    export class B extends A implements I3 { }
+    export interface I3 extends I1 { }
 }
 
 export namespace test5 {
     export interface I1 {
-        m(): string
-    }
-
-    export interface I2 extends I1 {
         m(): string { throw new Error() }
     }
 
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
+    export interface I2 extends I1 { }
 
-    export interface I4 extends I2, I3 {
-        m(): string { throw new Error() }
-    }
+    export interface I3 extends I1 { }
 
-    export class A implements I4 { }
-
-    export class B extends A { }
+    export interface I4 extends I2, I3 { }
 }

@@ -38,9 +38,7 @@ export namespace test6 {
 
     export class C4 extends C1 implements I1 { }
     export class C5 extends C2 implements I1 { }
-    export class C6 extends C3 implements I2 { }
     export class C7 extends C2 implements I2 { }
     class C8 extends C1 { }
     export class C9 extends C8 implements I1 { }
-    export class C10 extends C3 implements I1 { }
 }

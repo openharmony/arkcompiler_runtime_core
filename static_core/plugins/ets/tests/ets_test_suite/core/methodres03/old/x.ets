@@ -15,62 +15,42 @@
 
 export namespace test1 {
     export interface I1 {
-        m(x: I1): string
-    }
-
-    export interface I2 extends I1 {
-        m(x: I2): string { throw new Error() }
-    }
-
-    export interface I3 extends I1 {
-        m(x: I3): string { throw new Error() }
-    }
-
-    export interface I4 extends I2, I3 { }
-
-    export class C1 implements I4 {
         m(x: I1): string { throw new Error() }
     }
+
+    export interface I2 extends I1 { }
+
+    export interface I3 extends I1 { }
+
+    export interface I4 extends I2, I3 { }
 }
 
 export namespace test2 {
     export interface I1 {
-        m(): string
+        m(): string { throw new Error() }
     }
     export interface I2 extends I1 { }
     export interface I3 extends I1 { }
-
-    export class C1 implements I2, I3 {
-        m(): string { throw new Error() }
-    }
 }
 
 export namespace test3 {
-    export abstract class C1 {
-        abstract m(): string
+    export class C1 {
+        m(): string { throw new Error() }
     }
 
     export interface I1 {
         m(): number { throw new Error() }
-    }
-
-    export class C2 extends C1 {
-        m(): string { throw new Error() }
     }
 }
 
 export namespace test4 {
     export class A1 { }
 
-    export abstract class C1 {
-        abstract m(x: A1): string
-    }
-
-    export interface I1 {
+    export class C1 {
         m(x: A1): string { throw new Error() }
     }
 
-    export class C2 extends C1 implements I1 {
+    export interface I1 {
         m(x: A1): string { throw new Error() }
     }
 }
@@ -83,8 +63,6 @@ export namespace test5 {
     export abstract class C1 implements I1 {
         m(): string { throw new Error() }
     }
-
-    export class C2 extends C1 { }
 }
 
 export namespace test6 {

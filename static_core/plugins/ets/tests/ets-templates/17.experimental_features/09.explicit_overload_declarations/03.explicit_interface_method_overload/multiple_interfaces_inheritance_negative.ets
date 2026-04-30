@@ -19,9 +19,7 @@ limitations under the License.
 desc: >-
     A method is defined in a subinterface with the same name as the method in
     the superinterface. If signatures are override-compatible, then overriding
-    is used. Otherwise, a compile-time error occurs.
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0187: Method 'foo' is declared in I and J interfaces."
+    is used. Otherwise, implicit method overloading is used.
 ---*/
 
 let res: number = 0;

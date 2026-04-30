@@ -16,10 +16,8 @@ limitations under the License.
 /*---
 desc: Inheritance multiple default method from superinterfaces with same signatures.
 assert: >-
-      If an interface I inherits a default method whose signature is override-equivalent
-      with another method inherited by I, then a compile-time error occurs.
-      (This is the case whether the other method is abstract or default.)
-tags: [compile-only, negative]
+      Interface methods inherited from direct superinterfaces participate in the
+      overload set of the subinterface.
 ---*/
 
 interface A {
@@ -41,5 +39,13 @@ interface C {
 }
 
 interface D extends A, B, C {
+}
 
+class ConcreteD implements D {}
+
+function main(): void {
+    let d = new ConcreteD();
+    arktest.assertTrue((d as A).foo() == 1);
+    arktest.assertTrue((d as B).foo() == 2);
+    arktest.assertTrue((d as C).foo() == 3);
 }

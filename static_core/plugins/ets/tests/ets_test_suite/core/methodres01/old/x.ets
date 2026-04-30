@@ -13,28 +13,48 @@
  * limitations under the License.
  */
 
-export namespace test2 {
+export namespace test1 {
+    export interface I1 {
+        m(p: I1): string { throw new Error() }
+    }
+
+    export interface I2 extends I1 { }
+
+    export interface I3 extends I1 { }
+}
+
+export namespace test4a {
     export interface I1 {
         m(): string { throw new Error() }
     }
 
-    export abstract class A implements I1 {
-        abstract m(): string
-    }
+    export interface I2 { }
+}
 
-    export class B extends A {
+export namespace test4b {
+    export interface I1 { }
+
+    export interface I2 {
         m(): string { throw new Error() }
     }
 }
 
-export namespace test4 {
+export namespace test5b {
     export interface I1 {
         m(): string { throw new Error() }
     }
 
-    export class A implements I1 { }
+    export interface I2 { }
 
-    export class B extends A {
+    export interface I3 extends I1, I2 { }
+}
+
+export namespace test5c {
+    export interface I1 { }
+
+    export interface I2 {
         m(): string { throw new Error() }
     }
+
+    export interface I3 extends I1, I2 { }
 }

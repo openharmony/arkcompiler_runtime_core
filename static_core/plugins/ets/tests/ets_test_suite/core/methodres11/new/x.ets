@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export namespace test1 {
+export namespace test1a {
     export interface I1 {
         m(): string
     }
@@ -25,10 +25,34 @@ export namespace test1 {
     export interface I3 extends I1 {
         m(): string { return "I3" }
     }
+}
 
-    export class A implements I2 { }
+export namespace test1b {
+    export interface I1 {
+        m(): string
+    }
 
-    export class B extends A implements I3 { }
+    export interface I2 extends I1 {
+        m(): string { return "I2" }
+    }
+
+    export interface I3 extends I1 {
+        m(): string { return "I3" }
+    }
+}
+
+export namespace test1c {
+    export interface I1 {
+        m(): string
+    }
+
+    export interface I2 extends I1 {
+        m(): string { return "I2" }
+    }
+
+    export interface I3 extends I1 {
+        m(): string { return "I3" }
+    }
 }
 
 export namespace test2 {
@@ -39,8 +63,6 @@ export namespace test2 {
     export interface I2 extends I1 {
         m(): string
     }
-
-    export class A implements I2 { }
 }
 
 export namespace test3 {
@@ -51,10 +73,6 @@ export namespace test3 {
     export interface I2 extends I1 {
         m(): string
     }
-
-    export class A implements I2 { }
-
-    export class B extends A { }
 }
 
 export namespace test4 {
@@ -69,10 +87,6 @@ export namespace test4 {
     export interface I3 extends I1 {
         m(): string
     }
-
-    export class A implements I2 { }
-
-    export class B extends A implements I3 { }
 }
 
 export namespace test5 {
@@ -89,8 +103,4 @@ export namespace test5 {
     }
 
     export interface I4 extends I2, I3 { }
-
-    export class A implements I4 { }
-
-    export class B extends A { }
 }
