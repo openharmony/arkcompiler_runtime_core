@@ -16,6 +16,8 @@
 #ifndef PANDA_PLUGINS_ETS_COMPILER_ETS_CODEGEN_EXTENSIONS_H
 #define PANDA_PLUGINS_ETS_COMPILER_ETS_CODEGEN_EXTENSIONS_H
 
+bool ResolveCallByNameCodegen(ResolveVirtualInst *resolver);
+
 void EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsGetNativeMethodManagedClass(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsGetMethodNativePointer(IntrinsicInst *inst, Reg dst, SRCREGS &src);

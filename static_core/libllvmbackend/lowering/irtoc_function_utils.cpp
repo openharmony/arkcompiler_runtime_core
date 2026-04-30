@@ -40,8 +40,16 @@ constexpr std::array NOALIAS_IRTOC_FUNC = {
     "AnyCallNewRange"sv,
     "AnyCallNewShort"sv,
 #ifdef PANDA_WITH_ETS
+    "LookupGetterByNameShortEntrypoint"sv,
+    "LookupGetterByNameLongEntrypoint"sv,
+    "LookupGetterByNameObjEntrypoint"sv,
+    "LookupSetterByNameShortEntrypoint"sv,
+    "LookupSetterByNameLongEntrypoint"sv,
+    "LookupSetterByNameObjEntrypoint"sv,
+    "LookupFieldByNameEntrypoint"sv,
     "EtsGetTypeofEntrypoint"sv,
     "EtsGetIstrueEntrypoint"sv,
+    "LookupMethodByNameEntrypoint"sv,
 #endif
 };
 

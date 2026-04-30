@@ -16,6 +16,7 @@
 #include "ani_signature_builder.h"
 #include <cstddef>
 #include <vector>
+#include <algorithm>
 #include <sstream>
 
 namespace {
@@ -404,6 +405,11 @@ std::string Builder::GetPartialNamePrefix()
 std::string Builder::GetAsyncNamePrefix()
 {
     return "%%async-";
+}
+
+std::string Builder::GetUnionPropertyNamePrefix()
+{
+    return "%%union_prop-";
 }
 
 std::string Builder::GetLambdaPrefix()

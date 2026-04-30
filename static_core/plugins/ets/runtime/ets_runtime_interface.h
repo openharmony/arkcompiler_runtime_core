@@ -150,6 +150,12 @@ public:
     compiler::DataType::Type GetBoxedClassDataType(ClassPtr klass) const override;
     bool HasAsyncAnnotation(MethodPtr methodPtr) const override;
 
+    FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
+    MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;
+
+    template <panda_file::Type::TypeId FIELD_TYPE>
+    compiler::RuntimeInterface::MethodPtr GetLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter);
+
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/ets_interop_runtime_interface-inl.h"
 #endif
