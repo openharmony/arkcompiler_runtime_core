@@ -55,7 +55,7 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::HasClassMethodOverride(
         }
         return {ClassOverrideResult::Kind::NONE, 0};
     }
-    ArenaVector<std::pair<MethodInfo const *, size_t>> ownMethods(allocator_.Adapter());
+    InternalArenaVector<std::pair<MethodInfo const *, size_t>> ownMethods(allocator_);
     for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), &imethodInfo); !it.IsEmpty(); it.Next()) {
         auto &[info, entry] = it.Value();
         MethodInfo const *effective = entry.CandidateOr(info);
@@ -296,9 +296,9 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
             for (auto &method : iface->GetVirtualMethods()) {
                 uint32_t nameHash = GetHash32String(method.GetName().data);
                 auto it = interfaceMethodCandidatesByName_.find(nameHash);
-                ArenaVector<IfaceMethodCandidate> *bucket = nullptr;
+                InternalArenaVector<IfaceMethodCandidate> *bucket = nullptr;
                 if (it == interfaceMethodCandidatesByName_.end()) {
-                    bucket = allocator_.New<ArenaVector<IfaceMethodCandidate>>(allocator_.Adapter());
+                    bucket = allocator_.New<InternalArenaVector<IfaceMethodCandidate>>(allocator_);
                     interfaceMethodCandidatesByName_.insert({nameHash, bucket});
                 } else {
                     bucket = it->second;
@@ -393,11 +393,11 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveSingleInter
 
 template <class ProtoCompatibility, class OverridePred>
 // CC-OFFNXT(G.FMT.07) project code style
-ArenaVector<typename VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IfaceMethodCandidate>
-VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(Class *iface, Method &imethod,
-                                                                           ClassLinkerContext *ctx, ITable itable)
+auto VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(Class *iface, Method &imethod,
+                                                                                ClassLinkerContext *ctx, ITable itable)
+    -> InternalArenaVector<typename VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IfaceMethodCandidate>
 {
-    ArenaVector<IfaceMethodCandidate> candidates(allocator_.Adapter());
+    InternalArenaVector<IfaceMethodCandidate> candidates(allocator_);
     if (!useInterfaceMethodCandidateIndex_) {
         for (size_t k = 0; k < itable.Size(); k++) {
             auto *otherIface = itable[k].GetInterface();
@@ -405,9 +405,9 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(Class
             for (auto &method : otherIface->GetVirtualMethods()) {
                 uint32_t nameHash = GetHash32String(method.GetName().data);
                 auto it = interfaceMethodCandidatesByName_.find(nameHash);
-                ArenaVector<IfaceMethodCandidate> *bucket = nullptr;
+                InternalArenaVector<IfaceMethodCandidate> *bucket = nullptr;
                 if (it == interfaceMethodCandidatesByName_.end()) {
-                    bucket = allocator_.New<ArenaVector<IfaceMethodCandidate>>(allocator_.Adapter());
+                    bucket = allocator_.New<InternalArenaVector<IfaceMethodCandidate>>(allocator_);
                     interfaceMethodCandidatesByName_.insert({nameHash, bucket});
                 } else {
                     bucket = it->second;
@@ -440,12 +440,12 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(Class
 // deepest-first with back-pruning, order-independent maximal set
 template <class ProtoCompatibility, class OverridePred>
 void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::EliminateCandidates(
-    ArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx)
+    InternalArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx)
 {
     std::sort(candidates.begin(), candidates.end(),
               [](const IfaceMethodCandidate &a, const IfaceMethodCandidate &b) { return a.depth > b.depth; });
 
-    ArenaVector<IfaceMethodCandidate> survivors(allocator_.Adapter());
+    InternalArenaVector<IfaceMethodCandidate> survivors(allocator_);
     for (auto &c : candidates) {
         bool eliminated = false;
         for (auto &s : survivors) {
@@ -477,7 +477,7 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::EliminateCandidate
 // mixed abstract+default is conflict, all-abstract is AME
 template <class ProtoCompatibility, class OverridePred>
 IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ClassifySurvivors(
-    ArenaVector<IfaceMethodCandidate> &survivors, Method *imethod)
+    InternalArenaVector<IfaceMethodCandidate> &survivors, Method *imethod)
 {
     bool hasAbstract = false;
     bool hasDefault = false;

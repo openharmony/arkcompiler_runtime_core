@@ -30,11 +30,12 @@ struct VTableDiff {
         Method *oldMethod;
         Method *newMethod;
     };
-    explicit VTableDiff(ArenaAllocator *allocator) : changed(allocator->Adapter()) {}
-    ArenaVector<ChangedSlot> changed;  // NOLINT(misc-non-private-member-variables-in-classes)
+    explicit VTableDiff(mem::InternalArenaAllocator *allocator) : changed(*allocator) {}
+    InternalArenaVector<ChangedSlot> changed;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-static VTableDiff ComputeVTableDiff(ArenaAllocator *allocator, Span<Method *> superVtable, Span<Method *> vtable)
+static VTableDiff ComputeVTableDiff(mem::InternalArenaAllocator *allocator, Span<Method *> superVtable,
+                                    Span<Method *> vtable)
 {
     VTableDiff diff(allocator);
     for (size_t k = 0; k < superVtable.size(); k++) {

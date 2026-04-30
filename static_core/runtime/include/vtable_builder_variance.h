@@ -53,11 +53,11 @@ private:
                                       Method &imethod, ClassLinkerContext *ctx, ClassOverrideResult classOverride);
     IfaceMethodDispatch ResolveByElimination(Class *iface, Method &imethod, ClassLinkerContext *ctx, ITable itable);
 
-    ArenaVector<IfaceMethodCandidate> CollectCandidates(Class *iface, Method &imethod, ClassLinkerContext *ctx,
-                                                        ITable itable);
+    InternalArenaVector<IfaceMethodCandidate> CollectCandidates(Class *iface, Method &imethod, ClassLinkerContext *ctx,
+                                                                ITable itable);
 
-    void EliminateCandidates(ArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx);
-    IfaceMethodDispatch ClassifySurvivors(ArenaVector<IfaceMethodCandidate> &survivors, Method *imethod);
+    void EliminateCandidates(InternalArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx);
+    IfaceMethodDispatch ClassifySurvivors(InternalArenaVector<IfaceMethodCandidate> &survivors, Method *imethod);
     ClassOverrideResult HasClassMethodOverride(Method &imethod);
     void RebuildOwnMethodNameHashes();
     bool OwnMethodsShadowInterface(ITable itable);
@@ -67,9 +67,9 @@ private:
     static bool IsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
     ClassOverrideResult GetInheritedClassOverride(Method *inherited) const;
 
-    ArenaUnorderedSet<uint32_t> ownMethodNameHashes_ {allocator_.Adapter()};
-    ArenaUnorderedMap<uint32_t, ArenaVector<IfaceMethodCandidate> *> interfaceMethodCandidatesByName_ {
-        allocator_.Adapter()};
+    InternalArenaUnorderedSet<uint32_t> ownMethodNameHashes_ {allocator_};
+    InternalArenaUnorderedMap<uint32_t, InternalArenaVector<IfaceMethodCandidate> *> interfaceMethodCandidatesByName_ {
+        allocator_};
     bool useInterfaceMethodCandidateIndex_ {false};
 };
 

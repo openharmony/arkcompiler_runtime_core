@@ -20,8 +20,8 @@
 #include "runtime/include/class.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/itable.h"
-#include "runtime/include/mem/allocator.h"
 #include "runtime/include/vtable_builder_interface.h"
+#include "runtime/mem/internal_arena_allocator.h"
 
 namespace ark {
 
@@ -44,7 +44,7 @@ public:
         dispatches_ = dispatches;
     }
 
-    void SetAllocator(ArenaAllocator *allocator) override
+    void SetAllocator(mem::InternalArenaAllocator *allocator) override
     {
         allocator_ = allocator;
     }
@@ -63,7 +63,7 @@ private:
 
     ITable itable_;
     Span<const IfaceMethodDispatch> dispatches_;
-    ArenaAllocator *allocator_ {nullptr};
+    mem::InternalArenaAllocator *allocator_ {nullptr};
     // base-class ctor expects this field
     ClassLinkerErrorHandler *errorHandler_ __attribute__((unused));
 };

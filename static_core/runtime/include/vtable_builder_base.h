@@ -25,9 +25,11 @@
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/class_linker.h"
+#include "runtime/include/runtime.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/vtable_builder_interface.h"
+#include "runtime/mem/internal_arena_allocator.h"
 
 namespace ark {
 
@@ -156,10 +158,7 @@ private:
 
 class VTableInfo {
 public:
-    explicit VTableInfo(ArenaAllocator *allocator)
-        : vmethods_(allocator->Adapter()), copiedMethods_(allocator->Adapter())
-    {
-    }
+    explicit VTableInfo(mem::InternalArenaAllocator &allocator) : vmethods_(allocator), copiedMethods_(allocator) {}
 
     struct MethodEntry {
         explicit MethodEntry(size_t index) : index_(index) {}
@@ -259,8 +258,8 @@ private:
         }
     };
 
-    ArenaUnorderedMap<MethodInfo const *, MethodEntry, MethodNameHash> vmethods_;
-    ArenaUnorderedMap<MethodInfo const *, CopiedMethodEntry, MethodNameHash> copiedMethods_;
+    InternalArenaUnorderedMap<MethodInfo const *, MethodEntry, MethodNameHash> vmethods_;
+    InternalArenaUnorderedMap<MethodInfo const *, CopiedMethodEntry, MethodNameHash> copiedMethods_;
 };
 
 template <typename Pred, typename UMap>
@@ -351,7 +350,7 @@ public:
         return {dispatches_.data(), dispatches_.size()};
     }
 
-    ArenaAllocator *GetAllocator() override
+    mem::InternalArenaAllocator *GetAllocator() override
     {
         return &allocator_;
     }
@@ -373,13 +372,13 @@ protected:
 
     [[nodiscard]] bool CollectProxyMethods(PandaVector<Method *> *output);
 
-    ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_INTERNAL};
-    VTableInfo vtable_ {&allocator_};
+    mem::InternalArenaAllocator allocator_ {Runtime::GetCurrent()->GetInternalAllocator()};
+    VTableInfo vtable_ {allocator_};
     size_t numVmethods_ {0};
     size_t baseVTableSize_ {0};
-    ArenaVector<CopiedMethod> orderedCopiedMethods_ {allocator_.Adapter()};
-    ArenaVector<IfaceMethodDispatch> dispatches_ {allocator_.Adapter()};
-    ArenaVector<MethodInfo const *> baseMethodInfoByIndex_ {allocator_.Adapter()};
+    InternalArenaVector<CopiedMethod> orderedCopiedMethods_ {allocator_};
+    InternalArenaVector<IfaceMethodDispatch> dispatches_ {allocator_};
+    InternalArenaVector<MethodInfo const *> baseMethodInfoByIndex_ {allocator_};
     bool vtableAppendedOnly_ {true};
     ClassLinkerErrorHandler *errorHandler_;
 
