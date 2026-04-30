@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <cstdlib>
 #include "dtoa_helper.h"
 #include "ets_intrinsics_helpers.h"
 #include "ets_coroutine.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 #include "ets_panda_file_items.h"
 #include "ets_stubs.h"
 #include "ets_stubs-inl.h"
@@ -34,6 +36,14 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets::intrinsics::helpers {
+
+void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)
+{
+    std::array args {Value(outsidePromise->GetCoreType()), Value(internalPromise->GetCoreType())};
+
+    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(ManagedThread::GetCurrent(),
+                                                                                    args.data());
+}
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define RETURN_IF_CONVERSION_END(p, end, result) \

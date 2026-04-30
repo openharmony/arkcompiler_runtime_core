@@ -14,6 +14,7 @@
  */
 
 #include "intrinsics.h"
+#include "intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -53,8 +54,24 @@ EtsPromise *EtsAsyncContextResolve(EtsAsyncContext *asyncCtx, EtsObject *val)
     EtsHandleScope s(executionCtx);
     EtsHandle<EtsPromise> hpromise(executionCtx, returnValue);
     EtsHandle<EtsObject> hval(executionCtx, val);
-    EtsMutex::LockHolder lh(hpromise);
+    hpromise->Lock();
+    if (!hpromise->IsPending()) {
+        hpromise->Unlock();
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+        return hpromise.GetPtr();
+    }
+
+    if (hval.GetPtr() != nullptr && hval->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
+        auto *internalPromise = EtsPromise::FromEtsObject(hval.GetPtr());
+        EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
+        hpromise->Unlock();
+        helpers::SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+        return hpromise.GetPtr();
+    }
+
     hpromise->Resolve(executionCtx, hval.GetPtr());
+    hpromise->Unlock();
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return hpromise.GetPtr();
 }
