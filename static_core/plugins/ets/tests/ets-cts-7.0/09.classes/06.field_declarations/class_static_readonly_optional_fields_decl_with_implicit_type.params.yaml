@@ -286,7 +286,7 @@ cases:
         }
         class A extends B {
           static get field(): [check_type] {
-            return A._field
+            return B._field
           }
         }
     sub_cases_logic:
@@ -340,7 +340,7 @@ cases:
         }
         class A extends B {
           static get field(): [check_type] {
-            return A._field
+            return B._field
           }
         }
     sub_cases_logic:
@@ -373,7 +373,7 @@ cases:
         }
         class A extends B {
           static get field(): [check_type] {
-            return A._field
+            return B._field
           }
         }
       - |-
@@ -386,7 +386,7 @@ cases:
         }
         class A extends B {
           static get field(): [check_type] {
-            return A._field
+            return B._field
           }
         }
     sub_cases_logic:

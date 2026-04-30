@@ -152,7 +152,7 @@ cases:
               static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
-          arktest.assertEQ(C(33.0), 66.0)
+          arktest.assertEQ(B(33.0), 66.0)
           arktest.assertEQ(C('abc'), 'abcabc')
           arktest.assertEQ(C('abc', false), 'abcfalse')
 
@@ -170,7 +170,7 @@ cases:
               static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
-          arktest.assertEQ(C(33.0), 66.0)
+          arktest.assertEQ(B(33.0), 66.0)
           arktest.assertEQ(C('abc'), 'abcabc')
           arktest.assertEQ(C('abc', false), 'abcfalse')
 
@@ -189,8 +189,6 @@ cases:
               $_invoke(): string { return 'C' }
           }
       use: |-
-          arktest.assertEQ(C(), 'A')
-          arktest.assertEQ(B(), 'A')
           arktest.assertEQ(A(), 'A')
 
           arktest.assertEQ(new C().$_invoke(), 'C')

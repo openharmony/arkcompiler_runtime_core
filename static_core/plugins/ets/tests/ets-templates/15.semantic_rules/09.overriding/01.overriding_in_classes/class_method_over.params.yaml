@@ -175,8 +175,6 @@ cases:
       arktest.assertEQ(res, 21);
       Derived.foo<A>(a);
       arktest.assertEQ(res, 22);
-      Derived.foo<A, B>(new A(), new B());
-      arktest.assertEQ(res, 12);
       Derived.foo<A>(new A());
       arktest.assertEQ(res, 22);
 

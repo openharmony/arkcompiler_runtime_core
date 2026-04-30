@@ -156,14 +156,14 @@ cases:
         }
     sub_cases_logic:
       - |-
-        arktest.assertTrue(A.field instanceof [check_type])
-        arktest.assertEQ(A.field, [base_value])
-        A.field = [new_value]
-        arktest.assertTrue(A.field instanceof [check_type])
-        arktest.assertEQ(A.field, [new_value])
-        A.field = [base_value]
-        arktest.assertTrue(A.field instanceof [check_type])
-        arktest.assertEQ(A.field, [base_value])
+        arktest.assertTrue(Base.field instanceof [check_type])
+        arktest.assertEQ(Base.field, [base_value])
+        Base.field = [new_value]
+        arktest.assertTrue(Base.field instanceof [check_type])
+        arktest.assertEQ(Base.field, [new_value])
+        Base.field = [base_value]
+        arktest.assertTrue(Base.field instanceof [check_type])
+        arktest.assertEQ(Base.field, [base_value])
 
   - desc: |-
       Checking for changing the value from class method call.

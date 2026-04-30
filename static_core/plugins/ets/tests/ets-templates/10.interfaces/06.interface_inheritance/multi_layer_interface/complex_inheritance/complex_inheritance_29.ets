@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,12 +63,9 @@ function main(): void {
 
     arktest.assertEQ(Parent.parentStaticMethod(), "Parent static method");
     arktest.assertEQ(Parent.overrideMethod(), "Parent override method");
-    arktest.assertEQ(Parent.grandParentStaticMethod(), "GrandParent static method");
 
     arktest.assertEQ(Child.childStaticMethod(), "Child static method");
     arktest.assertEQ(Child.overrideMethod(), "Child override method");
-    arktest.assertEQ(Child.parentStaticMethod(), "Parent static method");
-    arktest.assertEQ(Child.grandParentStaticMethod(), "GrandParent static method");
 
     arktest.assertEQ(Child.overrideMethod(), "Child override method");
     arktest.assertEQ(Parent.overrideMethod(), "Parent override method");

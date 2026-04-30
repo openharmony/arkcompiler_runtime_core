@@ -34,7 +34,7 @@ class C extends B implements G {
 }
 
 function main(): void {
-    arktest.assertEQ(C.CONSTANT, "Constant from B");
+    arktest.assertEQ(B.CONSTANT, "Constant from B");
 
     const c: C = new C();
     arktest.assertEQ(c.CONSTANT, "Constant from interface C");

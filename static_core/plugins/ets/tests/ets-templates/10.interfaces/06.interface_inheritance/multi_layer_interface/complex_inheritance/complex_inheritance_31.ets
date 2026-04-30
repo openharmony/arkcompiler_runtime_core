@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ class Child extends Parent {
 
 function main(): void {
     arktest.assertEQ(Child.CHILD_CONST, "Child Constant");
-    arktest.assertEQ(Child.OVERRIDE_CONST, "Parent Override Constant");
+    arktest.assertEQ(Parent.OVERRIDE_CONST, "Parent Override Constant");
     const c: Child = new Child();
     arktest.assertEQ(c.INTERFACE_CONST, "Interface Constant");
     arktest.assertEQ(c.OVERRIDE_CONST, "Override Constant");

@@ -14,7 +14,7 @@
 --- # List of valid class members
 class_members:
   - {member: "public foo(): int { return 5; }", call: "return this.foo();", result: "5" }
-  - {member: "static foo(): int { return 5; }", call: "return B.foo();", result: "5" }
+  - {member: "static foo(): int { return 5; }", call: "return A.foo();", result: "5" }
   - {member: "protected foo(): int { return 5; }", call: "return this.foo();", result: "5" }
   - {member: "public result: int = 5;", call: "return this.result;", result: "5" }
   - {member: "protected result: int = 5;", call: "return this.result;", result: "5" }

@@ -35,8 +35,6 @@ function main(): void {
   arktest.assertEQ(a.field, {{c.instance_value}})
   arktest.assertTrue(Base.field instanceof {{c.check_type}})
   arktest.assertEQ(Base.field, {{c.static_value}})
-  arktest.assertTrue(A.field instanceof {{c.check_type}})
-  arktest.assertEQ(A.field, {{c.static_value}})
 }
 
 {% endfor %}

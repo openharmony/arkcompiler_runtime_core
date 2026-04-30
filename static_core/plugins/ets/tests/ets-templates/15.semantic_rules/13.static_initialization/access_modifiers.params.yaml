@@ -48,10 +48,10 @@ cases:
      }
      class B extends A {
        foo() {
-         return B.a
+         return A.a
        }
        static {
-         B.a = "initialized"
+         A.a = "initialized"
        }
      }
      function main() {

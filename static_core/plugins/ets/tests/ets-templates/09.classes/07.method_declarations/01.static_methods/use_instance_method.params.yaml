@@ -89,7 +89,7 @@ cases:
         }
         class C extends B { }
         function main() {
-          arktest.assertEQ(C.getCount(2), 3)
+          arktest.assertEQ(B.getCount(2), 3)
         }
 
     - doc: Access private method
@@ -151,5 +151,5 @@ cases:
         }
         class C extends B { }
         function main() {
-          arktest.assertEQ(C.getCount(2), 3)
+          arktest.assertEQ(B.getCount(2), 3)
         }

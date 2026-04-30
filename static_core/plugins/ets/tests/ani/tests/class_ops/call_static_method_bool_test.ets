@@ -106,11 +106,11 @@ class Parent {
 }
 class Child extends Parent {
     static childStaticMethod(): boolean {
-        Child.methodChecker = childMethodInChildWasCalled;
+        Parent.methodChecker = childMethodInChildWasCalled;
         return true;
     }
     static shadowingStaticMethod(): boolean {
-        Child.methodChecker = overridedMethodInChildWasCalled;
+        Parent.methodChecker = overridedMethodInChildWasCalled;
         return true;
     }
 }

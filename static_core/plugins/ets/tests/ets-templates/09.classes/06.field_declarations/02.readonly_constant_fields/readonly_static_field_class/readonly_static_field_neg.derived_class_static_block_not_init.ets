@@ -29,7 +29,7 @@ class Base {
 
 class A extends Base {
     static {
-        A.fieldA = {{c.check_value}}
+        Base.fieldA = {{c.check_value}}
     }
 }
 {% endfor %} 

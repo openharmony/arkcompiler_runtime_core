@@ -38,5 +38,4 @@ function main(): void {
     const child = new Child();
     arktest.assertEQ(child.greet(), "Hello from Child");
     arktest.assertEQ(Parent.greet(), "Hello from Parent");
-    arktest.assertEQ(Child.greet(), "Hello from Parent");
 }
