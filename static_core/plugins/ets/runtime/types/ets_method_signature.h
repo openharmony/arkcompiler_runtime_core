@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,8 @@ private:
     {
         EtsType paramType = GetTypeByFirstChar(signature[i]);
         // Check that type is valid and return type is not void
-        if (paramType == EtsType::UNKNOWN || (paramType == EtsType::VOID && (i != signature.size() - 1))) {
+        if (paramType == EtsType::UNKNOWN ||
+            ((paramType == EtsType::VOID || paramType == EtsType::NOVALUE) && (i != signature.size() - 1))) {
             return PandaString::npos;
         }
         pandaProto_.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(paramType));
@@ -156,6 +157,8 @@ private:
                 return EtsType::DOUBLE;
             case 'V':
                 return EtsType::VOID;
+            case 'X':
+                return EtsType::NOVALUE;
             default:
                 return EtsType::UNKNOWN;
         }

@@ -160,6 +160,7 @@ static void DumpPrimitivesField(ObjectHeader *objectHeader, const Field &field,
             *oStream << val << std::endl;
             break;
         }
+        case panda_file::Type::TypeId::NOVALUE:
         default:
             LOG(FATAL, COMMON) << "Error at object dump - wrong type id";
     }

@@ -1,0 +1,153 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Type-system / signature semantics for `never`:
+#   - `never` in return position -> primitive assembler descriptor `X`
+#   - `never` in param/field/var position -> reference descriptor `N` (undefined-shaped)
+#   - For override identity, `never`-param and `undefined`-param share one runtime
+#     descriptor; override is contravariant, so widening never->undefined is OK.
+
+--- # cases
+cases:
+    - desc: smoke - never-return direct call throws
+      decl: |-
+        function foo(): never { throw new Error("foo() never returns") }
+      body: |-
+        arktest.expectError(() => { let x: never = foo() }, new Error("foo() never returns"))
+
+    - desc: smoke - never-field init throws
+      decl: |-
+        function foo(): never { throw new Error("foo() never returns") }
+        class SmokeBox { x: never = foo() }
+      body: |-
+        arktest.expectError(() => { let a = new SmokeBox() }, new Error("foo() never returns"))
+
+    - desc: smoke - never-return as never-param arg throws
+      decl: |-
+        function foo(): never { throw new Error("foo() never returns") }
+        function bar(p: never): void {}
+      body: |-
+        arktest.expectError(() => { bar(foo()) }, new Error("foo() never returns"))
+
+    - desc: never overrides Object-returning method
+      decl: |-
+        class StubError extends Error {}
+        function stub(): int { throw new StubError() }
+        function neverErr(): never { throw new NeverError() }
+        class BaseRef { run(): Object { stub(); return new Object() } }
+        class DervRefNever extends BaseRef { override run(): never { return neverErr() } }
+      body: |-
+        let b: BaseRef = new DervRefNever()
+        arktest.expectThrow(() => { b.run() }, (e: Error): boolean => e instanceof NeverError)
+
+    - desc: never overrides int-returning method
+      decl: |-
+        function neverErr(): never { throw new NeverError() }
+        class StubError extends Error {}
+        function stub(): int { throw new StubError() }
+        class BaseInt { run(): int { return stub() } }
+        class DervIntNever extends BaseInt { override run(): never { return neverErr() } }
+      body: |-
+        let b: BaseInt = new DervIntNever()
+        arktest.expectThrow(() => { b.run() }, (e: Error): boolean => e instanceof NeverError)
+
+    - desc: never overrides double-returning method
+      decl: |-
+        function neverErr(): never { throw new NeverError() }
+        class StubError extends Error {}
+        function stub(): int { throw new StubError() }
+        class BaseDouble { run(): double { stub(); return 0.0 } }
+        class DervDoubleNever extends BaseDouble { override run(): never { return neverErr() } }
+      body: |-
+        let b: BaseDouble = new DervDoubleNever()
+        arktest.expectThrow(() => { b.run() }, (e: Error): boolean => e instanceof NeverError)
+
+    - desc: never overrides void-returning method
+      decl: |-
+        function neverErr(): never { throw new NeverError() }
+        class StubError extends Error {}
+        function stub(): int { throw new StubError() }
+        class BaseVoid { run(): void { stub() } }
+        class DervVoidNever extends BaseVoid { override run(): never { return neverErr() } }
+      body: |-
+        let b: BaseVoid = new DervVoidNever()
+        arktest.expectThrow(() => { b.run() }, (e: Error): boolean => e instanceof NeverError)
+
+    - desc: never overrides method with reference params
+      decl: |-
+        function neverErr(): never { throw new NeverError() }
+        class StubError extends Error {}
+        function stub(): int { throw new StubError() }
+        class BaseRefWithRefParams { run(a: Object, b: Object): Object { stub(); return a } }
+        class DervRefWithRefParamsNever extends BaseRefWithRefParams {
+            override run(a: Object, b: Object): never { return neverErr() }
+        }
+      body: |-
+        let b: BaseRefWithRefParams = new DervRefWithRefParamsNever()
+        arktest.expectThrow(() => { b.run(new Object(), new Object()) },
+            (e: Error): boolean => e instanceof NeverError)
+
+    - desc: undefined-param widens never-param override
+      decl: |-
+        class Tag { static s: string = "" }
+        class BaseNeverParam { run(x: never): void { Tag.s = "base-never" } }
+        class DervUndefParam extends BaseNeverParam {
+            override run(x: undefined): void { Tag.s = "derv-undef" }
+        }
+      body: |-
+        Tag.s = ""
+        let d: DervUndefParam = new DervUndefParam()
+        d.run(undefined)
+        arktest.assertEQ(Tag.s, "derv-undef")
+
+    - desc: never-param base widened by undefined in override chain
+      decl: |-
+        class A3 { run(x: never): string { return "A" } }
+        class B3 extends A3 { override run(x: undefined): string { return "B" } }
+        class C3 extends B3 { override run(x: undefined): string { return "C" } }
+      body: |-
+        let b: B3 = new C3()
+        arktest.assertEQ(b.run(undefined), "C")
+
+    - desc: plain generic erases to any
+      decl: |-
+        function plainGeneric<T>(x: T): T { return x }
+      body: |-
+        arktest.assertEQ(plainGeneric<int>(42), 42)
+        arktest.assertEQ(plainGeneric<string>("s"), "s")
+        arktest.assertEQ(plainGeneric<undefined>(undefined), undefined)
+
+    - desc: plain class generic erases to any
+      decl: |-
+        class PlainBox<T> {
+            v: T
+            constructor(init: T) { this.v = init }
+            get(): T { return this.v }
+        }
+      body: |-
+        let b1 = new PlainBox<int>(5)
+        arktest.assertEQ(b1.get(), 5)
+        let b2 = new PlainBox<string>("ok")
+        arktest.assertEQ(b2.get(), "ok")
+
+    - desc: never-return method implements interface returning number
+      decl: |-
+        interface I { m(): number }
+        class C implements I { m(): never { throw new Error() } }
+      body: |-
+        arktest.expectError(() => { (new C() as I).m() }, new Error())
+
+    - desc: Runtime.createNeverError returns a NeverError instance
+      decl: ""
+      body: |-
+        arktest.assertTrue(Runtime.createNeverError() instanceof NeverError)

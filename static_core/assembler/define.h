@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,8 @@ constexpr char PARSE_AREA_MARKER = '.';
     _("i64", I64)                \
     _("f32", F32)                \
     _("f64", F64)                \
-    _("any", TAGGED)
+    _("any", TAGGED)             \
+    _("novalue", NOVALUE)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define KEYWORDS_LIST(_)     \

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -368,6 +368,20 @@ TEST_F(CallObjectMethodVoidTest, call_Recursion_Method)
     ASSERT_EQ(env_->Object_CallMethod_Int(object, checkMethod, &result), ANI_OK);
     ASSERT_EQ(result, VAL5);
 }
+TEST_F(CallObjectMethodVoidTest, object_call_method_void_never)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("call_object_method_void_test.A", "fooNever", ":w", &object, &method);
+
+    ASSERT_EQ(env_->Object_CallMethod_Void(object, method), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+    ani_value args[1] = {};
+    ASSERT_EQ(env_->Object_CallMethod_Void_A(object, method, args), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

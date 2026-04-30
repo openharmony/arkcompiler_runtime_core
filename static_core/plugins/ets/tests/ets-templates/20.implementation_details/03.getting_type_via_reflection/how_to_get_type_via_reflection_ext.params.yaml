@@ -408,3 +408,49 @@ cases:
       let a: Any = 1;
       let type_of_any = Class.of(a);
       arktest.assertEQ(type_from_any.getName(), "Y");
+  - desc: PRIMITIVE_NEVER name and identity.
+    logic: |-
+      arktest.assertEQ(Class.PRIMITIVE_NEVER.getName(), "novalue");
+      arktest.assertNE(Class.PRIMITIVE_NEVER, Class.from<never>());
+      arktest.assertEQ(Class.from<never>().getName(), "N");
+  - desc: PRIMITIVE_NEVER is subtype of itself (reflexivity).
+    logic: |-
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_NEVER));
+  - desc: PRIMITIVE_NEVER is subtype of every primitive type (bottom type).
+    logic: |-
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_BOOLEAN));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_BYTE));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_CHAR));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_SHORT));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_INT));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_LONG));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_FLOAT));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_DOUBLE));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_NUMBER));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.PRIMITIVE_VOID));
+  - desc: PRIMITIVE_NEVER is subtype of reference never (N) and other reference types.
+    logic: |-
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<never>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<undefined>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<null>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<string>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<bigint>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<Error>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<Object>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<Any>()));
+  - desc: PRIMITIVE_NEVER is subtype of array, function, interface, and user class types.
+    logic: |-
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<Array<int>>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<FixedArray<int>>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<(p: int) => int>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<SomeInterface>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<User>()));
+      arktest.assertTrue(Class.PRIMITIVE_NEVER.isSubtypeOf(Class.from<ExtendedUser>()));
+  - desc: No non-never type is a subtype of PRIMITIVE_NEVER.
+    logic: |-
+      arktest.assertFalse(Class.PRIMITIVE_INT.isSubtypeOf(Class.PRIMITIVE_NEVER));
+      arktest.assertFalse(Class.PRIMITIVE_DOUBLE.isSubtypeOf(Class.PRIMITIVE_NEVER));
+      arktest.assertFalse(Class.PRIMITIVE_VOID.isSubtypeOf(Class.PRIMITIVE_NEVER));
+      arktest.assertFalse(Class.from<string>().isSubtypeOf(Class.PRIMITIVE_NEVER));
+      arktest.assertFalse(Class.from<Object>().isSubtypeOf(Class.PRIMITIVE_NEVER));
+      arktest.assertFalse(Class.from<User>().isSubtypeOf(Class.PRIMITIVE_NEVER));

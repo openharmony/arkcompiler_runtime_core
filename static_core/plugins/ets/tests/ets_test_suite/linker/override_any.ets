@@ -15,14 +15,14 @@
 
 class StubError extends Error { }
 
-class NeverError extends Error { }
+class CustomNeverError extends Error { }
 
 function stub() {
     throw new StubError();
 }
 
 function neverErr(): never {
-    throw new NeverError();
+    throw new CustomNeverError();
 }
 
 class OverrideParamAny {
@@ -88,7 +88,7 @@ function overrideMethods() {
     retObj.returnAny();
     retArr.returnAny();
     retUn.returnAny();
-    arktest.expectThrow(() => { retNever.returnAny() }, (e) => e instanceof NeverError)
+    arktest.expectThrow(() => { retNever.returnAny() }, (e) => e instanceof CustomNeverError)
 }
 
 function main() {

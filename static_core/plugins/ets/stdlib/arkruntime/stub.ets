@@ -196,7 +196,7 @@ export namespace stub {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
-     */    
+     */
     export function valueOf(value: int): Int {
         return new Int(value);
     }
@@ -208,7 +208,7 @@ export namespace stub {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
-     */   
+     */
     export function valueOf(value: long): Long {
         return new Long(value);
     }
@@ -220,7 +220,7 @@ export namespace stub {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
-     */   
+     */
     export function valueOf(value: float): Float {
         return new Float(value);
     }
@@ -232,8 +232,9 @@ export namespace stub {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
-     */   
+     */
     export function valueOf(value: double): Double {
         return new Double(value);
     }
+
 }

@@ -131,13 +131,21 @@ TEST_F(MangleSignatureTest, FormatPrimitives_NewToOld)
     desc = Mangle::ConvertSignature(":Y");
     EXPECT_STREQ(desc.value().c_str(), ":LY;");
 
-    // Check 'never'
+    // Check 'never' reference
     desc = Mangle::ConvertSignature("N:");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "LN;:V");
     desc = Mangle::ConvertSignature(":N");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), ":LN;");
+
+    // Check 'never' primitive
+    desc = Mangle::ConvertSignature("w:");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), "X:V");
+    desc = Mangle::ConvertSignature(":w");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), ":X");
 
     // Check mixed primitives
     desc = Mangle::ConvertSignature("zcbsilfdY:z");
@@ -147,6 +155,10 @@ TEST_F(MangleSignatureTest, FormatPrimitives_NewToOld)
     desc = Mangle::ConvertSignature("zcbsilfdY:N");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "ZCBSIJFDLY;:LN;");
+
+    desc = Mangle::ConvertSignature("U:w");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), "Lstd/core/Object;:X");
 }
 
 TEST_F(MangleSignatureTest, FormatPrimitives_OldToOld)
@@ -203,6 +215,12 @@ TEST_F(MangleSignatureTest, FormatPrimitives_OldToOld)
 
     // Check mixed primitives
     desc = Mangle::ConvertSignature("ZCBSIJFD:Z");
+    ASSERT_FALSE(desc.has_value());
+
+    // Check primitive never old format
+    desc = Mangle::ConvertSignature("X:V");
+    ASSERT_FALSE(desc.has_value());
+    desc = Mangle::ConvertSignature(":X");
     ASSERT_FALSE(desc.has_value());
 }
 
@@ -331,6 +349,14 @@ TEST_F(MangleSignatureTest, FormatPrimitivesFixedArray_NewToOld)
     desc = Mangle::ConvertSignature(":A{N}");
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), ":[LN;");
+
+    // Check 'FixedArray<primitive never>'
+    desc = Mangle::ConvertSignature("A{w}:");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), "[X:V");
+    desc = Mangle::ConvertSignature(":A{w}");
+    ASSERT_TRUE(desc.has_value());
+    EXPECT_STREQ(desc.value().c_str(), ":[X");
 
     // Check mixed 'FixedArray' types
     desc = Mangle::ConvertSignature("A{z}A{c}A{b}A{s}A{i}A{l}A{f}A{d}A{Y}:A{b}");
@@ -503,7 +529,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
 
     // Check never
     EXPECT_EQ(env_->Module_FindFunction(m, "fooNever", "N:", &fn), ANI_OK);
-    EXPECT_EQ(env_->Module_FindFunction(m, "fooNever", ":N", &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "fooNever", ":w", &fn), ANI_OK);
 
     // Check any
     EXPECT_EQ(env_->Module_FindFunction(m, "fooAny", "Y:", &fn), ANI_OK);
@@ -512,7 +538,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
     // Check generics
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "Y:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", ":Y", &fn), ANI_OK);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "YY:N", &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "YY:w", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "fooFixedArray", "A{Y}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "fooFixedArray", ":A{Y}", &fn), ANI_OK);
 
@@ -583,7 +609,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "d:", &fn), ANI_OK);
 
     // Check never
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooNever", ":N", &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooNever", ":w", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooNever", "N:", &fn), ANI_OK);
 
     // Check any
@@ -593,7 +619,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     // Check generics
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", "Y:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", ":Y", &fn), ANI_OK);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", "YY:N", &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", "YY:w", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooFixedArray", "A{Y}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooFixedArray", ":A{Y}", &fn), ANI_OK);
 
@@ -667,7 +693,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
 
     // Check never
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooNever", "N:", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "fooNever", ":N", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "fooNever", ":w", &method), ANI_OK);
 
     // Check any
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooAny", "Y:", &method), ANI_OK);
@@ -676,7 +702,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
     // Check generics
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", "Y:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", ":Y", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", "YY:N", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", "YY:w", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooFixedArray", "A{Y}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooFixedArray", ":A{Y}", &method), ANI_OK);
 
@@ -748,7 +774,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
 
     // Check never
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooNever", "N:", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooNever", ":N", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooNever", ":w", &method), ANI_OK);
 
     // Check any
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooAny", "Y:", &method), ANI_OK);
@@ -757,7 +783,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
     // Check generics
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", "Y:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", ":Y", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", "YY:N", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", "YY:w", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooFixedArray", "A{Y}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooFixedArray", ":A{Y}", &method), ANI_OK);
 
@@ -917,9 +943,8 @@ TEST_F(MangleSignatureTest, Class_CallStaticMethodByName)
     ASSERT_EQ(booleanResult, ANI_TRUE);
 
     // Check never
-    ani_ref res;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "fooNever", ":N", &res), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "fooNever", ":w"), ANI_PENDING_ERROR);
 
     ani_boolean hasError = ANI_FALSE;
     ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
@@ -927,6 +952,7 @@ TEST_F(MangleSignatureTest, Class_CallStaticMethodByName)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     // Check any
+    ani_ref res;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "fooAny", ":Y", &res), ANI_OK);
 
@@ -1000,9 +1026,8 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName)
     ASSERT_EQ(booleanResult, ANI_TRUE);
 
     // Check never
-    ani_ref res;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "fooNever", ":N", &res), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "fooNever", ":w"), ANI_PENDING_ERROR);
 
     ani_boolean hasError = ANI_FALSE;
     ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
@@ -1010,6 +1035,7 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     // Check any
+    ani_ref res;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "fooAny", ":Y", &res), ANI_OK);
 

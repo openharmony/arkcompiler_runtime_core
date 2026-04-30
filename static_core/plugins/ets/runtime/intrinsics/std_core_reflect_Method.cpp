@@ -55,7 +55,17 @@ extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionP
 {
     auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
     ASSERT(function != nullptr);
-    ASSERT(i >= 0 && static_cast<uint32_t>(i) < function->GetNumArgs());
+
+    if (UNLIKELY(i < 0 || static_cast<uint32_t>(i) >= function->GetParametersNum())) {
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
+
+        PandaStringStream pss;
+        pss << "Bad parameter index = " << i << "; expected index >= 0 and < " << function->GetParametersNum();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, pss.str());
+        return nullptr;
+    }
+
     // 0 is recevier type
     i = function->IsStatic() ? i : i + 1;
     auto *argType = function->ResolveArgType(i);

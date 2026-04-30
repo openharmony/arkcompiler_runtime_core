@@ -228,6 +228,8 @@ bool ResolveAndSetPrimitive(EtsExecutionContext *executionCtx, const PrimitiveFi
         case EtsType::VOID:
         case EtsType::UNKNOWN:
             break;
+        case EtsType::NOVALUE:
+            UNREACHABLE();
     }
     return false;
 }
@@ -255,6 +257,8 @@ Value GetPrimitiveValue(EtsExecutionContext *executionCtx, EtsObject *thisObj, E
         case EtsType::VOID:
         case EtsType::UNKNOWN:
             break;
+        case EtsType::NOVALUE:
+            UNREACHABLE();
     }
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                       "Failed to resolve primitive field type");

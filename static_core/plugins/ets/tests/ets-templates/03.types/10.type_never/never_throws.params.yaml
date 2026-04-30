@@ -1,0 +1,264 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Runtime behavior of `never`:
+#   - `as never` always throws ClassCastError at runtime.
+#   - reading a never-typed field/var emits a throw stub.
+#   - never-returning calls flow through any target slot.
+
+--- # cases
+cases:
+    - desc: cast Object to never throws
+      decl: ""
+      body: |-
+        let a: Object = new Object()
+        arktest.expectThrow(() => { let x: never = a as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Object cannot be cast to N"))
+
+    - desc: cast class instance to never throws
+      decl: |-
+        class NeverCastBox { v: int = 0 }
+      body: |-
+        let b: NeverCastBox = new NeverCastBox()
+        arktest.expectThrow(() => { let x: never = b as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("NeverCastBox cannot be cast to N"))
+
+    - desc: cast string to never throws
+      decl: ""
+      body: |-
+        let s: string = "abc"
+        arktest.expectThrow(() => { let x: never = s as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("LineString cannot be cast to N"))
+
+    - desc: cast null to never throws
+      decl: |-
+        type UT = Object | null
+      body: |-
+        let a: UT = null
+        arktest.expectThrow(() => { let x: never = a as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Null cannot be cast to N"))
+
+    - desc: cast in union assignment throws
+      decl: |-
+        type UT = Object | null
+      body: |-
+        let v: UT = new Object()
+        arktest.expectThrow(() => { let z: UT = v as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Object cannot be cast to N"))
+
+    - desc: cast int to never throws
+      decl: ""
+      body: |-
+        let i: int = 42
+        arktest.expectThrow(() => { let x: never = i as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Int cannot be cast to N"))
+
+    - desc: cast double to never throws
+      decl: ""
+      body: |-
+        let d: double = 3.14
+        arktest.expectThrow(() => { let x: never = d as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Double cannot be cast to N"))
+
+    - desc: cast boolean to never throws
+      decl: ""
+      body: |-
+        let b: boolean = true
+        arktest.expectThrow(() => { let x: never = b as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Boolean cannot be cast to N"))
+
+    - desc: cast char to never throws
+      decl: ""
+      body: |-
+        let c: char = c'A'
+        arktest.expectThrow(() => { let x: never = c as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Char cannot be cast to N"))
+
+    - desc: cast long to never throws
+      decl: ""
+      body: |-
+        let l: long = 1
+        arktest.expectThrow(() => { let x: never = l as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Long cannot be cast to N"))
+
+    - desc: cast byte to never throws
+      decl: ""
+      body: |-
+        let by: byte = 1 as byte
+        arktest.expectThrow(() => { let x: never = by as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Byte cannot be cast to N"))
+
+    - desc: cast short to never throws
+      decl: ""
+      body: |-
+        let sh: short = 1 as short
+        arktest.expectThrow(() => { let x: never = sh as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Short cannot be cast to N"))
+
+    - desc: cast float to never throws
+      decl: ""
+      body: |-
+        let f: float = 1.0f
+        arktest.expectThrow(() => { let x: never = f as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Float cannot be cast to N"))
+
+    - desc: cast undefined to never throws
+      decl: ""
+      body: |-
+        let u: undefined = undefined
+        arktest.expectThrow(() => { let x: never = u as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("undefined cannot be cast to N"))
+
+    - desc: cast Any to never throws
+      decl: ""
+      body: |-
+        let a: Any = new Object() as Any
+        arktest.expectThrow(() => { let x: never = a as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("Object cannot be cast to N"))
+
+    - desc: never field init throws
+      decl: |-
+        class NeverFieldBox { f: never = undefined as never }
+      body: |-
+        arktest.expectThrow(() => { let b = new NeverFieldBox() },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("undefined cannot be cast to N"))
+
+    - desc: never local init throws
+      decl: ""
+      body: |-
+        arktest.expectThrow(() => { let x: never = undefined as never },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("undefined cannot be cast to N"))
+
+    - desc: T-extends-never field init throws
+      decl: |-
+        class NeverBoundBox<T extends never> {
+            f: T = undefined as T
+            consume(x: T): T { return this.f }
+            init(): T { return undefined as T }
+        }
+      body: |-
+        arktest.expectThrow(() => { let nb = new NeverBoundBox<never>() },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("undefined cannot be cast to N"))
+
+    - desc: T-extends-never generic call throws at cast
+      decl: |-
+        function neverBoundGeneric<T extends never>(x: T): T {
+            throw new Error("never-bound")
+        }
+      body: |-
+        arktest.expectThrow(() => { neverBoundGeneric<never>(undefined as never) },
+            (e: Error): boolean => e instanceof ClassCastError &&
+                (e as ClassCastError).message.endsWith("undefined cannot be cast to N"))
+
+    - desc: never-returning direct call throws
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(() => { throwNever("direct") }, new Error("direct"))
+
+    - desc: never result fits int slot via cast
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(
+            () => { let x: int = (throwNever("int-slot") as int); arktest.assertTrue(x == 0) },
+            new Error("int-slot"))
+
+    - desc: never result fits Object slot
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(
+            () => { let o: Object = throwNever("obj-slot"); arktest.assertTrue(o != null) },
+            new Error("obj-slot"))
+
+    - desc: never result fits double slot via cast
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(
+            () => { let x: double = (throwNever("dbl-slot") as double); arktest.assertTrue(x == 0.0) },
+            new Error("dbl-slot"))
+
+    - desc: never result fits String slot via cast
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(
+            () => { let s: String = (throwNever("str-slot") as String); arktest.assertTrue(s != null) },
+            new Error("str-slot"))
+
+    - desc: never call into double slot without cast
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(() => { let d: double = throwNever("dbl-direct") },
+            new Error("dbl-direct"))
+
+    - desc: never call into String slot without cast
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+      body: |-
+        arktest.expectError(() => { let s: String = throwNever("str-direct") },
+            new Error("str-direct"))
+
+    - desc: lambda typed as () => never throws
+      decl: ""
+      body: |-
+        let fn: () => never = (): never => { throw new Error("lambda") }
+        arktest.expectError(() => { fn() }, new Error("lambda"))
+
+    - desc: never lambda assigned into () => Object throws
+      decl: ""
+      body: |-
+        let anyFn: () => Object = ((): never => { throw new Error("lambda-obj") }) as () => Object
+        arktest.expectError(() => { let r: Object = anyFn() }, new Error("lambda-obj"))
+
+    - desc: never lambda with param in interface slot throws
+      decl: ""
+      body: |-
+        let fn: (x: int) => Object = ((n: int): never => { throw new Error("param-lambda") }) as (x: int) => Object
+        arktest.expectError(() => { let r: Object = fn(42) }, new Error("param-lambda"))
+
+    - desc: never tail-call single level
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+        function neverTailCall(): never { throwNever("tail") }
+      body: |-
+        arktest.expectError(() => { neverTailCall() }, new Error("tail"))
+
+    - desc: never tail-call double chain
+      decl: |-
+        function throwNever(msg: string): never { throw new Error(msg) }
+        function neverTailCall(): never { throwNever("tail") }
+        function neverDoubleChain(): never { neverTailCall() }
+      body: |-
+        arktest.expectError(() => { neverDoubleChain() }, new Error("tail"))

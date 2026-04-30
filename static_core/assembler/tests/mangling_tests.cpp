@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,20 @@ TEST(ManglingTests, GetFunctionNameFromSignature)
 {
     std::string name = "Asm.main:(type1,type2,type3,type4)";
     ASSERT_EQ(GetFunctionNameFromSignature(name), "Asm.main");
+}
+
+TEST(ManglingTests, MangleFunctionNameNovalueReturn)
+{
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
+
+    auto returnType = Type("novalue", 0);
+    std::string name = "foo";
+    std::vector<Function::Parameter> empty;
+    ASSERT_EQ(MangleFunctionName(name, empty, returnType), "foo:novalue;");
+
+    std::vector<Function::Parameter> params;
+    params.emplace_back(Type {"N", 0}, language);
+    ASSERT_EQ(MangleFunctionName("bar", params, returnType), "bar:N;novalue;");
 }
 
 }  // namespace ark::test

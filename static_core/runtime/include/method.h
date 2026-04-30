@@ -969,7 +969,7 @@ private:
     Value GetReturnValueFromTaggedValue(uint64_t retValue)
     {
         panda_file::Type retType = GetReturnType();
-        if (retType.GetId() == panda_file::Type::TypeId::VOID) {
+        if (retType.GetId() == panda_file::Type::TypeId::VOID || retType.GetId() == panda_file::Type::TypeId::NOVALUE) {
             return Value(static_cast<int64_t>(0));
         }
         if (retType.GetId() == panda_file::Type::TypeId::REFERENCE) {

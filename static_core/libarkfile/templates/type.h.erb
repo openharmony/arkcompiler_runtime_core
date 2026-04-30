@@ -154,6 +154,8 @@ public:
             return "L";
         case panda_file::Type::TypeId::TAGGED:
             return "A";
+        case panda_file::Type::TypeId::NOVALUE:
+            return "X";
         default:
             UNREACHABLE();
         }
@@ -187,6 +189,8 @@ public:
             return Type(panda_file::Type::TypeId::U64);
         case 'A':
             return Type(panda_file::Type::TypeId::TAGGED);
+        case 'X':
+            return Type(panda_file::Type::TypeId::NOVALUE);
         case 'L':
         case '[':
         case '{':

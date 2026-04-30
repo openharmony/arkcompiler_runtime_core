@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -409,5 +409,30 @@ TEST(FunctionsTest, AnyInInstructionsTest)
     EXPECT_TRUE(ss.str().find(".function void foo12(Y a0) <static, access.function=public> {") != std::string::npos);
 }
 #undef DISASM_BIN_DIR
+
+TEST(FunctionsTest, NovalueReturnType)
+{
+    auto program = ark::pandasm::Parser().Parse(R"(
+        .record N <external>
+        .function novalue foo(N a0) <static, access.function=public> {
+            return.void
+        }
+        .function novalue bar() <static, access.function=public> {
+            return.void
+        }
+    )");
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find(".function novalue foo(N a0) <static, access.function=public> {") != std::string::npos);
+    EXPECT_TRUE(ss.str().find(".function novalue bar() <static, access.function=public> {") != std::string::npos);
+}
 
 }  // namespace ark::disasm::test

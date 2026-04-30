@@ -119,6 +119,8 @@ DataType::Type InstBuilder::ConvertPbcType(panda_file::Type type)
             return DataType::FLOAT64;
         case panda_file::Type::TypeId::REFERENCE:
             return DataType::REFERENCE;
+        case panda_file::Type::TypeId::NOVALUE:
+            return DataType::VOID;
         case panda_file::Type::TypeId::TAGGED:
         case panda_file::Type::TypeId::INVALID:
         default:

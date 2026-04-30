@@ -693,3 +693,15 @@ messages:
     level: debug
     args: section, option
     message: Option '${section}:${option}' is active.
+
+  BadReturnInstructionInNeverFunction:
+    number: 2008
+    args: suffix
+    message: >
+      Incorrect 'return${suffix}' instruction in function with 'never' return type.
+      Functions that never return cannot have any return instructions.
+
+  NovalueAsParameter:
+    number: 2009
+    message: >
+      Type 'novalue' cannot be used as a method parameter type.

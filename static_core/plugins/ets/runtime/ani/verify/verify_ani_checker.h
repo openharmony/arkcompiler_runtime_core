@@ -230,6 +230,8 @@
                     (VALUE).l = va_arg((VA_ARGS), uint32_t);                             \
                 }                                                                        \
                 break;                                                                   \
+            case panda_file::Type::TypeId::NOVALUE:                             \
+                [[fallthrough]];                                                         \
             default:                                                                     \
                 CLEANUP_ON_UNEXPECTED;                                                   \
                 LOG(FATAL, ANI) << "Unexpected argument type";                           \

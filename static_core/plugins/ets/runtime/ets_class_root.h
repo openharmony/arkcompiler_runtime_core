@@ -31,6 +31,7 @@ enum class EtsClassRoot {
     LONG = helpers::ToUnderlying(ClassRoot::I64),
     FLOAT = helpers::ToUnderlying(ClassRoot::F32),
     DOUBLE = helpers::ToUnderlying(ClassRoot::F64),
+    NOVALUE = helpers::ToUnderlying(ClassRoot::NOVALUE),
 
     ANY = helpers::ToUnderlying(ClassRoot::ANY),
 

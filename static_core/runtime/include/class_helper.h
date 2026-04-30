@@ -100,8 +100,9 @@ private:
 
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
     inline static const std::unordered_map<char, std::string_view> PRIMITIVE_RUNTIME_NAMES = {
-        {'V', "void"}, {'Z', "u1"},  {'B', "i8"},  {'H', "u8"},  {'S', "i16"}, {'C', "u16"}, {'I', "i32"}, {'U', "u32"},
-        {'J', "i64"},  {'Q', "u64"}, {'F', "f32"}, {'D', "f64"}, {'A', "any"}, {'Y', "Y"},   {'N', "N"}};
+        {'V', "void"}, {'Z', "u1"},  {'B', "i8"},  {'H', "u8"},     {'S', "i16"}, {'C', "u16"},
+        {'I', "i32"},  {'U', "u32"}, {'J', "i64"}, {'Q', "u64"},    {'F', "f32"}, {'D', "f64"},
+        {'A', "any"},  {'Y', "Y"},   {'N', "N"},   {'X', "novalue"}};
 };
 
 }  // namespace ark

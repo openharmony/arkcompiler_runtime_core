@@ -79,3 +79,18 @@ panda_target_include_directories(abc2program PUBLIC
 
 panda_add_sanitizers(TARGET abc2program SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_add_sanitizers(TARGET abc2prog SANITIZERS ${PANDA_SANITIZERS_LIST})
+
+if (PANDA_WITH_TESTS)
+    panda_add_gtest(
+        NAME abc2program_novalue_tests
+        SOURCES
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/abc2program_novalue_test.cpp
+        LIBRARIES
+            abc2program
+            arkassembler
+            arkfile
+            arkbase
+        SANITIZERS
+            ${PANDA_SANITIZERS_LIST}
+    )
+endif()

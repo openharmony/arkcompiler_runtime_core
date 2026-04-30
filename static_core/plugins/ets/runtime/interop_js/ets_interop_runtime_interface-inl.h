@@ -45,6 +45,8 @@ static std::pair<IntrinsicId, compiler::DataType::Type> GetInfoForInteropConvert
             return {IntrinsicId::INTRINSIC_COMPILER_CONVERT_F64_TO_LOCAL, compiler::DataType::FLOAT64};
         case panda_file::Type::TypeId::REFERENCE:
             return {IntrinsicId::INTRINSIC_COMPILER_CONVERT_REF_TYPE_TO_LOCAL, compiler::DataType::REFERENCE};
+        case panda_file::Type::TypeId::NOVALUE:
+            return {IntrinsicId::INTRINSIC_COMPILER_CONVERT_VOID_TO_LOCAL, compiler::DataType::NO_TYPE};
         default: {
             UNREACHABLE();
         }
@@ -116,6 +118,8 @@ GetInfoForInteropCallRetValueConversion(MethodPtr methodPtr) const override
         case panda_file::Type::TypeId::REFERENCE: {
             return {{GetInteropRefReturnValueConvertIntrinsic(method), compiler::DataType::REFERENCE}};
         }
+        case panda_file::Type::TypeId::NOVALUE:
+            return {};
         default: {
             UNREACHABLE();
         }
