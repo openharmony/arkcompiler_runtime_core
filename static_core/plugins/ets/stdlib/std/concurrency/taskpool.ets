@@ -1707,11 +1707,13 @@ export namespace taskpool {
                 });
             });
 
+            let shouldEnqueue = false;
+            let enqueuePriority: Priority = priority == undefined ? this.priority : priority;
             ConcurrencyHelpers.mutexLock(this.impl.implInnerMutex);
             try {
                 if (this.impl.runningCount < this.impl.runningCapacity) {
                     this.impl.runningCount = this.impl.runningCount + 1;
-                    internalTask.enqueue(priority == undefined ? this.priority : priority);
+                    shouldEnqueue = true;
                 } else {
                     // If waitingCapacity == 0, treat it's waitingQueue's length as unlimited. Task is added to tail.
                     while(true) {
@@ -1742,6 +1744,11 @@ export namespace taskpool {
                 }
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.impl.implInnerMutex);
+            }
+
+            // Enqueue outside of implInnerMutex to avoid ABBA deadlock with globalTaskQueuesMutex.
+            if (shouldEnqueue) {
+                internalTask.enqueue(enqueuePriority);
             }
 
             return promise;
