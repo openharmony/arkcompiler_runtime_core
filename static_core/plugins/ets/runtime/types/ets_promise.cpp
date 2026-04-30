@@ -41,46 +41,56 @@ EtsPromise *EtsPromise::Create(EtsExecutionContext *executionCtx)
     return hPromise.GetPtr();
 }
 
-void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx)
+/* static */
+void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx, EtsPromise *promise)
 {
-    auto *cbQueue = GetCallbackQueue(executionCtx);
-    auto *workerDomainQueue = GetWorkerDomainQueue(executionCtx);
-    auto queueSize = GetQueueSize();
+    auto *cbQueue = promise->GetCallbackQueue(executionCtx);
+    auto *workerDomainQueue = promise->GetWorkerDomainQueue(executionCtx);
+    auto queueSize = promise->GetQueueSize();
     ASSERT(queueSize == 0 || cbQueue != nullptr);
     ASSERT(queueSize == 0 || workerDomainQueue != nullptr);
 
-    if (state_ == STATE_REJECTED && queueSize == 0) {
-        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, executionCtx);
+    if (promise->GetState() == STATE_REJECTED && queueSize == 0) {
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(promise, executionCtx);
     }
 
     // Unblock awaitee jobs
     if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
-        GetEvent<CoroutineMode::STACKFUL>(executionCtx)->Fire();
+        promise->GetEvent<CoroutineMode::STACKFUL>(executionCtx)->Fire();
     } else {
-        GetEvent<CoroutineMode::STACKLESS>(executionCtx)->ResolveDependencies();
+        promise->GetEvent<CoroutineMode::STACKLESS>(executionCtx)->ResolveDependencies();
     }
 
+    if (queueSize == 0) {
+        promise->ClearQueues(executionCtx);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+        return;
+    }
+
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> hPromise(executionCtx, promise);      // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+    EtsHandle<EtsObjectArray> hCbQueue(executionCtx, cbQueue);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+    EtsHandle<EtsIntArray> hWorkerDomainQueue(executionCtx,
+                                              workerDomainQueue);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+
     for (int idx = 0; idx < queueSize; ++idx) {
-        auto *thenCallback = cbQueue->Get(idx);
-        auto workerDomain = static_cast<JobWorkerThreadDomain>(workerDomainQueue->Get(idx));
+        auto *thenCallback = hCbQueue->Get(idx);
+        EtsHandle<EtsObject> hThenCallback(executionCtx, thenCallback);
+        auto workerDomain = static_cast<JobWorkerThreadDomain>(hWorkerDomainQueue->Get(idx));
         auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
         ASSERT(workerDomain == JobWorkerThreadDomain::MAIN || workerDomain == JobWorkerThreadDomain::GENERAL);
         auto groupId = workerDomain == JobWorkerThreadDomain::MAIN
                            ? JobWorkerThreadGroup::FromDomain(jobMan, JobWorkerThreadDomain::MAIN)
                            : JobWorkerThreadGroup::AnyId();
-        EtsPromise::LaunchCallback(executionCtx, thenCallback, groupId);
+        EtsPromise::LaunchCallback(executionCtx, hThenCallback, groupId);
     }
-    ClearQueues(executionCtx);
+    hPromise->ClearQueues(executionCtx);
 }
 
 /* static */
-void EtsPromise::LaunchCallback(EtsExecutionContext *executionCtx, EtsObject *callback,
+void EtsPromise::LaunchCallback(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &handledCb,
                                 const JobWorkerThreadGroup::Id &groupId)
 {
     // Launch callback in its own coroutine
-    [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    auto handledCb = EtsHandle<EtsObject>(executionCtx, callback);
-
     if (!handledCb->GetClass()->IsFunction()) {
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
                           "Method have to be instance of function");

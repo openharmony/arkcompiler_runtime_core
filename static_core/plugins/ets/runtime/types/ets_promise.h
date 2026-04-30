@@ -195,7 +195,7 @@ public:
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
-        OnPromiseCompletion(executionCtx);
+        EtsPromise::OnPromiseCompletion(executionCtx, this);
     }
 
     void Reject(EtsExecutionContext *executionCtx, EtsObject *error)
@@ -204,7 +204,7 @@ public:
         ASSERT(error != nullptr);
         ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
-        OnPromiseCompletion(executionCtx);
+        EtsPromise::OnPromiseCompletion(executionCtx, this);
     }
 
     void SubmitCallback(EtsExecutionContext *executionCtx, EtsObject *callback, JobWorkerThreadDomain workerDomain)
@@ -264,11 +264,11 @@ public:
     }
 
     // launch promise then/catch callback: void()
-    static void LaunchCallback(EtsExecutionContext *executionCtx, EtsObject *callback,
+    static void LaunchCallback(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &handledCb,
                                const JobWorkerThreadGroup::Id &groupId);
 
 private:
-    void OnPromiseCompletion(EtsExecutionContext *executionCtx);
+    static void OnPromiseCompletion(EtsExecutionContext *executionCtx, EtsPromise *promise);
 
     void ClearQueues(EtsExecutionContext *executionCtx)
     {

@@ -163,7 +163,7 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     auto groupId = workerDomain == JobWorkerThreadDomain::MAIN
                        ? JobWorkerThreadGroup::FromDomain(jobExecCtx->GetManager(), JobWorkerThreadDomain::MAIN)
                        : JobWorkerThreadGroup::AnyId();
-    EtsPromise::LaunchCallback(executionCtx, hcallback.GetPtr(), groupId);
+    EtsPromise::LaunchCallback(executionCtx, hcallback, groupId);
 }
 
 EtsObject *EtsAwaitPromise(EtsPromise *promise)
