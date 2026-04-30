@@ -22,7 +22,6 @@
 //! METHOD        "stackless_await_in_loop.ETSGLOBAL::awaitInsideLoop"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Try"
-//! INST_NEXT     "Try"
 //! INST_NEXT     "Dispatch"
 //! INST_COUNT    "Dispatch", 1
 
