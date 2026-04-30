@@ -35,5 +35,7 @@ function main() {
       let b: B = new B(1, "some str");
       let c: Object;
       c = a;
+      arktest.assertTrue(c instanceof A, "expect instance of A")
       c = b;
+      arktest.assertTrue(c instanceof B, "expect instance of B")
 }

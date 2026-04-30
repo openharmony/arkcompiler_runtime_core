@@ -19,13 +19,13 @@ desc: Ensuring that method override in subclasses keeps void return types unchan
 
 class Base {
     methodOne(p: Base): void {
-        console.log("Base methodOne called");
+        arktest.assertTrue(p instanceof Base, "expect instance of Base")
     }
 }
 
 class Derived extends Base {
     override methodOne(p: Base): void {
-        console.log("Derived methodOne called");
+        arktest.assertTrue(p instanceof Base, "expect instance of Base")
     }
 }
 

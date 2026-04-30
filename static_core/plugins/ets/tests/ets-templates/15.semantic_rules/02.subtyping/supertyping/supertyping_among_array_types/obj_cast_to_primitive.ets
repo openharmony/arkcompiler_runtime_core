@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -21,4 +21,5 @@ function main(): void {
   let a1: Object = 1
   let a2: Object = 2
   let instance: int[] = [a1 as int, a2 as int];
+  arktest.assertTrue(instance instanceof Array, "expect instance of Array")
 }

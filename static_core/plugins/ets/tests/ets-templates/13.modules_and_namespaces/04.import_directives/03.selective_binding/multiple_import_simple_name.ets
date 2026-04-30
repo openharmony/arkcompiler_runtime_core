@@ -22,4 +22,5 @@ import {PI} from "std/math/consts";
 
 function main(): void {
     let x = sin(PI);
+    arktest.assertTrue(x < 1.0, "expect sin(PI) < 1")
 }

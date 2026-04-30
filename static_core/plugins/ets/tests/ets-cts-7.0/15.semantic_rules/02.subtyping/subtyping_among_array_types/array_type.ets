@@ -18,4 +18,7 @@ desc: Array type
 ---*/
 
 let a: int[];
-function main(): void {}
+function main(): void {
+    a = []
+    arktest.assertTrue(a instanceof Array, "expect instance of Array")
+}

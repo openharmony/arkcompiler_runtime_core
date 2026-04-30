@@ -21,4 +21,5 @@ import {sin} from "std/math";
 
 function main(): void {
     let x = sin(1.0);
+    arktest.assertTrue(x > 0, "expect sin(1.0) > 0")
 }

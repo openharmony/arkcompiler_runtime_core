@@ -23,7 +23,9 @@ class B extends A {}
 
 class C extends B {}
 
-function foo(b: B): void {}
+function foo(b: B): void {
+  arktest.assertTrue(b instanceof C, "expect instance of C")
+}
 
 function main() {
   foo(new C());
