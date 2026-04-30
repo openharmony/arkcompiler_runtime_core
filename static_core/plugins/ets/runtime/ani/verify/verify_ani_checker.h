@@ -32,6 +32,8 @@
     X(VERIFY_ENV_VERSION,                   VerifyEnvVersion)                     \
     X(VERIFY_NR_REFS,                       VerifyNrRefs)                         \
     X(VERIFY_REF,                           VerifyRef)                            \
+    X(VERIFY_MODULE,                        VerifyModule)                         \
+    X(VERIFY_NAMESPACE,                     VerifyNamespace)                      \
     X(VERIFY_CLASS,                         VerifyClass)                          \
     X(VERIFY_ENUM,                          VerifyEnum)                           \
     X(VERIFY_ENUM_ITEM,                     VerifyEnumItem)                       \
@@ -89,6 +91,9 @@
     X(VERIFY_ARRAYBUFFER_STORAGE,           VerifyArrayBufferStorage)             \
     X(VERIFY_BOOLEAN,                       VerifyBoolean)                        \
     X(VERIFY_ARRAYBUFFER_LENGTH,            VerifyArrayBufferLength)              \
+    X(VERIFY_NATIVE_FUNCTIONS,              VerifyNativeFunctions)                \
+    X(VERIFY_NATIVE_METHODS,                VerifyNativeMethods)                  \
+    X(VERIFY_STATIC_NATIVE_METHODS,         VerifyStaticNativeMethods)            \
     X(VERIFY_UTF16_BUFFER,                  VerifyUTF16Buffer)                    \
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
@@ -135,6 +140,8 @@
     X(ANI_FLOAT,                        Float,                     ani_float)                \
     X(ANI_DOUBLE,                       Double,                    ani_double)               \
     X(ANI_REF,                          Ref,                       VRef *)                   \
+    X(ANI_MODULE,                       Module,                    VModule *)                \
+    X(ANI_NAMESPACE,                    Namespace,                 VNamespace *)             \
     X(ANI_CLASS,                        Class,                     VClass *)                 \
     X(ANI_ENUM,                         Enum,                      VEnum *)                  \
     X(ANI_ENUM_ITEM,                    EnumItem,                  VEnumItem *)              \
@@ -151,6 +158,7 @@
     X(ANI_ARRAY,                        Array,                     VArray *)                 \
     X(ANI_ARRAYBUFFER,                  ArrayBuffer,               VArrayBuffer *)           \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
+    X(ANI_NATIVE_FUNCTIONS,             NativeFunctions,           const ani_native_function *) \
     X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
     X(ANI_VM_STORAGE,                   VmStorage,                 ani_vm **)                \
     X(ANI_METHOD_STORAGE,               MethodStorage,             VMethod **)               \
@@ -253,6 +261,8 @@ class VVm;
 class VEnv;
 
 class VRef;
+class VModule;
+class VNamespace;
 class VObject;
 class VTupleValue;
 class VClass;
@@ -355,6 +365,16 @@ public:
     static ANIArg MakeForRef(VRef *vref, std::string_view name)
     {
         return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_REF);
+    }
+
+    static ANIArg MakeForModule(VModule *vmodule, std::string_view name)
+    {
+        return ANIArg(ArgValueByModule(vmodule), name, Action::VERIFY_MODULE);
+    }
+
+    static ANIArg MakeForNamespace(VNamespace *vnamespace, std::string_view name)
+    {
+        return ANIArg(ArgValueByNamespace(vnamespace), name, Action::VERIFY_NAMESPACE);
     }
 
     static ANIArg MakeForClass(VClass *vclass, std::string_view name)
@@ -704,6 +724,23 @@ public:
         return ANIArg(ArgValueBySize(length), name, Action::VERIFY_ARRAYBUFFER_LENGTH);
     }
 
+    static ANIArg MakeForNativeFunctions(const ani_native_function *functions, ani_size nrFunctions,
+                                         std::string_view name)
+    {
+        return ANIArg(ArgValueByNativeFunctions(functions), name, Action::VERIFY_NATIVE_FUNCTIONS, nrFunctions);
+    }
+
+    static ANIArg MakeForNativeMethods(const ani_native_function *methods, ani_size nrMethods, std::string_view name)
+    {
+        return ANIArg(ArgValueByNativeFunctions(methods), name, Action::VERIFY_NATIVE_METHODS, nrMethods);
+    }
+
+    static ANIArg MakeForNativeStaticMethods(const ani_native_function *methods, ani_size nrMethods,
+                                             std::string_view name)
+    {
+        return ANIArg(ArgValueByNativeFunctions(methods), name, Action::VERIFY_STATIC_NATIVE_METHODS, nrMethods);
+    }
+
     static ANIArg MakeForErrorStorage(VError **errStorage, std::string_view name)
     {
         return ANIArg(ArgValueByErrorStorage(errStorage), name, Action::VERIFY_ERROR_STORAGE);
@@ -805,6 +842,11 @@ public:
         return returnType_;
     }
 
+    ani_size GetNativeFunctionCount() const
+    {
+        return nativeFunctionCount_;
+    }
+
 private:
     // NOLINTBEGIN(cppcoreguidelines-macro-usage)
     union RawValue {
@@ -838,6 +880,15 @@ private:
     {
     }
 
+    explicit ANIArg(ArgValue value, std::string_view name, Action action, ani_size nativeFunctionCount)
+        : value_(value.value),
+          type_(value.type),
+          name_(name),
+          action_(action),
+          nativeFunctionCount_(nativeFunctionCount)
+    {
+    }
+
     // NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-pro-type-union-access)
     // Generate methods:
     //   static ArgValue ArgValueBy<Name>(<Type> value);
@@ -858,6 +909,7 @@ private:
     Action action_ {};
 
     EtsType returnType_ {EtsType::UNKNOWN};
+    ani_size nativeFunctionCount_ {};
 };
 
 bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> args);
