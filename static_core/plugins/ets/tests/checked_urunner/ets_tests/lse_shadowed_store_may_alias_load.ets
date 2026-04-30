@@ -17,7 +17,7 @@
 //! RUN          force_jit: true,
 //!              options: "--compiler-regex='.*testMayAliasObservedStore.*' " +
 //!                "--compiler-inlining-blacklist='lse_shadowed_store_may_alias_load.ETSGLOBAL.Holder::nullcheck'",
-//!              entry: "lse_shadowed_store_may_alias_load.ETSGLOBAL::main"
+//!              entry: "lse_shadowed_store_may_alias_load.ETSGLOBAL::mainMayAliasObservedStore"
 //! METHOD       "lse_shadowed_store_may_alias_load.ETSGLOBAL::testMayAliasObservedStore"
 //! PASS_BEFORE  "LSE"
 //! INST_COUNT   /StoreObject.*Holder\.value/, 2
@@ -33,7 +33,7 @@
 //! INST_COUNT   /StoreObject.*Holder\.value/, 2
 //! PASS_AFTER   "LSE"
 //! INST_COUNT   /StoreObject.*Holder\.value/, 2
-//! RUN          entry: "lse_shadowed_store_may_alias_load.ETSGLOBAL::main"
+//! RUN          entry: "lse_shadowed_store_may_alias_load.ETSGLOBAL::mainMayAliasObservedStore"
 
 class Holder {
     public value: int = 0
@@ -50,9 +50,49 @@ function testMayAliasObservedStore(lhs: Holder, rhs: Holder): int {
     return witness
 }
 
-function main(): void {
+function mainMayAliasObservedStore(): void {
     const holder = new Holder()
     const other = new Holder()
     arktest.assertEQ(testMayAliasObservedStore(holder, holder), 1)
     arktest.assertEQ(testMayAliasObservedStore(holder, other), 0)
+}
+
+//! CHECKER      Check LSE keeps read store across merge for MAY_ALIAS load
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*testMayAliasObservedStoreAcrossBlocks.*'",
+//!              entry: "lse_shadowed_store_may_alias_load.ETSGLOBAL::mainMayAliasObservedStoreAcrossBlocks"
+//! METHOD       "lse_shadowed_store_may_alias_load.ETSGLOBAL::testMayAliasObservedStoreAcrossBlocks"
+//! PASS_BEFORE  "LSE"
+//! INST_COUNT   /StoreObject.*Holder\.value/, 3
+//! PASS_AFTER   "LSE"
+//! INST_COUNT   /StoreObject.*Holder\.value/, 3
+
+//! CHECKER      Check LSE keeps read store across merge for MAY_ALIAS load (AOT)
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PAOC     options: "--compiler-regex='.*testMayAliasObservedStoreAcrossBlocks.*'"
+//! METHOD       "lse_shadowed_store_may_alias_load.ETSGLOBAL::testMayAliasObservedStoreAcrossBlocks"
+//! PASS_BEFORE  "LSE"
+//! INST_COUNT   /StoreObject.*Holder\.value/, 3
+//! PASS_AFTER   "LSE"
+//! INST_COUNT   /StoreObject.*Holder\.value/, 3
+//! RUN          entry: "lse_shadowed_store_may_alias_load.ETSGLOBAL::mainMayAliasObservedStoreAcrossBlocks"
+
+function testMayAliasObservedStoreAcrossBlocks(a: Holder, b: Holder, flag: boolean) {
+    let res = 0;
+    a.value = 10;
+    if (flag) {
+        res = b.value;
+        a.value = 20;
+    }
+    a.value = 30;
+    return res;
+}
+
+function mainMayAliasObservedStoreAcrossBlocks(): void {
+    const holder = new Holder()
+    const other = new Holder()
+    arktest.assertEQ(testMayAliasObservedStoreAcrossBlocks(holder, holder, true), 10)
+    arktest.assertEQ(testMayAliasObservedStoreAcrossBlocks(holder, holder, false), 0)
+    arktest.assertEQ(testMayAliasObservedStoreAcrossBlocks(holder, other, true), 0)
+    arktest.assertEQ(testMayAliasObservedStoreAcrossBlocks(holder, other, false), 0)
 }

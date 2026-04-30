@@ -67,12 +67,13 @@ static bool PhiHasInput(Inst *phi, Inst *inst)
 
 class LseVisitor {
 public:
-    explicit LseVisitor(Graph *graph, Lse::HeapEqClasses *heaps)
+    explicit LseVisitor(Graph *graph, Lse::HeapEqClasses *heaps, Marker readMrk)
         : aa_(graph->GetAnalysis<AliasAnalysis>()),
           heaps_(*heaps),
           eliminations_(graph->GetLocalAllocator()->Adapter()),
           shadowedStores_(graph->GetLocalAllocator()->Adapter()),
-          disabledObjects_(graph->GetLocalAllocator()->Adapter())
+          disabledObjects_(graph->GetLocalAllocator()->Adapter()),
+          readMrk_(readMrk)
     {
     }
 
@@ -125,9 +126,9 @@ public:
             MarkForElimination(inst, hvalue->origin, hvalue);
             return;
         }
-        if (hvalue != nullptr && hvalue->origin->IsStore() && !hvalue->read) {
+        if (hvalue != nullptr && hvalue->origin->IsStore() && !IsRead(hvalue->origin)) {
             if (hvalue->origin->GetBasicBlock() == inst->GetBasicBlock()) {
-                const Lse::HeapValue heap = {inst, alive, false, false};
+                const Lse::HeapValue heap = {inst, alive, false};
                 MarkForElimination(hvalue->origin, inst, &heap);
             } else {
                 auto it =
@@ -164,7 +165,7 @@ public:
         }
 
         /* Set value of the inst to VAL */
-        blockHeap[inst] = {inst, alive, false, false};
+        blockHeap[inst] = {inst, alive, false};
     }
 
     void VisitLoad(Inst *inst)
@@ -194,10 +195,10 @@ public:
         for (auto &entry : blockHeap) {
             aliasCalls_++;
             if (aa_.CheckInstAlias(inst, entry.first) != NO_ALIAS) {
-                entry.second.read = true;
+                MarkAsRead(entry.second.origin);
             }
         }
-        blockHeap[inst] = {inst, inst, true, false};
+        blockHeap[inst] = {inst, inst, false};
     }
 
     bool HasBaseObject(Inst *inst)
@@ -292,7 +293,7 @@ public:
         for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
             auto &bheap = heaps_[eqClass].first.at(block);
             for (auto it = bheap.begin(); it != bheap.end();) {
-                it->second.read = true;
+                MarkAsRead(it->second.origin);
                 it++;
             }
         }
@@ -301,6 +302,16 @@ public:
     auto &GetEliminations()
     {
         return eliminations_;
+    }
+
+    void MarkAsRead(Inst *inst)
+    {
+        inst->SetMarker(readMrk_);
+    }
+
+    bool IsRead(Inst *inst)
+    {
+        return inst->IsMarked(readMrk_);
     }
 
     bool ProcessBackedges(PhiInst *phi, Loop *loop, Inst *cand, InstVector *insts)
@@ -338,7 +349,7 @@ public:
                     // Use the store instead of load
                     phi->AppendInput(val);
                     // And eliminate load
-                    struct Lse::HeapValue hvalue = {*it, val, false, false};
+                    struct Lse::HeapValue hvalue = {*it, val, false};
                     MarkForElimination(alive, *it, &hvalue);
                     continue;
                 }
@@ -407,8 +418,8 @@ public:
     void LoopDoElimination(Inst *cand, Loop *loop, PhiInst *phi, InstVector *insts)
     {
         auto replacement = phi != nullptr ? phi : cand;
-        struct Lse::HeapValue hvalue = {
-            replacement, replacement->IsStore() ? InstStoredValue(replacement) : replacement, false, false};
+        struct Lse::HeapValue hvalue = {replacement,
+                                        replacement->IsStore() ? InstStoredValue(replacement) : replacement, false};
         for (auto inst : *insts) {
             // No need to check MUST_ALIAS again, but we need to check for double elim
             if (eliminations_.find(inst) != eliminations_.end()) {
@@ -495,6 +506,9 @@ public:
         // We want to see if there are no paths from the store that evade any of its shadow stores
         for (auto &entry : shadowedStores_) {
             auto inst = entry.first;
+            if (IsRead(inst)) {
+                continue;
+            }
             auto marker = inst->GetBasicBlock()->GetGraph()->NewMarker();
             auto &shadows = shadowedStores_.at(inst);
             for (auto shadow : shadows) {
@@ -507,7 +521,7 @@ public:
                 if (eliminated != eliminations_.end()) {
                     alive = eliminated->second.val;
                 }
-                const Lse::HeapValue heap = {entry.second[0], alive, false, false};
+                const Lse::HeapValue heap = {entry.second[0], alive, false};
                 MarkForElimination(inst, entry.second[0], &heap);
             }
             inst->GetBasicBlock()->GetGraph()->EraseMarker(marker);
@@ -687,6 +701,7 @@ private:
     ArenaMap<Inst *, ArenaVector<Inst *>> shadowedStores_;
     SaveStateBridgesBuilder ssb_;
     InstVector disabledObjects_;
+    Marker readMrk_;
     uint32_t aliasCalls_ {0};
 };
 
@@ -853,10 +868,6 @@ void Lse::ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiFix
                 heapIt = blockHeap.erase(heapIt);
                 continue;
             }
-            if (predInstIt->second.val == heapValue.val) {
-                heapIt->second.read |= predInstIt->second.read;
-            }
-
             heapIt++;
         }
         predIt++;
@@ -1279,9 +1290,11 @@ bool Lse::RunImpl()
     GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<AliasAnalysis>();
 
-    visitor_ = GetGraph()->GetLocalAllocator()->New<LseVisitor>(GetGraph(), &heaps);
     auto markerHolder = MarkerHolder(GetGraph());
     auto phiFixupMrk = markerHolder.GetMarker();
+    auto readMarkerHolder = MarkerHolder(GetGraph());
+    auto readMrk = readMarkerHolder.GetMarker();
+    visitor_ = GetGraph()->GetLocalAllocator()->New<LseVisitor>(GetGraph(), &heaps, readMrk);
 
     RecordInstOrder();
     ProcessAllBBs(&heaps, phiFixupMrk);

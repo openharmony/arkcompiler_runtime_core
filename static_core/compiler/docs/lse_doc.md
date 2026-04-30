@@ -35,10 +35,11 @@ Once a heap is initialized for a basic block we iterate over instructions and up
 - if the instruction is a store and a stored value is equal to value from heap for this store then this store can be eliminated.
 - if the instruction is a store and a value from heap for this store is absent or differs from a new stored value then the new stored value is written into heap.  The values of memory instructions that `MUST_ALIAS` this store are updated as well.  All values in the heap that `MAY_ALIAS` this store instruction are invalidated.
 - if the instruction is a load and there is a value from the heap for this load then this load can be eliminated.
-- if the instruction is a load and there is no value from the heap for this load then we update heap value for this load with the result of this load.  All instructions that `MUST_ALIAS` this load updated as well.
+- if the instruction is a load and there is no value from the heap for this load then we update heap value for this load with the result of this load.  All previous stores that MAY_ALIAS this load are blocked from elimination.
 - If the instruction can invoke GC then all references on the heap that aren't mentioned in corresponded SaveState should be invalidated.
 - if the instruction is a volatile load then the whole heap is cleared.
 - if the instruction is a call then the whole heap is cleared.
+- if the instruction reads from heap and we're not sure about its effects (for example, can throw or can deoptimize) or is a volatile store, stores constituting the current heap state are blocked from elimination.
 
 All instructions that can be eliminated are recorded in a separate list for eliminated instructions and erase them at the end of optimization.
 
