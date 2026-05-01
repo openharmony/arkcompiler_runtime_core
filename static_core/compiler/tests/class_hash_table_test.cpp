@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -314,6 +314,86 @@ TEST_F(ClassHashTableTest, LoadAbcFileCanLoadClassHashTable)
     Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles(checkFilename);
 
     ASSERT(!pfPtr->GetClassHashTable().empty());
+}
+
+TEST_F(ClassHashTableTest, RejectEscapedAnPathKeepsClassHashTableUntouched)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    TmpFile pandaFname("./test.pf");
+    {
+        pandasm::Parser parser;
+        auto res = parser.Parse(GetSourceCode());
+        ASSERT_TRUE(res);
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+    }
+
+    auto pfile = panda_file::OpenPandaFile(pandaFname.GetFileName());
+    ASSERT_TRUE(pfile != nullptr);
+    ASSERT_TRUE(pfile->GetClassHashTable().empty());
+
+    std::string anFileLocation = "/tmp";
+    PandaString abcFilePrefix = "/../test";
+    std::string pandaFileLocation = pandaFname.GetFileName();
+    auto loaded = FileManager::TryLoadAnFileFromLocation(anFileLocation, abcFilePrefix, pandaFileLocation);
+    ASSERT_FALSE(loaded);
+    ASSERT_TRUE(pfile->GetClassHashTable().empty());
+}
+
+TEST_F(ClassHashTableTest, RejectEscapedAnPathThenLoadAbcCanPopulateClassHashTable)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    TmpFile pandaFname("RejectEscapedThenLoadAbcTest.abc");
+    TmpFile aotFname("RejectEscapedThenLoadAbcTest.an");
+
+    {
+        pandasm::Parser parser;
+        auto res = parser.Parse(GetSourceCode());
+        ASSERT_TRUE(res);
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+    }
+
+    {
+        auto res = os::exec::Exec(GetPaocFile(), "--gc-type=epsilon", "--paoc-panda-files", pandaFname.GetFileName(),
+                                  "--paoc-output", aotFname.GetFileName(), "--boot-panda-files", GetPandaStdLibFile());
+        ASSERT_TRUE(res);
+        ASSERT_EQ(res.Value(), 0U);
+    }
+
+    auto pfile = panda_file::OpenPandaFile(pandaFname.GetFileName());
+    ASSERT_TRUE(pfile != nullptr);
+    ASSERT_TRUE(pfile->GetClassHashTable().empty());
+
+    std::string anFileLocation = "/tmp";
+    PandaString abcFilePrefix = "/../test";
+    std::string pandaFileLocation = pandaFname.GetFileName();
+    auto loaded = FileManager::TryLoadAnFileFromLocation(anFileLocation, abcFilePrefix, pandaFileLocation);
+    ASSERT_FALSE(loaded);
+    ASSERT_TRUE(pfile->GetClassHashTable().empty());
+
+    std::string filename = os::GetAbsolutePath(pandaFname.GetFileName());
+    {
+        auto res = FileManager::LoadAbcFile(filename, panda_file::File::READ_ONLY);
+        ASSERT_TRUE(res);
+    }
+
+    const panda_file::File *pfPtr = nullptr;
+    auto checkFilename = [&pfPtr, filename](const panda_file::File &pf) {
+        if (pf.GetFilename() == filename) {
+            pfPtr = &pf;
+            return false;
+        }
+        return true;
+    };
+    Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles(checkFilename);
+
+    ASSERT_TRUE(pfPtr != nullptr);
+    ASSERT_FALSE(pfPtr->GetClassHashTable().empty());
 }
 
 void GetClassIdFromClassHashTableABC(const std::string &source, const std::string &fnOut)

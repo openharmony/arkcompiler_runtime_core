@@ -67,7 +67,20 @@ bool FileManager::TryLoadAnFileFromLocation(std::string_view anFileLocation, Pan
                                             std::string_view pandaFileLocation)
 {
     const PandaString &anPathSuffix = ".an";
-    PandaString anFilePath = PandaString(anFileLocation) + abcFilePrefix + anPathSuffix;
+
+    PandaString canonDirStr = PandaString(os::GetAbsolutePath(std::string(anFileLocation)));
+    if (canonDirStr.empty()) {
+        LOG(INFO, PANDAFILE) << "Invalid an directory: '" << anFileLocation << "'";
+        return false;
+    }
+    PandaString anFilePath = canonDirStr + abcFilePrefix + anPathSuffix;
+
+    PandaString rootWithSlash = canonDirStr + "/";
+    if (!(anFilePath.size() >= rootWithSlash.size() &&
+          anFilePath.compare(0, rootWithSlash.size(), rootWithSlash) == 0)) {
+        LOG(INFO, PANDAFILE) << "Candidate path escapes trusted directory: '" << anFilePath << "'";
+        return false;
+    }
 
     const char *filename = anFilePath.c_str();
     if (access(filename, F_OK) != 0) {
@@ -75,6 +88,7 @@ bool FileManager::TryLoadAnFileFromLocation(std::string_view anFileLocation, Pan
                               << anFileLocation << "'";
         return false;
     }
+
     auto res = FileManager::LoadAnFile(anFilePath, false);
     if (res && res.Value()) {
         LOG(INFO, PANDAFILE) << "Successfully load .an file for '" << pandaFileLocation << "': '" << anFileLocation

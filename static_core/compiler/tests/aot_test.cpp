@@ -678,6 +678,90 @@ TEST_F(AotTest, PaocGcType)
     RunAotdump(aotFname.GetFileName());
 }
 
+TEST_F(AotTest, TryLoadAnFileFromLocationRejectsEscapedPrefix)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    std::string anFileLocation = "/tmp";
+    PandaString abcFilePrefix = "/../test";
+    std::string pandaFileLocation = "test.pf";
+    auto loaded = FileManager::TryLoadAnFileFromLocation(anFileLocation, abcFilePrefix, pandaFileLocation);
+    ASSERT_FALSE(loaded);
+}
+
+TEST_F(AotTest, TryLoadAnFileFromLocationLoadsNormalPath)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    TmpFile aotFname("./test.an");
+    TmpFile pandaFname("./test.pf");
+
+    auto source = R"(
+        .function f64 main() {
+            fldai.64 1.0
+            return.64
+        }
+    )";
+
+    {
+        pandasm::Parser parser;
+        auto res = parser.Parse(source);
+        ASSERT_TRUE(res);
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+    }
+
+    {
+        auto runtime = Runtime::GetCurrent();
+        auto gcType = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
+        auto gcTypeName = "--gc-type=epsilon";
+        if (gcType == mem::GCType::STW_GC) {
+            gcTypeName = "--gc-type=stw";
+        } else if (gcType == mem::GCType::G1_GC) {
+            gcTypeName = "--gc-type=g1-gc";
+        } else {
+            ASSERT_TRUE(gcType == mem::GCType::EPSILON_GC || gcType == mem::GCType::EPSILON_G1_GC)
+                << "Invalid GC type\n";
+        }
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), gcTypeName, "--paoc-use-cha=false");
+        ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+        ASSERT_EQ(res.Value(), 0U);
+    }
+
+    std::string pandaFileLocation = os::GetAbsolutePath(pandaFname.GetFileName());
+    ASSERT_FALSE(pandaFileLocation.empty());
+    auto posStart = pandaFileLocation.find_last_of('/');
+    auto posEnd = pandaFileLocation.find_last_of('.');
+    ASSERT_NE(posStart, std::string::npos);
+    ASSERT_NE(posEnd, std::string::npos);
+
+    std::string anFileLocation = pandaFileLocation.substr(0, posStart);
+    PandaString abcFilePrefix = PandaString(pandaFileLocation.substr(posStart, posEnd - posStart));
+    auto loaded = FileManager::TryLoadAnFileFromLocation(anFileLocation, abcFilePrefix, pandaFileLocation);
+    ASSERT_TRUE(loaded);
+
+    auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+    ASSERT_TRUE(aotManager->GetFile(aotFname.GetFileName()) != nullptr);
+}
+
+TEST_F(AotTest, TryLoadAnFileFromLocationInvalidDirectoryRejected)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    uint32_t tid = os::thread::GetCurrentThreadId();
+    auto anFileLocation = helpers::string::Format("/tmp/an_missing_dir_%u", tid);
+    PandaString abcFilePrefix = "/test";
+    std::string pandaFileLocation = "test.pf";
+    auto loaded = FileManager::TryLoadAnFileFromLocation(anFileLocation, abcFilePrefix, pandaFileLocation);
+    ASSERT_FALSE(loaded);
+}
+
 TEST_F(AotTest, FileManagerLoadAbc)
 {
     if (RUNTIME_ARCH != Arch::X86_64) {
