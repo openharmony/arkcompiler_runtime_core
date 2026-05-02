@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,9 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Intl. NumberFormatOptions ResolvedNumberFormatOptions check possibility to read fields");
-    suite.addTest("testNumberFormatOptions", testNumberFormatOptions);
-    suite.addTest("testResolvedNumberFormatOptions", testResolvedNumberFormatOptions);
+    const suite = new arktest.ArkTestsuite('Intl. NumberFormatOptions ResolvedNumberFormatOptions check possibility to read fields');
+    suite.addTest('testNumberFormatOptions', testNumberFormatOptions);
+    suite.addTest('testResolvedNumberFormatOptions', testResolvedNumberFormatOptions);
     return suite.run();
 }
 
@@ -43,14 +43,14 @@ function testNumberFormatOptions() {
 function testResolvedNumberFormatOptions() {
     let x: Intl.ResolvedNumberFormatOptions = {
         // TS requires to define the following properties
-        locale: "",
-        style: "decimal",
-        numberingSystem: "latn",
+        locale: '',
+        style: 'decimal',
+        numberingSystem: 'latn',
         minimumIntegerDigits: 1,
         useGrouping: false,
-        notation: "compact",
-        signDisplay: "auto",
-        // The following properties couldn't be "undefined", so define them by example:
+        notation: 'compact',
+        signDisplay: 'auto',
+        // The following properties couldn't be 'undefined', so define them by example:
         maximumFractionDigits: 0,
         minimumFractionDigits: 0
     };
@@ -58,16 +58,16 @@ function testResolvedNumberFormatOptions() {
     arktest.assertEQ(x.currencySign, undefined);
     arktest.assertEQ(x.currency, undefined);
     arktest.assertEQ(x.currencyDisplay, undefined);
-    arktest.assertEQ(x.locale, "");
+    arktest.assertEQ(x.locale, '');
     arktest.assertEQ(x.maximumFractionDigits, 0);
     arktest.assertEQ(x.maximumSignificantDigits, undefined);
     arktest.assertEQ(x.minimumFractionDigits, 0);
     arktest.assertEQ(x.minimumIntegerDigits, 1);
     arktest.assertEQ(x.minimumSignificantDigits, undefined);
-    arktest.assertEQ(x.notation, "compact");
-    arktest.assertEQ(x.numberingSystem, "latn");
-    arktest.assertEQ(x.signDisplay, "auto");
-    arktest.assertEQ(x.style, "decimal");
+    arktest.assertEQ(x.notation, 'compact');
+    arktest.assertEQ(x.numberingSystem, 'latn');
+    arktest.assertEQ(x.signDisplay, 'auto');
+    arktest.assertEQ(x.style, 'decimal');
     arktest.assertEQ(x.unit, undefined);
     arktest.assertEQ(x.unitDisplay, undefined);
     arktest.assertEQ(x.useGrouping, false);

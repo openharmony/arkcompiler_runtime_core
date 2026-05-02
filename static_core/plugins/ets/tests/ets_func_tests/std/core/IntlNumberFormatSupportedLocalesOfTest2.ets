@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,10 @@
  */
 
 function main(): int {
-    let suite = new arktest.ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
+    let suite = new arktest.ArkTestsuite('Intl. NumberFormat supportedLocalesOf');
     // Tests are from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
-    suite.addTest("testSupportedLocalesOf0007", testSupportedLocalesOf0007);
-    suite.addTest("testSupportedLocalesOf0010", testSupportedLocalesOf0010);
+    suite.addTest('testSupportedLocalesOf0007', testSupportedLocalesOf0007);
+    suite.addTest('testSupportedLocalesOf0010', testSupportedLocalesOf0010);
     return suite.run();
 }
 

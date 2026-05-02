@@ -17,11 +17,11 @@ const success: int = 0;
 const fail: int = 1;
 
 function main(): int {
-    arktest.assertEQ( languageCodes.length, countryCodes.length,  "Error! Size of languageCodes should be the same as countryCodes")
+    arktest.assertEQ( languageCodes.length, countryCodes.length,  'Error! Size of languageCodes should be the same as countryCodes')
 
     let failures: int = 0;
-    failures += check(FormatNumber(), "Intl NumberFormat.format +-numbers and -Inf");
-    failures += check(FormatNumberUnion(), "Intl NumberFormat.format +-numbers and -Inf. Called union-type arg");
+    failures += check(FormatNumber(), 'Intl NumberFormat.format +-numbers and -Inf');
+    failures += check(FormatNumberUnion(), 'Intl NumberFormat.format +-numbers and -Inf. Called union-type arg');
     return failures;
 }
 
@@ -29,12 +29,12 @@ function check(result: number, message: string): int {
     if (result == 0) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
-const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru"];
-const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU"];
+const languageCodes: string[] = [ 'en', 'fr', 'ca', 'el', 'no', 'it', 'zh', 'ja', 'de', 'ru'];
+const countryCodes: string[] = [ 'US', 'FR', 'ES', 'GR', 'NO',  '',   'CN', 'JP', 'GE', 'RU'];
 const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
@@ -50,13 +50,13 @@ const RU: int = 9;
 const IR: int = 10;
 
 function FormatNumber(): int {
-    const funcName = "FormatNumber";
+    const funcName = 'FormatNumber';
     const values = numberValues;
     const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
+        if (countryCodes[i] != '') {
+            locale = locale + '-' + countryCodes[i];
         }
         for (let j = 0; j < values.length; j++) {
             const expected = exp[j][i];
@@ -69,13 +69,13 @@ function FormatNumber(): int {
 }
 
 function FormatNumberUnion(): int {
-    const funcName = "FormatNumberUnion";
+    const funcName = 'FormatNumberUnion';
     const values = numberValues;
     const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
+        if (countryCodes[i] != '') {
+            locale = locale + '-' + countryCodes[i];
         }
         for (let j = 0; j < values.length; j++) {
             const expected = exp[j][i];
@@ -155,7 +155,7 @@ function CheckFormatNumber(locale: string, funcName: string, value: number, expe
     try {
         nf = new Intl.NumberFormat(locale);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf = new Intl.NumberFormat(" + locale + ")\"");
+        console.log(funcName + '. Crashed call \"nf = new Intl.NumberFormat(' + locale + ')\"');
         return fail;
     }
 
@@ -163,21 +163,21 @@ function CheckFormatNumber(locale: string, funcName: string, value: number, expe
     try {
         str = nf.format(value);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf.formatRange\". " + locale );
+        console.log(funcName + '. Crashed call \"nf.formatRange\". ' + locale );
         return fail;
     }
 
     if (str == "") {
-        console.log(funcName + ". Got empty str result. " + locale);
+        console.log(funcName + '. Got empty str result. ' + locale);
         return fail;
     }
 
     if (expected != str) {
         let arr = new Array<Number>(str.length, (index: int) => str.codePointAt(index)!);
-        console.log(funcName + ". Got: \"" + str + "\" Codes: " + arr.join(","));
+        console.log(funcName + '. Got: \"' + str + '\" Codes: ' + arr.join(','));
         arr = new Array<Number>(expected.length, (index: int) => expected.codePointAt(index)!);
-        console.log(funcName + ". Exp: Codes: " + arr.join(","));
-        console.log(funcName + ". Detected on " + locale);
+        console.log(funcName + '. Exp: Codes: ' + arr.join(','));
+        console.log(funcName + '. Detected on ' + locale);
         return fail;
     }
     return success;
@@ -188,7 +188,7 @@ function CheckFormatUnion(locale: string, funcName: string, value: number | bigi
     try {
         nf = new Intl.NumberFormat(locale);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf = new Intl.NumberFormat(" + locale + ")\"");
+        console.log(funcName + '. Crashed call \"nf = new Intl.NumberFormat(' + locale + ')\"');
         return fail;
     }
 
@@ -196,21 +196,21 @@ function CheckFormatUnion(locale: string, funcName: string, value: number | bigi
     try {
         str = nf.format(value);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf.formatRange\". " + locale );
+        console.log(funcName + '. Crashed call \"nf.formatRange\". ' + locale );
         return fail;
     }
 
-    if (str == "") {
-        console.log(funcName + ". Got empty str result. " + locale);
+    if (str == '') {
+        console.log(funcName + '. Got empty str result. ' + locale);
         return fail;
     }
 
     if (expected != str) {
         let arr = new Array<Number>(str.length, (index: int) => str.codePointAt(index)!);
-        console.log(funcName + ". Got: \"" + str + "\" Codes: " + arr.join(","));
+        console.log(funcName + '. Got: \"' + str + '\" Codes: ' + arr.join(','));
         arr = new Array<Number>(expected.length, (index: int) => expected.codePointAt(index)!);
-        console.log(funcName + ". Exp: Codes: " + arr.join(","));
-        console.log(funcName + ". Detected on " + locale);
+        console.log(funcName + '. Exp: Codes: ' + arr.join(','));
+        console.log(funcName + '. Detected on ' + locale);
         return fail;
     }
     return success;

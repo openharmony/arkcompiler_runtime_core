@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-const en_US: string = "en-US"
-const zh_CN: string = "zh-CN"
-const ru_RU = "ru-RU"
-const er_ER = "er-OR" // Fake locale
-const badLocale = "test"
+const en_US: string = 'en-US'
+const zh_CN: string = 'zh-CN'
+const ru_RU = 'ru-RU'
+const er_ER = 'er-OR' // Fake locale
+const badLocale = 'test'
 const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US]
 
 function main() {
