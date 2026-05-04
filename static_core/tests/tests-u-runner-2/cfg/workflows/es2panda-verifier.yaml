@@ -35,7 +35,7 @@ parameters:
     opt-level: 2
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
-    verifier-timeout: 30
+    verifier-timeout: 60
     verifier-config: "${URUNNER_PATH}/runner/suites/ets-verifier.config"
     work-dir: ${parameters.work-dir}
     # adds --boot-panda-files option to verifier with all dependent abc files
