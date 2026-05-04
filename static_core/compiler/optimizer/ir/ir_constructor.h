@@ -1251,6 +1251,10 @@ public:
             if (inputInst->GetOpcode() == Opcode::Add) {
                 return;
             }
+            // Check only compared inputs for Selects
+            if ((inst->GetOpcode() == Opcode::Select || inst->GetOpcode() == Opcode::SelectImm) && inputIdx < 2U) {
+                return;
+            }
             CHECK_EQ(type, prevType);
         }
     }

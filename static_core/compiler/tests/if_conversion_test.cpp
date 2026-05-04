@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1807,6 +1807,57 @@ TEST_F(IfConversionTest, SelectTransformAdd4)
             ASSERT_FALSE(graph->RunPass<IfConversion>());
         }
     }
+}
+
+TEST_F(IfConversionTest, IfConversionMismatchedPhiType)
+{
+    Graph *graph = GetGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(4U, 5U, 6U)
+        {
+            INST(7U, Opcode::If).SrcType(DataType::UINT64).CC(CC_NE).Inputs(2U, 3U);
+        }
+        BASIC_BLOCK(5U, 7U)
+        {
+            INST(8U, Opcode::XorI).b().Inputs(0U).Imm(1U);
+        }
+        BASIC_BLOCK(6U, 7U)
+        {
+            INST(9U, Opcode::XorI).b().Inputs(1U).Imm(1U);
+        }
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(10U, Opcode::Phi).i32().Inputs({{5U, 8U}, {6U, 9U}});
+            INST(11U, Opcode::Return).i32().Inputs(10U);
+        }
+    }
+
+    ASSERT_TRUE(graph->RunPass<IfConversion>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+    GraphChecker(graph).Check();
+
+    Graph *expected = CreateEmptyGraph();
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(12U, Opcode::Select).i32().SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 1U, 2U, 3U);
+            INST(13U, Opcode::XorI).i32().Inputs(12U).Imm(1U);
+            INST(11U, Opcode::Return).i32().Inputs(13U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(graph, expected));
 }
 // NOLINTEND(readability-magic-numbers)
 
