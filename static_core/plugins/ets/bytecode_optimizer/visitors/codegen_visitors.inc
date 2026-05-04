@@ -59,3 +59,39 @@ static void VisitEtsNullcheck(GraphVisitor *visitor, Inst *inst)
     DoLdaObj(inst->GetSrcReg(0), enc->result_);
     enc->result_.emplace_back(pandasm::Create_ETS_NULLCHECK());
 }
+
+static void VisitEtsAsyncAwait(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    enc->result_.emplace_back(pandasm::Create_ETS_ASYNC_AWAIT(inst->GetSrcReg(0)));
+}
+
+static void VisitDispatch(GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    enc->result_.emplace_back(pandasm::Create_ETS_ASYNC_DISPATCH());
+}
+
+// Empty handler to support opcode
+static void VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst) {}
+
+static void VisitEtsAsyncUnpack(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    enc->result_.emplace_back(pandasm::Create_ETS_ASYNC_UNPACK(inst->GetSrcReg(0)));
+    DoStaObj(inst->GetDstReg(), enc->result_);
+}
+
+static void VisitEtsAsyncResolve(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    enc->result_.emplace_back(pandasm::Create_ETS_ASYNC_RESOLVE(inst->GetSrcReg(0)));
+    DoStaObj(inst->GetDstReg(), enc->result_);
+}
+
+static void VisitEtsAsyncReject(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    enc->result_.emplace_back(pandasm::Create_ETS_ASYNC_REJECT(inst->GetSrcReg(0)));
+    DoStaObj(inst->GetDstReg(), enc->result_);
+}

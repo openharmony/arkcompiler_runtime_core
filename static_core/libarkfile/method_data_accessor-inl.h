@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,6 +189,18 @@ inline void MethodDataAccessor::EnumerateAnnotations(Callback cb)
 
     helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(annotationsSp_, MethodTag::ANNOTATION, cb,
                                                                         &paramAnnotationSp_);
+}
+
+inline bool MethodDataAccessor::HasAnnotation(const panda_file::File &pf, const uint8_t *descriptor)
+{
+    bool found = false;
+    EnumerateAnnotations([&](File::EntityId annId) {
+        AnnotationDataAccessor ada(pf, annId);
+        if (utf::IsEqual(pf.GetStringData(ada.GetClassId()).data, descriptor)) {
+            found = true;
+        }
+    });
+    return found;
 }
 
 template <class Callback>

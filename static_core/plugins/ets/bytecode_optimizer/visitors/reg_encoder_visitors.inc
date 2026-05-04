@@ -37,3 +37,9 @@ static void VisitIstrue(ark::compiler::GraphVisitor *v, ark::compiler::Inst *ins
     auto *re = static_cast<RegEncoder *>(v);
     re->Check8Width(inst);
 }
+
+static void VisitDispatch([[maybe_unused]] ark::compiler::GraphVisitor *v, [[maybe_unused]] ark::compiler::Inst *inst)
+{
+}
+
+static void VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}

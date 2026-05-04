@@ -19,11 +19,15 @@
 % if instructions.first
 %   instructions = instructions.group_by(&:intrinsic_name)
 % end
-% lowerings = [["ets.equals",       "VisitEtsEquals<false>"],
-%              ["ets.strictequals", "VisitEtsEquals<true>"],
-%              ["ets.typeof",       "VisitEtsTypeof"],
-%              ["ets.istrue",       "VisitEtsIstrue"],
-%              ["ets.nullcheck",    "VisitEtsNullcheck"]
+% lowerings = [["ets.equals",         "VisitEtsEquals<false>"],
+%              ["ets.strictequals",   "VisitEtsEquals<true>"],
+%              ["ets.typeof",         "VisitEtsTypeof"],
+%              ["ets.istrue",         "VisitEtsIstrue"],
+%              ["ets.nullcheck",      "VisitEtsNullcheck"],
+%              ["ets.async.await",    "VisitEtsAsyncAwait"],
+%              ["ets.async.unpack",   "VisitEtsAsyncUnpack"],
+%              ["ets.async.resolve",  "VisitEtsAsyncResolve"],
+%              ["ets.async.reject",   "VisitEtsAsyncReject"]
 %             ]
 % instructions.each do |intrinsic_name, group|
 %     inst = group.first

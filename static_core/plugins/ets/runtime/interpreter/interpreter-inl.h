@@ -243,10 +243,11 @@ public:
         int32_t resumePoint = 0;
         if (asyncCtx->GetCompiledCode() == 0) {
             ASSERT(this->GetBytecodeOffset() < asyncCtx->GetAwaitId());
-            resumePoint = asyncCtx->RestoreInterpreterContext(frame, executionCtx) - this->GetBytecodeOffset();
+            resumePoint = asyncCtx->RestoreInterpreterContext(frame, executionCtx);
         } else {
             resumePoint = asyncCtx->RestoreCompiledContext(frame, executionCtx);
         }
+        resumePoint -= this->GetBytecodeOffset();
         this->template JumpToInst<true>(resumePoint);
     }
 

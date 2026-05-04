@@ -170,8 +170,7 @@ void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
 
 void InstBuilder::BuildAwait(const BytecodeInstruction *bcInst)
 {
-    // NOTE(compiler_team): support stackless in BCO #33857.
-    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+    if (GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }
@@ -201,8 +200,7 @@ void InstBuilder::BuildAwait(const BytecodeInstruction *bcInst)
 
 void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
 {
-    // NOTE(compiler_team): support stackless in BCO #33857.
-    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+    if (GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }
@@ -228,8 +226,7 @@ void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
 
 void InstBuilder::BuildUnpack(const BytecodeInstruction *bcInst)
 {
-    // NOTE(compiler_team): support stackless in BCO #33857.
-    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+    if (GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }
@@ -253,8 +250,7 @@ void InstBuilder::BuildUnpack(const BytecodeInstruction *bcInst)
 
 void InstBuilder::BuildResolve(const BytecodeInstruction *bcInst)
 {
-    // NOTE(compiler_team): support stackless in BCO #33857.
-    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+    if (GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }
@@ -278,8 +274,7 @@ void InstBuilder::BuildResolve(const BytecodeInstruction *bcInst)
 
 void InstBuilder::BuildReject(const BytecodeInstruction *bcInst)
 {
-    // NOTE(compiler_team): support stackless in BCO #33857.
-    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+    if (GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }

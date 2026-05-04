@@ -1192,7 +1192,7 @@ instructions:
     base: SaveStateInst
     signature: [d-real-pseudo, real-dyn]
     flags: [no_dce, no_hoist, no_cse, compiler_barrier, heap_inv, can_deoptimize]
-    modes: [jit_aot]
+    modes: [jit_aot, bytecode_opt]
     description: >-
       Do coroutines suspension. Contains information about virtual registers that must be saved before suspension.
       VReg inputs are set by the IR builder; non-VReg (bridge) inputs are added by the FillSaveStateSuspendInputs
@@ -1202,7 +1202,7 @@ instructions:
     base: DispatchInst
     signature: [ref, save_state]
     flags: [no_dce, no_hoist, compiler_barrier, terminator, can_deoptimize, require_state]
-    modes: [jit_aot]
+    modes: [jit_aot, bytecode_opt]
     description: >-
       Async resume dispatch terminator. Used on the non-null async-context path to continue execution
       from a saved suspend point.
