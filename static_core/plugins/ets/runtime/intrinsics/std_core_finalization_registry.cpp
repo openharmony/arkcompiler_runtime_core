@@ -31,6 +31,16 @@ extern "C" EtsInt StdFinalizationRegistryGetWorkerDomain()
     return static_cast<EtsInt>(FinalizationRegistryManager::GetExecCtxDomain(executionCtx));
 }
 
+extern "C" EtsFinalizationRegistry *StdFinalizationRegistryPopFinReg(EtsFinalizationRegistry *finReg)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsFinalizationRegistry> finRegHandle(executionCtx, finReg);
+    return executionCtx->GetPandaVM()->GetFinalizationRegistryManager()->PopFinalizationRegistry(executionCtx,
+                                                                                                 finRegHandle);
+}
+
 extern "C" void StdFinalizationRegistryFinishCleanup()
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();

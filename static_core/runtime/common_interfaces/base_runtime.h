@@ -155,7 +155,7 @@ public:
     static void *ReadBarrier(void *obj, void *field);
     static void *ReadBarrier(void **field);
     static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);
-    static void RequestGC(GCReason reason, bool async, GCType gcType);
+    static void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
     static void WaitForGCFinish();
     // Blocks until gcCompletedCount >= targetCount or GC exits
     static void WaitForGCCompletionCount(uint64_t targetCount);

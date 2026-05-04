@@ -80,7 +80,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, [[maybe_unuse
     // false allows to call RequestGCAndWait.
     // Sync or async current gcTask will be detected
     // inside RequestGCAndWait by reason
-    common_vm::BaseRuntime::RequestGC(reason, false, gcType);
+    common_vm::BaseRuntime::RequestGC(reason, false, gcType, true);
     return static_cast<EtsLong>(target);
 }
 

@@ -5829,6 +5829,16 @@ intrinsics:
       args: [  ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryGetWorkerDomain
 
+  - name: StdFinalizationRegistryPopFinReg
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: popFinReg
+    static: true
+    signature:
+      ret: std.core.FinalizationRegistry
+      args: [ std.core.FinalizationRegistry ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryPopFinReg
+
   - name: StdFinalizationRegistryFinishCleanup
     space: ets
     class_name: std.core.FinalizationRegistry

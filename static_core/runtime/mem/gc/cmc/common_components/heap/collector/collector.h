@@ -56,7 +56,7 @@ public:
     // reason: Reason for GC.
     // async:  Trigger from unsafe context, e.g., holding a lock, in the middle of an allocation.
     //         In order to prevent deadlocks, async trigger only add one async gc task and will not block.
-    void RequestGC(GCReason reason, bool async, GCType gcType);
+    void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
 
     virtual GCPhase GetGCPhase() const
     {
@@ -125,7 +125,7 @@ public:
     }
 
 protected:
-    virtual void RequestGCInternal(GCReason, bool, GCType)
+    virtual void RequestGCInternal(GCReason, bool, GCType, bool explicitRequest)
     {
         LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();

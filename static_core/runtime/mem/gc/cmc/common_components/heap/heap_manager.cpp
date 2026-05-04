@@ -21,13 +21,13 @@
 
 namespace common_vm {
 HeapManager::HeapManager() {}
-void HeapManager::RequestGC(GCReason reason, bool async, GCType gcType)
+void HeapManager::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
 {
     if (!Heap::GetHeap().IsGCEnabled()) {
         return;
     }
     Collector &collector = Heap::GetHeap().GetCollector();
-    collector.RequestGC(reason, async, gcType);
+    collector.RequestGC(reason, async, gcType, explicitRequest);
 }
 
 HeapAddress HeapManager::Allocate(size_t allocSize, AllocType allocType, bool allowGC)

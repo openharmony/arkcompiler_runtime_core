@@ -19,35 +19,69 @@ let p = new Promise<String>((_resolve: (value: String) => void): void => {
         resolve = _resolve;
 });
 
+let finreg1: FinalizationRegistry<int> | undefined;
+let finreg2: FinalizationRegistry<int> | undefined;
+
 function runGC(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let fullGcId = GC.startGC(GC.Cause.YOUNG);
-        GC.waitForFinishGC(fullGcId);
+        let gcId = GC.startGC(GC.Cause.YOUNG);
+        GC.waitForFinishGC(gcId);
     } catch (e) {
         throw new Error('Unexpected error during GC');
     }
 }
 
+class FinRegTestSuite extends arktest.ArkTestsuite {
+    constructor() {
+        super('FinalizationRegistrySuite');
+    }
 
-async function deadlockTest(): Promise<void> {
-    let finreg = new FinalizationRegistry<int>((tag: int) => {
-        waitForCompletion(async () => {
-            if (tag == 1) {
-                await p;
-            } else if (tag == 2) {
-                resolve!('Panda');
-            }
-        })
+    public before() {
+        finreg1 = undefined;
+        finreg2 = undefined;
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
+    }
+}
+
+function deadlockTest() {
+    finreg1 = new FinalizationRegistry<int>(async (tag: int) => {
+        if (tag == 1) {
+            await p;
+        } else if (tag == 2) {
+            resolve!('Panda');
+        }
     });
     // Regarding the implementation, after GC the callback will be executed 
     // first for register with number 1 and then for number 2
-    finreg.register({}, 2);
-    finreg.register({}, 1);
+    finreg1!.register({}, 2);
+    finreg1!.register({}, 1);
+    runGC();
+    Coroutine.Schedule();
+    runGC();
+    Coroutine.Schedule();
 }
 
-function main(): void {
-    deadlockTest();
+function twoFinRegsDeadlockTest() {
+    finreg1 = new FinalizationRegistry<int>(async (tag: int) => {
+        finreg2!.register({}, 2);
+        await p;
+    });
+    finreg2 = new FinalizationRegistry<int>((tag: int) => {
+        resolve!('Panda');
+    });
+    // Regarding the implementation, after GC the callback will be executed 
+    // first for register with number 1 and then for number 2
+    finreg1!.register({}, 1);
     runGC();
+    Coroutine.Schedule();
     runGC();
+    Coroutine.Schedule();
+}
+
+function main() {
+    let testsuite = new FinRegTestSuite();
+    testsuite.addTest('deadlockTest', deadlockTest);
+    testsuite.addTest('twoFinRegsDeadlockTest', twoFinRegsDeadlockTest);
+    return testsuite.run();
 }

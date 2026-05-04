@@ -49,7 +49,7 @@ JobWorkerThreadDomain FinalizationRegistryManager::GetExecCtxDomain(EtsExecution
 }
 
 // NO_THREAD_SAFETY_ANALYSIS is used here because there is no need to lock `finalizationList_` in this method, since
-// this method is not called during the execution of `StartCleanupCoroIfNeeded`.
+// this method is not called during the execution of `LaunchCleanupJobIfNeeded`.
 NO_THREAD_SAFETY_ANALYSIS void FinalizationRegistryManager::Enqueue(EtsFinalizationRegistry *finReg)
 {
     auto workerId = finReg->GetWorkerId();
@@ -70,14 +70,16 @@ NO_THREAD_SAFETY_ANALYSIS void FinalizationRegistryManager::Enqueue(EtsFinalizat
                             << " | Worker id: " << finReg->GetWorkerId();
         finalizationList_.push_back(finReg);
     } else {
-        EtsFinalizationRegistry *head = *it;
-        finReg->SetNextFinReg(head);
-        *it = finReg;
+        EtsFinalizationRegistry *last = *it;
+        while (last->GetNextFinReg() != nullptr) {
+            last = last->GetNextFinReg();
+        }
+        last->SetNextFinReg(finReg);
     }
 }
 
 // NO_THREAD_SAFETY_ANALYSIS is used here because there is no need to lock `finalizationList_` in this method, since
-// this method is not called during the execution of `StartCleanupCoroIfNeeded`.
+// this method is not called during the execution of `LaunchCleanupJobIfNeeded`.
 NO_THREAD_SAFETY_ANALYSIS void FinalizationRegistryManager::UpdateAndSweep(const ReferenceUpdater &updater)
 {
     auto it = finalizationList_.begin();
@@ -161,35 +163,10 @@ static JobWorkerThreadGroup::Id GetGroupId(JobManager *jobMan, JobWorkerThreadDo
     return JobWorkerThreadGroup::FromDomain(jobMan, JobWorkerThreadDomain::GENERAL);
 }
 
-static std::pair<EtsFinRegNode *, EtsFinRegNode *> CombineLists(EtsFinalizationRegistry *finReg)
-{
-    EtsFinRegNode *head = finReg->GetFinalizationQueueHead();
-    EtsFinRegNode *tail = finReg->GetFinalizationQueueTail();
-    finReg->SetFinalizationQueueHead(nullptr);
-    finReg->SetFinalizationQueueTail(nullptr);
-    auto *nextFinReg = finReg->GetNextFinReg();
-    finReg->SetNextFinReg(nullptr);
-    finReg = nextFinReg;
-    while (finReg != nullptr) {
-        EtsFinRegNode *newHead = finReg->GetFinalizationQueueHead();
-        EtsFinRegNode *newTail = finReg->GetFinalizationQueueTail();
-        finReg->SetFinalizationQueueHead(nullptr);
-        finReg->SetFinalizationQueueTail(nullptr);
-        tail->SetNext(newHead);
-        tail = newTail;
-        nextFinReg = finReg->GetNextFinReg();
-        finReg->SetNextFinReg(nullptr);
-        finReg = nextFinReg;
-    }
-    return std::make_pair(head, tail);
-}
-
-void FinalizationRegistryManager::LaunchCleanupJobIfNeeded(EtsExecutionContext *executionCtx)
+EtsFinalizationRegistry *FinalizationRegistryManager::FindFinRegForCleanup(EtsExecutionContext *executionCtx)
 {
     ASSERT(executionCtx != nullptr);
-    os::memory::LockHolder lock(cleanupMutex_);
     auto *jobExecCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
-    auto *jobMan = jobExecCtx->GetManager();
     auto currentWorkerId = jobExecCtx->GetWorker()->GetId();
     auto currentWorkerDomain = GetExecCtxDomain(executionCtx);
     LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
@@ -202,40 +179,29 @@ void FinalizationRegistryManager::LaunchCleanupJobIfNeeded(EtsExecutionContext *
     auto it = std::find_if(finalizationList_.begin(), finalizationList_.end(), pred);
     if (it == finalizationList_.end()) {
         LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] Nothing to clean up";
-        return;
+        return nullptr;
     }
-    auto [head, tail] = CombineLists(*it);
-    auto toDelete = it;
-    ++it;
-    LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] FinReg deleted from finalization list: ("
-                        << *toDelete << ")";
-    finalizationList_.erase(toDelete);
-    it = std::find_if(
-        it, finalizationList_.end(), [currentWorkerId, currentWorkerDomain](const EtsFinalizationRegistry *finReg) {
-            return CanCleanup(currentWorkerId, currentWorkerDomain, finReg->GetWorkerId(), finReg->GetWorkerDomain());
-        });
-    if (it != finalizationList_.end()) {
-        auto [head2, tail2] = CombineLists(*it);
-        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] FinReg deleted from finalization list: (" << *it
-                            << ")";
-        finalizationList_.erase(it);
-        tail->SetNext(head2);
-        tail = tail2;
-    }
+    return *it;
+}
 
-    if (UpdateFinRegJobsCountAndCheckIfCleanupNeeded()) {
-        ASSERT(head != nullptr);
+void FinalizationRegistryManager::LaunchCleanupJobIfNeeded(EtsExecutionContext *executionCtx)
+{
+    os::memory::LockHolder lock(cleanupMutex_);
+    auto *jobExecCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
+    auto *jobMan = jobExecCtx->GetManager();
+
+    auto *finReg = FindFinRegForCleanup(executionCtx);
+    if (finReg != nullptr && UpdateFinRegJobsCountAndCheckIfCleanupNeeded()) {
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, jobMan);
         Method *cleanup = PlatformTypes(vm_)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
         auto workerId = jobExecCtx->GetWorker()->GetId();
         auto workerDomain = GetExecCtxDomain(executionCtx);
         auto groupId = GetGroupId(jobMan, workerDomain, workerId);
-        auto args = PandaVector<Value> {Value(EtsObject::ToCoreType(head))};
+        auto args = PandaVector<Value> {Value(EtsObject::ToCoreType(finReg))};
         LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
                             << "] Launch FinReg cleanup job | Worker domain: " << workerDomain
-                            << " | Worker id: " << workerId << " | execution ctx id: " << jobExecCtx->GetId();
-        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
-                            << "] FinReg cleanup in progress, count: "
+                            << " | Worker id: " << workerId << " | execution ctx id: " << jobExecCtx->GetId()
+                            << " jobs count: "
                             // Atomic with relaxed order reason: no sync depends
                             << finRegCleanupJobsCount_.load(std::memory_order_relaxed);
         auto epInfo = Job::ManagedEntrypointInfo {event, cleanup, std::move(args)};
@@ -247,5 +213,30 @@ void FinalizationRegistryManager::LaunchCleanupJobIfNeeded(EtsExecutionContext *
             finRegCleanupJobsCount_.fetch_sub(1, std::memory_order_acq_rel);
         }
     }
+}
+
+EtsFinalizationRegistry *FinalizationRegistryManager::PopFinalizationRegistry(EtsExecutionContext *executionCtx,
+                                                                              EtsHandle<EtsFinalizationRegistry> finReg)
+{
+    os::memory::LockHolder lock(cleanupMutex_);
+    auto *next = finReg->GetNextFinReg();
+    auto it = std::find(finalizationList_.begin(), finalizationList_.end(), finReg.GetPtr());
+    if (it != finalizationList_.end()) {
+        // Its the list's head
+        if (next == nullptr) {
+            finalizationList_.erase(it);
+        } else {
+            *it = next;
+        }
+    }
+    finReg->SetNextFinReg(nullptr);
+
+    if (next == nullptr) {
+        next = FindFinRegForCleanup(executionCtx);
+    }
+    if (next == nullptr) {
+        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] Nothing to clean up";
+    }
+    return next;
 }
 }  // namespace ark::ets

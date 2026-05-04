@@ -33,6 +33,11 @@ public:
     NO_MOVE_SEMANTIC(EtsFinalizationRegistry);
     ~EtsFinalizationRegistry() = delete;
 
+    EtsObject *AsObject()
+    {
+        return static_cast<EtsObject *>(this);
+    }
+
     JobWorkerThreadDomain GetWorkerDomain() const
     {
         return static_cast<JobWorkerThreadDomain>(workerDomain_);
@@ -62,16 +67,6 @@ public:
     void SetFinalizationQueueHead(EtsFinRegNode *head)
     {
         ObjectAccessor::SetObject(this, GetFinalizationQueueHeadOffset(), EtsObject::ToCoreType(head));
-    }
-
-    EtsFinRegNode *GetFinalizationQueueTail()
-    {
-        return reinterpret_cast<EtsFinRegNode *>(ObjectAccessor::GetObject(this, GetFinalizationQueueTailOffset()));
-    }
-
-    void SetFinalizationQueueTail(EtsFinRegNode *tail)
-    {
-        ObjectAccessor::SetObject(this, GetFinalizationQueueTailOffset(), EtsObject::ToCoreType(tail));
     }
 
     static void Enqueue(EtsFinRegNode *node, EtsFinalizationRegistry *finReg);
@@ -118,11 +113,6 @@ private:
         return MEMBER_OFFSET(EtsFinalizationRegistry, finalizationQueueHead_);
     }
 
-    static constexpr size_t GetFinalizationQueueTailOffset()
-    {
-        return MEMBER_OFFSET(EtsFinalizationRegistry, finalizationQueueTail_);
-    }
-
     void DecrementListSize()
     {
         listSize_ -= 1;
@@ -141,7 +131,6 @@ private:
     ObjectPointer<EtsFinRegNode> nonUnregistrableList_;
     ObjectPointer<EtsFinalizationRegistry> nextFinReg_;
     ObjectPointer<EtsFinRegNode> finalizationQueueHead_;
-    ObjectPointer<EtsFinRegNode> finalizationQueueTail_;
     EtsInt workerId_;
     EtsInt workerDomain_;
     EtsInt mapSize_;

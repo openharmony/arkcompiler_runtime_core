@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,6 @@ public:
             MIRROR_FIELD_INFO(EtsFinalizationRegistry, nonUnregistrableList_, "nonUnregistrableList"),
             MIRROR_FIELD_INFO(EtsFinalizationRegistry, nextFinReg_, "nextFinReg"),
             MIRROR_FIELD_INFO(EtsFinalizationRegistry, finalizationQueueHead_, "finalizationQueueHead"),
-            MIRROR_FIELD_INFO(EtsFinalizationRegistry, finalizationQueueTail_, "finalizationQueueTail"),
             MIRROR_FIELD_INFO(EtsFinalizationRegistry, workerId_, "workerId"),
             MIRROR_FIELD_INFO(EtsFinalizationRegistry, workerDomain_, "workerDomain"),
             MIRROR_FIELD_INFO(EtsFinalizationRegistry, mapSize_, "mapSize"),

@@ -107,8 +107,8 @@ let finRegNoToken = new FinalizationRegistry<int>((i: int) => {
     resultsNoToken.push(i);
     jobsNoToken[i]!.resolve(undefined);
 });
-function registerNoTokenTest() {
 
+function registerNoTokenTest() {
     for (let seq of [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]) {
         arktest.assertEQ(finRegNoToken.getSize(), 0);
         arktest.assertEQ(resultsNoToken.length, 0);
@@ -123,7 +123,7 @@ function registerNoTokenTest() {
             jobsNoToken[i] = new PromiseWithResolvers<void>();
         }
 
-        // Cleanup finReg in given order
+        // Cleanup finReg in the given order
         for (let i of seq) {
             objects[i] = {};
             doFullGC();
@@ -352,7 +352,60 @@ function finRegReenqueueTest(): void {
     }
 }
 
-function main(): void {
+let finreg1: FinalizationRegistry<void> | undefined;
+let finreg2: FinalizationRegistry<void> | undefined;
+let finreg3: FinalizationRegistry<void> | undefined;
+
+function registerDeadObject(finreg: FinalizationRegistry<void>) {
+    finreg.register({}, undefined);
+}
+
+function registerAliveObject(finreg: FinalizationRegistry<void>, holder: Array<Object | undefined>) {
+    let obj: Object = {};
+    holder.push(obj);
+    finreg.register(obj, undefined);
+}
+
+async function gcDuringCleanupTest() {
+    let callCount = 0;
+    let holder: (Object | undefined)[] = [];
+    let resolve: ((x: undefined) => void) | undefined;
+    let cleanupComplete = new Promise<void>((rslv: (x:undefined)=>void) => { resolve = rslv; });
+    let callback = async () => {
+        ++callCount;
+        if (callCount == 1) {
+            // the first call
+            holder[0] = undefined;
+            doFullGC();
+            await cleanupComplete!
+        } else if (callCount == 2) {
+            resolve!(undefined);
+        }
+    };
+    finreg1 = new FinalizationRegistry<void>(callback);
+    finreg2 = new FinalizationRegistry<void>(callback);
+    finreg3 = new FinalizationRegistry<void>(() => {
+        Coroutine.Schedule();
+    });
+    registerDeadObject(finreg1!);
+    registerDeadObject(finreg2!);
+    registerAliveObject(finreg3!, holder);
+    doFullGC();
+    await cleanupComplete;
+    arktest.assertEQ(2, callCount);
+}
+
+class FinRegTestSuite extends arktest.ArkTestsuite {
+    constructor() {
+        super('FinalizationRegistrySuite');
+    }
+
+    public before() {
+        doFullGC();
+    }
+}
+
+function main() {
     for (let i = 0; i < removedObjectCallbacks.length; i++) {
         removedObjectCallbacks[i] = false;
     }
@@ -361,7 +414,7 @@ function main(): void {
     // Check that we successfully remove FinalizationRegistry instance
     // elemets and this cause no error during collection.
     doFullGC();
-    // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
+    // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
     // if main coro is executed first, the test will return false
     Coroutine.Schedule()
 
@@ -373,10 +426,12 @@ function main(): void {
     arktest.assertTrue(removedObjectCallbacks[4], "Fifth callback hasn't been called");
     arktest.assertNE(registry, null, 'Instance still alive');
 
-    ctorTests();
-    getSizeTests();
-    unregisterTests();
-
-    registerNoTokenTest();
-    finRegReenqueueTest();
+    let testsuite = new FinRegTestSuite();
+    testsuite.addTest('ctorTests', ctorTests);
+    testsuite.addTest('getSizeTests', getSizeTests);
+    testsuite.addTest('unregisterTests', unregisterTests);
+    testsuite.addTest('registerNoTokenTest', registerNoTokenTest);
+    testsuite.addTest('finRegReenqueueTest', finRegReenqueueTest);
+    testsuite.addAsyncTest('gcDuringCleanupTestTest', gcDuringCleanupTest);
+    return testsuite.run();
 }

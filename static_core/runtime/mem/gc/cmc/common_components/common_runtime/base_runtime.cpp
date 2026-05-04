@@ -244,14 +244,14 @@ void *BaseRuntime::AtomicReadBarrier(void *obj, void *field, std::memory_order o
         reinterpret_cast<BaseObject *>(obj), *reinterpret_cast<RefField<true> *>(field), order));
 }
 
-void BaseRuntime::RequestGC(GCReason reason, bool async, GCType gcType)
+void BaseRuntime::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
 {
     if (reason < GC_REASON_BEGIN || reason > GC_REASON_END || gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {
         LOG(ERROR, GC) << "Invalid gc reason or gc type, gc reason: " << GCReasonToString(reason)
                        << ", gc type: " << GCTypeToString(gcType);
         return;
     }
-    HeapManager::RequestGC(reason, async, gcType);
+    HeapManager::RequestGC(reason, async, gcType, explicitRequest);
 }
 
 void BaseRuntime::WaitForGCFinish()

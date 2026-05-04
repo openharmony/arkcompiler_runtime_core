@@ -36,7 +36,7 @@ public:
     void Init();
     void Fini();
     void StopGCWork();
-    void RequestGC(GCReason reason, bool async, GCType gcType);
+    void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
     void WaitForGCFinish();
 
     // Blocks until gcCompletedCount >= targetCount or GC exits
