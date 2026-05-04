@@ -32,7 +32,7 @@ SPEC_REPORT_YAML = "spec-report-yaml"
 SPEC_FILE = "spec-file"
 
 DEFAULT_DETAILED_REPORT = False
-DEFAULT_DETAILED_REPORT_FILE = "detailed-report-file"
+DEFAULT_DETAILED_REPORT_FILE = "detailed-report-file.md"
 DEFAULT_REPORT_DIR = "report"
 DEFAULT_SPEC_REPORT = False
 DEFAULT_REPORT_FORMAT = ReportFormat.LOG

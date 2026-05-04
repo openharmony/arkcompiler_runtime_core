@@ -111,8 +111,6 @@ class RunnerFileBased(Runner):
             execution_time = round((datetime.now(pytz.UTC) - self.start_time).total_seconds(), 3)
             xml_view.create_xml_report(results, execution_time)
             xml_view.create_ignore_list(set(results))
-            self.__generate_detailed_report(results)
-            self.__generate_spec_report(results)
 
         if self.test_env is None:
             raise common_exceptions.UnknownException("It seems no one test has been launched.")
@@ -131,6 +129,8 @@ class RunnerFileBased(Runner):
         self.create_execution_plan()
         standard_view.display_summary(analysis_results.fail_lists)
         standard_view.create_time_report(results, self.config.general.time_report)
+        self.__generate_detailed_report(results)
+        self.__generate_spec_report(results)
 
         return self.failed
 

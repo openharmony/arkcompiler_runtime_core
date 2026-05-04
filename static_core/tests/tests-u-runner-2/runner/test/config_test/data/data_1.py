@@ -96,7 +96,7 @@ args = {
     'test_suite1.parameters.work-dir': '.',
     'runner.processes': 1,
     'runner.detailed-report': False,
-    'runner.detailed-report-file': 'detailed-report-file',
+    'runner.detailed-report-file': 'detailed-report-file.md',
     'runner.report-dir': 'report',
     'runner.spec-report': False,
     'runner.spec-report-file': None,
