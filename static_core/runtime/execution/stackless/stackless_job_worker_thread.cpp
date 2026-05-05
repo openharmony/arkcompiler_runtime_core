@@ -54,11 +54,19 @@ void StacklessJobWorkerThread::ExecuteJobs()
     }
 }
 
+void StacklessJobWorkerThread::ExecuteJobsUntilHappened(JobEvent *awaitee)
+{
+    WaitForEvent(awaitee, true);
+}
+
 void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
 {
-    ASSERT(awaitee->GetType() == JobEvent::Type::BLOCKING);
+    WaitForEvent(awaitee, false);
+}
 
-    ProcessTimerEvents();
+void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee, bool executeJobs)
+{
+    ASSERT(awaitee->GetType() == JobEvent::Type::BLOCKING);
 
     if (awaitee->Happened()) {
         awaitee->Unlock();
@@ -68,8 +76,11 @@ void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
 
     AddJobInWaiters(awaitee, Job::GetCurrent());
 
-    // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
+        if (executeJobs) {
+            ExecuteJobs();
+        }
+
         waitersLock_.Lock();
         auto evtIt = waiters_.find(awaitee);
         // NOTE(panferovi): we need to fix ABA problem here
@@ -77,9 +88,14 @@ void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
             waitersLock_.Unlock();
             return;
         }
-        os::memory::LockHolder lh(runnablesLock_);
-        waitersLock_.Unlock();
-        runnablesCv_.Wait(&runnablesLock_);
+        {
+            os::memory::LockHolder lh(runnablesLock_);
+            waitersLock_.Unlock();
+            if (runnables_.Empty() || !executeJobs) {
+                WaitForRunnablesImpl();
+            }
+        }
+        ProcessTimerEvents();
     }
 }
 
@@ -104,17 +120,6 @@ void StacklessJobWorkerThread::UnblockWaiters(JobEvent *blocker)
         }
         PushToRunnableQueue(job, job->GetPriority());
     }
-}
-
-bool StacklessJobWorkerThread::EventIsInPendingQueue(JobEvent *event)
-{
-    os::memory::LockHolder lh(waitersLock_);
-    auto evtIt = waiters_.find(event);
-    // NOTE(panferovi): we need to fix ABA problem here
-    if (evtIt != waiters_.end()) {
-        return true;
-    }
-    return false;
 }
 
 void StacklessJobWorkerThread::AddRunnableJob(Job *job)
@@ -233,19 +238,28 @@ void StacklessJobWorkerThread::ExecuteJob(Job *job)
 
 void StacklessJobWorkerThread::WaitForRunnables()
 {
-    os::memory::LockHolder lh(runnablesLock_);
-    while (runnables_.Empty() && IsActive()) {
-        auto waitingTime = GetShortestTimerDelay();
-        if (waitingTime == 0) {
-            runnablesCv_.Wait(&runnablesLock_);
-        } else {
-            if (waitingTime > 0) {
-                runnablesCv_.TimedWait(&runnablesLock_, waitingTime);
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        {
+            os::memory::LockHolder lh(runnablesLock_);
+            if (!runnables_.Empty() || !IsActive()) {
+                break;
             }
-            break;
+            WaitForRunnablesImpl();
         }
+        ProcessTimerEvents();
     }
     LOG(DEBUG, EXECUTION) << "StacklessJobWorkerThread::WaitForRunnables: wakeup!";
+}
+
+void StacklessJobWorkerThread::WaitForRunnablesImpl()
+{
+    auto waitingTime = GetShortestTimerDelay();
+    if (waitingTime == 0) {
+        runnablesCv_.Wait(&runnablesLock_);
+    } else if (waitingTime > 0) {
+        runnablesCv_.TimedWait(&runnablesLock_, waitingTime);
+    }
 }
 
 void StacklessJobWorkerThread::UpdateLoadFactor()
@@ -273,7 +287,7 @@ void StacklessJobWorkerThread::ProcessTimerEvents()
     }
 
     PandaVector<TimerEvent *> expiredTimers;
-    uint64_t minCurrDelay = MAX_EXPIRATION_TIME;
+    minExpirationTime_ = MAX_EXPIRATION_TIME;
     {
         os::memory::LockHolder lh(waitersLock_);
         currTime = jobManager_->GetCurrentTime();
@@ -281,18 +295,13 @@ void StacklessJobWorkerThread::ProcessTimerEvents()
             if (evt->GetType() == JobEvent::Type::TIMER) {
                 auto *timerEvent = static_cast<TimerEvent *>(evt);
                 timerEvent->SetCurrentTime(currTime);
-                auto delay = timerEvent->GetDelay();
                 if (timerEvent->IsExpired()) {
                     expiredTimers.push_back(timerEvent);
-                } else if (delay < minCurrDelay) {
-                    minCurrDelay = delay;
-                    minExpirationTime_ = timerEvent->GetExpirationTime();
+                } else {
+                    minExpirationTime_ = std::min(minExpirationTime_, timerEvent->GetExpirationTime());
                 }
             }
         }
-    }
-    if (minCurrDelay == MAX_EXPIRATION_TIME) {
-        minExpirationTime_ = MAX_EXPIRATION_TIME;
     }
 
     std::sort(expiredTimers.begin(), expiredTimers.end(),

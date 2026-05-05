@@ -973,6 +973,8 @@ bool StackfulCoroutineManager::DetachExclusiveWorker()
 
     CheckProgramCompletion();
 
+    eWorker->DestroyLocalStorage();
+
     auto *eaCoro = Coroutine::GetCurrent();
     programCompletionLock_.Lock();
     DestroyEntrypointlessCoroutine(eaCoro);

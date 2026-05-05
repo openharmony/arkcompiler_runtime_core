@@ -479,18 +479,16 @@ void StacklessJobManager::WaitForMutatorJobsCompletion()
 {
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
-        GetCurrentWorker()->ExecuteJobs();
-        GetCurrentWorker()->GetSchedulerExecutionCtx()->ListUnhandledEventsOnProgramExit();
         {
             os::memory::LockHolder lkCompletion(programCompletionLock_);
             if (AllJobsAreExecuted()) {
                 return;
             }
             programCompletionEvent_.SetNotHappened();
+            programCompletionEvent_.Lock();
         }
-        static constexpr uint32_t SHORT_SLEEP_MS = 1;
-        // NOTE(panferovi): ambitious fix (issue: #34486)
-        os::thread::NativeSleep(SHORT_SLEEP_MS);
+        GetCurrentWorker()->ExecuteJobsUntilHappened(&programCompletionEvent_);
+        GetCurrentWorker()->GetSchedulerExecutionCtx()->ListUnhandledEventsOnProgramExit();
         LOG(DEBUG, COROUTINES) << "StacklessJobManager::WaitForMutatorJobsCompletion(): possibly "
                                   "spurious wakeup from wait...";
     }

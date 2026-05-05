@@ -108,6 +108,8 @@ public:
 
     inline void DestroyCallbackPoster();
 
+    inline void DestroyLocalStorage();
+
     inline JobExecutionContext *GetSchedulerExecutionCtx() const;
 
     inline void SetSchedulerExecutionCtx(JobExecutionContext *executionCtx);

@@ -339,6 +339,7 @@ void StackfulCoroutineWorker::ThreadProc()
 
     ScheduleLoopBody();
 
+    DestroyLocalStorage();
     coroManager_->DestroyEntrypointlessCoroutine(schedulerLoopCtx);
     ASSERT(threadId_ == os::thread::GetCurrentThreadId());
     coroManager_->OnWorkerShutdown(this);
