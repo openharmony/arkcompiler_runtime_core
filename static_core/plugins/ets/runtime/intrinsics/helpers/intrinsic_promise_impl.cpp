@@ -35,8 +35,11 @@ static void LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job,
     auto *jobMan = executionCtx->GetManager();
     auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(jobMan);
     auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
-    [[maybe_unused]] auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId, dependency});
+    LaunchParams lParams {job->GetPriority(), groupId, dependency};
+    [[maybe_unused]] auto launchResult = jobMan->Launch(job, lParams);
+
     ASSERT(launchResult == LaunchResult::OK);
+    ASSERT(!lParams.launchImmediately);  // so we can suppress csa
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
 }
@@ -123,7 +126,6 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
         asyncCtx->SetAwaitee(etsCtx, promise);
         stacklessJobMan->AwaitAsynchronous(dependency);
         promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
-        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return asyncCtx;
     }
 
@@ -142,7 +144,6 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
     auto *job = executionCtx->GetManager()->CreateJob<SuspendableJob>(asyncMethod->GetFullName(), std::move(epInfo));
     job->SetSuspensionContext(aCtxRef);
     LaunchJobWithDependency(executionCtx, job, asyncCtxHandle.GetPtr(), promiseHandle.GetPtr());
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return asyncCtxHandle.GetPtr();
 }
 

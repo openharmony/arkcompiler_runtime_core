@@ -408,7 +408,6 @@ void EtsEventWithDependencies::ResolveDependencies()
     auto *waitersList = GetWaitersList(EtsExecutionContext::GetCurrent());
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     for (auto waiters = GetNumberOfWaiters(state); waiters > 0; --waiters) {
-        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         auto *node = waitersList->PopFront();
         auto *blocker = node->GetEvent();
         bool externallyOwned = node->IsOwnedExternally();
