@@ -23,4 +23,23 @@ SuspendableJob *SuspendableJob::FromExecutionContext(JobExecutionContext *execut
     return FromJob(executionCtx->GetJob());
 }
 
+void SuspendableJob::InvokeEntrypoint()
+{
+    InvokeEntrypointImpl(true);
+}
+
+void SuspendableJob::PreInvokeExecutionContextUpdate()
+{
+    ASSERT_MANAGED_CODE();
+    JobExecutionContext *jobExecCtx = JobExecutionContext::GetCurrent();
+    jobExecCtx->SetSuspensionContext(suspensionCtx_);
+}
+
+void SuspendableJob::PostInvokeExecutionContextUpdate()
+{
+    ASSERT_MANAGED_CODE();
+    JobExecutionContext *jobExecCtx = JobExecutionContext::GetCurrent();
+    jobExecCtx->SetSuspensionContext(nullptr);
+}
+
 }  // namespace ark

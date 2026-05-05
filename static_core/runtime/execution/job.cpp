@@ -77,7 +77,9 @@ void Job::InvokeEntrypointImpl(bool resumedFrame)
         auto invokeMethod = [this, executionCtx, resumedFrame]() {
             auto &args = GetManagedEntrypointArguments();
             auto callFlags = resumedFrame ? CallFlags {CallFlags::IS_RESUMED} : CallFlags {};
+            PreInvokeExecutionContextUpdate();
             Value result = GetManagedEntrypoint()->Invoke(executionCtx, args.data(), callFlags);
+            PostInvokeExecutionContextUpdate();
             if (GetStatus() != Job::Status::BLOCKED) {
                 executionCtx->OnJobCompletion(result);
             }

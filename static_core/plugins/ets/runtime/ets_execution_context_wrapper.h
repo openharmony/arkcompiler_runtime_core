@@ -17,6 +17,7 @@
 
 #include "runtime/execution/job_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/types/ets_async_context.h"
 
 namespace ark {
 class CompletionEvent;
@@ -58,6 +59,22 @@ public:
         return MEMBER_OFFSET(EtsExecutionContextWrapper, executionCtx_);
     }
 
+    ObjectHeader *GetSuspensionContext() const override
+    {
+        return EtsAsyncContext::ToCoreType(asyncContext_);
+    }
+
+    void SetSuspensionContext(mem::Reference *asyncCtxRef) override
+    {
+        if (asyncCtxRef == nullptr) {
+            asyncContext_ = nullptr;
+            return;
+        }
+        auto *etsAsyncCtxRef = EtsReference::CastFromReference(asyncCtxRef);
+        auto *refStorage = executionCtx_.GetPandaAniEnv()->GetEtsReferenceStorage();
+        asyncContext_ = EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(etsAsyncCtxRef));
+    }
+
     void Initialize();
 
     void UpdateCachedObjects() override;
@@ -65,6 +82,8 @@ public:
     void CacheBuiltinClasses() override;
 
     void OnJobCompletion(Value returnValue) override;
+
+    void VisitGCRoots(const GCRootVisitor &cb) override;
 
 protected:
     // we would like everyone to use the factory to create a EtsExecutionContextWrapper
@@ -78,6 +97,7 @@ private:
     void CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job);
 
     EtsExecutionContext executionCtx_;
+    EtsAsyncContext *asyncContext_ = nullptr;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

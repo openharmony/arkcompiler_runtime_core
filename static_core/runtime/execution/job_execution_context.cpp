@@ -71,4 +71,9 @@ void JobExecutionContext::OnJobCompletion([[maybe_unused]] Value result)
     }
 }
 
+void JobExecutionContext::VisitGCRoots(const GCRootVisitor &cb)
+{
+    ManagedThread::VisitGCRoots(cb);
+}
+
 }  // namespace ark
