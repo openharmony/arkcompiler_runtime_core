@@ -27,6 +27,8 @@ parameters:
     enable-es2panda: true
     enable-verifier: true
     extension: ${parameters.extension}
+    es2panda-args: [ ]
+    verifier-args: [ ]
     # ark and ark_aot
     ark-profile-timeout: 180
     aot-timeout: 30
@@ -57,6 +59,8 @@ steps:
         enable-verifier: ${parameters.enable-verifier}
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
+        es2panda-args: ${parameters.es2panda-args}
+        verifier-args: ${parameters.verifier-args}
         boot-panda-files: ${parameters.boot-panda-files}
         stdlib: "${parameters.stdlib}"
     aot-pgo:

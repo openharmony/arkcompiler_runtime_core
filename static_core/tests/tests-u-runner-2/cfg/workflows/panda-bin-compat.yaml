@@ -29,6 +29,7 @@ parameters:
     enable-verifier: true
     extension: ${parameters.extension}
     es2panda-args: [ ]
+    verifier-args: [ ]
     # ark
     ark-timeout: 180
     gc-type: g1-gc
@@ -52,6 +53,7 @@ steps:
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
         es2panda-args: ${parameters.es2panda-args}
+        verifier-args: ${parameters.verifier-args}
         boot-panda-files: ${parameters.boot-panda-files}
     runtime-with-old-libs:
         from: ark
@@ -79,6 +81,7 @@ steps:
             - "${parameters.arktsconfig}"
             - "${parameters.extension}"
             - "${parameters.opt-level}"
+            - "${parameters.es2panda-args}"
             - "${parameters.work-dir}/gen/${test-id:parent}/${test-id:stem}"
             - "${parameters.work-dir}/intermediate/${test-id:parent}/${test-id:stem}"
         timeout: 60
@@ -92,6 +95,7 @@ steps:
             - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
             - "--load-runtimes=${parameters.load-runtimes}"
             - "--config-file=${parameters.verifier-config}"
+            - "${parameters.verifier-args}"
             - "${parameters.verifier-test-suite-args}"
             - "${parameters.output-file}"
     runtime-with-new-libs:
