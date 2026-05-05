@@ -269,7 +269,7 @@ def validate_windows_deps_root(deps_root: Path, tools: Dict[str, ToolSpec]) -> N
         "The current Windows dependency directory is too long, so git clone/fetch is likely to fail.",
         f"Current deps_root: {deps_root}",
         "Change deps_root in configs/config.json to a shorter absolute path,",
-        "or rerun src\\scripts\\bootstrap.cmd with a shorter --deps-root value directly.",
+        "or rerun src\\scripts\\bootstrap.bat with a shorter --deps-root value directly.",
         "For example: --deps-root .amv-deps\\arkts-migration-visualizer-bbb",
         "Overlong target directories:",
     ]

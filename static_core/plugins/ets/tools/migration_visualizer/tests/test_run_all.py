@@ -58,7 +58,7 @@ class RunAllTest(unittest.TestCase):
 
         fake_module = types.SimpleNamespace(
             CollectionRequest=FakeCollectionRequest,
-            collect_artifacts=lambda request: "/tmp/fallback-run-dir",
+            collect_artifacts=lambda request: "tmp/fallback-run-dir",
         )
 
         def fake_import_module(name):
@@ -75,13 +75,13 @@ class RunAllTest(unittest.TestCase):
         ) as local_loader_mock:
             result = run_all.run_collection_stage(
                 ".*Demo",
-                deps_root="/tmp/deps",
+                deps_root="tmp/deps",
                 manual_package="com.example.demo",
                 manual_ability="EntryAbility",
                 manual_duration=45,
             )
 
-        self.assertEqual(result, Path("/tmp/fallback-run-dir"))
+        self.assertEqual(result, Path("tmp/fallback-run-dir"))
         local_loader_mock.assert_called_once_with(
             "_local_arkts_migration_visualizer_collect_perf_runner",
             "collect/perf_runner.py",
@@ -93,7 +93,7 @@ class RunAllTest(unittest.TestCase):
                 "manual_package": "com.example.demo",
                 "manual_ability": "EntryAbility",
                 "manual_duration": 45,
-                "deps_root": "/tmp/deps",
+                "deps_root": "tmp/deps",
             },
         )
 
@@ -108,7 +108,7 @@ class RunAllTest(unittest.TestCase):
 
         fake_module = types.SimpleNamespace(
             IntegrationRequest=FakeIntegrationRequest,
-            integrate_artifact_bundle=lambda request: "/tmp/fallback-output.json",
+            integrate_artifact_bundle=lambda request: "tmp/fallback-output.json",
         )
 
         def fake_import_module(name):
@@ -123,9 +123,9 @@ class RunAllTest(unittest.TestCase):
             "_load_local_stage_module",
             return_value=fake_module,
         ) as local_loader_mock:
-            result = run_all.run_build_stage(Path("/tmp/run-dir"), Path("/tmp/out.json"))
+            result = run_all.run_build_stage(Path("tmp/run-dir"), Path("tmp/out.json"))
 
-        self.assertEqual(result, Path("/tmp/fallback-output.json"))
+        self.assertEqual(result, Path("tmp/fallback-output.json"))
         local_loader_mock.assert_called_once_with(
             "_local_arkts_migration_visualizer_build_integrate_dep",
             "build/integrate_dep.py",
@@ -133,8 +133,8 @@ class RunAllTest(unittest.TestCase):
         self.assertEqual(
             captured["request_kwargs"],
             {
-                "input_dir": Path("/tmp/run-dir"),
-                "output_path": Path("/tmp/out.json"),
+                "input_dir": Path("tmp/run-dir"),
+                "output_path": Path("tmp/out.json"),
                 "debug_enabled": True,
             },
         )
@@ -142,7 +142,7 @@ class RunAllTest(unittest.TestCase):
     def test_run_timeline_export_stage_falls_back_to_local_module_when_package_import_is_unavailable(self) -> None:
         run_all = load_module("run_all", "src/arkts_migration_visualizer/cli.py")
         captured = {}
-        export_result = types.SimpleNamespace(output_path=Path("/tmp/fallback-trace.json"))
+        export_result = types.SimpleNamespace(output_path=Path("tmp/fallback-trace.json"))
 
         class FakeTimelineExportRequest:
             def __init__(self, **kwargs):
@@ -243,8 +243,8 @@ class RunAllTest(unittest.TestCase):
     def test_main_export_timeline_uses_internal_stage_api(self) -> None:
         run_all = load_module("run_all", "src/arkts_migration_visualizer/cli.py")
         export_result = types.SimpleNamespace(
-            perf_db_path=Path("/tmp/demo/perf.db"),
-            output_path=Path("/tmp/demo/hapray_timeline_trace.json"),
+            perf_db_path=Path("tmp/demo/perf.db"),
+            output_path=Path("tmp/demo/hapray_timeline_trace.json"),
             trace_obj={
                 "metadata": {
                     "eventName": "instructions",
@@ -385,10 +385,10 @@ class RunAllTest(unittest.TestCase):
                 run_all,
                 "serve_web",
             ) as serve_web_mock:
-                run_all.main(["-t", ".*Demo", "--deps-root", "/tmp/deps", "--no-serve"])
+                run_all.main(["-t", ".*Demo", "--deps-root", "tmp/deps", "--no-serve"])
 
             self.assertFalse(serve_web_mock.called)
-            self.assertEqual(collection_requests, [(".*Demo", {"deps_root": "/tmp/deps", "manual_package": None, "manual_ability": None, "manual_duration": 30})])
+            self.assertEqual(collection_requests, [(".*Demo", {"deps_root": "tmp/deps", "manual_package": None, "manual_ability": None, "manual_duration": 30})])
             self.assertEqual(len(build_requests), 1)
             self.assertEqual(build_requests[0][0], run_dir)
             self.assertTrue((web_dir / "hierarchical_integrated_data.json").is_file())

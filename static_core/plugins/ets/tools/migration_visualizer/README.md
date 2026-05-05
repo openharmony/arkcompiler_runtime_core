@@ -38,7 +38,7 @@ migration_visualizer/
 │  ├─ run_all.py
 │  ├─ scripts/
 │  │  ├─ bootstrap.sh
-│  │  └─ bootstrap.cmd
+│  │  └─ bootstrap.bat
 │  ├─ sample_data/
 │  │  └─ hierarchical_integrated_data.json
 │  └─ web/
@@ -64,7 +64,7 @@ migration_visualizer/
 Notes:
 
 - `migration_visualizer` only needs Hapray's `perf` workflow. The upstream `gui-agent` dependency (`Open-AutoGLM`, model API, etc.) is not required by default
-- `bootstrap.sh` / `bootstrap.cmd` install the optional `gui-agent` dependency only when `--with-gui-agent` is passed explicitly
+- `bootstrap.sh` / `bootstrap.bat` install the optional `gui-agent` dependency only when `--with-gui-agent` is passed explicitly
 - When `uv` is available, bootstrap will use it for local/offline Python package installs and fall back to `pip` otherwise
 
 ## Configuration
@@ -133,7 +133,7 @@ Use the platform-specific dependency entrypoint:
 Windows:
 
 ```bat
-.\src\scripts\bootstrap.cmd --tool all --verify
+.\src\scripts\bootstrap.bat --tool all --verify
 ```
 
 macOS / Linux / WSL:
@@ -151,7 +151,7 @@ If you also need Hapray's optional `gui-agent` workflow:
 If the default mirrors are unstable, specify them explicitly:
 
 ```bat
-.\src\scripts\bootstrap.cmd --tool all --verify ^
+.\src\scripts\bootstrap.bat --tool all --verify ^
   --npm-registry https://<your-npm-mirror>/ ^
   --pip-index-url https://<your-pypi-mirror>/simple/ ^
   --deps-root C:\test\.amv-deps\migration_visualizer
@@ -161,7 +161,7 @@ Replace `<your-npm-mirror>` and `<your-pypi-mirror>` with the npm registry base 
 
 Notes:
 
-- `bootstrap.sh` and `bootstrap.cmd` both read `deps_root` from `configs/config.json`
+- `bootstrap.sh` and `bootstrap.bat` both read `deps_root` from `configs/config.json`
 - You can also override it temporarily from the command line with `--deps-root <path>`
 - The rule is: **command-line arguments take precedence over `configs/config.json`**
 - If you want the entire workflow to use the same temporary dependency directory, pass the same `--deps-root` value to bootstrap and to `arkts-migration-visualizer`
