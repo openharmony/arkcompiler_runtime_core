@@ -1,0 +1,84 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+targets:
+  - { type: string }
+  - { type: byte }
+  - { type: short }
+  - { type: int }
+  - { type: long }
+  - { type: float }
+  - { type: double }
+  - { type: number }
+  - { type: boolean }
+  - { type: char }
+  - { type: bigint }
+  - { type: String }
+  - { type: Byte }
+  - { type: Short }
+  - { type: Int }
+  - { type: Long }
+  - { type: Float }
+  - { type: Double }
+  - { type: Number }
+  - { type: Boolean }
+  - { type: Char }
+  - { type: BigInt }
+  - { type: Object }
+  - { type: Any }
+
+cases:
+  - name: String
+    decl: 'const t: String = new String("abc")'
+    matches: [string, String, Object, Any]
+
+  - name: Byte
+    decl: 'const t: Byte = new Byte(1 as byte)'
+    matches: [byte, Byte, Object, Any]
+
+  - name: Short
+    decl: 'const t: Short = new Short(2 as short)'
+    matches: [short, Short, Object, Any]
+
+  - name: Int
+    decl: 'const t: Int = new Int(3)'
+    matches: [int, Int, Object, Any]
+
+  - name: Long
+    decl: 'const t: Long = new Long(4 as long)'
+    matches: [long, Long, Object, Any]
+
+  - name: Float
+    decl: 'const t: Float = new Float(1.25)'
+    matches: [float, Float, Object, Any]
+
+  - name: Double
+    decl: 'const t: Double = new Double(2.5)'
+    matches: [double, number, Double, Number, Object, Any]
+
+  - name: Number
+    decl: 'const t: Number = new Number(2.5)'
+    matches: [double, number, Double, Number, Object, Any]
+
+  - name: Boolean
+    decl: 'const t: Boolean = new Boolean(true)'
+    matches: [boolean, Boolean, Object, Any]
+
+  - name: Char
+    decl: "const t: Char = new Char(c'Z')"
+    matches: [char, Char, Object, Any]
+
+  - name: BigInt
+    decl: 'const t: BigInt = new BigInt(1)'
+    matches: [bigint, BigInt, Object, Any]

@@ -106,6 +106,16 @@
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
+#28583 instanceof on direct value types returns incorrect results for bigint cross-type checks
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_1.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_2.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_3.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_4.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_5.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_6.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_7.ets
+07.expressions/16.instanceof_expression/instanceof_value_types_matrix_10.ets
+
 #33776 es2panda aborts on ensure-not-nullish expression over array indexing expression
 07.expressions/19.ensure-not-nullish_expression/warn2_4.ets
 07.expressions/19.ensure-not-nullish_expression/warn2_6.ets
@@ -535,6 +545,19 @@
 
 #32946 no warning issued if overloaded entity can never be selected for a call
 15.semantic_rules/11.overload_resolution/07.overload_set_warning/overload_set_warning.ets
+
+#34495 Incorrect behavior of instanceof with type erasure
+15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_0.ets
+15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_1.ets
+15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_2.ets
+15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_3.ets
+15.semantic_rules/12.type_erasure/instanceof_fixedarray_not_preserved_0.ets
+15.semantic_rules/12.type_erasure/instanceof_fixedarray_not_preserved_1.ets
+15.semantic_rules/12.type_erasure/instanceof_fixedarray_not_preserved_2.ets
+15.semantic_rules/12.type_erasure/instanceof_fixedarray_not_preserved_3.ets
+15.semantic_rules/12.type_erasure/instanceof_fixedarray_not_preserved_4.ets
+15.semantic_rules/12.type_erasure/instanceof_tuple_not_preserved_0.ets
+15.semantic_rules/12.type_erasure/instanceof_tuple_not_preserved_1.ets
 
 #30547
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_6.ets

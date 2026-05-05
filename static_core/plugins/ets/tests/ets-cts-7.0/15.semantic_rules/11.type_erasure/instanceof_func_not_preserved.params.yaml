@@ -1,0 +1,60 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Spec contradiction tests: function types on the RHS of instanceof.
+#
+# Per Spec 15 (Type Erasure table):
+#   Function type (P1,...,Pn)=>R effective type is (Any,...,Any)=>never.
+#   This is NOT identical to the original type → NOT preserved by erasure.
+#   NOT preserved up to undefined either → CTE per Spec 7 (instanceof).
+#
+# Implementation bug: IsTypeRetainedAfterErasure in arithmetic.cpp returns
+# true for function types when params/return are not type parameters.
+# NOTE #30480 acknowledges "many checks are missing".
+
+---
+cases:
+    # Function type () => int: EffectiveType = () => never != () => int
+    - decl: |-
+          function foo(): int { return 1 }
+          let f: () => int = foo
+      use: >-
+          ((): Object => f)() instanceof (() => int)
+      expected_out: |-
+            Type parameter is erased
+
+    # Function type () => void: EffectiveType = () => never != () => void
+    - decl: |-
+          function foo(): void {}
+          let f: () => void = foo
+      use: >-
+          ((): Object => f)() instanceof (() => void)
+      expected_out: |-
+            Type parameter is erased
+
+    # Function type with concrete params: (int) => string
+    # EffectiveType = (Any) => never != (int) => string
+    - decl: |-
+          function foo(x: int): string { return "s" }
+      use: >-
+          ((): Object => foo)() instanceof ((p: Any) => never)
+      expected_out: |-
+            Type parameter is erased
+
+    # Union containing function type: not preserved since function is not preserved
+    - decl: |-
+          let x: Object = new Object()
+      use: >-
+          x instanceof (() => void) | Object
+      expected_out: |-
+            Type parameter is erased
