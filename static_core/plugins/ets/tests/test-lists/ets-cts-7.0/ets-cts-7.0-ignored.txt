@@ -52,9 +52,7 @@
 #28898 Iterable refused as spread
 07.expressions/07.spread_expression/iterable.ets
 07.expressions/07.spread_expression/spex_iterable.ets
-07.expressions/07.spread_expression/spex_func_45.ets
-07.expressions/07.spread_expression/spex_func_75.ets
-07.expressions/07.spread_expression/spex_func_76.ets
+07.expressions/07.spread_expression/spex_func_iterable.ets
 
 #31822 Optional parameters count are not considered for function type subtyping
 07.expressions/16.instanceof_expression/instanceof_func_15.ets
