@@ -20,7 +20,7 @@ tags:
 - not-a-test
 ---*/
 
-@interface Deprecated {
+export @interface Deprecated {
     fromVersion: string
 }
 

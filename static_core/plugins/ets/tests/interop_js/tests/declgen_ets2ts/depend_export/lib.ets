@@ -21,7 +21,7 @@ interface I1 {
     I1Method(a: double): double { return a; };
 }
 
-class Base {
+export class Base {
     a: double = 1;
     constructor(a: double) {this.a = a;}
 }
@@ -65,8 +65,8 @@ export class C5 extends CC5 implements IP4 {}
 export class CC1 {}
 export class CC2 {}
 export class CC3 {}
-class CC4 {}
-class CC5 {}
+export class CC4 {}
+export class CC5 {}
 class CC7 implements IP3{}
 export class CP1 {}
 export class CP2 {}
@@ -110,7 +110,7 @@ class CN implements IN {}
 namespace image {
     export interface PixelMap {}
 }
-class Want {}
+export class Want {}
 export type ValueType = number | string | boolean | image.PixelMap | Want | ArrayBuffer | object | null | undefined;
 
 export let p3: E5;

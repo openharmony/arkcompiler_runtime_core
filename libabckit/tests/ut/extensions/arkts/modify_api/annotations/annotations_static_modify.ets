@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-@interface Anno1 {}
+export @interface Anno1 {}
 
-@interface Anno2 {}
+export @interface Anno2 {}
 
 @interface Anno3 {}
 
