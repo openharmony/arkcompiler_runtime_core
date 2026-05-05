@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,18 @@
  /*---
 
  name: issue-15142_10.ets
- tags: []
+ tags: [compile-only, negative]
  ---*/
 
- interface GetAndSet {
-    get value(): int
-    set value(value: int);
- }
+interface GetAndSet {
+   get value(): int
+   set value(value: int);
+}
 
 
- class Provider implements GetAndSet {
-    value: int = 3;
- }
+class Provider implements GetAndSet {
+   value: int = 3;
+}
 
 class Extender extends Provider {
     set value(val: int) {
@@ -35,9 +35,9 @@ class Extender extends Provider {
     }
 }
 
- function main(): void {
-    let test = new Extender();
-    arktest.assertEQ( test.value, 3)
-    test.value = 4;
-    arktest.assertEQ( test.value, 4)
- }
+function main(): void {
+   let test = new Extender();
+   arktest.assertEQ( test.value, 3)
+   test.value = 4;
+   arktest.assertEQ( test.value, 4)
+}
