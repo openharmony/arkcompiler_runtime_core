@@ -276,3 +276,23 @@ cases:
     call: |-
       let res = ((...rest: readonly string[]): boolean => { return true })()
       arktest.assertTrue(res)
+
+  # 24. spread inlined FixedArray
+  - sig: |-
+      sum(...numbers: FixedArray<number>): number
+    def: |-
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+
+    call: |-
+      arktest.assertEQ(sum(...[1, 2, 3]), 6)
+
+  # 25. spread inlined tuple
+  - sig: |-
+      sum(...numbers: [number, number, number]): number
+    def: |-
+      return numbers[0] + numbers[1] + numbers[2];
+    call: |-
+      arktest.assertEQ(sum(...[1, 2, 3]), 6)

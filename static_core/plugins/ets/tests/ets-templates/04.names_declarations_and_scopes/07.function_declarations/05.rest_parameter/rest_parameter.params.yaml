@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -276,3 +276,23 @@ cases:
     call: |-
       let res = ((...rest: readonly string[]): boolean => { return true })()
       arktest.assertTrue(res)
+
+  # 24. spread inlined FixedArray
+  - sig: |-
+      sum(...numbers: FixedArray<number>): number
+    def: |-
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+
+    call: |-
+      arktest.assertEQ(sum(...[1, 2, 3]), 6)
+
+  # 25. spread inlined tuple
+  - sig: |-
+      sum(...numbers: [number, number, number]): number
+    def: |-
+      return numbers[0] + numbers[1] + numbers[2];
+    call: |-
+      arktest.assertEQ(sum(...[1, 2, 3]), 6)

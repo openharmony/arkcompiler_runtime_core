@@ -19,3 +19,6 @@ cases:
     - arg_type: '[number, string]'
       arg_value: [1, "234"]
       type_hint: tuple
+    - arg_type: FixedArray<number>
+      arg_value: [1, 2, 3, 4]
+      type_hint: FixedArray
