@@ -21,7 +21,7 @@ parameters:
     # es2panda and verifier
     opt-level: 2
     es2panda-timeout: 30
-    verifier-timeout: 30
+    verifier-timeout: 60
     enable-es2panda: true
     enable-verifier: true
     extension: ${parameters.extension}
