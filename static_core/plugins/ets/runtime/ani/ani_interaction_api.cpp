@@ -135,10 +135,8 @@ static ani_status InitializeClass(ScopedManagedCodeFix &s, EtsClass *klass)
     bool isInitialized = classLinker->InitializeClass(executionCtx, klass);
     if (!isInitialized) {
         LOG(ERROR, ANI) << "Cannot initialize class: " << klass->GetDescriptor();
-        if (executionCtx->GetMT()->HasPendingException()) {
-            return ANI_PENDING_ERROR;
-        }
-        return ANI_ERROR;
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return ANI_PENDING_ERROR;
     }
     return ANI_OK;
 }
@@ -3993,7 +3991,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF8(ani_env *env, ani_string string,
         return ANI_BUFFER_TO_SMALL;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf8(utf8Buffer, 0, utf8Length, utf8Length);
-    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, utf8Length, ANI_ERROR);
+    ASSERT(actualCopiedSize == utf8Length);
     utf8Buffer[actualCopiedSize] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;
@@ -4072,7 +4070,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF16(ani_env *env, ani_string string
         return ANI_BUFFER_TO_SMALL;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, 0, utf16Length, utf16BufferSize);
-    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, utf16Length, ANI_ERROR);
+    ASSERT(actualCopiedSize == utf16Length);
     utf16Buffer[actualCopiedSize] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;
@@ -4098,7 +4096,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF16SubString(ani_env *env, ani_stri
         return ANI_OUT_OF_RANGE;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, substr_offset, substrSize, substrSize);
-    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, substrSize, ANI_ERROR);
+    ASSERT(actualCopiedSize == substrSize);
     utf16Buffer[actualCopiedSize] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;

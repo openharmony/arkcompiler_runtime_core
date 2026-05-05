@@ -251,10 +251,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread 
             klass->SetInitTid(thread->GetId());
         }
         klass->SetState(Class::State::INITIALIZING);
-        if (!ClassInitializer::InitializeFields(klass)) {
-            LOG(ERROR, CLASS_LINKER) << "Cannot initialize fields of class '" << klass->GetName() << "'";
-            return false;
-        }
+        ClassInitializer::InitializeFields(klass);
     }
 
     LOG(DEBUG, CLASS_LINKER) << "Initializing class " << klass->GetName();
@@ -453,7 +450,7 @@ static void InitializeStringField(Class *klass, const Field &field)
 
 /* static */
 template <MTModeT MODE>
-bool ClassInitializer<MODE>::InitializeFields(Class *klass)
+void ClassInitializer<MODE>::InitializeFields(Class *klass)
 {
     using Type = panda_file::Type;
 
@@ -502,8 +499,6 @@ bool ClassInitializer<MODE>::InitializeFields(Class *klass)
             }
         }
     }
-
-    return true;
 }
 
 template class ClassInitializer<MT_MODE_SINGLE>;
