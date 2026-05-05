@@ -374,7 +374,7 @@ export namespace taskpool {
         private needInterop: boolean = false;
         public isActive: boolean = true;
         public workerId: int = -1;
-        public currentPriority?: Priority = Priority.MEDIUM;
+        public currentPriority?: Priority = Priority.HIGH;
         public currentTasks: Map<Task, int> = new Map<Task, int>();
         public currentTasksMutex: Object = ConcurrencyHelpers.mutexCreate();
         public idleTime: long = 0;
