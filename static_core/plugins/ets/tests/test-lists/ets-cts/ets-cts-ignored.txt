@@ -690,12 +690,6 @@
 #34034
 23.binary_compatibility/01.classification_of_source_code_changes/enums/change_enum_constants_base_type/change_enum_constants_base_type.ets
 
-#34472
-24.build_system/metadata/base_tests/simultaneous_three_files/test_import.ets
-
-#34473
-24.build_system/metadata/base_tests/two_libs_simultaneous/test_import.ets
-
 #34386
 24.build_system/metadata/base_tests/two_libs_simultaneous_no_rootdir/test_import.ets
 
