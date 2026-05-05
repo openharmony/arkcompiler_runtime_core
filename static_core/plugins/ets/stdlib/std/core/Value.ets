@@ -606,6 +606,19 @@ export final class ArrayValue extends reflect.Value {
     private typ: ArrayType
     private data: Object
 
+    public static of(
+        v: FixedArray<boolean> | ValueArray<boolean>
+            | FixedArray<byte> | ValueArray<byte>
+            | FixedArray<char> | ValueArray<char>
+            | FixedArray<short> | ValueArray<short>
+            | FixedArray<int> | ValueArray<int>
+            | FixedArray<long> | ValueArray<long>
+            | FixedArray<float> | ValueArray<float>
+            | FixedArray<double> | ValueArray<double>
+    ): reflect.Value {
+        return reflect.Value.of(v)
+    }
+
     public override getType(): Type {
         return this.typ as Type
     }
@@ -772,6 +785,10 @@ export final class BooleanValue extends reflect.Value {
     private typ: BooleanType
     private data: boolean
 
+    public static of(v: boolean): BooleanValue {
+        return new BooleanValue(BooleanType.VAL, v)
+    }
+
     public override getType(): Type {
         return this.typ as Type
     }
@@ -804,6 +821,10 @@ export final class BooleanValue extends reflect.Value {
 export final class ByteValue extends reflect.Value {
     private typ: ByteType
     private data: byte
+
+    public static of(v: byte): ByteValue {
+        return new ByteValue(ByteType.VAL, v)
+    }
 
     public override getType(): Type {
         return this.typ as Type
@@ -838,6 +859,10 @@ export final class ShortValue extends reflect.Value {
     private typ: ShortType
     private data: short
 
+    public static of(v: short): ShortValue {
+        return new ShortValue(ShortType.VAL, v)
+    }
+
     public override getType(): Type {
         return this.typ as Type
     }
@@ -870,6 +895,10 @@ export final class ShortValue extends reflect.Value {
 export final class CharValue extends reflect.Value {
     private typ: CharType
     private data: char
+
+    public static of(v: char): CharValue {
+        return new CharValue(CharType.VAL, v)
+    }
 
     public override getType(): Type {
         return this.typ as Type
@@ -904,6 +933,10 @@ export final class IntValue extends reflect.Value {
     private typ: IntType
     private data: int
 
+    public static of(v: int): IntValue {
+        return new IntValue(IntType.VAL, v)
+    }
+
     public override getType(): Type {
         return this.typ as Type
     }
@@ -936,6 +969,10 @@ export final class IntValue extends reflect.Value {
 export final class FloatValue extends reflect.Value {
     private typ: FloatType
     private data: float
+
+    public static of(v: float): FloatValue {
+        return new FloatValue(FloatType.VAL, v)
+    }
 
     public override getType(): Type {
         return this.typ as Type
@@ -970,6 +1007,10 @@ export final class DoubleValue extends reflect.Value {
     private typ: DoubleType
     private data: double
 
+    public static of(v: double): DoubleValue {
+        return new DoubleValue(DoubleType.VAL, v)
+    }
+
     public override getType(): Type {
         return this.typ as Type
     }
@@ -1002,6 +1043,10 @@ export final class DoubleValue extends reflect.Value {
 export final class LongValue extends reflect.Value {
     private typ: LongType
     private data: long
+
+    public static of(v: long): LongValue {
+        return new LongValue(LongType.VAL, v)
+    }
 
     public override getType(): Type {
         return this.typ as Type
