@@ -99,7 +99,7 @@ cases:
   - stype: string
     sval: '"true"'
     dtype: as Boolean
-    error: {runtime: "ClassCastError: std.core.LineString cannot be cast to std.core.Boolean"}
+    error: {runtime: "ClassCastError: std.core.String cannot be cast to std.core.Boolean"}
     asserts: |
       arktest.assertTrue(dst instanceof boolean)
 #16

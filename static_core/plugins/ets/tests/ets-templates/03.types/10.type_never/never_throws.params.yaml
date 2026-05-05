@@ -41,7 +41,7 @@ cases:
         let s: string = "abc"
         arktest.expectThrow(() => { let x: never = s as never },
             (e: Error): boolean => e instanceof ClassCastError &&
-                (e as ClassCastError).message.endsWith("LineString cannot be cast to N"))
+                (e as ClassCastError).message.endsWith("String cannot be cast to N"))
 
     - desc: cast null to never throws
       decl: |-

@@ -639,7 +639,7 @@ function invokeByInterface(tester: InvokeTester, ifaceType: Class) {
 
     arktest.expectError(() => {
         ifaceType.getInstanceMethod("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.floatReference ])
-    }, new TypeError("Invalid operand type: Lstd/core/Float;"))
+    }, new TypeError("Invalid operand type: std.core.Float"))
 
     let notVirtualDerived = testerType.getInstanceMethod("notVirtualDerived")
     if (notVirtualDerived == undefined) {
