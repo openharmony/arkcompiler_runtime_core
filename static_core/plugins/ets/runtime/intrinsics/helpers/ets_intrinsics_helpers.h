@@ -432,8 +432,6 @@ EtsString *FpToString(FpType number, int radix)
     return EtsString::CreateFromMUtf8(result.c_str());
 }
 
-void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise);
-
 bool SameValueZero(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b);
 
 }  // namespace ark::ets::intrinsics::helpers

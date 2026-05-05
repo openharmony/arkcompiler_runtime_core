@@ -257,10 +257,10 @@ public:
         return mutex->IsHeld();
     }
 
-    void ChangeStateToPendingFromLinked()
+    bool TryChangeStateFromLinkedToPending()
     {
-        ASSERT(IsLinked());
-        state_ = STATE_PENDING;
+        uint32_t linkedState = STATE_LINKED;
+        return state_.compare_exchange_strong(linkedState, STATE_PENDING);
     }
 
     // launch promise then/catch callback: void()
@@ -286,7 +286,7 @@ private:
     ObjectPointer<EtsObject> interopObject_;        // internal object used in js interop
     ObjectPointer<EtsObject> linkedPromise_;        // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
-    uint32_t state_;  // the Promise's state
+    std::atomic<uint32_t> state_;  // the Promise's state
 
     friend class test::EtsPromiseTest;
 };

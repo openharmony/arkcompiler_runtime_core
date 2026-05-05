@@ -469,6 +469,24 @@ export class InvalidJobOperationError extends Error {
 }
 
 /**
+ * Represents the error that is thrown when invalid operation is called in the async context
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ */
+export class InvalidAsyncOperationError extends Error {
+    /**
+     * Constructs a new InvalidAsyncOperationError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     */
+    constructor(message?: String, options?: ErrorOptions) {
+        super("InvalidAsyncOperationError", message, options)
+    }
+}
+
+/**
  * Represents the error that is thrown when there is a wrong unsafe call to Function
  * @extends Error
  * @syscap SystemCapability.Utils.Lang

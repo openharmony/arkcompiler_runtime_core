@@ -156,6 +156,7 @@ public:
     DEFINE_VISIT(StoreArray);
     DEFINE_VISIT(NullCheck);
     DEFINE_VISIT(SaveState);
+    DEFINE_VISIT(SaveStateSuspend);
     DEFINE_VISIT(SafePoint);
     // NOTE(schernykh): support it
     // DEFINE_VISIT(SaveStateDeoptimize)

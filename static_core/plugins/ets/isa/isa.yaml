@@ -184,9 +184,9 @@ groups:
         format: [pref_op_none]
         intrinsic_name: INTRINSIC_COMPILER_ETS_NULLCHECK
 
-  - title: Suspend coroutine and return to the caller
+  - title: Suspend job and return to the caller
     description: >
-      Suspend coroutine and return to the caller
+      Suspend job and return to the caller
     verification:
       - none
     exceptions:
@@ -194,13 +194,17 @@ groups:
     properties:
       - suspend
     pseudo: |
-      context = vs
-      if context == null then
+      promise = vs
+      if promise == null then
        throw NullPointerException
       end
       resume_point_id = convert_resume_point_pc_to_id(next_pc)
       if resume_point_id == INVALID_RESUME_POINT_ID then
         throw_ets_exception(...)
+      end
+      context = await_promise_completion(promise)
+      if context == null then
+       throw NullPointerException
       end
       store_resume_point_id(context, resume_point_id)
       save_vregs_to(context)
@@ -208,7 +212,7 @@ groups:
       return acc
     namespace: ets
     instructions:
-      - sig: ets.async.suspend v:in:ref
+      - sig: ets.async.await v:in:ref
         prefix: ets
         acc: out:ref
         format: [pref_op_v_8]
@@ -223,16 +227,95 @@ groups:
     properties:
       - dispatch
     pseudo: |
-      context = vs
-      if context != null then
-        restore_vregs_from(context)
-        resume_point_id = load_resume_point_id(context)
+      cur_ctx = get_current_async_ctx()
+      if cur_ctx == null then
+        no_op
+      else
+        restore_vregs_from(cur_ctx)
+        resume_point_id = load_resume_point_id(cur_ctx)
         new_pc = convert_resume_point_id_to_pc(resume_point_id)
         pc = new_pc
       end
     namespace: ets
     instructions:
-      - sig: ets.async.dispatch v:in:ref
+      - sig: ets.async.dispatch
+        prefix: ets
+        acc: none
+        format: [pref_op_none]
+
+  - title: Unpack value from promise
+    description: >
+      Depending on the promise state, unpack the value from the promise
+      and set it to the acc or throw an exception
+    verification:
+      - none
+    exceptions:
+      - x_null
+    pseudo: |
+      promise = vs
+      if promise == null then
+        throw NullPointerException
+      end
+      if promise.is_pending then
+        throw_ets_exception(...)
+      end
+      if promise.is_rejected then
+        throw_ets_exception(promise.value)
+      end
+      acc = promise.value
+    namespace: ets
+    instructions:
+      - sig: ets.async.unpack v:in:ref
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_v_8]
+
+  - title: Complete async function with resolved promise
+    description: >
+      Complete async function with resolved promise
+    verification:
+      - none
+    exceptions:
+      - x_oom
+    pseudo: |
+      value = vs
+      cur_ctx = get_current_async_ctx()
+      if cur_ctx == null then
+        p = Promise.resolve(value)
+        acc = p
+      else
+        p = load_return_value(cur_ctx)
+        p.resolve(value)
+        acc = p
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.async.resolve v:in:ref
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_v_8]
+
+  - title: Complete async function with rejected promise
+    description: >
+      Complete async function with rejected promise
+    verification:
+      - none
+    exceptions:
+      - x_oom
+    pseudo: |
+      error = vs
+      cur_ctx = get_current_async_ctx()
+      if cur_ctx == null then
+        p = Promise.reject(error)
+        acc = p
+      else
+        p = load_return_value(cur_ctx)
+        p.reject(error)
+        acc = p
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.async.reject v:in:ref
         prefix: ets
         acc: out:ref
         format: [pref_op_v_8]

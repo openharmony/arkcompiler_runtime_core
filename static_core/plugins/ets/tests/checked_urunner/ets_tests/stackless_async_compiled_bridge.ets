@@ -45,8 +45,8 @@
 //! INST_NOT     /Call.*Inlined.*floatResumeCheck/
 //! INST_NOT     /Call.*Inlined.*loopResumeCheck/
 //! ASM_METHOD   "stackless_async_compiled_bridge.ETSGLOBAL::start"
-//! ASM_INST     "Intrinsic.StdPromiseAwait"
-//! ASM_INST     "CallEntrypoint: EtsStacklessInitAsyncContext"
+//! ASM_INST     "Intrinsic.CompilerEtsAwaitResolution"
+//! ASM_INST     "CallEntrypoint: EtsCompilerAwaitResolution"
 
 //! CHECKER      Check stackless async compiled bridge in AOT
 //! SKIP_IF      @architecture == "arm32"
@@ -75,8 +75,8 @@
 //! INST_NOT     /Call.*Inlined.*floatResumeCheck/
 //! INST_NOT     /Call.*Inlined.*loopResumeCheck/
 //! ASM_METHOD   "stackless_async_compiled_bridge.ETSGLOBAL::start"
-//! ASM_INST     "Intrinsic.StdPromiseAwait"
-//! ASM_INST     "CallEntrypoint: EtsStacklessInitAsyncContext"
+//! ASM_INST     "Intrinsic.CompilerEtsAwaitResolution"
+//! ASM_INST     "CallEntrypoint: EtsCompilerAwaitResolution"
 //! RUN          options: "--compiler-enable-jit=false --coroutine-impl=stackless",
 //!              entry: "stackless_async_compiled_bridge.ETSGLOBAL::main"
 

@@ -23,7 +23,7 @@ TEST_F(VerifierEtsOpcodeTest, DISABLED_NegSuspend1)
 {
     verifier::TypeSystem typeSystem(service_->verifierService, ark::panda_file::SourceLang::ETS);
 
-    // ets.async.suspend with wrong argument type
+    // ets.async.await with wrong argument type
     auto source =
         ".language eTS\n"
         ".record R {}\n"
@@ -32,7 +32,7 @@ TEST_F(VerifierEtsOpcodeTest, DISABLED_NegSuspend1)
         ".function void ETSGLOBAL.test(R a0)"
         "<static, access.function=public, ets.annotation.class=ets.coroutine.Async, ets.annotation.id=id_0>"
         "{\n"
-        "    ets.async.suspend a0\n"
+        "    ets.async.await a0\n"
         "    return.void\n"
         "}\n";
 
@@ -49,13 +49,13 @@ TEST_F(VerifierEtsOpcodeTest, DISABLED_NegSuspend2)
 {
     verifier::TypeSystem typeSystem(service_->verifierService, ark::panda_file::SourceLang::ETS);
 
-    // ets.async.suspend outside of async function
+    // ets.async.await outside of async function
     auto source = R"(
         .language eTS
-        .record arkruntime.AsyncContext {} <external>
+        .record std.core.Promise {} <external>
         .record ETSGLOBAL <extends=panda.Object, access.record=public> {}
-        .function void ETSGLOBAL.test(arkruntime.AsyncContext a0) <static, access.function=public> {
-            ets.async.suspend a0
+        .function void ETSGLOBAL.test(std.core.Promise a0) <static, access.function=public> {
+            ets.async.await a0
             return.void
         }
     )";
@@ -75,13 +75,13 @@ TEST_F(VerifierEtsOpcodeTest, DISABLED_PosSuspend1)
 
     auto source =
         ".language eTS\n"
-        ".record arkruntime.AsyncContext {} <external>\n"
+        ".record std.core.Promise {} <external>\n"
         ".record ets.coroutine.Async {} <external>\n"
         ".record ETSGLOBAL <extends=panda.Object, access.record=public> {}\n"
-        ".function void ETSGLOBAL.test(arkruntime.AsyncContext a0)"
+        ".function void ETSGLOBAL.test(std.core.Promise a0)"
         "<static, access.function=public, ets.annotation.class=ets.coroutine.Async, ets.annotation.id=id_0>"
         "{\n"
-        "    ets.async.suspend a0\n"
+        "    ets.async.await a0\n"
         "    return.void\n"
         "}\n";
 

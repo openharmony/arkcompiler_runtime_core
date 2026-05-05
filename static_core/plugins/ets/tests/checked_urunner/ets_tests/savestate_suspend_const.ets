@@ -21,11 +21,11 @@
 //! RUN_PAOC      options: "--compiler-inlining-blacklist=savestate_suspend_const.ETSGLOBAL::checkVals"
 //! METHOD        "savestate_suspend_const.ETSGLOBAL::asyncFoo"
 //! PASS_BEFORE   "FillSaveStateSuspendInputs"
-//! INST_NOT      /SaveStateSuspend.*bridge/
+//! INST_NOT      /SaveStateSuspend.*bridge.*bridge/
 //! PASS_AFTER    "FillSaveStateSuspendInputs"
 //! # check that undefined is not passed as immediate
 //! INST_NOT      /SaveStateSuspend.*0x0\(/
-//! INST          /SaveStateSuspend.*bridge/
+//! INST          /SaveStateSuspend.*bridge.*bridge/
 //! RUN           entry: "savestate_suspend_const.ETSGLOBAL::main", options: "--coroutine-impl=stackless"
 
 class Pair {

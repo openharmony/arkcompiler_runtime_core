@@ -220,9 +220,14 @@ macro(:ets_async_return_from_suspend) do |return_value|
   }
 end
 
-macro(:handle_ets_async_suspend) do |v, size|
-  async_ctx_usual := vreg_value(v).ref
+macro(:handle_ets_async_await) do |v, size|
+  awaitee := vreg_value(v).ref
+  If(awaitee, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
 
+  async_ctx_usual := call_runtime("EtsAwaitResolutionEntrypoint", awaitee).ref
   If(async_ctx_usual, 0).EQ.Unlikely {
     call_runtime("ThrowNullPointerExceptionFromInterpreter").void
     move_to_exception
@@ -236,12 +241,10 @@ macro(:handle_ets_async_suspend) do |v, size|
 
   compiled_code := ets_async_ctx_load_i64(async_ctx_usual, EtsConstants::ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET).i64
   If(compiled_code, 0).NE.Unlikely {
-    call_runtime("EtsEnsureCapacityForAsyncContextEntrypoint", %tr, async_ctx_usual, frame_size).void
+    async_ctx_resized := call_runtime("EtsEnsureCapacityForAsyncContextEntrypoint", %tr, async_ctx_usual, frame_size).ref
     If(exception_val(), 0).NE.Unlikely {
       move_to_exception
     }
-    # may have triggerred GC, need to read again
-    async_ctx_resized := vreg_value(v).ref
     ets_async_ctx_store_i64(async_ctx_resized, EtsConstants::ETS_ASYNC_CONTEXT_COMPILED_CODE_OFFSET, Cast(0).i64)
   }
 
@@ -310,8 +313,8 @@ Label(:SuspendReturn)
   ets_async_return_from_suspend(return_value)
 end
 
-macro(:handle_ets_async_dispatch) do |v, size|
-  async_ctx := vreg_value(v).ref
+macro(:handle_ets_async_dispatch) do |size|
+  async_ctx := call_runtime("EtsAsyncContextGetCurrentEntrypoint").ref
 
   If(async_ctx, 0).EQ {
     pc_null := AddI(pc).Imm(size).ptr
@@ -377,4 +380,37 @@ Label(:DispatchSlowPath)
 
 Label(:DispatchJoin)
   pc := Phi(pc_null, pc_fast, pc_slow).ptr
+end
+
+macro(:handle_ets_async_unpack) do |v|
+  promise := vreg_value(v).ref
+  value := call_runtime("EtsAsyncUnpackEntrypoint", promise).ref
+
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+
+  set_acc_object(value)
+end
+
+macro(:handle_ets_async_resolve) do |v|
+  value := vreg_value(v).ref
+  promise := call_runtime("EtsAsyncResolveEntrypoint", value).ref
+
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+
+  set_acc_object(promise)
+end
+
+macro(:handle_ets_async_reject) do |v|
+  error := vreg_value(v).ref
+  promise := call_runtime("EtsAsyncRejectEntrypoint", error).ref
+
+  If(exception_val(), 0).NE.Unlikely {
+    move_to_exception
+  }
+
+  set_acc_object(promise)
 end

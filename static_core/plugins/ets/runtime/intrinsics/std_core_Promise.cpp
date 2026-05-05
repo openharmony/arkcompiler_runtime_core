@@ -15,8 +15,7 @@
 
 #include "execution/stackless/stackless_job_manager.h"
 #include "intrinsics.h"
-#include "intrinsics/helpers/intrinsic_await_promise_impl.h"
-#include "intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "intrinsics/helpers/intrinsic_promise_impl.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -74,44 +73,10 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLink
         ThrowNullPointerException(ctx, executionCtx->GetMT());
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
-    EtsHandle<EtsObject> hvalue(executionCtx, value);
-
-    if (wasLinked == 0) {
-        /* When the value is still a Promise, the lock must be unlocked first. */
-        hpromise->Lock();
-        if (!hpromise->IsPending()) {
-            hpromise->Unlock();
-            return;
-        }
-        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
-            auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-            EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
-            hpromise->Unlock();
-            helpers::SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
-            return;
-        }
-        hpromise->Resolve(executionCtx, hvalue.GetPtr());
-        hpromise->Unlock();
-    } else {
-        /* When the value is still a Promise, the lock must be unlocked first. */
-        hpromise->Lock();
-        if (!hpromise->IsLinked()) {
-            hpromise->Unlock();
-            return;
-        }
-        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
-            auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-            EtsHandle<EtsPromise> hInternalPromise(executionCtx, internalPromise);
-            hpromise->ChangeStateToPendingFromLinked();
-            hpromise->Unlock();
-            helpers::SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
-            return;
-        }
-        hpromise->Resolve(executionCtx, hvalue.GetPtr());
-        hpromise->Unlock();
+    if (wasLinked == 1 && !promise->TryChangeStateFromLinkedToPending()) {
+        return;
     }
+    helpers::EtsPromiseResolveImpl(promise, value);
 }
 
 void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinked)
@@ -122,14 +87,10 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinke
         ThrowNullPointerException(ctx, executionCtx->GetMT());
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    EtsHandle<EtsPromise> hpromise(executionCtx, promise);
-    EtsHandle<EtsObject> herror(executionCtx, error);
-    EtsMutex::LockHolder lh(hpromise);
-    if ((!hpromise->IsPending() && wasLinked == 0) || (!hpromise->IsLinked() && wasLinked != 0)) {
+    if (wasLinked == 1 && !promise->TryChangeStateFromLinkedToPending()) {
         return;
     }
-    hpromise->Reject(executionCtx, herror.GetPtr());
+    helpers::EtsPromiseRejectImpl(promise, error);
 }
 
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)

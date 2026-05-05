@@ -84,19 +84,10 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     .record std.core.Error {
     }
 
-    .function arkruntime.AsyncContext arkruntime.AsyncContext.current() <static> {
-        lda.null
-        return.obj
-    }
-
     .function std.core.Promise async_foo(std.core.Promise a0) {
     try_begin:
-        call.short arkruntime.AsyncContext.current
-        sta.obj v0
-        ets.async.dispatch v0
-        lda.null
-        sta.obj v0
-        ets.async.suspend v0
+        ets.async.dispatch
+        ets.async.await a0
         lda.null
         return.obj
     try_end:
@@ -141,8 +132,11 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     EXPECT_EQ(prologueBlock->GetTrueSuccessor(), dispatchBlock);
     EXPECT_EQ(prologueBlock->GetLastInst()->GetOpcode(), Opcode::IfImm);
     EXPECT_TRUE(prologueBlock->GetLastInst()->CastToIfImm()->IsUnlikely());
-    EXPECT_EQ(CountInstInBlock(prologueBlock, Opcode::CallStatic), 1U);
-    EXPECT_EQ(dispatch->GetInput(0U).GetInst(), FindFirstInst(prologueBlock, Opcode::CallStatic));
+    EXPECT_EQ(CountInstInBlock(prologueBlock, Opcode::Intrinsic), 1U);
+    auto asyncContext = dispatch->GetInput(0U).GetInst();
+    EXPECT_EQ(asyncContext, FindFirstInst(prologueBlock, Opcode::Intrinsic));
+    EXPECT_EQ(asyncContext->CastToIntrinsic()->GetIntrinsicId(),
+              RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ASYNC_CONTEXT_CURRENT);
     EXPECT_EQ(dispatchBlock->GetTryId(), prologueBlock->GetTryId());
 
     auto continuationBlock = prologueBlock->GetFalseSuccessor();
@@ -150,7 +144,9 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     EXPECT_EQ(saveStateSuspend->GetBasicBlock(), continuationBlock);
     EXPECT_EQ(continuationBlock->GetLastInst()->GetOpcode(), Opcode::Return);
     EXPECT_NE(saveStateSuspendInst->GetAsyncContext(), nullptr);
-    EXPECT_EQ(saveStateSuspendInst->GetVirtualRegister(0U).Value(), 0U);
+    EXPECT_TRUE(saveStateSuspendInst->GetVirtualRegister(saveStateSuspendInst->GetAsyncContextIndex()).IsBridge());
+    EXPECT_EQ(saveStateSuspendInst->GetAsyncContext()->CastToIntrinsic()->GetIntrinsicId(),
+              RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_AWAIT_RESOLUTION);
 }
 
 }  // namespace ark::compiler

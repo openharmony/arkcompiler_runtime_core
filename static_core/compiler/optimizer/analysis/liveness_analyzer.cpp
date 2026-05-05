@@ -532,7 +532,11 @@ void LivenessAnalyzer::AdjustInputsLifetime(Inst *inst, LiveRange liveRange, Ins
     for (auto input : inst->GetInputs()) {
         auto inputInst = inst->GetDataFlowInput(input.GetInst());
         liveSet->Add(inputInst->GetLinearNumber());
-        if (inst->GetOpcode() == Opcode::WrapObjectNative) {
+        // NOTE (asidorov): remove workaround for SaveStateSuspend (#34570)
+        if (inst->IsSaveStateSuspend()) {
+            // +1 for spilling on stack (in case lifetime ends at SaveStateSuspend)
+            liveRange.SetEnd(GetInstLifeNumber(inst) + 1U);
+        } else if (inst->GetOpcode() == Opcode::WrapObjectNative) {
             auto *nativeCall = inst->GetUsers().Front().GetInst();
             // need to ensure that ref inputs will live until Native API call, +1 for spilling on stack
             liveRange.SetEnd(GetInstLifeNumber(nativeCall) + 1U);

@@ -25,6 +25,33 @@
 #include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark::compiler {
+namespace {
+void PlaceAsyncContextInput(SaveStateInst *saveStateSuspend, Inst *asyncContext)
+{
+    size_t actualAsyncContextInputIdx = saveStateSuspend->GetInputsCount();
+    for (size_t idx = 0; idx < saveStateSuspend->GetInputsCount(); ++idx) {
+        if (saveStateSuspend->GetInput(idx).GetInst() == asyncContext) {
+            actualAsyncContextInputIdx = idx;
+            break;
+        }
+    }
+
+    ASSERT(actualAsyncContextInputIdx < saveStateSuspend->GetInputsCount());
+    auto expectedAsyncContextInputIdx = saveStateSuspend->GetAsyncContextIndex();
+    if (actualAsyncContextInputIdx == expectedAsyncContextInputIdx) {
+        return;
+    }
+
+    auto expectedInput = saveStateSuspend->GetInput(expectedAsyncContextInputIdx).GetInst();
+    auto expectedVreg = saveStateSuspend->GetVirtualRegister(expectedAsyncContextInputIdx);
+    auto actualAsyncContextVreg = saveStateSuspend->GetVirtualRegister(actualAsyncContextInputIdx);
+
+    saveStateSuspend->SetInput(expectedAsyncContextInputIdx, asyncContext);
+    saveStateSuspend->SetInput(actualAsyncContextInputIdx, expectedInput);
+    saveStateSuspend->SetVirtualRegister(expectedAsyncContextInputIdx, actualAsyncContextVreg);
+    saveStateSuspend->SetVirtualRegister(actualAsyncContextInputIdx, expectedVreg);
+}
+}  // namespace
 
 void InstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
 {
@@ -141,46 +168,34 @@ void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
     }
 }
 
-void InstBuilder::BuildSuspend(const BytecodeInstruction *bcInst)
+void InstBuilder::BuildAwait(const BytecodeInstruction *bcInst)
 {
-    // NOTE(compiler_team): support stackless in BCO #33857
-    if (GetGraph()->IsBytecodeOptimizer()) {
+    // NOTE(compiler_team): support stackless in BCO #33857.
+    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
         failed_ = true;
         return;
     }
 
-    auto asyncContextVreg = bcInst->GetVReg(0);
-    // Set resuming bytecode PC
-    auto saveStateSuspend = CreateSaveState(Opcode::SaveStateSuspend, GetPc(bcInst->GetNext().GetAddress()));
+    auto pc = GetPc(bcInst->GetAddress());
+    auto promise = GetDefinition(bcInst->GetVReg(0));
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto asyncContext = GetGraph()->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_AWAIT_RESOLUTION);
 
-    // AsyncContext is already among SaveStateSuspend inputs.
-    size_t actualAsyncContextInputIdx = saveStateSuspend->GetInputsCount();
-    for (size_t idx = 0; idx < saveStateSuspend->GetInputsCount(); ++idx) {
-        auto reg = saveStateSuspend->GetVirtualRegister(idx);
-        if (reg.Value() == asyncContextVreg) {
-            actualAsyncContextInputIdx = idx;
-            break;
-        }
-    }
+    asyncContext->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    asyncContext->AppendInput(promise);
+    asyncContext->AddInputType(DataType::REFERENCE);
+    asyncContext->AppendInput(saveState);
+    asyncContext->AddInputType(DataType::NO_TYPE);
 
-    ASSERT(actualAsyncContextInputIdx < saveStateSuspend->GetInputsCount());
-    auto expectedAsyncContextInputIdx = saveStateSuspend->GetAsyncContextIndex();
-    // It may be not in the expected place.
-    if (actualAsyncContextInputIdx != expectedAsyncContextInputIdx) {
-        auto expectedInput = saveStateSuspend->GetInput(expectedAsyncContextInputIdx).GetInst();
-        auto actualAsyncContextInput = saveStateSuspend->GetInput(actualAsyncContextInputIdx).GetInst();
-        auto expectedVreg = saveStateSuspend->GetVirtualRegister(expectedAsyncContextInputIdx);
-        auto actualAsyncContextVreg = saveStateSuspend->GetVirtualRegister(actualAsyncContextInputIdx);
+    AddInstruction(saveState);
+    AddInstruction(asyncContext);
 
-        // Move AsyncContext to the expected place.
-        saveStateSuspend->SetInput(expectedAsyncContextInputIdx, actualAsyncContextInput);
-        saveStateSuspend->SetInput(actualAsyncContextInputIdx, expectedInput);
-
-        // Keep inputs and vregs in sync.
-        saveStateSuspend->SetVirtualRegister(expectedAsyncContextInputIdx, actualAsyncContextVreg);
-        saveStateSuspend->SetVirtualRegister(actualAsyncContextInputIdx, expectedVreg);
-    }
-
+    auto nextPc = GetPc(bcInst->GetNext().GetAddress());
+    auto saveStateSuspend = CreateSaveState(Opcode::SaveStateSuspend, nextPc);
+    // NOTE (asidorov): remove workaround for SaveStateSuspend (#34570)
+    saveStateSuspend->AppendBridge(asyncContext);
+    PlaceAsyncContextInput(saveStateSuspend, asyncContext);
     AddInstruction(saveStateSuspend);
 }
 
@@ -193,12 +208,97 @@ void InstBuilder::BuildDispatch(const BytecodeInstruction *bcInst)
     }
 
     auto pc = GetPc(bcInst->GetAddress());
-    auto asyncContext = GetDefinition(bcInst->GetVReg(0));
-    auto saveState = CreateSaveState(Opcode::SaveStateDeoptimize, pc);
+    auto asyncContext = GetGraph()->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ASYNC_CONTEXT_CURRENT);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+
+    asyncContext->AllocateInputTypes(GetGraph()->GetAllocator(), 1_I);
+    asyncContext->AppendInput(saveState);
+    asyncContext->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(asyncContext);
+
+    saveState = CreateSaveState(Opcode::SaveStateDeoptimize, pc);
     AddInstruction(saveState);
     auto dispatchInst = GetGraph()->CreateInstDispatch(DataType::NO_TYPE, pc, asyncContext, saveState);
     AddInstruction(dispatchInst);
     GetGraph()->SetDispatchInst(dispatchInst);
+}
+
+void InstBuilder::BuildUnpack(const BytecodeInstruction *bcInst)
+{
+    // NOTE(compiler_team): support stackless in BCO #33857.
+    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+        failed_ = true;
+        return;
+    }
+
+    auto pc = GetPc(bcInst->GetAddress());
+    auto promise = GetDefinition(bcInst->GetVReg(0));
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto result = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc,
+                                                  RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ASYNC_UNPACK);
+
+    result->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    result->AppendInput(promise);
+    result->AddInputType(DataType::REFERENCE);
+    result->AppendInput(saveState);
+    result->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(result);
+    UpdateDefinitionAcc(result);
+}
+
+void InstBuilder::BuildResolve(const BytecodeInstruction *bcInst)
+{
+    // NOTE(compiler_team): support stackless in BCO #33857.
+    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+        failed_ = true;
+        return;
+    }
+
+    auto pc = GetPc(bcInst->GetAddress());
+    auto value = GetDefinition(bcInst->GetVReg(0));
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto promise = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc,
+                                                   RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ASYNC_RESOLVE);
+
+    promise->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    promise->AppendInput(value);
+    promise->AddInputType(DataType::REFERENCE);
+    promise->AppendInput(saveState);
+    promise->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(promise);
+    UpdateDefinitionAcc(promise);
+}
+
+void InstBuilder::BuildReject(const BytecodeInstruction *bcInst)
+{
+    // NOTE(compiler_team): support stackless in BCO #33857.
+    if (GetGraph()->IsBytecodeOptimizer() || GetGraph()->IsAbcKit()) {
+        failed_ = true;
+        return;
+    }
+
+    auto pc = GetPc(bcInst->GetAddress());
+    auto error = GetDefinition(bcInst->GetVReg(0));
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto promise = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc,
+                                                   RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ASYNC_REJECT);
+
+    promise->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    promise->AppendInput(error);
+    promise->AddInputType(DataType::REFERENCE);
+    promise->AppendInput(saveState);
+    promise->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(promise);
+    UpdateDefinitionAcc(promise);
 }
 
 }  // namespace ark::compiler

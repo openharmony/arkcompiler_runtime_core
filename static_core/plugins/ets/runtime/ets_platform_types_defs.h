@@ -88,6 +88,7 @@
     TP("Lstd/core/UnsupportedOperationError;", coreUnsupportedOperationError)                                         \
     TP("Lstd/core/NegativeArraySizeError;", coreNegativeArraySizeError)                                               \
     TP("Lstd/core/InvalidJobOperationError;", coreInvalidJobOperationError)                                           \
+    TP("Lstd/core/InvalidAsyncOperationError;", coreInvalidAsyncOperationError)                                       \
     TP("Lstd/core/RangeError;", coreRangeError)                                                                       \
     TP("Lstd/core/SyntaxError;", coreSyntaxError)                                                                     \
     TP("Lstd/core/IndexOutOfBoundsError;", coreIndexOutOfBoundsError)                                                 \

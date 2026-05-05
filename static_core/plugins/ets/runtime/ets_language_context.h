@@ -74,11 +74,6 @@ public:
         return utf::CStringAsMutf8("Larkruntime/annotation/Async;");
     }
 
-    const uint8_t *GetAsyncContextClassDescriptor() const override
-    {
-        return utf::CStringAsMutf8("Larkruntime/AsyncContext;");
-    }
-
     const uint8_t *GetPromiseClassDescriptor() const override
     {
         return utf::CStringAsMutf8("Lstd/core/Promise;");

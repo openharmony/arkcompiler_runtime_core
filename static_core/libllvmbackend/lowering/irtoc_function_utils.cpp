@@ -61,6 +61,14 @@ constexpr std::array PTR_IGN_IRTOC_FUNC = {
     "AllocFrameStackOverflow"sv,
     "InitializeFrame"sv,
     "memmove"sv,
+#ifdef PANDA_WITH_ETS
+    "EtsAsyncContextGetCurrentEntrypoint"sv,
+    "EtsEnsureCapacityForAsyncContextEntrypoint"sv,
+    "EtsAwaitResolutionEntrypoint"sv,
+    "EtsAsyncUnpackEntrypoint"sv,
+    "EtsAsyncResolveEntrypoint"sv,
+    "EtsAsyncRejectEntrypoint"sv,
+#endif
 };
 
 namespace ark::llvmbackend::irtoc_function_utils {

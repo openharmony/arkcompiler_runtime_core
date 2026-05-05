@@ -34,6 +34,7 @@
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_promise_impl.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/class_linker-inl.h"
 
@@ -151,7 +152,7 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleSuspendStackless()
+    ALWAYS_INLINE void HandleAwaitStackless()
     {
         ASSERT(this->GetFrame()->IsStackless());
 
@@ -178,21 +179,30 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsAsyncSuspend()
+    ALWAYS_INLINE void HandleEtsAsyncAwait()
     {
         uint16_t v = this->GetInst().template GetVReg<FORMAT>();
 
-        LOG_INST() << "ets.async.suspend v" << v;
+        LOG_INST() << "ets.async.await v" << v;
 
         auto *frame = this->GetFrame();
         ASSERT(frame != nullptr);
 
-        auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
-        if (UNLIKELY(asyncCtx == nullptr)) {
+        auto *awaitee = EtsPromise::FromCoreType(frame->GetVReg(v).GetReference());
+        if (UNLIKELY(awaitee == nullptr)) {
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
             return;
         }
+
+        auto aCtx = intrinsics::helpers::EtsAwaitPromiseImpl(awaitee);
+        if (UNLIKELY(aCtx == nullptr)) {
+            ASSERT(this->GetThread()->HasPendingException());
+            this->MoveToExceptionHandler();
+            return;
+        }
+
+        auto asyncCtx = EtsAsyncContext::FromEtsObject(aCtx);
 
         // store resume point id
         auto resumePointId = reinterpret_cast<int64_t>(this->GetInst().GetNext().GetAddress());
@@ -212,19 +222,16 @@ public:
 
         // save vregs to context
         asyncCtx->SaveInterpreterContext(frame, executionCtx);
-        frame->GetAcc().Set(asyncCtx->GetReturnValue(executionCtx)->GetCoreType());
+        frame->GetAccAsVReg().SetReference(asyncCtx->GetReturnValue(executionCtx)->GetCoreType());
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsAsyncDispatch()
     {
-        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
-
-        LOG_INST() << "ets.async.dispatch v" << v;
+        LOG_INST() << "ets.async.dispatch";
 
         auto *executionCtx = this->GetExecutionContext();
-        auto *frame = this->GetFrame();
-        auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
+        auto *asyncCtx = EtsAsyncContext::GetCurrent(executionCtx);
 
         if (asyncCtx == nullptr) {
             this->template MoveToNextInst<FORMAT, true>();
@@ -232,6 +239,7 @@ public:
         }
 
         // load vregs & resume point id from context
+        auto *frame = this->GetFrame();
         const uint8_t *resumePoint;
         if (asyncCtx->GetCompiledCode() == 0) {
             resumePoint = reinterpret_cast<const uint8_t *>(asyncCtx->RestoreInterpreterContext(frame, executionCtx));
@@ -240,6 +248,82 @@ public:
                           asyncCtx->RestoreCompiledContext(frame, executionCtx);
         }
         this->template JumpTo<true>(resumePoint);
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsAsyncUnpack()
+    {
+        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
+        LOG_INST() << "ets.async.unpack v" << v;
+
+        auto *frame = this->GetFrame();
+        auto *executionCtx = this->GetExecutionContext();
+        auto *awaitee = EtsPromise::FromCoreType(frame->GetVReg(v).GetReference());
+        if (UNLIKELY(awaitee == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+            return;
+        }
+
+        if (UNLIKELY(awaitee->IsPending())) {
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreInvalidAsyncOperationError,
+                              "Cannot unpack pending promise");
+            this->MoveToExceptionHandler();
+            return;
+        }
+
+        if (awaitee->IsResolved()) {
+            this->GetAccAsVReg().SetReference(awaitee->GetValue(executionCtx)->GetCoreType());
+            this->template MoveToNextInst<FORMAT, true>();
+            return;
+        }
+
+        ASSERT(awaitee->IsRejected());
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(awaitee, executionCtx);
+        executionCtx->GetMT()->SetException(awaitee->GetValue(executionCtx)->GetCoreType());
+        this->MoveToExceptionHandler();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsAsyncResolve()
+    {
+        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
+        LOG_INST() << "ets.async.resolve v" << v;
+
+        auto *frame = this->GetFrame();
+        auto *executionCtx = this->GetExecutionContext();
+        auto *asyncCtx = EtsAsyncContext::GetCurrent(executionCtx);
+        auto *promise = asyncCtx != nullptr ? asyncCtx->GetReturnValue(executionCtx) : EtsPromise::Create(executionCtx);
+        if (UNLIKELY(promise == nullptr)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            this->MoveToExceptionHandler();
+            return;
+        }
+
+        this->GetAccAsVReg().SetReference(promise->GetCoreType());
+        intrinsics::helpers::EtsPromiseResolveImpl(promise, EtsObject::FromCoreType(frame->GetVReg(v).GetReference()));
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsAsyncReject()
+    {
+        uint16_t v = this->GetInst().template GetVReg<FORMAT>();
+        LOG_INST() << "ets.async.reject v" << v;
+
+        auto *frame = this->GetFrame();
+        auto *executionCtx = this->GetExecutionContext();
+        auto *asyncCtx = EtsAsyncContext::GetCurrent(executionCtx);
+        auto *promise = asyncCtx != nullptr ? asyncCtx->GetReturnValue(executionCtx) : EtsPromise::Create(executionCtx);
+        if (UNLIKELY(promise == nullptr)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            this->MoveToExceptionHandler();
+            return;
+        }
+
+        this->GetAccAsVReg().SetReference(promise->GetCoreType());
+        intrinsics::helpers::EtsPromiseRejectImpl(promise, EtsObject::FromCoreType(frame->GetVReg(v).GetReference()));
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
 private:
