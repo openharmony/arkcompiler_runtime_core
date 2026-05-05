@@ -327,13 +327,9 @@ static int RunThreads(Options &cliOptions, RuntimeOptions &runtimeOptions)
 {
     uint32_t threads = cliOptions.GetThreads();
     if (threads == 0) {
-        threads = std::thread::hardware_concurrency();
-        // hardware_concurrency can return 0 if the value is not computable or well defined
-        if (threads == 0) {
-            threads = 1;
-        } else if (threads > MAX_THREADS) {
-            threads = MAX_THREADS;
-        }
+        threads = 1;
+    } else if (threads > MAX_THREADS) {
+        threads = MAX_THREADS;
     }
     runtimeOptions.SetVerificationThreads(threads);
 
