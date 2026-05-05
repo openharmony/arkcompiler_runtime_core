@@ -624,6 +624,10 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
 
+#34624 Unexpected LinkerAbstractMethodError on extending generic class or interface
+20.implementation_details/07.bridge_methods_for_generic_overrides/class_bridge4.ets
+20.implementation_details/07.bridge_methods_for_generic_overrides/interface_bridge4.ets
+
 #34323 No verifier error on abstract method call
 23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/access_method/make_method_abstract_n.ets
 

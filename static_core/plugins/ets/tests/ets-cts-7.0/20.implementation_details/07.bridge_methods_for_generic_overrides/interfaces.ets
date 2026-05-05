@@ -64,6 +64,14 @@ class PositiveValidator implements Validator<number> {
   validate(v: number): boolean { return v > 0; }
 }
 
+interface TwoParamsBase<T, U = T> {
+  process(a: T, b: U): string
+}
+
+class TwoParamsChild implements TwoParamsBase<string> {
+  process(a: string, b: string): string { return '' }
+}
+
 function main(): int {
   let suite = new arktest.ArkTestsuite("BridgeMethodsInterfaces");
 
@@ -97,6 +105,11 @@ function main(): int {
     let v: Validator<number> = new PositiveValidator();
     arktest.assertEQ(v.validate(5), true);
     arktest.assertEQ(v.validate(-3), false);
+  });
+
+  suite.addTest("Bridge with two arguments", () => {
+    let b: TwoParamsBase<string, string> = new TwoParamsChild();
+    arktest.assertEQ(b.process('a', 'b'), '');
   });
 
   return suite.run();

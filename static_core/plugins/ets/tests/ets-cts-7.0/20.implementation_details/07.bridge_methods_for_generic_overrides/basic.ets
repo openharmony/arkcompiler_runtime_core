@@ -98,6 +98,13 @@ class LongChild extends LongBase<long> {
   override compute(v: long): long { return v * 2; }
 }
 
+class TwoParamsBase<T, U = T> {
+  process(a: T, b: U): string { return '' + a + b }
+}
+class TwoParamsChild extends TwoParamsBase<string> {
+  process(a: string, b: string): string { return '' }
+}
+
 function main(): int {
   let suite = new arktest.ArkTestsuite("BridgeMethodsBasic");
 
@@ -160,6 +167,11 @@ function main(): int {
   suite.addTest("Bridge with long", () => {
     let b: LongBase<long> = new LongChild();
     arktest.assertEQ(b.compute(1000000000000), 2000000000000);
+  });
+
+  suite.addTest("Bridge with two arguments", () => {
+    let b: TwoParamsBase<string, string> = new TwoParamsChild();
+    arktest.assertEQ(b.process('a', 'b'), '');
   });
 
   return suite.run();
