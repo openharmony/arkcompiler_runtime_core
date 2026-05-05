@@ -1,2 +1,0 @@
-# 33235
-07.expressions/14.chaining_operator/condition_compile_time_w.ets

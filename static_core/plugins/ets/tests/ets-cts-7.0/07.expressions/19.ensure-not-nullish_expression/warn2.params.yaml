@@ -23,7 +23,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           class A {
@@ -39,7 +39,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           class A {
@@ -57,7 +57,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - main: |-
           let w: string|int|null|undefined = ''
@@ -69,7 +69,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - main: |-
           let w: int = 0
@@ -81,7 +81,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - main: |-
           let w: string = ''
@@ -93,7 +93,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           let v: Array<null|undefined> = [null, undefined, null]
@@ -104,7 +104,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - main: |-
           let w: Any
@@ -116,7 +116,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - main: |-
           let w: Any
@@ -128,7 +128,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - main: |-
           let w: Any
@@ -140,7 +140,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     # generic type as nullish expression
     - decl: |-
@@ -154,7 +154,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           function foo<T extends undefined>(p: T): string {
@@ -167,7 +167,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           function foo<T extends null>(p: [T, T, T]): T {
@@ -181,7 +181,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           function foo<T extends undefined>(p: [T, T, T]): T {
@@ -195,7 +195,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     # call expression as nullish expression
     - decl: |-
@@ -209,7 +209,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           class A {
@@ -224,9 +224,9 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
-    # nullish function argument for non-nullish parameter
+    # nullish function argument for ensure-not-nullish parameter
     - decl: |-
           function foo(p: string|int) {
               return '' + p
@@ -239,7 +239,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     - decl: |-
           function foo(p: string|int) {
@@ -255,7 +255,7 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
 
     # extra '!' in ensure-not-nullish expression
     - decl: |-
@@ -271,4 +271,4 @@ cases:
               (e: Error) => e instanceof NullPointerError
           )
       warning: |-
-          Warning W0014: Bad operand type, the operand of the non-nullish expression is 'null' or 'undefined'.
+          Warning W0014: Operand of the ensure-not-nullish expression is 'null' or 'undefined'.
