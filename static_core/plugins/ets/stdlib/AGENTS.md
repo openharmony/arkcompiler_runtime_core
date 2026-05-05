@@ -18,6 +18,7 @@ The stdlib is organized into several layers:
 - **`std/interop/`** - JavaScript-ETS interoperation bridge
 - **`std/testing/`** - ArkTest unit testing framework
 - **`std/debug/`** - Debug utilities (not implicitly imported)
+- **`arkruntime/`** - ArkRuntime related api (not implicitly imported)
 - **`native/core/`** - C++ native implementations (Intl, RegExp, Process)
 
 ### Module System
