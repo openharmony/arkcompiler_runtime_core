@@ -31,6 +31,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread-inl.h"
+#include "runtime/include/exceptions.h"
 #include "runtime/interpreter/interpreter.h"
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/osr.h"

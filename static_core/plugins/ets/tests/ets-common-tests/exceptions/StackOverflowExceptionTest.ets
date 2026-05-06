@@ -22,6 +22,6 @@ function main() {
         test(1);
     } catch (e) {
         arktest.assertTrue(e instanceof StackOverflowError);
-        arktest.assertTrue(e.message == '');
+        arktest.assertTrue(e.message.contains('stack size', 0));
     }
 }
