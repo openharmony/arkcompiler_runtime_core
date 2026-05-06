@@ -25,6 +25,12 @@ async function allSettledExample(): Promise<void> {
         Promise.reject(new Error("Rejected")),
     ];
     const results = await Promise.allSettled(promises);
+    arktest.assertEQ(results.length, 2);
+    arktest.assertEQ(results[0].status, "fulfilled");
+    arktest.assertEQ((results[0] as PromiseFulfilledResult<string>).value, "Resolved");
+    arktest.assertEQ(results[1].status, "rejected");
+    arktest.assertEQ((results[1] as PromiseRejectedResult).reason instanceof Error, true);
+    arktest.assertEQ(((results[1] as PromiseRejectedResult).reason as Error).message, "Rejected");
 }
 
 async function startTest() {

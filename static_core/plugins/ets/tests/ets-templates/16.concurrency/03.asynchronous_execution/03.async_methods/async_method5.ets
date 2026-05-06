@@ -29,6 +29,7 @@ class MethodReturnVoidImplicit {
 async function startTest() {
     const example = new MethodReturnVoidImplicit();
     await example.methodReturnVoidImplicit();
+    arktest.assertEQ(example.value, 0);
 }
 
 async function main(): Promise<void> {
