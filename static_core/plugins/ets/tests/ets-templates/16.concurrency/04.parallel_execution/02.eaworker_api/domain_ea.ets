@@ -20,12 +20,12 @@ tags: [no-warmup]
 ---*/
 
 import { CoroutineExtras } from "std/debug/concurrency"
-import { launch, waitForCompletion, WorkerDomain, WorkerGroup, WorkerGroupId, LaunchParams } from "std/concurrency"
+import { launch, WorkerDomain, WorkerGroup, WorkerGroupId, LaunchParams } from "std/concurrency"
 import { EAWorker } from "std/core"
 
 {{c.decl}}
 
-function main(): void {
+async function main() {
     {{c.logic|indent}}
 }
 {% endfor %}

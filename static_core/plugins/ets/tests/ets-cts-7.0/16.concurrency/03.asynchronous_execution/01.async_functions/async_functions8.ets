@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Execute multiple asynchronous functions concurrently.
+tags: [no-warmup]
 ---*/
 
 async function testAsync1(): Promise<string> {
@@ -32,6 +33,6 @@ async function startTest() {
     arktest.assertEQ(res[1] === "testAsync2", true);
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

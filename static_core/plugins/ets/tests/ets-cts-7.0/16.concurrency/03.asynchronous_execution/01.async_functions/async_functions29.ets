@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous function.
       Using promise.any in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function functionWithAny(): Promise<string> {
@@ -39,6 +40,6 @@ async function startTest() {
     arktest.assertEQ(result, "Resolved after 100ms");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

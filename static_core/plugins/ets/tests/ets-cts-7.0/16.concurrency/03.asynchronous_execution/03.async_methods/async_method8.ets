@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Asynchronous method delayed return.
+tags: [no-warmup]
 ---*/
 
 class MethodWithDelay {
@@ -34,6 +35,6 @@ async function startTest() {
     arktest.assertEQ(result, "Resolved after 100 ms")
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

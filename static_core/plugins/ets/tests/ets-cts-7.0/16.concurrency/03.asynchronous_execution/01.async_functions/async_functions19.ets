@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       The async function in an asynchronous function returns a promise<never>.
+tags: [no-warmup]
 ---*/
 
 async function neverReturn(): Promise<never> {
@@ -30,6 +31,6 @@ async function startTest() {
     }
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

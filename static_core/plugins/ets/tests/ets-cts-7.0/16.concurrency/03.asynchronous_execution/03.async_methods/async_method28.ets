@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       using promise.any in asynchronous methods.
+tags: [no-warmup]
 ---*/
 
 class MethodWithAny {
@@ -42,6 +43,6 @@ async function startTest() {
   arktest.assertEQ(result, "Resolved after 100ms");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

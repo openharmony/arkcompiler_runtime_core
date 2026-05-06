@@ -21,7 +21,7 @@ cases:
       const mainWorkerId = CoroutineExtras.getWorkerId();
       const eaWorker = new EAWorker();
       eaWorker.start();
-      const eaWorkerId = waitForCompletion<int>(() => eaWorker.run<int>(CoroutineExtras.getWorkerId));
+      const eaWorkerId = await (() => eaWorker.run<int>(CoroutineExtras.getWorkerId))();
 
       arktest.assertNE(eaWorkerId, mainWorkerId, "EAWorker id equal to Main worker id");
       eaWorker.quit();
@@ -33,11 +33,11 @@ cases:
     logic: |-
       const eaWorker = new EAWorker();
       eaWorker.start();
-      const eaWorkerId = waitForCompletion<int>(() => eaWorker.run<int>(CoroutineExtras.getWorkerId));
+      const eaWorkerId = await (() => eaWorker.run<int>(CoroutineExtras.getWorkerId))();
       const params: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
-      const launchedWorkerId = waitForCompletion<int>(() => launch<int>(params, CoroutineExtras.getWorkerId));
+      const launchedWorkerId = await (() => launch<int>(params, CoroutineExtras.getWorkerId))();
       
       arktest.assertEQ(launchedWorkerId, eaWorkerId, "Launched worker id is not EA");
       eaWorker.quit();

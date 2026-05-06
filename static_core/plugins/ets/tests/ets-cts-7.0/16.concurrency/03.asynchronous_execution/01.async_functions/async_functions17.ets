@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Async arrow function in asynchronous function.
+tags: [no-warmup]
 ---*/
 
 async function asyncFunctionAsParam(fn: () => Promise<string>): Promise<string> {
@@ -27,6 +28,6 @@ async function startTest() {
     arktest.assertEQ(result, "Function as param result");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

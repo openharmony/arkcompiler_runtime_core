@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Explicitly return in an asynchronous method.
+tags: [no-warmup]
 ---*/
 
 class MethodReturnVoidImplicit {
@@ -31,6 +32,6 @@ async function startTest() {
     arktest.assertEQ(example.value, 0);
 }
 
-function main(): void {
-   waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

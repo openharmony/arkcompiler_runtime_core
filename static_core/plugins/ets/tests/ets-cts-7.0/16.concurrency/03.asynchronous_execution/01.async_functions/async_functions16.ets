@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Promise.allSettled in asynchronous functions.
+tags: [no-warmup]
 ---*/
 
 async function allSettledExample(): Promise<void> {
@@ -36,6 +37,6 @@ async function startTest() {
     await allSettledExample();
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Using promise.race in asynchronous methods.
+tags: [no-warmup]
 ---*/
 
 class MethodWithRace {
@@ -43,6 +44,6 @@ async function startTest() {
   arktest.assertEQ(result, "Resolved after 100ms");
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

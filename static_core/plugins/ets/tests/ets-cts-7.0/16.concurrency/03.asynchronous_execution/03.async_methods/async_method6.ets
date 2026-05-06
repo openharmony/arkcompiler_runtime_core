@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Asynchronous methods return generics.
+tags: [no-warmup]
 ---*/
 
 class MethodReturnGeneric {
@@ -30,6 +31,6 @@ async function startTest() {
     arktest.assertEQ(result, "Generic!");
 }
 
-function main(): void {
-    waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }

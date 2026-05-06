@@ -16,6 +16,7 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Asynchronous method returns undefined.
+tags: [no-warmup]
 ---*/
 
 async function functionReturnUndefined(): Promise<undefined> {
@@ -27,6 +28,6 @@ async function startTest() {
     arktest.assertEQ(result === undefined, true)
 }
 
-function main(): void {
-  waitForCompletion(startTest);
+async function main(): Promise<void> {
+    await startTest()
 }
