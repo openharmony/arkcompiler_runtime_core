@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 /*---
 desc: methods returning this, non-override, positive.
-tags: []
 ---*/
+
 class C {
     foo(): this {
         return this
@@ -28,4 +28,5 @@ class D extends C {
 
 function main(): void {
     let y: D = new D().foo()
+    arktest.assertTrue(y instanceof D, "expect instance of D")
 }

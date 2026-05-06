@@ -40,4 +40,5 @@ class Deriver extends MySuper<IName> {
 
 function main() {
     let test = new Deriver({name: 'Bob'})
+    arktest.assertTrue(test instanceof Deriver, "expect instance of Deriver")
 }

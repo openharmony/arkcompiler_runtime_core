@@ -32,9 +32,10 @@ class Clazz {
 }
 
 function main() {
-
     let q = new Shapes.Square;
+    arktest.assertTrue(q instanceof Shapes.Square, "expect instance of Shapes.Square")
     let a = new AnotherShapes.Square;
+    arktest.assertTrue(a instanceof AnotherShapes.Square, "expect instance of AnotherShapes.Square")
     let c = new Clazz;
-    
+    arktest.assertTrue(c instanceof Clazz, "expect instance of Clazz")
 }

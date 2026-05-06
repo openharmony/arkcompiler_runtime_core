@@ -31,4 +31,5 @@ class A {
 
 function main() {
   A.a
+  arktest.assertTrue(false, "this code is not expected to execute")
 }

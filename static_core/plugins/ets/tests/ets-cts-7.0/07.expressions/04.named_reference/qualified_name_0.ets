@@ -39,10 +39,12 @@ class SomeShape implements ShapeInterfaces.Calculable {
 }
 
 function main() {
-
   let circle = new Shapes.Circle;
+  arktest.assertTrue(circle instanceof Shapes.Circle, "expect instance of Shapes.Circle")
   let clazz = new Clazz;
+  arktest.assertTrue(clazz instanceof Clazz, "expect instance of Clazz")
   let more = new Quadrupole;
+  arktest.assertTrue(more instanceof Quadrupole, "expect instance of Quadrupole")
   let shape = new SomeShape;
-  
+  arktest.assertTrue(shape instanceof SomeShape, "expect instance of SomeShape")
 }

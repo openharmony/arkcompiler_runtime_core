@@ -23,5 +23,6 @@ class Person {
 }
   
 function main(): void {
-  let p: Person = { name: "Alice", age: 25, }
+  let p: Person = { name: "Alice", age: 25, } // comma at the end of the composite class
+  arktest.assertTrue(p instanceof Person, "expect instance of Person")
 }

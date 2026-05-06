@@ -19,5 +19,9 @@ desc: Subclasses of an abstract class can be non-abstract or in turn abstract.
 
 abstract class A {}
 abstract class B extends A {}
+class C extends B {}
 
-function main(): void {}
+function main(): void {
+  let c: C = new C
+  arktest.assertTrue(c instanceof A, "expect instance of A")
+}

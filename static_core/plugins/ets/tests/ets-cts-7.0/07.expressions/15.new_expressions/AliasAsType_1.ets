@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Type reference is a type alias
-tags: []
 ---*/
 
 class Testee<A = Alias> {
@@ -24,6 +23,6 @@ class Testee<A = Alias> {
 type Alias = String
 
 function main(): void {
-    new Testee()
-    new Testee
+    arktest.assertTrue(new Testee() instanceof Testee, "expect instance of Testee 1")
+    arktest.assertTrue(new Testee instanceof Testee, "expect instance of Testee 2")
 }

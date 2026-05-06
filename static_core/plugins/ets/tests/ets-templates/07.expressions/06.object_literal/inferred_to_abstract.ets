@@ -23,5 +23,6 @@ abstract class AbstractPerson {
 }
 
 function main(): void {
-  let p: AbstractPerson = { name: "Alice", age: 25 };
+  let p: AbstractPerson = { name: "Alice", age: 25 }
+  arktest.assertTrue(p instanceof AbstractPerson, "expect instance of AbstractPerson")
 }

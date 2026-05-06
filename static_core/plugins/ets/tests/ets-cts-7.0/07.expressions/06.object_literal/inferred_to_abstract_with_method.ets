@@ -26,5 +26,6 @@ abstract class AbstractPerson {
 }
 
 function main(): void {
-  let p: AbstractPerson = { name: "Alice", age: 25 };
+  let p: AbstractPerson = { name: "Alice", age: 25 }
+  arktest.assertEQ(p.foo(), 25, "expect return 25")
 }
