@@ -38,6 +38,9 @@ function check_with_object_and_cast_to_origin_type(v: Object): boolean {
       let b = v as {{c.fixed_array_cast_wrong_type}}
     }, expectedCastError)
     arktest.assertEQ(a.length, 3)
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(a instanceof {{c.fixed_array_check_wrong_type}})
     arktest.assertTrue(a[0] instanceof {{c.element_check_type}})
     arktest.assertFalse(a[0] instanceof {{c.element_check_wrong_type}})
     arktest.assertEQ(a[0], {{c.check_val_0}})
@@ -72,6 +75,9 @@ function check_with_object_and_cast_to_superclass_type(v: Object): boolean {
     arktest.assertFalse(v instanceof {{c.fixed_array_check_wrong_type}})
     let a = v as {{c.fixed_array_check_superclass_type}}
     arktest.assertEQ(a.length, 3)
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(a instanceof {{c.fixed_array_check_wrong_type}})
     arktest.assertTrue(a[0] instanceof {{c.element_check_type}})
     arktest.assertFalse(a[0] instanceof {{c.element_check_wrong_type}})
     arktest.assertEQ(a[0], {{c.check_val_0}})
@@ -120,6 +126,9 @@ function check_with_any_and_cast_to_origin_type(v: Any): boolean {
       let b = v as {{c.fixed_array_cast_wrong_type}}
     }, expectedCastError)
     arktest.assertEQ(a.length, 3)
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(a instanceof {{c.fixed_array_check_wrong_type}})
     arktest.assertTrue(a[0] instanceof {{c.element_check_type}})
     arktest.assertFalse(a[0] instanceof {{c.element_check_wrong_type}})
     arktest.assertEQ(a[0], {{c.check_val_0}})
@@ -154,6 +163,9 @@ function check_with_any_and_cast_to_superclass_type(v: Any): boolean {
     arktest.assertFalse(v instanceof {{c.fixed_array_check_wrong_type}})
     let a = v as {{c.fixed_array_check_superclass_type}}
     arktest.assertEQ(a.length, 3)
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(a instanceof {{c.fixed_array_check_wrong_type}})
     arktest.assertTrue(a[0] instanceof {{c.element_check_type}})
     arktest.assertFalse(a[0] instanceof {{c.element_check_wrong_type}})
     arktest.assertEQ(a[0], {{c.check_val_0}})
@@ -229,12 +241,58 @@ function main(): int {
     arktest.assertEQ(a[2], {{c.new_val_2}})
   });
 
+  testSuite.addTest("check_at_variable_declaration_cast_to_origin_type", () => {
+    let a: FixedArray<{{c.element_type}}> = [{{c.check_val_0}}, {{c.check_val_1}}, {{c.check_val_2}}]
+    let x = a as FixedArray<{{c.element_type}}>
+    arktest.expectThrow(() => {
+      let xwt = a as {{c.fixed_array_cast_wrong_type}}
+    }, expectedCastError)
+    arktest.assertEQ(x.length, 3)
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(x instanceof {{c.fixed_array_check_wrong_type}})
+    arktest.assertTrue(x[0] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[0] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[0], {{c.check_val_0}})
+    arktest.assertTrue(x[1] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[1] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[1], {{c.check_val_1}})
+    arktest.assertTrue(x[2] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[2] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[2], {{c.check_val_2}})
+    x[0] = {{c.new_val_0}}
+    x[1] = {{c.new_val_1}}
+    x[2] = {{c.new_val_2}}
+    arktest.assertEQ(x.length, 3)
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(x instanceof {{c.fixed_array_check_wrong_type}})
+    arktest.assertTrue(x[0] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[0] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[0], {{c.new_val_0}})
+    arktest.assertTrue(x[1] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[1] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[1], {{c.new_val_1}})
+    arktest.assertTrue(x[2] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[2] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[2], {{c.new_val_2}})
+    arktest.assertEQ(a.length, 3)
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(a instanceof {{c.fixed_array_check_wrong_type}})
+    arktest.assertTrue(a[0] instanceof {{c.element_check_type}})
+    arktest.assertFalse(a[0] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(a[0], {{c.new_val_0}})
+    arktest.assertTrue(a[1] instanceof {{c.element_check_type}})
+    arktest.assertFalse(a[1] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(a[1], {{c.new_val_1}})
+    arktest.assertTrue(a[2] instanceof {{c.element_check_type}})
+    arktest.assertFalse(a[2] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(a[2], {{c.new_val_2}})
+  });
+
   testSuite.addTest("check_at_variable_declaration_cast_to_object", () => {
     let a: FixedArray<{{c.element_type}}> = [{{c.check_val_0}}, {{c.check_val_1}}, {{c.check_val_2}}]
-    let act = a as FixedArray<{{c.element_type}}>
-    arktest.expectThrow(() => {
-      let awt = a as {{c.fixed_array_cast_wrong_type}}
-    }, expectedCastError)
     let ob : Object = a as Object
     let x = ob as FixedArray<{{c.element_type}}>
     arktest.expectThrow(() => {
@@ -307,6 +365,64 @@ function main(): int {
     x[0] = {{c.new_val_0}}
     x[1] = {{c.new_val_1}}
     x[2] = {{c.new_val_2}}
+    arktest.assertEQ(x.length, 3)
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(x instanceof {{c.fixed_array_check_wrong_type}})
+    arktest.assertTrue(x[0] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[0] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[0], {{c.new_val_0}})
+    arktest.assertTrue(x[1] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[1] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[1], {{c.new_val_1}})
+    arktest.assertTrue(x[2] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[2] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[2], {{c.new_val_2}})
+    arktest.assertEQ(a.length, 3)
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(a instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(a instanceof {{c.fixed_array_check_wrong_type}})
+    arktest.assertTrue(a[0] instanceof {{c.element_check_type}})
+    arktest.assertFalse(a[0] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(a[0], {{c.new_val_0}})
+    arktest.assertTrue(a[1] instanceof {{c.element_check_type}})
+    arktest.assertFalse(a[1] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(a[1], {{c.new_val_1}})
+    arktest.assertTrue(a[2] instanceof {{c.element_check_type}})
+    arktest.assertFalse(a[2] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(a[2], {{c.new_val_2}})
+  });
+
+testSuite.addTest("check_at_variable_declaration_cast_to_superclass_type", () => {
+    let a: FixedArray<{{c.element_type}}> = [{{c.check_val_0}}, {{c.check_val_1}}, {{c.check_val_2}}]
+    let x = a as {{c.fixed_array_check_superclass_type}}
+    arktest.assertEQ(x.length, 3)
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_type}})
+    arktest.assertTrue(x instanceof {{c.fixed_array_check_superclass_type}})
+    arktest.assertFalse(x instanceof {{c.fixed_array_check_wrong_type}})
+    arktest.assertTrue(x[0] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[0] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[0], {{c.check_val_0}})
+    arktest.assertTrue(x[1] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[1] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[1], {{c.check_val_1}})
+    arktest.assertTrue(x[2] instanceof {{c.element_check_type}})
+    arktest.assertFalse(x[2] instanceof {{c.element_check_wrong_type}})
+    arktest.assertEQ(x[2], {{c.check_val_2}})
+    x[0] = {{c.new_val_0}}
+    x[1] = {{c.new_val_1}}
+    x[2] = {{c.new_val_2}}
+{%- if c.new_wrong_val_0 %}
+    arktest.expectThrow(() => {
+      x[0] = {{c.new_wrong_val_0}}
+    }, expectedArrayStoreError)
+    arktest.expectThrow(() => {
+      x[1] = {{c.new_wrong_val_1}}
+    }, expectedArrayStoreError)
+    arktest.expectThrow(() => {
+      x[2] = {{c.new_wrong_val_2}}
+    }, expectedArrayStoreError)
+{%- endif %}
     arktest.assertEQ(x.length, 3)
     arktest.assertTrue(x instanceof {{c.fixed_array_check_type}})
     arktest.assertTrue(x instanceof {{c.fixed_array_check_superclass_type}})
