@@ -80,4 +80,7 @@ function(add_backtrace_native_test)
     add_dependencies(test_suite_backtrace_native  ${target}_cpp_test_gtests)
 endfunction()
 
-add_backtrace_native_test(FILE call_backtrace_native.ets CPP_SOURCE call_backtrace_native_test.cpp OPTIONS "")
+# issue: 34560
+if(NOT USE_GCOV_TOOLS AND NOT USE_LLVM_COV_TOOLS)
+    add_backtrace_native_test(FILE call_backtrace_native.ets CPP_SOURCE call_backtrace_native_test.cpp OPTIONS "")
+endif()
