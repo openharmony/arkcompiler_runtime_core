@@ -2553,9 +2553,34 @@
     - uint8_t             # boolean
     - ark::ObjectHeader*
 
+- name: StdCoreArrayIsPlatformArraySlowPath
+  entrypoint: EtsStdCoreArrayIsPlatformArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*
+
+- name: StdCoreArrayIsPlatformArrayOddSaved
+  entrypoint: EtsStdCoreArrayIsPlatformArray
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*
+
 - name: StdCoreArrayReverse
   entrypoint: EtsStdCoreArrayReverse
   bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+
+- name: StdCoreArrayReverse3Arg
+  entrypoint: EtsStdCoreArrayReverse
+  bridge: odd_saved3
   properties: [intrinsic]
   signature:
     - void
@@ -2631,6 +2656,18 @@
 - name: ArrayFastCopyToRefEntrypoint
   entrypoint: StdCoreObjectFastCopyToUnchecked
   bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyToRefOddSaved
+  entrypoint: StdCoreObjectFastCopyToUnchecked
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
     - void

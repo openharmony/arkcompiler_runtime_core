@@ -1937,7 +1937,6 @@ intrinsics:
       args:
         - std.core.Object
     impl: ark::ets::intrinsics::EtsStdCoreArrayIsPlatformArray
-    safe_intrinsic: true
     irtoc_impl: StdCoreArrayIsPlatformArrayFastNativePlus
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateStdCoreArrayIsPlatformArray

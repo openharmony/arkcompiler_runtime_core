@@ -37,6 +37,14 @@ def GenerateArrayFastCopyToRef(sync_type)
       next
     end
 
+    If(src_obj, 0).EQ.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    If(dst_obj, 0).EQ.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
     len := Sub(src_end, src_start).u32
     # if len <= 0 then do nothing
     If(len, 0).BE.Unlikely.b {
@@ -85,6 +93,10 @@ def GenerateArrayFastCopyToRef(sync_type)
     end
   Label(:Done)
     ReturnVoid().void
+  Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("ARRAY_FAST_COPY_TO_REF_ENTRYPOINT")
+    Intrinsic(:SLOW_PATH_ENTRY, src_obj, dst_obj, dst_start, src_start, src_end).AddImm(ep_offset).MethodAsImm("ArrayFastCopyToRefOddSavedBridge").Terminator.void
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end
 
