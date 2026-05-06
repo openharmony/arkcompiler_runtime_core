@@ -59,7 +59,7 @@ function doInWorker(func: () => void): Job<void> {
  * The test creates FinRegs in different domains, triggers GC in the main coro.
  * GC in the main coro must finalize FinRegs in the main and worker domains.
  */
-function cleanupCMCGCInMainTest() {
+async function cleanupCMCGCInMainTest() {
     let cleanupInMainHappened = new AtomicFlag(false);
     let cleanupInWorkerHappened = new AtomicFlag(false);
     let mainWorkerId = CoroutineExtras.getWorkerId();
@@ -75,7 +75,7 @@ function cleanupCMCGCInMainTest() {
                 if (currentId == mainWorkerId) {
                     resolve(undefined);
                 } else {
-                    reject(new Error("Expected worker id " + mainWorkerId + ", but got " + currentId));
+                    reject(new Error('Expected worker id ' + mainWorkerId + ', but got ' + currentId));
                 }
             });
         }).Await();
@@ -83,9 +83,8 @@ function cleanupCMCGCInMainTest() {
     register(mainFinReg!);
     register(workerFinReg!);
     GC.waitForFinishGC(GC.startGC(GC.Cause.THRESHOLD));
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    });
+
+    await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), true);
     arktest.assertEQ(cleanupInWorkerHappened.get(), true);
 }
@@ -94,7 +93,7 @@ function cleanupCMCGCInMainTest() {
  * The test creates FinRegs in different domains, triggers GC in a worker coro.
  * GC in the worker coro must finalize the FinReg in the worker domain.
  */
-function cleanupCMCGCInWorkerTest() {
+async function cleanupCMCGCInWorkerTest() {
     let cleanupInMainHappened = new AtomicFlag(false);
     let cleanupInWorkerHappened = new AtomicFlag(false);
     let mainWorkerId = CoroutineExtras.getWorkerId();
@@ -111,7 +110,7 @@ function cleanupCMCGCInWorkerTest() {
                 if (currentId == workerId || currentId == mainWorkerId) {
                     resolve(undefined);
                 } else {
-                    reject(new Error("Expected worker id " + workerId  + ", but got " + currentId));
+                    reject(new Error('Expected worker id ' + workerId  + ', but got ' + currentId));
                 }
             });
         }).Await();
@@ -119,9 +118,8 @@ function cleanupCMCGCInWorkerTest() {
     register(mainFinReg!);
     register(workerFinReg!);
     GC.waitForFinishGC(GC.startGC(GC.Cause.THRESHOLD));
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    })
+
+    await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), true);
     arktest.assertEQ(cleanupInWorkerHappened.get(), true);
 }
@@ -130,7 +128,7 @@ function cleanupCMCGCInWorkerTest() {
  * The test creates FinRegs in different domains, triggers GC in a EA coro.
  * GC in the EA coro must finalize the FinReg in the same EA worker.
  */
-function cleanupCMCGCInEAWorkerTest() {
+async function cleanupCMCGCInEAWorkerTest() {
     let cleanupInMainHappened = new AtomicFlag(false);
     let cleanupInWorkerHappened = new AtomicFlag(false);
     let cleanupInEAWorkerHappened = new AtomicFlag(false);
@@ -147,7 +145,7 @@ function cleanupCMCGCInEAWorkerTest() {
                 if (currentId == mainWorkerId) {
                     resolve(undefined);
                 } else {
-                    reject(new Error("Expected worker id " + mainWorkerId + ", but got " + currentId));
+                    reject(new Error('Expected worker id ' + mainWorkerId + ', but got ' + currentId));
                 }
             });
         }).Await();
@@ -161,7 +159,7 @@ function cleanupCMCGCInEAWorkerTest() {
                 if (currentId == workerId) {
                     resolve(undefined);
                 } else {
-                    reject(new Error("Expected worker id " + workerId + ", but got " + currentId));
+                    reject(new Error('Expected worker id ' + workerId + ', but got ' + currentId));
                 }
             });
         }).Await();
@@ -173,12 +171,10 @@ function cleanupCMCGCInEAWorkerTest() {
     eaWorker1.run<void>((): void => {
         Coroutine.Schedule();
     }).Await();
-    waitForCompletion(async () => {
-        await workerCleanupFinished;
-    });
-    waitForCompletion(async () => {
-        await eaWorkerCleanupFinished;
-    })
+
+    await workerCleanupFinished;
+    await eaWorkerCleanupFinished;
+
     arktest.assertEQ(cleanupInMainHappened.get(), true);
     arktest.assertEQ(cleanupInWorkerHappened.get(), true);
     arktest.assertEQ(cleanupInEAWorkerHappened.get(), true);
@@ -189,7 +185,7 @@ function cleanupCMCGCInEAWorkerTest() {
  * GC in the first EA coro must finalize the FinReg in the same EA worker and
  * don't touch the FinReg in another EA coro.
  */
-function cleanupInSameEAWorkerCMCGCTest() {
+async function cleanupInSameEAWorkerCMCGCTest() {
     let cleanup1Happened = new AtomicFlag(false);
     let cleanup2Happened = new AtomicFlag(false);
     let cleanup1Finished = new Promise<void>((resolve, reject) => {
@@ -201,7 +197,7 @@ function cleanupInSameEAWorkerCMCGCTest() {
                 if (currentId == workerId) {
                     resolve(undefined);
                 } else {
-                    reject(new Error("Expected worker id " + workerId + ", but got " + currentId));
+                    reject(new Error('Expected worker id ' + workerId + ', but got ' + currentId));
                 }
             });
         }).Await();
@@ -215,7 +211,7 @@ function cleanupInSameEAWorkerCMCGCTest() {
                 if (currentId == workerId) {
                     resolve(undefined);
                 } else {
-                    reject(new Error("Expected worker id " + workerId + ", but got " + currentId));
+                    reject(new Error('Expected worker id ' + workerId + ', but got ' + currentId));
                 }
             });
         }).Await();
@@ -229,17 +225,15 @@ function cleanupInSameEAWorkerCMCGCTest() {
     eaWorker2.run<void>((): void => {
         Coroutine.Schedule();
     }).Await();
-    waitForCompletion(async () => {
-        await cleanup1Finished;
-    })
-    waitForCompletion(async () => {
-        await cleanup2Finished;
-    })
+
+    await cleanup1Finished;
+    await cleanup2Finished;
+
     arktest.assertEQ(cleanup1Happened.get(), true);
     arktest.assertEQ(cleanup2Happened.get(), true);
 }
 
-function surviveGCTest() {
+async function surviveGCTest() {
     let cleanupFinished = new Promise<void>((resolve) => {
         eaWorker1.run<void>((): void => {
             eaFinReg = new FinalizationRegistry<undefined>(() => {
@@ -256,21 +250,20 @@ function surviveGCTest() {
     eaWorker1.run<void>((): void => {
         startGCWithCleanup(GC.Cause.FULL);
     }).Await();
-    waitForCompletion(async () => {
-        await cleanupFinished;
-    })
+
+    await cleanupFinished;
 }
 
-function main() {
+function main(): int {
     eaWorker1.start();
     eaWorker2.start();
     try {
         let testsuite = new FinRegTestSuite();
-        testsuite.addTest('cleanupCMCGCInMainTest', cleanupCMCGCInMainTest);
-        testsuite.addTest('cleanupCMCGCInWorkerTest', cleanupCMCGCInWorkerTest);
-        testsuite.addTest('cleanupCMCGCInEAWorkerTest', cleanupCMCGCInEAWorkerTest);
-        testsuite.addTest('cleanupInSameEAWorkerCMCGCTest', cleanupInSameEAWorkerCMCGCTest);
-        testsuite.addTest('surviveGCTest', surviveGCTest);
+        testsuite.addAsyncTest('cleanupCMCGCInMainTest', cleanupCMCGCInMainTest);
+        testsuite.addAsyncTest('cleanupCMCGCInWorkerTest', cleanupCMCGCInWorkerTest);
+        testsuite.addAsyncTest('cleanupCMCGCInEAWorkerTest', cleanupCMCGCInEAWorkerTest);
+        testsuite.addAsyncTest('cleanupInSameEAWorkerCMCGCTest', cleanupInSameEAWorkerCMCGCTest);
+        testsuite.addAsyncTest('surviveGCTest', surviveGCTest);
         return testsuite.run();
     } finally {
         eaWorker1.join();

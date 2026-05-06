@@ -65,12 +65,13 @@ class Event {
 
 async function executePeriodicallyTest() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    let runner = new taskpool.AsyncRunner("testRunner", 3);
+    let runner = new taskpool.AsyncRunner('testRunner', 3);
     let task1 = new taskpool.Task(returnAbc);
     await runner.execute(task1);
-    arktest.expectError(() => {
-        taskpool.executePeriodically(100, task1);
-    }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
+    arktest.expectError(
+        () => { taskpool.executePeriodically(100, task1); },
+        new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically')
+    );
     try {
         let res2 = await launchImpl(testPeriodFunc);
         arktest.assertEQ(res2, 'success');
@@ -85,12 +86,13 @@ function testPeriodFunc(): Any {
     let task = new taskpool.Task(sum, 80, 90);
     taskpool.executePeriodically(200, task);
     let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
-    
-    let runner = new taskpool.AsyncRunner("testRunner", 3);
-    arktest.expectError(() => {
-        runner.execute(task);
-    }, new Error('taskpool:: asyncRunner cannot execute executedTask'));
-    
+
+    let runner = new taskpool.AsyncRunner('testRunner', 3);
+    arktest.expectError(
+        () => { runner.execute(task); },
+        new Error('taskpool:: asyncRunner cannot execute executedTask')
+    );
+
     taskpool.cancel(task);
     return 'success';
 }
@@ -109,7 +111,7 @@ async function orderTest() {
         resultStr += '3';
         return resultStr;
     }
-    let runner = new taskpool.AsyncRunner("testRunner", 3);
+    let runner = new taskpool.AsyncRunner('testRunner', 3);
     let task1 = new taskpool.Task(func1);
     let task2 = new taskpool.Task(func2);
     let task3 = new taskpool.Task(func3);
@@ -131,45 +133,48 @@ async function orderTest() {
     arktest.assertEQ(res, 'abc');
 }
 
-function executeCommonTest(){
-    let runner = new taskpool.AsyncRunner("testRunner", 3);
+function executeCommonTest() {
+    let runner = new taskpool.AsyncRunner('testRunner', 3);
     let task = new taskpool.Task(returnAbc);
     taskpool.execute(task);
-    arktest.expectError(() => { 
-        runner.execute(task) 
-    }, new Error('taskpool:: asyncRunner cannot execute executedTask'));
+    arktest.expectError(
+        () => { runner.execute(task) },
+        new Error('taskpool:: asyncRunner cannot execute executedTask')
+    );
 }
 
 function executeAsyncRunnerTaskTest() {
-    let runner1 = new taskpool.AsyncRunner("testRunner", 3, 5);
-    let runner2 = new taskpool.AsyncRunner("testRunner", 3, 5);
+    let runner1 = new taskpool.AsyncRunner('testRunner', 3, 5);
+    let runner2 = new taskpool.AsyncRunner('testRunner', 3, 5);
 
     let task = new taskpool.Task(returnAbc);
     runner1.execute(task);
-    arktest.expectError(() => { 
-        runner2.execute(task) 
-    },new Error('taskpool:: asyncRunner cannot execute executedTask'));
+    arktest.expectError(
+        () => { runner2.execute(task) },
+        new Error('taskpool:: asyncRunner cannot execute executedTask')
+    );
 }
 
 function executeGroupTaskTest() {
-    let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
+    let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
 
     let group = new taskpool.TaskGroup();
     let task = new taskpool.Task(returnAbc);
     group.addTask(task);
-    arktest.expectError(() => { 
-        runner.execute(task) 
-    }, new Error('taskpool:: asyncRunner cannot execute groupTask'));
+    arktest.expectError(
+        () => { runner.execute(task) },
+        new Error('taskpool:: asyncRunner cannot execute groupTask')
+    );
 }
 
 async function cancelNonStartedTaskTest() {
     let task = new taskpool.Task(returnAbc);
-    let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
+    let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
 
-    arktest.expectError(() => {
-        taskpool.cancel(task); 
-        runner.execute(task);
-    }, new Error('taskpool:: task is not executed or has been executed'));
+    arktest.expectError(
+        () => { taskpool.cancel(task); runner.execute(task);},
+        new Error('taskpool:: task is not executed or has been executed')
+    );
     let t1 = new taskpool.Task(sum, 10, 20);
     let res1 = await runner.execute(t1);
     arktest.assertEQ(res1, 30);
@@ -181,34 +186,52 @@ async function cancelNonStartedTaskTest() {
 function addDependencyExecutedTaskTest() {
     let task1 = new taskpool.Task(returnAbc);
     let task2 = new taskpool.Task(returnAbc);
-    let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
+    let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
     runner.execute(task2);
-    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on'));
-    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency'));
+    arktest.expectError(
+        () => { task1.addDependency(task2) },
+        new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on')
+    );
+    arktest.expectError(
+        () => { task2.addDependency(task1) },
+        new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency')
+    );
 }
 
 async function cancelExecutingTaskTest() {
     let task = new taskpool.Task(returnAbc);
-    let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
+    let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
 
     let p = runner.execute(task);
     try {
         taskpool.cancel(task);
     } catch (e) {
-        let err = e as Error;
-        arktest.assertEQ(err.message, 'taskpool:: asyncRunner task has been executed');
+        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been executed');
         return undefined;
     }
-    arktest.expectError(() => { let res = waitForCompletion<Any>(() => p); }, new Error('taskpool:: asyncRunner task has been canceled'));
+
+    try {
+        await p
+        arktest.assertTrue(false, 'taskpool:: asyncRunner task has been canceled error expected')
+    } catch(e) {
+        if (e instanceof AssertionError) throw e
+        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been canceled')
+    }
 }
 
 async function cancelExecutedTaskTest() {
     let task = new taskpool.Task(returnAbc);
-    let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
-    arktest.expectError(() => { waitForCompletion<Any>(async () => {
+    let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
+
+    try {
         await runner.execute(task);
         taskpool.cancel(task);
-    }); }, new Error('taskpool:: asyncRunner task has been executed'));
+        arktest.assertTrue(false, 'asyncRunner task has been executed error expected')
+    } catch(e) {
+        if (e instanceof AssertionError) throw e
+        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been executed')
+    }
+
     let t1 = new taskpool.Task(sum, 10, 20);
     let res1 = await runner.execute(t1);
     arktest.assertEQ(res1, 30);
@@ -221,10 +244,11 @@ function addDependentTaskTest() {
     let task1 = new taskpool.Task(returnAbc);
     let task2 = new taskpool.Task(returnAbc);
     task1.addDependency(task2);
-    let runner = new taskpool.AsyncRunner("testRunner", 3, 5);
-    arktest.expectError(() => { 
-        runner.execute(task1) 
-    }, new Error('taskpool:: asyncRunner dependent task not allowed.'));
+    let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
+    arktest.expectError(
+        () => { runner.execute(task1) },
+        new Error('taskpool:: asyncRunner dependent task not allowed.')
+    );
 }
 
 async function taskWithDifferentParamsTest() {
@@ -253,7 +277,7 @@ async function taskWithDifferentParamsTest() {
     let task3 = new taskpool.Task(testWithThreeParams, 10.0, 'task3', 20.0);
     let task4 = new taskpool.Task(testWithFiveParams, 1.0, 2.0, 3.0, true, 'TEST');
 
-    let runner = new taskpool.AsyncRunner("testRunner", 3);
+    let runner = new taskpool.AsyncRunner('testRunner', 3);
     let res1 = await runner.execute(task1);
     let res2 = await runner.execute(task2);
     let res3 = await runner.execute(task3);
@@ -270,14 +294,14 @@ async function taskWithDifferentParamsTest() {
     arktest.assertEQ(task4.isDone(), true);
 }
 
-function printArgs(taskName: int){
+function printArgs(taskName: int) {
 
 }
 
 async function testExecute() {
-    const runner = new taskpool.AsyncRunner("test", 5);
+    const runner = new taskpool.AsyncRunner('test', 5);
     let num = 0;
-    for(let i =  0; i < 30; i++){
+    for (let i =  0; i < 30; i++) {
         let task: taskpool.Task = new taskpool.Task(`Task${i}`, printArgs, i);
             await runner.execute(task, taskpool.Priority.HIGH).then((res) => {
             num++;
@@ -289,9 +313,9 @@ async function testExecute() {
 }
 
 async function testWaitingDiacard() {
-    const runner = new taskpool.AsyncRunner("testexecute", 3, 5);
+    const runner = new taskpool.AsyncRunner('testexecute', 3, 5);
     let num = 0;
-    for(let i = 0; i < 30; i++){
+    for (let i = 0; i < 30; i++) {
         let task: taskpool.Task = new taskpool.Task(`Task${i}`, printArgs, i);
         await runner.execute(task, taskpool.Priority.HIGH).then((res) => {
             num++;
@@ -300,11 +324,11 @@ async function testWaitingDiacard() {
         })
     }
     arktest.assertEQ(num, 30);
-    
+
 }
 
 async function testDiscardHeadStrategy(): Promise<void> {
-    const runner = new taskpool.AsyncRunner("discard_head_test", 2, 2);
+    const runner = new taskpool.AsyncRunner('discard_head_test', 2, 2);
 
     const completedTasks: number[] = [];
     const discardedTasks: number[] = [];
@@ -318,64 +342,66 @@ async function testDiscardHeadStrategy(): Promise<void> {
             completedTasks.push(index);
             return `Task ${index} completed`;
         }, index, duration);
-        
+
         return runner.execute(task).catch((e: Error) => {
-            if (e.message.includes("waiting queue dropped head")) {
+            if (e.message.includes('waiting queue dropped head')) {
                 discardedTasks.push(index);
                 return `Task ${index} discarded`;
             }
             throw e;
         });
 
-    };
+    }
 
     const tasks = [
         createTask(0, 200), // longtask to ensure not executed immediately
-        createTask(1, 200), // 
+        createTask(1, 200), //
         createTask(2),      // join in waiting queue
-        createTask(3),      // 
+        createTask(3),      //
         createTask(4)       // trigger DISCARD_HEAD and drop task2
-    ];
+    ]
 
     const results = await Promise.allSettled(tasks);
 
-    arktest.assertEQ(discardedTasks.length, 1, "Exactly one task should be discarded");
-    arktest.assertEQ(discardedTasks[0], 2, "Task 2 (head of queue) should be discarded");
+    arktest.assertEQ(discardedTasks.length, 1, 'Exactly one task should be discarded');
+    arktest.assertEQ(discardedTasks[0], 2, 'Task 2 (head of queue) should be discarded');
 }
 
-// test  runningCapacity == 0 || waitingCapacity < 0 in constructor 
+// test  runningCapacity == 0 || waitingCapacity < 0 in constructor
 async function testEdgeConstructor(): Promise<void> {
 
     // runningCapacity == 0
-    arktest.expectError(() => { 
-        new taskpool.AsyncRunner("test2", 0, 2); 
-    }, new Error('taskpool:: runningCapacity must be a positive number'));
+    arktest.expectError(
+        () => { new taskpool.AsyncRunner('test2', 0, 2); },
+        new Error('taskpool:: runningCapacity must be a positive number')
+    );
 
 
     // waitingCapacity < 0
-    arktest.expectError(() => {
-        new taskpool.AsyncRunner("test2", 2, -2);
-    }, new Error('taskpool:: waitingCapacity must be a non-negative number'));
+    arktest.expectError(
+        () => { new taskpool.AsyncRunner('test2', 2, -2); },
+        new Error('taskpool:: waitingCapacity must be a non-negative number')
+    );
 }
 
-async function testAsyncRunnerExecuteOrder() : Promise<void>{
+async function testAsyncRunnerExecuteOrder(): Promise<void>{
     let count : int = 0;
     let runner = new taskpool.AsyncRunner(1);
     let isRunning = new Event();
     let result: int[] = [];
-    for(let i : int = 0; i < 10; i++){
-        let task = new taskpool.Task(`task_${i}`, async () => {
+    for (let i : int = 0; i < 10; i++) {
+        let task = new taskpool.Task(async() => {
             await delay(30);
             result.push(i);
             count++;
-            if(count >= 10) {
+            if (count >= 10) {
                 isRunning.fire();
             }
         });
         runner.execute(task);
     }
     isRunning.wait();
-    for(let i : int = 0; i< 10; i++) {
+    for (let i : int = 0; i < 10; i++) {
         arktest.assertEQ(result[i], i);
     }
 }
@@ -394,7 +420,7 @@ function main(): int {
     asyncRunnerSuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     asyncRunnerSuite.addTest('AddDependencyExecutedTaskTest', addDependencyExecutedTaskTest);
     asyncRunnerSuite.addAsyncTest('TaskWithDifferentParamsTest', taskWithDifferentParamsTest);
-    asyncRunnerSuite.addAsyncTest('TestExecute', testExecute); 
+    asyncRunnerSuite.addAsyncTest('TestExecute', testExecute);
     asyncRunnerSuite.addAsyncTest('TestDiscardHeadStrategy', testDiscardHeadStrategy);
     asyncRunnerSuite.addAsyncTest('TestEdgeConstructor', testEdgeConstructor);
     asyncRunnerSuite.addAsyncTest('TestWaitingDiacard', testWaitingDiacard);
