@@ -21,6 +21,14 @@ ani_verify_add_gtest(ani_verify_test_object_new_a
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_new_a_test.ets
 )
 
+ani_verify_add_gtest(ani_verify_test_object_get_type
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_get_type_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_object_instanceof
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_instanceof_test.cpp
+)
+
 ani_verify_add_generated_tests(ani_verify_test_object_get_field
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_get_field_test.cpp.j2
     J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_get_field_test.ets.j2

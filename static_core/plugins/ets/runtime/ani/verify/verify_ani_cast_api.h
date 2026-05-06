@@ -26,6 +26,7 @@ class VRef;
 class VModule;
 class VNamespace;
 class VObject;
+class VType;
 class VTupleValue;
 class VClass;
 class VEnum;
@@ -64,6 +65,11 @@ struct TypeMapping<VVm *> {
 };
 
 template <>
+struct TypeMapping<VVm **> {
+    using Type = ani_vm **;
+};
+
+template <>
 struct TypeMapping<VEnv *> {
     using Type = ani_env *;
 };
@@ -76,6 +82,11 @@ struct TypeMapping<VEnv **> {
 template <>
 struct TypeMapping<VRef *> {
     using Type = ani_ref;
+};
+
+template <>
+struct TypeMapping<VType *> {
+    using Type = ani_type;
 };
 
 template <>
@@ -111,6 +122,11 @@ struct TypeMapping<VEnumItem *> {
 template <>
 struct TypeMapping<VRef **> {
     using Type = ani_ref *;
+};
+
+template <>
+struct TypeMapping<VType **> {
+    using Type = ani_type *;
 };
 
 template <>

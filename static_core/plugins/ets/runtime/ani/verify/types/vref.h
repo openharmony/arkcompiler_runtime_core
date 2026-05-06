@@ -38,6 +38,14 @@ public:
     }
 };
 
+class VType : public VObject {
+public:
+    ani_type GetRef()
+    {
+        return static_cast<ani_type>(VObject::GetRef());
+    }
+};
+
 class VClass : public VObject {
 public:
     ani_class GetRef()

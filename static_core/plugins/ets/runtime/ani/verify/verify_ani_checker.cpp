@@ -40,6 +40,12 @@ namespace ark::ets::ani::verify {
 
 class ANIRefTypeChecker {
 public:
+    static EtsClass *GetTypeClass(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        ASSERT(ref != nullptr);
+        return EtsClass::FromEtsClassObject(s.ToInternalType(ref));
+    }
+
     static bool IsClass(ScopedManagedCodeFix &s, ani_ref ref)
     {
         if (ManagedCodeAccessor::IsUndefined(ref)) {
@@ -524,6 +530,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_REF:                          return "ani_ref";
         case ValueType::ANI_MODULE:                       return "ani_module";
         case ValueType::ANI_NAMESPACE:                    return "ani_namespace";
+        case ValueType::ANI_TYPE:                         return "ani_ref";
         case ValueType::ANI_CLASS:                        return "ani_class";
         case ValueType::ANI_ENUM:                         return "ani_enum";
         case ValueType::ANI_ENUM_ITEM:                    return "ani_enum_item";
@@ -543,7 +550,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_UTF16_BUFFER:                 return "uint16_t *";
         case ValueType::ANI_UTF16_STRING:                 return "const uint16_t *";
         case ValueType::ANI_ENV_STORAGE:                  return "ani_env **";
-        case ValueType::ANI_VM_STORAGE:                   return "ani_env **";
+        case ValueType::ANI_VM_STORAGE:                   return "ani_vm **";
         case ValueType::ANI_METHOD_STORAGE:               return "ani_method *";
         case ValueType::ANI_STATIC_METHOD_STORAGE:        return "ani_static_method *";
         case ValueType::ANI_FIELD_STORAGE:                return "ani_field *";
@@ -557,11 +564,14 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_FLOAT_STORAGE:                return "ani_float *";
         case ValueType::ANI_DOUBLE_STORAGE:               return "ani_double *";
         case ValueType::ANI_REF_STORAGE:                  return "ani_ref *";
+        case ValueType::ANI_TYPE_STORAGE:                 return "ani_ref *";
+        case ValueType::ANI_CLASS_STORAGE:                return "ani_ref *";
         case ValueType::ANI_OBJECT_STORAGE:               return "ani_object *";
         case ValueType::ANI_ENUM_STORAGE:                 return "ani_enum *";
         case ValueType::ANI_ENUM_ITEM_STORAGE:            return "ani_enum_item *";
         case ValueType::ANI_STRING_STORAGE:               return "ani_string *";
         case ValueType::ANI_SIZE_STORAGE:                 return "ani_size *";
+        case ValueType::UINT32_STORAGE:                   return "uint32_t *";
         case ValueType::ANI_BOOLEAN:                      return "ani_boolean";
         case ValueType::UINT32:                           return "uint32_t";
         case ValueType::ANI_ERROR:                        return "ani_error";
@@ -855,6 +865,24 @@ public:
         return {"wrong reference", ANIErrorSeverity::FATAL};
     }
 
+    VerificationResult VerifyType(VType *vtype)
+    {
+        auto err = VerifyRef(vtype);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsClass(s, vtype->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vtype->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+
+        class_ = ANIRefTypeChecker::GetTypeClass(s, vtype->GetRef());
+        return {};
+    }
+
     VerificationResult VerifyClass(VClass *vclass)
     {
         auto err = VerifyRef(vclass);
@@ -980,6 +1008,10 @@ public:
 
     VerificationResult VerifyError(VError *verr)
     {
+        if (verr == nullptr) {
+            return {"wrong reference", ANIErrorSeverity::FATAL};
+        }
+
         auto errMessage = VerifyRef(verr);
         if (errMessage) {
             return errMessage;
@@ -2028,6 +2060,12 @@ static VerificationResult VerifyNamespace(Verifier &v, const ANIArg &arg)
     return v.VerifyNamespace(arg.GetValueNamespace());
 }
 
+static VerificationResult VerifyType(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_TYPE);
+    return v.VerifyType(arg.GetValueType());
+}
+
 static VerificationResult VerifyClass(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CLASS);
@@ -2430,6 +2468,12 @@ static VerificationResult VerifyEnumItemStorage(Verifier &v, const ANIArg &arg)
     return v.VerifyTypeStorage(arg.GetValueEnumItemStorage(), "ani_enum_item");
 }
 
+static VerificationResult VerifyTypeStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_TYPE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueTypeStorage(), "ani_type");
+}
+
 static VerificationResult VerifyStringStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STRING_STORAGE);
@@ -2452,6 +2496,12 @@ static VerificationResult VerifyArrayBufferStorage(Verifier &v, const ANIArg &ar
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAYBUFFER_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueArrayBufferStorage(), "ani_arraybuffer");
+}
+
+static VerificationResult VerifyU32Storage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_U32_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueU32Storage(), "uint32_t");
 }
 
 static VerificationResult VerifySize([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
@@ -2494,6 +2544,12 @@ static VerificationResult VerifyObjectStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_OBJECT_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueObjectStorage(), "ani_object");
+}
+
+static VerificationResult VerifyClassStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CLASS_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueClassStorage(), "ani_class");
 }
 
 static VerificationResult VerifyErrorStorage(Verifier &v, const ANIArg &arg)
