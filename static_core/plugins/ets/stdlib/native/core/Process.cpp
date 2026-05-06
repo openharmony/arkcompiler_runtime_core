@@ -30,6 +30,7 @@
 #include "libarkbase/os/time.h"
 #include "plugins/ets/stdlib/native/core/Process.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+#include "runtime/include/runtime.h"
 
 namespace ark::ets::stdlib {
 
@@ -547,6 +548,11 @@ static ani_long GetSystemUptime([[maybe_unused]] ani_env *env)
 #endif
 }
 
+static void ReportUncaughtErrorImpl([[maybe_unused]] ani_env *env, ani_error error)
+{
+    Runtime::GetCurrent()->HandleUncaughtException(error);
+}
+
 void RegisterProcessNativeMethods(ani_env *env)
 {
     const auto childProcessImpls =
@@ -585,6 +591,8 @@ void RegisterProcessNativeMethods(ani_env *env)
         ani_native_function {"chdir", "C{std.core.String}:", reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
         ani_native_function {"uptime", ":l", reinterpret_cast<void *>(GetSystemUptime)},
         ani_native_function {"isIsolatedProcess", ":z", reinterpret_cast<void *>(IsIsolatedProcImpl)},
+        ani_native_function {"reportUncaughtError",
+                             "C{std.core.Error}:", reinterpret_cast<void *>(ReportUncaughtErrorImpl)},
     };
 
     ani_class childProcessKlass;

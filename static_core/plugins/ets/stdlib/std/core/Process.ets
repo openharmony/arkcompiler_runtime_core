@@ -545,11 +545,12 @@ export namespace StdProcess {
 
     const DEFAULT_ERROR_HANDLER_CALLBACK: (error: Object) => void = (error: Object): void => {
         console.error('Unhandled exception:', Class.of(error).getName());
+        error = error as Error;
+        reportUncaughtError(error);
         let out = new String();
         let toStr = new String();
         let stack = new String();
         if (error instanceof Error) {
-            error = error as Error;
             try {
                 toStr = error.toString() as string;
             } catch (e) {
@@ -659,6 +660,16 @@ export namespace StdProcess {
     function HandleUncaughtError(error: Object): void {
         errorHandler.handleUncaughtError(error);
     }
+
+    /**
+     *
+     * This is a function with no return value
+     * Report the uncaught error to vm and use DFX's ability to handle it
+     *
+     * @param { Error } error Uncaught error
+     *
+     */
+    native function reportUncaughtError(error: Error): void;
 
     let failedJobHandler: RejectedHandler = new RejectedHandler();
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
