@@ -26,6 +26,7 @@ parameters:
     enable-verifier: true
     extension: ${parameters.extension}
     es2panda-args: [ ]
+    verifier-args: [ ]
     # ark
     ark-timeout: 180
     gc-type: g1-gc
@@ -57,6 +58,7 @@ steps:
         # verifier
         enable-verifier: ${parameters.enable-verifier}
         verifier-timeout: ${parameters.verifier-timeout}
+        verifier-args: ${parameters.verifier-args}
         # ark
         boot-panda-files: ${parameters.boot-panda-files}
         ark-timeout: ${parameters.ark-timeout}
