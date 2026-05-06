@@ -8030,115 +8030,243 @@ NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(VEnv *venv, VClas
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Boolean(VEnv *venv, ani_boolean value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Boolean(VEnv *venv, ani_boolean value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Boolean(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoolean(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Boolean(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Boolean(VEnv *venv, ani_object obj, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Boolean(VEnv *venv, VObject *vobject, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Boolean(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::BOOLEAN),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Boolean(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Byte(VEnv *venv, ani_byte value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Byte(VEnv *venv, ani_byte value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Byte(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForByte(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Byte(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Byte(VEnv *venv, ani_object obj, ani_byte *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Byte(VEnv *venv, VObject *vobject, ani_byte *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Byte(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Byte(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Char(VEnv *venv, ani_char value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Char(VEnv *venv, ani_char value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Char(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForChar(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Char(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Char(VEnv *venv, ani_object obj, ani_char *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Char(VEnv *venv, VObject *vobject, ani_char *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Char(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Char(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Short(VEnv *venv, ani_short value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Short(VEnv *venv, ani_short value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Short(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForShort(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Short(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Short(VEnv *venv, ani_object obj, ani_short *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Short(VEnv *venv, VObject *vobject, ani_short *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Short(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Short(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Int(VEnv *venv, ani_int value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Int(VEnv *venv, ani_int value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Int(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForInt(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Int(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Int(VEnv *venv, ani_object obj, ani_int *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Int(VEnv *venv, VObject *vobject, ani_int *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Int(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Int(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Long(VEnv *venv, ani_long value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Long(VEnv *venv, ani_long value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Long(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForLong(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Long(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Long(VEnv *venv, ani_object obj, ani_long *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Long(VEnv *venv, VObject *vobject, ani_long *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Long(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Long(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Float(VEnv *venv, ani_float value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Float(VEnv *venv, ani_float value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Float(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForFloat(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Float(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Float(VEnv *venv, ani_object obj, ani_float *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Float(VEnv *venv, VObject *vobject, ani_float *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Float(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Float(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Box_Double(VEnv *venv, ani_double value, ani_object *result)
+NO_UB_SANITIZE static ani_status Primitive_Box_Double(VEnv *venv, ani_double value, VObject **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Box_Double(venv->GetEnv(), value, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForDouble(value, "value"),
+        ANIArg::MakeForObjectStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_object result {};
+    ani_status status = GetInteractionAPI(venv)->Primitive_Box_Double(venv->GetEnv(), value, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Primitive_Unbox_Double(VEnv *venv, ani_object obj, ani_double *result)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Double(VEnv *venv, VObject *vobject, ani_double *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Double(venv->GetEnv(), obj, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForBoxedPrimitiveObject(vobject, "obj", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->Primitive_Unbox_Double(venv->GetEnv(), vobject->GetRef(), result);
 }
 
 // clang-format off

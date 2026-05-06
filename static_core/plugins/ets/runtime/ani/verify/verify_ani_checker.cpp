@@ -174,7 +174,7 @@ static ani_size DoGetTupleLength(EtsExecutionContext *executionCtx, EtsHandle<Et
     return internalTuple->GetClass()->GetFieldsNumber();
 }
 
-static Class *GetTuplePrimitiveBoxClass(EtsExecutionContext *executionCtx, EtsType expectedType)
+static Class *GetPrimitiveBoxClass(EtsExecutionContext *executionCtx, EtsType expectedType)
 {
     switch (expectedType) {
         case EtsType::BOOLEAN:
@@ -229,7 +229,7 @@ static bool IsCorrectTupleElementType(EtsExecutionContext *executionCtx, EtsObje
         return !IsPrimitiveBoxedTupleElement(executionCtx, runtimeClass);
     }
 
-    return runtimeClass == GetTuplePrimitiveBoxClass(executionCtx, expectedType);
+    return runtimeClass == GetPrimitiveBoxClass(executionCtx, expectedType);
 }
 
 class CallArgs {
@@ -588,6 +588,13 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_SIZE_STORAGE:                 return "ani_size *";
         case ValueType::UINT32_STORAGE:                   return "uint32_t *";
         case ValueType::ANI_BOOLEAN:                      return "ani_boolean";
+        case ValueType::ANI_CHAR:                         return "ani_char";
+        case ValueType::ANI_BYTE:                         return "ani_byte";
+        case ValueType::ANI_SHORT:                        return "ani_short";
+        case ValueType::ANI_INT:                          return "ani_int";
+        case ValueType::ANI_LONG:                         return "ani_long";
+        case ValueType::ANI_FLOAT:                        return "ani_float";
+        case ValueType::ANI_DOUBLE:                       return "ani_double";
         case ValueType::UINT32:                           return "uint32_t";
         case ValueType::ANI_ERROR:                        return "ani_error";
         case ValueType::ANI_ERROR_STORAGE:                return "ani_error *";
@@ -1326,6 +1333,32 @@ public:
 
         EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
         class_ = etsObject->GetClass();
+        return {};
+    }
+
+    VerificationResult VerifyBoxedPrimitiveObject(VObject *vobject, EtsType primitiveType)
+    {
+        auto err = VerifyThisObject(vobject);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
+        auto *expectedClass = GetPrimitiveBoxClass(s.GetExecutionContext(), primitiveType);
+        auto *actualClass = etsObject->GetClass()->GetRuntimeClass();
+        auto makeError = [actualClass, expectedClass]() {
+            PandaStringStream ss;
+            ss << "wrong boxed primitive type, actual: " << actualClass->GetName()
+               << ", expected: " << expectedClass->GetName();
+            return ss.str();
+        };
+        if (!etsObject->GetClass()->IsBoxed()) {
+            return {makeError(), ANIErrorSeverity::ERROR};
+        }
+        if (actualClass != expectedClass) {
+            return {makeError(), ANIErrorSeverity::FATAL};
+        }
         return {};
     }
 
@@ -2506,6 +2539,12 @@ static VerificationResult VerifyThisObject(Verifier &v, const ANIArg &arg)
     return v.VerifyThisObject(arg.GetValueObject());
 }
 
+static VerificationResult VerifyBoxedPrimitiveObject(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOXED_PRIMITIVE_OBJECT);
+    return v.VerifyBoxedPrimitiveObject(arg.GetValueObject(), arg.GetReturnType());
+}
+
 static VerificationResult VerifyCtor(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CTOR);
@@ -2836,10 +2875,13 @@ static VerificationResult VerifyStaticNativeMethods(Verifier &v, const ANIArg &a
     return v.VerifyStaticNativeMethods(arg.GetValueNativeFunctions(), arg.GetNativeFunctionCount());
 }
 
-static VerificationResult VerifyBoolean(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyPrimitiveValue(Verifier &v, const ANIArg &arg)
 {
-    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOOLEAN);
-    return v.VerifyBoolean(arg.GetValueBoolean());
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_PRIMITIVE_VALUE);
+    if (arg.IsBooleanValue()) {
+        return v.VerifyBoolean(arg.GetValueBoolean());
+    }
+    return {};
 }
 
 static VerificationResult VerifyArrayBufferLength(Verifier &v, const ANIArg &arg)
