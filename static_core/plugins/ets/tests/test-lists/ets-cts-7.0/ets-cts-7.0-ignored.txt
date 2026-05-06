@@ -60,6 +60,21 @@
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/05.array_literal/arr_n_2.ets
 
+#34513 RTE on object literal of generic interface with default type parameter
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_interface_3.ets
+
+#34493 CTE on object literal of interface with generic method
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_1.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_2.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_3.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_4.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_5.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_6.ets
+
+#34491 CTE on implement interface method with type parameter depends on earlier one
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_7.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_8.ets
+
 #28898 Iterable refused as spread
 07.expressions/07.spread_expression/iterable.ets
 07.expressions/07.spread_expression/spex_49.ets
@@ -465,6 +480,11 @@
 #34295 No CTE for incorrect overriding
 15.semantic_rules/08.overriding/02.overriding_in_interfaces/overriding_n_7.ets
 15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_15.ets
+
+#34493 CTE on object literal of interface with generic method
+15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_5.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_7.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_11.ets
 
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets

@@ -1,0 +1,221 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 4.Override-Compatible Signatures in Generic Context 
+#                  with object literal creation
+cases:
+  - desc: |-
+      Gap 4a. Contravariant parameter, covariant return -- class types.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Handler<T extends Base> {
+          handle(input: T): T
+      }
+    call: |-
+      let h: Handler<Derived> = {
+          handle(input: Base): Derived {
+              return new Derived()
+          }
+      }
+      let result = h.handle(new Derived())
+      arktest.assertTrue(result instanceof Derived)
+
+  - desc: |-
+      Gap 4b. Contravariant parameter -- function types.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+      class Status {}
+
+      interface Callback {
+          execute(fn: (q: Base) => Derived): Status
+      }
+    call: |-
+      let c: Callback = {
+          execute(fn: (q: Derived) => Base): Status {
+              return new Status()
+          }
+      }
+      let s = c.execute((q: Base): Derived => { return new Derived() })
+      arktest.assertTrue(s instanceof Status)
+
+  - desc: |-
+      Gap 4c. Covariant return -- function types.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Factory {
+          create(): (q: Derived) => Base
+      }
+    call: |-
+      let f: Factory = {
+          create(): (q: Base) => Derived {
+              return (q: Base): Derived => { return new Derived() }
+          }
+      }
+      let fn = f.create()
+      arktest.assertTrue(fn(new Derived()) instanceof Derived)
+
+  - desc: |-
+      Gap 4d. Override-compatible with union type parameters.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+      class Another {}
+      class Status {}
+
+      interface Processor<T extends Derived> {
+          process(p: T): Status
+      }
+    call: |-
+      let p: Processor<Derived> = {
+          process(b: Base | Another): Status { return new Status() }
+      }
+      arktest.assertTrue(p.process(new Derived()) instanceof Status)
+
+  - desc: |-
+      Gap 4e. Override-compatible with union type return.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Producer {
+          produce(): Object
+      }
+    call: |-
+      let p: Producer = {
+          produce(): number | string { return 31 }
+      }
+      arktest.assertEQ(p.produce(), 31)
+
+  - desc: |-
+      Gap 4f. Type parameter constraint overriding -- covariant constraints.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Filter {
+          filter<T extends Base>(item: T): boolean
+      }
+    call: |-
+      let f: Filter = {
+          filter<T extends Base>(item: T): boolean { return true }
+      }
+      arktest.assertTrue(f.filter<Derived>(new Derived()))
+
+  - desc: |-
+      Gap 4g. Object widening to Object parameter.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+      class Status {}
+
+      interface MultiHandler {
+          handle(p1: Derived, p2: Base, p3: int): Status
+      }
+    call: |-
+      let h: MultiHandler = {
+          handle(p1: Object, p2: Object, p3: Object): Status { return new Status() }
+      }
+      arktest.assertTrue(h.handle(new Derived(), new Base(), 11) instanceof Status)
+
+  - desc: |-
+      Gap 4h. Generic method override with multiple type parameters.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Combiner {
+          combine<T extends Derived, U extends Base>(a: T, b: U): Base
+      }
+    call: |-
+      let c: Combiner = {
+          combine<T extends Derived, U extends Base>(a: T, b: U): Derived {
+              return new Derived()
+          }
+      }
+      arktest.assertTrue(c.combine<Derived, Base>(new Derived(), new Base()) instanceof Derived)
+
+  - desc: |-
+      Gap 4i. Single method covers multiple overloads.
+    decl: |-
+      class Base {}
+      class D1 extends Base {}
+      class D2 extends Base {}
+
+      interface Acceptor<T> {
+          accept(item: D1): T
+          accept(item: D2): T
+      }
+    call: |-
+      let a: Acceptor<Base> = {
+          accept(item: Base): Base { return item }
+      }
+      arktest.assertTrue(a.accept(new D1()) instanceof Base)
+      arktest.assertTrue(a.accept(new D2()) instanceof Base)
+
+  - desc: |-
+      Gap 4j. Covariant return with generic interface type parameter.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Supplier<T extends Base> {
+          supply(): T
+      }
+    call: |-
+      let s: Supplier<Base> = {
+          supply(): Derived {
+              return new Derived()
+          }
+      }
+      arktest.assertTrue(s.supply() instanceof Derived)
+
+  - desc: |-
+      Gap 4q. Contravariant fixed array parameter.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Collector<T extends Base> {
+          collect(items: FixedArray<T>): int
+      }
+    call: |-
+      let c: Collector<Derived> = {
+          collect(items: FixedArray<Base>): int {
+              return items.length
+          }
+      }
+      let arr: FixedArray<Derived> = [new Derived()]
+      arktest.assertEQ(c.collect(arr), 1)
+
+  - desc: |-
+      Gap 4m. Generic interface + generic method -- both override-compatible.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Transformer<T extends Base> {
+          transform<U extends Derived>(input: T, extra: U): T
+      }
+    call: |-
+      let t: Transformer<Derived> = {
+          transform<U extends Derived>(input: Base, extra: U): Derived {
+              return new Derived()
+          }
+      }
+      arktest.assertTrue(t.transform<Derived>(new Derived(), new Derived()) instanceof Derived)
