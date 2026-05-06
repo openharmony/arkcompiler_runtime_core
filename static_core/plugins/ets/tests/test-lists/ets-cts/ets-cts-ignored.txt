@@ -70,16 +70,6 @@
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
-#28583 instanceof on direct value types returns incorrect results for bigint cross-type checks
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_1.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_2.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_3.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_4.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_5.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_6.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_7.ets
-07.expressions/16.instanceof_expression/instanceof_value_types_matrix_10.ets
-
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
