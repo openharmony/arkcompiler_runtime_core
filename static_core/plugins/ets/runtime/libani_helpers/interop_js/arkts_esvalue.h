@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_LIBANI_HELPERS_INTEROP_JS_ARKTS_ESVALUE_H
 
 #include <ani.h>
+#include <node_api.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +35,13 @@ extern "C" {
  *  This API can be called only from ANI code.
  *  Experimental API, only for internal usage.
  */
-__attribute__((visibility("default"))) bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result);
+#ifdef __cplusplus
+__attribute__((visibility("default"))) bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result,
+                                                                 const napi_type_tag *tag = nullptr);
+#else
+__attribute__((visibility("default"))) bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result,
+                                                                 const napi_type_tag *tag);
+#endif
 
 #ifdef __cplusplus
 }

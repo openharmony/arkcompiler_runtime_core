@@ -143,7 +143,9 @@
     FN_MACRO(napi_create_dataview, napi_env, env, size_t, length, napi_value, arraybuffer, size_t, byte_offset,        \
              napi_value *, result)                                                                                     \
     FN_MACRO(napi_get_property_names, napi_env, env, napi_value, object, napi_value *, result)                         \
-    FN_MACRO(napi_create_object, napi_env, env, napi_value *, result)
+    FN_MACRO(napi_create_object, napi_env, env, napi_value *, result)                                                  \
+    FN_MACRO(napi_check_object_type_tag, napi_env, env, napi_value, js_object, const napi_type_tag *, type_tag,        \
+             bool *, result)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
