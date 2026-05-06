@@ -78,16 +78,18 @@ cases:
           arktest.assertTrue(a != b) // different types
 
     - warning: |-
-          Semantic error ESE0127: No matching call signature for assertTrue(Boolean)
-          Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.
-      tags: [negative, compile-only]
+          Warning W65002: Comparison of different enumeration types appears to be unintentional.
       decl: |-
           enum RGB { Red, Green, Blue }
           enum YMC { Yellow, Magenta, Cyan }
           let a = RGB.Red
           let b = YMC.Yellow
+          let c = YMC.Magenta
       main: |-
-          arktest.assertTrue(a != b) // different enumeration types
+          arktest.assertFalse(a != b)  // different enumeration types with same values
+          arktest.assertFalse(a !== b) // different enumeration types with same values
+          arktest.assertTrue(a != c)  // different enumeration types with diferent vales
+          arktest.assertTrue(a !== c) // different enumeration types with diferent vales
 
     - warning: |-
           Semantic error ESE0127: No matching call signature for assertTrue(Boolean)
