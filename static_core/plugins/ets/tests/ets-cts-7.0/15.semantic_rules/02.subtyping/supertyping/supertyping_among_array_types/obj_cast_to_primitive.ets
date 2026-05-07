@@ -21,4 +21,5 @@ function main(): void {
   let a1: Object = 1
   let a2: Object = 2
   let instance: int[] = [a1 as int, a2 as int];
+  arktest.assertTrue(instance instanceof Array, "expect instance of Array")
 }

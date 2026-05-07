@@ -15,7 +15,6 @@
 
 /*---
 desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: []
 files: ['./to_export.ets']
 ---*/
 
@@ -26,4 +25,5 @@ import {ClassAnnotation} from "./to_export"
 class MyClass {}
 
 function main() {
+    arktest.assertTrue(new MyClass instanceof MyClass, "expect instance of MyClass")
 }

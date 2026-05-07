@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 /*---
 desc: As any other declared entity, an annotation can be exported by using the keyword export.
-tags: []
 files: ['./to_export.ets']
 ---*/
 
@@ -26,4 +25,5 @@ import {ClassAnnotation} from "./to_export"
 class MyClass {}
 
 function main() {
+    arktest.assertTrue(new MyClass instanceof MyClass, "expect instance of MyClass")
 }

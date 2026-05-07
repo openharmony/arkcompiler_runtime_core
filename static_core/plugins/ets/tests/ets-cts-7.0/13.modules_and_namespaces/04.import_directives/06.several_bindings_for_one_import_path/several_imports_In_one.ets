@@ -22,4 +22,5 @@ import {sin, cos} from "std/math";
 function main(): void {
   let x = sin(1.0);
   let y = cos(1.0);
+  arktest.assertEQ(x * x + y * y, 1.0, "expect sum squares 1")
 }

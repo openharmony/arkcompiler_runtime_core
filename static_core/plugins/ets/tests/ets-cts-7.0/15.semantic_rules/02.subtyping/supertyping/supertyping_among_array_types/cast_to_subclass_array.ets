@@ -25,4 +25,5 @@ function main(): void {
   let b: B = new B;
   let i: I = b;
   let instance: B[] = [b, i as B];
+  arktest.assertTrue(instance instanceof Array, "expect instance of Array")
 }

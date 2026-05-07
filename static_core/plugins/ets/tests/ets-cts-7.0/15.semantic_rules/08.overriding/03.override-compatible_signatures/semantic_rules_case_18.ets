@@ -35,9 +35,11 @@ function main(): void {
 
     try {
         a.methodOne(a);
+        arktest.assertTrue(false, "this code is not expected to execute")
     } catch (e) {}
 
     try {
         b.methodOne(a);
+        arktest.assertTrue(false, "this code is not expected to execute")
     } catch (e) {}
 }

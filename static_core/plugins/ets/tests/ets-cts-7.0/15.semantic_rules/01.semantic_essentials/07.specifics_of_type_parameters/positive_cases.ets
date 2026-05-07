@@ -22,7 +22,7 @@ class Pos<T extends number> {
 }
 
 function main() {
-    new Pos<number>(1)
-    new Pos<number>(new Number(1))
-    new Pos<double>(1.0)
+    arktest.assertTrue(new Pos<number>(1) instanceof Pos, "expect instance of Pos - 1")
+    arktest.assertTrue(new Pos<number>(new Number(1)) instanceof Pos, "expect instance of Pos - new Number(1)")
+    arktest.assertTrue(new Pos<double>(1.0) instanceof Pos, "expect instance of Pos - 1.0")
 }

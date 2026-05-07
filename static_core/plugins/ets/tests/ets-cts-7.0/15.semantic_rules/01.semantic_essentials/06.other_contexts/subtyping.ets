@@ -21,7 +21,9 @@ class Base {}
 
 class Derived extends Base {}
 
-function want_base(x: Base) {}
+function want_base(x: Base) {
+  arktest.assertTrue(x instanceof Base, "expect instance of Base")
+}
 
 function main() {
     let a = new Base()

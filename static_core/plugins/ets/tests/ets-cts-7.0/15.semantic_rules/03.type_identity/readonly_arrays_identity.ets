@@ -24,4 +24,5 @@ function main(): void {
     let arr: readonly number[] = [1];
     //'readonly [Double]' must be able to assign to type 'ReadonlyArray<Double>
     let arr2: ReadonlyArray<Double> = arr
+    arktest.assertTrue(arr2 instanceof Array, "expect instance of Array")
 }

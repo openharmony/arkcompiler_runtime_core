@@ -22,4 +22,5 @@ import {sin as Sine, sin as SIN} from "std/math";
 function main(): void {
   let x = Sine(1.0);
   let y = SIN(1.0);
+  arktest.assertEQ(x, y, "expect sin(1.0) in both cases")
 }

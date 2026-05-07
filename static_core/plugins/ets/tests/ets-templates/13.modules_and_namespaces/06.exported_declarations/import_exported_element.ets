@@ -23,4 +23,5 @@ import * as Time from "std/time"
 
 function main() {
   let value = new Time.Chrono();
+  arktest.assertTrue(value instanceof Object, "expect instance of Object")
 }

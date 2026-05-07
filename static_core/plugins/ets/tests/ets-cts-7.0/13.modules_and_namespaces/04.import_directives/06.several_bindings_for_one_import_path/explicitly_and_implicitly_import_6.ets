@@ -24,4 +24,6 @@ function main(): void {
   let x = Sine(1.0);
   let y = all.sin(1.0);
   let z = Math.sin(1.0);
+  arktest.assertEQ(x, y, "expect sin(1.0) in both cases - y")
+  arktest.assertEQ(x, z, "expect sin(1.0) in both cases - z")
 }
