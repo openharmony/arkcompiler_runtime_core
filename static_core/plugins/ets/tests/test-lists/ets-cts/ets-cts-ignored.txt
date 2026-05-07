@@ -541,6 +541,9 @@
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_execution/01.async_functions/afunc_n_5.ets
 
+#34602
+16.concurrency/04.parallel_execution/02.eaworker_api/eaworker_two_workers_smoke.ets
+
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
