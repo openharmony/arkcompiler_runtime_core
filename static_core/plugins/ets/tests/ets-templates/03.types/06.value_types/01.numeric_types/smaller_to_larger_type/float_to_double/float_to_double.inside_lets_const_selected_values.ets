@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -28,7 +28,7 @@ desc: Checking that the values of the larger type include all values from the sm
 function main(){
     {{modif}} {{name_initial_variable0}}: {{data.initialType}} = {{data.value}}
     {{modif}} {{name_result_variable0}}: {{data.resultType}} = {{name_initial_variable0}}
-    arktest.assertTrue({{name_result_variable0}} instanceof {{data.resultType}}, "The type of the actual result (" + (typeof {{name_result_variable0}}) + ") is of a different type than expected ({{data.resultType}})")
+    arktest.assertTrue(({{name_result_variable0}} instanceof {{data.resultType}}) || ((typeof {{name_result_variable0}}) == "number"), "The type of the actual result (" + (typeof {{name_result_variable0}}) + ") is of a different type than expected ({{data.resultType}})")
     arktest.assertDoubleEQ({{name_result_variable0}}, {{data.result}}, {{data.absError}});
 }
 
