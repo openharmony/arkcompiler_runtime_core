@@ -28,7 +28,7 @@ cases:
               // CTE, No overload for foo is defined in I3
           }
       expected_out: |-
-          No new overload for 'foo' is defined in I3
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'I3'.
 
     - decl: |-
           interface I {
@@ -45,7 +45,75 @@ cases:
               // CTE, No overload for foo is defined in I3
           }
       expected_out: |-
-          No new overload for 'foo' is defined in I3
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'I3'.
+
+    - decl: |-
+          interface I {
+              m1(p: int): string;
+              m2(p: string): string;
+          }
+          interface I1 extends I {
+              overload foo { m1, m2 }
+          }
+          interface I2 extends I {
+              overload foo { m1, m2 }
+          }
+          interface I3 extends I1, I2 {
+          }
+      expected_out: |-
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'I3'.
+
+    - decl: |-
+          interface I1 {
+              f1(p: int): string;
+              overload foo { f1 }
+          }
+          interface I2 {
+              f2(p: string): string;
+              overload foo { f2 }
+          }
+          interface I3 {
+              f3(p: boolean): string;
+              overload foo { f3 }
+          }
+          interface I4 extends I1, I2, I3 {
+          }
+      expected_out: |-
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'I4'.
+
+    - decl: |-
+          interface I {
+              m1(p: int): string;
+              m2(p: string): string;
+          }
+          interface I1 extends I {
+              overload foo { m1 }
+          }
+          interface I2 extends I {
+              overload foo { m2 }
+          }
+          interface J extends I1 {
+          }
+          interface K extends I2 {
+          }
+          interface L extends J, K {
+          }
+      expected_out: |-
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'L'.
+
+    - decl: |-
+          interface I1 {
+              f1(p: int): string;
+              overload foo { f1 }
+          }
+          interface I2 {
+              f2(p: string): string;
+              overload foo { f2 }
+          }
+          interface I3 extends I1, I2 {
+          }
+      expected_out: |-
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'I3'.
 
     - decl: |-
           interface I1 {
