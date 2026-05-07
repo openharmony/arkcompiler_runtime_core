@@ -1,0 +1,59 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:  
+  # long
+  - { type: "long", value: "(-7).toLong()", instanceOfType: "long", result: "true" }
+  - { type: "long", value: "(-6).toLong()", instanceOfType: "short", result: "false" }
+  - { type: "long", value: "(-5).toLong()", instanceOfType: "int", result: "false" }
+  - { type: "long", value: "(-4).toLong()", instanceOfType: "byte", result: "false" }
+  - { type: "long", value: "(-3).toLong()", instanceOfType: "float", result: "false" }
+  - { type: "long", value: "(-2).toLong()", instanceOfType: "double", result: "false" }
+  - { type: "long", value: "(-1).toLong()", instanceOfType: "bigint", result: "false" }
+  - { type: "long", value: "(-110).toLong()", instanceOfType: "boolean", result: "false" }
+  - { type: "long", value: "(11).toLong()", instanceOfType: "string", result: "false" }
+  - { type: "long", value: "(0).toLong()", instanceOfType: "char", result: "false" }
+
+  - { type: "long", value: "3000000000", instanceOfType: "Long", result: "true" }
+  - { type: "long", value: "-4000000000", instanceOfType: "Short", result: "false" }
+  - { type: "long", value: "5000000000", instanceOfType: "Byte", result: "false" }
+  - { type: "long", value: "-6000000000", instanceOfType: "Int", result: "false" }
+  - { type: "long", value: "7000000000", instanceOfType: "Float", result: "false" }
+  - { type: "long", value: "-8000000000", instanceOfType: "Double", result: "false" }
+  - { type: "long", value: "9000000000", instanceOfType: "BigInt", result: "false" }
+  - { type: "long", value: "-10000000000", instanceOfType: "Boolean", result: "false" }
+  - { type: "long", value: "11000000000", instanceOfType: "String", result: "false" }
+  - { type: "long", value: "-12000000000", instanceOfType: "Char", result: "false" }
+
+  # Long (alias)
+  - { type: "Long", value: "new Long(1)", instanceOfType: "long", result: "true" }
+  - { type: "Long", value: "new Long(0)", instanceOfType: "short", result: "false" }
+  - { type: "Long", value: "new Long(-1)", instanceOfType: "int", result: "false" }
+  - { type: "Long", value: "new Long(0b1001)", instanceOfType: "byte", result: "false" }
+  - { type: "Long", value: "new Long(0x7F)", instanceOfType: "float", result: "false" }
+  - { type: "Long", value: "new Long(0o123)", instanceOfType: "double", result: "false" }
+  - { type: "Long", value: "new Long(127)", instanceOfType: "bigint", result: "false" }
+  - { type: "Long", value: "new Long(-110)", instanceOfType: "boolean", result: "false" }
+  - { type: "Long", value: "new Long(11)", instanceOfType: "string", result: "false" }
+  - { type: "Long", value: "new Long(0)", instanceOfType: "char", result: "false" }
+
+  - { type: "Long", value: "new Long(-0X0)", instanceOfType: "Long", result: "true" }
+  - { type: "Long", value: "new Long(-0B0111_1111)", instanceOfType: "Short", result: "false" }
+  - { type: "Long", value: "new Long(58)", instanceOfType: "Byte", result: "false" }
+  - { type: "Long", value: "new Long(-0X0A)", instanceOfType: "Int", result: "false" }
+  - { type: "Long", value: "new Long(-0O014)", instanceOfType: "Float", result: "false" }
+  - { type: "Long", value: "new Long(0)", instanceOfType: "Double", result: "false" }
+  - { type: "Long", value: "new Long(77)", instanceOfType: "BigInt", result: "false" }
+  - { type: "Long", value: "new Long(-0b1_10)", instanceOfType: "Boolean", result: "false" }
+  - { type: "Long", value: "new Long(-0O56)", instanceOfType: "String", result: "false" }
+  - { type: "Long", value: "new Long(0x0)", instanceOfType: "Char", result: "false" }
