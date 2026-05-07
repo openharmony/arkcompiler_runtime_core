@@ -554,8 +554,10 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_VM_STORAGE:                   return "ani_vm **";
         case ValueType::ANI_METHOD_STORAGE:               return "ani_method *";
         case ValueType::ANI_STATIC_METHOD_STORAGE:        return "ani_static_method *";
+        case ValueType::ANI_FUNCTION_STORAGE:             return "ani_function *";
         case ValueType::ANI_FIELD_STORAGE:                return "ani_field *";
         case ValueType::ANI_STATIC_FIELD_STORAGE:         return "ani_static_field *";
+        case ValueType::ANI_VARIABLE_STORAGE:             return "ani_variable *";
         case ValueType::ANI_BOOLEAN_STORAGE:              return "ani_boolean *";
         case ValueType::ANI_CHAR_STORAGE:                 return "ani_char *";
         case ValueType::ANI_BYTE_STORAGE:                 return "ani_byte *";
@@ -920,22 +922,27 @@ public:
         return {};
     }
 
-    VerificationResult VerifyClass(VClass *vclass)
+    VerificationResult VerifyClassRef(VRef *vref)
     {
-        auto err = VerifyRef(vclass);
+        auto err = VerifyRef(vref);
         if (err) {
             return err;
         }
 
         ScopedManagedCodeFix s(venv_->GetEnv());
-        if (!ANIRefTypeChecker::IsClass(s, vclass->GetRef())) {
+        if (!ANIRefTypeChecker::IsClass(s, vref->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vclass->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vref->GetRef());
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
-        class_ = s.ToInternalType(vclass->GetRef());
+        class_ = s.ToInternalType(static_cast<ani_class>(vref->GetRef()));
         return {};
+    }
+
+    VerificationResult VerifyClass(VClass *vclass)
+    {
+        return VerifyClassRef(vclass);
     }
 
     VerificationResult VerifyEnumDescriptor(const char *enumDescriptor)
@@ -1533,6 +1540,29 @@ public:
         return VerifyFindFieldNameImpl<true>(name);
     }
 
+    VerificationResult VerifyFindVariableName(const char *name)
+    {
+        auto err = VerifyTypePtr(name, "const char *");
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr) {
+            return {"wrong class for variable", ANIErrorSeverity::FATAL};
+        }
+
+        EtsField *field = class_->GetStaticFieldIDByName(name, nullptr);
+        if (field != nullptr) {
+            return {};
+        }
+        return {"wrong variable", ANIErrorSeverity::ERROR};
+    }
+
+    VerificationResult VerifyFindFunctionName(const char *name)
+    {
+        return VerifyMethodNameImpl(name, true);
+    }
+
     VerificationResult VerifyFindMethodSignature(const char *signature)
     {
         return VerifyFindMethodSignatureImpl<false>(signature);
@@ -1541,6 +1571,18 @@ public:
     VerificationResult VerifyFindStaticMethodSignature(const char *signature)
     {
         return VerifyFindMethodSignatureImpl<true>(signature);
+    }
+
+    VerificationResult VerifyFindFunctionSignature(const char *signature)
+    {
+        signature_ = signature;
+        if (class_ == nullptr) {
+            return {"wrong class for function", ANIErrorSeverity::FATAL};
+        }
+        if (name_ == nullptr) {
+            return {};
+        }
+        return VerifyFindMethod(name_, signature_, true, "wrong function");
     }
 
     VerificationResult VerifyFindSetterName(const char *name)
@@ -2196,6 +2238,18 @@ static VerificationResult VerifyFindStaticMethodSignature(Verifier &v, const ANI
     return v.VerifyFindStaticMethodSignature(arg.GetValueUTF8String());
 }
 
+static VerificationResult VerifyFindFunctionName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_FUNCTION_NAME);
+    return v.VerifyFindFunctionName(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyFindFunctionSignature(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_FUNCTION_SIGNATURE);
+    return v.VerifyFindFunctionSignature(arg.GetValueUTF8String());
+}
+
 static VerificationResult VerifyFindSetterName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_SETTER_NAME);
@@ -2358,6 +2412,12 @@ static VerificationResult VerifyFindStaticFieldName(Verifier &v, const ANIArg &a
     return v.VerifyFindStaticFieldName(arg.GetValueUTF8String());
 }
 
+static VerificationResult VerifyFindVariableName(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIND_VARIABLE_NAME);
+    return v.VerifyFindVariableName(arg.GetValueUTF8String());
+}
+
 static VerificationResult VerifyReadPropertyByName(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_PROPERTY_BY_NAME);
@@ -2448,6 +2508,12 @@ static VerificationResult VerifyStaticMethodStorage(Verifier &v, const ANIArg &a
     return v.VerifyTypeStorage(arg.GetValueStaticMethodStorage(), "ani_static_method");
 }
 
+static VerificationResult VerifyFunctionStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTION_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFunctionStorage(), "ani_function");
+}
+
 static VerificationResult VerifyFieldStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIELD_STORAGE);
@@ -2458,6 +2524,12 @@ static VerificationResult VerifyStaticFieldStorage(Verifier &v, const ANIArg &ar
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_FIELD_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueStaticFieldStorage(), "ani_static_field");
+}
+
+static VerificationResult VerifyVariableStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_VARIABLE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueVariableStorage(), "ani_variable");
 }
 
 static VerificationResult VerifyBooleanStorage(Verifier &v, const ANIArg &arg)

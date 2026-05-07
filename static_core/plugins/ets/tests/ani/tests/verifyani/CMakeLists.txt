@@ -22,6 +22,7 @@ add_subdirectory(error_ops)
 # NOTE(arutiunianan, #32898) re-enable after fix of flaky failures
 # add_subdirectory(function_ops)
 add_subdirectory(local_scope_ops)
+add_subdirectory(module_ops)
 add_subdirectory(object_ops)
 add_subdirectory(ref_ops)
 add_subdirectory(scope_ops)
