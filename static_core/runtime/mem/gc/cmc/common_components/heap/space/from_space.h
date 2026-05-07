@@ -53,6 +53,9 @@ public:
 
     void AssembleGarbageCandidates(RegionList &list)
     {
+        list.VisitAllRegions([](RegionDesc *region) {
+            RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(region)->SetCollectionSetRegionFlag(true);
+        });
         fromRegionList_.MergeRegionList(list, RegionDesc::RegionType::FROM_REGION);
     }
 
@@ -96,6 +99,7 @@ public:
     void ExemptFromRegion(RegionDesc *region)
     {
         exemptedFromRegionList_.PrependRegion(region, RegionDesc::RegionType::EXEMPTED_FROM_REGION);
+        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(region)->SetCollectionSetRegionFlag(false);
     }
 
     size_t GetSurvivedSize() const
