@@ -22,26 +22,28 @@ cases:
 
         const ea1 = new EAWorker();
         ea1.start();
-        await ea1.run<undefined>(() => {
-          waitForCompletion(async () => {
-            await m.lock()
+        await ea1.run<undefined>(async () => {
+          await m.lock()
+          try {
             flag = true
             cv.notifyOne(m)
+          } finally {
             m.unlock()
-          })
-        });
+          }
+        })
 
         const ea2 = new EAWorker();
         ea2.start();
-        await ea2.run<undefined>(() => {
-          waitForCompletion(async () => {
-            await m.lock()
+        await ea2.run<undefined>(async () => {
+          await m.lock()
+          try {
             while (flag == false) {
               await cv.wait(m)
             }
             arktest.assertTrue(flag);
+          } finally {
             m.unlock()
-          })
+          }
         });
         
         ea1.quit();
