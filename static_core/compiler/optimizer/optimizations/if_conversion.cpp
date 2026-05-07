@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -350,7 +350,9 @@ bool IfConversion::TryOptimizeSelectInstByMergingUnaryOperation(Inst *selectInst
     if (!UnaryOperationsAreMergable(v0, v1, &hasImm, &imm)) {
         return false;
     }
-    ASSERT(v0->GetType() == selectInst->GetType());
+    // Like with Phi, actual integer bit width may be different, for example:
+    // - after replacing XorI.i32 <bool>, 1 with Compare.b
+    ASSERT(DataType::GetCommonType(v0->GetType()) == DataType::GetCommonType(selectInst->GetType()));
 
     selectInst->SetInput(0, v0->GetInput(0).GetInst());
     selectInst->SetInput(1, v1->GetInput(0).GetInst());
