@@ -65,6 +65,19 @@ ANI_EXPORT std::string GetFieldStr(ani_env *env, ani_object obj, const char *nam
         }                                                          \
     } while (0)
 
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_RETURN_ON_PENDING_ERROR(status)                                            \
+    do {                                                                               \
+        ani_status _status = (status);                                                 \
+        if (UNLIKELY(_status != ANI_OK)) {                                             \
+            if (_status == ANI_PENDING_ERROR || _status == ANI_OUT_OF_MEMORY) {        \
+                return _status;                                                        \
+            }                                                                          \
+            ark::ets::stdlib::StdlibLogFatal("ANI_FATAL_IF_ERROR: " #status, _status); \
+            UNREACHABLE();                                                             \
+        }                                                                              \
+    } while (0)
+
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 }  // namespace ark::ets::stdlib

@@ -152,6 +152,55 @@ function test8(): int {
     return failure
 }
 
+function test9(): int {
+    let failure = 0
+    let ctr = new Int(0)
+    let emptyGlobal = new RegExp("(?:)", "g")
+    let emptyLambda: (str: String, args: Object[]) => String = (str: String, args: Object[]): String => {
+        failure += checkTestResult(str, "")
+        failure += checkTestResult(args[0] as Double, new Double(ctr.toDouble()))
+        failure += checkTestResult(args[1].toString(), "ab")
+        let ans = ctr.toString()
+        ctr++
+        return ans
+    }
+    failure += checkTestResult("0a1b2", "ab".replace(emptyGlobal, emptyLambda))
+    failure += checkTestResult(ctr, 3)
+
+    ctr = new Int(0)
+    let emptyUnicodeGlobal = new RegExp("(?:)", "gu")
+    let unicodeLambda: (str: String, args: Object[]) => String = (str: String, args: Object[]): String => {
+        failure += checkTestResult(str, "")
+        failure += checkTestResult(args[0] as Double, new Double((ctr == 0 ? 0 : 2).toDouble()))
+        failure += checkTestResult(args[1].toString(), "😀")
+        let ans = ctr.toString()
+        ctr++
+        return ans
+    }
+    failure += checkTestResult("0😀1", "😀".replace(emptyUnicodeGlobal, unicodeLambda))
+    failure += checkTestResult(ctr, 2)
+
+    return failure
+}
+
+function test10(): int {
+    let failure = 0
+    let named = new RegExp("(?<fst>.)(?<snd>.)", "")
+    let namedLambda: (str: String, args: Object[]) => String = (str: String, args: Object[]): String => {
+        failure += checkTestResult(str, "ab")
+        failure += checkTestResult(args[0].toString(), "a")
+        failure += checkTestResult(args[1].toString(), "b")
+        failure += checkTestResult(args[2] as Double, new Double(0.0))
+        failure += checkTestResult(args[3].toString(), "ab")
+        let groups = args[4] as Record<String, String | undefined>
+        failure += checkTestResult(groups.get("fst")!.toString(), "a")
+        failure += checkTestResult(groups.get("snd")!.toString(), "b")
+        return groups.get("snd")! + groups.get("fst")!
+    }
+    failure += checkTestResult("ba", "ab".replace(named, namedLambda))
+    return failure
+}
+
 function main(): int {
     let str = "xaxbxcx"
     let failure = 0
@@ -163,7 +212,20 @@ function main(): int {
     failure += test6()
     failure += test7()
     failure += test8()
+    failure += test9()
+    failure += test10()
+    failure += test11()
     console.println(failure)
+    return failure
+}
+
+function test11(): int {
+    let failure = 0
+    failure += checkTestResult("xaxbx", "ab".replace(new RegExp("(?:)", "g"), "x"))
+    failure += checkTestResult("xx", "😀😀".replace(new RegExp("😀", "g"), "x"))
+    failure += checkTestResult("😎😎", "😀😀".replace(new RegExp("😀", "g"), "😎"))
+    failure += checkTestResult("x😀x", "😀".replace(new RegExp("(?:)", "gu"), "x"))
+    failure += checkTestResult("😎😀😎", "😀".replace(new RegExp("(?:)", "gu"), "😎"))
     return failure
 }
 

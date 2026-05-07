@@ -14,6 +14,7 @@
  */
 
 #include "regexp_8.h"
+#include "regexp_common.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -262,6 +263,13 @@ void RegExp8::FreePcre2Object(Pcre2Obj re)
     }
     pcre2_code_free(reinterpret_cast<pcre2_code *>(re->pcre2Code));
     delete re;
+}
+
+bool RegExp8::HasCapturingGroups(Pcre2Obj re)
+{
+    ASSERT(re != nullptr);
+    ASSERT(re->pcre2Code != nullptr);
+    return HasCapturingGroupsImpl<pcre2_code_8>(re->pcre2Code);
 }
 
 void RegExp8::SanitizeGroupCaptureResults(const std::vector<bool> &countableGroups,

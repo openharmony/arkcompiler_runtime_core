@@ -20,7 +20,7 @@
 
 namespace ark::ets::stdlib {
 
-void RegisterRegExpNativeMethods(ani_env *env);
+ani_status RegisterRegExpNativeMethods(ani_env *env);
 
 }  // namespace ark::ets::stdlib
 
