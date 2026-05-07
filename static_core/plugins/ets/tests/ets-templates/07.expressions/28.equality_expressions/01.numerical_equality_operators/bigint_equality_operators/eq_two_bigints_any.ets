@@ -17,6 +17,7 @@
 desc: >-
     Value equality is used for operands of bigint type.
     Two bigints are equal if they have the same value.
+tags: [no-warmup]
 ---*/
 
 function eqAnyAny(a: Any, b: Any): void {
@@ -48,9 +49,26 @@ function main(): int {
     tests.addTest('{{loop.index}}', () => {
 {%- for a in c['values'] %}
 {%- for b in c['values'] %}
-        eqAnyAny({{a}}, {{b}})
-        eqAnyBigInt({{a}}, {{b}})
-        eqBigIntAny({{a}}, {{b}})
+        {
+            arktest.assertEQ({{a}}, {{b}})
+            arktest.assertTrue({{a}} == {{b}})
+            arktest.assertTrue({{a}} === {{b}})
+            arktest.assertFalse({{a}} != {{b}})
+            arktest.assertFalse({{a}} !== {{b}})
+            eqAnyAny({{a}}, {{b}})
+            eqAnyBigInt({{a}}, {{b}})
+            eqBigIntAny({{a}}, {{b}})
+
+            let localVar = {{a}}
+            arktest.assertEQ(localVar, localVar)
+            arktest.assertTrue(localVar == localVar)
+            arktest.assertTrue(localVar === localVar)
+            arktest.assertFalse(localVar != localVar)
+            arktest.assertFalse(localVar !== localVar)
+            eqAnyAny(localVar, localVar)
+            eqAnyBigInt(localVar, localVar)
+            eqBigIntAny(localVar, localVar)
+        }
 {%- endfor %}
 {% endfor %}
     })

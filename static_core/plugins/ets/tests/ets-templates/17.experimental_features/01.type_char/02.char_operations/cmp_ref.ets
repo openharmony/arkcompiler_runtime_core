@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for v in  vals %}
+{%- for v in vals %}
 /*---
 desc: >-
     ArkTS provides a number of operators to act on character values:
@@ -20,8 +20,8 @@ desc: >-
 ---*/
 
 function main() {
-    const v1: Char = new Char({{v.v1}})
-    const v2: Char = new Char({{v.v2}})
+    {{v.kw | default('const')}} v1: {{v.t1 | default('char')}} = {{v.v1}}
+    {{v.kw | default('const')}} v2: {{v.t2 | default('char')}} = {{v.v2}}
 
     {%- for c in v.cases %}
     arktest.assertEQ( (v1 {{c.op}} v2), {{c.r}} )

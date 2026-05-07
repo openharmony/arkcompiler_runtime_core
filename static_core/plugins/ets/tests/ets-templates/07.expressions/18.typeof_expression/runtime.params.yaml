@@ -91,3 +91,126 @@ cases:
           }
           let a = new A<undefined>(undefined)
           let t = a.m()
+
+    - desc: Object holding int at runtime
+      name: int
+      decl: |-
+          function f(o: Object): string {
+              return typeof o
+          }
+          let t = f(42)
+
+    - desc: Object holding string at runtime
+      name: string
+      decl: |-
+          function f(o: Object): string {
+              return typeof o
+          }
+          let t = f("hello")
+
+    - desc: Object holding boolean at runtime
+      name: boolean
+      decl: |-
+          function f(o: Object): string {
+              return typeof o
+          }
+          let t = f(true)
+
+    - desc: Object holding double at runtime
+      name: number
+      decl: |-
+          function f(o: Object): string {
+              return typeof o
+          }
+          let t = f(3.14)
+
+    - desc: Object holding function at runtime
+      name: function
+      decl: |-
+          function f(o: Object): string {
+              return typeof o
+          }
+          let t = f(() => { return 1 })
+
+    - desc: Object holding null at runtime
+      name: object
+      decl: |-
+          function f(o: Object|null): string {
+              return typeof o
+          }
+          let t = f(null)
+
+    - desc: type parameter with primitive int
+      name: int
+      decl: |-
+          class A<T> {
+              f: T
+              m() {
+                  return typeof this.f
+              }
+              constructor(p: T) {
+                  this.f  = p
+              }
+          }
+          let a = new A<int>(42)
+          let t = a.m()
+
+    - desc: type parameter with string
+      name: string
+      decl: |-
+          class A<T> {
+              f: T
+              m() {
+                  return typeof this.f
+              }
+              constructor(p: T) {
+                  this.f  = p
+              }
+          }
+          let a = new A<string>("hello")
+          let t = a.m()
+
+    - desc: type parameter with boolean
+      name: boolean
+      decl: |-
+          class A<T> {
+              f: T
+              m() {
+                  return typeof this.f
+              }
+              constructor(p: T) {
+                  this.f  = p
+              }
+          }
+          let a = new A<boolean>(true)
+          let t = a.m()
+
+    - desc: type parameter with null
+      name: object
+      decl: |-
+          class A<T> {
+              f: T
+              m() {
+                  return typeof this.f
+              }
+              constructor(p: T) {
+                  this.f  = p
+              }
+          }
+          let a = new A<null>(null)
+          let t = a.m()
+
+    - desc: type parameter with undefined
+      name: undefined
+      decl: |-
+          class A<T> {
+              f: T
+              m() {
+                  return typeof this.f
+              }
+              constructor(p: T) {
+                  this.f  = p
+              }
+          }
+          let a = new A<undefined>(undefined)
+          let t = a.m()

@@ -47,6 +47,12 @@ function main(): int {
 {%- for c in yaml_file.cases %}
     tests.addTest('{{loop.index}}', () => {
 {%- for b in c['values'] %}
+        arktest.assertNE({{c.a}}, {{b}})
+        arktest.assertFalse({{c.a}} == {{b}})
+        arktest.assertFalse({{c.a}} === {{b}})
+        arktest.assertTrue({{c.a}} != {{b}})
+        arktest.assertTrue({{c.a}} !== {{b}})
+
         neAnyAny({{c.a}}, {{b}})
         neAnyBigInt({{c.a}}, {{b}})
         neBigIntAny({{c.a}}, {{b}})

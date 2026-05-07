@@ -23,7 +23,7 @@ tags: [negative, compile-only]
 {{c.decl}}
 
 function main() {
-    let t = typeof {{exp}}
+    let t = typeof {{c.exp}}
 }
 
 {%- endfor %}

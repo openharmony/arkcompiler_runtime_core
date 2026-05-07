@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for eq in precision_eq %}
 
 /*---
-desc: Typeof throws CTE on overloaded function or method.
-tags: [negative, compile-only]
+desc: >-
+    Integer-to-float precision corner cases for equality.
+    {{eq.desc}}
 ---*/
 
-{{c.decl}}
-
-function main() {
-    let t = typeof {{c.exp}}
+function main(): void {
+    let left: {{eq.left_type}} = {{eq.left}}
+    let right: {{eq.right_type}} = {{eq.right}}
+    arktest.assertEQ(
+        left {{eq.op}} right,
+        {{eq.result}},
+        "Expected: {{eq.left}} ({{eq.left_type}}) {{eq.op}} {{eq.right}} ({{eq.right_type}}) is {{eq.result}}"
+    )
 }
 
-{%- endfor %}
+{% endfor %}
