@@ -728,7 +728,7 @@ export final class SparseArray<T> implements Iterable<T> {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public toString(): string {
+    public override toString(): string {
         return this.join(",")
     }
 

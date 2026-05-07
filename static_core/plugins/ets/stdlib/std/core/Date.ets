@@ -2050,7 +2050,7 @@ class ISODateParseResult {
     ms: int = 0
     tzOffset: long | undefined = undefined
 
-    toString(): string {
+    public override toString(): string {
         return `{ year: ${this.year}, month: ${this.month}, day: ${this.day}, hour: ${this.hour}, minute: ${this.minute}, second: ${this.second}, ms: ${this.ms}, TZ offset: ${this.tzOffset} }`
     }
 }

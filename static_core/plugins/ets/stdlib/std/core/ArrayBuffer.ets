@@ -75,7 +75,7 @@ export class ArrayBuffer
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    toString(): String {
+    public override toString(): String {
         return "[object ArrayBuffer]";
     }
 

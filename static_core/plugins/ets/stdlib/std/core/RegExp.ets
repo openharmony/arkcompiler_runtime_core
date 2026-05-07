@@ -150,7 +150,7 @@ export class RegExpResultArray extends Array<String | undefined> {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public toString(): String {
+    public override toString(): String {
         if (this.length > 0) {
             return super.toString();
         }

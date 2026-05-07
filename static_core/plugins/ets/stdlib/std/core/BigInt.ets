@@ -565,26 +565,6 @@ export final class BigInt {
     }
 
     /**
-     * Returns a string representation of the BigInt object.
-     *
-     * @param { double } [radix] An integer in the range 2 through 36 specifying the base to use for representing numeric
-     *     values.
-     * @returns { string } A string representing the specified BigInt object.
-     * @throws { RangeError } Throw RangeError when radix is not between 2 and 36
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public toString(radix?: double): string {
-        if (radix == undefined) {
-            return this.toString(10)
-        }
-        if (radix == -Infinity || radix == +Infinity || radix == NaN) {
-            throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
-        }
-        return this.toString(radix.toInt())
-    }
-
-    /**
      * Converts the BigInt to a binary string representation.
      *
      * @returns { string } A binary string representation of the BigInt.
