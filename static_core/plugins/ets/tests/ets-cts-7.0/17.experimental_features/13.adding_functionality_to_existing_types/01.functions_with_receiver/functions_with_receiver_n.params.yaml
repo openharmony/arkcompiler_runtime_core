@@ -105,3 +105,55 @@ cases:
       let i = 1
       i.foo()
     expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'Int'"
+
+  - decl: | # Map receiver
+      let x: Map<int, string> = new Map<int, string>()
+
+      function foo(this: Map<int, string>, functor: (x: Map<int, string>) => void) {
+          functor(this)
+      }
+
+      x.foo
+    expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'Map<Int,String>'"
+
+  - decl: | # int receiver
+      function foo(this: int, functor: (x: int) => void) {
+          functor(this)
+      }
+
+      let x = 56
+      x.foo
+    expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'Int'"
+
+  - decl: | # class method receiver
+      function foo(this: int) {
+      }
+
+      class A {
+          foo(): int { return 5 }
+      }
+
+      let x = new A
+      x.foo
+    expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'A'"
+
+  - decl: | # this.functor() with function receiver
+      function foo(this: int, functor: (this: int) => void) {
+          functor(this)
+      }
+
+      let x = 5
+      x.foo
+    expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'Int'"
+
+  - decl: | # function with receiver on class method (bug #31039 - no CTE)
+      class A {
+          foo(): int { return 5 }
+      }
+
+      function foo(this: int) {
+      }
+
+      let x = new A
+      x.foo
+    expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'A'"
