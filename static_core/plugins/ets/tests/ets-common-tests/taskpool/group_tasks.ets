@@ -15,7 +15,7 @@
 
 class Event {
     constructor() {
-        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void ) => {
             this.resolveFn = resolve;
         })
         this.job = new CompletableJob<boolean>();
@@ -63,9 +63,10 @@ async function testDelayFunc(): Promise<Any> {
     let task = new taskpool.Task(sum, 100, 300);
     let value = await taskpool.executeDelayed(100, task);
     let g = new taskpool.TaskGroup();
-    arktest.expectError(() => {
-        g.addTask(task);
-    }, new Error('taskpool:: taskGroup cannot add seqRunnerTask or executedTask'));
+    arktest.expectError(
+        () => { g.addTask(task); },
+        new Error('taskpool:: taskGroup cannot add seqRunnerTask or executedTask')
+    );
     return value;
 }
 
@@ -80,18 +81,20 @@ async function executeDelayedTest() {
     let task = new taskpool.Task(max, 10, 15);
     let g = new taskpool.TaskGroup();
     g.addTask(task);
-    arktest.expectError(() => {
-        taskpool.executeDelayed(100, task);
-    }, new Error('taskpool:: groupTask cannot executeDelayed outside'));
+    arktest.expectError(
+        () => { taskpool.executeDelayed(100, task); },
+        new Error('taskpool:: groupTask cannot executeDelayed outside')
+    );
 }
 
 function testPeriodFunc(): Any {
     let task = new taskpool.Task(sum, 100, 300);
     taskpool.executePeriodically(200, task);
     let g = new taskpool.TaskGroup();
-    arktest.expectError(() => {
-        g.addTask(task);
-    }, new Error('taskpool:: The interface does not support the periodicTask'));
+    arktest.expectError(
+        () => { g.addTask(task); },
+        new Error('taskpool:: The interface does not support the periodicTask')
+    );
     taskpool.cancel(task);
     return 'success';
 }
@@ -112,9 +115,10 @@ function grouptaskExecutePeriodicallyTest(): void {
     let task = new taskpool.Task(returnAbc);
     let g = new taskpool.TaskGroup();
     g.addTask(task);
-    arktest.expectError(() => {
-        taskpool.executePeriodically(10, task);
-    }, new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically'));
+    arktest.expectError(
+        () => { taskpool.executePeriodically(10, task); },
+        new Error('taskpool:: The concurrent task has been executed and cannot be executed periodically')
+    );
 }
 
 async function groupTaskExecuteRepeat() {
@@ -128,17 +132,19 @@ async function groupTaskExecuteRepeat() {
     arktest.assertEQ(res[0], 400);
 }
 
-function taskGroupNestedTaskTest(): void {
+async function taskGroupNestedTaskTest() {
     let group = new taskpool.TaskGroup();
-    let task : taskpool.Task = new taskpool.Task(()=>{
-        taskpool.execute(group);
-    })
+    let task : taskpool.Task = new taskpool.Task(
+        () => { taskpool.execute(group); }
+    )
     group.addTask(task);
-    arktest.expectError(() => {
-        waitForCompletion<void>(async (): Promise<void> => {
-            await taskpool.execute(task);
-        })
-    }, new Error('taskpool:: groupTask cannot execute outside'));
+    try {
+        await taskpool.execute(task);
+        arktest.assertTrue(false, 'groupTask executed outside group')
+    } catch(e) {
+        if (e instanceof AssertionError) throw e
+        arktest.assertEQ(e.message, 'taskpool:: groupTask cannot execute outside')
+    }
 }
 
 async function runOneGroupTest() {
@@ -215,10 +221,10 @@ function cancelNonStartedGroupTest() {
     let g = new taskpool.TaskGroup();
     g.addTask(returnAbc);
     g.addTask(returnDef);
-    arktest.expectError(() => {
-        taskpool.cancel(g);
-        taskpool.execute(g);
-    }, new Error('taskpool:: taskGroup is not executed or has been executed'));
+    arktest.expectError(
+        () => { taskpool.cancel(g); taskpool.execute(g); },
+        new Error('taskpool:: taskGroup is not executed or has been executed')
+    );
 }
 
 function waitWaiterSignal(event : Event) {
@@ -226,7 +232,7 @@ function waitWaiterSignal(event : Event) {
     taskpool.Task.checkCancellation();
 }
 
-function cancelExecutingGroupTest() {
+async function cancelExecutingGroupTest() {
     let g = new taskpool.TaskGroup();
     let waiter = new Event();
     let task = new taskpool.Task(waitWaiterSignal, waiter);
@@ -237,28 +243,33 @@ function cancelExecutingGroupTest() {
         taskpool.cancel(g);
         waiter.fire();
     } catch (e) {
-        let err = e as Error;
-        arktest.assertEQ(err.message, 'taskpool:: taskGroup is not executed or has been executed');
+        arktest.assertEQ(e.message, 'taskpool:: taskGroup is not executed or has been executed');
         return;
     }
-    arktest.expectError(() => {
-        waitForCompletion(async (): Promise<void> => {
-            await p;
-        })
-    }, new Error('taskpool:: taskGroup has been canceled'));
+
+    try {
+        await p;
+        arktest.assertTrue(false, 'taskGroup awaited from cancelled state')
+    } catch(e) {
+        if (e instanceof AssertionError) throw e
+        arktest.assertEQ(e.message, 'taskpool:: taskGroup has been canceled')
+    }
 }
 
-function cancelExecutedGroupTest1() {
+async function cancelExecutedGroupTest1() {
     let g = new taskpool.TaskGroup();
     g.addTask(returnAbc);
     g.addTask(returnDef);
-    arktest.expectError(() => {
-        waitForCompletion(async (): Promise<void> => {
-            await taskpool.execute(g);
-        })
+
+    try {
+        await taskpool.execute(g);
         // Group tasks finished, so 'cancel' should produce the Error
         taskpool.cancel(g);
-    }, new Error('taskpool:: taskGroup is not executed or has been executed'));
+        arktest.assertTrue(false, 'taskGroup cancelled from finished state')
+    } catch(e) {
+        if (e instanceof AssertionError) throw e
+        arktest.assertEQ(e.message, 'taskpool:: taskGroup is not executed or has been executed')
+    }
 }
 
 function cancelExecutedGroupTest2() {
@@ -269,10 +280,11 @@ function cancelExecutedGroupTest2() {
     g.addTask(sum, 100, 60);
     g.addTask(max, 80, 30);
     g.addTask(task);
-    taskpool.execute(g).then((res: object): void => {
-        arktest.expectError(() => {
-            taskpool.cancel(g);
-        }, new Error('taskpool:: taskGroup is not executed or has been executed'));
+    taskpool.execute(g).then( (res: object): void => {
+        arktest.expectError(
+            () => { taskpool.cancel(g); },
+            new Error('taskpool:: taskGroup is not executed or has been executed')
+        );
         result = res as int[];
         arktest.assertEQ(result[0], 160);
         arktest.assertEQ(result[1], 80);
@@ -286,19 +298,27 @@ function addExecutedTaskTest() {
     // Executed task
     let task = new taskpool.Task(returnAbc);
     taskpool.execute(task);
-    arktest.expectError(() => { g.addTask(task) }, expectedError);
+    arktest.expectError(
+        () => { g.addTask(task) },
+        expectedError
+    );
     // Executed task via SequenceRunner
     let runnerTask = new taskpool.Task(returnAbc);
     let runner = new taskpool.SequenceRunner();
     runner.execute(runnerTask);
-    arktest.expectError(() => { g.addTask(runnerTask) }, expectedError);
+    arktest.expectError(
+        () => { g.addTask(runnerTask) },
+        expectedError
+    );
 }
 
 function addLongTaskTest() {
     let g = new taskpool.TaskGroup();
     let t = new taskpool.LongTask(returnAbc);
-    arktest.expectError(() => { g.addTask(t) },
-                new Error('taskpool:: The interface does not support the long task'));
+    arktest.expectError(
+        () => { g.addTask(t) },
+        new Error('taskpool:: The interface does not support the long task')
+    );
 }
 
 function addTaskFromGroupTest() {
@@ -310,9 +330,15 @@ function addTaskFromGroupTest() {
     g2.addTask(t2);
     let expectedError = new Error('taskpool:: taskGroup cannot add groupTask');
     // Add the same task
-    arktest.expectError(() => { g1.addTask(t1) }, expectedError);
+    arktest.expectError(
+        () => { g1.addTask(t1) },
+        expectedError
+    );
     // Add task from another group
-    arktest.expectError(() => { g1.addTask(t2) }, expectedError);
+    arktest.expectError(
+        () => { g1.addTask(t2) },
+        expectedError
+    );
 }
 
 function addDependentTaskTest() {
@@ -320,7 +346,10 @@ function addDependentTaskTest() {
     let task2 = new taskpool.Task(returnAbc);
     task1.addDependency(task2);
     let taskGroup = new taskpool.TaskGroup();
-    arktest.expectError(() => { taskGroup.addTask(task1) }, new Error('taskpool:: dependent task not allowed.'));
+    arktest.expectError(
+        () => { taskGroup.addTask(task1) },
+        new Error('taskpool:: dependent task not allowed.')
+    );
 }
 
 function addDependencyForGroupTaskTest() {
@@ -328,11 +357,17 @@ function addDependencyForGroupTaskTest() {
     let taskGroup = new taskpool.TaskGroup();
     taskGroup.addTask(task1);
     let task2 = new taskpool.Task(returnAbc);
-    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: groupTask cannot addDependency'));
-    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: groupTask cannot be relied on'));
+    arktest.expectError(
+        () => { task1.addDependency(task2) },
+        new Error('taskpool:: groupTask cannot addDependency')
+    );
+    arktest.expectError(
+        () => { task2.addDependency(task1) },
+        new Error('taskpool:: groupTask cannot be relied on')
+    );
 }
 
-function addTaskWithDifferentParamsTest() {
+async function addTaskWithDifferentParamsTest() {
     let testWithZeroParam = (): string => {
         return 'testWithZeroParam';
     }
@@ -370,20 +405,24 @@ function addTaskWithDifferentParamsTest() {
     taskGroup.addTask(task2);
     taskGroup.addTask(task3);
     taskGroup.addTask(task4);
-    arktest.expectError(() => { taskGroup.addTask(longTask) },
-        new Error('taskpool:: The interface does not support the long task'));
-    waitForCompletion(async () => {
-        let res = await taskpool.execute(taskGroup);
-        arktest.assertEQ(res[0], 'testWithZeroParam');
-        arktest.assertEQ(res[1], 30);
-        arktest.assertEQ(res[2], 'testWithThreeParams res: 30');
-        arktest.assertEQ(res[3], 'TEST res: 6');
-        arktest.assertEQ(task1.isDone(), true);
-        arktest.assertEQ(task2.isDone(), true);
-        arktest.assertEQ(task3.isDone(), true);
-        arktest.assertEQ(task4.isDone(), true);
-        arktest.assertEQ(longTask.isDone(), false);
-    });
+
+    arktest.expectError(
+        () => { taskGroup.addTask(longTask) },
+        new Error('taskpool:: The interface does not support the long task')
+    );
+
+
+    let res = await taskpool.execute(taskGroup);
+    arktest.assertEQ(res[0], 'testWithZeroParam');
+    arktest.assertEQ(res[1], 30);
+    arktest.assertEQ(res[2], 'testWithThreeParams res: 30');
+    arktest.assertEQ(res[3], 'TEST res: 6');
+    arktest.assertEQ(task1.isDone(), true);
+    arktest.assertEQ(task2.isDone(), true);
+    arktest.assertEQ(task3.isDone(), true);
+    arktest.assertEQ(task4.isDone(), true);
+    arktest.assertEQ(longTask.isDone(), false);
+
 }
 
 async function groupTaskFailedNoSuccessCallbackTest() {
@@ -400,29 +439,31 @@ async function groupTaskFailedNoSuccessCallbackTest() {
     }
 
     let task1: taskpool.Task = new taskpool.Task(emptyFunc);
-    task1.onExecutionSucceeded(() => {
-        successCallbackFlag1 = true;
-    })
-    task1.onExecutionFailed(() => {
-        failCallbackFlag1 = true;
-    })
+    task1.onExecutionSucceeded(
+        () => { successCallbackFlag1 = true }
+    )
+    task1.onExecutionFailed(
+        () => { failCallbackFlag1 = true; }
+    )
 
     let task2: taskpool.Task = new taskpool.Task(errorFunc);
-    task2.onExecutionSucceeded(() => {
-        successCallbackFlag2 = true;
-    })
-    task2.onExecutionFailed(() => {
-        failCallbackFlag2 = true;
-    })
+    task2.onExecutionSucceeded(
+        () => { successCallbackFlag2 = true }
+    )
+    task2.onExecutionFailed(
+        () => { failCallbackFlag2 = true }
+    )
 
     taskGroup.addTask(task1);
     taskGroup.addTask(task2);
 
-    arktest.expectError(() => {
-        waitForCompletion(async () => {
-            await taskpool.execute(taskGroup);
-        })
-    }, new Error('task error'));
+    try {
+        await taskpool.execute(taskGroup);
+        arktest.assertTrue(false, 'taskGroup with error function task succeeds')
+    } catch(e) {
+        if (e instanceof AssertionError) throw e
+        arktest.assertEQ(e.message, 'task error')
+    }
 
     arktest.assertFalse(successCallbackFlag1);
     arktest.assertFalse(failCallbackFlag1);
@@ -436,19 +477,19 @@ async function main(): Promise<int> {
     taskGroupTestsuite.addAsyncTest('ExecutePeriodicallyTest', executePeriodicallyTest);
     taskGroupTestsuite.addTest('GrouptaskExecutePeriodicallyTest', grouptaskExecutePeriodicallyTest);
     taskGroupTestsuite.addAsyncTest('GroupTaskExecuteRepeatTest', groupTaskExecuteRepeat);
-    taskGroupTestsuite.addTest('taskGroupNestedTaskTest', taskGroupNestedTaskTest);
+    taskGroupTestsuite.addAsyncTest('taskGroupNestedTaskTest', taskGroupNestedTaskTest);
     taskGroupTestsuite.addAsyncTest('RunOneGroupTest', runOneGroupTest);
     taskGroupTestsuite.addAsyncTest('RunSeveralGroupsTest', runSeveralGroupsTest);
     taskGroupTestsuite.addTest('CancelNonStartedGroupTest', cancelNonStartedGroupTest);
-    taskGroupTestsuite.addTest('CancelExecutingGroupTest', cancelExecutingGroupTest);
-    taskGroupTestsuite.addTest('CancelExecutedGroupTest1', cancelExecutedGroupTest1);
+    taskGroupTestsuite.addAsyncTest('CancelExecutingGroupTest', cancelExecutingGroupTest);
+    taskGroupTestsuite.addAsyncTest('CancelExecutedGroupTest1', cancelExecutedGroupTest1);
     taskGroupTestsuite.addTest('CancelExecutedGroupTest2', cancelExecutedGroupTest2);
     taskGroupTestsuite.addTest('AddExecutedTaskTest', addExecutedTaskTest);
     taskGroupTestsuite.addTest('AddLongTaskTest', addLongTaskTest);
     taskGroupTestsuite.addTest('AddTaskFromGroupTest', addTaskFromGroupTest);
     taskGroupTestsuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     taskGroupTestsuite.addTest('AddDependencyForGroupTaskTest', addDependencyForGroupTaskTest);
-    taskGroupTestsuite.addTest('AddTaskWithDifferentParamsTest', addTaskWithDifferentParamsTest);
+    taskGroupTestsuite.addAsyncTest('AddTaskWithDifferentParamsTest', addTaskWithDifferentParamsTest);
     taskGroupTestsuite.addAsyncTest('GroupTaskFailedNoSuccessCallbackTest', groupTaskFailedNoSuccessCallbackTest);
     let res = await taskGroupTestsuite.runAsync();
     CoroutineExtras.stopTaskpool();
