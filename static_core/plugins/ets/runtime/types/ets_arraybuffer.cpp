@@ -110,7 +110,7 @@ void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsExecutionContext *execu
     auto inputManagedData = handle->GetManagedDataImpl();
     if (inputManagedData != nullptr) {
         // Pre read barrier is need, because an input managed buffer is movable.
-        auto *readBarrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+        auto *readBarrierSet = Mutator::GetCurrent()->GetBarrierSet();
         auto field = ToVoidPtr(ToUintPtr(static_cast<void *>(inputManagedData)) + coretypes::Array::GetDataOffset());
         readBarrierSet->ReadBarrier(&field);
         auto *src = inputManagedData->GetData<void>();

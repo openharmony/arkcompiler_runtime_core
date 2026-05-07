@@ -57,12 +57,12 @@ public:
     void StartGC() override {}
     void StopGC() override;
 
-    void EnableReadBarrier(ManagedThread *thread)
+    void EnableReadBarrier(Mutator *thread)
     {
         UpdateReadBarrierEntrypointInMutator<true>(thread);
     }
 
-    void DisableReadBarrier(ManagedThread *thread)
+    void DisableReadBarrier(Mutator *thread)
     {
         UpdateReadBarrierEntrypointInMutator<false>(thread);
     }
@@ -85,7 +85,7 @@ private:
     void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 
     template <bool ENABLE_BARRIER>
-    void UpdateReadBarrierEntrypointInMutator(ManagedThread *thread)
+    void UpdateReadBarrierEntrypointInMutator(Mutator *thread)
     {
         ObjFieldProcessFunc entrypointFunc = nullptr;
 

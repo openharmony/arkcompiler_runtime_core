@@ -308,7 +308,6 @@ JobExecutionContext *StacklessJobManager::CreateEntrypointlessExecCtx(Runtime *r
     ASSERT(job != nullptr);
     auto *execCtx = execCtxFactory_(runtime, vm, job);
     ASSERT(execCtx != nullptr);
-    execCtx->InitBuffers();
     if (makeCurrent) {
         JobExecutionContext::SetCurrent(execCtx);
         execCtx->NativeCodeBegin();

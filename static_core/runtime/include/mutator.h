@@ -20,7 +20,9 @@
 #include <type_traits>
 
 #include "runtime/include/locks.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mutator_status.h"
+#include "runtime/mem/gc/gc_barrier_set.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/thread/mutator.h"
@@ -34,6 +36,7 @@ class PandaVM;
 namespace mem {
 class GCBarrierSet;
 }  // namespace mem
+class ObjectHeader;
 
 /**
  * @brief Represents an entity that can mutate the managed heap state.
@@ -64,7 +67,7 @@ public:
     NO_COPY_SEMANTIC(Mutator);
     NO_MOVE_SEMANTIC(Mutator);
 
-    virtual ~Mutator() = default;
+    virtual ~Mutator();
 
     /// @returns The mutator from the current thread (TLS)
     PANDA_PUBLIC_API static Mutator *GetCurrent();
@@ -80,9 +83,39 @@ public:
         return MEMBER_OFFSET(Mutator, vm_);
     }
 
+    static constexpr uint32_t GetTlsCardTableAddrOffset()
+    {
+        return MEMBER_OFFSET(Mutator, cardTableAddr_);
+    }
+
+    static constexpr uint32_t GetTlsCardTableMinAddrOffset()
+    {
+        return MEMBER_OFFSET(Mutator, cardTableMinAddr_);
+    }
+
     static constexpr uint32_t GetTlsPreWrbEntrypointOffset()
     {
         return MEMBER_OFFSET(Mutator, preWrbEntrypoint_);
+    }
+    static constexpr uint32_t GetTlsPostWrbOneObjectOffset()
+    {
+        return MEMBER_OFFSET(Mutator, postWrbOneObject_);
+    }
+    static constexpr uint32_t GetTlsPostWrbTwoObjectsOffset()
+    {
+        return MEMBER_OFFSET(Mutator, postWrbTwoObjects_);
+    }
+    static constexpr uint32_t GetPreBuffOffset()
+    {
+        return MEMBER_OFFSET(Mutator, preBuff_);
+    }
+    static constexpr uint32_t GetG1PostBarrierBufferOffset()
+    {
+        return MEMBER_OFFSET(Mutator, g1PostBarrierRingBuffer_);
+    }
+    static constexpr uint32_t GetTlsReadBarrierEntrypointOffset()
+    {
+        return MEMBER_OFFSET(Mutator, readBarrierEntrypoint_);
     }
 
     ALWAYS_INLINE MutatorLock *GetMutatorLock() const
@@ -114,6 +147,46 @@ public:
     ALWAYS_INLINE void SetPreWrbEntrypoint(void *entry)
     {
         preWrbEntrypoint_ = entry;
+    }
+
+    PandaVector<ObjectHeader *> *GetPreBuff() const
+    {
+        return preBuff_;
+    }
+    PandaVector<ObjectHeader *> *MovePreBuff()
+    {
+        auto res = preBuff_;
+        preBuff_ = nullptr;
+        return res;
+    }
+    mem::GCG1BarrierSet::G1PostBarrierRingBufferType *GetG1PostBarrierBuffer()
+    {
+        return g1PostBarrierRingBuffer_;
+    }
+    void ResetG1PostBarrierBuffer()
+    {
+        g1PostBarrierRingBuffer_ = nullptr;
+    }
+
+    // Here methods which are just proxy or cache for runtime interface
+    ALWAYS_INLINE mem::BarrierType GetPreBarrierType() const
+    {
+        return preBarrierType_;
+    }
+
+    ALWAYS_INLINE mem::BarrierType GetPostBarrierType() const
+    {
+        return postBarrierType_;
+    }
+
+    void *GetReadBarrierEntrypoint() const
+    {
+        return readBarrierEntrypoint_;
+    }
+
+    void SetReadBarrierEntrypoint(void *entry)
+    {
+        readBarrierEntrypoint_ = entry;
     }
 
     virtual void OnRuntimeTerminated() {}
@@ -223,9 +296,14 @@ public:
      * @description This synchronization point can be used to insert a new attribute or method
      * into ManagedThread class.
      */
+
+    void InitBuffers();
+
 private:
     // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
     void TransitionFromRunningToSuspended(enum MutatorStatus status) NO_THREAD_SAFETY_ANALYSIS;
+
+    void InitCardTableData(mem::GCBarrierSet *barrier);
 
     // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
     NO_THREAD_SANITIZE uint32_t ReadFlagsAndMutatorStatusUnsafe();
@@ -358,10 +436,22 @@ private:
     uint32_t suspendCount_ GUARDED_BY(suspendLock_) = 0;
     std::atomic_uint32_t userCodeSuspendCount_ {0};
 
-    // -- GC barriers part --
+    // -- GC barriers & card table part --
     mem::GCBarrierSet *barrierSet_ {nullptr};
     std::atomic<void *> preWrbEntrypoint_ {nullptr};  // if NOT nullptr, stores pointer to PreWrbFunc and indicates we
                                                       // are currently in concurrent marking phase
+    void *cardTableAddr_ {nullptr};
+    void *cardTableMinAddr_ {nullptr};
+    // keeps IRtoC GC PostWrb impl for storing one object
+    void *postWrbOneObject_ {nullptr};
+    // keeps IRtoC GC PostWrb impl for storing two objects
+    void *postWrbTwoObjects_ {nullptr};
+    PandaVector<ObjectHeader *> *preBuff_ {nullptr};
+    mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
+    // Keep these here to speed up interpreter
+    mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
+    mem::BarrierType postBarrierType_ {mem::BarrierType::POST_WRB_NONE};
+    void *readBarrierEntrypoint_ {nullptr};
 };
 
 /**

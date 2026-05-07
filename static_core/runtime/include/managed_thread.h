@@ -286,28 +286,6 @@ public:
                            ManagedThread::ThreadType threadType,
                            ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
 
-    // Here methods which are just proxy or cache for runtime interface
-
-    ALWAYS_INLINE mem::BarrierType GetPreBarrierType() const
-    {
-        return preBarrierType_;
-    }
-
-    ALWAYS_INLINE mem::BarrierType GetPostBarrierType() const
-    {
-        return postBarrierType_;
-    }
-
-    void *GetReadBarrierEntrypoint() const
-    {
-        return readBarrierEntrypoint_;
-    }
-
-    void SetReadBarrierEntrypoint(void *entry)
-    {
-        readBarrierEntrypoint_ = entry;
-    }
-
     // Methods to access thread local storage
     InterpreterCache *GetInterpreterCache()
     {
@@ -322,36 +300,6 @@ public:
     void SetNativePc(uintptr_t pc)
     {
         nativePc_ = pc;
-    }
-
-    // buffers may be destroyed during Detach(), so it should be initialized once more
-    void InitBuffers();
-
-    PandaVector<ObjectHeader *> *GetPreBuff() const
-    {
-        return preBuff_;
-    }
-
-    PandaVector<ObjectHeader *> *MovePreBuff()
-    {
-        auto res = preBuff_;
-        preBuff_ = nullptr;
-        return res;
-    }
-
-    mem::GCG1BarrierSet::G1PostBarrierRingBufferType *GetG1PostBarrierBuffer()
-    {
-        return g1PostBarrierRingBuffer_;
-    }
-
-    void ResetG1PostBarrierBuffer()
-    {
-        g1PostBarrierRingBuffer_ = nullptr;
-    }
-
-    static constexpr uint32_t GetG1PostBarrierBufferOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, g1PostBarrierRingBuffer_);
     }
 
     ark::panda_file::SourceLang GetThreadLang() const
@@ -424,26 +372,6 @@ public:
     {
         return MEMBER_OFFSET(ManagedThread, tlab_);
     }
-    static constexpr uint32_t GetTlsCardTableAddrOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, cardTableAddr_);
-    }
-    static constexpr uint32_t GetTlsCardTableMinAddrOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, cardTableMinAddr_);
-    }
-    static constexpr uint32_t GetTlsPostWrbOneObjectOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, postWrbOneObject_);
-    }
-    static constexpr uint32_t GetTlsPostWrbTwoObjectsOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, postWrbTwoObjects_);
-    }
-    static constexpr uint32_t GetTlsReadBarrierEntrypointOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, readBarrierEntrypoint_);
-    }
     static constexpr uint32_t GetTlsStringClassPointerOffset()
     {
         return MEMBER_OFFSET(ManagedThread, stringClassPtr_);
@@ -456,11 +384,6 @@ public:
     {
         return MEMBER_OFFSET(ManagedThread, arrayU16ClassPtr_);
     }
-    static constexpr uint32_t GetPreBuffOffset()
-    {
-        return MEMBER_OFFSET(ManagedThread, preBuff_);
-    }
-
     static constexpr uint32_t GetLanguageExtensionsDataOffset()
     {
         return MEMBER_OFFSET(ManagedThread, languageExtensionData_);
@@ -835,8 +758,6 @@ protected:
 
 private:
     void InitThreadRandomState();
-    void FreePreBuffer();
-    void InitCardTableData(mem::GCBarrierSet *barrier);
     PandaString LogThreadStack(ThreadState newState) const;
 
 #ifdef PANDA_WITH_QUICKENER
@@ -873,13 +794,6 @@ private:
     uintptr_t nativePc_ {};
     CurrentFrameKind frameKind_ {0};
     ObjectHeader *exception_ {nullptr};
-    void *cardTableAddr_ {nullptr};
-    void *cardTableMinAddr_ {nullptr};
-    // keeps IRtoC GC PostWrb impl for storing one object
-    void *postWrbOneObject_ {nullptr};
-    // keeps IRtoC GC PostWrb impl for storing two objects
-    void *postWrbTwoObjects_ {nullptr};
-    PandaVector<ObjectHeader *> *preBuff_ {nullptr};
     void *languageExtensionData_ {nullptr};
     PandaVector<ObjectHeader **> localObjects_;
     WeightedAdaptiveTlabAverage *weightedAdaptiveTlabAverage_ {nullptr};
@@ -897,11 +811,6 @@ private:
     ObjectHeader *longToStringCache_ {nullptr};
 
     mem::TLAB *tlab_ {nullptr};
-    mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
-    // Keep these here to speed up interpreter
-    mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
-    mem::BarrierType postBarrierType_ {mem::BarrierType::POST_WRB_NONE};
-    void *readBarrierEntrypoint_ {nullptr};
     // Thread local storages to avoid locks in heap manager
     mem::StackFrameAllocator *stackFrameAllocator_;
     mem::InternalAllocator<>::LocalSmallObjectAllocator *internalLocalAllocator_;

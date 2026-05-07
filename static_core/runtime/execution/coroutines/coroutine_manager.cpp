@@ -35,7 +35,6 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
     ASSERT(main != nullptr);
 
     Coroutine::SetCurrent(main);
-    main->InitBuffers();
     main->RequestResume();
     main->NativeCodeBegin();
 
@@ -72,7 +71,6 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
     ASSERT(job != nullptr);
     auto *co = coFactory_(runtime, vm, job, ctx);
     ASSERT(co != nullptr);
-    co->InitBuffers();
     if (makeCurrent) {
         Coroutine::SetCurrent(co);
         co->RequestResume();

@@ -33,7 +33,6 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/mem/rem_set-inl.h"
 #include "runtime/include/thread-inl.h"
-#include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/g1/ref_updater.h"
 #include "runtime/mem/region_space.h"
 #include "runtime/include/stack_walker-inl.h"
@@ -2408,21 +2407,26 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
                                               mem::BuffersKeepingFlag keepBuffers)
 {
+    // Deletion of buffers must be synchronized with remset worker - if mutator get terminated (and its buffers deleted)
+    // at the same time as remset worker tries to read buffers data: data race occures. Update remset worker iterates
+    // over mutator using ForEach method, that accuires mutators lock in manager. Deregisration of mutator happens with
+    // same lock accuired. So if deregistration is done before deleting of buffers synchronization is done by mutators
+    // lock - update remset worker sees either mutator with buffers (as deletion of buffers happens only after
+    // deregistration) or sees no mutator at all. But if mutator is not being deregistated, then its buffers must be
+    // kept (because they can not be deleted synchronized with update remset worker).
+    ASSERT(mode == mem::MutatorUnregistrationMode::UNREGISTER || keepBuffers == mem::BuffersKeepingFlag::KEEP);
+
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     // The method must be called while the lock which guards thread/coroutine list is hold
     LOG(DEBUG, GC) << "Call OnMutatorTerminate";
     GC::OnMutatorTerminate(mutator, mode, keepBuffers);
-    if (mutator->GetMutatorType() != Mutator::MutatorType::MANAGED) {
-        return;
-    }
-    auto *thread = static_cast<ManagedThread *>(mutator);
     PandaVector<ObjectHeader *> *preBuff = nullptr;
     if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
-        preBuff = allocator->New<PandaVector<ObjectHeader *>>(*thread->GetPreBuff());
+        preBuff = allocator->New<PandaVector<ObjectHeader *>>(*mutator->GetPreBuff());
         ASSERT(preBuff != nullptr);
-        thread->GetPreBuff()->clear();
+        mutator->GetPreBuff()->clear();
     } else {  // keep_buffers == mem::BuffersKeepingFlag::DELETE
-        preBuff = thread->MovePreBuff();
+        preBuff = mutator->MovePreBuff();
     }
     ASSERT(preBuff != nullptr);
     {
@@ -2430,7 +2434,7 @@ void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistr
         satbBuffList_.push_back(preBuff);
     }
     {
-        auto *localBuffer = thread->GetG1PostBarrierBuffer();
+        auto *localBuffer = mutator->GetG1PostBarrierBuffer();
         ASSERT(localBuffer != nullptr);
         if (!localBuffer->IsEmpty()) {
             auto *tempBuffer = allocator->New<PandaVector<mem::CardTable::CardPtr>>();
@@ -2439,9 +2443,10 @@ void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistr
             }
             updateRemsetWorker_->AddPostBarrierBuffer(tempBuffer);
         }
+
         if (keepBuffers == mem::BuffersKeepingFlag::DELETE) {
-            thread->ResetG1PostBarrierBuffer();
             allocator->Delete(localBuffer);
+            mutator->ResetG1PostBarrierBuffer();
         }
     }
 }
@@ -2449,6 +2454,13 @@ void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistr
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
 {
+    // Need to create buffers for mutator
+    if (this->GetBarrierSet()->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
+        mutator->InitBuffers();
+    }
+
+    // We want to register mutator only after buffers are created or else there will be data race
+    // with reading buffers from update remset worker
     this->GetPandaVm()->GetMutatorManager()->RegisterMutator(mutator, [this](Mutator *mttr) {
         // Any access to other threads' data (including MAIN's) might cause a race here
         // so it sets barriers to mutator under MutatorManager lock
@@ -2487,14 +2499,14 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack, Marker
 {
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     // Process satb buffers of the active threads
-    auto callback = [this, objectStack, &marker](ManagedThread *thread) {
+    auto callback = [this, objectStack, &marker](Mutator *mutator) {
         // Acquire lock here to avoid data races with the threads
         // which are terminating now.
         // Data race is happens in thread.pre_buf_. The terminating thread may
         // release own pre_buf_ while GC thread iterates over threads and gets theirs
         // pre_buf_.
         os::memory::LockHolder lock(satbAndNewobjBufLock_);
-        auto preBuff = thread->GetPreBuff();
+        auto *preBuff = mutator->GetPreBuff();
         if (preBuff == nullptr) {
             // This can happens when the thread gives us own satb_buffer but
             // doesn't unregister from ThreadManaged.
@@ -2509,7 +2521,7 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack, Marker
         preBuff->clear();
         return true;
     };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback);
+    this->GetPandaVm()->GetMutatorManager()->ForEachMutator(callback);
 
     // Process satb buffers of the terminated threads
     os::memory::LockHolder lock(satbAndNewobjBufLock_);
@@ -2561,15 +2573,14 @@ void G1GC<LanguageConfig>::ClearSatb()
     // release own pre_buf_ while GC thread iterates over threads and gets theirs
     // pre_buf_.
     // Process satb buffers of the active threads
-    auto threadCallback = [this](ManagedThread *thread) {
+    this->GetPandaVm()->GetMutatorManager()->ForEachMutator([this](Mutator *mutator) {
         os::memory::LockHolder lock(satbAndNewobjBufLock_);
-        auto preBuff = thread->GetPreBuff();
+        auto preBuff = mutator->GetPreBuff();
         if (preBuff != nullptr) {
             preBuff->clear();
         }
         return true;
-    };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(threadCallback);
+    });
 
     os::memory::LockHolder lock(satbAndNewobjBufLock_);
     // Process satb buffers of the terminated threads

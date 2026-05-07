@@ -14,6 +14,7 @@
  */
 
 #include "runtime/mem/gc/g1/update_remset_worker.h"
+#include "runtime/include/mutator_manager.h"
 #include "runtime/mem/gc/g1/update_remset_worker-inl.h"
 #include "mem/gc/card_table.h"
 #include "runtime/include/language_context.h"
@@ -103,10 +104,10 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromThreads(PandaUnorderedSet<CardT
 {
     auto *vm = gc_->GetPandaVm();
     ASSERT(vm != nullptr);
-    auto *threadManager = vm->GetThreadManager();
-    ASSERT(threadManager != nullptr);
-    threadManager->EnumerateThreads([this, cards](ManagedThread *thread) {
-        auto *buffer = thread->GetG1PostBarrierBuffer();
+    auto *mutatorManager = vm->GetMutatorManager();
+    ASSERT(mutatorManager != nullptr);
+    mutatorManager->ForEachMutator([this, cards](Mutator *mutator) {
+        auto *buffer = mutator->GetG1PostBarrierBuffer();
         if (buffer != nullptr) {
             FillFromPostBarrierBuffer(buffer, cards);
         }

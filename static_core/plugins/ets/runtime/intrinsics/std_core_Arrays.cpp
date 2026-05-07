@@ -151,7 +151,7 @@ template <typename T>
 static auto GetCopy()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto *readBarrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+    auto *readBarrierSet = Mutator::GetCurrent()->GetBarrierSet();
     bool useReadBarrier = readBarrierSet->IsReadBarrierEnabled();
 
     return [useReadBarrier, readBarrierSet](T *srcPtr, T *dstPtr) {

@@ -18,6 +18,7 @@
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/include/mem/panda_containers.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
@@ -85,9 +86,19 @@ Mutator::Mutator(PandaVM *vm, MutatorType type) : vm_(vm), type_(type)
     auto *gc = vm_->GetGC();
     if (gc != nullptr) {
         barrierSet_ = gc->GetBarrierSet();
+        InitCardTableData(barrierSet_);
+        preBarrierType_ = barrierSet_->GetPreType();
+        postBarrierType_ = barrierSet_->GetPostType();
     }
     ASSERT(type_ != MutatorType::NONE);
     InitializeMutatorFlag();
+}
+
+Mutator::~Mutator()
+{
+    // Internal resources should be deleted in OnMutatorTerminate, if GC created them
+    ASSERT(preBuff_ == nullptr);
+    ASSERT(g1PostBarrierRingBuffer_ == nullptr);
 }
 
 CONSTEXPR_IN_RELEASE MutatorFlag GetInitialMutatorFlag()
@@ -360,6 +371,50 @@ void Mutator::WaitSuspension()
 #else
     common_vm::Mutator::WaitSuspension();
 #endif
+}
+
+void Mutator::InitCardTableData(mem::GCBarrierSet *barrier)
+{
+    auto postBarrierType = barrier->GetPostType();
+    switch (postBarrierType) {
+        case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
+            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
+            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
+            postWrbOneObject_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
+            break;
+        case ark::mem::BarrierType::POST_WRB_NONE:
+            postWrbOneObject_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
+            break;
+        case mem::POST_RB_NONE:
+        case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
+            break;
+        case mem::PRE_WRB_NONE:
+        case mem::PRE_RB_NONE:
+        case mem::PRE_SATB_BARRIER:
+        case ark::mem::BarrierType::CMC_READ_BARRIER:
+        case ark::mem::BarrierType::PRE_CMC_WRITE_BARRIER:
+            LOG(FATAL, RUNTIME) << "Post barrier expected";
+            break;
+    }
+}
+
+void Mutator::InitBuffers()
+{
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    mem::GC *gc = GetVM()->GetGC();
+    auto barrier = gc->GetBarrierSet();
+    if (barrier->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
+        // we need to recreate buffers if it was detach (we removed all structures) and attach again
+        // skip initializing in first attach after constructor
+        if (preBuff_ == nullptr) {
+            ASSERT(preBuff_ == nullptr);
+            preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
+            ASSERT(g1PostBarrierRingBuffer_ == nullptr);
+            g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
+        }
+    }
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)

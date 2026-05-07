@@ -861,10 +861,6 @@ Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, Pan
     ASSERT(job != nullptr);
     auto *co = GetCoroutineFactory()(runtime, vm, job, ctx);
     ASSERT(co != nullptr);
-
-    // Let's assume that even the "native" coroutine can eventually try to execute some managed code.
-    // In that case pre/post barrier buffers are necessary.
-    co->InitBuffers();
     return co;
 }
 
