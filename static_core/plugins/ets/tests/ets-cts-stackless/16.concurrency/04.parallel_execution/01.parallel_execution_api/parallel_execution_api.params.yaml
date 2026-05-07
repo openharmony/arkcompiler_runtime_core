@@ -17,21 +17,19 @@ cases:
     decl: |-
       import { CoroutineExtras } from "std/debug/concurrency"
       import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-      import { Job } from "std/core"
     logic: |-
       const params: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
       };
       
-      let job: Job<boolean> = launch<boolean>(params, CoroutineExtras.isMainWorker);
+      let promise: Promise<boolean> = launch<boolean>(params, CoroutineExtras.isMainWorker);
 
-      arktest.assertTrue(job.Await())
+      arktest.assertTrue(await promise)
 
   - desc: Checking default Main worker id.
     decl: |-
       import { CoroutineExtras } from "std/debug/concurrency"
       import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-      import { Job } from "std/core"
 
     logic: |-
       const expectedWorkerId = 0;

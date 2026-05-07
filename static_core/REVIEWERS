@@ -174,7 +174,6 @@ static_core/plugins/ets/runtime/intrinsics/std_*                              ^a
 static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_ExclusiveLauncher.cpp     ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
-static_core/plugins/ets/runtime/intrinsics/std_core_Job.cpp                   ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_Promise.cpp               ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_SyncPrimitives.cpp        ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876 ^dingding5
 static_core/plugins/ets/runtime/intrinsics/std_core_Timers.cpp                ^anton-sysoev @magikarp777 @molotkovmikhail ^ivan-tyulyandin @Nojpg @chernykhsergey ^slynkodenis ^vpukhov

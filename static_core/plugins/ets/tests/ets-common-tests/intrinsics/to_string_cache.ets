@@ -14,7 +14,6 @@
  */
 
 import {launch} from 'std/concurrency'
-import {Job} from 'std/core'
 
 // simple fast pseudo-random generator
 function xorshift(state: long): long {

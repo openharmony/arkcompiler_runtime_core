@@ -101,7 +101,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_internals.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Timers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_LegacyAtomics.cpp
@@ -148,7 +147,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
-    ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/types/ets_map.cpp
     ${ETS_EXT_SOURCES}/types/ets_finreg_node.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalization_registry.cpp

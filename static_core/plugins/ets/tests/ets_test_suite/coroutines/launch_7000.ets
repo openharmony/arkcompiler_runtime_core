@@ -17,16 +17,16 @@ import { launch } from "std/concurrency"
 
 async function create_7000_coro_test(): Promise<void> {
     const coro_to_create = 6999;
-    let j = new CompletableJob<void>();
+    let j = new PromiseWithResolvers<void>();
     let jobs = new Array<Promise<void>>();
 
-    let wait_func = (): void => { j.Await(); }
+    let wait_func = (): void => { j.promise.awaitSync(); }
 
     for (let i = 1; i < coro_to_create; ++ i) {
         jobs.push(launch(wait_func));
     }
 
-    j.finish();
+    j.resolve(undefined);
     for (let job of jobs) {
         await job;
     }

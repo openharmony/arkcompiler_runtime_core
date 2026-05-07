@@ -40,12 +40,6 @@ coretypes:
 - managed_class: std.core.Promise
   mirror_class: ark::ets::EtsPromise
 
-- managed_class: std.core.Job
-  mirror_class: ark::ets::EtsJob
-
-- managed_class: std.core.CompletableJob
-  mirror_class: ark::ets::EtsJob
-
 - managed_class: Array
   mirror_class: ark::ets::EtsCharArray
 
@@ -5835,39 +5829,6 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryFinishCleanup
 
-########################
-# std.core.Job #
-########################
-  - name: StdJobAwait
-    space: ets
-    class_name: std.core.Job
-    method_name: Await
-    static: false
-    signature:
-      ret: Y
-      args: []
-    impl: ark::ets::intrinsics::EtsAwaitJob
-
-  - name: StdJobFinish
-    space: ets
-    class_name: std.core.CompletableJob
-    method_name: finishImpl
-    static: false
-    signature:
-      ret: void
-      args: [ Y ]
-    impl: ark::ets::intrinsics::EtsFinishJob
-
-  - name: StdJobFail
-    space: ets
-    class_name: std.core.CompletableJob
-    method_name: failImpl
-    static: false
-    signature:
-      ret: void
-      args: [ Y ]
-    impl: ark::ets::intrinsics::EtsFailJob
-
 ######################
 # std.core.Promise #
 ######################
@@ -6998,16 +6959,6 @@ intrinsics:
       ret: u1
       args: []
     impl: ark::ets::intrinsics::StdSystemIsExternalTimerEnabled
-
-  - name: StdCoroutineDumpUnhandledFailedJobs
-    space: ets
-    class_name: std.debug.concurrency.CoroutineExtras
-    method_name: dumpUnhandledFailedJobs
-    static: true
-    signature:
-      ret: void
-      args: []
-    impl: ark::ets::intrinsics::StdSystemDumpUhandledFailedJobs
 
   - name: stdCoroutineGetCount
     space: ets

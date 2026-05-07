@@ -15,45 +15,33 @@
 
 type callbackT = (id: int) => void;
 
-class Event {
-    public Wait() {
-        while (this.flag.get() != true) {
-            Coroutine.Schedule();
-        }
-    }
-
-    public Fire() {
-        this.flag.set(true);
-    }
-
-    private flag = new AtomicFlag(false);
-};
-
-let event = new Event();
+let event = new PromiseWithResolvers<void>();
 
 class SharedJob<T> {
     constructor(jobs: Array<T>) {
-        this.sharedJob = new CompletableJob<void>();
+        this.sharedJob = new PromiseWithResolvers<void>();
         SharedJob.completeJob(jobs, this.sharedJob);
     }
 
     public Await(): void {
-        this.sharedJob.Await();
+        this.sharedJob.promise.awaitSync();
     }
 
-    private static async completeJob<T>(jobs: Array<T>, sharedJob: CompletableJob<void>) {
+    private static async completeJob<T>(jobs: Array<T>, sharedJob: PromiseWithResolvers<void>) {
         Coroutine.Schedule();
         for (let job of jobs) {
             if (job instanceof Promise) {
                 await job;
+            } else if (job instanceof PromiseWithResolvers) {
+                await job.promise;
             } else {
-                (job as CompletableJob<void>).Await();
+                throw new Error('invalid type')
             }
         }
-        sharedJob.finish();
+        sharedJob.resolve(undefined);
     }
 
-    private sharedJob: CompletableJob<void>;
+    private sharedJob: PromiseWithResolvers<void>;
 }
 
 function runConcurrently(callback: callbackT, coroutines: number) {
@@ -88,11 +76,11 @@ function sharedLockTest() {
     const coroutines = 10;
 
     let rLock = new RWLock().readLock();
-    let jobs = new Array<CompletableJob<void>>(coroutines, (index: int) => new CompletableJob<void>());
-    let sharedJob = new SharedJob<CompletableJob<void>>(jobs);
+    let jobs = new Array<PromiseWithResolvers<void>>(coroutines, (index: int) => new PromiseWithResolvers<void>());
+    let sharedJob = new SharedJob<PromiseWithResolvers<void>>(jobs);
     runConcurrently((id: int) => {
         rLock.lock();
-        jobs[id].finish();
+        jobs[id].resolve(undefined);
         sharedJob.Await();
         rLock.unlock();
     }, coroutines).Await();
@@ -155,12 +143,12 @@ async function readWriteMutualExclusionTest(): Promise<void> {
 
     let job = launch() {
         writeLockAttempted = true;
-        event.Fire();
+        event.resolve(undefined);
         writeLock.lock();
         writeAcquired = true;
         writeLock.unlock();
     };
-    event.Wait();
+    await event.promise;
 
     arktest.assertTrue(writeLockAttempted);
     arktest.assertFalse(writeAcquired);

@@ -27,14 +27,11 @@ function AbortTest(): void {
     Coroutine.Schedule();
 }
 
-function NoAbortTest(): void {
+function NoAbortTest(): Promise<void> {
     const params: LaunchParams = {abortFlag: false,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
-    let finished = new CompletableJob<void>();
-    launch(params, Failing).catch((_e: Error) => {
-        finished.finish();
-    });
+    let p = launch(params, Failing).catch((_e: Error) => {});
     Coroutine.Schedule();
-    finished.Await();
+    p.awaitSync();
 }
 
 export function main(args: FixedArray<string>): int {

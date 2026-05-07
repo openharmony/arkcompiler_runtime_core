@@ -37,7 +37,6 @@
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"

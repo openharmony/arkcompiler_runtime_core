@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-function testJobTest() {
-    let job1 = new CompletableJob<int>();
-    job1.finish(1);
+async function testPWRTest() {
+    let pwr1 = new PromiseWithResolvers<int>();
+    pwr1.resolve(1);
 
-    arktest.assertEQ(job1.Await(), 1);
+    arktest.assertEQ(await pwr1.promise, 1);
 
-    let job2 = new CompletableJob<int>();
-    job2.fail(new Error('Test error'));
+    let pwr2 = new PromiseWithResolvers<int>();
+    pwr2.reject(new Error('Test error'));
     try {
-        job2.Await();
+        await pwr2.promise;
     } catch (e) {
         arktest.assertEQ(e.toString(), 'Error: Test error');
     }
 }
 
 async function main(): Promise<int> {
-    let testSuite = new arktest.ArkTestsuite('coroutines.job_test');
-    testSuite.addTest('testJobTest', testJobTest);
+    let testSuite = new arktest.ArkTestsuite('coroutines.promise_with_resolvers_test');
+    testSuite.addAsyncTest('testPWRTest', testPWRTest);
     let res = await testSuite.runAsync();
     return res;
 }

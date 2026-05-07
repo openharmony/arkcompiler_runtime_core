@@ -27,32 +27,6 @@ function longFunc(duration: int): string {
     return 'success';
 }
 
-class Event {
-    constructor() {
-        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
-            this.resolveFn = resolve;
-        })
-        this.job = new CompletableJob<boolean>();
-        this.promise.then((result: boolean) => {
-            this.job.finish(result);
-        }).catch((e: Error) => {
-            this.job.fail(e);
-        });
-    }
-
-    public wait(): boolean {
-        return this.job.Await();
-    }
-
-    public fire(val: boolean = true) {
-        this.resolveFn!(val);
-    }
-
-    private promise: Promise<boolean>;
-    private resolveFn: ((val: boolean) => void) | null = null;
-    private job: CompletableJob<boolean>;
-}
-
 async function taskExecuteWithinTimeout(): Promise<void> {
     let task1 = new taskpool.Task(returnAbc);
     try {
@@ -510,13 +484,13 @@ async function timeoutNotTriggerSuccessAndFailedCallbacks(): Promise<void> {
 }
 
 async function cancelBeforeTimeout() {
-    let event = new Event();
+    let event = new PromiseWithResolvers<void>();
     let timeoutFunc = (): string => {
         let start = Date.now();
         while (Date.now() - start < 100) {
             continue;
         }
-        event.fire();
+        event.resolve(undefined);
         let start2 = Date.now();
         while (Date.now() - start2 < 600) {
             continue;
@@ -526,7 +500,7 @@ async function cancelBeforeTimeout() {
     let task = new taskpool.Task(timeoutFunc);
     let res = taskpool.execute(task, {timeout: 250});
     try {
-        event.wait();
+        await event.promise;
         taskpool.cancel(task);
         try {
             await res;

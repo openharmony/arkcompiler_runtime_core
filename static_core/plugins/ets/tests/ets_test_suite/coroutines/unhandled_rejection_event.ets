@@ -47,51 +47,10 @@ function testUnhandledRejectionObserverRegistration(): void {
     StdProcess.off('unhandledPromiseRejection');
 }
 
-function testAllUnhandledJobRejection(): void {
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertEQ(reason.message, 'get unhandled job rejection');
-    });
-
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertEQ(reason.message, 'get unhandled job rejection');
-    });
-
-    let observer1 = (reason: Error, obj: Object): void => {
-        arktest.assertTrue(false, 'Job handler that have been removed using off will no longer be triggered');
-    };
-
-    let observer2 = (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertEQ(reason.message, 'get unhandled job rejection');
-    };
-
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer2);
-    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
-
-    let job1 = new CompletableJob<int>();
-    job1.fail(new Error('get unhandled job rejection'));
-
-    let job2 = new CompletableJob<int>();
-    job2.fail(new Error('catch job rejection'));
-    try {
-        job2.Await();
-    } catch (e) {
-
-    }
-
-    CoroutineExtras.dumpUnhandledFailedJobs();
-    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
-}
-
 async function main(): Promise<int> {
-    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     StdProcess.off('unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_event');
     testSuite.addTest('testUnhandledRejectionObserverRegistration', testUnhandledRejectionObserverRegistration);
-    testSuite.addTest('testAllUnhandledJobRejection', testAllUnhandledJobRejection);
     let res = await testSuite.runAsync();
     return res;
 }

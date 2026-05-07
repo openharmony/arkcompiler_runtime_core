@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
-#include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "runtime/include/method.h"
@@ -42,11 +41,8 @@ static DefaultHandlerMode FromString(const std::string &s)
 }
 
 UnhandledObjectManager::UnhandledObjectManager(PandaEtsVM *vm)
-    : vm_(vm),
-      jobHandlerMode_(FromString(vm->GetOptions().GetListUnhandledOnExitJobs())),
-      promiseHandlerMode_(FromString(vm->GetOptions().GetListUnhandledOnExitPromises()))
+    : vm_(vm), promiseHandlerMode_(FromString(vm->GetOptions().GetListUnhandledOnExitPromises()))
 {
-    ASSERT(jobHandlerMode_ != DefaultHandlerMode::INVALID);
     ASSERT(promiseHandlerMode_ != DefaultHandlerMode::INVALID);
 }
 
@@ -76,7 +72,6 @@ static void UpdateObjectsImpl(PandaUnorderedSet<EtsObject *> &objects, const GCR
 void UnhandledObjectManager::UpdateObjects(const GCRootUpdater &gcRootUpdater)
 {
     os::memory::LockHolder lh(mutex_);
-    UpdateObjectsImpl(failedJobs_, gcRootUpdater);
     for (auto &it : rejectedPromises_) {
         UpdateObjectsImpl(it.second, gcRootUpdater);
     }
@@ -105,7 +100,6 @@ static void VisitObjectsImpl(PandaUnorderedSet<EtsObject *> &objects, const GCRo
 void UnhandledObjectManager::VisitObjects(const GCRootVisitor &visitor)
 {
     os::memory::LockHolder lh(mutex_);
-    VisitObjectsImpl(failedJobs_, visitor);
     for (auto &it : rejectedPromises_) {
         VisitObjectsImpl(it.second, visitor);
     }
@@ -154,7 +148,7 @@ template <typename T>
 static EtsHandle<EtsStdCoreArray> CreateEtsObjectArrayFromHandles(EtsExecutionContext *executionCtx,
                                                                   const PandaVector<EtsHandle<EtsObject>> &handles)
 {
-    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
+    static_assert(std::is_same_v<T, EtsPromise>);
     ASSERT(executionCtx != nullptr);
     EtsHandle<EtsStdCoreArray> arrayH(executionCtx, EtsStdCoreArray::Create(executionCtx, handles.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
@@ -181,16 +175,11 @@ template <typename T>
 static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
                                     EtsHandle<EtsStdCoreArray> &hobjects, DefaultHandlerMode handlerMode)
 {
-    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
+    static_assert(std::is_same_v<T, EtsPromise>);
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
-    Method *method {};
-    if constexpr (std::is_same_v<T, EtsJob>) {
-        method = platformTypes->coreStdProcessListUnhandledJobs->GetPandaMethod();
-        LOG(DEBUG, COROUTINES) << "List unhandled failed jobs";
-    } else if (std::is_same_v<T, EtsPromise>) {
-        method = platformTypes->coreStdProcessListUnhandledPromises->GetPandaMethod();
-        LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
-    }
+    Method *method = platformTypes->coreStdProcessListUnhandledPromises->GetPandaMethod();
+    LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
+
     ASSERT(method != nullptr);
     ASSERT(handlerMode != DefaultHandlerMode::INVALID);
     auto defaultHandlerMode = static_cast<int>(handlerMode);
@@ -215,7 +204,7 @@ template <typename T>
 static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
                                      const PandaUnorderedSet<EtsObject *> &objects, DefaultHandlerMode handlerMode)
 {
-    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
+    static_assert(std::is_same_v<T, EtsPromise>);
     ASSERT(executionCtx != nullptr);
     ASSERT(etsClassLinker != nullptr);
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
@@ -227,33 +216,6 @@ static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsExecutio
         return;
     }
     ListObjectsFromEtsArray<T>(etsClassLinker, executionCtx, hEtsArray, handlerMode);
-}
-
-void UnhandledObjectManager::AddFailedJob(EtsJob *job)
-{
-    os::memory::LockHolder lh(mutex_);
-    AddObjectImpl(failedJobs_, job->AsObject());
-}
-
-void UnhandledObjectManager::RemoveFailedJob(EtsJob *job)
-{
-    os::memory::LockHolder lh(mutex_);
-    RemoveObjectImpl(failedJobs_, job->AsObject());
-}
-
-void UnhandledObjectManager::ListFailedJobs(EtsExecutionContext *executionCtx)
-{
-    ASSERT_MANAGED_CODE();
-    ASSERT(executionCtx != nullptr);
-    PandaUnorderedSet<EtsObject *> unhandledObjects {};
-    {
-        os::memory::LockHolder lh(mutex_);
-        if (failedJobs_.empty()) {
-            return;
-        }
-        unhandledObjects.swap(failedJobs_);
-    }
-    ListUnhandledObjectsImpl<EtsJob>(vm_->GetClassLinker(), executionCtx, unhandledObjects, jobHandlerMode_);
 }
 
 void UnhandledObjectManager::AddRejectedPromise(EtsPromise *promise, EtsExecutionContext *adderExecutionCtx)
@@ -269,7 +231,7 @@ void UnhandledObjectManager::RemoveRejectedPromise(EtsPromise *promise, EtsExecu
     auto workerId = JobExecutionContext::CastFromMutator(removerExecutionCtx->GetMT())->GetWorker()->GetId();
     auto it = rejectedPromises_.find(workerId);
     if (it != rejectedPromises_.end()) {
-        it->second.erase(promise->AsObject());
+        RemoveObjectImpl(it->second, promise->AsObject());
         if (it->second.empty()) {
             rejectedPromises_.erase(it);
         }
@@ -305,12 +267,6 @@ void UnhandledObjectManager::ListRejectedPromises(EtsExecutionContext *execution
     }
 
     ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), executionCtx, unhandledObjects, promiseHandlerMode_);
-}
-
-bool UnhandledObjectManager::HasFailedJobObjects() const
-{
-    os::memory::LockHolder lh(mutex_);
-    return !(failedJobs_.empty());
 }
 
 bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsExecutionContext *executionCtx, bool listAllObjects) const

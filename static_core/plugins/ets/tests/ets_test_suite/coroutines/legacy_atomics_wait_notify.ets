@@ -103,19 +103,19 @@ async function testSyncTimedWaitNotifyRace(index: int) {
             return str;
         });
 
-        let event = new CompletableJob<void>();
+        let event = new PromiseWithResolvers<void>();
         let k = i;
         setTimeout(() => {
             let l = k;
             launch() {
                 Atomics.store(int32array, index, l + 1);
                 Atomics.notify(int32array, index);
-                event.finish();
+                event.resolve(undefined);
             }
         }, i);
 
         let s = await jb;
-        event.Await();
+        await event.promise;
         arktest.assertTrue(s == 'timed-out' || s == 'ok' || s == 'not-equal', s);
     }
 
@@ -135,17 +135,17 @@ async function testAsyncTimedWaitNotifyRace(index: int) {
             p = Atomics.waitAsync(int32array, index, i);
         }
         let k = i;
-        let event = new CompletableJob<void>();
+        let event = new PromiseWithResolvers<void>();
         setTimeout(() => {
             let l = k;
             launch() {
                 Atomics.store(int32array, index, l + 1);
                 Atomics.notify(int32array, index);
-                event.finish();
+                event.resolve(undefined);
             }
         }, i);
         let s = await p;
-        await event;
+        await event.promise;
         arktest.assertTrue(s == 'timed-out' || s == 'ok' || s == 'not-equal', s);
     }
 

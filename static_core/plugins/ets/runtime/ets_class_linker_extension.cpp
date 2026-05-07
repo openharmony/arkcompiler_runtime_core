@@ -765,7 +765,6 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
     executionCtx->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
-    executionCtx->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
     mThread->SetStringClassPtr(GetClassRoot(ClassRoot::LINE_STRING));
     mThread->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
     mThread->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));

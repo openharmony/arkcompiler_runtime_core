@@ -28,21 +28,8 @@ function SingleRejectedJob(): null {
 }
 
 async function testAllhandledRejection(): Promise<void> {
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-    });
-
     StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
-    });
-
-    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertEQ(reason.message, 'This is a single rejected job');
-
-        StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
-            arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        });
     });
 
     let g = launch(Failing);
@@ -80,7 +67,6 @@ async function testAllhandledRejection(): Promise<void> {
 }
 
 async function main(): Promise<int> {
-    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection')
     let testSuite = new arktest.ArkTestsuite('coroutines.allhandled_rejection');
     testSuite.addAsyncTest('testAllhandledRejection', testAllhandledRejection);
     let res = await testSuite.runAsync();

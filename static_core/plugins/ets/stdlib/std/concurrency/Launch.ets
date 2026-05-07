@@ -35,7 +35,7 @@ export class LaunchParams {
  * @param launchParams parameters of the new coroutine.
  * @param args arguments for the function coroFun.
  *
- * @returns instance of the Job class that represents newly launched coroutine.
+ * @returns instance of the Promise class that represents newly launched coroutine.
  *
  * @internal
  */
@@ -49,7 +49,7 @@ export function launch<R>(launchParams: LaunchParams, coroFun: () => R): Promise
  * @param coroFun entrypoint of the the new coroutine.
  * @param args arguments for the function coroFun.
  *
- * @returns instance of the Job class that represents newly launched coroutine.
+ * @returns instance of the Promise class that represents newly launched coroutine.
  *
  * @internal
  */
@@ -135,13 +135,7 @@ export class WorkerGroup {
  */
 export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     let resultPromise = asyncCallback();
-    let job = new CompletableJob<T>();
-    resultPromise.then((res: T) => {
-        job.finish(res);
-    }).catch((e: Error) => {
-        job.fail(e);
-    })
-    return job.Await();
+    return resultPromise.awaitSync();
 }
 
 function launchInternal<R>(coroFun: () => R, launchParams?: LaunchParams): Promise<R> {

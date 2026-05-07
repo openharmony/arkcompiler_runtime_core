@@ -50,7 +50,7 @@ function(add_ets_coroutines_test)
     get_filename_component(test_name "${ARG_FILE}" NAME_WE)
 
     if (ARG_LIST_UNHANDLED)
-        list(APPEND list_unhandled_option "--list-unhandled-on-exit:jobs=throw" "--list-unhandled-on-exit:promises=throw")
+        list(APPEND list_unhandled_option "--list-unhandled-on-exit:promises=throw")
     endif()
 
     get_target_property(STACKLESS_STDLIB etsstdlib.stackless FILE)
@@ -141,15 +141,6 @@ add_ets_coroutines_test(FILE unhandled_rejection_event.ets
 
 add_ets_coroutines_test(FILE unhandled_rejection_promise.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
-                        WORKERS "AUTO" "ONE"
-                        MODE "INT" "JIT" "AOT"
-)
-
-add_ets_coroutines_test(FILE dump_unhandled_jobs.ets
-                        SKIP_ARM32_COMPILER
-                        LIST_UNHANDLED
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO" "ONE"
@@ -386,7 +377,6 @@ add_ets_coroutines_test(FILE launch_return.ets
                         MODE "INT"
 )
 
-# NOTE(alimovilya, #34019): enable in aot mode
 add_ets_coroutines_test(FILE launch_return.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKLESS"
@@ -435,7 +425,6 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
                         MODE "INT" "JIT" "AOT"
 )
 
-# NOTE(alimovilya, #34019): enable in aot mode
 add_ets_coroutines_test(FILE wake_for_another_event.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKLESS"
@@ -541,7 +530,7 @@ add_ets_coroutines_test(FILE migration.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE job_test.ets
+add_ets_coroutines_test(FILE promise_with_resolvers_test.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"

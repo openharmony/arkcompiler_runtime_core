@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/intrinsics/helpers/intrinsic_promise_impl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
-#include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "runtime/execution/job-inl.h"
 #include "runtime/execution/job_execution_context.h"
@@ -115,15 +114,6 @@ EtsObject *EtsExecutionContextWrapper::TakePendingException(Job *job)
     return EtsObject::FromCoreType(exc);
 }
 
-void EtsExecutionContextWrapper::CompleteJob(EtsJob *completedJob, EtsObject *retObject, Job *job)
-{
-    if (HasPendingException()) {
-        EtsJob::EtsJobFail(completedJob, TakePendingException(job));
-        return;
-    }
-    EtsJob::EtsJobFinish(completedJob, retObject);
-}
-
 void EtsExecutionContextWrapper::CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job)
 {
     auto *platformTypes = PlatformTypes(GetExecutionCtx());
@@ -169,22 +159,13 @@ void EtsExecutionContextWrapper::OnJobCompletion(Value returnValue)
 
     auto *retObject = HasPendingException() ? nullptr : BoxReturnValue(returnValue);
     auto *completionObj = GetCompletionObject(retValueRef);
-    auto *platformTypes = PlatformTypes(GetExecutionCtx());
-    if (completionObj->IsInstanceOf(platformTypes->coreJob)) {
-        [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
-        EtsHandle<EtsJob> completedJob(GetExecutionCtx(), EtsJob::FromEtsObject(completionObj));
-        CompleteJob(completedJob.GetPtr(), retObject, job);
-        return;
-    }
 
-    if (completionObj->IsInstanceOf(platformTypes->corePromise)) {
-        [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
-        EtsHandle<EtsPromise> completedPromise(GetExecutionCtx(), EtsPromise::FromEtsObject(completionObj));
-        CompletePromise(completedPromise.GetPtr(), retObject, job);
-        return;
-    }
+    [[maybe_unused]] auto *platformTypes = PlatformTypes(GetExecutionCtx());
+    ASSERT(completionObj->IsInstanceOf(platformTypes->corePromise));
 
-    UNREACHABLE();
+    [[maybe_unused]] EtsHandleScope scope(GetExecutionCtx());
+    EtsHandle<EtsPromise> completedPromise(GetExecutionCtx(), EtsPromise::FromEtsObject(completionObj));
+    CompletePromise(completedPromise.GetPtr(), retObject, job);
 }
 
 void EtsExecutionContextWrapper::VisitGCRoots(const GCRootVisitor &cb)

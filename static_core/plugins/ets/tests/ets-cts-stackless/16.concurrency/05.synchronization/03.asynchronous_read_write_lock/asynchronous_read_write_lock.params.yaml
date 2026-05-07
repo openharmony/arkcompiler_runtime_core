@@ -24,7 +24,7 @@ cases:
 
         const ea1 = new EAWorker();
         ea1.start();
-        ea1.run<undefined>(() => {
+        await ea1.run<undefined>(() => {
           waitForCompletion(async () => {
             await readLock.lock();
             i++;
@@ -32,11 +32,11 @@ cases:
             i--;
             readLock.unlock();
           })
-        }).Await();
+        });
       
         const ea2 = new EAWorker();
         ea2.start();
-        ea2.run<undefined>(() => {
+        await ea2.run<undefined>(() => {
           waitForCompletion(async () => {
             await writeLock.lock();
             writeAcquired = true;
@@ -46,7 +46,7 @@ cases:
             Coroutine.Schedule();
             writeLock.unlock();
           })
-        }).Await();
+        });
 
         arktest.assertTrue(writeAcquired);
         ea1.quit();

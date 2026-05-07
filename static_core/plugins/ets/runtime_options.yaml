@@ -261,14 +261,6 @@ options:
       - warn
       - none
     description: "promises"
-  - name: jobs
-    type: std::string
-    default: none
-    possible_values:
-      - throw
-      - warn
-      - none
-    description: "jobs"
 
 - name: verify-ani
   type: bool

@@ -28,7 +28,6 @@
 #include "types/ets_method.h"
 #include "types/ets_primitives.h"
 #include "types/ets_type.h"
-#include "types/ets_job.h"
 #include "types/ets_promise.h"
 #include "types/ets_type_comptime_traits.h"
 #include "mem/vm_handle.h"
@@ -59,7 +58,7 @@ template <typename CoroResult>
 CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id groupId = JobWorkerThreadGroup::AnyId(),
                    bool postToMain = false)
 {
-    static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
+    static_assert(std::is_same_v<CoroResult, EtsPromise>);
 
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);

@@ -16,7 +16,7 @@
 
 async function out_of_coro_test() {
     const coro_to_create = 7001;
-    let blocker = new CompletableJob<void>();
+    let blocker = new PromiseWithResolvers<void>();
     let jobs = new Array<Promise<void>>();
     let errorCaught = false;
 
@@ -27,7 +27,7 @@ async function out_of_coro_test() {
     eaw2.start();
     await eaw2.run<void>(() => {});
 
-    let awaitIt = (): void => { blocker.Await(); }
+    let awaitIt = (): void => { blocker.promise.awaitSync(); }
 
     try {
         for (let i = 0; i < coro_to_create; ++i) {
@@ -43,7 +43,7 @@ async function out_of_coro_test() {
     }
     arktest.assertTrue(errorCaught, 'Coroutine limit error was expected');
 
-    blocker.finish();
+    blocker.resolve(undefined);
 
     for (let j of jobs) {
         await j;
