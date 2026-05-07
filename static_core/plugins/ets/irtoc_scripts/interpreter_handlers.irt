@@ -233,7 +233,7 @@ macro(:handle_ets_async_await) do |v, size|
     move_to_exception
   }
 
-  resume_point_id := Cast(AddI(pc).Imm(size).ptr).i64
+  resume_point_id := AddI(ins_offset).Imm(size).i64
   ets_async_ctx_store_i64(async_ctx_usual, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET, resume_point_id)
 
   method := get_method_ptr()
@@ -369,7 +369,9 @@ Label(:DispatchPrimExit)
   ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_REF_COUNT_OFFSET, Cast(0).i64)
   ets_async_ctx_store_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_PRIM_COUNT_OFFSET, Cast(0).i64)
 
-  pc_fast := Cast(ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET).i64).ptr
+  instructions := LoadI(%frame).Imm(Constants::FRAME_INSTRUCTIONS_OFFSET).ptr
+  resume_point_id := ets_async_ctx_load_i64(async_ctx, EtsConstants::ETS_ASYNC_CONTEXT_AWAIT_ID_OFFSET).i64
+  pc_fast := Add(instructions, resume_point_id).ptr
   Goto(:DispatchJoin)
 
 Label(:DispatchSlowPath)
