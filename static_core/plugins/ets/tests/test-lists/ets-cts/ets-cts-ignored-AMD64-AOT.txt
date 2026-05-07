@@ -1,5 +1,2 @@
-#34602
-16.concurrency/04.parallel_execution/02.eaworker_api/eaworker_two_workers_smoke.ets
-
 #34352
 16.concurrency/05.synchronization/02.asynchronous_mutex/asynchronous_mutex_1.ets
