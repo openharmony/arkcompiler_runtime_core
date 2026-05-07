@@ -39,6 +39,7 @@ using panda::panda_file::ForeignFieldItem;
 using panda::panda_file::ForeignMethodItem;
 using panda::panda_file::ItemContainer;
 using panda::panda_file::LineNumberProgramItem;
+using panda::panda_file::LiteralArrayItem;
 using panda::panda_file::MemoryBufferWriter;
 using panda::panda_file::MethodHandleItem;
 using panda::panda_file::MethodItem;
@@ -52,7 +53,6 @@ using panda::panda_file::Type;
 using panda::panda_file::TypeItem;
 using panda::panda_file::ValueItem;
 using panda::panda_file::Writer;
-using panda::panda_file::LiteralArrayItem;
 
 std::unordered_map<Type::TypeId, PrimitiveTypeItem *> CreatePrimitiveTypes(ItemContainer *container)
 {
@@ -139,9 +139,9 @@ std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, c
 }
 
 /* static */
-panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
-    ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
-    const AsmEmitter::AsmEntityCollections &entities)
+panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(ItemContainer *container, const Value *value,
+                                                       std::vector<panda_file::LiteralItem> *out,
+                                                       const AsmEmitter::AsmEntityCollections &entities)
 {
     ASSERT(out != nullptr);
 
@@ -220,9 +220,9 @@ ScalarValueItem *AsmEmitter::CreateScalarStringValueItem(ItemContainer *containe
 }
 
 /* static */
-ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
-    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out,
-    const std::map<std::string, BaseClassItem *> &classes)
+ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(ItemContainer *container, const Value *value,
+                                                         std::vector<ScalarValueItem> *out,
+                                                         const std::map<std::string, BaseClassItem *> &classes)
 {
     auto type = value->GetAsScalar()->GetValue<Type>();
     BaseClassItem *class_item;
@@ -307,9 +307,9 @@ ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container,
 }
 
 /* static */
-ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
-    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out, const Program &program,
-    const AsmEmitter::AsmEntityCollections &entities)
+ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(ItemContainer *container, const Value *value,
+                                                             std::vector<ScalarValueItem> *out, const Program &program,
+                                                             const AsmEmitter::AsmEntityCollections &entities)
 {
     auto annotation = value->GetAsScalar()->GetValue<AnnotationData>();
     auto *annotation_item = CreateAnnotationItem(container, annotation, program, entities);
@@ -386,8 +386,7 @@ ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *va
         case Value::Type::ARRAY: {
             std::vector<ScalarValueItem> elements;
             for (const auto &elem_value : value->GetAsArray()->GetValues()) {
-                auto *item =
-                    CreateScalarValueItem(container, &elem_value, &elements, program, entities);
+                auto *item = CreateScalarValueItem(container, &elem_value, &elements, program, entities);
                 if (item == nullptr) {
                     return nullptr;
                 }
@@ -405,7 +404,8 @@ ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *va
 
 /* static */
 AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const AnnotationData &annotation,
-    const Program &program, const AsmEmitter::AsmEntityCollections &entities)
+                                                 const Program &program,
+                                                 const AsmEmitter::AsmEntityCollections &entities)
 {
     auto record_name = annotation.GetName();
     if (!program.isGeneratedFromMergedAbc) {
@@ -683,7 +683,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                 }
                 case panda_file::LiteralTag::ARRAY_STRING:
                     ASSERT(program.array_types.find(Type(
-                        Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
+                               Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
                            program.array_types.end());
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
                         std::string_view(std::get<std::string>(literal.value_))));
@@ -1139,7 +1139,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
 
         auto *class_item = static_cast<ClassItem *>(Find(*items->GetClassMap(), name));
         if (!class_item) {
-            SetLastError("Cannot find class item for record "+ name);
+            SetLastError("Cannot find class item for record " + name);
             return false;
         }
 
@@ -1350,8 +1350,8 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
 }
 
 /* static */
-bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &program, bool emit_debug_info,
-    AsmEmitter::AsmEntityCollections &entities,
+bool AsmEmitter::MakeItemsForSingleProgram(
+    ItemContainer *items, const Program &program, bool emit_debug_info, AsmEmitter::AsmEntityCollections &entities,
     std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> primitive_types)
 {
     MakeArrayTypeItems(items, program);
@@ -1504,6 +1504,29 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
     return items.Write(writer);
 }
 
+bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::string, size_t> *stat,
+                      PandaFileToPandaAsmMaps *maps, bool debug_info,
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt,
+                      std::optional<ItemContainer::BytecodeVersion> bytecodeVersion)
+{
+    ItemContainer::SetApi(0);
+    ItemContainer::SetSubApi(panda_file::DEFAULT_SUB_API_VERSION);
+    auto items = ItemContainer {};
+    if (!Emit(&items, program, maps, debug_info, profile_opt)) {
+        return false;
+    }
+    if (bytecodeVersion.has_value()) {
+        items.SetBytecodeVersion(*bytecodeVersion);
+    }
+
+    items.DeduplicateItems();
+    if (stat != nullptr) {
+        *stat = items.GetStat();
+    }
+
+    return items.Write(writer);
+}
+
 bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debug_info,
                       panda::panda_file::pgo::ProfileOptimizer *profile_opt, uint8_t api, std::string subApi)
@@ -1514,6 +1537,19 @@ bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::
         return false;
     }
     return Emit(&writer, program, stat, maps, debug_info, profile_opt, api, subApi);
+}
+
+bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
+                      PandaFileToPandaAsmMaps *maps, bool debug_info,
+                      panda::panda_file::pgo::ProfileOptimizer *profile_opt,
+                      std::optional<ItemContainer::BytecodeVersion> bytecodeVersion)
+{
+    auto writer = FileWriter(filename);
+    if (!writer) {
+        SetLastError("Unable to open" + filename + " for writing");
+        return false;
+    }
+    return Emit(&writer, program, stat, maps, debug_info, profile_opt, bytecodeVersion);
 }
 
 std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program, PandaFileToPandaAsmMaps *maps,
@@ -1602,8 +1638,7 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     return true;
 }
 
-static void TryEmitPc(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                      uint32_t &pc_inc)
+static void TryEmitPc(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool, uint32_t &pc_inc)
 {
     if (pc_inc) {
         program->EmitAdvancePc(constant_pool, pc_inc);
@@ -1695,17 +1730,17 @@ void Function::CollectLocalVariable(std::vector<Function::LocalVariablePair> &lo
     }
 
     std::sort(local_variable_info.begin(), local_variable_info.end(),
-        [this](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
-        auto a_var = this->local_variable_debug[a.variable_index];
-        auto b_var = this->local_variable_debug[b.variable_index];
-        // If the same register is first used by a_var, and then used by b_var, the ending position of a_var needs
-        // to be equal or less then the starting position of b_var. This is to keep the order in local_variable_debug
-        // to make sure that if the usage of a_var start first, it will end first.
-        if (a.insn_order == b.insn_order && a_var.reg == b_var.reg) {
-            return a_var.start < b_var.start;
-        }
-        return a.insn_order < b.insn_order;
-    });
+              [this](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
+                  auto a_var = this->local_variable_debug[a.variable_index];
+                  auto b_var = this->local_variable_debug[b.variable_index];
+                  // If the same register is first used by a_var, and then used by b_var, the ending position of a_var
+                  // needs to be equal or less then the starting position of b_var. This is to keep the order in
+                  // local_variable_debug to make sure that if the usage of a_var start first, it will end first.
+                  if (a.insn_order == b.insn_order && a_var.reg == b_var.reg) {
+                      return a_var.start < b_var.start;
+                  }
+                  return a.insn_order < b.insn_order;
+              });
 }
 
 void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, const std::vector<uint8_t> &bytecode,
@@ -1755,7 +1790,7 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
             break;
         }
         if (emit_debug_info) {
-            LocalVarEmitContext context{pc_inc, end, iter->variable_index};
+            LocalVarEmitContext context {pc_inc, end, iter->variable_index};
             EmitLocalVariable(program, container, constant_pool, context);
         }
         start = end;
@@ -1807,9 +1842,9 @@ Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> 
     return Function::TryCatchInfo {try_catch_labels, try_catch_map, try_catch_order};
 }
 
-std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(
-    MethodItem *method, const std::map<std::string, BaseClassItem *> &class_items,
-    const std::vector<uint8_t> &bytecode) const
+std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(MethodItem *method,
+                                                         const std::map<std::string, BaseClassItem *> &class_items,
+                                                         const std::vector<uint8_t> &bytecode) const
 {
     std::vector<CodeItem::TryBlock> try_blocks;
 

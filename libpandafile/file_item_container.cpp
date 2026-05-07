@@ -698,7 +698,8 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
     writer->CountChecksum(true);
 
     const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
-    std::vector<uint8_t> versionVec(std::begin(bc_version.value()), std::end(bc_version.value()));
+    const auto &version = bytecode_version_.has_value() ? bytecode_version_.value() : bc_version.value();
+    std::vector<uint8_t> versionVec(std::begin(version), std::end(version));
 
     if (!writer->WriteBytes(versionVec)) {
         return false;

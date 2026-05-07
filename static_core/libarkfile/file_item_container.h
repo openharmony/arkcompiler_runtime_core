@@ -20,9 +20,11 @@
 #include "libarkfile/file_writer.h"
 #include "libarkfile/pgo.h"
 
+#include <array>
 #include <list>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <string_view>
@@ -35,6 +37,8 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
+    using BytecodeVersion = std::array<uint8_t, File::VERSION_SIZE>;
+
     PANDA_PUBLIC_API ItemContainer();
     ~ItemContainer() = default;
     NO_COPY_SEMANTIC(ItemContainer);
@@ -127,6 +131,11 @@ public:
     PANDA_PUBLIC_API bool Write(Writer *writer, bool deduplicateItems = true, bool computeLayout = true);
 
     PANDA_PUBLIC_API std::map<std::string, size_t> GetStat();
+
+    void SetBytecodeVersion(BytecodeVersion version)
+    {
+        bytecodeVersion_ = version;
+    }
 
     void DumpItemsStat(std::ostream &os) const;
 
@@ -598,6 +607,7 @@ private:
     BaseItem *end_;
 
     bool isQuickened_ = false;
+    std::optional<BytecodeVersion> bytecodeVersion_;
 };
 
 }  // namespace ark::panda_file

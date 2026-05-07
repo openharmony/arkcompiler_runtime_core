@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstring>
 #include <gtest/gtest.h>
@@ -60,6 +62,58 @@ TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileGetVersion)
     std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {24, 0, 0, 0};
     const auto versionsEquality = std::memcmp(expectedVersion.data(), version, sizeof(uint8_t) * ABCKIT_VERSION_SIZE);
     ASSERT_EQ(versionsEquality, 0);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFilesTest, StaticWriteAbcPreservesFileVersion)
+{
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/files/file_static.abc";
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/files/file_static_modified.abc";
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    std::array<uint8_t, ABCKIT_VERSION_SIZE> inputVersion {};
+    AbckitFileVersion version = g_implI->fileGetVersion(file);
+    std::copy_n(version, inputVersion.size(), inputVersion.begin());
+
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    helpers::AssertOpenAbc(OUTPUT_PATH, &file);
+    version = g_implI->fileGetVersion(file);
+    ASSERT_EQ(std::memcmp(inputVersion.data(), version, sizeof(uint8_t) * ABCKIT_VERSION_SIZE), 0);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiFilesTest, DynamicWriteAbcPreservesFileVersion)
+{
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/files/file_dynamic.abc";
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/files/file_dynamic_modified.abc";
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    std::array<uint8_t, ABCKIT_VERSION_SIZE> inputVersion {};
+    AbckitFileVersion version = g_implI->fileGetVersion(file);
+    std::copy_n(version, inputVersion.size(), inputVersion.begin());
+
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    helpers::AssertOpenAbc(OUTPUT_PATH, &file);
+    version = g_implI->fileGetVersion(file);
+    ASSERT_EQ(std::memcmp(inputVersion.data(), version, sizeof(uint8_t) * ABCKIT_VERSION_SIZE), 0);
 
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

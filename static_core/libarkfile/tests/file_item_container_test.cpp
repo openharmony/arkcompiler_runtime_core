@@ -89,6 +89,21 @@ TEST(ItemContainer, TestFileOpen)
     EXPECT_NE(File::Open(fileName), nullptr);
 }
 
+TEST(ItemContainer, TestBytecodeVersionOverride)
+{
+    ItemContainer container;
+    auto version = ItemContainer::BytecodeVersion(MIN_VERSION);
+    container.SetBytecodeVersion(version);
+
+    const std::string fileName = "test_bytecode_version_override.abc";
+    auto writer = FileWriter(fileName);
+    ASSERT_TRUE(container.Write(&writer));
+
+    auto pf = File::Open(fileName);
+    ASSERT_NE(pf, nullptr);
+    EXPECT_EQ(pf->GetHeader()->version, version);
+}
+
 TEST(ItemContainer, TestFileFormatVersionTooOld)
 {
     const std::string fileName = "test_file_format_version_too_old.abc";

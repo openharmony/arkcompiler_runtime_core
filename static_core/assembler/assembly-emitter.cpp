@@ -1849,9 +1849,19 @@ bool AsmEmitter::Emit(ItemContainer *items, Program &program, PandaFileToPandaAs
 bool AsmEmitter::Emit(Writer *writer, Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
+    return Emit(writer, program, stat, maps, debugInfo, profileOpt, std::nullopt);
+}
+
+bool AsmEmitter::Emit(Writer *writer, Program &program, std::map<std::string, size_t> *stat,
+                      PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt,
+                      std::optional<ItemContainer::BytecodeVersion> bytecodeVersion)
+{
     auto items = ItemContainer {};
     if (!Emit(&items, program, maps, debugInfo, profileOpt)) {
         return false;
+    }
+    if (bytecodeVersion.has_value()) {
+        items.SetBytecodeVersion(*bytecodeVersion);
     }
 
     if (stat != nullptr) {
@@ -1865,12 +1875,19 @@ bool AsmEmitter::Emit(Writer *writer, Program &program, std::map<std::string, si
 bool AsmEmitter::Emit(const std::string &filename, Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
+    return Emit(filename, program, stat, maps, debugInfo, profileOpt, std::nullopt);
+}
+
+bool AsmEmitter::Emit(const std::string &filename, Program &program, std::map<std::string, size_t> *stat,
+                      PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt,
+                      std::optional<ItemContainer::BytecodeVersion> bytecodeVersion)
+{
     auto writer = FileWriter(filename);
     if (!writer) {
         SetLastError("Unable to open " + filename + " for writing");
         return false;
     }
-    return Emit(&writer, program, stat, maps, debugInfo, profileOpt);
+    return Emit(&writer, program, stat, maps, debugInfo, profileOpt, bytecodeVersion);
 }
 
 std::unique_ptr<const panda_file::File> AsmEmitter::Emit(Program &program, PandaFileToPandaAsmMaps *maps)

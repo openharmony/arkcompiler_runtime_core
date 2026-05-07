@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H
 
 #include <memory>
+#include <optional>
 #include <type_traits>
 #include <vector>
 #include <unordered_map>
@@ -61,12 +62,22 @@ public:
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
                                       ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
+    PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, Program &program, std::map<std::string, size_t> *stat,
+                                      PandaFileToPandaAsmMaps *maps, bool debugInfo,
+                                      ark::panda_file::pgo::ProfileOptimizer *profileOpt,
+                                      std::optional<panda_file::ItemContainer::BytecodeVersion> bytecodeVersion);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     PANDA_PUBLIC_API static bool Emit(const std::string &filename, Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
                                       ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
+    PANDA_PUBLIC_API static bool Emit(const std::string &filename, Program &program,
+                                      std::map<std::string, size_t> *stat, PandaFileToPandaAsmMaps *maps,
+                                      bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt,
+                                      std::optional<panda_file::ItemContainer::BytecodeVersion> bytecodeVersion);
 
     PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(Program &program,
                                                                          PandaFileToPandaAsmMaps *maps = nullptr);
