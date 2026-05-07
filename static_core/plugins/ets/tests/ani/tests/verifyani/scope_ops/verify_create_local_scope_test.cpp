@@ -31,7 +31,7 @@ TEST_F(CreateLocalScopeTest, wrong_env)
 
 TEST_F(CreateLocalScopeTest, wrong_nr_refs_0)
 {
-    ASSERT_EQ(env_->c_api->CreateLocalScope(env_, 0), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->CreateLocalScope(env_, 0), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"nr_refs", "ani_size", "wrong value"},
@@ -41,12 +41,15 @@ TEST_F(CreateLocalScopeTest, wrong_nr_refs_0)
 
 TEST_F(CreateLocalScopeTest, wrong_nr_refs_1)
 {
-    ASSERT_EQ(env_->c_api->CreateLocalScope(env_, ani_size(std::numeric_limits<uint16_t>::max()) + 1), ANI_ERROR);
+#ifndef PANDA_TARGET_ARM32
+    ani_size nrRefs = static_cast<ani_size>(std::numeric_limits<uint32_t>::max()) + static_cast<ani_size>(1U);
+    ASSERT_EQ(env_->c_api->CreateLocalScope(env_, nrRefs), ANI_OUT_OF_MEMORY);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"nr_refs", "ani_size", "it is too big"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateLocalScope", testLines);
+#endif
 }
 
 TEST_F(CreateLocalScopeTest, wrong_all_args)

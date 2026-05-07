@@ -5677,6 +5677,7 @@ NO_UB_SANITIZE static ani_status WeakReference_Delete(ani_env *env, ani_wref wre
 {
     ANI_DEBUG_TRACE(env);
     CHECK_PTR_ARG(env);
+    CHECK_PTR_ARG(wref);
 
     ScopedManagedCodeFix s(env);
     return s.DelWeakRef(wref);
@@ -5688,6 +5689,7 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
 {
     ANI_DEBUG_TRACE(env);
     CHECK_PTR_ARG(env);
+    CHECK_PTR_ARG(wref);
     CHECK_PTR_ARG(wasReleasedResult);
     CHECK_PTR_ARG(refResult);
 

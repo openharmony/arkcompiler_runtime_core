@@ -72,6 +72,19 @@ TEST_F(WeakReferenceDeleteTest, invalid_env)
     ASSERT_EQ(env_->c_api->WeakReference_Delete(nullptr, wref), ANI_INVALID_ARGS);
 }
 
+TEST_F(WeakReferenceDeleteTest, invalid_wref)
+{
+    ASSERT_EQ(env_->c_api->WeakReference_Delete(env_, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(WeakReferenceDeleteTest, incorrect_ref_kind)
+{
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8("x", 1, &strRef), ANI_OK);
+    ASSERT_EQ(env_->c_api->WeakReference_Delete(env_, reinterpret_cast<ani_wref>(strRef)), ANI_INCORRECT_REF);
+    ASSERT_EQ(env_->Reference_Delete(strRef), ANI_OK);
+}
+
 TEST_F(WeakReferenceDeleteTest, weak_reference_delete_under_pending_error)
 {
     std::string longString(10000U, 'a');

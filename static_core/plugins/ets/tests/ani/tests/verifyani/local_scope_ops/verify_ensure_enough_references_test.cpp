@@ -21,7 +21,7 @@ class EnsureEnoughRef : public VerifyAniTest {};
 
 TEST_F(EnsureEnoughRef, wrong_env)
 {
-    ani_size cnt {};
+    ani_size cnt = 5U;
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, cnt), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -34,6 +34,29 @@ TEST_F(EnsureEnoughRef, success)
 {
     ani_size cnt = 5U;
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, cnt), ANI_OK);
+}
+
+TEST_F(EnsureEnoughRef, wrong_nr_refs_0)
+{
+    ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, 0), ANI_INVALID_ARGS);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"nrRefs", "ani_size", "wrong value"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
+}
+
+TEST_F(EnsureEnoughRef, wrong_nr_refs_too_big)
+{
+#ifndef PANDA_TARGET_ARM32
+    ani_size nrRefs = static_cast<ani_size>(std::numeric_limits<uint32_t>::max()) + static_cast<ani_size>(1U);
+    ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, nrRefs), ANI_OUT_OF_MEMORY);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"nrRefs", "ani_size", "it is too big"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
+#endif
 }
 
 TEST_F(EnsureEnoughRef, throw_error)

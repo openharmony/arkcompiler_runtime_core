@@ -527,7 +527,7 @@ NO_UB_SANITIZE static ani_status EnsureEnoughReferences(VEnv *venv, ani_size nrR
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env", false),
-        ANIArg::MakeForSize(nrRefs, "nrRefs"),
+        ANIArg::MakeForNrRefs(nrRefs, "nrRefs"),
     );
     // clang-format on
 
@@ -7704,7 +7704,13 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(VEnv *venv, VTupleValue 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status GlobalReference_Create(VEnv *venv, VRef *vref, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRef(vref, "ref"),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+    );
+    // clang-format on
 
     ani_ref result {};
     auto status = GetInteractionAPI(venv)->GlobalReference_Create(venv->GetEnv(), vref->GetRef(), &result);
@@ -7717,33 +7723,65 @@ NO_UB_SANITIZE static ani_status GlobalReference_Create(VEnv *venv, VRef *vref, 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status GlobalReference_Delete(VEnv *venv, VRef *vgref)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForGlobalRef(vgref, "gref"),
+    );
+    // clang-format on
 
     ani_ref gref = vgref->GetRef();
-    venv->DeleteGlobalVerifiedRef(vgref);
-    return GetInteractionAPI(venv)->GlobalReference_Delete(venv->GetEnv(), gref);
+    ani_status status = GetInteractionAPI(venv)->GlobalReference_Delete(venv->GetEnv(), gref);
+    if (LIKELY(status == ANI_OK) && venv->IsValidGlobalVerifiedRef(vgref)) {
+        venv->DeleteGlobalVerifiedRef(vgref);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status WeakReference_Create(VEnv *venv, ani_ref ref, ani_wref *result)
+NO_UB_SANITIZE static ani_status WeakReference_Create(VEnv *venv, VRef *vref, ani_wref *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->WeakReference_Create(venv->GetEnv(), ref, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForRef(vref, "ref"),
+        ANIArg::MakeForWRefStorage(result, "result"),
+    );
+    // clang-format on
+    return GetInteractionAPI(venv)->WeakReference_Create(venv->GetEnv(), vref->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status WeakReference_Delete(VEnv *venv, ani_wref wref)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForWRef(wref, "wref"),
+    );
+    // clang-format on
     return GetInteractionAPI(venv)->WeakReference_Delete(venv->GetEnv(), wref);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status WeakReference_GetReference(VEnv *venv, ani_wref wref, ani_boolean *wasReleasedResult,
-                                                            ani_ref *refResult)
+                                                            VRef **vrefResult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->WeakReference_GetReference(venv->GetEnv(), wref, wasReleasedResult, refResult);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForWRef(wref, "wref"),
+        ANIArg::MakeForBooleanStorage(wasReleasedResult, "was_released_result"),
+        ANIArg::MakeForRefStorage(vrefResult, "result"),
+    );
+    // clang-format on
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->WeakReference_GetReference(venv->GetEnv(), wref, wasReleasedResult, &result);
+    if (LIKELY(status == ANI_OK)) {
+        *vrefResult = result == nullptr ? nullptr : venv->AddLocalVerifiedRef(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

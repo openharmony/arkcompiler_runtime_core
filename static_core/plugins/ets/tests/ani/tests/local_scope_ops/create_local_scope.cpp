@@ -490,6 +490,36 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_invalid_result)
     ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_with_global_ref)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
+    ani_ref globalRef {};
+    ASSERT_EQ(env_->GlobalReference_Create(objectRef, &globalRef), ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(globalRef, &result), ANI_INCORRECT_REF);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+    ASSERT_EQ(env_->GlobalReference_Delete(globalRef), ANI_OK);
+    ASSERT_EQ(env_->Reference_Delete(result), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_with_weak_ref)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
+    ani_wref weakRef {};
+    ASSERT_EQ(env_->WeakReference_Create(objectRef, &weakRef), ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(reinterpret_cast<ani_ref>(weakRef), &result), ANI_INCORRECT_REF);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+    ASSERT_EQ(env_->WeakReference_Delete(weakRef), ANI_OK);
+    ASSERT_EQ(env_->Reference_Delete(result), ANI_OK);
+}
+
 TEST_F(CreateLocalScopeTest, create_local_scope_under_pending_error)
 {
     std::string longString(10000U, 'a');

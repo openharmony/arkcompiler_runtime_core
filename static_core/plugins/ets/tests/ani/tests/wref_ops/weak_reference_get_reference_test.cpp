@@ -133,6 +133,25 @@ TEST_F(WeakReferenceGetReferenceTest, invalid_ref_result)
     ASSERT_EQ(env_->WeakReference_GetReference(wref, &wasReleased, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(WeakReferenceGetReferenceTest, invalid_wref)
+{
+    ani_ref ref {};
+    ani_boolean wasReleased = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->WeakReference_GetReference(env_, nullptr, &wasReleased, &ref), ANI_INVALID_ARGS);
+}
+
+TEST_F(WeakReferenceGetReferenceTest, incorrect_ref_kind)
+{
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8("x", 1, &strRef), ANI_OK);
+
+    ani_ref ref {};
+    ani_boolean wasReleased = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->WeakReference_GetReference(env_, reinterpret_cast<ani_wref>(strRef), &wasReleased, &ref),
+              ANI_INCORRECT_REF);
+    ASSERT_EQ(env_->Reference_Delete(strRef), ANI_OK);
+}
+
 TEST_F(WeakReferenceGetReferenceTest, invalid_ref_env)
 {
     ani_ref undefinedRef;

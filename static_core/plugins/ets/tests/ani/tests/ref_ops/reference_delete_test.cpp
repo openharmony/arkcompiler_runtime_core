@@ -54,6 +54,17 @@ TEST_F(ReferenceDeleteTest, delete_object_global_ref)
     ASSERT_EQ(env_->Reference_Delete(objectGRef), ANI_INCORRECT_REF);
 }
 
+TEST_F(ReferenceDeleteTest, delete_object_weak_ref)
+{
+    ani_ref objectRef;
+    ASSERT_EQ(env_->String_NewUTF8("x", 1, reinterpret_cast<ani_string *>(&objectRef)), ANI_OK);
+    ani_wref objectWRef;
+    ASSERT_EQ(env_->WeakReference_Create(objectRef, &objectWRef), ANI_OK);
+
+    ASSERT_EQ(env_->Reference_Delete(reinterpret_cast<ani_ref>(objectWRef)), ANI_INCORRECT_REF);
+    ASSERT_EQ(env_->WeakReference_Delete(objectWRef), ANI_OK);
+}
+
 TEST_F(ReferenceDeleteTest, invalid_env)
 {
     ani_ref undefinedRef;

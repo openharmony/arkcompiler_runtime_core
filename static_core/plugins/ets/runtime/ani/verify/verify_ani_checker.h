@@ -35,6 +35,8 @@
     X(VERIFY_MODULE,                        VerifyModule)                         \
     X(VERIFY_NAMESPACE,                     VerifyNamespace)                      \
     X(VERIFY_TYPE,                          VerifyType)                           \
+    X(VERIFY_GLOBAL_REF,                    VerifyGlobalRef)                      \
+    X(VERIFY_WREF,                          VerifyWRef)                           \
     X(VERIFY_CLASS,                         VerifyClass)                          \
     X(VERIFY_ENUM,                          VerifyEnum)                           \
     X(VERIFY_ENUM_ITEM,                     VerifyEnumItem)                       \
@@ -86,6 +88,7 @@
     X(VERIFY_ENUM_ITEM_STORAGE,             VerifyEnumItemStorage)                \
     X(VERIFY_REF_STORAGE,                   VerifyRefStorage)                     \
     X(VERIFY_TYPE_STORAGE,                  VerifyTypeStorage)                    \
+    X(VERIFY_WREF_STORAGE,                  VerifyWRefStorage)                    \
     X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
     X(VERIFY_CLASS_STORAGE,                 VerifyClassStorage)                   \
     X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
@@ -147,6 +150,7 @@
     X(ANI_MODULE,                       Module,                    VModule *)                \
     X(ANI_NAMESPACE,                    Namespace,                 VNamespace *)             \
     X(ANI_TYPE,                         Type,                      VType *)                  \
+    X(ANI_WREF,                         WRef,                      ani_wref)                 \
     X(ANI_CLASS,                        Class,                     VClass *)                 \
     X(ANI_ENUM,                         Enum,                      VEnum *)                  \
     X(ANI_ENUM_ITEM,                    EnumItem,                  VEnumItem *)              \
@@ -181,6 +185,7 @@
     X(ANI_REF_STORAGE,                  RefStorage,                VRef **)                  \
     X(ANI_TYPE_STORAGE,                 TypeStorage,               VType **)                 \
     X(ANI_CLASS_STORAGE,                ClassStorage,              VClass **)                \
+    X(ANI_WREF_STORAGE,                 WRefStorage,               ani_wref *)               \
     X(ANI_OBJECT_STORAGE,               ObjectStorage,             VObject **)               \
     X(ANI_ENUM_STORAGE,                 EnumStorage,               VEnum **)                 \
     X(ANI_ENUM_ITEM_STORAGE,            EnumItemStorage,           VEnumItem **)             \
@@ -391,6 +396,16 @@ public:
     static ANIArg MakeForType(VType *vtype, std::string_view name)
     {
         return ANIArg(ArgValueByType(vtype), name, Action::VERIFY_TYPE);
+    }
+
+    static ANIArg MakeForGlobalRef(VRef *vgref, std::string_view name)
+    {
+        return ANIArg(ArgValueByRef(vgref), name, Action::VERIFY_GLOBAL_REF);
+    }
+
+    static ANIArg MakeForWRef(ani_wref wref, std::string_view name)
+    {
+        return ANIArg(ArgValueByWRef(wref), name, Action::VERIFY_WREF);
     }
 
     static ANIArg MakeForClass(VClass *vclass, std::string_view name)
@@ -693,6 +708,11 @@ public:
     static ANIArg MakeForRefStorage(VRef **refStorage, std::string_view name)
     {
         return ANIArg(ArgValueByRefStorage(refStorage), name, Action::VERIFY_REF_STORAGE);
+    }
+
+    static ANIArg MakeForWRefStorage(ani_wref *wrefStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByWRefStorage(wrefStorage), name, Action::VERIFY_WREF_STORAGE);
     }
 
     static ANIArg MakeForObjectStorage(VObject **valueStorage, std::string_view name)

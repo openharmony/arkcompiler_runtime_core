@@ -200,9 +200,9 @@ public:
         if (IsUndefined(wref)) {
             return ANI_OK;
         }
-        EtsReference *etsGRef = AniWRefToEtsRef(wref);
-        ASSERT(etsGRef->IsWeak());
-        GetRefStorage()->RemoveEtsRef(etsGRef);
+        EtsReference *etsRef = AniWRefToEtsRef(wref);
+        ANI_CHECK_RETURN_IF_EQ(etsRef->IsWeak(), false, ANI_INCORRECT_REF);
+        GetRefStorage()->RemoveEtsRef(etsRef);
         return ANI_OK;
     }
 
@@ -211,9 +211,9 @@ public:
         if (IsUndefined(wref)) {
             return GetUndefinedRef(result);
         }
-        EtsReference *etsGRef = AniWRefToEtsRef(wref);
-        ASSERT(etsGRef->IsWeak());
-        EtsObject *obj = GetRefStorage()->GetEtsObject(etsGRef);
+        EtsReference *etsRef = AniWRefToEtsRef(wref);
+        ANI_CHECK_RETURN_IF_EQ(etsRef->IsWeak(), false, ANI_INCORRECT_REF);
+        EtsObject *obj = GetRefStorage()->GetEtsObject(etsRef);
         if (obj == nullptr) {
             // Reference was freed.
             *wasReleasedResult = ANI_TRUE;
@@ -304,6 +304,7 @@ public:
             return GetUndefinedRef(result);
         }
         EtsReference *resultEtsRef = AniRefToEtsRef(ref);
+        ANI_CHECK_RETURN_IF_EQ(resultEtsRef->IsLocal(), false, ANI_INCORRECT_REF);
         EtsReference *etsRef = GetRefStorage()->PopLocalEtsFrame(resultEtsRef);
         ANI_CHECK_RETURN_IF_EQ(etsRef, nullptr, ANI_OUT_OF_REF);
         *result = EtsRefToAniRef(etsRef);
@@ -323,6 +324,7 @@ private:
     {
         ASSERT(!IsUndefined(ref));
         EtsReference *etsRef = AniRefToEtsRef(ref);
+        ASSERT(!etsRef->IsWeak());
         return GetRefStorage()->GetEtsObject(etsRef);
     }
 
@@ -330,7 +332,6 @@ private:
     {
         auto etsRef = reinterpret_cast<EtsReference *>(ref);
         ASSERT(etsRef != nullptr);
-        ASSERT(!etsRef->IsWeak());
         return etsRef;
     }
 
@@ -345,7 +346,6 @@ private:
     {
         auto etsRef = reinterpret_cast<EtsReference *>(wref);
         ASSERT(etsRef != nullptr);
-        ASSERT(etsRef->IsWeak());
         return etsRef;
     }
 
