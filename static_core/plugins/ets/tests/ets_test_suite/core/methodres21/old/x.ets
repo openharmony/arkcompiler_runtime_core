@@ -32,6 +32,4 @@ export namespace test5 {
         m(x: Object): string { throw new Error() }
         m(x: A1): string { throw new Error() }
     }
-
-    export class C1 implements I1 { }
 }

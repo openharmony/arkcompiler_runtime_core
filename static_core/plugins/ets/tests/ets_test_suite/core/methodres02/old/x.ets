@@ -13,14 +13,79 @@
  * limitations under the License.
  */
 
+export namespace test3a {
+    export class A1 { }
+    export class A2 extends A1 { }
+
+    export interface I1 {
+        m(x: A1): string { throw new Error() }
+    }
+
+    export interface I2 extends I1 {
+        m(x: Object): string { throw new Error() }
+    }
+
+    export interface I3 extends I1 { }
+
+    export interface I4 extends I2, I3 { }
+}
+
+export namespace test3b {
+    export class A1 { }
+    export class A2 extends A1 { }
+
+    export interface I1 {
+        m(x: A1): string { throw new Error() }
+    }
+
+    export interface I2 extends I1 {
+        m(x: Object): string { throw new Error() }
+    }
+
+    export interface I3 extends I1 { }
+
+    export interface I4 extends I2, I3 { }
+}
+
+export namespace test3c {
+    export class A1 { }
+    export class A2 extends A1 { }
+
+    export interface I1 {
+        m(x: A1): string { throw new Error() }
+    }
+
+    export interface I2 extends I1 { }
+
+    export interface I3 extends I1 {
+        m(x: A2): string { throw new Error() }
+    }
+
+    export interface I4 extends I2, I3 { }
+}
+
+export namespace test3d {
+    export class A1 { }
+    export class A2 extends A1 { }
+
+    export interface I1 {
+        m(x: A1): string { throw new Error() }
+    }
+
+    export interface I2 extends I1 {
+        m(x: Object): string { throw new Error() }
+    }
+
+    export interface I3 extends I1 { }
+
+    export interface I4 extends I2, I3 { }
+}
+
 export namespace test6 {
-    class R1 { }
-    class R2 extends R1 { }
+    export class R1 { }
+    export class R2 extends R1 { }
     export interface I1 {
         m(x: Object): R1 { throw new Error() }
     }
-    interface I2 extends I1 {
-        m(x: string): R2 { throw new Error() }
-    }
-    export class C1 implements I2 { }
+    export interface I2 extends I1 { }
 }

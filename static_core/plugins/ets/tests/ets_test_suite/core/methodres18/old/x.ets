@@ -17,47 +17,24 @@ export namespace test2 {
     export interface I1 {
         m(): string { throw new Error() }
     }
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-    export class C1 implements I2, I3 {
-        m(): string { throw new Error() }
-    }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
 }
 
 export namespace test3 {
     export interface I1 {
-        m(): string
-    }
-    export interface I2 extends I1 {
         m(): string { throw new Error() }
     }
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-    export class C1 implements I2, I3 {
-        m(): string { throw new Error() }
-    }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
 }
 
 export namespace test5 {
     export interface I1 {
         m(): string { throw new Error() }
     }
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-    export interface I4 extends I1 {
-        m(): string { throw new Error() }
-    }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I1 { }
     export interface I5 extends I2, I3, I4 { }
-    export class C1 implements I5 {
-        m(): string { throw new Error() }
-    }
 }

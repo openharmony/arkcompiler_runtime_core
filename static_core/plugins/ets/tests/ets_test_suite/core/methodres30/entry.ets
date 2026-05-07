@@ -55,11 +55,7 @@ namespace test4 {
         m(x: A1): string { return "I2" }
     }
 
-    interface I3 extends I {
-        m(x: A1): string { return "I3" }
-    }
-
-    class C implements I2, I3 { }
+    class C implements I2 { }
 
     export function run(): void {
         const c = new C();

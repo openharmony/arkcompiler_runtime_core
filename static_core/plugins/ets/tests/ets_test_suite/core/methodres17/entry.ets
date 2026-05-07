@@ -16,8 +16,10 @@
 import * as dep from "@dep/x"
 
 export namespace test1 {
+    export class B extends dep.test1.A { }
+
     export function run(): void {
-        const b = new dep.test1.B();
+        const b = new B();
         arktest.expectThrow(() => { b.m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
@@ -53,11 +55,21 @@ namespace test3 {
     }
 }
 
-export namespace test4 {
+export namespace test4a {
+    export class B extends dep.test4a.A implements dep.test4a.I2 { }
+
     export function run(): void {
-        const b = new dep.test4.B();
-        arktest.expectThrow(() => { (b as dep.test4.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
-        arktest.expectThrow(() => { (b as dep.test4.I2).m(); }, (e) => e instanceof LinkerAbstractMethodError);
+        const b = new B();
+        arktest.expectThrow(() => { (b as dep.test4a.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
+    }
+}
+
+export namespace test4b {
+    export class B extends dep.test4b.A implements dep.test4b.I2 { }
+
+    export function run(): void {
+        const b = new B();
+        arktest.expectThrow(() => { (b as dep.test4b.I2).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
 }
 
@@ -86,5 +98,6 @@ namespace test5 {
 test1.run();
 test2.run();
 test3.run();
-test4.run();
+test4a.run();
+test4b.run();
 test5.run();

@@ -19,10 +19,12 @@ limitations under the License.
 desc: >-
     Declaring sub-interface methods with override-compatible signatures.
     {{c.descr}}
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
 ---*/
 
   {{c.decl}}
+
+  function main(): void {
+    {{c.call}}
+  }
 
 {% endfor %}

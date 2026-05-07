@@ -51,18 +51,26 @@ namespace test2 {
     }
 }
 
-namespace test3 {
+namespace test3_i1 {
     interface I1 {
         m(x: Object): string { return "I1" }
     }
-    interface I2 {
-        m(x: string): string { return "I2" }
-    }
-    class C1 implements I1, I2 { }
+    class C1 implements I1 { }
 
     export function run(): void {
         const c = new C1();
         arktest.assertEQ((c as I1).m(new Object()), "I1");
+    }
+}
+
+namespace test3_i2 {
+    interface I2 {
+        m(x: string): string { return "I2" }
+    }
+    class C1 implements I2 { }
+
+    export function run(): void {
+        const c = new C1();
         arktest.assertEQ((c as I2).m("hello"), "I2");
     }
 }
@@ -130,7 +138,8 @@ namespace test6 {
 
 test1.run();
 test2.run();
-test3.run();
+test3_i1.run();
+test3_i2.run();
 test4.run();
 test5.run();
 test6.run();

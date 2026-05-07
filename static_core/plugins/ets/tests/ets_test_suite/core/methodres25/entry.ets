@@ -113,7 +113,7 @@ namespace test5 {
     }
 }
 
-namespace test6 {
+namespace test6a {
     interface I1 {
         m(x: int): int { return 10 }
     }
@@ -122,17 +122,27 @@ namespace test6 {
         m(x: int): int { return 20 }
     }
 
-    interface I3 extends I1 {
-        m(x: int, y: int): int { return 30 }
-    }
-
-    class C implements I2, I3 { }
+    class C implements I2 { }
 
     export function run(): void {
         const c = new C();
         arktest.assertEQ((c as I2).m(0), 20);
-        arktest.assertEQ((c as I3).m(0, 0), 30);
         arktest.assertEQ((c as I1).m(0), 20);
+    }
+}
+
+namespace test6b {
+    interface I1 { }
+
+    interface I3 extends I1 {
+        m(x: int, y: int): int { return 30 }
+    }
+
+    class C implements I3 { }
+
+    export function run(): void {
+        const c = new C();
+        arktest.assertEQ((c as I3).m(0, 0), 30);
     }
 }
 
@@ -151,7 +161,7 @@ namespace test7 {
     }
 }
 
-namespace test8 {
+namespace test8a {
     interface I1 {
         m(): string { return "I1m" }
         m(x: int): string { return "I1m1" }
@@ -162,17 +172,30 @@ namespace test8 {
         m(x: int): string { return "I2m1" }
     }
 
-    interface I3 extends I1 {
-        m(): string { return "I3m" }
-        m(x: int): string { return "I3m1" }
-    }
-
-    class C implements I2, I3 { }
+    class C implements I2 { }
 
     export function run(): void {
         const c = new C();
         arktest.assertEQ((c as I2).m(), "I2m");
         arktest.assertEQ((c as I2).m(0), "I2m1");
+    }
+}
+
+namespace test8b {
+    interface I1 {
+        m(): string { return "I1m" }
+        m(x: int): string { return "I1m1" }
+    }
+
+    interface I3 extends I1 {
+        m(): string { return "I3m" }
+        m(x: int): string { return "I3m1" }
+    }
+
+    class C implements I3 { }
+
+    export function run(): void {
+        const c = new C();
         arktest.assertEQ((c as I3).m(), "I3m");
         arktest.assertEQ((c as I3).m(0), "I3m1");
     }
@@ -183,6 +206,8 @@ test2.run();
 test3.run();
 test4.run();
 test5.run();
-test6.run();
+test6a.run();
+test6b.run();
 test7.run();
-test8.run();
+test8a.run();
+test8b.run();

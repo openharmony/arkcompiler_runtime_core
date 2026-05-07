@@ -15,62 +15,92 @@
 
 import * as dep from "@dep/x"
 
-namespace test1 {
+namespace test1a {
     interface I1 {
         m(): string { return "I1" }
     }
-    interface I2 {
-        m(): string { return "I2" }
-    }
-    class C1 implements I1, I2 { }
+    class C1 implements I1 { }
 
     export function run(): void {
         const c = new C1();
         arktest.assertEQ((c as I1).m(), "I1");
+    }
+}
+
+namespace test1b {
+    interface I2 {
+        m(): string { return "I2" }
+    }
+    class C1 implements I2 { }
+
+    export function run(): void {
+        const c = new C1();
         arktest.assertEQ((c as I2).m(), "I2");
     }
 }
 
 export namespace test2 {
+    class C1 implements dep.test2.I2, dep.test2.I3 { }
     export function run(): void {
-        arktest.expectThrow(() => { (new dep.test2.C1() as dep.test2.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+        arktest.expectThrow(() => { (new C1() as dep.test2.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
 export namespace test3 {
+    class C1 implements dep.test3.I2, dep.test3.I3 { }
     export function run(): void {
-        arktest.expectThrow(() => { (new dep.test3.C1() as dep.test3.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+        arktest.expectThrow(() => { (new C1() as dep.test3.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
-namespace test4 {
+namespace test4a {
     interface I1 {
         m(): string { return "I1" }
     }
-    interface I2 {
-        m(): string { return "I2" }
-    }
-    interface I3 {
-        m(): string { return "I3" }
-    }
-    class C1 implements I1, I2, I3 { }
+    class C1 implements I1 { }
 
     export function run(): void {
         const c = new C1();
         arktest.assertEQ((c as I1).m(), "I1");
+    }
+}
+
+namespace test4b {
+    interface I2 {
+        m(): string { return "I2" }
+    }
+    class C1 implements I2 { }
+
+    export function run(): void {
+        const c = new C1();
         arktest.assertEQ((c as I2).m(), "I2");
+    }
+}
+
+namespace test4c {
+    interface I3 {
+        m(): string { return "I3" }
+    }
+    class C1 implements I3 { }
+
+    export function run(): void {
+        const c = new C1();
         arktest.assertEQ((c as I3).m(), "I3");
     }
 }
 
 export namespace test5 {
+    class C1 implements dep.test5.I5 { }
     export function run(): void {
-        arktest.expectThrow(() => { (new dep.test5.C1() as dep.test5.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+        arktest.expectThrow(() => { (new C1() as dep.test5.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
     }
 }
 
-test1.run();
+test1a.run();
+test1b.run();
 test2.run();
 test3.run();
-test4.run();
+test4a.run();
+test4b.run();
+test4c.run();
 test5.run();

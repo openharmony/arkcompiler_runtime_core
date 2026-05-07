@@ -33,93 +33,155 @@ export namespace test1 {
     export class C1 implements I4 { }
 }
 
-export namespace test2 {
-    export interface I1 {
-        m(): string
-    }
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
+export namespace test2_i2 {
+    export interface I1 { }
+    export interface I2 extends I1 { m(): string { throw new Error() } }
+    export interface I3 extends I1 { }
+}
 
-    export class C1 implements I2, I3 { }
+export namespace test2_i3 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { m(): string { throw new Error() } }
 }
 
 export namespace test3 {
-    export interface I1 {
-        m(): string
-    }
-
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
     export interface I4 extends I2, I3 { }
-
-    export class C1 implements I4 { }
 }
 
 export namespace test4 {
-    export interface I1 {
-        m(): string
-    }
-
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I4 extends I1 {
-        m(): string { throw new Error() }
-    }
-
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I1 { }
     export interface I5 extends I2, I3, I4 { }
-
-    export class C1 implements I5 { }
 }
 
-export namespace test5 {
+export namespace test5_c3_i1 {
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c3_i2 {
+    export interface I1 { }
+    export interface I2 extends I1 { m(): string { throw new Error() } }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c3_i3 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { m(): string { throw new Error() } }
+    export interface I4 extends I2, I3 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c3_i4 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c4_i1 {
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c4_i2 {
+    export interface I1 { }
+    export interface I2 extends I1 { m(): string { throw new Error() } }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c4_i3 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { m(): string { throw new Error() } }
+    export interface I4 extends I2, I3 { }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c4_i4 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { m(): string { throw new Error() } }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c4_i5 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c5 {
+    export abstract class C2 { m(): string { throw new Error() } }
+    export interface I1 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c6_i1 {
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c6_i4 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { m(): string { throw new Error() } }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c6_i5 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+    export interface I5 extends I4 { m(): string { throw new Error() } }
+}
+
+export namespace test5_c7_i1 {
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+}
+
+export namespace test5_c8_i1 {
     export class C1 { }
-
-    export abstract class C2 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I1 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I2 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I3 extends I1 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I4 extends I2, I3 {
-        m(): string { throw new Error() }
-    }
-
-    export interface I5 extends I4 {
-        m(): string { throw new Error() }
-    }
-
-    export class C3 implements I4 { }
-    export class C4 implements I5 { }
-    export class C5 extends C2 implements I1 { }
-    export class C6 implements I5, I1 { }
-    export class C7 implements I4, I1 { }
-    export class C8 extends C1 implements I2, I3 {
-        m(): string { throw new Error() }
-    }
+    export interface I1 { m(): string { throw new Error() } }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
 }
+
+export namespace test5_c8_i2 {
+    export class C1 { }
+    export interface I1 { }
+    export interface I2 extends I1 { m(): string { throw new Error() } }
+    export interface I3 extends I1 { }
+}
+
+export namespace test5_c8_i3 {
+    export class C1 { }
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { m(): string { throw new Error() } }
+}
+

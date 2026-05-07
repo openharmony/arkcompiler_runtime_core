@@ -17,9 +17,7 @@ export namespace test3 {
     export interface I1 {
         m(x: Object): string
     }
-    interface I2 extends I1 {
+    export interface I2 extends I1 {
         m(x: string): string { return "I2" }
     }
-    class A implements I2 { }
-    export class B extends A { }
 }

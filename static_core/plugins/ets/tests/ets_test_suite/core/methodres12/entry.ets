@@ -36,8 +36,10 @@ namespace test1 {
 }
 
 export namespace test2 {
+    class B extends dep.test2.A { }
+
     export function run(): void {
-        const b = new dep.test2.B();
+        const b = new B();
         arktest.expectThrow(() => { b.m(); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (b as dep.test2.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }
@@ -62,8 +64,10 @@ namespace test3 {
 }
 
 export namespace test4 {
+    class C extends dep.test4.B { }
+
     export function run(): void {
-        const c = new dep.test4.C();
+        const c = new C();
         arktest.expectThrow(() => { c.m(); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (c as dep.test4.I1).m(); }, (e) => e instanceof LinkerAbstractMethodError);
     }

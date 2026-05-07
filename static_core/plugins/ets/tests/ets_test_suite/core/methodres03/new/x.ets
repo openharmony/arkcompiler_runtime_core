@@ -27,8 +27,6 @@ export namespace test1 {
     }
 
     export interface I4 extends I2, I3 { }
-
-    export class C1 implements I4 { }
 }
 
 export namespace test2 {
@@ -37,8 +35,6 @@ export namespace test2 {
     }
     export interface I2 extends I1 { }
     export interface I3 extends I1 { }
-
-    export class C1 implements I2, I3 { }
 }
 
 export namespace test3 {
@@ -49,8 +45,6 @@ export namespace test3 {
     export interface I1 {
         m(): number { return 42 }
     }
-
-    export class C2 extends C1 implements I1 { }
 }
 
 export namespace test4 {
@@ -63,8 +57,6 @@ export namespace test4 {
     export interface I1 {
         m(x: A1): string { return "I1" }
     }
-
-    export class C2 extends C1 implements I1 { }
 }
 
 export namespace test5 {
@@ -73,8 +65,6 @@ export namespace test5 {
     }
 
     export abstract class C1 implements I1 { }
-
-    export class C2 extends C1 { }
 }
 
 export namespace test6 {

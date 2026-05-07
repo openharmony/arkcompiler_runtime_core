@@ -18,3 +18,7 @@ cases:
         interface I1 { foo() {} }
         interface I2 { foo() {} }
         interface I3 extends I1, I2 {}
+        class Impl implements I3 {}
+      call: |
+        let obj = new Impl()
+        obj.foo()

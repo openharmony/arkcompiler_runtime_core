@@ -13,28 +13,36 @@
  * limitations under the License.
  */
 
-export namespace test5 {
+export namespace test5_i1 {
     export interface I1 {
         m(): string { throw new Error() }
     }
 
-    export interface I2 extends I1 {
-        m(): string
-    }
+    export interface I2 extends I1 { }
 
+    export interface I3 extends I2 { }
+
+    export interface I4 extends I1 { }
+
+    export interface I5 extends I4 { }
+}
+
+export namespace test5_i3 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
     export interface I3 extends I2 {
         m(): string { throw new Error() }
     }
+    export interface I4 extends I1 { }
+    export interface I5 extends I4 { }
+}
 
-    export interface I4 extends I1 {
-        m(): string
-    }
-
+export namespace test5_i5 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I2 { }
+    export interface I4 extends I1 { }
     export interface I5 extends I4 {
-        m(): string { throw new Error() }
-    }
-
-    export class C implements I3, I5 {
         m(): string { throw new Error() }
     }
 }

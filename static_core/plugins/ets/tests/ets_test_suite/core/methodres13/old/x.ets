@@ -13,76 +13,60 @@
  * limitations under the License.
  */
 
-export namespace test1 {
+export namespace test1_i1 {
     export interface I1 {
-        m(): string
+        m(): string { throw new Error() }
     }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+}
 
+export namespace test1_i2 {
+    export interface I1 { }
     export interface I2 extends I1 {
-        m(): string
+        m(): string { throw new Error() }
     }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
+}
 
+export namespace test1_i3 {
+    export interface I1 { }
+    export interface I2 extends I1 { }
     export interface I3 extends I1 {
         m(): string { throw new Error() }
     }
-
     export interface I4 extends I2, I3 { }
-
-    export class C1 implements I4 {
-        m(): string { throw new Error() }
-    }
 }
 
 export namespace test3 {
     export interface I1 {
-        m(): string
-    }
-
-    export interface I2 extends I1 {
-        m(): string
-    }
-
-    export interface I3 extends I1 {
-        m(): string
-    }
-
-    export class C1 implements I2, I3 {
         m(): string { throw new Error() }
     }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
 }
 
 export namespace test4 {
     export interface I1 {
-        m(): string
-    }
-
-    export interface I2 extends I1 {
-        m(): string
-    }
-
-    export interface I3 extends I1 {
-        m(): string
-    }
-
-    export interface I4 extends I2, I3 { }
-
-    export class A implements I4 {
         m(): string { throw new Error() }
     }
-
-    export class B extends A { }
+    export interface I2 extends I1 { }
+    export interface I3 extends I1 { }
+    export interface I4 extends I2, I3 { }
 }
 
-export namespace test5 {
+export namespace test5_i1 {
     export interface I1 {
-        m(x: Object): string
+        m(x: Object): string { throw new Error() }
     }
+    export interface I2 extends I1 { }
+}
 
+export namespace test5_i2 {
+    export interface I1 { }
     export interface I2 extends I1 {
         m(x: string): string { throw new Error() }
-    }
-
-    export class C1 implements I2 {
-        m(x: Object): string { throw new Error() }
     }
 }

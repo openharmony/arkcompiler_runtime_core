@@ -24,8 +24,8 @@ export namespace test6 {
         m(x: A1): string { throw new Error() }
     }
 
-    export abstract class C3 {
-        abstract m(x: Object): string
+    export class C3 {
+        m(x: Object): string { throw new Error() }
     }
 
     export interface I1 {
@@ -38,13 +38,7 @@ export namespace test6 {
 
     export class C4 extends C1 implements I1 { }
     export class C5 extends C2 implements I1 { }
-    export class C6 extends C3 implements I2 {
-        m(x: Object): string { throw new Error() }
-    }
     export class C7 extends C2 implements I2 { }
     class C8 extends C1 { }
     export class C9 extends C8 implements I1 { }
-    export class C10 extends C3 implements I1 {
-        m(x: Object): string { throw new Error() }
-    }
 }

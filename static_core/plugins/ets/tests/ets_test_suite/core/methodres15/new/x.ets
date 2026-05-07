@@ -17,62 +17,53 @@ export namespace test1 {
     export interface I1 {
         m(): string { return "I1" }
     }
-    interface I2 extends I1 {
+    export interface I2 extends I1 {
         m(): string
     }
-    export class A implements I2 { }
 }
 
 export namespace test2 {
     export interface I1 {
         m(): string { return "I1" }
     }
-    interface I2 extends I1 {
+    export interface I2 extends I1 {
         m(): string
     }
-    class A implements I2 { }
-    export class B extends A { }
 }
 
-export namespace test3 {
+export namespace test3a {
     export interface I1 {
         m(): string
     }
-    interface I2 extends I1 {
+    export interface I2 extends I1 {
         m(): string { return "I2" }
     }
     export interface I3 extends I1 {
         m(): string { return "I3" }
     }
-    class A implements I2 { }
-    export class B extends A implements I3 { }
 }
 
-export namespace test4 {
+export namespace test4a {
     export interface I1 {
         m(): string
     }
-    interface I2 extends I1 {
+    export interface I2 extends I1 {
         m(): string
     }
     export interface I3 extends I1 {
         m(): string { return "I3" }
     }
-    class A implements I2 { }
-    export class B extends A implements I3 { }
 }
 
-export namespace test5 {
+export namespace test5a {
     export interface I1 {
         m(): string
     }
-    interface I2 extends I1 {
+    export interface I2 extends I1 {
         m(): string { return "I2" }
     }
-    interface I3 extends I1 {
+    export interface I3 extends I1 {
         m(): string { return "I3" }
     }
-    interface I4 extends I2, I3 { }
-    export class A implements I4 { }
-    export class B extends A { }
+    export interface I4 extends I2, I3 { }
 }

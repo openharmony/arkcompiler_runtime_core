@@ -85,8 +85,9 @@ namespace test4 {
 }
 
 export namespace test5 {
+    class C1 implements dep.test5.I1 { }
     export function run(): void {
-        const c = new dep.test5.C1();
+        const c = new C1();
         const a1 = new dep.test5.A1();
         arktest.expectThrow(() => { (c as dep.test5.I1).m(a1); }, (e) => e instanceof LinkerAbstractMethodError);
         arktest.expectThrow(() => { (c as dep.test5.I1).m(new Object()); }, (e) => e instanceof LinkerAbstractMethodError);

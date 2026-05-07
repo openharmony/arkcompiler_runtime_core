@@ -58,12 +58,30 @@ namespace test2 {
     }
 }
 
-export namespace test3 {
+export namespace test3a {
+    export class C1 implements dep.test3a.I2, dep.test3a.I3 { }
+
     export function run(): void {
-        const c = new dep.test3.C1();
-        arktest.expectThrow(() => { (c as dep.test3.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
-        arktest.assertEQ((c as dep.test3.I2).m(), "I2");
-        arktest.assertEQ((c as dep.test3.I3).m(), "I3");
+        const c = new C1();
+        arktest.expectThrow(() => { (c as dep.test3a.I1).m(); }, (e) => e instanceof LinkerMethodConflictError);
+    }
+}
+
+export namespace test3b {
+    export class C1 implements dep.test3b.I2, dep.test3b.I3 { }
+
+    export function run(): void {
+        const c = new C1();
+        arktest.assertEQ((c as dep.test3b.I2).m(), "I2");
+    }
+}
+
+export namespace test3c {
+    export class C1 implements dep.test3c.I2, dep.test3c.I3 { }
+
+    export function run(): void {
+        const c = new C1();
+        arktest.assertEQ((c as dep.test3c.I3).m(), "I3");
     }
 }
 
@@ -87,5 +105,7 @@ namespace test4 {
 
 test1.run();
 test2.run();
-test3.run();
+test3a.run();
+test3b.run();
+test3c.run();
 test4.run();

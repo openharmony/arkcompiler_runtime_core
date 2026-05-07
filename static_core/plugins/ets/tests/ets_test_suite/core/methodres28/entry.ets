@@ -84,48 +84,44 @@ export namespace test3 {
     }
 }
 
-namespace test4 {
-    interface I0 {
-        m(): string { return "I0" }
-    }
-    interface I1 extends I0 {
-        m(): string { return "I1" }
-    }
-    interface I2 extends I0 {
-        m(): string { return "I2" }
-    }
-    interface I3 extends I0 {
-        m(): string { return "I3" }
-    }
-    interface I4 extends I0 {
-        m(): string { return "I4" }
-    }
-    class C implements I1, I2, I3, I4 { }
-    class D extends C {
-        m(): string { return "D" }
-    }
-
+namespace test4_i0_i1 {
+    interface I0 { m(): string { return "I0" } }
+    interface I1 extends I0 { m(): string { return "I1" } }
+    class C implements I1 { }
+    class D extends C { m(): string { return "D" } }
     export function run(): void {
         const d = new D();
         arktest.assertEQ(d.m(), "D");
         arktest.assertEQ((d as I0).m(), "D");
         arktest.assertEQ((d as I1).m(), "D");
+    }
+}
+
+namespace test4_i4 {
+    interface I0 { m(): string { return "I0" } }
+    interface I4 extends I0 { m(): string { return "I4" } }
+    class C implements I4 { }
+    class D extends C { m(): string { return "D" } }
+    export function run(): void {
+        const d = new D();
         arktest.assertEQ((d as I4).m(), "D");
     }
 }
 
-namespace test5 {
-    interface I1 {
-        m(): string { return "I1" }
-    }
-    interface I2 {
-        m(): string { return "I2" }
-    }
-    class C implements I1, I2 { }
-
+namespace test5_i1 {
+    interface I1 { m(): string { return "I1" } }
+    class C implements I1 { }
     export function run(): void {
         const c = new C();
         arktest.assertEQ((c as I1).m(), "I1");
+    }
+}
+
+namespace test5_i2 {
+    interface I2 { m(): string { return "I2" } }
+    class C implements I2 { }
+    export function run(): void {
+        const c = new C();
         arktest.assertEQ((c as I2).m(), "I2");
     }
 }
@@ -173,7 +169,9 @@ namespace test7 {
 test1.run();
 test2.run();
 test3.run();
-test4.run();
-test5.run();
+test4_i0_i1.run();
+test4_i4.run();
+test5_i1.run();
+test5_i2.run();
 test6.run();
 test7.run();
