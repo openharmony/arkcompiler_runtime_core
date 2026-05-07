@@ -118,4 +118,4 @@ class RunnerSRCDumper(RunnerJS):
                 target_file = target_dir / rel_path
                 target_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source_file, target_file)
-                Log.short(_LOGGER, f'Copied {source_file} to {target_file}')
+                Log.all(_LOGGER, f'Copied {source_file} to {target_file}')

@@ -173,6 +173,10 @@ class OneStepRunner:
         validation_result: ValidationResult | None = None
 
         self.report.command_line = ' '.join(cmd)
+        if step.stdout:
+            self.report.command_line = f"{self.report.command_line} >{step.stdout.as_posix()}"
+        if step.stderr:
+            self.report.command_line = f"{self.report.command_line} 2>{step.stderr.as_posix()}"
         _LOGGER.all(f"Run {name}: {self.report.command_line}")
 
         with (subprocess.Popen(

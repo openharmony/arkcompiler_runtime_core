@@ -313,6 +313,96 @@ In workflow/test-suite configuration files following macro modifiers are support
 Macro modifiers can be used where test paths or file references need to be dynamically manipulated based on the test context or requirements.
 
 
+## Srcdumper test suite
+
+The `srcdumper` test suite verifies that the **es2panda source-code dumper** is idempotent: it compiles an ETS source
+file, dumps the reconstructed source, recompiles the dump, and then compares the two resulting ASTs.
+
+### How it works
+
+The workflow `run-srcdumper` executes the following pipeline for every test:
+
+1. **`compile-original-with-dump-src`** – compiles the original `.ets` file with `--dump-ets-src-after-phases` and
+   saves the reconstructed source to `intermediate/dump/<test-id>`.
+2. **`strip-first-line`** – runs `cfg/scripts/strip-dump.sh` to remove the es2panda phase-name header line (and any
+   trailing fatal-error lines) from the dump file.
+3. **`compile-original-with-dump-ast`** – compiles the *original* source with `--dump-after-phases` and saves the
+   JSON AST to `intermediate/ast/<test-id>.ast`.
+4. **`compile-dumped-with-dump-ast`** – compiles the *dumped* source with `--dump-after-phases` and saves the JSON
+   AST to `intermediate/dump-ast/<test-id>.dumped.ast`.
+5. **`compare-dumps`** – runs `cfg/scripts/compare-dumps.sh` which calls `AstComparator` to compare the two AST
+   files.  The step fails if the ASTs differ.
+
+Steps 3 and 4 use `BypassValidator` so that a non-zero compiler exit code does not immediately fail the test; only the
+final AST comparison step determines pass/fail.
+
+### Running the srcdumper suite
+
+```bash
+./runner.sh run-srcdumper srcdumper [options]
+```
+
+### Test-suite configuration (`cfg/test-suites/srcdumper.yaml`)
+
+| Property | Value |
+|---|---|
+| `suite-name` | `srcdumper` |
+| `list-root` | `${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/srcdumper` |
+| `test-root` | `${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test` |
+| `generator-class` | `runner.extensions.generators.srcdumper.srcdumper_generator.SrcdumperGenerator` |
+| Collections | `compiler/ets`, `parser/ets`, `runtime/ets`, `ast`, `srcdump` |
+
+Tests that contain an error-expectation annotation (`/*@@…*/` or `/*@@?…*/`) are **automatically skipped** by the
+generator because they are expected to fail compilation and therefore cannot produce a valid dump.
+
+### Generator: `SrcdumperGenerator`
+
+**Location:** `runner/extensions/generators/srcdumper/srcdumper_generator.py`
+
+`SrcdumperGenerator` extends `IGenerator` and prepares the test corpus for the srcdumper workflow:
+
+- Scans each configured collection for `*.ets` files.
+- **Skips** files that contain an error-expectation annotation (`/*@@…*/` / `/*@@?…*/`).
+- Resolves transitive file dependencies declared in test metadata (`files:` field) and copies them alongside the
+  primary test file into the generation target directory.
+
+### Validator: `BypassValidator`
+
+**Location:** `runner/extensions/validators/bypass_validator.py`
+
+A pass-through validator that always returns `passed=True` regardless of the step's exit code or output.
+Use it on intermediate pipeline steps whose failure should not immediately abort the test (e.g. the AST-dump
+compilation steps in the srcdumper workflow).
+
+```yaml
+validator: runner.extensions.validators.bypass_validator.BypassValidator
+```
+
+#### `AstComparator` (srcdumper validator)
+
+**Location:** `runner/extensions/validators/srcdumper/ast_comparator.py`
+
+Compares two es2panda JSON AST dump files for semantic equivalence.  Before comparison the ASTs are
+*normalised*:
+
+| Normalisation step | Description |
+|---|---|
+| `remove_loc_nodes` | Strips all `loc` keys (source-location info). |
+| `remove_empty_statements` | Removes `EmptyStatement` nodes. |
+| `replace_null_literals` | Unifies `NullLiteral` and `ETSNullType` into a single sentinel value. |
+| `flatten_similar_nested_nodes` | Flattens nested `BlockStatement`/`ETSUnionType` nodes. |
+| `remove_duplicate_undefined_types` | Keeps only one `ETSUndefinedType` per list. |
+
+`AstComparator` can also be invoked as a standalone CLI tool:
+
+```bash
+python3 -m runner.extensions.validators.srcdumper.ast_comparator <dump1.ast> <dump2.ast>
+# exits 0 if equal, 1 if different
+```
+
+The companion script `cfg/scripts/strip-dump.sh` (wrapping `strip_dump.py`) removes the phase-name header line
+and any trailing fatal-error lines from a raw es2panda dump file before it is fed back into the compiler.
+
 ## ETS dependencies
 
 ### ets-es-checked test suite dependencies

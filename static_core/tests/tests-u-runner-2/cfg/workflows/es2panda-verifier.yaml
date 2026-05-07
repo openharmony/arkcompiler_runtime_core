@@ -43,6 +43,10 @@ parameters:
     is-panda: true
     boot-panda-files: ""
     es2panda-verifier-step-filter: "*"
+    es2panda-stdout: ""
+    es2panda-stderr: ""
+    verifier-stdout: ""
+    verifier-stderr: ""
 steps:
     es2panda:
         executable-path: ${parameters.build}/bin/es2panda
@@ -55,6 +59,8 @@ steps:
             - "${parameters.es2panda-args}"
             - "${parameters.es2panda-test-suite-args}"
             - "${parameters.work-dir}/gen/${test-id}"
+        stdout: ${parameters.es2panda-stdout}
+        stderr: ${parameters.es2panda-stderr}
     verifier:
         executable-path: ${parameters.build}/bin/verifier
         timeout: ${parameters.verifier-timeout}
@@ -68,3 +74,5 @@ steps:
             - "${parameters.verifier-args}"
             - "${parameters.verifier-test-suite-args}"
             - "${parameters.output-file}"
+        stdout: ${parameters.verifier-stdout}
+        stderr: ${parameters.verifier-stderr}
