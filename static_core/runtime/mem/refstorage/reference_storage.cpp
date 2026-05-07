@@ -169,7 +169,7 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
         if (localStorage_->size() == 1) {
             auto *runtime = Runtime::GetCurrent();
             if (runtime != nullptr && runtime->IsInitialized()) {
-                LOG(INFO, GC) << "restraceExt NewRef: " << ref << " when localStorage_.size() is 1";
+                LOG(DEBUG, GC) << "restraceExt NewRef: " << ref << " when localStorage_.size() is 1";
                 restraceExt(RES_ARK_LOCAL_HANDLE, (void *)ref, sizeof(Reference), TAG_RES_ARK_LOCAL_HANDLE, true,
                             false);
             }
@@ -216,7 +216,7 @@ void ReferenceStorage::RemoveRef(const Reference *ref)
         if (localStorage_ != nullptr && localStorage_->size() > 0 && block->IsBlockInFrame((*localStorage_)[0])) {
             auto *runtime = Runtime::GetCurrent();
             if (runtime != nullptr && runtime->IsInitialized()) {
-                LOG(INFO, GC) << "restraceExt RemoveRef: " << ref;
+                LOG(DEBUG, GC) << "restraceExt RemoveRef: " << ref;
                 restraceExt(RES_ARK_LOCAL_HANDLE, (void *)ref, sizeof(Reference), TAG_RES_ARK_LOCAL_HANDLE, false,
                             false);
             }
