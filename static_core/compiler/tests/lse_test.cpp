@@ -1928,6 +1928,28 @@ TEST_F(LSETest, EliminationOrderMattersLoops)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
+TEST_F(LSETest, ShadowedStoreObservedByMayAliasLoad)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).s32();
+        PARAMETER(3U, 3U).s32();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::StoreObject).s32().Inputs(0U, 2U).TypeId(100U);
+            INST(5U, Opcode::LoadObject).s32().Inputs(1U).TypeId(100U);
+            INST(6U, Opcode::StoreObject).s32().Inputs(0U, 3U).TypeId(100U);
+            INST(7U, Opcode::Return).s32().Inputs(5U);
+        }
+    }
+    auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    EXPECT_FALSE(GetGraph()->RunPass<Lse>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
+}
+
 /*
  * We can eliminate over SafePoints if the reference is listed in arguments
  */
