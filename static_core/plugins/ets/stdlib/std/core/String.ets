@@ -449,7 +449,170 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public native override compareTo(other: String): int;
 
-    private static defaultCollator_ = new Intl.Collator();
+    // Internal sentinel: localeCompare itself only returns -1, 0, or 1 here, so -2 means "fall back to Intl.Collator".
+    private static readonly LOCALE_COMPARE_FAST_UNSUPPORTED: int = -2;
+
+    // The ASCII weights below match ICU collation only for this allowlist and default options.
+    private static readonly localeCompareDefaultFastEnabled: boolean =
+        String.localeCompareDefaultCanUseFastPath(Intl.Locale.defaultTag());
+
+    private static defaultCollator = new Intl.Collator();
+
+    // All the available locales that are statically known to fulfill fast path conditions.
+    private static localeCompareDefaultCanUseFastPath(locale: string): boolean {
+        switch (locale) {
+            case "en-US":
+            case "en":
+            case "fr":
+            case "es":
+            case "de":
+            case "pt":
+            case "it":
+            case "ca":
+            case "de-AT":
+            case "fi":
+            case "id":
+            case "id-ID":
+            case "ms":
+            case "nl":
+            case "pl":
+            case "ro":
+            case "sl":
+            case "sv":
+            case "sw":
+            case "vi":
+            case "en-DE":
+            case "en-GB":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Weights are copied from the ICU-backed localeCompare ASCII fast path in ets_runtime js_collator.cpp.
+    // Primary (L1) weights compare base order. Weight 0 marks characters that must use Intl.Collator.
+    private static localeCompareWeightL1(code: int): int {
+        if (code >= 9 && code <= 13) {
+            return code - 8;
+        }
+        if (code >= 48 && code <= 57) {
+            return code - 9;
+        }
+        if (code >= 65 && code <= 90) {
+            return code - 16;
+        }
+        if (code >= 97 && code <= 122) {
+            return code - 48;
+        }
+        // Punctuation does not sort by ASCII code point order under ICU collation, so use explicit weights.
+        switch (code) {
+            case 32: return 6;
+            case 33: return 12;
+            case 34: return 16;
+            case 35: return 28;
+            case 36: return 38;
+            case 37: return 29;
+            case 38: return 27;
+            case 39: return 15;
+            case 40: return 17;
+            case 41: return 18;
+            case 42: return 24;
+            case 43: return 32;
+            case 44: return 9;
+            case 45: return 8;
+            case 46: return 14;
+            case 47: return 25;
+            case 58: return 11;
+            case 59: return 10;
+            case 60: return 33;
+            case 61: return 34;
+            case 62: return 35;
+            case 63: return 13;
+            case 64: return 23;
+            case 91: return 19;
+            case 92: return 26;
+            case 93: return 20;
+            case 94: return 31;
+            case 95: return 7;
+            case 96: return 30;
+            case 123: return 21;
+            case 124: return 36;
+            case 125: return 22;
+            case 126: return 37;
+            default: return 0;
+        }
+    }
+
+    // Tertiary (L3) weights compare case/variant order when primary weights are equal.
+    private static localeCompareWeightL3(code: int): int {
+        if (code >= 65 && code <= 90) {
+            return 2;
+        }
+        if ((code >= 9 && code <= 13) || (code >= 32 && code <= 126)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private static localeCompareSign(value: int): int {
+        if (value < 0) {
+            return -1;
+        }
+        if (value > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private static isAsciiOrOutOfBounds(value: String, index: int, length: int): boolean {
+        return index >= length || value.charCodeAt(index) < 128;
+    }
+
+    // Fast path for default-locale ASCII collation. It compares ICU-derived primary weights first;
+    // when primary weights are equal, it records the first tertiary difference as a case/variant tie-breaker.
+    // Unsupported characters or possible combining-mark effects return LOCALE_COMPARE_FAST_UNSUPPORTED.
+    private tryLocaleCompareFast(that: String): int {
+        const lhsLength = this.getLength();
+        const rhsLength = that.getLength();
+        const commonLength = Math.min(lhsLength, rhsLength).toInt();
+        let l3Result = 0;
+
+        for (let i = 0; i < commonLength; i++) {
+            const lhsCode = this.charCodeAt(i);
+            const rhsCode = that.charCodeAt(i);
+            const lhsWeightL1 = String.localeCompareWeightL1(lhsCode);
+            const rhsWeightL1 = String.localeCompareWeightL1(rhsCode);
+            if (lhsWeightL1 == 0 || rhsWeightL1 == 0) {
+                return String.LOCALE_COMPARE_FAST_UNSUPPORTED;
+            }
+
+            const l1Result = String.localeCompareSign(lhsWeightL1 - rhsWeightL1);
+            if (l1Result != 0) {
+                // A following non-ASCII code unit may be a combining mark, which can change ICU collation.
+                if (!String.isAsciiOrOutOfBounds(this, i + 1, lhsLength) ||
+                    !String.isAsciiOrOutOfBounds(that, i + 1, rhsLength)) {
+                    return String.LOCALE_COMPARE_FAST_UNSUPPORTED;
+                }
+                return l1Result;
+            }
+
+            if (lhsCode != rhsCode && l3Result == 0) {
+                l3Result = String.localeCompareSign(
+                    String.localeCompareWeightL3(lhsCode) - String.localeCompareWeightL3(rhsCode));
+            }
+        }
+
+        const lengthResult = String.localeCompareSign(lhsLength - rhsLength);
+        if (lengthResult != 0) {
+            const longer = lhsLength > rhsLength ? this : that;
+            // If the remaining suffix starts with an unsupported character, ICU must decide length ordering.
+            if (String.localeCompareWeightL1(longer.charCodeAt(commonLength)) == 0) {
+                return String.LOCALE_COMPARE_FAST_UNSUPPORTED;
+            }
+            return lengthResult;
+        }
+        return l3Result;
+    }
 
     /**
      * Comparison between this String and another one based on locale and options.
@@ -467,7 +630,13 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): int {
         if (locale == undefined && options == undefined) {
-            return String.defaultCollator_.compare(this, that)
+            if (String.localeCompareDefaultFastEnabled) {
+                const fastResult = this.tryLocaleCompareFast(that);
+                if (fastResult != String.LOCALE_COMPARE_FAST_UNSUPPORTED) {
+                    return fastResult;
+                }
+            }
+            return String.defaultCollator.compare(this, that)
         }
         return new Intl.Collator(locale, options).compare(this, that)
     }
