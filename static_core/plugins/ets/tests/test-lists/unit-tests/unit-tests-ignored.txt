@@ -30,3 +30,5 @@ ets-common-tests/intrinsics/uint32array_sort.ets
 #32560
 ets-common-tests/atomics/base_operation_compare_exchange.ets
 
+#34569
+ets-common-tests/taskpool/cancel_test.ets
