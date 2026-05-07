@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: Promise callbacks with the same priority are scheduled in FIFO order
 tags: [no-warmup]
 ---*/

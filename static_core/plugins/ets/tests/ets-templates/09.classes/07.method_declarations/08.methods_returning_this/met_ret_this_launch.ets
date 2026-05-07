@@ -14,37 +14,33 @@
  */
 
 /*---
-desc: Promise callbacks with the same priority are scheduled in FIFO order
-tags: [no-warmup]
+desc: calling method returning 'this' from coroutine
 ---*/
 
-async function resolved(): Promise<int> {
-  return 0
-}
+import { launch } from "std/concurrency"
 
-async function startTest(): Promise<void> {
-  let order: int[] = []
+class A {
+    fld: int = 0
 
-  let p = resolved()
+    foo(): this {
+        if (this.fld == 999) {
+            throw new Error()
+        }
+        this.fld += 1
+        return this
+    }
 
-  let c1 = p.then((v: int): int => {
-    order.push(1)
-    return v
-  })
-
-  let c2 = p.then((v: int): int => {
-    order.push(2)
-    return v
-  })
-
-  await c1
-  await c2
-
-  arktest.assertEQ(order.length, 2)
-  arktest.assertEQ(order[0], 1)
-  arktest.assertEQ(order[1], 2)
+    bar(): Promise<this> {
+        let self = this.foo().foo()
+        return launch<this>() {
+            return self.foo()
+        }
+    }
 }
 
 async function main(): Promise<void> {
-  await startTest()
+    let a = new A()
+
+    arktest.assertEQ(await a.bar(), a)
+    arktest.assertEQ(a.fld, 3)
 }

@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Promise callbacks with the same priority are scheduled in FIFO order
+desc: Higher priority jobs are scheduled before lower priority jobs, FIFO is preserved within each priority
 tags: [no-warmup]
 ---*/
 
@@ -25,24 +25,41 @@ async function resolved(): Promise<int> {
 async function startTest(): Promise<void> {
   let order: int[] = []
 
-  let p = resolved()
+  const ea = new EAWorker()
+  ea.start()
 
-  let c1 = p.then((v: int): int => {
-    order.push(1)
-    return v
+  await ea.run<undefined>(async () => {
+    let low1: Promise<undefined> = launch<undefined>() {
+      order.push(3)
+    }
+
+    let high1: Promise<int> = resolved().then((v: int): int => {
+      order.push(1)
+      return v
+    })
+
+    let low2: Promise<undefined> = launch<undefined>() {
+      order.push(4)
+    }
+
+    let high2: Promise<int> = resolved().then((v: int): int => {
+      order.push(2)
+      return v
+    })
+
+    await high1
+    await high2
+    await low1
+    await low2
   })
 
-  let c2 = p.then((v: int): int => {
-    order.push(2)
-    return v
-  })
-
-  await c1
-  await c2
-
-  arktest.assertEQ(order.length, 2)
+  arktest.assertEQ(order.length, 4)
   arktest.assertEQ(order[0], 1)
   arktest.assertEQ(order[1], 2)
+  arktest.assertEQ(order[2], 3)
+  arktest.assertEQ(order[3], 4)
+
+  ea.quit()
 }
 
 async function main(): Promise<void> {
