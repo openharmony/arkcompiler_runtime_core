@@ -418,9 +418,12 @@ class InteropWorker extends InternalWorker {
 
     start(initialTask: Task) {
         let wrappedTask = () => {
-            initialTask();
-            this.interopInitialized.set(true);
-            this.processPendingTasks();
+            try {
+                initialTask();
+            } finally {
+                this.interopInitialized.set(true);
+                this.processPendingTasks();
+            }
         }
         this.workerId = ExclusiveLauncher.elaunch(wrappedTask, this.getName(), true);
     }
@@ -518,8 +521,11 @@ class StaticWorker extends InternalWorker {
 
     start(initialTask: Task) {
         let initTask = () => {
-            initialTask();
-            this.joiningEvent.wait();
+            try {
+                initialTask();
+            } finally {
+                this.joiningEvent.wait();
+            }
         }
         this.workerId = ExclusiveLauncher.elaunch(initTask, this.getName(), false);
     }

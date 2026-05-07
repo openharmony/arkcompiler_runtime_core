@@ -221,6 +221,19 @@ async function testNestedEAWorker(): Promise<void> {
     arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
+async function testInitTaskEAWorker(): Promise<void> {
+    let e1 = new EAWorker(() => {
+        throw new Error('This is an exception in init task!');
+    });
+    let errs = '';
+    e1.setUncaughtExceptionHandler((e: Error) => {
+        errs += e.message;
+    });
+    e1.start();
+    await e1.join();
+    arktest.assertEQ(errs, 'This is an exception in init task!');
+}
+
 function testOfPrioritySetting(): void {
     let e = new EAWorker();
     arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
@@ -240,6 +253,7 @@ function main(): int {
     suite.addAsyncTest('testACoroutineCallAJCoroutine', testACoroutineCallAJCoroutine);
     suite.addAsyncTest('testAJCoroutineCallACoroutine', testAJCoroutineCallACoroutine);
     suite.addAsyncTest('testNestedEAWorker', testNestedEAWorker);
+    suite.addAsyncTest('testInitTaskEAWorker', testInitTaskEAWorker);
     suite.addTest('testOfPrioritySetting', testOfPrioritySetting);
 
     return suite.run();
