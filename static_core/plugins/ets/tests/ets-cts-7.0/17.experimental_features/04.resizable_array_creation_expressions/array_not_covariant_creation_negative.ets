@@ -18,7 +18,7 @@
 /*---
 desc: Create FixedArray with not covariant subtypes
 tags: [negative, compile-only]
-expected_out: " Semantic error ESE0002: Type 'Array<Dog>' has no call signatures."
+expected_out: {{c.out}}
 ---*/
 
 class Animal {}

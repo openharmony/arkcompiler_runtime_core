@@ -13,21 +13,24 @@
  * limitations under the License.
  */
 
-{% for logic in logics %}
 {% for c in cases %}
 
+{% set etype = (c.etype) if (c.etype is defined) else  c.type %}
 /*---
 desc: Create FixedArray with wrong predefined values
 tags: [negative, compile-only]
-expected_out: " Semantic error ESE0002: Type 'Array<{{c.expected_out_type}}>' has no call signatures."
+expected_out:
+    - "Semantic error ESE0127: No matching call signature for create(Int, {{c.itype}})"
+    - "Semantic error ESE0046: Type '{{c.itype}}' is not compatible with type '{{etype}}' at index 2"
 ---*/
 
-{% set logic_data = logic|replace("check_type", c.type)|replace("check_value", c.value) %}
 
+
+const abc: string = 'abc'
+const flag: boolean = true;
 
 function main(): void {
-  {{logic_data}}
+  let a = new {{c.type}}[30]({{c.value}})
 }
 
-{% endfor %}
 {% endfor %}

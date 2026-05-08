@@ -11,13 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-logics:
-    - "let a = new check_type[30](check_value)"
-    - "let a = new check_type[30]((inx: int) => check_value)"
 cases:
-    - {type: "Object", value: "undefined", expected_out_type: "Object"}
-    - {type: "Object", value: "null", expected_out_type: "Object"}
-    - {type: "number", value: "\"abc\"", expected_out_type: "Double"}
-    - {type: "int", value: "5.7", expected_out_type: "Int"}
-    - {type: "string", value: "123", expected_out_type: "String"}
-    - {type: "boolean", value: "\"true\"", expected_out_type: "Boolean"}
+   - { type: Object, value: "undefined", itype: "undefined"}
+   - { type: Object, value: "null", itype: "null"}
+   - { type: number, etype: Double, value: "abc", itype: String}
+   - { type: "int", value: 5.7, etype: Int, itype: Double}
+   - { type: "string", value: 123, itype: Int, etype: String}
+   - { type: "boolean", value: 123, itype: Int, etype: Boolean}
+   - { type: "boolean", value: abc, itype: String, etype: Boolean}

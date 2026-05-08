@@ -74,8 +74,10 @@ cases:
       if (a.meth<X[]>(v, new X[0](new X())) !== v) {  // I[] is not X[]
           return 1
       }
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+
   #7
   - use: |-
       let v: Object[]|null = Color.values()
@@ -130,8 +132,11 @@ cases:
       arktest.assertEQ(a.meth<B>(v, new Y<X>[0]), v)
     decl: |-
       type B = X[]|null
-    stdout: |-
-      "Semantic error ESE0127: No matching call signature for meth(Array<X>, Array<Y<X>>)"
+    stdout:
+      - "Semantic error ESE0127: No matching call signature for assertEQ(..., Array<X>)"
+      - "Semantic error ESE0127: No matching call signature for meth(Array<X>, Y<X>)"
+      - "Semantic error ESE0046: Type 'Y<X>' is not compatible with type 'Array<X>|null' at index 2"
+      - "Syntax error ESY63526: Expression to initialize array element is missed."
 
   # create array with interfaces
   #13
@@ -140,13 +145,18 @@ cases:
       if (a.meth<I[]>(v, v) !== v) {
           return 1;
       }
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+
   #14
   - use: |-
       let v: I[]|null = new I[0](new I()) // cannot use array creation expression with interfaces
       if (a.meth<I[]>(v, v) !== v) {  // I[]|null is not I[]
           return 1
       }
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching call signature for meth(Array<I>|null, Array<I>|null)"
+      - "Semantic error ESE0046: Type 'Array<I>|null' is not compatible with type 'Array<I>' at index 1"

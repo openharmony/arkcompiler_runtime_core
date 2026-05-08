@@ -18,7 +18,7 @@
 /*---
 desc: Create FixedArray with not covariant function subtypes
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0051: Cannot use array creation expression with non-constructable element type which is non-assignable from undefined."
+expected_out: {{c.out}}
 ---*/
 
 class A {}

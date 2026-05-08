@@ -13,21 +13,64 @@
 
 cases:
    - logic: "let a = new HandlerReq[30](handlerCInt)"
+     out:
+        - "Semantic error ESE0127: No matching call signature for create(Int, ((p1: C, p2: Int) => B))"
+        - "Semantic error ESE0046: Type '((p1: C, p2: Int) => B)' is not compatible with type 
+ '((p1: B, p2: Int) => B)' at index 2"
 
    - logic: "let a = new HandlerReq[30](handlerBInt)"
+     out:
+        - "Semantic error ESE0127: No matching call signature for create(Int, ((p1: B, p2: Int) => A))"
+        - "Semantic error ESE0046: Type '((p1: B, p2: Int) => A)' is not compatible with type
+ '((p1: B, p2: Int) => B)' at index 2"
 
    - logic: "let a = new HandlerReq[30](handlerB)"
+     out:
+        - "Semantic error ESE0127: No matching call signature for create(Int, ((p1: B) => A))"
+        - "Semantic error ESE0046: Type '((p1: B) => A)' is not compatible with type '((p1: B, p2: Int) => B)' at index 2"
 
    - logic: "let a = new HandlerReq[30](handlerBIntInt)"
+     out:
+        - "Semantic error ESE0127: No matching call signature for create(Int, ((p1: B, p2: Int, p3: Int) => B))"
+        - "Semantic error ESE0046: Type '((p1: B, p2: Int, p3: Int) => B)' is not compatible with type
+ '((p1: B, p2: Int) => B)' at index 2"
 
    - logic: "let a = new HandlerReq[30](handlerNothing)"
+     out:
+        - "Semantic error ESE0127: No matching call signature for create(Int, (() => C))"
+        - "Semantic error ESE0046: Type '(() => C)' is not compatible with type '((p1: B, p2: Int) => B)' at index 2"
 
    - logic: "let a = new HandlerReq[30]((inx: int) => handlerCInt)"
+     out:
+        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) =>
+ ((p1: B, p2: Int) => B)))"
+        - "Semantic error ESE0091: Type '((p1: C, p2: Int) => B)' is not compatible with the enclosing method's
+ return type '((p1: B, p2: Int) => B)'"
 
    - logic: "let a = new HandlerReq[30]((inx: int) => handlerBInt)"
+     out:
+        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) =>
+ ((p1: B, p2: Int) => B)))"
+        - "Semantic error ESE0091: Type '((p1: B, p2: Int) => A)' is not compatible with the enclosing method's
+ return type '((p1: B, p2: Int) => B)'"
 
    - logic: "let a = new HandlerReq[30]((inx: int) => handlerB)"
+     out:
+        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) =>
+ ((p1: B, p2: Int) => B)))"
+        - "Semantic error ESE0091: Type '((p1: B) => A)' is not compatible with the enclosing method's return type
+ '((p1: B, p2: Int) => B)'"
 
    - logic: "let a = new HandlerReq[30]((inx: int) => handlerBIntInt)"
+     out:
+        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) =>
+ ((p1: B, p2: Int) => B)))"
+        - "Semantic error ESE0091: Type '((p1: B, p2: Int, p3: Int) => B)' is not compatible with the enclosing
+ method's return type '((p1: B, p2: Int) => B)'"
 
    - logic: "let a = new HandlerReq[30]((inx: int) => handlerNothing)"
+     out:
+        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) =>
+ ((p1: B, p2: Int) => B)))"
+        - "Semantic error ESE0091: Type '(() => C)' is not compatible with the enclosing method's return type
+ '((p1: B, p2: Int) => B)'"

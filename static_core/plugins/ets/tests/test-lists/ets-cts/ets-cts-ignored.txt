@@ -6,6 +6,9 @@
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
 
+#34263
+03.types/21.utility_types/01.awaited_utility_type/awaited_return_1.ets
+
 #33270
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_0.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_1.ets

@@ -25,7 +25,8 @@ cases:
           cntr = 0
           let v: A[] = new A[100](new A())
           return 1
-      expected_out: "Semantic error ESE0139: Signature constructor(): undefined is not visible here."
+      expected_out:
+        - "Semantic error ESE0139: Signature constructor(): undefined is not visible here."
 
     - defs: |-
           class A {
@@ -37,7 +38,10 @@ cases:
       use: |-
           let v: A[] = new A[100](new A())
           return 1
-      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
+      expected_out:
+        - "Semantic error ESE0124: Expected 1 arguments, got 0."
+        - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+        - "Semantic error ESE0127: No matching construct signature for expr_n_1.A()"
 
     - defs: |-
           class A {
@@ -52,4 +56,5 @@ cases:
       use: |-
           let v: A[] = new A[100](new A())
           return 1
-      expected_out: "Semantic error ESE0139: Signature constructor(): undefined is not visible here."
+      expected_out:
+        - "Semantic error ESE0139: Signature constructor(): undefined is not visible here."

@@ -15,11 +15,10 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    The type of each dimensionExpression must be convertible (see Primitive Types Conversions)
+desc: The type of each dimensionExpression must be convertible (see Primitive Types Conversions)
     to an integer type. A compile-time error occurs otherwise.
 tags: [negative, compile-only]
-expected_out: "{{c.expected_out}}"
+expected_out: {{c.expected_out}}
 ---*/
 
 {{c.defs}}

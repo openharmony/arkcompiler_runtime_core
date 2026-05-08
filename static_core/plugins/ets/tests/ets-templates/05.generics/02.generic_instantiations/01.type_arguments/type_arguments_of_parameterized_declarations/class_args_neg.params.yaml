@@ -64,8 +64,11 @@ cases:
   #8
   - use: |-
       let v: A<A<X>[]> = new A<A<X>[]>(new A<Y>[0](new A<Y>())) // A<X>[] is not A<Y>[]
-    stdout: |-
-      "Semantic error ESE0127: No matching construct signature for class_args_neg_8.A(Array<A<Y>>)"
+    stdout:
+       - "Semantic error ESE0127: No matching construct signature for class_args_neg_8.A(...)"
+       - "Semantic error ESE0124: Expected 1 arguments, got 0."
+       - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+       - "Semantic error ESE0127: No matching construct signature for class_args_neg_8.A()"
   #9
   - use: |-
       let v: A<A<X[]>[]> = new A<A<X[]>[]>(new A<Y[]>[0](new A<Y[]>()))  // Y[] is not X[]
@@ -81,8 +84,11 @@ cases:
   #11
   - use: |-
       let v: A<A<I>[]> = new A<A<I>[]>(new A<Y>[0](new A<Y>()))  // Y doesn't implement I
-    stdout: |-
-      "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
+    stdout:
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_11.A(...)"
+      - "Semantic error ESE0124: Expected 1 arguments, got 0."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_11.A()"
   #12
   - use: |-
       let v: A<A<I[]>[]> = new A<A<I[]>[]>(new A<Y[]>[0](new A<Y[]>()))  // Y doesn't implement I
@@ -92,13 +98,19 @@ cases:
   #13
   - use: |-
       let v: A<Color[]> = new A<Color[]>(new Size[0](new Size()))  // Size is not Color
-    stdout: |-
-      "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 3"
+    stdout:
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_13.A(...)"
+      - "Semantic error ESE0124: Expected 3 arguments, got 0."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_13.Size()"
   #14
   - use: |-
       let v: A<A<Color[]>[]> = new A<A<Color[]>[]>(new A<Size[]>[0](new A<Size[]>()))  // Size[] is not Color[]
-    stdout: |-
-      "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
+    stdout:
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_14.A(...)"
+      - "Semantic error ESE0124: Expected 1 arguments, got 0."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_14.A()"
 
   # type argument is alias
   #15
@@ -127,8 +139,11 @@ cases:
       let v: A<B> = new A<B>(new A<X>[0](new A<X>()))  // A<X>[] is not A<Y>[]
     decl: |-
       type B = A<Y>[]
-    stdout: |-
-      "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
+    stdout:
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_18.A(...)"
+      - "Semantic error ESE0124: Expected 1 arguments, got 0."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_18.A()"
   #19
   - use: |-
       let v: A<B> = new A<B>(new A<X[]>[0]())  // X is not Y
@@ -149,13 +164,18 @@ cases:
   #21
   - use: |-
       let v: A<I[]> = new A<I[]>(new I[0](new I())) // Cannot use array creation expression with interfaces.
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_21.A(...)"
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+
   #22
   - use: |-
       let v: A<A<I[]>[]> = new A<A<I[]>[]>([new A<I[]>(new I[0](new I()))]) // Cannot use array creation expression with interfaces.
-    stdout: |-
-      "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+    stdout:
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_22.A(...)"
+      - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
+      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
 
   # type argument is tuple
   #23
