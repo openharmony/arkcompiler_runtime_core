@@ -89,6 +89,13 @@ class Test {
         return abcFiles.split(":");
     }
 
+    private static getAdditionalHapFile(): string {
+        let procManager = new StdProcess.ProcessManager();
+        const hapFile = procManager.getEnvironmentVar("ADDITIONAL_HAP_FILE");
+        arktest.assertLT(0, hapFile.length, "this test must have additional hap file")
+        return hapFile;
+    }
+
     private static loadRawFiles(paths: string[]): Array<ValueArray<byte>> {
         const rawFiles = Array.create<ValueArray<byte>>(paths.length, new ValueArray<byte>(0));
         for (let i = 0; i < rawFiles.length; i++) {
@@ -256,6 +263,15 @@ class Test {
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
     }
 
+    static testRuntimeLinkerAddHapFile() {
+        const linker = new AbcRuntimeLinker(undefined, []);
+        linker.addAbcFiles([Test.getAdditionalHapFile()]);
+
+        const cls1 = linker.loadClass(Test.additionalClass1Name, true);
+        arktest.assertNE(cls1, undefined, "AdditionalClass1 must be found");
+        arktest.assertEQ(cls1.getLinker(), linker, "AdditionalClass1 must be loaded by custom linker");
+    }
+
     static testMemoryRuntimeLinkerAddAbcFiles() {
         const allAbcFiles = Test.getAdditionalFilesList();
         // Cut out "additional1.ets" from the ABC files list
@@ -338,6 +354,7 @@ class Test {
         Test.testAbcRuntimeLinkerUnload();
         Test.testAbcRuntimeLinkerLoadErrorPath();
         Test.testRuntimeLinkerAddAbcFiles();
+        Test.testRuntimeLinkerAddHapFile();
         Test.testMemoryRuntimeLinkerAddAbcFiles();
         Test.testWrongClassName();
         Test.testLinkerUnresolvedClassError();
@@ -356,6 +373,7 @@ function main(): int {
     testsuite.addTest('testAbcRuntimeLinkerUnload', Test.testAbcRuntimeLinkerUnload);
     testsuite.addTest('testAbcRuntimeLinkerLoadErrorPath', Test.testAbcRuntimeLinkerLoadErrorPath);
     testsuite.addTest('testRuntimeLinkerAddAbcFiles', Test.testRuntimeLinkerAddAbcFiles);
+    testsuite.addTest('testRuntimeLinkerAddHapFile', Test.testRuntimeLinkerAddHapFile);
     testsuite.addTest('testMemoryRuntimeLinkerAddAbcFiles', Test.testMemoryRuntimeLinkerAddAbcFiles);
     testsuite.addAsyncTest('testConcurrentAddAbcFiles', Test.testConcurrent);
     testsuite.addTest('testWrongClassName', Test.testWrongClassName);

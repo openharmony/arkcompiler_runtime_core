@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,7 +41,7 @@ case "$ARGUMENT" in
 esac
 done
 
-EXPECTED_ERROR_MESSAGE="Error: Open failed, file: ${NON_EXISTING_ABC}"
+EXPECTED_ERROR_MESSAGE="AbcFileNotFoundError: Abc file not found: ${NON_EXISTING_ABC}"
 
 RUNTIME_ARGUMENTS="${BOOT_PANDA_FILES} --load-runtimes=ets --gc-type=g1-gc --panda-files=${NON_EXISTING_ABC} ${ENTRY_ABC} ${ENTRYPOINT}"
 

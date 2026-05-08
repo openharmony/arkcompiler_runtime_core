@@ -28,15 +28,15 @@ export final class AbcFile {
     }
 
     /** 
-      * Loads ABC file. 
+      * Loads ABC file.
       * 
       * @param runtimeLinker which the opened file will correspond to. 
       * 
-      * @param path to ABC file. 
+      * @param path to ABC file.
       * 
       * @returns instance of loaded AbcFile. 
       * 
-      * @throws errors happened on loading ABC file. 
+      * @throws errors happened on loading ABC file.
       */ 
     public static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile	 
 

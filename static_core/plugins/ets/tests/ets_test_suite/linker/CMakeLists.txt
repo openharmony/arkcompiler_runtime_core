@@ -105,6 +105,9 @@ function(test_runtime_linker_extensions test)
         get_filename_component(src_filename ${ets_source} NAME)
         set(output_abc ${additional_abc_dir}/${src_filename}.abc)
         list(APPEND additional_abc_files_list ${output_abc})
+        if (src_filename STREQUAL "additional1.ets")
+            set(additional_hap_source_abc ${output_abc})
+        endif()
 
         set(compilation_target ${test}-${src_filename}-ets-es2panda)
         list(APPEND compilations_targets_list ${compilation_target})
@@ -112,6 +115,22 @@ function(test_runtime_linker_extensions test)
             OPT_LEVEL ${ARG_OPT_LEVEL}
             COMPILER_EXTRA_OPTIONS "--ets-module")
     endforeach()
+    if (NOT additional_hap_source_abc)
+        message(FATAL_ERROR "additional1.ets is required to build runtime linker HAP test package")
+    endif()
+
+    set(additional_hap_stage_dir "${additional_abc_dir}/additional1_hap")
+    set(additional_hap_file "${additional_abc_dir}/additional1.ets.hap")
+    add_custom_command(
+        OUTPUT ${additional_hap_file}
+        COMMENT "Create ${additional_hap_file}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf ${additional_hap_stage_dir}
+        COMMAND ${CMAKE_COMMAND} -E rm -f ${additional_hap_file}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${additional_hap_stage_dir}/ets
+        COMMAND ${CMAKE_COMMAND} -E copy ${additional_hap_source_abc} ${additional_hap_stage_dir}/ets/modules_static.abc
+        COMMAND ${CMAKE_COMMAND} -E chdir ${additional_hap_stage_dir} zip -r -0 ${additional_hap_file} ets
+        DEPENDS ${additional_hap_source_abc}
+    )
 
     # Build rules for native shared library
     set(native_lib ${test}-shared-lib)
@@ -133,9 +152,10 @@ function(test_runtime_linker_extensions test)
     set(PANDA_RUN_PREFIX
         LD_LIBRARY_PATH=${native_lib_dir}
         ADDITIONAL_ABC_FILES=${additional_abc_files}
+        ADDITIONAL_HAP_FILE=${additional_hap_file}
         ${PANDA_RUN_PREFIX})
 
-    add_custom_target(${test}-add-deps DEPENDS ${compilations_targets_list} ${native_lib})
+    add_custom_target(${test}-add-deps DEPENDS ${compilations_targets_list} ${native_lib} ${additional_hap_file})
     # Note that some functions must be deliberately not inlined due to tests purposes.
     # For more information please refer to definitions of those methods
     add_linker_test(${test} ${test}-add-deps
