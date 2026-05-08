@@ -523,13 +523,13 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
-//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,0
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
 //! RUN           options: "--compiler-regex='.*[Cc]oncatLoop[0-9]*'",
 //!               entry: "ets_string_concat_loop.ETSGLOBAL::main"
@@ -1043,13 +1043,13 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
-//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,0
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 
 //! CHECKER       Invalid save states JIT (#I932LA/15833)
 //! SKIP_IF       @architecture == "arm32"
@@ -1534,9 +1534,9 @@
 //! INST_COUNT    /StringBuilder::append/,4
 //! INST_COUNT    /StringBuilder::toString/,2
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /StringBuilder::append/,4
-//! INST_COUNT    /StringBuilder::toString/,2
+//! INST_COUNT    /StringBuilder::toString/,1
 
 //! CHECKER       INTERP-IRTOC, check String concatenation loop
 //! SKIP_IF       @architecture == "arm32"
