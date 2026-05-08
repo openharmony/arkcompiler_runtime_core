@@ -102,8 +102,13 @@ void VTableBuilderBase<VISIT_SUPERITABLE>::AddBaseMethods(Class *baseClass)
     ASSERT(baseMethods != nullptr);
 
     if (baseClass != nullptr) {
+        baseVTableSize_ = baseClass->GetVTable().size();
+        baseMethodInfoByIndex_.clear();
+        baseMethodInfoByIndex_.reserve(baseVTableSize_);
         for (auto const &method : baseClass->GetVTable()) {
-            vtable_.AddEntry(&baseMethods->emplace_front(method, 0, true));
+            auto &mi = baseMethods->emplace_front(method, 0, true);
+            baseMethodInfoByIndex_.push_back(&mi);
+            vtable_.AddEntry(&mi);
         }
     }
 }

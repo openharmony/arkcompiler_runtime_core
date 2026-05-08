@@ -20,6 +20,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/itable.h"
+#include "runtime/include/mem/allocator.h"
 #include "runtime/include/vtable_builder_interface.h"
 
 namespace ark {
@@ -43,6 +44,11 @@ public:
         dispatches_ = dispatches;
     }
 
+    void SetAllocator(ArenaAllocator *allocator) override
+    {
+        allocator_ = allocator;
+    }
+
     void UpdateClass(Class *klass) override;
 
     void DumpITable([[maybe_unused]] Class *klass) override;
@@ -53,11 +59,11 @@ public:
     };
 
 private:
-    static Method *ResolveMethod(Span<Method *> vtable, ClassLinkerContext *ctx, Class *klass,
-                                 const IfaceMethodDispatch &disp);
+    static Method *ResolveMethod(Span<Method *> vtable, Class *klass, const IfaceMethodDispatch &disp);
 
     ITable itable_;
     Span<const IfaceMethodDispatch> dispatches_;
+    ArenaAllocator *allocator_ {nullptr};
     // base-class ctor expects this field
     ClassLinkerErrorHandler *errorHandler_ __attribute__((unused));
 };

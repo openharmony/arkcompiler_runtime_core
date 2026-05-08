@@ -22,7 +22,7 @@ namespace ark::ets {
 
 static constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
 
-bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2) const
+bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2)
 {
     if (info1.GetLoadContext() != info2.GetLoadContext()) {
         return false;
@@ -113,8 +113,6 @@ private:
             }
         }
 
-        // Need to traverse `RuntimeLinker` chain, which is why `EnumeratePandaFilesInChain` is used
-        // NOTE(vpukhov): speedup lookup with tls cache
         ctx_->EnumeratePandaFilesInChain([this](panda_file::File const &itpf) {
             auto itClassId = itpf.GetClassId(descriptor_);
             if (itClassId.IsValid() && !itpf.IsExternal(itClassId)) {
@@ -170,8 +168,10 @@ static bool RefExtendsOrImplements(const ClassLinkerContext *ctx, RefTypeLink su
             }
         }
     }
-    // subtype is interface (thus has no base class) or subtype is Object
-    if (subCDA.IsInterface() || subCDA.GetSuperClassId().GetOffset() == 0) {
+    if (subCDA.IsInterface()) {
+        return superCDA.GetSuperClassId().GetOffset() == 0;
+    }
+    if (subCDA.GetSuperClassId().GetOffset() == 0) {
         return false;
     }
     return RefIsAssignableToImpl(ctx, RefTypeLink(ctx, &subCDA.GetPandaFile(), subCDA.GetSuperClassId()), super, depth);
@@ -256,7 +256,6 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
     if (ClassHelper::IsUnionDescriptor(super.GetDescriptor())) {
         return IsAssignableToUnion(ctx, sub, super, depth);
     }
-    // Assume array does not implement interfaces
     if (ClassHelper::IsArrayDescriptor(sub.GetDescriptor())) {
         return false;
     }

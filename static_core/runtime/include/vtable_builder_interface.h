@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_VTABLE_BUILDER_INTERFACE_H
 #define PANDA_RUNTIME_VTABLE_BUILDER_INTERFACE_H
 
+#include "libarkbase/mem/arena_allocator.h"
 #include "runtime/include/method.h"
 
 namespace ark {
@@ -56,6 +57,7 @@ private:
 // always interface Method*, class Method* not yet materialized during SetupClassInfo
 struct IfaceMethodDispatch {
     enum class Kind : uint8_t {
+        REMAP_VTABLE,
         CLASS_METHOD,
         COPIED_ORDINARY,
         COPIED_CONFLICT,
@@ -64,6 +66,8 @@ struct IfaceMethodDispatch {
     Kind kind {Kind::CLASS_METHOD};
     Method *method {nullptr};
     size_t resolveIndex {0};
+    size_t itableIndex {0};
+    size_t methodIndex {0};
 };
 
 class VTableBuilder {
@@ -91,6 +95,8 @@ public:
     virtual Span<const CopiedMethod> GetCopiedMethods() const = 0;
 
     virtual Span<const IfaceMethodDispatch> GetIfaceMethodDispatches() const = 0;
+
+    virtual ArenaAllocator *GetAllocator() = 0;
 
     virtual ~VTableBuilder() = default;
 
