@@ -1,0 +1,74 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - src_type: char
+      src_val: c'A'
+      supertypes: [Any, Object, Char]
+
+    - src_type: boolean
+      src_val: 'true'
+      supertypes: [Any, Object, Boolean]
+
+    - src_type: byte
+      src_val: '1 as byte'
+      supertypes: [Any, Object, Numeric, Byte]
+
+    - src_type: short
+      src_val: '1 as short'
+      supertypes: [Any, Object, Numeric, Short]
+
+    - src_type: int
+      src_val: '1'
+      supertypes: [Any, Object, Numeric, Int]
+
+    - src_type: long
+      src_val: '1 as long'
+      supertypes: [Any, Object, Numeric, Long]
+
+    - src_type: float
+      src_val: '1.0f'
+      supertypes: [Any, Object, Numeric, Float]
+
+    - src_type: double
+      src_val: '1.0'
+      supertypes: [Any, Object, Numeric, Double]
+
+    - src_type: Enum_int
+      src_val: Enum_int.Blue
+      supertypes: [Any, Object, BaseEnum<Int>, Enum_int]
+
+    - src_type: Enum_byte
+      src_val: Enum_byte.Blue
+      supertypes: [Any, Object, BaseEnum<Byte>, Enum_byte]
+
+    - src_type: Enum_short
+      src_val: Enum_short.Blue
+      supertypes: [Any, Object, BaseEnum<Short>, Enum_short]
+
+    - src_type: Enum_long
+      src_val: Enum_long.Blue
+      supertypes: [Any, Object, BaseEnum<Long>, Enum_long]
+
+    - src_type: Enum_float
+      src_val: Enum_float.Blue
+      supertypes: [Any, Object, BaseEnum<Float>, Enum_float]
+
+    - src_type: Enum_double
+      src_val: Enum_double.Blue
+      supertypes: [Any, Object, BaseEnum<Double>, Enum_double]
+
+    - src_type: Enum_string
+      src_val: Enum_string.Blue
+      supertypes: [Any, Object, BaseEnum<String>, Enum_string]

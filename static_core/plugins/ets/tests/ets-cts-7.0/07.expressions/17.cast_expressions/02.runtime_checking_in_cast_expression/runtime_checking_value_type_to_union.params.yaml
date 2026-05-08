@@ -1,0 +1,94 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - type: byte
+      value: 127 as byte
+      union_type_pos: short|int|float|byte|char
+      union_type_neg: Short|Double|long|short
+
+    - type: Byte
+      value: new Byte(-127 as byte)
+      union_type_pos: short|int|byte|long|Double
+      union_type_neg: short|int|Double|boolean
+
+    - type: short
+      value: 32767 as short
+      union_type_pos: short|int|Float|char
+      union_type_neg: byte|long|Double|Char
+
+    - type: Short
+      value: new Short(-32767 as short)
+      union_type_pos: short|byte|long|Double
+      union_type_neg: int|Float|byte|long|Double|char
+
+    - type: int
+      value: '-32769'
+      union_type_pos: short|int|double
+      union_type_neg: short|Float|byte|char|long|Double
+
+    - type: Int
+      value: new Int(32769)
+      union_type_pos: char|int|Float|byte|long|Double
+      union_type_neg: long|Double|boolean
+
+    - type: long
+      value: 2147483648 as long
+      union_type_pos: byte|long|Double
+      union_type_neg: short|int|Float|byte|Double
+
+    - type: Long
+      value: new Long(-2147483648 as long)
+      union_type_pos: Short|int|Long|boolean
+      union_type_neg: Float|Double|char
+
+    - type: float
+      value: 1.1e11f
+      union_type_pos: int|Float|byte|long|Double
+      union_type_neg: short|int|byte|long|Double|boolean
+
+    - type: Float
+      value: new Float(-0.1e11f)
+      union_type_pos: short|int|Float|byte
+      union_type_neg: Short|int|byte|long|Double
+
+    - type: double
+      value: '0.0001'
+      union_type_pos: short|Double
+      union_type_neg: short|int|Float|byte|long
+
+    - type: Double
+      value: new Double(-0.0001)
+      union_type_pos: short|byte|long|Double
+      union_type_neg: short|int|Float|byte|long
+
+    - type: boolean
+      value: 'true'
+      union_type_pos: short|int|Float|boolean|byte|long
+      union_type_neg: short|int|Float|byte|long|Double
+
+    - type: Boolean
+      value: new Boolean(false)
+      union_type_pos: short|boolean|int|Float|byte|long|Double
+      union_type_neg: short|int|Float
+
+    - type: char
+      value: c'A'
+      union_type_pos: short|char|int|Float|byte|long|Double
+      union_type_neg: Short|int|Float
+
+    - type: Char
+      value: new Char(c'B')
+      union_type_pos: short|int|Float|byte|long|Double|Char
+      union_type_neg: short|int|boolean

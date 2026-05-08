@@ -1,0 +1,170 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # cast from numeric to numeric
+
+    - src_type: byte
+      src_val: 1 as byte
+      dst_type: int
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Byte.toInt(...) instead.
+
+    - src_type: Byte
+      src_val: new Byte(1 as byte)
+      dst_type: short
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Byte.toShort(...) instead.
+
+    - src_type: short
+      src_val: 1
+      dst_type: Long
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Short.toLong(...) instead.
+
+    - src_type: int
+      src_val: '1'
+      dst_type: float
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Int.toFloat(...) instead.
+
+    - src_type: float
+      src_val: 1f
+      dst_type: double
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Float.toDouble(...) instead.
+
+    - src_type: Double
+      src_val: new Double(1.0)
+      dst_type: long
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Double.toLong(...) instead.
+
+    - src_type: float
+      src_val: 1 as int
+      dst_type: int
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Float.toInt(...) instead.
+
+    - src_type: long
+      src_val: '1 as long'
+      dst_type: byte
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Long.toByte(...) instead.
+
+    - src_type: double
+      src_val: '1.0'
+      dst_type: Float
+      expected_out: |-
+          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Double.toFloat(...) instead.
+
+    # cast from numeric enum to numeric with the same base types
+
+    - dst_type: int
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Int' is not supported. Please use implicit conversion of enum value to 'Int' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - dst_type: byte
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Byte' is not supported. Please use implicit conversion of enum value to 'Byte' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: byte { Red = 1, Green = 2, Blue }
+
+    - dst_type: short
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Short' is not supported. Please use implicit conversion of enum value to 'Short' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: short { Red = 100, Green = 200, Blue }
+
+    - dst_type: long
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Long' is not supported. Please use implicit conversion of enum value to 'Long' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: long { Red = 100, Green = 200, Blue }
+
+    - dst_type: float
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Float' is not supported. Please use implicit conversion of enum value to 'Float' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: float { Red = 0.1f, Green = 0.2f, Blue = 0.3f }
+
+    - dst_type: double
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Double' is not supported. Please use implicit conversion of enum value to 'Double' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: double { Red = 0.1, Green = 0.2, Blue = 0.3 }
+
+    # cast from numeric enum to numeric with different base types
+
+    - dst_type: long
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Long' is not supported. Please use implicit conversion of enum value to 'Long' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum { Red, Green, Blue }
+
+    - dst_type: short
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Short' is not supported. Please use implicit conversion of enum value to 'Short' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: byte { Red = 1, Green = 2, Blue }
+
+    - dst_type: int
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Int' is not supported. Please use implicit conversion of enum value to 'Int' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: short { Red = 100, Green = 200, Blue }
+
+    - dst_type: float
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Float' is not supported. Please use implicit conversion of enum value to 'Float' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: long { Red = 100, Green = 200, Blue }
+
+    - dst_type: double
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Double' is not supported. Please use implicit conversion of enum value to 'Double' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: float { Red = 0.1f, Green = 0.2f, Blue = 0.3f }
+
+    - dst_type: int
+      src_type: Enum
+      src_val: Enum.Red
+      expected_out: |-
+          Semantic error ESE593372: Conversion from 'Enum' to 'Int' is not supported. Please use implicit conversion of enum value to 'Int' value or call 'enumValue.valueOf()'
+      decl: |-
+          enum Enum: double { Red = 0.1, Green = 0.2, Blue = 0.3 }

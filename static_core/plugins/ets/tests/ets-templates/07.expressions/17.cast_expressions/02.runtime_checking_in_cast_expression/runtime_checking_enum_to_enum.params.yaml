@@ -1,0 +1,62 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - type: Enum_int_1
+      value: Enum_int_1.Green
+
+    - type: Enum_int_2
+      value: Enum_int_2.Blue
+
+    - type: Enum_int_3
+      value: Enum_int_3.Green
+
+    - type: Enum_int_4
+      value: Enum_int_4.Blue
+
+    - type: Enum_string_1
+      value: Enum_string_1.Green
+
+    - type: Enum_string_2
+      value: Enum_string_2.Blue
+
+    - type: Enum_string_3
+      value: Enum_string_3.Green
+
+    - type: Enum_string_4
+      value: Enum_string_4.Blue
+
+    - type: Enum_byte_1
+      value: Enum_byte_1.Green
+
+    - type: Enum_byte_2
+      value: Enum_byte_2.Blue
+
+    - type: Enum_short_1
+      value: Enum_short_1.Green
+
+    - type: Enum_short_2
+      value: Enum_short_2.Blue
+
+    - type: Enum_float_1
+      value: Enum_float_1.Green
+
+    - type: Enum_float_2
+      value: Enum_float_2.Blue
+
+    - type: Enum_double_1
+      value: Enum_double_1.Green
+
+    - type: Enum_double_2
+      value: Enum_double_2.Blue
