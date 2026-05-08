@@ -101,12 +101,10 @@ async function asyncMutexExclusiveAcquireTest() {
 
 async function main(): Promise<int> {
     let asyncMutexTestsuite = new arktest.ArkTestsuite("asyncMutexTestsuite");
-    let asyncMutexTestsuiteDisabled = new arktest.ArkTestsuite("asyncMutexTestsuite.DISABLED");
 
-    // NOTE(ypigunova): include testcase, when bug will be fixed #33591
-    asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexStressTest', asyncMutexStressTest);
+    asyncMutexTestsuite.addAsyncTest('asyncMutexStressTest', asyncMutexStressTest);
     asyncMutexTestsuite.addAsyncTest('asyncMutexSimpleUnlockTest', asyncMutexSimpleUnlockTest);
-    asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexHardUnlockTest', asyncMutexHardUnlockTest);
-    asyncMutexTestsuiteDisabled.addAsyncTest('asyncMutexExclusiveAcquireTest', asyncMutexExclusiveAcquireTest);
+    asyncMutexTestsuite.addAsyncTest('asyncMutexHardUnlockTest', asyncMutexHardUnlockTest);
+    asyncMutexTestsuite.addAsyncTest('asyncMutexExclusiveAcquireTest', asyncMutexExclusiveAcquireTest);
     return await asyncMutexTestsuite.runAsync();
 }

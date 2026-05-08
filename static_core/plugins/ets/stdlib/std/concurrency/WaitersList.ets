@@ -50,8 +50,10 @@ class WaitersList {
         })
         let node = new Node(pResolver!);
         node.next = this.tail_.load();
-        while (this.tail_.compareAndSwap(node.next, node) != node.next) {
+        let tmp = node.next;
+        while (this.tail_.compareAndSwap(node.next, node) != tmp) {
             node.next = this.tail_.load();
+            tmp = node.next;
         }
         return promise;
     }
