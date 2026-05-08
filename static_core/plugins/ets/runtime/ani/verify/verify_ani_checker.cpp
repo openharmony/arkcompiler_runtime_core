@@ -508,6 +508,13 @@ PandaString ANIArg::GetStringValue() const
                 UNREACHABLE();
             }
             break;
+        case ValueType::FUNCTIONAL_OBJECT_ARGV:
+            if (GetValueFunctionalObjectArgv() == nullptr) {
+                FormatPointer(ss, GetValueFunctionalObjectArgv());
+            } else {
+                FormatPointer(ss, GetValueFunctionalObjectArgv()->argv);
+            }
+            break;
         default:
             FormatPointer(ss, GetValueRawPointer());
             break;
@@ -528,6 +535,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_OPTIONS:                      return "ani_options *";
         case ValueType::ANI_SIZE:                         return "ani_size";
         case ValueType::ANI_REF:                          return "ani_ref";
+        case ValueType::FUNCTIONAL_OBJECT_ARGV:           return "ani_ref *";
+        case ValueType::ANI_FN_OBJECT:                    return "ani_fn_object";
         case ValueType::ANI_MODULE:                       return "ani_module";
         case ValueType::ANI_NAMESPACE:                    return "ani_namespace";
         case ValueType::ANI_TYPE:                         return "ani_ref";
@@ -555,6 +564,9 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_METHOD_STORAGE:               return "ani_method *";
         case ValueType::ANI_STATIC_METHOD_STORAGE:        return "ani_static_method *";
         case ValueType::ANI_FUNCTION_STORAGE:             return "ani_function *";
+        case ValueType::ANI_MODULE_STORAGE:               return "ani_module *";
+        case ValueType::ANI_NAMESPACE_STORAGE:            return "ani_namespace *";
+        case ValueType::ANI_CLASS_STORAGE:                return "ani_class *";
         case ValueType::ANI_FIELD_STORAGE:                return "ani_field *";
         case ValueType::ANI_STATIC_FIELD_STORAGE:         return "ani_static_field *";
         case ValueType::ANI_VARIABLE_STORAGE:             return "ani_variable *";
@@ -568,7 +580,6 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_DOUBLE_STORAGE:               return "ani_double *";
         case ValueType::ANI_REF_STORAGE:                  return "ani_ref *";
         case ValueType::ANI_TYPE_STORAGE:                 return "ani_ref *";
-        case ValueType::ANI_CLASS_STORAGE:                return "ani_ref *";
         case ValueType::ANI_WREF_STORAGE:                 return "ani_wref *";
         case ValueType::ANI_OBJECT_STORAGE:               return "ani_object *";
         case ValueType::ANI_ENUM_STORAGE:                 return "ani_enum *";
@@ -922,6 +933,65 @@ public:
         return {};
     }
 
+    VerificationResult VerifyFunctionalObject(VFnObject *vfnObject)
+    {
+        canReadFunctionalObjectArgv_ = false;
+        auto err = VerifyRef(vfnObject);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsObject(s, vfnObject->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vfnObject->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+
+        EtsClass *cls = s.ToInternalType(vfnObject->GetRef())->GetClass();
+        if (!cls->IsFunction()) {
+            return {"wrong functional object", ANIErrorSeverity::ERROR};
+        }
+        canReadFunctionalObjectArgv_ = true;
+        return {};
+    }
+
+    VerificationResult VerifyFunctionalObjectArgv(ANIArg::AniFunctionalObjectArgv *args)
+    {
+        if (args == nullptr) {
+            return {"wrong functional object argv", ANIErrorSeverity::FATAL};
+        }
+
+        args->releaseArgvStorage.clear();
+        args->releaseArgv = args->argv;
+        if (args->argc == 0) {
+            return {};
+        }
+
+        if (args->argv == nullptr) {
+            return {"wrong pointer to use as argument in 'ani_ref *'", ANIErrorSeverity::ERROR};
+        }
+        if (!canReadFunctionalObjectArgv_) {
+            // Keep release parity: release checks fn kind before reading argv elements.
+            return {};
+        }
+
+        args->releaseArgvStorage.reserve(args->argc);
+        for (ani_size i = 0; i < args->argc; ++i) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            auto *varg = reinterpret_cast<VRef *>(args->argv[i]);
+            auto refErr = VerifyRef(varg);
+            if (refErr) {
+                PandaStringStream ss;
+                ss << "wrong reference in argv[" << i << "]";
+                return {ss.str(), refErr.GetSeverity()};
+            }
+            args->releaseArgvStorage.push_back(varg->GetRef());
+        }
+        args->releaseArgv = args->releaseArgvStorage.data();
+        return {};
+    }
+
     VerificationResult VerifyClassRef(VRef *vref)
     {
         auto err = VerifyRef(vref);
@@ -987,6 +1057,65 @@ public:
             return {"wrong reference", ANIErrorSeverity::FATAL};
         }
         return {};
+    }
+
+    template <bool IS_MODULE>
+    VerificationResult VerifyFindTypeDescriptor(const char *descriptor, bool allowClassDescriptor,
+                                                std::string_view invalidDescriptorError,
+                                                std::string_view wrongKindError)
+    {
+        auto err = VerifyTypePtr(descriptor, "const char *");
+        if (err) {
+            return err;
+        }
+
+        std::optional<PandaString> desc = Mangle::ConvertDescriptor(descriptor, allowClassDescriptor);
+        if (!desc.has_value()) {
+            return {PandaString(invalidDescriptorError), ANIErrorSeverity::ERROR};
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto *ctx = GetClassLinkerContext(s.GetExecutionContext());
+        if (ctx == nullptr) {
+            ctx = classLinker->GetExtension(panda_file::SourceLang::ETS)->GetBootContext();
+        }
+
+        Class *klass = classLinker->FindLoadedClass(utf::CStringAsMutf8(desc.value().c_str()), ctx);
+        if (klass == nullptr) {
+            return {};
+        }
+
+        if (EtsClass::FromRuntimeClass(klass)->IsModule() != IS_MODULE) {
+            return {PandaString(wrongKindError), ANIErrorSeverity::ERROR};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyModuleDescriptor(const char *moduleDescriptor)
+    {
+        auto err = VerifyTypePtr(moduleDescriptor, "const char *");
+        if (err) {
+            return err;
+        }
+
+        std::optional<PandaString> desc = Mangle::ConvertDescriptor(moduleDescriptor);
+        if (!desc.has_value()) {
+            return {"invalid module descriptor", ANIErrorSeverity::ERROR};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyNamespaceDescriptor(const char *namespaceDescriptor)
+    {
+        return VerifyFindTypeDescriptor<true>(namespaceDescriptor, false, "invalid namespace descriptor",
+                                              "descriptor is not namespace");
+    }
+
+    VerificationResult VerifyClassDescriptor(const char *classDescriptor)
+    {
+        return VerifyFindTypeDescriptor<false>(classDescriptor, true, "invalid class descriptor",
+                                               "descriptor is not class");
     }
 
     VerificationResult VerifyEnum(VEnum *venum)
@@ -2090,6 +2219,7 @@ private:
     std::optional<ANIArg::AniMethodArgs> methodArgsForExtInfo_ {};
     VArray *currentArray_ {};
     VTupleValue *currentTupleValue_ {};
+    bool canReadFunctionalObjectArgv_ {true};
 };
 
 using CheckerHandler = VerificationResult (*)(Verifier &, const ANIArg &);
@@ -2166,6 +2296,18 @@ static VerificationResult VerifyWRef(Verifier &v, const ANIArg &arg)
     return v.VerifyWRef(arg.GetValueWRef());
 }
 
+static VerificationResult VerifyFunctionalObject(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTIONAL_OBJECT);
+    return v.VerifyFunctionalObject(arg.GetValueFnObject());
+}
+
+static VerificationResult VerifyFunctionalObjectArgv(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTIONAL_OBJECT_ARGV);
+    return v.VerifyFunctionalObjectArgv(arg.GetValueFunctionalObjectArgv());
+}
+
 static VerificationResult VerifyClass(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CLASS);
@@ -2206,6 +2348,24 @@ static VerificationResult VerifyUTF8String(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF8_STRING);
     return v.VerifyTypePtr(arg.GetValueUTF8String(), "const char *");
+}
+
+static VerificationResult VerifyModuleDescriptor(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_MODULE_DESCRIPTOR);
+    return v.VerifyModuleDescriptor(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyNamespaceDescriptor(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NAMESPACE_DESCRIPTOR);
+    return v.VerifyNamespaceDescriptor(arg.GetValueUTF8String());
+}
+
+static VerificationResult VerifyClassDescriptor(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CLASS_DESCRIPTOR);
+    return v.VerifyClassDescriptor(arg.GetValueUTF8String());
 }
 
 static VerificationResult VerifyEnumDescriptor(Verifier &v, const ANIArg &arg)
@@ -2512,6 +2672,18 @@ static VerificationResult VerifyFunctionStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTION_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFunctionStorage(), "ani_function");
+}
+
+static VerificationResult VerifyModuleStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_MODULE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueModuleStorage(), "ani_module");
+}
+
+static VerificationResult VerifyNamespaceStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NAMESPACE_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueNamespaceStorage(), "ani_namespace");
 }
 
 static VerificationResult VerifyFieldStorage(Verifier &v, const ANIArg &arg)

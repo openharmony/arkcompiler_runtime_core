@@ -19,6 +19,8 @@ add_subdirectory(class_ops)
 add_subdirectory(env_ops)
 add_subdirectory(enum_ops)
 add_subdirectory(error_ops)
+add_subdirectory(find_ops)
+add_subdirectory(fn_object_ops)
 # NOTE(arutiunianan, #32898) re-enable after fix of flaky failures
 # add_subdirectory(function_ops)
 add_subdirectory(local_scope_ops)

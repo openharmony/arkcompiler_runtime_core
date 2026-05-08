@@ -37,6 +37,8 @@
     X(VERIFY_TYPE,                          VerifyType)                           \
     X(VERIFY_GLOBAL_REF,                    VerifyGlobalRef)                      \
     X(VERIFY_WREF,                          VerifyWRef)                           \
+    X(VERIFY_FUNCTIONAL_OBJECT,             VerifyFunctionalObject)               \
+    X(VERIFY_FUNCTIONAL_OBJECT_ARGV,        VerifyFunctionalObjectArgv)           \
     X(VERIFY_CLASS,                         VerifyClass)                          \
     X(VERIFY_ENUM,                          VerifyEnum)                           \
     X(VERIFY_ENUM_ITEM,                     VerifyEnumItem)                       \
@@ -76,6 +78,8 @@
     X(VERIFY_METHOD_STORAGE,                VerifyMethodStorage)                  \
     X(VERIFY_STATIC_METHOD_STORAGE,         VerifyStaticMethodStorage)            \
     X(VERIFY_FUNCTION_STORAGE,              VerifyFunctionStorage)                \
+    X(VERIFY_MODULE_STORAGE,                VerifyModuleStorage)                  \
+    X(VERIFY_NAMESPACE_STORAGE,             VerifyNamespaceStorage)               \
     X(VERIFY_FIELD_STORAGE,                 VerifyFieldStorage)                   \
     X(VERIFY_STATIC_FIELD_STORAGE,          VerifyStaticFieldStorage)             \
     X(VERIFY_VARIABLE_STORAGE,              VerifyVariableStorage)                \
@@ -108,6 +112,9 @@
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
     X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
+    X(VERIFY_MODULE_DESCRIPTOR,             VerifyModuleDescriptor)               \
+    X(VERIFY_NAMESPACE_DESCRIPTOR,          VerifyNamespaceDescriptor)            \
+    X(VERIFY_CLASS_DESCRIPTOR,              VerifyClassDescriptor)                \
     X(VERIFY_ENUM_DESCRIPTOR,               VerifyEnumDescriptor)                 \
     X(VERIFY_METHOD_NAME,                   VerifyMethodName)                     \
     X(VERIFY_STATIC_METHOD_NAME,            VerifyStaticMethodName)               \
@@ -152,6 +159,8 @@
     X(ANI_FLOAT,                        Float,                     ani_float)                \
     X(ANI_DOUBLE,                       Double,                    ani_double)               \
     X(ANI_REF,                          Ref,                       VRef *)                   \
+    X(FUNCTIONAL_OBJECT_ARGV,           FunctionalObjectArgv,      AniFunctionalObjectArgv *) \
+    X(ANI_FN_OBJECT,                    FnObject,                  VFnObject *)              \
     X(ANI_MODULE,                       Module,                    VModule *)                \
     X(ANI_NAMESPACE,                    Namespace,                 VNamespace *)             \
     X(ANI_TYPE,                         Type,                      VType *)                  \
@@ -178,6 +187,8 @@
     X(ANI_METHOD_STORAGE,               MethodStorage,             VMethod **)               \
     X(ANI_STATIC_METHOD_STORAGE,        StaticMethodStorage,       VStaticMethod **)         \
     X(ANI_FUNCTION_STORAGE,             FunctionStorage,           VFunction **)             \
+    X(ANI_MODULE_STORAGE,               ModuleStorage,             VModule **)               \
+    X(ANI_NAMESPACE_STORAGE,            NamespaceStorage,          VNamespace **)            \
     X(ANI_FIELD_STORAGE,                FieldStorage,              VField **)                \
     X(ANI_STATIC_FIELD_STORAGE,         StaticFieldStorage,        VStaticField **)          \
     X(ANI_VARIABLE_STORAGE,             VariableStorage,           VVariable **)             \
@@ -283,6 +294,7 @@ class VVm;
 class VEnv;
 
 class VRef;
+class VFnObject;
 class VModule;
 class VNamespace;
 class VObject;
@@ -318,6 +330,13 @@ public:
         const ani_value *vargs;  // NOTE: Reblace ani_value by VValue
         PandaSmallVector<ani_value> argsStorage;
         bool isVaArgs;
+    };
+
+    struct AniFunctionalObjectArgv {
+        ani_size argc {};
+        ani_ref *argv {};
+        PandaVector<ani_ref> releaseArgvStorage {};
+        ani_ref *releaseArgv {};
     };
 
     // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -360,6 +379,21 @@ public:
     static ANIArg MakeForFunctionStorage(VFunction **functionStorage, std::string_view name)
     {
         return ANIArg(ArgValueByFunctionStorage(functionStorage), name, Action::VERIFY_FUNCTION_STORAGE);
+    }
+
+    static ANIArg MakeForModuleStorage(VModule **moduleStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByModuleStorage(moduleStorage), name, Action::VERIFY_MODULE_STORAGE);
+    }
+
+    static ANIArg MakeForNamespaceStorage(VNamespace **namespaceStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByNamespaceStorage(namespaceStorage), name, Action::VERIFY_NAMESPACE_STORAGE);
+    }
+
+    static ANIArg MakeForClassStorage(VClass **classStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByClassStorage(classStorage), name, Action::VERIFY_CLASS_STORAGE);
     }
 
     static ANIArg MakeForFieldStorage(VField **fieldStorage, std::string_view name)
@@ -425,6 +459,16 @@ public:
         return ANIArg(ArgValueByWRef(wref), name, Action::VERIFY_WREF);
     }
 
+    static ANIArg MakeForFunctionalObject(VFnObject *vfnObject, std::string_view name)
+    {
+        return ANIArg(ArgValueByFnObject(vfnObject), name, Action::VERIFY_FUNCTIONAL_OBJECT);
+    }
+
+    static ANIArg MakeForFunctionalObjectArgv(AniFunctionalObjectArgv *args, std::string_view name)
+    {
+        return ANIArg(ArgValueByFunctionalObjectArgv(args), name, Action::VERIFY_FUNCTIONAL_OBJECT_ARGV);
+    }
+
     static ANIArg MakeForClass(VClass *vclass, std::string_view name)
     {
         return ANIArg(ArgValueByClass(vclass), name, Action::VERIFY_CLASS);
@@ -458,6 +502,21 @@ public:
     static ANIArg MakeForUTF8String(const char *ptr, std::string_view name)
     {
         return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_UTF8_STRING);
+    }
+
+    static ANIArg MakeForModuleDescriptor(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_MODULE_DESCRIPTOR);
+    }
+
+    static ANIArg MakeForNamespaceDescriptor(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_NAMESPACE_DESCRIPTOR);
+    }
+
+    static ANIArg MakeForClassDescriptor(const char *ptr, std::string_view name)
+    {
+        return ANIArg(ArgValueByUTF8String(ptr), name, Action::VERIFY_CLASS_DESCRIPTOR);
     }
 
     static ANIArg MakeForEnumDescriptor(const char *ptr, std::string_view name)
@@ -882,11 +941,6 @@ public:
     static ANIArg MakeForTypeStorage(VType **valueStorage, std::string_view name)
     {
         return ANIArg(ArgValueByTypeStorage(valueStorage), name, Action::VERIFY_TYPE_STORAGE);
-    }
-
-    static ANIArg MakeForClassStorage(VClass **valueStorage, std::string_view name)
-    {
-        return ANIArg(ArgValueByClassStorage(valueStorage), name, Action::VERIFY_CLASS_STORAGE);
     }
 
     static ANIArg MakeForPromiseStorage(VObject **valueStorage, std::string_view name)

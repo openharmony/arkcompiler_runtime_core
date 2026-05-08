@@ -358,7 +358,14 @@ NO_UB_SANITIZE static ani_status Type_IsAssignableFrom(VEnv *venv, VType *vfromT
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status FindModule(VEnv *venv, const char *moduleDescriptor, VModule **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForModuleDescriptor(moduleDescriptor, "module_descriptor"),
+        ANIArg::MakeForModuleStorage(vresult, "result"),
+    );
+    // clang-format on
+
     ani_module result {};
     ani_status status = GetInteractionAPI(venv)->FindModule(venv->GetEnv(), moduleDescriptor, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -368,7 +375,14 @@ NO_UB_SANITIZE static ani_status FindModule(VEnv *venv, const char *moduleDescri
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status FindNamespace(VEnv *venv, const char *namespaceDescriptor, VNamespace **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForNamespaceDescriptor(namespaceDescriptor, "namespace_descriptor"),
+        ANIArg::MakeForNamespaceStorage(vresult, "result"),
+    );
+    // clang-format on
+
     ani_namespace result {};
     ani_status status = GetInteractionAPI(venv)->FindNamespace(venv->GetEnv(), namespaceDescriptor, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -378,7 +392,14 @@ NO_UB_SANITIZE static ani_status FindNamespace(VEnv *venv, const char *namespace
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status FindClass(VEnv *venv, const char *classDescriptor, VClass **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForClassDescriptor(classDescriptor, "class_descriptor"),
+        ANIArg::MakeForClassStorage(vresult, "result"),
+    );
+    // clang-format on
+
     ani_class result {};
     ani_status status = GetInteractionAPI(venv)->FindClass(venv->GetEnv(), classDescriptor, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -1473,11 +1494,25 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(VEnv *venv, VEnumItem *venumI
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FunctionalObject_Call(VEnv *venv, ani_fn_object fn, ani_size argc, ani_ref *argv,
-                                                       ani_ref *result)
+NO_UB_SANITIZE static ani_status FunctionalObject_Call(VEnv *venv, VFnObject *vfnObject, ani_size argc, ani_ref *argv,
+                                                       VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->FunctionalObject_Call(venv->GetEnv(), fn, argc, argv, result);
+    ANIArg::AniFunctionalObjectArgv argvArgs {argc, argv, {}, argv};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForFunctionalObject(vfnObject, "fn"),
+        ANIArg::MakeForSize(argc, "argc"),
+        ANIArg::MakeForFunctionalObjectArgv(&argvArgs, "argv"),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status = GetInteractionAPI(venv)->FunctionalObject_Call(venv->GetEnv(), vfnObject->GetRef(), argc,
+                                                                       argvArgs.releaseArgv, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
