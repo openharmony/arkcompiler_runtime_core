@@ -13,6 +13,10 @@
 
 type: workflow
 workflow-name: panda-vs-node
+description: >-
+    Compiles and runs ETS tests with Ark interpreter, 
+    then runs them with Node.js, and compares the outputs.
+    Only works with `ets-ts-subset` test suite.
 parameters:
     # common
     build: ${PANDA_BUILD}

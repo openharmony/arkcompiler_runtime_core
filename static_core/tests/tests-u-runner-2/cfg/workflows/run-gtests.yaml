@@ -14,6 +14,7 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: run-gtests
+description: "Compiles ETS test sources and then executes the gtest parts of tests"
 workflow-kind: gtest
 parameters:
     build: ${PANDA_BUILD}

@@ -19,6 +19,7 @@ list-roots:
     - root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts
       name: ets-cts
 generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.EtsTemplatesGenerator
+workflows: [declgen-ets2ts]
 
 parameters:
     extension: ets

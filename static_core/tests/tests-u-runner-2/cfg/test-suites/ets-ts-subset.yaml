@@ -15,6 +15,7 @@ type: test-suite
 suite-name: ets-ts-subset
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets_ts_subset
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-ts-subset
+workflows: [panda-vs-node]
 
 parameters:
     work-dir: ${WORK_DIR}/${suite-name}

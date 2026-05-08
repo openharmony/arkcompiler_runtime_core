@@ -14,7 +14,15 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: runtime
-description: "Runs Ark runtime for the prepared ABC test artifacts"
+description: |-
+    Runs Ark runtime for the prepared ABC test artifacts.
+    Make sure that the required ABC files are prepared, for example by running es2panda-verifier workflow.
+    ```
+        runner.sh es2panda-verifier <test-suite> <options>
+        runner.sh ark <the same test-suite> <options>
+    ```
+    It's recommended to use different `--report-dir` options for both workflows to have separate logs for each workflow.
+independent: false
 parameters:
     ark-timeout: 180
     build: ${PANDA_BUILD}

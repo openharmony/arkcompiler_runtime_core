@@ -18,6 +18,7 @@ list-roots:
     - ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/declgenets2ts/ets-func-tests
     - root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-func-tests
       name: ets-func-tests
+workflows: [declgen-ets2ts]
 
 parameters:
     extension: ets

@@ -20,6 +20,7 @@ list-roots:
     - root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts-7.0
       name: ets-cts-7.0
 generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.EtsTemplatesGenerator
+workflows: [panda-bin-compat]
 
 parameters:
     extension: ets

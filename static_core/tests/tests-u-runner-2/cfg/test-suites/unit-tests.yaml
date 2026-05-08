@@ -16,6 +16,22 @@ type: test-suite
 suite-name: unit-tests
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/unit-tests
+workflows:
+    - ark
+    - ark-aot
+    - ark-aot-pgo
+    - es2panda-verifier
+    - hybrid-ark
+    - hybrid-es2panda-verifier
+    - hybrid-panda-int
+    - hybrid-panda-jit
+    - panda-all
+    - panda-aot
+    - panda-aot-pgo
+    - panda-int
+    - panda-jit
+    - panda-jit-repeats
+
 
 parameters:
     extension: ets
