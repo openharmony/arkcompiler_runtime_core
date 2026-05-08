@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,25 +13,42 @@
 
 ---
 cases:
+#0
   - decl: |-
       class OneArg<T extends SomeType> {}
       class A extends SomeType {}
     use: |-
       let a = new OneArg<A>()
+#1
   - decl: |-
       class TwoArgs<T extends SomeType, U extends OtherType> {}
       class A extends SomeType {}
-      class B implements OtherType {} 
+      class B implements OtherType {}
     use: |-
       let a = new TwoArgs<A, B>()
+#2
   - decl: |-
       function oneArg<T extends SomeType>() {}
       class A extends SomeType {}
     use: |-
       oneArg<A>()
+#3
   - decl: |-
       function twoArgs<T extends SomeType, U extends OtherType>() {}
       class A extends SomeType {}
-      class B implements OtherType {} 
+      class B implements OtherType {}
     use: |-
       twoArgs<A, B>()
+#4
+  - decl: |-
+      class Base<T> { value: T }
+    use: |-
+      let b: Base<never>
+#5
+  - decl: |-
+      function id<T>(x: T): T { return x };
+      function foo(): never {
+          throw new Error('Never')
+      }
+    use: |-
+      let r = id<never>(foo())
