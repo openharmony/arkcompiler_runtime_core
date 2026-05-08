@@ -22,8 +22,8 @@ assert: >-
         𝑚′ is otherwise accessible to code in I.
 tags: [negative, compile-only]
 expected_out: >-
-    Semantic error ESE985118: Class member foo with type Int in B cannot implement foo with type Int property from interface A
-    because the implementing return type is not compatible with the interface return type.
+    Semantic error ESE873275: Class member foo with type Int in B cannot override foo with type Int field from class A
+    because the overridden method has weaker access privileges.
 ---*/
 
 interface A {
