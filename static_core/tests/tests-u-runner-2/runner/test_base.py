@@ -40,6 +40,7 @@ from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
 from runner.runner_types.step_report import StepReport
 from runner.runner_types.test_env import TestEnv
+from runner.suites.gtest_file import GTestFile
 from runner.utils import ExpectedField
 
 _LOGGER = Log.get_logger(__file__)
@@ -342,9 +343,11 @@ class GTest(Test):
 
     def __init__(self, test_env: TestEnv, test_path: Path, params: IOptions, test_id: str, precompiled_tests: bool):
         Test.__init__(self, test_env, test_path, params, test_id)
-        self.path = self.path.parent
-        gtest_class, gtest_name = self.get_test_names()
-        self.gtest_class = gtest_class
-        self.gtest_name = gtest_name
+        gtest = GTestFile.parse_from_path(test_id)
+        if gtest is None:
+            raise ValueError(f"Gtest path is None: {test_path}")
+        self.gtest_class = gtest.get_test_case_name()
+        self.gtest_name = gtest.get_test_name()
+        self.path = test_path.joinpath(gtest.test_file_name)
         self.build_dir = Path(cast(str, self.test_env.config.workflow.get_parameter("build")))
         self.precompiled_tests = precompiled_tests
