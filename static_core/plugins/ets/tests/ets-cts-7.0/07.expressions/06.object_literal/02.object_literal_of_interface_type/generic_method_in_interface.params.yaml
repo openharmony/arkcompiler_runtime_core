@@ -1,0 +1,168 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 1: Generic Method in Interface + Object Literal
+cases:
+  - desc: |-
+      Gap 1a. Basic generic method.
+    decl: |-
+      interface Checker {
+          hasValue<T>(): boolean
+      }
+    call: |-
+      let c: Checker = {
+          hasValue<T>(): boolean { return true }
+      }
+      arktest.assertTrue(c.hasValue<int>())
+      arktest.assertTrue(c.hasValue<string>())
+
+  - desc: |-
+      Gap 1b. Generic method that uses T in signature.
+    decl: |-
+      interface Transformer {
+          transform<T>(value: T): T
+      }
+    call: |-
+      let t: Transformer = {
+          transform<T>(value: T): T { return value }
+      }
+      arktest.assertEQ(t.transform<int>(42), 42)
+      arktest.assertEQ(t.transform<string>('hello'), 'hello')
+
+  - desc: |-
+      Gap 1c. Generic method with concrete class constraint.
+    decl: |-
+      class Base {
+          name: string = ''
+      }
+      
+      class Derived extends Base {
+          id: int = 0
+      }
+
+      interface Processor {
+          process<T extends Base>(item: T): string 
+      }
+    call: |-
+      let p: Processor = {
+          process<T extends Base>(item: T): string { return item.name }
+      }
+      let d = new Derived()
+      d.name = 'test'
+      arktest.assertEQ(p.process<Derived>(d), 'test')
+
+  - desc: |-
+      Gap 1d. Generic method with default type parameter.
+    decl: |-
+      interface Builder {
+          build<T = int>(value: T): T 
+      }
+    call: |-
+      let b: Builder = {
+          build<T = int>(value: T): T { return value }
+      }
+      arktest.assertEQ(b.build(2), 2)
+      arktest.assertEQ(b.build<string>('test'), 'test')
+
+  - desc: |-
+      Gap 1e. Generic method with multiple type parameters.
+    decl: |-
+      interface Mapper {
+          map<K, V>(key: K, value: V): string
+      }
+    call: |-
+      let m: Mapper = {
+          map<K, V>(key: K, value: V): string { return '' + key + ': ' + value }
+      }
+      arktest.assertEQ(m.map<string, int>('age', 25), 'age: 25')
+
+  - desc: |-
+      Gap 1f. Multiple generic methods in one interface.
+    decl: |-
+      interface Codec {
+          encode<T>(value: T): string
+          decode<T>(raw: string): T
+      }
+    call: |-
+      let c: Codec = {
+          encode<T>(value: T): string {
+              return value as string
+          },
+          decode<T>(raw: string): T {
+              return raw as T
+          }
+      }
+      arktest.assertEQ(c.encode<string>('test'), 'test')
+      arktest.assertEQ(c.decode<string>('test'), 'test')
+
+  - desc: |-
+      Gap 1g. Generic methods with union type constraint.
+    decl: |-
+      class Cat {
+          sound(): string { return 'meow' }
+      }
+
+      class Dog {
+          sound(): string { return 'woof' }
+      }
+
+      interface Greeter {
+          greet<T extends Cat | Dog>(animal: T): string
+      }
+    call: |-
+      let g: Greeter = {
+          greet<T extends Cat | Dog>(animal: T): string {
+              return animal.sound()
+          }
+      }
+      arktest.assertEQ(g.greet<Cat>(new Cat()), 'meow')
+      arktest.assertEQ(g.greet<Dog>(new Dog()), 'woof')
+
+  - desc: |-
+      Gap 1h. Generic method with generic type in constraint.
+    decl: |-
+      interface Boxed<T> {
+          value: T
+      }
+
+      class BoxedImpl<T> implements Boxed<T> {
+          value: T
+          constructor(v: T) { this.value = v }
+      }
+
+      interface Unwrapper {
+          unwrap<T, B extends Boxed<T>>(boxed: B): T
+      }
+    call: |-
+      let u: Unwrapper = {
+          unwrap<T, B extends Boxed<T>>(boxed: B): T {
+              return boxed.value
+          }
+      }
+      let b = new BoxedImpl<int>(42)
+      arktest.assertEQ(u.unwrap<int, BoxedImpl<int>>(b), 42)
+
+  - desc: |-
+      Gap 1i. Generic method with dependent type parameters.
+    decl: |-
+      interface Caster {
+          cast<T, S extends T>(value: S): T
+      }
+    call: |-
+      let c: Caster = {
+          cast<T, S extends T>(value: S): T {
+              return value
+          }
+      }
+      arktest.assertTrue(c.cast<Object, String>('hello') instanceof Object)

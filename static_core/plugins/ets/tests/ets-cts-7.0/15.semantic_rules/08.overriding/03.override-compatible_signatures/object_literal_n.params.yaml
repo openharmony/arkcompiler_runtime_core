@@ -1,0 +1,90 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 4.Override-Compatible Signatures in Generic Context 
+#                  with object literal creation (negative cases)
+cases:
+  - desc: |-
+      Gap 4k. Negative. Contravariant array parameter.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Collector<T extends Base> {
+          collect(items: T[]): int
+      }
+    call: |-
+      let c: Collector<Derived> = {
+          collect(items: Base[]): int {
+              return items.length
+          }
+      }
+    expected_out: "Semantic error ESE0319: Type '(p1: Array<Base>) => Int' is not compatible with type '(items: Array<Derived>) => Int' at property 'collect'"
+
+  - desc: |-
+      Gap 4l. Negative. Contravariant tuple parameter.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface PairHandler<T extends Base> {
+          handlePair(pair: [T, T]): void
+      }
+    call: |-
+      let h: PairHandler<Derived> = {
+          handlePair(pair: [Base, Base]): void {}
+      }
+    expected_out: "Semantic error ESE0319: Type '(p1: [Base, Base]) => undefined' is not compatible with type '(pair: [Derived, Derived]) => undefined' at property 'handlePair'"
+
+  - desc: |-
+      Gap 4n. Negative. Covariant parameter.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Sink<T extends Base> {
+          consume(value: T): void
+      }
+    call: |-
+      let s: Sink<Base> = {
+          consume(value: Derived): void {}
+      }
+    expected_out: "Semantic error ESE0319: Type '(p1: Derived) => undefined' is not compatible with type '(value: Base) => undefined' at property 'consume'"
+
+  - desc: |-
+      Gap 4o. Negative. Contravariant return.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Source<T extends Base> {
+          produce(): T
+      }
+    call: |-
+      let s: Source<Derived> = {
+          produce(): Base { return new Base() }
+      }
+    expected_out: "Semantic error ESE0319: Type '() => Base' is not compatible with type '() => Derived' at property 'produce'"
+
+  - desc: |-
+      Gap 4p. Negative. Wrong number of type parameters.
+    decl: |-
+      interface Identity {
+          id<T>(value: T): T
+      }
+    call: |-
+      let i: Identity = {
+          id<T, U>(value: T): T { return value }
+      }
+    expected_out: "Semantic error ESE0319: Type '<T, U>(p1: T) => T' is not compatible with type '<T>(value: T) => T' at property 'id'"

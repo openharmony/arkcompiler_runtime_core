@@ -1,0 +1,141 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 2: Generic Interface + Methods in Object Literal
+cases:
+  - desc: |-
+      Gap 2a. Single method using interface type parameter.
+    decl: |-
+      interface Container<T> {
+          get value(): T
+          set value(v: T)
+      }
+    call: |-
+      let c: Container<int> = {
+          value: 1
+      }
+      c.value = 7
+      arktest.assertEQ(c.value, 7)
+
+  - desc: |-
+      Gap 2b. Generic interface with multiple type parameters.
+    decl: |-
+      interface Pair<K, V> {
+          key(): K
+          val(): V
+      }
+    call: |-
+      let p: Pair<string, int> = {
+          key(): string { return 'age' },
+          val(): int { return 25 }
+      }
+      arktest.assertEQ(p.key(), 'age')
+      arktest.assertEQ(p.val(), 25)
+
+  - desc: |-
+      Gap 2c. Generic interface with concrete class constraints.
+    decl: |-
+      class Animal {
+          name: string = ''
+      }
+
+      interface Shelter<T extends Animal> {
+          adopt(): T
+      }
+    call: |-
+      let s: Shelter<Animal> = {
+          adopt(): Animal {
+              let a = new Animal()
+              a.name = 'Rex'
+              return a
+          }
+      }
+      arktest.assertEQ(s.adopt().name, 'Rex')
+
+  - desc: |-
+      Gap 2d. Generic interface with type parameter default.
+    decl: |-
+      interface Wrapper<T = string> {
+          wrap(value: T): string
+      }
+    call: |-
+      let w: Wrapper = {
+          wrap(value: string): string {
+              return '[' + value + ']'
+          }
+      }
+      arktest.assertEQ(w.wrap('hi'), '[hi]')
+
+  - desc: |-
+      Gap 2e. Generic interface with union type constraint.
+    decl: |-
+      class Circle { radius: double = 0.0 }
+
+      class Rect { width: double = 0.0 }
+
+      interface Measurer<T extends Circle | Rect> {
+          measure(shape: T): double
+      }
+    call: |-
+      let m: Measurer<Circle> = {
+          measure(shape: Circle): double {
+              return shape.radius
+          }
+      }
+      let c = new Circle()
+      c.radius = 2.4
+      arktest.assertEQ(m.measure(c), 2.4)
+
+  - desc: |-
+      Gap 2f. Generic interface with generic type in constraint.
+    decl: |-
+      interface MyComparable<T> {
+          compareTo(other: T): int
+      }
+
+      class MyInt implements MyComparable<MyInt> { 
+          value: int
+          constructor(v: int) { 
+              this.value = v 
+          }
+          override compareTo(other: MyInt): int {
+              return this.value - other.value
+          }
+      }
+
+      interface Sorter<T extends MyComparable<T>> {
+          max(a: T, b: T): T
+      }
+    call: |-
+      let s: Sorter<MyInt> = {
+          max(a: MyInt, b: MyInt): MyInt {
+              return a.compareTo(b) >= 0 ? a : b
+          }
+      }
+      arktest.assertEQ(s.max(new MyInt(1), new MyInt(4)).value, 4)
+
+  - desc: |-
+      Gap 2g. Generic interface with dependent type parameters.
+    decl: |-
+      interface Converter<T, S extends T> {
+          convert(value: S): T
+      }
+    call: |-
+      let c: Converter<Object, String> = {
+          convert(v: String): Object {
+              return v
+          }
+      }
+      arktest.assertTrue(c.convert('hello') instanceof Object)
+      
