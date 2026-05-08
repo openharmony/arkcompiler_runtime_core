@@ -109,8 +109,8 @@ void StackfulCoroutineManager::FinalizeGeneralWorkers(size_t howMany, Runtime *r
         ASSERT(co != nullptr);
         finWorker->AddRunnableCoroutine(co);
     }
-    entrypointParam.workerFinalizationEvent.Lock();
 
+    entrypointParam.workerFinalizationEvent.Lock();
     Await(&entrypointParam.workerFinalizationEvent);
 
     os::memory::LockHolder lh(workersLock_);

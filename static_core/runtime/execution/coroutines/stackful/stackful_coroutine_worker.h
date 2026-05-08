@@ -78,16 +78,6 @@ public:
         return loadFactor_;
     }
 
-    void DisableForCrossWorkersLaunch()
-    {
-        isDisabledForCrossWorkersLaunch_ = true;
-    }
-
-    bool IsDisabledForCrossWorkersLaunch() const
-    {
-        return isDisabledForCrossWorkersLaunch_;
-    }
-
     /**
      * @brief Adds a coroutine to the runnables queue. Any new incoming RUNNABLE coroutine should be added
      * via this interface! And vice versa: no intra-worker queue transitions should be done via this
@@ -248,13 +238,6 @@ private:
      */
     void EnsureCoroutineSwitchEnabled(Coroutine *coro);
 
-    /// @return true if current method is called from another worker instance
-    bool IsCrossWorkerCall()
-    {
-        ASSERT(Coroutine::GetCurrent() != nullptr);
-        return (this != Coroutine::GetCurrent()->GetWorker());
-    }
-
     void MigrateCoroutinesImpl(StackfulCoroutineWorker *to, size_t migrateCount) REQUIRES(runnablesLock_);
 
     /* events */
@@ -292,8 +275,6 @@ private:  // data members
 
     // the timestamp of the last coroutine context switch
     std::atomic<uint64_t> lastCtxSwitchTimeMillis_ = 0;
-
-    std::atomic<bool> isDisabledForCrossWorkersLaunch_ = false;
 
     /**
      * This counter is incremented on DisableCoroutineSwitch calls and decremented on EnableCoroutineSwitch calls.

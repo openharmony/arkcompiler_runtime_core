@@ -114,6 +114,10 @@ public:
 
     inline void SetSchedulerExecutionCtx(JobExecutionContext *executionCtx);
 
+    inline void DisableForCrossWorkersLaunch();
+
+    inline bool IsDisabledForCrossWorkersLaunch() const;
+
     /// @brief should be called by JobManager just before the worker become visible for others
     virtual void OnBeforeWorkerStartup(const CreatePluginObjFunc &createEtsObj);
 
@@ -133,6 +137,9 @@ public:
 
     /// @brief Update worker local object in execution context
     virtual void CacheLocalObjectsInExecutionCtx() {}
+
+    /// @return true if current method is called from another worker instance
+    bool IsCrossWorkerCall();
 
 private:
     /// should be called once the VM is ready to create managed objects in the managed heap
@@ -156,6 +163,8 @@ private:
 
     // worker thread execution context
     JobExecutionContext *schedulerExecutionCtx_ = nullptr;
+
+    std::atomic<bool> isDisabledForCrossWorkersLaunch_ = false;
 };
 
 }  // namespace ark

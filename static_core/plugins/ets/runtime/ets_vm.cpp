@@ -129,6 +129,17 @@ static CoroutineManagerConfig CreateCoroutineManagerConfig(const RuntimeOptions 
     return cfg;
 }
 
+static JobManagerConfig CreateJobManagerConfig(const RuntimeOptions &options)
+{
+    auto &taskPoolMode = options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    JobManagerConfig cfg {options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+                          options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+                          taskPoolMode == ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
+                              ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
+                              : 0};
+    return cfg;
+}
+
 /* static */
 bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
@@ -259,12 +270,13 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     fullGCLongTimeListener_ = allocator->New<FullGCLongTimeListener>();
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
-    auto cfg = CreateCoroutineManagerConfig(options);
     const auto &coroType = options.GetCoroutineImpl(langStr);
     if (coroType == "stackful") {
+        auto cfg = CreateCoroutineManagerConfig(options);
         jobManager_ = allocator->New<StackfulCoroutineManager>(cfg, EtsCoroutine::Create<Coroutine>);
     } else if (coroType == "stackless") {
-        jobManager_ = allocator->New<StacklessJobManager>(JobManagerConfig {}, EtsExecutionContextWrapper::Create);
+        auto cfg = CreateJobManagerConfig(options);
+        jobManager_ = allocator->New<StacklessJobManager>(cfg, EtsExecutionContextWrapper::Create);
     } else {
         UNREACHABLE();
     }

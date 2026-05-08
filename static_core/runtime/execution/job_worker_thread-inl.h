@@ -96,6 +96,16 @@ inline void JobWorkerThread::SetSchedulerExecutionCtx(JobExecutionContext *execu
     schedulerExecutionCtx_ = executionCtx;
 }
 
+inline void JobWorkerThread::DisableForCrossWorkersLaunch()
+{
+    isDisabledForCrossWorkersLaunch_ = true;
+}
+
+inline bool JobWorkerThread::IsDisabledForCrossWorkersLaunch() const
+{
+    return isDisabledForCrossWorkersLaunch_;
+}
+
 }  // namespace ark
 
 #endif  // PANDA_RUNTIME_EXECUTION_JOB_WORKER_THREAD_INL_H

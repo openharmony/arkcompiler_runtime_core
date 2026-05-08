@@ -16,6 +16,7 @@
 #define PANDA_RUNTIME_EXECUTION_STACKLESS_STACKLESS_JOB_WORKER_THREAD_H
 
 #include "runtime/execution/job_worker_thread.h"
+#include "runtime/execution/job_events.h"
 #include "runtime/execution/priority_queue.h"
 #include "runtime/include/mem/panda_containers.h"
 
@@ -73,6 +74,8 @@ public:
 
     void CacheLocalObjectsInExecutionCtx() override;
 
+    void CompleteAllAffinedJobs();
+
 private:
     void AttachExecutionContext(JobExecutionContext *executionCtx);
 
@@ -80,13 +83,15 @@ private:
 
     void ScheduleLoopBody();
 
+    Job *TakeNextJob() REQUIRES(runnablesLock_);
+
     bool ExecuteRunnableJob();
 
     void WaitForRunnables();
 
     void WaitForRunnablesImpl() REQUIRES(runnablesLock_);
 
-    void WaitForEvent(JobEvent *awaitee, bool executeJobs) RELEASE(awaitee);
+    void WaitForEvent(JobEvent *awaitee, bool executeJobs, bool checkFinalization) RELEASE(awaitee);
 
     void UpdateLoadFactor();
 
@@ -106,6 +111,8 @@ private:
 
     void UpdateMinExpirationTime(JobEvent *blocker);
 
+    void CheckJobsExecution();
+
 private:
     static constexpr uint64_t MAX_EXPIRATION_TIME = std::numeric_limits<uint64_t>::max();
 
@@ -124,6 +131,9 @@ private:
 
     /// the minimal expiration time of pending timer
     uint64_t minExpirationTime_ = MAX_EXPIRATION_TIME;
+
+    Job *finalizationJob_ = nullptr;
+    BlockingEvent allJobsAreExecutedEvt_;
 };
 
 }  // namespace ark

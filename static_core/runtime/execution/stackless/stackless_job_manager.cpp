@@ -38,8 +38,9 @@ StacklessJobManager::StacklessJobManager(const JobManagerConfig &config, JobExec
 void StacklessJobManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
     InitializeWorkerIdAllocator();
+    CalculateWorkerLimits();
     CreateMainExecutionContext(runtime, vm);
-    CreateGeneralWorkers(COMMON_WORKERS_COUNT, runtime, vm);
+    CreateGeneralWorkers(commonWorkersCount_ - 1, runtime, vm);  // 1 is for MAIN here
     LOG(DEBUG, EXECUTION) << "StacklessJobManager(): successfully created and activated " << GetExistingWorkersCount()
                           << " job execution contexts workers";
 }
@@ -139,6 +140,7 @@ LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
     auto [w, affinityMask] = ChooseWorkerForJob(params);
     if UNLIKELY (w == nullptr) {
         DestroyJob(job);
+        ThrowRuntimeException("Unable to launch job: no suitable worker was found");
         return LaunchResult::NO_SUITABLE_WORKER;
     }
     job->SetAffinityMask(affinityMask);
@@ -216,7 +218,25 @@ bool StacklessJobManager::DetachExclusiveWorker()
         LOG(DEBUG, EXECUTION) << "Trying to destroy not exclusive worker";
         return false;
     }
-    LOG(FATAL, EXECUTION) << "This API is not yet supported in the stackless mode";
+
+    {
+        os::memory::LockHolder lock(workersLock_);
+        eWorker->DisableForCrossWorkersLaunch();
+    }
+
+    eWorker->DestroyCallbackPoster();
+    eWorker->CompleteAllAffinedJobs();
+
+    eWorker->Deactivate();
+
+    CheckProgramCompletion();
+
+    eWorker->DestroyLocalStorage();
+
+    auto *eaExecCtx = eWorker->GetSchedulerExecutionCtx();
+    DestroyEntrypointlessExecCtx(eaExecCtx);
+
+    OnWorkerShutdown(eWorker);
     return true;
 }
 
@@ -244,22 +264,76 @@ void StacklessJobManager::CreateGeneralWorkers(size_t howMany, Runtime *runtime,
     }
 }
 
-void StacklessJobManager::FinalizeGeneralWorkers([[maybe_unused]] size_t howMany, [[maybe_unused]] Runtime *runtime,
+void StacklessJobManager::FinalizeGeneralWorkers(size_t howMany, [[maybe_unused]] Runtime *runtime,
                                                  [[maybe_unused]] PandaVM *vm)
 {
-    LOG(FATAL, EXECUTION) << "This API is not yet supported in the stackless mode";
+    struct EntrypointParam {
+        explicit EntrypointParam(size_t wCount, JobManager *jobMan) : wCount_(wCount), workerFinalizationEvent(jobMan)
+        {
+        }
+
+        // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+        const size_t wCount_;
+        BlockingEvent workerFinalizationEvent;
+        std::atomic<uint32_t> finalizedWorkersCount = 0;
+        // NOLINTEND(misc-non-private-member-variables-in-classes)
+    };
+
+    auto wCountBeforeFinalization = GetActiveWorkersCount();
+    ASSERT(wCountBeforeFinalization > howMany);
+
+    auto entrypointParam = EntrypointParam(howMany, this);
+    auto jobEntrypoint = [](void *param) {
+        auto *finalizee = static_cast<StacklessJobWorkerThread *>(JobExecutionContext::GetCurrent()->GetWorker());
+        finalizee->CompleteAllAffinedJobs();
+        finalizee->Deactivate();
+        auto *entryParams = reinterpret_cast<EntrypointParam *>(param);
+        // Atomic with relaxed order reason: synchronization is not required
+        if (entryParams->finalizedWorkersCount.fetch_add(1, std::memory_order_relaxed) == entryParams->wCount_ - 1) {
+            entryParams->workerFinalizationEvent.Happen();
+        }
+    };
+
+    for (auto i = 0U; i < howMany; i++) {
+        auto *finWorker = ChooseWorkerForFinalization();
+        auto epInfo = Job::NativeEntrypointInfo {jobEntrypoint, &entrypointParam};
+        auto *job =
+            CreateJob("[finalization job]", std::move(epInfo), JobPriority::CRITICAL_PRIORITY, Job::Type::FINALIZER);
+        ASSERT(job != nullptr);
+        finWorker->AddRunnableJob(job);
+    }
+
+    entrypointParam.workerFinalizationEvent.Lock();
+    GetCurrentWorker()->ExecuteJobsUntilHappened(&entrypointParam.workerFinalizationEvent);
+
+    os::memory::LockHolder lh(workersLock_);
+    while (activeWorkersCount_ != wCountBeforeFinalization - howMany) {
+        workersCv_.Wait(&workersLock_);
+    }
+    ASSERT(activeWorkersCount_ > 0);
+}
+
+StacklessJobWorkerThread *StacklessJobManager::ChooseWorkerForFinalization()
+{
+    os::memory::LockHolder lh(workersLock_);
+    auto finWorkerIt = std::find_if(workers_.begin(), workers_.end(), [](auto &&worker) {
+        return !worker->IsMainWorker() && !worker->IsDisabledForCrossWorkersLaunch() && !worker->InExclusiveMode();
+    });
+    ASSERT(finWorkerIt != workers_.end());
+    (*finWorkerIt)->DisableForCrossWorkersLaunch();
+    return *finWorkerIt;
 }
 
 void StacklessJobManager::PreZygoteFork()
 {
     WaitForMutatorJobsCompletion();
-    FinalizeGeneralWorkers(COMMON_WORKERS_COUNT - 1, Runtime::GetCurrent(), Runtime::GetCurrent()->GetPandaVM());
+    FinalizeGeneralWorkers(commonWorkersCount_ - 1, Runtime::GetCurrent(), Runtime::GetCurrent()->GetPandaVM());
 }
 
 void StacklessJobManager::PostZygoteFork()
 {
     Runtime *runtime = Runtime::GetCurrent();
-    CreateGeneralWorkers(COMMON_WORKERS_COUNT - 1, runtime, runtime->GetPandaVM());
+    CreateGeneralWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
 }
 
 void StacklessJobManager::OnWorkerStartup(JobWorkerThread *worker)
@@ -366,6 +440,42 @@ bool StacklessJobManager::EnumerateWorkersImpl([[maybe_unused]] const EnumerateW
     return true;
 }
 
+void StacklessJobManager::CalculateWorkerLimits()
+{
+    ASSERT(commonWorkersCount_ == 0);
+    ASSERT(exclusiveWorkersLimit_ == 0);
+
+    // 1 is for MAIN
+    size_t eWorkersLimit =
+        std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(GetConfig().exclusiveWorkersLimit_));
+
+    // add preallocated exclusive workers count
+    eWorkersLimit += GetConfig().preallocatedExclusiveWorkersCount_;
+
+    // create and activate workers
+    size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
+
+    // workaround for issue #21582
+    const size_t maxCommonWorkers =
+        std::max(AffinityMask::MAX_WORKERS_COUNT - eWorkersLimit, static_cast<size_t>(2ULL));
+
+    commonWorkersCount_ = (GetConfig().workersCount_ == JobManagerConfig::WORKERS_COUNT_AUTO)
+                              ? std::min(numberOfAvailableCores, maxCommonWorkers)
+                              : std::min(static_cast<size_t>(GetConfig().workersCount_), maxCommonWorkers);
+    if (GetConfig().workersCount_ == JobManagerConfig::WORKERS_COUNT_AUTO) {
+        LOG(DEBUG, COROUTINES) << "StacklessJobManager(): AUTO mode selected, will set number of coroutine "
+                                  "common workers to number of CPUs / 4, but not less than 2 and no more than "
+                               << maxCommonWorkers << " = " << commonWorkersCount_;
+    }
+    exclusiveWorkersLimit_ = std::min(AffinityMask::MAX_WORKERS_COUNT - commonWorkersCount_, eWorkersLimit);
+
+    ASSERT(commonWorkersCount_ > 0);
+    ASSERT(commonWorkersCount_ + exclusiveWorkersLimit_ <= AffinityMask::MAX_WORKERS_COUNT);
+
+    LOG(DEBUG, COROUTINES) << "StacklessJobManager(): EWorkers limit is set to " << exclusiveWorkersLimit_
+                           << ", when suggested " << eWorkersLimit;
+}
+
 void StacklessJobManager::CreateMainExecutionContext(Runtime *runtime, PandaVM *vm)
 {
     ASSERT(GetMainThread() == nullptr);
@@ -431,9 +541,11 @@ std::pair<StacklessJobWorkerThread *, AffinityMask> StacklessJobManager::ChooseW
         LOG(DEBUG, EXECUTION) << w->GetName() << ": LF = " << w->GetLoadFactor();
     }
 #endif
-    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers), [mask](auto *w) {
-        // NOTE(panferovi): shouldn't we restrict exclusive workers? + check if worker is disabled for launch?
-        return mask.IsWorkerAllowed(w->GetId());
+    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers), [this, mask](auto *w) {
+        bool isMasked = mask.IsWorkerAllowed(w->GetId());
+        auto isSameWorker = GetCurrentWorker() == w;
+        // NOTE(panferovi): shouldn't we restrict exclusive workers?
+        return isMasked && (isSameWorker || !w->IsDisabledForCrossWorkersLaunch());
     });
     if (suitableWorkers.empty()) {
         return {nullptr, AffinityMask::Empty()};
