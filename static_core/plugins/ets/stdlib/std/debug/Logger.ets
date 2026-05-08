@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,21 +15,23 @@
 
 package std.debug;
 
+import { AtomicBoolean } from "std/concurrency";
+
 export namespace StdDebug {
 
 export final class Logger {
-        private static LOG_ENABLED: boolean = false;
+        private static LOG_ENABLED: AtomicBoolean = new AtomicBoolean(false);
 
         public static enableLogging(): void {
-            Logger.LOG_ENABLED = true;
+            Logger.LOG_ENABLED.store(true);
         }
 
         public static disableLogging(): void {
-            Logger.LOG_ENABLED = false;
+            Logger.LOG_ENABLED.store(false);
         }
 
         public static log(m: String): void {
-            if (Logger.LOG_ENABLED) {
+            if (Logger.LOG_ENABLED.load()) {
                 console.println(m);
             }
         }
