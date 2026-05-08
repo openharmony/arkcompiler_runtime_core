@@ -151,7 +151,7 @@ cases:
         }
       }
     logic: |-
-      let input = 1;
+      let input: short = 1;
       arktest.assertEQ(unitedSwitch(input), '1');
   - desc: Test string and null union types.
     decl: |-
