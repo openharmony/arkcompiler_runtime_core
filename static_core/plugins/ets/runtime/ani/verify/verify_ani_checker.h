@@ -143,6 +143,8 @@
     X(VERIFY_FIXED_ARRAY_FLOAT_STORAGE,     VerifyFixedArrayFloatStorage)         \
     X(VERIFY_FIXED_ARRAY_DOUBLE_STORAGE,    VerifyFixedArrayDoubleStorage)        \
     X(VERIFY_RESOLVER_STORAGE,              VerifyResolverStorage)                \
+    X(VERIFY_ANY_REF,                       VerifyAnyRef)                         \
+    X(VERIFY_REF_CALL_ARGS,                 VerifyRefCallArgs)                    \
 
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
 #define ANI_ARG_TYPES_MAP                                                                    \
@@ -231,6 +233,7 @@
     X(ANI_FIXED_ARRAY_DOUBLE_STORAGE,   FixedArrayDoubleStorage,   VFixedArrayDouble **)     \
     X(ANI_RESOLVER,                     Resolver,                  VResolver *)              \
     X(ANI_RESOLVER_STORAGE,             ResolverStorage,           VResolver **)             \
+    X(ANI_REF_CALL_ARGS,                RefCallArgs,               VRefCallArgs *)           \
 
 // CC-OFFNXT(G.PRE.02-CPP) keep va_list consumption local while sharing switch logic
 #define READ_VALUE_FROM_VA_LIST(TYPE, VA_ARGS, VALUE, CLEANUP_ON_UNEXPECTED)             \
@@ -261,7 +264,7 @@
                     (VALUE).l = va_arg((VA_ARGS), uint32_t);                             \
                 }                                                                        \
                 break;                                                                   \
-            case panda_file::Type::TypeId::NOVALUE:                             \
+            case panda_file::Type::TypeId::NOVALUE:                                      \
                 [[fallthrough]];                                                         \
             default:                                                                     \
                 CLEANUP_ON_UNEXPECTED;                                                   \
@@ -295,6 +298,49 @@ class VEnv;
 
 class VRef;
 class VFnObject;
+
+class VRefCallArgs {
+public:
+    VRefCallArgs(ani_size argcIn, VRef **vargvIn) : argc_(argcIn), vargv_(vargvIn) {}
+
+    [[nodiscard]] ani_size GetArgc() const
+    {
+        return argc_;
+    }
+
+    [[nodiscard]] VRef **GetVargv() const
+    {
+        return vargv_;
+    }
+
+    [[nodiscard]] ani_ref *GetReleaseArgv() const
+    {
+        return releaseArgv_;
+    }
+
+    void ClearReleaseArgvState()
+    {
+        releaseArgvStorage_.clear();
+        releaseArgv_ = nullptr;
+    }
+
+    PandaVector<ani_ref> &MutableReleaseArgvStorage()
+    {
+        return releaseArgvStorage_;
+    }
+
+    void SetReleaseArgv(ani_ref *argv)
+    {
+        releaseArgv_ = argv;
+    }
+
+private:
+    ani_size argc_ {};
+    VRef **vargv_ {};
+    PandaVector<ani_ref> releaseArgvStorage_ {};
+    ani_ref *releaseArgv_ {};
+};
+
 class VModule;
 class VNamespace;
 class VObject;
@@ -432,6 +478,11 @@ public:
     static ANIArg MakeForRef(VRef *vref, std::string_view name)
     {
         return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_REF);
+    }
+
+    static ANIArg MakeForAnyRef(VRef *vref, std::string_view name)
+    {
+        return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_ANY_REF);
     }
 
     static ANIArg MakeForModule(VModule *vmodule, std::string_view name)
@@ -936,6 +987,11 @@ public:
     static ANIArg MakeForResolverStorage(VResolver **valueStorage, std::string_view name)
     {
         return ANIArg(ArgValueByResolverStorage(valueStorage), name, Action::VERIFY_RESOLVER_STORAGE);
+    }
+
+    static ANIArg MakeForRefCallArgs(VRefCallArgs *refCallArgs, std::string_view name)
+    {
+        return ANIArg(ArgValueByRefCallArgs(refCallArgs), name, Action::VERIFY_REF_CALL_ARGS);
     }
 
     static ANIArg MakeForTypeStorage(VType **valueStorage, std::string_view name)
