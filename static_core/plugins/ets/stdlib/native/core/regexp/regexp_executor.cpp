@@ -90,6 +90,19 @@ uint32_t EtsRegExp::GetExtraCompileFlags()
     return extraFlags;
 }
 
+void EtsRegExp::ThrowBadFlagsException(ani_env *env)
+{
+    ThrowNewError(env, "std.core.RuntimeError", "invalid regular expression flags");
+}
+
+void EtsRegExp::SetIfNotSet(bool &flag)
+{
+    if (flag) {
+        ThrowBadFlagsException(env_);
+    }
+    flag = true;
+}
+
 void EtsRegExp::SetUnicodeFlag(const char &chr)
 {
     if (chr == 'u') {
@@ -103,19 +116,6 @@ void EtsRegExp::SetUnicodeFlag(const char &chr)
         }
         flagVnicode_ = true;
     }
-}
-
-void EtsRegExp::ThrowBadFlagsException(ani_env *env)
-{
-    ThrowNewError(env, "std.core.RuntimeError", "invalid regular expression flags");
-}
-
-void EtsRegExp::SetIfNotSet(bool &flag)
-{
-    if (flag) {
-        ThrowBadFlagsException(env_);
-    }
-    flag = true;
 }
 
 void EtsRegExp::SetFlag(const char &chr)
@@ -150,6 +150,11 @@ void EtsRegExp::SetFlags(const std::string &flagsStr)
     for (const auto &c : flagsStr) {
         SetFlag(c);
     }
+}
+
+uint32_t EtsRegExp::GetMatchFlags() const
+{
+    return HasUnicodeOrUnicodeSetsFlag() ? PCRE2_NO_UTF_CHECK : 0U;
 }
 
 }  // namespace ark::ets::stdlib

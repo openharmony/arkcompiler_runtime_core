@@ -161,6 +161,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/entrypoints/ets_proxy_entrypoints.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_common.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_matchall.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_replace.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_split.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_executor.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_16.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_8.cpp

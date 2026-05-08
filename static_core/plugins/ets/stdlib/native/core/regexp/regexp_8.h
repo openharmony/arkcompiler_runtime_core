@@ -33,6 +33,7 @@ public:
                           int32_t &endIndex);
     static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
+    static bool HasCapturingGroups(Pcre2Obj re);
     static void ApplyGroupMeta(const PatternGroupMeta &groupMeta, RegExpExecResult &result);
     static void SanitizeGroupCaptureResults(const std::vector<bool> &countableGroups,
                                             const std::map<size_t, size_t> &parentGroups, RegExpExecResult &result);

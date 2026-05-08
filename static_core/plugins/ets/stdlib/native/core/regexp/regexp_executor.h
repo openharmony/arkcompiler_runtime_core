@@ -53,10 +53,12 @@ public:
         return re8_ != nullptr || re16_ != nullptr;
     }
 
-    bool HasUnicodeFlag() const
+    bool HasUnicodeOrUnicodeSetsFlag() const
     {
         return flagUnicode_ || flagVnicode_;
     }
+
+    uint32_t GetMatchFlags() const;
 
     bool IsGlobal() const
     {

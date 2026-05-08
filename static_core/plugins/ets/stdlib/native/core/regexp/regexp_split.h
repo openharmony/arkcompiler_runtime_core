@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_INIT_NATIVE_METHODS_H
-#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_INIT_NATIVE_METHODS_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_REGEXP_REGEXP_SPLIT_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_REGEXP_REGEXP_SPLIT_H
 
 #include <ani.h>
 
 namespace ark::ets::stdlib {
 
-ani_status InitNativeMethods(ani_env *env);
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
+ani_array SplitNativeImpl(ani_env *env, ani_object regexp, ani_string pattern, ani_string flags, ani_string str,
+                          ani_int patternSize, ani_int strSize, ani_long limit, ani_boolean unicodeMatching,
+                          ani_boolean requiresUtf16Execution);
 
 }  // namespace ark::ets::stdlib
 
-#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_INIT_NATIVE_METHODS_H
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_REGEXP_REGEXP_SPLIT_H

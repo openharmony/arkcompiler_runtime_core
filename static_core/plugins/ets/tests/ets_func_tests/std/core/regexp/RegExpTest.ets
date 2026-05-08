@@ -20,6 +20,7 @@ function main(): int {
     suite.addTest('Alternation exec patterns', testAlternationExecPatterns);
     suite.addTest('Emoji replacement modes', testEmojiReplacementModes);
     suite.addTest('String replacement variants', testStringReplacementVariants);
+    suite.addTest('Literal replace fast path', testLiteralReplaceFastPath);
     suite.addTest('ReplaceAll capture groups', testReplaceAllGroupCallbacks);
 
     // Core pattern coverage
@@ -117,15 +118,31 @@ function testStringReplacementVariants(): void {
     const replaceAll = new RegExp("[Cz]", "g");
     const captureFirst = new RegExp("([Cz])");
     const captureAll = new RegExp("([Cz])", "g");
+    const emptyGlobal = new RegExp("(?:)", "g");
+    const emptyUnicodeGlobal = new RegExp("(?:)", "gu");
 
     arktest.assertEQ(haystack.replace(replaceFirst, "."), "ab.defgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgz");
     arktest.assertEQ(haystack.replace(replaceAll, "."), "ab.defg.ab.defg.ab.defg.ab.defg.ab.defg.ab.defg.ab.defg.ab.defg.");
     arktest.assertEQ(haystack.replace(replaceAll, "xyz"), "abxyzdefgxyzabxyzdefgxyzabxyzdefgxyzabxyzdefgxyzabxyzdefgxyzabxyzdefgxyzabxyzdefgxyzabxyzdefgxyz");
     arktest.assertEQ(haystack.replace(replaceFirst, "xyz"), "abxyzdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgz");
+    arktest.assertEQ("ab".replace(emptyGlobal, "."), ".a.b.");
+    arktest.assertEQ("😀".replace(emptyUnicodeGlobal, "."), ".😀.");
     arktest.assertEQ(haystack.replace(captureFirst, "x$1yz"), "abxCyzdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgzabCdefgz");
     arktest.assertEQ(haystack.replace(captureAll, "x$1yz"), "abxCyzdefgxzyzabxCyzdefgxzyzabxCyzdefgxzyzabxCyzdefgxzyzabxCyzdefgxzyzabxCyzdefgxzyzabxCyzdefgxzyzabxCyzdefgxzyz");
     arktest.assertEQ(haystack.replace(captureFirst, (match: string) => match), haystack);
     arktest.assertEQ(haystack.replace(captureAll, (match: string) => match), haystack);
+}
+
+function testLiteralReplaceFastPath(): void {
+    const globalReplace = new RegExp("a", "g");
+    arktest.assertEQ("aaa".replace(globalReplace, "b"), "bbb");
+    arktest.assertEQ(globalReplace.lastIndex, 3);
+
+    arktest.assertEQ("abc".replace(new RegExp("b"), "X"), "aXc");
+    arktest.assertEQ("abc".replace(new RegExp("d", "g"), "X"), "abc");
+    arktest.assertEQ("abc".replace(new RegExp("(?:)", "g"), "X"), "XaXbXcX");
+    arktest.assertEQ("a😀b".replace(new RegExp("😀", "gu"), "X"), "aXb");
+    arktest.assertEQ("a$b".replace(new RegExp("a"), "X"), "X$b");
 }
 
 function testReplaceAllGroupCallbacks(): void {
@@ -376,10 +393,10 @@ function testReplaceCachingPreservesLastIndex(): void {
     arktest.assertEQ(replaceFirst.lastIndex, 0);
 
     replaced = input.replace(replaceAll, "xyz");
-    arktest.assertEQ(replaceAll.lastIndex, 0);
+    arktest.assertEQ(replaceAll.lastIndex, 24);
     cached = input.replace(replaceAll, "xyz");
     arktest.assertTrue(replaced === cached);
-    arktest.assertEQ(replaceAll.lastIndex, 0);
+    arktest.assertEQ(replaceAll.lastIndex, 24);
 
     replaced = input.replace(captureFirst, "x$1yz");
     arktest.assertEQ(captureFirst.lastIndex, 0);
@@ -427,6 +444,7 @@ function testSplitSearchAndMatchStateBehavior(): void {
 
     sticky.lastIndex = 1;
     arktest.assertEQ(splitInput.split(sticky).toString(), 'a,b,c');
+    arktest.assertEQ(sticky.split(splitInput, undefined).toString(), 'a,b,c');
 
     sticky.lastIndex = -1;
     arktest.assertEQ(splitInput.split(sticky).toString(), 'a,b,c');

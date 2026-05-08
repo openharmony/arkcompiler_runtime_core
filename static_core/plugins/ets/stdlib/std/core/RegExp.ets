@@ -447,38 +447,35 @@ function toMatchArray(match: RegExpExecArray): RegExpMatchArray {
     return matchArray
 }
 
-class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
-    private regexp: RegExp
+class PrecomputedMatchAllIterator implements IterableIterator<RegExpMatchArray> {
+    private results: RegExpMatchArray[]
     private string: String
-    private returned: boolean
+    private hasIndices: boolean
+    private index_: int = 0
 
-    constructor(regexp: RegExp, string: String) {
-        this.regexp = regexp
+    constructor(results: RegExpMatchArray[], string: String, hasIndices: boolean) {
+        this.results = results
         this.string = string
-        this.returned = false
+        this.hasIndices = hasIndices
     }
 
     override next(): IteratorResult<RegExpMatchArray> {
-        if (this.returned) {
-            return new IteratorResult<RegExpMatchArray>();
-        }
-        let match = this.regexp.exec(this.string)
-        if (match == null) {
-            this.returned = true;
+        if (this.index_ >= this.results.length) {
             return new IteratorResult<RegExpMatchArray>()
         }
-        let matchArray = toMatchArray(match)
-        let matchStr = matchArray.$_get(0)
-        if (matchStr == "") {
-            this.regexp.lastIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
-        }
-        return new IteratorResult<RegExpMatchArray>(matchArray)
+        let result = this.results[this.index_]
+        this.index_++
+        result.input = this.string
+        result.postExecProcessing(result, this.string, result.index!, this.hasIndices)
+        return new IteratorResult<RegExpMatchArray>(result)
     }
 
     override $_iterator(): IterableIterator<RegExpMatchArray> {
         return this
     }
 }
+
+const DEFAULT_SPLIT_LIMIT: long = Int.MAX_VALUE.toLong()
 
 class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     private regexp: RegExp
@@ -686,8 +683,20 @@ export class RegExp extends Object {
     private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
         lastIndex: int, requiresUtf16Execution: boolean): RegExpMatchArray;
 
+    private native matchAllNativeImpl(pattern: String, flags: String, str: String, patternLength: int,
+        strLength: int, lastIndex: int, requiresUtf16Execution: boolean): RegExpMatchArray[];
+
     private native testImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
         lastIndex: int, requiresUtf16Execution: boolean): boolean;
+
+    private native replaceNativeImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
+        lastIndex: int, requiresUtf16Execution: boolean): RegExpExecArray[];
+
+    private native replaceLiteralNativeImpl(pattern: String, flags: String, str: String, replaceValue: String,
+        patternLength: int, strLength: int, lastIndex: int, requiresUtf16Execution: boolean): String;
+
+    private native splitNativeImpl(pattern: String, flags: String, str: String, patternLength: int,
+        strLength: int, limit: long, unicodeMatching: boolean, requiresUtf16Execution: boolean): String[];
 
     /**
      * Executes a match search on the string starting from the specified index.
@@ -780,46 +789,24 @@ export class RegExp extends Object {
         if (this.global) {
             this.lastIndex = 0
         }
-        let results = new Array<RegExpExecArray>()
-        let done = false
-        while (!done) {
-            let result = this.exec(str)
-            if (result == null) {
-                break;
-            }
-            results.push(result)
-            if (!this.global) {
-                break;
-            }
-            let matchStr = result.$_get(0)
-            if (matchStr == "") {
-                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
-            }
+        // Conservative check: '$' only disables the literal fast path; semantics stay in fallback.
+        if (replaceValue.indexOf(c'$') == -1) {
+            return this.replaceLiteralNativeImpl(this.pattern_, this.flags_, str, replaceValue, this.pattern_.length,
+                str.length, this.lastIndex, this.requiresUtf16Execution_)
         }
-        let lengthS = str.getLength()
-        let accumulatedResult = new StringBuilder()
-        let nextSourcePosition = 0
-        for (let i = 0; i < results.length; ++i) {
-            let result = results.at(i)!;
-            let nCaptures = result.length;
-            let matched = result.$_get(0)!;
-            let matchLength = matched.getLength();
-            let position = max(min(result.index, lengthS), 0);
-            let captures = new containers.UndefinableStringArray(nCaptures);
+        const results = this.replaceNativeImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length,
+            this.lastIndex, this.requiresUtf16Execution_)
+        return this.postProcessReplaceResults(str, results, (result: RegExpExecArray): String => {
+            let nCaptures = result.length
+            let matched = result.$_get(0)!
+            let position = max(min(result.index, str.getLength()), 0)
+            let captures = new containers.UndefinableStringArray(nCaptures)
             for (let n = 1; n < nCaptures; n++) {
-                let capN = result.$_get(n);
-                captures.pushBack(capN)
+                captures.pushBack(result.$_get(n))
             }
-            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups, replaceValue)
-            if (position >= nextSourcePosition) {
-                accumulatedResult.append(str.substring(nextSourcePosition, position)).append(replacement)
-                nextSourcePosition = position + matchLength
-            }
-        }
-        if (nextSourcePosition >= lengthS) {
-            return accumulatedResult.toString()
-        }
-        return accumulatedResult.append(str.substring(nextSourcePosition)).toString()
+            return String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups,
+                replaceValue)
+        })
     }
 
     /**
@@ -835,43 +822,42 @@ export class RegExp extends Object {
         if (this.global) {
             this.lastIndex = 0
         }
-        let results = new Array<RegExpExecArray>()
-        let done = false
-        while (!done) {
-            let result = this.exec(str)
-            if (result == null) {
-                break;
-            }
-            results.push(result)
-            if (!this.global) {
-                break;
-            }
-            let matchStr = result.$_get(0)
-            if (matchStr == "") {
-                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
-            }
-        }
-        let lengthS = str.getLength()
-        let accumulatedResult = new StringBuilder()
-        let nextSourcePosition = 0
-        for (let i = 0; i < results.length; ++i) {
-            let result = results.at(i)!;
-            let nCaptures = result.length;
-            let matched = result.$_get(0)!;
-            let matchLength = matched.getLength();
-            let position = (max(min(result.index, lengthS), 0));
-            let args = new containers.UndefinableObjectArray(nCaptures);
+        const results = this.replaceNativeImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length,
+            this.lastIndex, this.requiresUtf16Execution_)
+        return this.postProcessReplaceResults(str, results, (result: RegExpExecArray): String => {
+            let nCaptures = result.length
+            let matched = result.$_get(0)!
+            let position = max(min(result.index, str.getLength()), 0)
+            let args = new containers.UndefinableObjectArray(nCaptures)
             for (let n = 1; n < nCaptures; n++) {
-                let capN = result.$_get(n);
-                args.pushBack(capN)
+                args.pushBack(result.$_get(n))
             }
-            let namedCaptures: Object | undefined = result.groups;
-            args.pushBack(position.toDouble());
+            let namedCaptures: Object | undefined = result.groups
+            args.pushBack(position.toDouble())
             args.pushBack(str)
             if (namedCaptures != undefined) {
                 args.pushBack(namedCaptures)
             }
-            let replacement = replacer(matched, args.toArray());
+            return replacer(matched, args.toArray())
+        })
+    }
+
+    private postProcessReplaceResults(
+        str: String,
+        results: RegExpExecArray[],
+        buildReplacement: (result: RegExpExecArray) => String,
+    ): String {
+        let lengthS = str.getLength()
+        let accumulatedResult = new StringBuilder()
+        let nextSourcePosition = 0
+        for (let i = 0; i < results.length; ++i) {
+            let result = results.at(i)!
+            result.input = str
+            result.postExecProcessing(result, str, result.index, this.hasIndices)
+            let matched = result.$_get(0)!
+            let matchLength = matched.getLength()
+            let position = max(min(result.index, lengthS), 0)
+            let replacement = buildReplacement(result)
             if (position >= nextSourcePosition) {
                 accumulatedResult.append(str.substring(nextSourcePosition, position)).append(replacement)
                 nextSourcePosition = position + matchLength
@@ -893,12 +879,12 @@ export class RegExp extends Object {
      * @FaAndStageModel
      */
     public split(str: String, limit: Int | undefined): String[] {
-        let unicodeMatching = this.unicode
+        let unicodeMatching = this.unicode || this.unicodeSets
         let newFlags = this.sticky ? this.flags_ : this.flags_ + "y";
         let splitter = new RegExp(this.pattern_, newFlags)
         let lim: long;
         if (limit == undefined) {
-            lim = (1 << 32) -1
+            lim = DEFAULT_SPLIT_LIMIT
         } else if (limit == 0) {
             return new String[0]("")
         } else {
@@ -912,40 +898,8 @@ export class RegExp extends Object {
             }
             return [str]
         }
-        let splittedStrings = new containers.UndefinableStringArray()
-        let lastStart = 0
-        for (let lastEnd: int = 0; lastEnd < size;) {
-            splitter.lastIndex = lastEnd
-            let z = splitter.exec(str)
-            if (z == null) {
-                lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
-            } else {
-                let separatorRight = (splitter.lastIndex < size) ? splitter.lastIndex : size
-                if (separatorRight == lastStart) {
-                    lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
-                } else {
-                    let substr = str.substring(lastStart, lastEnd)
-                    splittedStrings.pushBack(substr)
-                    if (splittedStrings.size() == lim) {
-                        return splittedStrings.toArray() as String[]
-                    }
-                    lastStart = separatorRight
-                    let numberOfCaptures = z.length;
-                    for (let i = 1; i < numberOfCaptures; ++i) {
-                        let nextCapture = z.$_get(i)
-                        splittedStrings.pushBack(nextCapture)
-                        if (splittedStrings.size() == lim) {
-                            return splittedStrings.toArray() as String[]
-                        }
-                    }
-                    lastEnd = lastStart
-                }
-            }
-        }
-        let substr = str.substring(lastStart, size)
-        splittedStrings.pushBack(substr)
-        let res = splittedStrings.toArray() as String[]
-        return res
+        return splitter.splitNativeImpl(splitter.pattern_, splitter.flags_, str, splitter.pattern_.length,
+            str.length, lim, unicodeMatching, splitter.requiresUtf16Execution_)
     }
 
     /**
@@ -1001,7 +955,9 @@ export class RegExp extends Object {
         let matcher = new RegExp(this)
         matcher.lastIndex = this.lastIndex
         if (matcher.global) {
-            return new GlobalRegExpStringIterator(matcher, str)
+            let results = matcher.matchAllNativeImpl(matcher.pattern_, matcher.flags_, str, matcher.pattern_.length,
+                str.length, matcher.lastIndex, matcher.requiresUtf16Execution_)
+            return new PrecomputedMatchAllIterator(results, str, matcher.hasIndices)
         } else {
             return new RegExpStringIterator(matcher, str)
         }

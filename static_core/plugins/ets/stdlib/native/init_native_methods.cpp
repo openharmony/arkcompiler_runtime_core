@@ -20,12 +20,13 @@
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib {
-void InitNativeMethods(ani_env *env)
+ani_status InitNativeMethods(ani_env *env)
 {
     RegisterProcessNativeMethods(env);
-    RegisterRegExpNativeMethods(env);
+    ANI_RETURN_ON_PENDING_ERROR(RegisterRegExpNativeMethods(env));
     // NOTE (ikorobkov): Need to implement issue #18135
     ANI_FATAL_IF_ERROR(intl::InitCoreIntl(env));
+    return ANI_OK;
 }
 
 }  // namespace ark::ets::stdlib
