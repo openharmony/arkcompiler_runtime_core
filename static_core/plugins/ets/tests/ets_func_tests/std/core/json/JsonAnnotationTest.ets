@@ -136,6 +136,22 @@ class TestClass16 {
     public num: int = 10
 }
 
+class TestClass17 {
+    public baseName: string = 'base'
+}
+
+class TestClass18 extends TestClass17 {
+    @JSONRename('baseName')
+    public childName: string = 'child'
+}
+
+class TestClass19 {
+    @JSONRename('sharedName')
+    public firstName: string = 'first'
+    @JSONRename('sharedName')
+    public secondName: string = 'second'
+}
+
 function jsonStringify() {
     let obj: TestClass1 = new TestClass1()
     obj.setPassword(123456)
@@ -265,6 +281,18 @@ function jsonIgnoreTest() {
     arktest.assertEQ(obj.num, 20)
 }
 
+function jsonThrowWithInheritedFieldNameCollision() {
+    const obj = new TestClass18()
+    const expectMsg = 'Double usage of `baseName` in JsonAnnotationTest.TestClass18. The name also is used by JSONRename in base class'
+    checkThrow(() => {JSON.stringify(obj)}, expectMsg)
+}
+
+function jsonThrowWithDuplicateRenameTarget() {
+    const obj = new TestClass19()
+    const expectMsg = 'Cannot double rename sharedName in keys of JsonAnnotationTest.TestClass19'
+    checkThrow(() => {JSON.stringify(obj)}, expectMsg)
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('Json stringify && parse for annotation tests ')
     suite.addTest('JSON.stringify test with annotaion', jsonStringify)
@@ -277,5 +305,7 @@ function main(): int {
     suite.addTest('JSON test with extends', jsonTestWithExtends)
     suite.addTest('JSON test with different types', jsonTestWithTypes)
     suite.addTest('JSON test for ignore', jsonIgnoreTest)
+    suite.addTest('JSON throw test with inherited field name collision', jsonThrowWithInheritedFieldNameCollision)
+    suite.addTest('JSON throw test with duplicate rename target', jsonThrowWithDuplicateRenameTarget)
     return suite.run()
 }

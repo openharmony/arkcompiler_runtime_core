@@ -44,10 +44,6 @@ export @interface JSONStringifyGetter {
 }
 
 
-function findFieldByName(fields: Array<reflect.InstanceField>, name: string): reflect.InstanceField | undefined {
-    return fields.find((fld) => fld.getName() == name)
-}
-
 class JSONAPI {
     public native static getJSONStringifyIgnore(field: reflect.InstanceField): boolean
 
@@ -80,51 +76,145 @@ class FieldMetadata {
     }
 }
 
-class ClassMetadata {
-    readonly metadata: Array<FieldMetadata>;
-    readonly nameMap: Map<string, FieldMetadata>;
+class CachedObjectLayoutEntry {
+    readonly name: string
+    readonly metadata: FieldMetadata
 
-    constructor(metadata: Array<FieldMetadata>) {
-        this.metadata = metadata;
-        this.nameMap = new Map<string, FieldMetadata>();
-        for (let i = 0; i < metadata.length; i++) {
-            const meta = metadata[i];
-            this.nameMap.set(meta.name, meta);
+    constructor(name: string, metadata: FieldMetadata) {
+        this.name = name
+        this.metadata = metadata
+    }
+}
+
+function validateWritableFieldName(cls: Class, metadata: FieldMetadata, writtenNames: Set<string>): string {
+    const writableFieldName = metadata.rename!
+    if (writtenNames.has(writableFieldName)) {
+        throw new Error(`Cannot double rename ${writableFieldName} in keys of ${cls.getName()}`)
+    }
+    return writableFieldName
+}
+
+class ClassMetadata {
+    readonly cls: Class
+    readonly metadata: Array<FieldMetadata>
+    readonly nameMap: Map<string, FieldMetadata>
+    readonly hasRenames: boolean
+    readonly objectLayout: Array<CachedObjectLayoutEntry>
+    readonly fastObjectLayout: boolean
+    readonly tupleEntries: Array<FieldMetadata>
+
+    private constructor(cls: Class, metadata: Array<FieldMetadata>, nameMap: Map<string, FieldMetadata>, hasRenames: boolean,
+        objectLayout: Array<CachedObjectLayoutEntry>, fastObjectLayout: boolean, tupleEntries: Array<FieldMetadata>) {
+        this.cls = cls
+        this.metadata = metadata
+        this.nameMap = nameMap
+        this.hasRenames = hasRenames
+        this.objectLayout = objectLayout
+        this.fastObjectLayout = fastObjectLayout
+        this.tupleEntries = tupleEntries
+    }
+
+    static createFastObjectLayout(cls: Class, metadata: Array<FieldMetadata>, nameMap: Map<string, FieldMetadata>,
+        objectLayout: Array<CachedObjectLayoutEntry>, tupleEntries: Array<FieldMetadata>): ClassMetadata {
+        return new ClassMetadata(cls, metadata, nameMap, false, objectLayout, true, tupleEntries)
+    }
+
+    static createObjectLayout(cls: Class, metadata: Array<FieldMetadata>, nameMap: Map<string, FieldMetadata>,
+        hasRenames: boolean, tupleEntries: Array<FieldMetadata>): ClassMetadata {
+        const objectLayout = new Array<CachedObjectLayoutEntry>()
+        const nameToIndex = new Map<string, int>()
+        const writtenNames = new Set<string>()
+        const metadataLen = metadata.length
+        for (let i = 0; i < metadataLen; i++) {
+            const meta = metadata[i]
+            if (meta.ignore) {
+                continue
+            }
+            if (meta.rename !== undefined && nameMap.has(meta.rename!)) {
+                throw new Error(`Double usage of \`${meta.rename}\` in ${cls.getName()}.` +
+                    ' The name also is used by JSONRename in base class')
+            }
+            const writableFieldName = meta.rename !== undefined
+                ? validateWritableFieldName(cls, meta, writtenNames)
+                : meta.name
+            const entry = new CachedObjectLayoutEntry(writableFieldName, meta)
+            const existingIndex = nameToIndex.get(meta.name)
+            if (meta.rename !== undefined || existingIndex === undefined) {
+                nameToIndex.set(writableFieldName, objectLayout.length)
+                writtenNames.add(writableFieldName)
+                objectLayout.push(entry)
+            } else {
+                objectLayout[existingIndex] = entry
+            }
         }
+        return new ClassMetadata(cls, metadata, nameMap, hasRenames, objectLayout, false, tupleEntries)
     }
 }
 
 class FieldMetadataCache {
-    private static readonly CACHE_CAPACITY: int = 200;
-    private static readonly cache: ConcurrentLRUCache<Class, ClassMetadata> = new ConcurrentLRUCache<Class, ClassMetadata>(FieldMetadataCache.CACHE_CAPACITY);
+    private static readonly CACHE_CAPACITY: int = 200
+    private static readonly cache: ConcurrentLRUCache<Class, ClassMetadata> = new ConcurrentLRUCache<Class, ClassMetadata>(FieldMetadataCache.CACHE_CAPACITY)
 
-    static getMetadata(cls: Class): Array<FieldMetadata> {
-        const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
-            const fields = reflect.getInstanceFieldsRecursive(c);
+    private static getClassMetadata(cls: Class): ClassMetadata {
+        return FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class): ClassMetadata => {
+            const fields = reflect.getInstanceFieldsRecursive(c)
             const metadata = new Array<FieldMetadata>(fields.length, (i) => {
-                const field = fields[i];
-                const ignore = JSONAPI.getJSONStringifyIgnore(field);
-                const rename = JSONAPI.getJSONRename(field);
-                return new FieldMetadata(field, ignore, rename);
-            });
-            return new ClassMetadata(metadata);
-        });
-        return classMeta.metadata;
+                const field = fields[i]
+                const ignore = JSONAPI.getJSONStringifyIgnore(field)
+                const rename = JSONAPI.getJSONRename(field)
+                return new FieldMetadata(field, ignore, rename)
+            })
+            const nameMap = new Map<string, FieldMetadata>()
+            const objectLayout = new Array<CachedObjectLayoutEntry>()
+            const tupleEntries = new Array<FieldMetadata>()
+            let hasRenames = false
+            let hasSpecialSerialization = false
+            const metadataLen = metadata.length
+
+            for (let i = 0; i < metadataLen; i++) {
+                const meta = metadata[i]
+                nameMap.set(meta.name, meta)
+                if (!meta.ignore) {
+                    tupleEntries.push(meta)
+                }
+                if (meta.ignore || meta.rename !== undefined) {
+                    hasSpecialSerialization = true
+                }
+                if (!meta.ignore && meta.rename !== undefined) {
+                    hasRenames = true
+                }
+                if (!hasSpecialSerialization) {
+                    objectLayout.push(new CachedObjectLayoutEntry(meta.name, meta))
+                }
+            }
+
+            if (!hasSpecialSerialization) {
+                return ClassMetadata.createFastObjectLayout(c, metadata, nameMap, objectLayout, tupleEntries)
+            }
+            return ClassMetadata.createObjectLayout(c, metadata, nameMap, hasRenames, tupleEntries)
+        })
     }
 
     static getMetadataByName(cls: Class, name: string): FieldMetadata | undefined {
-        const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
-            const fields = reflect.getInstanceFieldsRecursive(c);
-            const metadata = new Array<FieldMetadata>(fields.length, (i) => {
-                const field = fields[i];
-                const ignore = JSONAPI.getJSONStringifyIgnore(field);
-                const rename = JSONAPI.getJSONRename(field);
-                return new FieldMetadata(field, ignore, rename);
-            });
-            return new ClassMetadata(metadata);
-        });
-        return classMeta.nameMap.get(name);
+        return FieldMetadataCache.getClassMetadata(cls).nameMap.get(name)
     }
+
+    static hasMetadataByName(cls: Class, name: string): boolean {
+        return FieldMetadataCache.getClassMetadata(cls).nameMap.has(name)
+    }
+
+    static getObjectLayout(cls: Class): Array<CachedObjectLayoutEntry> {
+        return FieldMetadataCache.getClassMetadata(cls).objectLayout
+    }
+
+    static hasFastObjectLayout(cls: Class): boolean {
+        return FieldMetadataCache.getClassMetadata(cls).fastObjectLayout
+    }
+
+    static getTupleEntries(cls: Class): Array<FieldMetadata> {
+        return FieldMetadataCache.getClassMetadata(cls).tupleEntries
+    }
+
 }
 
 // JsonSerializable provides a interface for external classes to override toJSON
@@ -643,16 +733,12 @@ export class JSON {
         let s = new StringBuilder('{')
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append('"');
-            s.append(JSON.stringify(i));
-            s.append('":');
+            s.append('"'.concat(JSON.stringify(i), '":'));
             s.append(JSON.stringify(d[i]));
             s.append(',');
         }
         if (d.length > 0) {
-            s.append('"');
-            s.append(JSON.stringify(last_elem));
-            s.append('":');
+            s.append('"'.concat(JSON.stringify(last_elem), '":'));
             s.append(JSON.stringify(d[last_elem]));
         }
         s.append('}');
@@ -681,9 +767,9 @@ export class JSON {
             return ''
         }
         if (obj instanceof JSValue) {
-            return JSON.stringifyJSValue(obj as JSValue)
+            return JSON.stringifyJSValue(obj)
         }
-        return new JSONWriter().write(obj)
+        return new JSONWriter().writeFast(obj)
     }
 
     private static native stringifyFast(obj: Any): string
@@ -702,10 +788,8 @@ export class JSON {
      * @FaAndStageModel
      */
     public static stringifyWithGetters(obj: Any): String {
-        if (obj === undefined) {
-            return ''
-        }
-        return new JSONWriter(undefined, undefined, true).write(obj)
+        const replacerOpt: ((key: string, value: Any) => Any) | undefined = undefined
+        return new JSONWriter(replacerOpt, undefined, true).write(obj)
     }
 
     /**
@@ -1094,177 +1178,12 @@ export class JSON {
 
 }
 
-interface ArrayHandle {
-    readonly length: int
-    readonly array: object
-    get(i: int): Any
-}
-
-class BoolArrayHandle implements ArrayHandle {
-    private arr: ValueArray<boolean>
-
-    public constructor(arr: ValueArray<boolean>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class ByteArrayHandle implements ArrayHandle {
-    private arr: ValueArray<byte>
-
-    public constructor(arr: ValueArray<byte>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class CharArrayHandle implements ArrayHandle {
-    private arr: ValueArray<char>
-
-    public constructor(arr: ValueArray<char>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class ShortArrayHandle implements ArrayHandle {
-    private arr: ValueArray<short>
-
-    public constructor(arr: ValueArray<short>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class IntArrayHandle implements ArrayHandle {
-    private arr: ValueArray<int>
-
-    public constructor(arr: ValueArray<int>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class LongArrayHandle implements ArrayHandle {
-    private arr: ValueArray<long>
-
-    public constructor(arr: ValueArray<long>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class FloatArrayHandle implements ArrayHandle {
-    private arr: ValueArray<float>
-
-    public constructor(arr: ValueArray<float>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
-class DoubleArrayHandle implements ArrayHandle {
-    private arr: ValueArray<double>
-
-    public constructor(arr: ValueArray<double>) {
-        this.arr = arr
-    }
-
-    public get length(): int {
-        return this.arr.length
-    }
-
-    public get array(): object {
-        return this.arr
-    }
-
-    public get(i: int): Any {
-        return this.arr[i]
-    }
-}
-
 class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_CLASS = Class.from<JSValue>()
     // Length of the bytecode getter prefix "%%get-" (GETTER_BEGIN in ets_type.h)
     private static readonly GETTER_PREFIX_LEN: int = 6
     private static readonly maxSpaceLength = 10
+    private static readonly getterMetadataCache = new Map<Class, Array<[string, reflect.InstanceMethod]>>()
 
     private static truncateSpace(space: String | undefined): String | undefined {
         if (space !== undefined && space.length > JSONWriter.maxSpaceLength) {
@@ -1281,11 +1200,29 @@ class JSONWriter {
     private readonly useFieldsFilter: boolean
     private readonly useIndent: boolean
     private readonly useAnnotatedGetters: boolean
+    private readonly useSimpleFastPath: boolean
+
+    private static readonly PADDING_CACHE_SIZE: int = 20
 
     private indentLevel: int = 0
+    private paddingCache: FixedArray<String> | undefined
+    private writtenNamesBuf: Set<string> = new Set<string>()
+    private fieldsFilterSet: Set<string> | undefined
+    private filterNamePos: Map<string, int> | undefined
 
     private readonly path = new Set<Any>()
     private buffer = new StringBuilder()
+
+    private getPaddingCache(): FixedArray<String> {
+        if (this.paddingCache === undefined) {
+            const cache = new FixedArray<String>(JSONWriter.PADDING_CACHE_SIZE)
+            for (let i = 0; i < JSONWriter.PADDING_CACHE_SIZE; i++) {
+                cache[i] = this.space!.repeat(i)
+            }
+            this.paddingCache = cache
+        }
+        return this.paddingCache!
+    }
 
     public constructor(replacer?: (key: String, value: Any) => Any, space?: String, useAnnotatedGetters: boolean = false) {
         this.replacer = replacer
@@ -1296,6 +1233,9 @@ class JSONWriter {
         this.useFieldsFilter = false
         this.useIndent = !(this.space == undefined || this.space == '')
         this.useAnnotatedGetters = useAnnotatedGetters
+        this.useSimpleFastPath = !this.useReplacer && !this.useIndent && !this.useAnnotatedGetters
+        this.fieldsFilterSet = new Set<string>()
+        this.filterNamePos = undefined
     }
 
     public constructor(filter: FixedArray<string>, space?: String, useAnnotatedGetters: boolean = false) {
@@ -1307,6 +1247,16 @@ class JSONWriter {
         this.useFieldsFilter = true
         this.useIndent = !(this.space == undefined || this.space == '')
         this.useAnnotatedGetters = useAnnotatedGetters
+        this.useSimpleFastPath = false
+
+        const filterSet = new Set<string>()
+        const namePos = new Map<string, int>()
+        for (let idx = 0; idx < filter.length; idx++) {
+            filterSet.add(filter[idx])
+            namePos.set(filter[idx], idx)
+        }
+        this.fieldsFilterSet = filterSet
+        this.filterNamePos = namePos
     }
 
     public write(obj: Any): String {
@@ -1317,6 +1267,69 @@ class JSONWriter {
         }
 
         return this.buffer.toString()
+    }
+
+    public writeFast(obj: Any): String {
+        this.writeObjectFast(obj)
+        return this.buffer.toString()
+    }
+
+    private writeObjectFast(obj: Any): void {
+        if (obj === null) {
+            this.buffer.append('null')
+        } else if (obj === undefined) {
+            this.buffer.append('')
+        } else if (obj instanceof String) {
+            this.writeStringDirect(obj)
+        } else if (obj instanceof Tuple) {
+            this.writeTupleValue(obj)
+        } else if (obj instanceof Record) {
+            this.writeStdCoreRecord(obj as Record<Numeric | string | BaseEnum<Int> | BaseEnum<Long> |
+                BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, Any>)
+        } else if (obj instanceof JsonReplacer) {
+            const record = obj.jsonReplacer()
+            this.writeStdCoreRecord(record)
+        } else if (obj instanceof ESValue) {
+            this.writeInteropESValue(obj)
+        } else if (obj instanceof jsonx.JsonElementSerializable) {
+            this.buffer.append(JSON.stringifyJsonElement(obj))
+        } else if (obj instanceof JsonSerializable) {
+            this.buffer.append('"'.concat(obj.toJSON(), '"'))
+        } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
+            this.buffer.append(JSONObject.EMPTY)
+        } else if (obj instanceof Function) {
+            this.buffer.append('')
+        } else if (this.writeValueTypeWrapper(obj)) {
+            // nothing to do - write completed successfully
+        } else if (obj instanceof Date) {
+            this.writeObject(obj.toJSON())
+        } else if (obj instanceof Array) {
+            this.writeStdCoreArrayFast(obj)
+        } else if (obj instanceof Int8Array || obj instanceof Int16Array || obj instanceof Int32Array
+                || obj instanceof Uint8Array || obj instanceof BigInt64Array || obj instanceof Uint16Array
+                || obj instanceof Uint32Array || obj instanceof Float32Array || obj instanceof Float64Array
+                || obj instanceof BigUint64Array || obj instanceof Uint8ClampedArray) {
+            this.writeTypedArray(obj)
+        } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map || obj instanceof RegExp) {
+            this.buffer.append(JSONObject.EMPTY)
+        } else if (obj instanceof JSValue) {
+            this.buffer.append(JSON.stringify(obj))
+        } else if (obj instanceof Object) {
+            const objCls = Class.of(obj)
+            if (objCls.isFixedArray()) {
+                this.writeFixedArrayObjectFast(obj as FixedArray<Any>)
+            } else if (objCls.isEnum()) {
+                this.writeEnumValue(obj, objCls)
+            } else {
+                if (FieldMetadataCache.hasFastObjectLayout(objCls)) {
+                    this.writeClassValueFast(obj, FieldMetadataCache.getObjectLayout(objCls))
+                } else {
+                    this.writeObject(obj)
+                }
+            }
+        } else {
+            this.writeObject(obj)
+        }
     }
 
     private writeStringDirect(str: String): void {
@@ -1462,7 +1475,7 @@ class JSONWriter {
         } else if (obj === undefined) {
             this.buffer.append('')
         } else if (obj instanceof String) {
-            this.writeStringDirect(obj as String)
+            this.writeStringDirect(obj)
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
@@ -1474,7 +1487,7 @@ class JSONWriter {
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
         } else if (obj instanceof JsonSerializable) {
-            this.buffer.append('"' + obj.toJSON() + '"')
+            this.buffer.append('"'.concat(obj.toJSON(), '"'))
         } else if (obj instanceof jsonx.JsonElementSerializable) {
             this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
@@ -1495,30 +1508,11 @@ class JSONWriter {
         } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map || obj instanceof RegExp) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof JSValue) {
-            this.buffer.append(JSON.stringify(obj as JSValue))
+            this.buffer.append(JSON.stringify(obj))
         } else if (obj instanceof Object) {
             const objCls = Class.of(obj)
             if (objCls.isFixedArray()) {
-                if (obj instanceof ValueArray<boolean>) {
-                    this.writeArrayHandleValue(new BoolArrayHandle(obj as ValueArray<boolean>))
-                } else if (obj instanceof ValueArray<byte>) {
-                    this.writeArrayHandleValue(new ByteArrayHandle(obj as ValueArray<byte>))
-                } else if (obj instanceof ValueArray<char>) {
-                    this.writeArrayHandleValue(new CharArrayHandle(obj as ValueArray<char>))
-                } else if (obj instanceof ValueArray<short>) {
-                    this.writeArrayHandleValue(new ShortArrayHandle(obj as ValueArray<short>))
-                } else if (obj instanceof ValueArray<int>) {
-                    this.writeArrayHandleValue(new IntArrayHandle(obj as ValueArray<int>))
-                } else if (obj instanceof ValueArray<long>) {
-                    this.writeArrayHandleValue(new LongArrayHandle(obj as ValueArray<long>))
-                } else if (obj instanceof ValueArray<float>) {
-                    this.writeArrayHandleValue(new FloatArrayHandle(obj as ValueArray<float>))
-                } else if (obj instanceof ValueArray<double>) {
-                    this.writeArrayHandleValue(new DoubleArrayHandle(obj as ValueArray<double>))
-                } else {
-                    // NOTE(aantipina): Issue #31995
-                    this.writeArrayValue(obj as FixedArray<Any>)
-                }
+                this.writeFixedArrayObject(obj as FixedArray<Any>)
             } else if (objCls.isEnum()) {
                 this.writeEnumValue(obj, objCls)
             } else {
@@ -1536,7 +1530,7 @@ class JSONWriter {
         if (valueOfMethod !== undefined) {
             const value: Object = valueOfMethod.invoke(obj) as Object
             if (value instanceof String) {
-                this.writeStringDirect(value as String)
+                this.writeStringDirect(value)
             } else {
                 this.buffer.append(value)
             }
@@ -1552,16 +1546,12 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const objClass = Class.of(obj)
-
-        const writableFields = this.getWritableFields(objClass, obj)
+        const tupleEntries = FieldMetadataCache.getTupleEntries(Class.of(obj))
 
         let fieldDumped = false
-        if (writableFields.length > 0) {
-            this.path.add(obj)
-            fieldDumped = this.writeTupleElements(writableFields)
-            this.path.delete(obj)
-        }
+        this.path.add(obj)
+        fieldDumped = this.writeTupleElements(tupleEntries, obj)
+        this.path.delete(obj)
 
         if (this.useIndent) {
             this.indentLevel -= 1
@@ -1580,22 +1570,12 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private writeTupleElements(tupleFields: Array<[string, Any]>): boolean {
-        const FIELD_VALUE = 1
-
+    private writeTupleElements(tupleEntries: Array<FieldMetadata>, obj: object): boolean {
         let fieldDumped = false
-        for (let fieldIdx = 0; fieldIdx < tupleFields.length; fieldIdx++) {
-            const objToDump = tupleFields[fieldIdx][FIELD_VALUE]
-            if (fieldDumped) {
-                this.buffer.append(',')
-                if (this.useIndent) {
-                    this.buffer.append('\n')
-                }
-            } else {
-                fieldDumped = true
-            }
-
-            this.writePadding()
+        const tupleEntriesLen = tupleEntries.length
+        for (let fieldIdx = 0; fieldIdx < tupleEntriesLen; fieldIdx++) {
+            const objToDump = tupleEntries[fieldIdx].getValue(obj)
+            fieldDumped = this.writeEntryPrefix(fieldDumped, true, this.useIndent)
 
             if (this.useIndent) {
                 this.buffer.append(' ')
@@ -1624,15 +1604,7 @@ class JSONWriter {
 
         let entryDumped = false
         if (this.useFieldsFilter) {
-            const writableEntries = this.getRecordWritableEntries(record)
-
-            const ENTRY_KEY = 0
-            const ENTRY_VAL = 1
-            for (const entry of writableEntries) {
-                const entryKey = entry[ENTRY_KEY]
-                const entryVal = entry[ENTRY_VAL]
-                entryDumped = this.writeRecordEntry(entryKey, entryVal, entryDumped)
-            }
+            entryDumped = this.writeFilteredRecordEntries(record, entryDumped)
         } else {
             record.forEach((entryVal: V, entryKey: K) => {
                 entryDumped = this.writeRecordEntry(entryKey, entryVal, entryDumped)
@@ -1654,51 +1626,31 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private getRecordWritableEntries<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(record: Record<K, V>): Array<[K, V]> {
-        // 'entry name' -> output position index
-        const entryNamePos = new Map<string, int>()
-        for (let idx = 0; idx < this.fieldsFilter.length; idx++) {
-            const entryName = this.fieldsFilter[idx]
-            entryNamePos.set(entryName, idx)
-        }
+    private writeFilteredRecordEntries<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(record: Record<K, V>, entryDumped: boolean): boolean {
+        const matchedEntries = new FixedArray<[K, V] | undefined>(this.fieldsFilter.length)
 
-        // 'entry key' -> output position index
-        const entryKeyPos = new Array<[K, int]>
-        for (const entryKey of record.keys()) {
-            const entryName = (entryKey as object).toString()
-            const entryPos = entryNamePos.get(entryName)
-            if (entryPos === undefined) {
-                continue
+        record.forEach((entryVal: V, entryKey: K) => {
+            const entryName = entryKey.toString()
+            const entryPos = this.filterNamePos!.get(entryName)
+            if (entryPos !== undefined) {
+                matchedEntries[entryPos] = [entryKey, entryVal]
             }
-
-            const entryKeyPosPair: [K, int] = [entryKey, entryPos]
-            entryKeyPos.push(entryKeyPosPair)
-        }
-
-        // sorting 'filtered in' entries by position
-        const ENTRY_POS = 1
-        entryKeyPos.sort((pos1: [K, int], pos2: [K, int]) => {
-            const entry1Pos = pos1[ENTRY_POS]
-            const entry2Pos = pos2[ENTRY_POS]
-            return (entry1Pos < entry2Pos) ? -1 : ((entry1Pos > entry2Pos) ? 1 : 0)
         })
 
-        const writableEntries = new Array<[K, V]>()
-
-        const ENTRY_KEY = 0
-        for (const entry of entryKeyPos) {
-            const entryKey = entry[ENTRY_KEY]
-            const entryVal = record.get(entryKey) as V
-
-            const writableEntry: [K, V] = [entryKey, entryVal]
-            writableEntries.push(writableEntry)
+        const matchedEntriesLen = matchedEntries.length
+        for (let i = 0; i < matchedEntriesLen; i++) {
+            const matchedEntry = matchedEntries[i]
+            if (matchedEntry === undefined) {
+                continue
+            }
+            entryDumped = this.writeRecordEntry(matchedEntry[0], matchedEntry[1], entryDumped)
         }
 
-        return writableEntries
+        return entryDumped
     }
 
     private writeRecordEntry<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
-        const entryName = (entryKey as object).toString()
+        const entryName = entryKey.toString()
         const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
         return this.writeField(entryName, replacedVal, entryDumped)
     }
@@ -1727,11 +1679,14 @@ class JSONWriter {
         }
 
         let fieldDumped = false
-        const writableFields = this.getWritableFields(objCls, obj)
-        if (writableFields.length > 0) {
+        if (this.useFieldsFilter) {
             this.path.add(obj)
-            fieldDumped = this.writeClassFields(writableFields, fieldDumped)
+            fieldDumped = this.writeFilteredClassFields(objCls, obj, fieldDumped)
             this.path.delete(obj)
+        } else {
+            const objectLayout = FieldMetadataCache.getObjectLayout(objCls)
+            const fastObjectLayout = FieldMetadataCache.hasFastObjectLayout(objCls)
+            fieldDumped = this.writeClassLayoutEntries(objectLayout, fastObjectLayout, obj, fieldDumped)
         }
 
         if (this.useAnnotatedGetters) {
@@ -1739,13 +1694,11 @@ class JSONWriter {
                 objCls,
                 obj,
                 this.useFieldsFilter,
-                this.fieldsFilter
+                this.fieldsFilterSet!
             )
-            if (annotatedGetters.length > 0) {
-                this.path.add(obj)
-                fieldDumped = this.writeClassFields(annotatedGetters, fieldDumped)
-                this.path.delete(obj)
-            }
+            this.path.add(obj)
+            fieldDumped = this.writeClassFields(annotatedGetters, fieldDumped)
+            this.path.delete(obj)
         }
 
         if (this.useIndent) {
@@ -1762,44 +1715,15 @@ class JSONWriter {
     }
 
     private writeField(fieldName: string, fieldVal: Any, fieldDumped: boolean): boolean {
-        if (fieldVal === undefined) {
-            return fieldDumped
-        }
-
-        if (fieldVal instanceof Function) {
-            return fieldDumped
-        }
-
-        if (fieldDumped) {
-            this.buffer.append(',')
-            if (this.useIndent) {
-                this.buffer.append('\n')
-            }
-        } else {
-            fieldDumped = true
-        }
-
-        this.checkReferencesCycle(fieldVal)
-        this.writePadding()
-
-        this.buffer.append('"')
-        this.buffer.append(fieldName)
-        this.buffer.append('":')
-
-        if (this.useIndent) {
-            this.buffer.append(' ')
-        }
-
-        this.writeObject(fieldVal)
-
-        return fieldDumped
+        return this.writeFieldImpl(fieldName, fieldVal, fieldDumped, true, this.useIndent, this.useSimpleFastPath)
     }
 
     private writeClassFields(writableFields: Array<[string, Any]>, fieldDumped: boolean): boolean {
         const FIELD_NAME = 0
         const FIELD_VALUE = 1
+        const writableFieldsLen = writableFields.length
 
-        for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
+        for (let fieldIdx = 0; fieldIdx < writableFieldsLen; fieldIdx++) {
             const fieldTypeValuePair = writableFields[fieldIdx]
 
             const objFieldName = fieldTypeValuePair[FIELD_NAME]
@@ -1812,70 +1736,129 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private checkSameRename(fieldName: string, fields: Array<[string, Any]>): boolean {
-        return fields.some((writableField) => writableField[0] == fieldName);
-    }
-
-    private findKeyIndex(fieldName: string, fields: Array<[string, Any]>): int {
-        return fields.findIndex((writableField) => writableField[0] == fieldName);
-    }
-
-    private getWritableFields(cls: Class, obj: object): Array<[string, Any]> {
-        const writableFields = new Array<[string, Any]>()
-
-        if (this.useFieldsFilter) {
-            for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
-                const fieldName = this.fieldsFilter[fieldIdx]
-                const metadata = FieldMetadataCache.getMetadataByName(cls, fieldName)
-                if (metadata === undefined) {
-                    continue
-                }
-                if (metadata.ignore) {
-                    continue
-                }
-                let writableFieldName = metadata.getName()
-                if (metadata.rename !== undefined) {
-                    const renamedMetadata = FieldMetadataCache.getMetadataByName(cls, metadata.rename!)
-                    if (renamedMetadata !== undefined) {
-                        throw new Error(`Double usage of \`${metadata.rename}\` in ${cls.getName()}.` +
-                            ' The name also is used by JSONRename in base class')
-                    }
-                    if (this.checkSameRename(writableFieldName, writableFields)) {
-                        throw new Error(`Cannot double rename ${writableFieldName} in keys of ${cls.getName()}`)
-                    }
-                }
-                const fieldNameValuePair: [string, Any] = [writableFieldName, metadata.getValue(obj)]
-                writableFields.push(fieldNameValuePair)
-            }
-        } else {
-            const metadataArray = FieldMetadataCache.getMetadata(cls)
-            for (let i = 0; i < metadataArray.length; i++) {
-                const metadata = metadataArray[i]
-                if (metadata.ignore) {
-                    continue
-                }
-                let writableFieldName = metadata.getName()
-                if (metadata.rename !== undefined) {
-                    const renamedMetadata = FieldMetadataCache.getMetadataByName(cls, metadata.rename!)
-                    if (renamedMetadata !== undefined) {
-                        throw new Error(`Double usage of \`${metadata.rename}\` in ${cls.getName()}.` +
-                            ' The name also is used by JSONRename in base class')
-                    }
-                    if (this.checkSameRename(writableFieldName, writableFields)) {
-                        throw new Error(`Cannot double rename ${writableFieldName} in keys of ${cls.getName()}`)
-                    }
-                }
-                const fieldNameValuePair: [string, Any] = [writableFieldName, metadata.getValue(obj)]
-                const index: int = this.findKeyIndex(metadata.name, writableFields)
-                if (metadata.rename !== undefined || index == -1) {
-                    writableFields.push(fieldNameValuePair)
-                } else {
-                    writableFields[index] = fieldNameValuePair
-                }
-            }
+    private writeClassLayoutEntries(entries: Array<CachedObjectLayoutEntry>, fastObjectLayout: boolean,
+        obj: Object, fieldDumped: boolean): boolean {
+        if (entries.length == 0) {
+            return fieldDumped
         }
 
-        return writableFields
+        let writePadding = false
+        let newlineAfterComma = false
+        let useFastWriter = false
+        let useReplacer = false
+
+        if (this.useReplacer) {
+            writePadding = true
+            newlineAfterComma = this.useIndent
+            useReplacer = true
+        } else if (this.useIndent) {
+            writePadding = true
+            newlineAfterComma = true
+        } else if (fastObjectLayout) {
+            useFastWriter = true
+        }
+
+        this.path.add(obj)
+        fieldDumped = this.writeClassLayoutFields(entries, obj, fieldDumped, writePadding, newlineAfterComma,
+            useFastWriter, useReplacer)
+        this.path.delete(obj)
+        return fieldDumped
+    }
+
+    private writeClassValueFast(obj: Object, entries: Array<CachedObjectLayoutEntry>): void {
+        const currentBuffer = this.buffer
+        this.buffer = new StringBuilder('{')
+
+        let fieldDumped = false
+        this.path.add(obj)
+        fieldDumped = this.writeClassLayoutFields(entries, obj, fieldDumped, false, false, true, false)
+        this.path.delete(obj)
+
+        this.buffer.append('}')
+        currentBuffer.append(fieldDumped ? this.buffer.toString() : JSONObject.EMPTY)
+        this.buffer = currentBuffer
+    }
+
+    private writeEntryPrefix(fieldDumped: boolean, writePadding: boolean, newlineAfterComma: boolean): boolean {
+        if (fieldDumped) {
+            this.buffer.append(',')
+            if (newlineAfterComma) {
+                this.buffer.append('\n')
+            }
+        } else {
+            fieldDumped = true
+        }
+
+        if (writePadding) {
+            this.writePadding()
+        }
+
+        return fieldDumped
+    }
+
+    private writeFieldImpl(fieldName: string, fieldVal: Any, fieldDumped: boolean, writePadding: boolean,
+        newlineAfterComma: boolean, useFastWriter: boolean): boolean {
+        if (fieldVal === undefined || fieldVal instanceof Function) {
+            return fieldDumped
+        }
+
+        fieldDumped = this.writeEntryPrefix(fieldDumped, writePadding, newlineAfterComma)
+        this.checkReferencesCycle(fieldVal)
+        const fieldPrefix = writePadding && this.useIndent
+            ? '"'.concat(fieldName, '": ')
+            : '"'.concat(fieldName, '":')
+        this.buffer.append(fieldPrefix)
+        if (useFastWriter) {
+            this.writeObjectFast(fieldVal)
+        } else {
+            this.writeObject(fieldVal)
+        }
+        return fieldDumped
+    }
+
+    private writeClassLayoutFields(entries: Array<CachedObjectLayoutEntry>, obj: object, fieldDumped: boolean,
+        writePadding: boolean, newlineAfterComma: boolean, useFastWriter: boolean, useReplacer: boolean): boolean {
+        const entriesLen = entries.length
+        for (let fieldIdx = 0; fieldIdx < entriesLen; fieldIdx++) {
+            const entry = entries[fieldIdx]
+            const fieldVal = entry.metadata.field.getValue(obj)
+            const objToDump = useReplacer ? this.replacer!(entry.name, fieldVal) : fieldVal
+            fieldDumped = this.writeFieldImpl(entry.name, objToDump, fieldDumped, writePadding, newlineAfterComma,
+                useFastWriter)
+        }
+
+        return fieldDumped
+    }
+
+    private writeFilteredClassFields(cls: Class, obj: object, fieldDumped: boolean): boolean {
+        const writtenNames = this.writtenNamesBuf
+        writtenNames.clear()
+        const fieldsFilterLen = this.fieldsFilter.length
+
+        for (let fieldIdx = 0; fieldIdx < fieldsFilterLen; fieldIdx++) {
+            const fieldName = this.fieldsFilter[fieldIdx]
+            const metadata = FieldMetadataCache.getMetadataByName(cls, fieldName)
+            if (metadata === undefined || metadata.ignore) {
+                continue
+            }
+
+            if (metadata.rename !== undefined && FieldMetadataCache.hasMetadataByName(cls, metadata.rename!)) {
+                throw new Error(`Double usage of \`${metadata.rename}\` in ${cls.getName()}.` +
+                    ' The name also is used by JSONRename in base class')
+            }
+            const writableFieldName = metadata.rename !== undefined
+                ? validateWritableFieldName(cls, metadata, writtenNames)
+                : metadata.name
+            if (metadata.rename !== undefined) {
+                writtenNames.add(writableFieldName)
+            }
+
+            const objFieldValue = metadata.getValue(obj)
+            const objToDump = this.useReplacer ? this.replacer!(writableFieldName, objFieldValue) : objFieldValue
+            fieldDumped = this.writeField(writableFieldName, objToDump, fieldDumped)
+        }
+
+        return fieldDumped
     }
 
     /**
@@ -1886,9 +1869,30 @@ class JSONWriter {
     * The prefix is stripped to produce the JSON key (e.g. `%%get-area` → key `"area"`).
     */
     private static getGetterKeyValuePairsAll(cls: Class, obj: Object, useFieldsFilter: boolean,
-        fieldsFilter: FixedArray<string>): Array<[string, Any]> {
+        fieldsFilterSet: Set<string>): Array<[string, Any]> {
 
         const namesAndValues = new Array<[string, Any]>()
+        const getterMetadata = JSONWriter.getGetterMetadata(cls)
+        const getterMetadataLen = getterMetadata.length
+        for (let i = 0; i < getterMetadataLen; i++) {
+            const getter = getterMetadata[i]
+            const name = getter[0]
+            if (useFieldsFilter && !JSONWriter.searchField(fieldsFilterSet, name)) {
+                continue
+            }
+            const value = getter[1].invoke(obj)
+            namesAndValues.push([name, value])
+        }
+        return namesAndValues
+    }
+
+    private static getGetterMetadata(cls: Class): Array<[string, reflect.InstanceMethod]> {
+        const cachedMetadata = JSONWriter.getterMetadataCache.get(cls)
+        if (cachedMetadata !== undefined) {
+            return cachedMetadata
+        }
+
+        const getterMetadata = new Array<[string, reflect.InstanceMethod]>()
         let currentClass: Class | undefined = cls
         while (currentClass != undefined) {
             const clsMethods = currentClass.getInstanceMethods()
@@ -1900,104 +1904,71 @@ class JSONWriter {
                     continue
                 }
                 const name = method.getName().substring(JSONWriter.GETTER_PREFIX_LEN)
-                if (useFieldsFilter && !JSONWriter.searchField(fieldsFilter, name)) {
-                    continue
-                }
-                const value = method.invoke(obj)
-                namesAndValues.push([name, value])
+                getterMetadata.push([name, method])
             }
             currentClass = currentClass.getSuper()
         }
-        return namesAndValues
+
+        JSONWriter.getterMetadataCache.set(cls, getterMetadata)
+        return getterMetadata
     }
 
-    private static searchField(fieldsFilter: FixedArray<string>, name: string): boolean {
-        for (let i = 0; i < fieldsFilter.length; i++) {
-            if (fieldsFilter[i] == name) {
-                return true
-            }
-        }
-        return false
+    private static searchField(fieldsFilterSet: Set<string>, name: string): boolean {
+        return fieldsFilterSet.has(name)
     }
 
-    private writeArrayValue<E>(array: FixedArray<E>): void {
+    private writeArrayPreamble(): void {
         this.buffer.append('[')
-
         if (this.useIndent) {
             this.buffer.append('\n')
             this.indentLevel += 1
         }
+    }
+
+    private writeArrayEpilogue(): void {
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append('\n')
+        }
+        this.writePadding()
+        this.buffer.append(']')
+    }
+
+    private writeFixedArrayLikeCore<E>(array: FixedArray<E>, useFastElementWriter: boolean): void {
+        this.writeArrayPreamble()
 
         const arrayLength = array.length
         if (arrayLength > 0) {
             this.path.add(array)
-
             const lastElementIndex = arrayLength - 1
-
             for (let idx = 0; idx < lastElementIndex; idx++) {
-                this.writeArrayElementValue(array[idx], idx)
+                if (useFastElementWriter) {
+                    this.writeObjectsArrayElementFast(array[idx], idx)
+                } else {
+                    this.writeObjectsArrayElement(array[idx], idx)
+                }
                 this.buffer.append(',')
-
                 if (this.useIndent) {
                     this.buffer.append('\n')
                 }
             }
-
-            this.writeArrayElementValue(array[lastElementIndex], lastElementIndex)
-
+            if (useFastElementWriter) {
+                this.writeObjectsArrayElementFast(array[lastElementIndex], lastElementIndex)
+            } else {
+                this.writeObjectsArrayElement(array[lastElementIndex], lastElementIndex)
+            }
             this.path.delete(array)
         }
 
-        if (this.useIndent) {
-            this.indentLevel -= 1
-            this.buffer.append('\n')
-        }
-
-        this.writePadding()
-
-        this.buffer.append(']')
+        this.writeArrayEpilogue()
     }
 
-    private writeArrayHandleValue(handle: ArrayHandle): void {
-        this.buffer.append('[')
-
-        if (this.useIndent) {
-            this.buffer.append('\n')
-            this.indentLevel += 1
-        }
-
-        const arrayLength = handle.length
-        if (arrayLength > 0) {
-            this.path.add(handle.array)
-
-            const lastElementIndex = arrayLength - 1
-
-            for (let idx = 0; idx < lastElementIndex; idx++) {
-                this.writeArrayElementValue(handle.get(idx), idx)
-                this.buffer.append(',')
-
-                if (this.useIndent) {
-                    this.buffer.append('\n')
-                }
-            }
-
-            this.writeArrayElementValue(handle.get(lastElementIndex), lastElementIndex)
-
-            this.path.delete(handle.array)
-        }
-
-        if (this.useIndent) {
-            this.indentLevel -= 1
-            this.buffer.append('\n')
-        }
-
-        this.writePadding()
-
-        this.buffer.append(']')
+    private writeFixedArrayObject<E>(array: FixedArray<E>): void {
+        this.writeFixedArrayLikeCore(array, false)
     }
 
-    private writeArrayElementValue(elemValue: Any, elemIndex: int): void {
-        this.writeObjectsArrayElement(elemValue, elemIndex)
+    private writeFixedArrayObjectFast<E>(array: FixedArray<E>): void {
+        this.writeFixedArrayLikeCore(array, true)
     }
 
     private writeValueTypeWrapper(obj: Any): boolean {
@@ -2045,15 +2016,13 @@ class JSONWriter {
         if (array.length > 0) {
             this.path.add(array)
 
+            const isBigIntArray = array instanceof BigInt64Array || array instanceof BigUint64Array
             const lastElementIndex: int = array.length - 1
 
             for (let idx: int = 0; idx < lastElementIndex; idx++) {
-                this.buffer.append('"')
-                this.buffer.append(idx)
-                this.buffer.append('"')
-                this.buffer.append(':')
+                this.buffer.append('"'.concat(idx.toString(), '":'))
 
-                if (array instanceof BigInt64Array | BigUint64Array) {
+                if (isBigIntArray) {
                     this.writeObjectsArrayElement((array as ArrayLike<bigint>)[idx], idx)
                 } else {
                     this.writeObjectsArrayElement((array as ArrayLike<Double>)[idx], idx)
@@ -2065,12 +2034,9 @@ class JSONWriter {
                 }
             }
 
-            this.buffer.append('"')
-            this.buffer.append(lastElementIndex)
-            this.buffer.append('"')
-            this.buffer.append(':')
+            this.buffer.append('"'.concat(lastElementIndex.toString(), '":'))
 
-            if (array instanceof BigInt64Array | BigUint64Array) {
+            if (isBigIntArray) {
                 this.writeObjectsArrayElement((array as ArrayLike<bigint>)[lastElementIndex], lastElementIndex)
             } else {
                 this.writeObjectsArrayElement((array as ArrayLike<Double>)[lastElementIndex], lastElementIndex)
@@ -2089,41 +2055,40 @@ class JSONWriter {
         this.buffer.append('}')
     }
 
-    private writeStdCoreArray<T>(array: Array<T>): void {
-        this.buffer.append("[")
+    private writeStdCoreArrayCore<T>(array: Array<T>, arrayLength: int, useFastElementWriter: boolean): void {
+        this.writeArrayPreamble()
 
-        if (this.useIndent) {
-            this.buffer.append('\n')
-            this.indentLevel += 1
-        }
-
-        if (array.length > 0) {
+        if (arrayLength > 0) {
             this.path.add(array)
-
-            const lastElementIndex: int = array.length - 1
-
+            const lastElementIndex = arrayLength - 1
             for (let idx = 0; idx < lastElementIndex; idx++) {
-                this.writeObjectsArrayElement(array[idx], idx)
+                if (useFastElementWriter) {
+                    this.writeObjectsArrayElementFast(array[idx], idx)
+                } else {
+                    this.writeObjectsArrayElement(array[idx], idx)
+                }
                 this.buffer.append(',')
-
                 if (this.useIndent) {
                     this.buffer.append('\n')
                 }
             }
-
-            this.writeObjectsArrayElement(array[lastElementIndex], lastElementIndex)
-
+            if (useFastElementWriter) {
+                this.writeObjectsArrayElementFast(array[lastElementIndex], lastElementIndex)
+            } else {
+                this.writeObjectsArrayElement(array[lastElementIndex], lastElementIndex)
+            }
             this.path.delete(array)
         }
 
-        if (this.useIndent) {
-            this.indentLevel -= 1
-            this.buffer.append('\n')
-        }
+        this.writeArrayEpilogue()
+    }
 
-        this.writePadding()
+    private writeStdCoreArray<T>(array: Array<T>): void {
+        this.writeStdCoreArrayCore(array, array.length, false)
+    }
 
-        this.buffer.append(']')
+    private writeStdCoreArrayFast<T>(array: Array<T>): void {
+        this.writeStdCoreArrayCore(array, array.length, true)
     }
 
     private writeObjectsArrayElement(arrayElement: Any, elementIndex: int): void {
@@ -2135,7 +2100,24 @@ class JSONWriter {
             this.buffer.append('null')
         } else {
             this.checkReferencesCycle(replacedElem)
-            this.writeObject(replacedElem)
+            if (this.useSimpleFastPath) {
+                this.writeObjectFast(replacedElem)
+            } else {
+                this.writeObject(replacedElem)
+            }
+        }
+    }
+
+    private writeObjectsArrayElementFast(arrayElement: Any, elementIndex: int): void {
+        if (this.useIndent) {
+            this.writePadding()
+        }
+
+        if (arrayElement == null || arrayElement instanceof Function) {
+            this.buffer.append('null')
+        } else {
+            this.checkReferencesCycle(arrayElement)
+            this.writeObjectFast(arrayElement)
         }
     }
 
@@ -2152,8 +2134,14 @@ class JSONWriter {
 
     private writePadding() {
         if (this.indentLevel > 0) {
-            const indent = this.space!.repeat(this.indentLevel)
-            this.buffer.append(indent)
+            const cache = this.getPaddingCache()
+            const idx = this.indentLevel < JSONWriter.PADDING_CACHE_SIZE
+                ? this.indentLevel
+                : JSONWriter.PADDING_CACHE_SIZE - 1
+            this.buffer.append(cache[idx])
+            if (this.indentLevel >= JSONWriter.PADDING_CACHE_SIZE) {
+                this.buffer.append(this.space!.repeat(this.indentLevel - JSONWriter.PADDING_CACHE_SIZE + 1))
+            }
         }
     }
 }
@@ -2233,20 +2221,24 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return arrayResult
 
         case jsonx.JsonType.JsonObject:
-            const it = elem.$_iterator()
-            const entries = Array.from(it)
-            if (entries.length == 0) {
-                return '{}'
-            }
             let objectResult: string = '{'
-            if (hasIndentation) {
-                objectResult = objectResult.concat('\n')
-            }
-            for (let i = 0; i < entries.length; i++) {
-                const key = entries[i][0]
-                const value = entries[i][1]
+            let hasEntries = false
+            for (const entry of elem.$_iterator()) {
+                const key = entry[0]
+                const value = entry[1]
                 if (value.jsonType == jsonx.JsonType.JsonUndefined) {
                     continue
+                }
+                if (hasEntries) {
+                    objectResult = objectResult.concat(',')
+                    if (hasIndentation) {
+                        objectResult = objectResult.concat('\n')
+                    }
+                } else {
+                    hasEntries = true
+                    if (hasIndentation) {
+                        objectResult = objectResult.concat('\n')
+                    }
                 }
                 if (hasIndentation) {
                     objectResult = objectResult.concat(nextIndentStr)
@@ -2257,14 +2249,12 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
                     objectResult = objectResult.concat(' ')
                 }
                 objectResult = objectResult.concat(stringifyElementRecursively(value, replacer, space, depth + 1))
-                if (i < entries.length - 1) {
-                    objectResult = objectResult.concat(',')
-                }
-                if (hasIndentation) {
-                    objectResult = objectResult.concat('\n')
-                }
+            }
+            if (!hasEntries) {
+                return '{}'
             }
             if (hasIndentation) {
+                objectResult = objectResult.concat('\n')
                 objectResult = objectResult.concat(indentStr)
             }
             objectResult = objectResult.concat('}')
@@ -2339,22 +2329,39 @@ class EscapeStringBuilder {
     }
 }
 
+const INDENT_CACHE_SIZE: int = 20
+let indentCache: FixedArray<string> | undefined = undefined
+let indentCacheUnit: string | undefined = undefined
+
+function buildIndentCache(unit: string): FixedArray<string> {
+    const cache = new FixedArray<string>(INDENT_CACHE_SIZE)
+    for (let i = 0; i < INDENT_CACHE_SIZE; i++) {
+        cache[i] = unit.repeat(i)
+    }
+    indentCache = cache
+    indentCacheUnit = unit
+    return cache
+}
+
 function getIndentation(space?: int | string, depth: int = 0): string {
-    if (space == undefined) {
+    if (space == undefined || depth == 0) {
         return ''
     }
-    if (space! instanceof string)
-    {
-        let unit = (space! as string).substring(0, 10)
-        return unit.repeat(depth)
+    let unit: string
+    if (space instanceof string) {
+        unit = space.substring(0, 10)
+    } else {
+        let n = (space as int) > 0 ? (space as int) : 0
+        unit = ' '.repeat(n > 10 ? 10 : n)
     }
-    let lower = (space! as int) > 0
-        ? (space! as int)
-        : 0
-    let aligned = lower > 10
-        ? 10
-        : lower
-    return ' '.repeat(aligned).repeat(depth)
+    if (unit.length == 0) {
+        return ''
+    }
+    const cache = indentCache !== undefined && indentCacheUnit == unit ? indentCache! : buildIndentCache(unit)
+    if (depth < INDENT_CACHE_SIZE) {
+        return cache[depth]
+    }
+    return unit.repeat(depth)
 }
 
 
@@ -3230,9 +3237,9 @@ class JSONValueParser {
             // NOTE(lyupaanastasia) parse union #27136
             throw new Error('UnionType is not supported yet')
         } else if (value instanceof JSONArray && type.isFixedArray()) {
-            return this.parseArray(value as JSONArray, type)
+            return this.parseArray(value, type)
         } else if (value instanceof JSONNumber) {
-            const num = this.createNumber(value as JSONNumber, type)
+            const num = this.createNumber(value, type)
             if (type.isEnum()) {
                 let valArray = type.getStaticMethod('values')!.invoke() as FixedArray<Any>
                 for (let idx = 0; idx < valArray.length; idx++) {
@@ -3244,7 +3251,7 @@ class JSONValueParser {
             return num
 
         } else if (value instanceof JSONString && Types.isCharType(type)) {
-            return (value as JSONString).value.charAt(0)
+            return value.value.charAt(0)
         } else if (value instanceof JSONString && (type === TypeColor.STRING_CLASS || type.isEnum())) {
             const str = (value as JSONString).value
             if (type.isEnum()) {
@@ -3263,7 +3270,7 @@ class JSONValueParser {
         } else if (value instanceof JSONNull && type === TypeColor.NULL_CLASS) {
             return null
         } else if (value instanceof JSONObject && this.isParseableObjectType(type)) {
-            return this.parseObject(value as JSONObject, type)
+            return this.parseObject(value, type)
         } else {
             const valueType = Class.of(value)
             throw new Error(`${type.getName()} is expected, but get ${valueType.getName()}`)
@@ -3281,24 +3288,19 @@ class JSONValueParser {
     }
 
     private parseObject(jsonObj: JSONObject, classType: Class): Object {
-        let setClassFieldFn = (obj: object, fields: Array<reflect.InstanceField>, fieldName: string, fieldVal: Any) => {
-            const field = findFieldByName(fields, fieldName)!
+        let setClassFieldFn = (field: reflect.InstanceField, obj: object, fieldVal: Any): void => {
             field.setValue(obj, fieldVal)
         }
 
         if (this.reviver != undefined) {
-            setClassFieldFn = (obj: object, fields: Array<reflect.InstanceField>, fieldName: string, fieldVal: Any) =>
-            {
-                const revivedVal = this.reviver!(fieldName, fieldVal)
-
-                const field = findFieldByName(fields, fieldName)!
+            setClassFieldFn = (field: reflect.InstanceField, obj: object, fieldVal: Any): void => {
+                const revivedVal = this.reviver!(field.getName(), fieldVal)
                 field.setValue(obj, revivedVal)
             }
         }
 
-        const obj = JSONValueParser.classGetDefaultCtor(classType).createInstance() as object
+        const obj: object = JSONValueParser.classGetDefaultCtor(classType).createInstance()
         let hasJsonParseIgnore: boolean = false
-        let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()
 
         const classFields = reflect.getInstanceFieldsRecursive(classType)
@@ -3321,7 +3323,7 @@ class JSONValueParser {
             }
 
             const classFieldVal = this.parse(jsonFieldVal, classField.getType())
-            setClassFieldFn(obj, classFields, classField.getName(), classFieldVal)
+            setClassFieldFn(classField, obj, classFieldVal)
         }
 
         for (const method of classType.getInstanceMethods()) {
@@ -3379,7 +3381,7 @@ class JSONValueParser {
     public parseInto(value: JSONValue, instance: object): Any {
         const classType = Class.of(instance)
         if (value instanceof JSONObject && this.isParseableObjectType(classType)) {
-            return this.parseObjectInto(value as JSONObject, instance)
+            return this.parseObjectInto(value, instance)
         }
         return this.parse(value, classType)
     }
@@ -3424,7 +3426,7 @@ class JSONValueParser {
             if (jsonFieldVal instanceof JSONObject && this.isParseableObjectType(fieldType)) {
                 const existingFieldVal = classField.getValue(existingObj)
                 if (existingFieldVal !== null && existingFieldVal !== undefined) {
-                    this.parseObjectInto(jsonFieldVal as JSONObject, existingFieldVal as object)
+                    this.parseObjectInto(jsonFieldVal, existingFieldVal as object)
                     continue
                 }
             }
@@ -3490,7 +3492,7 @@ class JSONValueParser {
         }
 
         for (let i = 0; i < len; i++) {
-            let elem = this.parse(jVal.values.at(i) as JSONValue, componentType)
+            let elem = this.parse(jVal.values.at(i), componentType)
             setArrayElementFn(arr, i, elem)
         }
         return arr
@@ -3499,7 +3501,7 @@ class JSONValueParser {
     private parsePrimitiveFixedArray(jVal: JSONArray, componentType: Class, len: int): Object {
         const parsed = new Array<Any>()
         for (let i = 0; i < len; i++) {
-            let elem = this.parse(jVal.values.at(i) as JSONValue, componentType)
+            let elem = this.parse(jVal.values.at(i), componentType)
             if (this.reviver !== undefined) {
                 const revivedVal = this.reviver!(`${i}`, elem)
                 if (revivedVal !== undefined) {
