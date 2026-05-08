@@ -847,6 +847,19 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             {%- endif %}
         }
     }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @returns { {{N}}Array } - a new {{N}}Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): {{N}}Array {
+        return new {{N}}Array(0)
+    }
+
     {%- set uniquePrimitiveTypes = ['number', 'int', T] if T != 'int' else ['number', 'int'] %}
         {%- set uniquePrimitiveTypes = uniquePrimitiveTypes if N != 'BigInt64' else uniquePrimitiveTypes + ['bigint'] %}
         {%- for argType in ['byte', 'short', 'int', 'long', 'float', 'bigint', 'number'] %}
@@ -896,18 +909,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     {%- elif N == 'Float32' %}
     private final native ofFloat(items: ValueArray<float>): void
     {%- endif %}
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { {{N}}Array } - a new {{N}}Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): {{N}}Array {
-        return new {{N}}Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<{{updatedElementCompat}}>.

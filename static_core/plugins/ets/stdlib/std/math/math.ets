@@ -295,6 +295,61 @@ export native function cbrt(v: double): double;
 export native function ceil(v: double): double;
 
 /**
+ * Leading zero bits count in 8-bit representation of `v`
+ * @param { byte } v - 8-bit integer
+ * @returns { int } Number of leading zero bits count in bit representation of `v`
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ */
+export function clz64(v: byte): int {
+    let extendedNum: long = v.toLong();
+    let mask: long = (((1).toLong() << 8) - 1) | (-1).toLong();
+    return clz64(extendedNum & mask);
+}
+
+/**
+ * Leading zero bits count in 16-bit representation of `v`
+ * @param { char } v - character value
+ * @returns { int } Number of leading zero bits count in bit representation of `v`
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ */
+export function clz64(v: char): int {
+    console.log("char")
+    let extendedNum: long = v.toLong();
+    let mask: long = (((1).toLong() << 16) - 1) | (-1).toLong();
+    return clz64(extendedNum & mask);
+}
+
+/**
+ * Leading zero bits count in 16-bit representation of `v`
+ * @param { short } v - 16-bit integer
+ * @returns { int } Number of leading zero bits count in bit representation of `v`
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ */
+export function clz64(v: short): int {
+    console.log("short")
+    let extendedNum: long = v.toLong();
+    let mask: long = (((1).toLong() << 16) - 1) | (-1).toLong();
+    return clz64(extendedNum & mask);
+}
+
+/**
+ * Leading zero bits count in 32-bit representation of `v`
+ * @param { int } v - 32-bit integer
+ * @returns { int } Number of leading zero bits count in bit representation of `v`
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ */
+export function clz64(v: int): int {
+    console.log("int")
+    let extendedNum: long = v.toLong();
+    let mask: long = (((1).toLong() << 32) - 1) | (-1).toLong();
+    return clz64(extendedNum & mask);
+}
+
+/**
  * Leading zero bits count in 64-bit representation of `v`
  * @param { long } v - 64-bit integer
  * @returns { int } Number of leading zero bits count in bit representation of `v`
@@ -307,58 +362,6 @@ export native function ceil(v: double): double;
  * clz64(0x0) == 64
  */
 export native function clz64(v: long): int;
-
-/**
- * Leading zero bits count in 32-bit representation of `v`
- * @param { int } v - 32-bit integer
- * @returns { int } Number of leading zero bits count in bit representation of `v`
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- */
-export function clz64(v: int): int {
-    let extendedNum: long = v.toLong();
-    let mask: long = (1 as long << 32) - 1;
-    return clz64(extendedNum & mask);
-}
-
-/**
- * Leading zero bits count in 16-bit representation of `v`
- * @param { short } v - 16-bit integer
- * @returns { int } Number of leading zero bits count in bit representation of `v`
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- */
-export function clz64(v: short): int {
-    let extendedNum: long = v.toLong();
-    let mask: long = (1 as long << 16) - 1;
-    return clz64(extendedNum & mask);
-}
-
-/**
- * Leading zero bits count in 8-bit representation of `v`
- * @param { byte } v - 8-bit integer
- * @returns { int } Number of leading zero bits count in bit representation of `v`
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- */
-export function clz64(v: byte): int {
-    let extendedNum: long = v.toLong();
-    let mask: long = (1 as long << 8) - 1;
-    return clz64(extendedNum & mask);
-}
-
-/**
- * Leading zero bits count in 16-bit representation of `v`
- * @param { char } v - character value
- * @returns { int } Number of leading zero bits count in bit representation of `v`
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- */
-export function clz64(v: char): int {
-    let extendedNum: long = v.toLong();
-    let mask: long = (1 as long << 16) - 1;
-    return clz64(extendedNum & mask);
-}
 
 /**
  * Leading zero bits count in 32-bit representation of `v`

@@ -674,6 +674,18 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Uint8ClampedArray } - a new Uint8ClampedArray
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Uint8ClampedArray {
+        return new Uint8ClampedArray(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<short> } items - a set of elements to include in the new array object.
      * @returns { Uint8ClampedArray } - a new Uint8ClampedArray
      * @static
@@ -719,18 +731,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofShort(items: ValueArray<short>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Uint8ClampedArray } - a new Uint8ClampedArray
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Uint8ClampedArray {
-        return new Uint8ClampedArray(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -1088,6 +1088,19 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public native reverse(): Uint8ClampedArray
 
     /**
+     * Creates a slice of current Uint8ClampedArray using range [begin, this.lengthInt].
+     *
+     * @param { int } begin - start index to be taken into slice.
+     * @returns { Uint8ClampedArray } - a new Uint8ClampedArray with elements of
+     *     current Uint8ClampedArray[begin, this.lengthInt].
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public slice(begin: int): Uint8ClampedArray {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current Uint8ClampedArray using range [begin, end]
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice}
      *
@@ -1107,19 +1120,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         const relEnd = normalizeIndex(end, this.lengthInt)
         let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffsetInt, relEnd * this.BYTES_PER_ELEMENT + this.byteOffsetInt)
         return new Uint8ClampedArray(buf)
-    }
-
-    /**
-     * Creates a slice of current Uint8ClampedArray using range [begin, this.lengthInt].
-     *
-     * @param { int } begin - start index to be taken into slice.
-     * @returns { Uint8ClampedArray } - a new Uint8ClampedArray with elements of
-     *     current Uint8ClampedArray[begin, this.lengthInt].
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public slice(begin: int): Uint8ClampedArray {
-        return this.sliceFromTo(begin, this.lengthInt)
     }
 
 
@@ -2290,6 +2290,18 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Uint8Array } - a new Uint8Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Uint8Array {
+        return new Uint8Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<short> } items - a set of elements to include in the new array object.
      * @returns { Uint8Array } - a new Uint8Array
      * @static
@@ -2335,18 +2347,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofShort(items: ValueArray<short>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Uint8Array } - a new Uint8Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Uint8Array {
-        return new Uint8Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -2716,6 +2716,19 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public native reverse(): Uint8Array
 
     /**
+     * Creates a slice of current Uint8Array using range [begin, this.lengthInt].
+     *
+     * @param { int } begin - start index to be taken into slice.
+     * @returns { Uint8Array } - a new Uint8Array with elements of
+     *     current Uint8Array[begin, this.lengthInt].
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public slice(begin: int): Uint8Array {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current Uint8Array using range [begin, end]
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice}
      *
@@ -2735,19 +2748,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         const relEnd = normalizeIndex(end, this.lengthInt)
         let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffsetInt, relEnd * this.BYTES_PER_ELEMENT + this.byteOffsetInt)
         return new Uint8Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Uint8Array using range [begin, this.lengthInt].
-     *
-     * @param { int } begin - start index to be taken into slice.
-     * @returns { Uint8Array } - a new Uint8Array with elements of
-     *     current Uint8Array[begin, this.lengthInt].
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public slice(begin: int): Uint8Array {
-        return this.sliceFromTo(begin, this.lengthInt)
     }
 
 
@@ -3916,6 +3916,18 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Uint16Array } - a new Uint16Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Uint16Array {
+        return new Uint16Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { Uint16Array } - a new Uint16Array
      * @static
@@ -3945,18 +3957,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
 
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Uint16Array } - a new Uint16Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Uint16Array {
-        return new Uint16Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -4326,6 +4326,19 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public native reverse(): Uint16Array
 
     /**
+     * Creates a slice of current Uint16Array using range [begin, this.lengthInt].
+     *
+     * @param { int } begin - start index to be taken into slice.
+     * @returns { Uint16Array } - a new Uint16Array with elements of
+     *     current Uint16Array[begin, this.lengthInt].
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public slice(begin: int): Uint16Array {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current Uint16Array using range [begin, end]
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice}
      *
@@ -4345,19 +4358,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         const relEnd = normalizeIndex(end, this.lengthInt)
         let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffsetInt, relEnd * this.BYTES_PER_ELEMENT + this.byteOffsetInt)
         return new Uint16Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Uint16Array using range [begin, this.lengthInt].
-     *
-     * @param { int } begin - start index to be taken into slice.
-     * @returns { Uint16Array } - a new Uint16Array with elements of
-     *     current Uint16Array[begin, this.lengthInt].
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public slice(begin: int): Uint16Array {
-        return this.sliceFromTo(begin, this.lengthInt)
     }
 
 
@@ -5548,6 +5548,18 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { Uint32Array } - a new Uint32Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): Uint32Array {
+        return new Uint32Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { Uint32Array } - a new Uint32Array
      * @static
@@ -5593,18 +5605,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native ofInt(items: ValueArray<int>): void
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofLong(items: ValueArray<long>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { Uint32Array } - a new Uint32Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): Uint32Array {
-        return new Uint32Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<int>.
@@ -5974,6 +5974,19 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public native reverse(): Uint32Array
 
     /**
+     * Creates a slice of current Uint32Array using range [begin, this.lengthInt].
+     *
+     * @param { int } begin - start index to be taken into slice.
+     * @returns { Uint32Array } - a new Uint32Array with elements of
+     *     current Uint32Array[begin, this.lengthInt].
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public slice(begin: int): Uint32Array {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current Uint32Array using range [begin, end]
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice}
      *
@@ -5993,19 +6006,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         const relEnd = normalizeIndex(end, this.lengthInt)
         let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffsetInt, relEnd * this.BYTES_PER_ELEMENT + this.byteOffsetInt)
         return new Uint32Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Uint32Array using range [begin, this.lengthInt].
-     *
-     * @param { int } begin - start index to be taken into slice.
-     * @returns { Uint32Array } - a new Uint32Array with elements of
-     *     current Uint32Array[begin, this.lengthInt].
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public slice(begin: int): Uint32Array {
-        return this.sliceFromTo(begin, this.lengthInt)
     }
 
 
@@ -7198,6 +7198,18 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     /**
      * Returns a new array from a set of elements.
      *
+     * @returns { BigUint64Array } - a new BigUint64Array
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static of(): BigUint64Array {
+        return new BigUint64Array(0)
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
      * @param { FixedArray<int> } items - a set of elements to include in the new array object.
      * @returns { BigUint64Array } - a new BigUint64Array
      * @static
@@ -7261,18 +7273,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     private final native ofNumber(items: ValueArray<number>): void
     private final native ofLong(items: ValueArray<long>): void
     private final native ofBigInt(items: FixedArray<Object>): void
-
-    /**
-     * Returns a new array from a set of elements.
-     *
-     * @returns { BigUint64Array } - a new BigUint64Array
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static of(): BigUint64Array {
-        return new BigUint64Array(0)
-    }
 
     /**
      * Creates an array from an object of FixedArray<BigInt>.
@@ -7634,6 +7634,19 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public native reverse(): BigUint64Array
 
     /**
+     * Creates a slice of current BigUint64Array using range [begin, this.lengthInt].
+     *
+     * @param { int } begin - start index to be taken into slice.
+     * @returns { BigUint64Array } - a new BigUint64Array with elements of
+     *     current BigUint64Array[begin, this.lengthInt].
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public slice(begin: int): BigUint64Array {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current BigUint64Array using range [begin, end]
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice}
      *
@@ -7653,19 +7666,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         const relEnd = normalizeIndex(end, this.lengthInt)
         let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffsetInt, relEnd * this.BYTES_PER_ELEMENT + this.byteOffsetInt)
         return new BigUint64Array(buf)
-    }
-
-    /**
-     * Creates a slice of current BigUint64Array using range [begin, this.lengthInt].
-     *
-     * @param { int } begin - start index to be taken into slice.
-     * @returns { BigUint64Array } - a new BigUint64Array with elements of
-     *     current BigUint64Array[begin, this.lengthInt].
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public slice(begin: int): BigUint64Array {
-        return this.sliceFromTo(begin, this.lengthInt)
     }
 
 
