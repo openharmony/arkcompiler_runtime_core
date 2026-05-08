@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -384,8 +384,8 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.57154"
-    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/57154"
+    VERSION: Final = "sdk-1.5.0-dev.63907"
+    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/63907"
 
     # Computed attributes
     ani_header_dir: Path = field(init=False)
@@ -461,6 +461,80 @@ class PandaVm(CachedResource):
         self._write_version(self.VERSION)
 
 
+class TaiheNapiBuild(CachedResource):
+    CLI_NAME = "napi-packages"
+    PATH_CACHE = "napi-packages"
+
+    # url for taihe napi packages
+    REPO: Final = (
+        "https://gitcode.com/m0_52007851/taihe-napi-bin/releases/download/v1.2.0/"
+    )
+
+    # Supported platforms
+    LINUX_X86_64: Final = "linux-x86_64"
+    WINDOWS_X86_64: Final = "windows-x86_64"
+    DARWIN_ARM64: Final = "darwin-arm64"
+    DARWIN_X86_64: Final = "darwin-x86_64"
+
+    # Bundle tarball file names for each platform
+    LINUX_X86_64_TAIHE_NAPI_BUNDLE: Final = (
+        "taihe-linux-x86_64-1.2.0+napi-20260112.tar.gz"
+    )
+    WINDOWS_X86_64_TAIHE_NAPI_BUNDLE: Final = (
+        "taihe-windows-x86_64-1.2.0+napi-20260112.tar.gz"
+    )
+    DARWIN_ARM64_TAIHE_NAPI_BUNDLE: Final = (
+        "taihe-darwin-arm64-1.2.0+napi-20260112.tar.gz"
+    )
+    DARWIN_X86_64_TAIHE_NAPI_BUNDLE: Final = (
+        "taihe-darwin-x86_64-1.2.0+napi-20260112.tar.gz"
+    )
+
+    files: ClassVar[dict[str, str]] = {
+        LINUX_X86_64: LINUX_X86_64_TAIHE_NAPI_BUNDLE,
+        WINDOWS_X86_64: WINDOWS_X86_64_TAIHE_NAPI_BUNDLE,
+        DARWIN_ARM64: DARWIN_ARM64_TAIHE_NAPI_BUNDLE,
+        DARWIN_X86_64: DARWIN_X86_64_TAIHE_NAPI_BUNDLE,
+    }
+
+    @override
+    def fetch(self):
+        # Clear and rebuild the cache directory
+        shutil.rmtree(self.base_path, ignore_errors=True)
+        self.base_path.mkdir(parents=True, exist_ok=True)
+
+        # System -> (repository url, file name)
+        downloads = {
+            self.LINUX_X86_64: (self.REPO, self.LINUX_X86_64_TAIHE_NAPI_BUNDLE),
+            self.WINDOWS_X86_64: (self.REPO, self.WINDOWS_X86_64_TAIHE_NAPI_BUNDLE),
+            self.DARWIN_ARM64: (self.REPO, self.DARWIN_ARM64_TAIHE_NAPI_BUNDLE),
+            self.DARWIN_X86_64: (self.REPO, self.DARWIN_X86_64_TAIHE_NAPI_BUNDLE),
+        }
+
+        # Download all platform bundles using curl
+        for _, (repo, filename) in downloads.items():
+            url = urljoin(repo, filename).replace("+", "%2B")
+            out_path = self.base_path / filename
+            logging.info("Downloading napi packages from %s to %s", url, out_path)
+            subprocess.run(["curl", "-fLsS", "-o", str(out_path), url], check=True)
+
+        logging.info("All napi packages downloaded to %s", self.base_path)
+
+    def extract_to(self, target_dir: Path, *, system: str):
+        tgz = self.base_path / self.files[system]
+
+        # Extract the tgz and get the directory list
+        with tarfile.open(tgz, "r:gz") as tar:
+            tar.extractall(target_dir, filter="tar")
+
+    @override
+    @classmethod
+    def construct(cls, ctx: ResourceContext) -> Self:
+        self = cls(cls.locate(ctx))
+        self.fetch()
+        return self
+
+
 class PythonBuild(CachedResource):
     CLI_NAME = "python-packages"
     PATH_CACHE = "python-packages"
@@ -486,6 +560,13 @@ class PythonBuild(CachedResource):
     WINDOWS_X86_64_PY_BUNDLE: Final = "python-mingw-x86-3.11.4_20251107.tar.gz"
     DARWIN_ARM64_PY_BUNDLE: Final = "python-darwin-arm64-3.11.4_20251107.tar.gz"
     DARWIN_X86_64_PY_BUNDLE: Final = "python-darwin-x86-3.11.4_20251107.tar.gz"
+
+    @override
+    @classmethod
+    def construct(cls, ctx: ResourceContext) -> Self:
+        self = cls(cls.locate(ctx))
+        self.fetch()
+        return self
 
     @override
     def fetch(self):
@@ -542,13 +623,6 @@ class PythonBuild(CachedResource):
             if dir_path != target_dir and dir_path.exists():
                 shutil.rmtree(dir_path, ignore_errors=True)
 
-    @override
-    @classmethod
-    def construct(cls, ctx: ResourceContext) -> Self:
-        self = cls(cls.locate(ctx))
-        self.fetch()
-        return self
-
 
 class Antlr(CachedResource):
     CLI_NAME = "antlr"
@@ -582,6 +656,7 @@ BUILTIN_RESOURCES: Sequence[ResourceT] = [
 ALL_RESOURCES: Sequence[ResourceT] = [
     *BUILTIN_RESOURCES,
     PandaVm,
+    TaiheNapiBuild,
     PythonBuild,
     Antlr,
 ]
