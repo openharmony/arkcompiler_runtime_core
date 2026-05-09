@@ -851,7 +851,9 @@ export namespace taskpool {
             }
             if (!isTaskPoolUseLaunch) {
                 initGlobalTaskQueues();
-                globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.push(this.task);
+                while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(this.task)) {
+                    Coroutine.Schedule();
+                }
                 let count = allTasks.get(this.task) ?? 0;
                 allTasks.set(this.task, count + 1);
                 const newWaitingTasksNum = waitingTasksNum.fetchAdd(1);
@@ -2416,7 +2418,7 @@ export namespace taskpool {
         waitingTasks.set(task, count == undefined ? 1 : count + 1);
     }
 
-    function popFromMap<T>(item: T, currentTasksMap: containers.ConcurrentHashMap<T, int>, possibleTasksMap: containers.ConcurrentHashMap<T, int>, cancelSet: containers.ConcurrentSet<T>): boolean {
+    function popFromMap<T extends Object>(item: T, currentTasksMap: containers.ConcurrentHashMap<T, int>, possibleTasksMap: containers.ConcurrentHashMap<T, int>, cancelSet: containers.ConcurrentSet<T>): boolean {
         const instancesOfTheTask: int = currentTasksMap.get(item)! - 1;
         if (instancesOfTheTask == 0) {
             // This is last instance in the map
@@ -2781,11 +2783,11 @@ export namespace taskpool {
         if (isGlobalTaskQueuesInitialized.get()) {
             return;
         }
-        globalTaskQueue = new Map<Priority, containers.LinkedBlockingQueue<Task>>();
-        globalTaskQueue.set(Priority.HIGH, new containers.LinkedBlockingQueue<Task>());
-        globalTaskQueue.set(Priority.MEDIUM, new containers.LinkedBlockingQueue<Task>());
-        globalTaskQueue.set(Priority.LOW, new containers.LinkedBlockingQueue<Task>());
-        globalTaskQueue.set(Priority.IDLE, new containers.LinkedBlockingQueue<Task>());
+        globalTaskQueue = new Map<Priority, containers.stackless.LinkedConcurrentQueue<Task>>();
+        globalTaskQueue.set(Priority.HIGH, new containers.stackless.LinkedConcurrentQueue<Task>());
+        globalTaskQueue.set(Priority.MEDIUM, new containers.stackless.LinkedConcurrentQueue<Task>());
+        globalTaskQueue.set(Priority.LOW, new containers.stackless.LinkedConcurrentQueue<Task>());
+        globalTaskQueue.set(Priority.IDLE, new containers.stackless.LinkedConcurrentQueue<Task>());
 
         isGlobalTaskQueuesInitialized.set(true);
     }
@@ -2847,7 +2849,7 @@ export namespace taskpool {
         return undefined;
     } 
     /**
-     * @brief Non-blocking priority-based task selection using LinkedBlockingQueue.poll()
+    * @brief Non-blocking priority-based task selection using LinkedConcurrentQueue.poll()
      * Uses poll() instead of pop() to avoid blocking
      */
     function selectTaskByPriorityNonBlocking(): Task | undefined {
@@ -2888,7 +2890,7 @@ export namespace taskpool {
 
 
     /**
-     * @brief Non-blocking implementation helper using poll() instead of pop()
+    * @brief Non-blocking implementation helper using poll() instead of pop()
      * @param priority The priority queue to get task from
      * @returns Task if found and executable, undefined otherwise
      */
@@ -2932,7 +2934,9 @@ export namespace taskpool {
             return false;
         }
 
-        globalTaskQueue.get(normalizeTaskQueuePriority(priority!))?.push(task);
+        while (!globalTaskQueue.get(normalizeTaskQueuePriority(priority!))?.add(task)) {
+            Coroutine.Schedule();
+        }
         ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
             ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
         });
@@ -3043,7 +3047,7 @@ export namespace taskpool {
     const taskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
     let isGlobalTaskQueuesInitialized: AtomicFlag = new AtomicFlag(false);
     let taskQueues: Map<Priority, Array<Task>>;
-    let globalTaskQueue: Map<Priority, containers.LinkedBlockingQueue<Task>>;
+    let globalTaskQueue: Map<Priority, containers.stackless.LinkedConcurrentQueue<Task>>;
     let pendingDependencyTasks: Map<Task, Priority> = new Map<Task, Priority>();
 
     // New task queue management variables

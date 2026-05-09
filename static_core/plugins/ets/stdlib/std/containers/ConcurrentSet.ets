@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ export namespace containers {
     /**
     * ConcurrentSet implementation
     */
-    export final class ConcurrentSet<T> implements ReadonlySet<T> {
+    export final class ConcurrentSet<T extends Object> implements ReadonlySet<T> {
         private readonly elements: ConcurrentHashMap<T, T>;
 
         /**

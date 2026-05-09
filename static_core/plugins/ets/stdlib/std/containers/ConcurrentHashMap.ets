@@ -17,7 +17,7 @@ package std.containers;
 
 export namespace containers {
 
-    final class MapNode<K, V> {
+    final class MapNode<K extends Object, V extends Object> {
         prev: MapNode<K, V>;
         next: MapNode<K, V>;
 
@@ -37,7 +37,7 @@ export namespace containers {
         }
     }
 
-    final class ConcurrentHashMapIterator<K, V, R> implements IterableIterator<R> {
+    final class ConcurrentHashMapIterator<K extends Object, V extends Object, R> implements IterableIterator<R> {
         private node: MapNode<K, V>;
         private tail: MapNode<K, V>;
         private mapper: (e: MapNode<K, V>) => R;
@@ -126,9 +126,9 @@ export namespace containers {
         }
     }
 
-    type ConcurrentHashMapBucket<K, V> = Array<MapNode<K, V>> | undefined;
+    type ConcurrentHashMapBucket<K extends Object, V extends Object> = Array<MapNode<K, V>> | undefined;
 
-    export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
+    export class ConcurrentHashMap<K extends Object, V extends Object> implements ReadonlyMap<K, V> {
         private headNode: MapNode<K, V> | undefined = undefined;
 
         private buckets: ConcurrentHashMapBucket<K, V>[] = [];

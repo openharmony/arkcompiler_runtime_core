@@ -23,37 +23,6 @@ package std.containers;
 */
 export namespace containers.stackless {
 
-    class AsyncCondVarOSBasedMutex {
-        constructor() {
-            this.waitersList_ = new WaitersList();
-            this.waiters_ = 0;
-        }
-
-        public async wait(mutex: Object): Promise<void> {
-            ++this.waiters_;
-            ConcurrencyHelpers.mutexUnlock(mutex);
-            await this.waitersList_.suspend();
-            ConcurrencyHelpers.mutexLock(mutex);
-        }
-
-        public notifyOne(mutex: Object): void {
-            if (this.waiters_ != 0) {
-                this.waitersList_.resume();
-                this.waiters_--;
-            }
-        }
-
-        public notifyAll(mutex: Object): void {
-            while (this.waiters_ != 0) {
-                this.waitersList_.resume();
-                this.waiters_--;
-            }
-        }
-
-        private waitersList_: WaitersList;
-        private waiters_: int;
-    }
-
     /**
     * ArrayConcurrentQueue is a bounded, thread-safe concurrent queue backed by a fixed-size array;
     * ArrayConcurrentQueue supports both asynchronous and non-blocking
@@ -77,7 +46,7 @@ export namespace containers.stackless {
             this.capacitySize = capacity;
             this.array = Array.create<T|undefined>(this.capacitySize, undefined);
             this.mutex = ConcurrencyHelpers.mutexCreate();
-            this.condVar = new AsyncCondVarOSBasedMutex();
+            this.condVar = new concurrency.stackless.AsyncCondVarBasedMutex();
         }
 
         /**
@@ -93,7 +62,9 @@ export namespace containers.stackless {
             for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                 const val = iterRes.value;
                 if (val !== undefined) {
-                    this.add(val);
+                    if (!this.add(val!)) {
+                        throw new RangeError("ArrayConcurrentQueue:: iterable exceeds capacity");
+                    }
                 }
             }
         }
@@ -110,7 +81,7 @@ export namespace containers.stackless {
             await this.waitUntilQueueIsNotFull();
             this.array[this.curTailIdx] = el;
             this.increaseTailIdx();
-            this.condVar.notifyOne(this.mutex);
+            this.condVar.notifyOne();
             ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
 
@@ -127,7 +98,7 @@ export namespace containers.stackless {
                 const val = this.array[this.curHeadIdx];
                 this.array[this.curHeadIdx] = undefined;
                 this.increaseHeadIdx();
-                this.condVar.notifyOne(this.mutex);
+                this.condVar.notifyOne();
                 return Promise.resolve(val!);
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -149,7 +120,7 @@ export namespace containers.stackless {
                 }
                 this.array[this.curTailIdx] = element;
                 this.increaseTailIdx();
-                this.condVar.notifyOne(this.mutex);
+                this.condVar.notifyOne();
                 return true;
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -172,7 +143,7 @@ export namespace containers.stackless {
                 const val = this.array[this.curHeadIdx];
                 this.array[this.curHeadIdx] = undefined;
                 this.increaseHeadIdx();
-                this.condVar.notifyOne(this.mutex);
+                this.condVar.notifyOne();
                 return val;
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -317,7 +288,7 @@ export namespace containers.stackless {
         private curHeadIdx: int = 0;                           // Index of the first element in a ArrayConcurrentQueue
         private curTailIdx: int = 0;                           // Index of the last element in a ArrayConcurrentQueue
         private mutex: Object;                                 // push/pop Mutex
-        private condVar: AsyncCondVarOSBasedMutex;             // push/pop CondVar
+        private condVar: concurrency.stackless.AsyncCondVarBasedMutex; // push/pop CondVar
         private capacitySize: int = 0;
         private isQueueFull: boolean = false;
         private isQueueEmpty: boolean = true;
