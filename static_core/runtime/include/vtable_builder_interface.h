@@ -15,10 +15,23 @@
 #ifndef PANDA_RUNTIME_VTABLE_BUILDER_INTERFACE_H
 #define PANDA_RUNTIME_VTABLE_BUILDER_INTERFACE_H
 
-#include "libarkbase/mem/arena_allocator.h"
 #include "runtime/include/method.h"
+#include "runtime/mem/internal_arena_allocator.h"
 
 namespace ark {
+
+template <class T>
+using InternalArenaForwardList = std::forward_list<T, mem::InternalArenaAllocator::Adapter<T>>;
+
+template <typename Key, typename T, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>>
+using InternalArenaUnorderedMap =
+    std::unordered_map<Key, T, Hash, KeyEqual, mem::InternalArenaAllocator::Adapter<std::pair<const Key, T>>>;
+
+template <class Key, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>>
+using InternalArenaUnorderedSet = std::unordered_set<Key, Hash, KeyEqual, mem::InternalArenaAllocator::Adapter<Key>>;
+
+template <typename T>
+using InternalArenaVector = std::vector<T, mem::InternalArenaAllocator::Adapter<T>>;
 
 class ClassLinker;
 class ClassLinkerContext;
@@ -96,7 +109,7 @@ public:
 
     virtual Span<const IfaceMethodDispatch> GetIfaceMethodDispatches() const = 0;
 
-    virtual ArenaAllocator *GetAllocator() = 0;
+    virtual mem::InternalArenaAllocator *GetAllocator() = 0;
 
     virtual ~VTableBuilder() = default;
 

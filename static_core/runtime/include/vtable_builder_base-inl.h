@@ -98,7 +98,7 @@ void VTableBuilderBase<VISIT_SUPERITABLE>::BuildForInterface(Span<Method> method
 template <bool VISIT_SUPERITABLE>
 void VTableBuilderBase<VISIT_SUPERITABLE>::AddBaseMethods(Class *baseClass)
 {
-    auto baseMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
+    auto baseMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
     ASSERT(baseMethods != nullptr);
 
     if (baseClass != nullptr) {
@@ -117,7 +117,7 @@ template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(panda_file::ClassDataAccessor *cda, ClassLinkerContext *ctx)
 {
     ASSERT(cda != nullptr);
-    auto classMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
+    auto classMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
     ASSERT(classMethods != nullptr);
 
     cda->EnumerateMethods([this, ctx, &classMethods](panda_file::MethodDataAccessor &mda) {
@@ -137,7 +137,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(panda_file::ClassData
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(Span<Method> methods)
 {
-    auto classMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
+    auto classMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
     ASSERT(classMethods != nullptr);
 
     for (auto &method : methods) {
@@ -157,7 +157,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(Span<Method> methods)
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddProxyClassMethods(Span<Method *> methods)
 {
-    auto *classMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
+    auto *classMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
     ASSERT(classMethods != nullptr);
 
     for (auto *method : methods) {
@@ -175,7 +175,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddProxyClassMethods(Span<Method *> m
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable itable, size_t superItableSize)
 {
-    auto defaultMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
+    auto defaultMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
     ASSERT(defaultMethods != nullptr);
 
     // NOTE(vpukhov): avoid traversing the whole itable and handle conflicting super vtable methods in a separate pass
