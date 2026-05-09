@@ -21,7 +21,7 @@ tags: [compile-only, negative]
 files:
 - ./modules/reexport_src1.ets
 - ./modules/reexport_src2.ets
-expected_out: "Semantic error ESE685267: Entity named 'A' is already exported"
+expected_out: "Semantic error ESE130586: The entity named 'A' is already exported."
 ---*/
 
 export * from "./modules/reexport_src1"

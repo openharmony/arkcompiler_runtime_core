@@ -15,19 +15,12 @@
 
 /*---
 desc: >-
-    Positive: importing a function and then declaring a local non-ambient
-    entity of the same name is allowed, and the local declaration takes
-    precedence. Because cross-package declarations are loaded from
-    storage as AMBIENT (`declare`), here 'helper' resolves
-    to the local `let helper`, so `console.log(helper)` prints its value;
-    the imported function is superseded (calling helper(1) would be a
-    compile error, 'Int has no call signatures').
+    Negative: importing a function and then declaring a local entity of the
+    same name in the module declaration scope is a duplicate declaration.
 files: [lib_helper.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json
-expected_out:
-    runtime:
-        - "5"
+tags: [compile-only, negative]
 ---*/
 
 import { helper } from '@panda/lib/lib_helper'

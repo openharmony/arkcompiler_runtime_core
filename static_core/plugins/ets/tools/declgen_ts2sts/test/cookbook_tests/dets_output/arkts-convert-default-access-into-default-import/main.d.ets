@@ -16,8 +16,6 @@
 
 import ___LibA_default from "./lib-a";
 import __LibB_default from "./lib-b";
-import * as LibA from './lib-a';
-import * as LibB from './lib-b';
 // This type name intentionally conflicts with the generated name for LibA
 export type __LibA_default = string;
 export declare const a1: ___LibA_default;

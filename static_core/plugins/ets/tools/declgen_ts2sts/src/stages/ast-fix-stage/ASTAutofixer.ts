@@ -162,6 +162,10 @@ export class Autofixer extends VisitorTraverser<undefined, undefined> {
 
     if (ts.isModuleBlock(node)) {
       for (const stmt of node.statements) {
+        if (isRedundantNamespaceExport(stmt, node)) {
+          continue;
+        }
+
         stmt.forEachChild((child) => {
           if (child.kind === ts.SyntaxKind.ExportKeyword) {
             shouldChange = false;
@@ -608,6 +612,19 @@ export class Autofixer extends VisitorTraverser<undefined, undefined> {
 
     return this.context.factory.updateSourceFile(node, statements);
   }
+}
+
+function isRedundantNamespaceExport(stmt: ts.Statement, block: ts.ModuleBlock): boolean {
+  if (!ts.isExportDeclaration(stmt) || stmt.moduleSpecifier || !stmt.exportClause || !ts.isNamedExports(stmt.exportClause)) {
+    return false;
+  }
+  if (stmt.exportClause.elements.length !== 1 || stmt.exportClause.elements[0].propertyName !== undefined) {
+    return false;
+  }
+  const name = stmt.exportClause.elements[0].name.text;
+  return block.statements.some((node) => {
+    return ts.isModuleDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === name;
+  });
 }
 
 /**

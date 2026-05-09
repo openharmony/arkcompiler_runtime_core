@@ -15,10 +15,12 @@
 
 /*---
 desc: >-
-    Negative: importing a const under an alias that collides with the
-    std/core global 'console' must be a compile-time error.
+    Positive: importing a const under an alias that collides with the std/core
+    global 'console' is allowed. Standard library constants and variables can
+    be redefined in a module scope, and the imported alias shadows the std/core
+    global in this module.
 files: [lib_probe.ets]
-tags: [compile-only, negative]
+tags: [compile-only]
 name: test_alias_var_n
 arktsconfig: arktsconfig-import.json
 es2panda_options: ['read-metadata']

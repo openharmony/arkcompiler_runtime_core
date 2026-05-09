@@ -15,10 +15,12 @@
 
 /*---
 desc: >-
-    Negative: importing a function under an alias that collides with the
-    std/core function 'swap' must be a compile-time error.
+    Positive: importing a function under an alias that collides with the
+    std/core function 'swap' is allowed. Standard library functions can be
+    redefined in a module scope, and the imported alias shadows the std/core
+    function in this module.
 files: [lib_probe.ets]
-tags: [compile-only, negative]
+tags: [compile-only]
 name: test_alias_function_n
 arktsconfig: arktsconfig-import.json
 es2panda_options: ['read-metadata']
