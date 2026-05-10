@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Warning W0000: Duplicated export aliases for 'declare'.
+Warning W0073: Duplicated export aliases for 'declare'.
 Syntax error ESY0279: Cannot find name 'declare' to export.
 Syntax error ESY0227: Unexpected token 'default'.
 Syntax error ESY0227: Unexpected token 'let'.

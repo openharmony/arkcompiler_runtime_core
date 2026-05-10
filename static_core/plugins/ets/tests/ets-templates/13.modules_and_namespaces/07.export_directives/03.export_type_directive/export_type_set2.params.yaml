@@ -25,14 +25,14 @@ cases:
       - 'type {D, D}'    
     expected_out:
       - "Warning W125428: 'D' has already imported"
-      - "Warning W0000: Duplicated export aliases for 'D'."
+      - "Warning W0073: Duplicated export aliases for 'D'."
   - description: '2. Duplicated export type. Class. Expect warning.'
     data:
       - 'class D {}'
     export_ex:
       - 'type {D}'
       - 'type {D}'
-    expected_out: "Warning W0000: Duplicated export aliases for 'D'."
+    expected_out: "Warning W0073: Duplicated export aliases for 'D'."
   - description: '3. Repited Export type. Class.'
     data:
       - 'export class D {}'
@@ -45,14 +45,14 @@ cases:
     export_ex:
       - 'type {NUM}'
       - 'type {NUM}'
-    expected_out: "Warning W0000: Duplicated export aliases for 'NUM'."
+    expected_out: "Warning W0073: Duplicated export aliases for 'NUM'."
   - description: '5. Duplicated export type. Constants. Expect warning.'
     data:
       - 'const NUM: int = 786'
     export_ex:
       - 'type {NUM, NUM}'
     expected_out:
-      - "Warning W0000: Duplicated export aliases for 'NUM'."
+      - "Warning W0073: Duplicated export aliases for 'NUM'."
       - "Warning W125428: 'NUM' has already imported"
   - description: '6. Duplicated export type. Constants. With AS. Expect warning.'
     data:
@@ -65,4 +65,4 @@ cases:
       - 'class D {}'
     export_ex:
       - 'type {D, D as default}'
-    expected_out: "Warning W0000: Duplicated export aliases for 'D'."
+    expected_out: "Warning W0073: Duplicated export aliases for 'D'."
