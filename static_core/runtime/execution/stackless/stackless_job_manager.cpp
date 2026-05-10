@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "runtime/execution/stackless/stackless_job_manager.h"
+
+#include "runtime/execution/dfx/async_stack_helper.h"
 #include "runtime/execution/stackless/stackless_job_worker_thread.h"
 #include "runtime/execution/affinity_mask.h"
 #include "runtime/execution/job_worker_group.h"
@@ -37,6 +38,9 @@ StacklessJobManager::StacklessJobManager(const JobManagerConfig &config, JobExec
 
 void StacklessJobManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
+    GetAsyncStackHelper().Initialize();
+    GetAsyncStackHelper().CheckLoadDfxAsyncStackFunc();
+
     InitializeWorkerIdAllocator();
     CreateMainExecutionContext(runtime, vm);
     CreateGeneralWorkers(COMMON_WORKERS_COUNT, runtime, vm);
@@ -142,6 +146,10 @@ LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
         return LaunchResult::NO_SUITABLE_WORKER;
     }
     job->SetAffinityMask(affinityMask);
+
+    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    job->SetAsyncStackID(stackId);
+    LOG(DEBUG, EXECUTION) << "Launch: job " << job->GetName() << " with async stack ID " << stackId;
 
     if (params.launchImmediately) {
         workersLock_.Unlock();

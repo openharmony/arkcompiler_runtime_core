@@ -18,6 +18,7 @@
 #include "runtime/execution/job_execution_context.h"
 #include "runtime/execution/coroutines/coroutine_context.h"
 #include "runtime/execution/coroutines/coroutine_manager.h"
+#include "runtime/execution/dfx/async_stack_scope.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/thread_scopes.h"
 
@@ -120,6 +121,9 @@ void Coroutine::OnContextSwitchedTo() {}
 void Coroutine::ExecuteJob(Job *job)
 {
     ASSERT(Coroutine::GetCurrent() == this);
+
+    dfx::AsyncStackScope asyncStackScope(job, GetCoroutineManager()->GetAsyncStackHelper());
+
     job->SetExecutionContext(this);
     job->SetStatus(Job::Status::RUNNING);
     if (job->HasManagedEntrypoint()) {

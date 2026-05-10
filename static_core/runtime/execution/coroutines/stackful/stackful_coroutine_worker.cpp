@@ -32,6 +32,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
       stats_(std::move(name))
 {
     LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << GetId() << " name=" << GetName();
+
     if (type == ScheduleLoopType::THREAD) {
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
         os::thread::SetThreadName(t.native_handle(), GetName().c_str());

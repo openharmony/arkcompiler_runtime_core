@@ -455,6 +455,61 @@ async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
     arktest.assertEQ(completedCount, 2);
 }
 
+function identityInt(value: int): int {
+    return value;
+}
+
+// The async stack integration touches task submission paths. Keep this as a
+// regression test to ensure existing taskpool execution semantics are unchanged.
+async function asyncStackSubmissionKeepsTaskpoolSemantics(): Promise<void> {
+    let executeTask = new taskpool.Task(identityInt, 1);
+    let executeResult = await taskpool.execute(executeTask);
+    arktest.assertEQ(executeResult, 1);
+
+    let timeoutTask = new taskpool.Task(identityInt, 2);
+    let timeoutResult = await taskpool.execute(timeoutTask, { timeout: 50 });
+    arktest.assertEQ(timeoutResult, 2);
+
+    let delayedTask = new taskpool.Task(identityInt, 3);
+    let delayedResult = await taskpool.executeDelayed(10, delayedTask);
+    arktest.assertEQ(delayedResult, 3);
+
+    let group = new taskpool.TaskGroup();
+    group.addTask(new taskpool.Task(identityInt, 4));
+    group.addTask(new taskpool.Task(identityInt, 5));
+    let groupResult = await taskpool.execute(group);
+    arktest.assertEQ(groupResult[0], 4);
+    arktest.assertEQ(groupResult[1], 5);
+
+    let sequenceRunner = new taskpool.SequenceRunner();
+    let sequenceTask = new taskpool.Task(identityInt, 6);
+    let sequenceResult = await sequenceRunner.execute(sequenceTask);
+    arktest.assertEQ(sequenceResult, 6);
+
+    let asyncRunner = new taskpool.AsyncRunner(1, 2);
+    let asyncRunnerBlocker = new taskpool.Task(async (): Promise<int> => {
+        await dependencyStressAsyncSleep(20.0);
+        return 7;
+    });
+    let asyncRunnerQueued = new taskpool.Task(identityInt, 8);
+    let asyncRunnerBlockerPromise = asyncRunner.execute(asyncRunnerBlocker);
+    let asyncRunnerQueuedPromise = asyncRunner.execute(asyncRunnerQueued);
+    arktest.assertEQ(await asyncRunnerBlockerPromise, 7);
+    arktest.assertEQ(await asyncRunnerQueuedPromise, 8);
+
+    let periodicEvent = new PromiseWithResolvers<void>();
+    let periodicCount: int = 0;
+    let periodicTask = new taskpool.Task((): int => {
+        periodicCount++;
+        periodicEvent.resolve(undefined);
+        return periodicCount;
+    });
+    taskpool.executePeriodically(10, periodicTask);
+    await periodicEvent.promise;
+    taskpool.cancel(periodicTask);
+    arktest.assertLE(1, periodicCount);
+}
+
 async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -474,6 +529,8 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
     commonTaskSuite.addAsyncTest('asyncRunnerExecuteInOnEnqueuedNoDeadlock', asyncRunnerExecuteInOnEnqueuedNoDeadlock);
     commonTaskSuite.addAsyncTest('taskpoolScalingShouldNotOverExpand', taskpoolScalingShouldNotOverExpand);
+    commonTaskSuite.addAsyncTest(
+        'asyncStackSubmissionKeepsTaskpoolSemantics', asyncStackSubmissionKeepsTaskpoolSemantics);
 
     let res = await commonTaskSuite.runAsync();
     

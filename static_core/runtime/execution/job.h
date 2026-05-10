@@ -197,6 +197,16 @@ public:
     inline JobExecutionContext *GetExecutionContext() const;
     /// @param executionCtx updates job's execution context
     inline void SetExecutionContext(JobExecutionContext *executionCtx);
+
+    inline void SetAsyncStackID(uint64_t asyncStackID)
+    {
+        asyncStackID_ = asyncStackID;
+    }
+
+    inline uint64_t GetAsyncStackID() const
+    {
+        return asyncStackID_;
+    }
     /// invokes job's entrypoint within execution context
     virtual void InvokeEntrypoint();
 
@@ -233,6 +243,8 @@ private:
 
     /// current execution context
     JobExecutionContext *executionCtx_ = nullptr;
+
+    uint64_t asyncStackID_ = 0U;
 };
 
 }  // namespace ark

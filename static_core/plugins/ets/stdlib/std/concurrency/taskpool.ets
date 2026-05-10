@@ -869,6 +869,10 @@ export namespace taskpool {
             return this.startTime == InternalTask.NOT_STARTED_TIME ? 0 : this.getDuration();
         }
 
+        captureAsyncStack(): void {
+            this.asyncStackId = collectAsyncStack();
+        }
+
         execute(currentWorker : GlobalQueueWorker | undefined = undefined): Any {
             initWorkerPoolSync();
             removePendingDependencyTask(this.task);
@@ -888,6 +892,15 @@ export namespace taskpool {
             // Task timed out during waiting - skip user function execution (promise already rejected)
             if (this.state.load() == InternalState.TIMEOUT.valueOf()) {
                 throw new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout");
+            }
+            let previousAsyncStackId: long = 0;
+            let shouldRestoreAsyncStackId: boolean = false;
+            if (this.asyncStackId != 0) {
+                previousAsyncStackId = getSubmitterStackId();
+                if (previousAsyncStackId != this.asyncStackId) {
+                    setSubmitterStackId(this.asyncStackId);
+                    shouldRestoreAsyncStackId = true;
+                }
             }
             this.callUserCallback(this.onStartCallback);
             let result: Any = null;
@@ -975,10 +988,22 @@ export namespace taskpool {
                 };
                 if (result instanceof Promise) {
                     return result.finally(() => {
-                        taskFinishedhandle();
+                        try {
+                            taskFinishedhandle();
+                        } finally {
+                            if (shouldRestoreAsyncStackId) {
+                                setSubmitterStackId(previousAsyncStackId);
+                            }
+                        }
                     });
                 } else {
-                    taskFinishedhandle();
+                    try {
+                        taskFinishedhandle();
+                    } finally {
+                        if (shouldRestoreAsyncStackId) {
+                            setSubmitterStackId(previousAsyncStackId);
+                        }
+                    }
                 }
             }
             return result;
@@ -1163,6 +1188,8 @@ export namespace taskpool {
         timerId: int = -1;
         /// id of the coroutine that executes task
         coroId: int = -1;
+        /// id of the async stack collected on task submission
+        asyncStackId: long = 0;
         /// whether the task has a timeout set
         hasTimeout: boolean = false;
         /// timeout duration in milliseconds
@@ -1678,6 +1705,7 @@ export namespace taskpool {
             this.checkExecution(task);
 
             const internalTask = InternalTask.of(task);
+            internalTask.captureAsyncStack();
             internalTask.seqId.store(this.impl.id);
             internalTask.runnerImpl = this.impl;
             taskSubmitted(task);
@@ -1878,6 +1906,7 @@ export namespace taskpool {
             this.checkExecution(task);
 
             const internalTask = InternalTask.of(task);
+            internalTask.captureAsyncStack();
             internalTask.runnerAsyncImpl = this.impl;
             internalTask.asyncId.store(this.impl.id);
             taskSubmitted(task);
@@ -2080,6 +2109,7 @@ export namespace taskpool {
         const internalTask = InternalTask.of(task);
         internalTask.checkExecution();
 
+        internalTask.captureAsyncStack();
         internalTask.isSubmitted = true;
 
         if (isTaskPoolUseLaunch) {
@@ -2106,6 +2136,7 @@ export namespace taskpool {
         const internalTask = InternalTask.of(task);
         internalTask.checkExecutionForTimeout();
 
+        internalTask.captureAsyncStack();
         internalTask.isSubmitted = true;
         internalTask.hasTimeout = true;
         internalTask.timeoutMs = configs.timeout ?? Infinity;
@@ -2184,13 +2215,14 @@ export namespace taskpool {
     function submitGroupTasks(group: TaskGroup, priority?: Priority): Array<Promise<Any>> {
         const promises: Array<Promise<Any>> = new Array<Promise<Any>>();
         GroupState.of(group).tasks.forEach((task: Task) => {
-            InternalTask.of(task).isSubmitted = true;
+            const internalTask = InternalTask.of(task);
+            internalTask.captureAsyncStack();
+            internalTask.isSubmitted = true;
             if (isTaskPoolUseLaunch) {
-                promises.push(launchPromise(InternalTask.of(task).execute));
+                promises.push(launchPromise(internalTask.execute));
             } else {
                 const promise = new Promise<Any>((resolve, reject) => {
                     const newDeferred = new PromiseDeferred(resolve, reject);
-                    const internalTask = InternalTask.of(task);
                     ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
                         if (internalTask.currentDeferred === undefined) {
                             internalTask.currentDeferred = newDeferred;
@@ -2199,7 +2231,7 @@ export namespace taskpool {
                         }
                     });
                 });
-                InternalTask.of(task).enqueue(priority);
+                internalTask.enqueue(priority);
                 promises.push(promise);
             }
         });
@@ -2307,8 +2339,10 @@ export namespace taskpool {
 
     function executeDelayedImpl(delayTime: int, task: Task, priority?: Priority): Promise<Any> {
         initWorkerPoolSync();
-        InternalTask.of(task).checkExecutionForDelayedTask(delayTime);
-        InternalTask.of(task).isSubmitted = true;
+        const internalTask = InternalTask.of(task);
+        internalTask.checkExecutionForDelayedTask(delayTime);
+        internalTask.captureAsyncStack();
+        internalTask.isSubmitted = true;
         ConcurrencyHelpers.lockGuard(mutex, () => {
             pendingDelayed.add(task);
         });
@@ -2384,11 +2418,13 @@ export namespace taskpool {
 
     function executePeriodicallyImpl(period: int, task: Task, priority?: Priority): void {
         initWorkerPoolSync();
-        InternalTask.of(task).checkExecutionForPeriodTask(period);
-        InternalTask.of(task).isSubmitted = true;
-        InternalTask.of(task).isPeriodicTask = true;
-        InternalTask.of(task).timerId = setInterval(() => {
-            if (InternalTask.of(task).timerId == -1) {
+        const internalTask = InternalTask.of(task);
+        internalTask.checkExecutionForPeriodTask(period);
+        internalTask.captureAsyncStack();
+        internalTask.isSubmitted = true;
+        internalTask.isPeriodicTask = true;
+        internalTask.timerId = setInterval(() => {
+            if (internalTask.timerId == -1) {
                 return;
             }
             taskSubmitted(task);
@@ -3258,6 +3294,9 @@ export namespace taskpool {
     native function getTaskId(): int;
     native function setTaskId(taskid: int): void;
     native function setCurrentTaskpoolWorkerPriority(priority: int): void;
+    native function collectAsyncStack(): long;
+    native function getSubmitterStackId(): long;
+    native function setSubmitterStackId(stackId: long): void;
 
     // managed mutex for taskpool containers below
     const mutex: Object = ConcurrencyHelpers.mutexCreate();

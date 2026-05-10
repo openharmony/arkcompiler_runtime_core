@@ -4580,6 +4580,36 @@ intrinsics:
       args: [ i32 ]
     impl: ark::ets::intrinsics::taskpool::SetCurrentTaskpoolWorkerPriority
 
+  - name: TaskpoolCollectAsyncStack
+    space: ets
+    class_name: std.concurrency.taskpool
+    method_name: collectAsyncStack
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::taskpool::CollectAsyncStack
+
+  - name: TaskpoolGetSubmitterStackId
+    space: ets
+    class_name: std.concurrency.taskpool
+    method_name: getSubmitterStackId
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetSubmitterStackId
+
+  - name: TaskpoolSetSubmitterStackId
+    space: ets
+    class_name: std.concurrency.taskpool
+    method_name: setSubmitterStackId
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::taskpool::SetSubmitterStackId
+
 ###################
 # std.time.Chrono #
 ###################

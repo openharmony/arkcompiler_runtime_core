@@ -17,6 +17,7 @@
 
 #include "runtime/thread_manager.h"
 #include "runtime/include/runtime.h"
+#include "runtime/execution/dfx/async_stack_helper.h"
 #include "runtime/execution/job.h"
 #include "runtime/execution/job_worker_group.h"
 #include "runtime/execution/job_launch.h"
@@ -208,6 +209,16 @@ public:
         return os::time::GetClockTimeInMicro();
     }
 
+    dfx::AsyncStackHelper &GetAsyncStackHelper()
+    {
+        return asyncStackHelper_;
+    }
+
+    const dfx::AsyncStackHelper &GetAsyncStackHelper() const
+    {
+        return asyncStackHelper_;
+    }
+
 protected:
     /// Worker enumerator, returns true iff cb call succeeds for every worker
     virtual bool EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const = 0;
@@ -233,6 +244,8 @@ private:
     os::memory::Mutex idsLock_;
     std::bitset<MAX_JOB_ID> jobIds_ GUARDED_BY(idsLock_);
     uint32_t lastJobId_ GUARDED_BY(idsLock_) = UNINITIALIZED_JOB_ID;
+
+    dfx::AsyncStackHelper asyncStackHelper_;
 };
 
 }  // namespace ark

@@ -180,6 +180,8 @@ set(SOURCES
     execution/coroutines/coroutine.cpp
     execution/coroutines/coroutine_manager.cpp
     execution/coroutines/coroutine_worker.cpp
+    execution/dfx/async_stack_helper.cpp
+    execution/dfx/async_stack_scope.cpp
     execution/coroutines/stackful/stackful_coroutine.cpp
     execution/coroutines/stackful/stackful_coroutine_manager.cpp
     execution/coroutines/stackful/stackful_coroutine_worker.cpp
@@ -844,6 +846,14 @@ add_gtests(
     tests/fibers_test.cpp
     NO_WARNING_FILTER
 )
+
+add_gtests(
+    arkruntime_async_stack_test
+    tests/async_stack_test.cpp
+)
+if(TARGET arkruntime_async_stack_test)
+    set_target_properties(arkruntime_async_stack_test PROPERTIES ENABLE_EXPORTS ON)
+endif()
 
 set(LAYOUT_TESTS_SOURCES
     tests/array_test.cpp
