@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -63,7 +63,7 @@ command_not_found_handle() {
         ninja|uv)        install_pip_pkgs "$1";;
         java)            install_apt_pkgs default-jre-headless;;
         python|python3)  install_apt_pkgs python-is-python3;;
-        pip|cmake|clang|curl) install_apt_pkgs "$1";;
+        pip|cmake|clang|curl|git) install_apt_pkgs "$1";;
         *) log_error "Unknown command $1" && exit 2;;
     esac
 }
@@ -103,6 +103,8 @@ main() {
     elif [[ "$MODE" == "taihe-dev" ]]; then
         log_stage "Running in taihe-dev mode"
     fi
+    log_stage "Checking source bootstrap deps" && ensure_command git
+    log_stage "Restoring missing Taihe sources and preserving local files" && restore_missing_taihe_sources
     # `uv bulid` runs ANTLR using java. Ensure java exists here.
     # Since we cannot intercept a missing command in Python.
     log_stage "Checking uv deps" && ensure_command java uv

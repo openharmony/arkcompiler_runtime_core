@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 [project]
-version = "1.2.3"
+version = "1.9.1"
 name = "taihe"
 description = "Language-neutral API tooling"
 requires-python = ">=3.10"
@@ -23,12 +23,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "coverage==7.13.2",
-    "hatchling==1.26.3",
+    "coverage==7.2.7",
     "pyright[nodejs]==1.1.400",
     "pytest==8.3.5",
-    "removestar==1.5.2",
     "ruff==0.8.4",
+    "setuptools==80.0.0",
+    "setuptools-scm==9.2.1",
 ]
 
 [[tool.uv.index]]
@@ -38,28 +38,33 @@ default = true
 ### Build System ###
 
 [build-system]
-requires = ["hatchling", "hatch-vcs", "antlr4-python3-runtime", "typing-extensions"]
-build-backend = "hatchling.build"
+requires = [
+    "setuptools==80.0.0",
+    "setuptools-scm==9.2.1",
+    "antlr4-python3-runtime==4.11.1",
+    "typing-extensions==4.13.2",
+]
+build-backend = "setuptools.build_meta"
 
 [project.scripts]
 taihec      = "taihe.cli.compiler:main"
 taihe-tryit = "taihe.cli.tryit:main"
 
-[tool.hatch.version.raw-options]
+[tool.setuptools_scm]
 search_parent_directories = true
 local_scheme = "dirty-tag"
 version_scheme = "python-simplified-semver"
+fallback_version = "0.0.0+thunk"
 
-[tool.hatch.build.hooks.custom]
-path = "compiler/hatch_build.py"
+[tool.setuptools.packages.find]
+where = ["compiler"]
+include = ["taihe*"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["compiler/taihe"]
+[tool.setuptools.package-dir]
+"taihe" = "compiler/taihe"
 
-[tool.hatch.build.targets.wheel.force-include]
-"./runtime" = "taihe/data/runtime"
-"./stdlib" = "taihe/data/stdlib"
-"./cmake" = "taihe/data/cmake"
+[tool.setuptools.package-data]
+"taihe.data" = ["runtime/**/*", "stdlib/**/*", "cmake/**/*"]
 
 ### Linting ###
 
@@ -67,6 +72,7 @@ packages = ["compiler/taihe"]
 include = ["compiler"]
 exclude = ["compiler/taihe/parse/antlr"]
 pythonVersion = '3.10'
+reportDeprecated = true
 
 # strict = ["compiler/taihe"]  # Maybe later: codegen
 strict = [
