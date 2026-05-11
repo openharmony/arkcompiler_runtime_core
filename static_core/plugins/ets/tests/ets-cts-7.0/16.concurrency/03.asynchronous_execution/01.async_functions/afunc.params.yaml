@@ -535,3 +535,52 @@ cases:
             .then((p: string): string => p + p)
 
         arktest.assertTrue((await r) == 'EE')
+
+    - decl: |-
+        // Async call inside lambda in static block is allowed (lambda is not executed during static init)
+        async function someAsyncFunc(): Promise<void> {}
+        class FooStaticBlock {
+            static callback: (() => void) | null = null
+            static {
+                let cb = () => { someAsyncFunc() }
+                FooStaticBlock.callback = cb
+            }
+        }
+      use: |-
+        // Verify class loaded without error
+        arktest.assertTrue(FooStaticBlock.callback != null)
+
+    - decl: |-
+        // Async call inside lambda in static field initializer is allowed
+        async function someAsyncFunc2(): Promise<void> {}
+        class FooStaticField {
+            static callback: () => void = () => { someAsyncFunc2() }
+        }
+      use: |-
+        // Verify class loaded without error
+        arktest.assertTrue(FooStaticField.callback != null)
+
+    - decl: |-
+        // Async call in constructor is allowed
+        async function someAsyncFunc3(): Promise<Int> { return 42 }
+        class FooCtor {
+            val: Promise<Int>
+            constructor() {
+                this.val = someAsyncFunc3()
+            }
+        }
+      use: |-
+        let obj = new FooCtor()
+        arktest.assertTrue((await obj.val) == 42)
+
+    - decl: |-
+        // Async call in instance method is allowed
+        async function someAsyncFunc4(): Promise<string> { return "hello" }
+        class FooMethod {
+            async run(): Promise<string> {
+                return await someAsyncFunc4()
+            }
+        }
+      use: |-
+        let obj = new FooMethod()
+        arktest.assertTrue((await obj.run()) == "hello")

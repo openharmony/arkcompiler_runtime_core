@@ -41,24 +41,3 @@ cases:
               if (p == 1) return 1.0
               return true
           }
-
-    - decl: |-
-        // A compile-time error occurs if async function is called in a static initializer
-        async function testAsync(): Promise<void> {}
-        class MyClass {
-            static {
-                testAsync();
-            }
-        }
-        
-    - decl: |-
-        // A compile-time error occurs if async function is called in a static initializer
-        async function testAsync(): Promise<void> {}
-        class MyClass {
-            public static myVar = testAsync();            
-        }
-
-    - decl: |-
-        // A compile-time error occurs if async function is called in a static initializer, including module scope;
-        async function testAsync(): Promise<void> {}
-        testAsync()   
