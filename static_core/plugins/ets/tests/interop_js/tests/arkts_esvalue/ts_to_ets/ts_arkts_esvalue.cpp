@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
+#include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/libani_helpers/interop_js/hybridgref_ani.h"
 #include "plugins/ets/runtime/libani_helpers/interop_js/hybridgref_napi.h"
 #include "plugins/ets/runtime/libani_helpers/interop_js/arkts_esvalue.h"
@@ -50,6 +51,12 @@ void NoopFinalize(napi_env env, void *finalizeData, void *finalizeHint)
     (void)env;
     (void)finalizeData;
     (void)finalizeHint;
+}
+
+static void TagFinalizer([[maybe_unused]] napi_env env, [[maybe_unused]] void *finalizeData, void *finalizeHint)
+{
+    auto *tag = static_cast<napi_type_tag *>(finalizeHint);
+    delete tag;
 }
 
 static napi_value NativeWrapRef(napi_env env, napi_callback_info info)
@@ -106,12 +113,7 @@ static napi_value NativeWrapRefSafe(napi_env env, napi_callback_info info)
 
     constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
     void *nativePtr = reinterpret_cast<void *>(DUMMY_NATIVE_POINTER);
-    status = napi_wrap(env, argv[0U], nativePtr, NoopFinalize, nullptr, nullptr);
-    if (status != napi_ok) {
-        delete tag;
-        return nullptr;
-    }
-    status = napi_type_tag_object(env, argv[0U], tag);
+    status = napi_wrap_hybrid_s(env, argv[0U], nativePtr, TagFinalizer, tag, tag, nullptr);
     if (status != napi_ok) {
         delete tag;
         return nullptr;
@@ -119,7 +121,6 @@ static napi_value NativeWrapRefSafe(napi_env env, napi_callback_info info)
 
     napi_value result;
     napi_get_undefined(env, &result);
-    delete tag;
     return result;
 }
 

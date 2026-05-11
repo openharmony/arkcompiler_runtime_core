@@ -53,6 +53,11 @@ napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_is_undefined(napi_env env, napi_value value, bool *result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_is_null(napi_env env, napi_value value, bool *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_unwrap_hybrid_s(napi_env env, napi_value js_object, const napi_type_tag *type_tag, void **result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_wrap_hybrid_s(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
+                   void *finalize_hint, const napi_type_tag *type_tag, napi_ref *result);
 // NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 
