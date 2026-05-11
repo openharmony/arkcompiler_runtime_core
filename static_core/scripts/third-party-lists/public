@@ -53,3 +53,4 @@ arkcompiler/toolchain,https://gitcode.com/openharmony/arkcompiler_toolchain,comm
 icu,https://gitcode.com/openharmony/third_party_icu,branch,OpenHarmony-5.0.1-Release,no_patches,no_submodules
 typescript,https://gitcode.com/openharmony/third_party_typescript,branch,OpenHarmony-5.0.1-Release,no_patches,no_submodules
 pcre2,https://gitcode.com/openharmony/third_party_pcre2,branch,master,no_patches,no_submodules
+libxml2,https://gitcode.com/openharmony/third_party_libxml2,commit,c10a7d6a39254123828eb2e1451577ec39440314,no_patches,no_submodules

@@ -14,6 +14,8 @@
  */
 import buffer from '@ohos.buffer';
 import { BusinessError } from "@ohos.base";
+import { stream } from "./@ohos.util.stream";
+import { util } from "./@ohos.util";
 
 const TypeErrorCodeId: int = 401;
 const BufferOverFlowErrorCodeId: int = 10200062;
@@ -920,6 +922,144 @@ export namespace xml {
             }
 
             return stringBuilder;
+        }
+    }
+
+    export interface XmlSAXHandler {
+        startDocument(): void;
+        endDocument(): void;
+        startElement(elementName: string, namespaceURI: string | undefined, qName: string | undefined, attributes: Map<string,string>): void;
+        endElement(elementName: string, namespaceURI: string | undefined, qName: string | undefined): void;
+        characters(content: string): void;
+    }
+
+    const PARSER_NOT_PARSING: boolean = false;
+    const PARSER_IS_PARSING: boolean = true;
+
+    export class XmlSAXParserHelper {
+        private static finalizationRegistry = new FinalizationRegistry<long>(
+            (pointer: long) => { XmlSAXParserHelper.releaseNative(pointer); }
+        );
+        private nativeBinding: long;
+
+        static { loadLibrary('ets_sdk_native'); }
+
+        constructor() {
+            this.nativeBinding = XmlSAXParserHelper.bindNative();
+            XmlSAXParserHelper.finalizationRegistry.register(this, this.nativeBinding);
+        }
+
+        public parse(parser: XmlSAXParser, handler: XmlSAXHandler, chunk: string, isFinal: boolean): void {
+            const error = XmlSAXParserHelper.parseInner(this.nativeBinding, parser, handler, chunk, isFinal);
+            if (error !== "") {
+                throw createBusinessError(TypeErrorCodeId, `Parse error in XmlSAXParserHelper parse: ${error}`);
+            }
+        }
+
+        private static native bindNative(): long;
+        private static native releaseNative(pointer: long): boolean;
+        private static native parseInner(pointer: long, parser: XmlSAXParser, handler: XmlSAXHandler, chunk: string,
+            isFinal: boolean): string;
+    }
+
+    export class XmlSAXParser {
+        private nativeSAXParser: XmlSAXParserHelper;
+        private inputStream: stream.Readable;
+        private encoding: string;
+        private isParsing: boolean;
+        private decoder: util.StringDecoder;
+        private onReadable: (() => void) | undefined;
+        private onEnd: (() => void) | undefined;
+        private onError: ((error: Error) => void) | undefined;
+
+        constructor(inputStream: stream.Readable, encoding?: string) {
+            if (encoding !== undefined && typeof encoding !== 'string') {
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. Encoding must be a string.');
+            }
+            if (encoding && encoding.toLowerCase() !== 'utf-8') {
+                throw createBusinessError(TypeErrorCodeId, 'Parameter error. Only UTF-8 encoding is supported.');
+            }
+
+            this.inputStream = inputStream;
+            this.encoding = encoding ? encoding : 'utf-8';
+            this.nativeSAXParser = new XmlSAXParserHelper();
+            this.isParsing = PARSER_NOT_PARSING;
+            this.decoder = new util.StringDecoder('utf-8')
+            this.onReadable = undefined;
+            this.onEnd = undefined;
+            this.onError = undefined;
+        }
+
+        public parse(handler: XmlSAXHandler): void {
+            if (this.isParsing === PARSER_IS_PARSING) {
+                throw createBusinessError(TypeErrorCodeId,
+                    'Parser is already parsing. Cannot call parse() again before parsing completes.');
+            }
+
+            this.isParsing = PARSER_IS_PARSING;
+
+            this.onReadable = () => {
+                let data = this.inputStream.read();
+                if (!data) {
+                    return;
+                }
+                try {
+                    if (data instanceof buffer.Buffer) {
+                        let text = this.decoder.write(new Uint8Array((data as buffer.Buffer).buffer));
+                        this.nativeSAXParser.parse(this, handler, text, false);
+                    } else {
+                        this.nativeSAXParser.parse(this, handler, data, false);
+                    }
+                } catch (e) {
+                    this.handleAsyncParseError(`Parse error in readable event: ${e}`);
+                }
+            };
+
+            this.onEnd = () => {
+                try {
+                    this.nativeSAXParser.parse(this, handler, '', true);
+                } catch (e) {
+                    this.handleAsyncParseError(`Parse error in end event: ${e}`);
+                }
+            };
+
+            this.onError = (error: Error) => {
+                this.handleAsyncParseError(`Stream error: ${error.message}`);
+            };
+
+            this.inputStream.on('readable', this.onReadable!);
+            this.inputStream.on('end', this.onEnd!);
+            this.inputStream.on('error', this.onError!);
+        }
+
+        private detachListeners(): void {
+            if (this.onReadable) {
+                this.inputStream.off('readable', this.onReadable);
+                this.onReadable = undefined;
+            }
+            if (this.onEnd) {
+                this.inputStream.off('end', this.onEnd);
+                this.onEnd = undefined;
+            }
+            if (this.onError) {
+                this.inputStream.off('error', this.onError);
+                this.onError = undefined;
+            }
+        }
+
+        private handleAsyncParseComplete(): void {
+            this.detachListeners();
+            this.isParsing = PARSER_NOT_PARSING;
+        }
+
+        private handleAsyncParseError(message: string): void {
+            try {
+                throw createBusinessError(TypeErrorCodeId,
+                    `Parse error in XmlSAXParserHelper parse: ${message}`);
+            } finally {
+                this.detachListeners();
+                this.isParsing = PARSER_NOT_PARSING;
+            }
         }
     }
 }

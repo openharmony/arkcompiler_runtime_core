@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,6 +23,7 @@ set(ETS_SDK_NATIVE_SRC
     api/ani_textdecoder.cpp
     api/ani_stringdecoder.cpp
     api/ani_xmlpullparser.cpp
+    api/ani_xmlsaxparser.cpp
     ${PANDA_ROOT}/plugins/ets/stdlib/native/core/stdlib_ani_helpers.cpp
 )
 
@@ -31,7 +32,7 @@ set(ETS_SDK_SO_LOC "${PANDA_BINARY_ROOT}/lib")
 panda_add_library(ets_sdk_native SHARED ${ETS_SDK_NATIVE_SRC})
 panda_target_sources(ets_sdk_native PRIVATE ${ETS_SDK_NATIVE_SRC})
 set_target_properties(ets_sdk_native PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${ETS_SDK_SO_LOC})
-panda_target_link_libraries(ets_sdk_native arkruntime)
+panda_target_link_libraries(ets_sdk_native arkruntime ani_helpers)
 if(PANDA_TARGET_OHOS)
     panda_target_link_libraries(ets_sdk_native uv)
 else()
@@ -40,5 +41,14 @@ else()
 endif()
 panda_target_include_directories(ets_sdk_native PRIVATE ${PANDA_ROOT}/plugins/ets/sdk/native/)
 panda_target_include_directories(ets_sdk_native PRIVATE ${PANDA_ROOT}/plugins/ets/runtime/ani/)
+
+add_subdirectory(${PANDA_ROOT}/cmake/third_party/libxml2 ${PANDA_BINARY_ROOT}/libxml2)
+panda_target_link_libraries(ets_sdk_native libxml2)
+add_dependencies(ets_sdk_native libxml2)
+panda_target_include_directories(ets_sdk_native SYSTEM PRIVATE
+    ${PANDA_BINARY_ROOT}/libxml2/include
+    ${PANDA_BINARY_ROOT}/libxml2/libxml2-2.14.0/include
+)
+panda_target_compile_definitions(ets_sdk_native PRIVATE IMPORT_LIBXML2)
 
 add_dependencies(ets_sdk_prereqs ets_sdk_native)

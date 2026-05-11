@@ -45,6 +45,7 @@
                 "openssl",
                 "libuv",
                 "pcre2",
+                "libxml2",
                 "json",
                 "musl",
                 "elfio",
