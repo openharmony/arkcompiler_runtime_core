@@ -134,3 +134,8 @@ function classSetValueString() {
     let class2: C2 = new C2();
     console.log(class2.c2F1)
 }
+
+export class classA{
+public static longField: long = 1000;
+public longField: long = 2000;
+} 
