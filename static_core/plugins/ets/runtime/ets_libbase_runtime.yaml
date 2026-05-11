@@ -4550,15 +4550,15 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::taskpool::GenerateAsyncRunnerId
 
-  - name: TaskpoolGetTaskPoolWorkersLimit
+  - name: TaskpoolGetDefaultTaskPoolWorkersLimit
     space: ets
     class_name: std.concurrency.taskpool
-    method_name: getTaskPoolWorkersLimit
+    method_name: getDefaultTaskPoolWorkersLimit
     static: true
     signature:
       ret: i32
       args: []
-    impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
+    impl: ark::ets::intrinsics::taskpool::GetDefaultTaskPoolWorkersLimit
 
   - name: TaskpoolCurrentWorkerHasPendingLocalJobs
     space: ets
@@ -7009,7 +7009,27 @@ intrinsics:
     signature:
       ret: i32
       args: []
-    impl: ark::ets::intrinsics::taskpool::GetTaskPoolWorkersLimit
+    impl: ark::ets::intrinsics::StdSystemGetTaskPoolWorkersLimit
+
+  - name: StdCoroutineGetHardwareTaskPoolWorkersLimit
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getHardwareTaskPoolWorkersLimit
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetHardwareTaskPoolWorkersLimit
+
+  - name: StdCoroutineGetExclusiveWorkersLimit
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getExclusiveWorkersLimit
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::StdCoroutineGetExclusiveWorkersLimit
 
   - name: StdCoroutineIsExternalTimerEnabled
     space: ets

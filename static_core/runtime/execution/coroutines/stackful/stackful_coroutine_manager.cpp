@@ -1158,19 +1158,21 @@ void StackfulCoroutineManager::CalculateWorkerLimits(size_t &exclusiveWorkersLim
     eWorkersLimit += GetConfig().preallocatedExclusiveWorkersCount;
 
     // create and activate workers
-    size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
+    size_t numberOfAvailableCores = std::max(static_cast<size_t>(std::thread::hardware_concurrency() / 4ULL),
+                                             static_cast<size_t>(MIN_COMMON_WORKERS_COUNT));
 
     // workaround for issue #21582
     const size_t maxCommonWorkers =
-        std::max(AffinityMask::MAX_WORKERS_COUNT - eWorkersLimit, static_cast<size_t>(2ULL));
+        std::max(AffinityMask::MAX_WORKERS_COUNT - eWorkersLimit, static_cast<size_t>(MIN_COMMON_WORKERS_COUNT));
 
     commonWorkersLimit = (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
                              ? std::min(numberOfAvailableCores, maxCommonWorkers)
                              : std::min(static_cast<size_t>(GetConfig().workersCount), maxCommonWorkers);
     if (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): AUTO mode selected, will set number of coroutine "
-                                  "common workers to number of CPUs / 4, but not less than 2 and no more than "
-                               << maxCommonWorkers << " = " << commonWorkersLimit;
+                                  "common workers to number of CPUs / 4, but not less than "
+                               << MIN_COMMON_WORKERS_COUNT << " and no more than " << maxCommonWorkers << " = "
+                               << commonWorkersLimit;
     }
     ASSERT(commonWorkersLimit > 0);
 

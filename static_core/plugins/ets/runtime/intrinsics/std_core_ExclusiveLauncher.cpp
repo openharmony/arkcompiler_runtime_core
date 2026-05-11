@@ -14,6 +14,7 @@
  */
 
 #include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/affinity_mask.h"
 #include "runtime/execution/job_launch.h"
 #include "runtime/execution/job_priority.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
@@ -226,6 +227,13 @@ void JoinExclusiveWorker(EtsInt workerId, EtsObject *finalTask)
     if (UNLIKELY(lResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
         jobMan->DestroyJob(job);
     }
+}
+
+extern "C" EtsInt StdCoroutineGetExclusiveWorkersLimit()
+{
+    const auto lang = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+    return static_cast<EtsInt>(std::min(static_cast<uint32_t>(AffinityMask::MAX_WORKERS_COUNT - 1U),
+                                        Runtime::GetCurrent()->GetOptions().GetCoroutineEWorkersLimit(lang)));
 }
 
 }  // namespace ark::ets::intrinsics

@@ -15,6 +15,8 @@
 
 #include <atomic>
 #include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
+#include "plugins/ets/runtime/types/ets_taskpool.h"
+#include "runtime/execution/affinity_mask.h"
 #include "runtime/execution/coroutines/coroutine.h"
 #include "runtime/include/runtime.h"
 
@@ -95,22 +97,23 @@ public:
     {
         auto event = Event();
         std::atomic_size_t count {0};
-        // The eaworker limit is 5(2 is set in GetExtraAniOptions, 3 is for taskpool eaworker).
-        std::thread worker1([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-        std::thread worker2([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-        std::thread worker3([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-        std::thread worker4([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-        std::thread worker5([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
-        std::thread worker6([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
+        constexpr size_t EXTRA_THREAD_TO_REACH_LIMIT = 1;
+        const size_t attachThreadCount = GetEffectiveExclusiveWorkersLimit() + EXTRA_THREAD_TO_REACH_LIMIT;
 
-        worker1.join();
-        worker2.join();
-        worker3.join();
-        worker4.join();
-        worker5.join();
-        worker6.join();
+        std::vector<std::thread> workers;
+        workers.reserve(attachThreadCount);
+        for (size_t i = 0; i < attachThreadCount; ++i) {
+            workers.emplace_back([this, &event, &count]() mutable { WaitUntilReachLimit(event, count); });
+        }
+
+        for (auto &worker : workers) {
+            worker.join();
+        }
         event.Wait();
-        ASSERT(count == 1);
+        // Atomic with relaxed order reason: count is only used as a cross-thread failure counter.
+        const size_t failedAttachCount = count.load(std::memory_order_relaxed);
+        ASSERT_GE(failedAttachCount, EXTRA_THREAD_TO_REACH_LIMIT);
+        ASSERT_LE(failedAttachCount, attachThreadCount);
     }
 
     template <typename... Args>
@@ -162,6 +165,22 @@ public:
     }
 
 private:
+    static size_t GetEffectiveExclusiveWorkersLimit()
+    {
+        const auto &options = Runtime::GetOptions();
+        const auto lang = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+        const size_t configuredEworkersLimit =
+            std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(options.GetCoroutineEWorkersLimit(lang)));
+        const auto &taskPoolMode = options.GetTaskpoolMode(lang);
+        if (taskPoolMode != ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE) {
+            return configuredEworkersLimit;
+        }
+
+        return configuredEworkersLimit + ets::intrinsics::taskpool::GetDefaultTaskPoolEWorkersLimit(options) +
+               ets::intrinsics::taskpool::TASKPOOL_MANAGER_EWORKERS_COUNT +
+               ets::intrinsics::taskpool::MAIN_EWORKER_RESERVED_COUNT;
+    }
+
     void WaitUntilReachLimit(Event &event, std::atomic_size_t &count)
     {
         ASSERT(Mutator::GetCurrent() == nullptr);
@@ -173,7 +192,8 @@ private:
             status = vm_->DetachCurrentThread();
             ASSERT(status == ANI_OK);
         } else {
-            count++;
+            // Atomic with relaxed order reason: count is only used as a cross-thread failure counter.
+            count.fetch_add(1U, std::memory_order_relaxed);
             event.Fire();
         }
     }

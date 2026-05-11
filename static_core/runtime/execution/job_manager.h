@@ -69,6 +69,8 @@ public:
     using EnumerateWorkerCallback = std::function<bool(JobWorkerThread *)>;
     using EnumerateJobsCallback = std::function<bool(Job *)>;
 
+    static constexpr uint32_t MIN_COMMON_WORKERS_COUNT = 2U;
+
     /**
      * @brief Should be called after JobManager creation and before any other method calls.
      * Initializes internal structures, creates the main execution context.

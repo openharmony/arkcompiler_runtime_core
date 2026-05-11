@@ -66,8 +66,12 @@ export final class CoroutineExtras {
     public static native retriggerTaskPoolShrink(): void;
     // (re)start blocked-worker expansion monitor
     public static native retriggerTaskPoolBlockedExpandMonitorDebug(): void;
-    // get taskpool workers limit based on the device
+    // get current taskpool workers limit
     public static native getTaskPoolWorkersLimit(): int;
+    // get taskpool workers limit based on the device
+    public static native getHardwareTaskPoolWorkersLimit(): int;
+    // get configured user EAWorker limit
+    public static native getExclusiveWorkersLimit(): int;
     //get the  current state of the coroutine usage counter 
     public static native getCoroutineCount() : long;
 }
