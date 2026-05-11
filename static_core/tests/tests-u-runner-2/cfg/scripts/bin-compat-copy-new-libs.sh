@@ -45,9 +45,20 @@ BASE="$1"
 
 suffix=".ets"
 
+# Only treat as templated test if the BASE stem itself ends with _<N> AND
+# there is at least one .new_<N>.ets file in the directory.  This avoids
+# false positives on test names that happen to end with a number (e.g.
+# remove_enum_constants_2) but are NOT generated from a template.
 if [[ "$BASE" =~ ^(.+)_([0-9]+)$ ]]; then
-    BASE="${BASH_REMATCH[1]}"
-    suffix="_${BASH_REMATCH[2]}.ets"
+    candidate_suffix="_${BASH_REMATCH[2]}.ets"
+    # Check if any .new_<N>.ets file exists (templated pattern)
+    for f in "${BASH_REMATCH[1]}".libr*.new${candidate_suffix}; do
+        if [ -f "$f" ]; then
+            BASE="${BASH_REMATCH[1]}"
+            suffix="${candidate_suffix}"
+            break
+        fi
+    done
 fi
 
 for new_lib in ${BASE}.libr*.new${suffix}; do

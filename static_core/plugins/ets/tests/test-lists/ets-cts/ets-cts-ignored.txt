@@ -690,10 +690,6 @@
 #34034
 23.binary_compatibility/01.classification_of_source_code_changes/enums/change_enum_constants_base_type/change_enum_constants_base_type.ets
 
-#34225
-23.binary_compatibility/01.classification_of_source_code_changes/enums/remove_enum_constants_2/remove_enum_constants_2.ets
-23.binary_compatibility/01.classification_of_source_code_changes/enums/rename_enum_constants_2/rename_enum_constants_2.ets
-
 #34472
 24.build_system/metadata/base_tests/simultaneous_three_files/test_import.ets
 
