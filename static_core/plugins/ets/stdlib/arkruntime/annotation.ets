@@ -16,15 +16,22 @@
 package arkruntime;
 
 export namespace annotation {
+    @Retention("SOURCE")
+    export @interface AccessRestriction {
+        modules: string[]
+    }
+
     /**
      * InternalAPI layer APIs should only be used within the platform code
      */
+    @AccessRestriction(["arkruntime", "std"])
     @Retention("SOURCE")
     export @interface InternalAPI {}
 
     /**
      * BytecodeAPI layer APIs should not be used within the source code
      */
+    @AccessRestriction(["arkruntime"])
     @Retention("SOURCE")
     export @interface BytecodeAPI {}
 
