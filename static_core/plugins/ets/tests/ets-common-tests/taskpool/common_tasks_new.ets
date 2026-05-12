@@ -246,6 +246,15 @@ function dependencyStressAsyncSleep(time: number): Promise<void> {
     });
 }
 
+async function workerTimerBackedTaskCompletes(): Promise<void> {
+    let timerTask = new taskpool.Task(async (): Promise<int> => {
+        await dependencyStressAsyncSleep(1.0);
+        return 7;
+    });
+    let result = await taskpool.execute(timerTask);
+    arktest.assertEQ(result, 7);
+}
+
 async function pendingDependencyShouldNotBlockReadyTask(): Promise<void> {
     const rounds: int = 10;
     for (let round: int = 0; round < rounds; round++) {
@@ -404,6 +413,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('onExecutionFailedtestmultAsyncfun', onExecutionFailedtestmultAsyncfun);
     commonTaskSuite.addAsyncTest('onFailCallbackExceptionTest', onFailCallbackExceptionTest);
     commonTaskSuite.addAsyncTest('multipleFailCallbackExceptionTest', multipleFailCallbackExceptionTest);
+    commonTaskSuite.addAsyncTest('workerTimerBackedTaskCompletes', workerTimerBackedTaskCompletes);
     // #33877: Test is incorrect and flaky fails
     commonTaskSuiteDisabled.addAsyncTest(
         'pendingDependencyShouldNotBlockReadyTask', pendingDependencyShouldNotBlockReadyTask);

@@ -92,6 +92,9 @@ export namespace taskpool {
 
         private workerBody() {
             while (this.isWorkerActive()) {
+                if (this.tryAdvanceRetireRequest()) {
+                    continue;
+                }
                 let task = getTaskFromGlobalQueue(this); // Now handles blocking internally to avoid CPU busy waiting
                 if (task === undefined) {
                     continue;
@@ -145,6 +148,7 @@ export namespace taskpool {
                             internalTask!.notifyDependencies();
                         }, 1);
                     });
+                    this.tryAdvanceRetireRequest();
                 }
             }
         }
@@ -182,6 +186,74 @@ export namespace taskpool {
             });
         }
 
+        private tryRequestRetireForShrink(): boolean {
+            if (this.retireRequested.get() || this.retireReady.get()) {
+                return false;
+            }
+            if (!removeFromIdleWorkersLocked(this)) {
+                return false;
+            }
+            this.retireRequested.set(true);
+            return true;
+        }
+
+        public hasRetireRequested(): boolean {
+            return this.retireRequested.get();
+        }
+
+        public isRetireReady(): boolean {
+            return this.retireReady.get();
+        }
+
+        public tryAdvanceRetireRequest(): boolean {
+            if (!this.retireRequested.get() || this.retireReady.get()) {
+                return false;
+            }
+            if (this.hasVisibleGlobalTask() || this.hasLocalPendingWork()) {
+                this.retireRequested.set(false);
+                return false;
+            }
+
+            let canRetire: boolean = false;
+            ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                let readyWorkersNum: int = 0;
+                for (let w: GlobalQueueWorker of workers) {
+                    if (w.isRetireReady()) {
+                        readyWorkersNum++;
+                    }
+                }
+                canRetire = workers.size - readyWorkersNum > WORKERS_MINIMUM;
+                if (canRetire) {
+                    this.retireReady.set(true);
+                    this.retireRequested.set(false);
+                } else {
+                    this.retireRequested.set(false);
+                }
+            });
+            if (!canRetire) {
+                return false;
+            }
+
+            this.setWorkerActive(false);
+            requestRetireCleanup();
+            return true;
+        }
+
+        private hasLocalPendingWork(): boolean {
+            let currentTasksSize: int = 0;
+            ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
+                currentTasksSize = this.currentTasks.size.toInt();
+            });
+            if (currentTasksSize != 0 || this.executingTaskBodyStartTime.load() != 0) {
+                return true;
+            }
+            return currentWorkerHasPendingLocalJobs();
+        }
+
+        private hasVisibleGlobalTask(): boolean {
+            return waitingTasksNum.load() != 0 || getNewTaskTotalCount() != 0;
+        }
+
         // For managerWorker to expand.
         triggerExpand(): void {
             let expandJob = this.run<Any>((): Any => {
@@ -201,16 +273,16 @@ export namespace taskpool {
                 }
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     let idleWorkersNum: int = 0;
-                    for (let w : GlobalQueueWorker of workers) {
-                        let currentTasksSize: int = 0;
-                        ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
-                            currentTasksSize = w.currentTasks.size.toInt();
-                        });
-                        if (currentTasksSize === 0) {
-                            idleWorkersNum++;
+                    for (let w: GlobalQueueWorker of idleWorkers) {
+                        if (!workers.has(w)) {
+                            continue;
                         }
+                        if (w.hasRetireRequested() || w.isRetireReady()) {
+                            continue;
+                        }
+                        idleWorkersNum++;
                     }
-                    
+
                     if (workers.size < workersLimit && idleWorkersNum < targetNum) {
                         let step: int = (Math.ceil(min(workersLimit - workers.size,
                                                    min(workersLimit, targetNum) - idleWorkersNum))).toInt();
@@ -233,7 +305,9 @@ export namespace taskpool {
             let shrinkJob = this.run<void>((): void => {
                 this.timerId = setInterval(() => {
                     let runningWorkersNum: int = 0;
+                    let retireRequests: int = 0;
                     ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        this.cleanupReadyWorkersLocked();
                         for (let w: GlobalQueueWorker of workers) {
                             let currentTasksSize: int = 0;
                             ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
@@ -262,8 +336,8 @@ export namespace taskpool {
                         }
                         let step = min(SHRINK_STEP, workers.size - targetNum);
                         let count: int = 0;
-                        for(let worker: GlobalQueueWorker of workers) {
-                            if (count >= step ) {
+                        for (let worker: GlobalQueueWorker of idleWorkers) {
+                            if (count >= step) {
                                 break;
                             }
                             if (worker.idleTime == 0) {
@@ -272,14 +346,15 @@ export namespace taskpool {
                             if (Chrono.nanoNow() - worker.idleTime < idleThreshold) {
                                 continue;
                             }
-                            worker.closeWorker();
-                            workers.delete(worker);
-                            // Ensure special-expansion bookkeeping does not leak when a worker is destroyed.
-                            this.blockedExpandedWorkerIds.delete(worker.workerId);
-                            count++;
+                            if (worker.tryRequestRetireForShrink()) {
+                                count++;
+                            }
                         }
-                        
-                    })
+                        retireRequests = count;
+                    });
+                    if (retireRequests > 0) {
+                        notifyNewTaskAvailable();
+                    }
                 }, triggerInterval);
             });
         }
@@ -358,6 +433,30 @@ export namespace taskpool {
             this.triggerBlockedExpandMonitor();
         }
 
+        public cleanupReadyWorkers(): void {
+            ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                this.cleanupReadyWorkersLocked();
+            });
+        }
+
+        private cleanupReadyWorkersLocked(): void {
+            let readyWorkers: Array<GlobalQueueWorker> = new Array<GlobalQueueWorker>();
+            for (let worker: GlobalQueueWorker of workers) {
+                if (worker.isRetireReady()) {
+                    readyWorkers.push(worker);
+                }
+            }
+
+            for (let worker: GlobalQueueWorker of readyWorkers) {
+                removeFromIdleWorkersLocked(worker);
+                workers.delete(worker);
+                this.blockedExpandedWorkerIds.delete(worker.workerId);
+                worker.retireReady.set(false);
+                worker.idleTime = 0;
+                worker.closeWorker();
+            }
+        }
+
         // For managerWorker to stop and release.
         stopManagerWorker(): void {
             clearInterval(this.timerId);
@@ -378,6 +477,8 @@ export namespace taskpool {
         public currentTasks: Map<Task, int> = new Map<Task, int>();
         public currentTasksMutex: Object = ConcurrencyHelpers.mutexCreate();
         public idleTime: long = 0;
+        private retireRequested: AtomicFlag = new AtomicFlag(false);
+        private retireReady: AtomicFlag = new AtomicFlag(false);
 
         // Start time of the current synchronous execution in this worker thread.
         // Stored as an atomic millisecond tick (lower 32-bit of ms-since-boot); 0 means not executing.
@@ -2770,13 +2871,36 @@ export namespace taskpool {
      * @see taskpool.TaskPoolWorker.performTask
      */
     function removeFromIdleWorkers(worker: GlobalQueueWorker): void {
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            removeFromIdleWorkersLocked(worker);
+        });
+    }
+
+    function removeFromIdleWorkersLocked(worker: GlobalQueueWorker): boolean {
         for (let w: GlobalQueueWorker of idleWorkers) {
             if (worker == w) {
                 idleWorkers.delete(w);
                 w.idleTime = 0;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function addToIdleWorkers(worker: GlobalQueueWorker): void {
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            addToIdleWorkersLocked(worker);
+        });
+    }
+
+    function addToIdleWorkersLocked(worker: GlobalQueueWorker): void {
+        for (let w: GlobalQueueWorker of idleWorkers) {
+            if (worker == w) {
                 return;
             }
         }
+        worker.idleTime = Chrono.nanoNow();
+        idleWorkers.add(worker);
     }
 
     function initGlobalTaskQueues(): void {
@@ -2822,10 +2946,24 @@ export namespace taskpool {
         ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
             // Double-check after acquiring lock to avoid race condition
             task = getTaskWithAttempts();
-            if (task === undefined && worker.isWorkerActive()) {
-                worker.idleTime = Chrono.nanoNow();
+        });
+        if (task != undefined) {
+            waitingTasksNum.fetchSub(1);
+            return task;
+        }
+        if (!worker.isWorkerActive()) {
+            return undefined;
+        }
+        if (worker.hasRetireRequested()) {
+            worker.tryAdvanceRetireRequest();
+            return undefined;
+        }
+        addToIdleWorkers(worker);
+        ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+            // Re-check after publishing idle state to avoid missing a wake-up.
+            task = getTaskWithAttempts();
+            if (task === undefined && worker.isWorkerActive() && !worker.hasRetireRequested()) {
                 Coroutine.Schedule();
-                idleWorkers.add(worker);
                 ConcurrencyHelpers.condVarWait(globalTaskCondVar, globalTaskQueuesMutex);
             }
         });
@@ -2834,6 +2972,7 @@ export namespace taskpool {
             waitingTasksNum.fetchSub(1);
             return task;
         }
+        worker.tryAdvanceRetireRequest();
         return undefined;
     }
 
@@ -2964,6 +3103,12 @@ export namespace taskpool {
         return undefined;
     }
 
+    function requestRetireCleanup(): void {
+        managerWorker?.run<void>(() => {
+            managerWorker!.cleanupReadyWorkers();
+        });
+    }
+
     /**
      * @brief Get total count of tasks across all new task queues
      * @returns Total number of tasks waiting
@@ -3025,6 +3170,7 @@ export namespace taskpool {
     native function isUsingLaunch(): boolean;
     native function isSupportingInterop(): boolean;
     native function getTaskPoolWorkersLimit(): int;
+    native function currentWorkerHasPendingLocalJobs(): boolean;
     native function getTaskId(): int;
     native function setTaskId(taskid: int): void;
     native function setCurrentTaskpoolWorkerPriority(priority: int): void;
