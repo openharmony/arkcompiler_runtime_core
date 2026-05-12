@@ -42,10 +42,9 @@ template <typename T>
 ani_status CreateSplitResultArray(ani_env *env, const Boundaries &boundaries, const T *inputData, int32_t inputSize,
                                   ani_array *out)
 {
-    ani_ref undefined {};
-    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
+    ani_ref emptyStr = CreateUtf8String(env, "", 0);
     ANI_RETURN_ON_PENDING_ERROR(
-        env->Array_New(static_cast<ani_size>(boundaries.size() / BOUNDARY_PAIR_SIZE), undefined, out));
+        env->Array_New(static_cast<ani_size>(boundaries.size() / BOUNDARY_PAIR_SIZE), emptyStr, out));
     for (ani_size i = 0; i < boundaries.size(); i += BOUNDARY_PAIR_SIZE) {
         const int32_t start = boundaries[i];
         const int32_t end = boundaries[i + 1];

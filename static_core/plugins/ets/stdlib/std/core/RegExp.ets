@@ -789,24 +789,30 @@ export class RegExp extends Object {
         if (this.global) {
             this.lastIndex = 0
         }
+        let strResult: String
         // Conservative check: '$' only disables the literal fast path; semantics stay in fallback.
         if (replaceValue.indexOf(c'$') == -1) {
-            return this.replaceLiteralNativeImpl(this.pattern_, this.flags_, str, replaceValue, this.pattern_.length,
-                str.length, this.lastIndex, this.requiresUtf16Execution_)
+            strResult = this.replaceLiteralNativeImpl(this.pattern_, this.flags_, str, replaceValue,
+                this.pattern_.length, str.length, this.lastIndex, this.requiresUtf16Execution_)
+        } else {
+            const results = this.replaceNativeImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length,
+                this.lastIndex, this.requiresUtf16Execution_)
+            strResult = this.postProcessReplaceResults(str, results, (result: RegExpExecArray): String => {
+                let nCaptures = result.length
+                let matched = result.$_get(0)!
+                let position = max(min(result.index, str.getLength()), 0)
+                let captures = new containers.UndefinableStringArray(nCaptures)
+                for (let n = 1; n < nCaptures; n++) {
+                    captures.pushBack(result.$_get(n))
+                }
+                return String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups,
+                    replaceValue)
+            })
         }
-        const results = this.replaceNativeImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length,
-            this.lastIndex, this.requiresUtf16Execution_)
-        return this.postProcessReplaceResults(str, results, (result: RegExpExecArray): String => {
-            let nCaptures = result.length
-            let matched = result.$_get(0)!
-            let position = max(min(result.index, str.getLength()), 0)
-            let captures = new containers.UndefinableStringArray(nCaptures)
-            for (let n = 1; n < nCaptures; n++) {
-                captures.pushBack(result.$_get(n))
-            }
-            return String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups,
-                replaceValue)
-        })
+        if (this.global) {
+            this.lastIndex = 0
+        }
+        return strResult
     }
 
     /**
@@ -824,6 +830,9 @@ export class RegExp extends Object {
         }
         const results = this.replaceNativeImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length,
             this.lastIndex, this.requiresUtf16Execution_)
+        if (this.global) {
+            this.lastIndex = 0
+        }
         return this.postProcessReplaceResults(str, results, (result: RegExpExecArray): String => {
             let nCaptures = result.length
             let matched = result.$_get(0)!
@@ -973,6 +982,7 @@ export class RegExp extends Object {
      */
     public test(str: String): boolean {
         if (str.length < this.lastIndex) {
+            this.lastIndex = 0
             return false
         }
         let globalOrSticky = this.global || this.sticky
