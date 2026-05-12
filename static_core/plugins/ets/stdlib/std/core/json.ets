@@ -43,7 +43,6 @@ export @interface JSONParseIgnore {
 export @interface JSONStringifyGetter {
 }
 
-
 class JSONAPI {
     public native static getJSONStringifyIgnore(field: reflect.InstanceField): boolean
 
@@ -52,6 +51,16 @@ class JSONAPI {
     public native static getJSONRename(field: reflect.InstanceField): string | undefined
 
     public native static getJSONStringifyGetter(method: reflect.InstanceMethod): boolean
+
+    public native static stringifyStringFast(str: String): String
+
+    public native static getFieldDeclaredFastType(field: reflect.InstanceField): int
+ 	 
+    public native static getIntFieldFast(field: reflect.InstanceField, obj: Object): int
+
+    public native static getLongFieldFast(field: reflect.InstanceField, obj: Object): long
+
+    public native static getDoubleFieldFast(field: reflect.InstanceField, obj: Object): double
 }
 
 class FieldMetadata {
@@ -76,13 +85,44 @@ class FieldMetadata {
     }
 }
 
+// Field value type classification (cached at runtime after first observation)
+const FVT_UNCLASSIFIED: int = -1
+const FVT_NULL: int = 0
+const FVT_STRING: int = 1
+const FVT_BOOLEAN: int = 2
+const FVT_INT: int = 3
+const FVT_LONG: int = 4
+const FVT_DOUBLE: int = 5
+const FVT_FLOAT: int = 6
+const FVT_BYTE: int = 7
+const FVT_SHORT: int = 8
+const FVT_CHAR: int = 9
+const FVT_BIGINT: int = 10
+const FVT_ARRAY: int = 11
+const FVT_COMPLEX: int = 12  // objects, records, etc
+
 class CachedObjectLayoutEntry {
     readonly name: string
     readonly metadata: FieldMetadata
+    readonly jsonKeyPrefix: string
+    readonly jsonKeyCommaPrefix: string
+    readonly field: reflect.InstanceField
+    readonly declaredFastType: int
+    cachedType: int = FVT_UNCLASSIFIED
+    cachedArrayElementType: int = FVT_UNCLASSIFIED
+    cachedNestedInfo: int = -1  // -1 = not probed, >= 0 = (depth << 8) | leafType
 
     constructor(name: string, metadata: FieldMetadata) {
         this.name = name
         this.metadata = metadata
+        this.jsonKeyPrefix = '"'.concat(name, '":')
+        this.jsonKeyCommaPrefix = ',"'.concat(name, '":')
+        this.field = metadata.field
+        this.declaredFastType = JSONAPI.getFieldDeclaredFastType(this.field)
+        if (this.declaredFastType === FVT_INT || this.declaredFastType === FVT_LONG ||
+            this.declaredFastType === FVT_DOUBLE) {
+            this.cachedType = this.declaredFastType
+        }
     }
 }
 
@@ -209,6 +249,14 @@ class FieldMetadataCache {
 
     static hasFastObjectLayout(cls: Class): boolean {
         return FieldMetadataCache.getClassMetadata(cls).fastObjectLayout
+    }
+
+    static tryGetFastObjectLayout(cls: Class): Array<CachedObjectLayoutEntry> | undefined {
+        const metadata = FieldMetadataCache.getClassMetadata(cls)
+        if (metadata.fastObjectLayout) {
+            return metadata.objectLayout
+        }
+        return undefined
     }
 
     static getTupleEntries(cls: Class): Array<FieldMetadata> {
@@ -347,162 +395,7 @@ export class JSON {
      * @returns String - JSON representation of byte
      */
     public static stringify(d: String): String {
-        const len = d.getLength()
-
-        if (len == 0) {
-            return '""'
-        }
-
-        let needsEscaping = false
-        let hasSurrogates = false
-        let finalSize = len + 2
-
-        for (let i = 0; i < len; i++) {
-            const code = d.charCodeAt(i)
-            if (code < 128) {
-                if (code == c'"' || code == c'\\' || code == c'\b' || code == c'\f' ||
-                    code == c'\n' || code == c'\r' || code == c'\t') {
-                    needsEscaping = true
-                    finalSize += 1
-                } else if (code < 0x20 || code == 0x7F) {
-                    needsEscaping = true
-                    finalSize += 5
-                }
-            } else if (code >= 0xD800 && code <= 0xDFFF) {
-                if (code >= 0xD800 && code <= 0xDBFF) {
-                    if (i + 1 >= len || d.charCodeAt(i + 1) < 0xDC00 || d.charCodeAt(i + 1) > 0xDFFF) {
-                        hasSurrogates = true
-                        needsEscaping = true
-                        finalSize += 5  // \uXXXX
-                    } else {
-                        hasSurrogates = true
-                        i++
-                    }
-                } else {
-                    hasSurrogates = true
-                    needsEscaping = true
-                    finalSize += 5
-                }
-            }
-        }
-
-        if (!needsEscaping && !hasSurrogates) {
-            return '"' + d + '"'
-        }
-
-        let chars = new ValueArray<char>(finalSize)
-        let charIndex = 0
-        chars[charIndex++] = c'"'
-
-        let begin = 0
-        for (let i = 0; i < len; ) {
-            const ch = d.charAt(i)
-            const code = ch.toInt()
-
-            if (begin < i) {
-                for (let j = begin; j < i; j++) {
-                    chars[charIndex++] = d.charAt(j)
-                }
-            }
-
-            if (code < 128) {
-                switch (ch) {
-                    case c'"':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'"'
-                        begin = i + 1
-                        break
-                    case c'\\':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'\\'
-                        begin = i + 1
-                        break
-                    case c'\b':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'b'
-                        begin = i + 1
-                        break
-                    case c'\f':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'f'
-                        begin = i + 1
-                        break
-                    case c'\n':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'n'
-                        begin = i + 1
-                        break
-                    case c'\r':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'r'
-                        begin = i + 1
-                        break
-                    case c'\t':
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c't'
-                        begin = i + 1
-                        break
-                    default:
-                        if (code < 0x20 || code == 0x7F) {
-                            const hex = code.toString(16).padStart(4, '0')
-                            chars[charIndex++] = c'\\'
-                            chars[charIndex++] = c'u'
-                            chars[charIndex++] = hex.charAt(0)
-                            chars[charIndex++] = hex.charAt(1)
-                            chars[charIndex++] = hex.charAt(2)
-                            chars[charIndex++] = hex.charAt(3)
-                            begin = i + 1
-                        } else {
-                            begin = i
-                        }
-                        break
-                }
-                i++
-            }
-            // Check for surrogate characters
-            else if (code >= 0xD800 && code <= 0xDFFF) {
-                if (Char.isHighSurrogate(ch)) {
-                    if (i + 1 < len && Char.isLowSurrogate(d.charAt(i + 1))) {
-                        chars[charIndex++] = ch
-                        chars[charIndex++] = d.charAt(i + 1)
-                        i += 2
-                    } else {
-                        const hex = code.toString(16).padStart(4, '0')
-                        chars[charIndex++] = c'\\'
-                        chars[charIndex++] = c'u'
-                        chars[charIndex++] = hex.charAt(0)
-                        chars[charIndex++] = hex.charAt(1)
-                        chars[charIndex++] = hex.charAt(2)
-                        chars[charIndex++] = hex.charAt(3)
-                        i++
-                    }
-                } else if (Char.isLowSurrogate(ch)) {
-                    const hex = code.toString(16).padStart(4, '0')
-                    chars[charIndex++] = c'\\'
-                    chars[charIndex++] = c'u'
-                    chars[charIndex++] = hex.charAt(0)
-                    chars[charIndex++] = hex.charAt(1)
-                    chars[charIndex++] = hex.charAt(2)
-                    chars[charIndex++] = hex.charAt(3)
-                    i++
-                } else {
-                    i++
-                }
-                begin = i
-            }
-            else {
-                i++
-            }
-        }
-
-        if (begin < len) {
-            for (let j = begin; j < len; j++) {
-                chars[charIndex++] = d.charAt(j)
-            }
-        }
-
-        chars[charIndex++] = c'"'
-        return new String(chars)
+        return JSONAPI.stringifyStringFast(d)
     }
 
     //--------------------------
@@ -1210,7 +1103,10 @@ class JSONWriter {
     private fieldsFilterSet: Set<string> | undefined
     private filterNamePos: Map<string, int> | undefined
 
-    private readonly path = new Set<Any>()
+    private readonly path = new Array<Any>()
+    private referenceNodeCount: int = 0
+    private static readonly CYCLE_CHECK_DEPTH: int = 16
+    private static readonly CYCLE_CHECK_PERIOD: int = 4096
     private buffer = new StringBuilder()
 
     private getPaddingCache(): FixedArray<String> {
@@ -1322,7 +1218,11 @@ class JSONWriter {
                 this.writeEnumValue(obj, objCls)
             } else {
                 if (FieldMetadataCache.hasFastObjectLayout(objCls)) {
-                    this.writeClassValueFast(obj, FieldMetadataCache.getObjectLayout(objCls))
+                    if (this.useSimpleFastPath) {
+                        this.writeClassInline(obj, FieldMetadataCache.getObjectLayout(objCls))
+                    } else {
+                        this.writeClassValueFast(obj, FieldMetadataCache.getObjectLayout(objCls))
+                    }
                 } else {
                     this.writeObject(obj)
                 }
@@ -1333,140 +1233,7 @@ class JSONWriter {
     }
 
     private writeStringDirect(str: String): void {
-        let len = str.getLength()
-        let needsEscape = false
-        for (let i = 0; i < len; i++) {
-            let code = str.charCodeAt(i)
-            if (code < 32 || code == 34 || code == 92 || code == 127 ||
-                (code >= 0xD800 && code <= 0xDFFF)) {
-                needsEscape = true
-                break
-            }
-        }
-
-        if (!needsEscape) {
-            this.buffer.append('"')
-            this.buffer.append(str)
-            this.buffer.append('"')
-            return
-        }
-
-        this.buffer.append('"')
-
-        let begin = 0
-        let i = 0
-
-        while (i < len) {
-            const ch = str.charAt(i)
-            const code = ch.toInt()
-
-            if (code < 128) {
-                switch (ch) {
-                    case c'"':
-                        // Copy characters before escape
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\"')
-                        begin = i + 1
-                        break
-                    case c'\\':
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\\\')
-                        begin = i + 1
-                        break
-                    case c'\b':
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\b')
-                        begin = i + 1
-                        break
-                    case c'\f':
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\f')
-                        begin = i + 1
-                        break
-                    case c'\n':
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\n')
-                        begin = i + 1
-                        break
-                    case c'\r':
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\r')
-                        begin = i + 1
-                        break
-                    case c'\t':
-                        if (begin < i) {
-                            this.buffer.append(str.substring(begin, i))
-                        }
-                        this.buffer.append('\\t')
-                        begin = i + 1
-                        break
-                    default:
-                        if (code < 0x20 || code == 0x7F) {
-                            // Control character -> \uXXXX
-                            if (begin < i) {
-                                this.buffer.append(str.substring(begin, i))
-                            }
-                            this.buffer.append('\\u')
-                            this.buffer.append(code.toString(16).padStart(4, '0'))
-                            begin = i + 1
-                        }
-                        break
-                }
-                i++
-            } else if (code >= 0xD800 && code <= 0xDFFF) {
-                // Surrogate pair handling
-                if (code >= 0xD800 && code <= 0xDBFF) {
-                    // High surrogate
-                    if (i + 1 < len) {
-                        const nextCode = str.charCodeAt(i + 1).toInt()
-                        if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) {
-                            // Valid surrogate pair - copy both
-                            i += 2
-                        } else {
-                            // Lone high surrogate -> \uXXXX
-                            if (begin < i) {
-                                this.buffer.append(str.substring(begin, i))
-                            }
-                            this.buffer.append('\\u')
-                            this.buffer.append(code.toString(16).padStart(4, '0'))
-                            begin = i
-                            i++
-                        }
-                    } else {
-                        i++
-                    }
-                } else {
-                    // Low surrogate (0xDC00-0xDFFF) - lone
-                    if (begin < i) {
-                        this.buffer.append(str.substring(begin, i))
-                    }
-                    this.buffer.append('\\u')
-                    this.buffer.append(code.toString(16).padStart(4, '0'))
-                    begin = i + 1
-                    i++
-                }
-            } else {
-                i++
-            }
-        }
-
-        if (begin < len) {
-            this.buffer.append(str.substring(begin, len))
-        }
-
-        this.buffer.append('"')
+        this.buffer.append(JSON.stringify(str))
     }
 
     private writeObject(obj: Any): void {
@@ -1549,9 +1316,9 @@ class JSONWriter {
         const tupleEntries = FieldMetadataCache.getTupleEntries(Class.of(obj))
 
         let fieldDumped = false
-        this.path.add(obj)
+        this.path.push(obj)
         fieldDumped = this.writeTupleElements(tupleEntries, obj)
-        this.path.delete(obj)
+        this.path.pop()
 
         if (this.useIndent) {
             this.indentLevel -= 1
@@ -1600,7 +1367,7 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        this.path.add(record)
+        this.path.push(record)
 
         let entryDumped = false
         if (this.useFieldsFilter) {
@@ -1611,7 +1378,7 @@ class JSONWriter {
             })
         }
 
-        this.path.delete(record)
+        this.path.pop()
 
         if (this.useIndent) {
             this.indentLevel -= 1
@@ -1680,9 +1447,9 @@ class JSONWriter {
 
         let fieldDumped = false
         if (this.useFieldsFilter) {
-            this.path.add(obj)
+            this.path.push(obj)
             fieldDumped = this.writeFilteredClassFields(objCls, obj, fieldDumped)
-            this.path.delete(obj)
+            this.path.pop()
         } else {
             const objectLayout = FieldMetadataCache.getObjectLayout(objCls)
             const fastObjectLayout = FieldMetadataCache.hasFastObjectLayout(objCls)
@@ -1696,9 +1463,9 @@ class JSONWriter {
                 this.useFieldsFilter,
                 this.fieldsFilterSet!
             )
-            this.path.add(obj)
+            this.path.push(obj)
             fieldDumped = this.writeClassFields(annotatedGetters, fieldDumped)
-            this.path.delete(obj)
+            this.path.pop()
         }
 
         if (this.useIndent) {
@@ -1758,10 +1525,10 @@ class JSONWriter {
             useFastWriter = true
         }
 
-        this.path.add(obj)
+        this.path.push(obj)
         fieldDumped = this.writeClassLayoutFields(entries, obj, fieldDumped, writePadding, newlineAfterComma,
             useFastWriter, useReplacer)
-        this.path.delete(obj)
+        this.path.pop()
         return fieldDumped
     }
 
@@ -1770,13 +1537,690 @@ class JSONWriter {
         this.buffer = new StringBuilder('{')
 
         let fieldDumped = false
-        this.path.add(obj)
+        this.path.push(obj)
         fieldDumped = this.writeClassLayoutFields(entries, obj, fieldDumped, false, false, true, false)
-        this.path.delete(obj)
+        this.path.pop()
 
         this.buffer.append('}')
         currentBuffer.append(fieldDumped ? this.buffer.toString() : JSONObject.EMPTY)
         this.buffer = currentBuffer
+    }
+
+    private writeClassInline(obj: Object, entries: Array<CachedObjectLayoutEntry>): void {
+        let fieldDumped = false
+        this.checkReferencesCycle(obj)
+        this.path.push(obj)
+        const entriesLen = entries.length
+        const buf = this.buffer
+        for (let i = 0; i < entriesLen; i++) {
+            const entry = entries[i]
+            const declaredFastType = entry.declaredFastType
+
+            // Fast path for declared primitive types: read directly via native, no boxing
+            if (declaredFastType === FVT_INT && entry.cachedType === FVT_INT) {
+                if (fieldDumped) {
+                    buf.append(entry.jsonKeyCommaPrefix)
+                } else {
+                    buf.append('{')
+                    buf.append(entry.jsonKeyPrefix)
+                    fieldDumped = true
+                }
+                buf.append(JSONAPI.getIntFieldFast(entry.field, obj))
+                continue
+            }
+            if (declaredFastType === FVT_LONG && entry.cachedType === FVT_LONG) {
+                if (fieldDumped) {
+                    buf.append(entry.jsonKeyCommaPrefix)
+                } else {
+                    buf.append('{')
+                    buf.append(entry.jsonKeyPrefix)
+                    fieldDumped = true
+                }
+                buf.append(JSONAPI.getLongFieldFast(entry.field, obj))
+                continue
+            }
+            if (declaredFastType === FVT_DOUBLE && entry.cachedType === FVT_DOUBLE) {
+                if (fieldDumped) {
+                    buf.append(entry.jsonKeyCommaPrefix)
+                } else {
+                    buf.append('{')
+                    buf.append(entry.jsonKeyPrefix)
+                    fieldDumped = true
+                }
+                const d: double = JSONAPI.getDoubleFieldFast(entry.field, obj)
+                buf.append(Double.isFinite(d) ? d : 'null')
+                continue
+            }
+            // Generic path: use getValue (boxes primitives) for non-typed fields
+            const fieldVal = entry.field.getValue(obj)
+            if (fieldVal === undefined || fieldVal instanceof Function) continue
+            if (fieldDumped) {
+                buf.append(entry.jsonKeyCommaPrefix)
+            } else {
+                buf.append('{')
+                buf.append(entry.jsonKeyPrefix)
+                fieldDumped = true
+            }
+            let ct = entry.cachedType
+            // Validate cached type against actual value to handle dynamic field types
+            if (ct !== FVT_UNCLASSIFIED) {
+                if (!JSONWriter.validateFieldType(fieldVal, ct)) {
+                    ct = FVT_UNCLASSIFIED
+                    entry.cachedArrayElementType = FVT_UNCLASSIFIED
+                    entry.cachedNestedInfo = -1
+                }
+            }
+            if (ct === FVT_STRING) {
+                this.writeStringDirect(fieldVal as String)
+            } else if (ct === FVT_INT) {
+                buf.append(fieldVal as int)
+            } else if (ct === FVT_LONG) {
+                buf.append(fieldVal as long)
+            } else if (ct === FVT_DOUBLE) {
+                const d: double = fieldVal as double
+                buf.append(Double.isFinite(d) ? d : 'null')
+            } else if (ct === FVT_BOOLEAN) {
+                buf.append(fieldVal as boolean)
+            } else if (ct === FVT_NULL) {
+                buf.append('null')
+            } else if (ct === FVT_FLOAT) {
+                const f: float = fieldVal as float
+                buf.append(Float.isFinite(f) ? f : 'null')
+            } else if (ct === FVT_BYTE) {
+                buf.append(fieldVal as byte)
+            } else if (ct === FVT_SHORT) {
+                buf.append(fieldVal as short)
+            } else if (ct === FVT_ARRAY) {
+                this.writeStdCoreArrayInline(fieldVal as Array<Any>, entry)
+            } else if (ct === FVT_CHAR || ct === FVT_BIGINT) {
+                buf.append(JSON.stringify(fieldVal))
+            } else if (ct === FVT_COMPLEX) {
+                this.writeObjectFast(fieldVal)
+            } else {
+                // FVT_UNCLASSIFIED: first time, classify and cache
+                const ft = JSONWriter.classifyFieldType(fieldVal)
+                entry.cachedType = ft
+                if (ft === FVT_STRING) {
+                    this.writeStringDirect(fieldVal as String)
+                } else if (ft === FVT_INT) {
+                    buf.append(fieldVal as int)
+                } else if (ft === FVT_LONG) {
+                    buf.append(fieldVal as long)
+                } else if (ft === FVT_DOUBLE) {
+                    const d: double = fieldVal as double
+                    buf.append(Double.isFinite(d) ? d : 'null')
+                } else if (ft === FVT_BOOLEAN) {
+                    buf.append(fieldVal as boolean)
+                } else if (ft === FVT_NULL) {
+                    buf.append('null')
+                } else if (ft === FVT_FLOAT) {
+                    const f: float = fieldVal as float
+                    buf.append(Float.isFinite(f) ? f : 'null')
+                } else if (ft === FVT_BYTE) {
+                    buf.append(fieldVal as byte)
+                } else if (ft === FVT_SHORT) {
+                    buf.append(fieldVal as short)
+                } else if (ft === FVT_ARRAY) {
+                    this.writeStdCoreArrayInline(fieldVal as Array<Any>, entry)
+                } else if (ft === FVT_CHAR || ft === FVT_BIGINT) {
+                    buf.append(JSON.stringify(fieldVal))
+                } else {
+                    this.writeObjectFast(fieldVal)
+                }
+            }
+        }
+        this.path.pop()
+        if (fieldDumped) {
+            buf.append('}')
+        } else {
+            buf.append("{}")
+        }
+    }
+
+    private static classifyFieldType(val: Any): int {
+        if (val === null || val === undefined) return FVT_NULL
+        if (val instanceof String) return FVT_STRING
+        if (val instanceof Boolean) return FVT_BOOLEAN
+        if (val instanceof Int) return FVT_INT
+        if (val instanceof Long) return FVT_LONG
+        if (val instanceof Double) return FVT_DOUBLE
+        if (val instanceof Float) return FVT_FLOAT
+        if (val instanceof Byte) return FVT_BYTE
+        if (val instanceof Short) return FVT_SHORT
+        if (val instanceof Char) return FVT_CHAR
+        if (val instanceof BigInt) return FVT_BIGINT
+        if (val instanceof Array) return FVT_ARRAY
+        return FVT_COMPLEX
+    }
+
+    // Validate that a value matches the cached type (single cheap instanceof check)
+    private static validateFieldType(val: Any, cachedType: int): boolean {
+        if (val === null || val === undefined) return cachedType === FVT_NULL
+        if (cachedType === FVT_STRING) return val instanceof String
+        if (cachedType === FVT_BOOLEAN) return val instanceof Boolean
+        if (cachedType === FVT_INT) return val instanceof Int
+        if (cachedType === FVT_LONG) return val instanceof Long
+        if (cachedType === FVT_DOUBLE) return val instanceof Double
+        if (cachedType === FVT_FLOAT) return val instanceof Float
+        if (cachedType === FVT_BYTE) return val instanceof Byte
+        if (cachedType === FVT_SHORT) return val instanceof Short
+        if (cachedType === FVT_CHAR) return val instanceof Char
+        if (cachedType === FVT_BIGINT) return val instanceof BigInt
+        if (cachedType === FVT_ARRAY) return val instanceof Array
+        if (cachedType === FVT_COMPLEX) {
+            return !(val instanceof String || val instanceof Boolean ||
+            val instanceof Int || val instanceof Long || val instanceof Double ||
+            val instanceof Float || val instanceof Byte || val instanceof Short ||
+            val instanceof Char || val instanceof BigInt || val instanceof Array)
+        }
+        return false
+    }
+
+    // Probe nested array structure: walk down array[0][0]... until finding a non-Array element.
+    // Returns (depth << 8) | leafType where depth=0 means flat primitive array.
+    // Returns -1 if structure is complex (mixed, objects, empty, all-null).
+    private static probeNestedArrayType(array: Array<Any>): int {
+        let depth: int = 0
+        let current: Array<Any> = array
+        while (true) {
+            const len = current.length
+            if (len === 0) return -1
+
+            // Find first non-null, non-Function element
+            let firstElem: Any | undefined = undefined
+            for (let i = 0; i < len; i++) {
+                const e = current[i]
+                if (e !== null && e !== undefined && !(e instanceof Function)) {
+                    firstElem = e
+                    break
+                }
+            }
+            if (firstElem === undefined) return -1
+
+            if (firstElem instanceof Array) {
+                depth++
+                if (depth > 7) return -1  // guard against extreme depth
+                current = firstElem as Array<Any>
+                continue
+            }
+
+            // Found a leaf element - classify its type
+            const leafType = JSONWriter.classifyFieldType(firstElem)
+            // Only enable fast path for numeric/boolean types (String needs escaping)
+            if (leafType === FVT_INT || leafType === FVT_LONG ||
+                leafType === FVT_DOUBLE || leafType === FVT_BOOLEAN ||
+                leafType === FVT_FLOAT || leafType === FVT_BYTE || leafType === FVT_SHORT) {
+                return (depth << 8) | leafType
+            }
+            return -1
+        }
+    }
+
+    private writeFieldValueFast(val: Any): void {
+        if (val === null || val === undefined || val instanceof Function) {
+            this.buffer.append('null')
+            return
+        }
+        if (val instanceof String) {
+            this.writeStringDirect(val)
+            return
+        }
+        if (val instanceof Boolean) {
+            this.buffer.append(val as boolean)
+            return
+        }
+        if (val instanceof Int) {
+            this.buffer.append(val as int)
+            return
+        }
+        if (val instanceof Long) {
+            this.buffer.append(val as long)
+            return
+        }
+        if (val instanceof Double) {
+            const d: double = val as double
+            if (Double.isFinite(d)) {
+                this.buffer.append(d)
+            } else {
+                this.buffer.append('null')
+            }
+            return
+        }
+        if (val instanceof Float) {
+            const f: float = val as float
+            if (Float.isFinite(f)) {
+                this.buffer.append(f)
+            } else {
+                this.buffer.append('null')
+            }
+            return
+        }
+        if (val instanceof Byte) {
+            this.buffer.append(val as byte)
+            return
+        }
+        if (val instanceof Short) {
+            this.buffer.append(val as short)
+            return
+        }
+        if (val instanceof Char) {
+            this.buffer.append(JSON.stringify(val))
+            return
+        }
+        if (val instanceof BigInt) {
+            this.buffer.append(JSON.stringify(val))
+            return
+        }
+        if (val instanceof Array) {
+            this.checkReferencesCycle(val)
+            this.writeStdCoreArrayInline(val as Array<Any>)
+            return
+        }
+        // Types that writeObjectFast handles but are not in the fast primitive checks
+        // Fall through to writeObjectFast for correct handling of:
+        // Tuple, Record, JsonReplacer, ESValue, JsonElementSerializable,
+        // JsonSerializable, ArrayBuffer/DataView, Date, TypedArrays,
+        // Set/Promise/Map/RegExp, JSValue
+        this.checkReferencesCycle(val)
+        this.writeObjectFast(val)
+    }
+
+    // Serialize a nested primitive array level (non-leaf: elements are Arrays)
+    // Each element is validated with instanceof to handle mixed-type arrays correctly
+    private writeNestedPrimitiveArray(
+        array: Array<Any>,
+        remainingDepth: int,
+        leafType: int,
+        lastElementIndex: int
+    ): void {
+        for (let idx = 0; idx <= lastElementIndex; idx++) {
+            if (idx > 0) this.buffer.append(',')
+            const elem = array[idx]
+            if (elem === null || elem === undefined) {
+                this.buffer.append('null')
+                continue
+            }
+            if (!(elem instanceof Array)) {
+                this.writeFieldValueFast(elem)
+                continue
+            }
+            const innerArray = elem as Array<Any>
+            this.buffer.append('[')
+            const innerLen = innerArray.length
+            if (innerLen > 0) {
+                if (remainingDepth > 1) {
+                    this.writeNestedPrimitiveArray(innerArray, remainingDepth - 1, leafType, innerLen - 1)
+                } else {
+                    this.writeLeafPrimitiveArray(innerArray, leafType, innerLen - 1)
+                }
+            }
+            this.buffer.append(']')
+        }
+    }
+
+    // Serialize leaf-level primitive array elements (no brackets, just comma-separated values)
+    // Each element is validated with instanceof to handle mixed-type arrays correctly
+    private writeLeafPrimitiveArray(
+        array: Array<Any>,
+        leafType: int,
+        lastElementIndex: int
+    ): void {
+        if (leafType === FVT_INT) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Int) {
+                    this.buffer.append(e as int)
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        } else if (leafType === FVT_LONG) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Long) {
+                    this.buffer.append(e as long)
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        } else if (leafType === FVT_DOUBLE) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Double) {
+                    const d: double = e as double
+                    this.buffer.append(Double.isFinite(d) ? d : 'null')
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        } else if (leafType === FVT_BOOLEAN) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Boolean) {
+                    this.buffer.append(e as boolean)
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        } else if (leafType === FVT_FLOAT) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Float) {
+                    const f: float = e as float
+                    this.buffer.append(Float.isFinite(f) ? f : 'null')
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        } else if (leafType === FVT_BYTE) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Byte) {
+                    this.buffer.append(e as byte)
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        } else if (leafType === FVT_SHORT) {
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) this.buffer.append(',')
+                const e = array[idx]
+                if (e === null || e === undefined) {
+                    this.buffer.append('null')
+                } else if (e instanceof Short) {
+                    this.buffer.append(e as short)
+                } else {
+                    this.writeFieldValueFast(e)
+                }
+            }
+        }
+    }
+
+    private writeStdCoreArrayInline(array: Array<Any>, cachedEntry?: CachedObjectLayoutEntry): void {
+        this.buffer.append('[')
+        const arrayLength = array.length
+        if (arrayLength > 0) {
+            const lastElementIndex = arrayLength - 1
+
+            // Check for cached nested array structure first
+            if (cachedEntry !== undefined) {
+                let nestedInfo = cachedEntry.cachedNestedInfo
+                if (nestedInfo === -1) {
+                    // First time: probe nested structure and cache
+                    nestedInfo = JSONWriter.probeNestedArrayType(array)
+                    cachedEntry.cachedNestedInfo = nestedInfo
+                }
+                if (nestedInfo >= 0) {
+                    const depth = nestedInfo >> 8
+                    const leafType = nestedInfo & 0xFF
+                    if (depth === 0) {
+                        // Flat primitive array: use leaf serializer directly
+                        this.writeLeafPrimitiveArray(array, leafType, lastElementIndex)
+                    } else {
+                        // Nested primitive array: recursive fast path
+                        this.writeNestedPrimitiveArray(array, depth, leafType, lastElementIndex)
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+
+            // Push array to path for cycle detection in all non-pure-primitive paths
+            this.path.push(array)
+
+            // Use cached array element type if available, otherwise probe
+            let elemType: int = FVT_UNCLASSIFIED
+            if (cachedEntry !== undefined) {
+                elemType = cachedEntry.cachedArrayElementType
+            }
+
+            if (elemType === FVT_UNCLASSIFIED) {
+                // Probe first non-null element to detect uniform type
+                let firstElem: Any = undefined
+                for (let probeIdx = 0; probeIdx <= lastElementIndex; probeIdx++) {
+                    const e = array[probeIdx]
+                    if (e !== null && e !== undefined && !(e instanceof Function)) {
+                        firstElem = e
+                        break
+                    }
+                }
+
+                if (firstElem !== undefined) {
+                    if (firstElem instanceof Int) {
+                        elemType = FVT_INT
+                    } else if (firstElem instanceof Long) {
+                        elemType = FVT_LONG
+                    } else if (firstElem instanceof Double) {
+                        elemType = FVT_DOUBLE
+                    } else if (firstElem instanceof String) {
+                        elemType = FVT_STRING
+                    } else if (firstElem instanceof Boolean) {
+                        elemType = FVT_BOOLEAN
+                    } else {
+                        elemType = FVT_COMPLEX
+                    }
+                }
+
+                // Cache element type for this field's future arrays
+                if (cachedEntry !== undefined) {
+                    cachedEntry.cachedArrayElementType = elemType
+                }
+            }
+
+            // Specialized fast paths for uniform primitive arrays with per-element validation
+            if (elemType === FVT_INT) {
+                for (let idx = 0; idx <= lastElementIndex; idx++) {
+                    if (idx > 0) this.buffer.append(',')
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        this.buffer.append('null')
+                    } else if (e instanceof Int) {
+                        this.buffer.append(e as int)
+                    } else {
+                        this.writeFieldValueFast(e)
+                    }
+                }
+                this.path.pop()
+                this.buffer.append(']')
+                return
+            }
+            if (elemType === FVT_LONG) {
+                for (let idx = 0; idx <= lastElementIndex; idx++) {
+                    if (idx > 0) this.buffer.append(',')
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        this.buffer.append('null')
+                    } else if (e instanceof Long) {
+                        this.buffer.append(e as long)
+                    } else {
+                        this.writeFieldValueFast(e)
+                    }
+                }
+                this.path.pop()
+                this.buffer.append(']')
+                return
+            }
+            if (elemType === FVT_DOUBLE) {
+                for (let idx = 0; idx <= lastElementIndex; idx++) {
+                    if (idx > 0) this.buffer.append(',')
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        this.buffer.append('null')
+                    } else if (e instanceof Double) {
+                        const d: double = e as double
+                        this.buffer.append(Double.isFinite(d) ? d : 'null')
+                    } else {
+                        this.writeFieldValueFast(e)
+                    }
+                }
+                this.path.pop()
+                this.buffer.append(']')
+                return
+            }
+            if (elemType === FVT_STRING) {
+                for (let idx = 0; idx <= lastElementIndex; idx++) {
+                    if (idx > 0) this.buffer.append(',')
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        this.buffer.append('null')
+                    } else if (e instanceof String) {
+                        this.writeStringDirect(e as String)
+                    } else {
+                        this.writeFieldValueFast(e)
+                    }
+                }
+                this.path.pop()
+                this.buffer.append(']')
+                return
+            }
+            if (elemType === FVT_BOOLEAN) {
+                for (let idx = 0; idx <= lastElementIndex; idx++) {
+                    if (idx > 0) this.buffer.append(',')
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        this.buffer.append('null')
+                    } else if (e instanceof Boolean) {
+                        this.buffer.append(e as boolean)
+                    } else {
+                        this.writeFieldValueFast(e)
+                    }
+                }
+                this.path.pop()
+                this.buffer.append(']')
+                return
+            }
+
+            // FVT_COMPLEX specialized path: skip 11-instanceof chain for object arrays
+            if (elemType === FVT_COMPLEX) {
+                let prevCls: Class | undefined = undefined
+                let prevEntries: Array<CachedObjectLayoutEntry> | undefined = undefined
+                for (let idx = 0; idx <= lastElementIndex; idx++) {
+                    if (idx > 0) {
+                        this.buffer.append(',')
+                    }
+                    const elem = array[idx]
+                    if (elem === null || elem === undefined || elem instanceof Function) {
+                        this.buffer.append('null')
+                        prevCls = undefined; prevEntries = undefined
+                        continue
+                    }
+                    this.checkReferencesCycle(elem)
+                    // Handle sub-arrays separately from Class.of dispatch
+                    if (elem instanceof Array) {
+                        this.writeStdCoreArrayInline(elem as Array<Any>)
+                        prevCls = undefined; prevEntries = undefined
+                        continue
+                    }
+                    // Skip primitive instanceof checks - go directly to Class.of dispatch
+                    const elemObj = elem as Object
+                    const elemCls = Class.of(elemObj)
+
+                    if (elemCls === prevCls && prevEntries !== undefined) {
+                        this.writeClassInline(elemObj, prevEntries)
+                    } else if (elemCls.isEnum()) {
+                        this.writeEnumValue(elemObj, elemCls)
+                        prevCls = undefined
+                        prevEntries = undefined
+                    } else {
+                        const fastEntries = FieldMetadataCache.tryGetFastObjectLayout(elemCls)
+                        if (fastEntries !== undefined) {
+                            prevCls = elemCls
+                            prevEntries = fastEntries
+                            this.writeClassInline(elemObj, fastEntries)
+                        } else {
+                            prevCls = undefined
+                            prevEntries = undefined
+                            this.writeObjectFast(elem)
+                        }
+                    }
+                }
+                this.path.pop()
+                this.buffer.append(']')
+                return
+            }
+
+            // General path with uniform type cache for fast-layout POJOs
+            let prevCls: Class | undefined = undefined
+            let prevEntries: Array<CachedObjectLayoutEntry> | undefined = undefined
+
+            for (let idx = 0; idx <= lastElementIndex; idx++) {
+                if (idx > 0) {
+                    this.buffer.append(',')
+                }
+                const elem = array[idx]
+                if (elem === null || elem === undefined || elem instanceof Function) {
+                    this.buffer.append('null')
+                    continue
+                }
+                if (elem instanceof String) { this.writeStringDirect(elem); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Boolean) { this.buffer.append(elem as boolean); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Int) { this.buffer.append(elem as int); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Long) { this.buffer.append(elem as long); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Double) {
+                    const d: double = elem as double
+                    this.buffer.append(Double.isFinite(d) ? d as double : 'null' as String)
+                    prevCls = undefined; prevEntries = undefined; continue
+                }
+                if (elem instanceof Float) {
+                    const f: float = elem as float
+                    this.buffer.append(Float.isFinite(f) ? f as float : 'null' as String)
+                    prevCls = undefined; prevEntries = undefined; continue
+                }
+                if (elem instanceof Byte) { this.buffer.append(elem as byte); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Short) { this.buffer.append(elem as short); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Char) { this.buffer.append(JSON.stringify(elem)); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof BigInt) { this.buffer.append(JSON.stringify(elem)); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Array) {
+                    this.checkReferencesCycle(elem)
+                    this.writeStdCoreArrayInline(elem as Array<Any>)
+                    prevCls = undefined; prevEntries = undefined; continue
+                }
+
+                // Non-primitive: use uniform type cache for fast-layout POJOs
+                this.checkReferencesCycle(elem)
+                const elemObj = elem as Object
+                const elemCls = Class.of(elemObj)
+
+                if (elemCls === prevCls && prevEntries !== undefined) {
+                    this.writeClassInline(elemObj, prevEntries)
+                } else if (elemCls.isEnum()) {
+                    this.writeEnumValue(elemObj, elemCls)
+                    prevCls = undefined
+                    prevEntries = undefined
+                } else {
+                    const fastEntries = FieldMetadataCache.tryGetFastObjectLayout(elemCls)
+                    if (fastEntries !== undefined) {
+                        prevCls = elemCls
+                        prevEntries = fastEntries
+                        this.writeClassInline(elemObj, fastEntries)
+                    } else {
+                        prevCls = undefined
+                        prevEntries = undefined
+                        this.writeObjectFast(elem)
+                    }
+                }
+            }
+            this.path.pop()
+        }
+        this.buffer.append(']')
     }
 
     private writeEntryPrefix(fieldDumped: boolean, writePadding: boolean, newlineAfterComma: boolean): boolean {
@@ -1939,7 +2383,7 @@ class JSONWriter {
 
         const arrayLength = array.length
         if (arrayLength > 0) {
-            this.path.add(array)
+            this.path.push(array)
             const lastElementIndex = arrayLength - 1
             for (let idx = 0; idx < lastElementIndex; idx++) {
                 if (useFastElementWriter) {
@@ -1957,7 +2401,7 @@ class JSONWriter {
             } else {
                 this.writeObjectsArrayElement(array[lastElementIndex], lastElementIndex)
             }
-            this.path.delete(array)
+            this.path.pop()
         }
 
         this.writeArrayEpilogue()
@@ -1968,7 +2412,169 @@ class JSONWriter {
     }
 
     private writeFixedArrayObjectFast<E>(array: FixedArray<E>): void {
-        this.writeFixedArrayLikeCore(array, true)
+        const arrayLength = array.length
+        if (arrayLength === 0) {
+            this.buffer.append('[')
+            this.buffer.append(']')
+            return
+        }
+
+        this.buffer.append('[')
+
+        // Probe first non-null element for uniform type specialization
+        let firstElem: Any | undefined = undefined
+        for (let probeIdx = 0; probeIdx < arrayLength; probeIdx++) {
+            const e = array[probeIdx]
+            if (e !== null && e !== undefined && !(e instanceof Function)) {
+                firstElem = e
+                break
+            }
+        }
+
+        // Specialized fast paths for uniform primitive arrays
+        // Note: FixedArray<Any> may contain mixed types, so check instanceof before casting
+        if (firstElem !== undefined) {
+            if (firstElem instanceof Int) {
+                let uniform = true
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e !== null && e !== undefined && !(e instanceof Int)) {
+                        uniform = false
+                        break
+                    }
+                }
+                if (uniform) {
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            this.buffer.append(e as int)
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+            if (firstElem instanceof Long) {
+                let uniform = true
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e !== null && e !== undefined && !(e instanceof Long)) {
+                        uniform = false
+                        break
+                    }
+                }
+                if (uniform) {
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            this.buffer.append(e as long)
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+            if (firstElem instanceof Double) {
+                let uniform = true
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e !== null && e !== undefined && !(e instanceof Double)) {
+                        uniform = false
+                        break
+                    }
+                }
+                if (uniform) {
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            const d: double = e as double
+                            this.buffer.append(Double.isFinite(d) ? d : 'null')
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+            if (firstElem instanceof String) {
+                let uniform = true
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e !== null && e !== undefined && !(e instanceof String)) {
+                        uniform = false
+                        break
+                    }
+                }
+                if (uniform) {
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            this.writeStringDirect(e as String)
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+        }
+
+        // General path
+        this.path.push(array)
+        for (let idx = 0; idx < arrayLength; idx++) {
+            if (idx > 0) {
+                this.buffer.append(',')
+            }
+
+            const elem = array[idx]
+            if (elem === null || elem === undefined || elem instanceof Function) {
+                this.buffer.append('null')
+                continue
+            }
+
+            if (elem instanceof String) {
+                this.writeStringDirect(elem)
+            } else if (elem instanceof Boolean) {
+                this.buffer.append(elem as boolean)
+            } else if (elem instanceof Int) {
+                this.buffer.append(elem as int)
+            } else if (elem instanceof Long) {
+                this.buffer.append(elem as long)
+            } else if (elem instanceof Double) {
+                const d: double = elem as double
+                this.buffer.append(Double.isFinite(d) ? d : 'null')
+            } else if (elem instanceof Float) {
+                const f: float = elem as float
+                this.buffer.append(Float.isFinite(f) ? f : 'null')
+            } else if (elem instanceof Byte) {
+                this.buffer.append(elem as byte)
+            } else if (elem instanceof Short) {
+                this.buffer.append(elem as short)
+            } else if (elem instanceof Char) {
+                this.buffer.append(JSON.stringify(elem))
+            } else if (elem instanceof BigInt) {
+                this.buffer.append(JSON.stringify(elem))
+            } else if (elem instanceof Array) {
+                this.checkReferencesCycle(elem)
+                this.writeStdCoreArrayFast(elem as Array<Any>)
+            } else {
+                this.checkReferencesCycle(elem)
+                this.writeObjectFast(elem)
+            }
+        }
+
+        this.path.pop()
+        this.buffer.append(']')
     }
 
     private writeValueTypeWrapper(obj: Any): boolean {
@@ -2014,7 +2620,7 @@ class JSONWriter {
         }
 
         if (array.length > 0) {
-            this.path.add(array)
+            this.path.push(array)
 
             const isBigIntArray = array instanceof BigInt64Array || array instanceof BigUint64Array
             const lastElementIndex: int = array.length - 1
@@ -2042,7 +2648,7 @@ class JSONWriter {
                 this.writeObjectsArrayElement((array as ArrayLike<Double>)[lastElementIndex], lastElementIndex)
             }
 
-            this.path.delete(array)
+            this.path.pop()
         }
 
         if (this.useIndent) {
@@ -2059,7 +2665,7 @@ class JSONWriter {
         this.writeArrayPreamble()
 
         if (arrayLength > 0) {
-            this.path.add(array)
+            this.path.push(array)
             const lastElementIndex = arrayLength - 1
             for (let idx = 0; idx < lastElementIndex; idx++) {
                 if (useFastElementWriter) {
@@ -2077,7 +2683,7 @@ class JSONWriter {
             } else {
                 this.writeObjectsArrayElement(array[lastElementIndex], lastElementIndex)
             }
-            this.path.delete(array)
+            this.path.pop()
         }
 
         this.writeArrayEpilogue()
@@ -2088,7 +2694,195 @@ class JSONWriter {
     }
 
     private writeStdCoreArrayFast<T>(array: Array<T>): void {
-        this.writeStdCoreArrayCore(array, array.length, true)
+        const arrayLength = array.length
+        if (arrayLength === 0) {
+            this.buffer.append('[')
+            this.buffer.append(']')
+            return
+        }
+
+        this.buffer.append('[')
+
+        // Probe first non-null element for uniform type specialization
+        let firstElem: Any | undefined = undefined
+        for (let probeIdx = 0; probeIdx < arrayLength; probeIdx++) {
+            const e = array[probeIdx]
+            if (e !== null && e !== undefined && !(e instanceof Function)) {
+                firstElem = e
+                break
+            }
+        }
+
+        // Specialized fast paths for uniform primitive arrays with full type validation
+        if (firstElem !== undefined) {
+            if (firstElem instanceof Int) {
+                // Validate all elements are Int or null before using fast path
+                let allIntOrNull: boolean = true
+                let hasNull: boolean = false
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        hasNull = true
+                    } else if (!(e instanceof Int)) {
+                        allIntOrNull = false
+                        break
+                    }
+                }
+                if (allIntOrNull) {
+                    if (!hasNull) {
+                        this.buffer.append(array.join(','))
+                        this.buffer.append(']')
+                        return
+                    }
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            this.buffer.append(e as int)
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+            if (firstElem instanceof Long) {
+                let allLongOrNull: boolean = true
+                let hasNull: boolean = false
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e === null || e === undefined) {
+                        hasNull = true
+                    } else if (!(e instanceof Long)) {
+                        allLongOrNull = false
+                        break
+                    }
+                }
+                if (allLongOrNull) {
+                    if (!hasNull) {
+                        this.buffer.append(array.join(','))
+                        this.buffer.append(']')
+                        return
+                    }
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            this.buffer.append(e as long)
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+            if (firstElem instanceof Double) {
+                let allDoubleOrNullOrInf: boolean = true
+                let canJoin: boolean = true
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e === null || e === undefined || e instanceof Function) {
+                        canJoin = false
+                    } else if (!(e instanceof Double)) {
+                        allDoubleOrNullOrInf = false
+                        break
+                    } else if (!Double.isFinite(e as double)) {
+                        canJoin = false
+                    }
+                }
+                if (allDoubleOrNullOrInf) {
+                    if (canJoin) {
+                        this.buffer.append(array.join(','))
+                        this.buffer.append(']')
+                        return
+                    }
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            const d: double = e as double
+                            this.buffer.append(Double.isFinite(d) ? d : 'null')
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+            if (firstElem instanceof String) {
+                let allStringOrNull: boolean = true
+                for (let idx = 0; idx < arrayLength; idx++) {
+                    const e = array[idx]
+                    if (e !== null && e !== undefined && !(e instanceof String)) {
+                        allStringOrNull = false
+                        break
+                    }
+                }
+                if (allStringOrNull) {
+                    for (let idx = 0; idx < arrayLength; idx++) {
+                        if (idx > 0) this.buffer.append(',')
+                        const e = array[idx]
+                        if (e === null || e === undefined) {
+                            this.buffer.append('null')
+                        } else {
+                            this.writeStringDirect(e as String)
+                        }
+                    }
+                    this.buffer.append(']')
+                    return
+                }
+            }
+        }
+
+        // General fast path with inline element handling
+        this.path.push(array)
+        for (let idx = 0; idx < arrayLength; idx++) {
+            if (idx > 0) {
+                this.buffer.append(',')
+            }
+
+            const elem = array[idx]
+            if (elem === null || elem === undefined || elem instanceof Function) {
+                this.buffer.append('null')
+                continue
+            }
+
+            if (elem instanceof String) {
+                this.writeStringDirect(elem)
+            } else if (elem instanceof Boolean) {
+                this.buffer.append(elem as boolean)
+            } else if (elem instanceof Int) {
+                this.buffer.append(elem as int)
+            } else if (elem instanceof Long) {
+                this.buffer.append(elem as long)
+            } else if (elem instanceof Double) {
+                const d: double = elem as double
+                this.buffer.append(Double.isFinite(d) ? d : 'null')
+            } else if (elem instanceof Float) {
+                const f: float = elem as float
+                this.buffer.append(Float.isFinite(f) ? f : 'null')
+            } else if (elem instanceof Byte) {
+                this.buffer.append(elem as byte)
+            } else if (elem instanceof Short) {
+                this.buffer.append(elem as short)
+            } else if (elem instanceof Char) {
+                this.buffer.append(JSON.stringify(elem))
+            } else if (elem instanceof BigInt) {
+                this.buffer.append(JSON.stringify(elem))
+            } else if (elem instanceof Array) {
+                this.checkReferencesCycle(elem)
+                this.writeStdCoreArrayFast(elem as Array<Any>)
+            } else {
+                this.checkReferencesCycle(elem)
+                this.writeObjectFast(elem)
+            }
+        }
+
+        this.path.pop()
+        this.buffer.append(']')
     }
 
     private writeObjectsArrayElement(arrayElement: Any, elementIndex: int): void {
@@ -2122,13 +2916,20 @@ class JSONWriter {
     }
 
     private checkReferencesCycle(obj: Any): void {
-        if (obj == null) {
+        if (!(obj instanceof Object)) {
             return
         }
 
-        const cycleDetected = this.path.has(obj)
-        if (cycleDetected) {
-            throw new TypeError('cyclic object value')
+        this.referenceNodeCount++
+        if (this.path.length < JSONWriter.CYCLE_CHECK_DEPTH &&
+            (this.referenceNodeCount & (JSONWriter.CYCLE_CHECK_PERIOD - 1)) != 0) {
+            return
+        }
+
+        for (let i = this.path.length - 1; i >= 0; i--) {
+            if (this.path[i] === obj) {
+                throw new TypeError('cyclic object value')
+            }
         }
     }
 
@@ -3811,4 +4612,3 @@ function createStringFromJSONValue(json: JSONValue): String {
     }
     throw new JSONTypeError('Cannot create String from JSON', {cause: json as Object} as ErrorOptions)
 }
-

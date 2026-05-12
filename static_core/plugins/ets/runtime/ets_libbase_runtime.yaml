@@ -1787,6 +1787,55 @@ intrinsics:
       args: [ std.core.reflect.InstanceMethod ]
     impl: ark::ets::intrinsics::StdCoreJSONGetJSONStringifyGetter
 
+  - name: StdCoreJSONStringifyStringFast
+    space: ets
+    class_name: std.core.JSONAPI
+    method_name: stringifyStringFast
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::StdCoreJSONStringifyStringFast
+
+  - name: StdCoreJSONGetFieldDeclaredFastType
+    space: ets
+    class_name: std.core.JSONAPI
+    method_name: getFieldDeclaredFastType
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetFieldDeclaredFastType
+
+  - name: StdCoreJSONGetIntFieldFast
+    space: ets
+    class_name: std.core.JSONAPI
+    method_name: getIntFieldFast
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.reflect.InstanceField, std.core.Object ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetIntFieldFast
+  
+  - name: StdCoreJSONGetLongFieldFast
+    space: ets
+    class_name: std.core.JSONAPI
+    method_name: getLongFieldFast
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.reflect.InstanceField, std.core.Object ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetLongFieldFast
+  
+  - name: StdCoreJSONGetDoubleFieldFast
+    space: ets
+    class_name: std.core.JSONAPI
+    method_name: getDoubleFieldFast
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.reflect.InstanceField, std.core.Object ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetDoubleFieldFast
 
 #################
 # std.core.Date #

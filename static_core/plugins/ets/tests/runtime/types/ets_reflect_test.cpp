@@ -79,7 +79,8 @@ public:
                                              MIRROR_FIELD_INFO(EtsReflectField, ownerType_, "ownerType"),
                                              MIRROR_FIELD_INFO(EtsReflectField, attr_, "attributes"),
                                              MIRROR_FIELD_INFO(EtsReflectField, etsField_, "fieldPtr"),
-                                             MIRROR_FIELD_INFO(EtsReflectField, accessMod_, "accessMod")};
+                                             MIRROR_FIELD_INFO(EtsReflectField, accessMod_, "accessMod"),
+                                             MIRROR_FIELD_INFO(EtsReflectField, cachedType_, "cachedType")};
     }
 
 protected:

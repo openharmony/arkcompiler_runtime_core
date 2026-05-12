@@ -37,8 +37,9 @@ export namespace reflect {
 class Field {
     protected name: string | undefined
     protected ownerType: Class
-    protected attributes: int
+    protected cachedType: Class | undefined
     protected fieldPtr: long
+    protected attributes: int
     protected accessMod: byte
 
     /**
