@@ -14,6 +14,8 @@
  */
 #include "common_components/common/run_type.h"
 
+#include "libarkbase/utils/logger.h"
+
 namespace ark::common_vm {
 // REMEMBER TO CHANGE NUM_OF_RUN_TYPES WHEN YOU ADD/REMOVE CONFIGS
 // this stores a config for each kind of run (represented by an index)

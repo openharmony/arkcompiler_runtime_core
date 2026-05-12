@@ -15,12 +15,12 @@
 
 #include "common_components/platform/cpu.h"
 
+#include "libarkbase/utils/logger.h"
+
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #include <sys/xattr.h>
 #include <unistd.h>
-
-#include "common_components/log/log.h"
 
 namespace ark::common_vm {
 uint32_t NumberOfCpuCore()

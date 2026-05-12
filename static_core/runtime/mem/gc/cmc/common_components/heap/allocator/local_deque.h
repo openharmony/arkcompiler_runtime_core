@@ -16,11 +16,12 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
 
+#include "common_components/heap/allocator/memory_map.h"
+
+#include "libarkbase/utils/logger.h"
+
 #include <cstddef>
 #include <cstdint>
-
-#include "common_components/heap/allocator/memory_map.h"
-#include "common_components/log/log.h"
 
 #define DEBUG_DEQUE false
 

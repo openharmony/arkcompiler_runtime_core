@@ -19,6 +19,7 @@
 #include "common_components/heap/heap.h"
 
 namespace ark::common_vm {
+
 std::atomic<StartupStatus> StartupStatusManager::startupStatus_ = StartupStatus::BEFORE_STARTUP;
 
 void StartupStatusManager::OnAppStartup()
@@ -28,7 +29,7 @@ void StartupStatusManager::OnAppStartup()
     startupStatus_.store(StartupStatus::COLD_STARTUP, std::memory_order_relaxed);
     auto *threadPool = Taskpool::GetCurrentTaskpool().get();
     threadPool->PostDelayedTask(MakePandaUnique<StartupTask>(0, threadPool, STARTUP_DURATION_MS), STARTUP_DURATION_MS);
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "SmartGC: app startup just finished, CMC FinishGCRestrainTask create", "");
+    LOG(INFO, GC) << "SmartGC: app startup just finished, CMC FinishGCRestrainTask create";
 }
 
 void HeuristicGCPolicy::Init()

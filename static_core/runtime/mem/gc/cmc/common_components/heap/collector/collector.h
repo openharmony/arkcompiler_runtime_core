@@ -30,6 +30,8 @@
 #include "common_interfaces/thread/mutator.h"
 #include "libarkbase/os/mutex.h"
 
+#include "libarkbase/utils/logger.h"
+
 namespace ark::common_vm {
 enum CollectorType {
     NO_COLLECTOR = 0,  // No Collector

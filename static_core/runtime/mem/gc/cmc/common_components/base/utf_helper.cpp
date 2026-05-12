@@ -15,7 +15,8 @@
 
 #include "common_components/base/utf_helper.h"
 #include "common_interfaces/objects/utils/span.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 static constexpr int32_t U16_SURROGATE_OFFSET = (0xd800 << 10UL) + 0xdc00 - 0x10000;

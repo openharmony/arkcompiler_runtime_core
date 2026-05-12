@@ -21,7 +21,10 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
+#include "runtime/trace.h"
+
 namespace ark::common_vm {
+
 void LargeSpace::AssembleGarbageCandidates()
 {
     largeRegionList_.MergeRegionList(recentLargeRegionList_, RegionDesc::RegionType::LARGE_REGION);
@@ -40,7 +43,7 @@ void LargeSpace::CollectFixTasks(FixHeapTaskList &taskList)
 
 size_t LargeSpace::CollectLargeGarbage()
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CollectLargeGarbage", "");
+    ScopedTrace tracer("CollectLargeGarbage", ENABLE_GC_TRACING);
     size_t garbageSize = 0;
     RegionDesc *region = largeRegionList_.GetHeadRegion();
     while (region != nullptr) {

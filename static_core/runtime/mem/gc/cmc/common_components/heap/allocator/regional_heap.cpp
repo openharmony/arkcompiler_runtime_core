@@ -27,6 +27,8 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/gc.h"
 
+#include "runtime/include/panda_vm.h"
+
 namespace ark::common_vm {
 template <AllocBufferType type>
 RegionDesc *RegionalHeap::AllocateThreadLocalRegion(bool expectPhysicalMem)
@@ -40,6 +42,39 @@ RegionDesc *RegionalHeap::AllocateThreadLocalRegion(bool expectPhysicalMem)
     }
 }
 
+size_t RegionalHeap::ReclaimGarbageMemory(bool releaseAll)
+{
+    auto gc = PandaVM::GetCurrent()->GetGC();
+    {
+        mem::GCScope<mem::TRACE_TIMING> gcScope("ReclaimGarbageRegions", gc);
+        regionManager_.ReclaimGarbageRegions();
+    }
+
+    mem::GCScope<mem::TRACE_TIMING> gcScope("ReleaseGarbageMemory", gc);
+    if (releaseAll) {
+        return regionManager_.ReleaseGarbageRegions(0);
+    } else {
+        size_t size = GetAllocatedBytes();
+        double cachedRatio = 1 - Heap::GetHeap().GetHeapParam().heapUtilization;
+        size_t targetCachedSize = static_cast<size_t>(size * cachedRatio);
+        return regionManager_.ReleaseGarbageRegions(targetCachedSize);
+    }
+}
+
+void RegionalHeap::ExemptFromSpace()
+{
+    auto gc = PandaVM::GetCurrent()->GetGC();
+    mem::GCScope<mem::TRACE_TIMING> gcScope("ExemptFromRegions", gc);
+    fromSpace_.ExemptFromRegions();
+}
+
+void RegionalHeap::CopyFromSpace(Taskpool *threadPool)
+{
+    auto gc = PandaVM::GetCurrent()->GetGC();
+    mem::GCScope<mem::TRACE_TIMING> gcScope("CopyFromRegions", gc);
+    fromSpace_.CopyFromRegions(threadPool);
+}
+
 // used to dump a brief summary of all regions.
 void RegionalHeap::DumpAllRegionSummary(const char *msg) const
 {
@@ -51,10 +86,13 @@ void RegionalHeap::DumpAllRegionSummary(const char *msg) const
     auto other = nonMovableSpace_.GetAllocatedSize() + largeSpace_.GetAllocatedSize();
 
     PandaOStringStream oss;
-    oss << msg << "Current allocated: " << ::ark::mem::Pretty(from + to + young + old + other)
-        << ". (from: " << ::ark::mem::Pretty(from) << "(exempt: " << ::ark::mem::Pretty(exempt)
-        << "), to: " << ::ark::mem::Pretty(to) << ", young: " << ::ark::mem::Pretty(young)
-        << ", old: " << ::ark::mem::Pretty(old) << ", other: " << ::ark::mem::Pretty(other) << ")";
+    oss << msg << "Current allocated: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(from + to + young + old + other)
+        << ". (from: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(from)
+        << "(exempt: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(exempt)
+        << "), to: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(to)
+        << ", young: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(young)
+        << ", old: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(old)
+        << ", other: " << ark::common_vm::TimeUtil::PrettyDigitsFormat(other) << ")";
     LOG(DEBUG, GC) << oss.str();
 }
 

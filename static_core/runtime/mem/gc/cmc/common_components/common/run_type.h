@@ -16,7 +16,8 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_RUN_TYPE_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_RUN_TYPE_H
 
-#include "common_components/log/log.h"
+#include <cstddef>
+#include <cstdint>
 
 namespace ark::common_vm {
 // slot with size no more than RUN_ALLOC_SMALL_SIZE is small slot.

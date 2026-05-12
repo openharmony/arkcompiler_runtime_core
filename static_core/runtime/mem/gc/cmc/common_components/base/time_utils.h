@@ -21,6 +21,8 @@
 #include "common_components/base/c_string.h"
 #include "common_interfaces/base/common.h"
 
+#include "runtime/include/mem/panda_string.h"
+
 namespace ark::common_vm {
 
 // number of nanoseconds in a microsecond / second.
@@ -47,6 +49,9 @@ CString GetDigitDate();
 
 // returns the current date in ISO yyyy-mm-dd hh:mm::ss.ms format
 PANDA_PUBLIC_API CString GetTimestamp();
+
+PandaString PrettyDigitsFormat(uint64_t number) noexcept;
+
 }  // namespace TimeUtil
 }  // namespace ark::common_vm
 

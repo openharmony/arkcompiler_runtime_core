@@ -129,15 +129,9 @@ void GCStats::Dump() const
         << " CMC GC freed " << FormatMemory(collectedBytes) << ", " << FormatMemory(largeGarbageSize)
         << " LOS objects, " << freePercent << "% free, " << FormatMemory(allocatedNow) << "/" << FormatMemory(totalHeap)
         << ", "
-        << "phase: STW_TOTAL paused: " << FormatTimeMs(TotalSTWTime()) << " total: " << FormatTimeMs(totalTimeNs);
+        << "phase: STW_TOTAL paused: " << FormatTimeMs(TotalSTWTime()) << " total: " << FormatTimeMs(totalTimeNs)
+        << ", " << collectedObjects << " collected objects, ";
     LOG(INFO, GC) << oss.str();
-
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::GCStatsDump",
-                 ("collectedObjects:" + std::to_string(collectedObjects) +
-                  ";collectedBytes:" + std::to_string(collectedBytes) + ";liveSize:" + std::to_string(allocatedNow) +
-                  ";heapSize:" + std::to_string(totalHeap) + ";total pause:" + FormatTimeMs(TotalSTWTime()) +
-                  ";total GC time:" + FormatTimeMs(totalTimeNs))
-                     .c_str());
 }
 
 PandaString GCStats::GetFinalStatistics() const
