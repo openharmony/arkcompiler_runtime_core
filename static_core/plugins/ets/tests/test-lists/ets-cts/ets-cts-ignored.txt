@@ -6,9 +6,6 @@
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
 
-#34263
-03.types/21.utility_types/01.awaited_utility_type/awaited_return_1.ets
-
 #33270
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_0.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_n_1.ets
@@ -18,10 +15,6 @@
 #29971
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
-
-#27159
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 
 #34389 es2panda aborts on complex type alias expression with generics
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_29.ets
@@ -89,7 +82,6 @@
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
 #34467 No expected ClassCastError on casting with Char and Boolean
-07.expressions/17.cast_expressions/cast_to_char_w_0.ets
 07.expressions/17.cast_expressions/cast_to_char_w_1.ets
 07.expressions/17.cast_expressions/cast_to_char_w_2.ets
 07.expressions/17.cast_expressions/cast_to_char_w_3.ets
@@ -102,35 +94,10 @@
 07.expressions/17.cast_expressions/cast_to_numeric_w_3.ets
 07.expressions/17.cast_expressions/cast_to_numeric_w_4.ets
 07.expressions/17.cast_expressions/cast_to_numeric_w_5.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_6.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_7.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_8.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_9.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_10.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_11.ets
 07.expressions/17.cast_expressions/cast_to_string_w_0.ets
-
-#34468 es2panda reports code generation failure on casting to Boolean
-07.expressions/17.cast_expressions/cast_to_boolean_w_0.ets
-07.expressions/17.cast_expressions/cast_to_boolean_w_1.ets
-07.expressions/17.cast_expressions/cast_to_boolean_w_2.ets
-07.expressions/17.cast_expressions/cast_to_boolean_w_3.ets
-07.expressions/17.cast_expressions/cast_to_boolean_w_4.ets
-07.expressions/17.cast_expressions/cast_to_boolean_w_5.ets
-07.expressions/17.cast_expressions/cast_to_boolean_w_6.ets
 
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
-
-#34456 Frontend bug: == and != between different enum types give ESE0114, but spec says enum equality compares by underlying value regardless of type
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_8.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_9.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_10.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_11.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_12.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_13.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_14.ets
-07.expressions/28.equality_expressions/enumeration_equality_operators/cross_enum_equality_15.ets
 
 #30340 &&= ||= ??= still not supported in code
 07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
@@ -425,7 +392,6 @@
 
 #34114
 15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_operations_const_2.ets
 
 #32075 Cannot use type 'void' as value.
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_1.ets
@@ -469,13 +435,6 @@
 #33447 Verifier error on 2 methods in subclass override same method in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/several_methods_override_negative.ets
 
-#31858 overriding conflict between superclass and superinterface implementations
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_15.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_17.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_21.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_23.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_24.ets
-
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_2.ets
 
@@ -491,10 +450,6 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_8.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_9.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/inherited_and_declared_methods_override_same_superclass_n.ets
-
-#30206
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_12.ets
-15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_13.ets
 
 #34295 No CTE for incorrect overriding
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_7.ets
