@@ -18,6 +18,7 @@
 #include "libarkbase/os/file.h"
 #include "libarkbase/os/mem.h"
 #include "extractortool/zip_file.h"
+#include "extractortool/extractor.h"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
@@ -37,6 +38,54 @@
 #include <sys/stat.h>
 
 namespace ark::test {
+
+// Test accessor class for accessing private members of ZipFile and Extractor
+class ZipFileTestAccessor {
+public:
+    static constexpr uint32_t MISMATCH_OFFSET_INCREMENT = 100;
+
+    static ark::extractor::ZipFile &GetZipFile(ark::extractor::Extractor &extractor)
+    {
+        return extractor.zipFile_;
+    }
+
+    static void SetZipFileReaderNull(ark::extractor::ZipFile &zf)
+    {
+        zf.zipFileReader_ = nullptr;
+    }
+
+    static void SetFileStartPos(ark::extractor::ZipFile &zf, uint64_t pos)
+    {
+        zf.fileStartPos_ = pos;
+    }
+
+    static void SetEntryOffset(ark::extractor::ZipFile &zf, const std::string &name, uint32_t offset)
+    {
+        zf.entriesMap_[name].localHeaderOffset = offset;
+    }
+
+    static void AddFakeEntry(ark::extractor::ZipFile &zf, const std::string &name, uint32_t offset)
+    {
+        ark::extractor::ZipEntry entry;
+        entry.localHeaderOffset = offset;
+        entry.fileName = name;
+        zf.entriesMap_[name] = entry;
+    }
+
+    static bool HasEntry(ark::extractor::ZipFile &zf, const std::string &name)
+    {
+        return zf.entriesMap_.find(name) != zf.entriesMap_.end();
+    }
+
+    static uint32_t GetEntryOffset(ark::extractor::ZipFile &zf, const std::string &name)
+    {
+        auto it = zf.entriesMap_.find(name);
+        if (it != zf.entriesMap_.end()) {
+            return it->second.localHeaderOffset;
+        }
+        return 0;
+    }
+};
 
 #define GTEST_COUT std::cerr << "[          ] [ INFO ]"
 
@@ -733,6 +782,549 @@ TEST(LIBZIPARCHIVE, ZipFileParseAllEntriesOverflowTest)
 
     ark::extractor::ZipFile zipFile(archivename);
     ASSERT_FALSE(zipFile.Open()) << "ZipFile::Open should fail for corrupted central directory entry";
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with entry not in entriesMap
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_001)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_001__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    auto result = zipFile.IsEntryDataConsistent("not_exist_entry");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::READ_ERROR);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with zipFileReader nullptr
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_002)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_002__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    ZipFileTestAccessor::SetZipFileReaderNull(zipFile);
+    auto result = zipFile.IsEntryDataConsistent("classes.abc");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::READ_ERROR);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with real entry and offset set to 0
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_003)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_003__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    ZipFileTestAccessor::SetEntryOffset(zipFile, "classes.abc", 0);
+    auto result = zipFile.IsEntryDataConsistent("classes.abc");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::CONSISTENT);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with fake entry name using real offset
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_004)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_004__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    // Get the offset of classes.abc
+    uint32_t realOffset = ZipFileTestAccessor::GetEntryOffset(zipFile, "classes.abc");
+    // Add fake entry with same offset
+    ZipFileTestAccessor::AddFakeEntry(zipFile, "fake_entry_name.abc", realOffset);
+    auto result = zipFile.IsEntryDataConsistent("fake_entry_name.abc");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::ENTRY_NOT_FOUND);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with real entry but modified offset
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_005)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_005__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    // Modify offset to cause mismatch
+    uint32_t mismatchOffset =
+        ZipFileTestAccessor::GetEntryOffset(zipFile, "classes.abc") + ZipFileTestAccessor::MISMATCH_OFFSET_INCREMENT;
+    ZipFileTestAccessor::SetEntryOffset(zipFile, "classes.abc", mismatchOffset);
+    auto result = zipFile.IsEntryDataConsistent("classes.abc");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::OFFSET_MISMATCH);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with real entry and correct offset
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_006)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_006__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    auto result = zipFile.IsEntryDataConsistent("classes.abc");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::CONSISTENT);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: ReadLocalHeaderName
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test ReadLocalHeaderName with fileStartPos overflow
+ */
+TEST(LIBZIPARCHIVE, ReadLocalHeaderName_001)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__READLOCALHEADER_TEST_001__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    // Set fileStartPos to UINT64_MAX to cause overflow when adding offset
+    ZipFileTestAccessor::SetFileStartPos(zipFile, UINT64_MAX);
+    // Test with fileStartPos overflow
+    ark::extractor::LocalHeader header;
+    std::string name;
+    bool result = zipFile.ReadLocalHeaderName(0, header, name);
+    EXPECT_FALSE(result);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: ReadLocalHeaderName
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test ReadLocalHeaderName with zipFileReader nullptr
+ */
+TEST(LIBZIPARCHIVE, ReadLocalHeaderName_002)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__READLOCALHEADER_TEST_002__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    ZipFileTestAccessor::SetZipFileReaderNull(zipFile);
+    ark::extractor::LocalHeader header;
+    std::string name;
+    bool result = zipFile.ReadLocalHeaderName(0, header, name);
+    EXPECT_FALSE(result);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: ReadLocalHeaderName
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test ReadLocalHeaderName with valid entry at offset 0
+ */
+TEST(LIBZIPARCHIVE, ReadLocalHeaderName_003)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__READLOCALHEADER_TEST_003__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    ark::extractor::LocalHeader header;
+    std::string name;
+    bool result = zipFile.ReadLocalHeaderName(0, header, name);
+    EXPECT_TRUE(result);
+    // First entry should be "directory/" based on GenerateZipfile
+    EXPECT_EQ(name, "directory/");
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: Extractor
+ * Function: GetSafeData
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test GetSafeData with non-abc file extension
+ */
+TEST(LIBZIPARCHIVE, GetSafeData_001)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__GETSAFEDATA_TEST_001__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::Extractor extractor(archivename);
+    ASSERT_TRUE(extractor.Init());
+    auto result = extractor.GetSafeData("module.json");
+    EXPECT_EQ(result, nullptr);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: Extractor
+ * Function: GetSafeData
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test GetSafeData with abc file but entry not in map
+ */
+TEST(LIBZIPARCHIVE, GetSafeData_002)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__GETSAFEDATA_TEST_002__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::Extractor extractor(archivename);
+    ASSERT_TRUE(extractor.Init());
+    auto result = extractor.GetSafeData("not_exist.abc");
+    EXPECT_EQ(result, nullptr);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: Extractor
+ * Function: GetSafeData
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test GetSafeData with abc file but zipFileReader nullptr
+ */
+TEST(LIBZIPARCHIVE, GetSafeData_003)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__GETSAFEDATA_TEST_003__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::Extractor extractor(archivename);
+    ASSERT_TRUE(extractor.Init());
+    auto &zipFile = ZipFileTestAccessor::GetZipFile(extractor);
+    ZipFileTestAccessor::SetZipFileReaderNull(zipFile);
+    auto result = extractor.GetSafeData("/data/storage/el1/bundle/com.example/classes.abc");
+    EXPECT_EQ(result, nullptr);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: Extractor
+ * Function: GetSafeData
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test GetSafeData with abc file and offset mismatch
+ */
+TEST(LIBZIPARCHIVE, GetSafeData_004)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__GETSAFEDATA_TEST_004__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::Extractor extractor(archivename);
+    ASSERT_TRUE(extractor.Init());
+    auto &zipFile = ZipFileTestAccessor::GetZipFile(extractor);
+    uint32_t mismatchOffset =
+        ZipFileTestAccessor::GetEntryOffset(zipFile, "classes.abc") + ZipFileTestAccessor::MISMATCH_OFFSET_INCREMENT;
+    ZipFileTestAccessor::SetEntryOffset(zipFile, "classes.abc", mismatchOffset);
+    auto result = extractor.GetSafeData("/data/storage/el1/bundle/com.example/classes.abc");
+    EXPECT_EQ(result, nullptr);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: Extractor
+ * Function: GetSafeData
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test GetSafeData with abc file and consistent result
+ */
+TEST(LIBZIPARCHIVE, GetSafeData_005)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__GETSAFEDATA_TEST_005__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::Extractor extractor(archivename);
+    ASSERT_TRUE(extractor.Init());
+    auto result = extractor.GetSafeData("/data/storage/el1/bundle/com.example/classes.abc");
+    EXPECT_NE(result, nullptr);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: Extractor
+ * Function: GetSafeData
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test GetSafeData with fake entry name using real offset
+ */
+TEST(LIBZIPARCHIVE, GetSafeData_006)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__GETSAFEDATA_TEST_006__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+
+    ark::extractor::Extractor extractor(archivename);
+    ASSERT_TRUE(extractor.Init());
+    auto &zipFile = ZipFileTestAccessor::GetZipFile(extractor);
+    // Get the offset of classes.abc using accessor
+    uint32_t realOffset = ZipFileTestAccessor::GetEntryOffset(zipFile, "classes.abc");
+    // Add fake entry with same offset
+    ZipFileTestAccessor::AddFakeEntry(zipFile, "fake_entry_name.abc", realOffset);
+    auto result = extractor.GetSafeData("/data/storage/el1/bundle/com.example/fake_entry_name.abc");
+    EXPECT_EQ(result, nullptr);
+
     (void)remove(archivename);
 }
 }  // namespace ark::test

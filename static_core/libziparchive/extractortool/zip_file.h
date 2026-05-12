@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,10 @@
 #include "file_mapper.h"
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/logger.h"
+
+namespace ark::test {
+class ZipFileTestAccessor;
+}  // namespace ark::test
 
 namespace ark::extractor {
 class ZipFileReader;
@@ -167,6 +171,14 @@ enum class CacheMode : uint32_t {
     CACHE_ALL
 };
 
+enum class ConsistencyResult {
+    CONSISTENT = 0,
+    OFFSET_MISMATCH,
+    DATA_DESCRIPTOR_SET,
+    ENTRY_NOT_FOUND,
+    READ_ERROR,
+};
+
 // zip file extract class for bundle format.
 class ZipFile {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
@@ -213,6 +225,8 @@ public:
     bool ExtractToBufByName(const std::string &fileName, std::unique_ptr<uint8_t[]> &dataPtr, size_t &len) const;
     void SetCacheMode(CacheMode cacheMode);
     bool UseDirCache() const;
+    ConsistencyResult IsEntryDataConsistent(const std::string &fileName) const;
+    bool ReadLocalHeaderName(uint32_t offset, LocalHeader &header, std::string &name) const;
 
 private:
     /**
@@ -311,6 +325,8 @@ private:
     ZipPos fileLength_ = 0;
     bool isOpen_ = false;
     CacheMode cacheMode_ = CacheMode::CACHE_CASE;
+
+    friend class ark::test::ZipFileTestAccessor;
 };
 }  // namespace ark::extractor
 #endif

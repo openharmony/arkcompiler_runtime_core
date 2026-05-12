@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,10 @@
 #include "file_mapper.h"
 #include "zip_file.h"
 
+namespace ark::test {
+class ZipFileTestAccessor;
+}  // namespace ark::test
+
 namespace ark::extractor {
 class Extractor {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
@@ -42,6 +46,8 @@ public:
 private:
     ZipFile zipFile_;
     std::string filePath_;
+
+    friend class ark::test::ZipFileTestAccessor;
 };
 }  // namespace ark::extractor
 #endif
