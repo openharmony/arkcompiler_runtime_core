@@ -206,6 +206,14 @@ public:
     }
 };
 
+class VFixedArrayRef final : public VFixedArray {
+public:
+    ani_fixedarray_ref GetRef()
+    {
+        return static_cast<ani_fixedarray_ref>(VFixedArray::GetRef());
+    }
+};
+
 }  // namespace ark::ets::ani::verify
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VREF_H

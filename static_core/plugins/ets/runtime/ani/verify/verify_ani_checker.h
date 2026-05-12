@@ -48,6 +48,19 @@
     X(VERIFY_TUPLE_VALUE,                   VerifyTupleValue)                     \
     X(VERIFY_TUPLE_INDEX,                   VerifyTupleIndex)                     \
     X(VERIFY_ARRAYBUFFER,                   VerifyArrayBuffer)                    \
+    X(VERIFY_FIXED_ARRAY,                   VerifyFixedArray)                     \
+    X(VERIFY_FIXED_ARRAY_BOOLEAN,           VerifyFixedArrayBoolean)              \
+    X(VERIFY_FIXED_ARRAY_CHAR,              VerifyFixedArrayChar)                 \
+    X(VERIFY_FIXED_ARRAY_BYTE,              VerifyFixedArrayByte)                 \
+    X(VERIFY_FIXED_ARRAY_SHORT,             VerifyFixedArrayShort)                \
+    X(VERIFY_FIXED_ARRAY_INT,               VerifyFixedArrayInt)                  \
+    X(VERIFY_FIXED_ARRAY_LONG,              VerifyFixedArrayLong)                 \
+    X(VERIFY_FIXED_ARRAY_FLOAT,             VerifyFixedArrayFloat)                \
+    X(VERIFY_FIXED_ARRAY_DOUBLE,            VerifyFixedArrayDouble)               \
+    X(VERIFY_FIXED_ARRAY_REF,               VerifyFixedArrayRef)                  \
+    X(VERIFY_FIXED_ARRAY_INITIAL_REF,       VerifyFixedArrayInitialRef)           \
+    X(VERIFY_FIXED_ARRAY_SET_REF,           VerifyFixedArraySetRef)               \
+    X(VERIFY_REGION_BUFFER,                 VerifyRegionBuffer)                   \
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
@@ -105,6 +118,7 @@
     X(VERIFY_U32_STORAGE,                   VerifyU32Storage)                     \
     X(VERIFY_BOOLEAN,                       VerifyBoolean)                        \
     X(VERIFY_ARRAYBUFFER_LENGTH,            VerifyArrayBufferLength)              \
+    X(VERIFY_FIXED_ARRAY_LENGTH,            VerifyFixedArrayLength)               \
     X(VERIFY_NATIVE_FUNCTIONS,              VerifyNativeFunctions)                \
     X(VERIFY_NATIVE_METHODS,                VerifyNativeMethods)                  \
     X(VERIFY_STATIC_NATIVE_METHODS,         VerifyStaticNativeMethods)            \
@@ -142,6 +156,7 @@
     X(VERIFY_FIXED_ARRAY_LONG_STORAGE,      VerifyFixedArrayLongStorage)          \
     X(VERIFY_FIXED_ARRAY_FLOAT_STORAGE,     VerifyFixedArrayFloatStorage)         \
     X(VERIFY_FIXED_ARRAY_DOUBLE_STORAGE,    VerifyFixedArrayDoubleStorage)        \
+    X(VERIFY_FIXED_ARRAY_REF_STORAGE,       VerifyFixedArrayRefStorage)           \
     X(VERIFY_RESOLVER_STORAGE,              VerifyResolverStorage)                \
     X(VERIFY_ANY_REF,                       VerifyAnyRef)                         \
     X(VERIFY_REF_CALL_ARGS,                 VerifyRefCallArgs)                    \
@@ -182,6 +197,16 @@
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_ARRAY,                        Array,                     VArray *)                 \
     X(ANI_ARRAYBUFFER,                  ArrayBuffer,               VArrayBuffer *)           \
+    X(ANI_FIXED_ARRAY,                  FixedArray,                VFixedArray *)            \
+    X(ANI_FIXED_ARRAY_BOOLEAN,          FixedArrayBoolean,         VFixedArrayBoolean *)     \
+    X(ANI_FIXED_ARRAY_CHAR,             FixedArrayChar,            VFixedArrayChar *)        \
+    X(ANI_FIXED_ARRAY_BYTE,             FixedArrayByte,            VFixedArrayByte *)        \
+    X(ANI_FIXED_ARRAY_SHORT,            FixedArrayShort,           VFixedArrayShort *)       \
+    X(ANI_FIXED_ARRAY_INT,              FixedArrayInt,             VFixedArrayInt *)         \
+    X(ANI_FIXED_ARRAY_LONG,             FixedArrayLong,            VFixedArrayLong *)        \
+    X(ANI_FIXED_ARRAY_FLOAT,            FixedArrayFloat,           VFixedArrayFloat *)       \
+    X(ANI_FIXED_ARRAY_DOUBLE,           FixedArrayDouble,          VFixedArrayDouble *)      \
+    X(ANI_FIXED_ARRAY_REF,              FixedArrayRef,             VFixedArrayRef *)         \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
     X(ANI_NATIVE_FUNCTIONS,             NativeFunctions,           const ani_native_function *) \
     X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
@@ -231,9 +256,11 @@
     X(ANI_FIXED_ARRAY_LONG_STORAGE,     FixedArrayLongStorage,     VFixedArrayLong **)       \
     X(ANI_FIXED_ARRAY_FLOAT_STORAGE,    FixedArrayFloatStorage,    VFixedArrayFloat **)      \
     X(ANI_FIXED_ARRAY_DOUBLE_STORAGE,   FixedArrayDoubleStorage,   VFixedArrayDouble **)     \
+    X(ANI_FIXED_ARRAY_REF_STORAGE,      FixedArrayRefStorage,      VFixedArrayRef **)        \
     X(ANI_RESOLVER,                     Resolver,                  VResolver *)              \
     X(ANI_RESOLVER_STORAGE,             ResolverStorage,           VResolver **)             \
     X(ANI_REF_CALL_ARGS,                RefCallArgs,               VRefCallArgs *)           \
+    X(CONST_VOID_PTR,                   ConstVoidPtr,              const void *)              \
 
 // CC-OFFNXT(G.PRE.02-CPP) keep va_list consumption local while sharing switch logic
 #define READ_VALUE_FROM_VA_LIST(TYPE, VA_ARGS, VALUE, CLEANUP_ON_UNEXPECTED)             \
@@ -283,6 +310,11 @@ class EtsClass;
 }  // namespace ark::ets
 
 namespace ark::ets::ani::verify {
+
+inline bool IsValidAniBoolean(ani_boolean value)
+{
+    return value == ANI_TRUE || value == ANI_FALSE;
+}
 
 PandaString NormalizeMethodNameForAni(const char *name);
 
@@ -359,6 +391,7 @@ class VString;
 class VError;
 class VArray;
 class VArrayBuffer;
+class VFixedArray;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
 class VFixedArrayByte;
@@ -367,6 +400,7 @@ class VFixedArrayInt;
 class VFixedArrayLong;
 class VFixedArrayFloat;
 class VFixedArrayDouble;
+class VFixedArrayRef;
 class VResolver;
 
 class ANIArg {
@@ -794,6 +828,71 @@ public:
         return ANIArg(ArgValueByArrayBuffer(varraybuffer), name, Action::VERIFY_ARRAYBUFFER);
     }
 
+    static ANIArg MakeForFixedArray(VFixedArray *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArray(varray), name, Action::VERIFY_FIXED_ARRAY);
+    }
+
+    static ANIArg MakeForFixedArrayBoolean(VFixedArrayBoolean *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayBoolean(varray), name, Action::VERIFY_FIXED_ARRAY_BOOLEAN);
+    }
+
+    static ANIArg MakeForFixedArrayChar(VFixedArrayChar *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayChar(varray), name, Action::VERIFY_FIXED_ARRAY_CHAR);
+    }
+
+    static ANIArg MakeForFixedArrayByte(VFixedArrayByte *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayByte(varray), name, Action::VERIFY_FIXED_ARRAY_BYTE);
+    }
+
+    static ANIArg MakeForFixedArrayShort(VFixedArrayShort *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayShort(varray), name, Action::VERIFY_FIXED_ARRAY_SHORT);
+    }
+
+    static ANIArg MakeForFixedArrayInt(VFixedArrayInt *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayInt(varray), name, Action::VERIFY_FIXED_ARRAY_INT);
+    }
+
+    static ANIArg MakeForFixedArrayLong(VFixedArrayLong *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayLong(varray), name, Action::VERIFY_FIXED_ARRAY_LONG);
+    }
+
+    static ANIArg MakeForFixedArrayFloat(VFixedArrayFloat *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayFloat(varray), name, Action::VERIFY_FIXED_ARRAY_FLOAT);
+    }
+
+    static ANIArg MakeForFixedArrayDouble(VFixedArrayDouble *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayDouble(varray), name, Action::VERIFY_FIXED_ARRAY_DOUBLE);
+    }
+
+    static ANIArg MakeForFixedArrayRef(VFixedArrayRef *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayRef(varray), name, Action::VERIFY_FIXED_ARRAY_REF);
+    }
+
+    static ANIArg MakeForFixedArrayInitialRef(VRef *vref, std::string_view name)
+    {
+        return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_FIXED_ARRAY_INITIAL_REF);
+    }
+
+    static ANIArg MakeForFixedArraySetRef(VRef *vref, std::string_view name)
+    {
+        return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_FIXED_ARRAY_SET_REF);
+    }
+
+    static ANIArg MakeForRegionBuffer(const void *buffer, ani_size length, std::string_view name)
+    {
+        return ANIArg(ArgValueByConstVoidPtr(buffer), name, Action::VERIFY_REGION_BUFFER, length);
+    }
+
     static ANIArg MakeForArrayIndex(ani_size index, std::string_view name)
     {
         return ANIArg(ArgValueBySize(index), name, Action::VERIFY_ARRAY_INDEX);
@@ -912,6 +1011,11 @@ public:
         return ANIArg(ArgValueBySize(length), name, Action::VERIFY_ARRAYBUFFER_LENGTH);
     }
 
+    static ANIArg MakeForFixedArrayLength(ani_size length, std::string_view name)
+    {
+        return ANIArg(ArgValueBySize(length), name, Action::VERIFY_FIXED_ARRAY_LENGTH);
+    }
+
     static ANIArg MakeForNativeFunctions(const ani_native_function *functions, ani_size nrFunctions,
                                          std::string_view name)
     {
@@ -977,6 +1081,11 @@ public:
     static ANIArg MakeForArrayDoubleStorage(VFixedArrayDouble **arrStorage, std::string_view name)
     {
         return ANIArg(ArgValueByFixedArrayDoubleStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
+    }
+
+    static ANIArg MakeForArrayRefStorage(VFixedArrayRef **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFixedArrayRefStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_REF_STORAGE);
     }
 
     static ANIArg MakeForResolver(VResolver *valueStorage, std::string_view name)

@@ -42,6 +42,7 @@ class VVariable;
 class VError;
 class VArray;
 class VArrayBuffer;
+class VFixedArray;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
 class VFixedArrayByte;
@@ -50,6 +51,7 @@ class VFixedArrayInt;
 class VFixedArrayLong;
 class VFixedArrayFloat;
 class VFixedArrayDouble;
+class VFixedArrayRef;
 class VResolver;
 
 namespace internal {
@@ -271,8 +273,23 @@ struct TypeMapping<VArrayBuffer *> {
 };
 
 template <>
+struct TypeMapping<VFixedArray *> {
+    using Type = ani_fixedarray;
+};
+
+template <>
+struct TypeMapping<VFixedArrayBoolean *> {
+    using Type = ani_fixedarray_boolean;
+};
+
+template <>
 struct TypeMapping<VFixedArrayBoolean **> {
     using Type = ani_fixedarray_boolean *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayChar *> {
+    using Type = ani_fixedarray_char;
 };
 
 template <>
@@ -281,8 +298,18 @@ struct TypeMapping<VFixedArrayChar **> {
 };
 
 template <>
+struct TypeMapping<VFixedArrayByte *> {
+    using Type = ani_fixedarray_byte;
+};
+
+template <>
 struct TypeMapping<VFixedArrayByte **> {
     using Type = ani_fixedarray_byte *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayShort *> {
+    using Type = ani_fixedarray_short;
 };
 
 template <>
@@ -291,8 +318,18 @@ struct TypeMapping<VFixedArrayShort **> {
 };
 
 template <>
+struct TypeMapping<VFixedArrayInt *> {
+    using Type = ani_fixedarray_int;
+};
+
+template <>
 struct TypeMapping<VFixedArrayInt **> {
     using Type = ani_fixedarray_int *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayLong *> {
+    using Type = ani_fixedarray_long;
 };
 
 template <>
@@ -301,13 +338,33 @@ struct TypeMapping<VFixedArrayLong **> {
 };
 
 template <>
+struct TypeMapping<VFixedArrayFloat *> {
+    using Type = ani_fixedarray_float;
+};
+
+template <>
 struct TypeMapping<VFixedArrayFloat **> {
     using Type = ani_fixedarray_float *;
 };
 
 template <>
+struct TypeMapping<VFixedArrayDouble *> {
+    using Type = ani_fixedarray_double;
+};
+
+template <>
 struct TypeMapping<VFixedArrayDouble **> {
     using Type = ani_fixedarray_double *;
+};
+
+template <>
+struct TypeMapping<VFixedArrayRef *> {
+    using Type = ani_fixedarray_ref;
+};
+
+template <>
+struct TypeMapping<VFixedArrayRef **> {
+    using Type = ani_fixedarray_ref *;
 };
 
 template <>

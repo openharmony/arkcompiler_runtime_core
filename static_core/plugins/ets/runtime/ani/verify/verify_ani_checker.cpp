@@ -15,7 +15,9 @@
 
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 
+#include <cstdint>
 #include <cstring>
+#include <limits>
 #include <optional>
 #include <string>
 
@@ -133,6 +135,14 @@ public:
         return arrayBufferKlass->IsAssignableFrom(klass);
     }
 
+    static bool IsFixedArray(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (s.IsNullishValue(ref)) {
+            return false;
+        }
+        return s.ToInternalType(ref)->GetClass()->IsArrayClass();
+    }
+
     static bool IsObject(ScopedManagedCodeFix &s, ani_ref ref)
     {
         if (s.IsNullishValue(ref)) {
@@ -232,6 +242,57 @@ static bool IsCorrectTupleElementType(EtsExecutionContext *executionCtx, EtsObje
     }
 
     return runtimeClass == GetTuplePrimitiveBoxClass(executionCtx, expectedType);
+}
+
+static std::string_view FixedArrayTypeToString(EtsClass *klass)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(klass->IsArrayClass());
+
+    EtsClass *componentType = klass->GetComponentType();
+    ASSERT(componentType != nullptr);
+
+    switch (componentType->GetType().GetId()) {
+        case panda_file::Type::TypeId::U1:
+            return "ani_fixedarray_boolean";
+        case panda_file::Type::TypeId::U16:
+            return "ani_fixedarray_char";
+        case panda_file::Type::TypeId::I8:
+            return "ani_fixedarray_byte";
+        case panda_file::Type::TypeId::I16:
+            return "ani_fixedarray_short";
+        case panda_file::Type::TypeId::I32:
+            return "ani_fixedarray_int";
+        case panda_file::Type::TypeId::I64:
+            return "ani_fixedarray_long";
+        case panda_file::Type::TypeId::F32:
+            return "ani_fixedarray_float";
+        case panda_file::Type::TypeId::F64:
+            return "ani_fixedarray_double";
+        case panda_file::Type::TypeId::REFERENCE:
+            return "ani_fixedarray_ref";
+        default:
+            UNREACHABLE();
+            return "";
+    }
+}
+
+static bool IsExpectedFixedArrayType(EtsClass *klass, panda_file::Type::TypeId expectedType)
+{
+    if (klass == nullptr || !klass->IsArrayClass()) {
+        return false;
+    }
+    EtsClass *componentType = klass->GetComponentType();
+    return componentType != nullptr && componentType->IsPrimitive() && componentType->GetType().GetId() == expectedType;
+}
+
+static bool IsFixedArrayRefType(EtsClass *klass)
+{
+    if (klass == nullptr || !klass->IsArrayClass()) {
+        return false;
+    }
+    EtsClass *componentType = klass->GetComponentType();
+    return componentType != nullptr && !componentType->IsPrimitive();
 }
 
 class CallArgs {
@@ -440,6 +501,9 @@ std::string_view ANIRefTypeToString(ScopedManagedCodeFix &s, ani_ref ref)
         if (ANIRefTypeChecker::IsArrayBuffer(s, ref)) {
             return "ani_arraybuffer";
         }
+        if (ANIRefTypeChecker::IsFixedArray(s, ref)) {
+            return FixedArrayTypeToString(s.ToInternalType(ref)->GetClass());
+        }
         if (ANIRefTypeChecker::IsClass(s, ref)) {
             return "ani_class";
         }
@@ -595,6 +659,16 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_ERROR_STORAGE:                return "ani_error *";
         case ValueType::ANI_ARRAY:                        return "ani_array";
         case ValueType::ANI_ARRAYBUFFER:                  return "ani_arraybuffer";
+        case ValueType::ANI_FIXED_ARRAY:                  return "ani_fixedarray";
+        case ValueType::ANI_FIXED_ARRAY_BOOLEAN:          return "ani_fixedarray_boolean";
+        case ValueType::ANI_FIXED_ARRAY_CHAR:             return "ani_fixedarray_char";
+        case ValueType::ANI_FIXED_ARRAY_BYTE:             return "ani_fixedarray_byte";
+        case ValueType::ANI_FIXED_ARRAY_SHORT:            return "ani_fixedarray_short";
+        case ValueType::ANI_FIXED_ARRAY_INT:              return "ani_fixedarray_int";
+        case ValueType::ANI_FIXED_ARRAY_LONG:             return "ani_fixedarray_long";
+        case ValueType::ANI_FIXED_ARRAY_FLOAT:            return "ani_fixedarray_float";
+        case ValueType::ANI_FIXED_ARRAY_DOUBLE:           return "ani_fixedarray_double";
+        case ValueType::ANI_FIXED_ARRAY_REF:              return "ani_fixedarray_ref";
         case ValueType::ANI_ARRAY_STORAGE:                return "ani_array *";
         case ValueType::ANI_ARRAYBUFFER_STORAGE:          return "ani_arraybuffer *";
         case ValueType::ANI_NATIVE_FUNCTIONS:             return "const ani_native_function *";
@@ -607,9 +681,11 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_FIXED_ARRAY_LONG_STORAGE:     return "ani_fixedarray_long *";
         case ValueType::ANI_FIXED_ARRAY_FLOAT_STORAGE:    return "ani_fixedarray_float *";
         case ValueType::ANI_FIXED_ARRAY_DOUBLE_STORAGE:   return "ani_fixedarray_double *";
+        case ValueType::ANI_FIXED_ARRAY_REF_STORAGE:      return "ani_fixedarray_ref *";
         case ValueType::ANI_RESOLVER:                     return "ani_resolver";
         case ValueType::ANI_RESOLVER_STORAGE:             return "ani_resolver *";
         case ValueType::ANI_REF_CALL_ARGS:                return "ani_ref *";
+        case ValueType::CONST_VOID_PTR:                   return "const void *";
         default:                                          UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
             if (action_ == Action::VERIFY_METHOD_A_ARGS) {
@@ -832,9 +908,15 @@ public:
         return {};
     }
 
+    VerificationResult VerifyFixedArrayLength(ani_size length)
+    {
+        skipFixedArrayInitialElement_ = length == 0;
+        return {};
+    }
+
     VerificationResult VerifyBoolean(ani_boolean value)
     {
-        if (value != ANI_TRUE && value != ANI_FALSE) {
+        if (!IsValidAniBoolean(value)) {
             return {"wrong value for ani_boolean", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -874,6 +956,9 @@ public:
 
     VerificationResult VerifyRef(VRef *vref)
     {
+        if (vref == nullptr) {
+            return {"wrong reference", ANIErrorSeverity::FATAL};
+        }
         if (GetEnvANIVerifier()->IsValidRefInCurrentFrame(vref)) {
             return {};
         }
@@ -1302,6 +1387,110 @@ public:
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
+        return {};
+    }
+
+    VerificationResult VerifyFixedArray(VFixedArray *varray)
+    {
+        return DoVerifyFixedArray(varray, std::nullopt);
+    }
+
+    VerificationResult VerifyPrimitivesFixedArray(VFixedArray *varray, panda_file::Type::TypeId expectedType)
+    {
+        ASSERT(expectedType != panda_file::Type::TypeId::REFERENCE);
+        return DoVerifyFixedArray(varray, expectedType);
+    }
+
+    VerificationResult DoVerifyFixedArray(VFixedArray *varray, std::optional<panda_file::Type::TypeId> expectedType)
+    {
+        auto err = VerifyRef(varray);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        EtsClass *klass = s.ToInternalType(varray->GetRef())->GetClass();
+        if (!klass->IsArrayClass()) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, varray->GetRef());
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+
+        if (expectedType.has_value() && !IsExpectedFixedArrayType(klass, expectedType.value())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << FixedArrayTypeToString(klass);
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyFixedArrayRef(VFixedArrayRef *varray)
+    {
+        auto err = VerifyRef(varray);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        EtsClass *klass = s.ToInternalType(varray->GetRef())->GetClass();
+        if (!IsFixedArrayRefType(klass)) {
+            PandaStringStream ss;
+            ss << "wrong reference type: "
+               << (klass->IsArrayClass() ? FixedArrayTypeToString(klass) : ANIRefTypeToString(s, varray->GetRef()));
+            return {ss.str(), ANIErrorSeverity::FATAL};
+        }
+        class_ = klass;
+        return {};
+    }
+
+    VerificationResult VerifyFixedArrayInitialRef(VRef *vref)
+    {
+        if (skipFixedArrayInitialElement_) {
+            return {};
+        }
+
+        if (vref == nullptr) {
+            return {"wrong reference", ANIErrorSeverity::ERROR};
+        }
+
+        return VerifyFixedArrayRefAssignable(vref, class_, ANIErrorSeverity::FATAL);
+    }
+
+    VerificationResult VerifyFixedArraySetRef(VRef *vref)
+    {
+        if (class_ == nullptr) {
+            return {};
+        }
+        EtsClass *componentType = class_->GetComponentType();
+        return VerifyFixedArrayRefAssignable(vref, componentType, ANIErrorSeverity::ERROR);
+    }
+
+    VerificationResult VerifyFixedArrayRefAssignable(VRef *vref, EtsClass *targetClass,
+                                                     ANIErrorSeverity wrongTypeSeverity)
+    {
+        auto err = VerifyRef(vref);
+        if (err) {
+            return err;
+        }
+
+        if (ManagedCodeAccessor::IsUndefined(vref->GetRef()) || targetClass == nullptr) {
+            return {};
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        EtsClass *klass = s.ToInternalType(vref->GetRef())->GetClass();
+        if (!targetClass->IsAssignableFrom(klass)) {
+            return {"wrong reference type", wrongTypeSeverity};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyRegionBuffer(const void *buffer, ani_size length)
+    {
+        static_cast<void>(length);
+        if (buffer == nullptr) {
+            return {"wrong native buffer", ANIErrorSeverity::ERROR};
+        }
         return {};
     }
 
@@ -2270,6 +2459,7 @@ private:
     std::optional<ANIArg::AniMethodArgs> methodArgsForExtInfo_ {};
     VArray *currentArray_ {};
     VTupleValue *currentTupleValue_ {};
+    bool skipFixedArrayInitialElement_ {false};
     bool canReadFunctionalObjectArgv_ {true};
 };
 
@@ -2543,6 +2733,84 @@ static VerificationResult VerifyArrayBuffer(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAYBUFFER);
     return v.VerifyArrayBuffer(arg.GetValueArrayBuffer());
+}
+
+static VerificationResult VerifyFixedArray(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY);
+    return v.VerifyFixedArray(arg.GetValueFixedArray());
+}
+
+static VerificationResult VerifyFixedArrayBoolean(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_BOOLEAN);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayBoolean(), panda_file::Type::TypeId::U1);
+}
+
+static VerificationResult VerifyFixedArrayChar(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_CHAR);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayChar(), panda_file::Type::TypeId::U16);
+}
+
+static VerificationResult VerifyFixedArrayByte(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_BYTE);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayByte(), panda_file::Type::TypeId::I8);
+}
+
+static VerificationResult VerifyFixedArrayShort(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_SHORT);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayShort(), panda_file::Type::TypeId::I16);
+}
+
+static VerificationResult VerifyFixedArrayInt(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_INT);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayInt(), panda_file::Type::TypeId::I32);
+}
+
+static VerificationResult VerifyFixedArrayLong(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_LONG);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayLong(), panda_file::Type::TypeId::I64);
+}
+
+static VerificationResult VerifyFixedArrayFloat(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_FLOAT);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayFloat(), panda_file::Type::TypeId::F32);
+}
+
+static VerificationResult VerifyFixedArrayDouble(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_DOUBLE);
+    return v.VerifyPrimitivesFixedArray(arg.GetValueFixedArrayDouble(), panda_file::Type::TypeId::F64);
+}
+
+static VerificationResult VerifyFixedArrayRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_REF);
+    return v.VerifyFixedArrayRef(arg.GetValueFixedArrayRef());
+}
+
+static VerificationResult VerifyFixedArrayInitialRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_INITIAL_REF);
+    return v.VerifyFixedArrayInitialRef(arg.GetValueRef());
+}
+
+static VerificationResult VerifyFixedArraySetRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_SET_REF);
+    return v.VerifyFixedArraySetRef(arg.GetValueRef());
+}
+
+static VerificationResult VerifyRegionBuffer(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REGION_BUFFER);
+    return v.VerifyRegionBuffer(arg.GetValueConstVoidPtr(), arg.GetNativeFunctionCount());
 }
 
 static VerificationResult VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
@@ -2875,6 +3143,12 @@ static VerificationResult VerifySize([[maybe_unused]] Verifier &v, [[maybe_unuse
     return {};
 }
 
+static VerificationResult VerifyFixedArrayLength(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_LENGTH);
+    return v.VerifyFixedArrayLength(arg.GetValueSize());
+}
+
 static VerificationResult VerifyNativeFunctions(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_NATIVE_FUNCTIONS);
@@ -2975,6 +3249,12 @@ static VerificationResult VerifyFixedArrayDoubleStorage(Verifier &v, const ANIAr
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueFixedArrayDoubleStorage(), "ani_fixedarray_double");
+}
+
+static VerificationResult VerifyFixedArrayRefStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_REF_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueFixedArrayRefStorage(), "ani_fixedarray_ref");
 }
 
 static VerificationResult VerifyResolver(Verifier &v, const ANIArg &arg)
