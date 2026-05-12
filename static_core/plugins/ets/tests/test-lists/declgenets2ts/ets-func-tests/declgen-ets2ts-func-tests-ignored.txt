@@ -127,6 +127,16 @@ std/core/DeepCopyTest.ets
 std/core/json/JsonElementParseTest.ets
 std/core/json/JsonElementFromJsonTest.ets
 std/core/json/JsonElementToJsonTest.ets
+std/core/json/JsonStringifyTest3.ets
+std/core/json/JsonStringifyTest4.ets
+std/core/json/JsonStringifyTest5.ets
+std/core/json/JsonStringifyTest6.ets
+std/core/json/JsonStringifyTest7.ets
+std/core/json/JsonStringifyTest8.ets
+std/core/json/JsonStringifyTest9.ets
+std/core/json/JsonStringifyTest10.ets
+std/core/json/JsonStringifyTest11.ets
+std/core/json/JsonStringifyTest12.ets
 std/core/std_core_char_static_Char_charsToCodePoint.ets
 std/containers/BlockingQueue/AddAndPollStress.ets
 std/core/ReflectTypeTest.ets
