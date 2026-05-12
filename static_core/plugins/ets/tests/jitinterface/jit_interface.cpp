@@ -31,11 +31,12 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_module md;
     const char *foundName = nullptr;
     static const std::array TEST_MODULE_NAMES = {
-        "string_tlab_allocations",  //
-        "string_tlab_repeat",       //
-        "test_any_static",          //
-        "esvalue_load_rte",         //
-        "import_type"               //
+        "string_tlab_allocations",   //
+        "string_tlab_repeat",        //
+        "test_any_static",           //
+        "esvalue_load_rte",          //
+        "import_type",               //
+        "ets_string_builder_deopt1"  //
     };
     for (auto moduleName : TEST_MODULE_NAMES) {
         if (ANI_OK != env->FindModule(moduleName, &md)) {

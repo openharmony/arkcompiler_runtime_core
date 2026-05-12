@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +25,7 @@ sources_dir=$(realpath "$1")
 EXIT_CODE=0
 
 check_num=$(find "${sources_dir}"/plugins/ets/tests/checked -name "*.ets" | wc -l)
-expected_num=5
+expected_num=6
 
 if [[ $check_num -ne $expected_num ]]; then
     echo -e "Error: Number of checked tests in 'static_core/plugins/ets/tests/checked': expected ${expected_num} found: ${check_num}.

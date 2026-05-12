@@ -18,6 +18,7 @@
 
 //! CHECKER      JIT optimize string builder instance, don't insert deoptimization
 //! RUN          entry: "ets_string_builder_deopt1.ETSGLOBAL::main",
+//!              env: "LD_LIBRARY_PATH=../../../../../../lib",
 //!              options: "--compiler-regex='.*ETSGLOBAL::(__noinline__caller|throws)'\
 //!                 --compiler-hotness-threshold=50 --compiler-profiling-threshold=0"
 //!
@@ -43,11 +44,11 @@
 //! METHOD       "__noinline__caller"
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "DeoptimizeIf"
-//! RUN          entry: "ets_string_builder_deopt1.ETSGLOBAL::main"
+//! RUN          entry: "ets_string_builder_deopt1.ETSGLOBAL::main", env: "LD_LIBRARY_PATH=../../../../../../lib"
 
 //! CHECKER      AOT PGO optimize string builder instance, can insert deoptimization
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PGO_PROF entry: "ets_string_builder_deopt1.ETSGLOBAL::main -- x"
+//! RUN_PGO_PROF entry: "ets_string_builder_deopt1.ETSGLOBAL::main -- x", env: "LD_LIBRARY_PATH=../../../../../../lib"
 //! RUN_PGO_PAOC options: ""
 //! EVENT        /Inline,ets_string_builder_deopt1.ETSGLOBAL::__noinline__caller,ets_string_builder_deopt1.ETSGLOBAL::throws,.*,STATIC,SUCCESS/
 //! METHOD       "throws"
@@ -59,7 +60,7 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! # Here, used SaveState of `LoadAndInitClass 'std.core.StringBuilder'` to deoptimize, which doesn't need the instance
 //! INST         "DeoptimizeIf"
-//! RUN          entry: "ets_string_builder_deopt1.ETSGLOBAL::main"
+//! RUN          entry: "ets_string_builder_deopt1.ETSGLOBAL::main", env: "LD_LIBRARY_PATH=../../../../../../lib"
 
 function throws(str: string, arg: int) {
   if (arg > 0) {
@@ -84,7 +85,12 @@ function __noinline__caller(str: string, arg: int) {
   }
 }
 
+native function compileMethod(str: String) : int;
+
 function main(args: FixedArray<string>): void {
+  loadLibrary("jitinterface");
+  compileMethod("ets_string_builder_deopt1.ETSGLOBAL::throws");
+
   // check that concatenation succeeded and NPE didn't occur
   if (args.length > 0 && args[0] == 'x') {
     // AOT profile collection
