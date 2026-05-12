@@ -1,0 +1,60 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:  
+  # double
+  - { type: "double", value: "-7.0", instanceOfType: "double", result: "true" }
+  - { type: "double", value: "-6.0", instanceOfType: "short", result: "false" }
+  - { type: "double", value: "-5.0", instanceOfType: "int", result: "false" }
+  - { type: "double", value: "-4.0", instanceOfType: "long", result: "false" }
+  - { type: "double", value: "-3.0", instanceOfType: "byte", result: "false" }
+  - { type: "double", value: "-2.0", instanceOfType: "float", result: "false" }
+  - { type: "double", value: "-1.0", instanceOfType: "bigint", result: "false" }
+  - { type: "double", value: "-110.0", instanceOfType: "boolean", result: "false" }
+  - { type: "double", value: "11.0", instanceOfType: "string", result: "false" }
+  - { type: "double", value: "0.0", instanceOfType: "char", result: "false" }
+
+  - { type: "double", value: "0.0", instanceOfType: "Double", result: "true" }
+  - { type: "double", value: "1.0", instanceOfType: "Short", result: "false" }
+  - { type: "double", value: "2.0", instanceOfType: "Long", result: "false" }
+  - { type: "double", value: "3.0", instanceOfType: "Int", result: "false" }
+  - { type: "double", value: "4.0", instanceOfType: "Byte", result: "false" }
+  - { type: "double", value: "5.0", instanceOfType: "Float", result: "false" }
+  - { type: "double", value: "6.0", instanceOfType: "BigInt", result: "false" }
+  - { type: "double", value: "110.0", instanceOfType: "Boolean", result: "false" }
+  - { type: "double", value: "100.0", instanceOfType: "String", result: "false" }
+  - { type: "double", value: "0.0", instanceOfType: "Char", result: "false" }
+
+  # Double (alias)
+  - { type: "Double", value: "new Double(1.0)", instanceOfType: "double", result: "true" }
+  - { type: "Double", value: "new Double(0.0)", instanceOfType: "short", result: "false" }
+  - { type: "Double", value: "new Double(-1.0)", instanceOfType: "int", result: "false" }
+  - { type: "Double", value: "new Double(9.0)", instanceOfType: "long", result: "false" }
+  - { type: "Double", value: "new Double(127.0)", instanceOfType: "byte", result: "false" }
+  - { type: "Double", value: "new Double(83.0)", instanceOfType: "float", result: "false" }
+  - { type: "Double", value: "new Double(127.0)", instanceOfType: "bigint", result: "false" }
+  - { type: "Double", value: "new Double(-110.0)", instanceOfType: "boolean", result: "false" }
+  - { type: "Double", value: "new Double(11.0)", instanceOfType: "string", result: "false" }
+  - { type: "Double", value: "new Double(0.0)", instanceOfType: "char", result: "false" }
+
+  - { type: "Double", value: "new Double(-0.0)", instanceOfType: "Double", result: "true" }
+  - { type: "Double", value: "new Double(-127.0)", instanceOfType: "Short", result: "false" }
+  - { type: "Double", value: "new Double(58.0)", instanceOfType: "Long", result: "false" }
+  - { type: "Double", value: "new Double(-10.0)", instanceOfType: "Int", result: "false" }
+  - { type: "Double", value: "new Double(-12.0)", instanceOfType: "Byte", result: "false" }
+  - { type: "Double", value: "new Double(0.0)", instanceOfType: "Float", result: "false" }
+  - { type: "Double", value: "new Double(77.0)", instanceOfType: "BigInt", result: "false" }
+  - { type: "Double", value: "new Double(-2.0)", instanceOfType: "Boolean", result: "false" }
+  - { type: "Double", value: "new Double(-46.0)", instanceOfType: "String", result: "false" }
+  - { type: "Double", value: "new Double(0.0)", instanceOfType: "Char", result: "false" }
+  

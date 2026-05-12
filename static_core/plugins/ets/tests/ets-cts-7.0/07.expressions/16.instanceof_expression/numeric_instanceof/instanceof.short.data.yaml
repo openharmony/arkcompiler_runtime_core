@@ -1,0 +1,60 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:  
+  # short
+  - { type: "short", value: "(-7).toShort()", instanceOfType: "byte", result: "false" }
+  - { type: "short", value: "(-6).toShort()", instanceOfType: "short", result: "true" }
+  - { type: "short", value: "(-5).toShort()", instanceOfType: "int", result: "false" }
+  - { type: "short", value: "(-4).toShort()", instanceOfType: "long", result: "false" }
+  - { type: "short", value: "(-3).toShort()", instanceOfType: "float", result: "false" }
+  - { type: "short", value: "(-2).toShort()", instanceOfType: "double", result: "false" }
+  - { type: "short", value: "(-1).toShort()", instanceOfType: "bigint", result: "false" }
+  - { type: "short", value: "(-110).toShort()", instanceOfType: "boolean", result: "false" }
+  - { type: "short", value: "(11).toShort()", instanceOfType: "string", result: "false" }
+  - { type: "short", value: "(0).toShort()", instanceOfType: "char", result: "false" }
+
+  - { type: "short", value: "(0).toShort()", instanceOfType: "Byte", result: "false" }
+  - { type: "short", value: "(1).toShort()", instanceOfType: "Short", result: "true" }
+  - { type: "short", value: "(2).toShort()", instanceOfType: "Long", result: "false" }
+  - { type: "short", value: "(3).toShort()", instanceOfType: "Int", result: "false" }
+  - { type: "short", value: "(4).toShort()", instanceOfType: "Float", result: "false" }
+  - { type: "short", value: "(5).toShort()", instanceOfType: "Double", result: "false" }
+  - { type: "short", value: "(6).toShort()", instanceOfType: "BigInt", result: "false" }
+  - { type: "short", value: "(110).toShort()", instanceOfType: "Boolean", result: "false" }
+  - { type: "short", value: "(100).toShort()", instanceOfType: "String", result: "false" }
+  - { type: "short", value: "(0).toShort()", instanceOfType: "Char", result: "false" }
+
+  # Short (alias)
+  - { type: "Short", value: "new Short(1)", instanceOfType: "byte", result: "false" }
+  - { type: "Short", value: "new Short(0)", instanceOfType: "short", result: "true" }
+  - { type: "Short", value: "new Short(-1)", instanceOfType: "int", result: "false" }
+  - { type: "Short", value: "new Short(0b1001)", instanceOfType: "long", result: "false" }
+  - { type: "Short", value: "new Short(0x7F)", instanceOfType: "float", result: "false" }
+  - { type: "Short", value: "new Short(0o123)", instanceOfType: "double", result: "false" }
+  - { type: "Short", value: "new Short(127)", instanceOfType: "bigint", result: "false" }
+  - { type: "Short", value: "new Short(-110)", instanceOfType: "boolean", result: "false" }
+  - { type: "Short", value: "new Short(11)", instanceOfType: "string", result: "false" }
+  - { type: "Short", value: "new Short(0)", instanceOfType: "char", result: "false" }
+
+  - { type: "Short", value: "new Short(-0X0)", instanceOfType: "Byte", result: "false" }
+  - { type: "Short", value: "new Short(-0B0111_1111)", instanceOfType: "Short", result: "true" }
+  - { type: "Short", value: "new Short(58)", instanceOfType: "Long", result: "false" }
+  - { type: "Short", value: "new Short(-0X0A)", instanceOfType: "Int", result: "false" }
+  - { type: "Short", value: "new Short(-0O014)", instanceOfType: "Float", result: "false" }
+  - { type: "Short", value: "new Short(0)", instanceOfType: "Double", result: "false" }
+  - { type: "Short", value: "new Short(77)", instanceOfType: "BigInt", result: "false" }
+  - { type: "Short", value: "new Short(-0b1_10)", instanceOfType: "Boolean", result: "false" }
+  - { type: "Short", value: "new Short(-0O56)", instanceOfType: "String", result: "false" }
+  - { type: "Short", value: "new Short(0x0)", instanceOfType: "Char", result: "false" }
+  

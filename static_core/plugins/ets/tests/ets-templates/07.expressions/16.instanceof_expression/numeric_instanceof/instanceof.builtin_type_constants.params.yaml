@@ -1,0 +1,169 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:  
+  # byte (Byte)
+  - { value: "Byte.MAX_VALUE", instanceOfType: "byte", result: "true" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "Byte", result: "true" }
+
+  - { value: "Byte.MAX_VALUE", instanceOfType: "short", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "int", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "long", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "float", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "double", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "bigint", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "boolean", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "char", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "string", result: "false" }
+
+  - { value: "Byte.MIN_VALUE", instanceOfType: "Short", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "Int", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "Long", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "Float", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "Double", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "BigInt", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "Boolean", result: "false" }
+  - { value: "Byte.MAX_VALUE", instanceOfType: "Char", result: "false" }
+  - { value: "Byte.MIN_VALUE", instanceOfType: "String", result: "false" }
+
+  # short (Short)
+  - { value: "Short.MIN_VALUE", instanceOfType: "short", result: "true" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "Short", result: "true" }
+
+  - { value: "Short.MAX_VALUE", instanceOfType: "byte", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "int", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "long", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "float", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "double", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "bigint", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "boolean", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "char", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "string", result: "false" }
+
+  - { value: "Short.MIN_VALUE", instanceOfType: "Byte", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "Int", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "Long", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "Float", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "Double", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "BigInt", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "Boolean", result: "false" }
+  - { value: "Short.MAX_VALUE", instanceOfType: "Char", result: "false" }
+  - { value: "Short.MIN_VALUE", instanceOfType: "String", result: "false" }
+
+  # int (Int)
+  - { value: "Int.MAX_VALUE", instanceOfType: "int", result: "true" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "Int", result: "true" }
+
+  - { value: "Int.MAX_VALUE", instanceOfType: "byte", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "short", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "long", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "float", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "double", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "bigint", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "boolean", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "char", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "string", result: "false" }
+
+  - { value: "Int.MIN_VALUE", instanceOfType: "Byte", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "Short", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "Long", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "Float", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "Double", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "BigInt", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "Boolean", result: "false" }
+  - { value: "Int.MAX_VALUE", instanceOfType: "Char", result: "false" }
+  - { value: "Int.MIN_VALUE", instanceOfType: "String", result: "false" }
+
+  # long (Long)
+  - { value: "Long.MIN_VALUE", instanceOfType: "long", result: "true" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "Long", result: "true" }
+
+  - { value: "Long.MAX_VALUE", instanceOfType: "byte", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "short", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "int", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "float", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "double", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "bigint", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "boolean", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "char", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "string", result: "false" }
+
+  - { value: "Long.MIN_VALUE", instanceOfType: "Byte", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "Short", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "Int", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "Float", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "Double", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "BigInt", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "Boolean", result: "false" }
+  - { value: "Long.MAX_VALUE", instanceOfType: "Char", result: "false" }
+  - { value: "Long.MIN_VALUE", instanceOfType: "String", result: "false" }
+
+  # float (Float)
+  - { value: "Float.MAX_VALUE", instanceOfType: "float", result: "true" }
+  - { value: "Float.NaN", instanceOfType: "float", result: "true" }
+  - { value: "Float.POSITIVE_INFINITY", instanceOfType: "float", result: "true" }
+
+  - { value: "Float.MIN_VALUE", instanceOfType: "Float", result: "true" }
+  - { value: "Float.MAX_SAFE_INTEGER", instanceOfType: "Float", result: "true" }
+  - { value: "Float.NEGATIVE_INFINITY", instanceOfType: "Float", result: "true" }
+
+  - { value: "Float.MAX_SAFE_INTEGER", instanceOfType: "byte", result: "false" }
+  - { value: "Float.MIN_VALUE", instanceOfType: "short", result: "false" }
+  - { value: "Float.MAX_VALUE", instanceOfType: "int", result: "false" }
+  - { value: "Float.NaN", instanceOfType: "long", result: "false" }
+  - { value: "Float.MIN_VALUE", instanceOfType: "double", result: "false" }
+  - { value: "Float.MAX_SAFE_INTEGER", instanceOfType: "bigint", result: "false" }
+  - { value: "Float.MAX_VALUE", instanceOfType: "boolean", result: "false" }
+  - { value: "Float.MIN_VALUE", instanceOfType: "char", result: "false" }
+  - { value: "Float.MAX_SAFE_INTEGER", instanceOfType: "string", result: "false" }
+
+  - { value: "Float.NEGATIVE_INFINITY", instanceOfType: "Byte", result: "false" }
+  - { value: "Float.NaN", instanceOfType: "Short", result: "false" }
+  - { value: "Float.POSITIVE_INFINITY", instanceOfType: "Int", result: "false" }
+  - { value: "Float.MAX_SAFE_INTEGER", instanceOfType: "Long", result: "false" }
+  - { value: "Float.MAX_VALUE", instanceOfType: "Double", result: "false" }
+  - { value: "Float.MAX_SAFE_INTEGER", instanceOfType: "BigInt", result: "false" }
+  - { value: "Float.NaN", instanceOfType: "Boolean", result: "false" }
+  - { value: "Float.POSITIVE_INFINITY", instanceOfType: "Char", result: "false" }
+  - { value: "Float.NEGATIVE_INFINITY", instanceOfType: "String", result: "false" }
+
+  # double (Double)
+  - { value: "Double.MAX_VALUE", instanceOfType: "double", result: "true" }
+  - { value: "Double.MAX_SAFE_INTEGER", instanceOfType: "double", result: "true" }
+  - { value: "Double.NaN", instanceOfType: "double", result: "true" }
+  - { value: "Double.NEGATIVE_INFINITY", instanceOfType: "double", result: "true" }
+
+  - { value: "Double.MIN_VALUE", instanceOfType: "Double", result: "true" }
+  - { value: "Double.MIN_SAFE_INTEGER", instanceOfType: "Double", result: "true" }
+  - { value: "Double.POSITIVE_INFINITY", instanceOfType: "Double", result: "true" }
+
+  - { value: "Double.MAX_SAFE_INTEGER", instanceOfType: "byte", result: "false" }
+  - { value: "Double.MIN_SAFE_INTEGER", instanceOfType: "short", result: "false" }
+  - { value: "Double.MIN_VALUE", instanceOfType: "int", result: "false" }
+  - { value: "Double.NaN", instanceOfType: "long", result: "false" }
+  - { value: "Double.MIN_VALUE", instanceOfType: "float", result: "false" }
+  - { value: "Double.MIN_SAFE_INTEGER", instanceOfType: "bigint", result: "false" }
+  - { value: "Double.MAX_VALUE", instanceOfType: "boolean", result: "false" }
+  - { value: "Double.MIN_VALUE", instanceOfType: "char", result: "false" }
+  - { value: "Double.MAX_SAFE_INTEGER", instanceOfType: "string", result: "false" }
+
+  - { value: "Double.NEGATIVE_INFINITY", instanceOfType: "Byte", result: "false" }
+  - { value: "Double.NaN", instanceOfType: "Short", result: "false" }
+  - { value: "Double.POSITIVE_INFINITY", instanceOfType: "Int", result: "false" }
+  - { value: "Double.MIN_SAFE_INTEGER", instanceOfType: "Long", result: "false" }
+  - { value: "Double.MAX_SAFE_INTEGER", instanceOfType: "Float", result: "false" }
+  - { value: "Double.MAX_VALUE", instanceOfType: "BigInt", result: "false" }
+  - { value: "Double.NaN", instanceOfType: "Boolean", result: "false" }
+  - { value: "Double.POSITIVE_INFINITY", instanceOfType: "Char", result: "false" }
+  - { value: "Double.NEGATIVE_INFINITY", instanceOfType: "String", result: "false" }
+

@@ -1,0 +1,59 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases: 
+  # int
+  - { type: "int", value: "0", instanceOfType: "byte", result: "false" }
+  - { type: "int", value: "1", instanceOfType: "short", result: "false" }
+  - { type: "int", value: "-1", instanceOfType: "int", result: "true" }
+  - { type: "int", value: "0o147", instanceOfType: "long", result: "false" }
+  - { type: "int", value: "-0X1_A", instanceOfType: "float", result: "false" }
+  - { type: "int", value: "0B00001", instanceOfType: "double", result: "false" }
+  - { type: "int", value: "new Int(12)", instanceOfType: "bigint", result: "false" }
+  - { type: "int", value: "0x0", instanceOfType: "boolean", result: "false" }
+  - { type: "int", value: "0B0", instanceOfType: "string", result: "false" }
+  - { type: "int", value: "0o0", instanceOfType: "char", result: "false" }    
+
+  - { type: "int", value: "new Byte(1).toInt()", instanceOfType: "Byte", result: "false" }
+  - { type: "int", value: "new Short(1).toInt()", instanceOfType: "Short", result: "false" }
+  - { type: "int", value: "new Int(12)", instanceOfType: "Long", result: "false" }
+  - { type: "int", value: "12", instanceOfType: "Int", result: "true" }
+  - { type: "int", value: "+(-(-234))", instanceOfType: "Float", result: "false" }
+  - { type: "int", value: "+22", instanceOfType: "Double", result: "false" }
+  - { type: "int", value: "+(+45)", instanceOfType: "BigInt", result: "false" }
+  - { type: "int", value: "-0x01", instanceOfType: "Boolean", result: "false" }
+  - { type: "int", value: "-0B01", instanceOfType: "String", result: "false" }
+  - { type: "int", value: "-0o01", instanceOfType: "Char", result: "false" }  
+
+  # Int (alias)
+  - { type: "Int", value: "0", instanceOfType: "byte", result: "false" }
+  - { type: "Int", value: "1", instanceOfType: "short", result: "false" }
+  - { type: "Int", value: "-1", instanceOfType: "int", result: "true" }
+  - { type: "Int", value: "0o147", instanceOfType: "long", result: "false" }
+  - { type: "Int", value: "-0X1_A", instanceOfType: "float", result: "false" }
+  - { type: "Int", value: "0B00001", instanceOfType: "double", result: "false" }
+  - { type: "Int", value: "new Int(12)", instanceOfType: "bigint", result: "false" }
+  - { type: "Int", value: "new Int(0x0)", instanceOfType: "boolean", result: "false" }
+  - { type: "Int", value: "new Int(0B0)", instanceOfType: "string", result: "false" }
+  - { type: "Int", value: "new Int(0o0)", instanceOfType: "char", result: "false" } 
+
+  - { type: "Int", value: "new Byte(10).toInt()", instanceOfType: "Byte", result: "false" }
+  - { type: "Int", value: "new Short(-11).toInt()", instanceOfType: "Short", result: "false" }
+  - { type: "Int", value: "new Int(-0x2)", instanceOfType: "Long", result: "false" }
+  - { type: "Int", value: "12", instanceOfType: "Int", result: "true" }
+  - { type: "Int", value: "-(+234)", instanceOfType: "Float", result: "false" }
+  - { type: "Int", value: "-(-22)", instanceOfType: "Double", result: "false" }
+  - { type: "Int", value: "new Int(-(+45))", instanceOfType: "BigInt", result: "false" }
+  - { type: "Int", value: "new Int(-0x01)", instanceOfType: "Boolean", result: "false" }
+  - { type: "Int", value: "new Int(-0B01)", instanceOfType: "String", result: "false" }
+  - { type: "Int", value: "new Int(-0o01)", instanceOfType: "Char", result: "false" }  
