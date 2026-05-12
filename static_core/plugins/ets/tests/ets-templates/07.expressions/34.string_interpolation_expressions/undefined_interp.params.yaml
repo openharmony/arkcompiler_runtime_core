@@ -1,0 +1,92 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+    # Class field initialized to undefined, method returns it, used in template literal
+    - defs: |-
+          class A1 {
+              x: Object|undefined = undefined
+              get(): Object|undefined {
+                  return this.x
+              }
+          }
+      call: |-
+          ${new A1().get()}
+      expected: |-
+          'undefined'
+
+    # Void function return used in template literal
+    - defs: |-
+          function voidFoo(): void {}
+      call: |-
+          ${voidFoo()}
+      expected: |-
+          'undefined'
+
+    # Void function return combined with other text in template literal
+    - defs: |-
+          function voidBar(): void {}
+      call: |-
+          result: ${voidBar()}
+      expected: |-
+          'result: undefined'
+
+    # Class method returning undefined mixed with text in template literal
+    - defs: |-
+          class A2 {
+              x: Object|undefined = undefined
+              get(): Object|undefined {
+                  return this.x
+              }
+          }
+      call: |-
+          value is ${new A2().get()}
+      expected: |-
+          'value is undefined'
+
+    # Multiple undefined interpolations in one template literal
+    - defs: |-
+          class A3 {
+              x: Object|undefined = undefined
+              get(): Object|undefined {
+                  return this.x
+              }
+          }
+          function voidBaz(): void {}
+      call: |-
+          ${new A3().get()} ${voidBaz()}
+      expected: |-
+          'undefined undefined'
+
+    # Undefined from class getter alongside non-undefined values
+    - defs: |-
+          class A4 {
+              x: Object|undefined = undefined
+              y: string = "hello"
+              getX(): Object|undefined {
+                  return this.x
+              }
+              getY(): string {
+                  return this.y
+              }
+          }
+      call: |-
+          ${new A4().getX()} ${new A4().getY()}
+      expected: |-
+          'undefined hello'
+
+    # Single undefined expression
+    - call: |-
+          ${undefined}
+      expected: |-
+          'undefined'
