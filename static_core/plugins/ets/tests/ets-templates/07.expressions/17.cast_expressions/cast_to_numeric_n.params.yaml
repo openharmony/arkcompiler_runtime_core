@@ -19,55 +19,55 @@ cases:
       src_val: 1 as byte
       dst_type: int
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Byte.toInt(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Byte.toInt(...) instead.
 
     - src_type: Byte
       src_val: new Byte(1 as byte)
       dst_type: short
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Byte.toShort(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Byte.toShort(...) instead.
 
     - src_type: short
       src_val: 1
       dst_type: Long
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Short.toLong(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Short.toLong(...) instead.
 
     - src_type: int
       src_val: '1'
       dst_type: float
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Int.toFloat(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Int.toFloat(...) instead.
 
     - src_type: float
       src_val: 1f
       dst_type: double
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Float.toDouble(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Float.toDouble(...) instead.
 
     - src_type: Double
       src_val: new Double(1.0)
       dst_type: long
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Double.toLong(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Double.toLong(...) instead.
 
     - src_type: float
       src_val: 1 as int
       dst_type: int
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Float.toInt(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Float.toInt(...) instead.
 
     - src_type: long
       src_val: '1 as long'
       dst_type: byte
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Long.toByte(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Long.toByte(...) instead.
 
     - src_type: double
       src_val: '1.0'
       dst_type: Float
       expected_out: |-
-          Semantic error ESE0029: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Double.toFloat(...) instead.
+          Semantic error ESE123811: 'As' expression for cast is deprecated for numeric types. Use explicit conversion function Double.toFloat(...) instead.
 
     # cast from numeric enum to numeric with the same base types
 
