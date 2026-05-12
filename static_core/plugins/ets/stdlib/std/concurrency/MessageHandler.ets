@@ -93,10 +93,10 @@ export namespace concurrency {
         /**
          * Check if messages with a specific identifier and object exist
          * @param { int } what The message identifier to check
-         * @param { Object } obj The object to check
+         * @param { Any } obj The object to check
          * @returns { boolean } True if messages with the identifier and object exist, false otherwise
          */
-        public hasMessages(what: int, obj: Object): boolean {
+        public hasMessages(what: int, obj: Any): boolean {
             if (this.workerIsMain()) {
                 return false;
             }
@@ -104,7 +104,7 @@ export namespace concurrency {
                 return false;
             }
             return this.hasMessage((value: MessageStatus, key: Message) => {
-                return key.getWhat() == what && key.getObject() == obj && value != MessageStatus.CANCELLED;
+                return key.getWhat() == what && key.getObject() === obj && value != MessageStatus.CANCELLED;
             });
         }
 
@@ -156,10 +156,10 @@ export namespace concurrency {
         /**
          * Remove messages with a specific identifier and object
          * @param { int } what The message identifier to remove
-         * @param { Object } obj The object to match
+         * @param { Any } obj The object to match
          * @returns { boolean } True if messages were successfully removed, false otherwise
          */
-        public removeMessages(what: int, obj: Object): boolean {
+        public removeMessages(what: int, obj: Any): boolean {
             if (this.workerIsMain()) {
                 return false;
             }
@@ -167,7 +167,7 @@ export namespace concurrency {
                 return false;
             }
             return this.removeMessages((value: MessageStatus, key: Message) => {
-                return key.getWhat() == what && key.getObject() == obj && value == MessageStatus.NOT_EXECUTED && key.getCallback() === undefined;
+                return key.getWhat() == what && key.getObject() === obj && value == MessageStatus.NOT_EXECUTED && key.getCallback() === undefined;
             });
         }
 

@@ -35,7 +35,7 @@ export namespace concurrency {
         private static readonly defaultMessagewhat : int = -1000000;
         private what: int = Message.defaultMessagewhat;
         private callback: CB | undefined = undefined;
-        private obj: Object | undefined = undefined;
+        private obj: Any = undefined;
         private status: AtomicInt = new AtomicInt(MessageInnerStatus.PENDING.valueOf());
         private isProcessed: AtomicFlag = new AtomicFlag(false);
 
@@ -60,10 +60,10 @@ export namespace concurrency {
         /**
          * Create a message instance with message identifier and additional object
          * @param { int } what The message identifier
+         * @param { Any } obj Additional object data
          * @param { MessageHandler } handler The message handler
-         * @param { Object } obj Additional object data
          */
-        constructor(what: int, obj: Object, handler: concurrency.MessageHandler) {
+        constructor(what: int, obj: Any, handler: concurrency.MessageHandler) {
             this.handler = handler;
             this.what = what;
             this.obj = obj;
@@ -100,13 +100,10 @@ export namespace concurrency {
 
         /**
          * Get the additional object of the message
-         * @returns { Object } Additional object data
+         * @returns { Any } Additional object data
          */
-        public getObject(): Object | undefined {
-            if (this.obj != undefined) {
-                return this.obj as Object;
-            }
-            return undefined;
+        public getObject(): Any {
+            return this.obj;
         }
 
         /**
@@ -136,7 +133,7 @@ export namespace concurrency {
                 return this.callback == other.getCallback();
             }
             if (this.what != undefined) {
-                return this.what == other.getWhat() && this.obj == other.getObject();
+                return this.what == other.getWhat() && this.obj === other.getObject();
             }
             return false;
         }
