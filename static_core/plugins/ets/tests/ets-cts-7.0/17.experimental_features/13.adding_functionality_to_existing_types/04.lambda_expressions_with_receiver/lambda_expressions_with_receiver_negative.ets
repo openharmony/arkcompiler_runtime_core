@@ -19,9 +19,15 @@ desc: >-
     A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
     as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0082: Extension function can only defined for class, interface or array."
+expected_out: "{{c.out}}"
 ---*/
 
 {{c.decl}}
+{%- if c.use is defined %}
+
+function main() {
+    {{c.use|indent}}
+}
+{%- endif %}
 
 {%- endfor %}
