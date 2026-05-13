@@ -64,11 +64,22 @@
 07.expressions/16.instanceof_expression/instanceof_func_15.ets
 07.expressions/16.instanceof_expression/instanceof_func_16.ets
 
-#31808 Optional params in supertype should be optonal, if they are optional in subtype
-07.expressions/16.instanceof_expression/instanceof_func_18.ets
-
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
+
+#31822
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_n_opt1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_n_opt2.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_n_default1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_n_req1_opt1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_n_req1_opt2.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_n_req1_default1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_before_number_call_n_opt1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_before_number_call_n_opt2.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_before_number_call_n_default1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_before_number_call_n_req1_opt1.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_before_number_call_n_req1_opt2.ets
+07.expressions/17.cast_expressions/02.runtime_checking_in_cast_expression/function_cast_optional_before_number_call_n_req1_default1.ets
 
 #34467 No expected ClassCastError on casting with Char and Boolean
 07.expressions/17.cast_expressions/cast_to_char_w_0.ets

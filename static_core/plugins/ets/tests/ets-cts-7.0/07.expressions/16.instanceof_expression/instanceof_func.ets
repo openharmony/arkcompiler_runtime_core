@@ -19,7 +19,10 @@
 desc: >-
     Check instanceof behaviour for function types with type erasure (15.12).
     Parameter types are erased to Any, return type to never.
-    Signature structure (mandatory/optional/rest pattern) is preserved.
+    Signature structure (mandatory/optional/rest pattern) allows subtype to
+    have less or equal number of required parameters and less or equal number of
+    (required + optional) parameters, and requires supertype to have rest parameter
+    if subtype has it. instanceof checks match by function subtyping
 ---*/
 
 {{c.decl or ""}}

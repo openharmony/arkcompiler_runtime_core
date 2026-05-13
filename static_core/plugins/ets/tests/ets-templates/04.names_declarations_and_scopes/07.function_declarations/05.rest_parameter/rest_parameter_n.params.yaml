@@ -32,6 +32,18 @@ cases:
       return q.length + p.length;
     expected: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
 
+  - sig: |-
+      foo(y: boolean, ...p: int[], x?: int): int[]
+    def: |-
+      return p;
+    expected: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
+
+  - sig: |-
+      foo(y: boolean, ...p: int[], x: int = 0): int[]
+    def: |-
+      return p;
+    expected: "Syntax error ESY0067: Rest parameter must be the last formal parameter."
+
   # 3. not array
   - sig: |-
       foo(...p: Object): Object
