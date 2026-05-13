@@ -50,3 +50,10 @@ cases:
 
   - decl: |-
       type foo = (x1?: int, x2: int, x3: int) => int
+
+  - decl: |-
+      class C {}
+      type foo1_d = (x: C = new C()) => void
+
+  - decl: |-
+      type foo2_d = (x: bigint, y: char = c'a') => void
