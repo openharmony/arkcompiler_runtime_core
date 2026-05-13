@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/code_scopes-inl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
@@ -102,15 +103,15 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
     NapiScope jsHandleScope(jsenv);
 
     auto jsObj = JSConvertJSValue::WrapWithNullCheck(jsenv, jsValueObject);
+    void *res = nullptr;
     if (tag != nullptr) {
-        bool isMatched = false;
-        if (napi_check_object_type_tag(jsenv, jsObj, tag, &isMatched) != napi_ok || !isMatched) {
+        if (napi_unwrap_hybrid_s(jsenv, jsObj, tag, &res) != napi_ok) {
             return false;
         }
-    }
-    void *res = nullptr;
-    if (napi_unwrap(jsenv, jsObj, &res) != napi_ok) {
-        return false;
+    } else {
+        if (napi_unwrap(jsenv, jsObj, &res) != napi_ok) {
+            return false;
+        }
     }
     *result = res;
     return true;

@@ -62,7 +62,7 @@ function main(): void {
     const zero_tag = 0x0000;
     nativeWrapRefSafe(zeroObj, zero_tag, zero_tag);
     nativeSaveRef(zeroObj);
-    ASSERT_TRUE(!etsVm.getFunction('Lts_arkts_esvalue/ETSGLOBAL;', 'etsCheckWrappedPtrSafe')(zero_tag, zero_tag));
+    ASSERT_TRUE(etsVm.getFunction('Lts_arkts_esvalue/ETSGLOBAL;', 'etsCheckWrappedPtrSafe')(zero_tag, zero_tag));
     
     const maxObj = new MyObject(127);
     const max_tag = 0xFFFF;
