@@ -53,31 +53,40 @@ cases:
     logic: |-
       async function startTest(): Promise<void> {
         let lock = new concurrency.stackless.AsyncMutex()
-        let isLocked = true;
-
+        let counter = 0;
+        let cycleCounter = 10;
         const ea1 = new EAWorker();
         ea1.start();
-        await ea1.run<undefined>(async () => {
-          await lock.lock()
-          try {
-            arktest.assertTrue(isLocked)
-          } finally {
-            lock.unlock()
+        let promise1 = ea1.run<void>(
+          () => {
+            (async () => {
+              await lock.lock();
+              for(let i = 0; i < cycleCounter; ++i) {
+                ++counter;
+              }
+              arktest.assertTrue(counter == cycleCounter || counter == cycleCounter * 2);
+              lock.unlock();
+            })().awaitSync();
           }
-        })
-      
+        )
+
         const ea2 = new EAWorker();
         ea2.start();
-        await ea2.run<undefined>(async () => {
-          await lock.lock()
-          try {
-            isLocked = false
-            Coroutine.Schedule()
-          } finally {
-            lock.unlock()
+        let promise2 = ea2.run<void>(
+          () => {
+            (async () => {
+              await lock.lock();
+              for(let i = 0; i < cycleCounter; ++i) {
+                ++counter;
+              }
+              arktest.assertTrue(counter == cycleCounter || counter == cycleCounter * 2);
+              lock.unlock();
+            })().awaitSync();
           }
-        })
-
+        )
+        await promise1;
+        await promise2;
         ea1.quit();
         ea2.quit();
+        arktest.assertEQ(counter, cycleCounter * 2)
       }

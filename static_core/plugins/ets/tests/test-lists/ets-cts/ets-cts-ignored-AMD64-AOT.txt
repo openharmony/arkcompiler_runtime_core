@@ -1,2 +1,0 @@
-#34352
-16.concurrency/05.synchronization/02.asynchronous_mutex/asynchronous_mutex_1.ets
