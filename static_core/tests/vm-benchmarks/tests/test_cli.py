@@ -184,3 +184,20 @@ def test_bench_by_tags():
     with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tags=Interop'):
         bus2 = {bu.name for bu in generate_main(args=Args())}
     test.assertEqual(bus1, bus2)
+
+
+def test_cpumask_cpufreq():
+    """Test cpumask and cpufreq parameters"""
+    test = TestCase()
+    with cmdline('all --lang=ets --platform=arkts_ohos --cpumask=0x3 --cpufreq=85% ./examples'):
+        args = Args()
+        test.assertEqual(args.get('cpumask'), '0x3')
+        test.assertEqual(args.get('cpufreq'), '85%')
+    with cmdline('all --lang=ets --platform=arkts_ohos --cpumask=0b1010 ./examples'):
+        args = Args()
+        test.assertEqual(args.get('cpumask'), '0b1010')
+        test.assertEqual(args.get('cpufreq'), '')
+    with cmdline('all --lang=ets --platform=arkts_ohos --cpufreq=4220000 ./examples'):
+        args = Args()
+        test.assertEqual(args.get('cpumask'), '')
+        test.assertEqual(args.get('cpufreq'), '4220000')

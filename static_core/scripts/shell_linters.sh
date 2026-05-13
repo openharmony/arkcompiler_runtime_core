@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -76,7 +76,7 @@ set +e
 
 EXIT_CODE=0
 
-skip_options="^${root_dir}/third_party/"
+skip_options="^${root_dir}/third_party/\|^${root_dir}/tests/vm-benchmarks/src/vmb/resources/"
 if [ ! -z "$SKIP_FOLDERS" ]; then
     for pt in $SKIP_FOLDERS; do
         skip_options="${skip_options}\|^${root_dir}/${pt}/"

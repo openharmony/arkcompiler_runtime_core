@@ -13,7 +13,7 @@
 
 [project]
 name = "vmb"
-version = "1.0.5"
+version = "1.0.6"
 description = "Virtual Machine Benchmarks"
 readme = "readme.md"
 requires-python = ">=3.7"
