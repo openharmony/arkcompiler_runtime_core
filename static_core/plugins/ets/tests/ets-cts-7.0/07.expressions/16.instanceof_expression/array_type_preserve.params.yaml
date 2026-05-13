@@ -1,0 +1,49 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # G1 Array<Any> preserved in instanceof
+    - expr: |-
+        let a: Array<Any> = [1, "1"]
+        let t = pass(a) instanceof Array<Any>
+    - expr: |-
+        let a: Array<Any> = []
+        let t = pass(a) instanceof Array<Any>
+    - expr: |-
+        let a: Array<String> = ["String"]
+        let t = pass(a) instanceof Array<Any>
+
+    # G2 Array<Any> | undefined preserved in instanceof
+    - expr: |-
+        let a: Array<Any> | undefined = [1]
+        let t = pass(a) instanceof Array<Any> | undefined
+    - expr: |-
+        let a: Array<Any> | undefined = undefined
+        let t = pass(a) instanceof Array<Any> | undefined
+
+    # G6 Fixed Array with nested non-preserved type
+    - expr: |-
+          let a: FixedArray<Array<Int>> = [[1]]
+          let t = pass(a) instanceof FixedArray<Array<Any>>
+
+    # G7 Fixed Array with union type
+    - expr: |-
+          let a: FixedArray< int | undefined > = [1]
+          let t = pass(a) instanceof FixedArray< int | undefined >
+    - expr: |-
+          let a: FixedArray< String | undefined > = ["1"]
+          let t = pass(a) instanceof FixedArray< String | undefined >
+    - expr: |-
+          let a: FixedArray< Object | undefined > = ["1"]
+          let t = pass(a) instanceof FixedArray< Object | undefined >

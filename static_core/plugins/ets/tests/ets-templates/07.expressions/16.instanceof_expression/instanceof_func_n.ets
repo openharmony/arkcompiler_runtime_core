@@ -15,6 +15,11 @@
 
 {% for c in cases %}
 {% for t in c['rhs_types'] %}
+{% set rt = c.func_type %}
+{% set
+response = "Syntax error ESY18871: Type parameter is erased from type '" ~ rt ~ "' when used in instanceof expression."
+%}
+
 /*---
 desc: >-
     Check instanceof behaviour for function types with type erasure (15.12).
@@ -23,6 +28,8 @@ desc: >-
     have less or equal number of required parameters and less or equal number of
     (required + optional) parameters, and requires supertype to have rest parameter
     if subtype has it. instanceof checks match by function subtyping
+tags: [compile-only, negative]
+expected_out: "{{response}}"
 ---*/
 
 {{c.decl or ""}}
@@ -32,7 +39,7 @@ let func: T
 func = {{c.func}}
 
 function main() {
-    arktest.assertEQ(func instanceof {{t.type}}, {{t.res}})
+    let probe = func instanceof {{t.type}}
 }
 {% endfor %}
 {% endfor %}
