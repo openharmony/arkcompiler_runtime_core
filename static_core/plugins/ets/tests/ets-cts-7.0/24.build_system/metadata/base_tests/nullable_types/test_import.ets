@@ -26,13 +26,13 @@ expected_out:
         - "fallback"
 ---*/
 
-import {Box, unwrap} from '@panda/lib/test_lib'
+import {NullableBox, unwrap} from '@panda/lib/test_lib'
 
-let b1 = new Box<String>()
+let b1 = new NullableBox<String>()
 console.log(b1.isEmpty())
 b1.put("hello")
 console.log(b1.isEmpty())
 console.log(unwrap(b1, "default"))
 
-let b2 = new Box<String>()
+let b2 = new NullableBox<String>()
 console.log(unwrap(b2, "fallback"))

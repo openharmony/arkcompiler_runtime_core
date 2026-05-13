@@ -2508,6 +2508,9 @@
 24.build_system/metadata/base_tests/lambda_types/test_import.ets
 24.build_system/metadata/base_tests/reexport_rename/test_import.ets
 24.build_system/metadata/base_tests/wildcard_reexport/test_import.ets
+24.build_system/metadata/base_tests/decl_rewrite/test_import.ets
+24.build_system/metadata/base_tests/generic_interface/test_import.ets
+24.build_system/metadata/base_tests/nullable_types/test_import.ets
 
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL

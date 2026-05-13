@@ -25,10 +25,10 @@ export interface Printable {
     toString(): string
 }
 
-export interface Comparable<T> {
+export interface Rankable<T> {
     compareTo(other: T): int
 }
 
-export function maxOf<T extends Comparable<T>>(a: T, b: T): T {
+export function maxOf<T extends Rankable<T>>(a: T, b: T): T {
     return a.compareTo(b) >= 0 ? a : b
 }
