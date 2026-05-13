@@ -18,7 +18,7 @@ desc: >-
   Static fields of a superclass are not inherited. Accessing a superclass
   static field via the subclass name causes a compile-time error.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0087: Property 'sField' does not exist on type 'Child'"
+expected_out: "Semantic error ESE854298: Class static member sField must be accessed with the class name Base qualification only."
 ---*/
 
 class Base {
