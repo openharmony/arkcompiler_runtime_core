@@ -19,7 +19,7 @@ desc: >-
     As there is more than one applicable method, the most specific method must be selected.
 tags: [compile-only, negative]
 expected_out: |-
-    {{c.expected_out}}
+    {{c.expected_out|indent}}
 ---*/
 
 {{c.decl}}

@@ -19,7 +19,7 @@ desc: >-
     The object reference and the method identifier are used to determine the type in which to search the method.
 tags: [negative, compile-only]
 expected_out: |-
-    {{c.expected_out}}
+    {{c.expected_out|indent}}
 ---*/
 
 {{c.decl}}

@@ -30,8 +30,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
       expected_out: |-
-          Semantic error ESE0130: Function met is already declared.
           Semantic error ESE0131: Function met with this assembly signature already declared.
+          Warning W2323: The order of entities in an overload set implies that the overloaded entity with the signature '(p: Double, q: Double|undefined) => String' will never be selected for a call, as the preceding entity with the signature '(p: Double, _: Double|undefined) => String' prevails.
 
     - decl: |-
           class C {
@@ -53,5 +53,5 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(),  "n" )
       expected_out: |-
-          Semantic error ESE0130: Function met is already declared.
           Semantic error ESE0131: Function met with this assembly signature already declared.
+          Warning W2323: The order of entities in an overload set implies that the overloaded entity with the signature '(p: Double, q: Double|undefined) => String' will never be selected for a call, as the preceding entity with the signature '(p: Double, _: Double|undefined) => String' prevails.
