@@ -1,0 +1,101 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+        // A compile-time error occurs if async function is called in a static initializer
+        async function testAsync(): Promise<void> {}
+        class MyClass {
+            static {
+                testAsync();
+            }
+        }
+      tags: "[compile-only, negative]"
+      step_kind: compiler
+      expected_out: "Semantic error ESE1339359: An async function call is not allowed in a static initializer"
+
+    - decl: |-
+        // A compile-time error occurs if async function is called in a static initializer
+        async function testAsync(): Promise<void> {}
+        class MyClass {
+            public static myVar = testAsync();
+        }
+      tags: "[compile-only, negative]"
+      step_kind: compiler
+      expected_out: "Semantic error ESE1339359: An async function call is not allowed in a static initializer"
+
+    - decl: |-
+        // A compile-time error occurs if async function is called in a static initializer, including module scope;
+        async function testAsync(): Promise<void> {}
+        testAsync()
+      tags: "[compile-only, negative]"
+      step_kind: compiler
+      expected_out: "Semantic error ESE1339359: An async function call is not allowed in a static initializer"
+
+    - decl: |-
+        // A compile-time error occurs if async method is called in a static field initializer
+        class MyClass {
+            static async doWork(): Promise<void> {}
+            static val: Promise<void> = MyClass.doWork()
+        }
+      tags: "[compile-only, negative]"
+      step_kind: compiler
+      expected_out: "Semantic error ESE1339359: An async function call is not allowed in a static initializer"
+
+    - decl: |-
+        // A compile-time error occurs if async function is called in a static initializer
+        async function crasher(): Promise<Int> {
+            return await Promise.resolve(1);
+        }
+        try {
+            let x = crasher();
+        } catch (e) {
+            arktest.assertTrue(e instanceof InvalidJobOperationError);
+        }
+      tags: "[compile-only, negative]"
+      step_kind: compiler
+      expected_out: "Semantic error ESE1339359: An async function call is not allowed in a static initializer"
+
+    - decl: |-
+        // A runtime-time error occurs if async function is called in a static initializer
+        async function crasher(): Promise<Int> {
+            return await Promise.resolve(1);
+        }
+        let f: Function = crasher;
+        f.unsafeCall();
+      tags: "[negative]"
+      step_kind: runtime
+      expected_error: "InvalidJobOperationError: Cannot call async in the current context!"
+
+    - decl: |-
+        // A runtime-time error occurs if async function is called in a static initializer
+        async function crasher(): Promise<Int> {
+            return await Promise.resolve(1);
+        }
+        let f: Any = crasher;
+        (f as Function).unsafeCall();
+      tags: "[negative]"
+      step_kind: runtime
+      expected_error: "InvalidJobOperationError: Cannot call async in the current context!"
+
+    - decl: |-
+        // A runtime-time error occurs if async function is called in a static initializer
+        async function crasher(): Promise<Int> {
+            return await Promise.resolve(1);
+        }
+        let f: Any = crasher;
+        (f as () => Promise<Int>)();
+      tags: "[negative]"
+      step_kind: runtime
+      expected_error: "InvalidJobOperationError: Cannot call async in the current context!"
