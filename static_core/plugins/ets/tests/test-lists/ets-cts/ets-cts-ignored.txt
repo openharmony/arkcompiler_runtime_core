@@ -510,8 +510,6 @@
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/10.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
 
-#31167 RTE if class overrides overloaded method in superinterface
-15.semantic_rules/10.overloading/first_match/first_match_1c_3i_8.ets
 
 #32340 Methods from direct superclass or superinterface not added to explicit overload set
 15.semantic_rules/11.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_negative_1.ets
