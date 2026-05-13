@@ -1,0 +1,4 @@
+/system/framework/assembled_advanced_ets_abc.abc
+void @ohos.arkui.advanced.SegmentButton.SegmentButton::onItemsPositionChange(@ohos.arkui.advanced.SegmentButton.SegmentButton, std.core.String)
+void @ohos.arkui.advanced.SegmentButton.SegmentButton::updateSelectedIndexes(@ohos.arkui.advanced.SegmentButton.SegmentButton)
+void @ohos.arkui.advanced.SegmentButton.SegmentButton::onSelectedChange(@ohos.arkui.advanced.SegmentButton.SegmentButton, std.core.String)

@@ -1,4 +1,10 @@
 {
+  "defaultAotArgs": [
+    "--load-runtimes=ets",
+    "--compiler-enable-fast-interop=false",
+    "--compiler-cross-arch=arm64",
+    "--paoc-generate-symbols=true"
+  ],
   "components": [
     {
       "componentsName": "etsstdlib",
