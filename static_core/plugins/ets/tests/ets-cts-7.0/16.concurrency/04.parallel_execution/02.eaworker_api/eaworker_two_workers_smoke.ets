@@ -41,7 +41,7 @@ async function startTest() {
   ea2.start()
 
   let job1 = ea1.run<undefined>( async () => {
-      console.log("S1=" + writeRun) // To ensure the async function has started.
+      console.log("S1=" + readRun) // To ensure the async function has started.
       await readLock.lock()
       readRun = true
       i++
