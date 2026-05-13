@@ -33,9 +33,6 @@ static constexpr const char *INVOKE_METHOD_NAME = "$_invoke";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 //--------------
-static constexpr const char *PROPERTY = "%%property-";
-static constexpr const uint8_t PROPERTY_PREFIX_LENGTH = 11;
-//--------------
 static constexpr const char *GETTER_BEGIN = "%%get-";
 static constexpr const char *SETTER_BEGIN = "%%set-";
 static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 6;
