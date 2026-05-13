@@ -471,9 +471,6 @@
 17.experimental_features/01.type_char/02.char_operations/char_erased_equality_23.ets
 17.experimental_features/01.type_char/02.char_operations/char_erased_equality_25.ets
 
-#34221
-17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
-
 #34222
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
 
