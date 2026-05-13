@@ -37,12 +37,13 @@
 #include "common_components/heap/collector/gc_infos.h"
 #include "common_components/heap/collector/region_bitmap.h"
 #include "common_components/heap/collector/region_rset.h"
-#include "common_components/log/log.h"
 #include "common_interfaces/mem/tlab.h"
 #include "securec.h"
 #ifdef COMMON_ASAN_SUPPORT
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
+
+#include "libarkbase/utils/logger.h"
 
 namespace common_vm {
 template <typename T>
@@ -153,8 +154,9 @@ public:
                 // Atomic with release order reason: data race with markBitmap_ with dependecies on writes before
                 // the store
                 __atomic_store_n(&metadata.liveInfo_.markBitmap_, allocated, std::memory_order_release);
-                DLOG(REGION, "region %p(base=%#zx)@%#zx liveinfo %p alloc markbitmap %p", this, GetRegionBase(),
-                     GetRegionStart(), &metadata.liveInfo_, metadata.liveInfo_.markBitmap_);
+                LOG(DEBUG, GC) << "region " << this << "(base=" << std::hex << "0x" << GetRegionBase() << ")@ "
+                               << "0x" << GetRegionStart() << " liveinfo " << &metadata.liveInfo_
+                               << " alloc markbitmap " << metadata.liveInfo_.markBitmap_;
                 return allocated;
             }
         } while (true);
@@ -194,8 +196,9 @@ public:
                 // Atomic with release order reason: data race with resurrectBitmap_ with dependecies on writes before
                 // the store
                 __atomic_store_n(&metadata.liveInfo_.resurrectBitmap_, allocated, std::memory_order_release);
-                DLOG(REGION, "region %p(base=%#zx)@%#zx liveinfo %p alloc resurrectbitmap %p", this, GetRegionBase(),
-                     GetRegionStart(), &metadata.liveInfo_, metadata.liveInfo_.resurrectBitmap_);
+                LOG(DEBUG, GC) << "region " << this << "(base=" << std::hex << "0x" << GetRegionBase() << ")@ "
+                               << "0x" << GetRegionStart() << " liveinfo " << &metadata.liveInfo_
+                               << " alloc resurrectbitmap " << metadata.liveInfo_.resurrectBitmap_;
                 return allocated;
             }
         } while (true);
@@ -234,8 +237,9 @@ public:
                 // Atomic with release order reason: data race with enqueueBitmap_ with dependecies on writes before
                 // the store
                 __atomic_store_n(&metadata.liveInfo_.enqueueBitmap_, allocated, std::memory_order_release);
-                DLOG(REGION, "region %p(base=%#zx)@%#zx liveinfo %p alloc enqueuebitmap %p", this, GetRegionBase(),
-                     GetRegionStart(), &metadata.liveInfo_, metadata.liveInfo_.enqueueBitmap_);
+                LOG(DEBUG, GC) << "region " << this << "(base=" << std::hex << "0x" << GetRegionBase() << ")@ "
+                               << "0x" << GetRegionStart() << " liveinfo " << &metadata.liveInfo_
+                               << " alloc enqueuebitmap " << metadata.liveInfo_.enqueueBitmap_;
                 return allocated;
             }
         } while (true);
@@ -455,7 +459,7 @@ public:
 
     static RegionDesc *GetRegionDescAt(uintptr_t allocAddr)
     {
-        ASSERT_LOGF(Heap::IsHeapAddress(allocAddr), "Cannot get region info of a non-heap object");
+        ASSERT_PRINT(Heap::IsHeapAddress(allocAddr), "Cannot get region info of a non-heap object");
         UnitInfo *unit = reinterpret_cast<UnitInfo *>(UnitInfo::heapStartAddress -
                                                       (((allocAddr - UnitInfo::heapStartAddress) / UNIT_SIZE) + 1) *
                                                           sizeof(RegionDesc));
@@ -518,8 +522,9 @@ public:
     {
         uintptr_t unitAddress = RegionDesc::GetUnitAddress(idx);
         size_t size = cnt * RegionDesc::UNIT_SIZE;
-        DLOG(REGION, "clear dirty units[%zu+%zu, %zu) @[%#zx+%zu, %#zx)", idx, cnt, idx + cnt, unitAddress, size,
-             RegionDesc::GetUnitAddress(idx + cnt));
+        LOG(DEBUG, GC) << "clear dirty units[" << idx << "+" << cnt << ", " << idx + cnt << ") @["
+                       << "0x" << std::hex << unitAddress << "+" << std::dec << size << ", "
+                       << "0x" << std::hex << RegionDesc::GetUnitAddress(idx + cnt) << ")";
         MemorySet(unitAddress, size, 0, size);
     }
 
@@ -527,10 +532,11 @@ public:
     {
         void *unitAddress = reinterpret_cast<void *>(RegionDesc::GetUnitAddress(idx));
         size_t size = cnt * RegionDesc::UNIT_SIZE;
-        DLOG(REGION, "release physical memory for units [%zu+%zu, %zu) @[%p+%zu, 0x%zx)", idx, cnt, idx + cnt,
-             unitAddress, size, RegionDesc::GetUnitAddress(idx + cnt));
+        LOG(DEBUG, GC) << "release physical memory for units [" << idx << "+" << cnt << ", " << idx + cnt << ") @["
+                       << unitAddress << "+" << size << ", 0x" << std::hex << RegionDesc::GetUnitAddress(idx + cnt)
+                       << std::dec << ")";
 #if defined(_WIN64)
-        LOGE_IF(UNLIKELY(!VirtualFree(unitAddress, size, MEM_DECOMMIT)))
+        LOG_IF(UNLIKELY(!VirtualFree(unitAddress, size, MEM_DECOMMIT)), ERROR, MM_OBJECT_EVENTS)
             << "VirtualFree failed in ReturnPage, errno: " << GetLastError();
 
 #elif defined(__APPLE__)
@@ -545,8 +551,8 @@ public:
 #ifdef USE_HWASAN
         ASAN_POISON_MEMORY_REGION(unitAddress, size);
         const uintptr_t pSz = size;
-        LOG_COMMON(DEBUG) << std::hex << "set [" << unitAddress << ", "
-                          << (reinterpret_cast<uintptr_t>(unitAddress) + pSz) << ") poisoned\n";
+        LOG(DEBUG, COMMON) << std::hex << "set [" << unitAddress << ", "
+                           << (reinterpret_cast<uintptr_t>(unitAddress) + pSz) << ") poisoned\n";
 #endif
     }
 
@@ -569,7 +575,7 @@ public:
 
     size_t GetAvailableSize() const
     {
-        ASSERT_LOGF(IsSmallRegion(), "wrong region type");
+        ASSERT_PRINT(IsSmallRegion(), "wrong region type");
         return GetRegionEnd() - GetRegionAllocPtr();
     }
 
@@ -609,8 +615,10 @@ public:
     {
         DCHECK(metadata.liveInfo_.relatedRegion_ == this);
         metadata.liveInfo_.ClearLiveInfo();
-        DLOG(REGION, "region %p(base=%#zx)@%#zx+%zu clear liveinfo %p type %u", this, GetRegionBase(), GetRegionStart(),
-             GetRegionSize(), &metadata.liveInfo_, GetRegionType());
+        LOG(DEBUG, GC) << "region " << this << "(base="
+                       << "0x" << std::hex << GetRegionBase() << ")@0x" << std::hex << GetRegionStart() << "+"
+                       << std::dec << GetRegionSize() << " clear liveinfo " << &metadata.liveInfo_ << " type "
+                       << static_cast<size_t>(GetRegionType());
         metadata.liveByteCount = 0;
     }
 
@@ -694,7 +702,7 @@ public:
     // This could only used to a `RegionDesc` which has been initialized
     HeapAddress GetRegionBaseFast() const
     {
-        ASSERT_LOGF(metadata.regionBase == GetRegionBase(), "");
+        ASSERT_PRINT(metadata.regionBase == GetRegionBase(), "");
         return metadata.regionBase;
     }
 
@@ -732,8 +740,11 @@ public:
         if (metadata.markingLine == std::numeric_limits<uintptr_t>::max()) {
             uintptr_t line = GetRegionAllocPtr();
             metadata.markingLine = line;
-            DLOG(REGION, "set region %p(base=%#zx)@%#zx+%zu marking-line %#zx type %u", this, GetRegionBase(),
-                 GetRegionStart(), GetRegionSize(), GetMarkingLine(), GetRegionType());
+            LOG(DEBUG, GC) << "set region " << this << "(base="
+                           << "0x" << std::hex << GetRegionBase() << ")@0x" << std::hex << GetRegionStart() << "+"
+                           << std::dec << GetRegionSize() << " marking-line "
+                           << "0x" << std::hex << GetMarkingLine() << " type " << std::dec
+                           << static_cast<size_t>(GetRegionType());
         }
     }
 
@@ -742,8 +753,11 @@ public:
         if (metadata.forwardLine == std::numeric_limits<uintptr_t>::max()) {
             uintptr_t line = GetRegionAllocPtr();
             metadata.forwardLine = line;
-            DLOG(REGION, "set region %p(base=%#zx)@%#zx+%zu copy-line %#zx type %u", this, GetRegionBase(),
-                 GetRegionStart(), GetRegionSize(), GetCopyLine(), GetRegionType());
+            LOG(DEBUG, GC) << "set region " << this << "(base="
+                           << "0x" << std::hex << GetRegionBase() << ")@0x" << std::hex << GetRegionStart() << "+"
+                           << std::dec << GetRegionSize() << " copy-line "
+                           << "0x" << std::hex << GetCopyLine() << " type " << std::dec
+                           << static_cast<size_t>(GetRegionType());
         }
     }
 
@@ -925,7 +939,7 @@ public:
             return;
         }
         size_t prevIdx = r->GetUnitIdx();
-        ASSERT_LOGF(prevIdx < NULLPTR_IDX, "exceeds the maxinum limit for region info");
+        ASSERT_PRINT(prevIdx < NULLPTR_IDX, "exceeds the maxinum limit for region info");
         metadata.prevRegionIdx = static_cast<uint32_t>(prevIdx);
     }
 
@@ -945,7 +959,7 @@ public:
             return;
         }
         size_t nextIdx = r->GetUnitIdx();
-        ASSERT_LOGF(nextIdx < NULLPTR_IDX, "exceeds the maxinum limit for region info");
+        ASSERT_PRINT(nextIdx < NULLPTR_IDX, "exceeds the maxinum limit for region info");
         metadata.nextRegionIdx = static_cast<uint32_t>(nextIdx);
     }
 
@@ -956,7 +970,7 @@ public:
 
     void DetachTLAB()
     {
-        ASSERT_LOGF(metadata.tlab != nullptr, "TLAB in RegionDesc is already nullptr");
+        ASSERT_PRINT(metadata.tlab != nullptr, "TLAB in RegionDesc is already nullptr");
         metadata.tlab->startAddr_ = 0;
         metadata.tlab->allocPtr_ = 0;
         metadata.tlab->endAddr_ = 0;
@@ -965,7 +979,7 @@ public:
 
     void AttachTLAB(TLAB *tlab)
     {
-        ASSERT_LOGF(metadata.tlab == nullptr, "TLAB in RegionDesc is not nullptr, cannot attach");
+        ASSERT_PRINT(metadata.tlab == nullptr, "TLAB in RegionDesc is not nullptr, cannot attach");
         metadata.tlab = tlab;
         metadata.tlab->startAddr_ = metadata.regionStart;
         metadata.tlab->allocPtr_ = metadata.allocPtr;
@@ -1074,7 +1088,9 @@ private:
             size_t extraSize = size - sizeof(ObjectSlot);
             if (extraSize > 0) {
                 uintptr_t start = reinterpret_cast<uintptr_t>(this) + sizeof(ObjectSlot);
-                LOGE_IF((memset_s(reinterpret_cast<void *>(start), extraSize, 0, extraSize) != EOK)) << "memset_s fail";
+                LOG_IF((memset_s(reinterpret_cast<void *>(start), extraSize, 0, extraSize) != EOK), ERROR,
+                       MM_OBJECT_EVENTS)
+                    << "memset_s fail";
             }
         }
     };
@@ -1191,7 +1207,7 @@ private:
                 return (allocAddr - heapStartAddress) / UNIT_SIZE;
             }
 
-            LOG_COMMON(FATAL) << "Unresolved fatal";
+            LOG(FATAL, COMMON) << "Unresolved fatal";
             UNREACHABLE();
         }
 
@@ -1380,7 +1396,7 @@ public:
         HeapAddress GetRegionBase() const
         {
             uintptr_t base = reinterpret_cast<uintptr_t>(this);
-            ASSERT_LOGF(base == regionDesc_->GetRegionBaseFast(), "");
+            ASSERT_PRINT(base == regionDesc_->GetRegionBaseFast(), "");
             return static_cast<HeapAddress>(base);
         }
 
@@ -1417,7 +1433,7 @@ private:
         size_t base = GetRegionBase();
         metadata.regionBase = base;
         metadata.regionStart = base + RegionDesc::UNIT_HEADER_SIZE;
-        ASSERT_LOGF(metadata.regionStart % UNIT_BEGIN_ALIGN == 0, "");
+        ASSERT_PRINT(metadata.regionStart % UNIT_BEGIN_ALIGN == 0, "");
         metadata.allocPtr = GetRegionStart();
         metadata.regionEnd = base + nUnit * RegionDesc::UNIT_SIZE;
         DCHECK(GetRegionStart() < GetRegionEnd());
@@ -1437,7 +1453,7 @@ private:
                                     nUnit * RegionDesc::UNIT_SIZE);
         uintptr_t pAddr = metadata.regionBase;
         uintptr_t pSz = nUnit * RegionDesc::UNIT_SIZE;
-        LOG_COMMON(DEBUG) << std::hex << "set [" << pAddr << std::hex << ", " << (pAddr + pSz) << ") unpoisoned\n";
+        LOG(DEBUG, COMMON) << std::hex << "set [" << pAddr << std::hex << ", " << (pAddr + pSz) << ") unpoisoned\n";
 #endif
     }
 

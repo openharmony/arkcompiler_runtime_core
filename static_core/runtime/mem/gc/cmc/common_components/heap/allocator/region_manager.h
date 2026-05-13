@@ -119,15 +119,16 @@ public:
 
     size_t CollectRegion(RegionDesc *region)
     {
-        DLOG(REGION, "collect region %p@%#zx+%zu type %u", region, region->GetRegionStart(), region->GetLiveByteCount(),
-             region->GetRegionType());
+        LOG(DEBUG, GC) << "collect region " << region << "@0x" << std::hex << region->GetRegionStart() << "+"
+                       << std::dec << region->GetLiveByteCount() << " type "
+                       << static_cast<size_t>(region->GetRegionType());
 
 #ifdef USE_HWASAN
         ASAN_POISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(region->GetRegionBase()),
                                   region->GetRegionBaseSize());
         const uintptr_t p_addr = region->GetRegionBase();
         const uintptr_t p_size = region->GetRegionBaseSize();
-        LOG_COMMON(DEBUG) << std::hex << "set [" << p_addr << std::hex << ", " << p_addr + p_size << ") poisoned\n";
+        LOG(DEBUG, COMMON) << std::hex << "set [" << p_addr << std::hex << ", " << p_addr + p_size << ") poisoned\n";
 #endif
         garbageRegionList_.PrependRegion(region, RegionDesc::RegionType::GARBAGE_REGION);
         if (region->IsLargeRegion()) {

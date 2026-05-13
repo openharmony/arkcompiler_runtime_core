@@ -40,7 +40,8 @@ BaseObject *IdleBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &fie
 {
     RefField<false> oldField(field.GetFieldValue(order));
     BaseObject *target = (BaseObject *)(oldField.GetFieldValue());
-    DLOG(BARRIER, "atomic read obj %p ref@%p: %#zx -> %p", obj, &field, oldField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "atomic read obj " << obj << " ref@" << &field << ": 0x" << std::hex << oldField.GetFieldValue()
+                   << " -> " << std::dec << target;
     return target;
 }
 
@@ -53,15 +54,15 @@ void IdleBarrier::UpdateRememberSet(BaseObject *object, BaseObject *ref) const
         RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(ref));
     if (!objMetaRegion->IsInYoungSpaceForWB() && refMetaRegion->IsInYoungSpaceForWB()) {
         if (objMetaRegion->MarkRSetCardTable(object)) {
-            DLOG(BARRIER, "update point-out remember set of region %p, obj %p, ref: %p<%p>",
-                 objMetaRegion->GetRegionDesc(), object, ref, ref->GetTypeInfo());
+            LOG(DEBUG, GC) << "update point-out remember set of region " << objMetaRegion->GetRegionDesc() << ", obj "
+                           << object << ", ref: " << ref << "<" << ref->GetTypeInfo() << ">";
         }
     }
 }
 
 void IdleBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const
 {
-    DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+    LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
 }
 
 void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
@@ -70,6 +71,6 @@ void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false
         return;
     }
     UpdateRememberSet(obj, ref);
-    DLOG(BARRIER, "write obj %p ref@%p: %p => %p", obj, &field, field.GetTargetObject(), ref);
+    LOG(DEBUG, GC) << "write obj " << obj << " ref@" << &field << ": " << field.GetTargetObject() << " => " << ref;
 }
 }  // namespace common_vm

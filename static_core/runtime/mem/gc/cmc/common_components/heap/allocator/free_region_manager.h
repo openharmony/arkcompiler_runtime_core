@@ -51,10 +51,10 @@ public:
             // first try to get a dirty region.
             if (tryDirtyTree && dirtyUnitTreeMutex_.TryLock()) {
                 if (dirtyUnitTree_.TakeUnits(num, idx)) {
-                    DLOG(REGION, "c-tree %p alloc dirty units[%u+%u, %u) @[0x%zx, 0x%zx), %u dirty-units left",
-                         &dirtyUnitTree_, idx, num, idx + num, RegionDesc::GetUnitAddress(idx),
-                         RegionDesc::GetUnitAddress(idx + num), dirtyUnitTree_.GetTotalCount());
-
+                    LOG(DEBUG, GC) << "c-tree " << &dirtyUnitTree_ << " alloc dirty units[" << idx << "+" << num << ", "
+                                   << idx + num << ") @[0x" << std::hex << RegionDesc::GetUnitAddress(idx) << ", 0x"
+                                   << std::hex << RegionDesc::GetUnitAddress(idx + num) << "), " << std::dec
+                                   << dirtyUnitTree_.GetTotalCount() << " dirty-units left";
                     // it makes sense to slow down allocation by clearing region memory.
                     RegionDesc::ClearUnits(idx, num);
                     RegionDesc *region = RegionDesc::InitRegion(idx, num, uclass);
@@ -72,9 +72,10 @@ public:
                     MemoryMap::CommitMemory(reinterpret_cast<void *>(RegionDesc::GetUnitAddress(idx)),
                                             num * RegionDesc::UNIT_SIZE);
 #endif
-                    DLOG(REGION, "c-tree %p alloc released units%u+%u @0x%zx+%zu, %u released-units left",
-                         &releasedUnitTree_, idx, num, RegionDesc::GetUnitAddress(idx), num * RegionDesc::UNIT_SIZE,
-                         releasedUnitTree_.GetTotalCount());
+                    LOG(DEBUG, GC) << "c-tree " << &releasedUnitTree_ << " alloc released units" << idx << "+" << num
+                                   << " @0x" << std::hex << RegionDesc::GetUnitAddress(idx) << "+" << std::dec
+                                   << num * RegionDesc::UNIT_SIZE << ", " << releasedUnitTree_.GetTotalCount()
+                                   << " released-units left";
                     RegionDesc *region = RegionDesc::InitRegion(idx, num, uclass);
                     releasedUnitTreeMutex_.Unlock();
                     PrehandleReleasedUnit(expectPhysicalMem, idx, num);
@@ -93,8 +94,8 @@ public:
     {
         ark::os::memory::LockHolder lg(dirtyUnitTreeMutex_);
         if (UNLIKELY(!dirtyUnitTree_.MergeInsert(idx, num, true))) {
-            LOG_COMMON(FATAL) << "tid " << GetTid() << ": failed to add dirty units [" << idx << "+" << num << ", "
-                              << (idx + num) << ")";
+            LOG(FATAL, COMMON) << "tid " << GetTid() << ": failed to add dirty units [" << idx << "+" << num << ", "
+                               << (idx + num) << ")";
         }
     }
 
@@ -102,8 +103,8 @@ public:
     {
         ark::os::memory::LockHolder lg(releasedUnitTreeMutex_);
         if (UNLIKELY(!releasedUnitTree_.MergeInsert(idx, num, true))) {
-            LOG_COMMON(FATAL) << "tid %d: failed to add release units [" << idx << "+" << num << ", " << (idx + num)
-                              << ")";
+            LOG(FATAL, COMMON) << "tid " << GetTid() << ": failed to add release units [" << idx << "+" << num << ", "
+                               << (idx + num) << ")";
         }
     }
 

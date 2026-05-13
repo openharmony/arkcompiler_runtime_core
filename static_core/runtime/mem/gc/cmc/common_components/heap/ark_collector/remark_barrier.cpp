@@ -19,6 +19,8 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
+#include "libarkbase/utils/logger.h"
+
 namespace common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
 // so we don't expect reading barrier have the ability to modify the referent field.
@@ -38,7 +40,8 @@ BaseObject *RemarkBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &f
     BaseObject *target = nullptr;
     RefField<false> oldField(field.GetFieldValue(order));
     target = reinterpret_cast<BaseObject *>((oldField.GetFieldValue()));
-    DLOG(TBARRIER, "katomic read obj %p ref@%p: %#zx -> %p", obj, &field, oldField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "katomic read obj " << obj << " ref@" << &field << ": 0x" << std::hex << oldField.GetFieldValue()
+                   << " -> " << std::dec << target;
     return target;
 }
 

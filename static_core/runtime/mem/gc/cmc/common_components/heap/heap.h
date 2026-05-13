@@ -63,7 +63,7 @@ public:
     static void throwOOM()
     {
         // Maybe we need to add heapdump logic here
-        LOG_COMMON(FATAL) << "Out of Memory, abort.";
+        LOG(FATAL, COMMON) << "Out of Memory, abort.";
         UNREACHABLE();
     }
     static Heap &GetHeap();

@@ -23,6 +23,8 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
+#include "libarkbase/utils/logger.h"
+
 namespace common_vm {
 BaseObject *PreforwardBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
 {
@@ -53,7 +55,8 @@ BaseObject *PreforwardBarrier::AtomicReadRefField(BaseObject *obj, RefField<true
 {
     RefField<false> tmpField(field.GetFieldValue(order));
     BaseObject *target = ReadRefField(nullptr, tmpField);
-    DLOG(PBARRIER, "atomic read obj %p ref@%p: %#zx -> %p", obj, &field, tmpField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "atomic read obj " << obj << " ref@" << &field << ": 0x" << std::hex << tmpField.GetFieldValue()
+                   << " -> " << std::dec << target;
     return target;
 }
 }  // namespace common_vm

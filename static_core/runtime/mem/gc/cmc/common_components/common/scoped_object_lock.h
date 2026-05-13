@@ -29,8 +29,8 @@ public:
                 state == BaseStateWord::ForwardState::NORMAL) {
                 lockedObj_ = &obj;
             } else {
-                LOG_COMMON(FATAL) << "this state need to be dealt with when lock object, state: "
-                                  << static_cast<uint8_t>(state);
+                LOG(FATAL, COMMON) << "this state need to be dealt with when lock object, state: "
+                                   << static_cast<size_t>(state);
                 return;
             }
             BaseStateWord curState = lockedObj_->GetBaseStateWord();
@@ -41,7 +41,7 @@ public:
     }
     ~ScopedObjectLock()
     {
-        LOGF_CHECK(lockedObj_ != nullptr) << "from copy is nullptr when unlock object\n";
+        LOG_IF(UNLIKELY(lockedObj_ == nullptr), FATAL, COMMON) << "from copy is nullptr when unlock object\n";
         lockedObj_->UnlockExclusive(BaseStateWord::ForwardState::NORMAL);
     }
 

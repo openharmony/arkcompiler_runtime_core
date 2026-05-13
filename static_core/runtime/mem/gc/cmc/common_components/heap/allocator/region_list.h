@@ -66,8 +66,8 @@ public:
             regionCount_ -= nRegion;
             unitCount_ -= nUnit;
         } else {
-            LOG_COMMON(FATAL) << "region list error count " << regionCount_ << "-" << nRegion << " " << unitCount_
-                              << "-" << nUnit;
+            LOG(FATAL, COMMON) << "region list error count " << regionCount_ << "-" << nRegion << " " << unitCount_
+                               << "-" << nUnit;
         }
     }
 
@@ -209,12 +209,12 @@ private:
         RegionDesc *prev = region->GetPrevRegion();
         RegionDesc *next = region->GetNextRegion();
         if (prev != nullptr && prev->GetNextRegion() != region) {
-            LOG_COMMON(FATAL) << "illegal region node";
+            LOG(FATAL, COMMON) << "illegal region node";
             UNREACHABLE();
         }
 
         if (next != nullptr && next->GetPrevRegion() != region) {
-            LOG_COMMON(FATAL) << "illegal region node";
+            LOG(FATAL, COMMON) << "illegal region node";
             UNREACHABLE();
         }
     }

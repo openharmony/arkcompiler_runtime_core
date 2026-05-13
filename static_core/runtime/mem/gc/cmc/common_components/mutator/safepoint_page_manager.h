@@ -20,6 +20,9 @@
 
 #include "common_components/base/globals.h"
 #include "common_components/base/sys_call.h"
+
+#include "libarkbase/utils/logger.h"
+
 #include "securec.h"
 
 namespace common_vm {
@@ -35,18 +38,19 @@ public:
             reinterpret_cast<uint8_t *>(mmap(nullptr, COMMON_PAGE_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
         unreadablePageForRawData_ =
             reinterpret_cast<uint8_t *>(mmap(nullptr, COMMON_PAGE_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
-        LOGF_CHECK(
-            (readablePage_ != MAP_FAILED && unreadablePage_ != MAP_FAILED && unreadablePageForRawData_ != MAP_FAILED))
+        LOG_IF(UNLIKELY(!(readablePage_ != MAP_FAILED && unreadablePage_ != MAP_FAILED &&
+                          unreadablePageForRawData_ != MAP_FAILED)),
+               FATAL, GC)
             << "allocate safepoint page failed!";
     }
 
     ~SafepointPageManager()
     {
-        LOGE_IF(UNLIKELY(munmap(readablePage_, COMMON_PAGE_SIZE) != EOK))
+        LOG_IF(UNLIKELY(munmap(readablePage_, COMMON_PAGE_SIZE) != EOK), ERROR, COMMON)
             << "munmap failed in SafepointPageManager readablePage destruction, errno: " << errno;
-        LOGE_IF(UNLIKELY(munmap(unreadablePage_, COMMON_PAGE_SIZE) != EOK))
+        LOG_IF(UNLIKELY(munmap(unreadablePage_, COMMON_PAGE_SIZE) != EOK), ERROR, COMMON)
             << "munmap failed in SafepointPageManager unreadablePage destruction, errno: " << errno;
-        LOGE_IF(UNLIKELY(munmap(unreadablePageForRawData_, COMMON_PAGE_SIZE) != EOK))
+        LOG_IF(UNLIKELY(munmap(unreadablePageForRawData_, COMMON_PAGE_SIZE) != EOK), ERROR, COMMON)
             << "munmap failed in SafepointPageManager unreadablePageForRawData destruction, errno: " << errno;
     }
 

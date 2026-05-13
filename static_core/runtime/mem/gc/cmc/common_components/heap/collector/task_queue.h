@@ -22,7 +22,8 @@
 #include "common_components/common/page_allocator.h"
 #include "common_components/heap/collector/gc_request.h"
 #include "common_components/heap/heap.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 #include "libarkbase/os/mutex.h"
 
 // gc task and task queue implementation
@@ -102,14 +103,14 @@ public:
 
     explicit GCRunner(GCTaskType type) : GCTask(type), gcReason_(GC_REASON_INVALID)
     {
-        ASSERT_LOGF(type != GCTaskType::GC_TASK_INVOKE_GC, "invalid gc task!");
+        ASSERT_PRINT(type != GCTaskType::GC_TASK_INVOKE_GC, "invalid gc task!");
     }
 
     GCRunner(GCTaskType type, GCReason reason, GCType gcType = GC_TYPE_FULL)
         : GCTask(type), gcReason_(reason), gcType_(gcType)
     {
-        ASSERT_LOGF(gcReason_ >= GC_REASON_BEGIN && gcReason_ <= GC_REASON_END, "invalid reason");
-        ASSERT_LOGF(gcType_ >= GC_TYPE_BEGIN && gcType_ <= GC_TYPE_END, "invalid gc type");
+        ASSERT_PRINT(gcReason_ >= GC_REASON_BEGIN && gcReason_ <= GC_REASON_END, "invalid reason");
+        ASSERT_PRINT(gcType_ >= GC_TYPE_BEGIN && gcType_ <= GC_TYPE_END, "invalid gc type");
     }
 
     GCRunner(const GCRunner &task) = default;
@@ -125,7 +126,7 @@ public:
             auto gcType = reason == GC_REASON_YOUNG ? GC_TYPE_YOUNG : GC_TYPE_FULL;
             return GCRunner(GCTaskType::GC_TASK_INVOKE_GC, reason, gcType);
         } else {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "Invalid priority in GetGCRequestByPrio function";
+            LOG(FATAL, COMMON) << "Invalid priority in GetGCRequestByPrio function";
             UNREACHABLE();
             return GCRunner();
         }
@@ -138,7 +139,7 @@ public:
         } else if (taskType_ == GCTaskType::GC_TASK_INVOKE_GC) {
             return PRIO_INVOKE_GC + gcReason_;
         }
-        LOG_COMMON(FATAL) << "Invalid task in GetPriority function";
+        LOG(FATAL, COMMON) << "Invalid task in GetPriority function";
         UNREACHABLE();
         return 0;
     }
@@ -319,9 +320,11 @@ public:
             // Retrieve the task and then process data with dfx
             Type task = asyncTaskQueue_.Pop();
             if (task.IsInvalid()) {
-                VLOG(DEBUG, "invalid gc task: type %u, reason %u", task.GetTaskType(), task.GetGCReason());
+                LOG(DEBUG, GC) << "invalid gc task: type " << static_cast<size_t>(task.GetTaskType()) << ", reason "
+                               << task.GetGCReason();
             } else {
-                VLOG(DEBUG, "dequeue gc task: type %u. reason %u", task.GetTaskType(), task.GetGCReason());
+                LOG(DEBUG, GC) << "dequeue gc task: type " << static_cast<size_t>(task.GetTaskType()) << ", reason "
+                               << task.GetGCReason();
                 return task;
             }
 

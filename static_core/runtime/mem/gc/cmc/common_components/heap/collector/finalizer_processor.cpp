@@ -24,13 +24,25 @@
 namespace common_vm {
 constexpr uint32_t DEFAULT_FINALIZER_TIMEOUT_MS = 2000;
 
+template <typename FuncType, typename... Args>
+static void CheckCall(FuncType func, const char *funcName, const char *what, Args... args)
+{
+    int rc = func(args...);
+    if (UNLIKELY(rc != 0)) {
+        errno = rc;
+        /* LCOV_EXCL_BR_LINE */
+        LOG(FATAL, COMMON) << funcName << " failed for " << what << " reason " << strerror(errno) << " return "
+                           << errno;
+    }
+}
+
 // Note: can only be called by FinalizerProcessor thread
 extern "C" PANDA_PUBLIC_API void *ArkProcessFinalizers(void *arg)
 {
 #ifdef __APPLE__
-    CHECK_CALL(pthread_setname_np, ("gc-helper"), "finalizer-processor thread setname");
+    CheckCall(pthread_setname_np, "pthread_setname_np", "finalizer-processor thread setname", "gc-helper");
 #elif defined(__linux__) || defined(PANDA_TARGET_OHOS)
-    CHECK_CALL(prctl, (PR_SET_NAME, "gc-helper"), "finalizer-processor thread setname");
+    CheckCall(prctl, "prctl", "finalizer-processor thread setname", PR_SET_NAME, "gc-helper");
 #endif
     reinterpret_cast<FinalizerProcessor *>(arg)->Run();
     return nullptr;
@@ -49,14 +61,16 @@ void FinalizerProcessor::Start()
         stackSize = static_cast<size_t>(PTHREAD_STACK_MIN);
     }
 #endif
-    CHECK_CALL(pthread_attr_init, (&attr), "init pthread attr");
-    CHECK_CALL(pthread_attr_setdetachstate, (&attr, PTHREAD_CREATE_JOINABLE), "set pthread joinable");
-    CHECK_CALL(pthread_attr_setstacksize, (&attr, stackSize), "set pthread stacksize");
-    CHECK_CALL(pthread_create, (&thread, &attr, ArkProcessFinalizers, this), "create finalizer-process thread");
+    CheckCall(pthread_attr_init, "pthread_attr_init", "init pthread attr", &attr);
+    CheckCall(pthread_attr_setdetachstate, "pthread_attr_setdetachstate", "set pthread joinable", &attr,
+              PTHREAD_CREATE_JOINABLE);
+    CheckCall(pthread_attr_setstacksize, "pthread_attr_setstacksize", "set pthread stacksize", &attr, stackSize);
+    CheckCall(pthread_create, "pthread_create", "create finalizer-process thread", &thread, &attr, ArkProcessFinalizers,
+              this);
 #ifdef __WIN64
-    CHECK_CALL(pthread_setname_np, (thread, "gc-helper"), "finalizer-processor thread setname");
+    CheckCall(pthread_setname_np, "pthread_setname_np", "finalizer-processor thread setname", thread, "gc-helper");
 #endif
-    CHECK_CALL(pthread_attr_destroy, (&attr), "destroy pthread attr");
+    CheckCall(pthread_attr_destroy, "pthread_attr_destroy", "destroy pthread attr", &attr);
     threadHandle_ = thread;
 
     WaitStarted();
@@ -155,7 +169,7 @@ void FinalizerProcessor::Init()
     MutatorManager::Instance().MutatorManagementRLock();
     fpMutator_ = mutator;
     MutatorManager::Instance().MutatorManagementRUnlock();
-    VLOG(DEBUG, "FinalizerProcessor thread started");
+    LOG(DEBUG, GC) << "FinalizerProcessor thread started";
 }
 
 void FinalizerProcessor::Fini()
@@ -164,15 +178,15 @@ void FinalizerProcessor::Fini()
     fpMutator_ = nullptr;
     MutatorManager::Instance().MutatorManagementRUnlock();
     MutatorManager::Instance().DestroyRuntimeMutator(ThreadType::FP_THREAD);
-    VLOG(DEBUG, "FinalizerProcessor thread stopped");
+    LOG(DEBUG, GC) << "FinalizerProcessor thread stopped";
 }
 
 void FinalizerProcessor::WaitStop()
 {
     pthread_t thread = threadHandle_;
     int tmpResult = ::pthread_join(thread, nullptr);
-    LOGF_CHECK(tmpResult == 0) << "::pthread_join() in FinalizerProcessor::WaitStop() return " << tmpResult
-                               << " rather than 0.";
+    LOG_IF(UNLIKELY(tmpResult != 0), FATAL, GC)
+        << "::pthread_join() in FinalizerProcessor::WaitStop() return " << tmpResult << " rather than 0.";
     started_ = false;
     threadHandle_ = 0;
 }
@@ -192,7 +206,7 @@ void FinalizerProcessor::NotifyStarted()
 {
     {
         ark::os::memory::LockHolder lock(startedLock_);
-        LOGF_CHECK(started_ != true) << "unpexcted true, FinalizerProcessor might not wait stopped";
+        LOG_IF(UNLIKELY(started_), FATAL, GC) << "unexpected true, FinalizerProcessor might not wait stopped";
         started_ = true;
     }
     startedCondition_.SignalAll();
@@ -236,7 +250,7 @@ void FinalizerProcessor::EnqueueFinalizables(const std::function<bool(BaseObject
 // 4. remove processed finalizables
 void FinalizerProcessor::ProcessFinalizableList()
 {
-    LOG_COMMON(FATAL) << "Unresolved fatal";
+    LOG(FATAL, COMMON) << "Unresolved fatal";
     UNREACHABLE();
 }
 
@@ -251,7 +265,7 @@ void FinalizerProcessor::ProcessFinalizables()
         // workingFinalizables is expected empty, thus we could use std::swap here
         workingFinalizables_.swap(finalizables_);
     }
-    DLOG(FINALIZE, "finalizer: working size %zu", workingFinalizables_.size());
+    LOG(DEBUG, GC) << "finalizer: working size " << workingFinalizables_.size();
     ProcessFinalizableList();
     if (finalizables_.empty()) {
         // Atomic with relaxed order reason: data race with hasFinalizableJob_ with no synchronization or ordering
@@ -272,7 +286,9 @@ void FinalizerProcessor::LogAfterProcess()
     timeProcessUsed_ += timeConsumed;
     constexpr float percentageDivend = 100.0f;
     float percentage = (static_cast<float>(TIME_FACTOR * timeProcessUsed_) / totalTimePassed) / percentageDivend;
-    DLOG(FINALIZE, "[FinalizerProcessor] End (%luus [%luus] [%.2f%%])", timeConsumed, timeProcessUsed_, percentage);
+    [[maybe_unused]] constexpr int logPercentagePrecision = 2;
+    LOG(DEBUG, GC) << "[FinalizerProcessor] End (" << timeConsumed << "us [" << timeProcessUsed_ << "us] ["
+                   << std::fixed << std::setprecision(logPercentagePrecision) << percentage << "%])";
 }
 #endif
 

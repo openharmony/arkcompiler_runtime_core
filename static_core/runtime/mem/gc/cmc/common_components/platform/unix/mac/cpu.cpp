@@ -37,7 +37,7 @@ size_t PhysicalSize()
     int64_t size = 0;
     size_t bufferLength = sizeof(size);
     if (sysctl(mib, mibLength, &size, &bufferLength, nullptr, 0) != 0) {
-        LOG_COMMON(FATAL) << "sysctl error";
+        LOG(FATAL, COMMON) << "sysctl error";
     }
     return static_cast<size_t>(size);
 }

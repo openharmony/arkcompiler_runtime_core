@@ -20,14 +20,13 @@
 #include <cstdint>
 
 #include "common_components/heap/allocator/local_deque.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 
 #ifndef NDEBUG
-#define CTREE_ASSERT(cond, msg) ASSERT_LOGF(cond, msg)
 #define CTREE_CHECK_PARENT_AND_LCHILD(n) CheckParentAndLeftChild(n)
 #define CTREE_CHECK_PARENT_AND_RCHILD(n) CheckParentAndRightChild(n)
 #else
-#define CTREE_ASSERT(cond, msg) (void(0))
 #define CTREE_CHECK_PARENT_AND_LCHILD(n) (void(0))
 #define CTREE_CHECK_PARENT_AND_RCHILD(n) (void(0))
 #endif
@@ -92,7 +91,7 @@ public:
     void DecTotalCount(uint32_t cnt)
     {
         if (totalCount_ < cnt) {  // LCOV_EXCL_BR_LINE
-            LOG_COMMON(FATAL) << "Treap::DecTotalCount() Should not execute here, abort.";
+            LOG(FATAL, COMMON) << "Treap::DecTotalCount() Should not execute here, abort.";
             UNREACHABLE();
         }
         totalCount_ -= cnt;
@@ -107,7 +106,7 @@ public:
     {
         if (root_ == nullptr) {
             root_ = new (nodeAllocator_.Allocate()) TreapNode(idx, num, refreshRegionDesc);
-            CTREE_ASSERT(root_ != nullptr, "fail to allocate a new node");
+            ASSERT_PRINT(root_ != nullptr, "fail to allocate a new node");
             IncTotalCount(num);
             return true;
         }
@@ -337,12 +336,12 @@ private:
         while (nearest != nullptr) {
             if (nearest->GetIndex() == endIdx) {
                 if (nearest->l != nullptr) {
-                    CTREE_ASSERT(false, "merging failed case 1");
+                    ASSERT_PRINT(false, "merging failed case 1");
                     return MergeResult::MERGE_ERROR;
                 }
                 break;
             } else if (nearest->GetIndex() < endIdx) {
-                CTREE_ASSERT(false, "merging failed case 2");
+                ASSERT_PRINT(false, "merging failed case 2");
                 return MergeResult::MERGE_ERROR;
             } else {
                 parent = nearest;
@@ -377,12 +376,12 @@ private:
         while (nearest != nullptr) {
             if (nearest->GetIndex() + nearest->GetCount() == startIdx) {
                 if (nearest->r != nullptr) {
-                    CTREE_ASSERT(false, "merging failed case 3");
+                    ASSERT_PRINT(false, "merging failed case 3");
                     return MergeResult::MERGE_ERROR;
                 }
                 break;
             } else if (nearest->GetIndex() + nearest->GetCount() > startIdx) {
-                CTREE_ASSERT(false, "merging failed case 4");
+                ASSERT_PRINT(false, "merging failed case 4");
                 return MergeResult::MERGE_ERROR;
             } else {
                 parent = nearest;
@@ -437,7 +436,7 @@ private:
         }
         TreapNode *node = *nodePtr;
         if (node != nullptr && node->GetCount() < num) {
-            DLOG(REGION, "c-tree %p fail to take %u free units", this, num);
+            LOG(DEBUG, GC) << "c-tree " << this << " fail to take " << num << " free units";
             return false;
         }
         TreapNode **nextNodePtr = nullptr;
@@ -480,8 +479,8 @@ private:
         }
 
         index = node->GetIndex();
-        DLOG(REGION, "c-tree %p v-alloc %u units from [%u+%u, %u)", this, count, index, nodeCount, index + nodeCount);
-
+        LOG(DEBUG, GC) << "c-tree " << this << " v-alloc " << count << " units from [" << index << "+" << nodeCount
+                       << ", " << index + nodeCount << ")";
         node->UpdateNode(index + count, nodeCount - count, false);
         DecTotalCount(count);
         if (node->GetCount() == 0) {
@@ -495,7 +494,7 @@ private:
     // move node n down in the tree to maintain the heap property
     NO_INLINE TreapNode *LowerNode(TreapNode *n)
     {
-        CTREE_ASSERT(n, "lowering node failed");
+        ASSERT_PRINT(n, "lowering node failed");
         TreapNode *tmp = nullptr;
 
         if (n->l != nullptr && n->l->GetCount() > n->GetCount()) {
@@ -526,7 +525,7 @@ private:
     // return the new position of node n.
     TreapNode *&LowerImproperNodeOnce(TreapNode *&n) const
     {
-        CTREE_ASSERT(n, "failed to lower node once");
+        ASSERT_PRINT(n, "failed to lower node once");
         if (n->l != nullptr) {
             // use the child which has the max count to instead of node.
             if (n->r != nullptr && n->r->GetCount() >= n->l->GetCount()) {
@@ -575,7 +574,7 @@ private:
     void RemoveZeroNode(TreapNode *&n)
     {
         TreapNode *&nodeRef = MaintainHeapPropertyForZeroNode(n);
-        LOGF_CHECK((nodeRef->l == nullptr && nodeRef->r == nullptr)) << "UNEXPECT";
+        LOG_IF(UNLIKELY(!(nodeRef->l == nullptr && nodeRef->r == nullptr)), FATAL, MM_OBJECT_EVENTS) << "UNEXPECT";
         nodeAllocator_.Deallocate(nodeRef);
         nodeRef = nullptr;
     }
@@ -599,8 +598,8 @@ private:
         if (n != nullptr) {
             const TreapNode *l = n->l;
             if (l != nullptr) {
-                CTREE_ASSERT((n->GetIndex() > (l->GetIndex() + l->GetCount())), "left child overlapped with parent");
-                CTREE_ASSERT((n->GetCount() >= l->GetCount()), "left child bigger than parent");
+                ASSERT_PRINT((n->GetIndex() > (l->GetIndex() + l->GetCount())), "left child overlapped with parent");
+                ASSERT_PRINT((n->GetCount() >= l->GetCount()), "left child bigger than parent");
             }
         }
     }
@@ -609,8 +608,8 @@ private:
         if (n != nullptr) {
             const TreapNode *r = n->r;
             if (r != nullptr) {
-                CTREE_ASSERT(((n->GetIndex() + n->GetCount()) < r->GetIndex()), "right child overlapped with parent");
-                CTREE_ASSERT((n->GetCount() >= r->GetCount()), "right child bigger than parent");
+                ASSERT_PRINT(((n->GetIndex() + n->GetCount()) < r->GetIndex()), "right child overlapped with parent");
+                ASSERT_PRINT((n->GetCount() >= r->GetCount()), "right child bigger than parent");
             }
         }
     }
@@ -633,9 +632,10 @@ private:
         }
 
         if (total != GetTotalCount()) {  // LCOV_EXCL_BR_LINE
-            DLOG(REGION, "c-tree %p total unit count %u (expect %u)", this, GetTotalCount(), total);
+            LOG(DEBUG, GC) << "c-tree " << this << " total unit count " << GetTotalCount() << " (expect " << total
+                           << ")";
             DumpTree("internal error tree");
-            LOG_COMMON(FATAL) << "Treap::VerifyTree() Should not execute here, abort.";
+            LOG(FATAL, COMMON) << "Treap::VerifyTree() Should not execute here, abort.";
             UNREACHABLE();
         }
     }

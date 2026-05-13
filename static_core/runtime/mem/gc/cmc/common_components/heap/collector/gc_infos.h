@@ -56,8 +56,8 @@ public:
     virtual ~GCInfoNode() = default;
     virtual void DumpFrameGCInfo() const
     {
-        DLOG(ENUM, "  time stamp: %s method name: %s, start ip: %p, frame pc: %p, return address: %p", timeStamp.Str(),
-             methodName.Str(), startPC, pc, ra);
+        LOG(DEBUG, GC) << "  time stamp: " << timeStamp.Str() << " method name: " << methodName.Str()
+                       << ", start ip: " << startPC << ", frame pc: " << pc << ", return address: " << ra;
         DumpMapGCInfo(regRoots, "Register roots", "register: %d, root: %p  ");
         DumpMapGCInfo(slotRoots, "Slot roots", "offset: %d, root: %p  ");
         DumpMapGCInfo(invalidRegRoots, "Invalid register roots", "register id: %d, root: %p  ");
@@ -88,7 +88,7 @@ protected:
     {
         constexpr size_t numPerRow = 5;
         constexpr size_t defaultCount = 0;
-        DLOG(ENUM, "    %s: {", title.Str());
+        LOG(DEBUG, GC) << "    " << title.Str() << " {";
         size_t size = rootMap.size();
         size_t remain = size % numPerRow;
         size_t count = defaultCount;
@@ -107,7 +107,7 @@ protected:
             detail.Append("\n");
         }
         detail.Append("    }\n");
-        DLOG(ENUM, "%s", detail.Str());
+        LOG(DEBUG, GC) << detail.Str();
     }
 
 private:
@@ -184,10 +184,10 @@ public:
     }
     void DumpFrameInfo() const
     {
-        DLOG(ENUM, "  fix roots info:");
+        LOG(DEBUG, GC) << "  fix roots info:";
         std::for_each(gcInfosForFix.begin(), gcInfosForFix.end(),
                       [](const GCInfoNodeForFix &info) { info.DumpFrameGCInfo(); });
-        DLOG(ENUM, "  marking roots info:");
+        LOG(DEBUG, GC) << "  marking roots info:";
         std::for_each(gcInfosForMarking.begin(), gcInfosForMarking.end(),
                       [](const GCInfoNode &info) { info.DumpFrameGCInfo(); });
     }
@@ -233,10 +233,10 @@ public:
     void DumpGCInfos() const
     {
         size_t size = gcInfos.size();
-        DLOG(ENUM, " current thread happened %d times GC", size);
+        LOG(DEBUG, GC) << " current thread happened " << size << " times GC";
         size_t i = 1;
         std::for_each(gcInfos.rbegin(), gcInfos.rend(), [&i](const CurrentGCInfo &cur) {
-            DLOG(ENUM, " the %d scan stack: ", i++);
+            LOG(DEBUG, GC) << " the " << i++ << " scan stack: ";
             cur.DumpFrameInfo();
         });
     }

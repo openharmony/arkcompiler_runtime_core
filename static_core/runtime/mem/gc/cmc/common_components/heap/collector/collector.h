@@ -76,7 +76,7 @@ public:
 
     virtual GCStats &GetGCStats()
     {
-        LOG_COMMON(FATAL) << "Unresolved fatal";
+        LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
 
@@ -127,7 +127,7 @@ public:
 protected:
     virtual void RequestGCInternal(GCReason, bool, GCType)
     {
-        LOG_COMMON(FATAL) << "Unresolved fatal";
+        LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
 

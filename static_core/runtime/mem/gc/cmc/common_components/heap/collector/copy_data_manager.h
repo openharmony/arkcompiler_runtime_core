@@ -26,7 +26,8 @@
 #include "common_components/base/mem_utils.h"
 #include "common_components/base/sys_call.h"
 #include "common_components/heap/collector/region_bitmap.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 
 #ifdef _WIN64
 #include "common_components/base/atomic_spin_lock.h"
@@ -85,7 +86,8 @@ class HeapBitmapManager {
                 return startAddr;
             }
             size_t pageSize = RoundUp(sz, COMMON_PAGE_SIZE);
-            LOGE_IF(UNLIKELY(!VirtualAlloc(reinterpret_cast<void *>(lastAddr), pageSize, MEM_COMMIT, PAGE_READWRITE)))
+            LOG_IF(UNLIKELY(!VirtualAlloc(reinterpret_cast<void *>(lastAddr), pageSize, MEM_COMMIT, PAGE_READWRITE)),
+                   ERROR, GC)
                 << "VirtualAlloc commit failed in Allocate, errno: " << GetLastError();
             // Atomic with seq_cst order reason: data race with lastCommitEndAddr with requirement for sequentially
             // consistent order where threads observe all modifications in the same order
@@ -102,14 +104,16 @@ class HeapBitmapManager {
         void ReleaseMemory()
         {
 #if defined(_WIN64)
-            LOGE_IF(UNLIKELY(!VirtualFree(reinterpret_cast<void *>(startAddress_), size_, MEM_DECOMMIT)))
+            LOG_IF(UNLIKELY(!VirtualFree(reinterpret_cast<void *>(startAddress_), size_, MEM_DECOMMIT)), ERROR, GC)
                 << "VirtualFree failed in ReturnPage, errno: " << GetLastError();
 #elif defined(__APPLE__)
             (void)madvise(reinterpret_cast<void *>(startAddress_), size_, MADV_DONTNEED);
 #else
-            DLOG(REGION, "clear copy-data @[%#zx+%zu, %#zx)", startAddress_, size_, startAddress_ + size_);
+            LOG(DEBUG, GC) << "clear copy-data @[0x" << std::hex << startAddress_ << std::dec << "+" << size_ << ", 0x"
+                           << std::hex << startAddress_ + size_ << std::dec << ")";
             if (madvise(reinterpret_cast<void *>(startAddress_), size_, MADV_DONTNEED) == 0) {
-                DLOG(REGION, "release copy-data @[%#zx+%zu, %#zx)", startAddress_, size_, startAddress_ + size_);
+                LOG(DEBUG, GC) << "release copy-data @[0x" << std::hex << startAddress_ << std::dec << "+" << size_
+                               << ", 0x" << std::hex << startAddress_ + size_ << std::dec << ")";
             }
 #endif
             for (size_t i = 0; i < Zone::ZoneType::ZONE_TYPE_CNT; ++i) {

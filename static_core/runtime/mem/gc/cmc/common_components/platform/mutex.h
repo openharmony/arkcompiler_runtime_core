@@ -20,11 +20,11 @@
 #include "common_interfaces/thread/mutator_state_transition.h"
 
 #ifdef DEBUG
-#define FATAL_IF_ERROR(f, rc)                            \
-    do {                                                 \
-        if (rc != 0) {                                   \
-            LOG_COMMON(FATAL) << f << " failed: " << rc; \
-        }                                                \
+#define FATAL_IF_ERROR(f, rc)                             \
+    do {                                                  \
+        if (rc != 0) {                                    \
+            LOG(FATAL, COMMON) << f << " failed: " << rc; \
+        }                                                 \
     } while (false)
 #else
 #define FATAL_IF_ERROR(f, rc) static_cast<void>(0)

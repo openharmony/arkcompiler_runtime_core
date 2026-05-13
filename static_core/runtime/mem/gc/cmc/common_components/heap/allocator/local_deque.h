@@ -23,11 +23,13 @@
 #include "common_components/log/log.h"
 
 #define DEBUG_DEQUE false
-#if DEBUG_DEQUE
-#define DEQUE_ASSERT(cond, msg) ASSERT_LOGF(cond, msg)
-#else
-#define DEQUE_ASSERT(cond, msg) (void(0))
-#endif
+
+static void DequeAssert([[maybe_unused]] bool condition, [[maybe_unused]] const char *message)
+{
+    if constexpr (DEBUG_DEQUE) {
+        ASSERT_PRINT(condition, message);
+    }
+}
 
 namespace common_vm {
 // Designed for single-use, single-purpose operations
@@ -77,27 +79,27 @@ public:
     void Push(ValType v)
     {
         topAddr_ += VAL_SIZE;
-        DEQUE_ASSERT(topAddr < endAddr, "not enough memory");
+        DequeAssert(topAddr_ < endAddr_, "not enough memory");
         *reinterpret_cast<ValType *>(topAddr_) = v;
     }
     ValType Top()
     {
-        DEQUE_ASSERT(topAddr >= frontAddr, "read empty queue");
+        DequeAssert(topAddr_ >= frontAddr_, "read empty queue");
         return *reinterpret_cast<ValType *>(topAddr_);
     }
     void Pop()
     {
-        DEQUE_ASSERT(topAddr >= frontAddr, "pop empty queue");
+        DequeAssert(topAddr_ >= frontAddr_, "pop empty queue");
         topAddr_ -= VAL_SIZE;
     }
     ValType Front()
     {
-        DEQUE_ASSERT(frontAddr <= topAddr, "front reach end");
+        DequeAssert(frontAddr_ <= topAddr_, "front reach end");
         return *reinterpret_cast<ValType *>(frontAddr_);
     }
     void PopFront()
     {
-        DEQUE_ASSERT(frontAddr <= topAddr, "pop front empty queue");
+        DequeAssert(frontAddr_ <= topAddr_, "pop front empty queue");
         frontAddr_ += VAL_SIZE;
     }
     void Clear()
@@ -142,7 +144,7 @@ public:
     Type Top()
     {
         if (LIKELY(top_ < LOCAL_LENGTH)) {
-            DEQUE_ASSERT(top >= front, "read empty queue");
+            DequeAssert(top_ >= front_, "read empty queue");
             return array_[top_];
         }
         return sud_->Top();
@@ -150,11 +152,11 @@ public:
     void Pop()
     {
         if (LIKELY(top_ < LOCAL_LENGTH)) {
-            DEQUE_ASSERT(top >= front, "pop empty queue");
+            DequeAssert(top_ >= front_, "pop empty queue");
             --top_;
             return;
         }
-        DEQUE_ASSERT(top == LOCAL_LENGTH, "pop error");
+        DequeAssert(top_ == LOCAL_LENGTH, "pop error");
         sud_->Pop();
         if (sud_->Empty()) {
             // if local array is empty, reuse loacl array
@@ -170,20 +172,20 @@ public:
     Type Front()
     {
         if (LIKELY(front_ < LOCAL_LENGTH)) {
-            DEQUE_ASSERT(front <= top, "read empty queue front");
+            DequeAssert(front_ <= top_, "read empty queue front");
             return array_[front_];
         }
-        DEQUE_ASSERT(top == LOCAL_LENGTH, "queue front error");
+        DequeAssert(top_ == LOCAL_LENGTH, "queue front error");
         return sud_->Front();
     }
     void PopFront()
     {
         if (LIKELY(front_ < LOCAL_LENGTH)) {
-            DEQUE_ASSERT(front <= top, "pop front empty queue");
+            DequeAssert(front_ <= top_, "pop front empty queue");
             ++front_;
             return;
         }
-        DEQUE_ASSERT(front == LOCAL_LENGTH, "pop front error");
+        DequeAssert(front_ == LOCAL_LENGTH, "pop front error");
         sud_->PopFront();
     }
 
@@ -230,7 +232,7 @@ public:
     {
         void *result = nullptr;
         if (UNLIKELY(this->head_ == nullptr)) {
-            DEQUE_ASSERT(this->currAddr + allocSize <= this->endAddr, "not enough memory");
+            DequeAssert(this->currAddr_ + allocSize <= this->endAddr_, "not enough memory");
             result = reinterpret_cast<void *>(this->currAddr_);
             this->currAddr_ += allocSize;
         } else {

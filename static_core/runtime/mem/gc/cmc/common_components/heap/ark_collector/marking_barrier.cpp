@@ -21,6 +21,8 @@
 
 #include "common_interfaces/thread/mutator.h"
 
+#include "libarkbase/utils/logger.h"
+
 namespace common_vm {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,
 // so we don't expect reading barrier have the ability to modify the referent field.
@@ -39,7 +41,7 @@ void MarkingBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObj
 {
     if (rememberedObject != nullptr) {
         mutator->RememberObjectInSatbBuffer(rememberedObject);
-        DLOG(BARRIER, "pre-write barrier rememberedObject: %p", rememberedObject);
+        LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
     }
 }
 
@@ -47,7 +49,7 @@ void MarkingBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<fa
 {
     if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
         UpdateRememberSet(obj, ref);
-        DLOG(BARRIER, "write obj %p ref-field@%p: -> %p", obj, &field, ref);
+        LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": -> " << ref;
     }
 }
 
@@ -56,7 +58,8 @@ BaseObject *MarkingBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &
     BaseObject *target = nullptr;
     RefField<false> oldField(field.GetFieldValue(order));
     target = (BaseObject *)(oldField.GetFieldValue());
-    DLOG(TBARRIER, "katomic read obj %p ref@%p: %#zx -> %p", obj, &field, oldField.GetFieldValue(), target);
+    LOG(DEBUG, GC) << "katomic read obj " << obj << " ref@" << &field << ": 0x" << std::hex << oldField.GetFieldValue()
+                   << " -> " << std::dec << target;
     return target;
 }
 

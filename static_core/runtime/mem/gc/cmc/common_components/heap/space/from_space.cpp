@@ -36,10 +36,11 @@ void FromSpace::DumpRegionStats() const
     size_t allocExemptedFromSize = exemptedFromRegionList_.GetAllocatedSize();
     size_t units = fromUnits + exemptedFromUnits;
 
-    VLOG(DEBUG, "\tfrom space units: %zu (%zu B)", units, units * RegionDesc::UNIT_SIZE);
-    VLOG(DEBUG, "\t  from-regions %zu: %zu units (%zu B, alloc %zu)", fromRegions, fromUnits, fromSize, allocFromSize);
-    VLOG(DEBUG, "\t  exempted from-regions %zu: %zu units (%zu B, alloc %zu)", exemptedFromRegions, exemptedFromUnits,
-         exemptedFromSize, allocExemptedFromSize);
+    LOG(DEBUG, GC) << "\tfrom space units: " << units << " (" << units * RegionDesc::UNIT_SIZE << " B)";
+    LOG(DEBUG, GC) << "\t  from-regions " << fromRegions << ": " << fromUnits << " units (" << fromSize << " B, alloc "
+                   << allocFromSize << ")";
+    LOG(DEBUG, GC) << "\t  exempted from-regions " << exemptedFromRegions << ": " << exemptedFromUnits << " units ("
+                   << exemptedFromSize << " B, alloc " << allocExemptedFromSize << ")";
 }
 
 // forward only regions whose garbage bytes is greater than or equal to exemptedRegionThreshold.
@@ -54,9 +55,9 @@ void FromSpace::ExemptFromRegions()
         size_t liveBytes = fromRegion->GetLiveByteCount();
         if (liveBytes > threshold) {  // ignore this region
             RegionDesc *del = fromRegion;
-            DLOG(REGION, "region %p @0x%zx+%zu exempted by forwarding: %zu units, %u live bytes", del,
-                 del->GetRegionStart(), del->GetRegionAllocatedSize(), del->GetUnitCount(), del->GetLiveByteCount());
-
+            LOG(DEBUG, GC) << "region " << del << " @0x" << std::hex << del->GetRegionStart() << std::dec << "+"
+                           << del->GetRegionAllocatedSize() << " exempted by forwarding: " << del->GetUnitCount()
+                           << " units, " << del->GetLiveByteCount() << " live bytes";
             fromRegion = fromRegion->GetNextRegion();
             if (fromRegionList_.TryDeleteRegion(del, RegionDesc::RegionType::FROM_REGION,
                                                 RegionDesc::RegionType::EXEMPTED_FROM_REGION)) {
@@ -71,8 +72,8 @@ void FromSpace::ExemptFromRegions()
 
     size_t newFromBytes = fromRegionList_.GetUnitCount() * RegionDesc::UNIT_SIZE;
     size_t exemptedFromBytes = exemptedFromRegionList_.GetUnitCount() * RegionDesc::UNIT_SIZE;
-    VLOG(DEBUG, "exempt from-space: %zu B - %zu B -> %zu B, %zu B floating garbage, %zu B to forward", oldFromBytes,
-         exemptedFromBytes, newFromBytes, floatingGarbage, forwardBytes);
+    LOG(DEBUG, GC) << "exempt from-space: " << oldFromBytes << " B - " << exemptedFromBytes << " B -> " << newFromBytes
+                   << " B, " << floatingGarbage << " B floating garbage, " << forwardBytes << " B to forward";
 }
 
 class CopyTask : public Task {
@@ -121,13 +122,13 @@ void FromSpace::CopyFromRegions()
     // iterate each region in fromRegionList
     RegionDesc *fromRegion = fromRegionList_.GetHeadRegion();
     while (fromRegion != nullptr) {
-        ASSERT_LOGF(fromRegion->IsValidRegion(), "region is not head when get head region of from region list");
+        ASSERT_PRINT(fromRegion->IsValidRegion(), "region is not head when get head region of from region list");
         RegionDesc *region = fromRegion;
         fromRegion = fromRegion->GetNextRegion();
         heap_.CopyRegion(region);
     }
 
-    VLOG(DEBUG, "forward %zu from-region units", fromRegionList_.GetUnitCount());
+    LOG(DEBUG, GC) << "forward " << fromRegionList_.GetUnitCount() << " from-region units";
 
     AllocationBuffer *allocBuffer = AllocationBuffer::GetAllocBuffer();
     if (LIKELY(allocBuffer != nullptr)) {
@@ -150,7 +151,7 @@ void FromSpace::CopyFromRegions(Taskpool *threadPool)
         RegionDesc *region = fromRegionList_.GetHeadRegion();
         TaskPackMonitor monitor(parallel, parallel);
         for (uint32_t i = 0; i < parallel; ++i) {
-            ASSERT_LOGF(region != nullptr, "from region list records wrong region info");
+            ASSERT_PRINT(region != nullptr, "from region list records wrong region info");
             RegionDesc *startRegion = region;
             for (size_t count = 0; count < regionCntEachTask; ++count) {
                 region = region->GetNextRegion();

@@ -121,9 +121,10 @@ public:
 
         InitRegionPhaseLine(region);
 
-        DLOG(REGION, "alloc small object region %p @0x%zx+%zu units[%zu+%zu, %zu) type %u", region,
-             region->GetRegionStart(), region->GetRegionSize(), region->GetUnitIdx(), region->GetUnitCount(),
-             region->GetUnitIdx() + region->GetUnitCount(), region->GetRegionType());
+        LOG(DEBUG, GC) << "alloc small object region " << region << " @0x" << std::hex << region->GetRegionStart()
+                       << "+" << std::dec << region->GetRegionSize() << " units[" << region->GetUnitIdx() << "+"
+                       << region->GetUnitCount() << ", " << region->GetUnitIdx() + region->GetUnitCount() << ") type "
+                       << static_cast<size_t>(region->GetRegionType());
         AddFullRegion(region);
 
         uintptr_t start = region->GetRegionStart();
@@ -141,8 +142,8 @@ public:
     void HandleFullThreadLocalRegion(RegionDesc *region)
     {
         ark::os::memory::LockHolder lock(lock_);
-        ASSERT_LOGF(region->GetRegionType() == RegionDesc::RegionType::THREAD_LOCAL_OLD_REGION,
-                    "not thread local old region");
+        ASSERT_PRINT(region->GetRegionType() == RegionDesc::RegionType::THREAD_LOCAL_OLD_REGION,
+                     "not thread local old region");
         tlOldRegionList_.DeleteRegion(region);
         recentFullOldRegionList_.PrependRegion(region, RegionDesc::RegionType::OLD_REGION);
     }

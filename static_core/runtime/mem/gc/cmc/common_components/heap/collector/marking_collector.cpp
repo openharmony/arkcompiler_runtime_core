@@ -65,7 +65,7 @@ static void ClearWeakRef(WeakStack::value_type *begin, WeakStack::value_type *en
     for (auto iter = begin; iter != end; ++iter) {
         RefField<> *fieldPointer = iter->first;
         size_t offset = iter->second;
-        ASSERT_LOGF(offset % sizeof(RefField<>) == 0, "offset is not aligned");
+        ASSERT_PRINT(offset % sizeof(RefField<>) == 0, "offset is not aligned");
 
         RefField<> &field = reinterpret_cast<RefField<> &>(*fieldPointer);
         RefField<> oldField(field);
@@ -119,7 +119,7 @@ void MarkingCollector::ProcessMarkStack([[maybe_unused]] uint32_t threadIndex, P
             if (Heap::IsHeapAddress(obj) && (!MarkObject(obj))) {
                 markStack.Push(obj);
                 needProcess = true;
-                DLOG(TRACE, "tracing take from satb buffer: obj %p", obj);
+                LOG(DEBUG, GC) << "tracing take from satb buffer: obj " << obj;
             }
         }
         return needProcess;
@@ -228,7 +228,7 @@ void MarkingCollector::TracingImpl(GlobalMarkStack &globalMarkStack, bool parall
 
     // enable parallel marking if we have thread pool.
     Taskpool *threadPool = GetThreadPool();
-    ASSERT_LOGF(threadPool != nullptr, "thread pool is null");
+    ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
     if (parallel) {  // parallel marking.
         uint32_t parallelCount = 0;
         // During the STW remark phase, Expect it to utilize all GC threads.
@@ -276,7 +276,7 @@ bool MarkingCollector::PushRootToWorkStack(LocalCollectStack &collectStack, Base
 {
     RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
     if (gcReason_ == GCReason::GC_REASON_YOUNG && !regionInfo->IsInYoungSpace()) {
-        DLOG(ENUM, "enum: skip old object %p<%p>(%zu)", obj, obj->GetTypeInfo(), obj->GetSize());
+        LOG(DEBUG, GC) << "enum: skip old object " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")";
         return false;
     }
 
@@ -284,8 +284,9 @@ bool MarkingCollector::PushRootToWorkStack(LocalCollectStack &collectStack, Base
     bool marked = regionInfo->MarkObject(obj);
     if (!marked) {
         DCHECK(!regionInfo->IsGarbageRegion());
-        DLOG(TRACE, "mark obj %p<%p>(%zu) in region %p(%u)@%#zx, live %u", obj, obj->GetTypeInfo(), obj->GetSize(),
-             regionInfo, regionInfo->GetRegionType(), regionInfo->GetRegionStart(), regionInfo->GetLiveByteCount());
+        LOG(DEBUG, GC) << "mark obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ") in region "
+                       << regionInfo << "(" << static_cast<size_t>(regionInfo->GetRegionType()) << ")@0x" << std::hex
+                       << regionInfo->GetRegionStart() << std::dec << ", live " << regionInfo->GetLiveByteCount();
         collectStack.Push(obj);
         return true;
     } else {
@@ -326,7 +327,7 @@ void MarkingCollector::MarkingRoots(const CArrayList<BaseObject *> &collectedRoo
 
     COMMON_PHASE_TIMER("MarkingRoots");
 
-    ASSERT_LOGF(GetThreadPool() != nullptr, "null thread pool");
+    ASSERT_PRINT(GetThreadPool() != nullptr, "null thread pool");
 
     // use fewer threads and lower priority for concurrent mark.
     const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
@@ -355,7 +356,7 @@ void MarkingCollector::Remark()
                  ("mark obejects:" + std::to_string(markedObjectCount_.load(std::memory_order_relaxed))).c_str());
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    VLOG(DEBUG, "mark %zu objects", markedObjectCount_.load(std::memory_order_relaxed));
+    LOG(DEBUG, GC) << "mark " << markedObjectCount_.load(std::memory_order_relaxed) << " objects";
 }
 
 class ClearWeakRefTask : public ArrayTaskDispatcher::ArrayTask {
@@ -383,7 +384,7 @@ void MarkingCollector::ClearWeakStack(bool parallel)
     }
     // the globalWeakStack_ cannot be modified during task execution
     Taskpool *threadPool = GetThreadPool();
-    ASSERT_LOGF(threadPool != nullptr, "thread pool is null");
+    ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
     constexpr size_t BATCH_N = 200;
     if (parallel && globalWeakStack_.size() > BATCH_N) {
         auto inputs = &globalWeakStack_;
@@ -420,7 +421,7 @@ bool MarkingCollector::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
             remarkStack.pop_back();
             if (Heap::IsHeapAddress(obj) && !this->MarkObject(obj)) {
                 collectStack.Push(obj);
-                DLOG(TRACE, "satb buffer add obj %p", obj);
+                LOG(DEBUG, GC) << "satb buffer add obj " << obj;
             }
         }
         collectStack.Publish();
@@ -440,7 +441,7 @@ void MarkingCollector::MarkRememberSetImpl(BaseObject *object, LocalCollectStack
             if (region->IsInYoungSpace() && !region->IsNewObjectSinceMarking(targetObj) &&
                 !this->MarkObject(targetObj)) {
                 collectStack.Push(targetObj);
-                DLOG(TRACE, "remember set marking obj: %p@%p, ref: %p", object, &field, targetObj);
+                LOG(DEBUG, GC) << "remember set marking obj: " << object << "@" << &field << ", ref: " << targetObj;
             }
         }
     };
@@ -449,7 +450,7 @@ void MarkingCollector::MarkRememberSetImpl(BaseObject *object, LocalCollectStack
 
 void MarkingCollector::ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel)
 {
-    LOGF_CHECK(MarkSatbBuffer(globalMarkStack)) << "not cleared\n";
+    LOG_IF(UNLIKELY(!MarkSatbBuffer(globalMarkStack)), FATAL, GC) << "not cleared\n";
 }
 
 void MarkingCollector::MarkAwaitingJitFort()
@@ -467,8 +468,8 @@ void MarkingCollector::Fini()
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
 void MarkingCollector::DumpHeap(const CString &tag)
 {
-    ASSERT_LOGF(MutatorManager::Instance().WorldStopped(), "Not In STW");
-    DLOG(FRAGMENT, "DumpHeap %s", tag.Str());
+    ASSERT_PRINT(MutatorManager::Instance().WorldStopped(), "Not In STW");
+    LOG(DEBUG, GC) << "DumpHeap " << tag.Str();
     // dump roots
     DumpRoots(FRAGMENT);
     // dump object contents
@@ -477,10 +478,10 @@ void MarkingCollector::DumpHeap(const CString &tag)
         // obj->DumpObject(FRAGMENT)
     };
     bool ret = Heap::GetHeap().ForEachObject(dumpVisitor, false);
-    LOGE_IF(UNLIKELY(!ret)) << "theAllocator.ForEachObject() in DumpHeap() return false.";
+    LOG_IF(UNLIKELY(!ret), ERROR, GC) << "theAllocator.ForEachObject() in DumpHeap() return false.";
 
     // dump object types
-    DLOG(FRAGMENT, "Print Type information");
+    LOG(DEBUG, GC) << "Print Type information";
     std::set<TypeInfo *> classinfoSet;
     auto assembleClassInfoVisitor = [&classinfoSet](BaseObject *obj) {
         TypeInfo *classInfo = obj->GetTypeInfo();
@@ -488,17 +489,17 @@ void MarkingCollector::DumpHeap(const CString &tag)
         (void)classinfoSet.insert(classInfo);
     };
     ret = Heap::GetHeap().ForEachObject(assembleClassInfoVisitor, false);
-    LOGE_IF(UNLIKELY(!ret)) << "theAllocator.ForEachObject()#2 in DumpHeap() return false.";
+    LOG_IF(UNLIKELY(!ret), ERROR, GC) << "theAllocator.ForEachObject()#2 in DumpHeap() return false.";
 
     for (auto it = classinfoSet.begin(); it != classinfoSet.end(); it++) {
         TypeInfo *classInfo = *it;
     }
-    DLOG(FRAGMENT, "Dump Allocator");
+    LOG(DEBUG, GC) << "Dump Allocator";
 }
 
 void MarkingCollector::DumpRoots(LogType logType)
 {
-    LOG_COMMON(FATAL) << "Unresolved fatal";
+    LOG(FATAL, COMMON) << "Unresolved fatal";
     UNREACHABLE();
 }
 #endif
@@ -597,7 +598,7 @@ void MarkingCollector::UpdateGCStats()
     oss << "allocated bytes " << bytesAllocated << " (survive bytes " << survivedBytes << ", recent-allocated "
         << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << gcStats.targetFootprint
         << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold;
-    VLOG(DEBUG, oss.str().c_str());
+    LOG(DEBUG, GC) << oss.str();
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::UpdateGCStats END",
                  ("allocated bytes:" + std::to_string(bytesAllocated) + ";survive bytes:" +
                   std::to_string(survivedBytes) + ";recent allocated:" + std::to_string(recentBytes) +
@@ -627,7 +628,8 @@ void MarkingCollector::CopyObject(const BaseObject &fromObj, BaseObject &toObj, 
 {
     uintptr_t from = reinterpret_cast<uintptr_t>(&fromObj);
     uintptr_t to = reinterpret_cast<uintptr_t>(&toObj);
-    LOGE_IF(memmove_s(reinterpret_cast<void *>(to), size, reinterpret_cast<void *>(from), size) != EOK)
+    LOG_IF(UNLIKELY(memmove_s(reinterpret_cast<void *>(to), size, reinterpret_cast<void *>(from), size) != EOK), ERROR,
+           GC)
         << "memmove_s fail";
 #if defined(COMMON_TSAN_SUPPORT)
     Sanitizer::TsanFixShadow(reinterpret_cast<void *>(from), reinterpret_cast<void *>(to), size);
@@ -650,9 +652,9 @@ void MarkingCollector::RunGarbageCollection(uint64_t gcIndex, GCReason reason, G
     auto gcReasonName = std::string(g_gcRequests[gcReason_].name);
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
     auto currentThreshold = Heap::GetHeap().GetCollector().GetGCStats().GetThreshold();
-    VLOG(DEBUG, "Begin GC log. GCReason: %s, GCType: %s, Current allocated %s, Current threshold %s, gcIndex=%llu",
-         gcReasonName.c_str(), GCTypeToString(gcType), Pretty(currentAllocatedSize).c_str(),
-         Pretty(currentThreshold).c_str(), gcIndex);
+    LOG(DEBUG, GC) << "Begin GC log. GCReason: " << gcReasonName << ", GCType: " << GCTypeToString(gcType)
+                   << ", Current allocated " << Pretty(currentAllocatedSize) << ", Current threshold "
+                   << Pretty(currentThreshold) << ", gcIndex=" << gcIndex;
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::RunGarbageCollection",
                  ("GCReason:" + gcReasonName + ";GCType:" + GCTypeToString(gcType) +
                   ";Sensitive:" + std::to_string(static_cast<int>(Heap::GetHeap().GetSensitiveStatus())) +
@@ -695,7 +697,7 @@ void MarkingCollector::UpdateGCCompletionStats(GCStats &gcStats)
         const int prec = 3;
         oss << "total gc time: " << Pretty(gcTimeNs / NS_PER_US) << " us, collection rate ";
         oss << std::setprecision(prec) << rate << " MB/s";
-        VLOG(DEBUG, oss.str().c_str());
+        LOG(DEBUG, GC) << oss.str();
     }
 
     g_gcCount++;

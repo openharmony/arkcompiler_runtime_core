@@ -28,7 +28,7 @@ using namespace std;
 Allocator::Allocator()
 {
     allocBufferManager_ = new (std::nothrow) AllocBufferManager();
-    LOGF_CHECK(allocBufferManager_ != nullptr) << "new alloc buffer manager failed";
+    LOG_IF(UNLIKELY(allocBufferManager_ == nullptr), FATAL, MM_OBJECT_EVENTS) << "new alloc buffer manager failed";
     asyncAllocationInitSwitch_ = InitAyncAllocation();
     // Atomic with seq_cst order reason: data race with isAsyncAllocationEnable_ with requirement for sequentially
     // consistent order where threads observe all modifications in the same order
@@ -46,7 +46,7 @@ bool Allocator::InitAyncAllocation()
 #endif
     }
     if (strlen(enableAsyncAllocation) != 1) {
-        LOG_COMMON(ERROR) << "Unsupported arkEnableAsyncAllocation, arkEnableAsyncAllocation should be 0 or 1.\n";
+        LOG(ERROR, COMMON) << "Unsupported arkEnableAsyncAllocation, arkEnableAsyncAllocation should be 0 or 1.\n";
 #if defined(PANDA_TARGET_OHOS)
         return true;
 #else
@@ -60,7 +60,7 @@ bool Allocator::InitAyncAllocation()
         case '1':
             return true;
         default:
-            LOG_COMMON(ERROR) << "Unsupported arkEnableAsyncAllocation, arkEnableAsyncAllocation should be 0 or 1.\n";
+            LOG(ERROR, COMMON) << "Unsupported arkEnableAsyncAllocation, arkEnableAsyncAllocation should be 0 or 1.\n";
     }
     return true;
 }
@@ -84,7 +84,7 @@ PagePool &PagePool::Instance() noexcept
 Allocator *Allocator::CreateAllocator()
 {
     RegionalHeap *heapSpace = new (std::nothrow) RegionalHeap();
-    LOGF_CHECK(heapSpace != nullptr) << "New RegionalHeap failed";
+    LOG_IF(UNLIKELY(heapSpace == nullptr), FATAL, MM_OBJECT_EVENTS) << "New RegionalHeap failed";
     return heapSpace;
 }
 }  // namespace common_vm

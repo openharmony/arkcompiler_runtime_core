@@ -14,6 +14,8 @@
  */
 #include "common_components/common/run_type.h"
 
+#include "libarkbase/utils/logger.h"
+
 namespace common_vm {
 // REMEMBER TO CHANGE NUM_OF_RUN_TYPES WHEN YOU ADD/REMOVE CONFIGS
 // this stores a config for each kind of run (represented by an index)
@@ -92,10 +94,10 @@ uint32_t RunType::g_size2Idx[MAX_NUM_OF_RUN_TYPES] = {0};  // all zero-initialis
 void RunType::InitRunTypeMap()
 {
     constexpr uint32_t runSizeShift = 3;
-    ASSERT_LOGF(RunType::NUM_OF_RUN_TYPES <= RunType::MAX_NUM_OF_RUN_TYPES, "too many configs");
+    ASSERT_PRINT(RunType::NUM_OF_RUN_TYPES <= RunType::MAX_NUM_OF_RUN_TYPES, "too many configs");
     uint32_t idx = RunType::NUM_OF_RUN_TYPES;
     uint32_t nextSize = RunType::TYPES[RunType::NUM_OF_RUN_TYPES - 1].size;
-    ASSERT_LOGF(nextSize <= (RunType::MAX_NUM_OF_RUN_TYPES << runSizeShift), "size too big in config");
+    ASSERT_PRINT(nextSize <= (RunType::MAX_NUM_OF_RUN_TYPES << runSizeShift), "size too big in config");
     uint32_t i = (RunType::MAX_NUM_OF_RUN_TYPES - 1);
     while (true) {
         if (((i + 1) << runSizeShift) > nextSize) {
@@ -103,11 +105,11 @@ void RunType::InitRunTypeMap()
                 RunType::g_size2Idx[i] = idx;
             }
         } else {
-            ASSERT_LOGF(((i + 1) << runSizeShift) == nextSize, "init run config error");
-            ASSERT_LOGF(idx > 0, "init run config error");
+            ASSERT_PRINT(((i + 1) << runSizeShift) == nextSize, "init run config error");
+            ASSERT_PRINT(idx > 0, "init run config error");
             RunType::g_size2Idx[i] = --idx;
             if (idx > 0 && idx < RunType::NUM_OF_RUN_TYPES) {
-                ASSERT_LOGF(static_cast<size_t>(RunType::TYPES[idx - 1].size) < nextSize, "not in ascending order");
+                ASSERT_PRINT(static_cast<size_t>(RunType::TYPES[idx - 1].size) < nextSize, "not in ascending order");
                 nextSize = RunType::TYPES[idx - 1].size;
             } else {
                 nextSize = 0;
@@ -121,7 +123,7 @@ void RunType::InitRunTypeMap()
         }
     }
 
-    ASSERT_LOGF(RUNTYPE_SIZE_TO_RUN_IDX(RUN_ALLOC_LARGE_SIZE) + 1 == RunType::NUM_OF_RUN_TYPES,
-                "run config inconsistent: large size");
+    ASSERT_PRINT(RUNTYPE_SIZE_TO_RUN_IDX(RUN_ALLOC_LARGE_SIZE) + 1 == RunType::NUM_OF_RUN_TYPES,
+                 "run config inconsistent: large size");
 }
 }  // namespace common_vm

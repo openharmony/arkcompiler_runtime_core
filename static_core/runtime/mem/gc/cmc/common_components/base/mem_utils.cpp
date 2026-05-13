@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "common_components/log/log.h"
+#include "libarkbase/utils/logger.h"
+
 #include "securec.h"
 
 namespace common_vm {
@@ -23,7 +24,8 @@ void MemorySet(uintptr_t dest, size_t size, int c, size_t count)
     while (size != 0) {
         size_t sizePerChunk = size > SECUREC_MEM_MAX_LEN ? SECUREC_MEM_MAX_LEN : size;
         size_t countPerChunk = count > SECUREC_MEM_MAX_LEN ? SECUREC_MEM_MAX_LEN : count;
-        LOGE_IF(memset_s(reinterpret_cast<void *>(destAddress), sizePerChunk, c, countPerChunk) != EOK)
+        LOG_IF(UNLIKELY(memset_s(reinterpret_cast<void *>(destAddress), sizePerChunk, c, countPerChunk) != EOK), ERROR,
+               MM_OBJECT_EVENTS)
             << "memset_s fail";
         size -= sizePerChunk;
         count -= countPerChunk;
@@ -38,8 +40,9 @@ void MemoryCopy(uintptr_t dest, size_t size, const uintptr_t src, size_t count)
     while (size != 0) {
         size_t sizePerChunk = size > SECUREC_MEM_MAX_LEN ? SECUREC_MEM_MAX_LEN : size;
         size_t countPerChunk = count > SECUREC_MEM_MAX_LEN ? SECUREC_MEM_MAX_LEN : count;
-        LOGE_IF(memcpy_s(reinterpret_cast<void *>(destAddress), sizePerChunk, reinterpret_cast<void *>(srcAddress),
-                         countPerChunk) != EOK)
+        LOG_IF(UNLIKELY(memcpy_s(reinterpret_cast<void *>(destAddress), sizePerChunk,
+                                 reinterpret_cast<void *>(srcAddress), countPerChunk) != EOK),
+               ERROR, MM_OBJECT_EVENTS)
             << "memcpy_s fail";
         size -= sizePerChunk;
         count -= countPerChunk;

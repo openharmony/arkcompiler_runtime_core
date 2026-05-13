@@ -122,7 +122,7 @@ public:
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "SmartGC: set high sensitive status: ", std::to_string(isStart).c_str());
         isStart ? SetSensitiveStatus(AppSensitiveStatus::ENTER_HIGH_SENSITIVE)
                 : SetSensitiveStatus(AppSensitiveStatus::EXIT_HIGH_SENSITIVE);
-        LOG_COMMON(INFO) << "SmartGC: set high sensitive status: " << isStart;
+        LOG(INFO, COMMON) << "SmartGC: set high sensitive status: " << isStart;
     }
 
     bool InSensitiveStatus() const

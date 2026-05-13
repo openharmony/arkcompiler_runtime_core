@@ -322,7 +322,8 @@ public:
     {
         uint64_t elapsedTimeNs = GetElapsedTime();
         stwParam_.elapsedTimeNs = elapsedTimeNs;
-        VLOG(DEBUG, "%s stw time %zu us", reason_, elapsedTimeNs / 1000);  // 1000:nsec per usec
+        const uint64_t elapsedTimeUs = elapsedTimeNs / 1000UL;
+        LOG(DEBUG, GC) << reason_ << " stw time " << elapsedTimeUs << " us";  // 1000:nsec per usec
         MutatorManager::Instance().StartTheWorld();
     }
 
