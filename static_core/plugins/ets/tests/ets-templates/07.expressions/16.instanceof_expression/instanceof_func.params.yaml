@@ -13,8 +13,10 @@
 
 ---
 # Type erasure for function types: parameter types are erased to Any, return type
-# to never. Signature structure (mandatory/optional/rest pattern) is preserved.
-# instanceof checks match by function subtyping
+# to never. Signature structure (mandatory/optional/rest pattern) allows subtype to
+# have less or equal number of required parameters and less or equal number of
+# (required + optional) parameters, and requires supertype to have rest parameter
+# if subtype has it. instanceof checks match by function subtyping
 #
 # M - mandatory
 # O - optional
@@ -58,7 +60,7 @@ cases:
       - { type: '(x: Parent) => GrandChild', res: 'false' } # Different structure: 1M != 1M+2O
       - { type: '(x: Parent, y?: Child) => GrandChild', res: 'false' } # Different structure: 1M+1O != 1M+2O
       - { type: '(x: Parent, y?: Parent, z?: GrandChild) => GrandChild', res: 'true' } # Same structure 1M+2O, param types erased
-      - { type: '(x: Parent, y: Child, z?: GrandChild) => GrandChild', res: 'false' } # Different structure: 2M+1O != 1M+2O
+      - { type: '(x: Parent, y: Child, z?: GrandChild) => GrandChild', res: 'true' } # Allowed difference in structure: 2M+1O != 1M+2O but subtype is allowed to have less M since spec 1.2.1 tp7
       - { type: '(x?: Parent, y?: Child, z?: GrandChild) => GrandChild', res: 'false' } # Different structure: 3O != 1M+2O
 
 #20
