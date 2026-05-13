@@ -166,61 +166,9 @@ cases:
           let ok = v1 == null && v2 == undefined && v3[0] == null && v3[1] == null && v4[0] == null &&
               v5[1] == null && v6[0] == 43.0 && v6[1] == 'xyz'
 
-    # recursive cases
-    - defs: |-
-          type NestedTup = [boolean, NestedTup|undefined, string]
-      use: |-
-          let v1: NestedTup = [true, [true, undefined, 'xyz'], 'abc']
-          let ok = v1[0] == true
-
-    - defs: |-
-          type NestedNumArray = number | NestedNumArray[]
-      use: |-
-          let v1: NestedNumArray = 1.0
-          let v2: NestedNumArray = [1.0, 2.0, 3.0] as NestedNumArray[]
-          let v3: NestedNumArray = [1.0, [2.0, 3.0] as NestedNumArray[], 4.0] as NestedNumArray[]
-          let v4: NestedNumArray = [[1.0] as NestedNumArray[]] as NestedNumArray[]
-          let v5: NestedNumArray = [1.0, [[[2.0] as NestedNumArray[]]]] as NestedNumArray[]
-          let ok = v1 == 1.0 &&
-              (v2[0] as number)== 1.0 && (v2[1] as number) == 2.0 && (v2[2] as number) == 3.0 &&
-              (v3[0] as number) == 1.0 && (v3[1] as NestedNumArray[])[0] == 2.0 && (v3[1] as NestedNumArray[])[1] == 3.0 && (v3[2] as number) == 4.0 &&
-              ((v4[0] as NestedNumArray[])[0] as number) == 1.0 &&
-              (v5[0] as number == 1.0) && ((((v5[1] as NestedNumArray[])[0] as NestedNumArray[])[0] as NestedNumArray[])[0] as number) == 2.0
-
-    - defs: |-
-          type Foo = (p: string) => string
-          type NestedFunc = NestedFunc[] | Foo
-      use: |-
-          let v1: NestedFunc = []
-          let v2: NestedFunc = (p: string): string => { return p + p }
-          let v3: NestedFunc = [v1, v2, (p: string): string => { return p + p }]
-            let ok = v3.length == 3 &&
-                ((v3 as NestedFunc[])[0] as NestedFunc[]).length == 0 &&
-                ((v3 as NestedFunc[])[1] as Foo)('abc') == 'abcabc' &&
-                ((v3 as NestedFunc[])[2] as Foo)('xyz') == 'xyzxyz'
-
     - defs: |-
           enum Color { Red, Green, Blue };
           type BaseColor = Color;
       use: |-
           let v: BaseColor = BaseColor.Red;
           let ok = true;
-
-    - defs: |-
-          type Func = (p: int, q: Func) => int;
-      use: |-
-          let a:Func = (p: int, q: Func):int => {return 1};
-          let ok:boolean = a(10, a) == 1;
-
-    - defs: |-
-        type I = () => I | null
-      use: |-
-        const i: I = () => null
-        let ok = i() == null
-
-    - defs: |-
-        type I = () => I | null
-      use: |-
-        const i: I = () => (() => null) as I
-        const result = i();
-        let ok = result != null

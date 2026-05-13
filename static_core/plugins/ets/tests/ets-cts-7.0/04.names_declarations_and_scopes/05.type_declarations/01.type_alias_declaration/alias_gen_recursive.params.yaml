@@ -1,0 +1,261 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - defs: |-
+      type A<T> = Array<A<T>>
+    use: |-
+      let v1: A<number> = new Array<A<number>>()
+      let v2: A<number> = [new Array<A<number>>(), v1]
+      let v3: A<number> = [new Array<A<number>>(), v2, v1]
+      arktest.assertTrue(v1 instanceof Array)
+      arktest.assertEQ(v1.length, 0)
+      arktest.assertTrue(v2 instanceof Array)
+      arktest.assertEQ(v2.length, 2)
+      arktest.assertTrue(v2[0] instanceof Array)
+      arktest.assertEQ(v2[0].length, 0)
+      arktest.assertTrue(v2[1] instanceof Array)
+      arktest.assertEQ(v2[1].length, 0)
+      arktest.assertTrue(v3 instanceof Array)
+      arktest.assertEQ(v3.length, 3)
+      arktest.assertTrue(v3[0] instanceof Array)
+      arktest.assertEQ(v3[0].length, 0)
+      arktest.assertTrue(v3[1] instanceof Array)
+      arktest.assertEQ(v3[1].length, 2)
+      arktest.assertTrue(v3[1][0] instanceof Array)
+      arktest.assertEQ(v3[1][0].length, 0)
+      arktest.assertTrue(v3[1][1] instanceof Array)
+      arktest.assertEQ(v3[1][1].length, 0)
+      arktest.assertTrue(v3[2] instanceof Array)
+      arktest.assertEQ(v3[2].length, 0)
+
+  - defs: |-
+      type A<T> = string | Array<A<T>>
+    use: |-
+      let v1: A<number> = "abc"
+      let v2: A<number> = [new Array<A<number>>(), v1]
+      let v3: A<number> = [new Array<A<number>>(), v2, "efg"]
+      arktest.assertTrue(v1 instanceof string)
+      arktest.assertEQ(v1, "abc")
+      arktest.assertTrue(v2 instanceof Array)
+      arktest.assertEQ(v2.length, 2)
+      arktest.assertTrue(v2[0] instanceof Array)
+      arktest.assertEQ((v2[0] as Array<A<number>>).length, 0)
+      arktest.assertTrue(v2[1] instanceof string)
+      arktest.assertEQ(v2[1], "abc")
+      arktest.assertTrue(v3 instanceof Array)
+      arktest.assertEQ(v3.length, 3)
+      arktest.assertTrue(v3[0] instanceof Array)
+      arktest.assertEQ((v3[0] as Array<A<number>>).length, 0)
+      arktest.assertTrue(v3[1] instanceof Array)
+      arktest.assertEQ((v3[1] as Array<A<number>>).length, 2)
+      arktest.assertTrue((v3[1] as Array<A<number>>)[0] instanceof Array)
+      arktest.assertEQ(((v3[1] as Array<A<number>>)[0] as Array<A<number>>).length, 0)
+      arktest.assertTrue((v3[1] as Array<A<number>>)[1] instanceof string)
+      arktest.assertEQ((v3[1] as Array<A<number>>)[1], "abc")
+      arktest.assertTrue(v3[2] instanceof string)
+      arktest.assertEQ(v3[2], "efg")
+
+  - defs: |-
+      type A<T> = T | Array<A<T>>
+    use: |-
+      let v1: A<number> = 123
+      let v2: A<number> = [new Array<A<number>>(), v1]
+      let v3: A<number> = [new Array<A<number>>(), v2, 567]
+      arktest.assertTrue(v1 instanceof number)
+      arktest.assertEQ(v1, 123)
+      arktest.assertTrue(v2 instanceof Array)
+      arktest.assertEQ(v2.length, 2)
+      arktest.assertTrue(v2[0] instanceof Array)
+      arktest.assertEQ((v2[0] as Array<A<number>>).length, 0)
+      arktest.assertTrue(v2[1] instanceof number)
+      arktest.assertEQ(v2[1], 123)
+      arktest.assertTrue(v3 instanceof Array)
+      arktest.assertEQ(v3.length, 3)
+      arktest.assertTrue(v3[0] instanceof Array)
+      arktest.assertEQ((v3[0] as Array<A<number>>).length, 0)
+      arktest.assertTrue(v3[1] instanceof Array)
+      arktest.assertEQ((v3[1] as Array<A<number>>).length, 2)
+      arktest.assertTrue((v3[1] as Array<A<number>>)[0] instanceof Array)
+      arktest.assertEQ(((v3[1] as Array<A<number>>)[0] as Array<A<number>>).length, 0)
+      arktest.assertTrue((v3[1] as Array<A<number>>)[1] instanceof number)
+      arktest.assertEQ((v3[1] as Array<A<number>>)[1], 123)
+      arktest.assertTrue(v3[2] instanceof number)
+      arktest.assertEQ(v3[2], 567)
+
+  - defs: |-
+      class C<T> {
+        value: T | null
+        constructor(value: T | null) {
+          this.value = value
+        }
+      }
+      type B<T> = C<B<T>>
+    use: |-
+      let v1: B<number> = new C<B<number>>(null)
+      let v2: B<number> = new C<B<number>>(v1)
+      let v3: B<number> = new C<B<number>>(v2)
+      arktest.assertEQ(v1.value, null)
+      arktest.assertEQ(v2.value!.value, null)
+      arktest.assertEQ(v3.value!.value!.value, null)
+      let first = v3 as C<B<number>>
+      let second = first.value as B<number>
+      let third = (second as C<B<number>>).value as B<number>
+      let fourth = third as C<B<number>>
+      arktest.assertNE(first.value, null)
+      arktest.assertNE(second.value, null)
+      arktest.assertNE(third, null)
+      arktest.assertEQ(fourth.value, null)
+
+  - defs: |-
+      class C<T> {
+        value: T | null
+        constructor(value: T | null) {
+          this.value = value
+        }
+      }
+      type M<T> = C<F<T>>
+      type F<T> = C<M<T>>
+    use: |-
+      let v1: M<bigint> = new C<F<bigint>>(null)
+      let v2: F<bigint> = new C<M<bigint>>(v1)
+      let v3: M<bigint> = new C<F<bigint>>(v2)
+      arktest.assertEQ(v1.value, null)
+      arktest.assertEQ((v2.value as M<bigint>).value, null)
+      arktest.assertEQ(((v3.value as F<bigint>).value as M<bigint>).value, null)
+      let first = v3 as C<F<bigint>>
+      let second = first.value as F<bigint>
+      let third = (second as C<M<bigint>>).value as M<bigint>
+      let fourth = third as C<F<bigint>>
+      arktest.assertNE(first.value, null)
+      arktest.assertNE(second.value, null)
+      arktest.assertNE(third, null)
+      arktest.assertEQ(fourth.value, null)
+
+  - defs: |-
+      type NestedMap<K> = K | Map<K, NestedMap<K>>
+    use: |-
+      let v1: NestedMap<String> = 'A'
+      let v2: NestedMap<Number> = 42.0
+      let v3: NestedMap<String> = new Map<String, NestedMap<String>>()
+      let v4: NestedMap<String> = new Map<String, NestedMap<String>>()
+      v3.set('A', 'B')
+      v4.set('C', v3)
+      arktest.assertEQ(v1, 'A')
+      arktest.assertEQ(v2, 42.0)
+      arktest.assertEQ(v3.get('A'), 'B')
+      arktest.assertEQ((v4.get('C') as Map<String, NestedMap<String>>).get('A'), 'B')
+
+  - defs: |-
+      class A<T, U> {
+        public value: U | boolean
+        constructor(value: U | boolean) {
+          this.value = value
+        }
+      }
+      class B {}
+      type Stuff<T, U> = A<T, Stuff<B, U>>;
+    use: |-
+      let v1: Stuff<B, Char> = new A<B, Stuff<B, Char>>(true)
+      let v2: Stuff<Int, Char> = new A<Int, Stuff<B, Char>>(v1)
+      arktest.assertEQ(v1.value, true)
+      arktest.assertEQ((v2.value as A<B, Stuff<B, Char>>).value, true)
+
+  - defs: |-
+      type Matrix<T> = (p: Matrix<Long>) => T;
+    use: |-
+      let a: Matrix<Boolean> = (p: Matrix<Long>):Boolean => {return true};
+      let b: Matrix<Long> = (p: Matrix<Long>):Long => {return 1};
+      arktest.assertEQ(a(b), true)
+      arktest.assertEQ(b(b), 1)
+
+  - defs: |-
+      type A<T> = FixedArray<B<T> | T>
+      type B<T> = Array<A<T> | T | string>
+      function func1(): A<number> {
+        return [2.0] as A<number>
+      }
+      function func2(): FixedArray<B<number> | string> {
+        return [] as FixedArray<B<number> | string>
+      }
+    use: |-
+      let a = func1()
+      let b = func2()
+      arktest.assertEQ(a.length, 1)
+      arktest.assertEQ(a[0], 2.0)
+      arktest.assertEQ(b.length, 0)
+
+  - defs: |-
+      type ValueOrArray<T> = T | ArrayOfValueOrArray<T>
+      class ArrayOfValueOrArray<T> extends Array<ValueOrArray<T>> {
+        public value: boolean
+        constructor(value: boolean) {
+          super()
+          this.value = value
+        }
+      }
+    use: |-
+      let v1: ArrayOfValueOrArray<string> = new ArrayOfValueOrArray<string>(true)
+      let v2: ArrayOfValueOrArray<string> = new ArrayOfValueOrArray<string>(false)
+      v1.push("abc")
+      v2.push("efg")
+      v2.push(v1)
+      arktest.assertEQ(v1.length, 1)
+      arktest.assertEQ(v1[0], "abc")
+      arktest.assertEQ(v1.value, true)
+      arktest.assertEQ(v2.length, 2)
+      arktest.assertEQ(v2[0], "efg")
+      arktest.assertEQ((v2[1] as ArrayOfValueOrArray<string>).length, 1)
+      arktest.assertEQ((v2[1] as ArrayOfValueOrArray<string>)[0], "abc")
+      arktest.assertEQ(v2.value, false)
+
+  - defs: |-
+      class Node<T> {
+        value: T
+        left: Alias<T> | undefined
+        right?: Alias<T>
+      }
+      type Alias<T> = Node<T>
+    use: |-
+      let v1 = new Alias<string>
+      let v2 = new Alias<string>
+      v1.value = "I am Node root"
+      v2.left = v1
+      arktest.assertTrue(v1 instanceof Node)
+      arktest.assertTrue(v2 instanceof Node)
+      arktest.assertEQ((v2.left as Alias<string>).value, "I am Node root")
+
+  - defs: |-
+      class Node<T> {
+        value: T
+        left: Alias<T> | undefined
+        right?: Alias<T>
+      }
+      type Alias<T> = Node<T>
+    use: |-
+      let xx: Alias<string> = { value: 'I am Node root', left: { value: 'I am Left Node' }}
+      let xl: Node<string> = xx.left!
+      arktest.assertTrue(xx instanceof Node)
+      arktest.assertTrue(xx.value instanceof string)
+      arktest.assertEQ(xx.value, 'I am Node root')
+      arktest.assertEQ(xl.value, 'I am Left Node')
+
+  - defs: |-
+      type TRR<T> = Record<string, T | TRR<T> | undefined>
+    use: |-
+      let x: TRR<string> = {'k1': 'String 1'}
+      let xr: TRR<string> = {'k1': 'String 2', 'k2': x, 'k3': undefined}
+      arktest.assertEQ(xr['k1'], 'String 2')
+      arktest.assertEQ(xr['k2'], x)
+      arktest.assertEQ((xr['k2'] as TRR<string>)['k1'], 'String 1')
+      arktest.assertEQ(xr['k3'], undefined)
