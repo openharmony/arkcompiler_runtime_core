@@ -988,10 +988,30 @@ In the above example, ``C()`` is a *type call expression*. It is the short
 form of the normal method call ``C.$_invoke()``. Using an explicit call is
 always valid for the methods ``$_invoke`` and ``$_instantiate``.
 
-A class can define either the method ``$_invoke()`` or the method ``$_instantiate``
-but not both. Otherwise, a :index:`compile-time error` occurs. However, a class
-can define several implementations of the methods ``$_invoke`` or ``$_instantiate``
-with different signatures:
+A class can define several implementations of the methods ``$_invoke`` or
+``$_instantiate`` with different signatures:
+
+..  code-block:: typescript
+    :linenos:
+
+    // OK, two $_invoke with different signatures
+    class B {
+        static $_invoke(p: int): int { return p; }
+        static $_invoke(): string { return "hello"; }
+    }
+
+Ordinary :ref:`Static Methods` are not inherited and cannot be called from
+subclasses, but a *type call expression* allows using methods
+``$_invoke`` or ``$_instantiate`` defined in superclasses and overloading
+them. See :ref:`Overload Set for Methods $_invoke and $_instantiate`.
+
+A :index:`compile-time error` occurs if:
+
+- A class defines both the method ``$_invoke()`` and the method
+  ``$_instantiate``;
+
+- A class defines one of these methods and other method is defined
+  in a superclass.
 
 ..  code-block:: typescript
     :linenos:
@@ -1002,10 +1022,13 @@ with different signatures:
         static $_instantiate(factory: () => A): A { return factory(); }
     }
 
-    // OK, two $_invoke with different signatures
     class B {
-        static $_invoke(p: int): int { return p; }
-        static $_invoke(): string { return "hello"; }
+        static $_invoke(i: int): int { return i; }
+    }
+    
+    // Compile-time error, both $_invoke and $_instantiate defined
+    class C extends B {
+        static $_instantiate(factory: () => A): A { return factory(); }
     }
 
 Static methods have no access to type parameters of generic in |LANG|. It means
@@ -1048,6 +1071,9 @@ call of ``$_invoke()`` must not use a type parameter.
            constructor() { console.log("constructed") }
        }
        let x = new C() // constructor is called
+
+A class can declare an *instance* method ``$_invoke`` or ``$_instantiate``
+or both, but this does not make the class *callable*.
 
 The methods ``$_invoke`` and ``$_instantiate`` are similar but have differences
 as discussed below.
@@ -1092,10 +1118,6 @@ the signature has parameters, then the call must contain corresponding arguments
     console.log(Add(2, 2)) // prints: 4
     console.log(Add.$_invoke(2, 2)) // prints: 4
     console.log(Add("Number ", "one")) // prints "Number one"
-
-
-A class can declare an instance method ``$_invoke``
-but the method does not make the class *callable*.
 
 .. index::
    static method
@@ -1215,6 +1237,27 @@ if:
     }
     let x = C() // Compile-time error, wrong '$_instantiate' 1st parameter
 
+An implicitly passed factory returns an instance of the class used is the call:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+        static $_instantiate(factory: () => A): A { 
+            return factory() 
+        }
+    }
+    class B extends A {
+        field = 1
+    }
+
+    let a = A()    // Creates instance of 'A', 
+    let b = B()    // Creates instance of 'B'
+    console.log(a) // Output: A{}
+    console.log(b) // Output: B{field: 1}
+    
+    console.log(b.field) // Compile-time error, declared type of 'a' is 'A'
+
 Where the method ``$_instantiate`` is used implicitly
 in the *type call expression*:
 
@@ -1281,10 +1324,6 @@ no parameterless class constructor, then a
         A() // OK, default is used for the optional factory
         A.$_instantiate(() => { return new A(1); }) // OK, explicit call
 
-
-A class can declare an instance method ``$_instantiate``
-but the method does not make the class *callable*.
-
 .. index::
    method
    call
@@ -1296,6 +1335,60 @@ but the method does not make the class *callable*.
    callable type
    instance method
    instance
+
+|
+
+.. _Overload Set for Methods $_invoke and $_instantiate:
+
+Overload Set for Methods ``$_invoke`` and ``$_instantiate``
+===========================================================
+
+.. meta:
+    frontend_status: None
+
+An overload set for the name ``$_invoke`` or ``$_instantiate``
+is formed from the following:
+
+- Implicitly overloaded static methods (see :ref:`Implicit Method Overloading`);
+
+- Explicitly overloaded static methods listed in :ref:`Explicit Class Method Overload`;
+
+- Static methods from a direct superclass, if any.
+
+The following steps are taken to form an overload set:
+
+#. Explicitly and implicitly overloaded methods defined
+   in a current class are added into an overload set in the order
+   described in :ref:`Forming an Overload Set`, including the
+   methods that override methods from the superclass.
+
+#. Overload set from a direct superclass (if any) is added at the end of an
+   overload set of the current class. A method that is already added to the
+   overload set is not added again.
+
+Steps listed above are close to the steps descibed in
+:ref:`Overload Set for Class Instance Methods` except that
+
+- only static methods with names ``$_invoke`` or ``$_instantiate`` are considered;
+
+- methods from interfaces are not considered as static methods are not allowed
+  in interfaces.
+
+Forming an *overload set* for ``$_invoke`` is represented in the example below:
+
+..  code-block:: typescript
+    :linenos:
+
+    class A {
+        static $_invoke(i: int) { console.log(i) } // #1
+    }
+    class B extends A {
+        static $_invoke(s: string) { console.log(s) } //#2
+        // The overload set for '$_invoke' is {$_invoke#2, $_invoke#1}
+    }
+
+    B(42)    // Calls A.$_invoke, output: 42
+    B("abc") // Calls B.$_invoke, output: "abc"
 
 |
 
@@ -1576,8 +1669,8 @@ Explicit Function Overload
 .. meta:
     frontend_status: None
 
-*Explicit function overload* allows declaring a name for a set of functions
-(see :ref:`Function Declarations`). The syntax is presented below:
+*Explicit function overload* directive allows declaring a name for a set of
+functions (see :ref:`Function Declarations`). The syntax is presented below:
 
 .. code-block:: abnf
 
@@ -1597,19 +1690,21 @@ Explicit Function Overload
     qualified name
 
 A :index:`compile-time error` occurs if an *identifier* in the list refers
-to no accessible function.
+to inaccessible function.
 
-All overloaded functions must be in the same module or namespace scope (see
-:ref:`Scopes`). Otherwise, a :index:`compile-time error` occurs. The erroneous
+All overloaded function declarations as well as the *explicit function overload*
+directive must be in the same module or namespace scope (see :ref:`Scopes`).
+Otherwise, a :index:`compile-time error` occurs. The erroneous
 overload declarations are represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
-    import {foo1} from "something"
+    import {foo1, foo3} from "something"
 
     function foo2() {}
     overload foo {foo1, foo2} // Compile-time error
+    overload bar {foo1, foo3} // Compile-time error
 
     namespace N {
         export function fooN() {}

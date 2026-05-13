@@ -57,20 +57,16 @@ which there is no target type in the context where the expression is used.
 
 The type of a *standalone expression* is determined as follows:
 
-- In case of :ref:`Numeric Literals`, the type is the default type of a literal:
-
-    - Type of :ref:`Integer Literals` is ``int`` or ``long``;
-    - Type of :ref:`Floating-Point Literals` is ``double`` or ``float``.
-
-- In case of :ref:`Constant Expressions`, the type is inferred from operand
-  types and operations.
+- In case of :ref:`Constant Expressions`, including :ref:`Numeric Literals`,
+  the type is inferred using :ref:`Type Inference for Constant Expressions`.
 
 - In case of an :ref:`Array Literal`, the type is inferred from the elements
   (see :ref:`Array Type Inference from Types of Elements`).
 
-- Otherwise, a :index:`compile-time error` occurs. Specifically,
-  a :index:`compile-time error` occurs if an *object literal* is used
-  as a *standalone expression*.
+- In case of an :ref:`Object Literal`, the type cannot be is inferred and a
+  :index:`compile-time error` occurs.
+
+- Otherwise, the type is defined as in :ref:`Type of Expression`.
 
 The situation is represented in the example below:
 
@@ -180,7 +176,8 @@ as follows:
     }
 
 -  Otherwise, the type of ``expr`` is evaluated as type of a standalone
-   expression as in the example below:
+   expression (see :ref:`Type of Standalone Expression`) as in the example
+   below:
 
 .. code-block:: typescript
    :linenos:
@@ -290,12 +287,14 @@ Specifics of Type Parameters
 .. meta:
     frontend_status: Done
 
-If the type of a left-hand-side expression in *assignment-like context* is a
-type parameter, then it provides no additional information for type inference
-even where a type parameter constraint is set.
+If the type of a left-hand-side expression in *assignment-like context* (see
+:ref:`Assignment-like Contexts`) is a type parameter, then it provides no
+additional information for type inference even where a type parameter
+constraint is set.
 
 If the *target type* of an expression is a *type parameter*, then the type of
-the expression is inferred as the type of a *standalone expression*.
+the expression is inferred as the type of a *standalone expression* (see
+:ref:`Type of Standalone Expression`).
 
 The semantics is represented in the example below:
 
@@ -314,18 +313,16 @@ The semantics is represented in the example below:
 .. code-block:: typescript
    :linenos:
 
-    class C<T extends number> {
-        constructor (x: T) {}
-    }
-
-    new C(1) // Compile-time error
+    function foo <T extends number> (x: T) {}
+    foo (1) // Compile-time error
 
 The type of ``'1'`` in the example above is inferred as ``int`` (default type of
-an integer literal). The expression is considered ``new C<int>(1)`` and causes
+an integer literal). The expression is considered as ``foo <int>(1)`` and causes
 a :index:`compile-time error` because ``int`` is not a subtype of ``number``
 (type parameter constraint).
 
-Explicit type argument ``new C<number>(1)`` must be used to fix the code.
+Explicit type argument ``foo <number>(1)`` must be used to have such code
+compiled with no errors.
 
 .. index::
    inferred type
@@ -1036,7 +1033,7 @@ are met:
 
     let foo: (x?: number, y?: string) => void = (): void => {} // OK: ``m <= n``
     foo = (p?: number): void => {}                             // OK:  ``m <= n``
-    foo = (p1?: number, p2?: string): void => {}               // OK: Identical types
+    foo = (p1?: number, p2?: string): void => {}               // OK: identical types
     foo = (p: number): void => {}
           // Compile-time error, 1st parameter in type is optional but mandatory in lambda
     foo = (p1: number, p2?: string): void => {}
@@ -1185,7 +1182,7 @@ Identity relation for types ``A`` and ``B`` is defined as follows:
 
 .. note::
    :ref:`Type Alias Declaration` creates no new type but only a new name for
-   the existing type. An alias is indistinguishable from its base type.
+   the existing type. A type alias is indistinguishable from its base type.
 
 .. note::
    If a generic class or an interface has a type parameter ``T`` while its
@@ -1263,9 +1260,9 @@ Invariance, Covariance and Contravariance
     frontend_status: Done
 
 *Variance* is how subtyping between types relates to subtyping between
-derived types, including generic types (See :ref:`Generics`), member
+derived types, including generic types (see :ref:`Generics`), member
 signatures of generic types (type of parameters, return type),
-and overriding entities (See :ref:`Override-Compatible Signatures`).
+and overriding entities (see :ref:`Override-Compatible Signatures`).
 Variance can be of three kinds:
 
 -  Covariance,
@@ -1576,19 +1573,17 @@ inferred from the context, if the context allows.
 The following contexts allow inference:
 
 - :ref:`Assignment-like Contexts`;
-- :ref:`Cast Expression` context;
-- :ref:`Numeric Operator Contexts`.
+- :ref:`Cast Expression` context.
 
-If context does not allow to to infer type, the *value default type* is set as follows:
+If context does not allow the type to be inferred, the value type
+is set as follows (see :ref:`Specifics of Constant Expressions Evaluation`
+for detail):
 
-- ``int`` for a constant expression of a *big integer type* 
-  (see :ref:`Specifics of Constant Expressions Evaluation`) if its value
+- ``int`` for an integer constant expression if its value
   can be represented by a 32-bit number;
-- ``long`` for a constant expression of a *big integer type* 
-  (see :ref:`Specifics of Constant Expressions Evaluation`) if its value
+- ``long`` for an integer constant expression if its value
   can be represented by a 64-bit number;
-- ``double`` or ``float`` for a floating-point constant expression 
-  (see :ref:`Specifics of Constant Expressions Evaluation`).
+- ``double`` or ``float`` for a floating-point constant expression.
 
 Type inference is used only where the *target type* is one of the following:
 
@@ -1726,10 +1721,11 @@ the following conditions:
 
 -  If there is no return statement, or if all return statements have no
    expressions, then the return type is ``void`` (see
-   :ref:`Type void or undefined`). It effectively implies that a call to a
+   :ref:`Type undefined or void`). It effectively implies that a call to a
    function, method, or lambda returns the value ``undefined``.
 -  If there are *k* return statements (where *k* is 1 or more) with
-   the same type expression *R*, then ``R`` is the return type.
+   the identical type (see :ref:`Type Identity`) expression *R*, then ``R`` is
+   the return type.
 -  If there are *k* return statements (where *k* is 2 or more) with
    expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
    *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
@@ -3570,6 +3566,9 @@ specific entities have a higher priority. Further details are discussed in
 :ref:`Overload Set for Interface Methods` and
 :ref:`Overload Set for Class Instance Methods`.
 
+Forming *overload sets* for methods that implement :ref:`Callable Types`
+is described in :ref:`Overload Set for Methods $_invoke and $_instantiate`.
+
 |
 
 .. _Overload Set for Functions:
@@ -4239,8 +4238,9 @@ member is excluded in the right-hand-side column for brevity):
    * - ``Any``
      - ``Any``
    * - ``never``
-     - ``never``
-   * - ``undefined``
+     - - when ``never`` is a return type then ``never`` with no ``undefined`` added
+       - otherwise ``undefined``
+   * - ``undefined`` or ``void``
      - ``undefined``
    * - ``null``
      - ``null``
@@ -4300,19 +4300,6 @@ member is excluded in the right-hand-side column for brevity):
      - ``Map <Effective type (K), Effective type (V)>``
    * - ReturnType<F>
      - ``Effective type (return type of F)``
-
-Additional type mapping defines an *effective signature type*, i.e.,
-an *effective type* of a corresponding type except the following:
-
-.. list-table::
-   :width: 100%
-   :widths: 45 55
-   :header-rows: 1
-
-   * - **Original Type**
-     - **Effective signature type**
-   * - Return type ``never``
-     - ``never``
 
 Otherwise, the original type is *preserved*.
 

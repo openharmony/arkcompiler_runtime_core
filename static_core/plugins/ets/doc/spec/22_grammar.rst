@@ -275,6 +275,20 @@ Grammar Summary
        identifier typeParameters? signature block
        ;
 
+    recordLiteral:
+       '{' recordLiteralElementSequence? '}'
+       ;
+
+    recordLiteralElementSequence:
+       recordLiteralElement (',' recordLiteralElement)* ','?
+       ;
+
+    recordLiteralElement:
+       expression ':' expression
+       |
+       spreadExpression
+       ;
+
     spreadExpression:
         '...' expression
         ;
@@ -968,19 +982,10 @@ Grammar Summary
 
     ambientEnumDeclaration
         : 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
-        | 'const' 'enum' identifier enumBaseType? '{' ambientConstEnumMemberList? '}'
         ;
 
     ambientEnumMemberList:
         identifier (',' identifier)* ','?
-        ;
-
-    ambientConstEnumMemberList:
-        ambientConstEnumMember (',' ambientConstEnumMember)* ','?
-        ;
-
-    ambientConstEnumMember:
-        identifier '=' constExpression
         ;
 
     ambientNamespaceDeclaration:
@@ -995,11 +1000,12 @@ Grammar Summary
         'export'?
         ( ambientConstantDeclaration
         | ambientFunctionDeclaration
+        | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | ambientAccessorDeclaration
-        | 'const'? enumDeclaration
+        | ambientEnumDeclaration
         | typeAlias
         )
         ;
@@ -1070,7 +1076,16 @@ Grammar Summary
         ;
 
     annotationUsage:
-        '@' qualifiedName annotationValues?
+        AnnotationUsageNoParentheses |
+        annotationUsageWithParentheses
+        ;
+
+    annotationUsageNoParentheses:
+        '@' qualifiedName
+        ;
+
+    annotationUsageWithParentheses:
+        '@' qualifiedName annotationValues
         ;
 
     annotationValues:

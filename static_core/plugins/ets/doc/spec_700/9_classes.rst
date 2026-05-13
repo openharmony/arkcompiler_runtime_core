@@ -698,7 +698,7 @@ are fulfilled:
     - Interface defines both a getter and a setter that have the same name;
     - Class implements a property by a field;
     - Return type of a getter and parameter type of a setter are not of the
-      same type.
+      identical type (see :ref:`Type Identity`).
 
 This situation is represented by the example below:
 
@@ -1418,8 +1418,7 @@ Syntactically, a field declaration is similar to a variable declaration.
 A field with an identifier marked with ``'?'`` is called *optional field*
 (see :ref:`Optional Fields`).
 A field with an identifier marked with ``'!'`` is called
-*field with late initialization*
-(see :ref:`Fields with Late Initialization`).
+*field with late initialization* (see :ref:`Fields with Late Initialization`).
 
 A :index:`compile-time error` occurs if:
 
@@ -1691,9 +1690,9 @@ If such use occurs then runtime error can occur as shown in the following exampl
    :linenos:
 
     class C {
-        f0 = this // Compile-time warning as 'this' is used
+        f0 = this // Compile-time warning, as 'this' is used
 
-        f1 = this.init_f1() // Compile-time warning as method of 'this' method is invoked
+        f1 = this.init_f1() // Compile-time warning, as method of 'this' method is invoked
 
         init_f1 (): string {
            console.log (this.f1) // this.f1 was not yet initialized, a runtime error occurs
@@ -1705,7 +1704,7 @@ If such use occurs then runtime error can occur as shown in the following exampl
     function foo (f: () => B) { return f() }
     class A {
         field1 = foo(() => this.field2) 
-            // Compile-time warning as 'this' is used in the initializer code
+            // Compile-time warning, as 'this' is used in the initializer code
             // At runtime the lambda call will lead to a runtime error as
             // this.field2 was not yet initialized
 
@@ -1734,21 +1733,17 @@ Fields with Late Initialization
 .. meta:
     frontend_status: Done
 
-*Field with late initialization* ``f!: T = expr`` effectively means that the
-type of the field ``f`` is ``T | undefined``. However, the field behaves like a
-field of type ``T`` with any form of access.
+A *field with late initialization* ``f!: T`` has the semantics that its
+initialization will be performed somewhere, potentially not within a class
+declaration. Within the class, such a field behaves like a field of type ``T``.
 
-*Field with late initialization* must be an *instance field*. Otherwise,
-a :index:`compile-time error` occurs.
+A :index:`compile-time error` occurs if a *field with late initialization*:
 
-*Field with late initialization* cannot be of a *nullish type* (see
-:ref:`Nullish Types`). Otherwise, a :index:`compile-time error` occurs.
-
-As all other fields, a *field with late initialization* must be initialized
-before it is used for the first time. However, this field can be initialized
-*later* and not within a class declaration.
-Initialization of this field can be performed in a constructor
-(see :ref:`Constructor Declaration`), although it is not mandatory.
+- Is a *static field*;
+- Is of a *nullish type* (see :ref:`Nullish Types`);
+- Is a ``readonly`` (see :ref:`Readonly Constant Fields`) field;
+- Is an  ``optional`` (see :ref:`Optional Fields`) field;
+- Has a *field initializer*.
 
 .. index::
    field with late initialization
@@ -1756,21 +1751,18 @@ Initialization of this field can be performed in a constructor
    instance field
    initialization
    nullish type
-   class declaration
    field
-   constructor
-   constructor declaration
 
-*Field with late initialization* cannot have *field initializers*, and can be
-neither ``readonly`` (see :ref:`Readonly Constant Fields`) nor ``optional``
-(see :ref:`Optional Fields`). Otherwise, a :index:`compile-time error` occurs.
-*Field with late initialization* must be initialized explicitly, even though
-its type has a *default value* which is ignored at the point of declaration.
+Like all other fields, a *field with late initialization* must be initialized
+before it is read for the first time. 
+
+A *field with late initialization* must be initialized explicitly, even though
+its type has a *default value* which is never used.
 
 Each time a *field with late initialization* is read, a field initialization
-check is performed. If the compiler identifies that a field is not
-initialized, then a :index:`compile-time error` occurs. Otherwise, a check
-is performed at runtime, and if a non-initialized field is encountered, then
+check is performed. If the compiler identifies that a field is not initialized,
+then a :index:`compile-time error` occurs. Otherwise, the check is performed
+at runtime, and if a uninitialized field is encountered, then
 a :index:`runtime error` occurs:
 
 .. code-block:: typescript
@@ -1873,8 +1865,10 @@ A :index:`compile-time error` occurs if:
         ff = 66                  // Compile-time error, as access modifers are different 
     }
 
-An overridden field must be initialized explicitly either by using an
-initializer or in a constructor. Otherwise, :index:`compile-time error` occurs.
+Overridden fields, except those with late initialization (see
+:ref:Fields with Late Initialization), must be explicitly initialized either
+with a field initializer or in a constructor. Otherwise,
+a :index:`compile-time error` occurs.
 Implicit initialization is not used, even though the type of the field has
 a default value (see :ref:`Default Values for Types`):
 
@@ -1950,7 +1944,8 @@ initialization is normally performed in the context of *superclass* constructors
 
 The term *same-type* in case of generic classes means that the type of a field
 in a derived class must be the same as in the base class instantiated with a
-parameter of the same type as the type of the field in the derived class.
+parameter of the identical type (see :ref:`Type Identity`) as the type of the
+field in the derived class.
 
 The situation is represented in the example below:
 
@@ -2977,9 +2972,9 @@ compile time in all possible cases. The following strategy is taken:
       y: Object
       constructor () {
           super() // mandatory call to base class constructor
-          crash_this(this) // Compile-time warning as this.y is not initialized yet
+          crash_this(this) // Compile-time warning, as this.y is not initialized yet
                            // is guaranteed, however a compiler can issue a
-                           // Compile-time error
+                           // compile-time error
           this.y = new Object
       }
     }
@@ -3191,9 +3186,9 @@ There are two kinds of *explicit constructor calls*:
 
 A :index:`compile-time error` occurs if:
 
--  *Superclass constructor call* refers to an inaccessible direct superclass
+ - *Superclass constructor call* refers to an inaccessible direct superclass
    constructor.
--  *Explicit constructor call* is used as expression.
+ - *Explicit constructor call* is used as expression.
 
 A :index:`compile-time error` occurs if arguments of an explicit constructor
 call refer to one of the following:

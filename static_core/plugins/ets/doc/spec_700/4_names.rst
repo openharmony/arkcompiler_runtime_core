@@ -579,7 +579,6 @@ The syntax of *type declaration* is presented below:
         classDeclaration
         | interfaceDeclaration
         | enumDeclaration
-        | constEnumDeclaration
         | typeAlias
         ;
 
@@ -651,7 +650,7 @@ introduced by using type alias (particularly for a generic type).
     type Dictionary = Map<string, string>
     type MapOfString<T> = Map<T, string>
 
-A type alias acts as a new name only. It neither changes the original type
+A type alias acts as a new type name only. It neither changes the original type
 meaning nor introduces a new type.
 
 .. code-block:: typescript
@@ -997,15 +996,13 @@ Assignability with Initializer
 .. meta:
     frontend_status: Done
 
-If a variable or constant declaration contains type annotation ``T`` and
-initializer expression *E*, then the type of *E* must be assignable to ``T``
-(see :ref:`Assignability`).
+If a variable or constant declaration contains a type annotation ``T`` and the
+initializer expression is of type ``E``, then type ``E ``must be assignable to
+type ``T`` (see :ref:`Assignability`).
 
 .. index::
    initializer expression
-   assignment-like contexts
    annotation
-   constant declaration
    type
    assignability
    type annotation
@@ -1709,7 +1706,7 @@ The syntax of *return type* is presented below:
         ;
 
 If a function, a method, or a lambda return type is other than ``void`` or 
-``undefined`` (see :ref:`Type void or undefined`), or than a union type
+``undefined`` (see :ref:`Type undefined or void`), or than a union type
 containing ``void`` or ``undefined``, and the execution path in the function,
 method, or lambda body has neither a ``return`` statement (see
 :ref:`Return Statements`) nor a ``throw`` statement (see
@@ -1726,7 +1723,7 @@ be used in class instance methods only (see :ref:`Methods Returning this`).
 If a function, a method, or a lambda return type is not specified, then it is
 inferred from its body (see :ref:`Return Type Inference`). If there is no body,
 then the function, method, or lambda return type is ``void`` (see
-:ref:`Type void or undefined`).
+:ref:`Type undefined or void`).
 
 
 .. code-block:: typescript

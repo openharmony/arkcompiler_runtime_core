@@ -618,12 +618,12 @@ Integral literals with different radices are represented by the examples below:
 .. code-block:: typescript
    :linenos:
 
-    153 // decimal literal
-    1_153 // decimal literal
-    0xBAD3 // hex literal
-    0xBAD_3 // hex literal
-    0o777 // octal literal
-    0b101 // binary literal
+    153         // decimal literal
+    153_000     // decimal literal
+    0xBAD       // hex literal
+    0x7FFF_FFFF // hex literal
+    0o777       // octal literal
+    0b101       // binary literal
 
 The underscore character ``'_'`` between successive
 digits can be used to improve readability.
@@ -632,79 +632,45 @@ However, the underscore character must be neither the very first nor the very
 last symbol of an integer literal.
 
 .. index::
-   prefix
-   value
-   literal
-   integer
    underscore character
+   compiler-internal integer type
 
-If context allows inferring type, then :ref:`Type Inference for Constant Expressions`
-is used to determine the type of an integer literal. Otherwise, the type is
-determined as follows:
+The type of an integer literal is the *compiler-internal integer type*
+(see :ref:`Specifics of Constant Expressions Evaluation`) which is used
+during constants expression evaluation.
+:ref:`Type Inference for Constant Expressions` is always applied
+after evaluating a constant expression to infer the type of a numeric constant
+expression, assigning it to a predefined numeric type. 
 
-- If the literal value can be represented by a non-negative 32-bit number,
-  i.e., the value is in the range ``0..max(int)``, then the type is ``int``;
+If an integer literal is a part of a constant expression
+(see :ref:`Constant Expressions`) a value of the literal can be out of range
+of type ``long``, but the value of the whole integer contsant expression
+must be in the range of type ``long`` or the type determined by the context.
 
-- If the literal value can be represented by a non-negative 64-bit number,
-  i.e., the value is in the range ``0..max(long)``, then the type is ``long``;
-
-- Otherwise, a :index:`compile-time error` occurs.
-
-The concept is represented by the examples below:
+The example below illustrates how type inference is used to determine the type
+of constant expressions (note that ``'-'`` is not a part of an integer literal
+but :ref:`Unary Minus` operator):
 
 .. code-block:: typescript
-   :linenos:
+  :linenos:
 
-    // literals of type int:
-    0
-    1
-    0x7F
-    0x7FFF_FFFF // max(int)
+   const max_int1 = 21474836477 // OK, type: int, value: max(int)
+   const max_int2 = 0x7FFFFFFF  // OK, type: int, value: max(int)
+   
+   const min_int1 = - 2147483648 // OK, type: int, value: min(int)
+   const min_int2 = - 0x80000000 // OK, type: int, value: min(int)
 
-    // literals of type long:
-    0x8000_0000
-    0x7FFF_FFFF_1
-    9223372036854775807 // max(long)
+   const long1    =   0x80000000 // OK, type: long
+   
+   const err1: int = 2147483648 // Compile-time error, the value is out of range for 'int'
+   
+   const max_long = 0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
+   const min_long = - 0x8000_0000_0000_0000 // OK, type: long, value: min(long)
+   
+   const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
+   const err3 = 9223372036854775808   // Compile-time error, the value is too large
 
-    // Compile-time error, the value is too large:
-    9223372036854775808 // max(long) + 1
-    0xFFFF_FFFF_FFFF_FFFF_0
-
-.. index::
-   integer literal
-   int
-   long
-
-.. note::
-
-    For better compatibility with |TS|, an integer literal cannot
-    be used to define a negative value. Several corner cases are
-    represented in the following example:
-    
-
-    .. code-block:: typescript
-      :linenos:
-
-       const max_int1 = 0x7FFFFFFF  // OK, type: int, value: max(int)
-       const max_int2 = 21474836477  // the same
-       
-       const x1 = 0x80000000 // OK, type: long (!), value: 2147483648
-       const x2 = 2147483648  // Same
-       
-       const err1: int = 2147483648 // Compile-time error, the value is out of range for 'int'
-       
-       const min_int = - 21474836477 - 1 // OK, type: int, value: min(int)
-       
-       const max_long1 = 0x7FFF_FFFF_FFFF_FFFF // OK, type: long, value: max(long)
-       const max_long2 = 9223372036854775807   // Same (decimal literal)
-       
-       const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
-       const err3 = 9223372036854775808   // Compile-time error, the value is too large
-       
-       // integer negation cannot be applied to a value that is too large:
-       const err4 = -9223372036854775808  // Compile-time error, the value is too large
-       
-       const min_long = - max_long - 1  // OK, type: long, value: min(long)
+   const max_long2 = 0x7FFF_FFFF_FFFF_FFFF + 10 - 10  // OK, type: long, value: max(long)
 
 |
 
@@ -1114,7 +1080,7 @@ If an operator is applied to a literal, then the literal type is replaced for
     frontend_status: Done
 
 *Undefined literal* is the only literal of types ``void`` and ``undefined``
-(see :ref:`Type void or undefined`) to denote a reference with a value that is
+(see :ref:`Type undefined or void`) to denote a reference with a value that is
 not defined. The *undefined literal* is represented by the keyword ``undefined``:
 
 .. code-block:: abnf

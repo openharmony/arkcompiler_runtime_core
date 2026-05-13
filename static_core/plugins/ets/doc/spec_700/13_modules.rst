@@ -1819,10 +1819,11 @@ The *export type directive* syntax is presented below:
         'export' 'type' selectiveBindings
         ;
 
-|LANG| supports no additional semantic checks for entities exported by using
-*export type* directives.
+If a binding refers to anything other than type, a :index:compile-time error
+occurs. 
 
-If a binding refers to something other than ``type``, then a :index:`compile-time error` occurs.
+|LANG| does not provide any other additional semantic checks for entities
+exported by using *export type* directives in comparison to *export* directives.
 
 .. index::
    export
@@ -2236,8 +2237,11 @@ Entry point functions have the following features:
 - Entry point function must either have no parameters, or have one parameter of
   type ``FixedArray<string>`` that provides access to the arguments of a program command
   line;
-- Entry point function return type is either ``void`` (see
-  :ref:`Type void or undefined`) or ``int``;
+- Entry point function may be asynchronous (see :ref:`Async Functions`);
+- If entry point function is not asynchronous, its return type is either
+  ``void`` (see :ref:`Type undefined or void`) or ``int``;
+- If entry point function is asynchronous, its return type is either
+  ``Promise<void>`` or ``Promise<int>`` (see :ref:`Concurrency Promise Class`);
 - Entry point function cannot be overloaded;
 - Entry point function is called ``main`` by default.
 
@@ -2289,13 +2293,31 @@ below:
     function main(p: number) { // Compile-time error, incorrect main signature
     }
 
-    // Option 4: top-level statement is the entry point
+    async function main() {
+      // Option 4: an asynchronous entry point function. Its return type is
+      // inferred from the body of main(). It will be 'Promise<int>' if the body
+      // has 'return' with an expression that has 'Promise<int>' or integer
+      // type. It will be 'Promise<void>' if there is no return at all in the
+      // body.
+    }
+
+    async function main(): Promise<void> {
+      // Option 5: asynchronous entry point function, explicit :Promise<void>
+      // - no return in the function body required
+    }
+
+    async function main(): Promise<int> {
+      // Option 6: asynchronous entry point function, explicit :Promise<int>
+      // - return is required
+    }
+
+    // Option 7: top-level statement is the entry point
     console.log ("Hello, world!")
 
-    // Option 5: top-level exported function
+    // Option 8: top-level exported function
     export function entry(): void {}
 
-    // Option 5: top-level exported function with command-line arguments
+    // Option 9: top-level exported function with command-line arguments
     export function entry(cmdLine: FixedArray<string>): void {}
 
 .. index::
