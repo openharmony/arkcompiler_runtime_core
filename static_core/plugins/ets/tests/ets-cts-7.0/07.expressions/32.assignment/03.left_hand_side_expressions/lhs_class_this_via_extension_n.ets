@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+{% for c in cases %}
 /*---
-desc: Verify whether this can not be used as a left-hand side value.
+desc: Verify whether this can not be used as a left-hand side value in extension function.
 tags: [compile-only, negative]
 expected_out:
     - "Semantic error ESE0025: Invalid left-hand side of assignment expression"
@@ -23,13 +23,15 @@ expected_out:
 ---*/
 
 class MyClass {
+    value: number = 0
 }
 
 function foo(this: MyClass, value: MyClass) {
-    this = value
+    {{c}}
 }
 
 function main(): void {
   let obj: MyClass = new MyClass();
   obj.foo(obj)
 }
+{% endfor %}
