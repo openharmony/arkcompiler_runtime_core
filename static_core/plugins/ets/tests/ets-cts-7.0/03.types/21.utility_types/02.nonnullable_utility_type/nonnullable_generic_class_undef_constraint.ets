@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: NonNullish Type Parameter
-
+desc: >-
+  NonNullable<T> as return type in generic class method with T extends MyBase | undefined constraint.
+  Instantiation with non-undefined type: result is non-null.
 ---*/
 
 class MyBase {}
 
-class A<T extends MyBase | null> {
+class A<T extends MyBase | undefined> {
     foo(p:T): NonNullable<T> {
         return p!
     }
