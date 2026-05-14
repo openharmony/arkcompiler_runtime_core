@@ -172,6 +172,15 @@ interop_test("mark_test_sts_ref_js") {
   sources = [ "mark_test_utils.cpp" ]
 }
 
+interop_test("mark_test_sts_ref_js_weak") {
+  js = [
+    "mark_test_sts_ref_js_weak.js",
+    "mark_test_utils.js",
+  ]
+  ets = "xgc_tests_package/xgc_tests.ets"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
 interop_test("root_from_ea_test") {
   js = [
     "ea_coro/ea_test_runner.js",
@@ -227,6 +236,7 @@ group("xgc_tests") {
       ":mark_test_mass_ref",
       ":mark_test_passive_xgc",
       ":mark_test_sts_ref_js",
+      ":mark_test_sts_ref_js_weak",
       ":mark_test_xgc",
       ":remark_cycle_test",
       ":sweep_cycle_test",
