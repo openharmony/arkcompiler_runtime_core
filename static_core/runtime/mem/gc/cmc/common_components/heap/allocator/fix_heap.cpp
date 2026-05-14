@@ -142,6 +142,9 @@ void FixHeapWorker::DispatchRegionFixTask(FixHeapTask *task)
                 FixRegion<COLLECT_POLYSIZE_NONMOVABLE>(region);
             } else if (region->IsLargeRegion()) {
                 FixRegion<IGNORED>(region);
+            } else if (region->IsUnmovableFromRegion()) {
+                region->ClearRSet();
+                FixRegion<FILL_FREE>(region);
             } else {
                 FixRegion<FILL_FREE>(region);
             }

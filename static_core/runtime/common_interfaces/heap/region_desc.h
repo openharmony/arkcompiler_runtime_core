@@ -1316,7 +1316,10 @@ public:
         }
 
         explicit InlinedRegionMetaData(RegionDesc *regionDesc)
-            : regionDesc_(regionDesc), regionRSet_(regionDesc->GetRSet()), regionType_(regionDesc->GetRegionType())
+            : regionDesc_(regionDesc),
+              regionRSet_(regionDesc->GetRSet()),
+              regionType_(regionDesc->GetRegionType()),
+              isCollectionSet_(false)
         {
             // Since this is a backup copy of `RegionDesc`, create rset at first to guarantee data consistency
             DCHECK(regionRSet_ != nullptr);
@@ -1347,6 +1350,16 @@ public:
         {
             DCHECK(RegionDesc::IsAliveRegionType(regionType_));
             return regionType_;
+        }
+
+        bool IsInCollectionSet() const
+        {
+            return isCollectionSet_;
+        }
+
+        void SetCollectionSetRegionFlag(bool flag)
+        {
+            isCollectionSet_ = flag;
         }
 
         bool IsInRecentSpace() const
@@ -1416,6 +1429,7 @@ public:
         RegionDesc *regionDesc_ {nullptr};
         RegionRSet *regionRSet_ {nullptr};
         RegionType regionType_ {};
+        bool isCollectionSet_;
 
         friend class RegionDesc;
     };

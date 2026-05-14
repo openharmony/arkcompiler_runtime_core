@@ -241,6 +241,7 @@ void RegionalHeap::CopyRegion(RegionDesc *region)
         fromSpace_.DeleteFromRegion(region);
         // since this region is possibly partially-forwarded, treat it as to-region.
         toSpace_.AddFullRegion(region);
+        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(region)->SetCollectionSetRegionFlag(false);
     }
 }
 

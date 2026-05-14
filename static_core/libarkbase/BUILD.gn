@@ -156,7 +156,7 @@ if (is_mingw) {
   }
 }
 libarkbase_libs = []
-if (is_linux && ark_static_standalone_build) {
+if (is_linux && (ark_static_standalone_build || ark_standalone_build)) {
   libarkbase_sources += [
     "os/debug_info.cpp",
     "os/stacktrace.cpp",

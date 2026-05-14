@@ -50,9 +50,13 @@ void IdleBarrier::UpdateRememberSet(BaseObject *object, BaseObject *ref) const
     DCHECK(object != nullptr);
     RegionDesc::InlinedRegionMetaData *objMetaRegion =
         RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(object));
+    if (objMetaRegion->IsInCollectionSet()) {
+        return;
+    }
+
     RegionDesc::InlinedRegionMetaData *refMetaRegion =
         RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(ref));
-    if (!objMetaRegion->IsInYoungSpaceForWB() && refMetaRegion->IsInYoungSpaceForWB()) {
+    if (refMetaRegion->IsInYoungSpaceForWB()) {
         if (objMetaRegion->MarkRSetCardTable(object)) {
             LOG(DEBUG, GC) << "update point-out remember set of region " << objMetaRegion->GetRegionDesc() << ", obj "
                            << object << ", ref: " << ref << "<" << ref->GetTypeInfo() << ">";
