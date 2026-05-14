@@ -29,8 +29,10 @@
             "components": [
                 "bounds_checking_function",
                 "ets_runtime",
+                "faultloggerd",
                 "hilog",
                 "hitrace",
+                "hisysevent",
                 "init",
                 "json",
                 "napi",

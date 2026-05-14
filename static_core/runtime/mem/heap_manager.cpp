@@ -17,8 +17,6 @@
 #include "runtime/mem/lock_config_helper.h"
 #include "runtime/mem/internal_allocator-inl.h"
 
-#include <string>
-
 #include "libarkbase/mem/mmap_mem_pool-inl.h"
 #include "libarkbase/mem/pool_manager.h"
 #include "runtime/handle_base-inl.h"
@@ -99,6 +97,14 @@ bool HeapManager::Finalize()
     return true;
 }
 
+void HeapManager::NotifyAllocationFailedListeners(size_t size)
+{
+    auto *nm = GetNotificationManager();
+    if (nm->HasAllocationFailedListeners()) {
+        nm->OutOfMemoryEvent(size);
+    }
+}
+
 ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment align, ManagedThread *thread,
                                           ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned)
 {
@@ -115,6 +121,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
     if (UNLIKELY(mem == nullptr)) {
         mem = TryGCAndAlloc(size, align, thread, objInitType, pinned);
         if (UNLIKELY(mem == nullptr)) {
+            NotifyAllocationFailedListeners(size);
             ThrowOutOfMemoryError("AllocateObject failed");
             return nullptr;
         }
@@ -223,6 +230,7 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
     }
     if (UNLIKELY(mem == nullptr)) {
         if (ManagedThread::GetCurrent() != nullptr) {
+            NotifyAllocationFailedListeners(size);
             ThrowOutOfMemoryError("AllocateNonMovableObject failed");
         }
         return nullptr;

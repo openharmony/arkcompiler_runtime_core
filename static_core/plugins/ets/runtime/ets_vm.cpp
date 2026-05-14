@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_vm.h"
-#include <atomic>
+#include "plugins/ets/runtime/ets_vm_out_of_memory_listener.h"
 
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "execution/job_execution_context.h"
@@ -42,6 +42,7 @@
 #include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/compiler.h"
 #include "runtime/include/runtime.h"
+#include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/value-inl.h"
 #include "runtime/init_icu.h"
@@ -270,6 +271,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     rendezvous_ = allocator->New<Rendezvous>(this);
     objStateTable_ = MakePandaUnique<EtsObjectStateTable>(allocator);
     InitializeRandomEngine();
+    outOfMemoryListener_ = allocator->New<EtsVmOutOfMemoryListener>(this);
 }
 
 PandaEtsVM::~PandaEtsVM()
@@ -287,6 +289,7 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(compiler_);
     allocator->Delete(unhandledObjectManager_);
     allocator->Delete(fullGCLongTimeListener_);
+    allocator->Delete(outOfMemoryListener_);
     if (saverWorker_ != nullptr) {
         allocator->Delete(saverWorker_);
     }
@@ -357,6 +360,10 @@ static void CreateEtsObjects(PandaVector<CoroutineWorker::LocalObjectData> &obje
 
 bool PandaEtsVM::Initialize()
 {
+#if !defined(ARK_USE_COMMON_RUNTIME)
+    runtime_->GetNotificationManager()->AddListener(outOfMemoryListener_,
+                                                    RuntimeNotificationManager::Event::OUT_OF_MEMORY_EVENTS);
+#endif
     if (!ark::intrinsics::Initialize(ark::panda_file::SourceLang::ETS)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize eTS intrinsics";
         return false;
@@ -422,6 +429,13 @@ bool PandaEtsVM::InitializeFinish()
     return true;
 }
 
+void PandaEtsVM::StopListeners()
+{
+#if !defined(ARK_USE_COMMON_RUNTIME)
+    runtime_->GetNotificationManager()->RemoveListener(outOfMemoryListener_,
+                                                       RuntimeNotificationManager::Event::OUT_OF_MEMORY_EVENTS);
+#endif
+}
 void PandaEtsVM::UninitializeThreads()
 {
     // Wait until all threads finish the work

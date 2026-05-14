@@ -420,6 +420,10 @@ config("ark_common_config") {
   if (is_ark_dfx_memory) {
     defines += [ "PANDA_ENABLE_DFX_MEMORY_CHECK" ]
   }
+
+  if (enable_hisysevent) {
+    defines += [ "PANDA_ENABLE_HISYSEVENT" ]
+  }
 }
 
 config("ark_config") {

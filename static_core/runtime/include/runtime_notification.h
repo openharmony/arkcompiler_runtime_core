@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,8 @@ public:
     {
     }
 
+    virtual void OutOfMemory([[maybe_unused]] size_t size) {}
+
     // Deprecated events
     virtual void ThreadStart([[maybe_unused]] ManagedThread::ThreadId threadId) {}
     virtual void ThreadEnd([[maybe_unused]] ManagedThread::ThreadId threadId) {}
@@ -126,6 +128,7 @@ public:
         MONITOR_EVENTS = 0x100,
         ALLOCATION_EVENTS = 0x200,
         CONSOLE_EVENTS = 0x400,
+        OUT_OF_MEMORY_EVENTS = 0x800,
         ALL = 0xFFFFFFFF
     };
 
@@ -139,7 +142,8 @@ public:
           vmEventsListeners_(allocator->Adapter()),
           methodListeners_(allocator->Adapter()),
           classListeners_(allocator->Adapter()),
-          monitorListeners_(allocator->Adapter())
+          monitorListeners_(allocator->Adapter()),
+          allocationFailedListeners_(allocator->Adapter())
     {
     }
 
@@ -169,6 +173,9 @@ public:
                              &hasAllocationListeners_);
 
         AddListenerIfMatches(listener, eventMask, &consoleListeners_, Event::CONSOLE_EVENTS, &hasConsoleListeners_);
+
+        AddListenerIfMatches(listener, eventMask, &allocationFailedListeners_, Event::OUT_OF_MEMORY_EVENTS,
+                             &hasAllocationFailedListeners_);
 
         {
             // We cannot stop GC thread, so holding lock to avoid data race
@@ -205,6 +212,9 @@ public:
                                 &hasAllocationListeners_);
 
         RemoveListenerIfMatches(listener, eventMask, &consoleListeners_, Event::CONSOLE_EVENTS, &hasConsoleListeners_);
+
+        RemoveListenerIfMatches(listener, eventMask, &allocationFailedListeners_, Event::OUT_OF_MEMORY_EVENTS,
+                                &hasAllocationFailedListeners_);
 
         {
             // We cannot stop GC thread, so holding lock to avoid data race
@@ -454,6 +464,22 @@ public:
         return hasAllocationListeners_;
     }
 
+    bool HasAllocationFailedListeners() const
+    {
+        return hasAllocationFailedListeners_;
+    }
+
+    void OutOfMemoryEvent(size_t size)
+    {
+        if (UNLIKELY(hasAllocationFailedListeners_)) {
+            for (auto *listener : allocationFailedListeners_) {
+                if (listener != nullptr) {
+                    listener->OutOfMemory(size);
+                }
+            }
+        }
+    }
+
     void ObjectAllocEvent(BaseClass *klass, ObjectHeader *object, ManagedThread *thread, size_t size) const
     {
         if (UNLIKELY(hasAllocationListeners_)) {
@@ -582,6 +608,7 @@ private:
     PandaList<RuntimeListener *> monitorListeners_;
     PandaList<RuntimeListener *> allocationListeners_;
     PandaList<RuntimeListener *> consoleListeners_;
+    PandaList<RuntimeListener *> allocationFailedListeners_;
 
     bool hasBytecodePcListeners_ = false;
     bool hasLoadModuleListeners_ = false;
@@ -594,6 +621,7 @@ private:
     bool hasMonitorListeners_ = false;
     bool hasAllocationListeners_ = false;
     bool hasConsoleListeners_ = false;
+    bool hasAllocationFailedListeners_ = false;
     Rendezvous *rendezvous_ {nullptr};
 
     os::memory::RWLock debuggerLock_;

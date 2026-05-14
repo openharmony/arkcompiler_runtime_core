@@ -101,6 +101,8 @@ public:
     virtual void HandleReturnFrame() {}
     virtual void ProcessReferenceFinalizers();
     virtual void BeforeShutdown() {}
+    // Remove notification listeners from notification manager
+    virtual void StopListeners() {}
 
     virtual mem::GCStats *GetGCStats() const = 0;
     virtual mem::HeapManager *GetHeapManager() const = 0;

@@ -75,6 +75,7 @@ namespace ark::ets {
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
 class FinalizationRegistryManager;
+class EtsVmOutOfMemoryListener;
 
 using WalkEventLoopCallback = std::function<void(void *, void *)>;
 
@@ -109,6 +110,7 @@ public:
     void VisitVmRoots(const GCRootVisitor &visitor) override;
     void UpdateAndSweepVmRefs(const ReferenceUpdater &updater) override;
     void UninitializeThreads() override;
+    void StopListeners() override;
 
     void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
     void HandleGCRoutineInMutator() override;
@@ -462,6 +464,7 @@ private:
     os::memory::Mutex atomicsMutex_;
     UnhandledObjectManager *unhandledObjectManager_ {nullptr};
     FullGCLongTimeListener *fullGCLongTimeListener_ {nullptr};
+    EtsVmOutOfMemoryListener *outOfMemoryListener_ {nullptr};
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;

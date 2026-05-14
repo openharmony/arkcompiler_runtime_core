@@ -53,6 +53,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_stdlib_cache.cpp
     ${ETS_EXT_SOURCES}/ets_stubs.cpp
     ${ETS_EXT_SOURCES}/ets_vm.cpp
+    ${ETS_EXT_SOURCES}/ets_vm_out_of_memory_listener.cpp
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/integrate/ark_vm_api.cpp
     ${ETS_EXT_SOURCES}/integrate/ets_ani_expo.cpp

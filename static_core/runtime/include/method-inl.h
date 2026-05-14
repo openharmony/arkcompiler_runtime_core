@@ -224,7 +224,7 @@ ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualAr
     PandaUniquePtr<Frame, FrameDeleter> frame =
         InitFrame<InvokeHelper>(thread, numActualArgs, args, currentFrame, callFlags);
     if (UNLIKELY(frame.get() == nullptr)) {
-        ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
+        ark::ThrowStackOverflowException(thread);
         return GetReturnValueFromException<InvokeHelper, ValueT>();
     }
 
@@ -323,7 +323,7 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
         interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(nregs, nregs, this, currentFrame),
         FrameDeleter(thread));
     if (UNLIKELY(frame.get() == nullptr)) {
-        ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
+        ark::ThrowStackOverflowException(thread);
         return res;
     }
 
@@ -353,7 +353,7 @@ Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, 
     PandaUniquePtr<Frame, FrameDeleter> frame =
         InitFrameWithNumVRegs<InvokeHelper, ValueT, true>(thread, numVregs, numArgs, args, currentFrame, callFlags);
     if (UNLIKELY(frame.get() == nullptr)) {
-        ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
+        ark::ThrowStackOverflowException(thread);
         return nullptr;
     }
 
