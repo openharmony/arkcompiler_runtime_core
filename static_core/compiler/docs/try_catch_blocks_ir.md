@@ -63,7 +63,7 @@ IR for this `main` method is:
 ```                                
 `Try-begin` and `Try-end` - are try boundaries basic blocks. Both of them have one normal control-flow successor and N catch-handlers successors (N is equal 2 in the example: try-block has 2 catch-handlers in the method).
 
-Edges form `Try-end` block to the catch-handlers are needed for correct linear order of basic blocks, since program flow can be jumped to the catch-handler after each throwable instruction, placed between try boundaries.
+Edges from `Try-end` block to the catch-handlers are needed for correct linear order of basic blocks, since program flow can be jumped to the catch-handler after each throwable instruction, placed between try boundaries.
 
 ## IR with unreachable try-end
 

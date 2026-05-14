@@ -216,6 +216,7 @@ groups:
         prefix: ets
         acc: out:ref
         format: [pref_op_v_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_AWAIT_RESOLUTION
 
   - title: Select a resume point and move to it
     description: >
@@ -269,6 +270,7 @@ groups:
         prefix: ets
         acc: out:ref
         format: [pref_op_v_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_ASYNC_UNPACK
 
   - title: Complete async function with resolved promise
     description: >
@@ -294,6 +296,7 @@ groups:
         prefix: ets
         acc: out:ref
         format: [pref_op_v_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_ASYNC_RESOLVE
 
   - title: Complete async function with rejected promise
     description: >
@@ -319,3 +322,4 @@ groups:
         prefix: ets
         acc: out:ref
         format: [pref_op_v_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_ASYNC_REJECT

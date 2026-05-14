@@ -251,7 +251,7 @@ Inst *InstBuilder::GetDefinition(size_t vreg)
 
     if (vreg >= currentDefs_->size() || (*currentDefs_)[vreg] == nullptr) {
         failed_ = true;
-        COMPILER_LOG(ERROR, IR_BUILDER) << "GetDefinition failed for verg " << vreg;
+        COMPILER_LOG(ERROR, IR_BUILDER) << "GetDefinition failed for vreg " << vreg;
         return nullptr;
     }
     return (*currentDefs_)[vreg];

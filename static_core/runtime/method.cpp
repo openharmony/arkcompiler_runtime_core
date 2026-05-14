@@ -613,23 +613,13 @@ bool Method::IsProxy() const
 
 bool Method::HasAsyncAnnotation() const
 {
-    const panda_file::File &pf = *GetPandaFile();
-    panda_file::MethodDataAccessor mda(pf, GetFileId());
     auto langCtx = LanguageContext(plugins::GetLanguageContextBase(GetClass()->GetSourceLang()));
-    const auto *asyncAnnoDesc = langCtx.GetAsyncAnnotationDescriptor();
-    if (asyncAnnoDesc == nullptr) {
+    const auto *desc = langCtx.GetAsyncAnnotationDescriptor();
+    if (desc == nullptr) {
         return false;
     }
-    auto asyncAnnoDescStr = std::string(utf::Mutf8AsCString(asyncAnnoDesc));
-    bool hasAsyncAnnotation = false;
-    mda.EnumerateAnnotations([&](panda_file::File::EntityId annId) {
-        panda_file::AnnotationDataAccessor ada(pf, annId);
-        auto className = panda_file::StringDataToString(pf.GetStringData(ada.GetClassId()));
-        if (className == asyncAnnoDescStr) {
-            hasAsyncAnnotation = true;
-        }
-    });
-    return hasAsyncAnnotation;
+    panda_file::MethodDataAccessor mda(*GetPandaFile(), GetFileId());
+    return mda.HasAnnotation(*GetPandaFile(), desc);
 }
 
 /* static */

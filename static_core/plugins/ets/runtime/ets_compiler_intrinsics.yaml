@@ -145,6 +145,7 @@ intrinsics:
       ret: arkruntime.AsyncContext
       args: [ std.core.Promise ]
     codegen_arch: [ amd64, arm64 ]
+    clear_flags: [ acc_read ]
     codegen_func: CreateAwaitResolution
 
   - name: CompilerEtsAsyncUnpack
@@ -155,6 +156,7 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.Promise ]
     codegen_arch: [ amd64, arm64 ]
+    clear_flags: [ acc_read ]
     codegen_func: CreateAsyncUnpack
 
   - name: CompilerEtsAsyncResolve
@@ -165,6 +167,7 @@ intrinsics:
       ret: std.core.Promise
       args: [ ref ]
     codegen_arch: [ amd64, arm64 ]
+    clear_flags: [ acc_read ]
     codegen_func: CreateAsyncResolve
 
   - name: CompilerEtsAsyncReject
@@ -175,6 +178,7 @@ intrinsics:
       ret: std.core.Promise
       args: [ ref ]
     codegen_arch: [ amd64, arm64 ]
+    clear_flags: [ acc_read ]
     codegen_func: CreateAsyncReject
 
   - name: CompilerEtsStringFromCharCodeSingleNoCache

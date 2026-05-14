@@ -90,17 +90,17 @@ void SaveLiveVRegs(EtsExecutionContext *executionCtx, EtsAsyncContext *asyncCont
             void *refValue = ToVoidPtr(ToObjPtr(bit_cast<void *>(slotValue)));
             frameOffsets->Set(curRefCount, locationValue);
             refValues->Set(curRefCount, static_cast<EtsObject *>(refValue));
-            LOG(DEBUG, COROUTINES) << "Saved compiled ref #" << curRefCount << "/" << totalRefCount << " with value "
-                                   << refValue << " from CFrame slot " << locationValue << " to async context ("
-                                   << vregInfo << ")";
+            LOG(DEBUG, COROUTINES) << "Saved compiled ref #" << (curRefCount + 1) << "/" << totalRefCount
+                                   << " with value " << refValue << " from CFrame slot " << locationValue
+                                   << " to async context (" << vregInfo << ")";
             ++curRefCount;
         } else {
             auto primValue = slotValue;
             frameOffsets->Set(totalRefCount + curPrimCount, static_cast<EtsShort>(locationValue));
             primValues->Set(curPrimCount, primValue);
-            LOG(DEBUG, COROUTINES) << "Saved compiled prim #" << curPrimCount << "/" << totalPrimCount << " with value "
-                                   << primValue << " from CFrame slot " << locationValue << " to async context ("
-                                   << vregInfo << ")";
+            LOG(DEBUG, COROUTINES) << "Saved compiled prim #" << (curPrimCount + 1) << "/" << totalPrimCount
+                                   << " with value " << primValue << " from CFrame slot " << locationValue
+                                   << " to async context (" << vregInfo << ")";
             ++curPrimCount;
         }
     }
@@ -126,7 +126,7 @@ void RestoreLiveVRegs(EtsExecutionContext *executionCtx, EtsAsyncContext *asyncC
         auto *value = EtsObject::ToCoreType(refValues->Get(idx));
         cframe.SetValueToSlot(locationValue, bit_cast<CFrame::SlotType>(value));
         refValues->Set(idx, nullptr);
-        LOG(DEBUG, COROUTINES) << "Restored compiled ref #" << idx << "/" << refCount << " with value " << value
+        LOG(DEBUG, COROUTINES) << "Restored compiled ref #" << (idx + 1) << "/" << refCount << " with value " << value
                                << " into CFrame slot " << locationValue << " from async context";
     }
 
@@ -134,7 +134,7 @@ void RestoreLiveVRegs(EtsExecutionContext *executionCtx, EtsAsyncContext *asyncC
         auto locationValue = frameOffsets->Get(refCount + idx);
         auto value = primValues->Get(idx);
         cframe.SetValueToSlot(locationValue, bit_cast<CFrame::SlotType>(value));
-        LOG(DEBUG, COROUTINES) << "Restored compiled prim #" << idx << "/" << primCount << " with value " << value
+        LOG(DEBUG, COROUTINES) << "Restored compiled prim #" << (idx + 1) << "/" << primCount << " with value " << value
                                << " into CFrame slot " << locationValue << " from async context";
     }
 

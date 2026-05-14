@@ -15,6 +15,8 @@
 #ifndef PANDA_ETS_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 #define PANDA_ETS_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 
+#include <string_view>
+
 #include "bytecode_optimizer/runtime_adapter.h"
 
 namespace ark {
@@ -28,6 +30,13 @@ public:
     ~EtsBytecodeOptimizerRuntimeAdapter() override = default;
     NO_COPY_SEMANTIC(EtsBytecodeOptimizerRuntimeAdapter);
     NO_MOVE_SEMANTIC(EtsBytecodeOptimizerRuntimeAdapter);
+
+    bool HasAsyncAnnotation(MethodPtr methodPtr) const override
+    {
+        const auto *desc = utf::CStringAsMutf8("Larkruntime/annotation/Async;");
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(methodPtr));
+        return mda.HasAnnotation(pandaFile_, desc);
+    }
 
     bool IsEtsConstructor(MethodPtr method) const
     {

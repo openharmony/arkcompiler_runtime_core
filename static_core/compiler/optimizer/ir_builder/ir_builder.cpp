@@ -18,6 +18,7 @@
 #include "compiler_logger.h"
 #include "libarkbase/macros.h"
 #include "optimizer/ir/basicblock.h"
+#include "optimizer/ir/inst.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "pbc_iterator.h"
 #include "libarkfile/bytecode_instruction.h"
@@ -137,6 +138,12 @@ void IrBuilder::SplitDispatch()
     }
 
     ASSERT(dispatch->GetOpcode() == Opcode::Dispatch);
+
+    if (GetGraph()->IsBytecodeOptimizer()) {
+        dispatch->ClearFlag(inst_flags::TERMINATOR);
+        return;
+    }
+
     auto *prologueBlock = dispatch->GetBasicBlock();
     ASSERT(prologueBlock->IsTry());
 

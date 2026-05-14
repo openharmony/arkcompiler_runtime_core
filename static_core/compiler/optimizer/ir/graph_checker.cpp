@@ -3050,6 +3050,11 @@ BasicBlock *GraphChecker::FindDispatchPrologue([[maybe_unused]] GraphVisitor *v,
 void GraphChecker::VisitDispatch([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     [[maybe_unused]] auto graph = static_cast<GraphChecker *>(v)->GetGraph();
+
+    if (graph->IsBytecodeOptimizer()) {
+        return;
+    }
+
     [[maybe_unused]] auto startBlock = graph->GetStartBlock();
     [[maybe_unused]] auto dispatchBlock = inst->GetBasicBlock();
     [[maybe_unused]] auto prologueBlock = FindDispatchPrologue(v, inst);

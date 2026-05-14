@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@
 #include "compiler/optimizer/ir/datatype.h"
 #include "runtime_adapter.h"
 #include "libarkbase/utils/utf.h"
+
+#ifdef PANDA_WITH_ETS
+#include "plugins/ets/compiler/runtime_adapter_ets.h"
+#endif
 
 namespace ark::bytecodeopt::test {
 
@@ -243,5 +247,44 @@ TEST(RuntimeAdapter, Fields)
     EXPECT_EQ(adapter.GetFieldTypeById(storeToStatic, fieldId), compiler::DataType::Type::INT64);
     EXPECT_EQ(adapter.IsFieldVolatile(fieldPtr), false);
 }
+
+#ifdef PANDA_WITH_ETS
+TEST(RuntimeAdapter, EtsBCORuntimeAdapterDetectsAsyncAnnotation)
+{
+    // Verifies runtime adapter detects the ETS async annotation.
+    auto source = std::string(R"(
+.language eTS
+.record arkruntime.annotation.Async <ets.annotation, access.record=public> {}
+.record ETSGLOBAL <extends=panda.Object, access.record=public> {}
+.function void ETSGLOBAL.async_t() <static, access.function=public, ets.annotation.class=arkruntime.annotation.Async> {
+    return.void
+}
+.function void ETSGLOBAL.sync_t() <static, access.function=public> {
+    return.void
+}
+    )");
+    std::unique_ptr<const panda_file::File> arkf = ParseAndEmit(source);
+    auto pointers = GetPointers(arkf.get());
+
+    ASSERT_EQ(pointers.method.size(), 2U);
+    EtsBytecodeOptimizerRuntimeAdapter adapter(*arkf);
+
+    RuntimeInterface::MethodPtr asyncMethod = nullptr;
+    RuntimeInterface::MethodPtr syncMethod = nullptr;
+    for (auto method : pointers.method) {
+        auto name = adapter.GetMethodName(method);
+        if (name == "async_t") {
+            asyncMethod = method;
+        } else if (name == "sync_t") {
+            syncMethod = method;
+        }
+    }
+
+    ASSERT_NE(asyncMethod, nullptr);
+    ASSERT_NE(syncMethod, nullptr);
+    EXPECT_TRUE(adapter.HasAsyncAnnotation(asyncMethod));
+    EXPECT_FALSE(adapter.HasAsyncAnnotation(syncMethod));
+}
+#endif
 
 }  // namespace ark::bytecodeopt::test

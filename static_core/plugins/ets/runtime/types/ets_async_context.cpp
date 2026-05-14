@@ -210,8 +210,8 @@ void EtsAsyncContext::SaveInterpreterContext(ark::Frame *frame, EtsExecutionCont
             auto *ref = EtsObject::FromCoreType(vreg.GetReference());
             frameOffsets->Set(idx, frameIdx);
             AddReference(executionCtx, idx, ref);
-            LOG(DEBUG, COROUTINES) << "Saved interpreter ref #" << idx << "/" << totalRefCountForDebug << " with value "
-                                   << ref << " from frame slot " << frameIdx << " to async context";
+            LOG(DEBUG, COROUTINES) << "Saved interpreter ref #" << (idx + 1) << "/" << totalRefCountForDebug
+                                   << " with value " << ref << " from frame slot " << frameIdx << " to async context";
             idx++;
         }
     }
@@ -223,7 +223,7 @@ void EtsAsyncContext::SaveInterpreterContext(ark::Frame *frame, EtsExecutionCont
             auto prim = vreg.GetValue();
             frameOffsets->Set(refCount + idx, frameIdx);
             AddPrimitive(executionCtx, idx, prim);
-            LOG(DEBUG, COROUTINES) << "Saved interpreter prim #" << idx << "/" << totalPrimCountForDebug
+            LOG(DEBUG, COROUTINES) << "Saved interpreter prim #" << (idx + 1) << "/" << totalPrimCountForDebug
                                    << " with value " << prim << " from frame slot " << frameIdx << " to async context";
             idx++;
         }
@@ -256,7 +256,7 @@ EtsLong EtsAsyncContext::RestoreInterpreterContext(ark::Frame *frame, EtsExecuti
         auto *ref = refValues->Get(idx);
         vreg.SetReference(EtsObject::ToCoreType(ref));
         refValues->Set(idx, nullptr);
-        LOG(DEBUG, COROUTINES) << "Restored interpreter ref #" << idx << "/" << refCount << " with value " << ref
+        LOG(DEBUG, COROUTINES) << "Restored interpreter ref #" << (idx + 1) << "/" << refCount << " with value " << ref
                                << " into frame slot " << offset << " from async context";
     }
 
@@ -265,8 +265,8 @@ EtsLong EtsAsyncContext::RestoreInterpreterContext(ark::Frame *frame, EtsExecuti
         auto vreg = frameHandler.GetVReg(offset);
         auto prim = primValues->Get(idx);
         vreg.SetPrimitive(prim);
-        LOG(DEBUG, COROUTINES) << "Restored interpreter prim #" << idx << "/" << primCount << " with value " << prim
-                               << " into frame slot " << offset << " from async context";
+        LOG(DEBUG, COROUTINES) << "Restored interpreter prim #" << (idx + 1) << "/" << primCount << " with value "
+                               << prim << " into frame slot " << offset << " from async context";
     }
     SetRefCount(0);
     SetPrimCount(0);
@@ -356,7 +356,7 @@ uint32_t EtsAsyncContext::RestoreCompiledContext(ark::Frame *frame, EtsExecution
         auto *ref = refValues->Get(idx);
         auto restorer = [ref, idx, offset, refCount](auto vreg, const compiler::VRegInfo &vregInfo) {
             vreg.SetReference(EtsObject::ToCoreType(ref));
-            LOG(DEBUG, COROUTINES) << "Restored compiled ref #" << idx << "/" << refCount << " with value " << ref
+            LOG(DEBUG, COROUTINES) << "Restored compiled ref #" << (idx + 1) << "/" << refCount << " with value " << ref
                                    << " matched by compiled slot " << offset << " into interpreter " << vregInfo;
         };
         RestoreMatchingVRegs(vregList, frameHandler, frameSize, SlotOffsetVRegMatcher(offset), restorer);
@@ -368,8 +368,9 @@ uint32_t EtsAsyncContext::RestoreCompiledContext(ark::Frame *frame, EtsExecution
         auto prim = primValues->Get(idx);
         auto restorer = [prim, idx, offset, primCount](auto vreg, const compiler::VRegInfo &vregInfo) {
             vreg.SetPrimitive(prim);
-            LOG(DEBUG, COROUTINES) << "Restored compiled prim #" << idx << "/" << primCount << " with value " << prim
-                                   << " matched by compiled slot " << offset << " into interpreter " << vregInfo;
+            LOG(DEBUG, COROUTINES) << "Restored compiled prim #" << (idx + 1) << "/" << primCount << " with value "
+                                   << prim << " matched by compiled slot " << offset << " into interpreter "
+                                   << vregInfo;
         };
         RestoreMatchingVRegs(vregList, frameHandler, frameSize, SlotOffsetVRegMatcher(offset), restorer);
     }

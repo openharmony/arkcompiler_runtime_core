@@ -14,3 +14,6 @@
  */
 
 #include "ets_codegen_intrinsics_gen.inc"
+case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ASYNC_CONTEXT_CURRENT: {
+    break;
+}
