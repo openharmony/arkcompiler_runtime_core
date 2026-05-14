@@ -16,6 +16,7 @@ type: test-suite
 suite-name: parser
 list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/parser
 test-root: ${parameters.parser-root}
+workflows: [es2panda-verifier]
 
 parameters:
   updater: runner.extensions.updaters.parser.parser_updater.ParserUpdater

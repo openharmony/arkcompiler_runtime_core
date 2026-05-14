@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,21 @@ suite-name: ets-cts-6.0
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets-cts-6.0
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts-6.0
 generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.EtsTemplatesGenerator
+workflows:
+    - ark
+    - ark-aot
+    - ark-aot-pgo
+    - es2panda-verifier
+    - hybrid-ark
+    - hybrid-es2panda-verifier
+    - hybrid-panda-int
+    - hybrid-panda-jit
+    - panda-all
+    - panda-aot
+    - panda-aot-pgo
+    - panda-int
+    - panda-jit
+    - panda-jit-repeats
 
 parameters:
     extension: ets

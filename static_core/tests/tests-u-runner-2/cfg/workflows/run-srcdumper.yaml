@@ -12,10 +12,10 @@
 # limitations under the License.
 
 type: workflow
-workflow-name: run-srcdumper # only for test suite `srcdumper`
+workflow-name: run-srcdumper
 description: >-
-    This workflow is used only for test suite `srcdumper` to compile a source file with the es2panda compiler and 
-    dump the source code.
+    This workflow is used only for test suite `srcdumper` to compile a source file 
+    with the es2panda compiler and dump the source code.
 parameters:
     arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
     build: ${PANDA_BUILD}

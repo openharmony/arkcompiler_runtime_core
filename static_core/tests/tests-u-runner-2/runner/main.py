@@ -19,7 +19,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 import pytz
 
@@ -28,6 +28,7 @@ from runner.enum_types.verbose_format import VerboseKind
 from runner.environment import RunnerEnv
 from runner.init_runner import InitRunner
 from runner.logger import Log
+from runner.map_test_suites import CliArgsDict, check_mapping_ts_vs_wf
 from runner.options.cli_options import apply_cli_environment_overrides, get_args
 from runner.options.config import Config
 from runner.runner_base import Runner
@@ -54,6 +55,10 @@ def main() -> None:
     args = get_args(env_props)
     apply_cli_environment_overrides(args, env_props)
     logger = load_config(args)
+
+    if not check_mapping_ts_vs_wf(args):
+        sys.exit(1)
+
     config = Config(args)
 
     config.workflow.check_types()
@@ -116,7 +121,7 @@ def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, rep
     return failed_tests
 
 
-def load_config(args: dict[str, Any]) -> Log:  # type: ignore[explicit-any]
+def load_config(args: CliArgsDict) -> Log:
     runner_verbose = "runner.verbose"
     test_suite_const = "test-suite"
 

@@ -16,6 +16,7 @@ type: test-suite
 suite-name: compiler_checker_suite
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/checked_urunner
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/compiler_checker_suite
+workflows: [checker]
 
 parameters:
     extension: ets

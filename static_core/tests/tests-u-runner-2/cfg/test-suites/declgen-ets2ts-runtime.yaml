@@ -18,6 +18,7 @@ list-roots:
     - ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/declgenets2ts/ets-runtime
     - root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/ets-runtime
       name: ets-runtime
+workflows: [declgen-ets2ts]
 
 parameters:
     extension: ets

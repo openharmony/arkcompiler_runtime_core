@@ -16,6 +16,7 @@ type: test-suite
 suite-name: astchecker
 list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/astchecker
 test-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
+workflows: [es2panda-verifier]
 
 parameters:
   work-dir: ${WORK_DIR}/${suite-name}

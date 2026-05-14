@@ -1,4 +1,7 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,18 +13,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-version: 0.0.0.1
-type: test-suite
-suite-name: declgenparser
-test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tools/declgen_ts2sts/test
-list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tools/declgen_ts2sts/test/test-lists
-workflows: []  # not supported by UR2
-
-parameters:
-    opt-level: 0
-    output-file: "/dev/null"
-    enable-verifier: false
-    extension: ets
-    load-runtimes: ets
-    work-dir: ${WORK_DIR}/${suite-name}

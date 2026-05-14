@@ -16,6 +16,7 @@ suite-name: srcdumper
 list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/srcdumper
 test-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
 generator-class: runner.extensions.generators.srcdumper.srcdumper_generator.SrcdumperGenerator
+workflows: [run-srcdumper]
 
 parameters:
     validator: runner.extensions.validators.return_0_validator.Return0Validator

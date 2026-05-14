@@ -16,6 +16,7 @@ type: test-suite
 suite-name: runtime-mockstd-gtests
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/runtime-mockstd-gtests
+workflows: [run-gtests]
 
 parameters:
     work-dir: ${WORK_DIR}/${suite-name}

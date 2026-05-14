@@ -14,6 +14,8 @@
 runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: arkts-jit
+description: >
+    Compiles and verifies ETS tests, then runs Ark with JIT enabled on hybrid build."
 parameters:
     # common
     build: ${PANDA_BUILD}

@@ -38,6 +38,7 @@ class CliOptionsConsts(BaseEnum):
     QEMU = "qemu"
     DESCRIPTION = "description"
     STEPS = "steps"
+    WORKFLOWS = "workflows"
 
 
 FROM = "from"
@@ -98,8 +99,12 @@ def add_config_info(configs_loader: "ConfigsLoader",
 def make_config_description(config_data: dict) -> str:
     desc = config_data.get(f"{CliOptionsConsts.DESCRIPTION.value}", "")
     steps = config_data.get(f"{CliOptionsConsts.STEPS.value}", {})
+    workflows = config_data.get(f"{CliOptionsConsts.WORKFLOWS.value}", [])
 
     config_desc = [desc]
+    if workflows:
+        workflows_desc = "Recommended workflows: [" + ", ".join(workflows) + "]"
+        config_desc.append(workflows_desc)
     if steps:
         config_desc.append(f"{CliOptionsConsts.STEPS.value.upper()}:")
     for step_name, step_data in steps.items():
