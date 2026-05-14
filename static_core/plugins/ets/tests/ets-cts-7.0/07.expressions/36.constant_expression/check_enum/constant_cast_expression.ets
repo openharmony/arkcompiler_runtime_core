@@ -23,7 +23,7 @@ desc: >-
 ---*/
 
 {% for c in cases %}
-enum TestEnum{{loop.index}}: {{c.type}} { One = {{c.expr}} as {{c.type}}, Two }
+enum TestEnum{{loop.index}}: {{c.type}} { One = {{c.expr}} as {{c.cast_type|default(c.type)}}, Two }
 {%- endfor %}
 
 function main() {

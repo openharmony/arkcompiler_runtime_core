@@ -66,5 +66,12 @@ function main() {
         arktest.assertEQ(tup[1 as short], 'abc')
     })
 
+    tests.addTest('Cast expression for const index', () => {
+        const c0 = 0
+        const c1 = 1
+        arktest.assertEQ(tup[c0 as int], 42.0)
+        arktest.assertEQ(tup[c1 as short], 'abc')
+    })
+
     return tests.run()
 }

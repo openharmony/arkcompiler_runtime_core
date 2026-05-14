@@ -90,9 +90,9 @@ cases:
         (see Assignability) to the base type.
         params: not assignable value type
     check_variants:
-      - {check_type: "int", init_value_type: "long", c_value: "1"}
-      - {check_type: "short", init_value_type: "int", c_value: "1"}
-      - {check_type: "byte", init_value_type: "short", c_value: "1"}
+      - {check_type: "int", init_value_type: "long", c_value: "2147483648"}
+      - {check_type: "short", init_value_type: "int", c_value: "32768"}
+      - {check_type: "byte", init_value_type: "short", c_value: "128"}
     decl_variants:
       - |-
         const c: [init_value_type] = [c_value]

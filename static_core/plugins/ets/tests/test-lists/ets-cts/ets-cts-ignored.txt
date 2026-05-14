@@ -120,10 +120,6 @@
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_enum.ets
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_local.ets
 
-#33994 Unexpected CTE on constant expression with cast operation on numeric literals
-07.expressions/36.constant_expression/check_enum/constant_cast_expression.ets
-07.expressions/36.constant_expression/check_tuple/tuple_index.ets
-
 #29971
 08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
 08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
