@@ -7944,74 +7944,183 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(VEnv *venv, VResolver *v
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_InstanceOf(VEnv *venv, ani_ref ref, ani_ref type, ani_boolean *result)
+NO_UB_SANITIZE static ani_status Any_InstanceOf(VEnv *venv, VRef *vref, VRef *vtype, ani_boolean *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_InstanceOf(venv->GetEnv(), ref, type, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForAnyRef(vtype, "type"),
+        ANIArg::MakeForBooleanStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Any_InstanceOf(venv->GetEnv(), vref->GetRef(), vtype->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_GetProperty(VEnv *venv, ani_ref ref, const char *name, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_GetProperty(VEnv *venv, VRef *vref, const char *name, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_GetProperty(venv->GetEnv(), ref, name, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForUTF8String(name, "name"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status = GetInteractionAPI(venv)->Any_GetProperty(venv->GetEnv(), vref->GetRef(), name, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_SetProperty(VEnv *venv, ani_ref ref, const char *name, ani_ref value)
+NO_UB_SANITIZE static ani_status Any_SetProperty(VEnv *venv, VRef *vref, const char *name, VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_SetProperty(venv->GetEnv(), ref, name, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForUTF8String(name, "name"),
+        ANIArg::MakeForRef(vvalue, "value")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Any_SetProperty(venv->GetEnv(), vref->GetRef(), name, vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_GetByIndex(VEnv *venv, ani_ref ref, ani_size index, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_GetByIndex(VEnv *venv, VRef *vref, ani_size index, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_GetByIndex(venv->GetEnv(), ref, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForSize(index, "index"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status = GetInteractionAPI(venv)->Any_GetByIndex(venv->GetEnv(), vref->GetRef(), index, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_SetByIndex(VEnv *venv, ani_ref ref, ani_size index, ani_ref value)
+NO_UB_SANITIZE static ani_status Any_SetByIndex(VEnv *venv, VRef *vref, ani_size index, VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_SetByIndex(venv->GetEnv(), ref, index, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForSize(index, "index"),
+        ANIArg::MakeForRef(vvalue, "value")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Any_SetByIndex(venv->GetEnv(), vref->GetRef(), index, vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_GetByValue(VEnv *venv, ani_ref ref, ani_ref key, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_GetByValue(VEnv *venv, VRef *vref, VRef *vkey, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_GetByValue(venv->GetEnv(), ref, key, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForRef(vkey, "key"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Any_GetByValue(venv->GetEnv(), vref->GetRef(), vkey->GetRef(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_SetByValue(VEnv *venv, ani_ref ref, ani_ref key, ani_ref value)
+NO_UB_SANITIZE static ani_status Any_SetByValue(VEnv *venv, VRef *vref, VRef *vkey, VRef *vvalue)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_SetByValue(venv->GetEnv(), ref, key, value);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vref, "ref"),
+        ANIArg::MakeForRef(vkey, "key"),
+        ANIArg::MakeForRef(vvalue, "value")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Any_SetByValue(venv->GetEnv(), vref->GetRef(), vkey->GetRef(), vvalue->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_Call(VEnv *venv, ani_ref func, ani_size argc, ani_ref *argv, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_Call(VEnv *venv, VRef *vfunc, ani_size argc, VRef **vargv, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_Call(venv->GetEnv(), func, argc, argv, result);
+    VRefCallArgs refArgs(argc, vargv);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vfunc, "func"),
+        ANIArg::MakeForSize(argc, "argc"),
+        ANIArg::MakeForRefCallArgs(&refArgs, "argv"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Any_Call(venv->GetEnv(), vfunc->GetRef(), argc, refArgs.GetReleaseArgv(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_CallMethod(VEnv *venv, ani_ref self, const char *name, ani_size argc,
-                                                ani_ref *argv, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_CallMethod(VEnv *venv, VRef *vself, const char *name, ani_size argc, VRef **vargv,
+                                                VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_CallMethod(venv->GetEnv(), self, name, argc, argv, result);
+    VRefCallArgs refArgs(argc, vargv);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vself, "self"),
+        ANIArg::MakeForMethodName(name, "name"),
+        ANIArg::MakeForSize(argc, "argc"),
+        ANIArg::MakeForRefCallArgs(&refArgs, "argv"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status = GetInteractionAPI(venv)->Any_CallMethod(venv->GetEnv(), vself->GetRef(), name, argc,
+                                                                refArgs.GetReleaseArgv(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_New(VEnv *venv, ani_ref ctor, ani_size argc, ani_ref *argv, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_New(VEnv *venv, VRef *vctor, ani_size argc, VRef **vargv, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Any_New(venv->GetEnv(), ctor, argc, argv, result);
+    VRefCallArgs refArgs(argc, vargv);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForAnyRef(vctor, "ctor"),
+        ANIArg::MakeForSize(argc, "argc"),
+        ANIArg::MakeForRefCallArgs(&refArgs, "argv"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Any_New(venv->GetEnv(), vctor->GetRef(), argc, refArgs.GetReleaseArgv(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

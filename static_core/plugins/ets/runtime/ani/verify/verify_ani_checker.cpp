@@ -19,6 +19,7 @@
 #include <optional>
 #include <string>
 
+#include "libarkbase/utils/span.h"
 #include "libarkfile/file_items.h"
 #include "libarkfile/helpers.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
@@ -32,8 +33,9 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_field.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::verify {
@@ -607,6 +609,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_FIXED_ARRAY_DOUBLE_STORAGE:   return "ani_fixedarray_double *";
         case ValueType::ANI_RESOLVER:                     return "ani_resolver";
         case ValueType::ANI_RESOLVER_STORAGE:             return "ani_resolver *";
+        case ValueType::ANI_REF_CALL_ARGS:                return "ani_ref *";
         default:                                          UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
             if (action_ == Action::VERIFY_METHOD_A_ARGS) {
@@ -878,6 +881,54 @@ public:
             return {};
         }
         return {"wrong reference", ANIErrorSeverity::FATAL};
+    }
+
+    VerificationResult VerifyAnyApiRefIsXRefClass(ani_ref ref)
+    {
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        EtsObject *obj = s.ToInternalType(ref);
+        if (obj != nullptr && !obj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+            return {"Static types are not supported", ANIErrorSeverity::FATAL};
+        }
+        return {};
+    }
+
+    VerificationResult VerifyAnyRef(VRef *vref)
+    {
+        auto err = VerifyRef(vref);
+        if (err) {
+            return err;
+        }
+        return VerifyAnyApiRefIsXRefClass(vref->GetRef());
+    }
+
+    VerificationResult VerifyRefCallArgs(VRefCallArgs *desc)
+    {
+        if (desc == nullptr) {
+            return {"wrong pointer to use as argument in 'ani_ref *argv'", ANIErrorSeverity::FATAL};
+        }
+        desc->ClearReleaseArgvState();
+        if (desc->GetArgc() == 0) {
+            return {};
+        }
+        if (desc->GetVargv() == nullptr) {
+            return {"wrong pointer to use as argument in 'ani_ref *argv'", ANIErrorSeverity::FATAL};
+        }
+        Span<VRef *> argvSpan(desc->GetVargv(), desc->GetArgc());
+        for (VRef *argRef : argvSpan) {
+            auto err = VerifyRef(argRef);
+            if (err) {
+                return err;
+            }
+        }
+        auto &releaseStorage = desc->MutableReleaseArgvStorage();
+        releaseStorage.reserve(desc->GetArgc());
+        for (ani_size i = 0; i < desc->GetArgc(); ++i) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            releaseStorage.push_back(desc->GetVargv()[i]->GetRef());
+        }
+        desc->SetReleaseArgv(releaseStorage.data());
+        return {};
     }
 
     VerificationResult VerifyType(VType *vtype)
@@ -2266,6 +2317,12 @@ static VerificationResult VerifyRef(Verifier &v, const ANIArg &arg)
     return v.VerifyRef(arg.GetValueRef());
 }
 
+static VerificationResult VerifyAnyRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ANY_REF);
+    return v.VerifyAnyRef(arg.GetValueRef());
+}
+
 static VerificationResult VerifyModule(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_MODULE);
@@ -2930,6 +2987,12 @@ static VerificationResult VerifyResolverStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_RESOLVER_STORAGE);
     return v.VerifyTypeStorage<VResolver **>(arg.GetValueResolverStorage(), "ani_resolver");
+}
+
+static VerificationResult VerifyRefCallArgs(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF_CALL_ARGS);
+    return v.VerifyRefCallArgs(arg.GetValueRefCallArgs());
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
