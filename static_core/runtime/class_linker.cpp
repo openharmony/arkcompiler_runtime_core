@@ -305,9 +305,8 @@ static size_t GetClassSize(ClassDataAccessorT dataAccessor, size_t vtableSize, s
 
     size_t numSfields = 0;
 
-    dataAccessor.template EnumerateStaticFieldTypes([&num8bitSfields, &num16bitSfields, &num32bitSfields,
-                                                     &num64bitSfields, &numRefSfields, &numTaggedSfields,
-                                                     &numSfields](Type fieldType) {
+    dataAccessor.EnumerateStaticFieldTypes([&num8bitSfields, &num16bitSfields, &num32bitSfields, &num64bitSfields,
+                                            &numRefSfields, &numTaggedSfields, &numSfields](Type fieldType) {
         ++numSfields;
 
         switch (fieldType.GetId()) {

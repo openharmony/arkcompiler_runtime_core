@@ -408,17 +408,10 @@ if (defined(enable_perf_counters)) {
   _libarkruntime_calculated_sources += [ "tooling/perf_counter.cpp" ]
 }
 
-if (is_mob && !is_android) {
-  _libarkruntime_calculated_sources += [
-    "$ark_root/platforms/mobile/runtime/mutator.cpp",
-    "$ark_root/platforms/mobile/runtime/verify_app_install.cpp",
-  ]
-} else {
-  _libarkruntime_calculated_sources += [
-    "$ark_root/platforms/common/runtime/mutator.cpp",
-    "$ark_root/platforms/common/runtime/verify_app_install.cpp",
-  ]
-}
+_libarkruntime_calculated_sources += [
+  "$ark_root/platforms/common/runtime/mutator.cpp",
+  "$ark_root/platforms/common/runtime/verify_app_install.cpp",
+]
 
 _libarkruntime_core_vm_sources = [
   "core/core_class_linker_extension.cpp",
@@ -666,7 +659,7 @@ ohos_shared_library("libarkruntime") {
   cflags_cc = [ "-fno-emulated-tls" ]
   ldflags = [ "-fno-emulated-tls" ]
 
-  if (!is_mac) {
+  if (!is_darwin) {
     # MacOS linker has no --exclude-libs flag
     ldflags += [ "-Wl,--exclude-libs,libpcre2_static_8.a:libpcre2_static_16.a" ]
   }
@@ -711,7 +704,7 @@ ohos_shared_library("libarkruntime") {
 
   if (is_mingw || is_win) {
     output_extension = "dll"
-  } else if (is_mac) {
+  } else if (is_darwin) {
     output_extension = "dylib"
   } else {
     output_extension = "so"

@@ -293,7 +293,7 @@ void ObjectAllocatorG1<MT_MODE>::IterateOverYoungObjects(const ObjectVisitor &ob
 {
     auto youngRegions = objectYoungAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>();
     for (auto r : youngRegions) {
-        r->template IterateOverObjects(objectVisitor);
+        r->IterateOverObjects(objectVisitor);
     }
 }
 
@@ -470,7 +470,7 @@ template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::CompactYoungRegions(const GCObjectVisitor &deathChecker,
                                                      const ObjectVisitorEx &moveChecker)
 {
-    objectYoungAllocator_->template CompactYoungToTenured(deathChecker, moveChecker, objectTenuredAllocator_.get());
+    objectYoungAllocator_->CompactYoungToTenured(deathChecker, moveChecker, objectTenuredAllocator_.get());
 }
 
 template <MTModeT MT_MODE>

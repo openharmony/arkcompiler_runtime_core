@@ -278,6 +278,9 @@ if (ark_static_standalone_build) {
 is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
          (current_cpu != "arm" || is_wearable_product)
 
+is_ios = current_os == "ios"
+is_darwin = is_ios || is_mac
+
 if (is_ohos && is_standard_system) {
   hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
   hitrace_root = "//base/hiviewdfx/hitrace/interfaces/native/innerkits"
