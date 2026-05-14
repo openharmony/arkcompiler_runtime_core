@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,10 +79,16 @@ protected:
     template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
     void Stringify(T number)
     {
-        if (std::isfinite(number)) {
-            ss_ << number;
+        if (std::isnan(number)) {
+            ss_ << "\"NaN\"";
+        } else if (std::isinf(number)) {
+            if (number > 0) {
+                ss_ << "\"Infinity\"";
+            } else {
+                ss_ << "\"-Infinity\"";
+            }
         } else {
-            ss_ << "null";
+            ss_ << number;
         }
     }
 
