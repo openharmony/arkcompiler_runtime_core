@@ -45,7 +45,7 @@ FILE_BEGIN = %{
 #include "libarkbase/mem/stack_like_allocator.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/heap/region_desc.h"
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 #ifndef __clang_analyzer__
 

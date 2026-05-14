@@ -358,6 +358,17 @@ void CodegenFastPath::EmitAtomicByteOrIntrinsic([[maybe_unused]] IntrinsicInst *
     GetEncoder()->EncodeAtomicByteOr(src[FIRST_OPERAND], src[SECOND_OPERAND], fastEncoding);
 }
 
+void CodegenFastPath::EmitAtomicU64OrIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                               SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_ATOMIC_U64_OR);
+    bool fastEncoding = true;
+    if (GetArch() == Arch::AARCH64 && !g_options.IsCpuFeatureEnabled(CpuFeature::ATOMICS)) {
+        fastEncoding = false;
+    }
+    GetEncoder()->EncodeAtomicU64Or(src[FIRST_OPERAND], src[SECOND_OPERAND], fastEncoding);
+}
+
 void CodegenFastPath::EmitSaveOrRestoreRegsEpIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst,
                                                        [[maybe_unused]] SRCREGS src)
 {

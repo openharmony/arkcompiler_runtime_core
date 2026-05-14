@@ -265,6 +265,14 @@ module CommonRuntimeConstants
     REGION_TYPE_FROM_REGION = "static_cast<uint64_t>(common_vm::RegionDesc::RegionType::FROM_REGION)"
     FORWARD_STATE_SHIFT = "cross_values::GetForwardStateShift(GetArch())"
     FORWARD_STATE_FORWARDED = "static_cast<uint64_t>(common_vm::BaseStateWord::ForwardState::FORWARDED)"
+    REGION_SIZE_BIT = "ark::helpers::math::GetIntLog2(ark::mem::RegionDesc::UNIT_SIZE)"
+    REGION_IS_COLLECTION_SET_OFFSET = "cross_values::GetRegionIsCollectionSetOffset(GetArch())"
+    REGION_TYPE_THREAD_LOCAL = "static_cast<uint64_t>(ark::mem::RegionDesc::RegionType::THREAD_LOCAL_REGION)"
+    REGION_RSET_OFFSET = "cross_values::GetRegionRsetOffset(GetArch())"
+    RSET_CARD_TABLE_OFFSET = "cross_values::GetRsetCardTableOffset(GetArch())"
+    MARKED_BYTES_PER_BIT = "ark::helpers::math::GetIntLog2(common_vm::kMarkedBytesPerBit)"
+    BITS_PER_WORD = "ark::helpers::math::GetIntLog2(common_vm::kBitsPerWord)"
+    BITS_PER_WORD_MASK = "common_vm::kBitsPerWord - 1u"
 end
 
 macro(:get_entry) { |entry_offset|

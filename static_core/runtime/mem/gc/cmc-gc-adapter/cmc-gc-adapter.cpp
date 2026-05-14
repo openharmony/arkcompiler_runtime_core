@@ -14,12 +14,14 @@
  */
 
 #include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/math_helpers.h"
 #include "runtime/mark_word.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/base_runtime.h"
+#include "common_interfaces/heap/region_desc.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {
@@ -34,11 +36,14 @@ CMCGCAdapter<LanguageConfig>::CMCGCAdapter(ObjectAllocatorBase *objectAllocator,
 template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::InitializeImpl()
 {
+#if defined(ARK_USE_COMMON_RUNTIME)
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
-    auto barrierSet = allocator->New<GCCMCBarrierSet>(allocator);
+    auto barrierSet =
+        allocator->New<GCCMCBarrierSet>(allocator, ark::helpers::math::GetIntLog2(ark::mem::RegionDesc::UNIT_SIZE));
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
     LOG(DEBUG, GC) << "CMC GC adapter initialized...";
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 template <class LanguageConfig>

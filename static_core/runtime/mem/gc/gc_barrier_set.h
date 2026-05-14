@@ -235,13 +235,13 @@ public:
 #else
     static constexpr bool USE_READ_BARRIERS = false;
 #endif
-    explicit GCCMCBarrierSet(mem::InternalAllocatorPtr allocator);
+    explicit GCCMCBarrierSet(mem::InternalAllocatorPtr allocator, uint8_t regionSizeBitsCount);
 
     NO_COPY_SEMANTIC(GCCMCBarrierSet);
     NO_MOVE_SEMANTIC(GCCMCBarrierSet);
     ~GCCMCBarrierSet() override = default;
 
-    bool IsSameRegion(void *ref, void *obj);
+    void UpdateRememberSet(void *obj, void *ref) const;
 
     bool IsPreBarrierEnabled() override;
 
@@ -264,6 +264,8 @@ private:
     ObjFieldProcessFunc readBarrierFunc_;
     /// Function which is called for the pre write barrier
     ObjRefProcessFunc preWriteBarrierFunc_;
+    /// How much bits needed for the region
+    uint8_t regionSizeBitsCount_ {0};
 
     void WriteBarrier(void *obj, void *field, void *newValue) override;
 };

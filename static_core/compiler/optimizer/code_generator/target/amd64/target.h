@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -304,6 +304,7 @@ public:
     void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
+    void EncodeAtomicU64Or(Reg addr, Reg value, bool fastEncoding) override;
 
     void EncodeSelect(const ArgsSelect &args) override;
     void EncodeSelect(const ArgsSelectImm &args) override;

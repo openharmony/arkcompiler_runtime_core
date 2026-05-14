@@ -45,7 +45,6 @@
 
 namespace ark::mem {
 
-using ::ark::common_vm::AlignUp;
 using ::ark::common_vm::Heap;
 using ::ark::common_vm::HeapAddress;
 using ::ark::common_vm::HeapBitmapManager;
@@ -1444,7 +1443,8 @@ public:
     // should keep as same as the align of BaseObject
     static constexpr size_t UNIT_BEGIN_ALIGN = 8;
     // default common region unit header size.
-    static constexpr size_t UNIT_HEADER_SIZE = AlignUp<size_t>(sizeof(InlinedRegionMetaData), UNIT_BEGIN_ALIGN);
+    static constexpr size_t UNIT_HEADER_SIZE =
+        ark::common_vm::AlignUp<size_t>(sizeof(InlinedRegionMetaData), UNIT_BEGIN_ALIGN);
     // default common region unit available size.
     static constexpr size_t UNIT_AVAILABLE_SIZE = UNIT_SIZE - UNIT_HEADER_SIZE;
 
@@ -1523,6 +1523,8 @@ public:
     friend constexpr size_t GetMetaDataInRegionOffset();
     static constexpr size_t REGION_RSET_IN_INLINED_METADATA_OFFSET = MEMBER_OFFSET(InlinedRegionMetaData, regionRSet_);
     static constexpr size_t REGION_TYPE_IN_INLINED_METADATA_OFFSET = MEMBER_OFFSET(InlinedRegionMetaData, regionType_);
+    static constexpr size_t REGION_CS_IN_INLINED_METADATA_OFFSET =
+        MEMBER_OFFSET(InlinedRegionMetaData, isCollectionSet_);
 };
 
 HeapAddress RegionDesc::InlinedRegionMetaData::GetRegionStart() const

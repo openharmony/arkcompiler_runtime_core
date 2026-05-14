@@ -279,24 +279,43 @@ entrypoints:
   - ark::ObjectHeader*
   - ark::ObjectHeader*
 
-- name: CmcPostWriteBarrier
-  entrypoint: CmcPostWriteBarrier
+- name: CmcPostWriteBarrierSingleFast
+  entrypoint: CmcPostWriteBarrierSingleFast
   bridge: none
-  properties: []
+  properties: [irtoc]
   signature:
     - void
     - ark::ObjectHeader*
     - int32_t
     - ark::ObjectHeader*
 
-- name: CmcPostWritePairBarrier
-  entrypoint: CmcPostWritePairBarrier
+- name: CmcPostWriteBarrierSingleSlow
+  entrypoint: CmcPostWriteBarrierSingleSlow
   bridge: none
-  properties: []
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: CmcPostWriteBarrierPairFast
+  entrypoint: CmcPostWriteBarrierPairFast
+  bridge: none
+  properties: [irtoc]
   signature:
     - void
     - ark::ObjectHeader*
     - int32_t
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: CmcPostWriteBarrierPairSlow
+  entrypoint: CmcPostWriteBarrierPairSlow
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
     - ark::ObjectHeader*
     - ark::ObjectHeader*
 

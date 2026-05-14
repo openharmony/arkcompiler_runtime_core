@@ -275,6 +275,12 @@ void Encoder::EncodeAtomicByteOr([[maybe_unused]] Reg addr, [[maybe_unused]] Reg
     SetFalseResult();
 }
 
+void Encoder::EncodeAtomicU64Or([[maybe_unused]] Reg addr, [[maybe_unused]] Reg value,
+                                [[maybe_unused]] bool fastEncoding)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeCompressedStringCharAt([[maybe_unused]] ArgsCompressedStringCharAt &&args)
 {
     SetFalseResult();

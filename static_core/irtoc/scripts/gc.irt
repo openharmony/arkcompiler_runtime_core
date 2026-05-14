@@ -234,6 +234,257 @@ def PostInterRegionBarrierTwoCardsSlow()
     }
 end
 
+def CmcPostWriteBarrierSingleFast()
+    params = {obj: 'ref_uint', offset: 'word', value: 'ref_uint'}
+    mask = RegMask.new($full_regmap, :arg0, :arg1, :tmp0)
+
+    function("CmcPostWriteBarrierSingleFast".to_sym,
+             params: params,
+             regmap: $full_regmap,
+             regalloc_set: mask,
+             mode: [:FastPath]) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            next
+        end
+
+        if defines.ARK_USE_COMMON_RUNTIME
+
+            If(value, 0).EQ.Unlikely {
+                Goto(:Done)
+            }
+
+            If(ShrI(Xor(obj, value).ref_uint).Imm(CommonRuntimeConstants::REGION_SIZE_BIT).ref_uint, 0).EQ.Likely {
+                Goto(:Done)
+            }
+
+            ep_offset = get_entrypoint_offset("CMC_POST_WRITE_BARRIER_SINGLE_SLOW")
+            LiveOut(obj).DstReg(regmap[:arg0]).ref_uint
+            LiveOut(value).DstReg(regmap[:arg1]).ref_uint
+            Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("CmcPostWriteBarrierSingleSlow").Terminator.void
+
+        end
+
+    Label(:Done)
+        ReturnVoid().void
+    }
+end
+
+def CmcPostWriteBarrierSingleSlow()
+    if Options.arch == :arm64
+        mask = RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee1, :tmp0, :tmp1)
+    elsif Options.arch == :x86_64
+        mask = RegMask.new($full_regmap, :arg0, :arg1, :callee0, :tmp0, :tmp1)
+    else
+        mask = $panda_mask
+    end
+
+    params = {obj: 'ref_uint', value: 'ref_uint'}
+
+    function(:CmcPostWriteBarrierSingleSlow,
+            params: params,
+            regmap: $full_regmap,
+            regalloc_set: mask,
+            mode: [:FastPath]) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            next
+        end
+
+        if defines.ARK_USE_COMMON_RUNTIME
+
+            objRegion := And(obj, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint
+            objRegionPtr := Cast(objRegion).SrcType(Constants::REF_UINT).ptr
+            isCollectionSet := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_IS_COLLECTION_SET_OFFSET).u8
+
+            If(isCollectionSet, 0).NE.Unlikely {
+                Goto(:Done)
+            }
+
+            valueRegion := Cast(And(value, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).SrcType(Constants::REF_UINT).ptr
+            valueRegionType := LoadI(valueRegion).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+
+            If(valueRegionType, CommonRuntimeConstants::REGION_TYPE_THREAD_LOCAL).LT.b {
+                Goto(:Done)
+            }
+
+            If(valueRegionType, CommonRuntimeConstants::REGION_TYPE_FROM_REGION).GT.b {
+                Goto(:Done)
+            }
+
+            remset := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_RSET_OFFSET).ptr
+            objOffset := Sub(obj, objRegion).u64
+            bitIdx := ShrI(objOffset).Imm(CommonRuntimeConstants::MARKED_BYTES_PER_BIT).u64
+            wordIdx := ShrI(bitIdx).Imm(CommonRuntimeConstants::BITS_PER_WORD).u64
+            bitInWord := AndI(bitIdx).Imm(CommonRuntimeConstants::BITS_PER_WORD_MASK).u64
+            bitMask := Shl(1, bitInWord).u64
+            wordOffset := ShlI(wordIdx).Imm(3).u64
+            cardTable := AddI(remset).Imm(CommonRuntimeConstants::RSET_CARD_TABLE_OFFSET).ptr
+            wordAddr := Add(cardTable, wordOffset).ptr
+
+            word := LoadI(wordAddr).Imm(0).u64
+            alreadyMarked := And(word, bitMask).u64
+
+            If(alreadyMarked, 0).NE {
+                Goto(:Done)
+            }
+
+            Intrinsic(:ATOMIC_U64_OR, wordAddr, bitMask).void
+        
+        end
+
+    Label(:Done)
+        ReturnVoid().void
+    }
+end
+
+def CmcPostWriteBarrierPairFast()
+    params = {obj: 'ref_uint', offset: 'word', value1: 'ref_uint', value2: 'ref_uint'}
+    mask = RegMask.new($full_regmap, :arg0, :arg1, :arg2, :tmp0)
+
+    function("CmcPostWriteBarrierPairFast".to_sym,
+             params: params,
+             regmap: $full_regmap,
+             regalloc_set: mask,
+             mode: [:FastPath]) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            next
+        end
+
+        if defines.ARK_USE_COMMON_RUNTIME
+
+            If(value1, 0).EQ.Unlikely {
+                Goto(:Check2)
+            }
+
+            If(ShrI(Xor(obj, value1).ref_uint).Imm(CommonRuntimeConstants::REGION_SIZE_BIT).ref_uint, 0).EQ.Likely {
+                Goto(:Check2)
+            }
+
+            Goto(:CallSlow)
+
+        Label(:Check2)
+            If(value2, 0).EQ.Unlikely {
+                Goto(:Done)
+            }
+
+            If(ShrI(Xor(obj, value2).ref_uint).Imm(CommonRuntimeConstants::REGION_SIZE_BIT).ref_uint, 0).EQ.Likely {
+                Goto(:Done)
+            }
+
+        Label(:CallSlow)
+            ep_offset = get_entrypoint_offset("CMC_POST_WRITE_BARRIER_PAIR_SLOW")
+            LiveOut(obj).DstReg(regmap[:arg0]).ref_uint
+            LiveOut(value1).DstReg(regmap[:arg1]).ref_uint
+            LiveOut(value2).DstReg(regmap[:arg2]).ref_uint
+            Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("CmcPostWriteBarrierPairSlow").Terminator.void
+
+        end
+
+    Label(:Done)
+        ReturnVoid().void
+    }
+end
+
+def CmcPostWriteBarrierPairSlow()
+    if Options.arch == :arm64
+        mask = RegMask.new($full_regmap, :arg0, :arg1, :arg2, :callee0, :callee1, :tmp0, :tmp1)
+    elsif Options.arch == :x86_64
+        mask = RegMask.new($full_regmap, :arg0, :arg1, :arg2, :callee0, :tmp0, :tmp1)
+    else
+        mask = $panda_mask
+    end
+
+    params = {obj: 'ref_uint', value1: 'ref_uint', value2: 'ref_uint'}
+
+    function(:CmcPostWriteBarrierPairSlow,
+            params: params,
+            regmap: $full_regmap,
+            regalloc_set: mask,
+            mode: [:FastPath]) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            next
+        end
+
+        if defines.ARK_USE_COMMON_RUNTIME
+
+            objRegion := And(obj, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint
+            objRegionPtr := Cast(objRegion).SrcType(Constants::REF_UINT).ptr
+            isCollectionSet := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_IS_COLLECTION_SET_OFFSET).u8
+
+            If(isCollectionSet, 0).NE.Unlikely {
+                Goto(:Done)
+            }
+
+            If(value1, 0).EQ.Unlikely {
+                Goto(:CheckValue2)
+            }
+
+            value1Region := Cast(And(value1, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).SrcType(Constants::REF_UINT).ptr
+            value1RegionType := LoadI(value1Region).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+
+            If(value1RegionType, CommonRuntimeConstants::REGION_TYPE_THREAD_LOCAL).LT.b {
+                Goto(:CheckValue2)
+            }
+
+            If(value1RegionType, CommonRuntimeConstants::REGION_TYPE_FROM_REGION).GT.b {
+                Goto(:CheckValue2)
+            }
+
+            Goto(:UpdateRemSet)
+
+        Label(:CheckValue2)
+
+            If(value2, 0).EQ.Unlikely {
+                Goto(:Done)
+            }
+
+            value2Region := Cast(And(value2, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).SrcType(Constants::REF_UINT).ptr
+            value2RegionType := LoadI(value2Region).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+
+            If(value2RegionType, CommonRuntimeConstants::REGION_TYPE_THREAD_LOCAL).LT.b {
+                Goto(:Done)
+            }
+
+            If(value2RegionType, CommonRuntimeConstants::REGION_TYPE_FROM_REGION).GT.b {
+                Goto(:Done)
+            }
+
+        Label(:UpdateRemSet)
+            remset := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_RSET_OFFSET).ptr
+            objOffset := Sub(obj, objRegion).u64
+            bitIdx := ShrI(objOffset).Imm(CommonRuntimeConstants::MARKED_BYTES_PER_BIT).u64
+            wordIdx := ShrI(bitIdx).Imm(CommonRuntimeConstants::BITS_PER_WORD).u64
+            bitInWord := AndI(bitIdx).Imm(CommonRuntimeConstants::BITS_PER_WORD_MASK).u64
+            bitMask := Shl(1, bitInWord).u64
+            wordOffset := ShlI(wordIdx).Imm(3).u64
+            cardTable := AddI(remset).Imm(CommonRuntimeConstants::RSET_CARD_TABLE_OFFSET).ptr
+            wordAddr := Add(cardTable, wordOffset).ptr
+
+            word := LoadI(wordAddr).Imm(0).u64
+            alreadyMarked := And(word, bitMask).u64
+
+            If(alreadyMarked, 0).NE {
+                Goto(:Done)
+            }
+
+            Intrinsic(:ATOMIC_U64_OR, wordAddr, bitMask).void
+
+        end
+
+    Label(:Done)
+        ReturnVoid().void
+    }
+end
+
+CmcPostWriteBarrierSingleFast()
+CmcPostWriteBarrierSingleSlow()
+
+CmcPostWriteBarrierPairFast()
+CmcPostWriteBarrierPairSlow()
+
 PostInterRegionBarrierSlow()
 PostInterRegionBarrierTwoCardsSlow()
 

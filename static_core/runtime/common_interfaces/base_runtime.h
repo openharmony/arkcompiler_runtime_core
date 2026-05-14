@@ -161,7 +161,6 @@ public:
 
     // Need refactor, move to other file
     static void PreWriteBarrier(void *preVal, Mutator *mutator);
-    static void WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator);
     static void *ReadBarrier(void *obj, void *field);
     static void *ReadBarrier(void **field);
     static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);

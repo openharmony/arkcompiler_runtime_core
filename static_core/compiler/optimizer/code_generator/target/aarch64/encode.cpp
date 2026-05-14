@@ -3020,16 +3020,8 @@ void Aarch64Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc
     GetMasm()->Cset(VixlReg(dst), ConvertTest(cc));
 }
 
-void Aarch64Encoder::EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding)
+void Aarch64Encoder::EncodeAtomicOrImpl(Reg addr, Reg value, TypeInfo type, uint8_t regSize)
 {
-    if (fastEncoding) {
-#ifndef NDEBUG
-        vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kAtomics);
-#endif
-        GetMasm()->Stsetb(VixlReg(value, BYTE_SIZE), MemOperand(VixlReg(addr)));
-        return;
-    }
-
     // Slow encoding, should not be used in production code!!!
     auto linkReg = GetTarget().GetLinkReg();
     auto frameReg = GetTarget().GetFrameReg();
@@ -3043,25 +3035,62 @@ void Aarch64Encoder::EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding)
     if (hasTemps) {
         tmp1.AcquireWithLr();
         tmp2.AcquireWithLr();
-        orValue = tmp1.GetReg().As(INT32_TYPE);
+        orValue = tmp1.GetReg().As(type);
         storeResult = tmp2.GetReg().As(INT32_TYPE);
     } else {
         GetMasm()->stp(VixlReg(frameReg), VixlReg(linkReg),
                        MemOperand(vixl::aarch64::sp, -PAIR_OFFSET, vixl::aarch64::AddrMode::PreIndex));
-        orValue = frameReg.As(INT32_TYPE);
+        orValue = frameReg.As(type);
         storeResult = linkReg.As(INT32_TYPE);
     }
 
     auto *loop = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     GetMasm()->Bind(loop);
-    GetMasm()->Ldxrb(VixlReg(orValue), MemOperand(VixlReg(addr)));
-    GetMasm()->Orr(VixlReg(orValue), VixlReg(orValue), VixlReg(value, WORD_SIZE));
-    GetMasm()->Stxrb(VixlReg(storeResult), VixlReg(orValue), MemOperand(VixlReg(addr)));
+    switch (regSize) {
+        case BYTE_SIZE:
+            GetMasm()->Ldxrb(VixlReg(orValue), MemOperand(VixlReg(addr)));
+            GetMasm()->Orr(VixlReg(orValue), VixlReg(orValue), VixlReg(value, regSize));
+            GetMasm()->Stxrb(VixlReg(storeResult), VixlReg(orValue), MemOperand(VixlReg(addr)));
+            break;
+        case DOUBLE_WORD_SIZE:
+            GetMasm()->Ldxr(VixlReg(orValue), MemOperand(VixlReg(addr)));
+            GetMasm()->Orr(VixlReg(orValue), VixlReg(orValue), VixlReg(value, regSize));
+            GetMasm()->Stxr(VixlReg(storeResult), VixlReg(orValue), MemOperand(VixlReg(addr)));
+            break;
+        default:
+            UNREACHABLE();
+    }
     GetMasm()->Cbnz(VixlReg(storeResult), loop);
     if (!hasTemps) {
         GetMasm()->ldp(VixlReg(frameReg), VixlReg(linkReg),
                        MemOperand(vixl::aarch64::sp, PAIR_OFFSET, vixl::aarch64::AddrMode::PostIndex));
     }
+}
+
+void Aarch64Encoder::EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding)
+{
+    if (fastEncoding) {
+#ifndef NDEBUG
+        vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kAtomics);
+#endif
+        GetMasm()->Stsetb(VixlReg(value, BYTE_SIZE), MemOperand(VixlReg(addr)));
+        return;
+    }
+
+    EncodeAtomicOrImpl(addr, value, INT32_TYPE, BYTE_SIZE);
+}
+
+void Aarch64Encoder::EncodeAtomicU64Or(Reg addr, Reg value, bool fastEncoding)
+{
+    if (fastEncoding) {
+#ifndef NDEBUG
+        vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kAtomics);
+#endif
+        GetMasm()->Stset(VixlReg(value, DOUBLE_WORD_SIZE), MemOperand(VixlReg(addr)));
+        return;
+    }
+
+    EncodeAtomicOrImpl(addr, value, INT64_TYPE, DOUBLE_WORD_SIZE);
 }
 
 void Aarch64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)

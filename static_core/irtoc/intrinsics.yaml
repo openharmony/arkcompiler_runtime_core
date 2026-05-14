@@ -343,6 +343,21 @@ intrinsics:
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: Atomic bit set on byte in memory, without return
 
+- name: AtomicU64Or
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "EmitAtomicU64OrIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitAtomicU64Or
+  signature:
+      ret: void
+      args: [ u64, u64 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Atomic 64-bit OR in memory, without return
+
 - name: CompressEightUtf16ToUtf8CharsUsingSimd
   class_name: Irtoc
   method_name:

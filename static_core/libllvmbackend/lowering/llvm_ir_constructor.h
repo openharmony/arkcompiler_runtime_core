@@ -88,6 +88,8 @@ private:
     bool EmitExpandU8U16(Inst *inst);
     bool EmitReverseHalfWords(Inst *inst);
     bool EmitAtomicByteOr(Inst *inst);
+    bool EmitAtomicU64Or(Inst *inst);
+    bool EmitAtomicOrImpl(Inst *inst, llvm::Type *type);
     static llvm::Value *LoadFromExecutionContext(llvm::IRBuilder<> *builder,
                                                  llvmbackend::LLVMArkInterface *arkInterface, Arch arch,
                                                  uintptr_t offset, llvm::Type *type = nullptr);

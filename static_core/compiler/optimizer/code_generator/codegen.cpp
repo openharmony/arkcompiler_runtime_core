@@ -346,6 +346,13 @@ void Codegen::EmitAtomicByteOrIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[
     GetEncoder()->SetFalseResult();
 }
 
+void Codegen::EmitAtomicU64OrIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                       [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
 void Codegen::EmitSaveOrRestoreRegsEpIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
                                                [[maybe_unused]] SRCREGS src)
 {
@@ -2245,14 +2252,14 @@ void Codegen::CreateCmcPostWRBCall(Inst *inst, MemRef mem, Reg srcReg, RegMask p
     live_regs |= preserved;
 
     if (!mem.HasIndex()) {
-        CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER, INVALID_REGISTER, mem.GetBase(),
-                    TypedImm(mem.GetDisp()), srcReg);
+        CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER_SINGLE_FAST, INVALID_REGISTER,
+                    mem.GetBase(), TypedImm(mem.GetDisp()), srcReg);
         return;
     }
     ScopedTmpReg offset(GetEncoder());
     MemRefToOffset(offset, mem);
-    CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER, INVALID_REGISTER, mem.GetBase(), offset,
-                srcReg);
+    CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER_SINGLE_FAST, INVALID_REGISTER,
+                mem.GetBase(), offset, srcReg);
 }
 
 void Codegen::CreateCmcPostWRBCallWithPair(Inst *inst, MemRef mem, Reg srcReg1, Reg srcReg2, RegMask preserved)
@@ -2261,7 +2268,7 @@ void Codegen::CreateCmcPostWRBCallWithPair(Inst *inst, MemRef mem, Reg srcReg1, 
     live_regs |= preserved;
 
     ASSERT(!mem.HasIndex());
-    CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_PAIR_BARRIER, INVALID_REGISTER, mem.GetBase(),
+    CallBarrier(live_regs, live_vregs, EntrypointId::CMC_POST_WRITE_BARRIER_PAIR_FAST, INVALID_REGISTER, mem.GetBase(),
                 TypedImm(mem.GetDisp()), srcReg1, srcReg2);
 }
 
@@ -2286,10 +2293,6 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
         ASSERT(barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER ||
                barrierType == ark::mem::BarrierType::POST_CMC_WRITE_BARRIER);
     }
-    if (barrierType == ark::mem::BarrierType::POST_CMC_WRITE_BARRIER) {
-        CreateCmcPostWRB(inst, mem, reg1, reg2, preserved);
-        return;
-    }
     // For dynamic methods, another check
     if (GetGraph()->IsDynamicMethod()) {
         CreatePostWRBForDynamicImpl(inst, mem, reg1, reg2, preserved);
@@ -2300,7 +2303,7 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
 
 void Codegen::CreatePostWRBImpl(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask preserved)
 {
-    SCOPED_DISASM_STR(this, "Post-write barrier with G1-GC");
+    SCOPED_DISASM_STR(this, "Post-write barrier");
     PostWriteBarrier pwb(this, inst);
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
@@ -3065,15 +3068,24 @@ void PostWriteBarrier::EncodeOnlineIrtocBarrier(Args args)
 {
     SCOPED_DISASM_STR(cg_, "Post Online Irtoc-WRB");
     auto hasObj2 = HasObject2(args);
-    if (type_ == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
-        if (hasObj2) {
-            EncodeOnlineIrtocRegionTwoRegsBarrier(args);
-        } else {
-            EncodeOnlineIrtocRegionOneRegBarrier(args);
-        }
-    } else {
-        // Unknown GC barrier type
-        UNREACHABLE();
+    switch (type_) {
+        case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
+            if (hasObj2) {
+                EncodeOnlineIrtocRegionTwoRegsBarrier(args);
+            } else {
+                EncodeOnlineIrtocRegionOneRegBarrier(args);
+            }
+            break;
+        case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
+            if (hasObj2) {
+                EncodeOnlineIrtocCMCRegionTwoRegsBarrier(args);
+            } else {
+                EncodeOnlineIrtocCMCRegionOneRegBarrier(args);
+            }
+            break;
+        default:
+            // Unknown GC barrier type
+            UNREACHABLE();
     }
 }
 
@@ -3135,6 +3147,46 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionOneRegBarrier(Args args)
     EncodeCheckObject(base, args.reg1, skip, args.checkObject);
     cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
     EncodeWrapOneArg(paramReg0, base, args.mem);
+    ScopedTmpReg tmpReg(enc, true);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
+    cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
+    enc->BindLabel(skip);
+}
+
+void PostWriteBarrier::EncodeOnlineIrtocCMCRegionOneRegBarrier(Args args)
+{
+    static constexpr auto ENTRYPOINT_ID {RuntimeInterface::EntrypointId::CMC_POST_WRITE_BARRIER_SINGLE_SLOW};
+    auto *enc {cg_->GetEncoder()};
+    auto base = GetBase(args);
+    auto paramRegs = GetParamRegs(2U, args);
+    auto skip = enc->CreateLabel();
+    EncodeCheckObject(base, args.reg1, skip, args.checkObject);
+    cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
+    cg_->FillCallParams(base, args.reg1);
+    ScopedTmpReg tmpReg(enc, true);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
+    cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
+    enc->BindLabel(skip);
+}
+
+void PostWriteBarrier::EncodeOnlineIrtocCMCRegionTwoRegsBarrier(Args args)
+{
+    static constexpr auto ENTRYPOINT_ID {RuntimeInterface::EntrypointId::CMC_POST_WRITE_BARRIER_PAIR_SLOW};
+    auto *enc {cg_->GetEncoder()};
+    auto base = GetBase(args);
+    auto paramRegs = GetParamRegs(3U, args);
+    auto check2 = enc->CreateLabel();
+    auto callSlow = enc->CreateLabel();
+    auto skip = enc->CreateLabel();
+    EncodeCheckObject(base, args.reg1, check2, args.checkObject);
+    enc->EncodeJump(callSlow);
+    enc->BindLabel(check2);
+    EncodeCheckObject(base, args.reg2, skip, args.checkObject);
+    enc->BindLabel(callSlow);
+    cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
+    cg_->FillCallParams(base, args.reg1, args.reg2);
     ScopedTmpReg tmpReg(enc, true);
     cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
     enc->MakeCall(tmpReg);

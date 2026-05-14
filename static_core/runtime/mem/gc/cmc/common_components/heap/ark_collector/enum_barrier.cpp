@@ -42,14 +42,6 @@ void EnumBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject
     }
 }
 
-void EnumBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
-{
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-        UpdateRememberSet(obj, ref);
-        LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": -> " << ref;
-    }
-}
-
 BaseObject *EnumBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const
 {
     BaseObject *target = nullptr;

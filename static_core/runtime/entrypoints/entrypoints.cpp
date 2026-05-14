@@ -154,7 +154,9 @@ extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_
     LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object in compiled code at " << mem << " size: " << size;
     auto *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
+#ifndef ARK_USE_COMMON_RUNTIME
     ASSERT(size <= Runtime::GetOptions().GetMaxTlabSize());
+#endif
     // 1. Pointer to TLAB
     // 2. Pointer to allocated memory
     // 3. size
@@ -425,28 +427,6 @@ extern "C" ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj)
         return nullptr;
     }
     return ObjectHeader::Clone(obj);
-}
-
-extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
-                                    [[maybe_unused]] ark::ObjectHeader *ref)
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    Mutator::GetCurrent()->GetBarrierSet()->PostBarrier(obj, offset, ref);
-#else
-    UNREACHABLE();
-#endif
-}
-
-extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
-                                        [[maybe_unused]] ark::ObjectHeader *ref1,
-                                        [[maybe_unused]] ark::ObjectHeader *ref2)
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    Mutator::GetCurrent()->GetBarrierSet()->PostBarrier(obj, offset, ref1);
-    Mutator::GetCurrent()->GetBarrierSet()->PostBarrier(obj, offset + OBJECT_POINTER_SIZE, ref2);
-#else
-    UNREACHABLE();
-#endif
 }
 
 extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)

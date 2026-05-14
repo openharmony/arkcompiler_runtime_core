@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,7 @@ public:
     void EmitWriteTlabStatsSafeIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitExpandU8ToU16Intrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitAtomicByteOrIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitAtomicU64OrIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitSaveOrRestoreRegsEpIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitTailCallIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
     void EmitSlowPathEntryIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;

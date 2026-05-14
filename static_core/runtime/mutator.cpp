@@ -390,7 +390,10 @@ void Mutator::InitCardTableData(mem::GCBarrierSet *barrier)
             postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
             break;
         case mem::POST_RB_NONE:
+            break;
         case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
+            postWrbOneObject_ = reinterpret_cast<void *>(CmcPostWriteBarrierSingleFast);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(CmcPostWriteBarrierPairFast);
             break;
         case mem::PRE_WRB_NONE:
         case mem::PRE_RB_NONE:

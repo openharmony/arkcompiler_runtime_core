@@ -33,13 +33,6 @@ BaseObject *PostMarkingBarrier::ReadStaticRef(RefField<false> &field) const
     return ReadRefField(nullptr, field);
 }
 
-void PostMarkingBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
-{
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-        UpdateRememberSet(obj, ref);
-    }
-}
-
 BaseObject *PostMarkingBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const
 {
     BaseObject *target = nullptr;
