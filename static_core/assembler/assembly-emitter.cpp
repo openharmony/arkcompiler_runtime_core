@@ -894,6 +894,15 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
         auto *item = items->GetOrCreateStringItem(s);
         entities.stringItems.insert({s, item});
     }
+    if (program.metadata.empty()) {
+        return;
+    }
+    for (const auto &[moduleInfo, metadata] : program.metadata) {
+        auto pkgName = moduleInfo.GetPkgName();
+        auto moduleName = moduleInfo.GetModuleName();
+        entities.stringItems.insert({pkgName, items->GetOrCreateStringItem(pkgName)});
+        entities.stringItems.insert({moduleName, items->GetOrCreateStringItem(moduleName)});
+    }
 }
 
 template <Value::Type TYPE, typename CType = ValueTypeHelperT<TYPE>>
@@ -1843,7 +1852,7 @@ bool AsmEmitter::Emit(ItemContainer *items, Program &program, PandaFileToPandaAs
         return false;
     }
 
-    items->CreateMetadataItem(program.metadata);
+    items->SetMetadataItems(program.metadata);
 
     if (profileOpt != nullptr) {
         items->ReorderItems(profileOpt);

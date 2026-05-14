@@ -942,6 +942,39 @@ bool CodeItem::Write(Writer *writer)
     return true;
 }
 
+void MetadataItems::SetMetadata(MetadataByModules metadata)
+{
+    metadata_ = std::move(metadata);
+    if (metadata_.empty()) {
+        return;
+    }
+
+    compressedMetadata_ = MetadataAccessor::CompressMetadata(metadata_);
+
+    for (auto const &[_, moduleMetadata] : metadata_) {
+        if (!moduleMetadata.empty()) {
+            isEmpty_ = false;
+            return;
+        }
+    }
+}
+
+size_t MetadataItems::CalculateSize() const
+{
+    uint32_t metadataSize = File::METADATA_FLAG_SIZE;
+    if (!IsEnabled()) {
+        return metadataSize;
+    }
+
+    metadataSize += ID_SIZE;
+    if (!IsEmpty()) {
+        metadataSize += ID_SIZE;
+        metadataSize += NumItems() * ID_SIZE * MetadataAccessor::INDEX_ITEM_SIZE;
+        metadataSize += CompressedSize();
+    }
+    return metadataSize;
+}
+
 ScalarValueItem *ValueItem::GetAsScalar()
 {
     ASSERT(!IsArray());

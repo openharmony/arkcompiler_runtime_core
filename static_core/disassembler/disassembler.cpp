@@ -425,7 +425,7 @@ void Disassembler::FillLiteralArrayData(pandasm::LiteralArray *litArray, const p
             auto strId = panda_file::helpers::Read<sizeof(T)>(&sp);
             pandasm::LiteralArray::Literal lit;
             lit.tag = tag;
-            lit.value = StringDataToString(file_->GetStringData(panda_file::File::EntityId(strId)));
+            lit.value = file_->GetStringData(panda_file::File::EntityId(strId)).ToString();
             litArray->literals.push_back(lit);
         }
     }
@@ -477,8 +477,7 @@ std::variant<bool, uint8_t, uint16_t, uint32_t, uint64_t, float, double, std::st
 
 std::string Disassembler::ParseStringData(const panda_file::LiteralDataAccessor::LiteralValue &value) const
 {
-    auto strData = file_->GetStringData(panda_file::File::EntityId(std::get<uint32_t>(value)));
-    return StringDataToString(strData);
+    return file_->GetStringData(panda_file::File::EntityId(std::get<uint32_t>(value))).ToString();
 }
 
 std::string Disassembler::ParseLiteralArrayData(const panda_file::LiteralDataAccessor::LiteralValue &value) const
@@ -608,7 +607,7 @@ void Disassembler::GetRecords()
 void Disassembler::GetField(pandasm::Field &field, const panda_file::FieldDataAccessor &fieldAccessor)
 {
     panda_file::File::EntityId fieldNameId = fieldAccessor.GetNameId();
-    field.name = StringDataToString(file_->GetStringData(fieldNameId));
+    field.name = file_->GetStringData(fieldNameId).ToString();
 
     uint32_t fieldType = fieldAccessor.GetType();
     field.type = FieldTypeToPandasmType(fieldType);
@@ -907,10 +906,10 @@ void Disassembler::GetMetaData(pandasm::Function *method, const panda_file::File
 
     panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
 
-    const auto methodNameRaw = StringDataToString(file_->GetStringData(methodAccessor.GetNameId()));
+    const auto methodNameRaw = file_->GetStringData(methodAccessor.GetNameId()).ToString();
 
     if (!methodAccessor.IsStatic()) {
-        const auto className = StringDataToString(file_->GetStringData(methodAccessor.GetClassId()));
+        const auto className = file_->GetStringData(methodAccessor.GetClassId()).ToString();
         auto thisType = pandasm::Type::FromDescriptor(className);
 
         LOG(DEBUG, DISASSEMBLER) << "method (raw: \'" << methodNameRaw
@@ -1146,7 +1145,7 @@ std::string Disassembler::ScalarValueToString(const panda_file::ScalarValue &val
         ss << value.Get<double>();
     } else if (type == "string") {
         const auto id = value.Get<panda_file::File::EntityId>();
-        ss << "\"" << StringDataToString(file_->GetStringData(id)) << "\"";
+        ss << "\"" << file_->GetStringData(id).ToString() << "\"";
     } else if (type == "record") {
         const auto id = value.Get<panda_file::File::EntityId>();
         ss << GetFullRecordName(id);
@@ -1158,7 +1157,7 @@ std::string Disassembler::ScalarValueToString(const panda_file::ScalarValue &val
         const auto id = value.Get<panda_file::File::EntityId>();
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
         ss << GetFullRecordName(fieldAccessor.GetClassId()) << "."
-           << StringDataToString(file_->GetStringData(fieldAccessor.GetNameId()));
+           << file_->GetStringData(fieldAccessor.GetNameId()).ToString();
     } else if (type == "annotation") {
         const auto id = value.Get<panda_file::File::EntityId>();
         ss << "id_" << id;
@@ -1201,7 +1200,7 @@ std::string Disassembler::ArrayValueToString(const panda_file::ArrayValue &value
         ss << value.Get<double>(idx);
     } else if (type == "string") {
         const auto id = value.Get<panda_file::File::EntityId>(idx);
-        ss << '\"' << StringDataToString(file_->GetStringData(id)) << '\"';
+        ss << '\"' << file_->GetStringData(id).ToString() << '\"';
     } else if (type == "record") {
         const auto id = value.Get<panda_file::File::EntityId>(idx);
         ss << GetFullRecordName(id);
@@ -1213,7 +1212,7 @@ std::string Disassembler::ArrayValueToString(const panda_file::ArrayValue &value
         const auto id = value.Get<panda_file::File::EntityId>(idx);
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
         ss << GetFullRecordName(fieldAccessor.GetClassId()) << "."
-           << StringDataToString(file_->GetStringData(fieldAccessor.GetNameId()));
+           << file_->GetStringData(fieldAccessor.GetNameId()).ToString();
     } else if (type == "annotation") {
         const auto id = value.Get<panda_file::File::EntityId>(idx);
         ss << "id_" << id;
@@ -1228,7 +1227,7 @@ std::string Disassembler::GetFullMethodName(const panda_file::File::EntityId &me
 {
     ark::panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
 
-    const auto methodNameRaw = StringDataToString(file_->GetStringData(methodAccessor.GetNameId()));
+    const auto methodNameRaw = file_->GetStringData(methodAccessor.GetNameId()).ToString();
 
     std::string className = GetFullRecordName(methodAccessor.GetClassId());
     if (IsSystemType(className)) {
@@ -1254,7 +1253,7 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
 
 std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &classId) const
 {
-    std::string name = StringDataToString(file_->GetStringData(classId));
+    std::string name = file_->GetStringData(classId).ToString();
     if (name.empty()) {
         LOG(FATAL, DISASSEMBLER) << "Record name is empty";
     }
@@ -1888,7 +1887,7 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
     if (bcIns.HasFlag(BytecodeInstruction::Flags::TYPE_ID)) {
         auto idx = bcIns.GetId().AsIndex();
         auto id = file_->ResolveClassIndex(methodId, idx);
-        auto type = pandasm::Type::FromDescriptor(StringDataToString(file_->GetStringData(id)));
+        auto type = pandasm::Type::FromDescriptor(file_->GetStringData(id).ToString());
 
         name.str("");
         name << type.GetPandasmName();
@@ -1904,7 +1903,7 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
         if (skipStrings_ || quiet_) {
             name << std::hex << "0x" << bcIns.GetId().AsFileId();
         } else {
-            name << StringDataToString(file_->GetStringData(bcIns.GetId().AsFileId()));
+            name << file_->GetStringData(bcIns.GetId().AsFileId()).ToString();
         }
 
         name << '\"';
@@ -1916,7 +1915,7 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
 
         auto recordName = GetFullRecordName(fieldAccessor.GetClassId());
         name << recordName << '.';
-        name << StringDataToString(file_->GetStringData(fieldAccessor.GetNameId()));
+        name << file_->GetStringData(fieldAccessor.GetNameId()).ToString();
     } else if (bcIns.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
         auto index = bcIns.GetId().AsIndex();
         name << "array_" << index;

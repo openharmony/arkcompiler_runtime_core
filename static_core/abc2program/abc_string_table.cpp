@@ -27,7 +27,7 @@ std::string AbcStringTable::GetStringById(uint32_t stringId) const
 
 std::string AbcStringTable::GetStringById(panda_file::File::EntityId entityId) const
 {
-    std::string str = StringDataToString(file_.GetStringData(entityId));
+    std::string str = file_.GetStringData(entityId).ToString();
     return str;
 }
 

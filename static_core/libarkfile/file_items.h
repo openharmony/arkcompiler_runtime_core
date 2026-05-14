@@ -16,6 +16,7 @@
 #ifndef LIBPANDAFILE_FILE_ITEMS_H_
 #define LIBPANDAFILE_FILE_ITEMS_H_
 
+#include "metadata_accessor.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_writer.h"
 #include "libarkbase/macros.h"
@@ -1725,53 +1726,52 @@ private:
 class ScalarValueItem;
 class ArrayValueItem;
 
-class MetadataItem : public BaseItem {
+class MetadataItems {
 public:
-    explicit MetadataItem(std::vector<uint8_t> metadata) : metadata_(std::move(metadata)) {}
+    explicit MetadataItems() = default;
+    ~MetadataItems() = default;
 
-    ~MetadataItem() override = default;
+    void SetMetadata(MetadataByModules metadata);
 
-    DEFAULT_MOVE_SEMANTIC(MetadataItem);
-    DEFAULT_COPY_SEMANTIC(MetadataItem);
-
-    ItemTypes GetItemType() const override
+    bool IsEnabled() const
     {
-        return ItemTypes::METADATA_ITEM;
-    }
-
-    size_t CalculateSize() const override
-    {
-        return metadata_.size();
-    }
-
-    bool Write(Writer *writer) override
-    {
-        writer->WriteBytes(metadata_);
-        return true;
-    }
-
-    std::vector<uint8_t> GetValue() const
-    {
-        return metadata_;
+        return !metadata_.empty();
     }
 
     bool IsEmpty() const
     {
-        return metadata_.empty();
+        return isEmpty_;
     }
 
-    size_t Size() const
+    MetadataByModules ByModules() const
+    {
+        return metadata_;
+    }
+
+    EncodedMetadata Compressed() const
+    {
+        return compressedMetadata_;
+    }
+
+    size_t CompressedSize() const
+    {
+        return compressedMetadata_.size();
+    }
+
+    size_t CalculateSize() const;
+
+    size_t NumItems() const
     {
         return metadata_.size();
     }
 
-    static bool IsNullOrEmpty(const std::unique_ptr<MetadataItem> &item)
-    {
-        return item == nullptr || item->IsEmpty();
-    }
+    DEFAULT_MOVE_SEMANTIC(MetadataItems);
+    DEFAULT_COPY_SEMANTIC(MetadataItems);
 
 private:
-    std::vector<uint8_t> metadata_;
+    MetadataByModules metadata_;
+    EncodedMetadata compressedMetadata_;
+    bool isEmpty_ = true;
 };
 
 class ValueItem : public BaseItem {

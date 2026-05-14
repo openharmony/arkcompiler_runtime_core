@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <limits>
 #include <thread>
+#include "libarkfile/metadata_accessor.h"
 #include <type_traits>
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/span.h"
@@ -255,6 +256,7 @@ ItemContainer::ItemContainer()
     codeItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
     debugItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
     end_ = debugItemsEnd_->get();
+    metadata_ = std::make_unique<MetadataItems>();
 }
 
 ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
@@ -281,9 +283,9 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
     return item;
 }
 
-void ItemContainer::CreateMetadataItem(std::vector<uint8_t> metadata)
+void ItemContainer::SetMetadataItems(MetadataByModules metadata)
 {
-    metadataItem_ = std::make_unique<MetadataItem>(std::move(metadata));
+    metadata_->SetMetadata(std::move(metadata));
 }
 
 bool ItemContainer::IsMetadataEnabled() const
@@ -691,7 +693,7 @@ uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection, bool updateOrde
     uint32_t classIdxOffset = sizeof(File::Header);
     uint32_t exportIdxOffset = classIdxOffset + numClasses * ID_SIZE;
     uint32_t curOffset;
-    uint32_t metadataSize = GetMetadataSize();
+    uint32_t metadataSize = metadata_->CalculateSize();
     if (metadataSize > 0) {
         curOffset = exportIdxOffset + (numExportClasses + numLiteralarrays) * ID_SIZE + metadataSize;
     } else {
@@ -913,7 +915,7 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
     }
 
     uint32_t classMapSize = classMap_.size() * ID_SIZE;
-    uint32_t metadataSize = GetMetadataSize();
+    uint32_t metadataSize = metadata_->CalculateSize();
     uint32_t exportDataSize = exportMap_.size() * ID_SIZE + metadataSize;
     if (!writer->Write<uint32_t>(IsMetadataEnabled() ? exportDataSize : exportMap_.size())) {
         return false;
@@ -1149,21 +1151,44 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
 
 bool ItemContainer::WriteExportData(Writer *writer)
 {
-    auto isMetadataSkipped = MetadataItem::IsNullOrEmpty(metadataItem_);
+    // Write export class idx and metadata
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-    if (!writer->Write<uint32_t>(!isMetadataSkipped)) {
+    if (!writer->Write<uint32_t>(metadata_->IsEnabled())) {
         return false;
     }
-    if (!isMetadataSkipped && !writer->Write<uint32_t>(metadataItem_->Size())) {
+
+    // If metadata isn't enabled, the export map size equals to numExportTable - METADATA_FLAG_SIZE,
+    // then don't write it to keep backward compatibility and save space
+    if (metadata_->IsEnabled() && !writer->Write<uint32_t>(exportMap_.size() * ID_SIZE)) {
         return false;
     }
-    for (auto &entry : exportMap_) {
-        if (!writer->Write(entry.second->GetOffset())) {
+    for (const auto &[_, item] : exportMap_) {
+        if (!writer->Write(item->GetOffset())) {
             return false;
         }
     }
 
-    return isMetadataSkipped || metadataItem_->Write(writer);
+    if (!metadata_->IsEnabled() || metadata_->IsEmpty()) {
+        return true;
+    }
+
+    if (!writer->Write<uint32_t>(metadata_->NumItems())) {
+        return false;
+    }
+
+    for (const auto &[module, metadata] : metadata_->ByModules()) {
+        if (!writer->Write<uint32_t>(GetOrCreateStringItem(module.GetPkgName())->GetOffset())) {
+            return false;
+        }
+        if (!writer->Write<uint32_t>(GetOrCreateStringItem(module.GetModuleName())->GetOffset())) {
+            return false;
+        }
+        if (!writer->Write<uint32_t>(metadata.size())) {
+            return false;
+        }
+    }
+
+    return writer->WriteBytes(metadata_->Compressed());
 }
 
 bool ItemContainer::PrepareRegionSectionForWrite(RegionSectionMode regionSectionMode, bool *rebuildRegionSection,

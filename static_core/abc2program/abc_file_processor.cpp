@@ -23,6 +23,7 @@
 #include "abc_method_processor.h"
 #include "get_language_specific_metadata.inc"
 #include "mangling.h"
+#include "libarkfile/metadata_accessor.h"
 
 namespace ark::abc2program {
 
@@ -85,8 +86,12 @@ void AbcFileProcessor::FillProgramStrings()
 
 void AbcFileProcessor::FillMetadata()
 {
-    auto metadata = file_->GetMetadata();
-    program_->metadata.insert(program_->metadata.begin(), metadata.begin(), metadata.end());
+    if (!file_->IsMetadataEnabled()) {
+        return;
+    }
+    panda_file::MetadataAccessor ma;
+    ma.SetFile(*file_);
+    program_->metadata = ma.GetMetadata();
 }
 
 void AbcFileProcessor::FillExternalFieldsToRecords()

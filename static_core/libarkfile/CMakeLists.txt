@@ -66,6 +66,7 @@ set(SOURCES
     ${ARKFILE_ROOT}/debug_info_extractor.cpp
     ${ARKFILE_ROOT}/literal_data_accessor.cpp
     ${ARKFILE_ROOT}/file_format_version.cpp
+    ${ARKFILE_ROOT}/metadata_accessor.cpp
 )
 
 panda_add_library(arkfile ${PANDA_DEFAULT_LIB_TYPE} ${SOURCES})

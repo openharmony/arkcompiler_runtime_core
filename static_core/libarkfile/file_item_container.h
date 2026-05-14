@@ -19,6 +19,7 @@
 #include "libarkfile/file_items.h"
 #include "libarkfile/file_writer.h"
 #include "libarkfile/pgo.h"
+#include "metadata_accessor.h"
 
 #include <algorithm>
 #include <array>
@@ -56,13 +57,7 @@ public:
 
     PANDA_PUBLIC_API StringItem *GetOrCreateStringItem(const std::string &str);
 
-    PANDA_PUBLIC_API void CreateMetadataItem(std::vector<uint8_t> metadata);
-
-    bool IsMetadataEnabled() const;
-
     const std::array<uint8_t, File::VERSION_SIZE> &GetCurrentVersion() const;
-
-    uint32_t GetMetadataSize() const;
 
     PANDA_PUBLIC_API LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);
 
@@ -77,6 +72,8 @@ public:
     PANDA_PUBLIC_API ScalarValueItem *GetOrCreateFloatValueItem(float v);
 
     PANDA_PUBLIC_API ScalarValueItem *GetOrCreateDoubleValueItem(double v);
+
+    PANDA_PUBLIC_API void SetMetadataItems(MetadataByModules metadata);
 
     ScalarValueItem *GetOrCreateIdValueItem(BaseItem *v);
 
@@ -685,7 +682,7 @@ private:
 
     size_t GetForeignSize() const;
 
-    std::unique_ptr<MetadataItem> metadataItem_ = nullptr;
+    std::unique_ptr<MetadataItems> metadata_;
     std::unordered_map<std::string, StringItem *> stringMap_;
     std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarrayMap_;
 
