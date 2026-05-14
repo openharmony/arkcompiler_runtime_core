@@ -31,12 +31,12 @@
     ldp d14, d15, [\base_reg], #16
 .endm
 
-.extern EtsAsyncDispatchImpl
-.extern EtsAsyncSuspendImpl
+.extern MAKE_ASM_NAME(EtsAsyncDispatchImpl)
+.extern MAKE_ASM_NAME(EtsAsyncSuspendImpl)
 
-.global EtsAsyncDispatchStub
-.type EtsAsyncDispatchStub, %function
-EtsAsyncDispatchStub:
+.global MAKE_ASM_NAME(EtsAsyncDispatchStub)
+TYPE_FUNCTION(EtsAsyncDispatchStub)
+MAKE_ASM_NAME(EtsAsyncDispatchStub):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -51,7 +51,7 @@ EtsAsyncDispatchStub:
     // Pass current compiled frame base pointer as arg2
     mov x2, fp
 
-    bl EtsAsyncDispatchImpl
+    bl MAKE_ASM_NAME(EtsAsyncDispatchImpl)
 
     ldr lr, [sp], #16
     CFI_RESTORE(lr)
@@ -63,9 +63,9 @@ EtsAsyncDispatchStub:
     // Finish unwind information for the dispatch stub.
     CFI_ENDPROC
 
-.global EtsAsyncSuspendStub
-.type EtsAsyncSuspendStub, %function
-EtsAsyncSuspendStub:
+.global MAKE_ASM_NAME(EtsAsyncSuspendStub)
+TYPE_FUNCTION(EtsAsyncSuspendStub)
+MAKE_ASM_NAME(EtsAsyncSuspendStub):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -78,7 +78,7 @@ EtsAsyncSuspendStub:
     // Pass caller return address as arg3 (from lr)
     mov x3, lr
 
-    bl EtsAsyncSuspendImpl
+    bl MAKE_ASM_NAME(EtsAsyncSuspendImpl)
 
     // Rewind to the first saved callee register slot in the current compiled CFrame.
     ldr lr, [fp, #(-CFRAME_FLAGS_SLOT * SLOT_SIZE)]
