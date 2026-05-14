@@ -16,8 +16,8 @@ limitations under the License.
 {% for member in members %}
 /*---
 desc: >-
-    Default access modifiers.
-    If no modifier is explicitly provided, iy is implicitly declared public dy default.
+    If no modifier is explicitly provided, then a class member or a constructor
+    is implicitly considered public by default.
     {{member}}
 ---*/
 

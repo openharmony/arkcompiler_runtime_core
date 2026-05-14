@@ -20,6 +20,7 @@ desc: >-
     Member or constructor with private modifier can be accessed only within their declaring abstract class.
       {{test.doc}}
 tags: [compile-only, negative]
+expected_out: "{{test.error}}"
 ---*/
 
 {{test.decl}}

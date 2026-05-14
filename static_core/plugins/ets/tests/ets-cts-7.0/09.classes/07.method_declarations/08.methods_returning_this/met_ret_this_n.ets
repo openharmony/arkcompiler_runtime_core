@@ -19,6 +19,7 @@ desc: >-
     A return type of an instance method can be this.
     It means that the return type is the class type that the method belongs to.
 tags: [compile-only, negative]
+expected_out: "{{c.error}}"
 ---*/
 
 {{c.decl}}

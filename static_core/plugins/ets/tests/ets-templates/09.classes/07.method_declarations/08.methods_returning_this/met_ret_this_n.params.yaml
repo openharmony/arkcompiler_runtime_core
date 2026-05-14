@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,6 +26,8 @@ cases:
           }
       use: |-
           let x = A.foo()
+      error: |-
+        Syntax error ESY0044: A 'this' type is available only as return type in a non-static method of a class or struct and extension functions.
 
     # case 1
     - decl: |-
@@ -40,6 +42,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0281: A 'this' cannot be used as a part of union type.
 
     # case 2
     - decl: |-
@@ -54,6 +58,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0281: A 'this' cannot be used as a part of union type.
 
     # case 3
     - decl: |-
@@ -68,6 +74,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0282: A 'this' cannot be used as a part of tuple type.
 
     # case 4
     - decl: |-
@@ -82,6 +90,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0283: A 'this' cannot be used as type of array.
 
     # case 5
     - decl: |-
@@ -104,6 +114,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0141: Class member foo with type A in A cannot override foo with type Super field from class Super because the overriding return type is not compatible with the other return type.
 
     # case 6
     - decl: |-
@@ -126,6 +138,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0141: Class member foo with type Super in A cannot override foo with type Super field from class Super because the overriding return type is not compatible with the other return type.
 
     # case 7
     - decl: |-
@@ -140,6 +154,8 @@ cases:
           }
       use: |-
           let x = new A().foo()
+      error: |-
+        Semantic error ESE0031: Only extension function or a class method can return 'this'
 
     # case 8
     - decl: |-
@@ -154,6 +170,8 @@ cases:
           }
       use: |-
           let x = new A().instance
+      error: |-
+        Syntax error ESY0044: A 'this' type is available only as return type in a non-static method of a class or struct and extension functions.
 
     # case 9
     - decl: |-
@@ -169,6 +187,8 @@ cases:
         }
       use: |-
         let x = new A().instance
+      error: |-
+        Semantic error ESE0031: Only extension function or a class method can return 'this'
 
     # case 10
     - decl: |-
@@ -191,3 +211,5 @@ cases:
           let a: A = { fld: 1 }
           arktest.assertEQ(a.foo().bar(10).foo(), a)
           arktest.assertEQ(a.fld, 13)
+      error: |-
+        Semantic error ESE0087: Property 'foo' does not exist on type 'B'

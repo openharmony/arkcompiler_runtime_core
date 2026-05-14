@@ -18,6 +18,7 @@ desc: >-
     Check constructor with private access modifier in class.
     Member or constructor with private modifier can be accessed only within their declaring class.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0127: No matching construct signature for private_constructor_access_out_class_n.A(Int, Int)"
 ---*/
 
 class A {

@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Member or constructor with private modifier can be accessed only within their declaring class.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0139: Signature constructor(x: Int): undefined is not visible here."
 ---*/
 
 class A {

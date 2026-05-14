@@ -21,6 +21,7 @@ desc: >-
     and classes derived from their declaring class.
     {{test.doc}}
 tags: [negative, compile-only]
+expected_out: "{{test.error}}"
 ---*/
 
 {{test.decl}}

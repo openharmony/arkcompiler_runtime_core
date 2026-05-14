@@ -26,6 +26,8 @@ tests:
           return this.x
         }
       }
+    error: |-
+      Semantic error ESE0293: Property x is not visible here.
 
   - doc: access private field - implement method from abstract class
     decl: |-
@@ -38,6 +40,8 @@ tests:
           return this.x
         }
       }
+    error: |-
+      Semantic error ESE0293: Property x is not visible here.
 
   - doc: access private field - use abstract class field inside child class method
     decl: |-
@@ -49,6 +53,8 @@ tests:
           this.x = 1
         }
       }
+    error: |-
+      Semantic error ESE0293: Property x is not visible here.
 
   - doc: access private static field - from overridden method
     decl: |-
@@ -63,6 +69,8 @@ tests:
           return A.x
         }
       }
+    error: |-
+      Semantic error ESE0293: Property x is not visible here.
 
   - doc: access private static field
     decl: |-
@@ -74,6 +82,8 @@ tests:
           return C.x
         }
       }
+    error: |-
+      Semantic error ESE0293: Property x is not visible here.
 
   - doc: access private method - from overridden method
     decl: |-
@@ -90,6 +100,8 @@ tests:
           return this.getValue()
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature getValue(): Int is not visible here.
 
   - doc: access private method
     decl: |-
@@ -103,6 +115,8 @@ tests:
           return A.getValue()
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature getValue(): Int is not visible here.
 
   - doc: access private static method - from overridden method
     decl: |-
@@ -119,6 +133,8 @@ tests:
           return A.getValue()
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature getValue(): Int is not visible here.
 
   - doc: access private static method - from overridden method, use class name to access static field
     decl: |-
@@ -135,6 +151,8 @@ tests:
           return C.getValue()
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature getValue(): Int is not visible here.
 
   - doc: access private static method
     decl: |-
@@ -148,6 +166,8 @@ tests:
           return A.getValue()
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature getValue(): Int is not visible here.
 
   - doc: access private getter - from overridden method
     decl: |-
@@ -166,6 +186,8 @@ tests:
           return this.val
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(): Int is not visible here.
 
   - doc: access private getter
     decl: |-
@@ -180,6 +202,8 @@ tests:
           return this.val
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(): Int is not visible here.
 
   - doc: access private static getter - from overridden method
     decl: |-
@@ -197,6 +221,8 @@ tests:
           return A.val
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(): Int is not visible here.
 
   - doc: access private static getter
     decl: |-
@@ -211,6 +237,8 @@ tests:
           return A.val
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(): Int is not visible here.
 
   - doc: access private setter - from overridden method
     decl: |-
@@ -228,6 +256,8 @@ tests:
           this.val = i
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(i: Int): undefined is not visible here.
 
   - doc: access private setter
     decl: |-
@@ -242,6 +272,8 @@ tests:
           this.val = i
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(i: Int): undefined is not visible here.
 
   - doc: access private static setter - from overridden method
     decl: |-
@@ -259,6 +291,8 @@ tests:
           A.val = i
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(i: Int): undefined is not visible here.
 
   - doc: access private static setter
     decl: |-
@@ -269,6 +303,9 @@ tests:
         }
       }
       class C extends A {
+        foo(i: int) {
           A.val = i
         }
       }
+    error: |-
+      Semantic error ESE0139: Signature val(i: Int): undefined is not visible here.

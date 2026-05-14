@@ -19,6 +19,7 @@ desc: >-
     Member or constructor with protected modifier can be accessed only within their declaring class
     and classes derived from their declaring class.
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0139: Signature constructor(x: Int, y: Int): undefined is not visible here."
 ---*/
 
 class A {
