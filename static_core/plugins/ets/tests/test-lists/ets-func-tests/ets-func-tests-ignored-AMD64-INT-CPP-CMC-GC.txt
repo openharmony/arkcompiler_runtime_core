@@ -10,3 +10,6 @@ ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
 
 #33648
 ets_func_tests/std/debug/CountInstancesOfClass.ets
+
+#32998
+std/core/get_hash.ets
