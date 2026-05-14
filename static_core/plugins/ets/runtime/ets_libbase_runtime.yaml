@@ -5532,6 +5532,17 @@ intrinsics:
     impl: ark::ets::intrinsics::ArkRuntimeStackTraceProvisionStackTrace
     clear_flags: [ no_dce ]
 
+  - name: StackTraceGetMainThreadStackTrace
+    space: ets
+    class_name: std.dfx.StackTraceHelper
+    method_name: getMainThreadStackTrace
+    static: true
+    signature:
+      ret: std.core.String
+      args: []
+    impl: ark::ets::intrinsics::StackTraceGetMainThreadStackTrace
+    clear_flags: [ no_dce ]
+
   - name: StdCoreExit
     space: ets
     class_name: std.core.ETSGLOBAL

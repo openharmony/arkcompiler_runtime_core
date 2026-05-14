@@ -26,6 +26,8 @@
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
 
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+
 namespace ark::ets::intrinsics {
 
 EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
@@ -33,39 +35,39 @@ EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
     auto executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsMethod *method = EtsMethod::FromRuntimeMethod(stack->GetMethod());
-    auto className = EtsHandle<EtsString>(executionCtx, method->GetClass()->GetName());
-    if (UNLIKELY(className.GetPtr() == nullptr)) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
-        return nullptr;
-    }
-    auto methodName = EtsHandle<EtsString>(executionCtx, method->GetNameString());
-    if (UNLIKELY(methodName.GetPtr() == nullptr)) {
+    helpers::StackTraceElementInfo info;
+    if (!GetStackTraceElementBasicInfo(stack, &info)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
-    const auto lineNumber = method->GetLineNumFromBytecodeOffset(stack->GetBytecodePc());
-    auto *sourceFile = reinterpret_cast<const char *>(method->GetClassSourceFile().data);
-    if (sourceFile == nullptr) {
-        sourceFile = "<unknown>";
+    EtsHandle<EtsString> classNameHandle(executionCtx, EtsString::CreateFromMUtf8(info.className.c_str()));
+    if (UNLIKELY(classNameHandle.GetPtr() == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
     }
+    EtsHandle<EtsString> methodNameHandle(executionCtx, EtsString::CreateFromMUtf8(info.methodName.c_str()));
+    if (UNLIKELY(methodNameHandle.GetPtr() == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+
     auto *stackTraceElement = EtsStackTraceElement::Create(executionCtx);
     if (UNLIKELY(stackTraceElement == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     auto element = EtsHandle<EtsStackTraceElement>(executionCtx, stackTraceElement);
-    element->SetClassName(className.GetPtr());
-    element->SetMethodName(methodName.GetPtr());
+    element->SetClassName(classNameHandle.GetPtr());
+    element->SetMethodName(methodNameHandle.GetPtr());
 
-    EtsString *sourceFileName = EtsString::CreateFromMUtf8(sourceFile);
+    EtsString *sourceFileName = EtsString::CreateFromMUtf8(info.sourceFile);
     if (UNLIKELY(sourceFileName == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     element->SetSourceFileName(sourceFileName);
-    element->SetLineNumber(lineNumber);
+    element->SetLineNumber(info.lineNumber);
     return element.GetPtr();
 }
 

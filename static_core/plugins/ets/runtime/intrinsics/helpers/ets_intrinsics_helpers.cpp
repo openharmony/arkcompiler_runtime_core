@@ -819,4 +819,27 @@ bool SameValueZero(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b
     return EtsReferenceEquals(executionCtx, a, b);
 }
 
+bool GetStackTraceElementBasicInfo(StackWalker *stack, StackTraceElementInfo *info)
+{
+    EtsMethod *method = EtsMethod::FromRuntimeMethod(stack->GetMethod());
+    if (UNLIKELY(method == nullptr)) {
+        return false;
+    }
+
+    info->method = method;
+    info->lineNumber = method->GetLineNumFromBytecodeOffset(stack->GetBytecodePc());
+    auto *sourceFile = reinterpret_cast<const char *>(method->GetClassSourceFile().data);
+    info->sourceFile = (sourceFile != nullptr) ? sourceFile : "<unknown>";
+
+    std::string className = method->GetClass()->GetRuntimeClass()->GetName();
+    if (UNLIKELY(className.empty())) {
+        return false;
+    }
+    info->className = className;
+
+    info->methodName = method->GetName();
+
+    return true;
+}
+
 }  // namespace ark::ets::intrinsics::helpers
