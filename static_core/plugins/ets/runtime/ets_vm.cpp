@@ -867,6 +867,47 @@ void PandaEtsVM::UpdateAndSweepVmRefs(const ReferenceUpdater &updater)
     }
 }
 
+void PandaEtsVM::CreateANIVerifier(bool useWorkaround)
+{
+    ASSERT(aniVerifier_ == nullptr);
+
+    auto aniVerifier = MakePandaUnique<ani::verify::ANIVerifier>();
+    aniVerifier->SetVerifyOptions(useWorkaround);
+    aniVerifier_ = std::move(aniVerifier);
+    PandaVector<ani::verify::ANIVerifier::GlobalData::MethodRange> collectedMethodRanges;
+    PandaVector<ani::verify::ANIVerifier::GlobalData::FieldRange> collectedFieldRanges;
+
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *ext = classLinker->GetExtension(SourceLanguage::ETS);
+    classLinker->EnumerateClasses([&](Class *klass) {
+        Span<Method> methods = klass->GetMethodsWithCopied();
+        if (!methods.empty()) {
+            auto start = ToUintPtr(methods.begin());
+            auto end = ToUintPtr(methods.end());
+            collectedMethodRanges.push_back({start, end});
+        }
+        for (auto &method : klass->GetMethodsWithCopied()) {
+            if (method.IsNative() && !method.IsIntrinsic() && !method.IsProxy()) {
+                const void *ep = ext->GetNativeEntryPointFor(&method);
+                method.SetCompiledEntryPoint(ep);
+            }
+        }
+        Span<Field> fields = klass->GetFields();
+        if (!fields.empty()) {
+            auto start = ToUintPtr(fields.begin());
+            auto end = ToUintPtr(fields.end());
+            collectedFieldRanges.push_back({start, end});
+        }
+
+        return true;
+    });
+
+    aniVerifier_->AddMethodRanges(std::move(collectedMethodRanges));
+    aniVerifier_->AddFieldRanges(std::move(collectedFieldRanges));
+
+    c_api = ani::verify::GetVerifyVMAPI();
+}
+
 EtsFinalizableWeakRef *PandaEtsVM::RegisterFinalizerForObject(EtsExecutionContext *executionCtx,
                                                               const EtsHandle<EtsObject> &object,
                                                               void (*finalizer)(void *), void *finalizerArg)

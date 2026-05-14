@@ -34,6 +34,8 @@
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vwref.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_resolve.h"
+#include "plugins/ets/runtime/ani/verify/ani_verifier.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
@@ -777,10 +779,9 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
     return false;
 }
 
-static bool IsValidMethodArgRefType(ani_env *env, EtsMethod *method, VRef *ref, size_t refArgNumber)
+static bool IsValidMethodArgRefType(ani_env *env, EtsMethod *method, ani_ref ref, size_t refArgNumber)
 {
-    auto realRef = ref->GetRef();
-    if (ManagedCodeAccessor::IsUndefined(realRef)) {
+    if (ManagedCodeAccessor::IsUndefined(ref)) {
         return true;
     }
 
@@ -797,7 +798,7 @@ static bool IsValidMethodArgRefType(ani_env *env, EtsMethod *method, VRef *ref, 
         return true;
     }
 
-    Class *inputKlass = s.ToInternalType(realRef)->GetClass()->GetRuntimeClass();
+    Class *inputKlass = s.ToInternalType(ref)->GetClass()->GetRuntimeClass();
     return methodKlass->IsAssignableFrom(inputKlass);
 }
 
@@ -993,10 +994,17 @@ public:
         if (vref == nullptr) {
             return {"reference is nullptr", ANIErrorSeverity::ERROR};
         }
-        if (!GetEnvANIVerifier()->IsValidRef(vref)) {
+        EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
+        if (!envANIVerifier->IsValidRef(vref)) {
             return {"reference not found (may be deleted, out of scope, or corrupted)", ANIErrorSeverity::FATAL};
         }
-        return {};
+        if (envANIVerifier->IsValidRef(vref)) {
+            return {};
+        }
+        if (envANIVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vref))) {
+            return {};
+        }
+        return {"wrong reference", ANIErrorSeverity::FATAL};
     }
 
     VerificationResult VerifyEscapeRef(VRef *vref)
@@ -1101,6 +1109,9 @@ public:
             }
             return {"wrong reference type: local reference, expected: global reference", ANIErrorSeverity::ERROR};
         }
+        if (envVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vgref))) {
+            return {"wrong global reference", ANIErrorSeverity::ERROR};
+        }
         return {"wrong global reference", ANIErrorSeverity::FATAL};
     }
 
@@ -1115,9 +1126,15 @@ public:
         }
 
         if (envVerifier->IsValidRef(reinterpret_cast<VRef *>(vwref))) {
+            if (!InternalRef::IsVWRef(vwref)) {
+                return {"wrong weak reference", ANIErrorSeverity::ERROR};
+            }
             if (ManagedCodeAccessor::IsUndefined(vwref->GetWRef())) {
                 return {};
             }
+            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+        }
+        if (envVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vwref))) {
             return {"wrong weak reference", ANIErrorSeverity::ERROR};
         }
         return {"wrong weak reference", ANIErrorSeverity::FATAL};
@@ -1176,7 +1193,8 @@ public:
                 ss << "wrong reference in argv[" << i << "]";
                 return {ss.str(), refErr.GetSeverity()};
             }
-            args->releaseArgvStorage.push_back(varg->GetRef());
+            ani_ref ref = ResolveToAniRef(varg, GetEnvANIVerifier());
+            args->releaseArgvStorage.push_back(ref);
         }
         args->releaseArgv = args->releaseArgvStorage.data();
         return {};
@@ -1189,14 +1207,15 @@ public:
             return err;
         }
 
+        ani_ref classRef = ResolveToAniRef(vref, GetEnvANIVerifier());
         ScopedManagedCodeFix s(venv_->GetEnv());
-        if (!ANIRefTypeChecker::IsClass(s, vref->GetRef())) {
+        if (!ANIRefTypeChecker::IsClass(s, classRef)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vref->GetRef()) << ", expected: ani_class";
+            ss << "wrong reference type: " << ANIRefTypeToString(s, classRef) << ", expected: ani_class";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
-        class_ = s.ToInternalType(static_cast<ani_class>(vref->GetRef()));
+        class_ = s.ToInternalType(static_cast<ani_class>(classRef));
         return {};
     }
 
@@ -1359,11 +1378,11 @@ public:
         if (err) {
             return err;
         }
-
+        ani_ref str = ResolveToAniRef(vstr, GetEnvANIVerifier());
         ScopedManagedCodeFix s(venv_->GetEnv());
-        if (!ANIRefTypeChecker::IsString(s, vstr->GetRef())) {
+        if (!ANIRefTypeChecker::IsString(s, str)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vstr->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, str);
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
@@ -1380,10 +1399,11 @@ public:
             return errMessage;
         }
 
+        ani_ref error = ResolveToAniRef(verr, GetEnvANIVerifier());
         ScopedManagedCodeFix s(venv_->GetEnv());
-        if (!ANIRefTypeChecker::IsError(s, verr->GetRef())) {
+        if (!ANIRefTypeChecker::IsError(s, error)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, verr->GetRef()) << ", expected: ani_error";
+            ss << "wrong reference type: " << ANIRefTypeToString(s, error) << ", expected: ani_error";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
@@ -1396,10 +1416,11 @@ public:
             return err;
         }
 
+        ani_ref array = ResolveToAniRef(varray, GetEnvANIVerifier());
         ScopedManagedCodeFix s(venv_->GetEnv());
-        if (!ANIRefTypeChecker::IsArray(s, varray->GetRef())) {
+        if (!ANIRefTypeChecker::IsArray(s, array)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, varray->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, array);
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -1594,6 +1615,9 @@ public:
             return {"wrong reference", ANIErrorSeverity::ERROR};
         }
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
+        if (envANIVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vref))) {
+            return {};
+        }
         if (!envANIVerifier->IsValidRef(vref)) {
             return {"wrong reference", ANIErrorSeverity::FATAL};
         }
@@ -1619,14 +1643,15 @@ public:
             return err;
         }
 
+        ani_ref object = ResolveToAniRef(vobject, GetEnvANIVerifier());
         ScopedManagedCodeFix s(venv_->GetEnv());
-        if (!ANIRefTypeChecker::IsObject(s, vobject->GetRef())) {
+        if (!ANIRefTypeChecker::IsObject(s, object)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vobject->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, object);
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
-        EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
+        EtsObject *etsObject = s.ToInternalType(object);
         class_ = etsObject->GetClass();
         return {};
     }
@@ -1686,14 +1711,17 @@ public:
 
     VerificationResult DoVerifyMethod(impl::VMethod *vmethod, impl::VMethod::ANIMethodType type, EtsType returnType)
     {
-        impl::VMethod::ANIMethodType methodType = vmethod->GetType();
-        if (methodType != type) {
-            PandaStringStream ss;
-            ss << "wrong type: " << ANIFuncTypeToString(methodType) << ", expected: " << ANIFuncTypeToString(type);
-            return {ss.str(), ANIErrorSeverity::FATAL};
+        auto envANIVerifier = GetEnvANIVerifier();
+        if (!envANIVerifier->IsValidRawEtsMethod(reinterpret_cast<void *>(vmethod))) {
+            impl::VMethod::ANIMethodType methodType = vmethod->GetType();
+            if (methodType != type) {
+                PandaStringStream ss;
+                ss << "wrong type: " << ANIFuncTypeToString(methodType) << ", expected: " << ANIFuncTypeToString(type);
+                return {ss.str(), ANIErrorSeverity::FATAL};
+            }
         }
-
-        EtsType methodReturnType = vmethod->GetEtsMethod()->GetReturnValueType();
+        auto method = ResolveToEtsMethod(vmethod, GetEnvANIVerifier());
+        EtsType methodReturnType = method->GetReturnValueType();
         if (methodReturnType != returnType) {
             PandaStringStream ss;
             ss << "wrong return type: " << EtsTypeToString(methodReturnType)
@@ -1720,12 +1748,12 @@ public:
         if (err) {
             return err;
         }
-
-        if (!vctor->GetEtsMethod()->IsConstructor()) {
+        auto ctor = ResolveToEtsMethod(vctor, GetEnvANIVerifier());
+        if (!ctor->IsConstructor()) {
             return {"method is not ctor", ANIErrorSeverity::FATAL};
         }
 
-        if (vctor->GetEtsMethod()->GetClass() != class_) {
+        if (ctor->GetClass() != class_) {
             return {"wrong class for ctor", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -1762,8 +1790,8 @@ public:
         if (err) {
             return err;
         }
-
-        if (!vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+        auto field = ResolveToEtsField(vfield, GetEnvANIVerifier());
+        if (!field->GetDeclaringClass()->IsAssignableFrom(class_)) {
             PandaStringStream ss;
             ss << ARG_NAME << " does not belong to the " << OWNER_NAME;
             return {ss.str(), ANIErrorSeverity::FATAL};
@@ -1812,8 +1840,8 @@ public:
         if (err) {
             return err;
         }
-
-        if (vfield->GetEtsField()->IsReadonly()) {
+        auto field = ResolveToEtsField(vfield, GetEnvANIVerifier());
+        if (field->IsReadonly()) {
             if constexpr (IS_STATIC) {
                 return {"static field is read-only", ANIErrorSeverity::FATAL};
             } else {
@@ -2203,7 +2231,8 @@ public:
         // flag that ANI can verify.
         // After the frontend adaptation keeps this information, the const variable check
         // can work correctly.
-        if (vvariable->GetEtsField()->IsReadonly()) {
+        auto variable = ResolveToEtsField(vvariable, GetEnvANIVerifier());
+        if (variable->IsReadonly()) {
             return {"variable is const", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -2227,11 +2256,12 @@ public:
             return err;
         }
 
-        if (vmethod->GetEtsMethod()->IsConstructor()) {
+        auto method = ResolveToEtsMethod(vmethod, GetEnvANIVerifier());
+        if (method->IsConstructor()) {
             return {"method is ctor", ANIErrorSeverity::FATAL};
         }
 
-        if (!vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+        if (!method->GetClass()->IsAssignableFrom(class_)) {
             return {"method does not belong to the object", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -2252,8 +2282,8 @@ public:
         if (err) {
             return err;
         }
-
-        if (!vstaticmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+        auto staticmethod = ResolveToEtsMethod(vstaticmethod, GetEnvANIVerifier());
+        if (!staticmethod->GetClass()->IsAssignableFrom(class_)) {
             return {"wrong class for method", ANIErrorSeverity::FATAL};
         }
         return {};
@@ -2278,14 +2308,17 @@ public:
 
     VerificationResult DoVerifyField(impl::VField *vfield, impl::VField::ANIFieldType type, EtsType returnType)
     {
-        impl::VField::ANIFieldType fieldType = vfield->GetType();
-        if (fieldType != type) {
-            PandaStringStream ss;
-            ss << "wrong type: " << ANIFieldTypeToString(fieldType) << ", expected: " << ANIFieldTypeToString(type);
-            return {ss.str(), ANIErrorSeverity::FATAL};
+        auto envANIVerifier = GetEnvANIVerifier();
+        if (!envANIVerifier->IsValidRawEtsField(reinterpret_cast<void *>(vfield))) {
+            impl::VField::ANIFieldType fieldType = vfield->GetType();
+            if (fieldType != type) {
+                PandaStringStream ss;
+                ss << "wrong type: " << ANIFieldTypeToString(fieldType) << ", expected: " << ANIFieldTypeToString(type);
+                return {ss.str(), ANIErrorSeverity::FATAL};
+            }
         }
-
-        EtsType fieldReturnType = vfield->GetEtsField()->GetEtsType();
+        auto field = ResolveToEtsField(vfield, GetEnvANIVerifier());
+        EtsType fieldReturnType = field->GetEtsType();
         if (fieldReturnType != returnType) {
             PandaStringStream ss;
             ss << "wrong value type: " << EtsTypeToString(fieldReturnType)
@@ -2564,8 +2597,8 @@ public:
                 return false;
             }
             if (type.IsReference()) {
-                if (UNLIKELY(!IsValidMethodArgRefType(venv_->GetEnv(), methodArgs->method,
-                                                      reinterpret_cast<VRef *>(value.r), refIndex))) {
+                auto ref = ResolveToAniRef(reinterpret_cast<VRef *>(value.r), GetEnvANIVerifier());
+                if (UNLIKELY(!IsValidMethodArgRefType(venv_->GetEnv(), methodArgs->method, ref, refIndex))) {
                     err = {"wrong method arguments", ANIErrorSeverity::FATAL};
                     return false;
                 }
@@ -3501,8 +3534,13 @@ static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaAniEnv *pandaEnv, const A
         PandaString name = getName(i++);
         bool isValid = IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs);
         if (isValid && type.IsReference()) {
-            isValid =
-                IsValidMethodArgRefType(pandaEnv, methodArgs->method, reinterpret_cast<VRef *>(value.r), refIndex);
+            ani_ref ref {};
+            if (envANIVerifier->IsValidRawAniGlobalRef(reinterpret_cast<void *>(value.r))) {
+                ref = reinterpret_cast<ani_ref>(value.r);
+            } else {
+                ref = reinterpret_cast<VRef *>(value.r)->GetRef();
+            }
+            isValid = IsValidMethodArgRefType(pandaEnv, methodArgs->method, ref, refIndex);
         }
         extArgInfoList.emplace_back(ExtArgInfo {std::move(name), value.l, type, isValid});
         return true;

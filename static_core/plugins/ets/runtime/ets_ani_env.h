@@ -60,6 +60,9 @@ public:
         return envANIVerifier_.get();
     }
 
+    /// @brief Internally creates and initializes the Environment-specific ANI Verifier.
+    void CreateEnvANIVerifier();
+
     void SetException(EtsThrowable *thr);
     EtsThrowable *GetThrowable() const;
     bool HasPendingException() const;

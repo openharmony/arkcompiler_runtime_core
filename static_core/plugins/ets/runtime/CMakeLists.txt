@@ -231,7 +231,8 @@ endif()
 
 if (PANDA_TARGET_OHOS)
     list (APPEND ETS_RUNTIME_SOURCES
-        ${ETS_EXT_SOURCES}/platform/ohos/logger.cpp)
+        ${ETS_EXT_SOURCES}/platform/ohos/logger.cpp
+        ${ETS_EXT_SOURCES}/platform/ohos/verify_ani_enable.cpp)
 endif()
 
 panda_target_sources(arkruntime_obj PRIVATE ${ETS_RUNTIME_SOURCES})

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_H
 
 #include "libarkbase/macros.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "plugins/ets/runtime/types/ets_class.h"
@@ -169,6 +170,11 @@ public:
     mem::ReferenceStorage *GetAsReferenceStorage()
     {
         return this;
+    }
+
+    void CollectLocalReferenceHandles(PandaUnorderedSet<uintptr_t> *out) const
+    {
+        mem::ReferenceStorage::CollectLocalReferenceHandles(out);
     }
 };
 }  // namespace ark::ets

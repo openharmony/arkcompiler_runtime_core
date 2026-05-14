@@ -16,8 +16,11 @@
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
+#include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/mem/ets_reference.h"
 
 namespace ark::ets::ani::verify {
 
@@ -26,9 +29,10 @@ constexpr ani_size DEFAULT_NATIVE_FRAME_CAPACITY = 4096;
 
 EnvANIVerifier::EnvANIVerifier(PandaAniEnv *ownerEnv, ANIVerifier *verifier,
                                const __ani_interaction_api *interactionAPI)
-    : verifier_(verifier), interactionAPI_(interactionAPI)
+    : verifier_(verifier), interactionAPI_(interactionAPI), ownerEnv_(ownerEnv)
 {
     DoPushNativeFrame(ownerEnv, VERIFICATION_BOTTOM_FRAME);
+    SnapshotPreforkRawLocalRefs();
 }
 
 VEnv *EnvANIVerifier::GetEnv()
@@ -273,9 +277,97 @@ bool EnvANIVerifier::IsValidMethod(impl::VMethod *vmethod) const
     return verifier_->IsValidMethod(vmethod);
 }
 
+bool EnvANIVerifier::IsValidRawEtsMethod(void *ptr) const
+{
+    return verifier_->IsValidRawEtsMethod(ptr);
+}
 bool EnvANIVerifier::IsValidField(impl::VField *vfield) const
 {
     return verifier_->IsValidField(vfield);
+}
+
+bool EnvANIVerifier::IsValidRawEtsField(void *ptr) const
+{
+    return verifier_->IsValidRawEtsField(ptr);
+}
+
+bool EnvANIVerifier::IsValidRawAniGlobalRef(void *ptr) const
+{
+    return verifier_->IsValidRawAniGlobalRef(ptr);
+}
+
+bool EnvANIVerifier::IsValidRawAniWeakRef(void *ptr) const
+{
+    return verifier_->IsValidRawAniWeakRef(ptr);
+}
+
+bool EnvANIVerifier::IsValidRawAniLocalRef(void *ptr) const
+{
+    if (ptr == nullptr) {
+        return false;
+    }
+
+    if (grandfatheredRawLocals_.find(ptr) == grandfatheredRawLocals_.cend()) {
+        return false;
+    }
+
+    auto *vref = reinterpret_cast<VRef *>(ptr);
+    if (IsVerifyManagedRef(vref)) {
+        return false;
+    }
+
+    auto *etsRef = reinterpret_cast<EtsReference *>(ptr);
+    if (EtsReference::IsUndefined(etsRef)) {
+        return false;
+    }
+    if (!etsRef->IsLocal() || etsRef->IsGlobal() || etsRef->IsWeak()) {
+        return false;
+    }
+
+    ASSERT(!frames_.empty());
+    if (ownerEnv_ == nullptr) {
+        return false;
+    }
+
+    return ownerEnv_->GetEtsReferenceStorage()->IsValidEtsRef(etsRef);
+}
+
+void EnvANIVerifier::RemoveGrandfatheredRawLocalRef(void *ptr)
+{
+    if (ptr == nullptr) {
+        return;
+    }
+    grandfatheredRawLocals_.erase(ptr);
+}
+
+bool EnvANIVerifier::IsVerifyManagedRef(VRef *vref) const
+{
+    if (InternalRef::IsVRef(vref)) {
+        return true;
+    }
+    if (InternalRef::IsVWRef(reinterpret_cast<VWRef *>(vref))) {
+        return true;
+    }
+    if (IsValidLocalRef(vref) || IsValidGlobalVerifiedRef(vref) || IsValidWeakRef(reinterpret_cast<VWRef *>(vref))) {
+        return true;
+    }
+    return false;
+}
+
+void EnvANIVerifier::SnapshotPreforkRawLocalRefs()
+{
+    if (!verifier_->IsWorkaroundNoCrashIfInvalidUsage()) {
+        return;
+    }
+    if (ownerEnv_ == nullptr) {
+        return;
+    }
+
+    PandaUnorderedSet<uintptr_t> handles;
+    ownerEnv_->GetEtsReferenceStorage()->CollectLocalReferenceHandles(&handles);
+    for (uintptr_t handle : handles) {
+        grandfatheredRawLocals_.insert(reinterpret_cast<void *>(handle));
+    }
 }
 
 bool EnvANIVerifier::CanBeDeletedFromCurrentScope(VRef *vref)

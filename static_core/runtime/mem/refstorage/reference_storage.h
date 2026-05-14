@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_MEM_REFERENCES_STORAGE_H
 #define PANDA_RUNTIME_MEM_REFERENCES_STORAGE_H
 
+#include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/object_header.h"
 #include "runtime/mem/frame_allocator.h"
 #include "runtime/mem/refstorage/reference.h"
@@ -107,6 +108,9 @@ public:
     void DumpLocalRefClasses();
     bool IsValidRef(const Reference *ref);
     void SetRefCheckValidate(bool refCheckValidate);
+
+    /// Collect handles of LOCAL-type references in the local reference storage (excludes STACK refs).
+    void CollectLocalReferenceHandles(PandaUnorderedSet<uintptr_t> *out) const;
 
 private:
     NO_COPY_SEMANTIC(ReferenceStorage);

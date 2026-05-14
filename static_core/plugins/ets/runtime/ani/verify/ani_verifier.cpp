@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
@@ -47,11 +48,51 @@ void ANIVerifier::DeleteGlobalVerifiedRef(VRef *vgref)
     grefs.erase(it);
 }
 
+bool ANIVerifier::IsValidRawAniGlobalRef(void *ptr)
+{
+    if (ptr == nullptr) {
+        return false;
+    }
+
+    PandaEtsVM *vm = PandaEtsVM::GetCurrent();
+    mem::GlobalObjectStorage *globalStorage = vm->GetGlobalObjectStorage();
+    auto etsRef = reinterpret_cast<EtsReference *>(ptr);
+    if (!etsRef->IsGlobal()) {
+        return false;
+    }
+    auto ref = EtsReference::CastToReference(etsRef);
+
+    return globalStorage->IsValidGlobalRef(ref);
+}
+
+bool ANIVerifier::IsValidRawAniWeakRef(void *ptr)
+{
+    if (ptr == nullptr) {
+        return false;
+    }
+
+    PandaEtsVM *vm = PandaEtsVM::GetCurrent();
+    mem::GlobalObjectStorage *globalStorage = vm->GetGlobalObjectStorage();
+    auto etsRef = reinterpret_cast<EtsReference *>(ptr);
+    if (EtsReference::IsUndefined(etsRef)) {
+        return false;
+    }
+    if (!etsRef->IsWeak()) {
+        return false;
+    }
+    auto ref = EtsReference::CastToReference(etsRef);
+
+    return globalStorage->IsValidGlobalRef(ref);
+}
+
 bool ANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref)
 {
     auto &grefs = GetGlobalData().grefsMap;
     os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().grefsMapMutex);
-    return grefs.find(vgref) != grefs.cend();
+    if (grefs.find(vgref) != grefs.cend()) {
+        return true;
+    }
+    return IsValidRawAniGlobalRef(reinterpret_cast<void *>(vgref));
 }
 
 VWRef *ANIVerifier::AddVerifiedWeakRef(ani_wref wref)
@@ -83,7 +124,49 @@ bool ANIVerifier::IsValidWeakRef(VWRef *vwref)
     }
     auto &wrefs = GetGlobalData().wrefsMap;
     os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().wrefsMapMutex);
-    return wrefs.find(vwref) != wrefs.cend();
+    if (wrefs.find(vwref) != wrefs.cend()) {
+        return true;
+    }
+    return IsValidRawAniWeakRef(reinterpret_cast<void *>(vwref));
+}
+
+// Append incoming ranges to storage, sort by start, merge overlapping or adjacent intervals in place, then
+// resize to the merged prefix. Used when accumulating method/field native code address ranges.
+template <typename RangeVector>
+void AddRangesInternal(PandaVector<typename RangeVector::value_type> &&ranges, RangeVector &storage)
+{
+    if (ranges.empty()) {
+        return;
+    }
+
+    storage.insert(storage.end(), std::make_move_iterator(ranges.begin()), std::make_move_iterator(ranges.end()));
+    std::sort(storage.begin(), storage.end(), [](const auto &a, const auto &b) { return a.start < b.start; });
+    size_t mergedCount = 0;
+    for (size_t i = 1; i < storage.size(); ++i) {
+        if (storage[i].start <= storage[mergedCount].end) {
+            storage[mergedCount].end = std::max(storage[mergedCount].end, storage[i].end);
+        } else {
+            mergedCount++;
+            storage[mergedCount] = storage[i];
+        }
+    }
+    if (!storage.empty()) {
+        storage.resize(mergedCount + 1);
+    }
+}
+
+void ANIVerifier::AddMethodRanges(PandaVector<GlobalData::MethodRange> &&ranges)
+{
+    auto &data = GetGlobalData();
+    os::memory::WriteLockHolder holder(data.methodsMapLock);
+    AddRangesInternal(std::move(ranges), data.methodRanges);
+}
+
+void ANIVerifier::AddFieldRanges(PandaVector<GlobalData::FieldRange> &&ranges)
+{
+    auto &data = GetGlobalData();
+    os::memory::WriteLockHolder holder(data.fieldsMapLock);
+    AddRangesInternal(std::move(ranges), data.fieldRanges);
 }
 
 impl::VMethod *ANIVerifier::AddMethod(EtsMethod *method)
@@ -123,11 +206,42 @@ void ANIVerifier::DeleteMethod(impl::VMethod *vmethod)
     GetGlobalData().methodsMap.erase(it);
 }
 
+bool ANIVerifier::IsValidRawEtsMethod(void *ptr)
+{
+    if (ptr == nullptr) {
+        return false;
+    }
+    os::memory::ReadLockHolder lock(GetGlobalData().methodsMapLock);
+
+    auto &ranges = GetGlobalData().methodRanges;
+    if (ranges.empty()) {
+        return false;
+    }
+
+    auto addr = ToUintPtr(ptr);
+    auto it = std::lower_bound(ranges.begin(), ranges.end(), addr,
+                               [](const GlobalData::MethodRange &range, uintptr_t val) { return range.end <= val; });
+
+    return (it != ranges.end() && addr >= it->start);
+}
+
 bool ANIVerifier::IsValidMethod(impl::VMethod *vmethod)
 {
     os::memory::ReadLockHolder lock(GetGlobalData().methodsMapLock);
+    if (GetGlobalData().methodsMap.find(vmethod) != GetGlobalData().methodsMap.cend()) {
+        return true;
+    }
 
-    return GetGlobalData().methodsMap.find(vmethod) != GetGlobalData().methodsMap.cend();
+    auto &ranges = GetGlobalData().methodRanges;
+    if (ranges.empty()) {
+        return false;
+    }
+
+    auto ptr = ToUintPtr(vmethod);
+    auto it = std::lower_bound(ranges.begin(), ranges.end(), ptr,
+                               [](const GlobalData::MethodRange &range, uintptr_t val) { return range.end <= val; });
+
+    return (it != ranges.end()) && (ptr >= it->start);
 }
 
 impl::VField *ANIVerifier::AddField(EtsField *field)
@@ -166,11 +280,34 @@ void ANIVerifier::DeleteField(impl::VField *vfield)
     GetGlobalData().fieldsMap.erase(it);
 }
 
+bool ANIVerifier::IsValidRawEtsField(void *ptr)
+{
+    if (ptr == nullptr) {
+        return false;
+    }
+    os::memory::ReadLockHolder lock(GetGlobalData().fieldsMapLock);
+
+    auto addr = ToUintPtr(ptr);
+    auto it = std::lower_bound(GetGlobalData().fieldRanges.begin(), GetGlobalData().fieldRanges.end(), addr,
+                               [](const GlobalData::FieldRange &range, uintptr_t val) { return range.end <= val; });
+    return (it != GetGlobalData().fieldRanges.end() && addr >= it->start);
+}
+
 bool ANIVerifier::IsValidField(impl::VField *vfield)
 {
     os::memory::ReadLockHolder lock(GetGlobalData().fieldsMapLock);
+    if (GetGlobalData().fieldsMap.find(vfield) != GetGlobalData().fieldsMap.cend()) {
+        return true;
+    }
+    auto &ranges = GetGlobalData().fieldRanges;
+    if (ranges.empty()) {
+        return false;
+    }
 
-    return GetGlobalData().fieldsMap.find(vfield) != GetGlobalData().fieldsMap.cend();
+    auto ptr = ToUintPtr(vfield);
+    auto it = std::lower_bound(ranges.begin(), ranges.end(), ptr,
+                               [](const GlobalData::FieldRange &range, uintptr_t val) { return range.end <= val; });
+    return (it != ranges.end()) && (ptr >= it->start);
 }
 
 VResolver *ANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)

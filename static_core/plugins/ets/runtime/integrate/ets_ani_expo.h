@@ -51,6 +51,7 @@ public:
     static void HandleUncaughtException(ani_error aniError);
 
 private:
+    static void InitializeVerifyANI(ani_env *env);
     static void TryLoadAotFileForBoot();
     static void LoadAotFileForApp(std::string const &aotFileName);
     /**
