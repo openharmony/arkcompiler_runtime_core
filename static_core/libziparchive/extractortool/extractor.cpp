@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,6 +113,15 @@ std::shared_ptr<FileMapper> Extractor::GetSafeData(const std::string &fileName)
 {
     std::string relativePath = GetRelativePath(fileName);
     if (!StringEndWith(relativePath, EXT_NAME_ABC, sizeof(EXT_NAME_ABC) - 1)) {
+        return nullptr;
+    }
+
+    auto result = zipFile_.IsEntryDataConsistent(relativePath);
+    if (result != ConsistencyResult::CONSISTENT) {
+        LOG(ERROR, ZIPARCHIVE) << "Entry data not consistent for " << relativePath.c_str()
+                               << ", result=" << static_cast<int>(result);
+    }
+    if (result == ConsistencyResult::OFFSET_MISMATCH) {
         return nullptr;
     }
 
