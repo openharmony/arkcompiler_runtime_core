@@ -50,6 +50,7 @@
     X(VERIFY_ARRAYBUFFER,                   VerifyArrayBuffer)                    \
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
+    X(VERIFY_BOXED_PRIMITIVE_OBJECT,        VerifyBoxedPrimitiveObject)           \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
     X(VERIFY_READ_FIELD,                    VerifyReadField)                      \
     X(VERIFY_READ_FIELD_BY_NAME,            VerifyReadFieldByName)                \
@@ -103,7 +104,7 @@
     X(VERIFY_VOID_PTR_STORAGE,              VerifyVoidPtrStorage)                 \
     X(VERIFY_ARRAYBUFFER_STORAGE,           VerifyArrayBufferStorage)             \
     X(VERIFY_U32_STORAGE,                   VerifyU32Storage)                     \
-    X(VERIFY_BOOLEAN,                       VerifyBoolean)                        \
+    X(VERIFY_PRIMITIVE_VALUE,               VerifyPrimitiveValue)                 \
     X(VERIFY_ARRAYBUFFER_LENGTH,            VerifyArrayBufferLength)              \
     X(VERIFY_NATIVE_FUNCTIONS,              VerifyNativeFunctions)                \
     X(VERIFY_NATIVE_METHODS,                VerifyNativeMethods)                  \
@@ -630,6 +631,11 @@ public:
         return ANIArg(ArgValueByObject(vobject), name, Action::VERIFY_THIS_OBJECT);
     }
 
+    static ANIArg MakeForBoxedPrimitiveObject(VObject *vobject, std::string_view name, EtsType primitiveType)
+    {
+        return ANIArg(ArgValueByObject(vobject), name, Action::VERIFY_BOXED_PRIMITIVE_OBJECT, primitiveType);
+    }
+
     static ANIArg MakeForField(VField *vfield, std::string_view name, EtsType fieldType, AccessMode accessMode)
     {
         if (accessMode == AccessMode::READWRITE) {
@@ -904,7 +910,42 @@ public:
 
     static ANIArg MakeForBoolean(ani_boolean booleanValue, std::string_view name)
     {
-        return ANIArg(ArgValueByBoolean(booleanValue), name, Action::VERIFY_BOOLEAN);
+        return ANIArg(ArgValueByBoolean(booleanValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForChar(ani_char charValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByChar(charValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForByte(ani_byte byteValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByByte(byteValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForShort(ani_short shortValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByShort(shortValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForInt(ani_int intValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByInt(intValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForLong(ani_long longValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByLong(longValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForFloat(ani_float floatValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByFloat(floatValue), name, Action::VERIFY_PRIMITIVE_VALUE);
+    }
+
+    static ANIArg MakeForDouble(ani_double doubleValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByDouble(doubleValue), name, Action::VERIFY_PRIMITIVE_VALUE);
     }
 
     static ANIArg MakeForArrayBufferLength(size_t length, std::string_view name)
@@ -1043,6 +1084,11 @@ public:
     ani_size GetNativeFunctionCount() const
     {
         return nativeFunctionCount_;
+    }
+
+    bool IsBooleanValue() const
+    {
+        return type_ == ValueType::ANI_BOOLEAN;
     }
 
 private:
