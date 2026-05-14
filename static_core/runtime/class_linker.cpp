@@ -1033,6 +1033,13 @@ static void OnError(ClassLinkerErrorHandler *errorHandler, ClassLinker::Error er
     }
 }
 
+static void OnClassNotFound(ClassLinkerErrorHandler *errorHandler, const uint8_t *descriptor)
+{
+    if (errorHandler != nullptr) {
+        errorHandler->OnClassNotFound(descriptor);
+    }
+}
+
 static bool TryInsertClassLoading(panda_file::File::EntityId &classId, const panda_file::File *pf,
                                   panda_file::ClassDataAccessor &classDataAccessor, ClassLoadingSet *threadLocalSet,
                                   ClassLinkerErrorHandler *errorHandler)
@@ -1636,24 +1643,6 @@ Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool needCopyDescr
     return arrayClass;
 }
 
-static PandaString PandaFilesToString(const PandaVector<const panda_file::File *> &pandaFiles)
-{
-    PandaStringStream ss;
-    ss << "[";
-
-    size_t n = pandaFiles.size();
-    for (size_t i = 0; i < n; i++) {
-        ss << pandaFiles[i]->GetFilename();
-
-        if (i < n - 1) {
-            ss << ", ";
-        }
-    }
-
-    ss << "]";
-    return ss.str();
-}
-
 Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
                              ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
@@ -1686,14 +1675,7 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
             }
 
             if (!classId.IsValid()) {
-                PandaStringStream ss;
-                {
-                    // can't make a wider scope for lock here - will get recursion
-                    os::memory::LockHolder lock {bootPandaFilesLock_};
-                    ss << "Cannot find class " << descriptor
-                       << " in boot panda files: " << PandaFilesToString(bootPandaFiles_);
-                }
-                OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
+                OnClassNotFound(errorHandler, descriptor);
                 return nullptr;
             }
         }
@@ -1750,14 +1732,7 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
         }
 
         if (!extId.IsValid()) {
-            PandaStringStream ss;
-            {
-                // can't make a wider scope for lock here - will get recursion
-                os::memory::LockHolder lock {bootPandaFilesLock_};
-                ss << "Cannot find class " << descriptor
-                   << " in boot panda files: " << PandaFilesToString(bootPandaFiles_);
-            }
-            OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
+            OnClassNotFound(errorHandler, descriptor);
             return nullptr;
         }
 

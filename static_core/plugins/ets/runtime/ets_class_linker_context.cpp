@@ -33,17 +33,27 @@ public:
 
     void OnError(ClassLinker::Error error, const PandaString &message) override
     {
+        classNotFoundDescriptor_ = nullptr;
         lastError_.emplace(error, message);
+    }
+
+    void OnClassNotFound(const uint8_t *descriptor) override
+    {
+        lastError_.reset();
+        classNotFoundDescriptor_ = descriptor;
     }
 
     bool HasError() const
     {
-        return lastError_.has_value();
+        return lastError_.has_value() || classNotFoundDescriptor_ != nullptr;
     }
 
     ClassLinker::Error GetErrorCode() const
     {
         ASSERT(HasError());
+        if (classNotFoundDescriptor_ != nullptr) {
+            return ClassLinker::Error::CLASS_NOT_FOUND;
+        }
         return lastError_->first;
     }
 
@@ -51,26 +61,30 @@ public:
     {
         ASSERT(HasError());
         if (errorHandler_ != nullptr) {
-            errorHandler_->OnError(lastError_->first, lastError_->second);
+            if (classNotFoundDescriptor_ != nullptr) {
+                errorHandler_->OnClassNotFound(classNotFoundDescriptor_);
+            } else {
+                errorHandler_->OnError(lastError_->first, lastError_->second);
+            }
         }
     }
 
     void ClearError()
     {
         lastError_.reset();
+        classNotFoundDescriptor_ = nullptr;
     }
 
 private:
     ClassLinkerErrorHandler *errorHandler_ {nullptr};
     std::optional<std::pair<ClassLinker::Error, PandaString>> lastError_;
+    const uint8_t *classNotFoundDescriptor_ {nullptr};
 };
 
 void ReportClassNotFound(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)
 {
     if (errorHandler != nullptr) {
-        PandaStringStream ss;
-        ss << "Cannot find class " << descriptor;
-        errorHandler->OnError(ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
+        errorHandler->OnClassNotFound(descriptor);
     }
 }
 

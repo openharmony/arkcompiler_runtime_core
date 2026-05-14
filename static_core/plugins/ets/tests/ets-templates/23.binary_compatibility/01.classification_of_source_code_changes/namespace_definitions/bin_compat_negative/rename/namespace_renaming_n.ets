@@ -21,7 +21,7 @@ tags: [negative]
 negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
 expected_error:
     verify-new-libs:
-    - "E/verifier: Cannot link class: Cannot find class Lnamespace_renaming_n/libr_{{loop.index0}}/N; in boot panda files: "
+    - "E/verifier: Cannot link class: Cannot find class Lnamespace_renaming_n/libr_{{loop.index0}}/N;"
     - "E/verifier: Verifier error 55: Cache miss for field at offset"
     - "E/verifier: Verifier error 61: Cannot resolve field id"
     - "E/verifier: Error: method void namespace_renaming_n_{{loop.index0}}.ETSGLOBAL::main() failed to verify"
