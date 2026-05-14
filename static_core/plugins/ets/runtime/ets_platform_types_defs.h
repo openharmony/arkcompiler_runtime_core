@@ -146,7 +146,7 @@
     TP("Lstd/core/BaseWeakRef;", coreBaseWeakRef)                                                                     \
     TP("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                       \
     TP("Lstd/core/FinalizationRegistry;", coreFinalizationRegistry)                                                   \
-    SM("Lstd/core/FinalizationRegistry;", "execCleanup", "Lstd/core/FinRegNode;:V",                                   \
+    SM("Lstd/core/FinalizationRegistry;", "execCleanup", "Lstd/core/FinalizationRegistry;:V",                         \
        coreFinalizationRegistryExecCleanup)                                                                           \
     TP("Lstd/core/FinRegNode;", coreFinRegNode)                                                                       \
     /* Containers */                                                                                                  \

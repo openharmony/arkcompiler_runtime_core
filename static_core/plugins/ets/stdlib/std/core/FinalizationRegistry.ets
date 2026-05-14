@@ -57,7 +57,7 @@ export final class FinalizationRegistry<T> {
      * @param callback_value callback function which will be called
      * after registered object reclamation.
      */
-    public constructor(callback: (value: T) => void) {
+    public constructor(callback: (value: T) => void | Promise<void>) {
         this.callback = callback;
         this.workerId = FinalizationRegistry.getWorkerId();
         this.workerDomain = FinalizationRegistry.getWorkerDomain();
@@ -218,30 +218,50 @@ export final class FinalizationRegistry<T> {
         this.mapSize--;
     }
 
-    private static execCleanup<T>(head: FinRegNode<T> | undefined): void {
-        while (head != undefined) {
-            let finReg = head.finReg;
-            let arg = head.arg;
-            try {
-                finReg.callback(arg);
-            } catch (e) {
-                console.log(`Error: ` + e.toString());
-                if (e instanceof Error) {
+    private pop(): FinRegNode<T> | undefined {
+        let node: FinRegNode<T> | undefined = undefined;
+        this.mutex.lockGuard(() => {
+            node = this.finalizationQueueHead;
+            if (node == undefined) {
+                return;
+            }
+            this.finalizationQueueHead = node!.next;
+            node!.next = undefined;
+        });
+        return node;
+    }
+
+    private static execCleanup<T>(finReg: FinalizationRegistry<T>): void {
+        while (true) {
+            let node = finReg.pop();
+            while (node != undefined) {
+                let arg = node!.arg;
+                try {
+                    finReg.callback(arg);
+                } catch (e) {
+                    console.error(e);
                     if (e.stack) {
-                        console.log(e.stack);
+                        console.error(e.stack);
                     }
                 }
+                node = finReg.pop();
             }
-            head = head.next;
+            // Get the next FinReg.
+            let nextFinReg = FinalizationRegistry.popFinReg(finReg);
+            if (nextFinReg == undefined) {
+                FinalizationRegistry.finishCleanup();
+                return;
+            }
+            finReg = nextFinReg!;
         }
-        FinalizationRegistry.finishCleanup();
     }
 
     private static native getWorkerId(): int;
     private static native getWorkerDomain(): int;
+    private static native popFinReg<U>(finReg: FinalizationRegistry<U>): FinalizationRegistry<U> | undefined;
     private static native finishCleanup(): void;
 
-    private callback: (value: T) => void;
+    private callback: (value: T) => void | Promise<void>;
     private mutex = new Mutex();
     private workerId: int;
     private workerDomain: int;
@@ -256,7 +276,6 @@ export final class FinalizationRegistry<T> {
 
     private nextFinReg: FinalizationRegistry<T> | undefined = undefined;
     private finalizationQueueHead: FinRegNode<T> | undefined = undefined;
-    private finalizationQueueTail: FinRegNode<T> | undefined = undefined;
 
     private static readonly INITIAL_BUCKETS_COUNT: int = 16;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,11 @@ namespace ark::ets {
 void EtsFinalizationRegistry::Enqueue(EtsFinRegNode *node, EtsFinalizationRegistry *finReg)
 {
     Remove(node, finReg);
-    EtsFinRegNode *tail = finReg->GetFinalizationQueueTail();
-    if (tail == nullptr) {
-        finReg->SetFinalizationQueueHead(node);
-    } else {
-        tail->SetNext(node);
-    }
-    finReg->SetFinalizationQueueTail(node);
+    ASSERT(node->GetNext() == nullptr);
+    ASSERT(node->GetPrev() == nullptr);
+    EtsFinRegNode *oldHead = finReg->GetFinalizationQueueHead();
+    finReg->SetFinalizationQueueHead(node);
+    node->SetNext(oldHead);
 }
 
 void EtsFinalizationRegistry::Remove(EtsFinRegNode *node, EtsFinalizationRegistry *finReg)

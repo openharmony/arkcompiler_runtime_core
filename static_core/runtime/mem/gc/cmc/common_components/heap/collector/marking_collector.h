@@ -272,9 +272,9 @@ protected:
 
     virtual void DoGarbageCollection() = 0;
 
-    void RequestGCInternal(GCReason reason, bool async, GCType gcType) override
+    void RequestGCInternal(GCReason reason, bool async, GCType gcType, bool explicitRequest = false) override
     {
-        collectorResources_.RequestGC(reason, async, gcType);
+        collectorResources_.RequestGC(reason, async, gcType, explicitRequest);
     }
     void MergeWeakStack(WeakStack &weakStack);
     void UpdateNativeThreshold(GCParam &gcParam);

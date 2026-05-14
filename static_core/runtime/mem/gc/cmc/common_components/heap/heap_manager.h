@@ -32,7 +32,7 @@ public:
     void Init(const RuntimeParam &param);
     void Fini();
 
-    static void RequestGC(GCReason reason, bool async, GCType gcType);
+    static void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
     static void MarkJitFortMemInstalled(void *vm, void *obj);
 
     // alloc return memory address, not "object" pointers, since they're not

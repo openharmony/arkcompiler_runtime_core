@@ -71,6 +71,9 @@ public:
      */
     void LaunchCleanupJobIfNeeded(EtsExecutionContext *executionCtx);
 
+    EtsFinalizationRegistry *PopFinalizationRegistry(EtsExecutionContext *executionCtx,
+                                                     EtsHandle<EtsFinalizationRegistry> finReg);
+
     /// @brief Decreases the counter of launched cleanup jobs
     void CleanupJobFinished();
 
@@ -84,6 +87,7 @@ public:
                            JobWorkerThreadDomain domain);
 
 private:
+    EtsFinalizationRegistry *FindFinRegForCleanup(EtsExecutionContext *executionCtx) REQUIRES(cleanupMutex_);
     /// @brief Increase number of cleanup coroutines and check if not exceeds limit
     bool UpdateFinRegJobsCountAndCheckIfCleanupNeeded();
     EtsFinalizationRegistry *UpdateAndSweepFinRegChain(EtsFinalizationRegistry *cur, const ReferenceUpdater &updater);
