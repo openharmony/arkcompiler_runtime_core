@@ -567,7 +567,12 @@ macro(:safepoint) do |acc_type, is_save_acc|
   if defines.SAFEPOINT_TIME_CHECKER_ENABLED
     call_runtime("SafepointCheckerEntrypoint", %tr).void
   end
-  flags := LoadI(%tr).Imm(Constants::THREAD_FLAG_OFFSET).u16
+  # This code will be unified. Issue #34605
+  if defines.ARK_USE_COMMON_RUNTIME
+    flags := LoadI(%tr).Imm(Constants::MUTATOR_SAFEPOINT_ACTIVE_OFFSET).u32
+  else
+    flags := LoadI(%tr).Imm(Constants::THREAD_FLAG_OFFSET).u16
+  end
   If(flags, 0).NE.Unlikely {
     save_acc_var(acc, acc_tag) if is_save_acc
     call_runtime("SafepointEntrypointInterp", %tr).void
@@ -665,7 +670,7 @@ macro(:initobj_call) do |id, size, callee, nargs, copy_lambda, op_format, first_
   klass := Phi(klass_1, klass_2).ref
   save_acc_var(acc, acc_tag)
 
-  component_type := LoadI(klass).Imm(Constants::CLASS_COMPONENT_OFFSET).ref
+  component_type := LoadI(klass).SetNeedReadBarrier(true).Imm(Constants::CLASS_COMPONENT_OFFSET).ref
   If(component_type, 0).NE.Unlikely {
     array := call_runtime("CreateMultiDimensionalArrayById", %tr, %frame, klass, get_method_ptr(), id, pc, op_format).ptr
     If(array, 0).EQ.Unlikely {

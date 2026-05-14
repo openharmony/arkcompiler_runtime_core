@@ -45,6 +45,7 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/string_flatten.h"
 #include "runtime/include/safepoint_timer.h"
+#include "runtime/mem/gc/gc_barrier_set.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/base_runtime.h"
@@ -430,8 +431,7 @@ extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[m
                                     [[maybe_unused]] ark::ObjectHeader *ref)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    common_vm::BaseRuntime::WriteBarrier(obj, field, ref, Mutator::GetCurrent());
+    Mutator::GetCurrent()->GetBarrierSet()->PostBarrier(obj, offset, ref);
 #else
     UNREACHABLE();
 #endif
@@ -442,9 +442,8 @@ extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj,
                                         [[maybe_unused]] ark::ObjectHeader *ref2)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1, Mutator::GetCurrent());
-    common_vm::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2,
-                                         Mutator::GetCurrent());
+    Mutator::GetCurrent()->GetBarrierSet()->PostBarrier(obj, offset, ref1);
+    Mutator::GetCurrent()->GetBarrierSet()->PostBarrier(obj, offset + OBJECT_POINTER_SIZE, ref2);
 #else
     UNREACHABLE();
 #endif

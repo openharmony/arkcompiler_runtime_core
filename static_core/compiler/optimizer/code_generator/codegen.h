@@ -159,6 +159,8 @@ public:
 
     Reg ConvertRegister(Register r, DataType::Type type = DataType::Type::INT64);
 
+    Reg Upcast(Reg r, TypeInfo type, bool signedCast);
+
     template <size_t SRC_REGS_COUNT>
     constexpr auto ConvertSrcRegisters(Inst *inst)
     {

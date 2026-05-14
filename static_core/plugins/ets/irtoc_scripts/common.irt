@@ -160,7 +160,7 @@ end
 # value, and returns it as a pointer. See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
 #
 macro(:get_object_pointer_imm) do |base, offset|
-  Cast(LoadI(base).Imm(offset).ref).ptr
+  Cast(LoadI(base).Imm(offset).SetNeedReadBarrier(true).ref).ptr
 end
 
 ###
@@ -168,7 +168,7 @@ end
 # See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
 #
 macro(:get_object_pointer) do |base, offset|
-  Cast(Load(base, Cast(offset).word).ref).ptr
+  Cast(Load(base, Cast(offset).word).SetNeedReadBarrier(true).ref).ptr
 end
 
 ###

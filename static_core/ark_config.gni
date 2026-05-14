@@ -182,7 +182,7 @@ enable_irtoc = true
 enable_codegen = true
 if (is_mingw || current_os == "win" || current_os == "mingw" ||
     current_os == "winuwp" || current_os == "mac" || host_os == "mac" ||
-    !runtime_core_enable_codegen || ark_use_common_runtime ||
+    !runtime_core_enable_codegen ||
     linux_x64_panda_runtime_codegen_disabled) {
   # Disable irtoc and codegen for:
   # - mingw and similar configurations
