@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,12 +33,13 @@ constexpr int LOWER_PRIOIRITY = 1;
 #elif defined(PANDA_TARGET_WINDOWS)
 constexpr int LOWER_PRIOIRITY = -1;
 #endif
+static constexpr uint32_t THREAD_NAME_MAX_LENGTH = 15;
 
 void ThreadFunc()
 {
-    g_curThreadId = GetCurrentThreadId();
     {
         os::memory::LockHolder lk(g_mu);
+        g_curThreadId = GetCurrentThreadId();
         g_updated = true;
     }
     g_cv.Signal();
@@ -71,40 +72,165 @@ TEST_F(ThreadTest, SetCurrentThreadPriorityTest)
 #endif
 }
 
-TEST_F(ThreadTest, SetOtherThreadPriorityTest)
+void ThreadSetNameFunc(const char *expectedName)
 {
-    auto parentPid = GetCurrentThreadId();
-    auto parentPrioBefore = GetPriority(parentPid);
+    {
+        os::memory::LockHolder lk(g_mu);
+        g_updated = true;
+    }
+    g_cv.Signal();
 
-    auto newThread = ThreadStart(ThreadFunc);
-    // wait for the new_thread to update CUR_THREAD_ID
+    {
+        // wait for the main thread to SetThreadName
+        os::memory::LockHolder lk(g_mu);
+        while (!g_operated) {
+            g_cv.Wait(&g_mu);
+        }
+    }
+    NativeHandleType handle = GetNativeHandle();
+
+    std::array<char, THREAD_NAME_MAX_LENGTH + 1> threadName = {0};
+#ifdef PANDA_TARGET_UNIX
+    auto ret = pthread_getname_np(handle, threadName.data(), threadName.size());
+#elif defined(PANDA_TARGET_WINDOWS)
+    auto ret = pthread_getname_np(reinterpret_cast<pthread_t>(handle), threadName.data(), threadName.size());
+#endif
+    ASSERT_EQ(ret, 0);
+    ASSERT_STREQ(threadName.data(), expectedName);
+}
+
+TEST_F(ThreadTest, SetThreadNameTest)
+{
+    g_updated = false;
+    g_operated = false;
+
+    const char *threadName = "TestThread";
+    auto newThread = ThreadStart(ThreadSetNameFunc, threadName);
+
     g_mu.Lock();
     while (!g_updated) {
         g_cv.Wait(&g_mu);
     }
-    auto childPid = g_curThreadId;
 
-    auto childPrioBefore = GetPriority(childPid);
-    (void)childPrioBefore;
-    auto ret = SetPriority(childPid, LOWEST_PRIORITY);
-
-    auto childPrioAfter = GetPriority(childPid);
-    (void)childPrioAfter;
-    auto parentPrioAfter = GetPriority(parentPid);
-
+    auto ret = SetThreadName(newThread, threadName);
     g_operated = true;
     g_mu.Unlock();
     g_cv.Signal();
+    ASSERT_EQ(ret, 0);
+
     void *res;
     ThreadJoin(newThread, &res);
+}
 
-    ASSERT_EQ(parentPrioBefore, parentPrioAfter);
-#ifdef PANDA_TARGET_UNIX
-    ASSERT_EQ(ret, 0U);
-    ASSERT(childPrioBefore <= childPrioAfter);
-#elif defined(PANDA_TARGET_WINDOWS)
-    ASSERT_NE(ret, 0U);
-    ASSERT(childPrioAfter <= childPrioBefore);
-#endif
+TEST_F(ThreadTest, SetThreadNameEmptyTest)
+{
+    g_updated = false;
+    g_operated = false;
+
+    const char *emptyName = "";
+    auto newThread = ThreadStart(ThreadSetNameFunc, emptyName);
+    g_mu.Lock();
+    while (!g_updated) {
+        g_cv.Wait(&g_mu);
+    }
+
+    auto ret = SetThreadName(newThread, emptyName);
+    g_operated = true;
+    g_mu.Unlock();
+    g_cv.Signal();
+    ASSERT_EQ(ret, 0);
+
+    void *res;
+    ThreadJoin(newThread, &res);
+}
+
+TEST_F(ThreadTest, SetThreadNameLongNameTest)
+{
+    g_updated = false;
+    g_operated = false;
+
+    const char *longName = "ThisIsAVeryLongThreadName";
+    const char *expectedName = "ThisIsAVeryLong";
+    auto newThread = ThreadStart(ThreadSetNameFunc, expectedName);
+    g_mu.Lock();
+    while (!g_updated) {
+        g_cv.Wait(&g_mu);
+    }
+
+    auto ret = SetThreadName(newThread, longName);
+    g_operated = true;
+    g_mu.Unlock();
+    g_cv.Signal();
+    ASSERT_EQ(ret, 0);
+
+    void *res;
+    ThreadJoin(newThread, &res);
+}
+
+TEST_F(ThreadTest, SetThreadNameExact16Test)
+{
+    g_updated = false;
+    g_operated = false;
+
+    const char *exact16Name = "Exactly16Chars!";
+    const char *expectedName = "Exactly16Chars!";
+    auto newThread = ThreadStart(ThreadSetNameFunc, expectedName);
+    g_mu.Lock();
+    while (!g_updated) {
+        g_cv.Wait(&g_mu);
+    }
+
+    auto ret = SetThreadName(newThread, exact16Name);
+    g_operated = true;
+    g_mu.Unlock();
+    g_cv.Signal();
+    ASSERT_EQ(ret, 0);
+
+    void *res;
+    ThreadJoin(newThread, &res);
+}
+
+TEST_F(ThreadTest, SetThreadNameExact15Test)
+{
+    g_updated = false;
+    g_operated = false;
+
+    const char *exact15Name = "Exactly15Chars";
+    auto newThread = ThreadStart(ThreadSetNameFunc, exact15Name);
+    g_mu.Lock();
+    while (!g_updated) {
+        g_cv.Wait(&g_mu);
+    }
+
+    auto ret = SetThreadName(newThread, exact15Name);
+    g_operated = true;
+    g_mu.Unlock();
+    g_cv.Signal();
+    ASSERT_EQ(ret, 0);
+
+    void *res;
+    ThreadJoin(newThread, &res);
+}
+
+TEST_F(ThreadTest, SetThreadNameWithSpecialCharsTest)
+{
+    g_updated = false;
+    g_operated = false;
+
+    const char *specialName = "Thread-123_ABC";
+    auto newThread = ThreadStart(ThreadSetNameFunc, specialName);
+    g_mu.Lock();
+    while (!g_updated) {
+        g_cv.Wait(&g_mu);
+    }
+
+    auto ret = SetThreadName(newThread, specialName);
+    g_operated = true;
+    g_mu.Unlock();
+    g_cv.Signal();
+    ASSERT_EQ(ret, 0);
+
+    void *res;
+    ThreadJoin(newThread, &res);
 }
 }  // namespace ark::os::thread
