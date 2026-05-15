@@ -47,7 +47,7 @@ p{{i + 1}}: P{{i + 1}}{% if not loop.last or rest %}, {% endif %}
 ({% for i in range(narg) -%}
 p{{i + 1}}: Any{% if not loop.last or rest %}, {% endif %}
 {%- endfor -%}
-{%- if rest %}...r: FixedArray<Any>{% endif %}): Any
+{%- if rest %}...r: FixedArray<Any>{% endif %}): R
 {%- endmacro %}
 
 {%- macro listArgs(from, to) -%}

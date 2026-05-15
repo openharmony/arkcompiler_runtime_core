@@ -209,20 +209,6 @@ cases:
           arktest.assertEQ(i2.foo(undefined), 3)
           arktest.assertEQ(i2.foo(new Object()), 3)
 
-    # Any and Object have different effective types: interface return type Object
-    # is NOT overridden by class return type Any (Any is covariant to Object)
-    - decl: |-
-          interface I {
-              foo(): Object { return 0 }
-          }
-          class Impl implements I {
-              foo(): Any { return 1 }
-          }
-          let i: I = new Impl
-      use: |-
-          let v = i.foo()
-          arktest.assertEQ(v, 0)
-
     # Any and Object have different effective types: interface return type Any
     # is overridden by class return type Object (Object is covariant to Any)
     - decl: |-

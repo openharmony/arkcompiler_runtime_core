@@ -357,10 +357,6 @@
 15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_9.ets
 15.semantic_rules/08.overriding/01.overriding_in_classes/inherited_and_declared_methods_override_same_superclass_n.ets
 
-#34295 No CTE for incorrect overriding
-15.semantic_rules/08.overriding/02.overriding_in_interfaces/overriding_n_7.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_with_object_n_15.ets
-
 #33245 Wrong CTE for generic extends union type (spec 15.9.3)
 15.semantic_rules/08.overriding/03.override-compatible_signatures/override_generic_extends_union.ets
 

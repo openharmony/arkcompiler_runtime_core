@@ -144,71 +144,71 @@ export interface Function0<out R>
 
 export abstract class LambdaR0<in PR, out R>
     implements FunctionR0<PR, R> {
-    abstract invokeR0(...r: FixedArray<Any>): Any;
+    abstract invokeR0(...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         return this.invokeR0(...r)
     }
-    final invokeR1(p1: Any, ...r: FixedArray<Any>): Any {
+    final invokeR1(p1: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1]))
     }
-    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any {
+    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2]))
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3]))
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4]))
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5]))
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6]))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -216,108 +216,108 @@ export abstract class LambdaR0<in PR, out R>
 }
 export abstract class Lambda0<out R>
     implements Function0<R> {
-    abstract invoke0(): Any;
+    abstract invoke0(): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 0) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke0()
     }
-    final invoke1 (p1: Any): Any {
+    final invoke1 (p1: Any): R {
         return this.invoke0()
     }
-    final invoke2 (p1: Any, p2: Any): Any {
+    final invoke2 (p1: Any, p2: Any): R {
         return this.invoke0()
     }
-    final invoke3 (p1: Any, p2: Any, p3: Any): Any {
+    final invoke3 (p1: Any, p2: Any, p3: Any): R {
         return this.invoke0()
     }
-    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): Any {
+    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): R {
         return this.invoke0()
     }
-    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any {
+    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): R {
         return this.invoke0()
     }
-    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
+    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R {
         return this.invoke0()
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke0()
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke0()
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke0()
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke0()
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke0()
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke0()
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke0()
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke0()
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke0()
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke0()
     }
-    final invokeR0(...r: FixedArray<Any>): Any {
+    final invokeR0(...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR1(p1: Any, ...r: FixedArray<Any>): Any {
+    final invokeR1(p1: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any {
+    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -336,69 +336,69 @@ export interface Function1<in P1, out R>
 
 export abstract class LambdaR1<in P1, in PR, out R>
     implements FunctionR1<P1, PR, R> {
-    abstract invokeR1(p1: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR1(p1: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 1) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR1(r[0], 
             ...Runtime.removeFrontElementsStub(r, 1))
     }
-    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any {
+    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2]))
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3]))
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4]))
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5]))
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6]))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -406,102 +406,102 @@ export abstract class LambdaR1<in P1, in PR, out R>
 }
 export abstract class Lambda1<in P1, out R>
     implements Function1<P1, R> {
-    abstract invoke1(p1: Any): Any;
+    abstract invoke1(p1: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 1) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke1(r[0])
     }
-    final invoke2 (p1: Any, p2: Any): Any {
+    final invoke2 (p1: Any, p2: Any): R {
         return this.invoke1(p1)
     }
-    final invoke3 (p1: Any, p2: Any, p3: Any): Any {
+    final invoke3 (p1: Any, p2: Any, p3: Any): R {
         return this.invoke1(p1)
     }
-    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): Any {
+    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): R {
         return this.invoke1(p1)
     }
-    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any {
+    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): R {
         return this.invoke1(p1)
     }
-    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
+    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R {
         return this.invoke1(p1)
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke1(p1)
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke1(p1)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke1(p1)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke1(p1)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke1(p1)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke1(p1)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke1(p1)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke1(p1)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke1(p1)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke1(p1)
     }
-    final invokeR1(p1: Any, ...r: FixedArray<Any>): Any {
+    final invokeR1(p1: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any {
+    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -520,65 +520,65 @@ export interface Function2<in P1, in P2, out R>
 
 export abstract class LambdaR2<in P1, in P2, in PR, out R>
     implements FunctionR2<P1, P2, PR, R> {
-    abstract invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 2) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR2(r[0], r[1], 
             ...Runtime.removeFrontElementsStub(r, 2))
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3]))
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4]))
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5]))
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6]))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -586,96 +586,96 @@ export abstract class LambdaR2<in P1, in P2, in PR, out R>
 }
 export abstract class Lambda2<in P1, in P2, out R>
     implements Function2<P1, P2, R> {
-    abstract invoke2(p1: Any, p2: Any): Any;
+    abstract invoke2(p1: Any, p2: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 2) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke2(r[0], r[1])
     }
-    final invoke3 (p1: Any, p2: Any, p3: Any): Any {
+    final invoke3 (p1: Any, p2: Any, p3: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): Any {
+    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any {
+    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
+    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any {
+    final invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -694,61 +694,61 @@ export interface Function3<in P1, in P2, in P3, out R>
 
 export abstract class LambdaR3<in P1, in P2, in P3, in PR, out R>
     implements FunctionR3<P1, P2, P3, PR, R> {
-    abstract invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 3) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR3(r[0], r[1], r[2], 
             ...Runtime.removeFrontElementsStub(r, 3))
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4]))
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5]))
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6]))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -756,90 +756,90 @@ export abstract class LambdaR3<in P1, in P2, in P3, in PR, out R>
 }
 export abstract class Lambda3<in P1, in P2, in P3, out R>
     implements Function3<P1, P2, P3, R> {
-    abstract invoke3(p1: Any, p2: Any, p3: Any): Any;
+    abstract invoke3(p1: Any, p2: Any, p3: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 3) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke3(r[0], r[1], r[2])
     }
-    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): Any {
+    final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any {
+    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
+    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any {
+    final invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -858,57 +858,57 @@ export interface Function4<in P1, in P2, in P3, in P4, out R>
 
 export abstract class LambdaR4<in P1, in P2, in P3, in P4, in PR, out R>
     implements FunctionR4<P1, P2, P3, P4, PR, R> {
-    abstract invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 4) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR4(r[0], r[1], r[2], r[3], 
             ...Runtime.removeFrontElementsStub(r, 4))
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5]))
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6]))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -916,84 +916,84 @@ export abstract class LambdaR4<in P1, in P2, in P3, in P4, in PR, out R>
 }
 export abstract class Lambda4<in P1, in P2, in P3, in P4, out R>
     implements Function4<P1, P2, P3, P4, R> {
-    abstract invoke4(p1: Any, p2: Any, p3: Any, p4: Any): Any;
+    abstract invoke4(p1: Any, p2: Any, p3: Any, p4: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 4) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke4(r[0], r[1], r[2], r[3])
     }
-    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any {
+    final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
+    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any {
+    final invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1012,53 +1012,53 @@ export interface Function5<in P1, in P2, in P3, in P4, in P5, out R>
 
 export abstract class LambdaR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
     implements FunctionR5<P1, P2, P3, P4, P5, PR, R> {
-    abstract invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 5) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR5(r[0], r[1], r[2], r[3], r[4], 
             ...Runtime.removeFrontElementsStub(r, 5))
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6]))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -1066,78 +1066,78 @@ export abstract class LambdaR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
 }
 export abstract class Lambda5<in P1, in P2, in P3, in P4, in P5, out R>
     implements Function5<P1, P2, P3, P4, P5, R> {
-    abstract invoke5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any;
+    abstract invoke5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 5) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke5(r[0], r[1], r[2], r[3], r[4])
     }
-    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
+    final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any {
+    final invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1156,49 +1156,49 @@ export interface Function6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
 
 export abstract class LambdaR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, out R>
     implements FunctionR6<P1, P2, P3, P4, P5, P6, PR, R> {
-    abstract invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 6) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR6(r[0], r[1], r[2], r[3], r[4], r[5], 
             ...Runtime.removeFrontElementsStub(r, 6))
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7]))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -1206,72 +1206,72 @@ export abstract class LambdaR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, 
 }
 export abstract class Lambda6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
     implements Function6<P1, P2, P3, P4, P5, P6, R> {
-    abstract invoke6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any;
+    abstract invoke6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 6) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke6(r[0], r[1], r[2], r[3], r[4], r[5])
     }
-    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
+    final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any {
+    final invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1290,45 +1290,45 @@ export interface Function7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out 
 
 export abstract class LambdaR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in PR, out R>
     implements FunctionR7<P1, P2, P3, P4, P5, P6, P7, PR, R> {
-    abstract invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 7) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR7(r[0], r[1], r[2], r[3], r[4], r[5], r[6], 
             ...Runtime.removeFrontElementsStub(r, 7))
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8]))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -1336,66 +1336,66 @@ export abstract class LambdaR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 }
 export abstract class Lambda7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out R>
     implements Function7<P1, P2, P3, P4, P5, P6, P7, R> {
-    abstract invoke7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any;
+    abstract invoke7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 7) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke7(r[0], r[1], r[2], r[3], r[4], r[5], r[6])
     }
-    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
+    final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any {
+    final invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1414,41 +1414,41 @@ export interface Function8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P
 
 export abstract class LambdaR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in PR, out R>
     implements FunctionR8<P1, P2, P3, P4, P5, P6, P7, P8, PR, R> {
-    abstract invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 8) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 
             ...Runtime.removeFrontElementsStub(r, 8))
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9]))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -1456,60 +1456,60 @@ export abstract class LambdaR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 }
 export abstract class Lambda8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, out R>
     implements Function8<P1, P2, P3, P4, P5, P6, P7, P8, R> {
-    abstract invoke8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any;
+    abstract invoke8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 8) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7])
     }
-    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
+    final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any {
+    final invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1528,37 +1528,37 @@ export interface Function9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P
 
 export abstract class LambdaR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in PR, out R>
     implements FunctionR9<P1, P2, P3, P4, P5, P6, P7, P8, P9, PR, R> {
-    abstract invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 9) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], 
             ...Runtime.removeFrontElementsStub(r, 9))
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10]))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14, p15, p16]))
     }
@@ -1566,54 +1566,54 @@ export abstract class LambdaR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 }
 export abstract class Lambda9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, out R>
     implements Function9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R> {
-    abstract invoke9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any;
+    abstract invoke9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 9) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8])
     }
-    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
+    final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any {
+    final invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1632,33 +1632,33 @@ export interface Function10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in PR, out R>
     implements FunctionR10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, PR, R> {
-    abstract invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 10) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], 
             ...Runtime.removeFrontElementsStub(r, 10))
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11]))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14, p15, p16]))
     }
@@ -1666,48 +1666,48 @@ export abstract class LambdaR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, out R>
     implements Function10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, R> {
-    abstract invoke10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any;
+    abstract invoke10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 10) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])
     }
-    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
+    final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any {
+    final invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1726,29 +1726,29 @@ export interface Function11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in PR, out R>
     implements FunctionR11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PR, R> {
-    abstract invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 11) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], 
             ...Runtime.removeFrontElementsStub(r, 11))
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12]))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14, p15, p16]))
     }
@@ -1756,42 +1756,42 @@ export abstract class LambdaR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, out R>
     implements Function11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, R> {
-    abstract invoke11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any;
+    abstract invoke11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 11) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10])
     }
-    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
+    final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any {
+    final invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1810,25 +1810,25 @@ export interface Function12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in PR, out R>
     implements FunctionR12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, PR, R> {
-    abstract invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 12) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], 
             ...Runtime.removeFrontElementsStub(r, 12))
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13]))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14, p15, p16]))
     }
@@ -1836,36 +1836,36 @@ export abstract class LambdaR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, out R>
     implements Function12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, R> {
-    abstract invoke12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any;
+    abstract invoke12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 12) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11])
     }
-    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
+    final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any {
+    final invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1884,21 +1884,21 @@ export interface Function13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in PR, out R>
     implements FunctionR13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, PR, R> {
-    abstract invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 13) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], 
             ...Runtime.removeFrontElementsStub(r, 13))
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14]))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14, p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14, p15, p16]))
     }
@@ -1906,30 +1906,30 @@ export abstract class LambdaR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, out R>
     implements Function13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, R> {
-    abstract invoke13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any;
+    abstract invoke13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 13) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12])
     }
-    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
+    final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any {
+    final invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -1948,17 +1948,17 @@ export interface Function14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in PR, out R>
     implements FunctionR14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, PR, R> {
-    abstract invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 14) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], 
             ...Runtime.removeFrontElementsStub(r, 14))
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
             ...Runtime.addFrontElementsStub(r, [p15]))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
             ...Runtime.addFrontElementsStub(r, [p15, p16]))
     }
@@ -1966,24 +1966,24 @@ export abstract class LambdaR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, out R>
     implements Function14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, R> {
-    abstract invoke14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any;
+    abstract invoke14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 14) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13])
     }
-    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
+    final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any {
+    final invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): R {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -2002,13 +2002,13 @@ export interface Function15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in PR, out R>
     implements FunctionR15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, PR, R> {
-    abstract invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 15) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], 
             ...Runtime.removeFrontElementsStub(r, 15))
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invokeR15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, 
             ...Runtime.addFrontElementsStub(r, [p16]))
     }
@@ -2016,18 +2016,18 @@ export abstract class LambdaR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, out R>
     implements Function15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, R> {
-    abstract invoke15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any;
+    abstract invoke15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 15) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14])
     }
-    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
+    final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
-    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any {
+    final invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): R {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
@@ -2046,7 +2046,7 @@ export interface Function16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 
 export abstract class LambdaR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
     implements FunctionR16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, PR, R> {
-    abstract invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any;
+    abstract invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 16) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], 
@@ -2056,12 +2056,12 @@ export abstract class LambdaR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
 }
 export abstract class Lambda16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, out R>
     implements Function16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, R> {
-    abstract invoke16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any;
+    abstract invoke16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): R;
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < 16) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15])
     }
-    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
+    final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke16(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
     }
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
