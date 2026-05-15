@@ -205,3 +205,17 @@ cases:
           ).catch(
               (p: Error): void => {}
           );
+
+    - decl: |-
+          const neverPromise: Promise<never> = new Promise<never>( (): void => {} )
+      use: "//stub"
+    - decl: |-
+          function failAsync(message: string): Promise<never> {
+              return Promise.reject(new Error(message));
+          }
+      use: |-
+          try {
+              await failAsync('test')
+          } catch (e) {
+              arktest.assertEQ(e.message, 'test')
+          }
