@@ -218,7 +218,7 @@ cases:
         let a3 = new A3;
         let a4 = new A4;
         let c1 = new C1;
-        arktest.assertEQ(c1.foo(a1), 'foo4', 'foo4 call expected');
+        arktest.assertEQ(c1.foo(a1), 'foo2', 'foo2 call expected');
         arktest.assertEQ(c1.foo(a2), 'foo4', 'foo4 call expected');
         arktest.assertEQ(c1.foo(a3), 'foo4', 'foo4 call expected');
         arktest.assertEQ(c1.foo(a4), 'foo3', 'foo3 call expected');
