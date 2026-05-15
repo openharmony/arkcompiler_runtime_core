@@ -33,6 +33,9 @@ function prepare_file_test2() {
 	    cat "$SCRIPT_DIR"/test/test_file_expected_list_ohos_arm64_withoutLLVM.txt >> "$EXPECTED"
 	fi
     fi
+    if [ "$ANDROID_ARM64" = "true" ]; then
+	    cat "$SCRIPT_DIR"/test/test_file_expected_list_android_arm64_withoutLLVM.txt >> "$EXPECTED"
+    fi
     if [ "$LINUX_ARM64_TOOLS" = "true" ]; then
         cat "$SCRIPT_DIR"/test/test_file_expected_list_arm64.txt >> "$EXPECTED"
     fi
@@ -87,6 +90,9 @@ if [ "$OHOS_ARM32" = "true" ]; then
 fi
 if [ "$OHOS_ARM64" = "true" ]; then
     echo "build-sdk/ohos_arm64" >> "$EXPECTED"
+fi
+if [ "$ANDROID_ARM64" = "true" ]; then
+    echo "build-sdk/android_arm64" >> "$EXPECTED"
 fi
 if [ "$LINUX_ARM64_TOOLS" = "true" ]; then
     echo "build-sdk/linux_arm64_host_tools" >> "$EXPECTED"
