@@ -17,12 +17,10 @@
 #include "libarkbase/utils/logger.h"
 #include <algorithm>
 #include <cstdlib>
-#include <sstream>
 #include "include/method.h"
 #include "include/runtime.h"
 #include "include/panda_vm.h"
 #include <sys/ucontext.h>
-#include <sys/stat.h>
 #include "compiler_options.h"
 #include "code_info/code_info.h"
 #include "include/stack_walker.h"
@@ -461,112 +459,5 @@ bool CrashFallbackDumpHandler::Action(int sig, [[maybe_unused]] siginfo_t *sigin
     PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::RUNTIME, false).GetStream());
     return false;
 }
-
-// NOLINTNEXTLINE
-std::string AotEscapeSignalHandler::escapeSignalFlagFilePath_ = "/data/storage/ark-profile/aot_escape.txt";
-bool AotEscapeSignalHandler::isEscaped_ = false;
-
-void AotEscapeSignalHandler::SetEscaped(bool isEscape)
-{
-    AotEscapeSignalHandler::isEscaped_ = isEscape;
-}
-
-void AotEscapeSignalHandler::SetEscapedFlagFilePath(std::string &escapeFlagPath)
-{
-    escapeSignalFlagFilePath_ = escapeFlagPath;
-}
-
-bool AotEscapeSignalHandler::NotTheTargetSignal(int sig)
-{
-    // following are the target signal, will cause to aot escape. If the target, return false
-    auto result = true;
-    if (sig == SIGSEGV || sig == SIGABRT || sig == SIGBUS || sig == SIGFPE || sig == SIGILL) {
-        result = false;
-    }
-    return result;
-}
-
-bool AotEscapeSignalHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, void *context)
-{
-    return HandleAction(sig, siginfo, context);
-}
-
-#if defined(PANDA_TARGET_OHOS) || (defined(PANDA_TARGET_AMD64))
-bool AotEscapeSignalHandler::HandleAction(int sig, [[maybe_unused]] siginfo_t *siginfo, void *context)
-{
-    if (NotTheTargetSignal(sig)) {
-        return false;
-    }
-    if (IsEscapeSignalFlagExists()) {
-        return false;
-    }
-    if (!Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->HasAotFiles()) {
-        return false;
-    }
-    LOG(ERROR, RUNTIME) << "AotEscapeSignalHandler handle AOT escape type, signal = " << sig;
-
-    std::ifstream file(escapeSignalFlagFilePath_);
-    std::stringstream buffer;
-    if (file.is_open()) {
-        buffer << file.rdbuf();
-        file.close();
-    }
-
-    uintptr_t const pc = SignalContext(context).GetPC();
-    buffer << "Signal: " << sig << ", PC: " << pc << ", isInAot: ";
-    auto isInAot = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->InAotFileRange(pc);
-    buffer << (isInAot ? "true\n" : "false\n");
-
-    auto content = buffer.str();
-    int failedNum = -1;
-    const auto filePerm = 0666;
-    // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    const auto perm = O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int fd = open(escapeSignalFlagFilePath_.c_str(), perm, filePerm);
-    if (fd == failedNum) {
-        LOG(ERROR, RUNTIME) << "AotEscapeSignalHandler handle AOT escape. Failed to open: " << strerror(errno);
-        return false;
-    }
-    if (write(fd, content.c_str(), content.length()) == failedNum) {
-        LOG(ERROR, RUNTIME) << "AotEscapeSignalHandler handle AOT escape. Failed to write: " << strerror(errno);
-    }
-    close(fd);
-    return false;
-}
-
-bool AotEscapeSignalHandler::IsEscapeSignalFlagExists()
-{
-    if (isEscaped_) {
-        return true;
-    }
-    std::ifstream file(escapeSignalFlagFilePath_);
-    if (!file.is_open()) {
-        return false;
-    }
-    int lineCount = 0;
-    std::string line;
-    while (std::getline(file, line)) {
-        lineCount++;
-        if (lineCount >= CRASH_SIGNAL_THREASHOLD) {
-            isEscaped_ = true;
-            break;
-        }
-    }
-    file.close();
-    return isEscaped_;
-}
-#else
-bool AotEscapeSignalHandler::HandleAction([[maybe_unused]] int sig, [[maybe_unused]] siginfo_t *siginfo,
-                                          [[maybe_unused]] void *context)
-{
-    return isEscaped_;
-}
-
-bool AotEscapeSignalHandler::IsEscapeSignalFlagExists()
-{
-    return isEscaped_;
-}
-#endif
 
 }  // namespace ark

@@ -139,6 +139,7 @@ set(SOURCES
     object_accessor.cpp
     osr.cpp
     arch/asm_support.cpp
+    aot_escape_signal_handler.cpp
     signal_handler.cpp
     profilesaver/profile_saver.cpp
     profilesaver/profile_dump_info.cpp
@@ -1052,6 +1053,11 @@ add_gtests(
 add_gtests(
     arkruntime_signal_test
     tests/signal_handler_test.cpp
+)
+
+add_gtests(
+    arkruntime_on_stack_string_test
+    tests/on_stack_string_test.cpp
 )
 
 panda_add_gtest(

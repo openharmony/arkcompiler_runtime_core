@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 #include <csignal>
+#include <fstream>
 #include <string>
+#include <vector>
 
 #include "aot/aot_builder/aot_builder.h"
 #include "aot/compiled_method.h"
@@ -44,6 +46,34 @@ std::string GetPandaStdLibPath()
     auto execPath = ark::os::file::File::GetExecutablePath().Value();
     return execPath + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
 }
+
+#if defined(PANDA_TARGET_AMD64)
+std::vector<std::string> ReadLines(const std::string &path)
+{
+    std::ifstream file(path);
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+    return lines;
+}
+
+void CheckEscapeSignalLine(const std::string &line, int sig)
+{
+    std::string prefix = "Signal: " + std::to_string(sig) + ", PC: ";
+    ASSERT_EQ(line.find(prefix), 0U);
+    auto isInAotPos = line.find(", isInAot: ");
+    ASSERT_NE(isInAotPos, std::string::npos);
+    auto pcText = line.substr(prefix.size(), isInAotPos - prefix.size());
+    ASSERT_FALSE(pcText.empty());
+    for (char ch : pcText) {
+        ASSERT_TRUE(ch >= '0' && ch <= '9');
+    }
+    auto isInAotText = line.substr(isInAotPos + std::string(", isInAot: ").size());
+    ASSERT_TRUE(isInAotText == "true" || isInAotText == "false");
+}
+#endif
 
 RuntimeOptions MakeBaseOptions()
 {
@@ -203,6 +233,63 @@ TEST_F(AotEscapeSignalHandlerTest, AotEscapeTestCallAction)
 
     std::remove(aotEscapePath.c_str());
     AotEscapeSignalHandler::SetEscaped(false);
+}
+
+TEST_F(AotEscapeSignalHandlerTest, AotEscapeTestCallActionWritesEscapeRecords)
+{
+    auto options = MakeBaseOptions();
+    options.SetAotFile(anPath_);
+
+    std::string aotEscapePath = "AotEscapeTestWriteEscapeRecordsPath.txt";
+    std::remove(aotEscapePath.c_str());
+    AotEscapeSignalHandler::SetEscaped(false);
+    AotEscapeSignalHandler::SetEscapedFlagFilePath(aotEscapePath);
+
+    Runtime::Create(options);
+    auto hasAot = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->HasAotFiles();
+    ASSERT_TRUE(hasAot);
+
+    ucontext_t uc;
+    mcontext_t ucMcontext = {};
+    uc.uc_mcontext = ucMcontext;
+    AotEscapeSignalHandler::HandleAction(SIGSEGV, nullptr, &uc);
+    AotEscapeSignalHandler::HandleAction(SIGABRT, nullptr, &uc);
+    AotEscapeSignalHandler::HandleAction(SIGBUS, nullptr, &uc);
+    Runtime::Destroy();
+
+    constexpr size_t expectedLineCount = 3U;
+    constexpr size_t sigsegvLineIndex = 0U;
+    constexpr size_t sigabrtLineIndex = 1U;
+    constexpr size_t sigbusLineIndex = 2U;
+    auto lines = ReadLines(aotEscapePath);
+    ASSERT_EQ(lines.size(), expectedLineCount);
+    CheckEscapeSignalLine(lines[sigsegvLineIndex], SIGSEGV);
+    CheckEscapeSignalLine(lines[sigabrtLineIndex], SIGABRT);
+    CheckEscapeSignalLine(lines[sigbusLineIndex], SIGBUS);
+    AotEscapeSignalHandler::SetEscaped(false);
+    ASSERT_TRUE(AotEscapeSignalHandler::IsEscapeSignalFlagExists());
+    AotEscapeSignalHandler::SetEscaped(false);
+
+    std::remove(aotEscapePath.c_str());
+}
+
+TEST_F(AotEscapeSignalHandlerTest, AotEscapeTestCountsUnterminatedLastLine)
+{
+    std::string aotEscapePath = "AotEscapeTestUnterminatedLastLinePath.txt";
+    std::remove(aotEscapePath.c_str());
+    AotEscapeSignalHandler::SetEscaped(false);
+    AotEscapeSignalHandler::SetEscapedFlagFilePath(aotEscapePath);
+
+    {
+        std::ofstream file(aotEscapePath);
+        file << "Signal: 11, PC: 1, isInAot: false\n";
+        file << "Signal: 6, PC: 2, isInAot: false\n";
+        file << "Signal: 7, PC: 3, isInAot: false";
+    }
+
+    ASSERT_TRUE(AotEscapeSignalHandler::IsEscapeSignalFlagExists());
+    AotEscapeSignalHandler::SetEscaped(false);
+    std::remove(aotEscapePath.c_str());
 }
 #endif
 
