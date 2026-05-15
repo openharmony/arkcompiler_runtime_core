@@ -24,8 +24,8 @@ const ClassWithDefaultParameterMethods = etsMod.getClass('ClassWithDefaultParame
 
 	let obj = new ClassWithDefaultParameterMethods();
 
-	ASSERT_THROWS(TypeError, () => obj.overloaded_method(INT_VALUE));
-	ASSERT_THROWS(TypeError, () => obj.overloaded_method(STRING_VALUE));
+	ASSERT_EQ(obj.overloadedMethod(INT_VALUE), 'int');
+	ASSERT_EQ(obj.overloadedMethod(STRING_VALUE), 'string');
 }
 
 GCJSRuntimeCleanup();

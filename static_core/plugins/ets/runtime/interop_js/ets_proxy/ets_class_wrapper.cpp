@@ -519,6 +519,9 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     }
 
     CollectClassMethods(&propsMethod, overloads);
+    for (auto &methodSetPair : propsMethod) {
+        methodSetPair.second->SortMethods();
+    }
     if (!etsClass_->GetRuntimeClass()->IsObjectClass() && !etsClass_->GetRuntimeClass()->IsAnyClass()) {
         UpdatePropsWithBaseClasses(&propsMethod, &propsField);
     }
@@ -1158,7 +1161,11 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
 
     EtsMethodWrapper *ctorWrapper = EtsMethodWrapper::ResolveLazyLink(ctx, etsCtorLink_);
     ASSERT(ctorWrapper != nullptr);
-    EtsMethod *ctorMethod = ctorWrapper->GetEtsMethod(jsArgs.Size());
+    auto [ctorMethod, errorMessage] = ctorWrapper->GetSuitableMethod(env, jsArgs.Size(), jsArgs);
+    if (UNLIKELY(ctorMethod == nullptr)) {
+        ctx->ThrowJSTypeError(env, errorMessage);
+        return false;
+    }
     ASSERT(ctorMethod->IsInstanceConstructor());
 
     napi_value callRes = CallETSInstance(executionCtx, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());

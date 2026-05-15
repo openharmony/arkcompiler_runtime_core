@@ -163,21 +163,21 @@ struct JSConvertBase {
         ASSERT(res.has_value() || InteropCtx::SanityJSExceptionPending() || InteropCtx::SanityETSExceptionPending());
         return res;
     }
+
+    static bool MatchType(napi_env env, napi_value jsVal)
+    {
+        return Impl::MatchTypeImpl(env, jsVal);
+    }
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define JSCONVERT_DEFINE_TYPE(type, cpptype_)                                                                \
-    struct JSConvert##type : public JSConvertBase<JSConvert##type, cpptype_> {                               \
-        static constexpr const char *TYPE_NAME = #type;                                                      \
-        /* Must not fail */                                                                                  \
-        [[maybe_unused]] static inline napi_value WrapImpl([[maybe_unused]] napi_env env,                    \
-                                                           [[maybe_unused]] cpptype etsVal);                 \
-        /* May fail */                                                                                       \
-        [[maybe_unused]] static inline std::optional<cpptype> UnwrapImpl([[maybe_unused]] InteropCtx *ctx,   \
-                                                                         [[maybe_unused]] napi_env env,      \
-                                                                         [[maybe_unused]] napi_value jsVal); \
+#define JSCONVERT_DEFINE_TYPE(type, cpptype_)                                                             \
+    struct JSConvert##type : public JSConvertBase<JSConvert##type, cpptype_> {                            \
+        static constexpr const char *TYPE_NAME = #type;                                                   \
+        static inline napi_value WrapImpl(napi_env env, cpptype etsVal);                                  \
+        static inline std::optional<cpptype> UnwrapImpl(InteropCtx *ctx, napi_env env, napi_value jsVal); \
+        static inline bool MatchTypeImpl(napi_env env, napi_value jsVal);                                 \
     }
-
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define JSCONVERT_WRAP(type) \
     inline napi_value JSConvert##type::WrapImpl([[maybe_unused]] napi_env env, [[maybe_unused]] cpptype etsVal)
@@ -186,6 +186,10 @@ struct JSConvertBase {
 #define JSCONVERT_UNWRAP(type)                                                  \
     inline std::optional<JSConvert##type::cpptype> JSConvert##type::UnwrapImpl( \
         [[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] napi_env env, [[maybe_unused]] napi_value jsVal)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define JSCONVERT_MATCH_TYPE_IMPL(type) \
+    inline bool JSConvert##type::MatchTypeImpl([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value jsVal)
 }  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_BASE_H

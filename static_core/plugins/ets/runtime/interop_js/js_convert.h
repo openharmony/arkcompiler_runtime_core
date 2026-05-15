@@ -77,6 +77,24 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     }
 
     template <typename P = Cpptype>
+    static std::enable_if_t<std::is_integral_v<P>, bool> MatchTypeImpl([[maybe_unused]] napi_env env, napi_value jsVal)
+    {
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        napi_value result = jsVal;
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
+            return false;
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_number)) {
+            return false;
+        }
+        double val;
+        NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
+        return std::isfinite(val) && val >= static_cast<double>(std::numeric_limits<Cpptype>::min()) &&
+               val <= static_cast<double>(std::numeric_limits<Cpptype>::max()) && val == std::trunc(val);
+    }
+
+    template <typename P = Cpptype>
     static std::enable_if_t<std::is_floating_point_v<P>, napi_value> WrapImpl(napi_env env, Cpptype etsVal)
     {
         napi_value jsVal;
@@ -103,6 +121,34 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
         double val;
         NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
         return val;
+    }
+
+    template <typename P = Cpptype>
+    static std::enable_if_t<std::is_floating_point_v<P>, bool> MatchTypeImpl([[maybe_unused]] napi_env env,
+                                                                             napi_value jsVal)
+    {
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        napi_value result = jsVal;
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
+            return false;
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_number)) {
+            return false;
+        }
+
+        if constexpr (std::is_same_v<Cpptype, float>) {
+            double val;
+            NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
+            return std::isnan(val) || std::isinf(val) ||
+                   (val >= -std::numeric_limits<float>::max() && val <= std::numeric_limits<float>::max());
+        }
+        return true;
+    }
+
+    static bool MatchType(napi_env env, napi_value jsVal)
+    {
+        return MatchTypeImpl(env, jsVal);
     }
 };
 
@@ -138,6 +184,11 @@ JSCONVERT_UNWRAP(U1)
     }
     return {};
 }
+JSCONVERT_MATCH_TYPE_IMPL(U1)
+{
+    napi_valuetype type = GetValueType<true>(env, jsVal);
+    return type == napi_boolean;
+}
 
 JSCONVERT_DEFINE_TYPE(U16, char16_t);
 JSCONVERT_WRAP(U16)
@@ -161,6 +212,11 @@ JSCONVERT_UNWRAP(U16)
         return EtsBoxPrimitive<EtsChar>::FromCoreType(objVal.value())->GetValue();
     }
     return {};
+}
+JSCONVERT_MATCH_TYPE_IMPL(U16)
+{
+    napi_valuetype type = GetValueType<true>(env, jsVal);
+    return type == napi_string;
 }
 
 JSCONVERT_DEFINE_TYPE(String, EtsString *);
@@ -216,6 +272,11 @@ JSCONVERT_UNWRAP(String)
     }
     return resultEtsString;
 }
+JSCONVERT_MATCH_TYPE_IMPL(String)
+{
+    napi_valuetype type = GetValueType<true>(env, jsVal);
+    return type == napi_string;
+}
 
 JSCONVERT_DEFINE_TYPE(BigInt, EtsBigInt *);
 JSCONVERT_WRAP(BigInt)
@@ -269,6 +330,11 @@ JSCONVERT_UNWRAP(BigInt)
     bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), array.empty() ? 0 : signBit == 0 ? 1 : -1);
 
     return bigInt;
+}
+JSCONVERT_MATCH_TYPE_IMPL(BigInt)
+{
+    napi_valuetype type = GetValueType<true>(env, jsVal);
+    return type == napi_bigint;
 }
 
 JSCONVERT_DEFINE_TYPE(JSValue, JSValue *);
@@ -333,6 +399,20 @@ JSCONVERT_UNWRAP(EtsObject)
 {
     auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
     return objectConverter->Unwrap(ctx, jsVal);
+}
+JSCONVERT_MATCH_TYPE_IMPL(EtsObject)
+{
+    napi_valuetype type = GetValueType<true>(env, jsVal);
+
+    if (type == napi_null || type == napi_undefined) {
+        return true;
+    }
+
+    if (type == napi_object || type == napi_function) {
+        return true;  // Generic object match
+    }
+
+    return false;
 }
 
 // ESError convertors are supposed to box JSValue objects, do not treat them in any other way
@@ -510,6 +590,47 @@ JSCONVERT_UNWRAP(EtsNull)
 #undef JSCONVERT_DEFINE_TYPE
 #undef JSCONVERT_WRAP
 #undef JSCONVERT_UNWRAP
+#undef JSCONVERT_MATCH_TYPE_IMPL
+
+ALWAYS_INLINE inline bool CheckArgMatchObject(napi_env env, EtsClass *cls, napi_value jsArg)
+{
+    if (cls->IsStringClass()) {
+        return JSConvertString::MatchType(env, jsArg);
+    }
+    if (cls == PlatformTypes()->coreBigInt) {
+        return JSConvertBigInt::MatchType(env, jsArg);
+    }
+    if (cls->GetRuntimeClass()->IsObjectClass() || cls->GetRuntimeClass()->IsAnyClass()) {
+        return true;
+    }
+    if (cls == PlatformTypes()->coreArray || cls == PlatformTypes()->coreSet || cls == PlatformTypes()->coreMap) {
+        InteropCtx::ThrowJSTypeError(env, "Overload resolution for Array, Map and Set is not supported");
+        return false;
+    }
+    return JSConvertEtsObject::MatchType(env, jsArg);
+}
+
+// NOLINTBEGIN(modernize-avoid-c-arrays)
+ALWAYS_INLINE inline bool CheckArgMatchPrimitive(napi_env env, EtsType argType, napi_value jsArg)
+{
+    using MatchFunc = bool (*)(napi_env, napi_value);
+    static constexpr MatchFunc MATCHERS[] = {
+        JSConvertU1::MatchType,  JSConvertI8::MatchType,  JSConvertU16::MatchType, JSConvertI16::MatchType,
+        JSConvertI32::MatchType, JSConvertI64::MatchType, JSConvertF32::MatchType, JSConvertF64::MatchType,
+    };
+    auto idx = static_cast<size_t>(argType);
+    return idx < std::size(MATCHERS) ? MATCHERS[idx](env, jsArg) : false;
+}
+// NOLINTEND(modernize-avoid-c-arrays)
+
+ALWAYS_INLINE inline bool CheckArgMatch(napi_env env, EtsMethod *method, uint32_t idx, napi_value jsArg)
+{
+    EtsType argType = method->GetArgType(idx);
+    if (argType == EtsType::OBJECT) {
+        return CheckArgMatchObject(env, method->ResolveArgType(idx), jsArg);
+    }
+    return CheckArgMatchPrimitive(env, argType, jsArg);
+}
 
 template <typename T>
 ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(InteropCtx *ctx, JSValue *jsvalue,

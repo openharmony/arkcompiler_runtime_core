@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { etsVm, getTestModule } = require('../scenarios.test.abc');
 
-const etsMod = getTestModule('scenarios');
-const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const overloadedFunction = etsMod.getFunction('overloadedFunction');
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
+namespace ark::ets::interop::js::testing {
+
+class OverloadEtsToTsTest : public EtsInteropTest {};
+
+TEST_F(OverloadEtsToTsTest, test_overload_ets_to_ts)
 {
-	const INT_VALUE = 1;
-	const STRING_VALUE = 'Hello';
-
-	ASSERT_EQ(overloadedFunction(INT_VALUE), 'int');
-	ASSERT_EQ(overloadedFunction(STRING_VALUE), 'string');
+    ASSERT_TRUE(RunJsTestSuite("test_overload.ts"));
 }
 
-GCJSRuntimeCleanup();
+}  // namespace ark::ets::interop::js::testing

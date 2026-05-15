@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,11 @@
 
 namespace ark::ets::interop::js::testing {
 
-class OverloadCheckedErrorEtsToTsTest : public EtsInteropTest {};
+class OverloadTsToEtsTest : public EtsInteropTest {};
 
-TEST_F(OverloadCheckedErrorEtsToTsTest, test_overload_checked_error)
+TEST_F(OverloadTsToEtsTest, test_overload_ts_to_ets)
 {
-    ASSERT_TRUE(RunJsTestSuite("test_overload_checked_error.ts"));
+    ASSERT_TRUE(RunJsTestSuite("test_dynamic_overload.ts"));
 }
 
 }  // namespace ark::ets::interop::js::testing

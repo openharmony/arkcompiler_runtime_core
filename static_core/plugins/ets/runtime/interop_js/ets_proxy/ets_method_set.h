@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,11 +38,6 @@ public:
 
     const char *GetName() const;
 
-    bool IsValid() const
-    {
-        return isValid_;
-    }
-
     bool IsSetter()
     {
         return strncmp(GetName(), SETTER_BEGIN, strlen(SETTER_BEGIN)) == 0;
@@ -63,19 +58,19 @@ public:
         return anyMethod_->IsConstructor();
     }
 
-    ALWAYS_INLINE EtsMethod *GetMethod(uint32_t parametersNum) const
+    ALWAYS_INLINE const PandaVector<EtsMethod *> &GetMethods(uint32_t parametersNum) const
     {
         // Try optional parameters
         uint32_t tempParameter = parametersNum;
         while (LIKELY(tempParameter < entries_.size())) {
-            if (LIKELY(entries_[tempParameter] != nullptr)) {
+            if (LIKELY(!entries_[tempParameter].empty())) {
                 return entries_[tempParameter];
             }
             tempParameter++;
         }
         // Try rest params
         for (size_t params = std::min(static_cast<size_t>(parametersNum), entries_.size() - 1); params > 0; params--) {
-            if (entries_[params] != nullptr && entries_[params]->GetPandaMethod()->HasVarArgs()) {
+            if (!entries_[params].empty() && entries_[params].front()->GetPandaMethod()->HasVarArgs()) {
                 return entries_[params];
             }
         }
@@ -85,9 +80,11 @@ public:
     template <typename Callback>
     void EnumerateMethods(const Callback &callback) const
     {
-        for (auto m : entries_) {
-            if (nullptr != m) {
-                callback(m);
+        for (const auto &bucket : entries_) {
+            for (auto m : bucket) {
+                if (nullptr != m) {
+                    callback(m);
+                }
             }
         }
     }
@@ -108,6 +105,7 @@ public:
     }
 
     void MergeWith(const EtsMethodSet &other);
+    void SortMethods();
 
 private:
     explicit EtsMethodSet(EtsMethod *singleMethod, EtsClass *enclosingClass)
@@ -115,12 +113,13 @@ private:
 #ifndef NDEBUG
           name_(singleMethod->GetFullName(false)),
 #endif
-          entries_(PandaVector<EtsMethod *>(singleMethod->GetParametersNum() + 1)),
+          entries_(PandaVector<PandaVector<EtsMethod *>>(singleMethod->GetParametersNum() + 1)),
           anyMethod_(singleMethod),
           jsPublicName_(singleMethod->GetName())
     {
         entries_[singleMethod->GetParametersNum() -
-                 static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())] = singleMethod;
+                 static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())]
+            .push_back(singleMethod);
     }
 
     EtsMethodSet(EtsMethod *singleMethod, EtsClass *enclosingClass, std::string jsName)
@@ -128,12 +127,13 @@ private:
 #ifndef NDEBUG
           name_(singleMethod->GetFullName(false)),
 #endif
-          entries_(PandaVector<EtsMethod *>(singleMethod->GetParametersNum() + 1)),
+          entries_(PandaVector<PandaVector<EtsMethod *>>(singleMethod->GetParametersNum() + 1)),
           anyMethod_(singleMethod),
           jsPublicName_(std::move(jsName))
     {
         entries_[singleMethod->GetParametersNum() -
-                 static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())] = singleMethod;
+                 static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())]
+            .push_back(singleMethod);
     }
 
     EtsClass *const enclosingClass_;
@@ -143,17 +143,14 @@ private:
 #endif
 
     // Index number in vector is a number of paramaters for O(1) lookup
-    PandaVector<EtsMethod *> entries_;
+    PandaVector<PandaVector<EtsMethod *>> entries_;
 
     // Abritrary item from set to get common properties
     const EtsMethod *const anyMethod_;
     std::string jsPublicName_;
 
-    bool isValid_ = true;
-
     EtsMethodSet *baseMethodSet_ = nullptr;
 };
-
 template <class Iterator>
 PandaVector<Method *> CollectAllPandaMethods(Iterator begin, Iterator end)
 {

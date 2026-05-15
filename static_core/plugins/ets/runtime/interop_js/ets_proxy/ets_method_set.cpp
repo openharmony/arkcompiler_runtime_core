@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_set.h"
 
+#include <algorithm>
 #include "plugins/ets/runtime/types/ets_method.h"
 
 #include <functional>
@@ -44,15 +45,31 @@ void EtsMethodSet::MergeWith(const EtsMethodSet &other)
         entries_.resize(other.entries_.size());
     }
     for (uint32_t i = 0; i < other.entries_.size(); ++i) {
-        EtsMethod *newMethod = other.entries_[i];
-        if (nullptr == newMethod) {
-            continue;
+        for (auto *newMethod : other.entries_[i]) {
+            if (newMethod != nullptr) {
+                entries_[i].push_back(newMethod);
+            }
         }
-        if (nullptr == entries_[i]) {
-            entries_[i] = other.entries_[i];
-        } else {
-            isValid_ = false;  // error: duplicate number of parameters
-        }
+    }
+}
+
+void EtsMethodSet::SortMethods()
+{
+    for (auto &bucket : entries_) {
+        std::sort(bucket.begin(), bucket.end(), [](EtsMethod *a, EtsMethod *b) {
+            if (a == nullptr) {
+                return false;
+            }
+            if (b == nullptr) {
+                return true;
+            }
+            int32_t lineA = a->GetLineNumFromBytecodeOffset(0);
+            int32_t lineB = b->GetLineNumFromBytecodeOffset(0);
+            if (lineA != lineB) {
+                return lineA < lineB;
+            }
+            return a->GetMethodId() < b->GetMethodId();
+        });
     }
 }
 
