@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,9 +54,9 @@ TEST(JsonBuilderTest, StringifiesNumbers)
     EXPECT_THAT(-100L, StringifiesAs("-100"));
     EXPECT_THAT(1e24, StringifiesAs("1e+24"));
     EXPECT_THAT(1e-24, StringifiesAs("1e-24"));
-    EXPECT_THAT(std::numeric_limits<double>::infinity(), StringifiesAs("null"));
-    EXPECT_THAT(-std::numeric_limits<double>::infinity(), StringifiesAs("null"));
-    EXPECT_THAT(std::numeric_limits<double>::quiet_NaN(), StringifiesAs("null"));
+    EXPECT_THAT(std::numeric_limits<double>::infinity(), StringifiesAs("\"Infinity\""));
+    EXPECT_THAT(-std::numeric_limits<double>::infinity(), StringifiesAs("\"-Infinity\""));
+    EXPECT_THAT(std::numeric_limits<double>::quiet_NaN(), StringifiesAs("\"NaN\""));
 
     EXPECT_THAT(-2147483648L, StringifiesAs("-2147483648"));
     EXPECT_THAT(4294967295U, StringifiesAs("4294967295"));

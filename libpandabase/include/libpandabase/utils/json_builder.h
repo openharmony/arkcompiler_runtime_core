@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,10 +75,16 @@ protected:
     void Stringify(T &&number)
     {
         auto value = static_cast<double>(std::forward<T>(number));
-        if (std::isfinite(value)) {
-            ss_ << value;
+        if (std::isnan(value)) {
+            ss_ << "\"NaN\"";
+        } else if (std::isinf(value)) {
+            if (value > 0) {
+                ss_ << "\"Infinity\"";
+            } else {
+                ss_ << "\"-Infinity\"";
+            }
         } else {
-            ss_ << "null";
+            ss_ << value;
         }
     }
 
