@@ -107,6 +107,7 @@ export namespace taskpool {
                     this.updateCurrentWorkerPriority(taskPriority);
                     this.currentPriority = taskPriority;
                 }
+                this.currentTasksCount.fetchAdd(1);
                 ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
                     const curCount: int | undefined = this.currentTasks.get(task);
                     this.currentTasks.set(task, curCount == undefined ? 1 : curCount + 1);
@@ -142,6 +143,7 @@ export namespace taskpool {
                 } finally {
                     // Clear synchronous task body execution mark.
                     this.executingTaskBodyStartTime.store(0);
+                    this.currentTasksCount.fetchSub(1);
                     // this is to mock ArkTS-dyn behavior
                     EAWorker.postToMain<void>(() => {
                         setTimeout(() => {
@@ -256,47 +258,118 @@ export namespace taskpool {
 
         // For managerWorker to expand.
         triggerExpand(): void {
+            if (!this.tryMarkExpandJobPending()) {
+                return;
+            }
             let expandJob = this.run<Any>((): Any => {
-                let targetNum: int = 0;
-                ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
-                    if (totalExecCount.load() != 0) {
-                        let averageDuration: number = totalExecTime.load() / totalExecCount.load();
-                        let result: number = (averageDuration * waitingTasksNum.load()) / TASK_DURATION;
-                        targetNum = (min(result, waitingTasksNum.load())).toInt();
-                    } else {
-                        let waitingNum: int = waitingTasksNum.load();
-                        targetNum = (min(waitingNum, STEP_SIZE)).toInt();
-                    }
-                });
-                if (targetNum == 0) {
-                    return 0;
-                }
-                ConcurrencyHelpers.lockGuard(workersMutex, () => {
-                    let idleWorkersNum: int = 0;
-                    for (let w: GlobalQueueWorker of idleWorkers) {
-                        if (!workers.has(w)) {
-                            continue;
+                try {
+                    // Take the queue snapshot before reading execution stats to avoid nested mutexes.
+                    let queueSnap: int = 0;
+                    ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+                        queueSnap = getNewTaskTotalCount();
+                    });
+                    let targetNum: int = 0;
+                    ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                        // Use a queue snapshot for the expansion target. waitingTasksNum is updated across
+                        // enqueue/dequeue races and can briefly include tasks that are already running.
+                        if (totalExecCount.load() == 0) {
+                            targetNum = min(queueSnap, STEP_SIZE);
+                        } else {
+                            const averageDuration: number = totalExecTime.load() / totalExecCount.load();
+                            const result: number = Math.ceil((averageDuration * queueSnap) / TASK_DURATION);
+                            targetNum = min(queueSnap, result.toInt());
                         }
-                        if (w.hasRetireRequested() || w.isRetireReady()) {
-                            continue;
-                        }
-                        idleWorkersNum++;
+                    });
+                    if (targetNum == 0) {
+                        return 0;
                     }
-
-                    if (workers.size < workersLimit && idleWorkersNum < targetNum) {
-                        let step: int = (Math.ceil(min(workersLimit - workers.size,
-                                                   min(workersLimit, targetNum) - idleWorkersNum))).toInt();
-                        for (let i = 0; i < step; ++i) {
-                            let w: GlobalQueueWorker = new GlobalQueueWorker(isTaskpoolSupportInterop);
-                            if (this.isAlive()) {
-                                workers.add(w);
+                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        const workerCount: int = workers.size.toInt();
+                        let runnableIdleWorkersNum: int = 0;
+                        let runningWorkersNum: int = 0;
+                        for (let w : GlobalQueueWorker of workers) {
+                            if (w.hasRetireRequested() || w.isRetireReady()) {
+                                continue;
+                            }
+                            if (w.currentTasksCount.load() == 0) {
+                                runnableIdleWorkersNum++;
                             } else {
-                                w.closeWorker();
+                                runningWorkersNum++;
+                            }
+                        }
+                        const idleWorkersNum: int = runnableIdleWorkersNum;
+                        
+                        if (workerCount < workersLimit && idleWorkersNum < targetNum) {
+                            // Cap by total-worker shortage. The target total is running workers plus the
+                            // runnable backlog target, so stale waiting counters cannot over-expand a batch.
+                            const targetTotalWorkers: int = min(workersLimit, targetNum + runningWorkersNum);
+                            const desiredTotal: int = targetTotalWorkers - workerCount;
+                            const available: int = workersLimit - workerCount;
+                            const step: int = min(desiredTotal, available);
+                            if (step > 0) {
+                                for (let i = 0; i < step; ++i) {
+                                    let w: GlobalQueueWorker = new GlobalQueueWorker(isTaskpoolSupportInterop);
+                                    if (this.isAlive()) {
+                                        workers.add(w);
+                                    } else {
+                                        w.closeWorker();
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    // Align with native DispatchAndTryExpandInner: re-check expansion while tasks remain.
+                    if (!isTaskPoolUseLaunch) {
+                        let poolSize: int = 0;
+                        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                            poolSize = workers.size.toInt();
+                        });
+                        if (poolSize < workersLimit) {
+                            let qRem: int = 0;
+                            ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+                                qRem = getNewTaskTotalCount();
+                            });
+                            if (qRem > 0) {
+                                this.scheduleExpandRetryIfNeeded();
                             }
                         }
                     }
-                });
-                return 1;
+                    return 1;
+                } finally {
+                    this.finishExpandJob();
+                }
+            });
+        }
+
+        private tryMarkExpandJobPending(): boolean {
+            let shouldRun: boolean = false;
+            ConcurrencyHelpers.lockGuard(this.expandJobMutex, () => {
+                if (!this.expandJobPending) {
+                    this.expandJobPending = true;
+                    shouldRun = true;
+                }
+            });
+            return shouldRun;
+        }
+
+        private finishExpandJob(): void {
+            ConcurrencyHelpers.lockGuard(this.expandJobMutex, () => {
+                this.expandJobPending = false;
+            });
+        }
+
+        /// Debounced short retry so async expand does not miss one worker when races clear the queue snapshot.
+        private scheduleExpandRetryIfNeeded(): void {
+            ConcurrencyHelpers.lockGuard(this.expandJobMutex, () => {
+                if (this.expandRetryTimerId != -1) {
+                    return;
+                }
+                this.expandRetryTimerId = setTimeout((): void => {
+                    ConcurrencyHelpers.lockGuard(this.expandJobMutex, () => {
+                        this.expandRetryTimerId = -1;
+                    });
+                    this.triggerExpand();
+                }, TRIGGER_EXPAND_RETRY_MS);
             });
         }
 
@@ -464,6 +537,13 @@ export namespace taskpool {
                 clearInterval(this.blockedExpandTimerId);
                 this.blockedExpandTimerId = -1;
             }
+            ConcurrencyHelpers.lockGuard(this.expandJobMutex, () => {
+                if (this.expandRetryTimerId != -1) {
+                    clearTimeout(this.expandRetryTimerId);
+                    this.expandRetryTimerId = -1;
+                }
+            });
+            this.finishExpandJob();
             this.join();
         }
 
@@ -476,6 +556,7 @@ export namespace taskpool {
         public currentPriority?: Priority = Priority.HIGH;
         public currentTasks: Map<Task, int> = new Map<Task, int>();
         public currentTasksMutex: Object = ConcurrencyHelpers.mutexCreate();
+        public currentTasksCount: AtomicInt = new AtomicInt(0);
         public idleTime: long = 0;
         private retireRequested: AtomicFlag = new AtomicFlag(false);
         private retireReady: AtomicFlag = new AtomicFlag(false);
@@ -489,6 +570,11 @@ export namespace taskpool {
 
         // managerWorker only: blocked-worker expansion monitor timer.
         private blockedExpandTimerId: int = -1;
+        // managerWorker only: one-shot expand re-check (see native TRIGGER_EXPAND_INTERVAL).
+        private expandRetryTimerId: int = -1;
+        // managerWorker only: coalesce concurrent enqueue-triggered expansion jobs and guard expandRetryTimerId.
+        private expandJobPending: boolean = false;
+        private expandJobMutex: Object = ConcurrencyHelpers.mutexCreate();
         // managerWorker only: worker ids that already triggered a special expansion.
         private blockedExpandedWorkerIds: Set<int> = new Set<int>();
         private static getWorkerPriority(taskPriority: Priority): WorkerPriority {
@@ -957,10 +1043,8 @@ export namespace taskpool {
                 }
                 let count = allTasks.get(this.task) ?? 0;
                 allTasks.set(this.task, count + 1);
-                const newWaitingTasksNum = waitingTasksNum.fetchAdd(1);
-                if (newWaitingTasksNum > workers.size * 2) {
-                    tryTriggerExpand();
-                }
+                waitingTasksNum.fetchAdd(1);
+                tryTriggerExpand();
                 // Notify waiting workers using condition variable
                 ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
                     ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
@@ -3235,6 +3319,7 @@ export namespace taskpool {
     const STEP_SIZE: int = 2;
     const SHRINK_STEP: int = 4; // 4: try to release 4 threads every time.
     const TASK_DURATION: int = 100; // 100: 100ms.
+    const TRIGGER_EXPAND_RETRY_MS: int = 10; // Same order as native TRIGGER_EXPAND_INTERVAL.
     const WORKERS_MINIMUM: int = 1; // 1: minimum thread num when idle.
 }
 

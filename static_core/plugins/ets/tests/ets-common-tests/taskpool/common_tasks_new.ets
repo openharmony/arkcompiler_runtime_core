@@ -19,6 +19,14 @@ function returnAbc(): string {
     return (() => 'a')() + (() => 'b')() + (() => 'c')();
 }
 
+async function delay(ms: int): Promise<void> {
+    await new Promise<void>((resolve) => {
+        setTimeout(() => {
+            resolve(undefined);
+        }, ms);
+    });
+}
+
 function defaultWorkerPriorityIsHigh(): void {
     if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
         return;
@@ -29,6 +37,51 @@ function defaultWorkerPriorityIsHigh(): void {
     info.threadInfos.forEach((threadInfo: taskpool.ThreadInfo) => {
         arktest.assertEQ(threadInfo.priority, taskpool.Priority.HIGH);
     });
+}
+
+function scalingLongRunningTask(duration: int): string {
+    let start = Date.now();
+    while ((Date.now() - start) < duration) {
+        continue;
+    }
+    return 'success';
+}
+
+async function waitUntilWorkersAtMost(expected: int, timeoutMs: int): Promise<void> {
+    let start = Date.now();
+    while ((Date.now() - start) < timeoutMs) {
+        let workersNum = CoroutineExtras.getTaskPoolWorkersNum();
+        arktest.assertTrue(workersNum <= expected);
+        if (workersNum == expected) {
+            return;
+        }
+        await delay(5);
+    }
+    arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), expected);
+}
+
+async function executeScalingBatch(count: int): Promise<void> {
+    let promises: Promise<Any>[] = [];
+    for (let i: int = 0; i < count; i++) {
+        let task = new taskpool.Task(scalingLongRunningTask, 20);
+        promises.push(taskpool.execute(task));
+    }
+
+    await waitUntilWorkersAtMost(count, 60);
+    await Promise.all(promises);
+}
+
+async function taskpoolScalingShouldNotOverExpand(): Promise<void> {
+    if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        return;
+    }
+
+    const limit: int = max(4, CoroutineExtras.getTaskPoolWorkersLimit());
+    const currentWorkersNum: int = CoroutineExtras.getTaskPoolWorkersNum();
+    if (currentWorkersNum >= limit) {
+        return;
+    }
+    await executeScalingBatch(currentWorkersNum + 1);
 }
 
 async function cancelInSuccessCallback() {
@@ -420,6 +473,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
     commonTaskSuite.addAsyncTest('asyncRunnerExecuteInOnEnqueuedNoDeadlock', asyncRunnerExecuteInOnEnqueuedNoDeadlock);
+    commonTaskSuite.addAsyncTest('taskpoolScalingShouldNotOverExpand', taskpoolScalingShouldNotOverExpand);
 
     let res = await commonTaskSuite.runAsync();
     
