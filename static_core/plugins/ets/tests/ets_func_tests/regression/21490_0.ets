@@ -18,7 +18,6 @@ desc: Issue 21490. Function type arity
 tags: [negative, compile-only]
 expected_out:
   - "[21490_0.ets:30:9] Semantic error ESE0124: Expected 0 arguments, got 1."
-  - '[21490_0.ets:30:9] Semantic error ESE0127: No matching call signature for ("Kaboom")'
 ---*/
 
 type ft = (value?: String) => void
@@ -35,4 +34,4 @@ function main(): int {
 }
 
 /* @@? 30:9 Error Semantic error ESE0124: Expected 0 arguments, got 1. */
-/* @@? 30:9 Error Semantic error ESE0127: No matching call signature for ("Kaboom") */
+/* @@? 30:9 Error Semantic error ESE0127: No matching call signature for (Kaboom) */
