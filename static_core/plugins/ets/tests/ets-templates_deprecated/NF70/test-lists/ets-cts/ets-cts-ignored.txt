@@ -1028,13 +1028,6 @@
 #32614 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
 09.classes/09.constructor_declaration/cons_parameters_gen_24.ets
 
-#33500 es2panda aborts when implicit super() calls a superconstructor with rest parameter
-09.classes/09.constructor_declaration/01.constructor_body/implicit_superclass_constructor_call4.ets
-
-#33535 Unexpected field initialization error if some code is added before this() in secondary constructor
-09.classes/09.constructor_declaration/01.constructor_body/check_fld_init25.ets
-09.classes/09.constructor_declaration/01.constructor_body/check_fld_init26.ets
-
 #33660
 09.classes/09.constructor_declaration/01.constructor_body/direct_invocation_itself_n.ets
 09.classes/09.constructor_declaration/01.constructor_body/indirect_invocation_itself1_n.ets
