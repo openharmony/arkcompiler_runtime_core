@@ -16,32 +16,70 @@ types:
   # predefined value types: double, float, long, int, short, byte, boolean, char
   - type: |-
       double
-    init: "0.0"
+    init: "1.0"
+    change: "1.5"
 
   - type: |-
       float
-    init: "0.0f"
+    init: "1.0f"
+    change: "2.5f"
 
   - type: |-
       long
-    init: "0"
+    init: "1"
+    change: "9223372036854775807"
 
   - type: |-
       int
-    init: "0"
+    init: "1"
+    change: "2147483647"
 
   - type: |-
       short
-    init: "0"
+    init: "1"
+    change: "32767"
 
   - type: |-
       byte
-    init: "0"
+    init: "1"
+    change: "127"
 
   - type: |-
       boolean
     init: "true"
+    change: "false"
 
   - type: |-
       char
     init: "c'c'"
+    change: "c'x'"
+
+  - type: |-
+      string
+    init: "\"abc\""
+    change: "\"efg\""
+
+  - type: |-
+      bigint
+    init: "5n"
+    change: "127n"
+
+  - type: |-
+      Object
+    init: "5n"
+    change: "\"abc\""
+
+  - type: |-
+      Any
+    init: "\"efg\""
+    change: "null"
+
+  - type: |-
+      null
+    init: "null"
+    change: "null"
+
+  - type: |-
+      undefined
+    init: "undefined"
+    change: "undefined"
