@@ -18,14 +18,17 @@ limitations under the License.
 /*---
 desc: >- 
     Access modifiers.
-    Members and constructors may have either private, internal, internal protected, protected or public modifier to
+    Members and constructors may have either private, protected or public modifier to
     explicitly specify the desired accessibility.
-    "{{mod}} {{member}}"
-tags: [compile-only]
+    "{{mod}} {{member.type}}"
 ---*/
 
 class A {
     {{mod}} {{member.body}}
+}
+
+function main() {
+    arktest.assertEQ(new A().bar(), 7)
 }
 
 {% endfor %}

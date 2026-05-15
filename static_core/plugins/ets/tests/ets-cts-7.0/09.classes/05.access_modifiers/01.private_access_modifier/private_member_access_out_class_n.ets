@@ -19,6 +19,7 @@ desc: >-
     Check members with private access modifier out class.
     Member or constructor with private modifier can be accessed only within their declaring class.
 tags: [negative, compile-only]
+expected_out: "{{member.error}}"
 ---*/
 
 class A {

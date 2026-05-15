@@ -14,7 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Field getter with static modifier
+desc: Static getter of the private static field
 ---*/
 
 class A {

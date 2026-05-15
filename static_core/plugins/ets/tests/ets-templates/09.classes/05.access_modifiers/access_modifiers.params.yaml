@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,17 @@ modifiers:
 
  # List of class members
 members:
-  - { body: "x: int;" }
-  - { body: "foo(): void {}" }
-  - { body: "constructor() {}" }
+  - body: |-
+      x: int = 7;
+      bar(): int { return this.x };
+    type: field
+  - body: |-
+      foo(): int { return 7 };
+      bar(): int { return this.foo() };
+    type: method
+  - body: |-
+      constructor(x: int) { this.x = x };
+      constructor() { this(7) };
+      x: int = 1;
+      bar(): int { return this.x };
+    type: constructor

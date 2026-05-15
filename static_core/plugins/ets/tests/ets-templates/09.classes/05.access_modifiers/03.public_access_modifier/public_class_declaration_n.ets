@@ -16,6 +16,7 @@
 /*---
 desc: There is no ability to use modifier 'public' for a class.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0030: Local class or interface declaration members can not have access modifies."
 ---*/
 
 public class A {}

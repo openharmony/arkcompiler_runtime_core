@@ -14,7 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Field setter with static modifier
+desc: Static setter for the private static field
 ---*/
 
 class A {

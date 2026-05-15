@@ -13,6 +13,6 @@
 
  # List of class members
 members:
-  - { body: "x: int;", call: "instance.x" }
-  - { body: "foo(): void {}", call: "instance.foo()" }
-  - { body: "constructor(y: int) { this.y = y; }", call: "let x: A = new A(5)" }
+  - { body: "x: int;", call: "arktest.assertEQ(instance.x, 0)" }
+  - { body: "foo(): boolean { return true }", call: "arktest.assertTrue(instance.foo())" }
+  - { body: "constructor(y: int) { this.y = y; }", call: "let x: A = new A(5); arktest.assertEQ(x.y, 5)" }

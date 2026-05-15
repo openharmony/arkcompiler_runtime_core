@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ desc: >-
     A return type of an instance method can be this.
     It means that the return type is the class type that the method belongs to.
 tags: [compile-only, negative]
+expected_out: "{{c.error}}"
 ---*/
 
 {{c.decl}}

@@ -19,6 +19,17 @@ modifiers:
 
  # List of class members
 members:
-  - { body: "x: int;" }
-  - { body: "foo(): void {}" }
-  - { body: "constructor() {}" }
+  - body: |-
+      x: int = 7;
+      bar(): int { return this.x };
+    type: field
+  - body: |-
+      foo(): int { return 7 };
+      bar(): int { return this.foo() };
+    type: method
+  - body: |-
+      constructor(x: int) { this.x = x };
+      constructor() { this(7) };
+      x: int = 1;
+      bar(): int { return this.x };
+    type: constructor
