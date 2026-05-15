@@ -231,6 +231,7 @@ and to define the values of annotation fields:
     annotationUsageWithParentheses:
         '@' qualifiedName annotationValues
         ;
+
     annotationValues:
         '(' (objectLiteral | constantExpression)? ')'
         ;
@@ -758,6 +759,10 @@ As ``@Retention`` has a single field, it can be used with a short notation
    string literal
    notation
 
+If an annotation has the "BYTECODE" or "RUNTIME" policy, but not the "SOURCE"
+policy, then the values of its fields can be read during
+execution, see :ref:`Runtime Access to Annotations` for detail.
+
 |
 
 .. _Target Annotation:
@@ -775,7 +780,7 @@ if ``@Target`` is used elsewhere.
 
 ``@Target`` specifies the set of source code contexts in which the declared
 annotation can be used. The contexts are specified by using a set of values
-of an ``AnnotationTargets`` enumeration defined in :ref:`Standard Library`.
+of an ``AnnotationTargets`` defined in :ref:`Standard Library`.
 
 The annotation ``@Target`` has a single field ``targets`` of type
 ``AnnotationTargets[]``. It is typically used as follows:
@@ -804,10 +809,10 @@ If the annotation is present in the declaration of annotation ``X``, then
 the compiler checks that ``X`` is used in the specified contexts only.
 Otherwise, a :index:`compile-time error` occurs.
 
-If no annotation is present in the declaration of annotation ``X``, then
+If the annotation is not present in the declaration of annotation ``X``, then
 the usage of ``X`` is not restricted.
 
-An ``AnnotationTargets`` union type contains string literals for the following
+The ``AnnotationTargets`` type contains string literals for the following
 targets:
 
 .. index::
@@ -876,7 +881,7 @@ targets:
    type
    annotation
 
-A :index:`compile-time error` occurs if an enumeration member is used more
+A :index:`compile-time error` occurs if some value is used more
 than once in an ``@Target`` annotation:
 
 .. code-block:: typescript
@@ -895,9 +900,10 @@ Runtime Access to Annotations
 .. meta:
     frontend_status: None
 
-For an annotation with *retention policy* (see :ref:`Retention Annotation`)
-``BYTECODE`` or ``RUNTIME`` an abstract class with the name of the annotation
-is implicitly declared. All fields of this class are ``readonly``.
+For an annotation with the "BYTECODE" or "RUNTIME"  *retention policy*
+(see :ref:`Retention Annotation`) an abstract class with the name of
+the annotation is implicitly declared by the compiler.
+All fields of this class are declared ``readonly``.
 If a field is of an array type, the array type is also ``readonly``.
 
 .. index::
@@ -921,7 +927,7 @@ For the following annotation:
         attrs: number[]
     }
 
---the abstract class is declared:
+-- the abstract class is declared:
 
 .. code-block:: typescript
    :linenos:
@@ -947,6 +953,18 @@ The use of such a class is represented in following example:
    abstract class
    declaration
    readonly name
+
+.. note::
+   - An abstract class **is not** declared for annotations with the "SOURCE"
+     retention policy.
+  
+   - The only way to get instance of an implicitly declared abstract class
+     is to call the reflection library.
+     A :index:`compile-time error` occurs if:
+     
+     - *New expression* is used for the class (see :ref:`New Expressions`);
+     
+     - The class is used in a :ref:`Class Extension Clause`.
 
 .. raw:: pdf
 

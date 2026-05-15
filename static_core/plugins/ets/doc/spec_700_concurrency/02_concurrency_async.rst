@@ -83,7 +83,7 @@ instance of ``Promise<T>``. Both options are allowed to be the ``expression`` of
 the ``return`` statement inside the ``async`` function body (see :ref:`return
 Statements` and :ref:`Return Type Inference`). ``T`` here is a subtype of
 :ref:`Type Any`. If ``T`` has ``void`` or ``undefined`` type (see
-:ref:`Type void or undefined`) then, like in non-asynchronous functions, an
+:ref:`Type undefined or void`) then, like in non-asynchronous functions, an
 argumentless ``return`` statement is allowed.
 
 .. note::

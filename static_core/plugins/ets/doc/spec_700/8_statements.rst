@@ -187,7 +187,7 @@ until a return occurs (see :ref:`Return Statements`).
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
 :ref:`Method Declarations`) declared implicitly or explicitly with
-return type ``void`` (see :ref:`Type void or undefined`), then the block can contain no
+return type ``void`` (see :ref:`Type undefined or void`), then the block can contain no
 return statement at all. Such a block is equivalent to one that ends in a
 ``return`` statement, and is executed accordingly.
 
@@ -919,7 +919,7 @@ occur inside one of the following:
 
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` or ``undefined``
-  (see :ref:`Type void or undefined`), or a union type (see :ref:`Union Types`)
+  (see :ref:`Type undefined or void`), or a union type (see :ref:`Union Types`)
   containing ``void`` or ``undefined``;
 - Asynchronous function, method or lambda body with return type
   ``Promise<void>`` (see :ref:`Asynchronous execution`);

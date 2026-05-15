@@ -310,16 +310,23 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
 -  Members inherited from a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 
-A :index:`compile-time error` occurs if the method explicitly declared by the
-interface has the same name as the ``Object``'s ``public`` method.
+When a method explicitly declared by the interface has the same name as the
+``Object``'s ``public`` method with the override-compatible signature (see
+:ref:`Override-Compatible Signatures`) and is the *interface default method*
+(see :ref:`Default Interface Method Declarations`), then such a method will
+never be invoked.
 
 .. code-block:: typescript
    :linenos:
 
     interface I {
-        toString (p: number): void // Compile-time error
-        toString(): string { return "some string" } // Compile-time error
+        toString(): string {
+             return "This method will never be called"
+        }
     }
+    class A implements I {}
+    console.log ((new A).toString()) // Object.toString() is called
+
 
 .. index::
    interface

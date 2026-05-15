@@ -365,17 +365,18 @@ Type of Expression
 Every expression in the |LANG| programming language has a type. The type of an
 expression is determined at compile time.
 
-In most contexts, an expression must be *compatible* with the type expected in
-a context. This type is called *target type*. If no target type is available
-in a context, then the expression is called a *standalone expression*:
+In most contexts, an expression must be compatible with the type expected in
+the context. This type is called the target type. If no target type is
+available in the context, then the expression is called a standalone
+expression:
 
 .. code-block:: typescript
    :linenos:
 
-    let a = expr // no target type is available
+    let a = expr0 // no target type is available
 
     function foo() {
-        expr // no target type is available
+        expr0 // no target type is available
     }
 
 Otherwise, the expression is *non-standalone*:
@@ -399,10 +400,10 @@ Otherwise, the expression is *non-standalone*:
 .. code-block:: typescript
    :linenos:
 
-    let a: number = expr // target type of 'expr' is number
+    let a: number = expr1 // target type of 'expr1' is number
 
     function foo(s: string) {}
-    foo(expr) // target type of 'expr' is string
+    foo(expr2) // target type of 'expr2' is string
 
 In some cases, the type of an expression cannot be inferred (see
 :ref:`Type Inference`) from the expression itself (see
@@ -419,7 +420,7 @@ In some cases, the type of an expression cannot be inferred (see
 
 The evaluation of an expression type requires completing the following steps:
 
-#. Collect information for type inference (type annotation,
+#. Collect information for type inference (type annotation, 
    generic constraints, etc);
 
 #. Perform :ref:`Type Inference`;
@@ -1436,8 +1437,8 @@ from the initialization expression instead by using the following algorithm:
    the type of the array literal cannot be inferred, and a
    :index:`compile-time error` occurs.
 
-#. If all initialization expressions are of the same type ``T``,
-   then the array literal type is ``T[]``.
+#. If all initialization expressions are of the identical type ``T`` (see
+   :ref:`Type Identity`), then the array literal type is ``T[]``.
 
 #. If each initialization expression is of a numeric type (see
    :ref:`Numeric Types`), then the array literal type is ``number[]``.
@@ -1497,10 +1498,13 @@ Object Literal
 .. meta:
     frontend_status: Done
 
-*Object literal* is an expression that can be used to create a class instance
-with methods and fields with initial values. In some cases it is more
-convenient to use an *object literal* in place of a class instance creation
-expression (see :ref:`New Expressions`).
+*Object literal* is an expression that can be used to create a class instance.
+In many cases it is more convenient to use an *object literal* in place of
+a class instance creation expression (see :ref:`New Expressions`).
+
+A special form of object literal called a *record literal* is used to create
+an instance of :ref:`Record Utility Type`.
+See :ref:`Object Literal of Record Type` for syntax and other details.
 
 .. index::
    object literal
@@ -2052,14 +2056,13 @@ Object Literal of ``Record`` Type
 .. meta:
     frontend_status: Done
 
-Generic type ``Record<Key, Value>`` (see :ref:`Record Utility Type`) is used
+Utility type ``Record<Key, Value>`` (see :ref:`Record Utility Type`) is used
 to map properties of a type (type ``Key``) to another type (type ``Value``).
 A special form of object literal is used to initialize the value of such
 type:
 
 .. index::
    object literal
-   generic type
    utility type
    record type
    type property
@@ -2073,16 +2076,21 @@ The syntax of *record literal* is presented below:
 .. code-block:: abnf
 
     recordLiteral:
-       '{' keyValueSequence? '}'
+       '{' recordLiteralElementSequence? '}'
        ;
 
-    keyValueSequence:
-       keyValue (',' keyValue)* ','?
+    recordLiteralElementSequence:
+       recordLiteralElement (',' recordLiteralElement)* ','?
        ;
 
-    keyValue:
+    recordLiteralElement:
        expression ':' expression
+       |
+       spreadExpression
        ;
+
+When a *recordLiteralElement* is represented as a pair of expressions, it
+embodies the semantics of a key-value pair.
 
 The first expression in ``keyValue`` denotes a key and must be of type ``Key``.
 The second expression denotes a value and must be of type ``Value``:
@@ -2129,6 +2137,34 @@ occurs:
     let map: Record<"aa" | "bb", number> = {
         "aa": 1,
     } // Compile-time error, "bb" key is missing
+
+When a *recordLiteralElement* is represented as a spread expression, its type
+must be ``Record<Key, Value>``, where the Key type matches the Key type of the
+current Record type. Additionally, the Value type must be a subtype of the
+Value type of the current Record type.If these conditions are not met, a
+:index:`compile-time error` occurs. The purpose of the spread expression is to
+populate the current Record with elements from the Record being spread.
+
+This is represented in the following examples:
+
+.. code-block:: typescript
+
+    let map1: Record<string, number> = {"aa": 1, "bb": 2} 
+    let map2: Record<string, number> = {...map1, "cc": 3} 
+    // map2 will be the record with {"aa": 1, "bb": 2, "cc": 3} values
+
+    class B {}
+    class A extends B {}
+    let map3: Record<string, A> = {"aa": new A, "bb": new A} 
+    let map4: Record<string, B> = {...map3, "cc": new B} 
+    // map4 will be the record with {"aa": new A, "bb": new A, "cc": new B} values
+
+    let map5: Record<string, number> = {...map3, "cc": 123}
+    // Compile-time error, type of Value of map3 is not a subtype of Value of map5
+
+    let map6: Record<number, B> = {...map3, 2: new B}
+    // Compile-time error, type of Key of map6 is different from the type of Key of map3
+
 
 |
 
@@ -2207,10 +2243,8 @@ Spread Expression
     frontend_status: Done
 
 *Spread expression* can be used only within an array literal (see
-:ref:`Array Literal`) or argument passing (see :ref:`Rest Parameter`).
-The *expression* must be of an iterable type (see :ref:`Iterable Types`)
-or of a tuple type (see :ref:`Tuple Types`).
-
+:ref:`Array Literal`), argument passing (see :ref:`Rest Parameter`), or within
+an object literal of the Record type (see :ref:`Object Literal of Record Type`).
 Otherwise, a :index:`compile-time error` occurs.
 
 The syntax of *spread expression* is presented below:
@@ -2220,6 +2254,10 @@ The syntax of *spread expression* is presented below:
     spreadExpression:
         '...' expression
         ;
+
+The *expression* must be of an iterable type (see :ref:`Iterable Types`) or of
+a tuple type (see :ref:`Tuple Types`). Otherwise, a :index:`compile-time error`
+occurs.
 
 A *spread expression* is evaluated:
 
@@ -4057,17 +4095,6 @@ the type of a cast expression is always the ``target`` type.
    operand
    cast operator
 
-A :index:`compile-time error` occurs if the ``target`` type is type ``never``:
-
-.. code-block:: typescript
-   :linenos:
-
-    1 as never // Compile-time error
-
-.. index::
-   never type
-   target type
-
 If ``target`` type is not *preserved up to undefined* by :ref:`Type Erasure`,
 then a :index:`compile-time warning` occurs.
 
@@ -4076,7 +4103,7 @@ then a :index:`compile-time warning` occurs.
 
     class X<out T> { }
     function foo(p1: X<Object>) {
-        p1 as X<number> // Compile-time warning - such cast converison is type unsafe
+        p1 as X<number> // Compile-time warning, such cast converison is type unsafe
     }
 
 
@@ -4105,35 +4132,24 @@ Type Inference in Cast Expression
 .. meta:
     frontend_status: Partly
 
-The following combinations of ``expr`` and ``target`` are considered for the
-``expr as target`` expression:
+Type inference is used in ``expr as target`` expression if:
 
--  ``expr`` is a numeric literal, see :ref:`Type Inference for Constant Expressions`
-   for detail;
+-  ``expr`` is a numeric literal, see :ref:`Type Inference for Constant Expressions`;
 
--  ``expr`` is an :ref:`Array Literal`, and ``target`` is an *array type* or
-   a *tuple type* (see :ref:`Array Literal Type Inference from Context` for
-   detail);
+-  ``expr`` is an :ref:`Array Literal`, see :ref:`Array Literal Type Inference from Context`;
 
--  ``expr`` is an :ref:`Object Literal`, and ``target`` is *class type*,
-   *interface type*, or :ref:`Record Utility Type` (see the subsections of
-   :ref:`Object Literal` for detail).
+-  ``expr`` is an :ref:`Object Literal`, see :ref:`Object Literal`.
 
 .. index::
    cast expression
    type inference
    expression
-   numeric type
-   value
-   interface type
-   record type
-   utility type
-   class type
-   interface type
    object literal
 
 This kind of a *cast expression* results in inferring the target type for
-``expr``. This expression never causes a :index:`runtime error`
+``expr``, see the relevant section for detail.
+
+This expression never causes a :index:`runtime error`
 by itself. However, the evaluation of array literal elements or
 object literal properties can cause a :index:`runtime error`.
 
@@ -4281,6 +4297,61 @@ a :index:`compile-time warning` is issued:
     let a: C = new D()
     a as D // Compile-time warning, cast always succeeds
     a as E // Compile-time warning, cast always throws ClassCastError
+
+As |LANG| uses type erasure (see :ref:`Type Erasure`) work with arrays has some
+specifics illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Test for the array of the speciifc type elements
+    function test0 (o: Object) {
+       if (o instanceof Array) { // type erasure allows to check if parameter
+                                 // is of an Array kind
+          console.log ("Array: ", o as Array<number>)
+       }
+       if (o instanceof FixedArray<number>) { // type check of FixedArray<number> is available
+          console.log ("FixedArray: ", o as FixedArray<number>)
+       }
+       if (o instanceof ValueArray<number>) { // type check of ValueArray<number> is available
+          console.log ("ValueArray: ", o as ValueArray<number>)
+       }
+    }
+
+    test0 (new number[3](123)) // pass Array<number> as the argument
+
+    const fa0: FixedArray<number> = [111, 222, 333]
+    test0 (fa0) // pass FixedArray<number> as the argument
+
+    const va0: ValueArray<number> = [111, 222, 333]
+    test0 (va0)
+    
+    // Output
+    Array:  123,123,123
+    ValueArray:  [111, 222, 333]
+    FixedArray:  [111, 222, 333]
+ 
+
+    // Test for the array of the generic parameter type elements
+    function test1<T> (o: Object) {
+       if (o instanceof Array) { // type erasure allows to check if parameter
+                                 // is of an Array kind
+          console.log ("Array: ", o as Array<T>)
+       }
+       if (o instanceof FixedArray<T>) { // type check of FixedArray<T> is available
+          console.log ("FixedArray: ", o as FixedArray<T>)
+       }
+    }
+
+    test1 <number> (new number[3](123)) // pass Array<number> as the argument
+
+    const fa: FixedArray<number> = [111, 222, 333]
+    test1 <number> (fa) // pass FixedArray<number> as the argument
+
+    
+    // Output
+    Array:  123,123,123
+    FixedArray:  [111, 222, 333]
 
 |
 
@@ -4694,8 +4765,8 @@ result of a *postfix increment expression* is a value, not a variable.
 If the evaluation of the operand *expression* completes normally at runtime,
 then:
 
--  Value *1* of the same type as a variable is added to the value of the
-   variable; and
+-  Value *1* of the identical type (see :ref:`Type Identity`) as a variable is
+   added to the value of the variable; and
 -  Result of addition is stored back into the variable.
 
 .. index::
@@ -4766,8 +4837,8 @@ If evaluation of the operand expression completes at runtime, then:
    completion
    evaluation
 
--  Value '*1*' of the same type as a variable is subtracted from the value
-   of the variable; and
+-  Value '*1*' of the identical type (see :ref:`Type Identity`) as a variable
+   is subtracted from the value of the variable; and
 -  Result of the subtraction is stored back into the variable.
 
 Otherwise, the *postfix decrement expression* completes abruptly, and
@@ -4846,8 +4917,8 @@ If evaluation of the operand *expression* completes normally at runtime, then:
    conversion
    convertibility
 
--  Value *1* of the same type as a variable is added to the value of the
-   variable; and
+-  Value *1* of the identical type (see :ref:`Type Identity`) as a variable is added
+   to the value of the variable; and
 -  Result of the addition is stored back into the variable.
 
 Otherwise, the *prefix increment expression* completes abruptly, and no
@@ -4911,8 +4982,8 @@ result of a prefix decrement expression is a value, not a variable.
 
 If evaluation of the operand *expression* completes normally at runtime, then:
 
--  Value *1* of the same type as a variable is subtracted from the value of the
-   variable; and
+-  Value *1* of the identical type (see :ref:`Type Identity`) as a variable is
+   subtracted from the value of the variable; and
 -  Result of the subtraction is stored back into the variable.
 
 Otherwise, the *prefix decrement expression* completes abruptly, and no
@@ -5465,7 +5536,8 @@ side effects.
 
 Bigint multiplication is associative.
 
-Integer multiplication is associative when all operands are of the same type.
+Integer multiplication is associative when all operands are of the identical
+type (see :ref:`Type Identity`).
 
 Floating-point multiplication is not associative.
 
@@ -6114,7 +6186,8 @@ is performed.
 If operand expressions have no side effects, then addition is a commutative
 operation.
 
-If all operands are of the same type, then integer addition is associative.
+If all operands are of the identical type (see :ref:`Type Identity`), then
+integer addition is associative.
 
 Floating-point addition is not associative.
 
@@ -6645,10 +6718,20 @@ Enumeration Relational Operators
 .. meta:
     frontend_status: Done
 
-If both operands are of the same enumeration type (see :ref:`Enumerations`),
-then :ref:`Numeric Relational Operators`
-or :ref:`String Relational Operators` are used depending on the type of enumeration
-base type. Otherwise, a :index:`compile-time error` occurs.
+Relational operators can be applied to values of enumeration types
+(see :ref:`Enumerations`) if:
+
+- Both operands are of the same enumeration type. 
+  
+- One operand is of an enumeration type, other is of the *enumeration
+  base type* (see :ref:`Enumeration Base Type`) or of a numeric type,
+  if the *enumeration base type* is a numeric type.
+  
+-  Otherwise, a :index:`compile-time error` occurs.
+
+:ref:`Numeric Relational Operators` or :ref:`String Relational Operators`
+are used for *enumeration relation operators* depending on the
+*enumeration base type*.
 
 .. index::
    enumeration relational operator
@@ -6656,8 +6739,20 @@ base type. Otherwise, a :index:`compile-time error` occurs.
    enumeration base type
    string value
    relational operator
-   numeric relational operator
-   string relational operator
+
+.. code-block:: typescript
+   :linenos:
+
+    enum E { A = 1, B = 2, C = 3}
+    
+    console.log(E.A < E.B) // true
+    
+    function test(e: E, i: int): boolean {
+        return e < i
+    }
+
+    console.log(test(E.A, 0)) // false
+    console.log(test(E.A, 2)) // true
 
 |
 
@@ -6739,10 +6834,16 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
 - Both operands are of enumeration types (see :ref:`Enumerations`) and
   have the same numeric value or the same string value;
 
+- One operand is of an enumeration type and other is of the *enumeration base
+  type* (see :ref:`Enumeration Base Type`) or of a numeric type
+  (if the *enumeration base type* is a numeric type), 
+  and operands have the same numeric value or the same string value;
+  
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
 
-- Both operands are of the same type and refer to the same object.
+- Both operands are of the identical type (see :ref:`Type Identity`) and refer
+  to the same object.
 
 .. index::
    operand
@@ -8218,7 +8319,7 @@ If a *lambda body* is a single ``expression``, then it is handled as follows:
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``.
 
 If *lambda signature* return type is neither ``void`` (see
-:ref:`Type void or undefined`) nor ``never`` (see :ref:`Type never`), and the
+:ref:`Type undefined or void`) nor ``never`` (see :ref:`Type never`), and the
 execution path of the lambda body has neither a return statement (see
 :ref:`Return Statements`) nor a single expression as a body, then a
 :index:`compile-time error` occurs.
@@ -8542,16 +8643,23 @@ to numeric operands, the operator is evaluated as follows:
   to type ``float`` before operator evaluation and the result type is
   ``float``; or
 
-- Otherwise, all operands are converted to *some big integer type* that allows
-  handling arbitrary-precision integers (like ``bigint`` type) or integers
-  larger than the maximum value of type ``long``.
+- Otherwise, all operands before evaluation are converted to
+  *compiler-internal integer type* and the result type is that type.
+  The *compiler-internal integer type* must be at least 128-bit integer type
+  or an arbitrary-precision integer type (like :ref:`Type bigint`).
 
+.. index::
+   compiler-internal integer type
+   
 If a constant expression consists of a single integer literal or
-a constant of an integer type, it is also converted to the same big integer type.
+a single constant of an integer type allowed in :ref:`Constant Expressions`,
+it is converted to the *compiler-internal integer type*.
 
-:ref:`Type Inference for Constant Expressions` is always used to infer the
-type of constant expression. In other words, *big integer type* is an
-internal compiler type and values of this type cannot occur during execution.
+:ref:`Type Inference for Constant Expressions` is always applied
+after evaluating a constant expression to infer the type of a numeric constant
+expression, assigning it to a predefined numeric type. 
+In other words, *compiler-internal integer type* is the type used by the
+compiler only. Values of this type cannot occur during execution.
 
 In case of mixed constant expression, each numeric subexpression is evaluated
 as described above:
@@ -8559,9 +8667,11 @@ as described above:
 .. code-block:: typescript
    :linenos:
 
-    const c = 3
+    function foo() {
+        const c = 3
 
-    c > 1 && c*2 < 8 // numeric subexpressions: (c > 1) and (c*2 < 8)
+        c > 1 && c*2 < 8 // numeric subexpressions: (c > 1) and (c*2 < 8)
+    }
 
 .. raw:: pdf
 

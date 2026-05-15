@@ -324,7 +324,7 @@ Normally, two different instantiations of the same generic class or
 interface (like ``Array<number>`` and ``Array<string>``) are handled
 as different and unrelated types.
 |LANG| supports type parameter variance that allows *subtyping*
-relationship between such instantiations (See :ref:`Subtyping`),
+relationship between such instantiations (see :ref:`Subtyping`),
 depending on the *subtyping* relationship between argument types.
 
 .. index::

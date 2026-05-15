@@ -99,8 +99,10 @@ A comprehensive list of such scenarios is presented below:
   its parameters whose type in the original definition
   is a type parameter are represented with *reference* type. The same
   applies to the return type of a method. If, on the other hand, such
-  method is overridden, the paremeters and return type are represented
+  method is overridden, the parameters and return type are represented
   as *primitives*.
+- A class field with late initialization is represented as a *reference type* field
+  initialized with the ``undefined`` value.
 - The return type of a ``valueOf`` methods for *value types* is
   represented as *reference*.
 - In all other cases, *primitive* representation is selected.

@@ -700,17 +700,16 @@ The syntax of *ambient namespace declaration* is presented below:
         'export'?
         ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
+        | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | ambientAccessorDeclaration
-        | 'const'? enumDeclaration
+        | ambientEnumDeclaration
         | typeAlias
         )
         ;
 
-An *enumeration type declaration* can be prefixed with the keyword ``const``
-for |TS| compatibility. The prefix has no influence on the declared type.
 Only exported entities can be accessed outside a namespace.
 
 Namespaces can be nested:
@@ -855,6 +854,29 @@ declaration is not specified.
     declare get age() // Compile-time error, return type must be specified
 
 See :ref:`Accessor Declarations` for details.
+
+|
+
+.. _Ambient Type Alias Declarations:
+
+Ambient Type Alias Declarations
+*******************************
+
+.. meta:
+    frontend_status: None
+    
+An *ambient type alias declaration* shares the same semantics as a type alias
+declaration (refer to :ref:`Type Alias Declaration`). It does not require the
+provision of any non-ambient declaration elsewhere.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare type A = number
+    declare function foo (p: A): A
+
+    // No need to have 'type A = number' declared again 
+
 
 .. raw:: pdf
 
