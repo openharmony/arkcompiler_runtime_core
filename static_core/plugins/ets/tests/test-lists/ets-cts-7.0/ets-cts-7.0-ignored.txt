@@ -433,6 +433,10 @@
 15.semantic_rules/11.type_erasure/instanceof_tuple_not_preserved_0.ets
 15.semantic_rules/11.type_erasure/instanceof_tuple_not_preserved_1.ets
 
+#34565
+15.semantic_rules/11.type_erasure/instanceof_n_1.ets
+15.semantic_rules/11.type_erasure/instanceof_n_9.ets
+
 #34602
 16.concurrency/04.parallel_execution/02.eaworker_api/eaworker_two_workers_smoke.ets
 

@@ -13,8 +13,7 @@
 
 ---
 cases:
-    # Array
-
+    #00 Array
     - decl: |-
           let x: Array<string> = ['']
       use: |-
@@ -22,7 +21,7 @@ cases:
               ((): Object => x)() instanceof Array // OK
           )
 
-    # FixedArray
+    #01 FixedArray
     - decl: |-
           let x: FixedArray<string> = ['']
       use: |-
@@ -30,7 +29,7 @@ cases:
               ((): Object => x)() instanceof FixedArray<string> // OK
           )
 
-    # union with Array
+    #02 union with Array
     - decl: |-
           let x: Array<number>|Record<string, number> = [1.0]
       use: |-
@@ -38,7 +37,7 @@ cases:
               ((): Object => x)() instanceof Array|Record // OK
           )
 
-    # union with FixedArray
+    #03 union with FixedArray
     - decl: |-
           let x: FixedArray<int>|Promise<long>|Array<string> = ['']
       use: |-
@@ -46,8 +45,7 @@ cases:
               ((): Object => x)() instanceof FixedArray<int>|Promise|Array // OK
           )
 
-
-    # union with various elements
+    #04 union with various elements
     - decl: |-
           class A<T> {}
           let x: Promise<number>|string[][]|undefined|A<int>|Record<string, number> = undefined
@@ -56,14 +54,13 @@ cases:
               ((): Any => x)() instanceof Promise|Array|undefined|A|Record // OK
           )
 
-    # tuple
+    #05-06 tuple
     - decl: |-
           let x: [Promise<number>|undefined, Array<string>|Array<number>] = [undefined, ['']]
       use: |-
           arktest.assertTrue(
             ((): Object => x)() instanceof Tuple // OK
           )
-
 
     - decl: |-
           let x: [Array<number>, FixedArray<string>|Array<number>] = [[1.0], [1.0]]
@@ -72,7 +69,7 @@ cases:
             ((): Object => x)() instanceof Tuple // OK
           )
 
-    # string literal types erased
+    #07-08 string literal types erased
     - decl: |-
           let x: 'a'|'b'|'c' = 'a'
       use: |-
@@ -87,7 +84,7 @@ cases:
               ((): Object => x)() instanceof string|int|Error // OK
           )
 
-    # enum types not erased
+    #09-12 enum types not erased
     - decl: |-
           enum Color { Red, Green, Blue }
           let x = Color.Green
@@ -122,7 +119,7 @@ cases:
               ((): Object => x)() instanceof Color|Size
           )
 
-    # function's type arguments erased
+    #13 function's type arguments erased
     - decl: |-
           function foo<T, U, V, X>(p1: T, p2: U, p3: V, p4: X): T {
               return p1
@@ -133,7 +130,7 @@ cases:
               x instanceof ((p1: Any, p2: Any, p3: Any, p4: Any) => never) // OK
           )
 
-    # original type is preserved
+    #14 original type is preserved
     - decl: |-
           let x: string = ''
       use: |-
