@@ -884,6 +884,7 @@ add_gtests(
 add_gtests(
     arkruntime_stack_overflow_test
     tests/stack_overflow_test.cpp
+    tests/stack_overflow_oom_test.cpp
 )
 
 add_gtests(

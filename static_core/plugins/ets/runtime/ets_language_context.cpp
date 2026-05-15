@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <array>
+
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_itable_builder.h"
 #include "plugins/ets/runtime/ets_language_context.h"
@@ -24,7 +27,9 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include <array>
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "include/mem/panda_string.h"
+#include "intrinsics.h"
 
 namespace ark::ets {
 
@@ -63,13 +68,15 @@ mem::GC *EtsLanguageContext::CreateGC(mem::GCType gcType, mem::ObjectAllocatorBa
     return mem::CreateGC<EtsLanguageConfig>(gcType, objectAllocator, settings);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) const
 {
     ASSERT(thread != nullptr);
+    if (UNLIKELY(thread->HasPendingException())) {
+        return;
+    }
     EtsExecutionContext *executionCtx = EtsExecutionContext::FromMT(thread);
-    EtsClassLinker *classLinker = executionCtx->GetPandaVM()->GetClassLinker();
-    const char *classDescriptor = utf::Mutf8AsCString(GetStackOverflowErrorClassDescriptor());
-    EtsClass *cls = classLinker->GetClass(classDescriptor, true);
+    EtsClass *cls = PlatformTypes(thread)->coreStackOverflowError;
     ASSERT(cls != nullptr);
 
     EtsHandleScope scope(executionCtx);
@@ -89,19 +96,22 @@ void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) cons
     }
     errHandle->SetName(executionCtx, name);
 
-    auto *message = EtsString::CreateNewEmptyString();
+    PandaString msg("stack size ");
+    msg += ToPandaString(thread->GetStackFrameAllocator()->GetAllocatedSize()) + " bytes";
+    auto *message = EtsString::CreateFromMUtf8(msg.c_str());
     if (UNLIKELY(message == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
     errHandle->SetMessage(executionCtx, message);
 
-    auto *stackLines = EtsTypedObjectArray<EtsStackTraceElement>::Create(
-        PlatformTypes(executionCtx->GetMT())->arkruntimeStackTraceElement, 0U);
-    if (UNLIKELY(stackLines == nullptr)) {
+    auto *stackLinesRaw = ark::ets::intrinsics::ArkRuntimeStackTraceProvisionStackTrace();
+    if (UNLIKELY(stackLinesRaw == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
+    auto *stackLines = EtsTypedObjectArray<EtsStackTraceElement>::FromCoreType(
+        reinterpret_cast<EtsObjectArray *>(stackLinesRaw)->GetCoreType());
     errHandle->SetStackLines(executionCtx, stackLines);
 
     executionCtx->GetMT()->SetException(exc.GetPtr()->GetCoreType());

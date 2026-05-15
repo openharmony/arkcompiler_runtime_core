@@ -40,6 +40,7 @@ static Class *GetExceptionClass(const uint8_t *mutf8Name, ManagedThread *thread,
     return cls;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
 {
     ASSERT(thread == ManagedThread::GetCurrent());
@@ -63,7 +64,12 @@ void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *m
         return;
     }
 
-    VMHandle<ObjectHeader> excHandle(thread, ObjectHeader::Create(cls));
+    auto *obj = ObjectHeader::Create(cls);
+    if (obj == nullptr) {
+        ASSERT(thread->HasPendingException());
+        return;
+    }
+    VMHandle<ObjectHeader> excHandle(thread, obj);
 
     coretypes::String *msg;
     if (mutf8Msg != nullptr) {
@@ -128,6 +134,9 @@ mem::GC *CoreLanguageContext::CreateGC(mem::GCType gcType, mem::ObjectAllocatorB
 
 void CoreLanguageContext::ThrowStackOverflowException(ManagedThread *thread) const
 {
+    if (UNLIKELY(thread->HasPendingException())) {
+        return;
+    }
     auto runtime = Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -135,7 +144,12 @@ void CoreLanguageContext::ThrowStackOverflowException(ManagedThread *thread) con
     auto *cls = classLinker->GetClass(ctx.GetStackOverflowErrorClassDescriptor(), true, extension->GetBootContext());
 
     HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<ObjectHeader> exc(thread, ObjectHeader::Create(cls));
+    auto *obj = ObjectHeader::Create(cls);
+    if (obj == nullptr) {
+        ASSERT(thread->HasPendingException());
+        return;
+    }
+    VMHandle<ObjectHeader> exc(thread, obj);
     thread->SetException(exc.GetPtr());
 }
 

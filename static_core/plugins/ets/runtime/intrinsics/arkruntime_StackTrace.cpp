@@ -18,6 +18,7 @@
 #include "runtime/runtime_helpers.h"
 #include "types/ets_method.h"
 #include "types/ets_stacktrace_element.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
@@ -78,19 +79,10 @@ extern "C" EtsObjectArray *ArkRuntimeStackTraceProvisionStackTrace()
 
     auto stackTraceElementClass = PlatformTypes(executionCtx)->arkruntimeStackTraceElement;
 
-    auto walker = StackWalker::Create(executionCtx->GetMT());
-
-    PandaVector<EtsHandle<EtsStackTraceElement>> stackTraceElements;
+    uint32_t linesSize = 0;
     for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
-        auto element = EtsHandle<EtsStackTraceElement>(executionCtx, CreateStackTraceElement(&stack));
-        if (UNLIKELY(element.GetPtr() == nullptr)) {
-            ASSERT(executionCtx->GetMT()->HasPendingException());
-            return nullptr;
-        }
-        stackTraceElements.push_back(element);
+        linesSize++;
     }
-
-    const auto linesSize = static_cast<uint32_t>(stackTraceElements.size());
 
     auto *resultArray = EtsObjectArray::Create(stackTraceElementClass, linesSize);
     if (UNLIKELY(resultArray == nullptr)) {
@@ -98,8 +90,16 @@ extern "C" EtsObjectArray *ArkRuntimeStackTraceProvisionStackTrace()
         return nullptr;
     }
     EtsHandle<EtsObjectArray> resultArrayHandle(executionCtx, resultArray);
-    for (uint32_t i = 0; i < linesSize; i++) {
-        resultArrayHandle.GetPtr()->Set(i, stackTraceElements[i]->AsObject());
+    uint32_t i = 0;
+    for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame() && i < linesSize;
+         stack.NextFrame()) {
+        auto element = CreateStackTraceElement(&stack);
+        if (UNLIKELY(element == nullptr)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return nullptr;
+        }
+        resultArrayHandle.GetPtr()->Set(i, element->AsObject());
+        i++;
     }
     return resultArrayHandle.GetPtr();
 }
