@@ -14,7 +14,9 @@
  */
 
 #include "ani_gtest_array_ops.h"
+#include <cstdint>
 #include <iostream>
+#include <limits>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {

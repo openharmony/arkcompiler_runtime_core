@@ -888,7 +888,6 @@ template <typename T>
 static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array, ani_size start, ani_size len, T *buf)
 {
     ASSERT(array != nullptr);
-    ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
 
     ScopedManagedCodeFix s(env);
     EtsArray *internalArray = s.ToInternalType(array);
@@ -907,7 +906,6 @@ template <typename T>
 static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array, ani_size start, ani_size len, T *buf)
 {
     ASSERT(array != nullptr);
-    ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
 
     ScopedManagedCodeFix s(env);
     EtsArray *internalArray = s.ToInternalType(array);

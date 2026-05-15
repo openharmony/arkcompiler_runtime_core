@@ -13,7 +13,7 @@
 
 ani_verify_add_generated_tests(ani_verify_test_fixed_array_new
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_new_test.cpp.j2
-    PARAMS "boolean: type=boolean,Type=Boolean"  
+    PARAMS "boolean: type=boolean,Type=Boolean"
            "byte: type=byte,Type=Byte"
            "char: type=char,Type=Char"
            "double: type=double,Type=Double"
@@ -21,6 +21,46 @@ ani_verify_add_generated_tests(ani_verify_test_fixed_array_new
            "int: type=int,Type=Int"
            "long: type=long,Type=Long"
            "short: type=short,Type=Short"
+)
+
+ani_verify_add_generated_tests(ani_verify_test_fixed_array_get_region
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_get_region_test.cpp.j2
+    PARAMS "boolean: type=boolean,Type=Boolean,wrong_type=byte,WrongType=Byte"
+           "byte: type=byte,Type=Byte,wrong_type=int,WrongType=Int"
+           "char: type=char,Type=Char,wrong_type=int,WrongType=Int"
+           "double: type=double,Type=Double,wrong_type=int,WrongType=Int"
+           "float: type=float,Type=Float,wrong_type=int,WrongType=Int"
+           "int: type=int,Type=Int,wrong_type=byte,WrongType=Byte"
+           "long: type=long,Type=Long,wrong_type=int,WrongType=Int"
+           "short: type=short,Type=Short,wrong_type=int,WrongType=Int"
+)
+
+ani_verify_add_generated_tests(ani_verify_test_fixed_array_set_region
+    J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_set_region_test.cpp.j2
+    PARAMS "boolean: type=boolean,Type=Boolean,wrong_type=byte,WrongType=Byte"
+           "byte: type=byte,Type=Byte,wrong_type=int,WrongType=Int"
+           "char: type=char,Type=Char,wrong_type=int,WrongType=Int"
+           "double: type=double,Type=Double,wrong_type=int,WrongType=Int"
+           "float: type=float,Type=Float,wrong_type=int,WrongType=Int"
+           "int: type=int,Type=Int,wrong_type=byte,WrongType=Byte"
+           "long: type=long,Type=Long,wrong_type=int,WrongType=Int"
+           "short: type=short,Type=Short,wrong_type=int,WrongType=Int"
+)
+
+ani_verify_add_gtest(ani_verify_test_fixed_array_get_length
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_get_length_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_fixed_array_new_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_new_ref_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_fixed_array_set_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_set_ref_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_fixed_array_get_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_fixed_array_get_ref_test.cpp
 )
 
 ani_verify_add_gtest(ani_verify_test_array_new
