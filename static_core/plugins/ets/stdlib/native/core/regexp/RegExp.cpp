@@ -163,34 +163,40 @@ static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
-static ani_boolean Test(ani_env *env, [[maybe_unused]] ani_object regexp, ani_string pattern, ani_string flags,
-                        ani_string str, ani_int patternSize, ani_int strSize, ani_int lastIndex,
+static ani_boolean Test(ani_env *env, [[maybe_unused]] ani_object regexp, ani_string pattern, ani_string str,
+                        ani_int patternSize, ani_int strSize, ani_int lastIndex, ani_int compileFlags,
+                        ani_int matchFlags, ani_int extraCompileFlags, ani_boolean globalOrSticky,
                         ani_boolean requiresUtf16Execution)
 {
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
-    auto re = EtsRegExp(env);
-    re.SetFlags(ConvertFromAniString(env, flags));
+    ExecData execData = MakeTestExecData(env, pattern, str, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    const bool isGlobalOrSticky = static_cast<bool>(globalOrSticky);
 
     int32_t endIndex = 0;
-    auto executionKind = SelectExecutionKind(re, execData);
-    auto testResult = PrepareInputAndRun<bool>(
-        re, execData, env, executionKind,
-        [&re, &execData, &endIndex](const uint8_t *inputData) -> bool {
-            return RegExp8::TestMatch(re.GetCompiledRe8(), re.GetMatchFlags(), inputData,
-                                      static_cast<int>(execData.inputSize), execData.lastIndex, endIndex);
+    auto executionKind = SelectExecutionKind(execData.requiresUtf16Execution, execData);
+    auto testResult = PreparePatternAndInputAndRunTest<bool>(
+        execData, env, executionKind,
+        [&execData, &endIndex, compileFlags, matchFlags, extraCompileFlags](const uint8_t *patternData,
+                                                                            const uint8_t *inputData) -> bool {
+            return RegExp8::CompileAndTest(
+                patternData, static_cast<int>(execData.patternSize), static_cast<uint32_t>(compileFlags),
+                static_cast<uint32_t>(extraCompileFlags), inputData, static_cast<int>(execData.inputSize),
+                execData.lastIndex, static_cast<uint32_t>(matchFlags), endIndex);
         },
-        [&re, &execData, &endIndex](const uint16_t *inputData) -> bool {
-            return RegExp16::TestMatch(re.GetCompiledRe16(), re.GetMatchFlags(), inputData,
-                                       static_cast<int>(execData.inputSize), execData.lastIndex, endIndex);
+        [&execData, &endIndex, compileFlags, matchFlags, extraCompileFlags](const uint16_t *patternData,
+                                                                            const uint16_t *inputData) -> bool {
+            return RegExp16::CompileAndTest(
+                patternData, static_cast<int>(execData.patternSize), static_cast<uint32_t>(compileFlags),
+                static_cast<uint32_t>(extraCompileFlags), inputData, static_cast<int>(execData.inputSize),
+                execData.lastIndex, static_cast<uint32_t>(matchFlags), endIndex);
         });
-    const bool globalOrSticky = re.IsGlobal() || re.IsSticky();
-    if (re.HasCompiledRe()) {
-        re.Destroy();
-    }
-    if (testResult && globalOrSticky) {
+    if (testResult && isGlobalOrSticky) {
         ani_field lastIndexField;
         ANI_FATAL_IF_ERROR(FindLastIndexField(env, &lastIndexField));
         ANI_FATAL_IF_ERROR(SetLastIndex(env, regexp, lastIndexField, endIndex));
+    } else if (!testResult && isGlobalOrSticky) {
+        ani_field lastIndexField;
+        ANI_FATAL_IF_ERROR(FindLastIndexField(env, &lastIndexField));
+        ANI_FATAL_IF_ERROR(SetLastIndex(env, regexp, lastIndexField, 0));
     }
     return testResult ? ANI_TRUE : ANI_FALSE;
 }
@@ -204,7 +210,7 @@ ani_status RegisterRegExpNativeMethods(ani_env *env)
         ani_native_function {"matchImpl",
                              "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpMatchArray}",
                              reinterpret_cast<void *>(Match)},
-        ani_native_function {"testImpl", "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:z",
+        ani_native_function {"testImpl", "C{std.core.String}C{std.core.String}iiiiiizz:z",
                              reinterpret_cast<void *>(Test)},
         ani_native_function {"replaceNativeImpl",
                              "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.Array}",

@@ -22,6 +22,7 @@
 
 #include "plugins/ets/runtime/ets_exceptions.h"
 
+#include <memory>
 #include <utility>
 
 namespace ark::ets::stdlib {
@@ -145,6 +146,43 @@ Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *pattern, uint32_t flags, ui
     compiled->pcre2Code = re;
     compiled->groupMeta = BuildPatternGroupMeta(pattern, static_cast<size_t>(len));
     return compiled;
+}
+
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
+bool RegExp16::CompileAndTest(const uint16_t *pattern, int patternLen, uint32_t compileFlags, uint32_t extraFlags,
+                              const uint16_t *input, int inputLen, int startOffset, uint32_t matchFlags,
+                              int32_t &endIndex)
+{
+    int errorNumber;
+    PCRE2_SIZE errorOffset;
+    auto *compileContext = GetOrCreateCompileCtx16();
+    if (compileContext == nullptr) {
+        return false;
+    }
+    pcre2_set_compile_extra_options(compileContext, extraFlags | EXTRA_FLAGS_MASK);
+    auto *code = pcre2_compile(reinterpret_cast<PCRE2_SPTR>(pattern), patternLen, compileFlags, &errorNumber,
+                               &errorOffset, compileContext);
+    if (code == nullptr) {
+        return false;
+    }
+
+    std::unique_ptr<pcre2_code, decltype(&pcre2_code_free)> codeGuard(code, &pcre2_code_free);
+
+    auto matchDataHandle = AcquireTestMatchData16();
+    auto *matchData = matchDataHandle.data;
+    if (matchData == nullptr) {
+        return false;
+    }
+    MatchDataScope16 matchDataScope(matchDataHandle.tls, matchData, matchDataHandle.usePrealloc);
+    const auto resultCount = pcre2_match(code, input, inputLen, startOffset, matchFlags, matchData, nullptr);
+    if (resultCount < 0) {
+        return false;
+    }
+
+    auto *ovector = pcre2_get_ovector_pointer(matchData);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    endIndex = static_cast<int32_t>(ovector[1]);
+    return true;
 }
 
 RegExpExecResult RegExp16::Execute(Pcre2Obj re, uint32_t matchFlags, const uint16_t *str, int len,

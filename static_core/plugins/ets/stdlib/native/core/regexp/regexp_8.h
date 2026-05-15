@@ -26,6 +26,9 @@ namespace ark::ets::stdlib {
 class RegExp8 {
 public:
     static Pcre2Obj CreatePcre2Object(const uint8_t *pattern, uint32_t flags, uint32_t extraFlags, const int len);
+    static bool CompileAndTest(const uint8_t *pattern, int patternLen, uint32_t compileFlags, uint32_t extraFlags,
+                               const uint8_t *input, int inputLen, int startOffset, uint32_t matchFlags,
+                               int32_t &endIndex);
     static RegExpExecResult Execute(Pcre2Obj re, uint32_t matchFlags, const uint8_t *str, const int len,
                                     const int startOffset);
     // CC-OFFNXT(G.FUN.01, huge_method) solid logic
