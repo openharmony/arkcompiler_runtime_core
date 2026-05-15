@@ -134,7 +134,7 @@ class StandardView:
         time_report_path = self.__report_root / f"{self.__summary.name}-time_report-{timestamp}.txt"
 
         write_2_file(time_report_path, time_report)
-        _LOGGER.all(f"Time report saved to {time_report_path}")
+        _LOGGER.default(f"Time report saved to {time_report_path}")
 
     def __create_updated(self, tests: list[Test]) -> None:
         name, state = ("updated", "still failed")

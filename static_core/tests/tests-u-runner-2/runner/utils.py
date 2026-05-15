@@ -499,7 +499,9 @@ def convert_dict_params_into_list(params: dict) -> list:
     return [str(item) for item in output_list]
 
 
-def check_item_in_params(params: dict, item: str | list[str]) -> bool:
+def check_item_in_params(params: dict, item: str | list[str] | int) -> bool:
+    if isinstance(item, int):
+        return True
     items = [item] if isinstance(item, str) else item
 
     for sub_item in items:
