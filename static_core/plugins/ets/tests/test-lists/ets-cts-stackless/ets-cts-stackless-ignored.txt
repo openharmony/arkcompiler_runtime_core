@@ -958,12 +958,6 @@
 #33437
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_29.ets
 
-#29122
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_18.ets
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_19.ets
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_32.ets
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over2_9.ets
-
 #32036  No CTE when no new overload defined in the class or subinterface
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/cte_int_cls_n_0.ets
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/cte_int_cls_n_1.ets

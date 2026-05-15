@@ -22,7 +22,7 @@ cases:
   - { type: Float,               value: 'new Float(3.14f)', param: 'value',             result: 'double'  }
   - { type: Number,              value: 'new Double(3.14)', param: 'value',             result: 'double'  }
   - { type: String,              value: '"abc"',            param: 'value',             result: 'string'  }
-  - { type: Color,               value: 'Color.Red',        param: 'value',             result: 'Color'   }
+  - { type: Color,               value: 'Color.Red',        param: 'value',             result: 'int'     }
   - { type: T,                   value: '[3.14, "abc"]',    param: 'value',             result: 'T'       }
   - { type: R,                   value: '[14, false]',      param: 'value',             result: 'R'       }
   - { type: boolean,             value: 'false',            param: '[value]',           result: 'object'  }

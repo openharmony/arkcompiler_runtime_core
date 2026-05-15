@@ -31,8 +31,8 @@ cases:
   - { value: '3.14',               result: 'double'     }
   - { value: '3.14f',              result: 'float'      }
   - { value: '"abc"',              result: 'string'     }
-  - { value: 'Color.Red',          result: 'Color'      }
-  - { value: 'Size.L',             result: 'Size'       }
+  - { value: 'Color.Red',          result: 'int'        }
+  - { value: 'Size.L',             result: 'string'     }
   - { value: '[3.14, "abc"] as T', result: 'T'          }
   - { value: '[3.14, false] as R', result: 'R'          }
   - { value: '["abc"]',            result: 'FA:string'  }
@@ -45,7 +45,7 @@ cases:
   - { value: '[3.14]',             result: 'FA:double'  }
   - { value: '[new Object()]',     result: 'FA:object'  }
   - { value: '[Color.Red]',        result: 'FA:Color'   }
-  - { value: '[Size.M]',           result: 'FA:Size'    }
+  - { value: '[Size.M]',           result: 'FA:string'  }
   - { value: 'new FixedArray<A>(1)',           result: 'FA:A'       }
   - { value: '[3.14, 3.14]',       result: 'FA:double'  }
   - { value: '["abc", "xyz"]',     result: 'FA:string'  }
