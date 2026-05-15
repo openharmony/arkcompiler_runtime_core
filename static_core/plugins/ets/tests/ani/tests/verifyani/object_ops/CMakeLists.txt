@@ -47,6 +47,13 @@ ani_verify_add_generated_tests(ani_verify_test_object_set_field
     J2_CPP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_set_field_test.cpp.j2
     J2_ETS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_set_field_test.ets.j2
     PARAMS "boolean: Type=Boolean,type=boolean,ret_type=boolean,wrong_ret=int"
+           "char: Type=Char,type=char,ret_type=char,wrong_ret=int"
+           "byte: Type=Byte,type=byte,ret_type=byte,wrong_ret=int"
+           "short: Type=Short,type=short,ret_type=short,wrong_ret=int"
+           "int: Type=Int,type=int,ret_type=int,wrong_ret=byte"
+           "long: Type=Long,type=long,ret_type=long,wrong_ret=int"
+           "float: Type=Float,type=float,ret_type=float,wrong_ret=int"
+           "double: Type=Double,type=double,ret_type=double,wrong_ret=int"
 )
 
 ani_verify_add_generated_tests(ani_verify_test_object_get_property_by_name

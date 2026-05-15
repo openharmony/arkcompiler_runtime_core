@@ -112,11 +112,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_env)
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {% if type == "boolean" %}
         {"value", "ani_{{ type }}"},
-        {% elif type == "ref" %}
-        {"value", "ani_ref"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);
@@ -133,11 +129,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_object_0)
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *", "wrong object for field"},
-        {% if type == "boolean" %}
         {"value", "ani_{{ type }}"},
-        {% elif type == "ref" %}
-        {"value", "ani_ref"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);
@@ -156,11 +148,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_object_1)
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference type: null"},
         {"name", "const char *", "wrong object for field"},
-        {% if type == "boolean" %}
         {"value", "ani_{{ type }}"},
-        {% elif type == "ref" %}
-        {"value", "ani_ref"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);
@@ -177,11 +165,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_name)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
-        {% if type == "boolean" %}
         {"value", "ani_{{ type }}"},
-        {% elif type == "ref" %}
-        {"value", "ani_ref"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);
@@ -203,11 +187,13 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_all_args)
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
-        {% if type == "boolean" %}
+{% if type == "boolean" %}
         {"value", "ani_boolean", "wrong value for ani_boolean"},
-        {% elif type == "ref" %}
+{% elif type == "ref" %}
         {"value", "ani_ref", "wrong reference"},
-        {% endif %}
+{% else %}
+        {"value", "ani_{{ type }}"},
+{% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);
@@ -241,11 +227,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_type)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *", expectedErr.c_str()},
-        {% if type == "boolean" %}
         {"value", "ani_{{ type }}"},
-        {% elif type == "ref" %}
-        {"value", "ani_ref"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);
@@ -275,11 +257,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, object_from_local_scope)
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"name", "const char *", "wrong object for field"},
-        {% if type == "boolean" %}
         {"value", "ani_{{ type }}"},
-        {% elif type == "ref" %}
-        {"value", "ani_ref"},
-        {% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_{{ Type }}", testLines);

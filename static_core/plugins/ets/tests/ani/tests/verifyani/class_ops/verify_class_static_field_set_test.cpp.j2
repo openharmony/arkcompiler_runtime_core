@@ -73,9 +73,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_env)
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field"},
-{% if type == "ref" %}
-        {"ref", "ani_ref"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticField_{{ Type }}", testLines);
@@ -99,9 +97,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_class)
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
         {"static_field", "ani_static_field", "wrong class for static field"},
-{% if type == "ref" %}
-        {"ref", "ani_ref"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticField_{{ Type }}", testLines);
@@ -122,9 +118,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_field)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field", "wrong static field"},
-{% if type == "ref" %}
-        {"ref", "ani_ref"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticField_{{ Type }}", testLines);
@@ -148,9 +142,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_wrong_type)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field", "wrong return type"},
-{% if type == "ref" %}
-        {"ref", "ani_ref"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticField_{{ Type }}", testLines);
@@ -169,7 +161,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_invalid_args
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"value", "ani_ref", "wrong reference"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticField_{{ Type }}", testLines);
