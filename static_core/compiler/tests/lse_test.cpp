@@ -1950,6 +1950,148 @@ TEST_F(LSETest, ShadowedStoreObservedByMayAliasLoad)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
 }
 
+TEST_F(LSETest, ShadowedStoreReadByMayAliasLoadAfterMerge)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).b();
+        PARAMETER(3U, 3U).s32();
+        PARAMETER(4U, 4U).s32();
+        PARAMETER(5U, 5U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(6U, Opcode::StoreObject).s32().Inputs(0U, 3U).TypeId(100U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
+        }
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(8U, Opcode::LoadObject).s32().Inputs(1U).TypeId(100U);
+            INST(9U, Opcode::StoreObject).s32().Inputs(0U, 4U).TypeId(100U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(10U, Opcode::Phi).s32().Inputs({{2U, 3U}, {4U, 8U}});
+            INST(11U, Opcode::StoreObject).s32().Inputs(0U, 5U).TypeId(100U);
+            INST(12U, Opcode::Return).s32().Inputs(10U);
+        }
+    }
+    auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    EXPECT_FALSE(GetGraph()->RunPass<Lse>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
+}
+
+TEST_F(LSETest, ShadowedStoreReadByHeapReadingInstAfterMerge)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).b();
+        PARAMETER(2U, 2U).s32();
+        PARAMETER(3U, 3U).s32();
+        PARAMETER(4U, 4U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(5U, Opcode::StoreObject).s32().Inputs(0U, 2U).TypeId(100U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(1U);
+        }
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(7U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(0U, 7U);
+            INST(9U, Opcode::StoreObject).s32().Inputs(0U, 3U).TypeId(100U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(10U, Opcode::StoreObject).s32().Inputs(0U, 4U).TypeId(100U);
+            INST(11U, Opcode::Return).ref().Inputs(0U);
+        }
+    }
+    auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    EXPECT_FALSE(GetGraph()->RunPass<Lse>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
+}
+
+SRC_GRAPH(RemoveShadowedStoreAfterMerge, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).b();
+        PARAMETER(3U, 3U).s32();
+        PARAMETER(4U, 4U).s32();
+        PARAMETER(5U, 5U).s32();
+        PARAMETER(6U, 6U).s32();
+        BASIC_BLOCK(2U, 4U, 3U)
+        {
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(7U, Opcode::StoreObject).s32().Inputs(0U, 3U).TypeId(100U);
+            INST(9U, Opcode::LoadObject).s32().Inputs(1U).TypeId(100U);
+            INST(10U, Opcode::StoreObject).s32().Inputs(0U, 4U).TypeId(100U);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(14U, Opcode::StoreObject).s32().Inputs(0U, 6U).TypeId(100U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(11U, Opcode::Phi).s32().Inputs({{4U, 6U}, {3U, 9U}});
+            INST(12U, Opcode::StoreObject).s32().Inputs(0U, 5U).TypeId(100U);
+            INST(13U, Opcode::Return).s32().Inputs(11U);
+        }
+    }
+}
+
+OUT_GRAPH(RemoveShadowedStoreAfterMerge, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        PARAMETER(2U, 2U).b();
+        PARAMETER(3U, 3U).s32();
+        PARAMETER(4U, 4U).s32();
+        PARAMETER(5U, 5U).s32();
+        PARAMETER(6U, 6U).s32();
+        BASIC_BLOCK(2U, 4U, 3U)
+        {
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(7U, Opcode::StoreObject).s32().Inputs(0U, 3U).TypeId(100U);
+            INST(9U, Opcode::LoadObject).s32().Inputs(1U).TypeId(100U);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(14U, Opcode::StoreObject).s32().Inputs(0U, 6U).TypeId(100U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(11U, Opcode::Phi).s32().Inputs({{4U, 6U}, {3U, 9U}});
+            INST(12U, Opcode::StoreObject).s32().Inputs(0U, 5U).TypeId(100U);
+            INST(13U, Opcode::Return).s32().Inputs(11U);
+        }
+    }
+}
+
+TEST_F(LSETest, RemoveShadowedStoreAfterMerge)
+{
+    src_graph::RemoveShadowedStoreAfterMerge::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::RemoveShadowedStoreAfterMerge::CREATE(graphLsed);
+    ASSERT_TRUE(GetGraph()->RunPass<Lse>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
+}
+
 /*
  * We can eliminate over SafePoints if the reference is listed in arguments
  */

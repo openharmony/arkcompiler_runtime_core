@@ -51,11 +51,15 @@ class LseVisitor;
  * load then this load can be eliminated.
  * - if the instruction is a load and there is no value from the heap for this
  * load then we update heap value for this load with the result of this load.
- * All instructions that MUST_ALIAS this load updated as well.
+ * All previous stores that MAY_ALIAS this load are blocked from elimination.
  * - if the instruction is a volatile load then the whole heap is invalidated.
  * - if the instruction is a call then the whole heap is invalidated.
+ * - if the instruction reads from heap and we're not sure about its effects
+ * (for example, can throw or can deoptimize) or is a volatile store, stores
+ * constituting the current heap state are blocked from elimination.
  *
  * Instructions that invalidate heap are enumerated in IsHeapInvalidatingInst.
+ * Instructions that read heap are enumerated in IsHeapReadingInst.
  * Instructions that cannot be eliminated are presented in
  * CanEliminateInstruction.
  *
@@ -92,7 +96,6 @@ public:
     struct HeapValue {
         Inst *origin;  // The instruction the value comes from
         Inst *val;     // The value itself
-        bool read;     // Whether the value could be read by the code we don't know anything about
         bool local;    // Whether this value should be only used in the BasicBlock it originated from
     };
 
