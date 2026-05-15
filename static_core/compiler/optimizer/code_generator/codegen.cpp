@@ -840,6 +840,20 @@ Reg Codegen::ConvertRegister(Register r, DataType::Type type)
     }
 }
 
+Reg Codegen::Upcast(Reg r, TypeInfo type, bool signedCast)
+{
+    ASSERT(r.GetSize() <= type.GetSize());
+    if (r.GetSize() < type.GetSize()) {
+        if (r.GetId() != GetRegfile()->GetZeroReg().GetId()) {
+            auto upcasted = r.As(type);
+            GetEncoder()->EncodeCast(upcasted, signedCast, r, signedCast);
+            return upcasted;
+        }
+        return r.As(type);
+    }
+    return r;
+}
+
 // Panda don't support types less then 32, so we need sign or zero extended to 32
 Imm Codegen::ConvertImmWithExtend(uint64_t imm, DataType::Type type)
 {

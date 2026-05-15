@@ -2105,6 +2105,12 @@ void GraphChecker::VisitLoad(GraphVisitor *v, Inst *inst)
     CheckMemoryInstruction(v, inst, load->GetNeedReadBarrier());
     CheckNeedGCBarrier(v, inst, load->GetGCBarrierEntrypoint(), load->GetNeedReadBarrier());
 }
+void GraphChecker::VisitLoadI(GraphVisitor *v, Inst *inst)
+{
+    auto *load = inst->CastToLoadI();
+    CheckMemoryInstruction(v, inst, load->GetNeedReadBarrier());
+    CheckNeedGCBarrier(v, inst, load->GetGCBarrierEntrypoint(), load->GetNeedReadBarrier());
+}
 void GraphChecker::VisitLoadArray(GraphVisitor *v, Inst *inst)
 {
     auto *loadArray = inst->CastToLoadArray();

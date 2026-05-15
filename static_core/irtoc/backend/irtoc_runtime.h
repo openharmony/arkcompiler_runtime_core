@@ -106,7 +106,7 @@ public:
     ::ark::mem::BarrierType GetPreType() const override
     {
 #if defined(ARK_USE_COMMON_RUNTIME)
-        return ::ark::mem::BarrierType::PRE_WRB_NONE;
+        return ::ark::mem::BarrierType::PRE_CMC_WRITE_BARRIER;
 #else
         return ::ark::mem::BarrierType::PRE_SATB_BARRIER;
 #endif

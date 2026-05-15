@@ -30,11 +30,11 @@ def GenerateTypedArrayFillInternal(name, prefix, type, outType, scale, cgmode)
             next
         end
         if signed
-          buffer := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).SetNeedReadBarrier(true).Imm(EtsConstants::TYPED_ARRAY_BUFFER_OFFSET).ref
         else
-          buffer := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).SetNeedReadBarrier(true).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
         end
-        bufferData := LoadI(buffer).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref
+        bufferData := LoadI(buffer).SetNeedReadBarrier(true).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref
         If(bufferData, 0).EQ.Unlikely {
           Goto(:SlowPathEntrypoint)
         }
@@ -242,8 +242,8 @@ def GenerateTypedArraySetValuesFromArray(name, etype, stype, elm_size, mode)
     }
 
     # load TypedArray params, ArrayBuffer and Array
-    buffer := LoadI(dest).Imm(eval("EtsConstants::#{prefix}_BUFFER_OFFSET")).ref
-    packet := LoadI(buffer).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref
+    buffer := LoadI(dest).SetNeedReadBarrier(true).Imm(eval("EtsConstants::#{prefix}_BUFFER_OFFSET")).ref
+    packet := LoadI(buffer).SetNeedReadBarrier(true).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref
     If(packet, 0).EQ.Unlikely {
       Goto(:SlowPathEntrypoint)
     }
@@ -322,12 +322,12 @@ def GenerateArrayCopyWithin(name, uname, type, scale)
         end
 
         if signed
-          buffer := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).SetNeedReadBarrier(true).Imm(EtsConstants::TYPED_ARRAY_BUFFER_OFFSET).ref
         else
-          buffer := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
+          buffer := LoadI(arr).SetNeedReadBarrier(true).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
         end
 
-        bufferData := Cast(LoadI(buffer).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref).ptr
+        bufferData := Cast(LoadI(buffer).SetNeedReadBarrier(true).Imm(EtsConstants::ARRAY_BUFFER_DATA_OFFSET).ref).ptr
         If(bufferData, 0).EQ.Unlikely {
           Goto(:SlowPathEntrypoint)
         }

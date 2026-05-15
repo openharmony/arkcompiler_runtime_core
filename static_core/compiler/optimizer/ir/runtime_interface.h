@@ -846,6 +846,10 @@ public:
     {
         return ark::cross_values::GetManagedThreadFlagOffset(arch);
     }
+    uint32_t GetMutatorSafepointActiveOffset(Arch arch) const
+    {
+        return ark::cross_values::GetMutatorSafepointActiveOffset(arch);
+    }
     size_t GetTlsFrameOffset(Arch arch) const
     {
         return ark::cross_values::GetManagedThreadFrameOffset(arch);
@@ -911,7 +915,8 @@ public:
     bool NeedsPreWriteBarrier() const
     {
         auto type = GetPreType();
-        return type == ::ark::mem::BarrierType::PRE_SATB_BARRIER;
+        return type == ::ark::mem::BarrierType::PRE_SATB_BARRIER ||
+               type == ::ark::mem::BarrierType::PRE_CMC_WRITE_BARRIER;
     }
 
     bool NeedsPostWriteBarrier() const

@@ -35,7 +35,7 @@ function(:StringBuilderBool,
         next
     end
 
-    value := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+    value := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
     count := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
@@ -79,7 +79,7 @@ function(:StringBuilderChar,
         next
     end
 
-    value := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+    value := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
     count := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
@@ -110,7 +110,7 @@ def GenerateStringBuilderString(compression)
         next
     end
 
-    value := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+    value := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
     value := Cast(value).SrcType(Constants::COMPILER_REFERENCE).ptr
     count := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32

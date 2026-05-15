@@ -133,7 +133,7 @@ def GenerateStringBuilderAppendLong(cgmode)
 
   # 1. Check if there is a free slot in the buffer
   index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+  buffer := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -185,7 +185,7 @@ def GenerateStringBuilderAppendBool(cgmode)
 
   # 1. Check if there is a free slot in the buffer
   index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+  buffer := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -241,7 +241,7 @@ def GenerateStringBuilderAppendChar(cgmode)
 
   # 1. Check if there is a free slot in the buffer
   index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+  buffer := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -351,7 +351,7 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
       raise "Unexpected number of arguments: #{num_args}"
   end
 
-  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+  buffer := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -526,7 +526,7 @@ def GenerateStringBuilderToString(cgmode)
 
   # Walk through the buffer elements and append their content to new_str
   index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
+  buffer := LoadI(sb).SetNeedReadBarrier(true).Imm(Constants::SB_BUFFER_OFFSET).ref
   dst_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
   i1 := Cast(0).i32
 Label(:ForEachBufferSlot)

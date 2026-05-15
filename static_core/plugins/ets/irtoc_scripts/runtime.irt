@@ -49,8 +49,14 @@ scoped_macro(:isHashedString) do |obj|
 end
 
 scoped_macro(:isHashedObject) do |obj|
-  mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
-  obj_status := AndI(mark_word).Imm(RuntimeConstants::MARK_WORD_STATUS_MASK_IN_PLACE).u32
+  # This code will be unified. Issue #34605
+  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
+    mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u64
+    obj_status := AndI(mark_word).Imm(RuntimeConstants::MARK_WORD_STATUS_MASK_IN_PLACE).u64
+  else
+    mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
+    obj_status := AndI(mark_word).Imm(RuntimeConstants::MARK_WORD_STATUS_MASK_IN_PLACE).u32
+  end
   Compare(obj_status, RuntimeConstants::MARK_WORD_STATUS_HASHED_IN_PLACE).EQ.b
 end
 
@@ -106,8 +112,14 @@ scoped_macro(:fetchHashCodeString) do |obj|
 end
 
 scoped_macro(:fetchHashCodeObject) do |obj|
-  mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
-  AndI(mark_word).Imm(RuntimeConstants::MARK_WORD_HASH_CODE_MASK).u32
+  # This code will be unified. Issue #34605
+  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
+    mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u64
+    Cast(AndI(mark_word).Imm(RuntimeConstants::MARK_WORD_HASH_CODE_MASK).u64).u32
+  else
+    mark_word := LoadI(obj).Imm(Constants::MARK_WORD_OFFSET).u32
+    AndI(mark_word).Imm(RuntimeConstants::MARK_WORD_HASH_CODE_MASK).u32
+  end
 end
 
 scoped_macro(:fetchHashCode) do |obj, is_string|
@@ -229,7 +241,7 @@ def GenerateGetHashCodeByValue(cgmode)
       Goto(:SlowPathEntrypointBigint)
     }
     If(isEnumType(flags), 0).NE.Unlikely {
-      enum_value := LoadI(obj).Imm(EtsConstants::ENUM_VALUE_OFFSET).ref
+      enum_value := LoadI(obj).SetNeedReadBarrier(true).Imm(EtsConstants::ENUM_VALUE_OFFSET).ref
       enum_klass := load_class(enum_value)
       enum_flags := LoadI(enum_klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
       

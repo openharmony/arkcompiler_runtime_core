@@ -646,11 +646,13 @@ void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
     ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
     auto tmp = scopedTmp.GetReg();
     encoder->EncodeAdd(tmp, src0, Imm(offset));
-    auto mem = MemRef(tmp, src1, shift);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
     if (instLoadArray->GetNeedReadBarrier()) {
+        // Create MemRef using upcasted index because MemRefToOffset arithmetic requires the same registers size
+        auto mem = MemRef(tmp, enc->GetCodegen()->Upcast(src1, src0.GetType(), true), shift);
         enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst);
     } else {
+        auto mem = MemRef(tmp, src1, shift);
         encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
     }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
@@ -1001,14 +1003,18 @@ void EncodeVisitor::VisitLoad(GraphVisitor *visitor, Inst *inst)
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0U), DataType::POINTER);  // pointer
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1U), DataType::UINT32);   // offset
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
-    auto mem = MemRef(src0, src1, loadByOffset->GetScale());
 
     if (loadByOffset->GetNeedReadBarrier()) {
+        // Create MemRef using upcasted index because MemRefToOffset arithmetic requires the same registers size
+        auto mem = MemRef(src0, enc->GetCodegen()->Upcast(src1, src0.GetType(), false), loadByOffset->GetScale());
         enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, loadByOffset->GetVolatile());
-    } else if (loadByOffset->GetVolatile()) {
-        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
     } else {
-        enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
+        auto mem = MemRef(src0, src1, loadByOffset->GetScale());
+        if (loadByOffset->GetVolatile()) {
+            enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
+        } else {
+            enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
+        }
     }
 }
 
@@ -2281,8 +2287,14 @@ void EncodeVisitor::VisitSafePoint(GraphVisitor *visitor, Inst *inst)
     auto codegen = enc->GetCodegen();
     auto graph = codegen->GetGraph();
     auto encoder = enc->GetEncoder();
+    // This code will be unified. Issue #34605
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto flagAddrOffset = graph->GetRuntime()->GetMutatorSafepointActiveOffset(codegen->GetArch());
+    ScopedTmpRegU32 tmp(encoder);
+#else
     int64_t flagAddrOffset = graph->GetRuntime()->GetFlagAddrOffset(codegen->GetArch());
     ScopedTmpRegU16 tmp(encoder);
+#endif
     // TMP <= Flag
     auto mem = MemRef(codegen->ThreadReg(), flagAddrOffset);
     encoder->EncodeLdr(tmp, false, mem);

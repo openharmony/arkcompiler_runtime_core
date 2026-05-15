@@ -442,7 +442,7 @@ function(:StringFlatCheck,
       Return(str).ref
     }
 
-    baseClass := LoadI(str).ref
+    baseClass := load_class(str)
     stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
     If(stringType, Constants::STRING_TYPE_TREE).EQ {
         stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
