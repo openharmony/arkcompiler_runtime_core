@@ -261,7 +261,7 @@ TEST_F(RegionAllocatorTest, AllocateAndMoveYoungObjectsToTenured)
             return ObjectStatus::ALIVE_OBJECT;
         },
         []([[maybe_unused]] ObjectHeader *src, [[maybe_unused]] ObjectHeader *dst) {});
-    allocator.ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
+    allocator.ResetAllYoungRegions([](uintptr_t, uintptr_t) {});
     size_t objectFound = 0;
     allocator.IterateOverObjects([&objectFound](ObjectHeader *object) {
         (void)object;
@@ -321,10 +321,6 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjects)
     ASSERT_EQ(objectFound, ALLOCATION_COUNT);
     // Check that we can still correctly allocate smth in tenured:
     ASSERT_TRUE(AllocateObjectWithClass<RegionFlag::IS_OLD>(allocator) != nullptr);
-    // Reset tenured regions:
-    allocator.ResetAllSpecificRegions<RegionFlag::IS_OLD>();
-    // Check that we can still correctly allocate smth in tenured:
-    ASSERT_TRUE(AllocateObjectWithClass<RegionFlag::IS_OLD>(allocator) != nullptr);
 }
 
 TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjectsViaMarkedBitmap)
@@ -374,10 +370,6 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjectsViaMarkedBitmap)
     ASSERT_EQ(objectFound, markedTenuredObjectCount);
     // Check that we can still correctly allocate smth in tenured:
     ASSERT_TRUE(AllocateObjectWithClass<RegionFlag::IS_OLD>(allocator) != nullptr);
-    // Reset tenured regions:
-    allocator.ResetAllSpecificRegions<RegionFlag::IS_OLD>();
-    // Check that we can still correctly allocate smth in tenured:
-    ASSERT_TRUE(AllocateObjectWithClass<RegionFlag::IS_OLD>(allocator) != nullptr);
 }
 
 TEST_F(RegionAllocatorTest, AsanTest)
@@ -403,16 +395,8 @@ TEST_F(RegionAllocatorTest, AsanTest)
             return ObjectStatus::ALIVE_OBJECT;
         },
         []([[maybe_unused]] ObjectHeader *src, [[maybe_unused]] ObjectHeader *dst) {});
-    allocator.ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
+    allocator.ResetAllYoungRegions([](uintptr_t, uintptr_t) {});
     for (auto i : youngObjects) {
-#ifdef PANDA_ASAN_ON
-        EXPECT_DEATH(DeathWriteUint64(i), "") << "Write " << sizeof(uint64_t) << " bytes at address " << std::hex << i;
-#else
-        (void)i;
-#endif  // PANDA_ASAN_ON
-    }
-    allocator.ResetAllSpecificRegions<RegionFlag::IS_OLD>();
-    for (auto i : oldObjects) {
 #ifdef PANDA_ASAN_ON
         EXPECT_DEATH(DeathWriteUint64(i), "") << "Write " << sizeof(uint64_t) << " bytes at address " << std::hex << i;
 #else

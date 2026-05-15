@@ -606,19 +606,17 @@ size_t RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegionToTargetAll
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-template <RegionFlag REGIONS_TYPE>
-void RegionAllocator<AllocConfigT, LockConfigT>::ResetAllSpecificRegions()
+template <typename F>
+void RegionAllocator<AllocConfigT, LockConfigT>::ResetAllYoungRegions(const F &onRegionDestroy)
 {
-    ResetCurrentRegion<false, REGIONS_TYPE>();
+    ResetCurrentRegion<false, RegionFlag::IS_EDEN>();
     this->GetSpace()->IterateRegions([&](Region *region) {
-        if (!region->HasFlag(REGIONS_TYPE)) {
+        if (!region->IsYoung()) {
             return;
         }
-        this->GetSpace()->template FreeRegion<RegionSpace::ReleaseRegionsPolicy::NoRelease>(region);
+        this->GetSpace()->template FreeRegion<F, RegionSpace::ReleaseRegionsPolicy::NoRelease>(region, onRegionDestroy);
     });
-    if constexpr (REGIONS_TYPE == RegionFlag::IS_EDEN) {
-        retainedTlabs_.clear();
-    }
+    retainedTlabs_.clear();
 }
 
 template <typename AllocConfigT, typename LockConfigT>

@@ -477,6 +477,11 @@ public:
         return allocator_;
     }
 
+    size_t GetMaxYoungSize() const
+    {
+        return spaces_->GetMaxYoungSize();
+    }
+
     ~RegionPool() = default;
     NO_COPY_SEMANTIC(RegionPool);
     NO_MOVE_SEMANTIC(RegionPool);
@@ -535,6 +540,10 @@ public:
 
     Region *NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovable, RegionFlag properties,
                       OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
+
+    template <typename F, ReleaseRegionsPolicy REGIONS_RELEASE_POLICY = ReleaseRegionsPolicy::Release,
+              OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>
+    void FreeRegion(Region *region, const F &onRegionDestroy);
 
     template <ReleaseRegionsPolicy REGIONS_RELEASE_POLICY = ReleaseRegionsPolicy::Release,
               OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>

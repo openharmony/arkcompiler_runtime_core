@@ -320,10 +320,10 @@ public:
 
     /**
      * Reset all regions with type /param regions_type.
-     * @tparam regions_type - type of regions needed to proceed.
+     * @tparam F - the calls the callback it it decide to release region's memory.
      */
-    template <RegionFlag REGIONS_TYPE>
-    void ResetAllSpecificRegions();
+    template <typename F>
+    void ResetAllYoungRegions(const F &onRegionDestroy);
 
     /**
      * Reset regions from vector.

@@ -139,7 +139,22 @@ public:
         objectTenuredAllocator_->ReleaseReservedRegion();
     }
 
-    void ResetYoungAllocator() final;
+    template <typename F>
+    void ResetYoungAllocator(const F &onRegionDestroy)
+    {
+        auto callback = [](ManagedThread *thread) {
+            thread->CollectTLABMetrics();
+            if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+                thread->GetWeightedTlabAverage()->ComputeNewSumAndResetSamples();
+            }
+            // Here we should not collect current TLAB fill statistics for adaptive size
+            // since it may not be completely filled before resetting
+            thread->ClearTLAB();
+            return true;
+        };
+        Mutator::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
+        objectYoungAllocator_->ResetAllYoungRegions(onRegionDestroy);
+    }
 
     template <RegionFlag REGIONS_TYPE, RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY,
               OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK, typename Container>
