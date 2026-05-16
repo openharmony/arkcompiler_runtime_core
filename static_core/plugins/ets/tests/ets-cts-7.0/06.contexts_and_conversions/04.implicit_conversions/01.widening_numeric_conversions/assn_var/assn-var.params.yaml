@@ -15,6 +15,7 @@
 cases:
     - from_type: byte
       to_type: short
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0b0 as byte, val: 0 }
           - { expr: Byte.MIN_VALUE, val: -128 }
@@ -22,6 +23,7 @@ cases:
 
     - from_type: byte
       to_type: int
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0b0 as byte, val: 0 }
           - { expr: Byte.MIN_VALUE, val: -128 }
@@ -29,6 +31,7 @@ cases:
 
     - from_type: byte
       to_type: long
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0b0 as byte, val: 0 }
           - { expr: Byte.MIN_VALUE, val: -128 }
@@ -36,6 +39,7 @@ cases:
 
     - from_type: byte
       to_type: float
+      sample_value: {from: 1, to_1: 0.0f, to_2: 1.0f}
       values:
           - { expr: 0b0 as byte, val: 0.0f }
           - { expr: Byte.MIN_VALUE, val: -128.0f }
@@ -43,6 +47,7 @@ cases:
 
     - from_type: byte
       to_type: double
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0b0 as byte, val: 0.0 }
           - { expr: Byte.MIN_VALUE, val: -128.0 }
@@ -50,6 +55,7 @@ cases:
 
     - from_type: byte
       to_type: number
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0b0 as byte, val: 0.0 }
           - { expr: Byte.MIN_VALUE, val: -128.0 }
@@ -57,6 +63,7 @@ cases:
 
     - from_type: short
       to_type: int
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0b0, val: 0 }
           - { expr: Short.MIN_VALUE, val: -32_768 }
@@ -64,6 +71,7 @@ cases:
 
     - from_type: short
       to_type: long
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0b0, val: 0 }
           - { expr: Short.MIN_VALUE, val: -32_768 }
@@ -71,6 +79,7 @@ cases:
 
     - from_type: short
       to_type: float
+      sample_value: {from: 1, to_1: 0.0f, to_2: 1.0f}
       values:
           - { expr: 0b0, val: 0.0f }
           - { expr: Short.MIN_VALUE, val: -32_768.0f }
@@ -78,6 +87,7 @@ cases:
 
     - from_type: short
       to_type: double
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0b0, val: 0.0 }
           - { expr: Short.MIN_VALUE, val: -32_768.0}
@@ -85,6 +95,7 @@ cases:
 
     - from_type: short
       to_type: number
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0b0, val: 0.0 }
           - { expr: Short.MIN_VALUE, val: -32_768.0 }
@@ -92,6 +103,7 @@ cases:
 
     - from_type: int
       to_type: long
+      sample_value: {from: 1, to_1: 0, to_2: 1}
       values:
           - { expr: 0, val: 0 }
           - { expr: Int.MIN_VALUE, val: -2147483648 }
@@ -99,6 +111,7 @@ cases:
 
     - from_type: int
       to_type: float
+      sample_value: {from: 1, to_1: 0.0f, to_2: 1.0f}
       values:
           - { expr: 0, val: 0.0f }
           - { expr: Int.MIN_VALUE, val: -2147483600.0f } # expected loss of precision
@@ -106,6 +119,7 @@ cases:
 
     - from_type: int
       to_type: double
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0, val: 0.0 }
           - { expr: Int.MIN_VALUE, val: -2147483648.0 }
@@ -113,6 +127,7 @@ cases:
 
     - from_type: int
       to_type: number
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0, val: 0.0 }
           - { expr: Int.MIN_VALUE, val: -2147483648.0 }
@@ -120,6 +135,7 @@ cases:
 
     - from_type: long
       to_type: float
+      sample_value: {from: 1, to_1: 0.0f, to_2: 1.0f}
       values:
           - { expr: 0, val: 0.0f }
           - { expr: Long.MIN_VALUE, val: -9223372000000000000.0f } # expected loss of precision
@@ -127,6 +143,7 @@ cases:
 
     - from_type: long
       to_type: double
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0, val: 0.0 }
           - { expr: Long.MIN_VALUE, val: -9223372036854775808.0 }
@@ -134,6 +151,7 @@ cases:
 
     - from_type: long
       to_type: number
+      sample_value: {from: 1, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: 0, val: 0.0 }
           - { expr: Long.MIN_VALUE, val: -9223372036854775808.0 }
@@ -141,6 +159,7 @@ cases:
 
     - from_type: float
       to_type: double
+      sample_value: {from: 1f, to_1: 0.0, to_2: 1.0}
       values:
           - { expr: +0.0f, val: +0.0 }
           - { expr: -0.0f, val: -0.0 }
@@ -151,6 +170,7 @@ cases:
 
     - from_type: Color
       to_type: int
+      sample_value: {from: Color.Red, to_1: 0, to_2: 1}
       defs: |-
           enum Color { Red, Green, Blue }
       values:
@@ -160,6 +180,7 @@ cases:
 
     - from_type: Color
       to_type: long
+      sample_value: {from: Color.Red, to_1: 0, to_2: 1}
       defs: |-
           enum Color { Red=100, Green=200, Blue=300 }
       values:
@@ -169,6 +190,7 @@ cases:
 
     - from_type: Color
       to_type: float
+      sample_value: {from: Color.Red, to_1: 0.0f, to_2: 1.0f}
       defs: |-
           enum Color { Red=10, Green=20, Blue=30 }
       values:
@@ -178,6 +200,7 @@ cases:
 
     - from_type: Color
       to_type: double
+      sample_value: {from: Color.Red, to_1: 0.0, to_2: 1.0}
       defs: |-
           enum Color { Red=10001, Green=10002, Blue=10003 }
       values:
@@ -187,6 +210,7 @@ cases:
 
     - from_type: Color
       to_type: number
+      sample_value: {from: Color.Red, to_1: 0.0, to_2: 1.0}
       defs: |-
           enum Color { Red=20001, Green=20002, Blue=20003 }
       values:
@@ -194,20 +218,22 @@ cases:
           - { expr: Color.Green, val: 20002.0 }
           - { expr: Color.Blue, val: 20003.0 }
 
-    - from_type: Color
+    - from_type: ColorLong
       to_type: double
+      sample_value: {from: ColorLong.Red, to_1: 0.0, to_2: 1.0}
       defs: |-
-          enum Color:long { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
+          enum ColorLong:long { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
       values:
-          - { expr: Color.Red, val: 3000000001.0 }
-          - { expr: Color.Green, val: 3000000002.0 }
-          - { expr: Color.Blue, val: 3000000003.0 }
+          - { expr: ColorLong.Red, val: 3000000001.0 }
+          - { expr: ColorLong.Green, val: 3000000002.0 }
+          - { expr: ColorLong.Blue, val: 3000000003.0 }
 
-    - from_type: Color
+    - from_type: ColorLong
       to_type: number
+      sample_value: {from: ColorLong.Red, to_1: 0.0, to_2: 1.0}
       defs: |-
-          enum Color:long { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
+          enum ColorLong:long { Red=3_000_000_001, Green=3_000_000_002, Blue=3_000_000_003 }
       values:
-          - { expr: Color.Red, val: 3000000001.0 }
-          - { expr: Color.Green, val: 3000000002.0 }
-          - { expr: Color.Blue, val: 3000000003.0 }
+          - { expr: ColorLong.Red, val: 3000000001.0 }
+          - { expr: ColorLong.Green, val: 3000000002.0 }
+          - { expr: ColorLong.Blue, val: 3000000003.0 }
