@@ -280,7 +280,7 @@ cases:
       B.x++
     expected_out:
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
 
   - desc: |-
       >-
@@ -622,22 +622,22 @@ cases:
         }
     expected_out:
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."
       - |-
-        "Semantic error ESE0207: 'x' is a static property of 'A'"
+        "Semantic error ESE854298: Class static member x must be accessed with the class name A qualification only."

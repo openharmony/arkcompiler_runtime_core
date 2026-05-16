@@ -18,7 +18,7 @@ desc: >-
   Static accessors of a superclass are not inherited. Accessing a superclass
   static accessor via the subclass name causes a compile-time error.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0087: Property 'sProp' does not exist on type 'Child'"
+expected_out: "Semantic error ESE854298: Class static member sProp must be accessed with the class name Base qualification only."
 ---*/
 
 class Base {

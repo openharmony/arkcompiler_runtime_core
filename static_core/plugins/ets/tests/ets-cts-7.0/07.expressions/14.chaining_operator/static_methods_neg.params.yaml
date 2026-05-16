@@ -57,4 +57,4 @@ cases:
       let b: B | undefined = cond ? bb : undefined
       let res: int|undefined = b?.no_params_with_return()
     stdout: |-
-      "Semantic error ESE0207: 'no_params_with_return' is a static property of 'B'" 
+      "Semantic error ESE0207: 'no_params_with_return' is a static property of 'A'" 

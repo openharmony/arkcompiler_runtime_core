@@ -20,19 +20,19 @@ cases:
     use: |-
       B.foo()
     expected: |-
-      "Semantic error ESE0087: Property 'foo' does not exist on type 'B'"
+      "Semantic error ESE854298: Class static member foo must be accessed with the class name A qualification only."
   - decl: |-
       static f: number = 1
     use: |-
       B.f
     expected: |-
-      "Semantic error ESE0087: Property 'f' does not exist on type 'B'"
+      "Semantic error ESE854298: Class static member f must be accessed with the class name A qualification only."
   - decl: |-
       static readonly f: number = 1
     use: |-
       B.f
     expected: |-
-      "Semantic error ESE0087: Property 'f' does not exist on type 'B'"
+      "Semantic error ESE854298: Class static member f must be accessed with the class name A qualification only."
   - decl: |-
       static get prop(): int {
         return 1;
@@ -40,4 +40,4 @@ cases:
     use: |-
       B.prop
     expected: |-
-      "Semantic error ESE0087: Property 'prop' does not exist on type 'B'"
+      "Semantic error ESE854298: Class static member prop must be accessed with the class name A qualification only."

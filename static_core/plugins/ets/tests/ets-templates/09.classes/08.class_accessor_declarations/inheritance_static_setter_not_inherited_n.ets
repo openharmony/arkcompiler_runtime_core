@@ -20,7 +20,7 @@ assert: >-
     to use static members of its superclass must use explicit qualification
     using the superclass name.
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0087: Property 'prop' does not exist on type 'B'"
+expected_out: "Semantic error ESE854298: Class static member prop must be accessed with the class name A qualification only."
 ---*/
 
 class A {

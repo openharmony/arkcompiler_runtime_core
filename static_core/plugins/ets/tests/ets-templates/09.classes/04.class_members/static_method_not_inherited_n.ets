@@ -18,7 +18,7 @@ desc: >-
   Static methods of a superclass are not inherited. Accessing a superclass
   static method via the subclass name causes a compile-time error.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0087: Property 'sMethod' does not exist on type 'Child'"
+expected_out: "Semantic error ESE854298: Class static member sMethod must be accessed with the class name Base qualification only."
 ---*/
 
 class Base {
