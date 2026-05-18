@@ -517,6 +517,10 @@ export class RegExp extends Object {
     private source_: String = ""
     private flags_: String = ""
     private flagsSorted_: boolean = false
+    private compileFlags_: int = 0
+    private matchFlags_: int = 0
+    private extraCompileFlags_: int = 0
+    private globalOrSticky_: boolean = false
     private requiresUtf16Execution_: boolean = false
     private isGlobal: boolean = false
     private isUnicode: boolean = false
@@ -686,8 +690,9 @@ export class RegExp extends Object {
     private native matchAllNativeImpl(pattern: String, flags: String, str: String, patternLength: int,
         strLength: int, lastIndex: int, requiresUtf16Execution: boolean): RegExpMatchArray[];
 
-    private native testImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
-        lastIndex: int, requiresUtf16Execution: boolean): boolean;
+    private native testImpl(pattern: String, str: String, patternLength: int, strLength: int, lastIndex: int,
+        compileFlags: int, matchFlags: int, extraCompileFlags: int, globalOrSticky: boolean,
+        requiresUtf16Execution: boolean): boolean;
 
     private native replaceNativeImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int,
         lastIndex: int, requiresUtf16Execution: boolean): RegExpExecArray[];
@@ -985,18 +990,11 @@ export class RegExp extends Object {
             this.lastIndex = 0
             return false
         }
-        let globalOrSticky = this.global || this.sticky
-        if (!globalOrSticky || (this.lastIndex < 0)) {
+        if (!this.globalOrSticky_ || (this.lastIndex < 0)) {
             this.lastIndex = 0
         }
-        let res = this.testImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, this.lastIndex,
-            this.requiresUtf16Execution_)
-
-        if (!res && globalOrSticky) {
-            this.lastIndex = 0
-        }
-
-        return res
+        return this.testImpl(this.pattern_, str, this.pattern_.length, str.length, this.lastIndex, this.compileFlags_,
+            this.matchFlags_, this.extraCompileFlags_, this.globalOrSticky_, this.requiresUtf16Execution_)
     }
 
     /**
@@ -1104,6 +1102,10 @@ export class RegExp extends Object {
         re.isIgnoreCase = re.flags_.contains("i", 0)
         re.isIndices = re.flags_.contains("d", 0)
         re.isDotAll = re.flags_.contains("s", 0)
+        re.compileFlags_ = RegExp.buildCompileFlags(re)
+        re.matchFlags_ = RegExp.buildMatchFlags(re)
+        re.extraCompileFlags_ = RegExp.PCRE2_EXTRA_ALT_BSUX
+        re.globalOrSticky_ = re.isGlobal || re.isSticky
         re.requiresUtf16Execution_ = re.isUnicode || re.isUnicodeSets || pattern.contains("\\u", 0)
         RegExp.parse(pattern, re.flags_)
     }
@@ -1115,4 +1117,48 @@ export class RegExp extends Object {
         }
         return result
     }
+
+    private static buildCompileFlags(re: RegExp): int {
+        let flags: int = 0
+        if (re.isMultiline) {
+            flags |= RegExp.PCRE2_MULTILINE
+        }
+        if (re.isIgnoreCase) {
+            flags |= RegExp.PCRE2_CASELESS
+            flags |= RegExp.PCRE2_UCP
+        }
+        if (re.isSticky) {
+            flags |= RegExp.PCRE2_ANCHORED
+        }
+        if (re.isDotAll) {
+            flags |= RegExp.PCRE2_DOTALL
+        }
+        if (re.isUnicode) {
+            flags |= RegExp.PCRE2_UTF
+        }
+        if (re.isUnicodeSets) {
+            flags |= RegExp.PCRE2_UCP
+        }
+        flags |= RegExp.PCRE2_MATCH_UNSET_BACKREF
+        flags |= RegExp.PCRE2_ALLOW_EMPTY_CLASS
+        return flags
+    }
+
+    private static buildMatchFlags(re: RegExp): int {
+        if (re.isUnicode || re.isUnicodeSets) {
+            return RegExp.PCRE2_NO_UTF_CHECK
+        }
+        return 0
+    }
+
+    private static readonly PCRE2_ALLOW_EMPTY_CLASS: int = 0x00000001
+    private static readonly PCRE2_CASELESS: int = 0x00000008
+    private static readonly PCRE2_DOTALL: int = 0x00000020
+    private static readonly PCRE2_MATCH_UNSET_BACKREF: int = 0x00000200
+    private static readonly PCRE2_MULTILINE: int = 0x00000400
+    private static readonly PCRE2_UCP: int = 0x00020000
+    private static readonly PCRE2_UTF: int = 0x00080000
+    private static readonly PCRE2_ANCHORED: int = -2147483648
+    private static readonly PCRE2_NO_UTF_CHECK: int = 1073741824
+    private static readonly PCRE2_EXTRA_ALT_BSUX: int = 0x00000020
 }

@@ -202,15 +202,7 @@ template bool HasCapturingGroupsImpl<pcre2_code_16>(const void *pcre2Code);
 
 InputExecutionKind SelectExecutionKind(const EtsRegExp &re, const ExecData &data)
 {
-    const bool forceUtf16 = data.requiresUtf16Execution || re.HasUnicodeOrUnicodeSetsFlag();
-    const bool canUseLatin1Direct = !data.isUtf16Input && !data.isUtf16Pattern && !forceUtf16;
-    if (canUseLatin1Direct) {
-        return InputExecutionKind::LATIN1_DIRECT;
-    }
-    if (data.isUtf16Input) {
-        return InputExecutionKind::UTF16_DIRECT;
-    }
-    return InputExecutionKind::LATIN1_TO_UTF16;
+    return SelectExecutionKind(data.requiresUtf16Execution || re.HasUnicodeOrUnicodeSetsFlag(), data);
 }
 
 ani_status CreateResultArray(ani_env *env, const std::vector<ani_object> &results, ani_array *out)

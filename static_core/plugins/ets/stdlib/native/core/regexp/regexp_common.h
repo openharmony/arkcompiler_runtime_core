@@ -137,6 +137,21 @@ inline ExecData MakeExecData(ani_env *env, ani_string pattern, ani_string str, a
             static_cast<bool>(requiresUtf16Execution)};
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
+inline ExecData MakeTestExecData(ani_env *env, ani_string pattern, ani_string str, ani_int patternSize, ani_int strSize,
+                                 ani_int lastIndex, ani_boolean requiresUtf16Execution)
+{
+    return {pattern,
+            str,
+            {},
+            static_cast<int32_t>(lastIndex),
+            static_cast<size_t>(patternSize),
+            static_cast<size_t>(strSize),
+            IsUtf16(env, pattern),
+            IsUtf16(env, str),
+            static_cast<bool>(requiresUtf16Execution)};
+}
+
 template <typename ResultT, typename Latin1Fn, typename Utf16Fn>
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 ResultT PrepareInputAndRun(EtsRegExp &re, const ExecData &execData, ani_env *env, InputExecutionKind executionKind,
@@ -180,6 +195,18 @@ ResultT PrepareInputAndRun(EtsRegExp &re, const ExecData &execData, ani_env *env
     }
 }
 
+inline InputExecutionKind SelectExecutionKind(bool forceUtf16, const ExecData &data)
+{
+    const bool canUseLatin1Direct = !data.isUtf16Input && !data.isUtf16Pattern && !forceUtf16;
+    if (canUseLatin1Direct) {
+        return InputExecutionKind::LATIN1_DIRECT;
+    }
+    if (data.isUtf16Input) {
+        return InputExecutionKind::UTF16_DIRECT;
+    }
+    return InputExecutionKind::LATIN1_TO_UTF16;
+}
+
 template <typename CharT>
 int32_t AdvanceIndex(const CharT *data, int32_t size, int32_t pos, bool unicode)
 {
@@ -219,6 +246,49 @@ RegExpExecResult ExecuteOnce(EtsRegExp &re, uint32_t matchFlags, const CharT *in
         auto result = RegExp16::Execute(compiled, matchFlags, input, inputSize, lastEnd);
         RegExp16::ApplyGroupMeta(compiled->groupMeta, result);
         return result;
+    }
+}
+
+template <typename ResultT, typename Latin1Fn, typename Utf16Fn>
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
+ResultT PreparePatternAndInputAndRunTest(const ExecData &execData, ani_env *env, InputExecutionKind executionKind,
+                                         Latin1Fn &&latin1Fn, Utf16Fn &&utf16Fn)
+{
+    switch (executionKind) {
+        case InputExecutionKind::LATIN1_DIRECT: {
+            const uint8_t *patternData = nullptr;
+            const uint8_t *inputData = nullptr;
+            {
+                ark::ets::ani::ScopedManagedCodeFix scope(env);
+                auto *patternEtsStr = scope.ToInternalType(execData.pattern);
+                RegExpStringAccessor patternAccessor(patternEtsStr);
+                patternData = patternAccessor.GetDataUtf8();
+
+                auto *inputEtsStr = scope.ToInternalType(execData.input);
+                RegExpStringAccessor inputAccessor(inputEtsStr);
+                inputData = inputAccessor.GetDataUtf8();
+            }
+            return std::forward<Latin1Fn>(latin1Fn)(patternData, inputData);
+        }
+        case InputExecutionKind::UTF16_DIRECT:
+        case InputExecutionKind::LATIN1_TO_UTF16: {
+            const uint16_t *patternData = nullptr;
+            const uint16_t *inputData = nullptr;
+            std::vector<uint16_t> patternStorage;
+            std::vector<uint16_t> inputStorage;
+            {
+                ark::ets::ani::ScopedManagedCodeFix scope(env);
+                const bool needsPatternMaterialization = !execData.isUtf16Pattern;
+                patternData = AcquireUtf16Input(scope, execData.pattern, static_cast<int32_t>(execData.patternSize),
+                                                needsPatternMaterialization, patternStorage);
+                const bool needsInputMaterialization = executionKind == InputExecutionKind::LATIN1_TO_UTF16;
+                inputData = AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize),
+                                              needsInputMaterialization, inputStorage);
+            }
+            return std::forward<Utf16Fn>(utf16Fn)(patternData, inputData);
+        }
+        default:
+            UNREACHABLE();
     }
 }
 
