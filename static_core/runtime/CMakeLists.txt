@@ -272,11 +272,7 @@ else()
     list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/mutator.cpp)
 endif()
 
-if (PANDA_TARGET_MOBILE)
-    list(APPEND SOURCES ${PANDA_ROOT}/platforms/mobile/runtime/verify_app_install.cpp)
-else()
-    list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/verify_app_install.cpp)
-endif()
+list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/verify_app_install.cpp)
 
 if (PANDA_WITH_SAFEPOINT_CHECKER)
     list(APPEND SOURCES

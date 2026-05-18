@@ -126,15 +126,9 @@ set(INCLUDE_DIRECTORIES)
 set(LINK_LIBRARIES)
 
 # Handle library load method
-if(PANDA_TARGET_MOBILE)
-    set(UNIX_SOURCES_COMMON ${UNIX_SOURCES_COMMON}
-        ${PANDA_ROOT}/platforms/mobile/libarkbase/library_loader_load.cpp
-    )
-else()
-    set(UNIX_SOURCES_COMMON ${UNIX_SOURCES_COMMON}
-        ${PANDA_ROOT}/platforms/unix/libarkbase/library_loader_load.cpp
-    )
-endif()
+set(UNIX_SOURCES_COMMON ${UNIX_SOURCES_COMMON}
+    ${PANDA_ROOT}/platforms/unix/libarkbase/library_loader_load.cpp
+)
 
 # Native stacktraces
 if (PANDA_TARGET_WINDOWS)
@@ -208,11 +202,7 @@ endif()
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
-if(PANDA_TARGET_MOBILE)
-    set(COHERENCY_LINE_SIZE_H_INPUT "${PANDA_ROOT}/platforms/mobile/libarkbase/coherency_line_size.h")
-else()
-    set(COHERENCY_LINE_SIZE_H_INPUT "${PANDA_ROOT}/platforms/common/libarkbase/coherency_line_size.h")
-endif()
+set(COHERENCY_LINE_SIZE_H_INPUT "${PANDA_ROOT}/platforms/common/libarkbase/coherency_line_size.h")
 
 set(COHERENCY_LINE_SIZE_H_OUTPUT "${GENERATED_DIR}/coherency_line_size.h")
 
