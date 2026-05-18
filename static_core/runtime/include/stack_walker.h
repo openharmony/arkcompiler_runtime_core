@@ -288,6 +288,12 @@ private:
     template <bool CREATE>
     CFrameType CreateCFrameForC2IBridge(Frame *frame);
 
+    // Build a CFrame from the COMPILER-side predecessor of a BYPASS boundary frame.
+    // The predecessor may itself be an INTERPRETER boundary (e.g. a proxy trampoline),
+    // in which case we step through it as a C2I bridge instead of reading it as a CFrame.
+    template <bool CREATE>
+    CFrameType CreateCFrameFromBypass(SlotType *bypassBoundary);
+
     template <bool OBJECTS, bool WITH_REG_INFO, typename Func>
     bool IterateRegs(Func func);
 
