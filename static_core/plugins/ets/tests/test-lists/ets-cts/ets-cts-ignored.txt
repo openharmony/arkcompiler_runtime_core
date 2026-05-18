@@ -175,9 +175,6 @@
 11.enumerations/enum_cte_n_leibt_4_0.ets
 11.enumerations/enum_cte_n_mot_4_0.ets
 
-#33978
-11.enumerations/enum_decl_22.ets
-
 #33639
 11.enumerations/01.enumeration_base_type/enum_int_3.ets
 11.enumerations/01.enumeration_base_type/enum_int_4.ets
@@ -187,9 +184,6 @@
 
 #33640
 11.enumerations/01.enumeration_base_type/enum_int_n_2.ets
-
-#33978
-11.enumerations/01.enumeration_base_type/enum_int_5.ets
 
 #33639
 11.enumerations/02.enumeration_with_explicit_base_type/enum_double_decl_udvt_0_0.ets
@@ -212,12 +206,7 @@
 11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udil_0_0.ets
 
 #33978
-11.enumerations/02.enumeration_with_explicit_base_type/enum_double_decl_udvt_2_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_2_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_decl_udvt_byte_2_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_decl_udvt_int_2_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_decl_udvt_long_2_0.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_decl_udvt_short_2_0.ets
 
 #29682
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomin1_0_0.ets
@@ -292,17 +281,6 @@
 
 #33977
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_uemviie_0_0.ets
-
-#33978
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_phcei4_byte_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_phcei4_int_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_phcei4_long_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_phcei4_short_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax3_1_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax4_1_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_4.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_5.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_6.ets
 
 #33979
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_byte_0_0.ets
@@ -440,10 +418,6 @@
 15.semantic_rules/12.type_erasure/instanceof_tuple_not_preserved_0.ets
 15.semantic_rules/12.type_erasure/instanceof_tuple_not_preserved_1.ets
 
-#34565
-15.semantic_rules/12.type_erasure/instanceof_n_1.ets
-15.semantic_rules/12.type_erasure/instanceof_n_9.ets
-
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
@@ -467,9 +441,6 @@
 17.experimental_features/01.type_char/02.char_operations/char_erased_equality_21.ets
 17.experimental_features/01.type_char/02.char_operations/char_erased_equality_23.ets
 17.experimental_features/01.type_char/02.char_operations/char_erased_equality_25.ets
-
-#34222
-17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
 
 #34223
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
