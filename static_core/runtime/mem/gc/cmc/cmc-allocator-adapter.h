@@ -18,6 +18,10 @@
 
 #include "runtime/include/mem/allocator.h"
 
+namespace ark::common_vm {
+class HeapManager;
+}
+
 namespace ark::mem {
 class ObjectAllocConfigWithCrossingMap;
 class ObjectAllocConfig;
@@ -31,7 +35,9 @@ public:
 
     explicit CMCObjectAllocatorAdapter(MemStatsType *memStats, bool createPygoteSpaceAllocator);
 
-    ~CMCObjectAllocatorAdapter() final = default;
+#if defined(ARK_USE_COMMON_RUNTIME)
+    ~CMCObjectAllocatorAdapter();
+#endif
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                  ObjectAllocatorBase::ObjMemInitPolicy objInit, bool pinned) override;
@@ -54,6 +60,9 @@ public:
     }
 
     size_t GetTLABMaxAllocSize() override;
+
+private:
+    common_vm::HeapManager *heapManager_;
 };
 
 }  // namespace ark::mem

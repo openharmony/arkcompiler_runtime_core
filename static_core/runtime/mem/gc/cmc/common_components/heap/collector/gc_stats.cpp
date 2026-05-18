@@ -64,7 +64,7 @@ void GCStats::Init()
     collectionRate = 0.0;
 
     // 20 MB:set 20 MB as intial value
-    heapThreshold = std::min(BaseRuntime::GetInstance()->GetGCParam().gcThreshold, 20 * MB);
+    heapThreshold = std::min(Heap::GetHeap().GetGCParam().gcThreshold, 20 * MB);
     // 0.2:set 20% heap size as intial value
     heapThreshold = std::min(static_cast<size_t>(Heap::GetHeap().GetMaxCapacity() * 0.2), heapThreshold);
 

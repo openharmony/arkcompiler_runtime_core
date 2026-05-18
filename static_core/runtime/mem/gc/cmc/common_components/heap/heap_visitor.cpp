@@ -13,6 +13,7 @@
  * limitations under the License.
  **/
 
+#include "common_components/heap/heap.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/base_runtime.h"
@@ -21,12 +22,12 @@ namespace ark::common_vm {
 
 void VisitRoots(const RefFieldVisitor &visitor)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) { vm->VisitAllRoots(visitor); });
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) { vm->VisitAllRoots(visitor); });
 }
 
 void VisitSTWRoots(const RefFieldVisitor &visitor)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) {
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) {
         vm->VisitGlobalRoots(visitor);
         vm->VisitConcurrentRoots(visitor);
     });
@@ -34,12 +35,12 @@ void VisitSTWRoots(const RefFieldVisitor &visitor)
 
 void VisitConcurrentRoots(const RefFieldVisitor &visitor)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) { vm->VisitConcurrentRoots(visitor); });
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) { vm->VisitConcurrentRoots(visitor); });
 }
 
 void VisitWeakRoots(const WeakRefFieldVisitor &visitor)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) {
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) {
         vm->VisitAllRoots(visitor);
         vm->UpdateAndSweep(visitor);
     });
@@ -47,12 +48,12 @@ void VisitWeakRoots(const WeakRefFieldVisitor &visitor)
 
 void VisitGlobalRoots(const RefFieldVisitor &visitor)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) { vm->VisitGlobalRoots(visitor); });
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) { vm->VisitGlobalRoots(visitor); });
 }
 
 void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) {
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) {
         vm->VisitGlobalRoots(visitor);
         vm->UpdateAndSweep(visitor);
     });
@@ -60,7 +61,7 @@ void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung)
 
 void VisitPreforwardRoots(const RefFieldVisitor &visitor)
 {
-    BaseRuntime::GetInstance()->ForEachVM([&visitor](VMInterface *vm) { vm->VisitPreforwardRoots(visitor); });
+    Heap::GetHeap().GetCollector().ForEachVM([&visitor](VMInterface *vm) { vm->VisitPreforwardRoots(visitor); });
 }
 
 void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator) {}

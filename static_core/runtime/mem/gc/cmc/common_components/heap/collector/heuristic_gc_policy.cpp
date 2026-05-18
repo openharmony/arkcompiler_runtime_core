@@ -34,7 +34,7 @@ void StartupStatusManager::OnAppStartup()
 
 void HeuristicGCPolicy::Init()
 {
-    HeapParam &heapParam = BaseRuntime::GetInstance()->GetHeapParam();
+    const HeapParam &heapParam = Heap::GetHeap().GetHeapParam();
     heapSize_ = heapParam.heapSize * KB;
 #ifndef PANDA_TARGET_32
     // 2: only half heapSize used allocate
@@ -220,12 +220,12 @@ void HeuristicGCPolicy::ChangeGCParams(bool isBackground)
             allocated > MIN_BACKGROUND_GC_SIZE) {
             Heap::GetHeap().GetCollector().RequestGC(GC_REASON_BACKGROUND, true, GC_TYPE_FULL);
         }
-        Taskpool::GetCurrentTaskpool()->SetThreadPriority(PriorityMode::BACKGROUND);
-        BaseRuntime::GetInstance()->GetGCParam().multiplier = 1;
+        common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::BACKGROUND);
+        Heap::GetHeap().GetGCParam().multiplier = 1;
     } else {
         Taskpool::GetCurrentTaskpool()->SetThreadPriority(PriorityMode::FOREGROUND);
         // 3: The front-end application waterline is 3 times
-        BaseRuntime::GetInstance()->GetGCParam().multiplier = 3;
+        Heap::GetHeap().GetGCParam().multiplier = 3;
     }
 }
 

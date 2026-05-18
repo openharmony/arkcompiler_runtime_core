@@ -17,6 +17,7 @@
 #include <iomanip>
 
 #include "runtime/mem/gc/cmc/cmc-gc.h"
+#include "runtime/mem/gc/cmc/common_components/heap/heap_manager.h"
 
 #include "common_components/log/log.h"
 #include "common_components/base/time_utils.h"
@@ -34,7 +35,6 @@
 
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/math_helpers.h"
-#include "runtime/mark_word.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
@@ -47,7 +47,6 @@
 
 namespace ark::mem {
 using ark::common_vm::AllocationBuffer;
-using ark::common_vm::BaseRuntime;
 using ark::common_vm::FixHeapTask;
 using ark::common_vm::FixHeapWorker;
 using ark::common_vm::FlipFunction;
@@ -1026,7 +1025,7 @@ private:
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ProcessReferencesAfterCopy()
 {
-    BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessReferencesAfterCopy(); });
+    ForEachVM([](VMInterface *vm) { vm->ProcessReferencesAfterCopy(); });
 }
 
 template <class LanguageConfig>
@@ -1083,8 +1082,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
         return;
     }
 
-    const auto avoidConcurrentMarking =
-        BaseRuntime::GetInstance()->GetGCParam().singlePassCompactionEnabled && isYoungGC;
+    const auto avoidConcurrentMarking = Heap::GetHeap().GetGCParam().singlePassCompactionEnabled && isYoungGC;
     if (!avoidConcurrentMarking) {
         auto collectedRoots = EnumRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>();
         MarkingHeap(collectedRoots);
@@ -2348,8 +2346,9 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
     size_t bytesAllocated = space.GetAllocatedBytes();
 
     size_t targetSize;
-    HeapParam &heapParam = BaseRuntime::GetInstance()->GetHeapParam();
-    GCParam &gcParam = BaseRuntime::GetInstance()->GetGCParam();
+    Heap *heap = &common_vm::Heap::GetHeap();
+    const HeapParam &heapParam = heap->GetHeapParam();
+    GCParam &gcParam = heap->GetGCParam();
     if (!gcStats.isYoungGC()) {
         gcStats.shouldRequestYoung = true;
         size_t delta = bytesAllocated * (1.0 / heapParam.heapUtilization - 1.0);
@@ -2692,7 +2691,7 @@ bool CmcGC<LanguageConfig>::WaitForGC([[maybe_unused]] ark::GCTask task)
         default:
             UNREACHABLE();
     }
-    ark::common_vm::BaseRuntime::RequestGC(reason, false, type);
+    ark::common_vm::HeapManager::RequestGC(reason, false, type);
 #endif  // ARK_USE_COMMON_RUNTIME
     return false;
 }
@@ -2718,7 +2717,7 @@ template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::Trigger([[maybe_unused]] ark::PandaUniquePtr<ark::GCTask> task)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::BaseRuntime::RequestGC(ark::common_vm::GCReason::GC_REASON_OOM, false,
+    ark::common_vm::HeapManager::RequestGC(ark::common_vm::GCReason::GC_REASON_OOM, false,
                                            ark::common_vm::GCType::GC_TYPE_FULL);
 #endif  // ARK_USE_COMMON_RUNTIME
     return false;
@@ -2734,7 +2733,7 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::StopGC()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::BaseRuntime::StopGCWork();
+    ark::common_vm::Heap::GetHeap().StopGCWork();
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

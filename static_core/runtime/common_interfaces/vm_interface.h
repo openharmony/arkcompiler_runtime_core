@@ -22,6 +22,7 @@
 namespace ark::mem {
 class PANDA_PUBLIC_API VMInterface {
 public:
+    virtual void Init() = 0;
     virtual void VisitGlobalRoots(const RefFieldVisitor &visitor) = 0;
     virtual void VisitConcurrentRoots(const RefFieldVisitor &visitor) = 0;
     virtual void VisitAllRoots(const RefFieldVisitor &visitor) = 0;
@@ -29,12 +30,8 @@ public:
     virtual void VisitPreforwardRoots(const RefFieldVisitor &visitor) = 0;
     virtual void ProcessFinalizationRegistryCleanup() = 0;
     virtual void ProcessReferencesAfterCopy() = 0;
-    // Deleted copy operations
-    VMInterface(const VMInterface &) = delete;
-    VMInterface &operator=(const VMInterface &) = delete;
-    // Deleted move operations
-    VMInterface(VMInterface &&) = delete;
-    VMInterface &operator=(VMInterface &&) = delete;
+    NO_COPY_SEMANTIC(VMInterface);
+    NO_MOVE_SEMANTIC(VMInterface);
     // Default construction
     VMInterface() = default;
     virtual ~VMInterface() = default;

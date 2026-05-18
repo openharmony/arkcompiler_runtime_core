@@ -172,6 +172,10 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         return Unexpected(PandaString("Cannot create MemoryManager"));
     }
 
+    if (vmIface != nullptr) {
+        vmIface->Init();
+    }
+
     auto allocator = mm->GetHeapManager()->GetInternalAllocator();
     auto vm = allocator->New<PandaEtsVM>(runtime, options, mm, vmIface);
     if (vm == nullptr) {

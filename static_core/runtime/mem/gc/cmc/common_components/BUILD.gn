@@ -21,7 +21,6 @@ crt_sources = [
   "base/utf_helper.cpp",
   "common/page_cache.cpp",
   "common/run_type.cpp",
-  "common_runtime/base_runtime.cpp",
   "common_runtime/base_runtime_param.cpp",
   "heap/allocator/allocator.cpp",
   "heap/allocator/fix_heap.cpp",

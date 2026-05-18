@@ -21,7 +21,7 @@
 #include "common_components/heap/heap.h"
 
 #include "common_interfaces/thread/mutator-inl.h"
-#include "include/locks.h"
+#include "runtime/include/panda_vm.h"
 #include "libarkbase/os/mutex.h"
 
 namespace ark::common_vm {
@@ -110,9 +110,33 @@ void MutatorManager::Init()
     SetSuspensionMutatorCount(0);
 }
 
+MutatorManager *MutatorManager::mutatorManager_ = nullptr;
+
+/* static */
 MutatorManager &MutatorManager::Instance() noexcept
 {
-    return BaseRuntime::GetInstance()->GetMutatorManager();
+    return *mutatorManager_;
+}
+
+/* static */
+void MutatorManager::Create()
+{
+    auto *runtime = Runtime::GetCurrent();
+    auto allocator = runtime->GetInternalAllocator();
+    mutatorManager_ = allocator->New<MutatorManager>();
+    LOG_IF(UNLIKELY(mutatorManager_ == nullptr), FATAL, RUNTIME) << "MutatorManager instance creation failed";
+    mutatorManager_->Init();
+}
+
+void MutatorManager::Destroy()
+{
+    if (mutatorManager_ != nullptr) {
+        auto *runtime = Runtime::GetCurrent();
+        auto allocator = runtime->GetInternalAllocator();
+        mutatorManager_->Fini();
+        allocator->Delete(mutatorManager_);
+        mutatorManager_ = nullptr;
+    }
 }
 
 void MutatorManager::AcquireMutatorLockW()
@@ -191,6 +215,11 @@ void MutatorManager::StartTheWorld() noexcept
 
     // Release stwMutex to allow other thread call STW.
     stwMutex_.Unlock();
+}
+
+ark::MutatorLock *MutatorManager::GetMutatorLockImpl() const
+{
+    return PandaVM::GetCurrent()->GetMutatorLock();
 }
 
 void MutatorManager::DumpMutators(uint32_t timeoutTimes)

@@ -654,9 +654,8 @@ void RegionManager::RequestForRegion(size_t size)
     size_t availableBytesAfterGC = heap.GetMaxCapacity() - gcstats.liveBytesAfterGC;
     double heuAllocRate = std::cos((pi / 2.0) * allocatedBytes / availableBytesAfterGC) * gcstats.collectionRate;
     // for maximum performance, choose the larger one.
-    double allocRate = std::max(static_cast<double>(BaseRuntime::GetInstance()->GetHeapParam().allocationRate) * MB /
-                                    SECOND_TO_NANO_SECOND,
-                                heuAllocRate);
+    double allocRate = std::max(
+        static_cast<double>(Heap::GetHeap().GetHeapParam().allocationRate) * MB / SECOND_TO_NANO_SECOND, heuAllocRate);
     ASSERT_PRINT(allocRate > 0.00001, "allocRate is zero");  // If it is less than 0.00001, it is considered as 0
     size_t waitTime = static_cast<size_t>(size / allocRate);
     uint64_t now = TimeUtil::NanoSeconds();
@@ -671,7 +670,7 @@ void RegionManager::RequestForRegion(size_t size)
 
     // Atomic with relaxed order reason: data race with prevRegionAllocTime_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    uint64_t sleepTime = std::min<uint64_t>(BaseRuntime::GetInstance()->GetHeapParam().allocationWaitTime,
+    uint64_t sleepTime = std::min<uint64_t>(Heap::GetHeap().GetHeapParam().allocationWaitTime,
                                             prevRegionAllocTime_.load(std::memory_order_relaxed) + waitTime - now);
     LOG(DEBUG, GC) << "wait " << sleepTime << " ns to alloc " << size << "(B)";
     ark::os::thread::NativeSleepUS(std::chrono::microseconds(sleepTime / NS_PER_US));

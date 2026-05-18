@@ -39,9 +39,7 @@ using ::ark::mem::RuntimeParam;
 using ::ark::mem::VMInterface;
 
 class BaseObject;
-class HeapManager;
 class Mutator;
-class MutatorManager;
 
 // Used by Collector::RequestGC.
 // It tells why GC is triggered.
@@ -111,111 +109,5 @@ enum class MemoryReduceDegree : uint8_t {
 
 using HeapVisitor = const std::function<void(BaseObject *)>;
 
-class GCListener {
-public:
-    GCListener() = default;
-
-    virtual void OnGCStart(GCReason reason, GCType type) = 0;
-    virtual void OnGCFinish(GCReason reason, GCType type) = 0;
-    virtual void OnGCPhaseStart(GCPhase phase) = 0;
-    virtual void OnGCPhaseEnd(GCPhase phase) = 0;
-
-    virtual ~GCListener() = default;
-
-    // No copy
-    GCListener(const GCListener &) = delete;
-    GCListener &operator=(const GCListener &) = delete;
-
-    // No move
-    GCListener(GCListener &&) = delete;
-    GCListener &operator=(GCListener &&) = delete;
-};
-
-class PANDA_PUBLIC_API BaseRuntime {
-public:
-    NO_COPY_SEMANTIC(BaseRuntime);
-    NO_MOVE_SEMANTIC(BaseRuntime);
-
-    BaseRuntime() = default;
-    ~BaseRuntime() = default;
-
-    static BaseRuntime *GetInstance();
-    static void DestroyInstance();
-
-    void PreFork(Mutator *mutator);
-    void PostFork(bool enableWarmStartup);
-
-    bool HasBeenInitialized();
-    static RuntimeParam GetDefaultParam();
-    void Init(const RuntimeParam &param);
-    void Init();
-    void Fini();
-    void SetMutatorLock(ark::MutatorLock *l);
-
-    bool RegisterVM(VMInterface *vm);
-    bool UnregisterVM(VMInterface *vm);
-    void ForEachVM(std::function<void(VMInterface *)> action);
-
-    void AddGCListener(GCListener *listener);
-    void RemoveGCListener(GCListener *listener);
-
-    // Need refactor, move to other file
-    static void PreWriteBarrier(void *preVal, Mutator *mutator);
-    static void *ReadBarrier(void *obj, void *field);
-    static void *ReadBarrier(void **field);
-    static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);
-    static void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
-    static void WaitForGCFinish();
-    // Blocks until gcCompletedCount >= targetCount or GC exits
-    static void WaitForGCCompletionCount(uint64_t targetCount);
-    static void StopGCWork();
-    static uint64_t GetGcCompletedCount();
-    static bool IsGcStarted();
-    static size_t GetFreeHeapSize();
-    static size_t GetUsedHeapSize();
-    static size_t GetReservedHeapSize();
-    static void EnterGCCriticalSection();
-    static void ExitGCCriticalSection();
-    static bool ForEachObj(HeapVisitor &visitor, bool safe);
-    static void NotifyNativeAllocation(size_t bytes);
-    static void NotifyNativeFree(size_t bytes);
-    static void NotifyNativeReset(size_t oldBytes, size_t newBytes);
-    static size_t GetNotifiedNativeSize();
-    static void ChangeGCParams(bool isBackground);
-    static bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
-    static void NotifyHighSensitive(bool isStart);
-    static void NotifyWarmStart();
-
-    HeapParam &GetHeapParam()
-    {
-        return param_.heapParam;
-    }
-
-    GCParam &GetGCParam()
-    {
-        return param_.gcParam;
-    }
-
-    MutatorManager &GetMutatorManager()
-    {
-        return *mutatorManager_;
-    }
-
-    HeapManager &GetHeapManager()
-    {
-        return *heapManager_;
-    }
-
-private:
-    RuntimeParam param_ {};
-
-    HeapManager *heapManager_ = nullptr;
-    MutatorManager *mutatorManager_ = nullptr;
-    static ark::os::memory::Mutex vmCreationLock_;
-    static BaseRuntime *baseRuntimeInstance_;
-    static bool initialized_;
-    std::unordered_set<VMInterface *> vmIfaces_;
-    ark::os::memory::RWLock vmIfacesLock_;
-};
 }  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_RUNTIME_H

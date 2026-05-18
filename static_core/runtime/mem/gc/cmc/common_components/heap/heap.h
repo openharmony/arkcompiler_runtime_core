@@ -215,6 +215,9 @@ public:
     virtual void SetForceThrowOOM(bool val) = 0;
     virtual void SetCollector(Collector *collector) = 0;
 
+    virtual const HeapParam &GetHeapParam() const = 0;
+    virtual GCParam &GetGCParam() = 0;
+
     static void OnHeapCreated(HeapAddress startAddr)
     {
         heapStartAddr_ = startAddr;

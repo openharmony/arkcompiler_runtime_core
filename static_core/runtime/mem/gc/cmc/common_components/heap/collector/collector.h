@@ -20,27 +20,50 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <set>
-#include <vector>
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_components/heap/collector/gc_request.h"
 #include "common_components/heap/collector/gc_stats.h"
 #include "common_interfaces/thread/mutator.h"
-#include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/base_runtime.h"
+#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::common_vm {
+enum CollectorType {
+    NO_COLLECTOR = 0,  // No Collector
+    PROXY_COLLECTOR,   // Proxy of Collector
+    COPY_COLLECTOR,    // Regional-Copying GC
+    SMOOTH_COLLECTOR,  // wgc
+    COLLECTOR_TYPE_COUNT,
+};
+
+class GCListener {
+public:
+    GCListener() = default;
+
+    virtual void OnGCStart(GCReason reason, GCType type) = 0;
+    virtual void OnGCFinish(GCReason reason, GCType type) = 0;
+    virtual void OnGCPhaseStart(GCPhase phase) = 0;
+    virtual void OnGCPhaseEnd(GCPhase phase) = 0;
+
+    virtual ~GCListener() = default;
+
+    NO_COPY_SEMANTIC(GCListener);
+    NO_MOVE_SEMANTIC(GCListener);
+};
+
+class MutatorManager;
+
 // Central garbage identification algorithm.
 class Collector {
 public:
     Collector();
-    virtual ~Collector() = default;
+    virtual ~Collector();
 
     static const char *GetGCPhaseName(GCPhase phase);
 
     // Initializer and finalizer.
-    virtual void Init(const RuntimeParam &param) = 0;
+    virtual void Init() = 0;
     virtual void Fini() {}
     const char *GetCollectorName() const;
 
@@ -91,12 +114,26 @@ public:
     virtual void RemoveGCListener(GCListener *listener) = 0;
     virtual void NotifyGCListeners(std::function<void(GCListener *)> notifier) = 0;
 
+    bool RegisterVM(VMInterface *vm);
+    bool UnregisterVM(VMInterface *vm);
+    void ForEachVM(std::function<void(VMInterface *)> action);
+
 protected:
-    virtual void RequestGCInternal(GCReason, bool, GCType, bool explicitRequest)
+    virtual void RequestGCInternal(GCReason, bool, GCType, bool)
     {
         LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
+
+    CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
+    std::atomic<GCPhase> gcPhase_ = {GCPhase::GC_PHASE_IDLE};
+
+private:
+    PandaVector<GCListener *> gcListeners_;
+    ark::os::memory::Mutex gcListenersLock_;
+
+    std::unordered_set<VMInterface *> vmIfaces_;
+    ark::os::memory::RWLock vmIfacesLock_;
 };
 }  // namespace ark::common_vm
 

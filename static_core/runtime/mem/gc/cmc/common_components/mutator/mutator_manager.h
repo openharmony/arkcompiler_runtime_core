@@ -25,7 +25,7 @@
 #include "common_components/base/rw_lock.h"
 #include "common_components/common/page_allocator.h"
 #include "common_components/mutator/satb_buffer.h"
-#include "include/locks.h"
+#include "runtime/include/locks.h"
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS) || defined(__APPLE__)
 #include "common_components/mutator/safepoint_page_manager.h"
 #endif
@@ -87,6 +87,8 @@ public:
     MutatorManager &operator=(MutatorManager &&) = delete;
 
     static MutatorManager &Instance() noexcept;
+    static void Create();
+    static void Destroy();
 
     void Init();
     void Fini()
@@ -111,14 +113,16 @@ public:
 
     bool TryAcquireMutatorLockW()
     {
-        ASSERT(mutatorLock_ != nullptr);
-        return mutatorLock_->TryWriteLock();
+        auto *mtl = GetMutatorLock();
+        ASSERT(mtl != nullptr);
+        return mtl->TryWriteLock();
     }
 
     bool TryAcquireMutatorLockR()
     {
-        ASSERT(mutatorLock_ != nullptr);
-        return mutatorLock_->TryReadLock();
+        auto *mtl = GetMutatorLock();
+        ASSERT(mtl != nullptr);
+        return mtl->TryReadLock();
     }
 
     void AcquireMutatorLockW();
@@ -186,14 +190,10 @@ public:
     void DumpAllGcInfos();
 #endif
 
-    void SetMutatorLock(ark::MutatorLock *l)
-    {
-        mutatorLock_ = l;
-    }
-
     __attribute__((always_inline)) inline ark::MutatorLock *GetMutatorLock() const
     {
-        return mutatorLock_;
+        static ark::MutatorLock *mutatorLock {GetMutatorLockImpl()};
+        return mutatorLock;
     }
 
     __attribute__((always_inline)) inline int *GetStwFutexWord()
@@ -245,14 +245,18 @@ public:
 
     void MutatorLockRUnlock() NO_THREAD_SAFETY_ANALYSIS
     {
-        ASSERT(mutatorLock_ != nullptr);
-        mutatorLock_->Unlock();
+        auto *mtl = GetMutatorLock();
+        ASSERT(mtl != nullptr);
+        ASSERT(mtl->GetState() == MutatorLock::MutatorLockState::RDLOCK);
+        mtl->Unlock();
     }
 
     void MutatorLockWUnlock() NO_THREAD_SAFETY_ANALYSIS
     {
-        ASSERT(mutatorLock_ != nullptr);
-        mutatorLock_->Unlock();
+        auto *mtl = GetMutatorLock();
+        ASSERT(mtl != nullptr);
+        ASSERT(mtl->GetState() == MutatorLock::MutatorLockState::WRLOCK);
+        mtl->Unlock();
     }
 
     void DestroyExpiredMutators();
@@ -265,12 +269,11 @@ public:
     std::list<Mutator *, StdContainerAllocator<Mutator *, MUTATOR_LIST>> allMutatorList_;
 
 private:
+    ark::MutatorLock *GetMutatorLockImpl() const;
+
     using ExpiredMutatorList = std::list<Mutator *, StdContainerAllocator<Mutator *, MUTATOR_LIST>>;
     ExpiredMutatorList expiringMutators_;
     ark::os::memory::Mutex expiringMutatorListLock_;
-
-    // guard mutator set for stop-the-world
-    ark::MutatorLock *mutatorLock_ {nullptr};
 
     // count of mutators need to be suspended for stw.
     // this field is also used as futex wait/wakeup word for stw.
@@ -289,6 +292,8 @@ private:
     SafepointPageManager *safepointPageManager_ = nullptr;
 #endif
     Mutator *nativeMutator_ = nullptr;
+
+    static MutatorManager *mutatorManager_;
 };
 
 // Scoped stop the world.
