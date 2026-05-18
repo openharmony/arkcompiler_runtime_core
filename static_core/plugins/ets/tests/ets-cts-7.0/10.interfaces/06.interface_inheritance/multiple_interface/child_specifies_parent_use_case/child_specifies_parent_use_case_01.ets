@@ -35,6 +35,8 @@ class ConcreteChild implements ChildWithConflict {}
 
 function main(): void {
     let c = new ConcreteChild();
+    arktest.assertTrue((c as ParentWithDefault1) instanceof ParentWithDefault1);
+    arktest.assertTrue((c as ParentWithDefault2) instanceof ParentWithDefault2);
     arktest.assertTrue((c as ParentWithDefault1).greet() == "Hello from ParentWithDefault1");
     arktest.assertTrue((c as ParentWithDefault2).greet() == "Hello from ParentWithDefault2");
 }
