@@ -16,9 +16,6 @@
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
 
-#34389 es2panda aborts on complex type alias expression with generics
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_recursive_8.ets
-
 #34391 No CTE on circular dependency in type alias
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_0.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_1.ets
