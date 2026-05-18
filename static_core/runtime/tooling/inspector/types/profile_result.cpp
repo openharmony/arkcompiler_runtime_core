@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,7 +96,7 @@ void Profile::SerializeCallFrame(JsonObjectBuilder &builder, const struct sample
     builder.AddProperty("callFrame", [&codeEntry](JsonObjectBuilder &objBuilder) {
         objBuilder.AddProperty("functionName", codeEntry.functionName);
         objBuilder.AddProperty("moduleName", codeEntry.moduleName);
-        objBuilder.AddProperty("scriptId", codeEntry.scriptId);
+        objBuilder.AddProperty("scriptId", std::to_string(codeEntry.scriptId));
         objBuilder.AddProperty("url", codeEntry.url);
         objBuilder.AddProperty("lineNumber", codeEntry.lineNumber);
         objBuilder.AddProperty("columnNumber", codeEntry.columnNumber);
