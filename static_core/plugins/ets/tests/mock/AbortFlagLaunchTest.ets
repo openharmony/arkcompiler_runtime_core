@@ -27,7 +27,7 @@ function AbortTest(): void {
     Coroutine.Schedule();
 }
 
-function NoAbortTest(): Promise<void> {
+function NoAbortTest(): void {
     const params: LaunchParams = {abortFlag: false,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
     let p = launch(params, Failing).catch((_e: Error) => {});
     Coroutine.Schedule();
