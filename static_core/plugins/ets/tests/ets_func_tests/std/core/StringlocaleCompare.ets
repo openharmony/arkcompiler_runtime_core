@@ -45,6 +45,27 @@ function testLocaleCompareUndefinedLocaleUsesDefaultCollator() {
     arktest.assertEQ("α".localeCompare("β"), defCollator.compare("α", "β"));
 }
 
+function testLocaleCompareDefaultFastPathMatchesDefaultCollator() {
+    const defCollator = new Intl.Collator();
+
+    arktest.assertEQ('MJH'.localeCompare('MJHA'), defCollator.compare('MJH', 'MJHA'));
+    arktest.assertEQ('abc'.localeCompare('DEF'), defCollator.compare('abc', 'DEF'));
+    arktest.assertEQ('abc'.localeCompare('DEF---'), defCollator.compare('abc', 'DEF---'));
+    arktest.assertEQ('A'.localeCompare('a'), defCollator.compare('A', 'a'));
+    arktest.assertEQ('a'.localeCompare('A'), defCollator.compare('a', 'A'));
+    arktest.assertEQ('!'.localeCompare('-'), defCollator.compare('!', '-'));
+    arktest.assertEQ('9'.localeCompare('A'), defCollator.compare('9', 'A'));
+}
+
+function testLocaleCompareDefaultFastPathFallbackCases() {
+    const defCollator = new Intl.Collator();
+
+    arktest.assertEQ('a'.localeCompare('b\u0301'), defCollator.compare('a', 'b\u0301'));
+    arktest.assertEQ('b\u0301'.localeCompare('a'), defCollator.compare('b\u0301', 'a'));
+    arktest.assertEQ('abc'.localeCompare('äbc'), defCollator.compare('abc', 'äbc'));
+    arktest.assertEQ('中文'.localeCompare('日本語'), defCollator.compare('中文', '日本語'));
+}
+
 function testStringlocaleCompare3Param() {
     let su: Intl.CollatorOptions = {
         usage: 'sort',
@@ -221,6 +242,8 @@ function main(): int {
     suite.addTest("Test StringlocaleCompare1Param", testStringlocaleCompare1Param);
     suite.addTest("Test StringlocaleCompare2Param", testStringlocaleCompare2Param);
     suite.addTest("localeCompare undefined locale matches default Intl.Collator", testLocaleCompareUndefinedLocaleUsesDefaultCollator);
+    suite.addTest('localeCompare default ASCII fast path matches default Intl.Collator', testLocaleCompareDefaultFastPathMatchesDefaultCollator);
+    suite.addTest('localeCompare default fast path fallback cases', testLocaleCompareDefaultFastPathFallbackCases);
     suite.addTest("Test StringlocaleCompare3Param", testStringlocaleCompare3Param);
     suite.addTest("default path: cache consistency", testDefaultPathCacheConsistency);
     suite.addTest("default path: repeated calls", testDefaultPathRepeatedCalls);
