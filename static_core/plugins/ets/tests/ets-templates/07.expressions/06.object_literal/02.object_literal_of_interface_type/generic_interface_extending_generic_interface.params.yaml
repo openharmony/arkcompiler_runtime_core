@@ -1,0 +1,102 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 6: Generic Interface Extending Generic Interface + Object Literal
+cases:
+  - desc: |-
+      Gap 6a. Extended interface method must be implemented.
+    decl: |-
+      interface Reader<T> {
+          read(): T
+      }
+
+      interface Parser<T, R> extends Reader<T> {
+          parse(raw: T): R
+      }
+    call: |-
+      let p: Parser<string, int> = {
+          read(): string { return '31' },
+          parse(raw: string): int { return 32 }
+      }
+      arktest.assertEQ(p.read(), '31')
+      arktest.assertEQ(p.parse('str'), 32)
+
+  - desc: |-
+      Gap 6b. Diamond inheritance -- two paths to same generic interface.
+    decl: |-
+      interface Base<T> {
+          get(): T
+      }
+
+      interface First<T> extends Base<T> {
+          first(): T
+      }
+
+      interface Second<T> extends Base<T> {
+          second(): T
+      }
+
+      interface Diamond<T> extends First<T>, Second<T> {}
+    call: |-
+      let d: Diamond<int> = {
+          get(): int { return 0 },
+          first(): int { return 1 },
+          second(): int { return 2 }
+      }
+      arktest.assertEQ(d.get(), 0)
+      arktest.assertEQ(d.first(), 1)
+      arktest.assertEQ(d.second(), 2)
+
+  - desc: |-
+      Gap 6c. Inherited default method from generic parent.
+    decl: |-
+      interface Base<T> {
+          format(value: T): string {
+              return '' + value
+          }
+      }
+
+      interface Extended<T> extends Base<T> {
+          process(value: T): T
+      }
+    call: |-
+      let e: Extended<int> = {
+          process(value: int): int {
+              return 2 * value
+          }
+      }
+      arktest.assertEQ(e.format(13), '13')
+      arktest.assertEQ(e.process(13), 26)
+
+  - desc: |-
+      Gap 6d. Diamond with conflicting defaults.
+    decl: |-
+      interface A {
+          greet(): string { return 'A' }
+      }
+
+      interface B extends A {
+          greet(): string { return 'B' }
+      }
+
+      interface C extends A {
+          greet(): string { return 'C' }
+      }
+
+      interface D extends B, C {}
+    call: |-
+      let d: D = {
+          greet(): string { return 'D' }
+      }
+      arktest.assertEQ(d.greet(), 'D')

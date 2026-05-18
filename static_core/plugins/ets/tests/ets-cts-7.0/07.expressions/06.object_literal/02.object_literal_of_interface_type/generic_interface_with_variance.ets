@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Test the array index access of an empty array.
+desc: {{c.desc}}
 ---*/
 
-function main(): void {
-  let isPassed: boolean = false;
-  let numbers: Array<number> = new Array<number>();
+{{c.decl}}
 
-  try {
-    let first: number | undefined = numbers[0];
-  } catch (error) {
-    error = error as Error;
-    arktest.assertEQ('RangeError', error.name);
-    arktest.assertEQ('Out of bounds', error.message);
-    isPassed = true;
-  } finally {
-    if (!isPassed) {
-      throw new Error('No RangeError occurred, but "Out of bounds" expected.');
-    }
-  }
+function main(): void {
+    {{c.call|indent}}
 }
+
+{% endfor %}

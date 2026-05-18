@@ -1,0 +1,66 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 8: Recursive Type Alias + Object Literal
+cases:
+  - desc: |-
+      Gap 8a. Recursive type alias as type argument.
+    decl: |-
+      class MySet<T> {
+          private lastIndex: int = 0
+          values: T[] = []
+      }
+
+      type TestSet = MySet<TestSet>
+
+      interface TestSetCreator {
+          create(): TestSet
+      }
+    call: |-
+      let c: TestSetCreator = {
+          create(): TestSet { return new TestSet }
+      }
+      arktest.assertEQ(c.create().values.length, 0)
+
+  - desc: |-
+      Gap 8b. Recursive type alias as array element.
+    decl: |-
+      type NestedArray = NestedArray[]
+
+      interface Flattener {
+          narr: NestedArray
+          depth(): int
+      }
+    call: |-
+      let f: Flattener = {
+          narr: [new NestedArray()],
+          depth(): int { return this.narr.length }
+      }
+      arktest.assertEQ(f.depth(), 1)
+
+  - desc: |-
+      Gap 8c. Type alias with union.
+    decl: |-
+      type JsonValue = string | double | boolean | JsonValue[]
+
+      interface JsonWriter {
+          write(value: JsonValue): string
+      }
+    call: |-
+      let w: JsonWriter = {
+          write(value: JsonValue): string {
+              return '' + value
+          }
+      }
+      arktest.assertEQ(w.write('hello'), 'hello')

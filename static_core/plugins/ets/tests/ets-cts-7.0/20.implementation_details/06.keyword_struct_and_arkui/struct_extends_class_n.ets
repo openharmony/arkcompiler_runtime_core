@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct as class extends another class.
+desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check struct as class extends another class.
 tags: [compile-only, negative]
 ---*/
 

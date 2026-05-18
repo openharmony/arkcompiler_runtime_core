@@ -30,7 +30,7 @@ function main(): void {
     isPassed = true;
   } finally {
     if (!isPassed) {
-      throw new Error('No RangeError occured, but "Out of bounds" expected.');
+      throw new Error('No RangeError occurred, but "Out of bounds" expected.');
     }
   }
 }
