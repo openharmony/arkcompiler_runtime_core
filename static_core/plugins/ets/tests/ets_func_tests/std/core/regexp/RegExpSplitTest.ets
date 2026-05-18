@@ -49,6 +49,17 @@ function splitTest(): void {
     const result4 = str4.split(regexp4)
     arktest.assertEQ(result4[0], 'A');
     arktest.assertEQ(result4[1], '😀C');
+
+    const str5 = 'item1-item2=item3'
+    const regexp5 = new RegExp('(-)|(=)', '')
+    const result5 = str5.split(regexp5);
+    arktest.assertEQ(result5[0], 'item1')
+    arktest.assertEQ(result5[1], '-')
+    arktest.assertEQ(result5[2], '')
+    arktest.assertEQ(result5[3], 'item2')
+    arktest.assertEQ(result5[4], '')
+    arktest.assertEQ(result5[5], '=')
+    arktest.assertEQ(result5[6], 'item3')
 }
 
 function splitEmojiTest(): void {

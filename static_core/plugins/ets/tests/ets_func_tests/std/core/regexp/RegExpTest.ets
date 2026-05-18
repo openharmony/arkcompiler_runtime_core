@@ -49,8 +49,12 @@ function main(): int {
     suite.addTest('DotAll unicode flags', testRegexDotAllUnicodeFlags);
     suite.addTest('Unicode flag only', testRegexUnicodeFlagOnly);
 
+    // Regex.lastIndex behavior
+    suite.addTest('lastIndex after replace() with "g" flag', testLastIndexGlobalReplace);
+    suite.addTest('lastIndex after test() with "g" flag', testLastIndexGlobalTest);
+
     return suite.run();
- }
+}
 
 
 class CharNumGroups {
@@ -136,7 +140,7 @@ function testStringReplacementVariants(): void {
 function testLiteralReplaceFastPath(): void {
     const globalReplace = new RegExp("a", "g");
     arktest.assertEQ("aaa".replace(globalReplace, "b"), "bbb");
-    arktest.assertEQ(globalReplace.lastIndex, 3);
+    arktest.assertEQ(globalReplace.lastIndex, 0);
 
     arktest.assertEQ("abc".replace(new RegExp("b"), "X"), "aXc");
     arktest.assertEQ("abc".replace(new RegExp("d", "g"), "X"), "abc");
@@ -195,8 +199,8 @@ function testBasicLiteralAndUrlPatterns(): void {
 
     reg = new RegExp(
         "^(?<urlStrIndex>.*?)(?<urlStr>(?:(?:ht|f)tps?[:：]//)?(?:[a-z0-9-]+\\.)+"
-            + "(?:com|edu|gov|mil|net|org|biz|info|name|museum|us|ca|uk|cn|cc|tw|de|au|sg|hk|ei|fr|me|im)(?![a-z])"
-            + "(?:\\:[0-9][0-9]*)?(?:\\.?/[a-z0-9.,;?'\\|*:\\\\+&%$#=~_-]*)*).*$",
+        + "(?:com|edu|gov|mil|net|org|biz|info|name|museum|us|ca|uk|cn|cc|tw|de|au|sg|hk|ei|fr|me|im)(?![a-z])"
+        + "(?:\\:[0-9][0-9]*)?(?:\\.?/[a-z0-9.,;?'\\|*:\\\\+&%$#=~_-]*)*).*$",
         "i",
     );
     arktest.assertFalse(reg.test('a'));
@@ -209,8 +213,8 @@ function testBasicLiteralAndUrlPatterns(): void {
 
     reg = new RegExp(
         "^(?<urlStrIndex>.*?)(?<urlStr>(?:https?[:：]//)?(?:[a-z0-9-\\\\]+\\.)+"
-            + "(?:com|edu|gov|mil|net|org|biz|info|name|museum|us|ca|uk|cn|cc|tw|de|au|sg|hk|ei|fr|me|im)(?![a-z])"
-            + "(?:\\:\\d{4})?(?:/[a-z0-9.,;?'\\|*:\\\\+&%$#=~_-]*)*\\?(?:[a-z0-9]*=[a-z0-9.,;?'*:+%$#=~_\\u4E00-\\u9FA5-]*&?)*).*$",
+        + "(?:com|edu|gov|mil|net|org|biz|info|name|museum|us|ca|uk|cn|cc|tw|de|au|sg|hk|ei|fr|me|im)(?![a-z])"
+        + "(?:\\:\\d{4})?(?:/[a-z0-9.,;?'\\|*:\\\\+&%$#=~_-]*)*\\?(?:[a-z0-9]*=[a-z0-9.,;?'*:+%$#=~_\\u4E00-\\u9FA5-]*&?)*).*$",
         "i",
     );
     arktest.assertFalse(reg.test('a'));
@@ -393,10 +397,10 @@ function testReplaceCachingPreservesLastIndex(): void {
     arktest.assertEQ(replaceFirst.lastIndex, 0);
 
     replaced = input.replace(replaceAll, "xyz");
-    arktest.assertEQ(replaceAll.lastIndex, 24);
+    arktest.assertEQ(replaceAll.lastIndex, 0);
     cached = input.replace(replaceAll, "xyz");
     arktest.assertTrue(replaced === cached);
-    arktest.assertEQ(replaceAll.lastIndex, 24);
+    arktest.assertEQ(replaceAll.lastIndex, 0);
 
     replaced = input.replace(captureFirst, "x$1yz");
     arktest.assertEQ(captureFirst.lastIndex, 0);
@@ -627,4 +631,24 @@ function testRegexUnicodeFlagOnly(): void {
         arktest.assertTrue(re.test('\uD800'));
         arktest.assertTrue(re.test('\uDFFF'));
     }
+}
+
+function testLastIndexGlobalReplace() {
+    const str = "abc abc abc";
+    const regex = new RegExp('abc', 'g');
+    regex.lastIndex = 4;
+    const result = str.replace(regex, "XYZ");
+    arktest.assertEQ(result, "XYZ XYZ XYZ");
+    arktest.assertEQ(regex.lastIndex, 0);
+}
+
+function testLastIndexGlobalTest() {
+    let re = new RegExp("a", "g")
+    re.lastIndex = 2
+    let r1 = re.test("a")
+    arktest.assertFalse(r1)
+    arktest.assertEQ(re.lastIndex, 0)
+    let r2 = re.test("a")
+    arktest.assertTrue(r2)
+    arktest.assertEQ(re.lastIndex, 1)
 }
