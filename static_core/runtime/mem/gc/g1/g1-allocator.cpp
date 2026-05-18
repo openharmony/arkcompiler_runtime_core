@@ -444,23 +444,6 @@ void ObjectAllocatorG1<MT_MODE>::FreeObjectsMovedToPygoteSpace()
 }
 
 template <MTModeT MT_MODE>
-void ObjectAllocatorG1<MT_MODE>::ResetYoungAllocator()
-{
-    auto callback = [](ManagedThread *thread) {
-        thread->CollectTLABMetrics();
-        if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
-            thread->GetWeightedTlabAverage()->ComputeNewSumAndResetSamples();
-        }
-        // Here we should not collect current TLAB fill statistics for adaptive size
-        // since it may not be completely filled before resetting
-        thread->ClearTLAB();
-        return true;
-    };
-    Mutator::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
-    objectYoungAllocator_->ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
-}
-
-template <MTModeT MT_MODE>
 bool ObjectAllocatorG1<MT_MODE>::IsObjectInNonMovableSpace(const ObjectHeader *obj)
 {
     return nonmovableAllocator_->ContainObject(obj);

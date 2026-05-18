@@ -421,8 +421,6 @@ public:
 
     virtual std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() = 0;
 
-    virtual void ResetYoungAllocator() = 0;
-
     virtual TLAB *CreateNewTLAB(size_t tlabSize) = 0;
 
     virtual size_t GetTLABMaxAllocSize() = 0;
@@ -721,11 +719,6 @@ public:
     {
         LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: GetYoungBitmaps not applicable";
         UNREACHABLE();
-    }
-
-    void ResetYoungAllocator() final
-    {
-        LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: ResetYoungAllocator not applicable";
     }
 
     TLAB *CreateNewTLAB(size_t tlabSize) override;

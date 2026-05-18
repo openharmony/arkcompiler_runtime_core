@@ -15,6 +15,9 @@
 #ifndef PANDA_RUNTIME_MEM_REGION_SPACE_INL_H
 #define PANDA_RUNTIME_MEM_REGION_SPACE_INL_H
 
+#include "include/panda_vm.h"
+#include "include/runtime.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/mem/region_space.h"
 #include "libarkbase/utils/asan_interface.h"
 
@@ -134,9 +137,14 @@ void RegionPool::FreeRegion(Region *region)
     region->IsYoung() ? spaces_->FreeYoungPool(region, region->Size(), releasePages)
                       : spaces_->FreeTenuredPool(region, region->Size(), releasePages);
 }
-
 template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY>
 void RegionSpace::FreeRegion(Region *region)
+{
+    FreeRegion(region, [](uintptr_t, uintptr_t) {});
+}
+
+template <typename F, RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY>
+void RegionSpace::FreeRegion(Region *region, const F &onRegionDestroy)
 {
     ASSERT(region->GetSpace() == this);
     ASAN_POISON_MEMORY_REGION(ToVoidPtr(region->Begin()), region->End() - region->Begin());
@@ -151,9 +159,13 @@ void RegionSpace::FreeRegion(Region *region)
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (REGIONS_RELEASE_POLICY == ReleaseRegionsPolicy::NoRelease) {
         if (region->IsYoung()) {
-            // unlimited
-            emptyYoungRegions_.push_back(region->AsListNode());
-            return;
+            size_t maxYoungRegions = regionPool_->GetMaxYoungSize() / DEFAULT_REGION_SIZE;
+            if (emptyYoungRegions_.size() < maxYoungRegions) {
+                emptyYoungRegions_.push_back(region->AsListNode());
+                return;
+            } else {
+                onRegionDestroy(ToUintPtr(region), region->End());
+            }
         }
         if (region->HasFlag(RegionFlag::IS_OLD) && (emptyTenuredRegions_.size() < emptyTenuredRegionsMaxCount_)) {
             emptyTenuredRegions_.push_back(region->AsListNode());

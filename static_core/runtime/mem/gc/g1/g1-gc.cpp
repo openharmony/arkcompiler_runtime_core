@@ -1520,7 +1520,8 @@ void G1GC<LanguageConfig>::ResetRegionAfterMixedGC()
 {
     auto *objectAllocator = this->GetG1ObjectAllocator();
     if (!collectionSet_.Young().empty()) {
-        objectAllocator->ResetYoungAllocator();
+        objectAllocator->ResetYoungAllocator(
+            [this](uintptr_t begin, uintptr_t end) { this->GetCardTable()->ClearCardRange(begin, end); });
     }
     {
         GCScope<TRACE_TIMING> resetRegions("ResetRegions", this);
@@ -1556,7 +1557,8 @@ void G1GC<LanguageConfig>::FullPromotion(const CollectionSet &collectibleRegions
     ActualizeRemSets();
     if (!collectibleRegions.Young().empty()) {
         auto objectAllocator = this->GetG1ObjectAllocator();
-        objectAllocator->ResetYoungAllocator();
+        objectAllocator->ResetYoungAllocator(
+            [this](uintptr_t begin, uintptr_t end) { this->GetCardTable()->ClearCardRange(begin, end); });
     }
 }
 
@@ -1803,7 +1805,8 @@ void G1GC<LanguageConfig>::UpdateRefsAndClear(const CollectionSet &collectionSet
 
     auto objectAllocator = this->GetG1ObjectAllocator();
     if (!collectionSet.Young().empty()) {
-        objectAllocator->ResetYoungAllocator();
+        objectAllocator->ResetYoungAllocator(
+            [this](uintptr_t begin, uintptr_t end) { this->GetCardTable()->ClearCardRange(begin, end); });
     }
     {
         GCScope<TRACE_TIMING> resetRegions("ResetRegions", this);

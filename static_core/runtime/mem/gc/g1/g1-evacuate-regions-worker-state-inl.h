@@ -54,6 +54,7 @@ G1EvacuateRegionsWorkerState<LanguageConfig>::~G1EvacuateRegionsWorkerState()
     VisitCards([this](auto *card) {
         if (!card->IsMarked()) {
             card->Mark();
+            ASSERT(!card->IsYoung());
             gc_->updatedRefsQueueTemp_->push_back(card);
         }
     });
