@@ -163,9 +163,8 @@ void RegionSpace::FreeRegion(Region *region, const F &onRegionDestroy)
             if (emptyYoungRegions_.size() < maxYoungRegions) {
                 emptyYoungRegions_.push_back(region->AsListNode());
                 return;
-            } else {
-                onRegionDestroy(ToUintPtr(region), region->End());
             }
+            onRegionDestroy(ToUintPtr(region), region->End());
         }
         if (region->HasFlag(RegionFlag::IS_OLD) && (emptyTenuredRegions_.size() < emptyTenuredRegionsMaxCount_)) {
             emptyTenuredRegions_.push_back(region->AsListNode());
