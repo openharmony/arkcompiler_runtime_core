@@ -65,7 +65,6 @@ const std::unordered_set<std::string> GLOBAL_CLASS_NAMES = {"ETSGLOBAL", "_GLOBA
 constexpr auto BASE_ENUM_UNION =
     "{Ustd.core.Byte,std.core.Double,std.core.Float,std.core.Int,std.core.Long,std.core.Short,std.core.String}";
 constexpr std::string_view UNION_PREFIX = "{U";
-constexpr std::string_view UNION_PROP_PREFIX = "%%union_prop";
 constexpr auto STD_CORE_MODULE = "std.core";
 }  // namespace
 
@@ -122,14 +121,6 @@ static bool IsUnion(const std::string &name)
 static bool IsLazyImport(const std::string &recordName)
 {
     return recordName.find(LAZY_IMPORT) != std::string::npos;
-}
-
-static bool IsUnionProp(const std::string &className)
-{
-    if (className.size() < UNION_PROP_PREFIX.size()) {
-        return false;
-    }
-    return className.rfind(UNION_PROP_PREFIX) == 0;
 }
 
 AbckitString *CreateNameString(AbckitFile *file, const std::string &name)
@@ -989,44 +980,6 @@ static void AssignFunctions(AbckitFile *file,
     }
 }
 
-static void MoveUnionProp(AbckitFile *file, Container *container, AbckitCoreModule *stdModule,
-                          const std::string &className, std::unique_ptr<AbckitCoreClass> &klass)
-{
-    LIBABCKIT_LOG(DEBUG) << "Union prop: " << className << '\n';
-    AbckitCoreClass *existing = nullptr;
-    if (auto stdIt = stdModule->ct.find(className); stdIt != stdModule->ct.end()) {
-        existing = stdIt->second.get();
-    }
-    stdModule->ct[className] = std::move(klass);
-    if (existing != nullptr) {
-        UpdateNameToClass(file, container, existing, stdModule->ct[className].get());
-    }
-}
-
-static void MoveUnion(AbckitFile *file)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    auto *container = static_cast<Container *>(file->data);
-    auto &stdModule = container->nameToModule.at(STD_CORE_MODULE);
-    for (auto &[_, module] : container->nameToModule) {
-        if (module->isExternal) {
-            continue;
-        }
-
-        auto it = module->ct.begin();
-        while (it != module->ct.end()) {
-            const auto &[className, klass] = *it;
-            if (!IsUnionProp(className)) {
-                ++it;
-                continue;
-            }
-            MoveUnionProp(file, container, stdModule.get(), className, it->second);
-            it = module->ct.erase(it);
-        }
-    }
-}
-
 static bool IsNamespace(const std::string &className, pandasm::Record &record)
 {
     if (IsModuleName(className)) {
@@ -1561,7 +1514,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignPartial(file);
     AssignFunctions(file, containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->nameToObjectLiteral,
                     containerPtr->functions);
-    MoveUnion(file);
+    // %%union_prop-* records remain in their owning module (no relocation into std.core).
 
     // NOTE: AbckitCoreExportDescriptor
     // NOTE: AbckitModulePayload

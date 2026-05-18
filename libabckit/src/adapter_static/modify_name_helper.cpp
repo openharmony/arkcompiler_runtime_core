@@ -17,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -41,6 +42,7 @@ constexpr std::string_view FUNCTION_DELIMITER = ":";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view GETTER_PREFIX = "%%get-";
 constexpr std::string_view SETTER_PREFIX = "%%set-";
+constexpr std::string_view UNION_PROP_PREFIX = "%%union_prop-";
 constexpr auto ARRAY_SUFFIX = "[]";
 
 struct AnnotationUpdateData {
@@ -61,6 +63,41 @@ static bool UpdateAnnotationElementValueString(ark::pandasm::RecordMetadata *met
 static bool UpdateAnnotationElementValueRecord(ark::pandasm::RecordMetadata *metadata, const std::string &annoName,
                                                const std::string &elementName, const std::string &recordName);
 static std::string ExtractSimpleFunctionName(const std::string &keyName);
+
+static bool IsUnionPropClassName(const std::string &className)
+{
+    return className.rfind(UNION_PROP_PREFIX) == 0;
+}
+
+static std::string ReplaceUnionPropTypeName(const std::string &unionPropClassName, const std::string &oldSimpleName,
+                                            const std::string &newSimpleName)
+{
+    if (!IsUnionPropClassName(unionPropClassName)) {
+        return unionPropClassName;
+    }
+
+    std::string typesPart = unionPropClassName.substr(UNION_PROP_PREFIX.size());
+    std::vector<std::string> types;
+    std::istringstream iss(typesPart);
+    std::string type;
+    while (std::getline(iss, type, '|')) {
+        if (type == oldSimpleName) {
+            types.push_back(newSimpleName);
+        } else {
+            types.push_back(type);
+        }
+    }
+
+    std::ostringstream oss;
+    oss << UNION_PROP_PREFIX;
+    for (size_t i = 0; i < types.size(); ++i) {
+        if (i > 0) {
+            oss << '|';
+        }
+        oss << types[i];
+    }
+    return oss.str();
+}
 
 std::string AddGetSetPrefix(const std::string &input, const std::string &name)
 {
@@ -233,6 +270,59 @@ bool ObjectRefreshName(std::variant<AbckitCoreNamespace *, AbckitCoreClass *, Ab
             return true;
         },
         object);
+}
+
+static bool RefreshUnionPropRecordsReferencingClass(AbckitCoreClass *klass, const std::string &oldSimpleName,
+                                                    const std::string &newSimpleName)
+{
+    if (oldSimpleName.empty() || oldSimpleName == newSimpleName || IsUnionPropClassName(oldSimpleName)) {
+        return true;
+    }
+
+    AbckitCoreModule *module = klass->owningModule;
+    AbckitFile *file = module->file;
+    struct PendingUnionPropRename {
+        AbckitCoreClass *klass;
+        std::string oldSimpleName;
+        std::string newSimpleName;
+    };
+    std::vector<PendingUnionPropRename> pendingRenames;
+
+    for (const auto &[simpleName, classPtr] : module->ct) {
+        if (!IsUnionPropClassName(simpleName)) {
+            continue;
+        }
+        const std::string updatedSimpleName = ReplaceUnionPropTypeName(simpleName, oldSimpleName, newSimpleName);
+        if (updatedSimpleName == simpleName) {
+            continue;
+        }
+        pendingRenames.push_back({classPtr.get(), simpleName, updatedSimpleName});
+    }
+
+    for (const auto &pending : pendingRenames) {
+        const auto oldFullName = libabckit::GetStaticImplRecord(pending.klass)->name;
+        if (!ObjectRefreshName(pending.klass, pending.newSimpleName)) {
+            return false;
+        }
+        const auto newFullName = libabckit::GetStaticImplRecord(pending.klass)->name;
+        if (oldFullName == newFullName) {
+            continue;
+        }
+
+        auto classNode = file->nameToClass.extract(oldFullName);
+        if (!classNode.empty()) {
+            classNode.key() = newFullName;
+            file->nameToClass.insert(std::move(classNode));
+        }
+
+        auto tableNode = module->ct.extract(pending.oldSimpleName);
+        if (!tableNode.empty()) {
+            tableNode.key() = pending.newSimpleName;
+            module->ct.insert(std::move(tableNode));
+        }
+    }
+
+    return true;
 }
 
 static bool UpdateAnnotationElementValueMethod(ark::pandasm::ItemMetadata *metadata, const std::string &annoName,
@@ -1062,7 +1152,12 @@ bool libabckit::ModifyNameHelper::ClassRefreshName(AbckitCoreClass *klass, const
     LIBABCKIT_LOG_FUNC;
 
     auto oldFullName = GetStaticImplRecord(klass)->name;
+    const auto [_, oldSimpleName] = ClassGetNames(oldFullName);
     if (!ObjectRefreshName(klass, newName)) {
+        return false;
+    }
+
+    if (!newName.empty() && !RefreshUnionPropRecordsReferencingClass(klass, oldSimpleName, newName)) {
         return false;
     }
 
