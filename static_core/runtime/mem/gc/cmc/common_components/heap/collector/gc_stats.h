@@ -26,7 +26,7 @@
 #include "common_components/log/log.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // statistics for previous gc.
 class GCStats {
 public:
@@ -139,6 +139,6 @@ extern size_t g_gcCollectedTotalBytes;
 
 extern size_t g_fullGCCount;
 extern double g_fullGCMeanRate;
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H

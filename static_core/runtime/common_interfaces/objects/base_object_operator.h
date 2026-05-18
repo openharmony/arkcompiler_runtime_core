@@ -22,7 +22,7 @@
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/objects/base_state_word.h"
-namespace common_vm {
+namespace ark::common_vm {
 class BaseObject;
 
 class BaseObjectOperatorInterfaces {
@@ -42,7 +42,7 @@ public:
     virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor,
                                              const RefFieldVisitor &weakFieldHandler) const = 0;
     // Clear the field
-    virtual void ClearRef(BaseObject *object, RefField<> &field) const = 0;
+    virtual void ClearRef(BaseObject *object, ::ark::mem::RefField<> &field) const = 0;
     // Get forwarding pointer.
     virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
     // Set forwarding pointer.
@@ -57,5 +57,5 @@ private:
     BaseObjectOperatorInterfaces *staticObjOp_;
     friend BaseObject;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H

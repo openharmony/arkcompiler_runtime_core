@@ -20,7 +20,7 @@
 #include "common_interfaces/objects/string/base_string.h"
 #include "common_interfaces/objects/string/tree_string.h"
 
-namespace common_vm {
+namespace ark::mem {
 template <typename Allocator, typename WriteBarrier, objects_traits::EnableIfIsAllocate<Allocator, BaseObject *>,
           objects_traits::EnableIfIsWriteBarrier<WriteBarrier>>
 TreeString *TreeString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
@@ -74,5 +74,5 @@ uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
     }
     UNREACHABLE();
 }
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H

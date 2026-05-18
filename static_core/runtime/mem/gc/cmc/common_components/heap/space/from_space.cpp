@@ -22,7 +22,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 void FromSpace::DumpRegionStats() const
 {
     size_t fromRegions = fromRegionList_.GetRegionCount();
@@ -169,4 +169,4 @@ void FromSpace::GetPromotedTo(OldSpace &mspace)
 {
     mspace.PromoteRegionList(exemptedFromRegionList_);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

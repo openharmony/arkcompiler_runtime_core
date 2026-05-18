@@ -17,7 +17,7 @@
 
 #include "common_components/heap/ark_collector/idle_barrier.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // MarkingBarrier is the barrier for concurrent marking phase.
 // rename to TracingBarrier. Marking is confusing in consideration of MarkObject.
 class RemarkBarrier : public IdleBarrier {
@@ -29,5 +29,5 @@ public:
 
     BaseObject *AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const override;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // ~ARK_COMMON_MARK_BARRIER_H

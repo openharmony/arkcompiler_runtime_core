@@ -18,29 +18,11 @@
 
 #include <cstddef>
 #include <cstdint>
+#include "libarkbase/mem/mem.h"
 
-namespace common_vm {
-template <class T>
-inline uintptr_t ToUintPtr(T *val)
-{
-    return reinterpret_cast<uintptr_t>(val);
-}
-
-inline uintptr_t ToUintPtr(std::nullptr_t)
-{
-    return reinterpret_cast<uintptr_t>(nullptr);
-}
-
-inline void *ToVoidPtr(uintptr_t val)
-{
-    return reinterpret_cast<void *>(val);
-}
-
-template <class T>
-constexpr T AlignmentUp(T size, T alignment)
-{
-    return ((size + alignment - 1) & ~static_cast<T>(alignment - 1));
-}
-}  // namespace common_vm
+namespace ark::mem {
+using ark::ToUintPtr;
+using ark::ToVoidPtr;
+}  // namespace ark::mem
 
 #endif

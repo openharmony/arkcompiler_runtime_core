@@ -20,7 +20,7 @@
 #include <cstdint>
 #include "common_interfaces/base/common.h"
 
-namespace panda::common_vm {
+namespace panda::ark::mem {
 /*
  * Auxiliary static class that provides access to bits range within an integer value.
  */
@@ -141,5 +141,5 @@ public:
         return Get(value);
     }
 };
-}  // namespace panda::common_vm
+}  // namespace panda::ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_BIT_FIELD_H

@@ -17,7 +17,7 @@
 #include "common_components/heap/heap.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 namespace {
 const char *const COLLECTOR_NAME[] = {"No Collector", "Proxy Collector", "Regional-Copying Collector",
                                       "Smooth Collector"};
@@ -59,4 +59,4 @@ void Collector::RequestGC(GCReason reason, bool async, GCType gcType, bool expli
     RequestGCInternal(reason, async, gcType, explicitRequest);
     return;
 }
-}  // namespace common_vm.
+}  // namespace ark::common_vm.

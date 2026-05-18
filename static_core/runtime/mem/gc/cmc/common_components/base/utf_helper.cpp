@@ -23,7 +23,7 @@ static constexpr int32_t U16_SURROGATE_OFFSET = (0xd800 << 10UL) + 0xdc00 - 0x10
 #define U16_GET_SUPPLEMENTARY(lead, trail) \
     ((static_cast<int32_t>(lead) << 10UL) + static_cast<int32_t>(trail) - U16_SURROGATE_OFFSET)
 
-namespace common_vm::utf_helper {
+namespace ark::mem::utf_helper {
 
 uint32_t UTF16Decode(uint16_t lead, uint16_t trail)
 {
@@ -553,7 +553,7 @@ std::pair<int32_t, size_t> ConvertUtf8ToUnicodeChar(const uint8_t *utf8, size_t 
     if (maxLen == 0) {
         return {INVALID_UTF8, 0};
     }
-    common_vm::Span<const uint8_t> sp(utf8, maxLen);
+    ark::common_vm::Span<const uint8_t> sp(utf8, maxLen);
     // one byte
     uint8_t d0 = sp[0];
     if ((d0 & BIT_MASK_1) == 0) {
@@ -601,4 +601,4 @@ std::pair<int32_t, size_t> ConvertUtf8ToUnicodeChar(const uint8_t *utf8, size_t 
     }
     return {INVALID_UTF8, 0};
 }
-}  // namespace common_vm::utf_helper
+}  // namespace ark::mem::utf_helper

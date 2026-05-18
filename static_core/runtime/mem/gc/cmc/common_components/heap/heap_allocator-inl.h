@@ -18,8 +18,8 @@
 
 #include "common_interfaces/heap/heap_allocator.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 Address AllocateYoungInAllocBuffer(uintptr_t buffer, size_t size);
 Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size);
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_ALLOCATOR_INL_H

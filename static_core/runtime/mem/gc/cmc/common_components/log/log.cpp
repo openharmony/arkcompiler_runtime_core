@@ -15,7 +15,7 @@
 
 #include "common_components/log/log.h"
 
-namespace common_vm {
+namespace ark::mem {
 
 // number of digits in a pretty format segment (100,000,000 each has three digits)
 constexpr int NUM_DIGITS_PER_SEGMENT = 3;
@@ -31,4 +31,4 @@ std::string Pretty(uint64_t number) noexcept
     return orig;
 }
 
-}  // namespace common_vm
+}  // namespace ark::mem

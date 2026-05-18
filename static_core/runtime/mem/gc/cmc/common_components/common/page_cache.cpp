@@ -14,7 +14,7 @@
  */
 #include "common_components/common/page_cache.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 PageCache PageCache::instance_;
 
 ark::os::memory::Mutex &PageCache::GetPageMutex()
@@ -141,4 +141,4 @@ void PageCache::ReleaseSpanToPageCache(Span *span)
         idSpanMap_[span->pageId + i] = span;
     }
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

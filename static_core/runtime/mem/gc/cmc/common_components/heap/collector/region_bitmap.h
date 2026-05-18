@@ -24,7 +24,7 @@
 #include <sys/mman.h>
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 static constexpr size_t kBitsPerByte = 8;
 static constexpr size_t kMarkedBytesPerBit = 8;
 static constexpr size_t kBitsPerWord = sizeof(uint64_t) * kBitsPerByte;
@@ -79,6 +79,6 @@ struct RegionBitmap {
         return ret;
     }
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H

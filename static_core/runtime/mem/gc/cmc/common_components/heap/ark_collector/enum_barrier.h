@@ -18,7 +18,7 @@
 
 #include "common_components/heap/ark_collector/idle_barrier.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // EnumBarrier is the barrier for concurrent enum phase
 class EnumBarrier : public IdleBarrier {
 public:
@@ -32,6 +32,6 @@ public:
 
     BaseObject *AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const override;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ENUM_BARRIER_H

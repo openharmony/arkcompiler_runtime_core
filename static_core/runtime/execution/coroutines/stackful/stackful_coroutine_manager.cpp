@@ -306,7 +306,7 @@ void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     // NOTE(ivagin): #33824 move mutator registration under coroListLock_
-    common_vm::Mutator::RegisterNewMutator(co);
+    ark::common_vm::Mutator::RegisterNewMutator(co);
 #endif
     os::memory::LockHolder lock(coroListLock_);
     AddToRegistry(co);
@@ -329,7 +329,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
 
 #if defined(ARK_USE_COMMON_RUNTIME)
     // NOTE(ivagin): #33824 move mutator unregistration under coroListLock_
-    common_vm::Mutator::UnregisterMutator(co);
+    ark::common_vm::Mutator::UnregisterMutator(co);
 #endif
     {
         os::memory::LockHolder lList(coroListLock_);

@@ -22,7 +22,7 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 enum class TaskType : uint8_t {
     PGO_RESET_OUT_PATH_TASK,
     PGO_DUMP_TASK,
@@ -160,5 +160,5 @@ private:
     ark::os::memory::ConditionVariable cv_;
     ark::os::memory::Mutex mutex_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TASKPOOL_TASK_H

@@ -15,7 +15,7 @@
 
 #include "common_components/taskpool/task_queue.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 void TaskQueue::PostTask(std::unique_ptr<Task> task)
 {
     ark::os::memory::LockHolder guard(mtx_);
@@ -118,4 +118,4 @@ void TaskQueue::WaitForTask()
         cv_.Wait(&mtx_);
     }
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

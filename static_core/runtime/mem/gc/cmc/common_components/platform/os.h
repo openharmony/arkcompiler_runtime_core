@@ -19,8 +19,8 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace common_vm::os {
+namespace ark::mem::os {
 int PrctlSetVMA(const void *p, const size_t size, const char *tag);
-}  // namespace common_vm::os
+}  // namespace ark::mem::os
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_OS_H

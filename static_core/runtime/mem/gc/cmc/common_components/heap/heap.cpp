@@ -34,7 +34,7 @@
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
-namespace common_vm {
+namespace ark::common_vm {
 static_assert(Heap::NORMAL_UNIT_SIZE == RegionDesc::UNIT_SIZE);
 static_assert(Heap::NORMAL_UNIT_HEADER_SIZE == RegionDesc::UNIT_HEADER_SIZE);
 static_assert(Heap::NORMAL_UNIT_AVAILABLE_SIZE == RegionDesc::UNIT_AVAILABLE_SIZE);
@@ -500,4 +500,4 @@ void HeapImpl::UnregisterAllocBuffer(AllocationBuffer &buffer)
 {
     GetAllocator().UnregisterAllocBuffer(buffer);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

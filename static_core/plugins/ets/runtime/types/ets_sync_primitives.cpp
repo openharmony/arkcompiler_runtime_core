@@ -56,18 +56,18 @@ bool EtsMutex::TrySpinLockFor(std::atomic<uintptr_t> &state, uintptr_t &expected
     constexpr uint32_t LONG_REPEAT = 6;
     constexpr uint32_t LONG_DELAY = 24;
 
-    constexpr auto SPINLOCK_FUNC = [](std::atomic<uintptr_t> &state, uintptr_t &expected, uint32_t repeat,
+    constexpr auto SPINLOCK_FUNC = [](std::atomic<uintptr_t> &stat, uintptr_t &expect, uint32_t repeat,
                                       uint32_t delay) {
         for (uint32_t i = 0; i < repeat; ++i) {
-            if (!IsLocked(expected) &&
+            if (!IsLocked(expect) &&
                 // Atomic with acquire order reason: to make the changes in the critical section visible
-                state.compare_exchange_weak(expected, expected | LOCKED_STATE, std::memory_order_acquire,
-                                            std::memory_order_relaxed)) {
+                stat.compare_exchange_weak(expect, expect | LOCKED_STATE, std::memory_order_acquire,
+                                           std::memory_order_relaxed)) {
                 return true;
             }
             BackOff(delay);
             // Atomic with relaxed order reason: sync is not needed here because of CAS
-            expected = state.load(std::memory_order_relaxed);
+            expect = stat.load(std::memory_order_relaxed);
         }
         return false;
     };

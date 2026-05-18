@@ -19,7 +19,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 void ToSpace::DumpRegionStats() const
 {
     size_t tlToRegions = tlToRegionList_.GetRegionCount();
@@ -61,4 +61,4 @@ RegionDesc *ToSpace::AllocateThreadLocalRegion(bool expectPhysicalMem)
     return region;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

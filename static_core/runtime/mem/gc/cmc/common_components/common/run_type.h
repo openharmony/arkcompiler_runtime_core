@@ -18,7 +18,7 @@
 
 #include "common_components/log/log.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // slot with size no more than RUN_ALLOC_SMALL_SIZE is small slot.
 // small slot is allocated from cache run in thread-local buffer first.
 // slot with size (RUN_ALLOC_SMALL_SIZE, RUN_ALLOC_LARGE_SIZE] is allocated from global buffer.
@@ -63,6 +63,6 @@ public:
 #define RUNTYPE_RUN_IDX_TO_SIZE(idx) (RunType::TYPES[(idx)].size)
 
 constexpr int DEFAULT_PAGE_PER_RUN = 1;
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_RUN_TYPE_H

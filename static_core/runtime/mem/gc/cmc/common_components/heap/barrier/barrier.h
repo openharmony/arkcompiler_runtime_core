@@ -20,7 +20,7 @@
 #include "common_components/common/type_def.h"
 #include <vector>
 
-namespace common_vm {
+namespace ark::common_vm {
 class Collector;
 // Barrier is the base class to define read/write barriers.
 class Barrier {
@@ -69,6 +69,6 @@ protected:
     };
     Collector &theCollector;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H

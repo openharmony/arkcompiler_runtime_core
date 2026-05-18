@@ -18,7 +18,7 @@
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_components/log/log.h"
-namespace common_vm {
+namespace ark::common_vm {
 class ScopedObjectLock {
 public:
     NO_INLINE explicit ScopedObjectLock(BaseObject &obj)
@@ -48,5 +48,5 @@ public:
 private:
     BaseObject *lockedObj_ = {nullptr};
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // ~COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H

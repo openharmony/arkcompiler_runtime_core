@@ -20,7 +20,7 @@
 #include <cstdint>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
-namespace common_vm {
+namespace ark::mem {
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 static constexpr unsigned char firstByteMark[7] = {0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
 class UtfUtils {
@@ -317,6 +317,6 @@ public:
 private:
     static uint32_t HandleAndDecodeInvalidUTF16(uint16_t const *utf16, size_t len, size_t *index);
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)

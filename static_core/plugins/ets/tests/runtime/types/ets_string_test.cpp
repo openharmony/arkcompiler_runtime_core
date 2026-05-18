@@ -769,7 +769,7 @@ TEST_F(EtsStringTest, CreateUncomressedString)
     EXPECT_TRUE(dottedIString->IsUtf16());
 
     // Only chars with codes from 0x01 to 0x7F is allowed for using in compressed strings, see the
-    // common_vm::BaseString::IsASCIICharacter function from
+    // ark::mem::BaseString::IsASCIICharacter function from
     // runtime_core/common_interfaces/objects/string/base_string-inl.h
     EtsString *fromLatin1Suppl = CreateString({0xcc, 0xcd});  // ÌÍ
     EXPECT_FALSE(fromLatin1Suppl->IsUtf8());

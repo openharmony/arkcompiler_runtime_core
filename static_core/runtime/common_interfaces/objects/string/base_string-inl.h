@@ -29,14 +29,14 @@
 #include "common_interfaces/objects/utils/span.h"
 #include <securec.h>
 
-namespace common_vm {
+namespace ark::mem {
 std::u16string Utf16ToU16String(const uint16_t *utf16Data, uint32_t dataLen);
 std::u16string Utf8ToU16String(const uint8_t *utf8Data, uint32_t dataLen);
 
 template <typename T1, typename T2>
-int32_t CompareStringSpan(Span<T1> &lhsSp, Span<T2> &rhsSp, int32_t count);
+int32_t CompareStringSpan(ark::common_vm::Span<T1> &lhsSp, ark::common_vm::Span<T2> &rhsSp, int32_t count);
 template <typename T1, typename T2>
-bool IsSubStringAtSpan(Span<T1> &lhsSp, Span<T2> &rhsSp, uint32_t offset);
+bool IsSubStringAtSpan(ark::common_vm::Span<T1> &lhsSp, ark::common_vm::Span<T2> &rhsSp, uint32_t offset);
 
 template <typename ReadBarrier>
 uint32_t BaseString::ComputeHashcode(ReadBarrier &&readBarrier) const
@@ -245,30 +245,30 @@ bool BaseString::StringsAreEqualDiffUtfEncoding(ReadBarrier &&readBarrier, BaseS
     if (!left->IsUtf16() && !right->IsUtf16()) {
         const uint8_t *data1 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft8);
         const uint8_t *data2 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft8);
-        Span<const uint8_t> lhsSp(data1, lhsCount);
-        Span<const uint8_t> rhsSp(data2, rhsCount);
+        ark::common_vm::Span<const uint8_t> lhsSp(data1, lhsCount);
+        ark::common_vm::Span<const uint8_t> rhsSp(data2, rhsCount);
         return BaseString::StringsAreEquals(lhsSp, rhsSp);
     }
     if (!left->IsUtf16()) {
         const uint8_t *data1 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft8);
         const uint16_t *data2 =
             BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft16);
-        Span<const uint8_t> lhsSp(data1, lhsCount);
-        Span<const uint16_t> rhsSp(data2, rhsCount);
+        ark::common_vm::Span<const uint8_t> lhsSp(data1, lhsCount);
+        ark::common_vm::Span<const uint16_t> rhsSp(data2, rhsCount);
         return BaseString::StringsAreEquals(lhsSp, rhsSp);
     }
     if (!right->IsUtf16()) {
         const uint16_t *data1 =
             BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft16);
         const uint8_t *data2 = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft8);
-        Span<const uint16_t> lhsSp(data1, lhsCount);
-        Span<const uint8_t> rhsSp(data2, rhsCount);
+        ark::common_vm::Span<const uint16_t> lhsSp(data1, lhsCount);
+        ark::common_vm::Span<const uint8_t> rhsSp(data2, rhsCount);
         return BaseString::StringsAreEquals(lhsSp, rhsSp);
     }
     const uint16_t *data1 = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), left, bufLeftUft16);
     const uint16_t *data2 = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), right, bufRightUft16);
-    Span<const uint16_t> lhsSp(data1, lhsCount);
-    Span<const uint16_t> rhsSp(data2, rhsCount);
+    ark::common_vm::Span<const uint16_t> lhsSp(data1, lhsCount);
+    ark::common_vm::Span<const uint16_t> rhsSp(data2, rhsCount);
     return StringsAreEquals(lhsSp, rhsSp);
 }
 
@@ -312,9 +312,9 @@ bool BaseString::StringIsEqualUint8Data(ReadBarrier &&readBarrier, const BaseStr
     }
     if (str1->IsUtf8()) {
         std::vector<uint8_t> buf;
-        Span<const uint8_t> data1(BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf),
-                                  dataLen);
-        Span<const uint8_t> data2(dataAddr, dataLen);
+        ark::common_vm::Span<const uint8_t> data1(
+            BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf), dataLen);
+        ark::common_vm::Span<const uint8_t> data2(dataAddr, dataLen);
         return BaseString::StringsAreEquals(data1, data2);
     }
     std::vector<uint16_t> buf;
@@ -338,8 +338,9 @@ bool BaseString::StringsAreEqualUtf16(ReadBarrier &&readBarrier, const BaseStrin
         return IsUtf8EqualsUtf16(data, length, utf16Data, utf16Len);
     }
     std::vector<uint16_t> buf;
-    Span<const uint16_t> data1(BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf), length);
-    Span<const uint16_t> data2(utf16Data, utf16Len);
+    ark::common_vm::Span<const uint16_t> data1(
+        BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), str1, buf), length);
+    ark::common_vm::Span<const uint16_t> data2(utf16Data, utf16Len);
     return BaseString::StringsAreEquals(data1, data2);
 }
 
@@ -635,9 +636,9 @@ uint32_t BaseString::CopyDataUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uin
 
 template <typename ReadBarrier, typename Vec,
           std::enable_if_t<objects_traits::IS_STD_VECTOR_OF_V<std::decay_t<Vec>, uint8_t>, int>>
-Span<const uint8_t> BaseString::ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify, bool cesu8)
+ark::common_vm::Span<const uint8_t> BaseString::ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify, bool cesu8)
 {
-    Span<const uint8_t> str;
+    ark::common_vm::Span<const uint8_t> str;
     uint32_t strLen = GetLength();
     if (UNLIKELY(IsUtf16())) {
         using U16Vec = objects_traits::VectorWithSameAllocT<Vec, uint16_t>;
@@ -647,19 +648,19 @@ Span<const uint8_t> BaseString::ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, 
         size_t len = UtfUtils::Utf16ToUtf8Size(data, strLen, modify, false, cesu8) - 1;
         buf.reserve(len);
         len = UtfUtils::ConvertRegionUtf16ToUtf8(data, buf.data(), strLen, len, 0, modify, false, cesu8);
-        str = Span<const uint8_t>(buf.data(), len);
+        str = ark::common_vm::Span<const uint8_t>(buf.data(), len);
     } else {
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
-        str = Span<const uint8_t>(data, strLen);
+        str = ark::common_vm::Span<const uint8_t>(data, strLen);
     }
     return str;
 }
 
 template <typename ReadBarrier, typename Vec,
           std::enable_if_t<objects_traits::IS_STD_VECTOR_OF_V<std::decay_t<Vec>, uint8_t>, int>>
-Span<const uint8_t> BaseString::DebuggerToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify)
+ark::common_vm::Span<const uint8_t> BaseString::DebuggerToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify)
 {
-    Span<const uint8_t> str;
+    ark::common_vm::Span<const uint8_t> str;
     uint32_t strLen = GetLength();
     if (UNLIKELY(IsUtf16())) {
         using U16Vec = objects_traits::VectorWithSameAllocT<Vec, uint16_t>;
@@ -668,10 +669,10 @@ Span<const uint8_t> BaseString::DebuggerToUtf8Span(ReadBarrier &&readBarrier, Ve
         size_t len = UtfUtils::Utf16ToUtf8Size(data, strLen, modify) - 1;
         buf.reserve(len);
         len = UtfUtils::DebuggerConvertRegionUtf16ToUtf8(data, buf.data(), strLen, len, 0, modify);
-        str = Span<const uint8_t>(buf.data(), len);
+        str = ark::common_vm::Span<const uint8_t>(buf.data(), len);
     } else {
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
-        str = Span<const uint8_t>(data, strLen);
+        str = ark::common_vm::Span<const uint8_t>(data, strLen);
     }
     return str;
 }
@@ -680,8 +681,8 @@ Span<const uint8_t> BaseString::DebuggerToUtf8Span(ReadBarrier &&readBarrier, Ve
 template <typename DstType, typename SrcType>
 void BaseString::CopyChars(DstType *dst, SrcType *src, uint32_t count)
 {
-    Span<SrcType> srcSp(src, count);
-    Span<DstType> dstSp(dst, count);
+    ark::common_vm::Span<SrcType> srcSp(src, count);
+    ark::common_vm::Span<DstType> dstSp(dst, count);
     for (uint32_t i = 0; i < count; i++) {
         dstSp[i] = srcSp[i];
     }
@@ -786,7 +787,8 @@ inline bool BaseString::IsASCIICharacter(uint16_t data)
 }
 
 template <typename T>
-bool BaseString::MemCopyChars(Span<T> &dst, size_t dstMax, Span<const T> &src, size_t count)
+bool BaseString::MemCopyChars(ark::common_vm::Span<T> &dst, size_t dstMax, ark::common_vm::Span<const T> &src,
+                              size_t count)
 {
     DCHECK(dstMax >= count);
     DCHECK(dst.Size() >= src.Size());
@@ -798,7 +800,8 @@ bool BaseString::MemCopyChars(Span<T> &dst, size_t dstMax, Span<const T> &src, s
 }
 
 template <typename T1, typename T2>
-int32_t BaseString::LastIndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, int32_t pos)
+int32_t BaseString::LastIndexOf(ark::common_vm::Span<const T1> &lhsSp, ark::common_vm::Span<const T2> &rhsSp,
+                                int32_t pos)
 {
     int rhsSize = static_cast<int>(rhsSp.size());
     DCHECK(rhsSize > 0);
@@ -824,7 +827,8 @@ int32_t BaseString::LastIndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, in
 
 /* static */
 template <typename T1, typename T2>
-int32_t BaseString::IndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, int32_t pos, int32_t max)
+int32_t BaseString::IndexOf(ark::common_vm::Span<const T1> &lhsSp, ark::common_vm::Span<const T2> &rhsSp, int32_t pos,
+                            int32_t max)
 {
     auto first = static_cast<int32_t>(rhsSp[0]);
     for (int32_t i = pos; i <= max; i++) {
@@ -899,7 +903,7 @@ inline bool BaseString::CanBeCompressed(const uint16_t *utf16Data, uint32_t utf1
 }
 
 template <typename T1, typename T2>
-int32_t CompareStringSpan(Span<T1> &lhsSp, Span<T2> &rhsSp, int32_t count)
+int32_t CompareStringSpan(ark::common_vm::Span<T1> &lhsSp, ark::common_vm::Span<T2> &rhsSp, int32_t count)
 {
     for (int32_t i = 0; i < count; ++i) {
         auto left = static_cast<int32_t>(lhsSp[i]);
@@ -1081,7 +1085,7 @@ inline bool BaseString::IsUtf8EqualsUtf16(const uint8_t *utf8Data, size_t utf8Le
     }
     return utf8Data == utf8End && utf16Data == utf16End;
 }
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers, readability-else-after-return,

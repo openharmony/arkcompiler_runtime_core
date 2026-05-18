@@ -28,7 +28,7 @@ StaticObjectOperator StaticObjectOperator::instance_;
 
 class Handler {
 public:
-    explicit Handler(const common_vm::RefFieldVisitor &visitor) : visitor_(visitor) {}
+    explicit Handler(const ark::mem::RefFieldVisitor &visitor) : visitor_(visitor) {}
 
     ~Handler() = default;
 
@@ -37,18 +37,18 @@ public:
         if (*p == 0) {
             return true;
         }
-        auto **ref = reinterpret_cast<common_vm::BaseObject **>(p);
-        visitor_(reinterpret_cast<common_vm::RefField<> &>(*ref));
+        auto **ref = reinterpret_cast<ark::common_vm::BaseObject **>(p);
+        visitor_(reinterpret_cast<ark::mem::RefField<> &>(*ref));
         return true;
     }
 
 private:
-    const common_vm::RefFieldVisitor &visitor_;
+    const ark::mem::RefFieldVisitor &visitor_;
 };
 
 class SkipReferentHandler : public Handler {
 public:
-    explicit SkipReferentHandler(const common_vm::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
+    explicit SkipReferentHandler(const ark::mem::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
         : Handler(visitor), weakReferentPointer_(weakReferentPointer)
     {
     }
@@ -71,13 +71,13 @@ private:
 void StaticObjectOperator::Initialize()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::BaseObject::RegisterStatic(&instance_);
+    ark::common_vm::BaseObject::RegisterStatic(&instance_);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
-void StaticObjectOperator::ForEachRefField(const common_vm::BaseObject *object,
-                                           const common_vm::RefFieldVisitor &fieldHandler,
-                                           const common_vm::RefFieldVisitor &weakFieldHandler) const
+void StaticObjectOperator::ForEachRefField(const ark::common_vm::BaseObject *object,
+                                           const ark::mem::RefFieldVisitor &fieldHandler,
+                                           const ark::mem::RefFieldVisitor &weakFieldHandler) const
 {
     const auto *objHeader = reinterpret_cast<const ObjectHeader *>(object);
     auto *cls = objHeader->template ClassAddr<Class>();
@@ -86,8 +86,8 @@ void StaticObjectOperator::ForEachRefField(const common_vm::BaseObject *object,
         ObjectPointerType *referentPointer = reinterpret_cast<ObjectPointerType *>(
             ToUintPtr(objHeader) + ark::ets::EtsWeakReference::GetReferentOffset());
         if (*referentPointer != 0) {
-            weakFieldHandler(reinterpret_cast<common_vm::RefField<> &>(
-                *reinterpret_cast<common_vm::BaseObject **>(referentPointer)));
+            weakFieldHandler(reinterpret_cast<ark::mem::RefField<> &>(
+                *reinterpret_cast<ark::common_vm::BaseObject **>(referentPointer)));
         }
         SkipReferentHandler handler(fieldHandler, referentPointer);
         ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, const_cast<ObjectHeader *>(objHeader),
@@ -99,16 +99,16 @@ void StaticObjectOperator::ForEachRefField(const common_vm::BaseObject *object,
     }
 }
 
-size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const common_vm::BaseObject *object,
-                                                       const common_vm::RefFieldVisitor &fieldHandler,
-                                                       const common_vm::RefFieldVisitor &weakFieldHandler) const
+size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const ark::common_vm::BaseObject *object,
+                                                       const ark::mem::RefFieldVisitor &fieldHandler,
+                                                       const ark::mem::RefFieldVisitor &weakFieldHandler) const
 {
     size_t size = GetSize(object);
     ForEachRefField(object, fieldHandler, weakFieldHandler);
     return size;
 }
 
-void StaticObjectOperator::ClearRef(common_vm::BaseObject *object, common_vm::RefField<> &field) const
+void StaticObjectOperator::ClearRef(ark::common_vm::BaseObject *object, ark::mem::RefField<> &field) const
 {
     field.SetTargetObject(nullptr);
     auto *vm = ark::ets::PandaEtsVM::GetCurrent();
@@ -116,15 +116,15 @@ void StaticObjectOperator::ClearRef(common_vm::BaseObject *object, common_vm::Re
     referenceProcessor->EnqueueReference(reinterpret_cast<ObjectHeader *>(object));
 }
 
-common_vm::BaseObject *StaticObjectOperator::GetForwardingPointer(const common_vm::BaseObject *object) const
+ark::common_vm::BaseObject *StaticObjectOperator::GetForwardingPointer(const ark::common_vm::BaseObject *object) const
 {
     // Overwrite class by forwarding address. Read barrier must be called before reading class.
     uint64_t fwdAddr = *reinterpret_cast<const uint64_t *>(object);
-    return reinterpret_cast<common_vm::BaseObject *>(fwdAddr & ObjectHeader::GetClassMask());
+    return reinterpret_cast<ark::common_vm::BaseObject *>(fwdAddr & ObjectHeader::GetClassMask());
 }
 
-void StaticObjectOperator::SetForwardingPointerAfterExclusive(common_vm::BaseObject *object,
-                                                              common_vm::BaseObject *fwdPtr)
+void StaticObjectOperator::SetForwardingPointerAfterExclusive(ark::common_vm::BaseObject *object,
+                                                              ark::common_vm::BaseObject *fwdPtr)
 {
     auto &word = *reinterpret_cast<uint64_t *>(object);
     uint64_t flags = word & (~ObjectHeader::GetClassMask());

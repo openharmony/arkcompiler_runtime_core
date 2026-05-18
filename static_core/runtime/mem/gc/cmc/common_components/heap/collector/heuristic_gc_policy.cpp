@@ -19,7 +19,7 @@
 #include "common_components/heap/heap.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 std::atomic<StartupStatus> StartupStatusManager::startupStatus_ = StartupStatus::BEFORE_STARTUP;
 
 void StartupStatusManager::OnAppStartup()
@@ -27,7 +27,7 @@ void StartupStatusManager::OnAppStartup()
     // Atomic with relaxed order reason: data race with startupStatus_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     startupStatus_.store(StartupStatus::COLD_STARTUP, std::memory_order_relaxed);
-    Taskpool *threadPool = common_vm::Taskpool::GetCurrentTaskpool();
+    Taskpool *threadPool = Taskpool::GetCurrentTaskpool();
     threadPool->PostDelayedTask(std::make_unique<StartupTask>(0, threadPool, STARTUP_DURATION_MS), STARTUP_DURATION_MS);
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "SmartGC: app startup just finished, CMC FinishGCRestrainTask create", "");
 }
@@ -220,10 +220,10 @@ void HeuristicGCPolicy::ChangeGCParams(bool isBackground)
             allocated > MIN_BACKGROUND_GC_SIZE) {
             Heap::GetHeap().GetCollector().RequestGC(GC_REASON_BACKGROUND, true, GC_TYPE_FULL);
         }
-        common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::BACKGROUND);
+        Taskpool::GetCurrentTaskpool()->SetThreadPriority(PriorityMode::BACKGROUND);
         BaseRuntime::GetInstance()->GetGCParam().multiplier = 1;
     } else {
-        common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::FOREGROUND);
+        Taskpool::GetCurrentTaskpool()->SetThreadPriority(PriorityMode::FOREGROUND);
         // 3: The front-end application waterline is 3 times
         BaseRuntime::GetInstance()->GetGCParam().multiplier = 3;
     }
@@ -255,4 +255,4 @@ bool HeuristicGCPolicy::CheckAndTriggerHintGC(MemoryReduceDegree degree)
     }
     return false;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

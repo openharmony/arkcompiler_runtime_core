@@ -18,7 +18,7 @@
 
 #include "common_interfaces/objects/base_object.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 struct ObjectSlot {
     ObjectSlot *next;
 };
@@ -51,6 +51,6 @@ public:
 private:
     ObjectSlot *head_ = nullptr;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_SLOT_LIST_H

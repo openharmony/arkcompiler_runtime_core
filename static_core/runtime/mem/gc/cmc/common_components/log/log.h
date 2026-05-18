@@ -47,9 +47,9 @@
 #define OHOS_HITRACE_COUNT(level, name, count)
 #endif
 
-namespace common_vm {
+namespace ark::mem {
 
-#define COMMON_PHASE_TIMER(...) Timer ARK_pt_##__LINE__(__VA_ARGS__)
+#define COMMON_PHASE_TIMER(...) ::ark::mem::Timer ARK_pt_##__LINE__(__VA_ARGS__)
 
 std::string Pretty(uint64_t number) noexcept;
 
@@ -58,14 +58,14 @@ public:
     explicit Timer(const std::string pName) : name_(pName)
     {
         if (ark::Logger::IsLoggingOn(ark::Logger::Level::DEBUG, ark::Logger::Component::GC)) {
-            startTime_ = TimeUtil::MicroSeconds();
+            startTime_ = ark::common_vm::TimeUtil::MicroSeconds();
         }
     }
 
     ~Timer()
     {
         if (ark::Logger::IsLoggingOn(ark::Logger::Level::DEBUG, ark::Logger::Component::GC)) {
-            uint64_t stopTime = TimeUtil::MicroSeconds();
+            uint64_t stopTime = ark::common_vm::TimeUtil::MicroSeconds();
             uint64_t diffTime = stopTime - startTime_;
             LOG(DEBUG, GC) << name_ << " time: " << Pretty(diffTime) << "us";
         }
@@ -75,5 +75,5 @@ private:
     std::string name_;
     uint64_t startTime_ = 0;
 };
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_LOG_LOG_H

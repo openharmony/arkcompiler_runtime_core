@@ -106,17 +106,17 @@ void CoreClassLinkerExtension::FillStringClass(Class *strCls, ClassRoot flag)
         case ClassRoot::SLICED_STRING: {
             // used for gc
             strCls->SetSlicedStringClass();
-            strCls->SetRefFieldsNum(common_vm::SlicedString::REF_FIELDS_COUNT, false);
-            strCls->SetRefFieldsOffset(common_vm::SlicedString::PARENT_OFFSET, false);
-            (static_cast<BaseClass *>(strCls))->SetObjectSize(common_vm::SlicedString::SIZE);
+            strCls->SetRefFieldsNum(ark::mem::SlicedString::REF_FIELDS_COUNT, false);
+            strCls->SetRefFieldsOffset(ark::mem::SlicedString::PARENT_OFFSET, false);
+            (static_cast<BaseClass *>(strCls))->SetObjectSize(ark::mem::SlicedString::SIZE);
             break;
         }
         case ClassRoot::TREE_STRING: {
             // used for gc
             strCls->SetTreeStringClass();
-            strCls->SetRefFieldsNum(common_vm::TreeString::REF_FIELDS_COUNT, false);
-            strCls->SetRefFieldsOffset(common_vm::TreeString::LEFT_OFFSET, false);
-            (static_cast<BaseClass *>(strCls))->SetObjectSize(common_vm::TreeString::SIZE);
+            strCls->SetRefFieldsNum(ark::mem::TreeString::REF_FIELDS_COUNT, false);
+            strCls->SetRefFieldsOffset(ark::mem::TreeString::LEFT_OFFSET, false);
+            (static_cast<BaseClass *>(strCls))->SetObjectSize(ark::mem::TreeString::SIZE);
             break;
         }
         default: {

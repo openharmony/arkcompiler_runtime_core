@@ -17,7 +17,7 @@
 
 #include "common_components/taskpool/taskpool.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 class ArrayTaskDispatcher {
 public:
@@ -43,7 +43,7 @@ public:
     void JoinAndWait();
 
 private:
-    class Runner : public common_vm::Task {
+    class Runner : public Task {
     public:
         explicit Runner(ArrayTaskDispatcher *dispatcher) : Task(0), manager_(dispatcher) {}
         ~Runner();
@@ -66,6 +66,6 @@ private:
     int aliveTask_;
 };
 
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif

@@ -22,7 +22,7 @@
 
 #include "common_components/common/page_pool.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 using pageID = unsigned long long;
 // The maximum number of pages that PageCache can allocate
 constexpr size_t MAX_NPAGES = 129;
@@ -208,5 +208,5 @@ public:
 private:
     Span *head_ = new Span;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif

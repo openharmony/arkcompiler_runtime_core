@@ -30,7 +30,7 @@
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/logger.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // when there is a need to use PageAllocator to manage
 // the memory for a specific data structure, please add
 // a new type
@@ -417,5 +417,5 @@ inline bool operator==(StdContainerAllocator<Tp, tag> &, StdContainerAllocator<T
 {
     return true;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif

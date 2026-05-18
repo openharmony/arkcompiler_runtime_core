@@ -20,14 +20,16 @@
 #include "common_interfaces/objects/utils/field_macro.h"
 #include "common_interfaces/objects/utils/objects_traits.h"
 #include "common_interfaces/objects/readonly_handle.h"
-#include "common_interfaces/base/bit_field.h"
+#include "libarkbase/utils/bit_field.h"
 #include "common_interfaces/objects/utils/span.h"
 
 #include <type_traits>
 #include <vector>
 #include <cstring>
 
-namespace common_vm {
+namespace ark::mem {
+using ark::BitField;
+
 class LineString;
 class TreeString;
 class SlicedString;
@@ -381,7 +383,8 @@ public:
      */
     template <typename ReadBarrier, typename Vec,
               std::enable_if_t<objects_traits::IS_STD_VECTOR_OF_V<std::decay_t<Vec>, uint8_t>, int> = 0>
-    Span<const uint8_t> ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify = true, bool cesu8 = false);
+    ark::common_vm::Span<const uint8_t> ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify = true,
+                                                   bool cesu8 = false);
 
     /**
      * @brief Convert string to UTF-8 in debugger mode (non-CESU-8).
@@ -394,7 +397,7 @@ public:
      */
     template <typename ReadBarrier, typename Vec,
               std::enable_if_t<objects_traits::IS_STD_VECTOR_OF_V<std::decay_t<Vec>, uint8_t>, int> = 0>
-    Span<const uint8_t> DebuggerToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify = true);
+    ark::common_vm::Span<const uint8_t> DebuggerToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, bool modify = true);
 
     /**
      * @brief Check whether the string is in a flat (contiguous) representation.
@@ -478,7 +481,7 @@ public:
      * @return true if the spans are equal in length and content; false otherwise.
      */
     template <typename T, typename T1>
-    static bool StringsAreEquals(Span<const T> &str1, Span<const T1> &str2);
+    static bool StringsAreEquals(ark::common_vm::Span<const T> &str1, ark::common_vm::Span<const T1> &str2);
 
     /**
      * @brief Compare a UTF-8 string with a UTF-16 string for equality.
@@ -571,7 +574,8 @@ public:
      * @return true if all `count` characters were copied; false if `dstMax` was insufficient.
      */
     template <typename T>
-    static bool MemCopyChars(Span<T> &dst, size_t dstMax, Span<const T> &src, size_t count);
+    static bool MemCopyChars(ark::common_vm::Span<T> &dst, size_t dstMax, ark::common_vm::Span<const T> &src,
+                             size_t count);
 
     /**
      * @brief Determine whether string data is eligible for UTF-8 compression.
@@ -644,7 +648,8 @@ public:
      * @return The index of the first match, or -1 if not found.
      */
     template <typename T1, typename T2>
-    static int32_t IndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, int32_t pos, int32_t max);
+    static int32_t IndexOf(ark::common_vm::Span<const T1> &lhsSp, ark::common_vm::Span<const T2> &rhsSp, int32_t pos,
+                           int32_t max);
 
     /**
      * @brief Find the last occurrence of a substring within another span.
@@ -659,7 +664,8 @@ public:
      * @return The index of the last match, or -1 if not found.
      */
     template <typename T1, typename T2>
-    static int32_t LastIndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, int32_t pos);
+    static int32_t LastIndexOf(ark::common_vm::Span<const T1> &lhsSp, ark::common_vm::Span<const T2> &rhsSp,
+                               int32_t pos);
 
     /**
      * @brief Write characters from a BaseString into a buffer.
@@ -824,7 +830,7 @@ uint32_t PANDA_PUBLIC_API BaseString::GetHashcode(ReadBarrier &&readBarrier)
 // Check that two spans are equal. Should have the same length.
 /* static */
 template <typename T, typename T1>
-bool BaseString::StringsAreEquals(Span<const T> &str1, Span<const T1> &str2)
+bool BaseString::StringsAreEquals(ark::common_vm::Span<const T> &str1, ark::common_vm::Span<const T1> &str2)
 {
     DCHECK(str1.Size() <= str2.Size());
     size_t size = str1.Size();
@@ -846,5 +852,5 @@ inline uint32_t BaseString::MixHashcode(uint32_t hashcode, bool isInteger)
 {
     return isInteger ? (hashcode | IS_INTEGER_MASK) : (hashcode & (~IS_INTEGER_MASK));
 }
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H

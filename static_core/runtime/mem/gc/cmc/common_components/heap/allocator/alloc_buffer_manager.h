@@ -24,7 +24,7 @@
 #include "common_components/base/atomic_spin_lock.h"
 #include "common_components/common/page_allocator.h"
 #include "common_components/common/run_type.h"
-namespace common_vm {
+namespace ark::common_vm {
 using AllocBufferVisitor = std::function<void(AllocationBuffer &buffer)>;
 class AllocBufferManager {
 public:
@@ -84,5 +84,5 @@ private:
     ark::os::memory::Mutex hungryBuffersLock_;
     AtomicSpinLock allocBufferLock_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // ~COMMON_COMPONENTS_HEAP_ALLOCATOR_ALLOC_BUFFER_MANAGER

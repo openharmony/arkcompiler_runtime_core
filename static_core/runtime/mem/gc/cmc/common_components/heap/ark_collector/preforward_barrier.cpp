@@ -23,9 +23,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-#include "libarkbase/utils/logger.h"
-
-namespace common_vm {
+namespace ark::common_vm {
 BaseObject *PreforwardBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
 {
     do {
@@ -59,4 +57,4 @@ BaseObject *PreforwardBarrier::AtomicReadRefField(BaseObject *obj, RefField<true
                    << " -> " << std::dec << target;
     return target;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

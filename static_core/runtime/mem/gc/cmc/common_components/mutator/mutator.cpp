@@ -33,7 +33,7 @@
 #include "common_interfaces/thread/mutator-inl.h"
 #include "common_interfaces/thread/mutator_state_transition.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 ThreadLocalData *GetThreadLocalData()
 {
@@ -233,7 +233,7 @@ void Mutator::ClearSatbBufferNode()
 
 void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
 
-void Mutator::UpdateBarrierEntrypoint(common_vm::GCPhase phase) {}
+void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase) {}
 
 void Mutator::DumpMutator() const
 {
@@ -420,4 +420,4 @@ Mutator::TryBindMutatorScope::~TryBindMutatorScope()
     }
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

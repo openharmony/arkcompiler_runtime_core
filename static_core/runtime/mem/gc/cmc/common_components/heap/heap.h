@@ -28,15 +28,14 @@
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/objects/base_object.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class Allocator;
 class AllocationBuffer;
 class FinalizerProcessor;
 class CollectorResources;
 class HeuristicGCPolicy;
-using MemoryReduceDegree = common_vm::MemoryReduceDegree;
-using AppSensitiveStatus = common_vm::AppSensitiveStatus;
-using StartupStatus = common_vm::StartupStatus;
+using AppSensitiveStatus = ark::common_vm::AppSensitiveStatus;
+using StartupStatus = ark::common_vm::StartupStatus;
 
 class Heap {
 public:
@@ -252,5 +251,5 @@ public:
     static HeapAddress heapStartAddr_;
     static HeapAddress heapCurrentEnd_;
 };  // class Heap
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif

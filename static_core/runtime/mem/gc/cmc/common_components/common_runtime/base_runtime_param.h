@@ -20,7 +20,8 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/base/runtime_param.h"
 
-namespace common_vm {
+namespace ark::common_vm {
+using ::ark::mem::RuntimeParam;
 class BaseRuntimeParam {
 public:
     static RuntimeParam DefaultRuntimeParam();
@@ -88,6 +89,6 @@ private:
     V(gcParam, kMaxConcurrentRemainingBytes, size_t, 0, INT64_MAX, 512 * KB)
 
 #endif  // PANDA_TARGET_OHOS
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_RUNTIME_BASE_RUNTIME_PARAM_H

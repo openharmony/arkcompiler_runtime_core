@@ -180,18 +180,18 @@ Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, 
         case ClassRoot::SLICED_STRING: {
             // used for gc
             subClass->SetSlicedStringClass();
-            subClass->SetRefFieldsNum(common_vm::SlicedString::REF_FIELDS_COUNT, false);
-            subClass->SetRefFieldsOffset(common_vm::SlicedString::PARENT_OFFSET, false);
-            (static_cast<BaseClass *>(subClass))->SetObjectSize(common_vm::SlicedString::SIZE);
+            subClass->SetRefFieldsNum(ark::mem::SlicedString::REF_FIELDS_COUNT, false);
+            subClass->SetRefFieldsOffset(ark::mem::SlicedString::PARENT_OFFSET, false);
+            (static_cast<BaseClass *>(subClass))->SetObjectSize(ark::mem::SlicedString::SIZE);
             break;
         }
 
         case ClassRoot::TREE_STRING: {
             // used for gc
             subClass->SetTreeStringClass();
-            subClass->SetRefFieldsNum(common_vm::TreeString::REF_FIELDS_COUNT, false);
-            subClass->SetRefFieldsOffset(common_vm::TreeString::LEFT_OFFSET, false);
-            (static_cast<BaseClass *>(subClass))->SetObjectSize(common_vm::TreeString::SIZE);
+            subClass->SetRefFieldsNum(ark::mem::TreeString::REF_FIELDS_COUNT, false);
+            subClass->SetRefFieldsOffset(ark::mem::TreeString::LEFT_OFFSET, false);
+            (static_cast<BaseClass *>(subClass))->SetObjectSize(ark::mem::TreeString::SIZE);
             break;
         }
 

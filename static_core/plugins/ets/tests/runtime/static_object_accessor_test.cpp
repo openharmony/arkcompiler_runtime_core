@@ -90,23 +90,26 @@ public:
         EtsObject *valueObject = EtsBoxPrimitive<T>::Create(EtsExecutionContext::FromMT(coro), value);
 
         staticObjectAccessor.SetProperty(nullptr, nullptr, property,
-                                         reinterpret_cast<common_vm::BaseObject *>(valueObject));
-        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), "test",
-                                         reinterpret_cast<common_vm::BaseObject *>(valueObject));
-        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), property,
-                                         reinterpret_cast<common_vm::BaseObject *>(valueObject));
+                                         reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
+        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), "test",
+                                         reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
+        staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), property,
+                                         reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
 
-        common_vm::BaseObject *baseObject = staticObjectAccessor.GetProperty(nullptr, nullptr, property);
-        ASSERT_EQ(baseObject, nullptr);
-        baseObject = staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), "test");
+        ark::common_vm::BaseObject *baseObject = staticObjectAccessor.GetProperty(nullptr, nullptr, property);
         ASSERT_EQ(baseObject, nullptr);
         baseObject =
-            staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), property);
+            staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), "test");
+        ASSERT_EQ(baseObject, nullptr);
+        baseObject =
+            staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), property);
         ASSERT_EQ(reinterpret_cast<BoxType *>(baseObject)->GetValue(), value);
-        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), property),
-                  true);
-        ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), "test"),
-                  false);
+        ASSERT_EQ(
+            staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), property),
+            true);
+        ASSERT_EQ(
+            staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), "test"),
+            false);
     }
 
     template <typename T, typename BoxType>
@@ -114,18 +117,18 @@ public:
     {
         auto *coro = EtsCoroutine::GetCurrent();
         auto *array = EtsStdCoreArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
-        auto *baseObject = reinterpret_cast<common_vm::BaseObject *>(array);
+        auto *baseObject = reinterpret_cast<ark::common_vm::BaseObject *>(array);
         ASSERT_NE(baseObject, nullptr);
         StaticObjectAccessor staticObjectAccessor;
         EtsObject *valueObject = BoxType::Create(EtsExecutionContext::FromMT(coro), val);
         staticObjectAccessor.SetElementByIdx(nullptr, nullptr, 1,
-                                             reinterpret_cast<common_vm::BaseObject *>(valueObject));
+                                             reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
         staticObjectAccessor.SetElementByIdx(nullptr, baseObject, 1,
-                                             reinterpret_cast<common_vm::BaseObject *>(valueObject));
-        common_vm::BaseObject *baseObject2 = staticObjectAccessor.GetElementByIdx(nullptr, nullptr, 1);
+                                             reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
+        ark::common_vm::BaseObject *baseObject2 = staticObjectAccessor.GetElementByIdx(nullptr, nullptr, 1);
         ASSERT_EQ(baseObject2, nullptr);
         baseObject2 = staticObjectAccessor.GetElementByIdx(nullptr, baseObject, 1);
-        ASSERT_EQ(reinterpret_cast<common_vm::BaseObject *>(valueObject), baseObject2);
+        ASSERT_EQ(reinterpret_cast<ark::common_vm::BaseObject *>(valueObject), baseObject2);
     }
 
 private:
@@ -222,14 +225,14 @@ TEST_F(StaticObjectAccessorTest, SetAndGetPropertyValue1)
     EtsObject *barObj = EtsObject::Create(barKlass);
     EtsObject *fooObj1 = EtsObject::Create(fooKlass);
     StaticObjectAccessor staticObjectAccessor;
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(barObj), "foo1",
-                                     reinterpret_cast<common_vm::BaseObject *>(fooObj1));
-    common_vm::BaseObject *baseObject =
-        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(barObj), "foo1");
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(barObj), "foo1",
+                                     reinterpret_cast<ark::common_vm::BaseObject *>(fooObj1));
+    ark::common_vm::BaseObject *baseObject =
+        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(barObj), "foo1");
     ASSERT_EQ(reinterpret_cast<EtsObject *>(baseObject), fooObj1);
-    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(barObj), "foo1"),
+    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(barObj), "foo1"),
               true);
-    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(barObj), "test"),
+    ASSERT_EQ(staticObjectAccessor.HasProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(barObj), "test"),
               false);
 }
 
@@ -243,13 +246,13 @@ TEST_F(StaticObjectAccessorTest, SetAndGetPropertyValue2)
     EtsInt val = 1;
     EtsObject *valueObject = EtsBoxPrimitive<EtsInt>::Create(EtsExecutionContext::FromMT(coro), val);
     StaticObjectAccessor staticObjectAccessor;
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(fooObj1), "member",
-                                     reinterpret_cast<common_vm::BaseObject *>(valueObject));
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(barObj), "foo1",
-                                     reinterpret_cast<common_vm::BaseObject *>(fooObj1));
-    common_vm::BaseObject *baseObject =
-        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(barObj), "foo1");
-    common_vm::BaseObject *reObject = staticObjectAccessor.GetProperty(nullptr, baseObject, "member");
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(fooObj1), "member",
+                                     reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(barObj), "foo1",
+                                     reinterpret_cast<ark::common_vm::BaseObject *>(fooObj1));
+    ark::common_vm::BaseObject *baseObject =
+        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(barObj), "foo1");
+    ark::common_vm::BaseObject *reObject = staticObjectAccessor.GetProperty(nullptr, baseObject, "member");
     ASSERT_EQ(reinterpret_cast<EtsBoxPrimitive<EtsInt> *>(reObject)->GetValue(), 1);
 }
 
@@ -276,16 +279,16 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
     auto obj = EtsObject::Create(klass);
     EtsObject *valueObject = EtsBoxPrimitive<EtsDouble>::Create(EtsExecutionContext::FromMT(coro), VAL_DOUBLE);
     StaticObjectAccessor staticObjectAccessor;
-    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(obj), "firSide",
-                                     reinterpret_cast<common_vm::BaseObject *>(valueObject));
+    staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(obj), "firSide",
+                                     reinterpret_cast<ark::common_vm::BaseObject *>(valueObject));
     staticObjectAccessor.SetElementByIdx(
-        nullptr, reinterpret_cast<common_vm::BaseObject *>(reinterpret_cast<EtsObject *>(array)), 1,
-        reinterpret_cast<common_vm::BaseObject *>(obj));
-    common_vm::BaseObject *baseObject =
-        staticObjectAccessor.GetElementByIdx(nullptr, reinterpret_cast<common_vm::BaseObject *>(array), 1);
-    ASSERT_EQ(baseObject, reinterpret_cast<common_vm::BaseObject *>(obj));
-    common_vm::BaseObject *reObject =
-        staticObjectAccessor.GetProperty(nullptr, reinterpret_cast<common_vm::BaseObject *>(baseObject), "firSide");
+        nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(reinterpret_cast<EtsObject *>(array)), 1,
+        reinterpret_cast<ark::common_vm::BaseObject *>(obj));
+    ark::common_vm::BaseObject *baseObject =
+        staticObjectAccessor.GetElementByIdx(nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(array), 1);
+    ASSERT_EQ(baseObject, reinterpret_cast<ark::common_vm::BaseObject *>(obj));
+    ark::common_vm::BaseObject *reObject = staticObjectAccessor.GetProperty(
+        nullptr, reinterpret_cast<ark::common_vm::BaseObject *>(baseObject), "firSide");
     ASSERT_EQ(reinterpret_cast<EtsBoxPrimitive<EtsDouble> *>(reObject)->GetValue(), VAL_DOUBLE);
 }
 }  // namespace ark::ets::test

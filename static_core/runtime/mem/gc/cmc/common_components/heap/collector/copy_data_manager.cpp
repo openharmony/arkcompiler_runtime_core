@@ -25,7 +25,7 @@
 #include "common_components/heap/collector/copy_data_manager.h"
 #include "common_components/platform/os.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 static ImmortalWrapper<HeapBitmapManager> forwardDataManager;
 HeapBitmapManager &HeapBitmapManager::GetHeapBitmapManager()
@@ -61,7 +61,7 @@ void HeapBitmapManager::InitializeHeapBitmap()
     heapBitmapStart_ = reinterpret_cast<uintptr_t>(startAddress);
     heapBitmap_[0].InitializeMemory(heapBitmapStart_, heapBitmapSize, regionUnitCount_);
 
-    os::PrctlSetVMA(startAddress, allHeapBitmapSize_, "ArkTS Heap CMCGC HeapBitMap");
+    ::ark::mem::os::PrctlSetVMA(startAddress, allHeapBitmapSize_, "ArkTS Heap CMCGC HeapBitMap");
     initialized = true;
 }
 
@@ -79,4 +79,4 @@ void HeapBitmapManager::DestroyHeapBitmap()
     initialized = false;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

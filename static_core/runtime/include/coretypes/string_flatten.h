@@ -145,10 +145,10 @@ public:
         std::u16string result;
         if (IsUtf16()) {
             const uint16_t *data = this->GetDataUtf16();
-            result = common_vm::Utf16ToU16String(data, length);
+            result = ark::mem::Utf16ToU16String(data, length);
         } else {
             const uint8_t *data = this->GetDataUtf8();
-            result = common_vm::Utf8ToU16String(data, length);
+            result = ark::mem::Utf8ToU16String(data, length);
         }
         return result;
     }

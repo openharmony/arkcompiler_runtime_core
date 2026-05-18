@@ -21,7 +21,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::mem {
 
 /*
  * Auxiliary static class that provides access to bits range within an integer value.
@@ -141,6 +141,6 @@ public:
     }
 };
 
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_BIT_FIELD_H

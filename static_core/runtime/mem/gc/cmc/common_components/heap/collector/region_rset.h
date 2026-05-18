@@ -21,7 +21,7 @@
 #include <atomic>
 #include <errno.h>
 
-namespace common_vm {
+namespace ark::common_vm {
 class RegionRSet {
 public:
     static constexpr size_t CARD_SIZE = 512;
@@ -114,5 +114,5 @@ private:
 
 static_assert(RegionRSet::CARD_TABLE_DATA_OFFSET ==
               AlignUp<size_t>(sizeof(RegionRSet), sizeof(RegionRSet::CardElement)));
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_RSET_H

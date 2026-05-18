@@ -36,7 +36,7 @@
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/logger.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // a page pool maintain a pool of free pages, serve page allocation and free
 class PagePool {
 public:
@@ -159,7 +159,7 @@ protected:
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS)
         COMMON_PRCTL(result, size, memName);
 #endif
-        os::PrctlSetVMA(result, size, (std::string("ArkTS Heap CMCGC PagePool ") + memName).c_str());
+        ::ark::mem::os::PrctlSetVMA(result, size, (std::string("ArkTS Heap CMCGC PagePool ") + memName).c_str());
         return reinterpret_cast<uint8_t *>(result);
     }
 
@@ -174,5 +174,5 @@ private:
     std::atomic<uint32_t> smallPageUsed_ = {0};
     uint32_t totalPageCount_ = 0;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // ARK_COMM_RUNTIME_ALLOCATOR_PAGE_POOL_H

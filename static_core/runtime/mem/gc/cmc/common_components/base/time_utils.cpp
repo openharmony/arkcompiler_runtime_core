@@ -24,7 +24,7 @@
 #include "heap/collector/marking_collector.h"
 #include "securec.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 namespace TimeUtil {
 using Sec = std::chrono::seconds;
 using Ms = std::chrono::milliseconds;
@@ -109,4 +109,4 @@ CString GetTimestamp()
     return CString(buf);
 }
 }  // namespace TimeUtil
-}  // namespace common_vm
+}  // namespace ark::common_vm

@@ -20,7 +20,7 @@
 
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class PageCache {
 public:
     // Return the singleton object of PageCache
@@ -66,5 +66,5 @@ public:
         PageCache::GetInstance()->GetPageMutex().Unlock();
     }
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif

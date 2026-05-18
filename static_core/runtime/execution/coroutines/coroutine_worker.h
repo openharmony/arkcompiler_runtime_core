@@ -51,7 +51,7 @@ public:
     }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::Mutator *GetMutator()
+    ark::common_vm::Mutator *GetMutator()
     {
         return mutator_;
     }
@@ -59,7 +59,7 @@ public:
 
 private:
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common_vm::Mutator *mutator_ = nullptr;
+    ark::common_vm::Mutator *mutator_ = nullptr;
 #endif  // ARK_USE_COMMON_RUNTIME
 };
 

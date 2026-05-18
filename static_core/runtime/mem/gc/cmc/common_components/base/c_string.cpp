@@ -18,7 +18,7 @@
 
 #include <libgen.h>
 
-namespace common_vm {
+namespace ark::common_vm {
 // The last two characters are units, such as "kb" or "ms".
 constexpr int8_t LAST_CHARACTERS_SIZE = 2;
 // nDecimal = ceil(sizeof(int32_t) * 8 * log(2)) = ceil(2.41 * sizeof(int32_t))
@@ -621,4 +621,4 @@ void CString::ReplaceAll(CString replacement, CString target)
     return;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

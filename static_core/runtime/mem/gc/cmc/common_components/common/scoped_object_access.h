@@ -20,7 +20,7 @@
 
 #include "common_interfaces/thread/mutator-inl.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // Scoped guard for saferegion.
 class ScopedEnterSaferegion {
 public:
@@ -65,6 +65,6 @@ private:
     Mutator &mutator;
     bool leavedSafeRegion;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H

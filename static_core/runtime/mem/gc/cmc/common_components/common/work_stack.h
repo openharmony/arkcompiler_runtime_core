@@ -22,7 +22,7 @@
 #include "common_components/log/log.h"
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 template <typename T, size_t capacity>
 class StackBase {
 public:
@@ -183,5 +183,5 @@ private:
 template <typename T, size_t capacity,
           typename PushToGlobalNotify = __work_stack_internal_impl::DummyNoPushToGlobalNotify>
 using LocalStack = __work_stack_internal_impl::LocalStackImpl<T, capacity, PushToGlobalNotify>;
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_WORK_STACK_H

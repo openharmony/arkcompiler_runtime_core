@@ -49,7 +49,7 @@ class ObjectHeader;
  *       Use GetCurrent() and SetCurrent() to access the current thread's mutator.
  */
 #if defined(ARK_USE_COMMON_RUNTIME)
-class Mutator : public common_vm::Mutator {
+class Mutator : public ark::common_vm::Mutator {
 #else
 class Mutator {
 #endif
@@ -213,7 +213,7 @@ public:
 #if !defined(ARK_USE_COMMON_RUNTIME)
         return ReadFlag(SUSPEND_REQUEST);
 #else
-        return common_vm::Mutator::HasSuspendRequest();
+        return ark::common_vm::Mutator::HasSuspendRequest();
 #endif
     }
 
@@ -264,8 +264,8 @@ public:
     PANDA_PUBLIC_API void WaitSuspension();
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    void VisitMutatorRoots(const common_vm::RefFieldVisitor &visitor) override;
-    void UpdateBarrierEntrypoint(common_vm::GCPhase phase) override;
+    void VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor) override;
+    void UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase) override;
 #endif
 
     void MakeTSANHappyForThreadState();

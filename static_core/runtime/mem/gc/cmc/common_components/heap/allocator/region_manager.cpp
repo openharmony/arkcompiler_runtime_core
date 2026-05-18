@@ -45,10 +45,13 @@
 #include <sysinfoapi.h>
 #endif
 
-namespace common_vm {
+namespace ark::mem {
 uintptr_t RegionDesc::UnitInfo::totalUnitCount = 0;
 uintptr_t RegionDesc::UnitInfo::unitInfoStart = 0;
 uintptr_t RegionDesc::UnitInfo::heapStartAddress = 0;
+}  // namespace ark::mem
+
+namespace ark::common_vm {
 
 static size_t GetPageSize() noexcept
 {
@@ -74,6 +77,12 @@ const size_t COMMON_PAGE_SIZE = GetPageSize();
 const size_t AllocatorUtils::ALLOC_PAGE_SIZE = COMMON_PAGE_SIZE;
 // size of huge page is 2048KB.
 constexpr size_t HUGE_PAGE_UNIT_NUM = (2048 * KB) / RegionDesc::UNIT_SIZE;
+
+}  // namespace ark::common_vm
+
+namespace ark::mem {
+using ::ark::common_vm::MarkingCollector;
+using ::ark::common_vm::RegionalHeap;
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
 void RegionDesc::DumpRegionDesc(LogType type) const
@@ -207,7 +216,9 @@ void RegionDesc::VisitRememberSet(const std::function<void(BaseObject *)> &func)
     }
     GetRSet()->VisitAllMarkedCardBefore(func, GetRegionBaseFast(), GetRegionAllocPtr());
 }
+}  // namespace ark::mem
 
+namespace ark::common_vm {
 void RegionList::MergeRegionListWithoutHead(RegionList &srcList, RegionDesc::RegionType regionType)
 {
     RegionDesc *head = srcList.TakeHeadRegion();
@@ -286,8 +297,8 @@ void RegionList::PrependRegionLocked(RegionDesc *region, RegionDesc::RegionType 
     region->SetRegionType(type);
 
     size_t totalRegionSize = region->GetRegionEnd() - region->GetRegionBase();
-    os::PrctlSetVMA(reinterpret_cast<void *>(region->GetRegionBase()), totalRegionSize,
-                    (std::string("ArkTS Heap CMCGC Region ") + RegionDescRegionTypeToString(type)).c_str());
+    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(region->GetRegionBase()), totalRegionSize,
+                                (std::string("ArkTS Heap CMCGC Region ") + RegionDescRegionTypeToString(type)).c_str());
 
     region->SetPrevRegion(nullptr);
     IncCounts(1, region->GetUnitCount());
@@ -669,4 +680,4 @@ void RegionManager::RequestForRegion(size_t size)
     // constraints imposed on other reads or writes
     prevRegionAllocTime_.store(TimeUtil::NanoSeconds(), std::memory_order_relaxed);
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

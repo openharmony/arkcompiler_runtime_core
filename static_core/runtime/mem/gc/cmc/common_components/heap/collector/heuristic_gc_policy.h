@@ -21,7 +21,7 @@
 #include "common_components/taskpool/taskpool.h"
 #include "common_components/log/log.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 enum class StartupStatus : uint8_t {
     BEFORE_STARTUP,
     COLD_STARTUP,
@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    class StartupFinishTask : public common_vm::Task {
+    class StartupFinishTask : public Task {
     public:
         StartupFinishTask(uint32_t id) : Task(id) {}
         bool Run([[maybe_unused]] uint32_t threadIndex) override
@@ -68,7 +68,7 @@ private:
         }
     };
 
-    class StartupTask : public common_vm::Task {
+    class StartupTask : public Task {
     public:
         StartupTask(uint32_t id, Taskpool *pool, size_t delay) : Task(id), threadPool_(pool), delay_(delay) {}
         bool Run([[maybe_unused]] uint32_t threadIndex) override
@@ -217,6 +217,6 @@ private:
     std::atomic<AppSensitiveStatus> sensitiveStatus_ {AppSensitiveStatus::NORMAL_SCENE};
     std::atomic<size_t> recordSizeBeforeSensitive_ {0};
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H

@@ -19,8 +19,12 @@
 #include <atomic>
 #include <functional>
 #include "common_interfaces/objects/base_state_word.h"
-namespace common_vm {
+namespace ark::common_vm {
 class BaseObject;
+}  // namespace ark::common_vm
+
+namespace ark::mem {
+using ::ark::common_vm::BaseObject;
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-union-access)
 
@@ -175,5 +179,5 @@ private:
 
 // NOLINTEND(cppcoreguidelines-pro-type-union-access)
 
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H

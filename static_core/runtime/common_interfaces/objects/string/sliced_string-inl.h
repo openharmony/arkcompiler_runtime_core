@@ -20,7 +20,7 @@
 #include "common_interfaces/objects/string/base_string.h"
 #include "common_interfaces/objects/string/sliced_string.h"
 
-namespace common_vm {
+namespace ark::mem {
 template <typename Allocator, typename WriteBarrier, objects_traits::EnableIfIsAllocate<Allocator, BaseObject *>,
           objects_traits::EnableIfIsWriteBarrier<WriteBarrier>>
 SlicedString *SlicedString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier,
@@ -74,12 +74,12 @@ uint16_t SlicedString::Get(ReadBarrier &&readBarrier, int32_t index) const
     DCHECK(parent->IsLineString());
     if (parent->IsUtf8()) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        common_vm::Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
+        ark::common_vm::Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
         return sp[index];
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    common_vm::Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
+    ark::common_vm::Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
     return sp[index];
 }
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H

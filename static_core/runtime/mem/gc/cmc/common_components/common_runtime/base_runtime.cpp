@@ -29,7 +29,7 @@
 
 #include <iomanip>
 
-namespace common_vm {
+namespace ark::common_vm {
 
 ark::os::memory::Mutex BaseRuntime::vmCreationLock_;
 BaseRuntime *BaseRuntime::baseRuntimeInstance_ = nullptr;
@@ -343,4 +343,4 @@ void BaseRuntime::NotifyHighSensitive(bool isStart)
     Heap::GetHeap().NotifyHighSensitive(isStart);
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

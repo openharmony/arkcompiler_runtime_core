@@ -21,7 +21,15 @@
 #include "common_components/base/ark_sanitizer.h"
 #include "common_interfaces/base/common.h"
 
-namespace common_vm {
+namespace ark::mem {
+class RegionDesc;
+class VMInterface;
+}  // namespace ark::mem
+
+namespace ark::common_vm {
+using ::ark::mem::RegionDesc;
+using ::ark::mem::VMInterface;
+
 // Time Factors
 constexpr uint64_t TIME_FACTOR = 1000LL;
 constexpr uint64_t SECOND_TO_NANO_SECOND = TIME_FACTOR * TIME_FACTOR * TIME_FACTOR;
@@ -82,6 +90,6 @@ constexpr T AlignDown(T size, T alignment)
 {
     return (size & ~static_cast<T>(alignment - 1));
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_GLOBALS_H

@@ -25,7 +25,7 @@
 #include "common_interfaces/objects/utils/utf_utils.h"
 #include "securec.h"
 
-namespace common_vm {
+namespace ark::mem {
 
 inline size_t LineString::ComputeSizeUtf8(uint32_t utf8Len)
 {
@@ -59,10 +59,10 @@ uint16_t LineString::Get(int32_t index) const
         }
     }
     if (!IsUtf16()) {
-        common_vm::Span<const uint8_t> sp(GetDataUtf8(), length);
+        ark::common_vm::Span<const uint8_t> sp(GetDataUtf8(), length);
         return sp[index];
     }
-    common_vm::Span<const uint16_t> sp(GetDataUtf16(), length);
+    ark::common_vm::Span<const uint16_t> sp(GetDataUtf16(), length);
     return sp[index];
 }
 
@@ -107,8 +107,8 @@ void LineString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::vector<uint8_t> buf;
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), src, buf);
-        Span<uint16_t> to(GetDataUtf16Writable() + start, length);
-        Span<const uint8_t> from(data, length);
+        ark::common_vm::Span<uint16_t> to(GetDataUtf16Writable() + start, length);
+        ark::common_vm::Span<const uint8_t> from(data, length);
         for (uint32_t i = 0; i < length; i++) {
             to[i] = from[i];
         }
@@ -199,7 +199,7 @@ LineString *LineString::Create(Allocator &&allocator, size_t length, bool compre
     return string;
 }
 
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)

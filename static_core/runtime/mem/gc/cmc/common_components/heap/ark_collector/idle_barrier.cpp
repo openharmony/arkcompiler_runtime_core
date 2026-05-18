@@ -24,7 +24,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 BaseObject *IdleBarrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
 {
     RefField<> oldField(field);
@@ -77,4 +77,4 @@ void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false
     UpdateRememberSet(obj, ref);
     LOG(DEBUG, GC) << "write obj " << obj << " ref@" << &field << ": " << field.GetTargetObject() << " => " << ref;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

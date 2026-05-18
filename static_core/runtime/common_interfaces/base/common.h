@@ -26,7 +26,7 @@
 #ifdef ERROR
 #undef ERROR
 #endif
-namespace common_vm {
+namespace ark::mem {
 
 #if defined(NDEBUG)
 // CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
@@ -48,6 +48,6 @@ enum class LOG_LEVEL : uint8_t {
 };
 
 static constexpr size_t BITS_PER_BYTE = 8;
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_COMMON_H

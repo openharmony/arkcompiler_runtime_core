@@ -18,7 +18,7 @@
 
 #include "common_components/heap/barrier/barrier.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // IdleBarrier is the barrier for concurrent enum phase
 class IdleBarrier : public Barrier {
 public:
@@ -34,6 +34,6 @@ public:
 
     void UpdateRememberSet(BaseObject *object, BaseObject *ref) const;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_IDLE_BARRIER_H

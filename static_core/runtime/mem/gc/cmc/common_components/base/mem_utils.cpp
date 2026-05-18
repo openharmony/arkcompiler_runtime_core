@@ -17,7 +17,7 @@
 
 #include "securec.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 void MemorySet(uintptr_t dest, size_t size, int c, size_t count)
 {
     uintptr_t destAddress = dest;
@@ -50,4 +50,4 @@ void MemoryCopy(uintptr_t dest, size_t size, const uintptr_t src, size_t count)
         srcAddress += sizePerChunk;
     }
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

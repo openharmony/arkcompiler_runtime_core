@@ -28,7 +28,7 @@
 #include "qos.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 
 void *CollectorResources::GCMainThreadEntry(void *arg)
 {
@@ -364,4 +364,4 @@ void CollectorResources::RequestHeapDump(GCTask::GCTaskType gcTask)
     taskQueue_->EnqueueSync(dumpTask, filter);
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

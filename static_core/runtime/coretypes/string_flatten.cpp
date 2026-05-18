@@ -46,16 +46,16 @@ String *FlatStringInfo::SlowFlatten(VMHandle<String> &str, const LanguageContext
 
     VMHandle<String> resultHandle(thread, result);
     auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common_vm::BaseString *>(
+        return reinterpret_cast<ark::mem::BaseString *>(
             ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
     };
 
     if (compressed) {
-        common_vm::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), resultHandle->GetDataUtf8Writable(),
-                                           length);
+        ark::mem::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), resultHandle->GetDataUtf8Writable(),
+                                          length);
     } else {
-        common_vm::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(),
-                                           resultHandle->GetDataUtf16Writable(), length);
+        ark::mem::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), resultHandle->GetDataUtf16Writable(),
+                                          length);
     }
     return resultHandle.GetPtr();
 }
@@ -68,14 +68,14 @@ String *FlatStringInfo::SlowFlattenWithNativeMemory(VMHandle<String> &str, const
     bool compressed = str->IsUtf8();
     auto stringClass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
     size_t size =
-        compressed ? common_vm::LineString::ComputeSizeUtf8(length) : common_vm::LineString::ComputeSizeUtf16(length);
+        compressed ? ark::mem::LineString::ComputeSizeUtf8(length) : ark::mem::LineString::ComputeSizeUtf16(length);
     uint8_t *p =
         Runtime::GetCurrent()->GetInternalAllocator()->New<uint8_t[]>(size);  // NOLINT(modernize-avoid-c-arrays)
     if (p == nullptr) {
         return nullptr;
     }
 
-    auto pStr = reinterpret_cast<common_vm::BaseString *>(p);
+    auto pStr = reinterpret_cast<ark::mem::BaseString *>(p);
     // After setting length we should have a full barrier, so this write should happens-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     pStr->InitLengthAndFlags(length, compressed);
@@ -88,16 +88,16 @@ String *FlatStringInfo::SlowFlattenWithNativeMemory(VMHandle<String> &str, const
     reinterpret_cast<ObjectHeader *>(pStr)->SetClass(stringClass);
     String *lineStr = String::Cast(pStr);
     auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common_vm::BaseString *>(
+        return reinterpret_cast<ark::mem::BaseString *>(
             ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
     };
 
     if (compressed) {
-        common_vm::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), lineStr->GetDataUtf8Writable(),
-                                           length);
+        ark::mem::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), lineStr->GetDataUtf8Writable(),
+                                          length);
     } else {
-        common_vm::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), lineStr->GetDataUtf16Writable(),
-                                           length);
+        ark::mem::BaseString::WriteToFlat(std::move(readBarrier), str->ToString(), lineStr->GetDataUtf16Writable(),
+                                          length);
     }
     return lineStr;
 }
@@ -114,17 +114,17 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
         return FlatStringInfo(cachedFlatStr, 0, cachedFlatStr->GetLength());
     }
 
-    common_vm::TreeString *treeString = treeStr->ToTreeString();
+    ark::mem::TreeString *treeString = treeStr->ToTreeString();
     auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common_vm::BaseString *>(
+        return reinterpret_cast<ark::mem::BaseString *>(
             ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
     };
     if (treeString->IsFlat(std::move(readBarrier))) {
         auto readBarrierLeft = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
-        auto *first = String::Cast(treeString->GetLeftSubString<common_vm::BaseString *>(std::move(readBarrierLeft)));
+        auto *first = String::Cast(treeString->GetLeftSubString<ark::mem::BaseString *>(std::move(readBarrierLeft)));
         FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), first);
         return FlatStringInfo(first, 0, treeString->GetLength());
     }
@@ -149,13 +149,13 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
 // So VMHandle is not needed here.
 FlatStringInfo FlatStringInfo::FlattenSlicedString(String *slicedStr)
 {
-    const common_vm::SlicedString *slicedString = slicedStr->ToSlicedString();
+    const ark::mem::SlicedString *slicedString = slicedStr->ToSlicedString();
     auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common_vm::BaseString *>(
+        return reinterpret_cast<ark::mem::BaseString *>(
             ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
     };
     // NOLINTNEXTLINE(modernize-use-auto)
-    common_vm::BaseString *parent = slicedString->GetParent<common_vm::BaseString *>(std::move(readBarrier));
+    ark::mem::BaseString *parent = slicedString->GetParent<ark::mem::BaseString *>(std::move(readBarrier));
     return FlatStringInfo(String::Cast(parent), slicedString->GetStartIndex(), slicedString->GetLength());
 }
 

@@ -38,7 +38,7 @@
 #include <sys/mman.h>
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 
 class HeapBitmapManager {
     class Memory {
@@ -185,5 +185,5 @@ private:
     size_t allHeapBitmapSize_ = 0;
     bool initialized = false;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COPY_DATA_MANAGER_H

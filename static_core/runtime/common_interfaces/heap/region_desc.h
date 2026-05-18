@@ -43,9 +43,17 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-#include "libarkbase/utils/logger.h"
+namespace ark::mem {
 
-namespace common_vm {
+using ::ark::common_vm::AlignUp;
+using ::ark::common_vm::Heap;
+using ::ark::common_vm::HeapAddress;
+using ::ark::common_vm::HeapBitmapManager;
+using ::ark::common_vm::KB;
+using ::ark::common_vm::MemorySet;
+using ::ark::common_vm::RegionBitmap;
+using ::ark::common_vm::RegionRSet;
+
 template <typename T>
 class BitFields {
 public:
@@ -977,7 +985,7 @@ public:
         metadata.tlab = nullptr;
     }
 
-    void AttachTLAB(TLAB *tlab)
+    void AttachTLAB(ark::common_vm::TLAB *tlab)
     {
         ASSERT_PRINT(metadata.tlab == nullptr, "TLAB in RegionDesc is not nullptr, cannot attach");
         metadata.tlab = tlab;
@@ -1152,7 +1160,7 @@ private:
             uint32_t prevRegionIdx;  // support fast deletion for region list.
 
             uint32_t liveByteCount;
-            TLAB *tlab;
+            ark::common_vm::TLAB *tlab;
         };
 
         RegionLiveDesc liveInfo_ {};
@@ -1523,6 +1531,6 @@ HeapAddress RegionDesc::InlinedRegionMetaData::GetRegionStart() const
     DCHECK(addr == regionDesc_->GetRegionStart());
     return addr;
 }
-}  // namespace common_vm
+}  // namespace ark::mem
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_REGION_DESC_H

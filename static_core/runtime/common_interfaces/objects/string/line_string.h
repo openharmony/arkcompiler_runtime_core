@@ -20,7 +20,7 @@
 
 #include "common_interfaces/objects/string/base_string.h"
 
-namespace common_vm {
+namespace ark::mem {
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
@@ -238,7 +238,7 @@ inline uint16_t *LineString::GetDataUtf16Writable() const
     DCHECK(IsUtf16() && "BaseString: Read data as utf16 for utf8 string");
     return GetData();
 }
-}  // namespace common_vm
+}  // namespace ark::mem
 
 // NOLINTEND(cppcoreguidelines-special-member-functions)
 

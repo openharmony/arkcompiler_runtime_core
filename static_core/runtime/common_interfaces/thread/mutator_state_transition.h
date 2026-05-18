@@ -19,7 +19,7 @@
 #include "common_interfaces/thread/mutator-inl.h"
 #include "common_components/mutator/mutator_manager.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 enum class MutatorState : uint16_t {
     RUNNING = 0,
@@ -86,5 +86,5 @@ private:
     MutatorStateTransitionScope<T, MutatorState::RUNNING> scope_;
     NO_COPY_SEMANTIC(MutatorManagedScope);
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H

@@ -30,32 +30,33 @@ class PandaEtsVM;
 
 namespace ark::mem {
 
-class StaticObjectOperator : public common_vm::BaseObjectOperatorInterfaces {
+class StaticObjectOperator : public ark::common_vm::BaseObjectOperatorInterfaces {
 public:
     static void Initialize();
 
-    bool IsValidObject([[maybe_unused]] const common_vm::BaseObject *object) const override
+    bool IsValidObject([[maybe_unused]] const ark::common_vm::BaseObject *object) const override
     {
         return true;
     }
 
-    void ForEachRefField(const common_vm::BaseObject *object, const common_vm::RefFieldVisitor &fieldHandler,
-                         const common_vm::RefFieldVisitor &weakFieldHandler) const override;
-    size_t ForEachRefFieldAndGetSize(const common_vm::BaseObject *object,
-                                     const common_vm::RefFieldVisitor &fieldHandler,
-                                     const common_vm::RefFieldVisitor &weakFieldHandler) const override;
-    void ClearRef(common_vm::BaseObject *object, common_vm::RefField<> &field) const override;
+    void ForEachRefField(const ark::common_vm::BaseObject *object, const ark::mem::RefFieldVisitor &fieldHandler,
+                         const ark::mem::RefFieldVisitor &weakFieldHandler) const override;
+    size_t ForEachRefFieldAndGetSize(const ark::common_vm::BaseObject *object,
+                                     const ark::mem::RefFieldVisitor &fieldHandler,
+                                     const ark::mem::RefFieldVisitor &weakFieldHandler) const override;
+    void ClearRef(ark::common_vm::BaseObject *object, ark::mem::RefField<> &field) const override;
 
-    size_t GetSize(const common_vm::BaseObject *object) const override
+    size_t GetSize(const ark::common_vm::BaseObject *object) const override
     {
         // ObjectHeader must be binary compatible with BaseObject
         auto *hdr = reinterpret_cast<const ObjectHeader *>(object);
         return hdr->ObjectSize();
     }
 
-    common_vm::BaseObject *GetForwardingPointer(const common_vm::BaseObject *object) const override;
+    ark::common_vm::BaseObject *GetForwardingPointer(const ark::common_vm::BaseObject *object) const override;
 
-    void SetForwardingPointerAfterExclusive(common_vm::BaseObject *object, common_vm::BaseObject *fwdPtr) override;
+    void SetForwardingPointerAfterExclusive(ark::common_vm::BaseObject *object,
+                                            ark::common_vm::BaseObject *fwdPtr) override;
 
 private:
     static StaticObjectOperator instance_;

@@ -21,7 +21,7 @@
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/heap/allocator/regional_heap.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 Address AllocateYoungInAllocBuffer(uintptr_t buffer, size_t size)
 {
     if (buffer == 0) {
@@ -39,7 +39,7 @@ Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size)
                            << "buffer != 0";
     }
     AllocationBuffer *allocBuffer = reinterpret_cast<AllocationBuffer *>(buffer);
-    return allocBuffer->FastAllocateInTlab<common_vm::AllocBufferType::OLD>(size);
+    return allocBuffer->FastAllocateInTlab<AllocBufferType::OLD>(size);
 }
 
 Address HeapAllocator::AllocateInYoungOrHuge(size_t size, LanguageType language)
@@ -128,4 +128,4 @@ size_t HeapAllocator::GetTLABMaxAllocSize()
     return RegionDesc::UNIT_AVAILABLE_SIZE;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

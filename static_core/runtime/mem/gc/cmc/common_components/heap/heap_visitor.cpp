@@ -17,7 +17,7 @@
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 void VisitRoots(const RefFieldVisitor &visitor)
 {
@@ -72,4 +72,4 @@ void SweepUnmarkedXRefs() {}
 void AddXRefToRoots() {}
 
 void RemoveXRefFromRoots() {}
-}  // namespace common_vm
+}  // namespace ark::common_vm

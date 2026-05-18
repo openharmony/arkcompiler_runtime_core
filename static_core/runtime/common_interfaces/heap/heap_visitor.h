@@ -22,12 +22,12 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/objects/ref_field.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class BaseObject;
 class Mutator;
 using CommonRootVisitor = void (*)(void *root);
-using RefFieldVisitor = std::function<void(RefField<> &)>;
-using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
+using RefFieldVisitor = std::function<void(::ark::mem::RefField<> &)>;
+using WeakRefFieldVisitor = std::function<bool(::ark::mem::RefField<> &)>;
 
 void VisitRoots(const RefFieldVisitor &visitor);
 void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
@@ -56,5 +56,11 @@ PANDA_PUBLIC_API void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc fu
 PANDA_PUBLIC_API void RegisterSweepStaticRootsHook(SweepStaticRootsHookFunc func);
 PANDA_PUBLIC_API void RegisterUnmarkAllXRefsHook(UnmarkAllXRefsHookFunc func);
 PANDA_PUBLIC_API void RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsHookFunc func);
-}  // namespace common_vm
+}  // namespace ark::common_vm
+
+namespace ark::mem {
+using ::ark::common_vm::CommonRootVisitor;
+using ::ark::common_vm::RefFieldVisitor;
+using ::ark::common_vm::WeakRefFieldVisitor;
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H

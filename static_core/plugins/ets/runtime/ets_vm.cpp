@@ -65,7 +65,7 @@
 #include "libarkbase/taskmanager/task_manager.h"
 
 namespace ark::mem::ets {
-common_vm::VMInterface *RegisterCmcGcCallbacks();
+ark::mem::VMInterface *RegisterCmcGcCallbacks();
 }  // namespace ark::mem::ets
 
 namespace ark::ets {
@@ -73,8 +73,8 @@ namespace ark::ets {
 static PandaEtsVM *g_pandaEtsVM = nullptr;
 
 // Create MemoryManager by RuntimeOptions
-static std::pair<mem::MemoryManager *, common_vm::VMInterface *> CreateMM(Runtime *runtime,
-                                                                          const RuntimeOptions &options)
+static std::pair<mem::MemoryManager *, ark::mem::VMInterface *> CreateMM(Runtime *runtime,
+                                                                         const RuntimeOptions &options)
 {
     mem::MemoryManager::HeapOptions heapOptions {
         nullptr,                                      // is_object_finalizeble_func
@@ -95,7 +95,7 @@ static std::pair<mem::MemoryManager *, common_vm::VMInterface *> CreateMM(Runtim
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
 
-    common_vm::VMInterface *vmIface {nullptr};
+    ark::mem::VMInterface *vmIface {nullptr};
 #if defined(ARK_USE_COMMON_RUNTIME)
     vmIface = ark::mem::ets::RegisterCmcGcCallbacks();
 #endif
@@ -227,7 +227,7 @@ void PandaEtsVM::InitializeANI(const RuntimeOptions &options)
 
 // CC-OFFNXT(G.FUD.05) solid logic
 PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
-                       common_vm::VMInterface *vmIface)
+                       ark::mem::VMInterface *vmIface)
     : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm), vmIface_(vmIface)
 {
     ASSERT(runtime_ != nullptr);

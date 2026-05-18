@@ -34,7 +34,7 @@
 
 namespace ark::mem {
 
-namespace cvm = common_vm;
+namespace cvm = ark::common_vm;
 
 constexpr size_t TEST_ARRAY_SIZE = 1;
 constexpr size_t TEST_CLASS_VTABLE_SIZE = 0;
@@ -44,9 +44,9 @@ constexpr std::array<uint32_t, INT_ARRAY_SIZE> INT_ARRAY = {8, 95, 34, 47, 74, 7
 
 class CMCGCPreBarrierChecker : public cvm::GCListener {
 public:
-    void OnGCStart(common_vm::GCReason reason, common_vm::GCType type) override {}
-    void OnGCFinish(common_vm::GCReason reason, common_vm::GCType type) override {}
-    void OnGCPhaseStart(common_vm::GCPhase phase) override
+    void OnGCStart(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
+    void OnGCFinish(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
+    void OnGCPhaseStart(ark::common_vm::GCPhase phase) override
     {
         if (phase == cvm::GCPhase::GC_PHASE_MARK) {
             {
@@ -62,7 +62,7 @@ public:
             }
         }
     }
-    void OnGCPhaseEnd(common_vm::GCPhase phase) override
+    void OnGCPhaseEnd(ark::common_vm::GCPhase phase) override
     {
         if (phase == cvm::GCPhase::GC_PHASE_MARK) {
             {
@@ -131,9 +131,9 @@ private:
 
 class CMCGCReadBarrierChecker : public cvm::GCListener {
 public:
-    void OnGCStart(common_vm::GCReason reason, common_vm::GCType type) override {}
-    void OnGCFinish(common_vm::GCReason reason, common_vm::GCType type) override {}
-    void OnGCPhaseStart(common_vm::GCPhase phase) override
+    void OnGCStart(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
+    void OnGCFinish(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
+    void OnGCPhaseStart(ark::common_vm::GCPhase phase) override
     {
         if (phase == cvm::GCPhase::GC_PHASE_MARK) {
             {
@@ -161,7 +161,7 @@ public:
             }
         }
     }
-    void OnGCPhaseEnd(common_vm::GCPhase phase) override {}
+    void OnGCPhaseEnd(ark::common_vm::GCPhase phase) override {}
     template <typename A>
     void OnStartPhaseMark(A action)
     {

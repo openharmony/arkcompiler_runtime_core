@@ -18,7 +18,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common_vm::os::thread {
+namespace ark::mem::os::thread {
 
 ThreadId GetCurrentThreadId()
 {
@@ -43,4 +43,4 @@ int SetThreadName([[maybe_unused]] NativeHandleType threadNativeHandle, const ch
     return pthread_setname_np(name);
 }
 
-}  // namespace common_vm::os::thread
+}  // namespace ark::mem::os::thread

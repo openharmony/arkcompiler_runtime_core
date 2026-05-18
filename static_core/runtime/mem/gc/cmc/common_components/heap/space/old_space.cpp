@@ -18,7 +18,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 void OldSpace::DumpRegionStats() const
 {
     size_t oldRegions =
@@ -44,4 +44,4 @@ RegionDesc *OldSpace::AllocateThreadLocalRegion(bool expectPhysicalMem)
     }
     return region;
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

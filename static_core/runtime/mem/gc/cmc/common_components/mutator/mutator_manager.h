@@ -34,7 +34,7 @@
 #include "common_interfaces/thread/mutator.h"
 #include "libarkbase/os/mutex.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 const uint64_t WAIT_LOCK_INTERVAL = 5000;  // 5us
 const uint64_t WAIT_LOCK_TIMEOUT = 30;     // seconds
 const uint32_t MAX_TIMEOUT_TIMES = 1;
@@ -351,6 +351,6 @@ public:
         MutatorManager::Instance().UnlockStopTheWorld();
     }
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H

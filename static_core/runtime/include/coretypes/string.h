@@ -30,7 +30,7 @@
 namespace ark::coretypes {
 class String : public ObjectHeader {
 public:
-    static constexpr uint32_t STRING_LENGTH_SHIFT = common_vm::BaseString::LengthBits::START_BIT;
+    static constexpr uint32_t STRING_LENGTH_SHIFT = ark::mem::BaseString::LengthBits::START_BIT;
 
     // The prefix-function is stored in the state and takes O(|pattern|) space. For patterns below this length, the
     // shift of KMP is too short to compensate for the time required to allocate/deallocate the prefix-function.
@@ -192,10 +192,10 @@ public:
     PANDA_PUBLIC_API static bool StringsAreEqualUtf16(String *str1, const uint16_t *utf16Data, uint32_t utf16DataLength)
     {
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
-        return common_vm::BaseString::StringsAreEqualUtf16(readBarrier, str1->ToString(), utf16Data, utf16DataLength);
+        return ark::mem::BaseString::StringsAreEqualUtf16(readBarrier, str1->ToString(), utf16Data, utf16DataLength);
     }
 
     static bool IsMutf8EqualsUtf16(const uint8_t *utf8Data, const uint16_t *utf16Data, uint32_t utf16DataLength);
@@ -203,7 +203,7 @@ public:
     static uint32_t ComputeHashcodeMutf8(const uint8_t *mutf8Data, [[maybe_unused]] uint32_t utf16Length,
                                          bool canBeCompressed)
     {
-        return common_vm::BaseString::ComputeHashcodeUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), canBeCompressed);
+        return ark::mem::BaseString::ComputeHashcodeUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), canBeCompressed);
     }
 
     static uint32_t ComputeHashcodeMutf8(const uint8_t *mutf8Data, uint32_t utf16Length)
@@ -214,7 +214,7 @@ public:
 
     static uint32_t ComputeHashcodeUtf16(const uint16_t *utf16Data, uint32_t length)
     {
-        return common_vm::BaseString::ComputeHashcodeUtf16(utf16Data, length);
+        return ark::mem::BaseString::ComputeHashcodeUtf16(utf16Data, length);
     }
 
     static std::pair<int32_t, int32_t> NormalizeSubStringIndexes(int32_t beginIndex, int32_t endIndex,
@@ -266,7 +266,7 @@ public:
     size_t CopyDataRegionMUtf8(uint8_t *buf, size_t start, size_t length, size_t maxLength)
     {
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         // check the difference between CopyDataRegionUtf8 and CopyDataRegionMUtf8
@@ -276,7 +276,7 @@ public:
     uint32_t CopyDataUtf16(uint16_t *buf, uint32_t maxLength)
     {
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         return ToString()->CopyDataUtf16(std::move(readBarrier), buf, maxLength);
@@ -300,7 +300,7 @@ public:
             return 0;
         }
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         if (IsUtf16()) {
@@ -326,7 +326,7 @@ public:
         return static_cast<String *>(object);
     }
 
-    static String *Cast(common_vm::BaseString *str)
+    static String *Cast(ark::mem::BaseString *str)
     {
         return reinterpret_cast<String *>(str);
     }
@@ -365,36 +365,36 @@ public:
     uint32_t GetHashcode()
     {
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
 
         return ToString()->GetHashcode(std::move(readBarrier));
     }
 
-    common_vm::BaseString *ToString()
+    ark::mem::BaseString *ToString()
     {
-        return common_vm::BaseString::Cast(reinterpret_cast<common_vm::BaseObject *>(this));
+        return ark::mem::BaseString::Cast(reinterpret_cast<ark::mem::BaseObject *>(this));
     }
 
-    const common_vm::BaseString *ToStringConst() const
+    const ark::mem::BaseString *ToStringConst() const
     {
-        return common_vm::BaseString::ConstCast(reinterpret_cast<const common_vm::BaseObject *>(this));
+        return ark::mem::BaseString::ConstCast(reinterpret_cast<const ark::mem::BaseObject *>(this));
     }
 
     static constexpr uint32_t GetLengthOffset()
     {
-        return common_vm::BaseString::LENGTH_AND_FLAGS_OFFSET;
+        return ark::mem::BaseString::LENGTH_AND_FLAGS_OFFSET;
     }
 
     static constexpr uint32_t GetHashcodeOffset()
     {
-        return common_vm::BaseString::MIX_HASHCODE_OFFSET;
+        return ark::mem::BaseString::MIX_HASHCODE_OFFSET;
     }
 
     static constexpr uint32_t GetDataOffset()
     {
-        return common_vm::LineString::DATA_OFFSET;
+        return ark::mem::LineString::DATA_OFFSET;
     }
 
     uint32_t GetLength() const
@@ -413,7 +413,7 @@ public:
             return GetLength() + 1;
         }
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         return ToString()->GetUtf8Length(std::move(readBarrier), true, false);
@@ -425,7 +425,7 @@ public:
             return GetLength();
         }
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         return ToString()->GetUtf8Length(std::move(readBarrier), false, true) - 1;
@@ -441,7 +441,7 @@ public:
      */
     static bool IsASCIICharacter(uint16_t data)
     {
-        return common_vm::BaseString::IsASCIICharacter(data);
+        return ark::mem::BaseString::IsASCIICharacter(data);
     }
 
     bool IsUtf16() const
@@ -474,33 +474,33 @@ public:
         return ToStringConst()->IsSlicedString();
     }
 
-    common_vm::LineString *ToLineString()
+    ark::mem::LineString *ToLineString()
     {
         ASSERT(IsLineString());
-        return common_vm::LineString::Cast(ToString());
+        return ark::mem::LineString::Cast(ToString());
     }
 
-    const common_vm::SlicedString *ToSlicedString() const
+    const ark::mem::SlicedString *ToSlicedString() const
     {
         ASSERT(IsSlicedString());
-        return common_vm::SlicedString::ConstCast(ToStringConst());
+        return ark::mem::SlicedString::ConstCast(ToStringConst());
     }
 
-    common_vm::TreeString *ToTreeString()
+    ark::mem::TreeString *ToTreeString()
     {
         ASSERT(IsTreeString());
-        return common_vm::TreeString::Cast(ToString());
+        return ark::mem::TreeString::Cast(ToString());
     }
 
     uint16_t *GetDataUtf16()
     {
         ASSERT_PRINT(IsUtf16(), "String: Read data as utf16 for mutf8 string");
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+            return reinterpret_cast<ark::mem::BaseString *>(ObjectAccessor::GetObject(obj, offset));
         };
         std::vector<uint16_t> tmpBuf;
         return const_cast<uint16_t *>(
-            common_vm::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
+            ark::mem::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
     }
 
     uint16_t *GetTreeStringDataUtf16(PandaVector<uint16_t> &buf)
@@ -508,21 +508,21 @@ public:
         ASSERT_PRINT(IsTreeString(), "TreeString: only treeString can use utf16 interface");
         ASSERT_PRINT(IsUtf16(), "String: Read data as utf16 for mutf8 string");
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+            return reinterpret_cast<ark::mem::BaseString *>(ObjectAccessor::GetObject(obj, offset));
         };
         return const_cast<uint16_t *>(
-            common_vm::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), buf));
+            ark::mem::BaseString::GetUtf16DataFlat(std::move(readBarrier), ToStringConst(), buf));
     }
 
     uint8_t *GetDataUtf8()
     {
         ASSERT_PRINT(IsUtf8(), "String: Read data as utf8 for utf16 string");
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+            return reinterpret_cast<ark::mem::BaseString *>(ObjectAccessor::GetObject(obj, offset));
         };
         std::vector<uint8_t> tmpBuf;
         return const_cast<uint8_t *>(
-            common_vm::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
+            ark::mem::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), tmpBuf));
     }
 
     uint8_t *GetTreeStringDataUtf8(PandaVector<uint8_t> &buf)
@@ -530,10 +530,10 @@ public:
         ASSERT_PRINT(IsTreeString(), "TreeString: only treeString can use utf8 interface");
         ASSERT_PRINT(IsUtf8(), "String: Read data as utf8 for utf16 string");
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+            return reinterpret_cast<ark::mem::BaseString *>(ObjectAccessor::GetObject(obj, offset));
         };
         return const_cast<uint8_t *>(
-            common_vm::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), buf));
+            ark::mem::BaseString::GetUtf8DataFlat(std::move(readBarrier), ToStringConst(), buf));
     }
 
     uint8_t *GetDataMUtf8()
@@ -562,13 +562,13 @@ public:
     size_t ObjectSize() const
     {
         if (IsLineString()) {
-            return common_vm::LineString::ObjectSize(ToStringConst());
+            return ark::mem::LineString::ObjectSize(ToStringConst());
         }
         if (IsSlicedString()) {
-            return common_vm::SlicedString::SIZE;
+            return ark::mem::SlicedString::SIZE;
         }
         if (IsTreeString()) {
-            return common_vm::TreeString::SIZE;
+            return ark::mem::TreeString::SIZE;
         }
         UNREACHABLE();
     }
@@ -582,7 +582,7 @@ public:
     uint16_t At(int32_t index)
     {
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+            return reinterpret_cast<ark::mem::BaseString *>(ObjectAccessor::GetObject(obj, offset));
         };
         return ToString()->At<VERIFY>(std::move(readBarrier), index);
     }
@@ -598,7 +598,7 @@ public:
     {
         ASSERT(IsLineString());
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         ToLineString()->WriteData(std::move(readBarrier), src->ToString(), start, destSize, length);
@@ -623,7 +623,7 @@ public:
             return 0;
         }
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common_vm::BaseString *>(
+            return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         if (!IsUtf16()) {
@@ -665,9 +665,9 @@ static_assert(STRING_HASHCODE_OFFSET == ark::coretypes::String::GetHashcodeOffse
 
 constexpr uint32_t STRING_DATA_OFFSET = STRING_HASHCODE_OFFSET + sizeof(uint32_t);
 static_assert(STRING_DATA_OFFSET == ark::coretypes::String::GetDataOffset());
-constexpr uint32_t STRING_TYPE_LINE = static_cast<uint32_t>(common_vm::ObjectType::LINE_STRING);
-constexpr uint32_t STRING_TYPE_SLICE = static_cast<uint32_t>(common_vm::ObjectType::SLICED_STRING);
-constexpr uint32_t STRING_TYPE_TREE = static_cast<uint32_t>(common_vm::ObjectType::TREE_STRING);
+constexpr uint32_t STRING_TYPE_LINE = static_cast<uint32_t>(ark::mem::ObjectType::LINE_STRING);
+constexpr uint32_t STRING_TYPE_SLICE = static_cast<uint32_t>(ark::mem::ObjectType::SLICED_STRING);
+constexpr uint32_t STRING_TYPE_TREE = static_cast<uint32_t>(ark::mem::ObjectType::TREE_STRING);
 
 }  // namespace ark::coretypes
 

@@ -54,7 +54,7 @@ static bool StringStartWith(std::string_view str, std::string_view startStr)
 
 namespace ark::ets::interop::js {
 
-using common_vm::TaggedType;
+using ark::mem::TaggedType;
 
 [[maybe_unused]] static bool NotNativeOhmUrl(std::string_view url)
 {

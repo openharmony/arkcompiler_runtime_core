@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <iomanip>
+
 #include "common_components/heap/ark_collector/ark_collector.h"
 
 #include "common_components/log/log.h"
@@ -28,9 +30,7 @@
 #include "qos.h"
 #endif
 
-#include <iomanip>
-
-namespace common_vm {
+namespace ark::common_vm {
 bool ArkCollector::IsUnmovableFromObject(BaseObject *obj) const
 {
     // filter const string object.
@@ -139,7 +139,7 @@ static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMar
                        << "<" << targetObj->GetTypeInfo() << ">(" << targetObj->GetSize() << ")";
         return;
     }
-    common_vm::MarkingRefField(obj, targetObj, field, markStack, targetRegion);
+    MarkingRefField(obj, targetObj, field, markStack, targetRegion);
 }
 
 // note each ref-field will not be marked twice, so each old pointer the markingr meets must come from previous gc.
@@ -396,7 +396,7 @@ private:
     ArkCollector *collector_;
 };
 
-class RemarkingAndPreforwardTask : public common_vm::Task {
+class RemarkingAndPreforwardTask : public Task {
 public:
     RemarkingAndPreforwardTask(ArkCollector *collector, GlobalMarkStack &globalMarkStack, TaskPackMonitor &monitor,
                                std::function<Mutator *()> &next)
@@ -572,8 +572,8 @@ CArrayList<BaseObject *> ArkCollector::EnumRoots()
 {
     STWParam stwParam {"wgc-enumroot"};
     EnumRootsBuffer buffer;
-    CArrayList<common_vm::BaseObject *> *results = buffer.GetBuffer();
-    common_vm::RefFieldVisitor visitor = [&results](RefField<> &field) { results->push_back(field.GetTargetObject()); };
+    CArrayList<ark::common_vm::BaseObject *> *results = buffer.GetBuffer();
+    ark::mem::RefFieldVisitor visitor = [&results](RefField<> &field) { results->push_back(field.GetTargetObject()); };
 
     if constexpr (policy == EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR) {
         EnumRootsImpl<VisitRoots>(visitor);
@@ -678,7 +678,7 @@ void ArkCollector::PreforwardFlip()
 {
     auto remarkAndForwardGlobalRoot = [this]() {
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
-        SetGCThreadQosPriority(common_vm::PriorityMode::STW);
+        SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
         ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
         TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
         Remark();
@@ -687,7 +687,7 @@ void ArkCollector::PreforwardFlip()
 
         TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
-        SetGCThreadQosPriority(common_vm::PriorityMode::FOREGROUND);
+        SetGCThreadQosPriority(PriorityMode::FOREGROUND);
 
         VisitWeakGlobalRoots(weakVisitor, Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
     };
@@ -874,7 +874,7 @@ private:
     GCType gcType_;
 };
 
-class ConcurrentEvacuationTask : public common_vm::Task {
+class ConcurrentEvacuationTask : public Task {
 public:
     ConcurrentEvacuationTask(uint32_t id, ArkCollector &tc, ParallelMarkingMonitor &monitor,
                              GlobalEvacuationStack &globalStack)
@@ -907,7 +907,7 @@ private:
     GlobalEvacuationStack &globalStack_;
 };
 
-class RemarkTask : public common_vm::Task {
+class RemarkTask : public Task {
 public:
     RemarkTask(uint32_t id, ArkCollector &tc, ParallelMarkingMonitor &monitor, GlobalEvacuationStack &globalStack)
         : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
@@ -1084,7 +1084,7 @@ void ArkCollector::DoGarbageCollectionWithoutConcurrentMarking()
 template <ArkCollector::EnumRootsPolicy policy>
 void ArkCollector::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
 {
-    CArrayList<common_vm::BaseObject *> roots;
+    CArrayList<ark::common_vm::BaseObject *> roots;
 
     if constexpr (policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR) {
         STWParam param {"preforward-nonheap-roots"};
@@ -1108,7 +1108,7 @@ void ArkCollector::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
     stack.Publish();
 }
 
-template <void (&rootsVisitFunc)(const common_vm::RefFieldVisitor &)>
+template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
 void ArkCollector::PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots)
 {
     auto &heap = static_cast<RegionalHeap &>(theAllocator_);
@@ -1143,9 +1143,9 @@ void ArkCollector::PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject
 void ArkCollector::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots)
 {
     const auto enumGlobalRoots = [this, &forwardedRoots]() {
-        SetGCThreadQosPriority(common_vm::PriorityMode::STW);
+        SetGCThreadQosPriority(PriorityMode::STW);
         PreforwardNonHeapRootsImpl<VisitGlobalRoots>(forwardedRoots);
-        SetGCThreadQosPriority(common_vm::PriorityMode::FOREGROUND);
+        SetGCThreadQosPriority(PriorityMode::FOREGROUND);
     };
 
     ark::os::memory::Mutex stackMutex;
@@ -1476,12 +1476,12 @@ bool ArkCollector::InYoungCollectionSpace(RegionDesc::RegionType type) const
 }
 
 CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam &param,
-                                                                 const common_vm::RefFieldVisitor &visitor)
+                                                                 const ark::mem::RefFieldVisitor &visitor)
 {
     const auto enumGlobalRoots = [this, &visitor]() {
-        SetGCThreadQosPriority(common_vm::PriorityMode::STW);
+        SetGCThreadQosPriority(PriorityMode::STW);
         EnumRootsImpl<VisitGlobalRoots>(visitor);
-        SetGCThreadQosPriority(common_vm::PriorityMode::FOREGROUND);
+        SetGCThreadQosPriority(PriorityMode::FOREGROUND);
     };
 
     ark::os::memory::Mutex stackMutex;
@@ -1634,7 +1634,7 @@ void ArkCollector::CollectSmallSpace()
     collectorResources_.GetFinalizerProcessor().NotifyToReclaimGarbage();
 }
 
-void ArkCollector::SetGCThreadQosPriority(common_vm::PriorityMode mode)
+void ArkCollector::SetGCThreadQosPriority(PriorityMode mode)
 {
 #ifdef ENABLE_QOS
     LOG(DEBUG, COMMON) << "SetGCThreadQosPriority gettid " << gettid();
@@ -1656,7 +1656,7 @@ void ArkCollector::SetGCThreadQosPriority(common_vm::PriorityMode mode)
             UNREACHABLE();
             break;
     }
-    common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(mode);
+    Taskpool::GetCurrentTaskpool()->SetThreadPriority(mode);
 #endif
 }
 
@@ -1664,4 +1664,4 @@ bool ArkCollector::ShouldIgnoreRequest(GCRequest &request)
 {
     return request.ShouldBeIgnored();
 }
-}  // namespace common_vm
+}  // namespace ark::common_vm

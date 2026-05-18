@@ -18,16 +18,16 @@
 #include "common_interfaces/base_runtime.h"
 #include "runtime/include/runtime.h"
 
-using namespace common_vm;
+using namespace ark::mem;
 
 namespace ark::common_runtime {
 
 void InitCommonRuntime()
 {
     auto &runtimeOptions = Runtime::GetCurrent()->GetOptions();
-    auto *baseRuntime = BaseRuntime::GetInstance();
+    auto *baseRuntime = ark::common_vm::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
-    auto param = BaseRuntime::GetDefaultParam();
+    auto param = ark::common_vm::BaseRuntime::GetDefaultParam();
     // Single pass compaction should be enabled explicitly
     param.gcParam.singlePassCompactionEnabled =
         runtimeOptions.WasSetG1SinglePassCompactionEnabled() && runtimeOptions.IsG1SinglePassCompactionEnabled();
@@ -36,10 +36,10 @@ void InitCommonRuntime()
 
 void FinishCommonRuntime()
 {
-    auto *baseRuntime = BaseRuntime::GetInstance();
+    auto *baseRuntime = ark::common_vm::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Fini();
-    BaseRuntime::DestroyInstance();
+    ark::common_vm::BaseRuntime::DestroyInstance();
 }
 
 }  // namespace ark::common_runtime

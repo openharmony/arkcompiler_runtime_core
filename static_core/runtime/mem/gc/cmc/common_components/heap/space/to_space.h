@@ -33,7 +33,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 class OldSpace;
 // regions for small-sized movable objects, which may be moved during gc.
 class ToSpace : public RegionalSpace {
@@ -123,5 +123,5 @@ private:
     RegionList tlToRegionList_;
     RegionList fullToRegionList_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_TO_SPACE_H

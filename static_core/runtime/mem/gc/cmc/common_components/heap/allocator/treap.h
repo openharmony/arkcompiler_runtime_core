@@ -38,7 +38,7 @@
 // automatic memory management. Chapman and Hall/CRC, 2016.
 // This data structure doesn't guarantee the multi-thread safety, so the external invoker should take some
 // policy to avoid competition problems.
-namespace common_vm {
+namespace ark::common_vm {
 class Treap {
 public:
     Treap() = default;
@@ -641,6 +641,6 @@ private:
     }
 #endif
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_TREAP_H

@@ -24,7 +24,7 @@
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/heap.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 template <AllocBufferType type>
 RegionDesc *RegionalHeap::AllocateThreadLocalRegion(bool expectPhysicalMem)
 {
@@ -48,9 +48,10 @@ void RegionalHeap::DumpAllRegionSummary(const char *msg) const
     auto other = nonMovableSpace_.GetAllocatedSize() + largeSpace_.GetAllocatedSize();
 
     std::ostringstream oss;
-    oss << msg << "Current allocated: " << Pretty(from + to + young + old + other) << ". (from: " << Pretty(from)
-        << "(exempt: " << Pretty(exempt) << "), to: " << Pretty(to) << ", young: " << Pretty(young)
-        << ", old: " << Pretty(old) << ", other: " << Pretty(other) << ")";
+    oss << msg << "Current allocated: " << ::ark::mem::Pretty(from + to + young + old + other)
+        << ". (from: " << ::ark::mem::Pretty(from) << "(exempt: " << ::ark::mem::Pretty(exempt)
+        << "), to: " << ::ark::mem::Pretty(to) << ", young: " << ::ark::mem::Pretty(young)
+        << ", old: " << ::ark::mem::Pretty(old) << ", other: " << ::ark::mem::Pretty(other) << ")";
     LOG(DEBUG, GC) << oss.str();
 }
 
@@ -155,7 +156,7 @@ uintptr_t RegionalHeap::AllocLargeRegion(size_t size)
 uintptr_t RegionalHeap::AllocJitFortRegion(size_t size)
 {
     uintptr_t addr = largeSpace_.Alloc(size, false);
-    os::PrctlSetVMA(reinterpret_cast<void *>(addr), size, "ArkTS Code");
+    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(addr), size, "ArkTS Code");
     MarkJitFortMemAwaitingInstall(reinterpret_cast<BaseObject *>(addr));
     return addr;
 }
@@ -270,9 +271,9 @@ void RegionalHeap::Init(const RuntimeParam &param)
 
     size_t metadataSize = RegionManager::GetMetadataSize(regionNum);
     uintptr_t baseAddr = reinterpret_cast<uintptr_t>(map_->GetBaseAddr());
-    os::PrctlSetVMA(reinterpret_cast<void *>(baseAddr), metadataSize, "ArkTS Heap CMCGC Metadata");
-    os::PrctlSetVMA(reinterpret_cast<void *>(baseAddr + metadataSize), totalSize - metadataSize,
-                    "ArkTS Heap CMCGC RegionHeap");
+    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(baseAddr), metadataSize, "ArkTS Heap CMCGC Metadata");
+    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(baseAddr + metadataSize), totalSize - metadataSize,
+                                "ArkTS Heap CMCGC RegionHeap");
 
 #if defined(COMMON_SANITIZER_SUPPORT)
     Sanitizer::OnHeapAllocated(map->GetBaseAddr(), map->GetMappedSize());
@@ -522,4 +523,4 @@ void RegionalHeap::HandlePostGCJitFortInstallTask()
     }
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

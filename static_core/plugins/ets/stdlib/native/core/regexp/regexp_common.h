@@ -222,10 +222,10 @@ int32_t AdvanceIndex(const CharT *data, int32_t size, int32_t pos, bool unicode)
         const auto indexAdv = pos + 1;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         uint16_t hi = data[pos];
-        if (common_vm::UtfUtils::IsUTF16HighSurrogate(hi)) {
+        if (ark::mem::UtfUtils::IsUTF16HighSurrogate(hi)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             uint16_t lo = data[indexAdv];
-            if (common_vm::UtfUtils::IsUTF16LowSurrogate(lo)) {
+            if (ark::mem::UtfUtils::IsUTF16LowSurrogate(lo)) {
                 return indexAdv + SKIP_ONE_SYM;
             }
         }

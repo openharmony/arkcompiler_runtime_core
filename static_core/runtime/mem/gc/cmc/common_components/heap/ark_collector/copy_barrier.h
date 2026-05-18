@@ -18,7 +18,7 @@
 
 #include "common_components/heap/ark_collector/idle_barrier.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 // CopyBarrier is the barrier for concurrent forwarding.
 class CopyBarrier : public IdleBarrier {
 public:
@@ -36,6 +36,6 @@ public:
     void PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const override;
     void WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const override;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_COPY_BARRIER_H

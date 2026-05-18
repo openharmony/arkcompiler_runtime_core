@@ -18,7 +18,7 @@
 
 #include <cstddef>
 #include <cstdint>
-namespace common_vm {
+namespace ark::mem {
 using StateWordType = uint64_t;
 using MAddress = uint64_t;
 class TypeInfo;
@@ -28,6 +28,13 @@ enum class LanguageType : uint64_t {
     STATIC = 1,
 };
 
+}  // namespace ark::mem
+
+namespace ark::common_vm {
+class BaseObject;
+}  // namespace ark::common_vm
+
+namespace ark::mem {
 // NOLINTBEGIN(cppcoreguidelines-pro-type-union-access)
 
 class BaseStateWord {
@@ -97,12 +104,12 @@ public:
         return state.forwardState;
     }
 
-    common_vm::StateWordType GetBaseClassAddress() const
+    ark::mem::StateWordType GetBaseClassAddress() const
     {
         return state.bascClass;
     }
 
-    void SetFullBaseClassAddress(common_vm::StateWordType address)
+    void SetFullBaseClassAddress(ark::mem::StateWordType address)
     {
         state.bascClass = address;
     }
@@ -179,11 +186,11 @@ private:
         return state.language == LanguageType::DYNAMIC;
     }
 
-    friend class BaseObject;
+    friend class ::ark::common_vm::BaseObject;
 };
 static_assert(sizeof(BaseStateWord) == sizeof(uint64_t), "Excepts 8 bytes");
 
 // NOLINTEND(cppcoreguidelines-pro-type-union-access)
 
-}  // namespace common_vm
+}  // namespace ark::mem
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H

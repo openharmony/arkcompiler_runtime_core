@@ -40,7 +40,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size,
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<void *>(
-        common_vm::HeapAllocator::AllocateInYoungOrHuge(size, common_vm::LanguageType::STATIC));
+        ark::common_vm::HeapAllocator::AllocateInYoungOrHuge(size, ark::mem::LanguageType::STATIC));
 #else
     return nullptr;
 #endif
@@ -54,7 +54,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<ObjectHeader *>(
-        common_vm::HeapAllocator::AllocateInNonmoveOrHuge(size, common_vm::LanguageType::STATIC));
+        ark::common_vm::HeapAllocator::AllocateInNonmoveOrHuge(size, ark::mem::LanguageType::STATIC));
 #else
     return nullptr;
 #endif
@@ -64,12 +64,12 @@ template <MTModeT MT_MODE>
 void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto visitor = [&](common_vm::BaseObject *obj) {
+    auto visitor = [&](ark::common_vm::BaseObject *obj) {
         if (obj->IsStatic()) {
             objectVisitor(reinterpret_cast<ObjectHeader *>(obj));
         }
     };
-    common_vm::BaseRuntime::ForEachObj(visitor, true);
+    ark::common_vm::BaseRuntime::ForEachObj(visitor, true);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
@@ -77,7 +77,7 @@ template <MTModeT MT_MODE>
 TLAB *CMCObjectAllocatorAdapter<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t size)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    return reinterpret_cast<TLAB *>(common_vm::HeapAllocator::CreateTLAB());
+    return reinterpret_cast<TLAB *>(ark::common_vm::HeapAllocator::CreateTLAB());
 #else
     return nullptr;
 #endif
@@ -87,7 +87,7 @@ template <MTModeT MT_MODE>
 size_t CMCObjectAllocatorAdapter<MT_MODE>::GetTLABMaxAllocSize()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    return common_vm::HeapAllocator::GetTLABMaxAllocSize();
+    return ark::common_vm::HeapAllocator::GetTLABMaxAllocSize();
 #else
     return 0;
 #endif

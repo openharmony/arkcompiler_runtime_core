@@ -26,15 +26,15 @@ namespace ark::ets {
 
 StaticObjectAccessor StaticObjectAccessor::stcObjAccessor_;
 
-bool StaticObjectAccessor::HasProperty([[maybe_unused]] common_vm::Mutator *mutator, const common_vm::BaseObject *obj,
-                                       const char *name)
+bool StaticObjectAccessor::HasProperty([[maybe_unused]] ark::common_vm::Mutator *mutator,
+                                       const ark::common_vm::BaseObject *obj, const char *name)
 {
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
     return etsObj->GetClass()->GetFieldIDByName(name) != nullptr;
 }
 
-common_vm::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common_vm::Mutator *mutator,
-                                                        const common_vm::BaseObject *obj, const char *name)
+ark::mem::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] ark::common_vm::Mutator *mutator,
+                                                       const ark::common_vm::BaseObject *obj, const char *name)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
@@ -47,11 +47,11 @@ common_vm::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common_
     if (field == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<common_vm::BoxedValue>(GetPropertyValue(executionCtx, etsObj, field));
+    return reinterpret_cast<ark::mem::BoxedValue>(GetPropertyValue(executionCtx, etsObj, field));
 }
 
-bool StaticObjectAccessor::SetProperty([[maybe_unused]] common_vm::Mutator *mutator, common_vm::BaseObject *obj,
-                                       const char *name, common_vm::BoxedValue value)
+bool StaticObjectAccessor::SetProperty([[maybe_unused]] ark::common_vm::Mutator *mutator,
+                                       ark::common_vm::BaseObject *obj, const char *name, ark::mem::BoxedValue value)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
@@ -69,16 +69,16 @@ bool StaticObjectAccessor::SetProperty([[maybe_unused]] common_vm::Mutator *muta
     return SetPropertyValue(executionCtx, etsObj, field, reinterpret_cast<EtsObject *>(value));
 }
 
-bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common_vm::Mutator *mutator,
-                                           [[maybe_unused]] const common_vm::BaseObject *obj,
+bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] ark::common_vm::Mutator *mutator,
+                                           [[maybe_unused]] const ark::common_vm::BaseObject *obj,
                                            [[maybe_unused]] const uint32_t index)
 {
     LOG(ERROR, RUNTIME) << "HasElementByIdx has no meaning for static object";
     return false;
 }
 
-common_vm::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common_vm::Mutator *mutator,
-                                                            const common_vm::BaseObject *obj, const uint32_t index)
+ark::mem::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] ark::common_vm::Mutator *mutator,
+                                                           const ark::common_vm::BaseObject *obj, const uint32_t index)
 {
     auto *mThread = ManagedThread::GetCurrent();
     ASSERT(mThread != nullptr);
@@ -90,11 +90,12 @@ common_vm::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] com
     EtsMethod *method = etsObj->GetClass()->GetDirectMethod(GET_INDEX_METHOD, "I:LY;");
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObject)), ark::Value(index)};
     ark::Value value = method->GetPandaMethod()->Invoke(mThread, args.data());
-    return reinterpret_cast<common_vm::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
+    return reinterpret_cast<ark::mem::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
 }
 
-bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common_vm::Mutator *mutator, common_vm::BaseObject *obj,
-                                           uint32_t index, const common_vm::BoxedValue value)
+bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] ark::common_vm::Mutator *mutator,
+                                           ark::common_vm::BaseObject *obj, uint32_t index,
+                                           const ark::mem::BoxedValue value)
 {
     auto *mThread = ManagedThread::GetCurrent();
     ASSERT(mThread != nullptr);

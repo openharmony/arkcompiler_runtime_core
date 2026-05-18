@@ -33,7 +33,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common_vm {
+namespace ark::common_vm {
 class RegionalSpace {
 public:
     RegionalSpace(RegionManager &regionManager) : regionManager_(regionManager) {}
@@ -73,5 +73,5 @@ protected:
 
     RegionManager &regionManager_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_REGIONAL_SPACE_H

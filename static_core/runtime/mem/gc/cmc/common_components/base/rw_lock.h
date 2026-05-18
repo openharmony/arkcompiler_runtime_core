@@ -20,7 +20,7 @@
 
 #include "common_components/log/log.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class RwLock {
 public:
     void LockRead()
@@ -98,5 +98,5 @@ private:
     static constexpr int WRITE_LOCKED = -1;
     std::atomic<int> lockCount_ {0};
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_SPINLOCK_H

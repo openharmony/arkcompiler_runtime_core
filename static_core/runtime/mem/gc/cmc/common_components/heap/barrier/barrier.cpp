@@ -25,7 +25,7 @@
 
 #include "securec.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 
 void Barrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const
 {
@@ -59,4 +59,4 @@ BaseObject *Barrier::AtomicReadRefField(BaseObject *obj, RefField<true> &field, 
     return (BaseObject *)target;
 }
 
-}  // namespace common_vm
+}  // namespace ark::common_vm

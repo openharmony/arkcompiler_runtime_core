@@ -38,7 +38,7 @@
 #endif
 #include "common_interfaces/base_runtime.h"
 
-namespace common_vm {
+namespace ark::common_vm {
 class Taskpool;
 
 // RegionalHeap aims to be the API for other components of runtime
@@ -505,6 +505,6 @@ private:
     NonMovableSpace nonMovableSpace_;
     LargeSpace largeSpace_;
 };
-}  // namespace common_vm
+}  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_SPACE_H
