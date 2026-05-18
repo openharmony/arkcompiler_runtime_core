@@ -1846,6 +1846,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Char(VEnv *venv, VVariable *v
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::CHAR, AccessMode::READWRITE),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
 
@@ -1859,6 +1860,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Byte(VEnv *venv, VVariable *v
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::BYTE, AccessMode::READWRITE),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
 
@@ -1872,6 +1874,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Short(VEnv *venv, VVariable *
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::SHORT, AccessMode::READWRITE),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
 
@@ -1885,6 +1888,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Int(VEnv *venv, VVariable *vv
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::INT, AccessMode::READWRITE),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
 
@@ -1898,6 +1902,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Long(VEnv *venv, VVariable *v
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::LONG, AccessMode::READWRITE),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
 
@@ -1911,6 +1916,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Float(VEnv *venv, VVariable *
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::FLOAT, AccessMode::READWRITE),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
 
@@ -1924,6 +1930,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Double(VEnv *venv, VVariable 
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForVariable(vvariable, "variable", EtsType::DOUBLE, AccessMode::READWRITE),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
 
@@ -3028,7 +3035,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Boolean(VEnv *venv, VClass
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticField(vfield, "static_field", EtsType::BOOLEAN, AccessMode::READWRITE)
+        ANIArg::MakeForStaticField(vfield, "static_field", EtsType::BOOLEAN, AccessMode::READWRITE),
+        ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Boolean(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3044,6 +3052,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Char(VEnv *venv, VClass *v
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::CHAR, AccessMode::READWRITE),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Char(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3059,6 +3068,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Byte(VEnv *venv, VClass *v
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::BYTE, AccessMode::READWRITE),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Byte(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3074,6 +3084,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Short(VEnv *venv, VClass *
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::SHORT, AccessMode::READWRITE),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Short(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3088,6 +3099,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Int(VEnv *venv, VClass *vc
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::INT, AccessMode::READWRITE),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Int(venv->GetEnv(), vcls->GetRef(), vfield->GetField(), value);
@@ -3102,6 +3114,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Long(VEnv *venv, VClass *v
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::LONG, AccessMode::READWRITE),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Long(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3117,6 +3130,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Float(VEnv *venv, VClass *
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::FLOAT, AccessMode::READWRITE),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Float(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3132,6 +3146,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Double(VEnv *venv, VClass 
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::DOUBLE, AccessMode::READWRITE),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Double(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3146,7 +3161,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(VEnv *venv, VClass *vc
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticField(vfield, "static_field", EtsType::OBJECT, AccessMode::READWRITE),
-        ANIArg::MakeForRef(vvalue, "ref"),
+        ANIArg::MakeForRef(vvalue, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticField_Ref(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
@@ -3301,7 +3316,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Boolean(VEnv *venv, 
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
         ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BOOLEAN, AccessMode::READWRITE),
-        ANIArg::MakeForBoolean(value, "value")
+        ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3315,7 +3330,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Char(VEnv *venv, VCl
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::CHAR, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::CHAR, AccessMode::READWRITE),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3329,7 +3345,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Byte(VEnv *venv, VCl
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BYTE, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::BYTE, AccessMode::READWRITE),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3343,7 +3360,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Short(VEnv *venv, VC
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::SHORT, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::SHORT, AccessMode::READWRITE),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3357,7 +3375,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Int(VEnv *venv, VCla
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::INT, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::INT, AccessMode::READWRITE),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3371,7 +3390,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Long(VEnv *venv, VCl
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::LONG, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::LONG, AccessMode::READWRITE),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3385,7 +3405,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Float(VEnv *venv, VC
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::FLOAT, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::FLOAT, AccessMode::READWRITE),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -3399,7 +3420,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Double(VEnv *venv, V
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vcls, "class"),
-        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::DOUBLE, AccessMode::READWRITE)
+        ANIArg::MakeForStaticFieldByName(name, "name", EtsType::DOUBLE, AccessMode::READWRITE),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, value);
@@ -5407,6 +5429,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Char(VEnv *venv, VObject *vobje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::CHAR, AccessMode::READWRITE),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
 
@@ -5421,6 +5444,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Byte(VEnv *venv, VObject *vobje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::BYTE, AccessMode::READWRITE),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
 
@@ -5435,6 +5459,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Short(VEnv *venv, VObject *vobj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::SHORT, AccessMode::READWRITE),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
 
@@ -5449,6 +5474,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Int(VEnv *venv, VObject *vobjec
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::INT, AccessMode::READWRITE),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
 
@@ -5463,6 +5489,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Long(VEnv *venv, VObject *vobje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::LONG, AccessMode::READWRITE),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
 
@@ -5477,6 +5504,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Float(VEnv *venv, VObject *vobj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::FLOAT, AccessMode::READWRITE),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
 
@@ -5491,6 +5519,7 @@ NO_UB_SANITIZE static ani_status Object_SetField_Double(VEnv *venv, VObject *vob
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForField(vfield, "field", EtsType::DOUBLE, AccessMode::READWRITE),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
 
@@ -5679,6 +5708,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Char(VEnv *venv, VObject 
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::CHAR, AccessMode::READWRITE),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Char(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5693,6 +5723,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Byte(VEnv *venv, VObject 
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::BYTE, AccessMode::READWRITE),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Byte(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5707,6 +5738,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Short(VEnv *venv, VObject
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::SHORT, AccessMode::READWRITE),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Short(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5721,6 +5753,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Int(VEnv *venv, VObject *
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::INT, AccessMode::READWRITE),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Int(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5735,6 +5768,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Long(VEnv *venv, VObject 
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::LONG, AccessMode::READWRITE),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Long(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5749,6 +5783,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Float(VEnv *venv, VObject
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::FLOAT, AccessMode::READWRITE),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Float(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5763,6 +5798,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Double(VEnv *venv, VObjec
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForFieldByName(name, "name", EtsType::DOUBLE, AccessMode::READWRITE),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
     return GetInteractionAPI(venv)->Object_SetFieldByName_Double(venv->GetEnv(), vobject->GetRef(), name, value);
@@ -5956,6 +5992,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Char(VEnv *venv, VObje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::CHAR, AccessMode::READWRITE),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
 
@@ -5971,6 +6008,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Byte(VEnv *venv, VObje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::BYTE, AccessMode::READWRITE),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
 
@@ -5986,6 +6024,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Short(VEnv *venv, VObj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::SHORT, AccessMode::READWRITE),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
 
@@ -6001,6 +6040,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Int(VEnv *venv, VObjec
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::INT, AccessMode::READWRITE),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
 
@@ -6016,6 +6056,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Long(VEnv *venv, VObje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::LONG, AccessMode::READWRITE),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
 
@@ -6031,6 +6072,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Float(VEnv *venv, VObj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::FLOAT, AccessMode::READWRITE),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
 
@@ -6046,6 +6088,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Double(VEnv *venv, VOb
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForPropertyByName(name, "name", EtsType::DOUBLE, AccessMode::READWRITE),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
 
@@ -7965,6 +8008,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Char(VEnv *venv, VTupleValue
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::CHAR, "index"),
+        ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
 
@@ -7980,6 +8024,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Byte(VEnv *venv, VTupleValue
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::BYTE, "index"),
+        ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
 
@@ -7995,6 +8040,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Short(VEnv *venv, VTupleValu
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::SHORT, "index"),
+        ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
 
@@ -8010,6 +8056,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Int(VEnv *venv, VTupleValue 
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::INT, "index"),
+        ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
 
@@ -8025,6 +8072,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Long(VEnv *venv, VTupleValue
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::LONG, "index"),
+        ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
 
@@ -8040,6 +8088,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Float(VEnv *venv, VTupleValu
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::FLOAT, "index"),
+        ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
 
@@ -8055,6 +8104,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Double(VEnv *venv, VTupleVal
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForTupleValue(vtupleValue, "tuple_value"),
         ANIArg::MakeForTupleIndex(index, EtsType::DOUBLE, "index"),
+        ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
 

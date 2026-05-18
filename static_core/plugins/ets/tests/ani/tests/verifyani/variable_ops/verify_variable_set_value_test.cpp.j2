@@ -62,9 +62,7 @@ TEST_F(VariableSetValue{{ Type }}Test, null_env)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"variable", "ani_variable"},
-{% if type == "ref" or type == "boolean" %}
-        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }
@@ -81,9 +79,7 @@ TEST_F(VariableSetValue{{ Type }}Test, null_variable)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable", "wrong variable"},
-{% if type == "ref" or type == "boolean" %}
-        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }
@@ -102,9 +98,7 @@ TEST_F(VariableSetValue{{ Type }}Test, wrong_variable)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable", "wrong variable"},
-{% if type == "ref" or type == "boolean" %}
-        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }
@@ -125,9 +119,7 @@ TEST_F(VariableSetValue{{ Type }}Test, wrong_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable", "wrong return type"},
-{% if type == "ref" or type == "boolean" %}
-        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }
@@ -149,9 +141,7 @@ TEST_F(VariableSetValue{{ Type }}Test, DISABLED_const_variable)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable", "variable is const"},
-{% if type == "ref" or type == "boolean" %}
-        {"value", "ani_{{ "ref" if type == "ref" else type }}"},
-{% endif %}
+        {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }

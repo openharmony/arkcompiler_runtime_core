@@ -192,6 +192,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_field_2)
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetField_{{ Type }}", testLines);
 }
 
+{% if type == "boolean" %}
 TEST_F(ObjectSetField{{ Type }}Test, wrong_value)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_{{ type }}.Parent", &object_);
@@ -210,6 +211,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_value)
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetField_{{ Type }}", testLines);
 }
+{% endif %}
 
 TEST_F(ObjectSetField{{ Type }}Test, wrong_all_args)
 {
@@ -220,7 +222,11 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_all_args)
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object", "wrong reference"},
         {"field", "ani_field", "wrong field"},
+{% if type == "boolean" %}
         {"value", "ani_{{ type }}", "wrong value for ani_{{ type }}"},
+{% else %}
+        {"value", "ani_{{ type }}"},
+{% endif %}
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetField_{{ Type }}", testLines);
@@ -230,7 +236,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_type)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_field_{{ type }}.Parent", &object_);
     ani_field field {};
-    ASSERT_EQ(env_->Class_FindField(class_, "intField", &field), ANI_OK);
+    ASSERT_EQ(env_->Class_FindField(class_, "{{ wrong_ret }}Field", &field), ANI_OK);
 
     ani_{{ type }} value = ANI_TRUE;
     ASSERT_EQ(env_->c_api->Object_SetField_{{ Type }}(env_, object_, field, value), ANI_INVALID_TYPE);
