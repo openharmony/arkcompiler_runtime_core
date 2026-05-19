@@ -16,9 +16,6 @@
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
 
-#34389 es2panda aborts on complex type alias expression with generics
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_recursive_8.ets
-
 #34390 es2panda segfault when a type parameter default is provided for generic type parameter
 05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
 05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default_n_0.ets
