@@ -153,4 +153,4 @@ cases:
               overload m1 { m2, m3 }
           }
       expected_out: |-
-          Semantic error ESE0397: Method with the same name as overload declaration 'm1', overloadlist must list this medhod.
+          Semantic error ESE0397: Method with the same name as overload declaration 'm1', overloadlist must list this method.

@@ -16,7 +16,7 @@
 /*---
 desc: Compilation error when attempt to init field multiple times
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0263: An object literal cannot multiple properties with same name"
+expected_out: "Semantic error ESE0263: An object literal cannot have multiple properties with same name"
 ---*/
 
 

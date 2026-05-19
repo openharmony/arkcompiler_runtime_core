@@ -21,7 +21,7 @@ cases:
 
           overload foo { fooN, fooX }
         }
-      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
+      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this method."
 
     - decl: |-
         class C {
@@ -44,7 +44,7 @@ cases:
 
           overload foo { fooN, fooX }
         }
-      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
+      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this method."
 
     - decl: |-
         interface I {
@@ -57,7 +57,7 @@ cases:
 
           overload foo { fooN, fooX }
         }
-      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
+      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this method."
 
     - decl: |-
         interface I {
@@ -74,4 +74,4 @@ cases:
 
           overload foo { fooN, fooX }
         }
-      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
+      expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this method."

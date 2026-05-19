@@ -19,7 +19,7 @@
 desc: If an overload set is a combination of implicitly and explicitly overloaded entities,
       then an explicit overload list must contain the name of an implicitly overloaded entity.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
+expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this method."
 ---*/
 
 {{c.decl}}
