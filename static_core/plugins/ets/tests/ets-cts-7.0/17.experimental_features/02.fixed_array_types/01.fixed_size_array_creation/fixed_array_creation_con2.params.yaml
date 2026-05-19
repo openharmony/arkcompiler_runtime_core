@@ -103,6 +103,26 @@ cases:
         arktest.assertEQ((c[i] as Cat).name, "cat")
       }
 
+  - desc: Create FixedArray with element type that has no default constructor
+    decl: |-
+      class C {
+        v: string
+        constructor(v: string) {
+          this.v = v
+        }
+      }
+    logic: |-
+      let obj = new C("test")
+      let a = new FixedArray<C>(15, obj)
+      arktest.assertEQ(a.length, 15)
+      arktest.assertTrue(a[0] instanceof C)
+      arktest.assertEQ((a[0] as C).v, "test")
+
+      let b = new FixedArray<C>(15, new C("init"))
+      arktest.assertEQ(b.length, 15)
+      arktest.assertTrue(b[0] instanceof C)
+      arktest.assertEQ((b[0] as C).v, "init")
+
   - desc: Create FixedArray with covariant function subtypes
     decl: |-
       class A {
