@@ -30,6 +30,7 @@ class StaticLocalStorage {
 public:
     static constexpr size_t NUM_ENTRIES = static_cast<size_t>(IndexType::LAST_ID);
     using Finalizer = std::function<void(void *)>;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     struct Entry {
         union {
             void *ptr = nullptr;
@@ -45,11 +46,17 @@ public:
 
     ~StaticLocalStorage()
     {
+        Reset();
+    }
+
+    void Reset()
+    {
         for (auto &entry : entries_) {
             if (entry.finalizer != nullptr) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
                 entry.finalizer(entry.data.ptr);
             }
+            entry = Entry {};
         }
     }
 

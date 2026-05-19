@@ -81,6 +81,11 @@ inline void JobWorkerThread::DestroyCallbackPoster()
     extSchedulingPoster_.reset(nullptr);
 }
 
+inline void JobWorkerThread::DestroyLocalStorage()
+{
+    localStorage_.Reset();
+}
+
 inline JobExecutionContext *JobWorkerThread::GetSchedulerExecutionCtx() const
 {
     return schedulerExecutionCtx_;

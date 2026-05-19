@@ -45,6 +45,8 @@ public:
 
     void ExecuteJobs();
 
+    void ExecuteJobsUntilHappened(JobEvent *awaitee) RELEASE(awaitee);
+
     void WaitForEvent(JobEvent *awaitee) RELEASE(awaitee);
 
     void UnblockWaiters(JobEvent *blocker);
@@ -82,6 +84,10 @@ private:
 
     void WaitForRunnables();
 
+    void WaitForRunnablesImpl() REQUIRES(runnablesLock_);
+
+    void WaitForEvent(JobEvent *awaitee, bool executeJobs) RELEASE(awaitee);
+
     void UpdateLoadFactor();
 
     void UpdateLoadFactorImpl() REQUIRES(runnablesLock_);
@@ -91,8 +97,6 @@ private:
     void AddJobInWaiters(JobEvent *blocker, Job *job) RELEASE(*blocker);
 
     void RegisterIncomingJob(Job *newJob);
-
-    bool EventIsInPendingQueue(JobEvent *event);
 
     void ExecuteJob(Job *job);
 
