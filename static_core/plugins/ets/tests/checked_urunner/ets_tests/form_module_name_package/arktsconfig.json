@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "entry": [
+                "./entry"
+            ],
+
+            "package":[
+                "./.pkg"
+            ],
+
+            "dot_dot_package":[
+                "./..pkg"
+            ],
+
+            "dot_dot_dot_package":[
+                "./...pkg"
+            ],
+
+            "package_dot":[
+                "./pkg."
+            ],
+
+            "package_dot_dot":[
+                "./pkg.."
+            ],
+
+            "package_dot_dot_dot":[
+                "./pkg..."
+            ],
+
+            "dot_inside_package":[
+                "./p.k.g"
+            ]
+        },
+        "dependencies": {}
+    }
+}
