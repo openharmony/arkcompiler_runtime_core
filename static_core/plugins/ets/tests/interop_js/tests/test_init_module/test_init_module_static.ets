@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 // this will be compiled to <cctor>
 // and be executed when the module is initing
-let module = ESValue.load('js_code');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_init_module/test_init_module_dynamic');
 let initModuleTest = module.getProperty(`initModuleTest`);
 
 let magicToSet = initModuleTest.getProperty(`initMagic`).toString();

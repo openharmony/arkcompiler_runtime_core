@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,8 @@
  */
 
 function testOptionalParams(): void {
-    let module = ESValue.load('js_code');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_optional_params/ts_to_ets/test_optional_params_ts_to_ets');
     module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str'));
     module.getProperty('foo2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true));
     module.getProperty('foo3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true), ESValue.wrap(2));

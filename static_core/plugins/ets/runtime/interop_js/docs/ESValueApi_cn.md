@@ -2,6 +2,56 @@
 ## 介绍
 ESValue作为一个封装类，它主要提供了一系列能够在静态类型ArkTS-Sta中操作动态类型ArkTS-Dyn的数据接口。
 ## 详细接口
+
+### load
+`public static load(sdkModule: string): ESValue`  
+根据模块名加载ArkTS-Dyn的SDK模块，返回用ESValue包装的对象。
+
+参数：
+
+| 参数名 |  类型  | 必填 |     说明     |
+| :----: | :----: | :--: | :----------: |
+| sdkModule | string |  是  | 要加载的sdk模块 |
+
+返回值：
+
+|   类型    |          说明          |
+| :-------: | :--------------------: |
+|   ESValue | ESValue包装ArkTS-Dyn的SDK模块 |
+
+示例代码：
+```typescript
+// ArkTS-Sta
+let module = ESValue.load('@ohos.hilog');
+let def = module.getProperty('default'); // 默认导出的SDK模块需先获取'default'属性
+def.invokeMethod('info', 0x0000, 'testTag', 'hilog.invokeMethod'); // 调用hilog.info()方法
+```
+---
+### load
+`public static load(module: string, bundleName: string): ESValue`  
+根据模块的路径以及包名来指定加载ArkTS-Dyn的模块，返回用ESValue包装的对象。
+
+参数：
+
+| 参数名 |  类型  | 必填 |     说明     |
+| :----: | :----: | :--: | :----------: |
+| module | string |  是  | 要加载的ArkTS-Dyn模块的路径 |
+| bundleName | string |  是  | 应用包名 |
+
+返回值：
+
+|   类型    |          说明          |
+| :-------: | :--------------------: |
+|   ESValue | ESValue包装ArkTS-Dyn的模块 |
+
+示例代码：
+```typescript
+// ArkTS-Dyn file1.ets
+export let num: number = 1
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue'); // module为file1的路径，bundleName为应用包名
+```
+---
 ### Undefined
 `public static get Undefined(): ESValue`  
 获取存储动态undefined值的ESValue对象。
@@ -14,6 +64,7 @@ ESValue作为一个封装类，它主要提供了一系列能够在静态类型A
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let undefinedVal = ESValue.Undefined;
 let isUndefinedVal = undefinedVal.isUndefined(); // true
 ```
@@ -30,6 +81,7 @@ let isUndefinedVal = undefinedVal.isUndefined(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let nullVal = ESValue.Null;
 let isNullVal = nullVal.isNull(); // true
 ```
@@ -52,6 +104,7 @@ let isNullVal = nullVal.isNull(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let trueVal = ESValue.wrapBoolean(true);
 let boolVal = trueVal.toBoolean(); // true
 ```
@@ -74,6 +127,7 @@ let boolVal = trueVal.toBoolean(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let strWrap = ESValue.wrapString('Hello');
 let strValue = strWrap.toString(); // 'Hello'
 ```
@@ -96,6 +150,7 @@ let strValue = strWrap.toString(); // 'Hello'
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let numWrap = ESValue.wrapNumber(3.1415);
 let numValue = numWrap.toNumber(); // 3.1415
 ```
@@ -118,6 +173,7 @@ let numValue = numWrap.toNumber(); // 3.1415
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let bigWrap = ESValue.wrapBigInt(9007199254740991n);
 let bigValue = bigWrap.toBigInt(); // 9007199254740991n
 ```
@@ -140,6 +196,7 @@ let bigValue = bigWrap.toBigInt(); // 9007199254740991n
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let byteWrap = ESValue.wrapByte(100);
 let byteValue = byteWrap.unwrap(); // 100
 ```
@@ -162,6 +219,7 @@ let byteValue = byteWrap.unwrap(); // 100
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let shortWrap = ESValue.wrapShort(20000);
 let shortValue = shortWrap.unwrap(); // 20000
 ```
@@ -184,6 +242,7 @@ let shortValue = shortWrap.unwrap(); // 20000
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let intWrap = ESValue.wrapInt(2147483647);
 let intValue = intWrap.unwrap(); // 2147483647
 ```
@@ -206,6 +265,7 @@ let intValue = intWrap.unwrap(); // 2147483647
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let longWrap = ESValue.wrapLong(9223372036854775807);
 let longValue = longWrap.unwrap(); // 9223372036854775807
 ```
@@ -228,6 +288,7 @@ let longValue = longWrap.unwrap(); // 9223372036854775807
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let lon = Number.MAX_SAFE_INTEGER + 100;
 let lossyWrap = ESValue.wrapLongLossy(lon as long);
 let lossyValue = lossyWrap.isNumber(); // true
@@ -251,6 +312,7 @@ let lossyValue = lossyWrap.isNumber(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let flo: float = 3.1415927;
 let floatWrap = ESValue.wrapFloat(flo);
 let floatValue = floatWrap.unwrap(); // 3.1415927
@@ -274,6 +336,7 @@ let floatValue = floatWrap.unwrap(); // 3.1415927
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let doubleWrap = ESValue.wrapDouble(3.14159265358);
 let doubleValue = doubleWrap.unwrap(); // 3.14159265358
 ```
@@ -296,11 +359,11 @@ let doubleValue = doubleWrap.unwrap(); // 3.14159265358
 
 示例代码：
 ```typescript
-// file1.ets
+// ArkTS-Dyn file1.ets
 class A{
 }
 export let dynamicObject = new A();
-// file2.ets
+// ArkTS-Sta file2.ets
 'use static'
 import { dynamicObject } from 'file1';
 
@@ -320,6 +383,7 @@ let raw = objVal.isObject(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let numVal = ESValue.wrapNumber(42);
 let raw = numVal.unwrap(); // 42 (number)
 ```
@@ -336,6 +400,7 @@ let raw = numVal.unwrap(); // 42 (number)
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBoolean(true);
 let isBool = val.isBoolean(); // true
 ```
@@ -352,6 +417,7 @@ let isBool = val.isBoolean(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapString('text');
 let isStringValue = val.isString(); // true
 ```
@@ -368,6 +434,7 @@ let isStringValue = val.isString(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapNumber(3.14);
 let isNumValue = val.isNumber(); // true
 ```
@@ -384,6 +451,7 @@ let isNumValue = val.isNumber(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBigInt(100n);
 let isBigIntValue = val.isBigInt(); // true
 ```
@@ -400,6 +468,7 @@ let isBigIntValue = val.isBigInt(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Undefined;
 let isUndefinedValue = val.isUndefined(); // true
 ```
@@ -416,6 +485,7 @@ let isUndefinedValue = val.isUndefined(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Null;
 let isNullValue = val.isNull(); // true
 ```
@@ -432,6 +502,7 @@ let isNullValue = val.isNull(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let obj = ESValue.instantiateEmptyObject();
 let isStaticObj = obj.isStaticObject(); // true
 ```
@@ -448,11 +519,11 @@ let isStaticObj = obj.isStaticObject(); // true
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ets
 class A {};
 export let a = new A();
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('a');
 let isECMAObj = obj.isECMAObject(); // true
 ```
@@ -469,6 +540,7 @@ let isECMAObj = obj.isECMAObject(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let staticObj = ESValue.instantiateEmptyObject();
 let isStaObj = staticObj.isObject(); // true
 ```
@@ -485,10 +557,10 @@ let isStaObj = staticObj.isObject(); // true
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ets
 export function foo(){}
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let func = module.getProperty('foo');
 let isFunc = func.isFunction(); // true
 ```
@@ -505,6 +577,7 @@ let isFunc = func.isFunction(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBoolean(true);
 let boolVal = val.toBoolean(); // true
 ```
@@ -521,6 +594,7 @@ let boolVal = val.toBoolean(); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapString('hello');
 let strValue = val.toString(); // 'hello'
 ```
@@ -537,6 +611,7 @@ let strValue = val.toString(); // 'hello'
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapNumber(42);
 let numVal = val.toNumber(); // 42
 ```
@@ -553,6 +628,7 @@ let numVal = val.toNumber(); // 42
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBigInt(100n);
 let bigValue = val.toBigInt(); // 100n
 ```
@@ -569,6 +645,7 @@ let bigValue = val.toBigInt(); // 100n
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Undefined;
 let undefValue = val.toUndefined(); // undefined
 ```
@@ -585,6 +662,7 @@ let undefValue = val.toUndefined(); // undefined
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Null;
 let nullValue = val.toNull(); // null
 ```
@@ -601,6 +679,7 @@ let nullValue = val.toNull(); // null
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 class A {};
 let objA = ESValue.wrap(new A());
 let obj = objA.toStaticObject();
@@ -625,6 +704,7 @@ let obj = objA.toStaticObject();
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
 let res = ESValue.areEqual(val1, val2); // true (抽象相等)
@@ -649,6 +729,7 @@ let res = ESValue.areEqual(val1, val2); // true (抽象相等)
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
 let res = ESValue.areStrictlyEqual(val1, val2); // false
@@ -672,6 +753,7 @@ let res = ESValue.areStrictlyEqual(val1, val2); // false
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
 let res = val1.isEqualTo(val2); // true
@@ -695,6 +777,7 @@ let res = val1.isEqualTo(val2); // true
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapNumber(42);
 let res = val1.isStrictlyEqualTo(val2); // true
@@ -718,7 +801,7 @@ let res = val1.isStrictlyEqualTo(val2); // true
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Sta file1.ets
 export class User {
     name: string;
     id: number;
@@ -727,8 +810,8 @@ export class User {
         this.id = id;
     }
 }
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let dynUser = module.getProperty('User');
 let instance = dynUser.instantiate('hello', ESValue.wrapNumber(32));
 ```
@@ -745,6 +828,7 @@ let instance = dynUser.instantiate('hello', ESValue.wrapNumber(32));
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let obj = ESValue.instantiateEmptyObject();
 obj.setProperty('key', ESValue.wrapString('value'));
 ```
@@ -761,6 +845,7 @@ obj.setProperty('key', ESValue.wrapString('value'));
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let arr = ESValue.instantiateEmptyArray();
 arr.invokeMethod('push', ESValue.wrapNumber(1));
 arr.invokeMethod('push', ESValue.wrapNumber(2));
@@ -784,12 +869,12 @@ arr.invokeMethod('push', ESValue.wrapNumber(2));
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let A: Record<string, number> = {
     'property1': 1,
     'property2': 2
 };
-// file2.ets
+// ArkTS-Sta file2.ets
 let jsObjectA = module.getProperty('A');
 ```
 ---
@@ -811,10 +896,10 @@ let jsObjectA = module.getProperty('A');
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let jsArray = ['foo', 1, true];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsArray = module.getProperty('jsArray');
 let val = jsArray.getProperty(2); // true
 ```
@@ -837,10 +922,10 @@ let val = jsArray.getProperty(2); // true
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let jsArray = ['foo', 1, true];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsArray = module.getProperty('jsArray');
 let val = jsArray.getProperty(ESValue.wrapNumber(2)); // true
 ```
@@ -858,12 +943,12 @@ let val = jsArray.getProperty(ESValue.wrapNumber(2)); // true
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let A: Record<string, number> = {
     'property1': 1,
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = 'property1';
@@ -883,10 +968,10 @@ jsObjectA.setProperty(property, value);
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let jsArray1 = ['foo', 1, true];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsArray1 = module.getProperty('jsArray1');
 let value = ESValue.wrapBoolean(false);
 jsArray1.setProperty(2, value);
@@ -905,12 +990,12 @@ jsArray1.setProperty(2, value);
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let A: Record<string, number> = {
     'property1': 1,
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = ESValue.wrapString('property1');
@@ -935,14 +1020,14 @@ jsObjectA.setProperty(property, value);
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
 export let key = 'idx';
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let key = module.getProperty('key');
 let hasIdx = obj.hasProperty(key);
@@ -966,13 +1051,13 @@ let hasIdx = obj.hasProperty(key);
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let hasIdx = obj.hasProperty('idx');
 ```
@@ -995,14 +1080,14 @@ let hasIdx = obj.hasProperty('idx');
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
 export let key = 'idx';
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let key = module.getProperty('key');
 let hasIdx = obj.hasOwnProperty(key);
@@ -1026,13 +1111,13 @@ let hasIdx = obj.hasOwnProperty(key);
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Sta file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Dyn file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let hasIdx = obj.hasOwnProperty('idx');
 ```
@@ -1055,10 +1140,10 @@ let hasIdx = obj.hasOwnProperty('idx');
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export function jsFunc (): number { return 6; };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsFunc = module.getProperty('jsFunc');
 let result = jsFunc.invoke();
 ```
@@ -1082,7 +1167,7 @@ let result = jsFunc.invoke();
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let customIterable = {
     [Symbol.iterator]: function() {
         let step = 0;
@@ -1097,8 +1182,8 @@ export let customIterable = {
         };
     }
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let iterableObj = module.getProperty('customIterable');
 let global = ESValue.getGlobal();
 let symbol = global.getProperty('Symbol');
@@ -1126,14 +1211,14 @@ let iterator = symbolIteratorMethod.invokeWithRecv(iterableObj);
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let objWithFunc = {
     'func': function () {
         return 'hello';
     }
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsObjWithFunc = module.getProperty('objWithFunc');
 let result = jsObjWithFunc.invokeMethod('func');
 ```
@@ -1150,10 +1235,10 @@ let result = jsObjWithFunc.invokeMethod('func');
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let result: String = new String();
 for (const key of jsIterableObject.keys()) {
@@ -1173,10 +1258,10 @@ for (const key of jsIterableObject.keys()) {
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let result: number = 0;
 for (const value of jsIterableObject.values()) {
@@ -1196,10 +1281,10 @@ for (const value of jsIterableObject.values()) {
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let resultkey: String = new String();
 let resultValue: number = 0;
@@ -1227,12 +1312,12 @@ for (const entry of jsIterableObject.entries()) {
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export class User {
 	ID = 123;
 }
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsUser = module.getProperty('User');
 let user = jsUser.instantiate(100);
 let res =  user.instanceOf(jsUser);
@@ -1254,30 +1339,6 @@ ESValue.wrapNumber(42).typeOf();   // 'number'
 ESValue.Null.typeOf();       // 'null'
 ```
 ---
-### load
-`public static load(module: string): ESValue`  
-根据指定路径名加载ArkTS-Dyn的模块，返回用ESValue包装的对象。
-
-参数：
-
-| 参数名 |  类型  | 必填 |     说明     |
-| :----: | :----: | :--: | :----------: |
-| module | string |  是  | 模块路径或标识 |
-
-返回值：
-
-|   类型    |          说明          |
-| :-------: | :--------------------: |
-|   ESValue | ESValue包装ArkTS-Dyn的模块 |
-
-示例代码：
-```typescript
-// file1.js
-let num = 1;
-// file2.ets
-let module = ESValue.load('file1');
-```
----
 ### getGlobal
 `public static getGlobal(): ESValue`  
 获取ArkTS-Dyn的globalThis对象，返回用ESValue包装的对象。
@@ -1290,6 +1351,7 @@ let module = ESValue.load('file1');
 
 示例代码：
 ```typescript
+// ArkTS-Sta
 let global = ESValue.getGlobal();
 ```
 ---
@@ -1305,12 +1367,12 @@ let global = ESValue.getGlobal();
 
 示例代码：
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export async function getPromiseNumber(): Promise<number> {
     return Promise.resolve(42);
 }
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let sleepRetNumber = module.getProperty('getPromiseNumber');
 let res = sleepRetNumber.invoke().isPromise();
 ```
@@ -1338,16 +1400,16 @@ let res = sleepRetNumber.invoke().isPromise();
 
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export async function chainPromise(): Promise<number> {
     return Promise.resolve(1)
         .then(x => x + 1)
         .then(x => x * 2)
         .then(x => x);
 }
-// file2.ets
+// ArkTS-Sta file2.ets
 async function foo(){
-    let module = ESValue.load('file1');
+    let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
     let chainFunc = module.getProperty('chainPromise');
     let p = chainFunc.invoke().toPromise();
     let resESValue = await p; 
@@ -1367,10 +1429,10 @@ async function foo(){
 
 示例代码：
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let jsIterable = ['a', 'b', 'c', 'd'];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterable = module.getProperty('jsIterable');
 let result: String = new String();
 for (const elem of jsIterable) {

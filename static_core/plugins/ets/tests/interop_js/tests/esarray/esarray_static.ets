@@ -462,7 +462,7 @@ function testFlat(): boolean {
 }
 
 function testESValueConsumeESArray(): boolean {
-    let module = ESValue.load('testDecl');
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/esarray/esarray_dynamic');
     let esFuncArrayTestFunc = module.getProperty('esFuncArrayTest');
     let wrappedArray = ESValue.wrap(getOrderArray(5));
     let wrappedCallback = ESValue.wrap(consumeESArray as Object);
@@ -471,7 +471,7 @@ function testESValueConsumeESArray(): boolean {
 }
 
 function testESValueReturnESArray(): boolean {
-    let module = ESValue.load('testDecl');
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/esarray/esarray_dynamic');
     let returnArray = module.getProperty('returnSameArray');
     let result = returnArray.invoke();
     let arr: es.Array<number> = result.unwrap() as es.Array<number>;

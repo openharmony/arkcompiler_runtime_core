@@ -48,6 +48,7 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls);
 std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module);
 JSValue *JSRuntimeLoadModule(EtsString *module);
 JSValue *JSRuntimeLoadModule(EtsString *module, EtsString *abcFilePath);
+JSValue *JSRuntimeLoadModuleWithBundleName(EtsString *module, EtsString *bundleName);
 uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs);
 uint8_t JSRuntimeHasProperty(EtsObject *object, EtsString *name);
 JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property);

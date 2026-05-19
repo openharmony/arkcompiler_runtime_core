@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('starray');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/starray/ts_to_ets/starray');
 
 function testReturnArray(): boolean {
     let returnArray = module.getProperty('returnArray');

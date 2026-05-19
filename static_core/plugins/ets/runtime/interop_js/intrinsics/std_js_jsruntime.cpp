@@ -209,6 +209,11 @@ JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)
     return JSRuntimeLoadModule(module);
 }
 
+JSValue *JSRuntimeLoadModuleWithBundleNameIntrinsic(EtsString *module, EtsString *bundleName)
+{
+    return JSRuntimeLoadModuleWithBundleName(module, bundleName);
+}
+
 uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 {
     return JSRuntimeStrictEqual(lhs, rhs);

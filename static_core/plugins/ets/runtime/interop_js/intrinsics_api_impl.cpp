@@ -14,6 +14,8 @@
  */
 
 #include "runtime/include/mem/panda_string.h"
+#include <algorithm>
+#include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/object_header.h"
@@ -23,11 +25,14 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
+#include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/xref_object_operator.h"
 #include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "common_interfaces/objects/base_type.h"
@@ -624,6 +629,119 @@ JSValue *JSRuntimeLoadModule(EtsString *module, [[maybe_unused]] EtsString *abcF
 JSValue *JSRuntimeLoadModule(EtsString *module)
 {
     return JSRuntimeLoadModule(module, GetCallerABCPath());
+}
+
+static Class *GetEtsGlobalClass(EtsString *bundleName, InteropCtx *ctx, Method *callerMethod = nullptr)
+{
+    PandaString bundleNameStr = bundleName->GetMutf8();
+    std::replace(bundleNameStr.begin(), bundleNameStr.end(), '.', '/');
+    PandaString descriptor = "L" + bundleNameStr + "_dependency_ohmurl_map/ETSGLOBAL;";
+    ClassLinkerContext *linkerCtx = nullptr;
+    if (callerMethod != nullptr) {
+        linkerCtx = callerMethod->GetClass()->GetLoadContext();
+    } else {
+        linkerCtx = ctx->LinkerCtx();
+    }
+    return ctx->GetClassLinker()->GetClass(utf::CStringAsMutf8(descriptor.c_str()), true, linkerCtx);
+}
+
+static EtsString *GetMapValueByKey(ObjectHeader *mapObj, EtsString *key, EtsExecutionContext *executionCtx)
+{
+    if (mapObj == nullptr || key == nullptr) {
+        return nullptr;
+    }
+
+    // Get Map.get(key) method from cached Map class
+    auto *mapClass = PlatformTypes(executionCtx)->coreMap->GetRuntimeClass();
+    Method *baseMethod = PlatformTypes(executionCtx)->coreMapGet->GetPandaMethod();
+
+    if (!mapObj->IsInstanceOf(mapClass)) {
+        INTEROP_LOG(ERROR) << "mapObj is not an instance of std.core.Map";
+        return nullptr;
+    }
+
+    // Check if the method is not overridden, and resolve a proper method if necessary
+    auto *mapObjClass = mapObj->ClassAddr<Class>();
+    Method *method = mapObjClass->ResolveVirtualMethod(baseMethod);
+
+    // Prepare arguments: [this, key]
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    constexpr size_t NARGS = 2U;
+    std::array<Value, NARGS> args = {Value(mapObj), Value(key->GetCoreType())};
+
+    // Invoke method
+    Value result = method->Invoke(executionCtx->GetMT(), args.data());
+
+    if (executionCtx->GetMT()->HasPendingException()) {
+        INTEROP_LOG(ERROR) << "Exception thrown during Map.get";
+        return nullptr;
+    }
+
+    // Key not found (returns undefined/null)
+    ASSERT(result.IsReference());
+    if (result.GetAs<ObjectHeader *>() == nullptr) {
+        return nullptr;
+    }
+
+    // Convert result to EtsString
+    ObjectHeader *resultObj = result.GetAs<ObjectHeader *>();
+    auto *etsResultObj = EtsObject::FromCoreType(resultObj);
+    if (!etsResultObj->IsStringClass()) {
+        auto *stringClass = PlatformTypes(executionCtx)->coreString;
+        ThrowClassCastException(stringClass->GetRuntimeClass(), etsResultObj->GetClass()->GetRuntimeClass());
+        return nullptr;
+    }
+    return EtsString::FromEtsObject(etsResultObj);
+}
+
+static std::pair<EtsString *, EtsString *> GetOhmurlAndCallerABCPath(EtsString *moduleName, EtsString *bundleName)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *interopCtx = InteropCtx::Current(executionCtx);
+    if (interopCtx == nullptr) {
+        ThrowNoInteropContextException();
+        return {moduleName, nullptr};
+    }
+
+    EtsString *abcPath = GetCallerABCPath();
+    Class *klassEtsglobal = GetEtsGlobalClass(bundleName, interopCtx);
+    if (klassEtsglobal == nullptr) {
+        INTEROP_LOG(WARNING) << "Failed to get ETS global class, using moduleName for loading.";
+        return {moduleName, abcPath};
+    }
+
+    EtsClassLinker *etsClassLinker = executionCtx->GetPandaVM()->GetClassLinker();
+    EtsClass *etsKlass = EtsClass::FromRuntimeClass(klassEtsglobal);
+    if (!etsKlass->IsInitialized()) {
+        etsClassLinker->InitializeClass(executionCtx, etsKlass);
+    }
+
+    Field *ohmurlMapField = klassEtsglobal->GetStaticFieldByName(utf::CStringAsMutf8("map_ohmurl"));
+    ObjectHeader *ohmurlMapObj = nullptr;
+    if (ohmurlMapField != nullptr) {
+        if (ohmurlMapField->GetTypeId() == panda_file::Type::TypeId::REFERENCE) {
+            ohmurlMapObj = klassEtsglobal->GetFieldObject<true>(*ohmurlMapField);
+        } else {
+            INTEROP_LOG(ERROR) << "Field 'map_ohmurl' is not a reference type, expected Map";
+        }
+    }
+    EtsString *ohmurl = GetMapValueByKey(ohmurlMapObj, moduleName, executionCtx);
+    if (ohmurl == nullptr) {
+        INTEROP_LOG(ERROR) << "Ohmurl not found in ohmurl map with key: " << moduleName->GetMutf8();
+        ohmurl = moduleName;
+    }
+
+    return {ohmurl, abcPath};
+}
+
+JSValue *JSRuntimeLoadModuleWithBundleName(EtsString *module, EtsString *bundleName)
+{
+    auto [ohmurl, dynamicPath] = GetOhmurlAndCallerABCPath(module, bundleName);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (executionCtx->GetMT()->HasPendingException()) {
+        return nullptr;
+    }
+    return JSRuntimeLoadModule(ohmurl, dynamicPath);
 }
 
 uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs)

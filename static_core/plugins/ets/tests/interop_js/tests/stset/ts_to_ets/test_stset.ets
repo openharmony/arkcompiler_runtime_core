@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('stset');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/stset/ts_to_ets/stset');
 
 function testReturnSet(): boolean {
     let returnSet = module.getProperty('returnSet');

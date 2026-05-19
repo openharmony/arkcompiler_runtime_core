@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const module = ESValue.load('test_error');
+const module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_error/ts_to_ets/test_error');
 const throwRangeError = module.getProperty('throwRangeError');
 const throwRangeErrorWithMessage = module.getProperty('throwRangeErrorWithMessage');
 const throwReferenceError = module.getProperty('throwReferenceError');

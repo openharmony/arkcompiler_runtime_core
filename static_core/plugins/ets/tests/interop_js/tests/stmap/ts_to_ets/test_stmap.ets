@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('stmap');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/stmap/ts_to_ets/stmap');
 
 function testReturnMap(): boolean {
     let returnMap = module.getProperty('returnMap');

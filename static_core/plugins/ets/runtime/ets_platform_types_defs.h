@@ -176,6 +176,7 @@
     IM("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:LY;", coreRecordGet)  \
     IM("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}LY;:V", coreRecordSet) \
     TP("Lstd/core/Map;", coreMap)                                                                                     \
+    IM("Lstd/core/Map;", "get", "LY;:LY;", coreMapGet)                                                                \
     TP("Lstd/core/Set;", coreSet)                                                                                     \
     /* Iterators */                                                                                                   \
     TP("Lstd/core/MapIteratorImpl;", coreMapIteratorImpl)                                                             \

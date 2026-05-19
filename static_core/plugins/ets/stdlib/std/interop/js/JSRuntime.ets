@@ -547,6 +547,10 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
+    public static loadModuleWithBundleName(m: String, b: string): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     // ===================
     // Public API
     // ===================
