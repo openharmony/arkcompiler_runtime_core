@@ -28,6 +28,7 @@ type A = Testee
 
 function main() {
   let x = {{ins.init}};
+  arktest.assertTrue(x instanceof {{ins.check}})
 }
 
 {% endfor %}

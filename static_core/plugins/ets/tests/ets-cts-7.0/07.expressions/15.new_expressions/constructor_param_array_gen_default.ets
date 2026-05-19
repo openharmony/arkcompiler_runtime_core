@@ -25,6 +25,8 @@ desc: >-
     - Have a default value.
 ---*/
 
+let checked: boolean = false
+
 class A<T> extends Array<T> {
   i: {{c.type}}
   constructor(i : {{c.type}}) {
@@ -36,12 +38,15 @@ class C<T> {
   foo(element: T) {
     let arr = new T[1](element)
     arktest.assertEQ(arr.length, 1)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   let i = new A<Object>({{c.value}})
   new C<A<Object>>().foo(i)
+  arktest.assertTrue(checked)
 }
 
 {% endfor %}

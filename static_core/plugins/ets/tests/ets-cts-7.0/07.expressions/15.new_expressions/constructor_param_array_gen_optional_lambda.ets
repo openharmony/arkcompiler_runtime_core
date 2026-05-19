@@ -24,6 +24,7 @@ desc: >-
 
 ---*/
 
+let checked: boolean = false
 type foo = (i: Object|undefined) => Object|undefined
 
 class A<T> extends Array<T> {
@@ -40,9 +41,12 @@ class C<T> {
   foo() {
     let arr = new Array<T>()
     arktest.assertEQ(arr.length, 0)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   new C<A<Object>>().foo()
+  arktest.assertTrue(checked)
 }

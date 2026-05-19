@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,22 +13,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Creating an empty Array<T> succeeds without invoking an applicable
-    constructor for the element type.
-    {{c.doc}}
+    A new class instance expression creates a new object that is an instance of the specified class
+    and it is described in full details below.
 ---*/
 
-let checked: boolean = false
-{{c.decl}}
-
-function main(): void {
-  checked = false
-  new C<A>().foo()
-  arktest.assertTrue(checked)
+class C {
+  i: int = 0
+  j: string = ""
+  k: boolean = false
+  constructor(i: int, j: string, k: boolean) {
+    this.i = i
+    this.j = j
+    this.k = k
+  }
 }
 
-{% endfor %}
+function main() {
+  let i: C = new C(5, "str", true)
+  arktest.assertEQ(i.i, 5)
+  arktest.assertEQ(i.j, "str")
+  arktest.assertTrue(i.k)
+}

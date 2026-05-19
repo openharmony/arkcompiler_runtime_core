@@ -21,6 +21,8 @@ desc: >-
     type, even when that constructor has only non-default parameters.
 ---*/
 
+let checked: boolean = false
+
 {{c.decl}}
 
 class A<T> extends Array<T> {
@@ -31,11 +33,14 @@ class C<T> {
   foo() {
     let arr = new Array<T>()
     arktest.assertEQ(arr.length, 0)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   new C<A<Object>>().foo()
+  arktest.assertTrue(checked)
 }
 
 {% endfor %}
