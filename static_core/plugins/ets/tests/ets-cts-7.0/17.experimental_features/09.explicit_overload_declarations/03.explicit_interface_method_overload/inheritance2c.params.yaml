@@ -28,7 +28,7 @@ cases:
               foo1(p: C1) { return 'A.1' }
               foo(p: C1) { return 'A.2' }
               foo3(p: C1) { return 'A.3' }
-              // inherited overload foo { foo3, foo1, foo } // foo3(C1), foo1(C1), foo(C1)
+              // inherited overload foo { foo3, foo1, foo } // foo(C1), foo3(C1), foo1(C1)
           }
       main: |-
           let j: J = ((): J => new A)()
@@ -42,9 +42,9 @@ cases:
           arktest.assertEQ(k.foo(new C1), 'A.1')
 
           let a: A = ((): A => new A)()
-          arktest.assertEQ(a.foo(new C3), 'A.3')
-          arktest.assertEQ(a.foo(new C2), 'A.3')
-          arktest.assertEQ(a.foo(new C1), 'A.3')
+          arktest.assertEQ(a.foo(new C3), 'A.2')
+          arktest.assertEQ(a.foo(new C2), 'A.2')
+          arktest.assertEQ(a.foo(new C1), 'A.2')
 
     - decl: |-
           interface J {
@@ -96,13 +96,13 @@ cases:
           interface L extends K, M {
               foo(p: C1): string;
               foo3(p: C2): string;
-              // inherited overload foo { foo3, foo, foo1 } // foo3(C2), foo(C1), foo1(C1)
+              // inherited overload foo { foo3, foo, foo1 } // foo(C1), foo3(C2), foo1(C1)
           }
           class A implements L {
               foo1(p: C1) { return 'A.1' }
               foo(p: C1) { return 'A.2' }
               foo3(p: C1) { return 'A.3' }
-              // inherited overload foo { foo3, foo, foo1 } // foo3(C1), foo(C1), foo1(C1)
+              // inherited overload foo { foo3, foo, foo1 } // foo(C1), foo3(C1), foo1(C1)
           }
       main: |-
           let j: J = ((): J => new A)()
@@ -121,14 +121,14 @@ cases:
           arktest.assertEQ(m.foo(new C1), 'A.1')
 
           let l: L = ((): L => new A)()
-          arktest.assertEQ(l.foo(new C3), 'A.3')
-          arktest.assertEQ(l.foo(new C2), 'A.3')
+          arktest.assertEQ(l.foo(new C3), 'A.2')
+          arktest.assertEQ(l.foo(new C2), 'A.2')
           arktest.assertEQ(l.foo(new C1), 'A.2')
 
           let a: A = ((): A => new A)()
-          arktest.assertEQ(a.foo(new C3), 'A.3')
-          arktest.assertEQ(a.foo(new C2), 'A.3')
-          arktest.assertEQ(a.foo(new C1), 'A.3')
+          arktest.assertEQ(a.foo(new C3), 'A.2')
+          arktest.assertEQ(a.foo(new C2), 'A.2')
+          arktest.assertEQ(a.foo(new C1), 'A.2')
 
     - decl: |-
           interface J {

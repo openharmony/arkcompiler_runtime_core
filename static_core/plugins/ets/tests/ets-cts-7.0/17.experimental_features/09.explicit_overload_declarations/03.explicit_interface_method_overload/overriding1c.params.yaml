@@ -27,7 +27,7 @@ cases:
               foo1(p: C1) { return 'A.1' }
               foo(p: C2) { return 'A.2' }
               foo3(p: C3) { return 'A.3' }
-              // inherited overload foo { foo3, foo1, foo } // foo3(C3), foo1(C1), foo(C2)
+              // inherited overload foo { foo3, foo1, foo } // foo(C2), foo3(C3), foo1(C1)
           }
       main: |-
           let j: J = ((): J => new A)()
@@ -41,8 +41,8 @@ cases:
           arktest.assertEQ(k.foo(new C1), 'A.1')
 
           let a: A = ((): A => new A)()
-          arktest.assertEQ(a.foo(new C3), 'A.3')
-          arktest.assertEQ(a.foo(new C2), 'A.1')
+          arktest.assertEQ(a.foo(new C3), 'A.2')
+          arktest.assertEQ(a.foo(new C2), 'A.2')
           arktest.assertEQ(a.foo(new C1), 'A.1')
 
     - decl: |-
@@ -99,7 +99,7 @@ cases:
               foo1(p: C1) { return 'A.1' }
               foo(p: C2) { return 'A.2' }
               foo3(p: C3) { return 'A.3' }
-              // inherited overload foo { foo3, foo, foo1 } // foo3(C3), foo(C2), foo1(C1)
+              // inherited overload foo { foo3, foo, foo1 } // foo(C2), foo3(C3), foo1(C1)
           }
       main: |-
           let j: J = ((): J => new A)()
@@ -121,7 +121,7 @@ cases:
           arktest.assertEQ(l.foo(new C1), 'A.1')
 
           let a: A = ((): A => new A)()
-          arktest.assertEQ(a.foo(new C3), 'A.3')
+          arktest.assertEQ(a.foo(new C3), 'A.2')
           arktest.assertEQ(a.foo(new C2), 'A.2')
           arktest.assertEQ(a.foo(new C1), 'A.1')
 
@@ -139,7 +139,7 @@ cases:
               foo1(p: C1) { return 'A.1' }
               foo(p: C2) { return 'A.2' }
               foo3(p: C3) { return 'A.3' }
-              // inherited overload foo { foo3, foo1, foo } // foo3(C3), foo1(C1), foo(C2)
+              // inherited overload foo { foo3, foo1, foo } // foo(C2), foo3(C3), foo1(C1)
           }
       main: |-
           let j: J = {}
@@ -153,6 +153,6 @@ cases:
           arktest.assertEQ(k.foo(new C1), 'J.1')
 
           let a: A = {}
-          arktest.assertEQ(a.foo(new C3), 'A.3')
-          arktest.assertEQ(a.foo(new C2), 'A.1')
+          arktest.assertEQ(a.foo(new C3), 'A.2')
+          arktest.assertEQ(a.foo(new C2), 'A.2')
           arktest.assertEQ(a.foo(new C1), 'A.1')
