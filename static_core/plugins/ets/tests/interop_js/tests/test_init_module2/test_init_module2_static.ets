@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ function bar1() {
 
 
 function bar2() : boolean {
-    let module = ESValue.load('testDecl');
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_init_module2/test_init_module2_dynamic');
     let testNumber = module.getProperty(`testNumber`);
     return testNumber.toNumber() == 10;
 }

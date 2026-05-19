@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('union');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_union/ts_to_ets/union');
 let dynamicObj = module.getProperty('dynamicObj');
 let TestClass = module.getProperty("TestClass");
 

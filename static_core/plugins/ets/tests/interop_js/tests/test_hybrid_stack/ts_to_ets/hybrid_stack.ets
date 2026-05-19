@@ -50,7 +50,7 @@ let staLambdaFun2: () => void = () => {
     dyLambdaFun2();
 }
 
-let module = ESValue.load('testDecl');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_hybrid_stack/ts_to_ets/entry_stack');
 function staESFun1(): void {
     let dyES1 = module.getProperty('dyES1');
     dyES1.invoke(ESValue.wrap(() => {

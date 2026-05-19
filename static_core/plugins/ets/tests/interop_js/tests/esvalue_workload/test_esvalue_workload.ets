@@ -14,7 +14,7 @@
  */
 
 let ITERATIONS = 1000;
-let module = ESValue.load('ESValueWorkload');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/esvalue_workload/esvalue_workload');
 let fooInstance = module.getProperty('fooInstance');
 
 function testGetPropertyString50(): boolean {

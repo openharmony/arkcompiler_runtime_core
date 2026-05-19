@@ -14,6 +14,7 @@ Return Value:
 
 Example:
 ```typescript
+// ArkTS-Sta
 let undefinedVal = ESValue.Undefined;
 let isUndefinedVal = undefinedVal.isUndefined(); // true
 ```
@@ -33,7 +34,8 @@ Return Value:
 
 Example:
 
-```ts
+```typescript
+// ArkTS-Sta
 let nullVal = ESValue.Null;
 let isNullVal = nullVal.isNull(); // true
 ```
@@ -60,6 +62,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let trueVal = ESValue.wrapBoolean(true);
 let boolVal = trueVal.toBoolean(); // true
 ```
@@ -86,6 +89,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let strWrap = ESValue.wrapString('Hello');
 let strValue = strWrap.toString(); // 'Hello'
 ```
@@ -112,6 +116,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let numWrap = ESValue.wrapNumber(3.1415);
 let numValue = numWrap.toNumber(); // 3.1415
 ```
@@ -138,6 +143,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let bigWrap = ESValue.wrapBigInt(9007199254740991n);
 let bigValue = bigWrap.toBigInt(); // 9007199254740991n
 ```
@@ -164,6 +170,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let byteWrap = ESValue.wrapByte(100);
 let byteValue = byteWrap.unwrap(); // 100
 ```
@@ -190,6 +197,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let shortWrap = ESValue.wrapShort(20000);
 let shortValue = shortWrap.unwrap(); // 20000
 ```
@@ -216,6 +224,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let intWrap = ESValue.wrapInt(2147483647);
 let intValue = intWrap.unwrap(); // 2147483647
 ```
@@ -242,6 +251,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let longWrap = ESValue.wrapLong(9223372036854775807);
 let longValue = longWrap.unwrap(); // 9223372036854775807
 ```
@@ -268,6 +278,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let lon = Number.MAX_SAFE_INTEGER + 100;
 let lossyWrap = ESValue.wrapLongLossy(lon as long);
 let lossyValue = lossyWrap.isNumber(); // true
@@ -295,6 +306,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let flo: float = 3.1415927;
 let floatWrap = ESValue.wrapFloat(flo);
 let floatValue = floatWrap.unwrap(); // 3.1415927
@@ -322,6 +334,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let doubleWrap = ESValue.wrapDouble(3.14159265358);
 let doubleValue = doubleWrap.unwrap(); // 3.14159265358
 ```
@@ -348,11 +361,11 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ets
+// ArkTS-Dyn file1.ets
 class A{
 }
 export let dynamicObject = new A();
-// file2.ets
+// ArkTS-Sta file2.ets
 'use static'
 import { dynamicObject } from 'file1';
 
@@ -376,6 +389,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let numVal = ESValue.wrapNumber(42);
 let raw = numVal.unwrap(); // 42 (number)
 ```
@@ -396,6 +410,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBoolean(true);
 let isBool = val.isBoolean(); // true
 ```
@@ -416,6 +431,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapString('text');
 let isStringValue = val.isString(); // true
 ```
@@ -436,6 +452,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapNumber(3.14);
 let isNumValue = val.isNumber(); // true
 ```
@@ -456,6 +473,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBigInt(100n);
 let isBigIntValue = val.isBigInt(); // true
 ```
@@ -476,6 +494,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Undefined;
 let isUndefinedValue = val.isUndefined(); // true
 ```
@@ -496,6 +515,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Null;
 let isNullValue = val.isNull(); // true
 ```
@@ -516,6 +536,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let obj = ESValue.instantiateEmptyObject();
 let isStaticObj = obj.isStaticObject(); // true
 ```
@@ -536,11 +557,11 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ets
 class A {};
 export let a = new A();
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('a');
 let isECMAObj = obj.isECMAObject(); // true
 ```
@@ -561,6 +582,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let staticObj = ESValue.instantiateEmptyObject();
 let isStaObj = staticObj.isObject(); // true
 ```
@@ -581,10 +603,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ets
 export function foo(){}
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let func = module.getProperty('foo');
 let isFunc = func.isFunction(); // true
 ```
@@ -605,6 +627,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBoolean(true);
 let boolVal = val.toBoolean(); // true
 ```
@@ -625,6 +648,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapString('hello');
 let strValue = val.toString(); // 'hello'
 ```
@@ -645,6 +669,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapNumber(42);
 let numVal = val.toNumber(); // 42
 ```
@@ -665,6 +690,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.wrapBigInt(100n);
 let bigValue = val.toBigInt(); // 100n
 ```
@@ -685,6 +711,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Undefined;
 let undefValue = val.toUndefined(); // undefined
 ```
@@ -705,6 +732,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val = ESValue.Null;
 let nullValue = val.toNull(); // null
 ```
@@ -725,6 +753,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 class A {};
 let objA = ESValue.wrap(new A());
 let obj = objA.toStaticObject();
@@ -753,6 +782,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
 let res = ESValue.areEqual(val1, val2); // true (abstract equality)
@@ -781,6 +811,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
 let res = ESValue.areStrictlyEqual(val1, val2); // false
@@ -808,6 +839,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapString('42');
 let res = val1.isEqualTo(val2); // true
@@ -835,6 +867,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let val1 = ESValue.wrapNumber(42);
 let val2 = ESValue.wrapNumber(42);
 let res = val1.isStrictlyEqualTo(val2); // true
@@ -862,7 +895,7 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Sta file1.ets
 export class User {
     name: string;
     id: number;
@@ -871,8 +904,8 @@ export class User {
         this.id = id;
     }
 }
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let dynUser = module.getProperty('User');
 let instance = dynUser.instantiate('hello', ESValue.wrapNumber(32));
 ```
@@ -893,6 +926,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let obj = ESValue.instantiateEmptyObject();
 obj.setProperty('key', ESValue.wrapString('value'));
 ```
@@ -913,6 +947,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let arr = ESValue.instantiateEmptyArray();
 arr.invokeMethod('push', ESValue.wrapNumber(1));
 arr.invokeMethod('push', ESValue.wrapNumber(2));
@@ -940,12 +975,12 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let A: Record<string, number> = {
     'property1': 1,
     'property2': 2
 };
-// file2.ets
+// ArkTS-Sta file2.ets
 let jsObjectA = module.getProperty('A');
 ```
 
@@ -971,10 +1006,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let jsArray = ['foo', 1, true];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsArray = module.getProperty('jsArray');
 let val = jsArray.getProperty(2); // true
 ```
@@ -1001,10 +1036,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let jsArray = ['foo', 1, true];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsArray = module.getProperty('jsArray');
 let val = jsArray.getProperty(ESValue.wrapNumber(2)); // true
 ```
@@ -1026,12 +1061,12 @@ Parameters:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let A: Record<string, number> = {
     'property1': 1,
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = 'property1';
@@ -1055,10 +1090,10 @@ Parameters:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let jsArray1 = ['foo', 1, true];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsArray1 = module.getProperty('jsArray1');
 let value = ESValue.wrapBoolean(false);
 jsArray1.setProperty(2, value);
@@ -1081,12 +1116,12 @@ Parameters:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let A: Record<string, number> = {
     'property1': 1,
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsObjectA = module.getProperty('A');
 let value = ESValue.wrapNumber(5);
 let property = ESValue.wrapString('property1');
@@ -1115,14 +1150,14 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
 export let key = 'idx';
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let key = module.getProperty('key');
 let hasIdx = obj.hasProperty(key);
@@ -1150,13 +1185,13 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let hasIdx = obj.hasProperty('idx');
 ```
@@ -1183,14 +1218,14 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
 export let key = 'idx';
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let key = module.getProperty('key');
 let hasIdx = obj.hasOwnProperty(key);
@@ -1218,13 +1253,13 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Sta file1.ts
 class dynamicObjectA {
     idx: number = 0
 }
 export let dyObj = new dynamicObjectA();
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Dyn file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let obj = module.getProperty('dyObj');
 let hasIdx = obj.hasOwnProperty('idx');
 ```
@@ -1251,10 +1286,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export function jsFunc (): number { return 6; };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsFunc = module.getProperty('jsFunc');
 let result = jsFunc.invoke();
 ```
@@ -1282,7 +1317,7 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let customIterable = {
     [Symbol.iterator]: function() {
         let step = 0;
@@ -1297,8 +1332,8 @@ export let customIterable = {
         };
     }
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let iterableObj = module.getProperty('customIterable');
 let global = ESValue.getGlobal();
 let symbol = global.getProperty('Symbol');
@@ -1330,14 +1365,14 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export let objWithFunc = {
     'func': function () {
         return 'hello';
     }
 };
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsObjWithFunc = module.getProperty('objWithFunc');
 let result = jsObjWithFunc.invokeMethod('func');
 ```
@@ -1358,10 +1393,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let result: String = new String();
 for (const key of jsIterableObject.keys()) {
@@ -1385,10 +1420,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let result: number = 0;
 for (const value of jsIterableObject.values()) {
@@ -1412,10 +1447,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let testItetatorObject = {'a': 1, 'b': 2, 'c' : 3};
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterableObject = module.getProperty('testItetatorObject');
 let resultkey: String = new String();
 let resultValue: number = 0;
@@ -1447,12 +1482,12 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export class User {
 	ID = 123;
 }
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsUser = module.getProperty('User');
 let user = jsUser.instantiate(100);
 let res =  user.instanceOf(jsUser);
@@ -1482,14 +1517,43 @@ ESValue.Null.typeOf();       // 'null'
 
 ### load
 
-`public static load(module: string): ESValue`  
-Load the ArkTS-Dyn module according to the specified path name and return the object wrapped by ESValue.
+`public static load(sdkModule: string): ESValue`  
+Load the ArkTS-Dyn SDK module according to the specified path and return the object wrapped by ESValue.
 
 Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :------------: | :----: | :------: | :-----------------: |
-| module | string | Yes | The module path or identifier |
+| sdkModule | string | Yes | The SDK module to load |
+
+Return Value:
+
+| Type | Description |
+| :-------: | :----------------------------: |
+| ESValue | The ArkTS-Dyn SDK module wrapped by ESValue |
+
+Example:
+
+```typescript
+// ArkTS-Sta
+let module = ESValue.load('@ohos.hilog');
+let def = module.getProperty('default'); // For SDK modules with default export, need to get the 'default' property first
+def.invokeMethod('info', 0x0000, 'testTag', 'hilog.invokeMethod'); // Call hilog.info() method
+```
+
+-----
+
+### load
+
+`public static load(module: string, bundleName: string): ESValue`  
+Load the ArkTS-Dyn module according to the absolute path of the module and the bundle name, and return the object wrapped by ESValue.
+
+Parameters:
+
+| Parameter Name | Type | Required | Description |
+| :------------: | :----: | :------: | :-----------------: |
+| module | string | Yes | The absolute path of the ArkTS-Dyn module to load |
+| bundleName | string | Yes | The bundle name of the ArkTS-Dyn module to load |
 
 Return Value:
 
@@ -1500,10 +1564,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
-let num = 1;
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Dyn file1.ets
+export let num: number = 1
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue'); // module path is the path of file1 in the project, bundleName is the bundle name of file1
 ```
 
 -----
@@ -1522,6 +1586,7 @@ Return Value:
 Example:
 
 ```typescript
+// ArkTS-Sta
 let global = ESValue.getGlobal();
 ```
 
@@ -1541,12 +1606,12 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export async function getPromiseNumber(): Promise<number> {
     return Promise.resolve(42);
 }
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let sleepRetNumber = module.getProperty('getPromiseNumber');
 let res = sleepRetNumber.invoke().isPromise();
 ```
@@ -1576,16 +1641,16 @@ Return Value:
 Example:
 
 ```typescript
-// file1.ts
+// ArkTS-Dyn file1.ts
 export async function chainPromise(): Promise<number> {
     return Promise.resolve(1)
         .then(x => x + 1)
         .then(x => x * 2)
         .then(x => x);
 }
-// file2.ets
+// ArkTS-Sta file2.ets
 async function foo(){
-    let module = ESValue.load('file1');
+    let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
     let chainFunc = module.getProperty('chainPromise');
     let p = chainFunc.invoke().toPromise();
     let resESValue = await p; 
@@ -1609,10 +1674,10 @@ Return Value:
 Example:
 
 ```typescript
-// file1.js
+// ArkTS-Dyn file1.js
 export let jsIterable = ['a', 'b', 'c', 'd'];
-// file2.ets
-let module = ESValue.load('file1');
+// ArkTS-Sta file2.ets
+let module = ESValue.load('staticLibrary/src/main/ets/file1', 'com.example.esvalue');
 let jsIterable = module.getProperty('jsIterable');
 let result: String = new String();
 for (const elem of jsIterable) {

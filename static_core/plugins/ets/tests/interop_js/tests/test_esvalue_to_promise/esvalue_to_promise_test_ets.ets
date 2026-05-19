@@ -19,7 +19,8 @@ function assertWithLog(condition: boolean, testName: string): void {
 }
 
 async function checkToPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let sleepRetNumber = module.getProperty('sleepRetNumber');
     let p = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
     let res = await p;
@@ -27,7 +28,8 @@ async function checkToPromise(): Promise<void> {
 }
 
 async function checkToNumber(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let getPromiseNumber = module.getProperty('getPromiseNumber');
     let p = getPromiseNumber.invoke().toPromise();
     let res = false;
@@ -40,7 +42,8 @@ async function checkToNumber(): Promise<void> {
 }
 
 async function checkToString(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let getPromiseString = module.getProperty('getPromiseString');
     let p = getPromiseString.invoke().toPromise();
     let res = false;
@@ -53,7 +56,8 @@ async function checkToString(): Promise<void> {
 }
 
 async function checkToBoolean(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let getPromiseBoolean = module.getProperty('getPromiseBoolean');
     let p = getPromiseBoolean.invoke().toPromise();
     let res = false;
@@ -66,7 +70,8 @@ async function checkToBoolean(): Promise<void> {
 }
 
 async function checkToBigInt(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let getPromiseBigInt = module.getProperty('getPromiseBigInt');
     let p = getPromiseBigInt.invoke().toPromise();
     let res = false;
@@ -79,7 +84,8 @@ async function checkToBigInt(): Promise<void> {
 }
 
 function testInteropRejectStringCatch(): int {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let func = module.getProperty('asyncFunctionRejectAndFinallyString')
     let rejectedPromise = func.invoke().toPromise()
     rejectedPromise.catch((res: Error): void => {
@@ -94,7 +100,8 @@ function testInteropRejectStringCatch(): int {
 }
 
 function testInteropRejectStringThen(): int {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let func = module.getProperty('asyncFunctionRejectAndFinallyString')
     let rejectedPromise = func.invoke().toPromise()
     rejectedPromise.then(
@@ -111,7 +118,8 @@ function testInteropRejectStringThen(): int {
 }
 
 function testInteropFinally(): int {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let func = module.getProperty('asyncFunctionRejectAndFinallyString')
     let rejectedPromise = func.invoke().toPromise()
     rejectedPromise.finally((): void => {
@@ -121,7 +129,8 @@ function testInteropFinally(): int {
 }
 
 async function testInteropAll(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let asyncArrayFunctionBoolean = module.getProperty('asyncArrayFunctionBoolean');
     let asyncArrayFunctionBoolean2 = module.getProperty('asyncArrayFunctionBoolean2');
     const results = await Promise.all([asyncArrayFunctionBoolean.invoke().toPromise(), asyncArrayFunctionBoolean2.invoke().toPromise()]);
@@ -131,7 +140,8 @@ async function testInteropAll(): Promise<void> {
 }
 
 async function checkNestedPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let nestedPromiseFunc = module.getProperty('nestedPromise');
     let p = nestedPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -139,7 +149,8 @@ async function checkNestedPromise(): Promise<void> {
 }
 
 async function checkRaceTest(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let raceFunc = module.getProperty('raceTest');
     let p = raceFunc.invoke().toPromise();
     let res = await p;
@@ -147,7 +158,8 @@ async function checkRaceTest(): Promise<void> {
 }
 
 async function checkAllSettledTest(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let allSettledFunc = module.getProperty('allSettledTest');
     let p = allSettledFunc.invoke().toPromise();
     let res = await p;
@@ -167,7 +179,8 @@ async function checkAllSettledTest(): Promise<void> {
 }
 
 async function checkChainTest(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let chainFunc = module.getProperty('chainTest');
     let p = chainFunc.invoke().toPromise();
     let res = await p;
@@ -175,7 +188,8 @@ async function checkChainTest(): Promise<void> {
 }
 
 async function checkObjectPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let objectPromiseFunc = module.getProperty('objectPromise');
     let p = objectPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -191,7 +205,8 @@ async function checkObjectPromise(): Promise<void> {
 }
 
 async function checkArrayPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let arrayPromiseFunc = module.getProperty('arrayPromise');
     let p = arrayPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -199,7 +214,8 @@ async function checkArrayPromise(): Promise<void> {
 }
 
 async function checkNanPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let nanPromiseFunc = module.getProperty('nanPromise');
     let p = nanPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -209,7 +225,8 @@ async function checkNanPromise(): Promise<void> {
 }
 
 async function checkInfinityPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let infinityPromiseFunc = module.getProperty('infinityPromise');
     let p = infinityPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -219,7 +236,8 @@ async function checkInfinityPromise(): Promise<void> {
 }
 
 async function checkNullPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let nullPromiseFunc = module.getProperty('nullPromise');
     let p = nullPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -227,7 +245,8 @@ async function checkNullPromise(): Promise<void> {
 }
 
 async function checkUndefinedPromise(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let undefinedPromiseFunc = module.getProperty('undefinedPromise');
     let p = undefinedPromiseFunc.invoke().toPromise();
     let res = await p;
@@ -235,7 +254,8 @@ async function checkUndefinedPromise(): Promise<void> {
 }
 
 async function checkThrowTypeError(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let throwFunc = module.getProperty('throwError');
     let p = throwFunc.invoke().toPromise();
     let res = false;
@@ -246,7 +266,8 @@ async function checkThrowTypeError(): Promise<void> {
 }
 
 async function checkThrowNullError(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let throwFunc = module.getProperty('throwNullError');
     let p = throwFunc.invoke().toPromise();
     let res = false;
@@ -258,7 +279,8 @@ async function checkThrowNullError(): Promise<void> {
 }
 
 async function checkAwaitCatch(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let awaitCatchFunc = module.getProperty('awaitCatch');
     let p = awaitCatchFunc.invoke().toPromise();
     let res = await p;
@@ -266,7 +288,8 @@ async function checkAwaitCatch(): Promise<void> {
 }
 
 async function checkTimeoutSuccess(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let timeoutFunc = module.getProperty('timeoutSuccessTest');
     let p = timeoutFunc.invoke().toPromise();
     let res = await p;
@@ -274,7 +297,8 @@ async function checkTimeoutSuccess(): Promise<void> {
 }
 
 async function checkTimeoutFail(): Promise<void> {
-    let module = ESValue.load('esvalue_to_promise_test');
+    let module = ESValue.load(
+        '../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test');
     let timeoutFunc = module.getProperty('timeoutFailTest');
     let p = timeoutFunc.invoke().toPromise();
     let res = false;

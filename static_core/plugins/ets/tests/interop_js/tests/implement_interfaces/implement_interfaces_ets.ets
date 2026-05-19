@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 //NOTE(andreypetukhov) enable after fixibng #12808
 
-let module = ESValue.load('arkts_test_class')
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/implement_interfaces/arkts_class')
 let arkTestClass = module.getProperty('ArkTestClass');
 
 function arktsClassGetProperty(): boolean {

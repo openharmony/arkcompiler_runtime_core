@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 let global = ESValue.getGlobal();
 let gtestEnv = global.getProperty("gtest_env");
-let module = ESValue.load('main_js');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor_as_arg/main');
 
 let tsInt = module.getProperty('tsInt');
 let IIFECreateClassMain = module.getProperty('IIFECreateClassMain');

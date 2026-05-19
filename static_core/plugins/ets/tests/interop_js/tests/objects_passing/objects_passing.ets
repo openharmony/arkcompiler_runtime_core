@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 // Pass ArkTS object to JS (wrapping) (ArkTS calls TS)
 
-let module = ESValue.load('js_import')
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/objects_passing/objects_passing')
 let updateObjectId = module.getProperty('updateObjectId');
 let getOuterObj = module.getProperty('getOuterObj');
 let testOuterObject = module.getProperty('testOuterObject');

@@ -439,8 +439,8 @@ export final class ESValue {
         return typeof this.ev;
     }
 
-    public static load(module: string): ESValue {
-        return new ESValue(JSRuntime.loadModule(module));
+    public static load(module: string, bundleName: string = ""): ESValue {
+        return new ESValue(JSRuntime.loadModuleWithBundleName(module, bundleName));
     }
 
     public static getGlobal(): ESValue {
