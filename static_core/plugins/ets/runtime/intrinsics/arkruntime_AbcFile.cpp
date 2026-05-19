@@ -32,6 +32,11 @@
 
 namespace ark::ets::intrinsics {
 
+static constexpr const char *HSP_SUFFIX = ".hsp";
+static constexpr const char *HAP_SUFFIX = ".hap";
+static constexpr const char *PACKAGE_ABC_PATH = "/ets/modules_static.abc";
+static constexpr const char *PACKAGE_ABC_ENTRY = "ets/modules_static.abc";
+
 static EtsAbcFile *CreateAbcFile(EtsExecutionContext *executionCtx, ClassLinkerContext *ctx,
                                  std::unique_ptr<const panda_file::File> &&pf)
 {
@@ -43,10 +48,21 @@ static EtsAbcFile *CreateAbcFile(EtsExecutionContext *executionCtx, ClassLinkerC
     return abcFile;
 }
 
+static bool EndsWith(const std::string &path, const char *suffix)
+{
+    const std::string_view suffixStr(suffix);
+    return path.length() >= suffixStr.length() &&
+           path.compare(path.length() - suffixStr.length(), suffixStr.length(), suffixStr) == 0;
+}
+
 static bool IsHspPath(const std::string &path)
 {
-    std::string suffix = ".hsp";
-    return std::equal(suffix.rbegin(), suffix.rend(), path.rbegin());
+    return EndsWith(path, HSP_SUFFIX);
+}
+
+static bool IsHapPath(const std::string &path)
+{
+    return EndsWith(path, HAP_SUFFIX);
 }
 
 static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &extractor,
@@ -60,47 +76,38 @@ static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &ext
     return true;
 }
 
-static bool GetHspPath(const std::string &pathStr, EtsExecutionContext *executionCtx,
-                       std::unique_ptr<const panda_file::File> &pf)
+static std::string GetAbcPathFromPackagePath(const std::string &packagePath, const char *suffix)
 {
-    std::string hspPath = pathStr;
-    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
+    return packagePath.substr(0, packagePath.length() - std::strlen(suffix)).append(PACKAGE_ABC_PATH);
+}
+
+static bool GetPackagePath(const std::string &pathStr, EtsExecutionContext *executionCtx,
+                           std::unique_ptr<const panda_file::File> &pf, const char *suffix, bool isHsp)
+{
+    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(pathStr);
     if (!CheckExtractor(extractor, executionCtx, pathStr)) {
         return false;
     }
-    std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
-    auto safeData = extractor->GetSafeDataForHsp(abcPath);
+    std::string abcPath = GetAbcPathFromPackagePath(pathStr, suffix);
+    auto safeData = isHsp ? extractor->GetSafeDataForHsp(abcPath) : extractor->GetSafeData(PACKAGE_ABC_ENTRY);
     if (safeData == nullptr) {
-        LOG(ERROR, RUNTIME) << "Failed to get safe data from HSP archive: " << abcPath;
+        LOG(ERROR, RUNTIME) << "Failed to get safe data from ABC package: " << abcPath;
         return false;
     }
     pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
     return true;
 }
 
-static bool GetHapPath(const std::string &pathStr, EtsExecutionContext *executionCtx,
+static bool GetHspPath(const std::string &pathStr, EtsExecutionContext *executionCtx,
                        std::unique_ptr<const panda_file::File> &pf)
 {
-    size_t pos = pathStr.rfind("/ets/");
-    if (pos == std::string::npos) {
-        std::string message = std::string("Open failed, file: ") + pathStr;
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError, message);
-        return false;
-    }
-    std::string hapPath = pathStr.substr(0, pos);
-    hapPath += ".hap";
+    return GetPackagePath(pathStr, executionCtx, pf, HSP_SUFFIX, true);
+}
 
-    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
-    if (!CheckExtractor(extractor, executionCtx, pathStr)) {
-        return false;
-    }
-    auto safeData = extractor->GetSafeData(pathStr);
-    if (safeData == nullptr) {
-        LOG(ERROR, RUNTIME) << "Failed to get safe data from HAP archive: " << pathStr;
-        return false;
-    }
-    pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
-    return true;
+static bool GetHapPackagePath(const std::string &pathStr, EtsExecutionContext *executionCtx,
+                              std::unique_ptr<const panda_file::File> &pf)
+{
+    return GetPackagePath(pathStr, executionCtx, pf, HAP_SUFFIX, false);
 }
 
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
@@ -126,7 +133,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     if (pf == nullptr && IsHspPath(pathStr) && !GetHspPath(pathStr, executionCtx, pf)) {
         return nullptr;
     }
-    if (pf == nullptr && !GetHapPath(pathStr, executionCtx, pf)) {
+    if (pf == nullptr && IsHapPath(pathStr) && !GetHapPackagePath(pathStr, executionCtx, pf)) {
         return nullptr;
     }
     if (pf == nullptr) {
