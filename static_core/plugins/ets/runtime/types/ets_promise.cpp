@@ -62,15 +62,14 @@ void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx, EtsPromi
     }
 
     if (queueSize == 0) {
-        promise->ClearQueues(executionCtx);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+        promise->ClearQueues(executionCtx);
         return;
     }
 
     EtsHandleScope scope(executionCtx);
-    EtsHandle<EtsPromise> hPromise(executionCtx, promise);      // SUPPRESS_CSA(alpha.core.WasteObjHeader)
-    EtsHandle<EtsObjectArray> hCbQueue(executionCtx, cbQueue);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
-    EtsHandle<EtsIntArray> hWorkerDomainQueue(executionCtx,
-                                              workerDomainQueue);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+    EtsHandle<EtsPromise> hPromise(executionCtx, promise);
+    EtsHandle<EtsObjectArray> hCbQueue(executionCtx, cbQueue);
+    EtsHandle<EtsIntArray> hWorkerDomainQueue(executionCtx, workerDomainQueue);
 
     for (int idx = 0; idx < queueSize; ++idx) {
         auto *thenCallback = hCbQueue->Get(idx);

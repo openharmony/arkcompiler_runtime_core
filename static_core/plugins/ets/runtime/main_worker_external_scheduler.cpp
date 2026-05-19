@@ -19,7 +19,19 @@
 
 namespace ark::ets {
 
-static void ScheduleWrapper(void *param);
+static void ScheduleWrapper([[maybe_unused]] void *param)
+{
+    auto *jobMan = JobExecutionContext::GetCurrent()->GetManager();
+    ASSERT(JobExecutionContext::GetCurrent() == jobMan->GetMainThread());
+    jobMan->ExecuteJobs();
+}
+
+static void ResetTriggerAndScheduleWrapper(void *param)
+{
+    auto *needTriggerScheduler = static_cast<std::atomic<bool> *>(param);
+    *needTriggerScheduler = true;
+    ScheduleWrapper(nullptr);
+}
 
 MainWorkerExternalScheduler::MainWorkerExternalScheduler(TaskPosterFunc poster)
     : needTriggerScheduler_(true), poster_(poster)
@@ -30,23 +42,11 @@ void MainWorkerExternalScheduler::PostImpl(int64_t delayMs)
 {
     if (delayMs <= 0) {
         if (needTriggerScheduler_.exchange(false)) {
-            poster_(ScheduleWrapper, &needTriggerScheduler_, "ScheduleCoroutine", 0);
+            poster_(ResetTriggerAndScheduleWrapper, &needTriggerScheduler_, "ScheduleCoroutine", 0);
         }
     } else {
-        auto schedFunc = []([[maybe_unused]] void *param) {
-            JobExecutionContext::GetCurrent()->GetManager()->ExecuteJobs();
-        };
-        poster_(schedFunc, nullptr, "ScheduleCoroutine", delayMs);
+        poster_(ScheduleWrapper, nullptr, "ScheduleCoroutine", delayMs);
     }
-}
-
-static void ScheduleWrapper(void *param)
-{
-    auto *needTriggerScheduler = static_cast<std::atomic<bool> *>(param);
-    *needTriggerScheduler = true;
-    auto *jobMan = JobExecutionContext::GetCurrent()->GetManager();
-    ASSERT(JobExecutionContext::GetCurrent() == jobMan->GetMainThread());
-    jobMan->ExecuteJobs();
 }
 
 }  // namespace ark::ets
