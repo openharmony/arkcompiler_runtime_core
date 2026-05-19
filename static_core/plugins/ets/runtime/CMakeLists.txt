@@ -239,8 +239,7 @@ panda_target_include_directories(arkruntime_obj PUBLIC
     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/
     ${PANDA_ROOT}/runtime/mem/gc/cmc
 )
-add_dependencies(arkruntime_obj es2panda-public)
-panda_target_link_libraries(arkruntime_obj es2panda-public arkassembler)
+panda_target_link_libraries(arkruntime_obj arkassembler)
 
 panda_target_compile_definitions(arkruntime_obj PRIVATE ${CURRENT_DEFS})
 add_dependencies(arkruntime_obj cross_values)
