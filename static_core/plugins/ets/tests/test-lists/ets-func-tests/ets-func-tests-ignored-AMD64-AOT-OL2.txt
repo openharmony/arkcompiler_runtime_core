@@ -1,0 +1,2 @@
+#34220
+ets_func_tests/std/concurrency/workerlocal_test.ets
