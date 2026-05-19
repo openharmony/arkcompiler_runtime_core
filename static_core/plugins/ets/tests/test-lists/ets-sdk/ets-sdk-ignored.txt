@@ -1,3 +1,6 @@
+### Issue 34810
+api/@ohos/util/GetMainThreadStackTraceTest.ets
+
 ### Issue 25591
 api/@ohos/util/StringDecoder/EncodingTest.ets
 api/@ohos/util/stream/StreamPipeEnCodingTestPart4.ets
