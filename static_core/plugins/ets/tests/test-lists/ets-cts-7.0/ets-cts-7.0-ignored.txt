@@ -413,11 +413,9 @@
 17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_32.ets
 17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over2_9.ets
 
-#32036  No CTE when no new overload defined in the class or subinterface
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/cte_int_cls_n_0.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/cte_int_cls_n_1.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/cte_int_int_n_0.ets
-17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/cte_int_int_n_1.ets
+#34639
+15.semantic_rules/09.overloading/first_match/first_match_2c_4i.ets
+15.semantic_rules/09.overloading/first_match/first_match_3c_8i.ets
 
 #32038   Interface has methods
 17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_4.ets

@@ -43,7 +43,9 @@ interface I2 {
         foo_i2_p2(p: P2): string { return "I2" }
         overload foo { foo, foo_i2_p1, foo_i2_p2 }
     }
-class C1 implements I1, I2 { }
+class C1 implements I1, I2 {
+    overload foo { foo, foo_i1_p1, foo_i2_p1, foo_i2_p2 }
+}
 
 interface I3 { 
         foo(): void
@@ -68,7 +70,13 @@ interface I5 {
         foo_i5_p5(p: P5): string { return "I5" }
         overload foo { foo, foo_i5_p1, foo_i5_p2, foo_i5_p3, foo_i5_p4, foo_i5_p5 } 
     }
-class C2 extends C1 implements I4, I5 { foo() {} }
+class C2 extends C1 implements I4, I5 {
+    foo() {}
+    overload foo {
+        foo, foo_i1_p1, foo_i2_p2, foo_i4_p3, foo_i3_p4, foo_i5_p4, foo_i5_p1, foo_i5_p2, foo_i5_p3, foo_i5_p5, foo_i2_p1,
+        foo_i3_p1, foo_i3_p2, foo_i3_p3, foo_i4_p1, foo_i4_p2
+    }
+}
 
 let c1 = new C1()
 let c2 = new C2()

@@ -30,7 +30,7 @@ cases:
               m4(p: string) { return 'b' }
           }
       expected_out: |-
-          No new overload for 'foo' is defined in A
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'A'.
 
     - decl: |-
           interface I {
@@ -49,7 +49,7 @@ cases:
               m2(p: Object) { return 'b' }
           }
       expected_out: |-
-          No new overload for 'foo' is defined in A
+          Semantic error ESE0464: When multiple explicit overloads with the same name 'foo' are inherited, the new explicit overload must be declared instead in 'A'.
 
     - decl: |-
           interface I1 {

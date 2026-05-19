@@ -44,6 +44,7 @@ interface I2 {
 class C1 implements I1, I2 { 
         foo(p: P1): string { return "C1" } 
         foo(p: P2): string { return "C1" }
+        overload foo { foo, foo_i2_p1, foo_i2_p2, foo_i1_p1, foo_i1_p2 }
     }
 
 interface I3 { 
@@ -60,6 +61,7 @@ interface I4 extends I3 {
 class C2 extends C1 implements I4 {   
     foo() {}
     foo(p: P1): string { return "C2" }
+    overload foo { foo, foo_i2_p1, foo_i2_p2, foo_i1_p1, foo_i1_p2, foo_i3_p1, foo_i3_p2, foo_i4_p1, foo_i4_p2 }
 }
 
 let c1 = new C1()
