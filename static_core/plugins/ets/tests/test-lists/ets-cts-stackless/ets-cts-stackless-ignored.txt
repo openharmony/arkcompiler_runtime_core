@@ -1021,10 +1021,6 @@
 #31311
 17.experimental_features/13.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_8.ets
 
-#33332
-17.experimental_features/13.adding_functionality_to_existing_types/04.function_types_with_receiver/function_types_with_receiver_21.ets
-17.experimental_features/13.adding_functionality_to_existing_types/04.function_types_with_receiver/function_types_with_receiver_22.ets
-
 #33744
 17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
 

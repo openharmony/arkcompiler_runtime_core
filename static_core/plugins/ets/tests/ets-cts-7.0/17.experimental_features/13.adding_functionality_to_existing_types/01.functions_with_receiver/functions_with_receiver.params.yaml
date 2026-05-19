@@ -241,27 +241,27 @@ cases:
       class DSL {
       }      
       function run(this: DSL, call: (this: DSL) => string): string {
-        return this.call() + '-' + call(this)
+        return call(this) + '-' + call(this)
       }
 
     use: |
       let dsl = new DSL      
-      arktest.assertEQ('Call A: run-Call A: run', dsl.run((this: DSL) => 'Call A: run'))
+      arktest.assertEQ('Call A: run-Call A: run', run(dsl, (this: DSL) => 'Call A: run'))
 
   - decl: |
       type TR = (this: DSL) => string
       class DSL {
-      }      
+      }
       function run(this: DSL, call: (this: DSL) => string): string {
-        return this.call() + '-' + call(this)
+        return call(this) + '-' + call(this)
       }
 
     use: |
       let dsl = new DSL
       let alias = run
       let tc: TR = (this: DSL) => 'Call A: run'
-      
-      arktest.assertEQ('Call A: run-Call A: run', dsl.alias(tc))
+
+      arktest.assertEQ('Call A: run-Call A: run', alias(dsl, tc))
 
   - decl: | # A function with receiver can be defined in a namespace, can be accessed in the form of a qualifiedName only
       namespace NS {

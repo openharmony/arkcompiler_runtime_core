@@ -33,7 +33,7 @@ cases:
     use: |
       let fb1: FB<int> = (this: B<int>, x: int): int => { return x }
       arktest.assertEQ(new B<char>().fb1(1), 1)
-    out: "Semantic error ESE0046: Type 'B<Char>' is not compatible with type 'B<Int>' at index 1"
+    out: "Semantic error ESE0087: Property 'fb1' does not exist on type 'B'"
   - decl: |
       class A { }
       type F1 = (this: A) => boolean
@@ -109,6 +109,26 @@ cases:
       f = fb
     out: "Semantic error ESE0318: Type '((p1: B) => String)' cannot be assigned to type '((p1: A) => String)'"
   
+  - decl: |
+      class A { }
+      type FA = (this: A) => Function
+    use: |
+      let a: A = new A()
+      let f: FA = (this: A): Function => { return this.f }
+      a.f()
+    out: |
+      Semantic error ESE0087: Property 'f' does not exist on type 'A'\n
+      Semantic error ESE0087: Property 'f' does not exist on type 'A'
+  - decl: |
+      interface I { }
+      type FI = (this: I) => Function
+    use: |
+      let i: I = {}
+      let f: FI = (this: I): Function => { return this.f }
+      i.f()
+    out: |
+      Semantic error ESE0087: Property 'f' does not exist on type 'I'\n
+      Semantic error ESE0087: Property 'f' does not exist on type 'I'
   - decl: | # The method call syntax cannot be used when assigning the actual entity to a variable of function type with receiver
       class A {}
       type FA = (this: A) => void

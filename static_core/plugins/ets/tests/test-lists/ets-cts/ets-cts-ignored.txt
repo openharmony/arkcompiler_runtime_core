@@ -525,10 +525,6 @@
 #34098
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/same_names.ets
 
-#33332
-17.experimental_features/13.adding_functionality_to_existing_types/03.function_types_with_receiver/function_types_with_receiver_20.ets
-17.experimental_features/13.adding_functionality_to_existing_types/03.function_types_with_receiver/function_types_with_receiver_21.ets
-
 #33744
 17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
 

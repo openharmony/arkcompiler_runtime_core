@@ -251,7 +251,7 @@ cases:
 
         class Holder implements ReceiverTarget {
           foo(lf: CounterProvider) { lf(this) }
-          boo(lf: CounterProvider) { this.lf() }
+          boo(lf: CounterProvider) { lf(this) }
         }
 
       use: |-
