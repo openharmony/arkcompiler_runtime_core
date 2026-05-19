@@ -1636,7 +1636,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (this.getLength() >= end) {
             return this;
         }
-        let arr : FixedArray<char> = new FixedArray<char>(end)
+        let arr : ValueArray<char> = new ValueArray<char>(end)
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[i] = this.charAt(i)
         }
@@ -1662,7 +1662,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr : FixedArray<char> = new FixedArray<char>(end);
+        let arr : ValueArray<char> = new ValueArray<char>(end);
         let length = this.getLength();
         let strLength = str.getLength()
         for (let i: int = 0; i < length; i++) {
@@ -1692,7 +1692,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (padLen <= 0) {
             return this;
         }
-        let arr: FixedArray<char> = new FixedArray<char>(end)
+        let arr: ValueArray<char> = new ValueArray<char>(end)
         for(let i = 0; i < padLen; i++){
             arr[i] = ch
         }
@@ -1715,7 +1715,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr: FixedArray<char> = new FixedArray<char>(end);
+        let arr: ValueArray<char> = new ValueArray<char>(end);
         let padLen: int = end - this.getLength();
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[padLen + i] = this.charAt(i);
@@ -1808,97 +1808,106 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String): string {
+    public static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String): string {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
         if (position < 0 || position > stringLength) {
             throw new StringIndexOutOfBoundsError('Position ' + position + ' has to be in range 0..' + stringLength)
         }
+        if (replacement.indexOf(c'$') == -1) {
+            return replacement
+        }
         let tailPos = position + matchLength
         let m = captures.length
-        let result = ''
-        let doubleCapture = true;
-        for (let i: int = 0; i < replacement.getLength();) {
-            if (i + 1 < replacement.getLength()
-                        && replacement.charAt(i) == c'$'
-                        && replacement.charAt(i + 1) == c'$') {
-                result += c'$'
-                i += 2
-            } else if (i + 1 < replacement.getLength()
-                        && replacement.charAt(i) == c'$'
-                        && replacement.charAt(i + 1) == c'&') {
-                result += matched
-                i += 2
-            } else if (i + 1 < replacement.getLength()
-                        && replacement.charAt(i) == c'$'
-                        && replacement.charAt(i + 1) == c'`') {
-                if (position != 0) {
-                    result += str.substring(0, position)
-                }
-                i += 2
-            } else if (i + 1 < replacement.getLength()
-                        && replacement.charAt(i) == c'$'
-                        && replacement.charAt(i + 1) == c'\'') {
-                if (tailPos < stringLength) {
-                    result += str.substring(tailPos, stringLength)
-                }
-                i += 2
-            } else if (i + 2 < replacement.getLength()
-                            && doubleCapture
-                            && replacement.charAt(i) == c'$'
-                            && Char.isDecDigit(replacement.charAt(i + 1))
-                            && Char.isDecDigit(replacement.charAt(i + 2))) {
-                let firstDigit = replacement.charAt(i + 1).toInt() - Char.toInt(c'0');
-                let secondDigit = replacement.charAt(i + 2).toInt() - Char.toInt(c'0');
-                let digit = firstDigit * 10 + secondDigit;
-                if (digit == 0 || digit > m) {
-                    doubleCapture = false;
+        let replacementLength = replacement.getLength()
+        let result = new StringBuilder()
+        for (let i: int = 0; i < replacementLength;) {
+            let currentChar = replacement.charAt(i)
+            if (currentChar != c'$') {
+                let literalStart = i
+                let nextDollar = replacement.indexOf(c'$', i)
+                if (nextDollar == -1) {
+                    i = replacementLength
                 } else {
-                    result += captures[digit - 1];
-                    i += 3
+                    i = nextDollar
                 }
-            } else if (i + 2 < replacement.getLength()
-                            && replacement.charAt(i) == c'$'
-                            && Char.isDecDigit(replacement.charAt(i + 1))
-                            && !Char.isDecDigit(replacement.charAt(i + 2))
-                        || i + 1 < replacement.getLength()
-                            && replacement.charAt(i) == c'$'
-                            && Char.isDecDigit(replacement.charAt(i + 1))) {
-                let digit = replacement.charAt(i + 1).toInt() - Char.toInt(c'0');
-                if (digit == 0 || digit > m) {
-                    result += replacement.substring(i, i + 2)
-                } else {
-                    result += captures[digit - 1];
-                }
-                doubleCapture = true;
-                i += 2
-            } else if (i + 1 < replacement.getLength()
-                            && replacement.charAt(i) == c'$'
-                            && replacement.charAt(i + 1) == c'<') {
-                if (namedCaptures == undefined) {
-                    result += '$<';
-                    i += 2;
-                } else {
-                    let j = i + 2;
-                    for (; j < replacement.getLength() && replacement.charAt(j) != c'>'; ++j) {}
-                    if (j < replacement.getLength()) {
-                        let groupName = replacement.substring(i + 2, j);
-                        let capture = namedCaptures[groupName];
-                        if (capture != undefined) {
-                            result += capture
-                        }
-                        i = j + 1;
-                    } else {
-                        result += '$<';
-                        i += 2;
-                    }
-                }
-            } else {
-                result += replacement.charAt(i);
-                i += 1;
+                result.append(replacement.substring(literalStart, i))
+                continue
             }
+            if (i + 1 < replacementLength) {
+                let nextChar = replacement.charAt(i + 1)
+                if (nextChar == c'$') {
+                    result.append(c'$')
+                    i += 2
+                    continue
+                }
+                if (nextChar == c'&') {
+                    result.append(matched)
+                    i += 2
+                    continue
+                }
+                if (nextChar == c'`') {
+                    if (position != 0) {
+                        result.append(str.substring(0, position))
+                    }
+                    i += 2
+                    continue
+                }
+                if (nextChar == c'\'') {
+                    if (tailPos < stringLength) {
+                        result.append(str.substring(tailPos, stringLength))
+                    }
+                    i += 2
+                    continue
+                }
+                if (nextChar == c'<') {
+                    if (namedCaptures == undefined) {
+                        result.append('$<')
+                        i += 2
+                    } else {
+                        let j = i + 2
+                        for (; j < replacementLength && replacement.charAt(j) != c'>'; ++j) {}
+                        if (j < replacementLength) {
+                            let groupName = replacement.substring(i + 2, j)
+                            let capture = namedCaptures[groupName]
+                            if (capture != undefined) {
+                                result.append(capture)
+                            }
+                            i = j + 1
+                        } else {
+                            result.append('$<')
+                            i += 2
+                        }
+                    }
+                    continue
+                }
+                if (Char.isDecDigit(nextChar)) {
+                    let digit = nextChar.toInt() - Char.toInt(c'0')
+                    if (i + 2 < replacementLength) {
+                        let nextNextChar = replacement.charAt(i + 2)
+                        if (Char.isDecDigit(nextNextChar)) {
+                            let secondDigit = nextNextChar.toInt() - Char.toInt(c'0')
+                            let doubleDigit = digit * 10 + secondDigit
+                            if (doubleDigit != 0 && doubleDigit <= m) {
+                                result.append(captures[doubleDigit - 1])
+                                i += 3
+                                continue
+                            }
+                        }
+                    }
+                    if (digit == 0 || digit > m) {
+                        result.append(replacement.substring(i, i + 2))
+                    } else {
+                        result.append(captures[digit - 1])
+                    }
+                    i += 2
+                    continue
+                }
+            }
+            result.append(currentChar)
+            i += 1
         }
-        return result
+        return result.toString()
     }
 
     /**
@@ -2029,29 +2038,32 @@ export final class String extends Object implements Comparable<String>, Iterable
     public replaceAll(searchValue: String, replaceValue: String): String {
         let searchLength = searchValue.getLength()
         let advanceBy = max(1, searchLength)
-        let matchPositions = new containers.ArrayAsListInt();
+        let strLength = this.getLength()
         let position = this.indexOf(searchValue, 0)
+        if (position == -1) {
+            return this
+        }
+        let result = new StringBuilder()
+        let endOfLastMatch = 0
+        let hasSubstitutions = replaceValue.indexOf(c'$') != -1
         while (position != -1) {
-            matchPositions.pushBack(position)
-            if (position == this.getLength()) {
+            result.append(this.substring(endOfLastMatch, position))
+            if (hasSubstitutions) {
+                result.append(String.getSubstitution(searchValue, this, position, new String[0](""), undefined,
+                    replaceValue))
+            } else {
+                result.append(replaceValue)
+            }
+            endOfLastMatch = position + searchLength
+            if (position == strLength) {
                 break;
             }
             position = this.indexOf(searchValue, position + advanceBy)
         }
-        let endOfLastMatch = 0
-        let result = ''
-        let arrayMatchPositions = matchPositions.toArray()
-        for (let i = 0; i < arrayMatchPositions.length; ++i) {
-            let p = arrayMatchPositions[i]
-            let preserved = this.substring(endOfLastMatch, p)
-            let replacement = String.getSubstitution(searchValue, this, p, new String[0](""), undefined, replaceValue)
-            result = result + preserved + replacement
-            endOfLastMatch = p + searchLength
+        if (endOfLastMatch < strLength) {
+            result.append(this.substring(endOfLastMatch))
         }
-        if (endOfLastMatch < this.getLength()) {
-            result += this.substring(endOfLastMatch)
-        }
-        return result
+        return result.toString()
     }
 
     /**
