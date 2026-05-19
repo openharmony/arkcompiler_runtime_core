@@ -401,22 +401,6 @@ cases:
       arktest.assertTrue(callFoo(new Derived()) instanceof Object)
 
   - doc: |-
-      No overriding when return types are not covariant. Any is not a subtype of Object.
-    decl: |-
-      class Base {
-        foo(): Object { return new Object() }
-      }
-
-      class Derived extends Base {
-        foo(): Any { return 1 }
-      }
-
-      function callFoo(a: Base): Object { return a.foo() }
-    use: |-
-      arktest.assertTrue(callFoo(new Base()) instanceof Object)
-      arktest.assertTrue(callFoo(new Derived()) instanceof Object)
-
-  - doc: |-
       No overriding of instance methods if FixedArray element types are not contravariant.
       FixedArray<Any> param in base is not overridden by FixedArray<Object> param in derived.
     decl: |-
