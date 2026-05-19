@@ -18,7 +18,7 @@
 Internal collection stage used by arkts_migration_visualizer.cli.
 
 Supported dependency layouts:
-1. Managed GitCode dependencies bootstrapped by src/scripts/bootstrap.sh / bootstrap.cmd
+1. Managed GitCode dependencies bootstrapped by src/scripts/bootstrap.sh / bootstrap.bat
 2. User-provided homecheck_path / hapray_path overrides in configs/config.json
 """
 
@@ -655,7 +655,7 @@ def ensure_required_tool_state(
         sys.exit(
             "Homecheck/Hapray {} are still missing from the dependency lock file after bootstrap: {}.\n"
             "Run src/scripts/bootstrap.sh --tool all --verify (macOS/Linux/WSL) or "
-            "src\\scripts\\bootstrap.cmd --tool all --verify (Windows) again.".format(
+            "src\\scripts\\bootstrap.bat --tool all --verify (Windows) again.".format(
                 mode_label,
                 ", ".join(unresolved_after_bootstrap),
             )
@@ -796,7 +796,7 @@ def require_hapray_python(workspace: Path) -> Path:
     sys.exit(
         "Could not locate a Hapray virtual-environment Python for the current platform: {}\nChecked: {}\n"
         "Please run src/scripts/bootstrap.sh --tool hapray (macOS/Linux/WSL)"
-        " or src\\scripts\\bootstrap.cmd --tool hapray (Windows) again.".format(workspace, ", ".join(searched))
+        " or src\\scripts\\bootstrap.bat --tool hapray (Windows) again.".format(workspace, ", ".join(searched))
     )
 
 
@@ -954,7 +954,7 @@ def resolve_tool_roots(repo_root: Path, cfg: Dict[str, Any]) -> Tuple[Path, Path
     hapray_root = resolve_path(repo_root, hapray_override) if hapray_override else default_hapray
 
     if not homecheck_root or not hapray_root:
-        sys.exit("Homecheck/Hapray paths are missing from the dependency lock file. Run bootstrap.sh or bootstrap.cmd again.")
+        sys.exit("Homecheck/Hapray paths are missing from the dependency lock file. Run bootstrap.sh or bootstrap.bat again.")
     ensure_exists(homecheck_root, "Homecheck runtime directory")
     ensure_exists(hapray_root, "Hapray runtime directory")
     hapray_root = maybe_shorten_windows_hapray_root(repo_root, cfg, hapray_root)
@@ -981,7 +981,7 @@ def resolve_tool_roots_for_mode(repo_root: Path, cfg: Dict[str, Any], *, prefer_
     hapray_root = preferred_hapray
 
     if not homecheck_root or not hapray_root:
-        sys.exit("Homecheck/Hapray source paths are missing from the dependency lock file. Run bootstrap.sh or bootstrap.cmd again.")
+        sys.exit("Homecheck/Hapray source paths are missing from the dependency lock file. Run bootstrap.sh or bootstrap.bat again.")
     ensure_exists(homecheck_root, "Homecheck runtime directory")
     ensure_exists(hapray_root, "Hapray source directory")
     hapray_root = maybe_shorten_windows_hapray_root(repo_root, cfg, hapray_root)

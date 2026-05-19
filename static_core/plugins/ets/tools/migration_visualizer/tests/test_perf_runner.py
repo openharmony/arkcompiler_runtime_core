@@ -274,11 +274,14 @@ class PerfRunnerTest(unittest.TestCase):
             (base_dir / "configs/config.json").resolve(),
         )
 
-    def test_find_node_executable_checks_macos_nvm_locations(self) -> None:
+    def test_macos_node_candidates_include_standard_nvm_layout(self) -> None:
         perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
         with tempfile.TemporaryDirectory() as temp_dir:
             home_dir = Path(temp_dir) / "home"
-            node_path = home_dir / ".nvm" / "versions" / "node" / "v22.3.0" / "bin" / "node"
+            nvm_versions_dir = home_dir / ".nvm" / "versions" / "node"
+            nvm_versions_dir.mkdir(parents=True)
+            version_dir = Path(tempfile.mkdtemp(dir=nvm_versions_dir))
+            node_path = version_dir / "bin" / "node"
             node_path.parent.mkdir(parents=True)
             node_path.write_text("node", encoding="utf-8")
 
@@ -286,12 +289,27 @@ class PerfRunnerTest(unittest.TestCase):
                 perf_runner.Path,
                 "home",
                 return_value=home_dir,
-            ), mock.patch.object(
-                perf_runner.shutil,
-                "which",
-                return_value=None,
             ):
-                self.assertEqual(perf_runner.find_node_executable(), node_path.resolve())
+                self.assertIn(node_path, perf_runner.macos_node_candidates())
+
+    def test_find_node_executable_falls_back_to_macos_candidates_when_path_lookup_fails(self) -> None:
+        perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
+        node_path = Path("/tmp/fake-home/.nvm/versions/node/<detected-version>/bin/node")
+
+        with mock.patch.object(
+            perf_runner.shutil,
+            "which",
+            return_value=None,
+        ), mock.patch.object(
+            perf_runner,
+            "windows_node_candidates",
+            return_value=[],
+        ), mock.patch.object(
+            perf_runner,
+            "macos_node_candidates",
+            return_value=[node_path],
+        ):
+            self.assertEqual(perf_runner.find_node_executable(), node_path.resolve())
 
     def test_find_hdc_executable_checks_macos_non_exe_sdk_paths(self) -> None:
         perf_runner = load_module("perf_runner", "src/arkts_migration_visualizer/collect/perf_runner.py")
