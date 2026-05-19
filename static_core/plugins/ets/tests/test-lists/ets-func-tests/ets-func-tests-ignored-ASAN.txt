@@ -4,8 +4,28 @@ std/core/MathClz32Test.ets
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
+#34747
+ets_func_tests/spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0001.
+#34658
+ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-operands-negative-number-2.
+#34723
+ets_func_tests/spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.7.Return_Type/issue_16080_05.
+#34792
+ets-func-tests-templates/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0029.ets
 #33832
 ets_func_tests/std/concurrency/AsyncRWLockTest.ets
+#33585
+ets_func_tests/std/concurrency/AsyncCondVarTest.ets
+#34645
+ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
+#32636
+ets_func_tests/std/core/dateformat/IntlDateFormatOptionsYearNumericTest.ets
+#34744
+ets_func_tests/std/core/ConsoleAssertTest.ets
+#34681
+ets_func_tests/std/core/IntlLocaleThreadSafetyTest.ets
+#34646
+std/core/std_core_typedarrays_methods__Float64Array_001.ets
 
 #33140
 std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets
