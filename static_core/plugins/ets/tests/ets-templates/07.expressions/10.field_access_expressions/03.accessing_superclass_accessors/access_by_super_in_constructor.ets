@@ -14,24 +14,51 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The forms using the keyword super are valid in instance methods, constructors of a class or in the initializer of an instance variable of a class. Compile-time error occurs otherwise.
+desc: >-
+    The forms using the keyword super are valid in instance methods, constructors of a class or
+    in the initializer of an instance variable of a class. Compile-time error occurs otherwise.
 ---*/
 
-class A {
-  public x: int;
+class ACtorPublic {
+    public x: int
 
-  public constructor(x: int) {
-    this.x = x;
-  }
+    public constructor(x: int) {
+        this.x = x
+    }
 }
 
-class B extends A {
-  public constructor() {
-    super(5);
-  }
+class BCtorPublic extends ACtorPublic {
+    public constructor() {
+        super(5)
+    }
 }
 
-function main(): void {
-  let instance: B = new B();
-  arktest.assertEQ( instance.x, 5 )
+class ACtorProtected {
+    public x: int
+
+    protected constructor(x: int) {
+        this.x = x
+    }
+}
+
+class BCtorProtected extends ACtorProtected {
+    public constructor() {
+        super(5)
+    }
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("super(...) call from subclass constructor")
+
+    suite.addTest("subclass constructor calls public super constructor", () => {
+        let instance: BCtorPublic = new BCtorPublic()
+        arktest.assertEQ(instance.x, 5)
+    })
+
+    suite.addTest("subclass constructor calls protected super constructor", () => {
+        let instance: BCtorProtected = new BCtorProtected()
+        arktest.assertEQ(instance.x, 5)
+    })
+
+    return suite.run()
 }

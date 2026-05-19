@@ -14,24 +14,105 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The forms using the keyword super are valid in instance methods, constructors of a class or in the initializer of an instance variable of a class. Compile-time error occurs otherwise.
+desc: >-
+    The forms using the keyword super are valid in instance methods, constructors of a class or
+    in the initializer of an instance variable of a class. Compile-time error occurs otherwise.
 ---*/
 
-class A {
-  private _x: int;
+class AFromBase {
+    private _x: int
 
-  get x(): int{
-    return this._x;
-  }
+    get x(): int {
+        return this._x
+    }
 }
 
-final class B extends A {
-  public bar(): int {
-    return super.x;
-  }
+final class BFromBase extends AFromBase {
+    public bar(): int {
+        return super.x
+    }
 }
 
-function main(): void {
-  let instance: B = new B();
-  arktest.assertEQ( instance.bar(), 0 )
+class AFromCallStack {
+    private _x: int
+
+    get x(): int {
+        return this._x
+    }
+}
+
+final class BFromCallStack extends AFromCallStack {
+    private foo(): int {
+        return super.x
+    }
+
+    public bar(): int {
+        return this.foo()
+    }
+}
+
+class AFromSetterCtor {
+    private _x: int
+
+    protected get x(): int {
+        return this._x
+    }
+
+    protected set x(p: int) {
+        this._x = p
+    }
+}
+
+class BFromSetterCtor extends AFromSetterCtor {
+    constructor() {
+        super.x = 7
+    }
+
+    public bar(): int {
+        return this.x
+    }
+}
+
+class AFromOverride {
+    private _x: int
+
+    get x(): int {
+        return this._x
+    }
+
+    public bar(): int {
+        return 1
+    }
+}
+
+final class BFromOverride extends AFromOverride {
+    public override bar(): int {
+        return super.x
+    }
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("super.x access from instance method")
+
+    suite.addTest("super.x returned directly from public method", () => {
+        let instance: BFromBase = new BFromBase()
+        arktest.assertEQ(instance.bar(), 0)
+    })
+
+    suite.addTest("super.x returned through private helper called by public method", () => {
+        let instance: BFromCallStack = new BFromCallStack()
+        arktest.assertEQ(instance.bar(), 0)
+    })
+
+    suite.addTest("super.x assigned in constructor through setter, read via this", () => {
+        let instance: BFromSetterCtor = new BFromSetterCtor()
+        arktest.assertEQ(instance.bar(), 7)
+    })
+
+    suite.addTest("override method returns super.x bypassing inherited body", () => {
+        let instance = new BFromOverride
+        arktest.assertEQ(instance.bar(), 0)
+    })
+
+    return suite.run()
 }
