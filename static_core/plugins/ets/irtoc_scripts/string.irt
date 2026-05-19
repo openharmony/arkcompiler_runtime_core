@@ -726,49 +726,11 @@ Label(:Done)
 end
 
 
-function(:StringStartsWithBase,
-          params: {str: 'ref', pfx: 'ref', from_index: 'i32', pfx_i1: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPathPlus]) {
-
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    ReturnVoid().void
-    next
-  end
-
-  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  str_uncompressed := is_string_uncompressed_u32(str_len_packed)
-  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
-  pfx_uncompressed := is_string_uncompressed_u32(pfx_len_packed)
-  pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-
-Label(:Loop)
-  str_i := Phi(from_index, str_i1).i32
-  pfx_i := Phi(pfx_i1, pfx_i2).i32
-  If(pfx_i, pfx_len).GE.Unlikely.b {
-    Goto(:Done)
-  }
-  s := at(str_data, str_i, str_uncompressed)
-  p := at(pfx_data, pfx_i, pfx_uncompressed)
-  If(s, p).NE.Likely.b {
-    Return(0).b
-  }
-  pfx_i2 := AddI(pfx_i).Imm(1).i32
-  str_i1 := AddI(str_i).Imm(1).i32
-  Goto(:Loop)
-Label(:Done)
-  Return(1).b
-}
-
 def GenerateStringStartsWith(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
   function("StringStartsWith#{suffix}".to_sym,
-           params: {str_orig: 'ref', pfx_orig: 'ref', from_index: 'i32', arg4: 'i32'},
+           params: {str_orig: 'ref', pfx_orig: 'ref', from_index: 'i32'},
            regmap: $full_regmap,
            regalloc_set: $panda_mask,
            mode: [cgmode]) {
@@ -778,6 +740,12 @@ def GenerateStringStartsWith(cgmode)
     ReturnVoid().void
     next
   end
+
+  # 'str_orig' is supposed to be 'this', which can't be nullptr by design,
+  # so here we check 'pfx_orig' only.
+  If(reftoptr(pfx_orig), nullptr).EQ.Unlikely {
+    Goto(:SlowPathEntrypoint)
+  }
 
   if cgmode == :NativePlus
     str_orig0 := try_use_cached_flat_str_accept_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
@@ -815,17 +783,15 @@ def GenerateStringStartsWith(cgmode)
   pfx := Phi(pfx_orig0, pfxParent).ref
   resultPfxStartIndex := Phi(zeroIndex, pfxStartIndex).u32
 
-  pfx_len_packed := LoadI(pfx_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  pfx_len_packed_orig := LoadI(pfx_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if prefix is empty
-  # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
-  # thus if (packed length <= 1) then the actual length is equal to 0.
-  If(pfx_len_packed, 1).LE.Unlikely.b {
+  IfImm(is_packed_string_length_zero(pfx_len_packed_orig)).Imm(0).NE.Unlikely.b {
     Return(1).b
   }
 
-  str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  # Return 'false' if 'str' is empty as 'prefix' is not empty.
-  If(str_len_packed, 1).LE.Unlikely.b {
+  str_len_packed_orig := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Return 'false' if 'str' is empty but 'prefix' is not.
+  IfImm(is_packed_string_length_zero(str_len_packed_orig)).Imm(0).NE.Unlikely.b {
     Return(0).b
   }
 
@@ -835,10 +801,10 @@ def GenerateStringStartsWith(cgmode)
   }
   from_index2 := Phi(from_index, from_index1).i32
 
-  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
-  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
+  str_len_orig := ShrI(str_len_packed_orig).Imm(Constants::STRING_LENGTH_SHIFT).i32
+  pfx_len_orig := ShrI(pfx_len_packed_orig).Imm(Constants::STRING_LENGTH_SHIFT).i32
 
-  If(from_index2, Sub(str_len, pfx_len).i32).GT.Unlikely.b {
+  If(from_index2, Sub(str_len_orig, pfx_len_orig).i32).GT.Unlikely.b {
     # Return 'false' in this case, as we know that 'pfx' is not empty
     # and it is longer than the part of 'str' to be checked.
     Return(0).b
@@ -846,24 +812,40 @@ def GenerateStringStartsWith(cgmode)
 
   from_index3 := Add(from_index2, resultStrStartIndex).i32
 
-  if cgmode == :NativePlus
-    LiveOut(str).DstReg(regmap[:arg1]).ref
-    LiveOut(pfx).DstReg(regmap[:arg2]).ref
-    LiveOut(from_index3).DstReg(regmap[:arg3]).i32
-    LiveOut(resultPfxStartIndex).DstReg(regmap[:arg4]).i32
-  else
-    LiveOut(str).DstReg(regmap[:arg0]).ref
-    LiveOut(pfx).DstReg(regmap[:arg1]).ref
-    LiveOut(from_index3).DstReg(regmap[:arg2]).i32
-    LiveOut(resultPfxStartIndex).DstReg(regmap[:arg3]).i32
-  end
-  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE#{upsuffix}")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase#{suffix}").Terminator.b
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  str_uncompressed := is_string_uncompressed_u32(str_len_packed)
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
+  pfx_uncompressed := is_string_uncompressed_u32(pfx_len_packed)
+  pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
+Label(:Loop)
+  str_i := Phi(from_index3, str_i1).i32
+  pfx_i := Phi(resultPfxStartIndex, pfx_i2).i32
+  If(pfx_i, pfx_len).GE.Unlikely.b {
+    Goto(:Done)
+  }
+  s := at(str_data, str_i, str_uncompressed)
+  p := at(pfx_data, pfx_i, pfx_uncompressed)
+  If(s, p).NE.Likely.b {
+    Return(0).b
+  }
+  pfx_i2 := AddI(pfx_i).Imm(1).i32
+  str_i1 := AddI(str_i).Imm(1).i32
+  Goto(:Loop)
+Label(:Done)
+  Return(1).b
+
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
-  LabelGlobal(:SlowPathEntrypoint)
     Return(Call(str_orig, pfx_orig, from_index).Method("StdCoreStringStartsWith").b).b
+  else
+    entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, pfx_orig, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
+
 }
 end
 
@@ -926,6 +908,12 @@ def GenerateStringEndsWith(cgmode)
     ReturnVoid().void
     next
   end
+
+  # 'str_orig' is supposed to be 'this', which can't be nullptr by design,
+  # so here we check 'sfx_orig' only.
+  If(reftoptr(sfx_orig), nullptr).EQ.Unlikely {
+    Goto(:SlowPathEntrypoint)
+  }
 
   if cgmode == :NativePlus
     str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
@@ -1166,14 +1154,9 @@ function(:CreateStringFromCharCodeTlab,
     next
   end
 
-  # There is no check of the arguments against NullPointer as
-  # it's done in the InstBuilder (see AddArgNullcheckIfNeeded) for non-empty arrays
-  # and we suppose that the `NewArray (size=0)` instruction never returns `null`.
-  if defines.DEBUG
-    If(char_codes, 0).EQ {
-      Intrinsic(:UNREACHABLE).Terminator.void
-    }
-  end
+  If(reftoptr(char_codes), nullptr).EQ.Unlikely {
+    Goto(:SlowPathEntrypoint)
+  }
 
   char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::STD_CORE_ARRAY_DATA_OFFSET)
   codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
@@ -1585,13 +1568,8 @@ def GenerateStringIndexOf(cgmode)
 
   str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
-  # Check if str_orig is empty (return '-1' if so).
-  # Currently, there are two special bits in a packed length:
-  #   - lowest bit in length: 1:compressed/0:uncompressed.
-  #   - second lowest bit in length: 1:string is in string table/0:not in string table.
-  # Thus a string is considered to be empty if packed_length <= 3
-  StaticAssertEQ(Constants::STRING_PACKED_LENGTH_ZERO, 3)
-  IfImm(Compare(str_len_packed, Constants::STRING_PACKED_LENGTH_ZERO).LE.b).Imm(0).NE.Unlikely.b {
+  # Check if str_orig is empty (return '-1' if so)
+  IfImm(is_packed_string_length_zero(str_len_packed)).Imm(0).NE.Unlikely.b {
     Return(-1).i32
   }
 
@@ -3600,6 +3578,14 @@ def GenerateStringToCaseTlab(with_locale, tocase, cgmode = :FastPath)
       Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
       ReturnVoid().void
       next
+    end
+
+    if with_locale
+      # 'orig_str' is supposed to be 'this', which can't be nullptr by design,
+      # so here we check 'orig_locale' only.
+      If(reftoptr(orig_locale), nullptr).EQ.Unlikely {
+        Goto(:SlowPathEntrypoint)
+      }
     end
 
     # There is no check of the argument against NullPointer as
