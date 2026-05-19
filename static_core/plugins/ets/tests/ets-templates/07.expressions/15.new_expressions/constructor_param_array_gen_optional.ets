@@ -27,6 +27,7 @@ desc: >-
     Otherwise, a compile-time error occurs.
 ---*/
 
+let checked: boolean = false
 enum ENUM { Red, Green, Blue }
 type TPL = [number, string]
 
@@ -41,11 +42,14 @@ class C<T> {
   foo() {
     let arr = new Array<T>()
     arktest.assertEQ(arr.length, 0)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   new C<A<Object>>().foo()
+  arktest.assertTrue(checked)
 }
 
 {% endfor %}

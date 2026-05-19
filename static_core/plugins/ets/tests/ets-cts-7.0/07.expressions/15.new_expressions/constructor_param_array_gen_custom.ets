@@ -26,6 +26,8 @@ desc: >-
     Parameterless constructor used
 ---*/
 
+let checked: boolean = false
+
 class A<T> extends Array<T> {
   constructor() { }
   constructor(j: Object) { }
@@ -35,10 +37,14 @@ class C<T> {
   foo(element: T) {
     let arr = new T[5](element)
     arktest.assertEQ(arr.length, 5)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   let i: A<Object> = new A<Object>(1)
   new C<A<Object>>().foo(i)
+  arktest.assertTrue(i instanceof A)
+  arktest.assertTrue(checked)
 }

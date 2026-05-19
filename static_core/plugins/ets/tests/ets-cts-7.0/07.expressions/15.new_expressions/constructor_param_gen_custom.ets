@@ -26,6 +26,8 @@ desc: >-
     Parameterless constructor
 ---*/
 
+let checked: boolean = false
+
 class A {
   constructor() { }
   constructor(j: Object) { }
@@ -35,9 +37,12 @@ class C<T> {
   foo() {
     let arr = new Array<T>()
     arktest.assertEQ(arr.length, 0)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   new C<A>().foo()
+  arktest.assertTrue(checked)
 }

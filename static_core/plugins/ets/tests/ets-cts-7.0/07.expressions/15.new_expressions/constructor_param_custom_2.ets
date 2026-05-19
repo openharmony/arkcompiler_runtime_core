@@ -26,6 +26,7 @@ desc: >-
     Access in static class method
 ---*/
 
+let checked: boolean = false
 class C {
   j: number
 
@@ -39,9 +40,12 @@ class C {
     arr[0] = new C(1)
     arktest.assertEQ(arr.length, 5)
     arktest.assertEQ(arr.at(0).j, 1)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   C.foo()
+  arktest.assertTrue(checked)
 }

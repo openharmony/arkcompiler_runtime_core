@@ -16,49 +16,64 @@ class_instance:
 #0
   - decl: ''
     init: 'new Testee'
+    check: 'Testee'
 #1
   - decl: 'constructor () {}'
     init: 'new Testee'
+    check: 'Testee'
 #2
   - decl: 'constructor () {}'
     init: 'new A'
+    check: 'Testee'
 #3
   - decl: |-
       constructor () {}
       callme(): this { return this }
     init: 'new A().callme()'
+    check: 'Testee'
 #4
   - decl: |-
       constructor () {}
       callme(): this { return this }
     init: '(new A).callme()'
+    check: 'Testee'
 #5
   - decl: 'constructor () {}'
     init: '(() => { return new A })()'
+    check: 'Testee'
 #6
   - decl: 'constructor () {}'
     init: '(() => { return [new A(), new Testee][0] })()'
+    check: 'Testee'
 #7
   - decl: 'constructor (input?: String) {}'
     init: 'new Testee'
+    check: 'Testee'
 #8
   - decl: "constructor (input: String = 'Hello World') {}"
     init: 'new Testee'
+    check: 'Testee'
 #9
   - decl: 'constructor (...input: String[]) {}'
     init: 'new Testee'
+    check: 'Testee'
 #10
   - decl: 'constructor (...input: String[]) {}'
     init: 'new A'
+    check: 'Testee'
 #11
   - decl: 'constructor (...input: A[]) {}'
     init: 'new Testee(new A, new A, new A)'
+    check: 'Testee'
 #12
   - decl: ''
     init: 'new String'
+    check: 'String'
 #13
   - decl: ''
     init: '[ [new Double(0)],[new Double(0)] ]'
+    check: 'Array'
 #14
   - decl: ''
     init: '[ [[new A()],[new A()]], [[new A()],[new A()]] ]'
+    check: 'Array'

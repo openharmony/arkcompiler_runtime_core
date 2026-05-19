@@ -39,17 +39,21 @@ cases:
 
   - doc: access in static class method, no applicable constructor
     decl: |-
+      let checked: boolean = false
       class C {
         constructor(i: String) { }
         private constructor(j: Object) { }
         static foo() {
           let arr = new Array<C>()
           arktest.assertEQ(arr.length, 0)
+          checked = true
         }
       }
 
       function main(): void {
+        checked = false
         C.foo()
+        arktest.assertTrue(checked)
       }
 
   - doc: Base class constructor does not make derived class applicable for use

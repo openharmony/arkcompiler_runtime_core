@@ -27,6 +27,8 @@ desc: >-
     Access to a private constructor from static class method
 ---*/
 
+let checked: boolean = false
+
 class C<T> extends Array<T> {
   j: T
   constructor() { }
@@ -38,9 +40,12 @@ class C<T> extends Array<T> {
     arr[0] = new C<number>(1)
     arktest.assertEQ(arr.length, 5)
     arktest.assertEQ(arr.at(0).j, 1)
+    checked = true
   }
 }
 
 function main(): void {
+  checked = false
   C.foo()
+  arktest.assertTrue(checked)
 }

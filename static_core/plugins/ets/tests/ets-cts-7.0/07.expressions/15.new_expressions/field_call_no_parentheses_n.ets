@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,22 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Creating an empty Array<T> succeeds without invoking an applicable
-    constructor for the element type.
-    {{c.doc}}
+    If a class instance creation expression with no argument is used as object reference in a field call expression,
+    then missing parentheses '( )' leads to CTE.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0070: 'foo' type does not exist."
 ---*/
 
-let checked: boolean = false
-{{c.decl}}
-
-function main(): void {
-  checked = false
-  new C<A>().foo()
-  arktest.assertTrue(checked)
+class C {
+  foo: int = 0
 }
 
-{% endfor %}
+function main() {
+  new C.foo
+}

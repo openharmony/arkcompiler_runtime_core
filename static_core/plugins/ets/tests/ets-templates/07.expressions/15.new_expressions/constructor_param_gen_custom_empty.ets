@@ -22,10 +22,13 @@ desc: >-
     {{c.doc}}
 ---*/
 
+let checked: boolean = false
 {{c.decl}}
 
 function main(): void {
+  checked = false
   new C<A>().foo()
+  arktest.assertTrue(checked)
 }
 
 {% endfor %}
