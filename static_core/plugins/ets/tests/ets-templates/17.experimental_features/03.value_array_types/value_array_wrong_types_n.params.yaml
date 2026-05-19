@@ -36,3 +36,5 @@ cases:
     - type: Record<number, int>
     #multidimensional insted of value type
     - type: ValueArray<int>
+    #generic
+    - type: T
