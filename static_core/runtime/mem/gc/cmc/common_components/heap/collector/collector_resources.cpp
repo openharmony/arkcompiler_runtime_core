@@ -69,7 +69,6 @@ void CollectorResources::Init()
     finishedGcIndex_.store(0, std::memory_order_seq_cst);
     gcCompletedCount_.store(0, std::memory_order_seq_cst);
     StartGCThreads();
-    finalizerProcessor_.Start();
     gcStats_.Init();
     hasRelease = false;
 }
@@ -78,7 +77,6 @@ void CollectorResources::Fini()
 {
     if (hasRelease == false) {
         StopGCWork();
-        ASSERT_PRINT(!finalizerProcessor_.IsRunning(), "Invalid finalizerProcessor status");
         // Atomic with relaxed order reason: data race with gcThreadRunning_ with no synchronization or ordering
         // constraints imposed on other reads or writes
         ASSERT_PRINT(!gcThreadRunning_.load(std::memory_order_relaxed), "Invalid GC thread status");
@@ -91,7 +89,6 @@ void CollectorResources::Fini()
 
 void CollectorResources::StopGCWork()
 {
-    finalizerProcessor_.Stop();
     TerminateGCTask();
     StopGCThreads();
 }

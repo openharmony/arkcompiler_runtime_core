@@ -19,5 +19,6 @@ namespace ark::common_runtime {
 
 void InitCommonRuntime() {}
 void FinishCommonRuntime() {}
+void SetMutatorLock(MutatorLock *) {}
 
 }  // namespace ark::common_runtime

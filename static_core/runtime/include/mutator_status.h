@@ -37,7 +37,16 @@ enum class MutatorStatus : uint16_t {
     FINISHED,
 };
 
-enum MutatorFlag { NO_FLAGS = 0, SUSPEND_REQUEST = 2, RUNTIME_TERMINATION_REQUEST = 4, GC_ON_SAFEPOINT_REQUEST = 8 };
+enum MutatorFlag {
+    NO_FLAGS = 0,
+    SUSPEND_REQUEST = 1U << 1U,
+    RUNTIME_TERMINATION_REQUEST = 1U << 2U,
+    GC_ON_SAFEPOINT_REQUEST = 1U << 3U,
+    GC_PHASE_TRANSITION_REQUEST = 1U << 4U,
+    PENDING_CALLBACK_REQUEST = 1U << 5U,
+    RUNNING_CALLBACK_REQUEST = 1U << 6U,
+    SUSPEND_FOR_FINALIZE = 1U << 7U,
+};
 
 std::ostream &operator<<(std::ostream &stream, MutatorStatus status);
 

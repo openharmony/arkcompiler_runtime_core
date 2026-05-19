@@ -154,8 +154,6 @@ protected:
 
     void DoGarbageCollection() override;
 
-    void ProcessFinalizers() override;
-
 private:
     template <bool copy>
     bool TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &ref, BaseObject *&oldRef, BaseObject *&newRef) const;

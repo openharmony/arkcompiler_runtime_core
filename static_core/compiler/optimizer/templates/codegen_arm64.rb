@@ -56,10 +56,6 @@ class Codegen
     "safepoint_mem"
   end
 
-  def safepoint_constant
-    "#{runtime_info}->GetSafepointActiveValue()"
-  end
-
   def back_safepoint_label
     "cg->GetBackEdgeSP(inst)"
   end

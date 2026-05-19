@@ -328,7 +328,6 @@ protected:
     // let finalizerProcessor process finalizers, and mark resurrected if in stw gc
     void ClearWeakStack(bool parallel);
 
-    virtual void ProcessFinalizers() {}
     virtual void RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack)
     {
         LOG(FATAL, COMMON) << "Unresolved fatal";

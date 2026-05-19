@@ -34,8 +34,8 @@ static_assert((1UL << RUNSLOTS_ALIGNMENT) == RUNSLOTS_ALIGNMENT_IN_BYTES);
 
 class RunSlotsLockConfig {
 public:
-    using CommonLock = os::memory::Mutex;
-    using DummyLock = os::memory::DummyLock;
+    using CommonLock = ark::os::memory::Mutex;
+    using DummyLock = ark::os::memory::DummyLock;
 };
 
 /**

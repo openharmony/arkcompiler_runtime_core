@@ -36,8 +36,8 @@ static constexpr size_t PANDA_HUMONGOUS_OBJ_ALLOCATOR_RESERVED_MEM_MAX_POOL_SIZE
 
 class HumongousObjAllocatorLockConfig {
 public:
-    using CommonLock = os::memory::RWLock;
-    using DummyLock = os::memory::DummyLock;
+    using CommonLock = ark::os::memory::RWLock;
+    using DummyLock = ark::os::memory::DummyLock;
 
     template <MTModeT MT_MODE>
     using ParameterizedLock = typename LockConfigHelper<HumongousObjAllocatorLockConfig, MT_MODE>::Value;

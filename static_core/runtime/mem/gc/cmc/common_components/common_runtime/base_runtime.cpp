@@ -18,11 +18,11 @@
 #include "common_components/common_runtime/base_runtime_param.h"
 #include "common_components/log/log.h"
 #include "common_components/common/page_pool.h"
+#include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_components/heap/heap.h"
 #include "common_components/heap/heap_manager.h"
 #include "common_components/mutator/mutator_manager.h"
-#include "common_interfaces/thread/mutator_state_transition.h"
 
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/logger.h"
@@ -159,6 +159,11 @@ void BaseRuntime::Fini()
     initialized_ = false;
 }
 
+void BaseRuntime::SetMutatorLock(ark::MutatorLock *l)
+{
+    mutatorManager_->SetMutatorLock(l);
+}
+
 bool BaseRuntime::RegisterVM(VMInterface *vm)
 {
     ark::os::memory::WriteLockHolder vmIfacesWriteLock(vmIfacesLock_);
@@ -193,7 +198,7 @@ void BaseRuntime::PreFork(Mutator *mutator)
 {
     RequestGC(GC_REASON_USER, false, GC_TYPE_FULL);
     {
-        MutatorNativeScope scope(mutator);
+        common_vm::ScopedEnterSaferegion enterSaferegion(true);
         HeapManager::StopRuntimeThreads();
     }
 }

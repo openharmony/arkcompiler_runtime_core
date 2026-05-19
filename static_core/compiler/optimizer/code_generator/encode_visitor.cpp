@@ -2287,14 +2287,8 @@ void EncodeVisitor::VisitSafePoint(GraphVisitor *visitor, Inst *inst)
     auto codegen = enc->GetCodegen();
     auto graph = codegen->GetGraph();
     auto encoder = enc->GetEncoder();
-    // This code will be unified. Issue #34605
-#if defined(ARK_USE_COMMON_RUNTIME)
-    auto flagAddrOffset = graph->GetRuntime()->GetMutatorSafepointActiveOffset(codegen->GetArch());
-    ScopedTmpRegU32 tmp(encoder);
-#else
     int64_t flagAddrOffset = graph->GetRuntime()->GetFlagAddrOffset(codegen->GetArch());
     ScopedTmpRegU16 tmp(encoder);
-#endif
     // TMP <= Flag
     auto mem = MemRef(codegen->ThreadReg(), flagAddrOffset);
     encoder->EncodeLdr(tmp, false, mem);

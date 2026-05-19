@@ -26,7 +26,6 @@
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/thread/mutator.h"
-#include "common_interfaces/thread/mutator-inl.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
@@ -202,37 +201,21 @@ public:
 
     void CleanUpMutatorStatus();
 
-#if defined(ARK_USE_COMMON_RUNTIME)
-    PANDA_PUBLIC_API NO_THREAD_SAFETY_ANALYSIS void UpdateStatus(enum MutatorStatus status);
-#else
-    PANDA_PUBLIC_API void UpdateStatus(enum MutatorStatus status);
-#endif
+    PANDA_PUBLIC_API void UpdateStatus(enum MutatorStatus status) NO_THREAD_SAFETY_ANALYSIS;
 
     ALWAYS_INLINE bool IsSuspended() const
     {
-#if !defined(ARK_USE_COMMON_RUNTIME)
         return ReadFlag(SUSPEND_REQUEST);
-#else
-        return ark::common_vm::Mutator::HasSuspendRequest();
-#endif
     }
 
     ALWAYS_INLINE bool IsRuntimeTerminated() const
     {
-#if !defined(ARK_USE_COMMON_RUNTIME)
         return ReadFlag(RUNTIME_TERMINATION_REQUEST);
-#else
-        return false;
-#endif
     }
 
     ALWAYS_INLINE void SetRuntimeTerminated()
     {
-#if !defined(ARK_USE_COMMON_RUNTIME)
         SetFlag(RUNTIME_TERMINATION_REQUEST);
-#else
-        UNREACHABLE();
-#endif
     }
 
     bool IsThreadAlive() const
@@ -257,11 +240,16 @@ public:
 
     PANDA_PUBLIC_API void Safepoint();
 
-    PANDA_PUBLIC_API void SafepointPoll();
+    PANDA_PUBLIC_API void SafepointPoll() NO_THREAD_SAFETY_ANALYSIS;
 
     PANDA_PUBLIC_API bool IsUserSuspended() const;
 
-    PANDA_PUBLIC_API void WaitSuspension();
+    PANDA_PUBLIC_API void WaitSuspension() NO_THREAD_SAFETY_ANALYSIS;
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+    // CMC-GC specific transition: TestAllFlags + HandleSuspensionRequest
+    PANDA_PUBLIC_API void TransitCMCMutatorToRunning() NO_THREAD_SAFETY_ANALYSIS;
+#endif
 
 #if defined(ARK_USE_COMMON_RUNTIME)
     void VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor) override;
@@ -308,6 +296,9 @@ private:
     // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
     NO_THREAD_SANITIZE uint32_t ReadFlagsAndMutatorStatusUnsafe();
 
+    // NOTE(ivagin): make these methods private once common_vm::Mutator is fully merged into ark::Mutator.
+    // They are public now because common_vm::Mutator accesses them via static_cast<ark::Mutator*>(this).
+public:
     // NO_THREAD_SANITIZE for invalid TSAN data race report
     NO_THREAD_SANITIZE bool ReadFlag(MutatorFlag flag) const
     {
@@ -319,6 +310,7 @@ private:
     NO_THREAD_SANITIZE uint32_t ReadFlagsUnsafe() const;
 
     void SetFlag(MutatorFlag flag);
+    bool ExchangeFlags(MutatorFlag oldFlag, MutatorFlag newFlag);
 
     void ClearFlag(MutatorFlag flag);
 
@@ -391,6 +383,8 @@ private:
         }
         // NOLINTEND(cppcoreguidelines-pro-type-union-access)
     }
+
+private:
     PandaVM *vm_ {nullptr};
     MutatorLock *mutatorLock_ {nullptr};
     MutatorType type_ {MutatorType::NONE};

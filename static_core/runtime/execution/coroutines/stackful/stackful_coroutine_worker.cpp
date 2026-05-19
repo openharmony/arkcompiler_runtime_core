@@ -551,10 +551,6 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     EnsureCoroutineSwitchEnabled(from->GetCoroutine());
     LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
                            << to->GetCoroutine()->GetName();
-#if defined(ARK_USE_COMMON_RUNTIME)
-    ASSERT(!from->GetCoroutine()->IsInRunningState());
-    ASSERT(!to->GetCoroutine()->IsInRunningState());
-#endif
     stats_.FinishInterval(JobTimeStats::SCH_ALL);
     OnBeforeContextSwitch(from, to);
     stats_.StartInterval(JobTimeStats::CTX_SWITCH);

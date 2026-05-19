@@ -603,7 +603,6 @@ void ArkCollector::MarkingHeap(const CArrayList<BaseObject *> &collectedRoots)
     TransitionToGCPhase(GCPhase::GC_PHASE_MARK, true);
 
     MarkingRoots(collectedRoots);
-    ProcessFinalizers();
     ExemptFromSpace();
 }
 
@@ -1497,14 +1496,6 @@ CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam &param
     return rootSet;
 }
 
-void ArkCollector::ProcessFinalizers()
-{
-    std::function<bool(BaseObject *)> finalizable = [this](BaseObject *obj) { return !IsMarkedObject(obj); };
-    FinalizerProcessor &fp = collectorResources_.GetFinalizerProcessor();
-    fp.EnqueueFinalizables(finalizable, snapshotFinalizerNum_);
-    fp.Notify();
-}
-
 BaseObject *ArkCollector::ForwardObject(BaseObject *obj)
 {
     BaseObject *to = TryForwardObject(obj);
@@ -1630,8 +1621,6 @@ void ArkCollector::CollectSmallSpace()
          std::to_string(stats.nonMovableGarbageSize) + "B;large:" + std::to_string(stats.largeSpaceSize) + "-" +
          std::to_string(stats.largeGarbageSize) + "B;garbage ratio:" + std::to_string(stats.garbageRatio))
             .c_str());
-
-    collectorResources_.GetFinalizerProcessor().NotifyToReclaimGarbage();
 }
 
 void ArkCollector::SetGCThreadQosPriority(PriorityMode mode)

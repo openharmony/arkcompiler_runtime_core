@@ -16,7 +16,6 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
 
-#include "common_components/heap/collector/finalizer_processor.h"
 #include "common_components/heap/collector/task_queue.h"
 #include "common_components/taskpool/taskpool.h"
 
@@ -103,11 +102,6 @@ public:
         return Heap::GetHeap().IsGCEnabled();
     }
 
-    FinalizerProcessor &GetFinalizerProcessor()
-    {
-        return finalizerProcessor_;
-    }
-
     void BroadcastGCFinished();
     GCStats &GetGCStats()
     {
@@ -184,7 +178,6 @@ private:
     }
 #endif
     CollectorProxy &collectorProxy_;
-    FinalizerProcessor finalizerProcessor_;
     GCStats gcStats_;
     bool hasRelease = false;
 };

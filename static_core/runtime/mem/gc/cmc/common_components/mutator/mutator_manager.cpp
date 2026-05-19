@@ -17,11 +17,11 @@
 #include <thread>
 
 #include "common_components/base/time_utils.h"
-#include "common_components/heap/collector/finalizer_processor.h"
 #include "common_components/heap/collector/marking_collector.h"
 #include "common_components/heap/heap.h"
 
 #include "common_interfaces/thread/mutator-inl.h"
+#include "include/locks.h"
 #include "libarkbase/os/mutex.h"
 
 namespace ark::common_vm {
@@ -49,7 +49,6 @@ void MutatorManager::BindMutator(Mutator &mutator) const
     if (UNLIKELY(tlData->buffer == nullptr)) {
         (void)AllocationBuffer::GetOrCreateAllocBuffer();
     }
-    mutator.SetSafepointActive(false);
     tlData->mutator = &mutator;
 }
 
@@ -91,61 +90,14 @@ void MutatorManager::DestroyExpiredMutators()
 
 void MutatorManager::DestroyMutator(Mutator *mutator)
 {
-    if (TryAcquireMutatorManagementRLock()) {
+    if (TryAcquireMutatorLockR()) {
         delete mutator;  // call ~Mutator() under mutatorListLock
-        MutatorManagementRUnlock();
+        MutatorLockRUnlock();
     } else {
         expiringMutatorListLock_.Lock();
         expiringMutators_.push_back(mutator);
         expiringMutatorListLock_.Unlock();
     }
-}
-
-Mutator *MutatorManager::CreateRuntimeMutator(ThreadType threadType)
-{
-    // Because TSAN tool can't identify the RwLock implemented by ourselves,
-    // we use a global instance fpMutatorInstance instead of an instance created on
-    // heap in order to prevent false positives.
-    static Mutator fpMutatorInstance;
-    Mutator *mutator = nullptr;
-    if (threadType == ThreadType::FP_THREAD) {
-        mutator = &fpMutatorInstance;
-    } else {
-        mutator = new (std::nothrow) Mutator();
-    }
-    LOG_IF(UNLIKELY(mutator == nullptr), FATAL, GC) << "create mutator out of native memory";
-    MutatorManagementRLock();
-    mutator->InitTid();
-    MutatorManager::Instance().BindMutator(*mutator);
-    mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
-    ThreadLocal::SetMutator(mutator);
-    ThreadLocal::SetThreadType(threadType);
-    ThreadLocal::SetProcessorFlag(true);
-    ThreadLocalData *threadData = GetThreadLocalData();
-    PreRunManagedCode(mutator, 2, threadData);  // 2 layers
-    // only running mutator can enter saferegion.
-    MutatorManagementRUnlock();
-    return mutator;
-}
-
-void MutatorManager::DestroyRuntimeMutator(ThreadType threadType)
-{
-    Mutator *mutator = ThreadLocal::GetMutator();
-    LOG_IF(UNLIKELY(mutator == nullptr), FATAL, GC) << "Fini UpdateThreads with null mutator";
-
-    MutatorManagementRLock();
-    (void)mutator->LeaveSaferegion();
-    // fp mutator is a static instance, we can't delete it, we reset the mutator to avoid invalid memory
-    // access when static instance destruction.
-    if (threadType != ThreadType::FP_THREAD) {
-        delete mutator;
-    } else {
-        mutator->ResetMutator();
-    }
-    ThreadLocal::SetAllocBuffer(nullptr);
-    ThreadLocal::SetMutator(nullptr);
-    ThreadLocal::SetProcessorFlag(false);
-    MutatorManagementRUnlock();
 }
 
 void MutatorManager::Init()
@@ -163,13 +115,13 @@ MutatorManager &MutatorManager::Instance() noexcept
     return BaseRuntime::GetInstance()->GetMutatorManager();
 }
 
-void MutatorManager::AcquireMutatorManagementWLock()
+void MutatorManager::AcquireMutatorLockW()
 {
     uint64_t start = TimeUtil::NanoSeconds();
-    bool acquired = TryAcquireMutatorManagementWLock();
+    bool acquired = TryAcquireMutatorLockW();
     while (!acquired) {
         TimeUtil::SleepForNano(WAIT_LOCK_INTERVAL);
-        acquired = TryAcquireMutatorManagementWLock();
+        acquired = TryAcquireMutatorLockW();
         uint64_t now = TimeUtil::NanoSeconds();
         if (!acquired && ((now - start) / SECOND_TO_NANO_SECOND > WAIT_LOCK_TIMEOUT)) {
             LOG(FATAL, COMMON) << "Wait mutator list lock timeout";
@@ -187,26 +139,11 @@ void MutatorManager::VisitAllMutators(MutatorVisitor func, bool ignoreFinalizer)
             func(*mutator);
         }
     }
-    if (!ignoreFinalizer) {
-        Mutator *mutator = Heap::GetHeap().GetFinalizerProcessor().GetMutator();
-        if (mutator != nullptr) {
-            func(*mutator);
-        }
-    }
 }
 
 void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
 {
-#ifndef NDEBUG
-    bool saferegionEntered = false;
-    // Ensure an active mutator entered saferegion before STW (aka. stop all other mutators).
-    if (!IsGcThread()) {
-        Mutator *mutator = Mutator::GetMutator();
-        if (mutator != nullptr) {
-            saferegionEntered = mutator->EnterSaferegion(true);
-        }
-    }
-#endif
+    ASSERT(IsGcThread());
     // Block if another thread is holding the stwMutex.
     // Prevent multi-thread doing STW concurrently.
     stwMutex_.Lock();
@@ -214,16 +151,9 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
     // order where threads observe all modifications in the same order
     stwTriggered_.store(true, std::memory_order_seq_cst);
 
-    AcquireMutatorManagementWLock();
-
-#ifndef NDEBUG
-    // If current mutator saferegion state changed,
-    // we should restore it after the mutator called StartTheWorld().
-    saferegionStateChanged_ = saferegionEntered;
-#endif
-
     size_t mutatorCount = GetMutatorCount();
     if (UNLIKELY(mutatorCount == 0)) {
+        AcquireMutatorLockW();
         // Atomic with release order reason: data race with worldStopped_ with dependecies on writes before the store
         worldStopped_.store(true, std::memory_order_release);
         if (syncGCPhase) {
@@ -234,7 +164,7 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
     // set mutatorCount as countOfMutatorsToStop.
     SetSuspensionMutatorCount(static_cast<uint32_t>(mutatorCount));
     DemandSuspensionForStw();
-    WaitUntilAllStopped();
+    AcquireMutatorLockW();
 
     // the world is stopped.
     // Atomic with release order reason: data race with worldStopped_ with dependecies on writes before the store
@@ -246,9 +176,7 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
 
 void MutatorManager::StartTheWorld() noexcept
 {
-#ifndef NDEBUG
-    bool shouldLeaveSaferegion = saferegionStateChanged_;
-#endif
+    ASSERT(IsGcThread());
     // Atomic with seq_cst order reason: data race with stwTriggered_ with requirement for sequentially consistent
     // order where threads observe all modifications in the same order
     stwTriggered_.store(false, std::memory_order_seq_cst);
@@ -265,93 +193,10 @@ void MutatorManager::StartTheWorld() noexcept
     (void)Futex(GetStwFutexWord(), FUTEX_WAKE, INT_MAX);
 #endif
 
-    MutatorManagementWUnlock();
+    MutatorLockWUnlock();
 
     // Release stwMutex to allow other thread call STW.
     stwMutex_.Unlock();
-#ifndef NDEBUG
-    // Restore saferegion state if the state is changed when mutator calls StopTheWorld().
-    if (!IsGcThread()) {
-        Mutator *mutator = Mutator::GetMutator();
-        if (mutator != nullptr && shouldLeaveSaferegion) {
-            (void)mutator->LeaveSaferegion();
-        }
-    }
-#endif
-}
-
-void MutatorManager::YieldAndRefreshMutatorList(std::list<Mutator *> &pendingMutators,
-                                                const std::function<bool(Mutator &)> &shouldInclude)
-{
-    // Temporarily release WLock to let RegisterNewMutator/UnregisterMutator (which take RLock) proceed.
-    // Without this, a mutator blocked on RLock cannot reach safepoint, causing deadlock.
-    MutatorManagementWUnlock();
-    (void)sched_yield();
-    AcquireMutatorManagementWLock();
-
-    // Remove mutators that were destroyed while WLock was released.
-    for (auto it = pendingMutators.begin(); it != pendingMutators.end();) {
-        if (std::find(allMutatorList_.begin(), allMutatorList_.end(), *it) == allMutatorList_.end()) {
-            it = pendingMutators.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    // Pick up newly registered mutators that match the predicate.
-    VisitAllMutators([&pendingMutators, &shouldInclude](Mutator &mutator) {
-        if (std::find(pendingMutators.begin(), pendingMutators.end(), &mutator) == pendingMutators.end()) {
-            if (shouldInclude(mutator)) {
-                pendingMutators.push_back(&mutator);
-            }
-        }
-    });
-}
-
-void MutatorManager::WaitUntilAllStopped()
-{
-    uint64_t beginTime = TimeUtil::MilliSeconds();
-    std::list<Mutator *> unstoppedMutators;
-    auto func = [&unstoppedMutators](Mutator &mutator) {
-        if ((!mutator.InSaferegion())) {
-            unstoppedMutators.emplace_back(&mutator);
-        }
-    };
-    VisitAllMutators(func);
-
-    size_t remainMutatorsSize = unstoppedMutators.size();
-    if (remainMutatorsSize == 0) {
-        return;
-    }
-
-    // Synchronize operation to ensure that all mutators complete phase transition
-    // Use unstoppedMutators to avoid traversing the entire mutatorList
-    int timeoutTimes = 0;
-    while (true) {
-        for (auto it = unstoppedMutators.begin(); it != unstoppedMutators.end();) {
-            Mutator *mutator = *it;
-            if (mutator->InSaferegion()) {
-                // current it(mutator) is finished by GC
-                it = unstoppedMutators.erase(it);
-            } else {
-                ++it;  // skip current round & check it next round
-            }
-        }
-
-        if (unstoppedMutators.size() == 0) {
-            return;
-        }
-
-        auto time =
-            ((remainMutatorsSize / STW_TIMEOUTS_THREADS_BASE_COUNT) * STW_TIMEOUTS_BASE_MS) + STW_TIMEOUTS_BASE_MS;
-        if (UNLIKELY(g_enableGCTimeoutCheck && TimeUtil::MilliSeconds() - beginTime > time)) {
-            timeoutTimes++;
-            beginTime = TimeUtil::MilliSeconds();
-            DumpMutators(timeoutTimes);
-        }
-
-        YieldAndRefreshMutatorList(unstoppedMutators, [](Mutator &mutator) { return !mutator.InSaferegion(); });
-        remainMutatorsSize = unstoppedMutators.size();
-    }
 }
 
 void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &undoneMutators)
@@ -378,23 +223,17 @@ void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &
             return;
         }
 
-        YieldAndRefreshMutatorList(undoneMutators, [phase](Mutator &mutator) {
-            if (mutator.GetMutatorPhase() == phase && mutator.FinishedTransition()) {
-                return false;
-            }
-            mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_GC_PHASE);
-            mutator.SetSafepointActive(true);
-            return true;
-        });
+        // Yield CPU to let running mutators reach their next safepoint and process
+        (void)sched_yield();
     }
 }
 
 void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
 {
-    // Try to occupy mutatorListLock prevent some mutators from exiting
+    // Prevent mutators from unregistering
     bool worldStopped = WorldStopped();
     if (!worldStopped) {
-        AcquireMutatorManagementWLock();
+        stwMutex_.Lock();
     }
 
     GCPhase prevPhase = Heap::GetHeap().GetGCPhase();
@@ -408,13 +247,12 @@ void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
     std::list<Mutator *> undoneMutators;
     // Broadcast mutator phase transition signal to all mutators
     VisitAllMutators([&undoneMutators](Mutator &mutator) {
-        mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_GC_PHASE);
-        mutator.SetSafepointActive(true);
+        mutator.SetSuspensionFlag(ark::GC_PHASE_TRANSITION_REQUEST);
         undoneMutators.push_back(&mutator);
     });
     EnsurePhaseTransition(phase, undoneMutators);
     if (!worldStopped) {
-        MutatorManagementWUnlock();
+        stwMutex_.Unlock();
     }
 }
 

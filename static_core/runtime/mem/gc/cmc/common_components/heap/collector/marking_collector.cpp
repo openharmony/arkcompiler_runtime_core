@@ -181,27 +181,6 @@ void MarkingCollector::MergeWeakStack(WeakStack &weakStack)
     }
 }
 
-class MergeMutatorRootsScope {
-public:
-    MergeMutatorRootsScope() : manager_(&MutatorManager::Instance()), worldStopped_(manager_->WorldStopped())
-    {
-        if (!worldStopped_) {
-            manager_->MutatorManagementWLock();
-        }
-    }
-
-    ~MergeMutatorRootsScope()
-    {
-        if (!worldStopped_) {
-            manager_->MutatorManagementWUnlock();
-        }
-    }
-
-private:
-    MutatorManager *manager_;
-    bool worldStopped_;
-};
-
 void MarkingCollector::TracingSerial(GlobalMarkStack &globalMarkStack)
 {
     // serial marking with a single mark task.

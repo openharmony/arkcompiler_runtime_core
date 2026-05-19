@@ -28,6 +28,10 @@
 
 #include "libarkbase/os/mutex.h"
 
+namespace ark {
+class MutatorLock;
+}  // namespace ark
+
 namespace ark::common_vm {
 using ::ark::mem::GCParam;
 using ::ark::mem::HeapParam;
@@ -146,6 +150,7 @@ public:
     void Init(const RuntimeParam &param);
     void Init();
     void Fini();
+    void SetMutatorLock(ark::MutatorLock *l);
 
     bool RegisterVM(VMInterface *vm);
     bool UnregisterVM(VMInterface *vm);

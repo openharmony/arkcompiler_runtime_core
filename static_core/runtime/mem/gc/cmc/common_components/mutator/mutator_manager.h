@@ -25,11 +25,13 @@
 #include "common_components/base/rw_lock.h"
 #include "common_components/common/page_allocator.h"
 #include "common_components/mutator/satb_buffer.h"
+#include "include/locks.h"
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS) || defined(__APPLE__)
 #include "common_components/mutator/safepoint_page_manager.h"
 #endif
 #include "common_components/mutator/thread_local.h"
 #include "common_components/log/log.h"
+#include "common_interfaces/thread/mutator-inl.h"
 
 #include "common_interfaces/thread/mutator.h"
 #include "libarkbase/os/mutex.h"
@@ -107,17 +109,19 @@ public:
         VisitAllMutators(func);
     }
 
-    bool TryAcquireMutatorManagementWLock()
+    bool TryAcquireMutatorLockW()
     {
-        return mutatorManagementRWLock_.TryLockWrite();
+        ASSERT(mutatorLock_ != nullptr);
+        return mutatorLock_->TryWriteLock();
     }
 
-    bool TryAcquireMutatorManagementRLock()
+    bool TryAcquireMutatorLockR()
     {
-        return mutatorManagementRWLock_.TryLockRead();
+        ASSERT(mutatorLock_ != nullptr);
+        return mutatorLock_->TryReadLock();
     }
 
-    void AcquireMutatorManagementWLock();
+    void AcquireMutatorLockW();
 
     static void VisitMuatorHelper(void *argPtr, void *handle)
     {
@@ -133,22 +137,15 @@ public:
     // Some functions about stw
     void StopTheWorld(bool syncGCPhase, GCPhase phase) ACQUIRE(stwMutex_);
     void StartTheWorld() noexcept RELEASE(stwMutex_);
-    void WaitUntilAllStopped();
     void DumpMutators(uint32_t timeoutTimes);
     void DemandSuspensionForStw()
     {
-        VisitAllMutators([](Mutator &mutator) {
-            mutator.SetSafepointActive(true);
-            mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_STW);
-        });
+        VisitAllMutators([](Mutator &mutator) { mutator.SetSuspensionFlag(ark::SUSPEND_REQUEST); });
     }
 
     void CancelSuspensionAfterStw()
     {
-        VisitAllMutators([](Mutator &mutator) {
-            mutator.SetSafepointActive(false);
-            mutator.ClearSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_STW);
-        });
+        VisitAllMutators([](Mutator &mutator) { mutator.ClearSuspensionFlag(ark::SUSPEND_REQUEST); });
     }
 
     void BindMutator(Mutator &mutator) const;
@@ -158,9 +155,6 @@ public:
     void UnbindMutatorOnly() const;
 
     void DestroyMutator(Mutator *mutator);
-
-    Mutator *CreateRuntimeMutator(ThreadType threadType) __attribute__((noinline));
-    void DestroyRuntimeMutator(ThreadType threadType);
 
     bool WorldStopped() const
     {
@@ -186,7 +180,7 @@ public:
     }
 
     void EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &undoneMutators);
-    void TransitionAllMutatorsToGCPhase(GCPhase phase);
+    void TransitionAllMutatorsToGCPhase(GCPhase phase) NO_THREAD_SAFETY_ANALYSIS;
 
     template <class STWFunction>
     void FlipMutators(STWParam &param, STWFunction &&stwFunction, FlipFunction *flipFunction);
@@ -194,6 +188,16 @@ public:
     void DumpForDebug();
     void DumpAllGcInfos();
 #endif
+
+    void SetMutatorLock(ark::MutatorLock *l)
+    {
+        mutatorLock_ = l;
+    }
+
+    __attribute__((always_inline)) inline ark::MutatorLock *GetMutatorLock() const
+    {
+        return mutatorLock_;
+    }
 
     __attribute__((always_inline)) inline int *GetStwFutexWord()
     {
@@ -242,32 +246,19 @@ public:
     }
 #endif
 
-    void MutatorManagementRLock()
+    void MutatorLockRUnlock() NO_THREAD_SAFETY_ANALYSIS
     {
-        mutatorManagementRWLock_.LockRead();
+        ASSERT(mutatorLock_ != nullptr);
+        mutatorLock_->Unlock();
     }
 
-    void MutatorManagementRUnlock()
+    void MutatorLockWUnlock() NO_THREAD_SAFETY_ANALYSIS
     {
-        mutatorManagementRWLock_.UnlockRead();
-    }
-
-    void MutatorManagementWLock()
-    {
-        mutatorManagementRWLock_.LockWrite();
-    }
-
-    void MutatorManagementWUnlock()
-    {
-        mutatorManagementRWLock_.UnlockWrite();
+        ASSERT(mutatorLock_ != nullptr);
+        mutatorLock_->Unlock();
     }
 
     void DestroyExpiredMutators();
-
-    // Release/reacquire WLock to let RegisterNewMutator/UnregisterMutator proceed,
-    // then reconcile pendingMutators with allMutatorList_.
-    void YieldAndRefreshMutatorList(std::list<Mutator *> &pendingMutators,
-                                    const std::function<bool(Mutator &)> &shouldInclude);
 
     bool HasNativeMutator();
 
@@ -282,7 +273,7 @@ private:
     ark::os::memory::Mutex expiringMutatorListLock_;
 
     // guard mutator set for stop-the-world
-    RwLock mutatorManagementRWLock_;
+    ark::MutatorLock *mutatorLock_ {nullptr};
 
     // count of mutators need to be suspended for stw.
     // this field is also used as futex wait/wakeup word for stw.
@@ -290,9 +281,6 @@ private:
 
     // Ensure only one thread can doing STW.
     ark::os::memory::RecursiveMutex stwMutex_;
-#ifndef NDEBUG
-    bool saferegionStateChanged_ = false;
-#endif
     // Show current STW state
     std::atomic<bool> worldStopped_ = {false};
     std::atomic<bool> stwTriggered_ = {false};

@@ -21,16 +21,11 @@
 
 namespace ark {
 
-#if !defined(ARK_USE_COMMON_RUNTIME)
 class PANDA_PUBLIC_API MutatorLock : public os::memory::RWLock {
-    using LockT = os::memory::RWLock;
-#else
-class PANDA_PUBLIC_API MutatorLock : public os::memory::DummyLock {
-    using LockT = os::memory::DummyLock;
-#endif
+    using LockT = ark::os::memory::RWLock;
 #ifndef NDEBUG
 public:
-    enum MutatorLockState {UNLOCKED, RDLOCK, WRLOCK};
+    enum MutatorLockState { UNLOCKED, RDLOCK, WRLOCK };
 
     void ReadLock() ACQUIRE_SHARED();
 

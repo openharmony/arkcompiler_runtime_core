@@ -134,7 +134,6 @@ module Constants
     THREAD_FLATTENED_STRING_CACHE_OFFSET = "cross_values::GetManagedThreadFlattenedStringCacheOffset(GetArch())"
     THREAD_FLAG_OFFSET = "cross_values::GetManagedThreadFlagOffset(GetArch())"
     THREAD_VM_OFFSET = "cross_values::GetThreadVmOffset(GetArch())"
-    MUTATOR_SAFEPOINT_ACTIVE_OFFSET = "cross_values::GetMutatorSafepointActiveOffset(GetArch())"
     MARK_WORD_OFFSET = "cross_values::GetObjectHeaderMarkWordOffset(GetArch())"
     BASE_CLASS_MANAGED_OBJECT_OFFSET = "cross_values::GetBaseClassManagedObjectOffset(GetArch())"
     BASE_CLASS_FLAGS_OFFSET = "cross_values::GetBaseClassFlagsOffset(graph->GetArch())"

@@ -56,9 +56,7 @@ MutatorLock *Locks::NewMutatorLock()
 
 void MutatorLock::ReadLock()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     ASSERT(!HasLock());
-#endif
     LockT::ReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::ReadLock";
     Mutator::GetCurrent()->SetLockState(RDLOCK);
@@ -66,9 +64,7 @@ void MutatorLock::ReadLock()
 
 void MutatorLock::WriteLock()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     ASSERT(!HasLock());
-#endif
     LockT::WriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::WriteLock";
     Mutator::GetCurrent()->SetLockState(WRLOCK);
@@ -89,19 +85,23 @@ bool MutatorLock::TryWriteLock()
     bool ret = LockT::TryWriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryWriteLock";
     if (ret) {
-        Mutator::GetCurrent()->SetLockState(WRLOCK);
+        if (LIKELY(Mutator::GetCurrent() != nullptr)) {
+            Mutator::GetCurrent()->SetLockState(WRLOCK);
+        }
     }
     return ret;
 }
 
 void MutatorLock::Unlock()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
-    ASSERT(HasLock());
-#endif
+    if (LIKELY(Mutator::GetCurrent() != nullptr)) {
+        ASSERT(HasLock());
+    }
     LockT::Unlock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::Unlock";
-    Mutator::GetCurrent()->SetLockState(UNLOCKED);
+    if (LIKELY(Mutator::GetCurrent() != nullptr)) {
+        Mutator::GetCurrent()->SetLockState(UNLOCKED);
+    }
 }
 
 MutatorLock::MutatorLockState MutatorLock::GetState() const

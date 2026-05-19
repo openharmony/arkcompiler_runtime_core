@@ -417,7 +417,6 @@ public:
 
         nonMovableSpace_.PrepareForward();
     }
-    void FeedHungryBuffers() override;
 
     // markObj
     static bool MarkObject(const BaseObject *obj)

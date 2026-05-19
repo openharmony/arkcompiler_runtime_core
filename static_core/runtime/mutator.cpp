@@ -15,6 +15,7 @@
 
 #include "runtime/include/mutator.h"
 
+#include "include/mutator_status.h"
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/panda_vm.h"
@@ -121,11 +122,7 @@ void Mutator::InitializeInitMutatorFlag()
 
 bool Mutator::TestAllFlags() const
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     return (fms_.asStruct.flags) != initialMutatorFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
-#else
-    return ark::common_vm::Mutator::HasSuspendRequest();
-#endif
 }
 
 void Mutator::SetFlag(MutatorFlag flag)
@@ -134,6 +131,13 @@ void Mutator::SetFlag(MutatorFlag flag)
     // where threads observe all modifications in the same order
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     fms_.asAtomic.flags.fetch_or(flag, std::memory_order_seq_cst);
+}
+
+bool Mutator::ExchangeFlags(MutatorFlag oldFlag, MutatorFlag newFlag)
+{
+    uint16_t oldFlag16 = oldFlag;
+    uint16_t newFlag16 = newFlag;
+    return fms_.asAtomic.flags.compare_exchange_strong(oldFlag16, newFlag16, std::memory_order_seq_cst);
 }
 
 void Mutator::ClearFlag(MutatorFlag flag)
@@ -152,17 +156,10 @@ uint32_t Mutator::ReadFlagsAndMutatorStatusUnsafe()
 
 enum MutatorStatus Mutator::GetStatus() const
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     // Atomic with acquire order reason: data race with flags with dependecies on reads after
     // the load which should become visible
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     return static_cast<enum MutatorStatus>(fms_.asAtomic.status.load(std::memory_order_acquire));
-#else
-    if (ark::common_vm::Mutator::IsInRunningState()) {
-        return MutatorStatus::RUNNING;
-    }
-    return MutatorStatus::NATIVE;
-#endif
 }
 
 uint32_t Mutator::ReadFlagsUnsafe() const
@@ -173,32 +170,23 @@ uint32_t Mutator::ReadFlagsUnsafe() const
 
 void Mutator::InitializeMutatorFlag()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     fms_.asInt = initialMutatorFlag_;
-#endif
 }
 
 void Mutator::CleanUpMutatorStatus()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     InitializeMutatorFlag();
     {
         os::memory::LockHolder lock(suspendLock_);
         suspendCount_ = 0;
     }
     StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(MutatorStatus::CREATED);
-#endif
 }
 
-#if defined(ARK_USE_COMMON_RUNTIME)
-NO_THREAD_SAFETY_ANALYSIS void Mutator::UpdateStatus(enum MutatorStatus status)
-#else
 void Mutator::UpdateStatus(enum MutatorStatus status)
-#endif
 {
     MutatorStatus oldStatus = GetStatus();
-#if !defined(ARK_USE_COMMON_RUNTIME)
     if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
         TransitionFromRunningToSuspended(status);
     } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
@@ -206,7 +194,11 @@ void Mutator::UpdateStatus(enum MutatorStatus status)
         // running we need to check suspension flag and counter so SafepointPoll has to be done before
         // acquiring mutator_lock.
         // StoreStatus acquires lock here
+#if !defined(ARK_USE_COMMON_RUNTIME)
         StoreStatus<CHECK_SAFEPOINT, READLOCK>(MutatorStatus::RUNNING);
+#else
+        TransitCMCMutatorToRunning();
+#endif
     } else if (oldStatus == MutatorStatus::NATIVE && status != MutatorStatus::IS_TERMINATED_LOOP &&
                IsRuntimeTerminated()) {
         // If a daemon thread with NATIVE status was deregistered, it should not access any managed object,
@@ -219,15 +211,6 @@ void Mutator::UpdateStatus(enum MutatorStatus status)
         // NB! Status is not a simple bit, without atomics it can produce faulty GetStatus.
         StoreStatus(status);
     }
-#else
-    if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
-        ark::common_vm::Mutator::TransferToNativeIfInRunning();
-        GetMutatorLock()->Unlock();
-    } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
-        ark::common_vm::Mutator::TransferToRunningIfInNative();
-        GetMutatorLock()->ReadLock();
-    }
-#endif
 }
 
 void Mutator::TransitionFromRunningToSuspended(enum MutatorStatus status)
@@ -239,20 +222,15 @@ void Mutator::TransitionFromRunningToSuspended(enum MutatorStatus status)
 
 void Mutator::SuspendCheck()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     // We should use internal suspension to avoid missing call of IncSuspend
     SuspendImpl(true);
     GetMutatorLock()->Unlock();
     GetMutatorLock()->ReadLock();
     ResumeImpl(true);
-#else
-    UNREACHABLE();
-#endif
 }
 
 void Mutator::SuspendImpl(bool internalSuspend)
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     os::memory::LockHolder lock(suspendLock_);
     LOG(DEBUG, RUNTIME) << "Suspending thread " << os::thread::GetCurrentThreadId();
     if (!internalSuspend) {
@@ -266,14 +244,10 @@ void Mutator::SuspendImpl(bool internalSuspend)
     if (oldCount == 0) {
         SetFlag(SUSPEND_REQUEST);
     }
-#else
-    UNREACHABLE();
-#endif
 }
 
 void Mutator::ResumeImpl(bool internalResume)
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     os::memory::LockHolder lock(suspendLock_);
     LOG(DEBUG, RUNTIME) << "Resuming thread " << os::thread::GetCurrentThreadId();
     if (!internalResume) {
@@ -293,21 +267,14 @@ void Mutator::ResumeImpl(bool internalResume)
     // Help for UnregisterExitedThread
     TSAN_ANNOTATE_HAPPENS_BEFORE(&fms_);
     suspendVar_.Signal();
-#else
-    UNREACHABLE();
-#endif
 }
 
 void Mutator::SafepointPoll()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     if (TestAllFlags()) {
         trace::ScopedTrace scopedTrace("RunSafepoint");
         Safepoint();
     }
-#else
-    ark::common_vm::Mutator::CheckSafepointIfSuspended();
-#endif
 }
 
 void Mutator::Safepoint()
@@ -322,12 +289,20 @@ void Mutator::Safepoint()
         vm->GetGCTrigger()->TriggerGcIfNeeded(vm->GetGC());
     }
 #endif  // !NDEBUG
+
+#if !defined(ARK_USE_COMMON_RUNTIME)
     if (UNLIKELY(IsRuntimeTerminated())) {
         OnRuntimeTerminated();
     }
     if (IsSuspended()) {
         WaitSuspension();
     }
+#else
+    if (UNLIKELY(TestAllFlags())) {
+        WaitSuspension();
+    }
+#endif  // ARK_USE_COMMON_RUNTIME
+
 #if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
     this->ResetSafepointTimer(false);
 #endif  // SAFEPOINT_TIME_CHECKER_ENABLED
@@ -335,12 +310,7 @@ void Mutator::Safepoint()
 
 bool Mutator::IsUserSuspended() const
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     return userCodeSuspendCount_ > 0;
-#else
-    UNREACHABLE();
-    return false;
-#endif
 }
 
 void Mutator::WaitSuspension()
@@ -369,9 +339,41 @@ void Mutator::WaitSuspension()
     }
     UpdateStatus(oldStatus);
 #else
-    ark::common_vm::Mutator::WaitSuspension();
+    ASSERT(GetStatus() == MutatorStatus::RUNNING);
+    ASSERT(mutatorLock_->HasLock());
+
+    StoreStatus(ark::MutatorStatus::NATIVE);
+    GetMutatorLock()->Unlock();
+    common_vm::Mutator::HandleSuspensionRequest();
+    StoreStatus(ark::MutatorStatus::NATIVE);
+    TransitCMCMutatorToRunning();
 #endif
 }
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+void Mutator::TransitCMCMutatorToRunning()
+{
+    ASSERT(GetStatus() != MutatorStatus::RUNNING);
+    ASSERT(!mutatorLock_->HasLock());
+
+    while (true) {
+        if (UNLIKELY(TestAllFlags())) {
+            common_vm::Mutator::HandleSuspensionRequest();
+            StoreStatus(ark::MutatorStatus::NATIVE);
+            continue;
+        }
+        GetMutatorLock()->ReadLock();
+
+        if (UNLIKELY(TestAllFlags())) {
+            GetMutatorLock()->Unlock();
+            continue;
+        }
+        break;
+    }
+
+    StoreStatus(ark::MutatorStatus::RUNNING);
+}
+#endif
 
 void Mutator::InitCardTableData(mem::GCBarrierSet *barrier)
 {
@@ -461,11 +463,7 @@ void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase)
 
 void Mutator::MakeTSANHappyForThreadState()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     TSAN_ANNOTATE_HAPPENS_AFTER(&fms_);
-#else
-    UNREACHABLE();
-#endif
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)

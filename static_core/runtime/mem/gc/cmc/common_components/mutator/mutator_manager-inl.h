@@ -34,32 +34,18 @@ void MutatorManager::FlipMutators(STWParam &param, STWFunction &&stwFunction, Fl
         VisitAllMutators(
             [&undoneMutators, flipFunction](Mutator &mutator) {
                 mutator.SetFlipFunction(flipFunction);
-                mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK);
+                mutator.SetSuspensionFlag(ark::PENDING_CALLBACK_REQUEST);
                 undoneMutators.push_front(&mutator);
             },
             ignoreFinalizer);
     }
-    // Resume all mutator threads.
-    AcquireMutatorManagementWLock();
-    for (auto it = undoneMutators.begin(); it != undoneMutators.end();) {
-        bool hasDead = std::find(allMutatorList_.begin(), allMutatorList_.end(), *it) == allMutatorList_.end();
-        if (UNLIKELY(hasDead)) {
-            it = undoneMutators.erase(it);
-            continue;
-        }
-        Mutator *mutator = *it;
-        if (mutator->TryRunFlipFunction()) {
-            it = undoneMutators.erase(it);
-            continue;
-        }
-        it++;
+    for (auto *mutator : undoneMutators) {
+        mutator->TryRunFlipFunction();
     }
-    // Wait for flipFunction running finish.
-    for (auto it = undoneMutators.begin(); it != undoneMutators.end(); it++) {
-        Mutator *mutator = *it;
+    // Wait for mutators that are executing their flip concurrently.
+    for (auto *mutator : undoneMutators) {
         mutator->WaitFlipFunctionFinish();
     }
-    MutatorManagementWUnlock();
 }
 }  // namespace ark::common_vm
 
