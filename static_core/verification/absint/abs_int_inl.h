@@ -2506,6 +2506,11 @@ public:
         DBGBRK();
         Sync();
 
+        if (!CheckIfMethodSignatureReturnTypeResolved()) {
+            LOG_VERIFIER_CANNOT_RESOLVE_METHOD_RETURN_TYPE(context_.GetMethod()->GetFullName());
+            status_ = VerificationStatus::ERROR;
+            return false;
+        }
         if (!CheckType(ReturnType(), bits32_)) {
             LOG_VERIFIER_BAD_RETURN_INSTRUCTION_TYPE("", ToString(ReturnType()), ToString(bits32_));
             SET_STATUS_FOR_MSG(BadReturnInstructionType, WARNING);
@@ -2960,12 +2965,24 @@ public:
         return true;
     }
 
+    bool CheckIfMethodSignatureReturnTypeResolved()
+    {
+        const auto verifMethod = context_.GetMethod();
+        return !GetTypeSystem()->GetMethodSignature(verifMethod)->result.IsNone();
+    }
+
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnWide()
     {
         LOG_INST();
         DBGBRK();
         Sync();
+
+        if (!CheckIfMethodSignatureReturnTypeResolved()) {
+            LOG_VERIFIER_CANNOT_RESOLVE_METHOD_RETURN_TYPE(context_.GetMethod()->GetFullName());
+            status_ = VerificationStatus::ERROR;
+            return false;
+        }
 
         if (!CheckType(ReturnType(), bits64_)) {
             LOG_VERIFIER_BAD_RETURN_INSTRUCTION_TYPE(".64", ToString(ReturnType()), ToString(bits64_));
@@ -2991,6 +3008,12 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+
+        if (!CheckIfMethodSignatureReturnTypeResolved()) {
+            LOG_VERIFIER_CANNOT_RESOLVE_METHOD_RETURN_TYPE(context_.GetMethod()->GetFullName());
+            status_ = VerificationStatus::ERROR;
+            return false;
+        }
 
         if (!CheckType(ReturnType(), refType_)) {
             LOG_VERIFIER_BAD_RETURN_INSTRUCTION_TYPE(".obj", ToString(ReturnType()), ToString(refType_));
@@ -3207,7 +3230,7 @@ public:
         return true;
     }
 
-    // NOLINTNEXTLINE(readability-function-size)
+    // NOLINTNEXTLINE(readability-function-size) // CC-OFFNXT(G.FUN.01-CPP) solid logic
     template <typename NameGetter>
     bool CheckMethodArgs(NameGetter nameGetter, const PandaVector<Type> &formalArgs, Span<int> regs,
                          Type constructedType = Type {})
@@ -3227,6 +3250,12 @@ public:
             auto regNum = (!constructedType.IsNone() && sigIter == formalArgs.cbegin()) ? INVALID_REG : *(regsIter++);
             auto formalType = *(sigIter++);
 
+            if (formalType.IsNone()) {
+                LOG_VERIFIER_CANNOT_RESOLVE_METHOD_ARGUMENT_TYPE(context_.GetMethod()->GetFullName(), argnum);
+                status_ = VerificationStatus::ERROR;
+                return false;
+            }
+
             if (regNum != INVALID_REG && !IsRegDefined(regNum)) {
                 LOG_VERIFIER_BAD_CALL_UNDEFINED_REGISTER(nameGetter(), regNum);
                 SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
@@ -3236,6 +3265,7 @@ public:
             // arg: NormalizedTypeOf(actual_type) <= norm_type
             // check of physical compatibility
             bool incompatibleTypes = false;
+
             if (CheckMethodArgsNotFit(formalType, actualType, regNum, incompatibleTypes)) {
                 continue;
             }

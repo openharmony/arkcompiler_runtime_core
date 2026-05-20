@@ -720,3 +720,15 @@ messages:
     number: 2009
     message: >
       Type 'novalue' cannot be used as a method parameter type.
+
+  CannotResolveMethodReturnType:
+    number: 2010
+    args: method
+    message: >
+      Cannot resolve method return type in '${method}'.
+
+  CannotResolveMethodArgumentType:
+    number: 2011
+    args: method, arg_idx
+    message: >
+      Cannot resolve type of argument ${arg_idx} in '${method}'.
