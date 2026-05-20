@@ -97,11 +97,13 @@ public:
 
         ASSERT_NE(PandaEtsVM::GetCurrent()->GetANIVerifier(), nullptr);
         PandaEtsVM::GetCurrent()->GetANIVerifier()->SetAbortHook(AbortHook, this);
+        PandaEtsVM::GetCurrent()->GetANIVerifier()->SetErrorHook(AbortHook, this);
     }
 
     void TearDown() override
     {
         PandaEtsVM::GetCurrent()->GetANIVerifier()->SetAbortHook(nullptr, nullptr);
+        PandaEtsVM::GetCurrent()->GetANIVerifier()->SetErrorHook(nullptr, nullptr);
         AniTest::TearDown();
         ASSERT_NO_ABORT_MESSAGE();
         ss_.str("");  // clean ss_

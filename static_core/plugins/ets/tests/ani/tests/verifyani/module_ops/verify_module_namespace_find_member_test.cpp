@@ -190,7 +190,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_namespace_handle_kind_is_rejected)
 TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
 {
     ani_function function {};
-    ASSERT_EQ(env_->c_api->Module_FindFunction(env_, module_, nullptr, ":i", &function), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Module_FindFunction(env_, module_, nullptr, ":i", &function), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> functionLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
@@ -201,7 +201,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", functionLines);
 
     ani_variable variable {};
-    ASSERT_EQ(env_->c_api->Namespace_FindVariable(env_, ns_, nullptr, &variable), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Namespace_FindVariable(env_, ns_, nullptr, &variable), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
@@ -213,7 +213,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
 
 TEST_F(ModuleNamespaceFindMemberTest, wrong_result_storage_is_rejected)
 {
-    ASSERT_EQ(env_->c_api->Module_FindFunction(env_, module_, "moduleFunction", ":i", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Module_FindFunction(env_, module_, "moduleFunction", ":i", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> functionLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
@@ -223,7 +223,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_result_storage_is_rejected)
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", functionLines);
 
-    ASSERT_EQ(env_->c_api->Namespace_FindVariable(env_, ns_, "namespaceValue", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Namespace_FindVariable(env_, ns_, "namespaceValue", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
@@ -238,7 +238,7 @@ TEST_F(ModuleNamespaceFindMemberTest, pending_error_is_rejected)
     ThrowError();
 
     ani_function function {};
-    ASSERT_EQ(env_->c_api->Namespace_FindFunction(env_, ns_, "namespaceFunction", ":i", &function), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Namespace_FindFunction(env_, ns_, "namespaceFunction", ":i", &function), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"ns", "ani_namespace"},

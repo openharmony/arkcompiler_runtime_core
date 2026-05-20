@@ -69,7 +69,7 @@ TEST_F(ClassFindSetterTest, lookup_status_is_forwarded_without_verify_abort)
 TEST_F(ClassFindSetterTest, wrong_env)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindSetter(nullptr, class_, "prop", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindSetter(nullptr, class_, "prop", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"class", "ani_class"},
@@ -82,7 +82,7 @@ TEST_F(ClassFindSetterTest, wrong_env)
 TEST_F(ClassFindSetterTest, wrong_class)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, nullptr, "prop", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, nullptr, "prop", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
@@ -95,7 +95,7 @@ TEST_F(ClassFindSetterTest, wrong_class)
 TEST_F(ClassFindSetterTest, wrong_name)
 {
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, nullptr, &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, nullptr, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -107,7 +107,7 @@ TEST_F(ClassFindSetterTest, wrong_name)
 
 TEST_F(ClassFindSetterTest, wrong_result_storage)
 {
-    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, "prop", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, "prop", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
@@ -140,7 +140,7 @@ TEST_F(ClassFindSetterTest, pending_error_is_rejected)
     ThrowError();
 
     ani_method method {};
-    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, "prop", &method), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, "prop", &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"class", "ani_class"},

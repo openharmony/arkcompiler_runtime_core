@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -46,7 +46,7 @@ TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_env)
     ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(nullptr, class_, field, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(nullptr, class_, field, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -64,7 +64,7 @@ TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_class)
     ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
 
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, nullptr, field, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, nullptr, field, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -79,7 +79,7 @@ TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_class)
 TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_field)
 {
     ani_{{ type }} result;
-    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, nullptr, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -96,7 +96,7 @@ TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_result)
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

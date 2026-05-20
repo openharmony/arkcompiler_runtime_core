@@ -25,7 +25,7 @@ TEST_F(TypeGetSuperClassTest, wrong_env)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_class result {};
-    ASSERT_EQ(env_->c_api->Type_GetSuperClass(nullptr, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_GetSuperClass(nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"type", "ani_ref"},
@@ -39,7 +39,7 @@ TEST_F(TypeGetSuperClassTest, wrong_env)
 TEST_F(TypeGetSuperClassTest, wrong_type_null)
 {
     ani_class result {};
-    ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref", "wrong reference"},
@@ -70,7 +70,7 @@ TEST_F(TypeGetSuperClassTest, wrong_result_ptr)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, cls, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, cls, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref"},
@@ -103,7 +103,7 @@ TEST_F(TypeGetSuperClassTest, throw_error)
     ThrowError();
 
     ani_class superClass {};
-    ASSERT_EQ(env_->Type_GetSuperClass(cls, &superClass), ANI_ERROR);
+    ASSERT_EQ(env_->Type_GetSuperClass(cls, &superClass), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"type", "ani_ref"},

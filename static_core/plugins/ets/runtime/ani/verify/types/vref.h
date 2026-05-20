@@ -46,19 +46,19 @@ public:
     }
 };
 
+class VClass : public VType {
+public:
+    ani_class GetRef()
+    {
+        return static_cast<ani_class>(VType::GetRef());
+    }
+};
+
 class VFnObject final : public VObject {
 public:
     ani_fn_object GetRef()
     {
         return static_cast<ani_fn_object>(VObject::GetRef());
-    }
-};
-
-class VClass : public VObject {
-public:
-    ani_class GetRef()
-    {
-        return static_cast<ani_class>(VObject::GetRef());
     }
 };
 

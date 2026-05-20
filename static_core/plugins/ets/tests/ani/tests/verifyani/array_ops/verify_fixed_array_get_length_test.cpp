@@ -31,7 +31,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_env)
     ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
 
     ani_size result {};
-    ASSERT_EQ(env_->c_api->FixedArray_GetLength(nullptr, array, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->FixedArray_GetLength(nullptr, array, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_fixedarray"},
@@ -43,7 +43,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_env)
 TEST_F(FixedArrayGetLengthTest, wrong_array)
 {
     ani_size result {};
-    ASSERT_EQ(env_->FixedArray_GetLength(nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_GetLength(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_fixedarray", "wrong reference"},
@@ -57,7 +57,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_result)
     ani_fixedarray_int array {};
     ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
 
-    ASSERT_EQ(env_->FixedArray_GetLength(array, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_GetLength(array, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_fixedarray"},
@@ -90,7 +90,7 @@ TEST_F(FixedArrayGetLengthTest, throw_error)
     ThrowError();
 
     ani_size result {};
-    ASSERT_EQ(env_->FixedArray_GetLength(array, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_GetLength(array, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"array", "ani_fixedarray"},

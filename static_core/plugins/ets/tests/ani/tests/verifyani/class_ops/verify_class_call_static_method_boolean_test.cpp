@@ -129,7 +129,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_env)
     ani_boolean result;
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethod_Boolean(nullptr, cls, method, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -162,7 +162,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_0)
     ani_boolean result;
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethod_Boolean(env_, nullptr, method, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -317,7 +317,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_method_2)
     ani_boolean result;
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethod_Boolean(env_, cls, nullptr, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -340,7 +340,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_result)
 
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethod_Boolean(env_, cls, method, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -529,7 +529,8 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_ref_arg)
 
 TEST_F(ClassCallStaticMethodBooleanTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean(nullptr, nullptr, nullptr, nullptr, nullptr),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -552,7 +553,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_return_type)
     ani_boolean result;
     ASSERT_EQ(
         env_->c_api->Class_CallStaticMethod_Boolean(env_, cls, method, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
-        ANI_ERROR);
+        ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -802,7 +803,8 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_env)
               ANI_OK);
 
     ani_boolean result;
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(nullptr, cls, method, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(nullptr, cls, method, &result, args_.data()),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -833,7 +835,8 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_0)
               ANI_OK);
 
     ani_boolean result;
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, nullptr, method, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, nullptr, method, &result, args_.data()),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -979,7 +982,8 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_method_2)
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
 
     ani_boolean result;
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, nullptr, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, nullptr, &result, args_.data()),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -1000,7 +1004,8 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_result)
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
               ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, nullptr, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, nullptr, args_.data()),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -1031,7 +1036,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_args)
               ANI_OK);
 
     ani_boolean result;
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -1046,7 +1051,8 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_args)
 
 TEST_F(ClassCallStaticMethodBooleanATest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(nullptr, nullptr, nullptr, nullptr, nullptr),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -1100,7 +1106,8 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_return_type)
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticIntMethod", "zcbsilfdC{std.core.String}:i", &method), ANI_OK);
 
     ani_boolean result;
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, args_.data()),
+              ANI_INVALID_TYPE);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},

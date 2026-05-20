@@ -28,7 +28,7 @@ TEST_F(ArrayNewTest, wrong_env)
     ani_ref undefinedRef {};
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ani_array res {};
-    ASSERT_EQ(env_->c_api->Array_New(nullptr, length_, undefinedRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_New(nullptr, length_, undefinedRef, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"length", "ani_size"},
@@ -41,7 +41,7 @@ TEST_F(ArrayNewTest, wrong_env)
 TEST_F(ArrayNewTest, wrong_ref)
 {
     ani_array res {};
-    ASSERT_EQ(env_->Array_New(length_, nullptr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->Array_New(length_, nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
@@ -55,7 +55,7 @@ TEST_F(ArrayNewTest, wrong_result)
 {
     ani_ref undefinedRef {};
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
-    ASSERT_EQ(env_->Array_New(length_, undefinedRef, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Array_New(length_, undefinedRef, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
@@ -67,7 +67,7 @@ TEST_F(ArrayNewTest, wrong_result)
 
 TEST_F(ArrayNewTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Array_New(nullptr, length_, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_New(nullptr, length_, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"length", "ani_size"},
@@ -85,7 +85,7 @@ TEST_F(ArrayNewTest, throw_error)
     ThrowError();
 
     ani_array res {};
-    ASSERT_EQ(env_->Array_New(length_, undefinedRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->Array_New(length_, undefinedRef, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"length", "ani_size"},

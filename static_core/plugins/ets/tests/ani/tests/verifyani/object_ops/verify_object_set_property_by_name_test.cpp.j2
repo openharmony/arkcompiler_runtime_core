@@ -90,9 +90,9 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_env)
     {% if type == "ref" %}
     ani_object valueObj {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", valueObj), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", valueObj), ANI_INVALID_ARGS);
     {% else %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", {{ value }}), ANI_INVALID_ARGS);
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -110,9 +110,9 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_0)
     {% if type == "ref" %}
     ani_object valueObj {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", valueObj), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", valueObj), ANI_INVALID_ARGS);
     {% else %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, nullptr, "{{ type }}Prop", {{ value }}), ANI_INVALID_ARGS);
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -155,9 +155,9 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_name_0)
     {% if type == "ref" %}
     ani_object valueObj {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, nullptr, valueObj), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, nullptr, valueObj), ANI_INVALID_ARGS);
     {% else %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, nullptr, {{ value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, nullptr, {{ value }}), ANI_INVALID_ARGS);
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -177,9 +177,9 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_name_1)
     {% if type == "ref" %}
     ani_object valueObj {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", valueObj), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", valueObj), ANI_NOT_FOUND);
     {% else %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", {{ value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "notExistProperty", {{ value }}), ANI_NOT_FOUND);
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -215,7 +215,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_ref)
 {
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &object_);
 
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -231,7 +231,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_ref)
 TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
 {
     {% if type == "ref" %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -251,7 +251,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
     };
     // clang-format on
     {% else %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, {{ value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, {{ value }}), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -272,11 +272,11 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_type)
     ani_object valueObj {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
     ASSERT_EQ(
-        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Property", valueObj), ANI_ERROR);
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Property", valueObj), ANI_INVALID_TYPE);
     {% else %}
     ASSERT_EQ(
         env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Property", {{ value }}),
-        ANI_ERROR);
+        ANI_INVALID_TYPE);
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -301,9 +301,9 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_type)
     ani_object valueObj {};
     GetClassAndObject(env_, &class_, "ani_verify_test_object_set_property_by_name_{{ type }}.Parent", &valueObj);
     ASSERT_EQ(
-        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_ERROR);
+        env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", valueObj), ANI_NOT_FOUND);
     {% else %}
-    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(env_, object_, "{{ type }}Prop", {{ value }}), ANI_NOT_FOUND);
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {

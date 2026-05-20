@@ -25,7 +25,7 @@ TEST_F(ObjectGetTypeTest, wrong_env)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_type resultType {};
-    ASSERT_EQ(env_->c_api->Object_GetType(nullptr, cls, &resultType), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetType(nullptr, cls, &resultType), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object"},
@@ -39,7 +39,7 @@ TEST_F(ObjectGetTypeTest, wrong_env)
 TEST_F(ObjectGetTypeTest, wrong_object_null)
 {
     ani_type resultType {};
-    ASSERT_EQ(env_->c_api->Object_GetType(env_, nullptr, &resultType), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetType(env_, nullptr, &resultType), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
@@ -53,7 +53,7 @@ TEST_F(ObjectGetTypeTest, wrong_result_ptr)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Object_GetType(env_, cls, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_GetType(env_, cls, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
@@ -102,7 +102,7 @@ TEST_F(ObjectGetTypeTest, throw_error)
     ThrowError();
 
     ani_type resultType {};
-    ASSERT_EQ(env_->Object_GetType(cls, &resultType), ANI_ERROR);
+    ASSERT_EQ(env_->Object_GetType(cls, &resultType), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"object", "ani_object"},

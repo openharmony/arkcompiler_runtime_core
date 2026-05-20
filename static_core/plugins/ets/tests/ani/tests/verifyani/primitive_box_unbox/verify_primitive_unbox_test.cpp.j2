@@ -97,7 +97,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_env)
     ani_object object = BoxValue(TEST_VALUE);
     ani_{{ type }} result {};
 
-    ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, object, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, object, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"obj", "ani_object"},
@@ -110,7 +110,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_object)
 {
     ani_{{ type }} result {};
 
-    ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"obj", "ani_object", "wrong reference"},
@@ -174,7 +174,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_result)
 {
     ani_object object = BoxValue(TEST_VALUE);
 
-    ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"obj", "ani_object"},
@@ -185,7 +185,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_result)
 
 TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"obj", "ani_object", "wrong reference"},
@@ -200,7 +200,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, throw_error)
     ThrowError();
 
     ani_{{ type }} result {};
-    ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, &result), ANI_ERROR);
+    ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, &result), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     std::vector<TestLineInfo> testLines {

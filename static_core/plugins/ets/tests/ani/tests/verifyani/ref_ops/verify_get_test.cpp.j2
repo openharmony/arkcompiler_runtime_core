@@ -22,7 +22,7 @@ class Get{{ Suff }}Test : public VerifyAniTest {};
 TEST_F(Get{{ Suff }}Test, wrong_env)
 {
     ani_ref ref {};
-    ASSERT_EQ(env_->c_api->Get{{ Suff }}(nullptr, &ref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Get{{ Suff }}(nullptr, &ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "ani_ref *"},
@@ -32,7 +32,7 @@ TEST_F(Get{{ Suff }}Test, wrong_env)
 
 TEST_F(Get{{ Suff }}Test, wrong_ref)
 {
-    ASSERT_EQ(env_->c_api->Get{{ Suff }}(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Get{{ Suff }}(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
@@ -42,7 +42,7 @@ TEST_F(Get{{ Suff }}Test, wrong_ref)
 
 TEST_F(Get{{ Suff }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Get{{ Suff }}(nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Get{{ Suff }}(nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
@@ -65,7 +65,7 @@ TEST_F(Get{{ Suff }}Test, throw_error)
     ThrowError();
 
     ani_ref ref {};
-    ASSERT_EQ(env_->c_api->Get{{ Suff }}(env_, &ref), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Get{{ Suff }}(env_, &ref), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"result", "ani_ref *"},

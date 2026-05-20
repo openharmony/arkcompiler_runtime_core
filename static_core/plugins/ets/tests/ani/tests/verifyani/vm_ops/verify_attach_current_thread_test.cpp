@@ -23,7 +23,7 @@ class AttachCurrentThreadTest : public VerifyAniTest {};
 TEST_F(AttachCurrentThreadTest, wrong_vm)
 {
     ani_env *env {};
-    ASSERT_EQ(vm_->c_api->AttachCurrentThread(nullptr, nullptr, ANI_VERSION_1, &env), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->AttachCurrentThread(nullptr, nullptr, ANI_VERSION_1, &env), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *", "wrong VM pointer"},
         {"options", "ani_options *"},
@@ -105,7 +105,7 @@ TEST_F(AttachCurrentThreadTest, wrong_version)
 {
     const uint32_t fakeANIVersion = 0xfe3d;
     ani_env *env {};
-    ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, nullptr, fakeANIVersion, &env), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, nullptr, fakeANIVersion, &env), ANI_INVALID_VERSION);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
         {"options", "ani_options *"},
@@ -117,7 +117,7 @@ TEST_F(AttachCurrentThreadTest, wrong_version)
 
 TEST_F(AttachCurrentThreadTest, wrong_result_ptr)
 {
-    ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, nullptr, ANI_VERSION_1, nullptr), ANI_ERROR);
+    ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, nullptr, ANI_VERSION_1, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
         {"options", "ani_options *"},

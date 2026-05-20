@@ -45,7 +45,7 @@ static ani_string CreateString(ani_env *env)
 TEST_F(VerifyEnumGetItemByIndexTest, wrong_env)
 {
     ani_enum_item result {};
-    ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, enumColor_, 0U, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, enumColor_, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"enm", "ani_enum"},
@@ -58,7 +58,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_env)
 TEST_F(VerifyEnumGetItemByIndexTest, wrong_enm_null)
 {
     ani_enum_item result {};
-    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(nullptr, 0U, &result), ANI_ERROR);
+    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(nullptr, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enm", "ani_enum", "wrong reference"},
@@ -84,7 +84,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_enm_type)
 
 TEST_F(VerifyEnumGetItemByIndexTest, wrong_result_null)
 {
-    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(enumColor_, 0U, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(enumColor_, 0U, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enm", "ani_enum"},
@@ -96,7 +96,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_result_null)
 
 TEST_F(VerifyEnumGetItemByIndexTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, nullptr, 0U, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, nullptr, 0U, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"enm", "ani_enum", "wrong reference"},
@@ -118,7 +118,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, has_unhandled_error)
 {
     ThrowError();
     ani_enum_item result {};
-    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(enumColor_, 0U, &result), ANI_ERROR);
+    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(enumColor_, 0U, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"enm", "ani_enum"},

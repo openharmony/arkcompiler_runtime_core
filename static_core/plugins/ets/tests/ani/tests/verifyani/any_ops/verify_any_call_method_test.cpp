@@ -45,7 +45,7 @@ TEST_F(AnyCallMethodTest, wrong_self_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_ref out {};
-    ASSERT_EQ(env_->c_api->Any_CallMethod(env_, nullptr, "hashCode", 0U, nullptr, &out), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Any_CallMethod(env_, nullptr, "hashCode", 0U, nullptr, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},     {"self", "ani_ref", "wrong reference"},
         {"name", "const char *"}, {"argc", "ani_size"},

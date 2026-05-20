@@ -31,7 +31,7 @@ public:
 TEST_F(VerifyFindEnumTest, wrong_env)
 {
     ani_enum result {};
-    ASSERT_EQ(env_->c_api->FindEnum(nullptr, "verify_find_enum_test.Color", &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->FindEnum(nullptr, "verify_find_enum_test.Color", &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"enum_descriptor", "const char *"},
@@ -43,7 +43,7 @@ TEST_F(VerifyFindEnumTest, wrong_env)
 TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_null)
 {
     ani_enum result {};
-    ASSERT_EQ(env_->FindEnum(nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FindEnum(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enum_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
@@ -85,7 +85,7 @@ TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_not_enum_0)
 
 TEST_F(VerifyFindEnumTest, wrong_result)
 {
-    ASSERT_EQ(env_->FindEnum("verify_find_enum_test.Color", nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->FindEnum("verify_find_enum_test.Color", nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enum_descriptor", "const char *"},
@@ -96,7 +96,7 @@ TEST_F(VerifyFindEnumTest, wrong_result)
 
 TEST_F(VerifyFindEnumTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->FindEnum(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->FindEnum(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"enum_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
@@ -109,7 +109,7 @@ TEST_F(VerifyFindEnumTest, has_unhandled_error)
 {
     ThrowError();
     ani_enum result {};
-    ASSERT_EQ(env_->FindEnum("verify_find_enum_test.Color", &result), ANI_ERROR);
+    ASSERT_EQ(env_->FindEnum("verify_find_enum_test.Color", &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"enum_descriptor", "const char *"},

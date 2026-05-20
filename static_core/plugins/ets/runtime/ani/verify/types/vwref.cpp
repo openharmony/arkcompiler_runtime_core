@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,16 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 
-#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 
 namespace ark::ets::ani::verify {
 
-ani_ref VRef::GetRef()
+ani_wref VWRef::GetWRef()
 {
-    if (InternalRef::IsStackVRef(this)) {
-        return reinterpret_cast<ani_ref>(this);
-    }
-
-    InternalRef *iref = InternalRef::CastFromVRef(this);
-    return iref->GetRef();
+    InternalRef *iref = InternalRef::CastFromVWRef(this);
+    return iref->GetWRef();
 }
 
 }  // namespace ark::ets::ani::verify

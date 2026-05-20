@@ -20,9 +20,11 @@
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -64,26 +66,32 @@ public:
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteGlobalVerifiedRef(VRef *vgref);
-    bool IsValidGlobalVerifiedRef(VRef *vgref) const;
 
-    bool IsValidRefInCurrentFrame(VRef *vref) const;
-    bool IsGlobalRef(VRef *vref) const;
+    VWRef *AddVerifiedWeakRef(ani_wref wref);
+    void DeleteVerifiedWeakRef(VWRef *vwref);
+    bool IsValidWeakRef(VWRef *vwref) const;
+
+    bool IsValidRef(VRef *vref) const;
+    bool IsValidGlobalVerifiedRef(VRef *vref) const;
+    bool IsValidLocalRef(VRef *vref) const;
+    bool IsValidStackRef(VRef *vref) const;
     bool IsValidMethod(impl::VMethod *vmethod) const;
     bool IsValidField(impl::VField *vfield) const;
 
-    bool IsValidInCurrentFrame(VRef *vref);
+    bool IsInNativeFrame() const;
+    bool IsInLocalScope() const;
+    bool IsInEscapeLocalScope() const;
+    bool IsValidRefInCurrentScope(VRef *vref);
     bool CanBeDeletedFromCurrentScope(VRef *vref);
 
-    bool IsValidGlobalVerifiedResolver(VResolver *vresolver) const;
+    bool IsValidGlobalResolver(VResolver *vresolver) const;
     VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
-    void DeleteGlobalVerifiedResolver(VResolver *vresolver);
+    void DeleteGlobalResolver(VResolver *vresolver);
 
     const __ani_interaction_api *GetInteractionAPI() const
     {
         return interactionAPI_;
     }
-
-    bool IsValidStackRef(VRef *vref) const;
 
 private:
     enum class SubFrameType {
@@ -103,7 +111,7 @@ private:
     };
 
     void DoPushNativeFrame(PandaAniEnv *ownerEnv);
-    static bool IsValidVerifiedRef(const Frame &frame, VRef *vref);
+    static bool IsValidRefInFrame(const Frame &frame, VRef *vref);
 
     ANIVerifier *verifier_ {};
     const __ani_interaction_api *interactionAPI_ {};

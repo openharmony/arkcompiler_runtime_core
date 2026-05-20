@@ -42,7 +42,7 @@ TEST_F(FixedArrayGetRefTest, wrong_env)
     CreateStringFixedArray(env_, &array);
 
     ani_ref result {};
-    ASSERT_EQ(env_->c_api->FixedArray_Get_Ref(nullptr, array, 0U, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->FixedArray_Get_Ref(nullptr, array, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_fixedarray_ref"},
@@ -55,7 +55,7 @@ TEST_F(FixedArrayGetRefTest, wrong_env)
 TEST_F(FixedArrayGetRefTest, wrong_array)
 {
     ani_ref result {};
-    ASSERT_EQ(env_->FixedArray_Get_Ref(nullptr, 0U, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_Get_Ref(nullptr, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_fixedarray_ref", "wrong reference"},
@@ -70,7 +70,7 @@ TEST_F(FixedArrayGetRefTest, wrong_result)
     ani_fixedarray_ref array {};
     CreateStringFixedArray(env_, &array);
 
-    ASSERT_EQ(env_->FixedArray_Get_Ref(array, 0U, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_Get_Ref(array, 0U, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_fixedarray_ref"},
@@ -98,7 +98,7 @@ TEST_F(FixedArrayGetRefTest, throw_error)
     ThrowError();
 
     ani_ref result {};
-    ASSERT_EQ(env_->FixedArray_Get_Ref(array, 0U, &result), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_Get_Ref(array, 0U, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"array", "ani_fixedarray_ref"},

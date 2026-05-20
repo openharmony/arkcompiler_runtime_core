@@ -83,7 +83,8 @@ protected:
 TEST_F(ObjectNewTest, wrong_env)
 {
     ani_object obj {};
-    ASSERT_EQ(env_->c_api->Object_New(nullptr, cls_, ctor_, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_New(nullptr, cls_, ctor_, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
@@ -108,7 +109,8 @@ TEST_F(ObjectNewTest, wrong_env)
 TEST_F(ObjectNewTest, wrong_cls_0)
 {
     ani_object obj {};
-    ASSERT_EQ(env_->c_api->Object_New(env_, nullptr, ctor_, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_New(env_, nullptr, ctor_, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -161,7 +163,7 @@ TEST_F(ObjectNewTest, wrong_cls_1)
 TEST_F(ObjectNewTest, wrong_ctor_null)
 {
     ani_object obj {};
-    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, nullptr, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, nullptr, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -263,7 +265,8 @@ TEST_F(ObjectNewTest, DISABLED_wrong_ctor_invalidated)
 
 TEST_F(ObjectNewTest, wrong_result)
 {
-    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctor_, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctor_, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -767,7 +770,7 @@ TEST_F(ObjectNewTest, DISABLED_arg_union2)
 
 TEST_F(ObjectNewTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_New(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_New(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},

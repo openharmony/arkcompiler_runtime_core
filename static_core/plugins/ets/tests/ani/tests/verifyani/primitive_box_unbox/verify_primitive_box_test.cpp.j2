@@ -52,7 +52,7 @@ static ani_object TestWithArgsNative(ani_env *env, ani_{{ type }} value)
 TEST_F(PrimitiveBox{{ Type }}Test, wrong_env)
 {
     ani_object object {};
-    ASSERT_EQ(env_->c_api->Primitive_Box_{{ Type }}(nullptr, TEST_VALUE, &object), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Primitive_Box_{{ Type }}(nullptr, TEST_VALUE, &object), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"value", "ani_{{ type }}"},
@@ -63,7 +63,7 @@ TEST_F(PrimitiveBox{{ Type }}Test, wrong_env)
 
 TEST_F(PrimitiveBox{{ Type }}Test, wrong_result)
 {
-    ASSERT_EQ(env_->Primitive_Box_{{ Type }}(TEST_VALUE, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Primitive_Box_{{ Type }}(TEST_VALUE, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"value", "ani_{{ type }}"},
@@ -74,7 +74,7 @@ TEST_F(PrimitiveBox{{ Type }}Test, wrong_result)
 
 TEST_F(PrimitiveBox{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Primitive_Box_{{ Type }}(nullptr, TEST_VALUE, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Primitive_Box_{{ Type }}(nullptr, TEST_VALUE, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"value", "ani_{{ type }}"},
@@ -102,7 +102,7 @@ TEST_F(PrimitiveBox{{ Type }}Test, throw_error)
     ThrowError();
 
     ani_object object {};
-    ASSERT_EQ(env_->Primitive_Box_{{ Type }}(TEST_VALUE, &object), ANI_ERROR);
+    ASSERT_EQ(env_->Primitive_Box_{{ Type }}(TEST_VALUE, &object), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     std::vector<TestLineInfo> testLines {

@@ -39,6 +39,7 @@
     X(VERIFY_WREF,                          VerifyWRef)                           \
     X(VERIFY_FUNCTIONAL_OBJECT,             VerifyFunctionalObject)               \
     X(VERIFY_FUNCTIONAL_OBJECT_ARGV,        VerifyFunctionalObjectArgv)           \
+    X(VERIFY_ESCAPE_REF,                    VerifyEscapeRef)                      \
     X(VERIFY_CLASS,                         VerifyClass)                          \
     X(VERIFY_ENUM,                          VerifyEnum)                           \
     X(VERIFY_ENUM_ITEM,                     VerifyEnumItem)                       \
@@ -182,7 +183,7 @@
     X(ANI_MODULE,                       Module,                    VModule *)                \
     X(ANI_NAMESPACE,                    Namespace,                 VNamespace *)             \
     X(ANI_TYPE,                         Type,                      VType *)                  \
-    X(ANI_WREF,                         WRef,                      ani_wref)                 \
+    X(ANI_WREF,                         WRef,                      VWRef *)                  \
     X(ANI_CLASS,                        Class,                     VClass *)                 \
     X(ANI_ENUM,                         Enum,                      VEnum *)                  \
     X(ANI_ENUM_ITEM,                    EnumItem,                  VEnumItem *)              \
@@ -330,6 +331,7 @@ class VVm;
 class VEnv;
 
 class VRef;
+class VWRef;
 class VFnObject;
 
 class VRefCallArgs {
@@ -530,6 +532,11 @@ public:
         return ANIArg(ArgValueByNamespace(vnamespace), name, Action::VERIFY_NAMESPACE);
     }
 
+    static ANIArg MakeForEscapeRef(VRef *vref, std::string_view name)
+    {
+        return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_ESCAPE_REF);
+    }
+
     static ANIArg MakeForType(VType *vtype, std::string_view name)
     {
         return ANIArg(ArgValueByType(vtype), name, Action::VERIFY_TYPE);
@@ -540,9 +547,9 @@ public:
         return ANIArg(ArgValueByRef(vgref), name, Action::VERIFY_GLOBAL_REF);
     }
 
-    static ANIArg MakeForWRef(ani_wref wref, std::string_view name)
+    static ANIArg MakeForWRef(VWRef *vwref, std::string_view name)
     {
-        return ANIArg(ArgValueByWRef(wref), name, Action::VERIFY_WREF);
+        return ANIArg(ArgValueByWRef(vwref), name, Action::VERIFY_WREF);
     }
 
     static ANIArg MakeForFunctionalObject(VFnObject *vfnObject, std::string_view name)
@@ -1267,7 +1274,6 @@ private:
 
 bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> args);
 void VerifyReportANI(std::string_view functionName, std::string_view message);
-
 }  // namespace ark::ets::ani::verify
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_VERIFY_CHECKER_H

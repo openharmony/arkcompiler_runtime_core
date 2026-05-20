@@ -25,9 +25,11 @@
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/venv-inl.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
@@ -35,6 +37,10 @@
 #include "runtime/include/mem/panda_containers.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define CHECK_PTR_ARG(arg) ANI_CHECK_RETURN_IF_EQ(arg, nullptr, ANI_INVALID_ARGS)
+
 #define VERIFY_ANI_ARGS(...)                                   \
     do {                                                       \
         bool success = VerifyANIArgs(__func__, {__VA_ARGS__}); \
@@ -178,36 +184,26 @@ static ANIArg::AniMethodArgs GetVArgsByVVAArgs(impl::VMethod *vmethod, va_list v
     return GetVArgsByVVAArgs(GetEtsMethodIfPointerValid(vmethod), vvaArgs);
 }
 
-template <bool IS_STATIC, typename TRef>
-static EtsMethod *GetEtsMethodByNameImpl(VEnv *venv, TRef *vref, const char *name, const char *signature)
+static ani_status ResolveVerifiedMethodByName(VEnv *venv, VObject *vobject, const char *name, const char *signature,
+                                              VMethod **vmethod)
 {
-    ASSERT(venv != nullptr);
-    ASSERT(vref != nullptr);
-
-    ScopedManagedCodeFix s(venv->GetEnv());
-
-    EtsClass *etsClass = nullptr;
-    if constexpr (IS_STATIC) {
-        etsClass = s.ToInternalType(vref->GetRef());
-    } else {
-        auto *etsObject = s.ToInternalType(vref->GetRef());
-        ASSERT(etsObject != nullptr);
-        etsClass = etsObject->GetClass();
+    ASSERT(vmethod != nullptr);
+    ani_method methodHandle {};
+    ani_type result {};
+    ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), vobject->GetRef(), &result);
+    if (status != ANI_OK) {
+        return status;
+    }
+    auto vtype = static_cast<VType *>(venv->AddLocalVerifiedRef(result));
+    status = GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), static_cast<ani_class>(vtype->GetRef()), name,
+                                                       signature, &methodHandle);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    ASSERT(etsClass != nullptr);
-
-    EtsMethod *method = nullptr;
-    ani_status status = ResolveNamedMethod(etsClass, name, signature, IS_STATIC, &method);
-    if (UNLIKELY(status != ANI_OK || method == nullptr)) {
-        return nullptr;
-    }
-    return method;
-}
-
-static EtsMethod *GetEtsMethodByName(VEnv *venv, VObject *vobject, const char *name, const char *signature)
-{
-    return GetEtsMethodByNameImpl<false>(venv, vobject, name, signature);
+    *vmethod = venv->GetVerifiedMethod(methodHandle);
+    ASSERT(*vmethod != nullptr);
+    return ANI_OK;
 }
 
 static ani_status ResolveVerifiedStaticMethodByName(VEnv *venv, VClass *vclass, const char *name, const char *signature,
@@ -236,7 +232,7 @@ NO_UB_SANITIZE static ani_status GetVersion(VEnv *venv, uint32_t *result)
         ANIArg::MakeForU32Storage(result, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
     return GetInteractionAPI(venv)->GetVersion(venv->GetEnv(), result);
 }
 
@@ -249,7 +245,8 @@ NO_UB_SANITIZE static ani_status GetVM(VEnv *venv, VVm **result)
         ANIArg::MakeForVmStorage(result, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(result);
     ani_vm *vm {};
     ani_status status = GetInteractionAPI(venv)->GetVM(venv->GetEnv(), &vm);
     if (status == ANI_OK) {
@@ -277,7 +274,10 @@ NO_UB_SANITIZE static ani_status Object_New(VEnv *venv, VClass *vclass, VMethod 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vctor);
+    CHECK_PTR_ARG(vresult);
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
@@ -300,6 +300,12 @@ NO_UB_SANITIZE static ani_status Object_New_A(VEnv *venv, VClass *vclass, VMetho
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vctor);
+    CHECK_PTR_ARG(vresult);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_object result {};
@@ -324,6 +330,11 @@ NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, VMetho
     );
     // clang-format on
 
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vctor);
+    CHECK_PTR_ARG(vresult);
+
     auto args = GetVValueArgs(venv, methodArgs);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
@@ -342,7 +353,9 @@ NO_UB_SANITIZE static ani_status Object_GetType(VEnv *venv, VObject *vobject, VT
         ANIArg::MakeForTypeStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vresult);
     ani_type typeResult {};
     ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), vobject->GetRef(), &typeResult);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, typeResult, vresult);
@@ -360,6 +373,9 @@ NO_UB_SANITIZE static ani_status Object_InstanceOf(VEnv *venv, VObject *vobject,
         ANIArg::MakeForBooleanStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vtype);
 
     return GetInteractionAPI(venv)->Object_InstanceOf(venv->GetEnv(), vobject->GetRef(), vtype->GetRef(), result);
 }
@@ -374,7 +390,9 @@ NO_UB_SANITIZE static ani_status Type_GetSuperClass(VEnv *venv, VType *vtype, VC
         ANIArg::MakeForClassStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtype);
+    CHECK_PTR_ARG(vresult);
     ani_class superClass {};
     ani_status status = GetInteractionAPI(venv)->Type_GetSuperClass(venv->GetEnv(), vtype->GetRef(), &superClass);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, superClass, vresult);
@@ -393,6 +411,9 @@ NO_UB_SANITIZE static ani_status Type_IsAssignableFrom(VEnv *venv, VType *vfromT
         ANIArg::MakeForBooleanStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfromType);
+    CHECK_PTR_ARG(vtoType);
 
     return GetInteractionAPI(venv)->Type_IsAssignableFrom(venv->GetEnv(), vfromType->GetRef(), vtoType->GetRef(),
                                                           result);
@@ -408,6 +429,8 @@ NO_UB_SANITIZE static ani_status FindModule(VEnv *venv, const char *moduleDescri
         ANIArg::MakeForModuleStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_module result {};
     ani_status status = GetInteractionAPI(venv)->FindModule(venv->GetEnv(), moduleDescriptor, &result);
@@ -425,6 +448,8 @@ NO_UB_SANITIZE static ani_status FindNamespace(VEnv *venv, const char *namespace
         ANIArg::MakeForNamespaceStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_namespace result {};
     ani_status status = GetInteractionAPI(venv)->FindNamespace(venv->GetEnv(), namespaceDescriptor, &result);
@@ -442,6 +467,8 @@ NO_UB_SANITIZE static ani_status FindClass(VEnv *venv, const char *classDescript
         ANIArg::MakeForClassStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_class result {};
     ani_status status = GetInteractionAPI(venv)->FindClass(venv->GetEnv(), classDescriptor, &result);
@@ -459,6 +486,8 @@ NO_UB_SANITIZE static ani_status FindEnum(VEnv *venv, const char *enumDescriptor
         ANIArg::MakeForEnumStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_enum result {};
     ani_status status = GetInteractionAPI(venv)->FindEnum(venv->GetEnv(), enumDescriptor, &result);
@@ -479,6 +508,9 @@ NO_UB_SANITIZE static ani_status Module_FindFunction(VEnv *venv, VModule *vmodul
         ANIArg::MakeForFunctionStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vmodule);
+    CHECK_PTR_ARG(vresult);
 
     ani_function result {};
     ani_status status =
@@ -501,10 +533,13 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(VEnv *venv, VModule *vmodul
         ANIArg::MakeForVariableStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vmodule);
+    CHECK_PTR_ARG(vresult);
 
     ani_variable result {};
     ani_status status = GetInteractionAPI(venv)->Module_FindVariable(venv->GetEnv(), vmodule->GetRef(), name, &result);
-    if (LIKELY(status == ANI_OK)) {
+    if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedVariable(result);
     }
     return status;
@@ -523,7 +558,9 @@ NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, VNamespace *
         ANIArg::MakeForFunctionStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vnamespace);
+    CHECK_PTR_ARG(vresult);
     ani_function result {};
     ani_status status =
         GetInteractionAPI(venv)->Namespace_FindFunction(venv->GetEnv(), vnamespace->GetRef(), name, signature, &result);
@@ -545,7 +582,10 @@ NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, VNamespace *
         ANIArg::MakeForVariableStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vnamespace);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
     ani_variable result {};
     ani_status status =
         GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), vnamespace->GetRef(), name, &result);
@@ -567,6 +607,8 @@ NO_UB_SANITIZE static ani_status Module_BindNativeFunctions(VEnv *venv, VModule 
         ANIArg::MakeForSize(nrFunctions, "nr_functions")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vmodule);
     return GetInteractionAPI(venv)->Module_BindNativeFunctions(venv->GetEnv(), vmodule->GetRef(), functions,
                                                                nrFunctions);
 }
@@ -584,6 +626,8 @@ NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(VEnv *venv, VName
         ANIArg::MakeForSize(nrFunctions, "nr_functions")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vnamespace);
     return GetInteractionAPI(venv)->Namespace_BindNativeFunctions(venv->GetEnv(), vnamespace->GetRef(), functions,
                                                                   nrFunctions);
 }
@@ -600,6 +644,8 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(VEnv *venv, VClass *vcl
         ANIArg::MakeForSize(nrMethods, "nr_methods")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     return GetInteractionAPI(venv)->Class_BindNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
 }
 
@@ -612,6 +658,13 @@ NO_UB_SANITIZE static ani_status Reference_Delete(VEnv *venv, VRef *lvref)
         ANIArg::MakeForDelLocalRef(lvref, "lref"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(lvref);
+
+    if (!venv->IsValidLocalVerifiedRef(lvref) && !venv->IsValidStackVerifiedRef(lvref) &&
+        !ManagedCodeAccessor::IsUndefined(lvref->GetRef())) {
+        return ANI_INCORRECT_REF;
+    }
     ani_ref lref = lvref->GetRef();
     venv->DeleteLocalVerifiedRef(lvref);
     return GetInteractionAPI(venv)->Reference_Delete(venv->GetEnv(), lref);
@@ -626,6 +679,7 @@ NO_UB_SANITIZE static ani_status EnsureEnoughReferences(VEnv *venv, ani_size nrR
         ANIArg::MakeForNrRefs(nrRefs, "nrRefs"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
 
     return GetInteractionAPI(venv)->EnsureEnoughReferences(venv->GetEnv(), nrRefs);
 }
@@ -635,10 +689,12 @@ NO_UB_SANITIZE static ani_status CreateLocalScope(VEnv *venv, ani_size nrRefs)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
-        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnv(venv, "env", false),
         ANIArg::MakeForNrRefs(nrRefs, "nr_refs")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+
     ani_status status = GetInteractionAPI(venv)->CreateLocalScope(venv->GetEnv(), nrRefs);
     if (LIKELY(status == ANI_OK)) {
         venv->CreateLocalScope();
@@ -649,12 +705,14 @@ NO_UB_SANITIZE static ani_status CreateLocalScope(VEnv *venv, ani_size nrRefs)
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status DestroyLocalScope(VEnv *venv)
 {
-    // NODE: We should simultaneously verify args and check possibility of call this method
+    // NOTE: We should simultaneously verify args and check possibility of call this method
     // clang-format off
     VERIFY_ANI_ARGS(
-        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnv(venv, "env", false),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+
     VERIFY_ANI_ABORT_IF_ERROR(venv->DestroyLocalScope());
     return GetInteractionAPI(venv)->DestroyLocalScope(venv->GetEnv());
 }
@@ -664,10 +722,12 @@ NO_UB_SANITIZE static ani_status CreateEscapeLocalScope(VEnv *venv, ani_size nrR
 {
     // clang-format off
     VERIFY_ANI_ARGS(
-        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnv(venv, "env", false),
         ANIArg::MakeForNrRefs(nrRefs, "nr_refs")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+
     ani_status status = GetInteractionAPI(venv)->CreateEscapeLocalScope(venv->GetEnv(), nrRefs);
     if (LIKELY(status == ANI_OK)) {
         venv->CreateEscapeLocalScope();
@@ -680,11 +740,17 @@ NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(VEnv *venv, VRef *vref,
 {
     // clang-format off
     VERIFY_ANI_ARGS(
-        ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForRef(vref, "ref"),
+        ANIArg::MakeForEnv(venv, "env", false),
+        ANIArg::MakeForEscapeRef(vref, "ref"),
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vresult);
+    if (!venv->IsValidLocalVerifiedRef(vref)) {
+        return ANI_INCORRECT_REF;
+    }
     ani_ref ref = vref->GetRef();
     VERIFY_ANI_ABORT_IF_ERROR(venv->DestroyEscapeLocalScope(vref));
     ani_ref result {};
@@ -702,10 +768,12 @@ NO_UB_SANITIZE static ani_status ThrowError(VEnv *venv, VError *verr)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
-        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnv(venv, "env", false),
         ANIArg::MakeForError(verr, "error")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(verr);
     return GetInteractionAPI(venv)->ThrowError(venv->GetEnv(), verr->GetRef());
 }
 
@@ -718,6 +786,8 @@ NO_UB_SANITIZE static ani_status ExistUnhandledError(VEnv *venv, ani_boolean *re
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->ExistUnhandledError(venv->GetEnv(), result);
 }
@@ -731,6 +801,9 @@ NO_UB_SANITIZE static ani_status GetUnhandledError(VEnv *venv, VError **vresult)
         ANIArg::MakeForErrorStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
+
     ani_error result {};
     ani_status status = GetInteractionAPI(venv)->GetUnhandledError(venv->GetEnv(), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -745,6 +818,7 @@ NO_UB_SANITIZE static ani_status ResetError(VEnv *venv)
         ANIArg::MakeForEnv(venv, "env", false),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
 
     return GetInteractionAPI(venv)->ResetError(venv->GetEnv());
 }
@@ -757,6 +831,7 @@ NO_UB_SANITIZE static ani_status DescribeError(VEnv *venv)
         ANIArg::MakeForEnv(venv, "env", false),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
 
     return GetInteractionAPI(venv)->DescribeError(venv->GetEnv());
 }
@@ -766,10 +841,12 @@ NO_UB_SANITIZE static ani_status Abort(VEnv *venv, const char *message)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
-        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForEnv(venv, "env", false),
         ANIArg::MakeForUTF8String(message, "message")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(message);
 
     return GetInteractionAPI(venv)->Abort(venv->GetEnv(), message);
 }
@@ -783,6 +860,8 @@ NO_UB_SANITIZE static ani_status GetNull(VEnv *venv, VRef **vresult)
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->GetNull(venv->GetEnv(), &result);
@@ -799,6 +878,9 @@ NO_UB_SANITIZE static ani_status GetUndefined(VEnv *venv, VRef **vresult)
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
+
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->GetUndefined(venv->GetEnv(), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -815,6 +897,9 @@ NO_UB_SANITIZE static ani_status Reference_IsNull(VEnv *venv, VRef *vref, ani_bo
         ANIArg::MakeForBooleanStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Reference_IsNull(venv->GetEnv(), vref->GetRef(), result);
 }
@@ -829,6 +914,10 @@ NO_UB_SANITIZE static ani_status Reference_IsUndefined(VEnv *venv, VRef *vref, a
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Reference_IsUndefined(venv->GetEnv(), vref->GetRef(), result);
 }
 
@@ -842,6 +931,9 @@ NO_UB_SANITIZE static ani_status Reference_IsNullishValue(VEnv *venv, VRef *vref
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Reference_IsNullishValue(venv->GetEnv(), vref->GetRef(), result);
 }
@@ -857,6 +949,10 @@ NO_UB_SANITIZE static ani_status Reference_Equals(VEnv *venv, VRef *vref0, VRef 
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref0);
+    CHECK_PTR_ARG(vref1);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Reference_Equals(venv->GetEnv(), vref0->GetRef(), vref1->GetRef(), result);
 }
@@ -872,6 +968,10 @@ NO_UB_SANITIZE static ani_status Reference_StrictEquals(VEnv *venv, VRef *vref0,
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref0);
+    CHECK_PTR_ARG(vref1);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Reference_StrictEquals(venv->GetEnv(), vref0->GetRef(), vref1->GetRef(), result);
 }
@@ -888,6 +988,10 @@ NO_UB_SANITIZE static ani_status String_NewUTF16(VEnv *venv, const uint16_t *utf
         ANIArg::MakeForStringStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(utf16String);
+    CHECK_PTR_ARG(vresult);
+
     ani_string result {};
     ani_status status = GetInteractionAPI(venv)->String_NewUTF16(venv->GetEnv(), utf16String, utf16Size, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -904,6 +1008,9 @@ NO_UB_SANITIZE static ani_status String_GetUTF16Size(VEnv *venv, VString *vstrin
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vstring);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->String_GetUTF16Size(venv->GetEnv(), vstring->GetRef(), result);
 }
@@ -921,6 +1028,10 @@ NO_UB_SANITIZE static ani_status String_GetUTF16(VEnv *venv, VString *vstring, u
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vstring);
+    CHECK_PTR_ARG(utf16Buffer);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->String_GetUTF16(venv->GetEnv(), vstring->GetRef(), utf16Buffer, utf16BufferSize,
                                                     result);
@@ -941,6 +1052,8 @@ NO_UB_SANITIZE static ani_status String_GetUTF16SubString(VEnv *venv, VString *v
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vstring);
 
     return GetInteractionAPI(venv)->String_GetUTF16SubString(venv->GetEnv(), vstring->GetRef(), substrOffset,
                                                              substrSize, utf16Buffer, utf16BufferSize, result);
@@ -958,6 +1071,9 @@ NO_UB_SANITIZE static ani_status String_NewUTF8(VEnv *venv, const char *utf8Stri
         ANIArg::MakeForStringStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(utf8String);
+    CHECK_PTR_ARG(vresult);
 
     ani_string result {};
     ani_status status = GetInteractionAPI(venv)->String_NewUTF8(venv->GetEnv(), utf8String, utf8Size, &result);
@@ -975,6 +1091,9 @@ NO_UB_SANITIZE static ani_status String_GetUTF8Size(VEnv *venv, VString *vstring
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vstring);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->String_GetUTF8Size(venv->GetEnv(), vstring->GetRef(), result);
 }
@@ -992,6 +1111,10 @@ NO_UB_SANITIZE static ani_status String_GetUTF8(VEnv *venv, VString *vstring, ch
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vstring);
+    CHECK_PTR_ARG(utf8Buffer);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->String_GetUTF8(venv->GetEnv(), vstring->GetRef(), utf8Buffer, utf8BufferSize,
                                                    result);
@@ -1012,6 +1135,10 @@ NO_UB_SANITIZE static ani_status String_GetUTF8SubString(VEnv *venv, VString *vs
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vstring);
+    CHECK_PTR_ARG(utf8Buffer);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->String_GetUTF8SubString(venv->GetEnv(), vstring->GetRef(), substrOffset, substrSize,
                                                             utf8Buffer, utf8BufferSize, result);
@@ -1027,6 +1154,9 @@ NO_UB_SANITIZE static ani_status Array_GetLength(VEnv *venv, VArray *varray, ani
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Array_GetLength(venv->GetEnv(), varray->GetRef(), result);
 }
@@ -1042,6 +1172,11 @@ NO_UB_SANITIZE static ani_status Array_New(VEnv *venv, ani_size length, VRef *vi
         ANIArg::MakeForArrayStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    if (LIKELY(length != 0)) {
+        CHECK_PTR_ARG(vinitialElement);
+    }
+    CHECK_PTR_ARG(vresult);
 
     ani_array result {};
     ani_status status = GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, vinitialElement->GetRef(), &result);
@@ -1060,6 +1195,9 @@ NO_UB_SANITIZE static ani_status Array_Set(VEnv *venv, VArray *varray, ani_size 
         ANIArg::MakeForRef(vref, "ref")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(vref);
 
     return GetInteractionAPI(venv)->Array_Set(venv->GetEnv(), varray->GetRef(), index, vref->GetRef());
 }
@@ -1075,6 +1213,9 @@ NO_UB_SANITIZE static ani_status Array_Get(VEnv *venv, VArray *varray, ani_size 
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Array_Get(venv->GetEnv(), varray->GetRef(), index, &result);
@@ -1092,6 +1233,9 @@ NO_UB_SANITIZE static ani_status Array_Push(VEnv *venv, VArray *varray, VRef *vr
         ANIArg::MakeForRef(vref, "ref")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(vref);
 
     return GetInteractionAPI(venv)->Array_Push(venv->GetEnv(), varray->GetRef(), vref->GetRef());
 }
@@ -1106,6 +1250,9 @@ NO_UB_SANITIZE static ani_status Array_Pop(VEnv *venv, VArray *varray, VRef **vr
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Array_Pop(venv->GetEnv(), varray->GetRef(), &result);
@@ -1123,7 +1270,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetLength(VEnv *venv, VFixedArray *v
         ANIArg::MakeForSizeStorage(result, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     return GetInteractionAPI(venv)->FixedArray_GetLength(venv->GetEnv(), varray->GetRef(), result);
 }
 
@@ -1137,6 +1285,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(VEnv *venv, ani_size len
         ANIArg::MakeForArrayBooleanStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_boolean result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Boolean(venv->GetEnv(), length, &result);
@@ -1155,6 +1305,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Char(VEnv *venv, ani_size length
         ANIArg::MakeForArrayCharStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_char result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Char(venv->GetEnv(), length, &result);
@@ -1173,6 +1325,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Byte(VEnv *venv, ani_size length
         ANIArg::MakeForArrayByteStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_byte result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Byte(venv->GetEnv(), length, &result);
@@ -1191,6 +1345,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Short(VEnv *venv, ani_size lengt
         ANIArg::MakeForArrayShortStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_short result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Short(venv->GetEnv(), length, &result);
@@ -1209,6 +1365,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Int(VEnv *venv, ani_size length,
         ANIArg::MakeForArrayIntStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_int result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Int(venv->GetEnv(), length, &result);
@@ -1227,6 +1385,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Long(VEnv *venv, ani_size length
         ANIArg::MakeForArrayLongStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_long result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Long(venv->GetEnv(), length, &result);
@@ -1245,6 +1405,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Float(VEnv *venv, ani_size lengt
         ANIArg::MakeForArrayFloatStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_float result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Float(venv->GetEnv(), length, &result);
@@ -1263,6 +1425,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Double(VEnv *venv, ani_size leng
         ANIArg::MakeForArrayDoubleStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
 
     ani_fixedarray_double result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_New_Double(venv->GetEnv(), length, &result);
@@ -1284,7 +1448,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(VEnv *venv, VFixed
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1306,7 +1471,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Char(VEnv *venv, VFixedArr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1328,7 +1494,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(VEnv *venv, VFixedArr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1350,7 +1517,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(VEnv *venv, VFixedAr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1372,7 +1540,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(VEnv *venv, VFixedArra
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1394,7 +1563,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(VEnv *venv, VFixedArr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1416,7 +1586,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(VEnv *venv, VFixedAr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1438,7 +1609,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(VEnv *venv, VFixedA
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1460,7 +1632,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(VEnv *venv, VFixed
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
         VERIFY_ANI_ABORT_IF_ERROR(VerifyBooleanRegionBufferValues(nativeBuffer, length));
@@ -1483,7 +1656,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Char(VEnv *venv, VFixedArr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1505,7 +1679,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(VEnv *venv, VFixedArr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1527,7 +1702,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(VEnv *venv, VFixedAr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1549,7 +1725,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(VEnv *venv, VFixedArra
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1571,7 +1748,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(VEnv *venv, VFixedArr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1593,7 +1771,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(VEnv *venv, VFixedAr
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1615,7 +1794,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(VEnv *venv, VFixedA
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
     if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
@@ -1628,7 +1808,6 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(VEnv *venv, VFixedA
 NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, ani_size length, VRef *vinitialElement,
                                                     VFixedArrayRef **vresult)
 {
-    bool skipInitialElement = length == 0;
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
@@ -1638,11 +1817,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, an
         ANIArg::MakeForArrayRefStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtype);
+    if (LIKELY(length != 0)) {
+        CHECK_PTR_ARG(vinitialElement);
+    }
+    CHECK_PTR_ARG(vresult);
     ani_fixedarray_ref result {};
-    ani_ref initialElement = (skipInitialElement || vinitialElement == nullptr) ? nullptr : vinitialElement->GetRef();
-    ani_status status =
-        GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), vtype->GetRef(), length, initialElement, &result);
+    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), vtype->GetRef(), length,
+                                                                    vinitialElement->GetRef(), &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -1659,6 +1842,9 @@ NO_UB_SANITIZE static ani_status FixedArray_Set_Ref(VEnv *venv, VFixedArrayRef *
         ANIArg::MakeForFixedArraySetRef(vref, "ref")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(vref);
 
     return GetInteractionAPI(venv)->FixedArray_Set_Ref(venv->GetEnv(), varray->GetRef(), index, vref->GetRef());
 }
@@ -1674,7 +1860,9 @@ NO_UB_SANITIZE static ani_status FixedArray_Get_Ref(VEnv *venv, VFixedArrayRef *
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->FixedArray_Get_Ref(venv->GetEnv(), varray->GetRef(), index, &result);
 
@@ -1693,7 +1881,9 @@ NO_UB_SANITIZE static ani_status Enum_GetEnumItemByName(VEnv *venv, VEnum *venum
         ANIArg::MakeForEnumItemStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venum);
+    CHECK_PTR_ARG(vresult);
     ani_enum_item result {};
     ani_status status = GetInteractionAPI(venv)->Enum_GetEnumItemByName(venv->GetEnv(), venum->GetRef(), name, &result);
 
@@ -1712,7 +1902,9 @@ NO_UB_SANITIZE static ani_status Enum_GetEnumItemByIndex(VEnv *venv, VEnum *venu
         ANIArg::MakeForEnumItemStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venum);
+    CHECK_PTR_ARG(vresult);
     ani_enum_item result {};
     ani_status status =
         GetInteractionAPI(venv)->Enum_GetEnumItemByIndex(venv->GetEnv(), venum->GetRef(), index, &result);
@@ -1731,7 +1923,9 @@ NO_UB_SANITIZE static ani_status EnumItem_GetEnum(VEnv *venv, VEnumItem *venumIt
         ANIArg::MakeForEnumStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venumItem);
+    CHECK_PTR_ARG(vresult);
     ani_enum result {};
     ani_status status = GetInteractionAPI(venv)->EnumItem_GetEnum(venv->GetEnv(), venumItem->GetRef(), &result);
 
@@ -1749,6 +1943,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(VEnv *venv, VEnumItem *ve
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venumItem);
 
     return GetInteractionAPI(venv)->EnumItem_GetValue_Int(venv->GetEnv(), venumItem->GetRef(), result);
 }
@@ -1763,7 +1959,9 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_String(VEnv *venv, VEnumItem 
         ANIArg::MakeForStringStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venumItem);
+    CHECK_PTR_ARG(vresult);
     ani_string result {};
     ani_status status = GetInteractionAPI(venv)->EnumItem_GetValue_String(venv->GetEnv(), venumItem->GetRef(), &result);
 
@@ -1781,7 +1979,9 @@ NO_UB_SANITIZE static ani_status EnumItem_GetName(VEnv *venv, VEnumItem *venumIt
         ANIArg::MakeForStringStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venumItem);
+    CHECK_PTR_ARG(vresult);
     ani_string result {};
     ani_status status = GetInteractionAPI(venv)->EnumItem_GetName(venv->GetEnv(), venumItem->GetRef(), &result);
 
@@ -1799,6 +1999,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(VEnv *venv, VEnumItem *venumI
         ANIArg::MakeForSizeStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(venumItem);
 
     return GetInteractionAPI(venv)->EnumItem_GetIndex(venv->GetEnv(), venumItem->GetRef(), result);
 }
@@ -1817,7 +2019,9 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(VEnv *venv, VFnObject *vf
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfnObject);
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->FunctionalObject_Call(venv->GetEnv(), vfnObject->GetRef(), argc,
                                                                        argvArgs.releaseArgv, &result);
@@ -1835,6 +2039,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Boolean(VEnv *venv, VVariable
         ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Boolean(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1849,6 +2055,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Char(VEnv *venv, VVariable *v
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Char(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1863,6 +2071,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Byte(VEnv *venv, VVariable *v
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Byte(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1877,6 +2087,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Short(VEnv *venv, VVariable *
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Short(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1891,6 +2103,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Int(VEnv *venv, VVariable *vv
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Int(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1905,6 +2119,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Long(VEnv *venv, VVariable *v
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Long(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1919,6 +2135,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Float(VEnv *venv, VVariable *
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Float(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1933,6 +2151,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Double(VEnv *venv, VVariable 
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Double(venv->GetEnv(), vvariable->GetVariable(), value);
 }
@@ -1947,6 +2167,9 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(VEnv *venv, VVariable *vv
         ANIArg::MakeForRef(vvalue, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(vvalue);
 
     return GetInteractionAPI(venv)->Variable_SetValue_Ref(venv->GetEnv(), vvariable->GetVariable(), vvalue->GetRef());
 }
@@ -1961,6 +2184,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(VEnv *venv, VVariable
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Boolean(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -1975,6 +2201,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Char(VEnv *venv, VVariable *v
         ANIArg::MakeForCharStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Char(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -1989,6 +2218,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(VEnv *venv, VVariable *v
         ANIArg::MakeForByteStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Byte(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -2003,6 +2235,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Short(VEnv *venv, VVariable *
         ANIArg::MakeForShortStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Short(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -2017,6 +2252,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Int(VEnv *venv, VVariable *vv
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Int(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -2031,6 +2269,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Long(VEnv *venv, VVariable *v
         ANIArg::MakeForLongStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Long(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -2045,6 +2286,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Float(VEnv *venv, VVariable *
         ANIArg::MakeForFloatStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Float(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -2059,6 +2303,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Double(VEnv *venv, VVariable 
         ANIArg::MakeForDoubleStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Variable_GetValue_Double(venv->GetEnv(), vvariable->GetVariable(), result);
 }
@@ -2073,6 +2320,9 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Ref(VEnv *venv, VVariable *vv
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vvariable);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status =
@@ -2097,6 +2347,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean(VEnv *venv, VFunction *vf
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2117,6 +2370,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean_A(VEnv *venv, VFunction *
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2137,6 +2394,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean_V(VEnv *venv, VFunction *
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2160,6 +2420,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Char(VEnv *venv, VFunction *vfn, 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2180,6 +2443,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Char_A(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2199,6 +2466,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Char_V(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2222,6 +2492,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte(VEnv *venv, VFunction *vfn, 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2242,6 +2515,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte_A(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2261,6 +2538,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte_V(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2284,6 +2564,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Short(VEnv *venv, VFunction *vfn,
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2304,6 +2587,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Short_A(VEnv *venv, VFunction *vf
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2323,6 +2610,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Short_V(VEnv *venv, VFunction *vf
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2346,6 +2636,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Int(VEnv *venv, VFunction *vfn, a
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2366,6 +2659,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Int_A(VEnv *venv, VFunction *vfn,
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2385,6 +2682,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Int_V(VEnv *venv, VFunction *vfn,
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2408,6 +2708,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Long(VEnv *venv, VFunction *vfn, 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2428,6 +2731,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Long_A(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2447,6 +2754,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Long_V(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2470,6 +2780,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Float(VEnv *venv, VFunction *vfn,
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2490,6 +2803,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Float_A(VEnv *venv, VFunction *vf
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2509,6 +2826,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Float_V(VEnv *venv, VFunction *vf
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2532,6 +2852,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Double(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
@@ -2552,6 +2875,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Double_A(VEnv *venv, VFunction *v
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2571,6 +2898,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Double_V(VEnv *venv, VFunction *v
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
@@ -2594,6 +2924,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref(VEnv *venv, VFunction *vfn, V
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(vresult);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_ref result {};
@@ -2615,6 +2948,10 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref_A(VEnv *venv, VFunction *vfn,
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(vresult);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
@@ -2636,6 +2973,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref_V(VEnv *venv, VFunction *vfn,
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(vresult);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
@@ -2660,6 +3000,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Void(VEnv *venv, VFunction *vfn, 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), vfn->GetMethod(), args.data());
@@ -2677,6 +3019,9 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_A(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), vfn->GetMethod(), args.data());
@@ -2694,13 +3039,15 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_V(VEnv *venv, VFunction *vfn
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfn);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), vfn->GetMethod(), args.data());
     return status;
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
+/// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_FindField(VEnv *venv, VClass *vclass, const char *name, VField **vresult)
 {
     // clang-format off
@@ -2711,6 +3058,11 @@ NO_UB_SANITIZE static ani_status Class_FindField(VEnv *venv, VClass *vclass, con
         ANIArg::MakeForFieldStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
+
     ani_field result {};
 
     ani_status status = GetInteractionAPI(venv)->Class_FindField(venv->GetEnv(), vclass->GetRef(), name, &result);
@@ -2732,6 +3084,11 @@ NO_UB_SANITIZE static ani_status Class_FindStaticField(VEnv *venv, VClass *vclas
         ANIArg::MakeForStaticFieldStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
+
     ani_static_field result {};
     ani_status status = GetInteractionAPI(venv)->Class_FindStaticField(venv->GetEnv(), vclass->GetRef(), name, &result);
     if (LIKELY((status) == ANI_OK)) {
@@ -2753,6 +3110,11 @@ NO_UB_SANITIZE static ani_status Class_FindMethod(VEnv *venv, VClass *vclass, co
         ANIArg::MakeForMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
+
     ani_method result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
@@ -2775,6 +3137,12 @@ NO_UB_SANITIZE static ani_status Class_FindStaticMethod(VEnv *venv, VClass *vcla
         ANIArg::MakeForStaticMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(name);
+
+    CHECK_PTR_ARG(vresult);
+
     ani_static_method result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
@@ -2795,6 +3163,11 @@ NO_UB_SANITIZE static ani_status Class_FindSetter(VEnv *venv, VClass *vclass, co
         ANIArg::MakeForMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
+
     ani_method result {};
     ani_status status = GetInteractionAPI(venv)->Class_FindSetter(venv->GetEnv(), vclass->GetRef(), name, &result);
     if (LIKELY((status) == ANI_OK)) {
@@ -2814,6 +3187,11 @@ NO_UB_SANITIZE static ani_status Class_FindGetter(VEnv *venv, VClass *vclass, co
         ANIArg::MakeForMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
+
     ani_method result {};
     ani_status status = GetInteractionAPI(venv)->Class_FindGetter(venv->GetEnv(), vclass->GetRef(), name, &result);
     if (LIKELY((status) == ANI_OK)) {
@@ -2834,6 +3212,11 @@ NO_UB_SANITIZE static ani_status Class_FindIndexableGetter(VEnv *venv, VClass *v
         ANIArg::MakeForMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+
+    CHECK_PTR_ARG(vresult);
+
     ani_method result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_FindIndexableGetter(venv->GetEnv(), vclass->GetRef(), signature, &result);
@@ -2855,6 +3238,11 @@ NO_UB_SANITIZE static ani_status Class_FindIndexableSetter(VEnv *venv, VClass *v
         ANIArg::MakeForMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+
+    CHECK_PTR_ARG(vresult);
+
     ani_method result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_FindIndexableSetter(venv->GetEnv(), vclass->GetRef(), signature, &result);
@@ -2874,6 +3262,10 @@ NO_UB_SANITIZE static ani_status Class_FindIterator(VEnv *venv, VClass *vclass, 
         ANIArg::MakeForMethodStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vresult);
+
     ani_method result {};
     ani_status status = GetInteractionAPI(venv)->Class_FindIterator(venv->GetEnv(), vclass->GetRef(), &result);
     if (LIKELY((status) == ANI_OK)) {
@@ -2894,6 +3286,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Boolean(VEnv *venv, VClass
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Boolean(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                  result);
 }
@@ -2910,6 +3307,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Char(VEnv *venv, VClass *v
         ANIArg::MakeForCharStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Char(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                               result);
 }
@@ -2926,6 +3328,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Byte(VEnv *venv, VClass *v
         ANIArg::MakeForByteStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Byte(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                               result);
 }
@@ -2942,6 +3349,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Short(VEnv *venv, VClass *
         ANIArg::MakeForShortStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Short(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                result);
 }
@@ -2958,6 +3370,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Int(VEnv *venv, VClass *vc
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Int(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                              result);
 }
@@ -2974,6 +3391,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Long(VEnv *venv, VClass *v
         ANIArg::MakeForLongStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Long(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                               result);
 }
@@ -2990,6 +3412,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Float(VEnv *venv, VClass *
         ANIArg::MakeForFloatStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Float(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                result);
 }
@@ -3006,6 +3433,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Double(VEnv *venv, VClass 
         ANIArg::MakeForDoubleStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticField_Double(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                 result);
 }
@@ -3022,9 +3454,16 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Ref(VEnv *venv, VClass *vc
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(vresult);
+
     ani_ref result {};
-    return GetInteractionAPI(venv)->Class_GetStaticField_Ref(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                             &result);
+    auto status =
+        GetInteractionAPI(venv)->Class_GetStaticField_Ref(venv->GetEnv(), vcls->GetRef(), vfield->GetField(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3039,6 +3478,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Boolean(VEnv *venv, VClass
         ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Boolean(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                  value);
 }
@@ -3055,6 +3498,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Char(VEnv *venv, VClass *v
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Char(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                               value);
 }
@@ -3071,6 +3518,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Byte(VEnv *venv, VClass *v
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Byte(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                               value);
 }
@@ -3087,6 +3538,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Short(VEnv *venv, VClass *
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Short(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                value);
 }
@@ -3102,6 +3557,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Int(VEnv *venv, VClass *vc
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Int(venv->GetEnv(), vcls->GetRef(), vfield->GetField(), value);
 }
 
@@ -3117,6 +3576,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Long(VEnv *venv, VClass *v
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Long(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                               value);
 }
@@ -3133,6 +3596,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Float(VEnv *venv, VClass *
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Float(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                value);
 }
@@ -3149,6 +3616,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Double(VEnv *venv, VClass 
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Double(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                                 value);
 }
@@ -3164,6 +3635,11 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(VEnv *venv, VClass *vc
         ANIArg::MakeForRef(vvalue, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(vvalue);
+
     return GetInteractionAPI(venv)->Class_SetStaticField_Ref(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
                                                              vvalue->GetRef());
 }
@@ -3180,6 +3656,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Boolean(VEnv *venv, 
         ANIArg::MakeForBooleanStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3195,6 +3676,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Char(VEnv *venv, VCl
         ANIArg::MakeForCharStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3210,6 +3696,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Byte(VEnv *venv, VCl
         ANIArg::MakeForByteStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3225,6 +3716,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Short(VEnv *venv, VC
         ANIArg::MakeForShortStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3240,6 +3736,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Int(VEnv *venv, VCla
         ANIArg::MakeForIntStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3255,6 +3756,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Long(VEnv *venv, VCl
         ANIArg::MakeForLongStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3270,6 +3776,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Float(VEnv *venv, VC
         ANIArg::MakeForFloatStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3285,6 +3796,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Double(VEnv *venv, V
         ANIArg::MakeForDoubleStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
     return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, result);
 }
 
@@ -3300,6 +3816,11 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(VEnv *venv, VCla
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
+
     ani_ref result {};
     ani_status status =
         GetInteractionAPI(venv)->Class_GetStaticFieldByName_Ref(venv->GetEnv(), vcls->GetRef(), name, &result);
@@ -3319,6 +3840,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Boolean(VEnv *venv, 
         ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3334,6 +3859,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Char(VEnv *venv, VCl
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3349,6 +3878,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Byte(VEnv *venv, VCl
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3364,6 +3897,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Short(VEnv *venv, VC
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3379,6 +3916,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Int(VEnv *venv, VCla
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3394,6 +3935,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Long(VEnv *venv, VCl
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3409,6 +3954,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Float(VEnv *venv, VC
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3424,6 +3973,10 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Double(VEnv *venv, V
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, value);
 }
 
@@ -3439,6 +3992,11 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(VEnv *venv, VCla
         ANIArg::MakeForRef(vvalue, "value")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vcls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vvalue);
+
     return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Ref(venv->GetEnv(), vcls->GetRef(), name,
                                                                    vvalue->GetRef());
 }
@@ -3461,6 +4019,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean(VEnv *venv, VCla
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Boolean_A(
@@ -3483,6 +4045,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_A(VEnv *venv, VC
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Boolean_A(
@@ -3505,6 +4072,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_V(VEnv *venv, VC
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Boolean_A(
@@ -3530,6 +4101,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char(VEnv *venv, VClass 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Char_A(
@@ -3551,6 +4126,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char_A(VEnv *venv, VClas
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Char_A(
@@ -3572,6 +4152,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char_V(VEnv *venv, VClas
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Char_A(
@@ -3597,6 +4181,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte(VEnv *venv, VClass 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Byte_A(
@@ -3618,6 +4206,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte_A(VEnv *venv, VClas
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Byte_A(
@@ -3639,6 +4232,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte_V(VEnv *venv, VClas
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Byte_A(
@@ -3664,6 +4261,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short(VEnv *venv, VClass
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Short_A(
@@ -3686,6 +4287,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short_A(VEnv *venv, VCla
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Short_A(
@@ -3708,6 +4314,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short_V(VEnv *venv, VCla
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Short_A(
@@ -3733,6 +4343,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int(VEnv *venv, VClass *
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Int_A(
@@ -3754,6 +4368,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_A(VEnv *venv, VClass
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Int_A(
@@ -3775,6 +4394,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_V(VEnv *venv, VClass
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Int_A(
@@ -3800,6 +4423,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long(VEnv *venv, VClass 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Long_A(
@@ -3821,6 +4448,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long_A(VEnv *venv, VClas
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Long_A(
@@ -3842,6 +4474,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long_V(VEnv *venv, VClas
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Long_A(
@@ -3867,6 +4503,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float(VEnv *venv, VClass
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Float_A(
@@ -3889,6 +4529,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float_A(VEnv *venv, VCla
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Float_A(
@@ -3911,6 +4556,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float_V(VEnv *venv, VCla
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Float_A(
@@ -3936,6 +4585,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double(VEnv *venv, VClas
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Double_A(
@@ -3958,6 +4611,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_A(VEnv *venv, VCl
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Double_A(
@@ -3980,6 +4638,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_V(VEnv *venv, VCl
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Double_A(
@@ -4005,6 +4667,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref(VEnv *venv, VClass *
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(vresult);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_ref result {};
@@ -4028,6 +4694,11 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_A(VEnv *venv, VClass
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(vresult);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
@@ -4051,6 +4722,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_V(VEnv *venv, VClass
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(vresult);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
@@ -4077,6 +4752,9 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void(VEnv *venv, VClass 
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(venv->GetEnv(), vclass->GetRef(),
@@ -4097,6 +4775,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_A(VEnv *venv, VClas
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(venv->GetEnv(), vclass->GetRef(),
@@ -4117,6 +4799,9 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_V(VEnv *venv, VClas
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
+    CHECK_PTR_ARG(vstaticmethod);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(venv->GetEnv(), vclass->GetRef(),
@@ -4136,7 +4821,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean(VEnv *venv
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4176,7 +4862,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(VEnv *ve
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4194,9 +4881,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(VEnv *ve
         ANIArg::MakeForMethodAArgs(&methodArgs, "args")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                           signature, result, vargs);
+                                                                           signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4212,7 +4900,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(VEnv *ve
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4230,7 +4919,6 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(VEnv *ve
         ANIArg::MakeForMethodArgs(&methodArgs, "args")
     );
     // clang-format on
-
     auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
                                                                            signature, result, args.data());
@@ -4248,7 +4936,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char(VEnv *venv, V
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4289,7 +4978,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_A(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4307,9 +4997,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_A(VEnv *venv,
         ANIArg::MakeForMethodAArgs(&methodArgs, "args")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                        signature, result, vargs);
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4325,7 +5016,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_V(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4361,7 +5053,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte(VEnv *venv, V
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4402,7 +5095,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4420,9 +5114,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(VEnv *venv,
         ANIArg::MakeForMethodAArgs(&methodArgs, "args")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                        signature, result, vargs);
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4438,7 +5133,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_V(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4474,7 +5170,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short(VEnv *venv, 
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4515,7 +5212,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(VEnv *venv
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4534,8 +5232,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(VEnv *venv
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, vargs);
+                                                                         signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4551,7 +5251,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_V(VEnv *venv
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4587,7 +5288,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int(VEnv *venv, VC
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4628,7 +5330,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(VEnv *venv, 
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4647,8 +5350,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(VEnv *venv, 
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                       signature, result, vargs);
+                                                                       signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4664,7 +5369,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_V(VEnv *venv, 
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4700,7 +5406,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long(VEnv *venv, V
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4741,7 +5448,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4760,8 +5468,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(VEnv *venv,
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                        signature, result, vargs);
+                                                                        signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4777,7 +5487,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_V(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4813,7 +5524,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float(VEnv *venv, 
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4854,7 +5566,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(VEnv *venv
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4873,8 +5586,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(VEnv *venv
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, vargs);
+                                                                         signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4890,7 +5605,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_V(VEnv *venv
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4926,7 +5642,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4967,7 +5684,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(VEnv *ven
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -4986,8 +5704,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(VEnv *ven
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                          signature, result, vargs);
+                                                                          signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5003,7 +5723,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_V(VEnv *ven
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5039,7 +5760,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(VEnv *venv, VC
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5062,6 +5784,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(VEnv *venv, VC
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
     status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
@@ -5083,7 +5806,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(VEnv *venv, 
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5102,9 +5826,12 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(VEnv *venv, 
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    CHECK_PTR_ARG(vresult);
+    auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
     status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, &result, vargs);
+                                                                         signature, &result, args.data());
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -5123,7 +5850,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(VEnv *venv, 
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5141,7 +5869,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(VEnv *venv, 
         ANIArg::MakeForMethodArgs(&methodArgs, "args")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
     status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
@@ -5163,7 +5891,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(VEnv *venv, V
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5202,7 +5931,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5220,8 +5950,10 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(VEnv *venv,
     );
     // clang-format on
 
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                        signature, vargs);
+                                                                        signature, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5236,7 +5968,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_V(VEnv *venv,
         ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     VStaticMethod *vstaticmethod = nullptr;
     ani_status status = ResolveVerifiedStaticMethodByName(venv, vclass, name, signature, &vstaticmethod);
     if (status != ANI_OK) {
@@ -5271,6 +6004,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Boolean(VEnv *venv, VObject *vo
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Boolean(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                             result);
@@ -5287,6 +6024,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Char(VEnv *venv, VObject *vobje
         ANIArg::MakeForCharStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Char(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
 }
@@ -5302,6 +6043,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Byte(VEnv *venv, VObject *vobje
         ANIArg::MakeForByteStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Byte(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
 }
@@ -5317,6 +6062,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Short(VEnv *venv, VObject *vobj
         ANIArg::MakeForShortStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Short(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                           result);
@@ -5333,6 +6082,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Int(VEnv *venv, VObject *vobjec
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Int(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
 }
@@ -5348,6 +6101,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Long(VEnv *venv, VObject *vobje
         ANIArg::MakeForLongStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Long(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
 }
@@ -5363,6 +6120,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Float(VEnv *venv, VObject *vobj
         ANIArg::MakeForFloatStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
 
     return GetInteractionAPI(venv)->Object_GetField_Float(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                           result);
@@ -5380,7 +6141,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Double(VEnv *venv, VObject *vob
         ANIArg::MakeForDoubleStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(result);
     return GetInteractionAPI(venv)->Object_GetField_Double(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                            result);
 }
@@ -5396,6 +6160,10 @@ NO_UB_SANITIZE static ani_status Object_GetField_Ref(VEnv *venv, VObject *vobjec
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status =
@@ -5416,6 +6184,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Boolean(VEnv *venv, VObject *vo
         ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Boolean(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                             value);
@@ -5432,6 +6203,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Char(VEnv *venv, VObject *vobje
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Char(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
 }
@@ -5447,6 +6221,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Byte(VEnv *venv, VObject *vobje
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Byte(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
 }
@@ -5462,6 +6239,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Short(VEnv *venv, VObject *vobj
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Short(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
 }
@@ -5477,6 +6257,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Int(VEnv *venv, VObject *vobjec
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Int(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
 }
@@ -5492,6 +6275,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Long(VEnv *venv, VObject *vobje
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Long(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
 }
@@ -5507,6 +6293,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Float(VEnv *venv, VObject *vobj
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Float(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
 }
@@ -5522,6 +6311,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Double(VEnv *venv, VObject *vob
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
 
     return GetInteractionAPI(venv)->Object_SetField_Double(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                            value);
@@ -5538,6 +6330,10 @@ NO_UB_SANITIZE static ani_status Object_SetField_Ref(VEnv *venv, VObject *vobjec
         ANIArg::MakeForRef(vvalue, "ref"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vfield);
+    CHECK_PTR_ARG(vvalue);
 
     return GetInteractionAPI(venv)->Object_SetField_Ref(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
                                                         vvalue->GetRef());
@@ -5555,6 +6351,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Boolean(VEnv *venv, VObje
         ANIArg::MakeForBooleanStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5570,6 +6368,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Char(VEnv *venv, VObject 
         ANIArg::MakeForCharStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Char(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5585,6 +6385,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Byte(VEnv *venv, VObject 
         ANIArg::MakeForByteStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Byte(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5600,6 +6402,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Short(VEnv *venv, VObject
         ANIArg::MakeForShortStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Short(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5615,6 +6419,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Int(VEnv *venv, VObject *
         ANIArg::MakeForIntStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Int(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5630,6 +6436,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Long(VEnv *venv, VObject 
         ANIArg::MakeForLongStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Long(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5645,6 +6453,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Float(VEnv *venv, VObject
         ANIArg::MakeForFloatStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Float(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5660,6 +6470,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Double(VEnv *venv, VObjec
         ANIArg::MakeForDoubleStorage(result, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetFieldByName_Double(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5675,7 +6487,9 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(VEnv *venv, VObject *
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vresult);
     ani_ref tmp {};
     ani_status status =
         GetInteractionAPI(venv)->Object_GetFieldByName_Ref(venv->GetEnv(), vobject->GetRef(), name, &tmp);
@@ -5696,6 +6510,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Boolean(VEnv *venv, VObje
         ANIArg::MakeForBoolean(value, "value")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5711,6 +6527,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Char(VEnv *venv, VObject 
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Char(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5726,6 +6544,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Byte(VEnv *venv, VObject 
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Byte(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5741,6 +6561,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Short(VEnv *venv, VObject
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Short(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5756,6 +6578,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Int(VEnv *venv, VObject *
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Int(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5771,6 +6595,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Long(VEnv *venv, VObject 
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Long(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5786,6 +6612,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Float(VEnv *venv, VObject
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Float(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5801,6 +6629,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Double(VEnv *venv, VObjec
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Double(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5815,6 +6645,9 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Ref(VEnv *venv, VObject *
         ANIArg::MakeForRef(vvalue, "value")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vvalue);
     return GetInteractionAPI(venv)->Object_SetFieldByName_Ref(venv->GetEnv(), vobject->GetRef(), name,
                                                               vvalue->GetRef());
 }
@@ -5831,7 +6664,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Boolean(VEnv *venv, VO
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5847,7 +6681,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Char(VEnv *venv, VObje
         ANIArg::MakeForCharStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Char(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5863,7 +6698,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Byte(VEnv *venv, VObje
         ANIArg::MakeForByteStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Byte(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5879,7 +6715,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Short(VEnv *venv, VObj
         ANIArg::MakeForShortStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Short(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5895,7 +6732,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Int(VEnv *venv, VObjec
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Int(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5911,7 +6749,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Long(VEnv *venv, VObje
         ANIArg::MakeForLongStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Long(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5927,7 +6766,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Float(VEnv *venv, VObj
         ANIArg::MakeForFloatStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Float(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5943,7 +6783,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Double(VEnv *venv, VOb
         ANIArg::MakeForDoubleStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_GetPropertyByName_Double(venv->GetEnv(), vobject->GetRef(), name, result);
 }
 
@@ -5959,7 +6800,9 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Ref(VEnv *venv, VObjec
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status =
         GetInteractionAPI(venv)->Object_GetPropertyByName_Ref(venv->GetEnv(), vobject->GetRef(), name, &result);
@@ -5979,7 +6822,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Boolean(VEnv *venv, VO
         ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -5995,7 +6839,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Char(VEnv *venv, VObje
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Char(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6011,7 +6856,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Byte(VEnv *venv, VObje
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Byte(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6027,7 +6873,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Short(VEnv *venv, VObj
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Short(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6043,7 +6890,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Int(VEnv *venv, VObjec
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Int(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6059,7 +6907,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Long(VEnv *venv, VObje
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Long(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6075,7 +6924,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Float(VEnv *venv, VObj
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Float(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6091,7 +6941,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Double(VEnv *venv, VOb
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Double(venv->GetEnv(), vobject->GetRef(), name, value);
 }
 
@@ -6107,7 +6958,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(VEnv *venv, VObjec
         ANIArg::MakeForRef(vvalue, "value"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Object_SetPropertyByName_Ref(venv->GetEnv(), vobject->GetRef(), name,
                                                                  vvalue->GetRef());
 }
@@ -6130,6 +6982,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean(VEnv *venv, VObject *
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
@@ -6151,6 +7007,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(VEnv *venv, VObject
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
@@ -6172,6 +7033,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_V(VEnv *venv, VObject
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
@@ -6197,6 +7062,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char(VEnv *venv, VObject *vob
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
@@ -6218,6 +7087,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char_A(VEnv *venv, VObject *v
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
@@ -6239,6 +7113,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char_V(VEnv *venv, VObject *v
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
@@ -6264,6 +7142,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte(VEnv *venv, VObject *vob
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
@@ -6285,6 +7167,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_A(VEnv *venv, VObject *v
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
@@ -6306,6 +7193,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_V(VEnv *venv, VObject *v
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
@@ -6331,6 +7222,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short(VEnv *venv, VObject *vo
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
@@ -6352,6 +7247,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short_A(VEnv *venv, VObject *
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
@@ -6373,6 +7273,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short_V(VEnv *venv, VObject *
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
@@ -6398,6 +7302,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int(VEnv *venv, VObject *vobj
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
@@ -6419,6 +7327,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(VEnv *venv, VObject *vo
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
@@ -6440,6 +7353,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(VEnv *venv, VObject *vo
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
@@ -6465,6 +7382,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long(VEnv *venv, VObject *vob
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
@@ -6486,6 +7407,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_A(VEnv *venv, VObject *v
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
@@ -6507,6 +7433,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(VEnv *venv, VObject *v
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
@@ -6532,6 +7462,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float(VEnv *venv, VObject *vo
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
@@ -6553,6 +7487,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float_A(VEnv *venv, VObject *
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
@@ -6574,6 +7513,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float_V(VEnv *venv, VObject *
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
@@ -6599,6 +7542,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double(VEnv *venv, VObject *v
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
@@ -6620,6 +7567,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double_A(VEnv *venv, VObject 
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
@@ -6641,6 +7593,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double_V(VEnv *venv, VObject 
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
@@ -6666,6 +7622,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref(VEnv *venv, VObject *vobj
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(vresult);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_ref result {};
@@ -6689,6 +7649,11 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_A(VEnv *venv, VObject *vo
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(vresult);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
@@ -6712,6 +7677,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_V(VEnv *venv, VObject *vo
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(vresult);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
@@ -6737,6 +7706,9 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(VEnv *venv, VObject *vob
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
@@ -6757,6 +7729,10 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_A(VEnv *venv, VObject *v
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
+    CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
@@ -6777,6 +7753,9 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(VEnv *venv, VObject *v
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    CHECK_PTR_ARG(vmethod);
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
@@ -6788,41 +7767,40 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(VEnv *venv, VObject *v
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean(VEnv *venv, VObject *vobject, const char *name,
                                                                  const char *signature, ani_boolean *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::BOOLEAN, "method"),
-        ANIArg::MakeForBooleanStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
-                                                                      ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                            signature, result, vvaArgs);
-    }
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BOOLEAN),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), vobject->GetRef(), name,
+                                                                      signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6835,23 +7813,33 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_A(VEnv *venv, V
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::BOOLEAN, "method"),
+        ANIArg::MakeForSignature(signature, "signature")
+    );
+    // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BOOLEAN),
         ANIArg::MakeForBooleanStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
     );
     // clang-format on
 
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
-                                                                    ToAniMethod(method), result, args.data());
-    }
-
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), vobject->GetRef(), name,
-                                                                      signature, result, vargs);
+                                                                      signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6859,75 +7847,76 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_V(VEnv *venv, V
                                                                    const char *signature, ani_boolean *result,
                                                                    va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::BOOLEAN, "method"),
-        ANIArg::MakeForBooleanStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
-                                                                    ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                      signature, result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BOOLEAN),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), vobject->GetRef(), name,
+                                                                      signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Char(VEnv *venv, VObject *vobject, const char *name,
                                                               const char *signature, ani_char *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::CHAR, "method"),
-        ANIArg::MakeForCharStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
-                                                                   ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Char_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                         signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6940,22 +7929,33 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Char_A(VEnv *venv, VObj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::CHAR, "method"),
-        ANIArg::MakeForCharStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, vargs);
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6963,74 +7963,76 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Char_V(VEnv *venv, VObj
                                                                 const char *signature, ani_char *result,
                                                                 va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::CHAR, "method"),
-        ANIArg::MakeForCharStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::CHAR),
+        ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte(VEnv *venv, VObject *vobject, const char *name,
                                                               const char *signature, ani_byte *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::BYTE, "method"),
-        ANIArg::MakeForByteStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
-                                                                   ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Byte_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                         signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7043,22 +8045,33 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte_A(VEnv *venv, VObj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::BYTE, "method"),
-        ANIArg::MakeForByteStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, vargs);
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7066,74 +8079,76 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte_V(VEnv *venv, VObj
                                                                 const char *signature, ani_byte *result,
                                                                 va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::BYTE, "method"),
-        ANIArg::MakeForByteStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BYTE),
+        ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short(VEnv *venv, VObject *vobject, const char *name,
                                                                const char *signature, ani_short *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::SHORT, "method"),
-        ANIArg::MakeForShortStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
-                                                                    ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Short_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                          signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7146,22 +8161,33 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short_A(VEnv *venv, VOb
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::SHORT, "method"),
-        ANIArg::MakeForShortStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, vargs);
+                                                                    result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7169,74 +8195,77 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short_V(VEnv *venv, VOb
                                                                  const char *signature, ani_short *result,
                                                                  va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::SHORT, "method"),
-        ANIArg::MakeForShortStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::SHORT),
+        ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int(VEnv *venv, VObject *vobject, const char *name,
                                                              const char *signature, ani_int *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::INT, "method"),
-        ANIArg::MakeForIntStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Int_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                        signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                  result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7249,96 +8278,109 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int_A(VEnv *venv, VObje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::INT, "method"),
-        ANIArg::MakeForIntStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                  result, vargs);
+                                                                  result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int_V(VEnv *venv, VObject *vobject, const char *name,
                                                                const char *signature, ani_int *result, va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::INT, "method"),
-        ANIArg::MakeForIntStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                  result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::INT),
+        ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                  result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long(VEnv *venv, VObject *vobject, const char *name,
                                                               const char *signature, ani_long *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::LONG, "method"),
-        ANIArg::MakeForLongStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
-                                                                   ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Long_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                         signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7351,22 +8393,33 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long_A(VEnv *venv, VObj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::LONG, "method"),
-        ANIArg::MakeForLongStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, vargs);
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7374,74 +8427,76 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long_V(VEnv *venv, VObj
                                                                 const char *signature, ani_long *result,
                                                                 va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::LONG, "method"),
-        ANIArg::MakeForLongStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::LONG),
+        ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float(VEnv *venv, VObject *vobject, const char *name,
                                                                const char *signature, ani_float *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::FLOAT, "method"),
-        ANIArg::MakeForFloatStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
-                                                                    ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Float_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                          signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7454,22 +8509,31 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float_A(VEnv *venv, VOb
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::FLOAT, "method"),
-        ANIArg::MakeForFloatStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
 
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, vargs);
+                                                                    result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7477,74 +8541,76 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float_V(VEnv *venv, VOb
                                                                  const char *signature, ani_float *result,
                                                                  va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::FLOAT, "method"),
-        ANIArg::MakeForFloatStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::FLOAT),
+        ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double(VEnv *venv, VObject *vobject, const char *name,
                                                                 const char *signature, ani_double *result, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, result);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::DOUBLE, "method"),
-        ANIArg::MakeForDoubleStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
-                                                                     ToAniMethod(method), result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Double_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                           signature, result, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                     result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7557,22 +8623,33 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double_A(VEnv *venv, VO
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::DOUBLE, "method"),
-        ANIArg::MakeForDoubleStorage(result, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
-                                                                   ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                     result, vargs);
+                                                                     result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7580,75 +8657,79 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double_V(VEnv *venv, VO
                                                                   const char *signature, ani_double *result,
                                                                   va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::DOUBLE, "method"),
-        ANIArg::MakeForDoubleStorage(result, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
-                                                                   ToAniMethod(method), result, args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                     result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::DOUBLE),
+        ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                     result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref(VEnv *venv, VObject *vobject, const char *name,
                                                              const char *signature, VRef **vresult, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, vresult);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::OBJECT, "method"),
-        ANIArg::MakeForRefStorage(vresult, "result"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    ani_ref result {};
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), &result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                        signature, &result, vvaArgs);
-    }
-    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, vresult);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::OBJECT),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vresult);
+    ani_ref result {};
+    auto args = GetVValueArgs(venv, methodArgs);
+    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    &result, args.data());
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
@@ -7662,24 +8743,35 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_A(VEnv *venv, VObje
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::OBJECT, "method"),
-        ANIArg::MakeForRefStorage(vresult, "result"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_ref result {};
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
-                                                                  ToAniMethod(method), &result, args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name,
-                                                                        signature, &result, vargs);
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
+
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::OBJECT),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vresult);
+    CHECK_PTR_ARG(vargs);
+    ani_ref result {};
+    auto args = GetVValueArgs(venv, methodArgs);
+    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -7688,37 +8780,38 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_A(VEnv *venv, VObje
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_V(VEnv *venv, VObject *vobject, const char *name,
                                                                const char *signature, VRef **vresult, va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::OBJECT, "method"),
-        ANIArg::MakeForRefStorage(vresult, "result"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    ani_ref result {};
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
-                                                                             ToAniMethod(method), &result, args.data());
-        ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
         return status;
     }
 
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                               signature, &result, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::OBJECT),
+        ANIArg::MakeForRefStorage(vresult, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vresult);
+    ani_ref result {};
+    auto args = GetVValueArgs(venv, methodArgs);
+    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                    &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -7727,39 +8820,39 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_V(VEnv *venv, VObje
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void(VEnv *venv, VObject *vobject, const char *name,
                                                               const char *signature, ...)
 {
-    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(vvaArgs, signature);
-
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::VOID, "method"),
-        ANIArg::MakeForVvaArgs(vvaArgs, "...")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    if (UNLIKELY(!isArgsValid)) {
-        va_end(vvaArgs);
-        return ANI_ERROR;
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    ani_status status;
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
-                                                                   ToAniMethod(method), args.data());
-    } else {
-        status = GetInteractionAPI(venv)->Object_CallMethodByName_Void_V(venv->GetEnv(), vobject->GetRef(), name,
-                                                                         signature, vvaArgs);
-    }
+
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, signature);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
     va_end(vvaArgs);
-    return status;
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::VOID),
+        ANIArg::MakeForMethodArgs(&methodArgs, "...")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7771,54 +8864,67 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_A(VEnv *venv, VObj
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::VOID, "method"),
-        ANIArg::MakeForAArgs(vargs, "args")
+        ANIArg::MakeForSignature(signature, "signature")
     );
     // clang-format on
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        ANIArg::AniMethodArgs methodArgs {method, vargs, {}, false};
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::VOID),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    CHECK_PTR_ARG(vargs);
+    auto args = GetVValueArgs(venv, methodArgs);
     return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   vargs);
+                                                                   args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_V(VEnv *venv, VObject *vobject, const char *name,
                                                                 const char *signature, va_list vvaArgs)
 {
-    va_list copiedArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_copy(copiedArgs, vvaArgs);
     // clang-format off
-    bool isArgsValid = VerifyANIArgs(__func__, {
+    VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForObject(vobject, "object"),
         ANIArg::MakeForMethodName(name, "name"),
-        ANIArg::MakeForSignature(signature, "signature"),
-        ANIArg::MakeForMethodReturnType(EtsType::VOID, "method"),
-        ANIArg::MakeForVvaArgs(copiedArgs, "args")
-    });
+        ANIArg::MakeForSignature(signature, "signature")
+    );
     // clang-format on
-    va_end(copiedArgs);
-    ANI_CHECK_RETURN_IF_EQ(isArgsValid, false, ANI_ERROR);
-    EtsMethod *method = GetEtsMethodByName(venv, vobject, name, signature);
-    if (LIKELY(method != nullptr)) {
-        va_list argsToConvert;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-        va_copy(argsToConvert, vvaArgs);
-        ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(method, argsToConvert);
-        va_end(argsToConvert);
-        auto args = GetVValueArgs(venv, methodArgs);
-        return GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(), ToAniMethod(method),
-                                                                 args.data());
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
+    VMethod *vmethod = nullptr;
+    ani_status status = ResolveVerifiedMethodByName(venv, vobject, name, signature, &vmethod);
+    if (status != ANI_OK) {
+        return status;
     }
 
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_V(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::VOID),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args")
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), vobject->GetRef(), name, signature,
+                                                                   args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7831,7 +8937,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(VEnv *venv, VTupleV
         ANIArg::MakeForSizeStorage(result, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
     return GetInteractionAPI(venv)->TupleValue_GetNumberOfItems(venv->GetEnv(), vtupleValue->GetRef(), result);
 }
 
@@ -7847,6 +8954,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Boolean(VEnv *venv, VTupleVa
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Boolean(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7863,6 +8972,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Char(VEnv *venv, VTupleValue
         ANIArg::MakeForCharStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Char(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7879,6 +8990,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Byte(VEnv *venv, VTupleValue
         ANIArg::MakeForByteStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Byte(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7895,6 +9008,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Short(VEnv *venv, VTupleValu
         ANIArg::MakeForShortStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Short(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7911,6 +9026,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Int(VEnv *venv, VTupleValue 
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Int(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7927,6 +9044,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Long(VEnv *venv, VTupleValue
         ANIArg::MakeForLongStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Long(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7943,6 +9062,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Float(VEnv *venv, VTupleValu
         ANIArg::MakeForFloatStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Float(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7959,6 +9080,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Double(VEnv *venv, VTupleVal
         ANIArg::MakeForDoubleStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_GetItem_Double(venv->GetEnv(), vtupleValue->GetRef(), index, result);
 }
@@ -7975,6 +9098,9 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Ref(VEnv *venv, VTupleValue 
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status =
@@ -7995,6 +9121,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Boolean(VEnv *venv, VTupleVa
         ANIArg::MakeForBoolean(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Boolean(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8011,6 +9139,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Char(VEnv *venv, VTupleValue
         ANIArg::MakeForChar(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Char(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8027,6 +9157,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Byte(VEnv *venv, VTupleValue
         ANIArg::MakeForByte(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Byte(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8043,6 +9175,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Short(VEnv *venv, VTupleValu
         ANIArg::MakeForShort(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Short(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8059,6 +9193,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Int(VEnv *venv, VTupleValue 
         ANIArg::MakeForInt(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Int(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8075,6 +9211,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Long(VEnv *venv, VTupleValue
         ANIArg::MakeForLong(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Long(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8091,6 +9229,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Float(VEnv *venv, VTupleValu
         ANIArg::MakeForFloat(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Float(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8107,6 +9247,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Double(VEnv *venv, VTupleVal
         ANIArg::MakeForDouble(value, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Double(venv->GetEnv(), vtupleValue->GetRef(), index, value);
 }
@@ -8123,6 +9265,9 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(VEnv *venv, VTupleValue 
         ANIArg::MakeForRef(vvalue, "value"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vtupleValue);
+    CHECK_PTR_ARG(vvalue);
 
     return GetInteractionAPI(venv)->TupleValue_SetItem_Ref(venv->GetEnv(), vtupleValue->GetRef(), index,
                                                            vvalue->GetRef());
@@ -8138,6 +9283,9 @@ NO_UB_SANITIZE static ani_status GlobalReference_Create(VEnv *venv, VRef *vref, 
         ANIArg::MakeForRefStorage(vresult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     auto status = GetInteractionAPI(venv)->GlobalReference_Create(venv->GetEnv(), vref->GetRef(), &result);
@@ -8156,7 +9304,11 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(VEnv *venv, VRef *vgref)
         ANIArg::MakeForGlobalRef(vgref, "gref"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vgref);
+    if (!venv->IsValidGlobalVerifiedRef(vgref) && !ManagedCodeAccessor::IsUndefined(vgref->GetRef())) {
+        return ANI_INCORRECT_REF;
+    }
     ani_ref gref = vgref->GetRef();
     ani_status status = GetInteractionAPI(venv)->GlobalReference_Delete(venv->GetEnv(), gref);
     if (LIKELY(status == ANI_OK) && venv->IsValidGlobalVerifiedRef(vgref)) {
@@ -8166,45 +9318,76 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(VEnv *venv, VRef *vgref)
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status WeakReference_Create(VEnv *venv, VRef *vref, ani_wref *result)
+NO_UB_SANITIZE static ani_status WeakReference_Create(VEnv *venv, VRef *vref, VWRef **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForRef(vref, "ref"),
-        ANIArg::MakeForWRefStorage(result, "result"),
+        ANIArg::MakeForWRefStorage(reinterpret_cast<ani_wref *>(vresult), "result"),
     );
     // clang-format on
-    return GetInteractionAPI(venv)->WeakReference_Create(venv->GetEnv(), vref->GetRef(), result);
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vresult);
+
+    ani_wref runtimeWref {};
+    ani_status status = GetInteractionAPI(venv)->WeakReference_Create(venv->GetEnv(), vref->GetRef(), &runtimeWref);
+    if (LIKELY(status == ANI_OK)) {
+        *vresult = venv->AddVerifiedWeakRef(runtimeWref);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status WeakReference_Delete(VEnv *venv, ani_wref wref)
+NO_UB_SANITIZE static ani_status WeakReference_Delete(VEnv *venv, VWRef *vwref)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env", false),
-        ANIArg::MakeForWRef(wref, "wref"),
+        ANIArg::MakeForWRef(vwref, "wref"),
     );
     // clang-format on
-    return GetInteractionAPI(venv)->WeakReference_Delete(venv->GetEnv(), wref);
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vwref);
+    if (!venv->IsValidWeakRef(vwref) &&
+        !ManagedCodeAccessor::IsUndefined(reinterpret_cast<ani_ref>(vwref->GetWRef()))) {
+        return ANI_INCORRECT_REF;
+    }
+    ani_status status = GetInteractionAPI(venv)->WeakReference_Delete(venv->GetEnv(), vwref->GetWRef());
+    if (LIKELY(status == ANI_OK)) {
+        venv->DeleteVerifiedWeakRef(vwref);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status WeakReference_GetReference(VEnv *venv, ani_wref wref, ani_boolean *wasReleasedResult,
+NO_UB_SANITIZE static ani_status WeakReference_GetReference(VEnv *venv, VWRef *vwref, ani_boolean *wasReleasedResult,
                                                             VRef **vrefResult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForWRef(wref, "wref"),
+        ANIArg::MakeForWRef(vwref, "wref"),
         ANIArg::MakeForBooleanStorage(wasReleasedResult, "was_released_result"),
         ANIArg::MakeForRefStorage(vrefResult, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vwref);
+    CHECK_PTR_ARG(wasReleasedResult);
+    CHECK_PTR_ARG(vrefResult);
+    if (!venv->IsValidWeakRef(vwref)) {
+        if (venv->IsValidGlobalVerifiedRef(reinterpret_cast<VRef *>(vwref))) {
+            return ANI_INCORRECT_REF;
+        }
+        if (!ManagedCodeAccessor::IsUndefined(reinterpret_cast<VRef *>(vwref)->GetRef())) {
+            return ANI_INCORRECT_REF;
+        }
+    }
     ani_ref result {};
-    ani_status status =
-        GetInteractionAPI(venv)->WeakReference_GetReference(venv->GetEnv(), wref, wasReleasedResult, &result);
+    ani_status status = GetInteractionAPI(venv)->WeakReference_GetReference(venv->GetEnv(), vwref->GetWRef(),
+                                                                            wasReleasedResult, &result);
     if (LIKELY(status == ANI_OK)) {
         *vrefResult = result == nullptr ? nullptr : venv->AddLocalVerifiedRef(result);
     }
@@ -8223,6 +9406,8 @@ NO_UB_SANITIZE static ani_status CreateArrayBuffer(VEnv *venv, size_t length, vo
         ANIArg::MakeForArrayBufferStorage(varraybufferResult, "arraybuffer_result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varraybufferResult);
     ani_arraybuffer result {};
     ani_status status = GetInteractionAPI(venv)->CreateArrayBuffer(venv->GetEnv(), length, dataResult, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, varraybufferResult);
@@ -8241,6 +9426,8 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(VEnv *venv, VArrayBuffer *v
         ANIArg::MakeForSizeStorage(lengthResult, "length_result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varraybuffer);
     return GetInteractionAPI(venv)->ArrayBuffer_GetInfo(venv->GetEnv(), varraybuffer->GetRef(), dataResult,
                                                         lengthResult);
 }
@@ -8255,6 +9442,10 @@ NO_UB_SANITIZE static ani_status Promise_New(VEnv *venv, VResolver **vresultReso
         ANIArg::MakeForPromiseStorage(vresultPromise, "result_promise")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresultResolver);
+    CHECK_PTR_ARG(vresultPromise);
+
     ani_resolver realResolver {};
     ani_object realPromise {};
     ani_status status = GetInteractionAPI(venv)->Promise_New(venv->GetEnv(), &realResolver, &realPromise);
@@ -8275,11 +9466,14 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(VEnv *venv, VResolver *
         ANIArg::MakeForRef(vresolution, "resolution")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresolver);
+    CHECK_PTR_ARG(vresolution);
 
     ani_status status = GetInteractionAPI(venv)->PromiseResolver_Resolve(venv->GetEnv(), vresolver->GetResolver(),
                                                                          vresolution->GetRef());
     if (LIKELY(status == ANI_OK)) {
-        venv->DeleteGlobalVerifiedResolver(vresolver);
+        venv->DeleteGlobalResolver(vresolver);
     }
     return status;
 }
@@ -8294,11 +9488,14 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(VEnv *venv, VResolver *v
         ANIArg::MakeForError(vrejection, "rejection")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresolver);
+    CHECK_PTR_ARG(vrejection);
 
     ani_status status =
         GetInteractionAPI(venv)->PromiseResolver_Reject(venv->GetEnv(), vresolver->GetResolver(), vrejection->GetRef());
     if (LIKELY(status == ANI_OK)) {
-        venv->DeleteGlobalVerifiedResolver(vresolver);
+        venv->DeleteGlobalResolver(vresolver);
     }
     return status;
 }
@@ -8314,7 +9511,9 @@ NO_UB_SANITIZE static ani_status Any_InstanceOf(VEnv *venv, VRef *vref, VRef *vt
         ANIArg::MakeForBooleanStorage(result, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vtype);
     return GetInteractionAPI(venv)->Any_InstanceOf(venv->GetEnv(), vref->GetRef(), vtype->GetRef(), result);
 }
 
@@ -8329,6 +9528,10 @@ NO_UB_SANITIZE static ani_status Any_GetProperty(VEnv *venv, VRef *vref, const c
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Any_GetProperty(venv->GetEnv(), vref->GetRef(), name, &result);
@@ -8347,6 +9550,10 @@ NO_UB_SANITIZE static ani_status Any_SetProperty(VEnv *venv, VRef *vref, const c
         ANIArg::MakeForRef(vvalue, "value")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(vvalue);
 
     return GetInteractionAPI(venv)->Any_SetProperty(venv->GetEnv(), vref->GetRef(), name, vvalue->GetRef());
 }
@@ -8362,6 +9569,9 @@ NO_UB_SANITIZE static ani_status Any_GetByIndex(VEnv *venv, VRef *vref, ani_size
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Any_GetByIndex(venv->GetEnv(), vref->GetRef(), index, &result);
@@ -8380,6 +9590,9 @@ NO_UB_SANITIZE static ani_status Any_SetByIndex(VEnv *venv, VRef *vref, ani_size
         ANIArg::MakeForRef(vvalue, "value")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vvalue);
 
     return GetInteractionAPI(venv)->Any_SetByIndex(venv->GetEnv(), vref->GetRef(), index, vvalue->GetRef());
 }
@@ -8395,6 +9608,10 @@ NO_UB_SANITIZE static ani_status Any_GetByValue(VEnv *venv, VRef *vref, VRef *vk
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vkey);
+    CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
     ani_status status =
@@ -8414,6 +9631,10 @@ NO_UB_SANITIZE static ani_status Any_SetByValue(VEnv *venv, VRef *vref, VRef *vk
         ANIArg::MakeForRef(vvalue, "value")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vref);
+    CHECK_PTR_ARG(vkey);
+    CHECK_PTR_ARG(vvalue);
 
     return GetInteractionAPI(venv)->Any_SetByValue(venv->GetEnv(), vref->GetRef(), vkey->GetRef(), vvalue->GetRef());
 }
@@ -8431,7 +9652,12 @@ NO_UB_SANITIZE static ani_status Any_Call(VEnv *venv, VRef *vfunc, ani_size argc
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vfunc);
+    if (argc > 0) {
+        CHECK_PTR_ARG(vargv);
+    }
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status =
         GetInteractionAPI(venv)->Any_Call(venv->GetEnv(), vfunc->GetRef(), argc, refArgs.GetReleaseArgv(), &result);
@@ -8454,7 +9680,13 @@ NO_UB_SANITIZE static ani_status Any_CallMethod(VEnv *venv, VRef *vself, const c
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vself);
+    CHECK_PTR_ARG(name);
+    if (argc > 0) {
+        CHECK_PTR_ARG(vargv);
+    }
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Any_CallMethod(venv->GetEnv(), vself->GetRef(), name, argc,
                                                                 refArgs.GetReleaseArgv(), &result);
@@ -8475,7 +9707,12 @@ NO_UB_SANITIZE static ani_status Any_New(VEnv *venv, VRef *vctor, ani_size argc,
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vctor);
+    if (argc > 0) {
+        CHECK_PTR_ARG(vargv);
+    }
+    CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status =
         GetInteractionAPI(venv)->Any_New(venv->GetEnv(), vctor->GetRef(), argc, refArgs.GetReleaseArgv(), &result);
@@ -8495,6 +9732,8 @@ NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(VEnv *venv, VClas
         ANIArg::MakeForSize(nrMethods, "nr_methods")
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vclass);
     return GetInteractionAPI(venv)->Class_BindStaticNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
 }
 
@@ -8508,7 +9747,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Boolean(VEnv *venv, ani_boolean v
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Boolean(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8525,6 +9765,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Boolean(VEnv *venv, VObject *vo
         ANIArg::MakeForBooleanStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Boolean(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8538,7 +9780,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Byte(VEnv *venv, ani_byte value, 
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Byte(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8555,6 +9798,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Byte(VEnv *venv, VObject *vobje
         ANIArg::MakeForByteStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Byte(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8568,7 +9813,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Char(VEnv *venv, ani_char value, 
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Char(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8585,6 +9831,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Char(VEnv *venv, VObject *vobje
         ANIArg::MakeForCharStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Char(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8598,7 +9846,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Short(VEnv *venv, ani_short value
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Short(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8615,6 +9864,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Short(VEnv *venv, VObject *vobj
         ANIArg::MakeForShortStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Short(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8628,7 +9879,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Int(VEnv *venv, ani_int value, VO
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Int(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8645,6 +9897,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Int(VEnv *venv, VObject *vobjec
         ANIArg::MakeForIntStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Int(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8658,7 +9912,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Long(VEnv *venv, ani_long value, 
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Long(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8675,6 +9930,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Long(VEnv *venv, VObject *vobje
         ANIArg::MakeForLongStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Long(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8688,7 +9945,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Float(VEnv *venv, ani_float value
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Float(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8705,6 +9963,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Float(VEnv *venv, VObject *vobj
         ANIArg::MakeForFloatStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Float(venv->GetEnv(), vobject->GetRef(), result);
 }
 
@@ -8718,7 +9978,8 @@ NO_UB_SANITIZE static ani_status Primitive_Box_Double(VEnv *venv, ani_double val
         ANIArg::MakeForObjectStorage(vresult, "result"),
     );
     // clang-format on
-
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vresult);
     ani_object result {};
     ani_status status = GetInteractionAPI(venv)->Primitive_Box_Double(venv->GetEnv(), value, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
@@ -8735,6 +9996,8 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Double(VEnv *venv, VObject *vob
         ANIArg::MakeForDoubleStorage(result, "result"),
     );
     // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(vobject);
     return GetInteractionAPI(venv)->Primitive_Unbox_Double(venv->GetEnv(), vobject->GetRef(), result);
 }
 

@@ -33,6 +33,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ani/verify/types/vmethod.cpp
     ${ETS_EXT_SOURCES}/ani/verify/types/vfield.cpp
     ${ETS_EXT_SOURCES}/ani/verify/types/vref.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/types/vwref.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_checker.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_interaction_api.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_vm_api.cpp

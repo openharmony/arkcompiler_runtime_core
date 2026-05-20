@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -40,7 +40,7 @@ protected:
 
 TEST_F(PromiseResolverResolveTest, wrong_env)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, resolver, resolution), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, resolver, resolution), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"resolver", "ani_resolver"},
@@ -51,7 +51,7 @@ TEST_F(PromiseResolverResolveTest, wrong_env)
 
 TEST_F(PromiseResolverResolveTest, wrong_resolution)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, resolver, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, resolver, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
@@ -62,7 +62,7 @@ TEST_F(PromiseResolverResolveTest, wrong_resolution)
 
 TEST_F(PromiseResolverResolveTest, wrong_resolver)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, nullptr, resolution), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, nullptr, resolution), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver", "wrong resolver"},
@@ -73,7 +73,7 @@ TEST_F(PromiseResolverResolveTest, wrong_resolver)
 
 TEST_F(PromiseResolverResolveTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"resolver", "ani_resolver", "wrong resolver"},
@@ -86,7 +86,7 @@ TEST_F(PromiseResolverResolveTest, throw_error)
 {
     ThrowError();
 
-    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, resolver, resolution), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, resolver, resolution), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"resolver", "ani_resolver"},

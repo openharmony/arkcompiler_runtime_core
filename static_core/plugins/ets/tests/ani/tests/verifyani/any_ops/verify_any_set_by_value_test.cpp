@@ -41,7 +41,7 @@ TEST_F(AnySetByValueTest, wrong_ref_null)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Any_SetByValue(env_, nullptr, cls, cls), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Any_SetByValue(env_, nullptr, cls, cls), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},

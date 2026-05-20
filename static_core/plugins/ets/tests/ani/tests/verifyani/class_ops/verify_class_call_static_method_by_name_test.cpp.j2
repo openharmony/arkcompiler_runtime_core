@@ -156,13 +156,13 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   nullptr, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:",
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   nullptr, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &result,
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -181,13 +181,13 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_cls_0)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   env_, nullptr, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:",
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   env_, nullptr, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &result,
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -300,7 +300,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_result)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   env_, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", nullptr,
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -519,12 +519,12 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   nullptr, nullptr, nullptr, nullptr,
                   0xb1ba, 0xb1bab0ba, 0xb1bab0ba, 0xb1bab0ba, i_, l_, f_, d_, nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   nullptr, nullptr, nullptr, nullptr, nullptr,
                   0xb1ba, 0xb1bab0ba, 0xb1bab0ba, 0xb1bab0ba, i_, l_, f_, d_, nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -544,13 +544,13 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_return_type)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   env_, class_, "static{{ wrong_ret }}Method", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}",
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}(
                   env_, class_, "static{{ wrong_ret }}Method", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &result,
                   z_, c_, b_, s_, i_, l_, f_, d_, r_),
-              ANI_ERROR);
+              ANI_INVALID_TYPE);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -751,13 +751,13 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_env)
 {% if type == "void" %}
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   nullptr, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:", args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   nullptr, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &result,
                   args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -775,13 +775,13 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_cls_0)
 {% if type == "void" %}
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   env_, nullptr, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:", args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   env_, nullptr, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &result,
                   args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -801,7 +801,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_result)
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   env_, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", nullptr,
                   args_.data()),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -830,12 +830,12 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_args)
 {% if type == "void" %}
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   env_, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:", nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% else %}
     ani_{{ type }} result {};
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(
                   env_, class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &result, nullptr),
-              ANI_ERROR);
+              ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
@@ -884,9 +884,9 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, ambiguous_signature)
 TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_all_args)
 {
 {% if type == "void" %}
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
 {% else %}
-    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {

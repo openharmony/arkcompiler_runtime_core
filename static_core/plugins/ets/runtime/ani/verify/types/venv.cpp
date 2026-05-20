@@ -75,6 +75,12 @@ std::optional<PandaString> VEnv::DestroyEscapeLocalScope(VRef *vref)
     return GetEnvANIVerifier()->DestroyEscapeLocalScope(vref);
 }
 
+// Stack refs
+bool VEnv::IsValidStackVerifiedRef(VRef *vref)
+{
+    return GetEnvANIVerifier()->IsValidStackRef(vref);
+}
+
 // Local refs
 template <class RefType>
 auto VEnv::AddLocalVerifiedRef(RefType ref)
@@ -85,6 +91,11 @@ auto VEnv::AddLocalVerifiedRef(RefType ref)
 void VEnv::DeleteLocalVerifiedRef(VRef *vref)
 {
     GetEnvANIVerifier()->DeleteLocalVerifiedRef(vref);
+}
+
+bool VEnv::IsValidLocalVerifiedRef(VRef *vref)
+{
+    return GetEnvANIVerifier()->IsValidLocalRef(vref);
 }
 
 VMethod *VEnv::GetVerifiedMethod(ani_method method)
@@ -132,19 +143,34 @@ bool VEnv::IsValidGlobalVerifiedRef(VRef *vgref)
     return GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vgref);
 }
 
+VWRef *VEnv::AddVerifiedWeakRef(ani_wref wref)
+{
+    return GetEnvANIVerifier()->AddVerifiedWeakRef(wref);
+}
+
+void VEnv::DeleteVerifiedWeakRef(VWRef *vwref)
+{
+    GetEnvANIVerifier()->DeleteVerifiedWeakRef(vwref);
+}
+
+bool VEnv::IsValidWeakRef(VWRef *vwref)
+{
+    return GetEnvANIVerifier()->IsValidWeakRef(vwref);
+}
+
 VResolver *VEnv::AddGlobalVerifiedResolver(ani_resolver resolver)
 {
     return GetEnvANIVerifier()->AddGlobalVerifiedResolver(resolver);
 }
 
-void VEnv::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+void VEnv::DeleteGlobalResolver(VResolver *vresolver)
 {
-    GetEnvANIVerifier()->DeleteGlobalVerifiedResolver(vresolver);
+    GetEnvANIVerifier()->DeleteGlobalResolver(vresolver);
 }
 
-bool VEnv::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+bool VEnv::IsValidGlobalResolver(VResolver *vresolver)
 {
-    return GetEnvANIVerifier()->IsValidGlobalVerifiedResolver(vresolver);
+    return GetEnvANIVerifier()->IsValidGlobalResolver(vresolver);
 }
 
 EnvANIVerifier *VEnv::GetEnvANIVerifier()

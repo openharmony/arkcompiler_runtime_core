@@ -117,7 +117,6 @@ std::optional<PandaString> EnvANIVerifier::DestroyEscapeLocalScope([[maybe_unuse
             return "Illegal call DestroyEscapeLocalScope() after calling CreateLocalScope()";
         case SubFrameType::ESCAPE_LOCAL_SCOPE: {
             // Drop top frame
-            ASSERT(IsValidVerifiedRef(frames_.back(), vref));
             frames_.pop_back();
             return {};
         }
@@ -174,48 +173,83 @@ void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
     Frame &frame = frames_.back();
 
     auto it = frame.refs.find(vref);
+    if (it == frame.refs.cend()) {
+        LOG(ERROR, RUNTIME) << "Attempted to delete non-existent localRef: " << vref;
+        return;
+    }
     ASSERT(it != frame.refs.cend());
     frame.refs.erase(it);
 }
 
-bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref) const
+bool EnvANIVerifier::IsValidLocalRef(VRef *vref) const
 {
     ASSERT(!frames_.empty());
     for (auto it = frames_.crbegin(); it != frames_.crend(); ++it) {
-        if (IsValidVerifiedRef(*it, vref)) {
+        if (IsValidRefInFrame(*it, vref)) {
             return true;
         }
         if (it->frameType == SubFrameType::NATIVE_FRAME) {
-            break;
+            return false;
         }
     }
-    return IsValidStackRef(vref);
+    return false;
 }
 
-bool EnvANIVerifier::IsGlobalRef(VRef *vref) const
+bool EnvANIVerifier::IsValidRefInCurrentScope(VRef *vref)
+{
+    ASSERT(!frames_.empty());
+    Frame &frame = frames_.back();
+    auto it = frame.refs.find(vref);
+
+    return (it != frame.refs.cend());
+}
+
+bool EnvANIVerifier::IsValidWeakRef(VWRef *vwref) const
+{
+    return verifier_->IsValidWeakRef(vwref);
+}
+
+bool EnvANIVerifier::IsValidRef(VRef *vref) const
+{
+    if (IsValidWeakRef(reinterpret_cast<VWRef *>(vref))) {
+        return true;
+    }
+    if (IsValidLocalRef(vref)) {
+        return true;
+    }
+    if (IsValidGlobalVerifiedRef(vref)) {
+        return true;
+    }
+    if (IsValidStackRef(vref)) {
+        return true;
+    }
+    return false;
+}
+
+bool EnvANIVerifier::IsValidGlobalVerifiedRef(VRef *vref) const
 {
     return verifier_->IsValidGlobalVerifiedRef(vref);
 }
 
 bool EnvANIVerifier::IsValidMethod(impl::VMethod *vmethod) const
 {
-    return verifier_->IsValidVerifiedMethod(vmethod);
+    return verifier_->IsValidMethod(vmethod);
 }
 
 bool EnvANIVerifier::IsValidField(impl::VField *vfield) const
 {
-    return verifier_->IsValidVerifiedField(vfield);
+    return verifier_->IsValidField(vfield);
 }
 
 bool EnvANIVerifier::CanBeDeletedFromCurrentScope(VRef *vref)
 {
     ASSERT(!frames_.empty());
     Frame &frame = frames_.back();
-    return IsValidVerifiedRef(frame, vref);
+    return IsValidRefInFrame(frame, vref);
 }
 
 /*static*/
-bool EnvANIVerifier::IsValidVerifiedRef(const Frame &frame, VRef *vref)
+bool EnvANIVerifier::IsValidRefInFrame(const Frame &frame, VRef *vref)
 {
     return frame.refs.find(vref) != frame.refs.cend();
 }
@@ -227,12 +261,23 @@ VRef *EnvANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
 
 void EnvANIVerifier::DeleteGlobalVerifiedRef(VRef *vgref)
 {
+    if (!IsValidGlobalVerifiedRef(vgref)) {
+        return;
+    }
     verifier_->DeleteGlobalVerifiedRef(vgref);
 }
 
-bool EnvANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref) const
+VWRef *EnvANIVerifier::AddVerifiedWeakRef(ani_wref wref)
 {
-    return verifier_->IsValidGlobalVerifiedRef(vgref);
+    return verifier_->AddVerifiedWeakRef(wref);
+}
+
+void EnvANIVerifier::DeleteVerifiedWeakRef(VWRef *vwref)
+{
+    if (!verifier_->IsValidWeakRef(vwref)) {
+        return;
+    }
+    verifier_->DeleteVerifiedWeakRef(vwref);
 }
 
 bool EnvANIVerifier::IsValidStackRef(VRef *vref) const
@@ -245,14 +290,27 @@ VResolver *EnvANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)
     return verifier_->AddGlobalVerifiedResolver(resolver);
 }
 
-void EnvANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+void EnvANIVerifier::DeleteGlobalResolver(VResolver *vresolver)
 {
-    return verifier_->DeleteGlobalVerifiedResolver(vresolver);
+    return verifier_->DeleteGlobalResolver(vresolver);
 }
 
-bool EnvANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver) const
+bool EnvANIVerifier::IsValidGlobalResolver(VResolver *vresolver) const
 {
-    return verifier_->IsValidGlobalVerifiedResolver(vresolver);
+    return verifier_->IsValidGlobalResolver(vresolver);
+}
+
+bool EnvANIVerifier::IsInNativeFrame() const
+{
+    return !frames_.empty() && frames_.back().frameType == SubFrameType::NATIVE_FRAME;
+}
+bool EnvANIVerifier::IsInLocalScope() const
+{
+    return !frames_.empty() && frames_.back().frameType == SubFrameType::LOCAL_SCOPE;
+}
+bool EnvANIVerifier::IsInEscapeLocalScope() const
+{
+    return !frames_.empty() && frames_.back().frameType == SubFrameType::ESCAPE_LOCAL_SCOPE;
 }
 
 }  // namespace ark::ets::ani::verify

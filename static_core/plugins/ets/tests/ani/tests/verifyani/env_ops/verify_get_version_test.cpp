@@ -22,7 +22,7 @@ class GetVersionTest : public VerifyAniTest {};
 TEST_F(GetVersionTest, wrong_env)
 {
     uint32_t version {};
-    ASSERT_EQ(env_->c_api->GetVersion(nullptr, &version), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetVersion(nullptr, &version), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"result", "uint32_t *"},
@@ -32,7 +32,7 @@ TEST_F(GetVersionTest, wrong_env)
 
 TEST_F(GetVersionTest, wrong_result_ptr)
 {
-    ASSERT_EQ(env_->c_api->GetVersion(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->GetVersion(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result", "uint32_t *", "wrong pointer for storing 'uint32_t'"},

@@ -64,7 +64,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_wrong_data_storage)
 {
     ani_arraybuffer arraybuffer = CreateArrayBuffer();
     ani_size length {};
-    ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, nullptr, &length), ANI_ERROR);
+    ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, nullptr, &length), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"arraybuffer", "ani_arraybuffer"},
@@ -78,7 +78,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_wrong_length_storage)
 {
     ani_arraybuffer arraybuffer = CreateArrayBuffer();
     void *data {};
-    ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"arraybuffer", "ani_arraybuffer"},
@@ -95,7 +95,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_pending_error)
 
     void *data {};
     ani_size length {};
-    ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, &length), ANI_ERROR);
+    ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, &length), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"arraybuffer", "ani_arraybuffer"},

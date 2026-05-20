@@ -140,6 +140,28 @@ TEST_F(ClassSetStaticFieldRefTest, invalid_argument3)
     ASSERT_EQ(env_->c_api->Class_SetStaticField_Ref(nullptr, cls, field, string), ANI_INVALID_ARGS);
 }
 
+TEST_F(ClassSetStaticFieldRefTest, invalid_argument4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Ref(cls, field, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldRefTest, invalid_argument5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
+    ani_static_field field = nullptr;
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_Ref(env_, cls, field, nullptr), ANI_INVALID_ARGS);
+}
+
 TEST_F(ClassSetStaticFieldRefTest, combination_test1)
 {
     ani_class cls {};

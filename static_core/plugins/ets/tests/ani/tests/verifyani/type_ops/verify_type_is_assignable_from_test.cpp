@@ -25,7 +25,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_env)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_boolean result {};
-    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(nullptr, cls, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(nullptr, cls, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"from_type", "ani_ref"},
@@ -43,7 +43,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_from_type_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_boolean result {};
-    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, nullptr, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"from_type", "ani_ref", "wrong reference"},
@@ -82,7 +82,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_to_type_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_boolean result {};
-    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, cls, nullptr, &result), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, cls, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"from_type", "ani_ref"},
@@ -120,7 +120,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_result_ptr)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, cls, cls, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, cls, cls, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"from_type", "ani_ref"},
@@ -152,7 +152,7 @@ TEST_F(TypeIsAssignableFromTest, throw_error)
     ThrowError();
 
     ani_boolean result {};
-    ASSERT_EQ(env_->Type_IsAssignableFrom(cls, cls, &result), ANI_ERROR);
+    ASSERT_EQ(env_->Type_IsAssignableFrom(cls, cls, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"from_type", "ani_ref"},

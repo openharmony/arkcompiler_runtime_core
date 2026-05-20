@@ -44,7 +44,7 @@ TEST_F(AnyNewTest, wrong_ctor_null)
     ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
 
     ani_ref out {};
-    ASSERT_EQ(env_->c_api->Any_New(env_, nullptr, 0U, nullptr, &out), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Any_New(env_, nullptr, 0U, nullptr, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},    {"ctor", "ani_ref", "wrong reference"}, {"argc", "ani_size"}, {"argv", "ani_ref *"},
         {"result", "ani_ref *"},

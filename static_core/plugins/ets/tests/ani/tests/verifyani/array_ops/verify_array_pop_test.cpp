@@ -49,7 +49,7 @@ TEST_F(ArrayPopTest, wrong_env)
     CreateAndInitArray(env_, length, &arr);
 
     ani_ref res = nullptr;
-    ASSERT_EQ(env_->c_api->Array_Pop(nullptr, arr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_Pop(nullptr, arr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array"},
@@ -61,7 +61,7 @@ TEST_F(ArrayPopTest, wrong_env)
 TEST_F(ArrayPopTest, wrong_array)
 {
     ani_ref res = nullptr;
-    ASSERT_EQ(env_->Array_Pop(nullptr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Pop(nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference"},
@@ -162,7 +162,7 @@ TEST_F(ArrayPopTest, wrong_res)
     ani_size length = 3U;
     CreateAndInitArray(env_, length, &arr);
 
-    ASSERT_EQ(env_->Array_Pop(arr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Pop(arr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
@@ -173,7 +173,7 @@ TEST_F(ArrayPopTest, wrong_res)
 
 TEST_F(ArrayPopTest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Array_Pop(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Array_Pop(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array", "wrong reference"},
@@ -191,7 +191,7 @@ TEST_F(ArrayPopTest, throw_error)
     ThrowError();
 
     ani_ref res = nullptr;
-    ASSERT_EQ(env_->Array_Pop(arr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->Array_Pop(arr, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"array", "ani_array"},

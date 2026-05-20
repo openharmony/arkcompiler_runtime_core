@@ -21,7 +21,7 @@ class DescribeErrorTest : public VerifyAniTest {};
 
 TEST_F(DescribeErrorTest, wrong_env)
 {
-    ASSERT_EQ(env_->c_api->DescribeError(nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->DescribeError(nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
     };

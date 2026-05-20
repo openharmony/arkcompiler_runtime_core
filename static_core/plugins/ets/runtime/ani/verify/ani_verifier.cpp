@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ani/ani_type_check.h"
 #include "runtime/include/cframe.h"
 #include "runtime/include/stack_walker-inl.h"
+#include "runtime/include/mutator.h"
 
 namespace ark::ets::ani::verify {
 
@@ -53,15 +54,53 @@ bool ANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref)
     return grefs.find(vgref) != grefs.cend();
 }
 
+VWRef *ANIVerifier::AddVerifiedWeakRef(ani_wref wref)
+{
+    auto iwrefHolder = MakePandaUnique<InternalRef>(wref);
+    auto *iref = iwrefHolder.get();
+    auto *vwref = InternalRef::CastToVWRef(iref);
+    {
+        auto &wrefs = GetGlobalData().wrefsMap;
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().wrefsMapMutex);
+        wrefs[vwref] = std::move(iwrefHolder);
+    }
+    return vwref;
+}
+
+void ANIVerifier::DeleteVerifiedWeakRef(VWRef *vwref)
+{
+    auto &wrefs = GetGlobalData().wrefsMap;
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().wrefsMapMutex);
+    auto it = wrefs.find(vwref);
+    ASSERT(it != wrefs.cend());
+    wrefs.erase(it);
+}
+
+bool ANIVerifier::IsValidWeakRef(VWRef *vwref)
+{
+    if (vwref == nullptr) {
+        return false;
+    }
+    auto &wrefs = GetGlobalData().wrefsMap;
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().wrefsMapMutex);
+    return wrefs.find(vwref) != wrefs.cend();
+}
+
 impl::VMethod *ANIVerifier::AddMethod(EtsMethod *method)
 {
+    os::memory::WriteLockHolder lock(GetGlobalData().methodsMapLock);
+
+    auto &etsMap = GetGlobalData().etsMethodsMap;
+    auto it = etsMap.find(method);
+    if (it != etsMap.end()) {
+        return it->second;
+    }
+
     auto vmethodHolder = MakePandaUnique<impl::VMethod>(method);
     impl::VMethod *vmethod = vmethodHolder.get();
-    {
-        os::memory::WriteLockHolder lock(GetGlobalData().methodsMapLock);
+    etsMap[method] = vmethod;
 
-        GetGlobalData().methodsMap[vmethod] = std::move(vmethodHolder);
-    }
+    GetGlobalData().methodsMap[vmethod] = std::move(vmethodHolder);
     return vmethod;
 }
 
@@ -70,11 +109,21 @@ void ANIVerifier::DeleteMethod(impl::VMethod *vmethod)
     os::memory::WriteLockHolder lock(GetGlobalData().methodsMapLock);
 
     auto it = GetGlobalData().methodsMap.find(vmethod);
+    if (it == GetGlobalData().methodsMap.cend()) {
+        LOG(ERROR, RUNTIME) << "Attempted to delete non-existent Method: " << vmethod;
+        return;
+    }
     ASSERT(it != GetGlobalData().methodsMap.cend());
+    EtsMethod *etsMethod = vmethod->GetEtsMethod();
+    auto &etsMap = GetGlobalData().etsMethodsMap;
+    auto etsIt = etsMap.find(etsMethod);
+    if (etsIt != etsMap.end() && etsIt->second == vmethod) {
+        etsMap.erase(etsIt);
+    }
     GetGlobalData().methodsMap.erase(it);
 }
 
-bool ANIVerifier::IsValidVerifiedMethod(impl::VMethod *vmethod)
+bool ANIVerifier::IsValidMethod(impl::VMethod *vmethod)
 {
     os::memory::ReadLockHolder lock(GetGlobalData().methodsMapLock);
 
@@ -83,13 +132,17 @@ bool ANIVerifier::IsValidVerifiedMethod(impl::VMethod *vmethod)
 
 impl::VField *ANIVerifier::AddField(EtsField *field)
 {
+    os::memory::WriteLockHolder lock(GetGlobalData().fieldsMapLock);
+
+    auto &etsMap = GetGlobalData().etsFieldsMap;
+    auto it = etsMap.find(field);
+    if (it != etsMap.end()) {
+        return it->second;
+    }
     auto vfieldHolder = MakePandaUnique<impl::VField>(field);
     impl::VField *vfield = vfieldHolder.get();
-    {
-        os::memory::WriteLockHolder lock(GetGlobalData().fieldsMapLock);
-
-        GetGlobalData().fieldsMap[vfield] = std::move(vfieldHolder);
-    }
+    etsMap[field] = vfield;
+    GetGlobalData().fieldsMap[vfield] = std::move(vfieldHolder);
     return vfield;
 }
 
@@ -98,11 +151,22 @@ void ANIVerifier::DeleteField(impl::VField *vfield)
     os::memory::WriteLockHolder lock(GetGlobalData().fieldsMapLock);
 
     auto it = GetGlobalData().fieldsMap.find(vfield);
+    if (it == GetGlobalData().fieldsMap.cend()) {
+        LOG(ERROR, RUNTIME) << "Attempted to delete non-existent Field: " << vfield;
+        return;
+    }
     ASSERT(it != GetGlobalData().fieldsMap.cend());
+    EtsField *etsField = vfield->GetEtsField();
+    auto &etsMap = GetGlobalData().etsFieldsMap;
+    auto etsIt = etsMap.find(etsField);
+    if (etsIt != etsMap.end() && etsIt->second == vfield) {
+        etsMap.erase(etsIt);
+    }
+
     GetGlobalData().fieldsMap.erase(it);
 }
 
-bool ANIVerifier::IsValidVerifiedField(impl::VField *vfield)
+bool ANIVerifier::IsValidField(impl::VField *vfield)
 {
     os::memory::ReadLockHolder lock(GetGlobalData().fieldsMapLock);
 
@@ -121,7 +185,7 @@ VResolver *ANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)
     return vresolver;
 }
 
-void ANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+void ANIVerifier::DeleteGlobalResolver(VResolver *vresolver)
 {
     auto &resolvers = GetGlobalData().resolversMap;
     os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().resolverMapMutex);
@@ -130,16 +194,16 @@ void ANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
     resolvers.erase(it);
 }
 
-bool ANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+bool ANIVerifier::IsValidGlobalResolver(VResolver *vresolver)
 {
     auto &resolvers = GetGlobalData().resolversMap;
     os::memory::LockHolder<os::memory::Mutex> lockHolder(GetGlobalData().resolverMapMutex);
     return resolvers.find(vresolver) != resolvers.cend();
 }
 
-void ANIVerifier::Report(const std::string_view message)
+void ANIVerifier::Report(const std::string_view message, bool isFatal)
 {
-    if (IsWorkaroundNoCrashIfInvalidUsage()) {
+    if (IsWorkaroundNoCrashIfInvalidUsage() || !isFatal) {
         ANIVerifier::Error(message);
     } else {
         ANIVerifier::Abort(message);

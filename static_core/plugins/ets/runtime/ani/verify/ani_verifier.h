@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/ani_options.h"
 #include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vwref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
@@ -38,9 +39,14 @@ public:
         PandaMap<VRef *, PandaUniquePtr<InternalRef>> grefsMap GUARDED_BY(grefsMapMutex);
         os::memory::Mutex grefsMapMutex;
 
+        PandaMap<VWRef *, PandaUniquePtr<InternalRef>> wrefsMap GUARDED_BY(wrefsMapMutex);
+        os::memory::Mutex wrefsMapMutex;
+
+        PandaMap<EtsMethod *, impl::VMethod *> etsMethodsMap GUARDED_BY(methodsMapLock);
         PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsMap GUARDED_BY(methodsMapLock);
         os::memory::RWLock methodsMapLock;
 
+        PandaMap<EtsField *, impl::VField *> etsFieldsMap GUARDED_BY(fieldsMapLock);
         PandaMap<impl::VField *, PandaUniquePtr<impl::VField>> fieldsMap GUARDED_BY(fieldsMapLock);
         os::memory::RWLock fieldsMapLock;
 
@@ -48,7 +54,7 @@ public:
         os::memory::Mutex resolverMapMutex;
     };
 
-    void Report(const std::string_view message);
+    void Report(const std::string_view message, bool isFatal = true);
 
     void SetVerifyOptions(bool isWorkaroundNoCrashIfInvalidUsage)
     {
@@ -71,19 +77,23 @@ public:
     void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
+    VWRef *AddVerifiedWeakRef(ani_wref wref);
+    void DeleteVerifiedWeakRef(VWRef *vwref);
+    bool IsValidWeakRef(VWRef *vwref);
+
     impl::VMethod *AddMethod(EtsMethod *method);
     void DeleteMethod(impl::VMethod *vmethod);
-    bool IsValidVerifiedMethod(impl::VMethod *vmethod);
+    bool IsValidMethod(impl::VMethod *vmethod);
 
     impl::VField *AddField(EtsField *field);
     void DeleteField(impl::VField *vfield);
-    bool IsValidVerifiedField(impl::VField *vfield);
+    bool IsValidField(impl::VField *vfield);
 
     bool IsValidStackRef(VRef *vref);
 
     VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
-    void DeleteGlobalVerifiedResolver(VResolver *vresolver);
-    bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
+    void DeleteGlobalResolver(VResolver *vresolver);
+    bool IsValidGlobalResolver(VResolver *vresolver);
 
 private:
     void Abort(const std::string_view message);

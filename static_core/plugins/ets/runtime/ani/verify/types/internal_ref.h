@@ -20,21 +20,31 @@
 
 namespace ark::ets::ani::verify {
 
+class VWRef;
+
+inline constexpr uintptr_t VERIFY_HANDLE_TAG_MASK = 3U;
+inline constexpr uintptr_t VERIFY_HANDLE_TAG_VREF = 1U;
+inline constexpr uintptr_t VERIFY_HANDLE_TAG_VWREF = 1U;
+
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class InternalRef final {
 public:
-    explicit InternalRef(ani_ref ref) : ref_(ref) {}
+    explicit InternalRef(ani_ref aniRef);
+    explicit InternalRef(ani_wref aniWref);
 
     static VRef *CastToVRef(InternalRef *iref);
     static InternalRef *CastFromVRef(VRef *vref);
 
+    static VWRef *CastToVWRef(InternalRef *iref);
+    static InternalRef *CastFromVWRef(VWRef *vwref);
+
     static bool IsStackVRef(VRef *vref);
     static bool IsUndefinedStackRef(VRef *vref);
+    static bool IsVWRef(VWRef *vwref);
+    static bool IsVRef(VRef *vref);
 
-    ani_ref GetRef()
-    {
-        return ref_;
-    }
+    ani_ref GetRef();
+    ani_wref GetWRef();
 
     NO_COPY_SEMANTIC(InternalRef);
     NO_MOVE_SEMANTIC(InternalRef);
@@ -42,10 +52,10 @@ public:
     ~InternalRef() = default;
 
 private:
-    ani_ref ref_;
-
-    static constexpr uintptr_t TYPE_MASK = static_cast<uintptr_t>(1U);
-    static constexpr uintptr_t TYPE_VREF = static_cast<uintptr_t>(1U);
+    union {
+        ani_ref ref;
+        ani_wref wref;
+    };
 };
 
 }  // namespace ark::ets::ani::verify

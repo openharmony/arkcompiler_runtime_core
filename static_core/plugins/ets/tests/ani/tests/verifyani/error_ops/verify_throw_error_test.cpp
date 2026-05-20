@@ -31,7 +31,7 @@ TEST_F(ThrowErrorTest, wrong_env)
     ani_object err {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &err, undef, undef), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
 
-    ASSERT_EQ(env_->c_api->ThrowError(nullptr, static_cast<ani_error>(err)), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->ThrowError(nullptr, static_cast<ani_error>(err)), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"error", "ani_error"},
@@ -45,7 +45,7 @@ TEST_F(ThrowErrorTest, wrong_env)
 
 TEST_F(ThrowErrorTest, wrong_error)
 {
-    ASSERT_EQ(env_->c_api->ThrowError(env_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->ThrowError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"error", "ani_error", "wrong reference"},
@@ -93,13 +93,7 @@ TEST_F(ThrowErrorTest, throw_error)
 
     ThrowError();
 
-    ASSERT_EQ(env_->c_api->ThrowError(env_, err), ANI_ERROR);
-    std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"error", "ani_error"},
-    };
-    ASSERT_ERROR_ANI_ARGS_MSG("ThrowError", testLines);
-
+    ASSERT_EQ(env_->c_api->ThrowError(env_, err), ANI_OK);
     ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_EQ(env_->Reference_Delete(err), ANI_OK);
     ASSERT_EQ(env_->Reference_Delete(cls), ANI_OK);
