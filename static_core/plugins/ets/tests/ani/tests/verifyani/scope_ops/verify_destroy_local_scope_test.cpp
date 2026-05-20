@@ -32,7 +32,8 @@ TEST_F(DestroyLocalScopeTest, wrong_env)
 
 TEST_F(DestroyLocalScopeTest, destroy_local_scope_under_unhandled_error)
 {
-    ASSERT_EQ(env_->CreateLocalScope(1), ANI_OK);
+    constexpr ani_size SCOPE_CAPACITY = 4;
+    ASSERT_EQ(env_->CreateLocalScope(SCOPE_CAPACITY), ANI_OK);
     ThrowError();
 
     ASSERT_EQ(env_->c_api->DestroyLocalScope(env_), ANI_OK);
@@ -43,6 +44,20 @@ TEST_F(DestroyLocalScopeTest, success)
     ASSERT_EQ(env_->CreateLocalScope(1), ANI_OK);
 
     ASSERT_EQ(env_->c_api->DestroyLocalScope(env_), ANI_OK);
+}
+
+TEST_F(DestroyLocalScopeTest, create_scope_without_destroy)
+{
+    ASSERT_EQ(env_->CreateLocalScope(1), ANI_OK);
+
+    auto *pandaEnv = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
+    auto *envVerifier = pandaEnv->GetEnvANIVerifier();
+    auto err = envVerifier->PopNativeFrame();
+    ASSERT_TRUE(err.has_value());
+    ASSERT_THAT(err.value(),
+                ::testing::HasSubstr("It is necessary to call DestroyLocalScope(), after calling CreateLocalScope()"));
+
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 }
 
 TEST_F(DestroyLocalScopeTest, call_without_scope_and_wrong_env)

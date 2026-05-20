@@ -50,9 +50,9 @@ public:
     }
 
     // Scope
-    void CreateLocalScope();
+    void CreateLocalScope(ani_size capacity);
     [[nodiscard]] std::optional<PandaString> DestroyLocalScope();
-    void CreateEscapeLocalScope();
+    void CreateEscapeLocalScope(ani_size capacity);
     [[nodiscard]] std::optional<PandaString> DestroyEscapeLocalScope(VRef *vref);
     // Stack refs
     bool IsValidStackVerifiedRef(VRef *vref);

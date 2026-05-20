@@ -110,7 +110,8 @@ TEST_F(VerifyEnumItemGetIndexTest, wrong_enum_item_from_local_scope)
 {
     ani_enum localEnum {};
     ani_enum_item localItem {};
-    ASSERT_EQ(env_->CreateLocalScope(1), ANI_OK);
+    constexpr ani_size SCOPE_CAPACITY = 2;
+    ASSERT_EQ(env_->CreateLocalScope(SCOPE_CAPACITY), ANI_OK);
     ASSERT_EQ(env_->FindEnum("verify_enum_item_get_index_test.Color", &localEnum), ANI_OK);
     ASSERT_EQ(env_->Enum_GetEnumItemByName(localEnum, "RED", &localItem), ANI_OK);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);

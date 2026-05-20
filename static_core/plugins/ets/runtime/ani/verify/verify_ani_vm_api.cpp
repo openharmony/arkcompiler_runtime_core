@@ -19,10 +19,12 @@
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_vm_api.h"
+#include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define VERIFY_ANI_ARGS(...)                                   \
@@ -82,7 +84,21 @@ NO_UB_SANITIZE static ani_status AttachCurrentThread(VVm *vvm, const ani_options
 NO_UB_SANITIZE static ani_status DetachCurrentThread(VVm *vvm)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForVm(vvm, "vm"));
-    return g_vmApi->DetachCurrentThread(vvm->GetVm());
+    ani_vm *vm = vvm != nullptr ? vvm->GetVm() : nullptr;
+    if (UNLIKELY(vvm == nullptr)) {
+        return g_vmApi->DetachCurrentThread(vm);
+    }
+
+    auto *mutator = Mutator::GetCurrent();
+    if (UNLIKELY(mutator == nullptr)) {
+        EnvANIVerifier::ReportDetachOnUnattachedThread(vm);
+        return g_vmApi->DetachCurrentThread(vm);
+    }
+
+    auto *pandaEnv = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
+    pandaEnv->GetEnvANIVerifier()->DetachThread();
+
+    return g_vmApi->DetachCurrentThread(vm);
 }
 
 // clang-format off

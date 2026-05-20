@@ -44,13 +44,15 @@ public:
 
     VEnv *GetEnv();
     VEnv *AttachThread();
+    void DetachThread();
+    static void ReportDetachOnUnattachedThread(ani_vm *vm);
 
     void PushNativeFrame(PandaAniEnv *ownerEnv);
     [[nodiscard]] std::optional<PandaString> PopNativeFrame();
 
-    void CreateLocalScope();
+    void CreateLocalScope(ani_size capacity);
     [[nodiscard]] std::optional<PandaString> DestroyLocalScope();
-    void CreateEscapeLocalScope();
+    void CreateEscapeLocalScope(ani_size capacity);
     [[nodiscard]] std::optional<PandaString> DestroyEscapeLocalScope(VRef *vref);
 
     VRef *AddLocalVerifiedRef(ani_ref ref);
@@ -108,9 +110,10 @@ private:
         ArenaAllocator *refsAllocator;
         PandaUniquePtr<VEnv> venvHolder;
         VEnv *venv;
+        ani_size capacity;
     };
 
-    void DoPushNativeFrame(PandaAniEnv *ownerEnv);
+    void DoPushNativeFrame(PandaAniEnv *ownerEnv, ani_size capacity);
     static bool IsValidRefInFrame(const Frame &frame, VRef *vref);
 
     ANIVerifier *verifier_ {};

@@ -34,9 +34,11 @@ public:
     }
 
 protected:
+    static constexpr ani_size ESCAPE_SCOPE_CAPACITY = 2;
+
     void CreateEscapeLocalScope()
     {
-        ASSERT_EQ(env_->CreateEscapeLocalScope(1), ANI_OK);
+        ASSERT_EQ(env_->CreateEscapeLocalScope(ESCAPE_SCOPE_CAPACITY), ANI_OK);
     }
 
     void DestroyEscapeLocalScope()
@@ -123,7 +125,7 @@ TEST_F(DestroyEscapeLocalScopeTest, wrong_all_args)
 
 TEST_F(DestroyEscapeLocalScopeTest, success)
 {
-    ASSERT_EQ(env_->CreateEscapeLocalScope(1), ANI_OK);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(ESCAPE_SCOPE_CAPACITY), ANI_OK);
     ani_ref ref {};
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
     ani_ref escapeRef {};
@@ -134,7 +136,7 @@ TEST_F(DestroyEscapeLocalScopeTest, success)
 
 TEST_F(DestroyEscapeLocalScopeTest, invalid_ref_after_destroy_scope)
 {
-    ASSERT_EQ(env_->CreateEscapeLocalScope(1), ANI_OK);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(ESCAPE_SCOPE_CAPACITY), ANI_OK);
     ani_ref ref {};
     ani_class cls {};
     GetClassAndObject(env_, &cls, "std.core.Int", reinterpret_cast<ani_object *>(&ref));
