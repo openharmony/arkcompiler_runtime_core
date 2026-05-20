@@ -1560,6 +1560,34 @@ export namespace taskpool {
         constructor(func: Function, ...args: FixedArray<Any>) {
             super("", func, ...args);
         }
+
+        /**
+         * Check current running task is canceled or not
+         *
+         * @returns { boolean } true if current running task is canceled, false - otherwise
+         */
+        static isCanceled(): boolean {
+            return Task.isCanceled();
+        }
+
+        /**
+         * Check whether the current task has been canceled
+         *
+         * @throws Error if the current task has been canceled
+         */
+        static checkCancellation(): void {
+            return Task.checkCancellation();
+        }
+
+        /**
+         * Send data to host side and trigger the registered callback
+         * @param { ...Any } args arguments for the registered callback
+         * @throws Error if the function is not called from a taskpool task
+         * @throws Error if the callback is not registered
+         */
+        static sendData(...args: FixedArray<Any>): void {
+            return Task.sendData(...args);
+        }
     }
 
     class GroupState {

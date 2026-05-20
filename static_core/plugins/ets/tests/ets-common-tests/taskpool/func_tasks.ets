@@ -120,6 +120,26 @@ async function taskpoolFuncTestSumAndMulti() {
     arktest.assertEQ(result4, 400);
 }
 
+async function taskpoolFuncTestLongStatic(): Promise<void> {
+    let isCanceledResult = false;
+    let receivedData: int = 0;
+    let task = new taskpool.LongTask((): int => {
+        isCanceledResult = taskpool.LongTask.isCanceled();
+        taskpool.LongTask.checkCancellation();
+        taskpool.LongTask.sendData(123);
+        return 100;
+    });
+    
+    task.onReceiveData((data: int): void => {
+        receivedData = data;
+    });
+
+    let res = await taskpool.execute(task);
+    arktest.assertEQ(res, 100);
+    arktest.assertEQ(isCanceledResult, false);
+    arktest.assertEQ(receivedData, 123);
+}
+
 async function main(): Promise<int> {
     let funcTaskSuite = new arktest.ArkTestsuite('taskpool.FuncTask');
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt', taskpoolFuncTestSumInt);
@@ -132,6 +152,7 @@ async function main(): Promise<int> {
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt2', taskpoolFuncTestSumInt2);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt2SameArguments', taskpoolFuncTestSumInt2SameArguments);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumAndMulti', taskpoolFuncTestSumAndMulti);
+    funcTaskSuite.addAsyncTest('TaskpoolFuncTestLongStatic', taskpoolFuncTestLongStatic);
     let res = await funcTaskSuite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;
