@@ -16,17 +16,15 @@
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
 04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
 
-#34390 es2panda segfault when a type parameter default is provided for generic type parameter
-05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
-05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default_n_0.ets
-05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default_n_1.ets
-
 #34391 No CTE on circular dependency in type alias
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_0.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_1.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_2.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_3.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/recursive_type_alias_rhs_contexts_n_4.ets
+
+#34809
+05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
 
 #33818
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
