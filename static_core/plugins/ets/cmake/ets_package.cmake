@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -70,9 +70,11 @@ function(do_panda_ets_package TARGET)
         --load-runtimes=ets
     )
 
+    set(ETS_CONFIG_TARGET "")
     if(DEFINED ARG_ETS_CONFIG)
         list(APPEND ES2PANDA_ARGUMENTS --arktsconfig=${ARG_ETS_CONFIG})
         list(APPEND ES2PANDA_ARGUMENTS --stdlib=${PANDA_ROOT}/plugins/ets/stdlib)
+        set(ETS_CONFIG_TARGET "${ARG_ETS_CONFIG}")
     endif()
 
     set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/${TARGET})
@@ -89,7 +91,7 @@ function(do_panda_ets_package TARGET)
                 COMMENT "${TARGET}: Convert ets files to ${OUTPUT_ABC}"
                 COMMAND mkdir -p ${BUILD_DIR}/src
                 COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
-                DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ARG_ETS_SOURCES}
+                DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ARG_ETS_SOURCES} ${ETS_CONFIG_TARGET}
             )
         else()
             # Compile several .ets files and link them to OUTPUT_ABC
@@ -104,7 +106,7 @@ function(do_panda_ets_package TARGET)
                     COMMENT "${TARGET}: Convert ets files to ${CUR_OUTPUT_ABC}"
                     COMMAND mkdir -p ${BUILD_DIR}/src
                     COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${CUR_OUTPUT_ABC} ${ETS_SOURCE}
-                    DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ETS_SOURCE}
+                    DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ETS_SOURCE} ${ETS_CONFIG_TARGET}
                 )
             endforeach()
 
