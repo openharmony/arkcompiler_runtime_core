@@ -15,23 +15,68 @@ limitations under the License.
 
 /*---
 desc: >-
-    The result of the field access expression is computed at runtime.
-    For a non-static field: The object reference expression is evaluated.
-    Only the object reference type (not the class type of an actual object referred at runtime)
-    is used to determine the field to be accessed
+    The result of the field access expression is value or variable of the instance field in the class or interface
+    that is the type of the object reference expression. If the field is not readonly, then the result is variable.
+    If the field is readonly, then the result is value (except where the field access occurs in a constructor).
 ---*/
 
-class A {
-  a: int = 1;
+class ANonInit {
+    a: int = 1;
 }
 
-class B {
-  a: int = 2;
+class BNonInit {
+    a: int = 2;
 }
 
-function main(): void {
-  let i: A = new A();
-  let ii: B = new B();
-  arktest.assertEQ( i.a, 1 );
-  arktest.assertEQ( ii.a, 2 );
+class ANonUninit {
+    a: int;
+}
+
+class ANonCtor {
+    a: int;
+    constructor() { this.a = 1 }
+}
+
+class ANonReadonlyCtor {
+    readonly a: int;
+    constructor() { this.a = 1 }
+}
+
+class ANonReadonly {
+    readonly a: int = 1;
+}
+
+function main(): int {
+    let suite = new arktest.ArkTestsuite("Non-static field access via class type")
+
+    suite.addTest("instance fields initialized inline read distinct per type", () => {
+        let i: ANonInit = new ANonInit()
+        let ii: BNonInit = new BNonInit()
+        arktest.assertEQ(i.a, 1)
+        arktest.assertEQ(ii.a, 2)
+    })
+
+    suite.addTest("instance field default-initialized then reassigned", () => {
+        let i: ANonUninit = new ANonUninit()
+        i.a = 2
+        arktest.assertEQ(i.a, 2)
+    })
+
+    suite.addTest("instance field set in constructor then reassigned", () => {
+        let i: ANonCtor = new ANonCtor()
+        i.a = 2
+        arktest.assertEQ(i.a, 2)
+    })
+
+    suite.addTest("readonly field set in constructor read as value", () => {
+        let i: ANonReadonlyCtor = new ANonReadonlyCtor()
+        arktest.assertEQ(i.a * 2, 2)
+    })
+
+    suite.addTest("readonly field with inline initializer read as value", () => {
+        let i: ANonReadonly = new ANonReadonly()
+        arktest.assertEQ(i.a * 2, 2)
+    })
+
+    return suite.run()
 }
