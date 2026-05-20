@@ -19,17 +19,15 @@
 #include "allocator/regional_heap.h"
 #include "common/mark_work_stack.h"
 #include "common/type_def.h"
-#include "common_components/log/log.h"
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_state_word.h"
 #include "common_interfaces/objects/ref_field.h"
+#include "runtime/include/mem/panda_string.h"
 #include "mutator/mutator_manager.h"
 #include "securec.h"
 #include "common_interfaces/thread/mutator.h"
-#include "common_components/heap/heap.h"
 #include <iomanip>
 #include <sstream>
-#include <unordered_set>
 
 /**
  * Heap Verify:
@@ -56,13 +54,13 @@ void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 #define CONTEXT " at " << __FILE__ << ":" << __LINE__ << std::endl
 
-std::string HexDump(const void *address, size_t length)
+PandaString HexDump(const void *address, size_t length)
 {
     static constexpr size_t hexDigitsPerByte = 2;
     static constexpr size_t wordSize = sizeof(uint64_t);
     static constexpr size_t addressWidth = sizeof(void *) * hexDigitsPerByte;
 
-    std::ostringstream oss;
+    PandaOStringStream oss;
     oss << std::hex << std::setfill('0');
 
     const uint8_t *ptr = reinterpret_cast<const uint8_t *>(address);
@@ -85,11 +83,11 @@ std::string HexDump(const void *address, size_t length)
     return oss.str();
 }
 
-std::string GetObjectInfo(const BaseObject *obj)
+PandaString GetObjectInfo(const BaseObject *obj)
 {
     constexpr size_t defaultInfoLength = 64;
 
-    std::ostringstream s;
+    PandaOStringStream s;
     s << std::endl << ">>> address: " << obj << std::endl;
 
     s << "> Raw memory:" << std::endl;
@@ -116,9 +114,9 @@ std::string GetObjectInfo(const BaseObject *obj)
     return s.str();
 }
 
-std::string GetRefInfo(const RefField<> &ref)
+PandaString GetRefInfo(const RefField<> &ref)
 {
-    std::ostringstream s;
+    PandaOStringStream s;
     s << std::hex << std::endl << ">>> Ref value: 0x" << ref.GetFieldValue();
     if (Heap::IsTaggedObject(ref.GetFieldValue())) {
         s << GetObjectInfo(ref.GetTargetObject()) << std::endl;
@@ -360,7 +358,7 @@ public:
 
     // By default, IterateRemarked uses the VisitRoots method to traverse GC roots
     template <void (*VisitRoot)(const RefFieldVisitor &) = VisitRoots>
-    void IterateRemarked(VerifyVisitor &visitor, std::unordered_set<BaseObject *> &markSet, bool forRBDFX = false)
+    void IterateRemarked(VerifyVisitor &visitor, PandaUnorderedSet<BaseObject *> &markSet, bool forRBDFX = false)
     {
         MarkStack<BaseObject *> markStack;
         BaseObject *obj = nullptr;
@@ -427,7 +425,7 @@ void WVerify::VerifyAfterMarkInternal(RegionalHeap &space)
 
     auto iter = VerifyIterator(space);
     auto verifySTWRoots = AfterMarkVisitor();
-    std::unordered_set<BaseObject *> markSet;
+    PandaUnorderedSet<BaseObject *> markSet;
     iter.IterateRemarked<VisitSTWRoots>(verifySTWRoots, markSet);
     auto verifyConcurrentRoots = AfterMarkVisitor<false>();
     iter.IterateRemarked<VisitConcurrentRoots>(verifyConcurrentRoots, markSet);
@@ -490,7 +488,7 @@ void WVerify::VerifyAfterFixInternal(RegionalHeap &space)
     auto iter = VerifyIterator(space);
     auto visitor = AfterFixVisitor();
 
-    std::unordered_set<BaseObject *> markSet;
+    PandaUnorderedSet<BaseObject *> markSet;
     iter.IterateRemarked(visitor, markSet);
 
     LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterFix verified ref count: " << visitor.VerifyRefCount();
@@ -517,7 +515,7 @@ void WVerify::EnableReadBarrierDFXInternal(RegionalHeap &space)
     auto setter = ReadBarrierSetter();
     auto unsetter = ReadBarrierUnsetter();
 
-    std::unordered_set<BaseObject *> markSet;
+    PandaUnorderedSet<BaseObject *> markSet;
     iter.IterateRemarked(setter, markSet, true);
     // some slots of heap object are also roots, so we need to unset them
     iter.IterateRoot(unsetter);
@@ -543,7 +541,7 @@ void WVerify::DisableReadBarrierDFXInternal(RegionalHeap &space)
     auto iter = VerifyIterator(space);
     auto unsetter = ReadBarrierUnsetter();
 
-    std::unordered_set<BaseObject *> markSet;
+    PandaUnorderedSet<BaseObject *> markSet;
     iter.IterateRemarked(unsetter, markSet, true);
 }
 

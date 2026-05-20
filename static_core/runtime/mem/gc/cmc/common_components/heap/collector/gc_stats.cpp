@@ -72,20 +72,20 @@ void GCStats::Init()
     shouldRequestYoung = false;
 }
 
-static std::string FormatTimeMs(uint64_t ns)
+static PandaString FormatTimeMs(uint64_t ns)
 {
     constexpr double nsPerMs = 1e6;
-    std::ostringstream s;
+    PandaOStringStream s;
     s << std::fixed << std::setprecision(3U) << (static_cast<double>(ns) / nsPerMs) << "ms";
     return s.str();
 }
 
-static std::string FormatMemory(size_t bytes)
+static PandaString FormatMemory(size_t bytes)
 {
     constexpr size_t kb = 1024;
     constexpr size_t mb = 1024 * 1024;
     constexpr size_t gb = 1024 * 1024 * 1024;
-    std::ostringstream s;
+    PandaOStringStream s;
     if (bytes >= gb) {
         s << (bytes / gb) << "GB";
     } else if (bytes >= mb) {
@@ -98,7 +98,7 @@ static std::string FormatMemory(size_t bytes)
     return s.str();
 }
 
-static std::string FormatTimestamp()
+static PandaString FormatTimestamp()
 {
     auto now = std::chrono::system_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
@@ -108,7 +108,7 @@ static std::string FormatTimestamp()
     constexpr int bufSize = 32U;
     char buf[bufSize];
     std::strftime(buf, sizeof(buf), "%b %d %T", &tm);
-    std::ostringstream s;
+    PandaOStringStream s;
     s << buf << "." << std::setfill('0') << std::setw(3U) << ms.count();
     return s.str();
 }
@@ -124,7 +124,7 @@ void GCStats::Dump() const
             : static_cast<uint16_t>(round((1.0 - static_cast<double>(allocatedNow) / totalHeap) * MAX_PERCENT));
     uint64_t totalTimeNs = gcEndTime - gcStartTime;
 
-    std::ostringstream oss;
+    PandaOStringStream oss;
     oss << "[" << g_gcCount << "] "
         << "[" << GCTypeToString(gcType) << " (" << g_gcRequests[reason].name << ")] " << FormatTimestamp()
         << " CMC GC freed " << FormatMemory(collectedBytes) << ", " << FormatMemory(largeGarbageSize)
@@ -141,7 +141,7 @@ void GCStats::Dump() const
                      .c_str());
 }
 
-std::string GCStats::GetFinalStatistics() const
+PandaString GCStats::GetFinalStatistics() const
 {
     constexpr uint64_t mb = 1024L * 1024L;
     constexpr uint64_t nsToS = 1000L * 1000L * 1000L;
@@ -158,7 +158,7 @@ std::string GCStats::GetFinalStatistics() const
     auto maxMemory = heap.GetMaxCapacity();
 
     const int precision = 2;
-    std::stringstream statistic;
+    PandaStringStream statistic;
     statistic << std::fixed << std::setprecision(precision);
 
     statistic << "Total time spent in GC: " << FormatTimeMs(totalTimeGc) << "\n";

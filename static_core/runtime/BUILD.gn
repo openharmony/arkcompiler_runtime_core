@@ -14,6 +14,7 @@
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("$ark_root/plugins/plugins.gni")
 import("$ark_root/verification/verification.gni")
+import("$common_runtime_root/common_runtime.gni")
 
 if (ark_standalone_build) {
   import("$build_root/ark.gni")
@@ -429,6 +430,10 @@ _libarkruntime_calculated_sources += _libarkruntime_core_vm_sources
 _libarkruntime_calculated_sources += verifier_sources + plugin_verifier_sources
 _libarkruntime_calculated_sources += plugin_runtime_sources
 
+if (ark_use_common_runtime) {
+  _libarkruntime_calculated_sources += cmc_sources
+}
+
 _libarkruntime_calculated_configs = [
   "$ark_root/assembler:arkassembler_public_config",
   "$ark_root/libarkbase:arkbase_public_config",
@@ -490,6 +495,16 @@ _libarkruntime_calculated_deps += plugin_arkruntime_stdlib_plugin_deps
 _libarkruntime_calculated_external_deps += plugin_external_deps_runtime
 _libarkruntime_calculated_include_dirs += plugin_include_dirs_runtime
 
+if (ark_use_common_runtime) {
+  _libarkruntime_calculated_include_dirs += [
+    "$common_runtime_root/common_components",
+    "$common_runtime_root",
+  ]
+  if (is_ohos) {
+    _libarkruntime_calculated_defines += [ "ENABLE_COLD_STARTUP_GC_POLICY" ]
+  }
+}
+
 if (!is_mingw) {
   _libarkruntime_calculated_deps += [ "$ark_root/dprof:libdprof" ]
 }
@@ -513,7 +528,7 @@ if (current_cpu == "arm") {
 }
 
 if (is_ohos && is_standard_system) {
-  _libarkruntime_calculated_defines = [
+  _libarkruntime_calculated_defines += [
     "PANDA_OHOS_USE_INNER_HILOG",
     "PANDA_USE_HITRACE",
     "PANDA_USE_QOS",
@@ -676,10 +691,6 @@ ohos_shared_library("libarkruntime") {
     ldflags += coverage_ldflags
   }
 
-  if (ark_use_common_runtime) {
-    deps += [ "$common_runtime_root/common_components:libarkcommon_runtime" ]
-  }
-
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     external_deps += [
       "pcre2:libpcre2_static_16",
@@ -724,10 +735,6 @@ ohos_shared_library("libarkruntime_host") {
   external_deps = []
   if (current_toolchain == host_toolchain) {
     deps += [ ":libarkruntime_set_static_host" ]
-  }
-
-  if (ark_use_common_runtime) {
-    deps += [ "$common_runtime_root/common_components:libarkcommon_runtime" ]
   }
 
   if (!(ark_standalone_build || ark_static_standalone_build)) {

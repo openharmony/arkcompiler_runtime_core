@@ -27,8 +27,8 @@ void StartupStatusManager::OnAppStartup()
     // Atomic with relaxed order reason: data race with startupStatus_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     startupStatus_.store(StartupStatus::COLD_STARTUP, std::memory_order_relaxed);
-    Taskpool *threadPool = Taskpool::GetCurrentTaskpool();
-    threadPool->PostDelayedTask(std::make_unique<StartupTask>(0, threadPool, STARTUP_DURATION_MS), STARTUP_DURATION_MS);
+    auto *threadPool = Taskpool::GetCurrentTaskpool().get();
+    threadPool->PostDelayedTask(MakePandaUnique<StartupTask>(0, threadPool, STARTUP_DURATION_MS), STARTUP_DURATION_MS);
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "SmartGC: app startup just finished, CMC FinishGCRestrainTask create", "");
 }
 

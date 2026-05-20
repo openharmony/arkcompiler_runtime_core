@@ -518,7 +518,7 @@ TEST_F(CMCGCTest, PreBarrierCheck)
         });
     }
 
-    std::vector<cvm::BaseObject *> objects;
+    PandaStack<cvm::BaseObject *> objects;
     {
         cvm::ScopedEnterSaferegion safeRegion(true);
         checker.OnFinishPhaseMark([&objects, &coro] {

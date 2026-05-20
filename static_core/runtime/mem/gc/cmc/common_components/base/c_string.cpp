@@ -369,9 +369,9 @@ CString CString::SubStr(size_t index) const
     return SubStr(index, length_ - index);
 }
 
-std::vector<CString> CString::Split(CString &source, char separator)
+PandaVector<CString> CString::Split(CString &source, char separator)
 {
-    std::vector<CString> tokens;
+    PandaVector<CString> tokens;
     const char s[2] = {separator, '\0'};
     char *tmpSave = nullptr;
 

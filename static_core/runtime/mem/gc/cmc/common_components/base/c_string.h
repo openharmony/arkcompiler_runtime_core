@@ -16,10 +16,10 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_C_STRING_H
 
 #include <cstdint>
-#include <vector>
 #include <cstdlib>
 
 #include "common_interfaces/base/common.h"
+#include "runtime/include/mem/panda_containers.h"
 #include <securec.h>
 
 namespace ark::common_vm {
@@ -110,7 +110,7 @@ public:
     char &operator[](size_t index);
 
     // Split a string into string tokens according to the separator, such as blank space
-    static std::vector<CString> Split(CString &source, char separator = ' ');
+    static PandaVector<CString> Split(CString &source, char separator = ' ');
 
     static CString Strip(CString &source, char separator = ' ');
     static char *BaseName(const CString &path);

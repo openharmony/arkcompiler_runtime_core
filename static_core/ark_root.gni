@@ -32,7 +32,6 @@ arkplatform_root = "//arkcompiler/runtime_core/arkplatform"
 arkplatform_include = "$arkplatform_root"
 arkui_root = "//foundation/arkui"
 etsruntime_root = "//arkcompiler/ets_runtime"
-common_runtime_root = "//arkcompiler/runtime_core/static_core/runtime/mem/gc/cmc"
 
 ark_third_party_root = "//third_party"
 
@@ -49,3 +48,7 @@ if (ark_standalone_build) {
   ark_es2panda_root = "//arkcompiler/ets_frontend/ets2panda"
   import("//build/config/components/toolchain/build_type.gni")
 }
+
+# Derived from ark_root so it works under every layout (in particular
+# ark_static_standalone_build where ark_root is "//" instead of the OHOS path).
+common_runtime_root = "$ark_root/runtime/mem/gc/cmc"

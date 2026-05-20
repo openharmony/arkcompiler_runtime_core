@@ -26,6 +26,7 @@
 #include "common_components/common/page_allocator.h"
 #include "common_components/mutator/satb_buffer.h"
 #include "runtime/include/locks.h"
+#include "runtime/include/mem/panda_containers.h"
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS) || defined(__APPLE__)
 #include "common_components/mutator/safepoint_page_manager.h"
 #endif
@@ -105,7 +106,7 @@ public:
         return count;
     }
 
-    void GetAllMutators(std::vector<Mutator *> &mutators)
+    void GetAllMutators(ark::PandaVector<Mutator *> &mutators)
     {
         auto func = [&mutators](Mutator &mutator) { mutators.emplace_back(&mutator); };
         VisitAllMutators(func);

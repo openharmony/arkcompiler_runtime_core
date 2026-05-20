@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_CMC_GC_CMC_GC_H
 #define PANDA_RUNTIME_MEM_GC_CMC_GC_CMC_GC_H
 
+#include "runtime/include/mem/panda_containers.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 
 #include <cstdint>
@@ -53,7 +54,7 @@ public:
 };
 
 template <typename T>
-using CArrayList = std::vector<T>;
+using CArrayList = PandaVector<T>;
 
 template <typename StackType>
 class GlobalStackQueue;
@@ -233,7 +234,7 @@ public:
     // avoid std::function allocation for each object marking
     class MarkingRefFieldVisitor {
     public:
-        MarkingRefFieldVisitor() : closure_(std::make_shared<BaseObject *>(nullptr)) {}
+        MarkingRefFieldVisitor() : closure_(MakePandaUnique<BaseObject *>(nullptr)) {}
 
         template <typename Functor>
         void SetVisitor(Functor &&f)
@@ -259,7 +260,7 @@ public:
         {
             *closure_ = obj;
         }
-        const auto &GetClosure() const
+        const PandaUniquePtr<BaseObject *> &GetClosure() const
         {
             return closure_;
         }
@@ -267,7 +268,7 @@ public:
     private:
         ark::mem::RefFieldVisitor visitor_;
         ark::mem::RefFieldVisitor weakVisitor_;
-        std::shared_ptr<BaseObject *> closure_;
+        PandaUniquePtr<BaseObject *> closure_;
     };
     MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack, WeakStack &weakStack);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
@@ -609,7 +610,7 @@ private:
 
     GCMode gcMode_ = GCMode::CMC;
     std::atomic<ark::common_vm::GCPhase> gcPhase_ = {ark::common_vm::GCPhase::GC_PHASE_IDLE};
-    std::vector<ark::common_vm::GCListener *> gcListeners_;
+    PandaVector<ark::common_vm::GCListener *> gcListeners_;
     ark::os::memory::Mutex gcListenersLock_;
 };
 
@@ -666,7 +667,7 @@ private:
     bool finished_ {false};
     ark::os::memory::ConditionVariable cv_;
     ark::os::memory::Mutex mtx_;
-    std::vector<StackType> stacks_;
+    PandaVector<StackType> stacks_;
 };
 
 }  // namespace ark::mem

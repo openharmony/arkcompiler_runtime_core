@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "include/mem/panda_containers.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 
 #include <iomanip>
@@ -223,16 +224,16 @@ typename CmcGC<LanguageConfig>::MarkingRefFieldVisitor CmcGC<LanguageConfig>::Cr
     MarkingRefFieldVisitor visitor;
 
     if (gcReason_ == GCReason::GC_REASON_YOUNG) {
-        auto func = [obj = visitor.GetClosure(), &markStack](RefField<> &field) {
+        auto func = [obj = visitor.GetClosure().get(), &markStack](RefField<> &field) {
             MarkingRefField(*obj, field, markStack, GCReason::GC_REASON_YOUNG);
         };
         visitor.SetVisitor(func);
         visitor.SetWeakVisitor(func);
     } else {
-        visitor.SetVisitor([obj = visitor.GetClosure(), &markStack](RefField<> &field) {
+        visitor.SetVisitor([obj = visitor.GetClosure().get(), &markStack](RefField<> &field) {
             MarkingRefField(*obj, field, markStack, GCReason::GC_REASON_HEU);
         });
-        visitor.SetWeakVisitor([obj = visitor.GetClosure(), &weakStack](RefField<> &field) {
+        visitor.SetWeakVisitor([obj = visitor.GetClosure().get(), &weakStack](RefField<> &field) {
             MarkWeakRefField(*obj, field, weakStack, GCReason::GC_REASON_HEU);
         });
     }
@@ -471,7 +472,7 @@ private:
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
 {
-    std::vector<ark::common_vm::Mutator *> taskList;
+    PandaVector<ark::common_vm::Mutator *> taskList;
     auto &mutatorManager = MutatorManager::Instance();
     mutatorManager.VisitAllMutators([&taskList](ark::common_vm::Mutator &mutator) { taskList.push_back(&mutator); });
     std::atomic<int> taskIter = 0;
@@ -489,8 +490,8 @@ void CmcGC<LanguageConfig>::ParallelRemarkAndPreforward(GlobalMarkStack &globalM
     uint32_t parallelCount = runningWorkers + 1;  // 1 ：DaemonThread
     ark::common_vm::TaskPackMonitor monitor(runningWorkers, runningWorkers);
     for (uint32_t i = 1; i < parallelCount; ++i) {
-        GetThreadPool()->PostTask(std::make_unique<RemarkingAndPreforwardTask<LanguageConfig>>(
-            this, globalMarkStack, monitor, getNextMutator));
+        GetThreadPool()->PostTask(MakePandaUnique<RemarkingAndPreforwardTask<LanguageConfig>>(this, globalMarkStack,
+                                                                                              monitor, getNextMutator));
     }
     // Run in daemon thread.
     LocalCollectStack collectStack(&globalMarkStack);
@@ -825,13 +826,13 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
 
     const uint32_t runningWorkers = GetGCThreadCount(true) - 1;
     uint32_t parallelCount = runningWorkers + 1;  // 1 ：DaemonThread
-    std::vector<FixHeapWorker::Result> results(parallelCount);
+    PandaVector<FixHeapWorker::Result> results(parallelCount);
     {
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap [Parallel]", "");
         // Fix heap
         TaskPackMonitor monitor(runningWorkers, runningWorkers);
         for (uint32_t i = 1; i < parallelCount; ++i) {
-            GetThreadPool()->PostTask(std::make_unique<FixHeapWorker>(this, monitor, results[i], getNextTask));
+            GetThreadPool()->PostTask(MakePandaUnique<FixHeapWorker>(this, monitor, results[i], getNextTask));
         }
 
         FixHeapWorker gcWorker(this, monitor, results[0], getNextTask);
@@ -848,7 +849,7 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
         // Post clear task
         TaskPackMonitor monitor(runningWorkers, runningWorkers);
         for (uint32_t i = 1; i < parallelCount; ++i) {
-            GetThreadPool()->PostTask(std::make_unique<PostFixHeapWorker>(results[i], monitor));
+            GetThreadPool()->PostTask(MakePandaUnique<PostFixHeapWorker>(results[i], monitor));
         }
 
         PostFixHeapWorker gcWorker(results[0], monitor);
@@ -1259,7 +1260,7 @@ void CmcGC<LanguageConfig>::EnqueueRememberedSetRefs(GlobalEvacuationStack &glob
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
 {
-    std::vector<BaseObject *> remarkStack;
+    PandaStack<BaseObject *> remarkStack;
     MutatorManager::Instance().VisitAllMutators([&remarkStack](ark::common_vm::Mutator &mutator) {
         const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator.GetSatbBufferNode());
         if (node != nullptr) {
@@ -1270,8 +1271,8 @@ void CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
 
     LocalEvacuationStack localStack(&globalStack);
     while (!remarkStack.empty()) {
-        BaseObject *obj = remarkStack.back();
-        remarkStack.pop_back();
+        BaseObject *obj = remarkStack.top();
+        remarkStack.pop();
         CHECK(Heap::IsHeapAddress(obj));
         if (IsFromObject(obj)) {
             obj = ForwardObject(obj);
@@ -1296,7 +1297,7 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(GlobalEvacuationStack &global
         auto *threadPool = GetThreadPool();
         for (uint32_t i = 0; i < parallelCount; ++i) {
             threadPool->PostTask(
-                std::make_unique<ConcurrentEvacuationTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
+                MakePandaUnique<ConcurrentEvacuationTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
         }
         ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
         do {
@@ -1322,13 +1323,13 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
 {
     // NOTE: it is performed concurrently with other GC threads and mutators
-    std::vector<BaseObject *> remarkStack;
+    PandaStack<BaseObject *> remarkStack;
     auto fetchFromSatbBuffer = [this, &stack, &remarkStack]() {
         SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
         bool needProcess = false;
         while (!remarkStack.empty()) {
-            BaseObject *obj = remarkStack.back();
-            remarkStack.pop_back();
+            BaseObject *obj = remarkStack.top();
+            remarkStack.pop();
             CHECK(Heap::IsHeapAddress(obj));
             if (IsFromObject(obj)) {
                 obj = ForwardObject(obj);
@@ -1369,8 +1370,7 @@ void CmcGC<LanguageConfig>::MarkEvacuationStack(GlobalEvacuationStack &globalEva
 
         auto *threadPool = GetThreadPool();
         for (uint32_t i = 0; i < parallelCount; ++i) {
-            threadPool->PostTask(
-                std::make_unique<RemarkTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
+            threadPool->PostTask(MakePandaUnique<RemarkTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
         }
         ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
         do {
@@ -1894,13 +1894,13 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
     size_t nNewlyMarked = 0;
     WeakStack weakStack;
     auto visitor = CreateMarkingObjectRefFieldsVisitor(markStack, weakStack);
-    std::vector<BaseObject *> remarkStack;
+    PandaStack<BaseObject *> remarkStack;
     auto fetchFromSatbBuffer = [this, &markStack, &remarkStack]() {
         SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
         bool needProcess = false;
         while (!remarkStack.empty()) {
-            BaseObject *obj = remarkStack.back();
-            remarkStack.pop_back();
+            BaseObject *obj = remarkStack.top();
+            remarkStack.pop();
             if (Heap::IsHeapAddress(obj) && (MarkObjectIfNotMarked(obj))) {
                 markStack.Push(obj);
                 needProcess = true;
@@ -2009,14 +2009,14 @@ void CmcGC<LanguageConfig>::TracingImpl(GlobalMarkStack &globalMarkStack, bool p
 #ifdef PANDA_JS_ETS_HYBRID_MODE
             if (gcReason_ == GCReason::GC_REASON_XREF) {
                 threadPool->PostTask(
-                    std::make_unique<ConcurrentMarkingTask<LanguageConfig, true>>(0, *this, monitor, globalMarkStack));
+                    MakePandaUnique<ConcurrentMarkingTask<LanguageConfig, true>>(0, *this, monitor, globalMarkStack));
             } else {
                 threadPool->PostTask(
-                    std::make_unique<ConcurrentMarkingTask<LanguageConfig, false>>(0, *this, monitor, globalMarkStack));
+                    MakePandaUnique<ConcurrentMarkingTask<LanguageConfig, false>>(0, *this, monitor, globalMarkStack));
             }
 #else
             threadPool->PostTask(
-                std::make_unique<ConcurrentMarkingTask<LanguageConfig, false>>(0, *this, monitor, globalMarkStack));
+                MakePandaUnique<ConcurrentMarkingTask<LanguageConfig, false>>(0, *this, monitor, globalMarkStack));
 #endif
         }
         ParallelLocalMarkStack markStack(&globalMarkStack, &monitor);
@@ -2180,7 +2180,7 @@ bool CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkSatbBuffer", "");
     COMMON_PHASE_TIMER("MarkSatbBuffer");
     auto visitSatbObj = [this, &globalMarkStack]() {
-        std::vector<BaseObject *> remarkStack;
+        PandaStack<BaseObject *> remarkStack;
         auto func = [&remarkStack](ark::common_vm::Mutator &mutator) {
             const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator.GetSatbBufferNode());
             if (node != nullptr) {
@@ -2192,8 +2192,8 @@ bool CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
 
         LocalCollectStack collectStack(&globalMarkStack);
         while (!remarkStack.empty()) {  // LCOV_EXCL_BR_LINE
-            BaseObject *obj = remarkStack.back();
-            remarkStack.pop_back();
+            BaseObject *obj = remarkStack.top();
+            remarkStack.pop();
             if (Heap::IsHeapAddress(obj) && this->MarkObjectIfNotMarked(obj)) {
                 collectStack.Push(obj);
                 LOG(DEBUG, GC) << "satb buffer add obj " << obj;
@@ -2254,7 +2254,7 @@ void CmcGC<LanguageConfig>::DumpHeap(const CString &tag)
 
     // dump object types
     LOG(DEBUG, GC) << "Print Type information";
-    std::set<TypeInfo *> classinfoSet;
+    PandaSet<TypeInfo *> classinfoSet;
     auto assembleClassInfoVisitor = [&classinfoSet](BaseObject *obj) {
         TypeInfo *classInfo = obj->GetTypeInfo();
         // No need to check the result of insertion, because there are multiple-insertions.
@@ -2373,7 +2373,7 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
         ark::common_vm::g_gcRequests[ark::common_vm::GC_REASON_YOUNG].SetMinInterval(gcParam.gcInterval);
     }
     gcStats.IncreaseAccumulatedFreeSize(bytesAllocated);
-    std::ostringstream oss;
+    PandaOStringStream oss;
     oss << "allocated bytes " << bytesAllocated << " (survive bytes " << survivedBytes << ", recent-allocated "
         << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << gcStats.targetFootprint
         << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold;
@@ -2435,7 +2435,7 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::common_v
     MarkGCStart();
     gcReason_ = reason;
     gcType_ = gcType;
-    auto gcReasonName = std::string(ark::common_vm::g_gcRequests[gcReason_].name);
+    auto gcReasonName = PandaString(ark::common_vm::g_gcRequests[gcReason_].name);
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
     auto currentThreshold = GetGCStats().GetThreshold();
     LOG(DEBUG, GC) << "Begin GC log. GCReason: " << gcReasonName << ", GCType: " << GCTypeToString(gcType)
@@ -2482,7 +2482,7 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcS
     double rate =
         (static_cast<double>(gcStats.collectedBytes) / gcTimeNs) * (static_cast<double>(ark::common_vm::NS_PER_S) / MB);
     {
-        std::ostringstream oss;
+        PandaOStringStream oss;
         const int prec = 3;
         oss << "total gc time: " << ::ark::mem::Pretty(gcTimeNs / ark::common_vm::NS_PER_US) << " us, collection rate ";
         oss << std::setprecision(prec) << rate << " MB/s";

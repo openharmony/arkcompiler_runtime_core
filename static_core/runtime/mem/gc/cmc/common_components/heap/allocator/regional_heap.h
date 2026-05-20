@@ -32,6 +32,7 @@
 #include "common_components/heap/space/nonmovable_space.h"
 #include "common_interfaces/thread/mutator.h"
 #include "common_components/heap/space/large_space.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "common_interfaces/objects/base_object.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
@@ -491,7 +492,8 @@ private:
 
     // Awaiting JitFort object has no references from other objects,
     // but we need to keep them as live untill jit compilation has finished installing.
-    std::set<BaseObject *> awaitingJitFort_;
+    PandaSet<BaseObject *> awaitingJitFort_;
+    // Note(d.chikunov) - make it PandaStack in future
     std::stack<std::pair<void *, BaseObject *>> jitFortPostGCInstallTask_;
     ark::os::memory::Mutex awaitingJitFortMutex_;
 

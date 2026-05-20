@@ -20,6 +20,7 @@
 #include <stack>
 #include <vector>
 #include "common_components/taskpool/task.h"
+#include "runtime/include/mem/panda_containers.h"
 namespace ark::common_vm {
 
 class Collector;
@@ -59,15 +60,15 @@ struct FixHeapTask final {
     FixHeapTask &operator=(FixHeapTask &&) = default;
 };
 
-using FixHeapTaskList = std::vector<FixHeapTask>;
+using FixHeapTaskList = ark::PandaVector<FixHeapTask>;
 
 /// Worker class for parallel heap fixing operations
 class FixHeapWorker : public Task {
 public:
     /// Result structure containing the collected garbages and stats of heap fixing operations
     struct Result {
-        std::vector<std::tuple<RegionDesc *, BaseObject *, size_t>> monoSizeNonMovableGarbages;
-        std::vector<std::pair<BaseObject *, size_t>> polySizeNonMovableGarbages;
+        ark::PandaVector<std::tuple<RegionDesc *, BaseObject *, size_t>> monoSizeNonMovableGarbages;
+        ark::PandaVector<std::pair<BaseObject *, size_t>> polySizeNonMovableGarbages;
         size_t numProcessedRegions = 0;
     };
 
@@ -114,7 +115,6 @@ private:
 class PostFixHeapWorker : public Task {
 public:
     PostFixHeapWorker(FixHeapWorker::Result &result, TaskPackMonitor &monitor) noexcept
-
         : Task(0), monitor_(monitor), result_(result)
     {
     }
@@ -124,7 +124,7 @@ public:
 
     // During fix phase we also collect the entire empty regions into garbage list from non-movable region.
     // However, we can only do it during post-fix because those region can contains metadata for getObjectSize
-    // Hence we cache empty regions in those two stack and duirng post fix we collect the region as garbage,
+    // NOTE(d.chikunov) - make it PandaStack in future
     static std::stack<std::pair<RegionList *, RegionDesc *>> emptyRegionsToCollect;
     static void AddEmptyRegionToCollectDuringPostFix(RegionList *list, RegionDesc *region);
     static void CollectEmptyRegions();

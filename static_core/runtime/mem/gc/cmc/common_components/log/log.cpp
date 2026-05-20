@@ -20,9 +20,9 @@ namespace ark::mem {
 // number of digits in a pretty format segment (100,000,000 each has three digits)
 constexpr int NUM_DIGITS_PER_SEGMENT = 3;
 
-std::string Pretty(uint64_t number) noexcept
+PandaString Pretty(uint64_t number) noexcept
 {
-    std::string orig = std::to_string(number);
+    PandaString orig = ToPandaString(number);
     int pos = static_cast<int>(orig.length()) - NUM_DIGITS_PER_SEGMENT;
     while (pos > 0) {
         orig.insert(pos, ",");

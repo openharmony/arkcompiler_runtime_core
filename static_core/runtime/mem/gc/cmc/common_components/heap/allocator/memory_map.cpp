@@ -76,7 +76,7 @@ MemoryMap *MemoryMap::MapMemory(size_t reqSize, size_t initSize, const Option &o
     MemoryMap *memMap = new (std::nothrow) MemoryMap(mappedAddr, initSize, reqSize);
     LOG_IF(UNLIKELY(memMap == nullptr), FATAL, MM_OBJECT_EVENTS) << "new MemoryMap failed";
 
-    os::mem::TagAnonymousMemory(mappedAddr, reqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
+    os::mem::TagAnonymousMemory(mappedAddr, reqSize, (PandaString("ArkTS Heap CMCGC ") + opt.tag).c_str());
     return memMap;
 }
 
@@ -158,7 +158,7 @@ MemoryMap *MemoryMap::MapMemoryAlignInner4G(uint64_t reqSize, uint64_t initSize,
     MemoryMap *memMap = new (std::nothrow) MemoryMap(mappedAddr, initSize, reqSize);
     LOG_IF(UNLIKELY(memMap == nullptr), FATAL, MM_OBJECT_EVENTS) << "new MemMap failed";
 
-    os::mem::TagAnonymousMemory(mappedAddr, needReqSize, (std::string("ArkTS Heap CMCGC ") + opt.tag).c_str());
+    os::mem::TagAnonymousMemory(mappedAddr, needReqSize, (PandaString("ArkTS Heap CMCGC ") + opt.tag).c_str());
     return memMap;
 }
 

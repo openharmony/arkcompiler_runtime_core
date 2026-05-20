@@ -25,6 +25,7 @@
 #include "common_components/heap/collector/gc_request.h"
 #include "common_components/heap/collector/gc_stats.h"
 #include "common_interfaces/thread/mutator.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "common_interfaces/base_runtime.h"
 #include "runtime/include/mem/panda_containers.h"
 

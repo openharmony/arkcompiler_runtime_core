@@ -22,8 +22,7 @@ namespace ark::common_vm {
 template <class STWFunction>
 void MutatorManager::FlipMutators(STWParam &param, STWFunction &&stwFunction, FlipFunction *flipFunction)
 {
-    std::list<Mutator *> undoneMutators;
-
+    ark::PandaList<Mutator *> undoneMutators;
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "Waiting-STW", "");
     ScopedStopTheWorld stw(param);
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, param.stwReason, "");
