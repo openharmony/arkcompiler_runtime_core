@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,9 @@ tags: [compile-only, negative]
 interface I <T1 = Int, T2, T3>
 
 class A implements I {
-    data0: T0
-    data1: T1
-    data2: T2
+    data0?: T0
+    data1?: T1
+    data2?: T2
 }
 
 function main() : void {

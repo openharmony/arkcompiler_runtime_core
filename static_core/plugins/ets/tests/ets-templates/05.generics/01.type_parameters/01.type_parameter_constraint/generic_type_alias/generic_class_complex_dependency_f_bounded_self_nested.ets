@@ -20,7 +20,7 @@ params: >-
 ---*/
 
 class U<S> {
-    field0: S
+    field0?: S = undefined
     constructor(v?: S) {
         if (v !== undefined) {
             this.field0 = v
@@ -67,14 +67,17 @@ function testClassGeneric() {
     arktest.assertTrue(a instanceof A)
     arktest.assertTrue(a.fieldA instanceof B)
     arktest.assertEQ(a.fieldA, f)
-    let u0 = a.fieldA.field0
+    let u0 = a.fieldA.field0!
     arktest.assertTrue(u0 instanceof U)
-    arktest.assertTrue(a.fieldA.field0.field0 instanceof B)
-    arktest.assertEQ(a.fieldA.field0.field0, f)
-    arktest.assertTrue(a.fieldA.field0.field0.field0 instanceof U)
-    arktest.assertEQ(a.fieldA.field0.field0.field0, u0)
-    arktest.assertTrue(a.fieldA.field0.field0.field0.field0 instanceof B)
-    arktest.assertEQ(a.fieldA.field0.field0.field0.field0, f)
+    let b0 = u0.field0!
+    arktest.assertTrue(b0 instanceof B)
+    arktest.assertEQ(b0, f)
+    let u1 = b0.field0!
+    arktest.assertTrue(u1 instanceof U)
+    arktest.assertEQ(u1, u0)
+    let b1 = u1.field0!
+    arktest.assertTrue(b1 instanceof B)
+    arktest.assertEQ(b1, f)
 }
 
 function testClassFinalGeneric() {
@@ -82,12 +85,13 @@ function testClassFinalGeneric() {
     a.fieldA = new B()
     arktest.assertTrue(a instanceof Af)
     arktest.assertTrue(a.fieldA instanceof B)
-    let fa = (a.fieldA as B).field0
+    let fa = (a.fieldA as B).field0!
     arktest.assertTrue(fa instanceof U)
-    arktest.assertTrue(fa.field0 instanceof B)
-    arktest.assertEQ(fa.field0, a.fieldA)
-    arktest.assertTrue(fa.field0.field0 instanceof U)
-    arktest.assertEQ(fa.field0.field0, fa)
+    let b0 = fa.field0!
+    arktest.assertTrue(b0 instanceof B)
+    arktest.assertEQ(b0, a.fieldA)
+    arktest.assertTrue(b0.field0! instanceof U)
+    arktest.assertEQ(b0.field0!, fa)
 }
 
 function testClassAbstractGeneric() {
@@ -96,16 +100,19 @@ function testClassAbstractGeneric() {
     arktest.assertTrue(a instanceof C)
     arktest.assertTrue(a.fieldA instanceof B)
     arktest.assertEQ(a.fieldA, f)
-    let u0 = a.fieldA.field0
+    let u0 = a.fieldA.field0!
     arktest.assertTrue(u0 instanceof U)
-    arktest.assertTrue(a.fieldA.field0.field0 instanceof B)
-    arktest.assertEQ(a.fieldA.field0.field0, f)
-    arktest.assertTrue(a.fieldA.field0.field0.field0 instanceof U)
-    arktest.assertEQ(a.fieldA.field0.field0.field0, u0)
-    arktest.assertTrue(a.fieldA.field0.field0.field0.field0 instanceof B)
-    arktest.assertEQ(a.fieldA.field0.field0.field0.field0, f)
-    arktest.assertTrue(a.fieldA.field0.field0.field0.field0.field0 instanceof U)
-    arktest.assertEQ(a.fieldA.field0.field0.field0.field0.field0, u0)
+    let b0 = u0.field0!
+    arktest.assertTrue(b0 instanceof B)
+    arktest.assertEQ(b0, f)
+    let u1 = b0.field0!
+    arktest.assertTrue(u1 instanceof U)
+    arktest.assertEQ(u1, u0)
+    let b1 = u1.field0!
+    arktest.assertTrue(b1 instanceof B)
+    arktest.assertEQ(b1, f)
+    arktest.assertTrue(b1.field0! instanceof U)
+    arktest.assertEQ(b1.field0!, u0)
 }
 
 function main(): int {

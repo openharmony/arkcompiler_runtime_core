@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,8 @@ class Helper {}
 class A<T> {
     data: T
     isData: boolean
-    constructor(isData: boolean) {
+    constructor(data: T, isData: boolean) {
+        this.data = data
         this.isData = isData
     }
 }
@@ -34,17 +35,16 @@ class B<T> {
     constructor(data: T) {
         this.data = data
     }
-    foo<T>(isData: boolean = false): A<T> {
-        return new A<T>(isData)
+    foo<T>(data: T, isData: boolean = false): A<T> {
+        return new A<T>(data, isData)
     }
 }
 
 function main(): void {
     let b = new B<String>("hello")
-    let a = b.foo<Helper>(true);
+    let a = b.foo<Helper>(new Helper(), true);
     arktest.assertTrue( a instanceof A)
     arktest.assertEQ( a.isData, true)
-    a.data = new Helper()
     arktest.assertTrue( a.data instanceof Helper)
 }
 

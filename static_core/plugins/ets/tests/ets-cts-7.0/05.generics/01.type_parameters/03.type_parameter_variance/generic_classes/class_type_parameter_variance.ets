@@ -20,8 +20,9 @@ desc: Test of usage modifiers in and out, as well as type parameter without modi
 class X<in T1, out T2, T3> {
     readonly t2_obj: T2
     t3_obj: T3
-    constructor(p: T2) {
+    constructor(p: T2, q: T3) {
         this.t2_obj = p
+        this.t3_obj = q
     }
 
     f1(p: T1) {}
@@ -32,7 +33,7 @@ class X<in T1, out T2, T3> {
 }
 
 function main(): void {
-    let x: X<number, number, number> = new X<number, number, number>(1)
+    let x: X<number, number, number> = new X<number, number, number>(1, 2)
     arktest.assertEQ(x.f2(), 1)
     arktest.assertEQ(x.f3(1), 1)
 }

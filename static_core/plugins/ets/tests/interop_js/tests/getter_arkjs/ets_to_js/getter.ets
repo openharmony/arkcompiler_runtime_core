@@ -163,7 +163,7 @@ class StaticClass<T> {
     public static _static_value: string = '';
 
     constructor(value: T) {
-        this.value = value;
+        this._value = value;
     }
 
     public get value(): T {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,9 @@ desc: Test of usage modifiers in and out, as well as type parameter without modi
 class X<in T1, out T2, T3> {
     readonly t2_obj: T2
     t3_obj: T3
-    constructor(p: T2) {
+    constructor(p: T2, q: T3) {
         this.t2_obj = p
+        this.t3_obj = q
     }
 
     f1(p: T1) {}
@@ -32,7 +33,7 @@ class X<in T1, out T2, T3> {
 }
 
 function main(): void {
-    let x: X<number, number, number> = new X<number, number, number>(1)
+    let x: X<number, number, number> = new X<number, number, number>(1, 2)
     arktest.assertEQ(x.f2(), 1)
     arktest.assertEQ(x.f3(1), 1)
 }

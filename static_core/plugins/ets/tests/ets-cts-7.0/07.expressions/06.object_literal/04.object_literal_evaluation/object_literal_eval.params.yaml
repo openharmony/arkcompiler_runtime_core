@@ -124,7 +124,7 @@ cases:
 
   - decl: |
       class A<T> {
-          value: T
+          value: T = undefined as T
       }
 
       class C {

@@ -28,7 +28,7 @@ final class Y<T> extends X {}
 enum Color { Red, Green, Blue }
 
 class A <V> {
-    private v: V
+    private v: V = undefined as V
 
     public meth <T{{c.bound}}> (v: V, t: T): T {
         this.v = v

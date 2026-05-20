@@ -39,7 +39,7 @@ topLevelTypes:
   - "namespace Geometry { export class Point {} }"
   
 # Generic types
-  - "class GenericClass<T> { value: T; }"
+  - "class GenericClass<T> { value: T = undefined as T; }"
   - "interface GenericInterface<T> { getValue(): T; }"
   - "function genericFunc<T>(arg: T): T { return arg; }"
   

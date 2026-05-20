@@ -80,14 +80,14 @@ class SubsetValueSet extends ValueSetter {
 }
 
 class SetterAnyType<T> {
-   private _value: T;
+   private _value?: T;
 
    set value(arg: T) {
       this._value = arg;
    }
 
    get value(): T {
-      return this._value;
+      return this._value as T;
    }
 }
 

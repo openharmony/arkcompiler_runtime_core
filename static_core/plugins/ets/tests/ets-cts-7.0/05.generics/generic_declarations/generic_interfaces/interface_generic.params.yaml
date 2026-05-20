@@ -193,7 +193,7 @@ cases:
       }
 
       class Chainable<T> implements Ichainable<T> {
-        private value: T;
+        private value: T = undefined as T;
 
         set(value: T): this {
           this.value = value;
@@ -223,7 +223,7 @@ cases:
       }
 
       class Chainable<T> implements Ichainable<T> {
-        private value: T;
+        private value: T = undefined as T;
 
         set(value: T): this {
           this.value = value;

@@ -23,8 +23,6 @@ package std.concurrency;
  * one has stored an undefined value
  */
 class Wrapper <T> {
-    constructor() {}
-
     constructor(value: T) {
         this.value = value;
     }

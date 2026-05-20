@@ -24,11 +24,11 @@ interface IName {
 
 
 class MySuper<T> {
-    private _mf: T
+    private _mf: T = undefined as T
     set mf(value: T) {
         this._mf = value
     }
-    public visible: T
+    public visible: T = undefined as T
 }
 
 class Deriver extends MySuper<IName> {
