@@ -17,9 +17,12 @@
 #define PANDA_STS_VM_INTERFACE_H
 
 #include "hybrid/vm_interface.h"
+#include "hybrid/hybrid_heap_snapshot_info.h"
 #include <cstdint>
 #include <cstddef>
 #include <functional>
+#include <unordered_map>
+#include <vector>
 
 namespace arkplatform {
 
@@ -94,6 +97,38 @@ public:
      * Used to interrupt the barrier when XGC cannot proceed (e.g. ETS GC task rejected).
      */
     virtual void NotifyWaiters() = 0;
+
+    // --- Hybrid Heapdump Methods ---
+    /// @brief Trigger XGC and wait for completion
+    virtual bool TriggerXGCAndWait() = 0;
+    /// @brief Force a Full GC on the static VM
+    virtual void EtsForceFullGC() = 0;
+    /// @brief Enter static managed state and suspend all ETS managed threads
+    virtual void SuspendEtsThreads() = 0;
+    /// @brief Resume all ETS managed threads and leave static managed state
+    virtual void ResumeEtsThreads() = 0;
+    /// @brief Get ETS VM root objects as NodeInfo vector
+    virtual std::vector<arkplatform::NodeInfo> GetEtsVMRoots() = 0;
+    /// @brief Get all outgoing edges of a given static node
+    virtual void GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges) = 0;
+    /// @brief Get NodeInfo for a single static object by address
+    virtual arkplatform::NodeInfo GetEtsNodeInfo(uint64_t etsAddr) = 0;
+    /// @brief Get all static heap objects
+    virtual std::vector<arkplatform::NodeInfo> GetAllEtsObjects() = 0;
+    /// @brief Iterate all live static heap object addresses without constructing NodeInfo objects
+    virtual void IterateEtsObjects(const std::function<void(uint64_t)> &callback) = 0;
+    /**
+     * @brief Get JS<->ETS cross-VM reference mappings in a single traversal
+     * @param ecmaVM pointer to EcmaVM, only refs belonging to this VM are collected
+     */
+    virtual void GetXRefMaps(uintptr_t ecmaVM, std::unordered_map<uint64_t, uint64_t> &jsToEts,
+                             std::unordered_map<uint64_t, uint64_t> &etsToJs) = 0;
+    /// @brief Attach current thread to the VM
+    virtual bool AttachCurrentThread() = 0;
+    /// @brief Detach current thread from the VM
+    virtual bool DetachCurrentThread() = 0;
+    /// @brief Check if the current thread is attached to the VM
+    virtual bool IsCurrentThreadAttached() = 0;
 };
 
 }  // namespace arkplatform

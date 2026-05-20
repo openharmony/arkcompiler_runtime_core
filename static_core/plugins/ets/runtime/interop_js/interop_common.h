@@ -58,6 +58,10 @@ napi_unwrap_hybrid_s(napi_env env, napi_value js_object, const napi_type_tag *ty
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_wrap_hybrid_s(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
                    void *finalize_hint, const napi_type_tag *type_tag, napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_ref_get_vm(napi_ref ref, uintptr_t &result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_ref_get_value(napi_ref ref, uintptr_t &result);
 // NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 

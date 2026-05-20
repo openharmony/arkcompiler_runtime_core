@@ -64,6 +64,22 @@ public:
         return vm_;
     }
 
+    // --- Hybrid Heapdump Methods ---
+    PANDA_PUBLIC_API bool TriggerXGCAndWait() override;
+    PANDA_PUBLIC_API void EtsForceFullGC() override;
+    PANDA_PUBLIC_API void SuspendEtsThreads() override;
+    PANDA_PUBLIC_API void ResumeEtsThreads() override;
+    PANDA_PUBLIC_API std::vector<arkplatform::NodeInfo> GetEtsVMRoots() override;
+    PANDA_PUBLIC_API void GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges) override;
+    PANDA_PUBLIC_API arkplatform::NodeInfo GetEtsNodeInfo(uint64_t etsAddr) override;
+    PANDA_PUBLIC_API std::vector<arkplatform::NodeInfo> GetAllEtsObjects() override;
+    PANDA_PUBLIC_API void IterateEtsObjects(const std::function<void(uint64_t)> &callback) override;
+    PANDA_PUBLIC_API void GetXRefMaps(uintptr_t ecmaVM, std::unordered_map<uint64_t, uint64_t> &jsToEts,
+                                      std::unordered_map<uint64_t, uint64_t> &etsToJs) override;
+    PANDA_PUBLIC_API bool AttachCurrentThread() override;
+    PANDA_PUBLIC_API bool DetachCurrentThread() override;
+    PANDA_PUBLIC_API bool IsCurrentThreadAttached() override;
+
 private:
     enum class XGCSyncState { NONE, CONCURRENT_PHASE, CONCURRENT_FINISHED, REMARK_PHASE };
 
@@ -107,6 +123,8 @@ private:
     VMBarrier xgcBarrier_;
     // xgcSyncState_ is used only for debug
     thread_local static XGCSyncState xgcSyncState_;
+
+    thread_local static bool dumpManagedScopeActive_;
 
     PandaEtsVM *vm_ {nullptr};
 

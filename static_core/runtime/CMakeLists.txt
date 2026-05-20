@@ -42,6 +42,7 @@ set(SOURCES
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
     tooling/tools.cpp
+    tooling/hprof/heap_dump.cpp
     tooling/sampler/sampling_profiler.cpp
     tooling/sampler/sample_writer.cpp
     tooling/sampler/samples_record.cpp
@@ -630,6 +631,8 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
     PUBLIC ${PANDA_ROOT}/runtime
+    PUBLIC ${PANDA_ROOT}/../arkplatform
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../..
 )
 
 panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options arkassembler)
@@ -886,6 +889,11 @@ panda_add_gtest(
 add_gtests(
     arkruntime_get_method_test
     tests/getmethod_test.cpp
+)
+
+add_gtests(
+    arkruntime_heap_dump_test
+    tests/heap_dump_test.cpp
 )
 
 add_gtests(

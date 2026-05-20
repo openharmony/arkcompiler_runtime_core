@@ -529,6 +529,18 @@ void SharedReferenceStorage::VisitRoots(const GCRootVisitor &visitor)
     }
 }
 
+void SharedReferenceStorage::VisitAllRefs(const SharedRefVisitor &visitor)
+{
+    os::memory::ReadLockHolder lock(storageLock_);
+    size_t capacity = Capacity();
+    for (size_t i = 1U; i < capacity; ++i) {
+        SharedReference *ref = GetItemByIndex(i);
+        if (!ref->IsEmpty()) {
+            visitor(ref);
+        }
+    }
+}
+
 void SharedReferenceStorage::UpdateRefs(const GCRootUpdater &gcRootUpdater)
 {
     // No need lock, because we visit roots on pause and we wait XGC ConcurrentSweep for local GCs

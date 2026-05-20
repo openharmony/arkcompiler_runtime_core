@@ -26,6 +26,7 @@
 namespace ark::ets::interop::js {
 // Forward declarations
 class InteropCtx;
+class STSVMInterfaceImpl;
 }  // namespace ark::ets::interop::js
 
 namespace ark::ets::interop::js::ets_proxy {
@@ -43,6 +44,7 @@ public:
     ~SharedReferenceStorage() override;
 
     using PreInitJSObjectCallback = std::function<napi_value(SharedReference **)>;
+    using SharedRefVisitor = std::function<void(SharedReference *)>;
 
     /// @return current storage size
     size_t Size() const
@@ -82,6 +84,12 @@ public:
      * @param visitor gc root visitor
      */
     void VisitRoots(const GCRootVisitor &visitor) override;
+
+    /**
+     * @brief Visit all non-empty refs in the storage
+     * @param visitor callback for each non-empty SharedReference
+     */
+    void VisitAllRefs(const SharedRefVisitor &visitor);
 
     /// Update ref in the storage for EtsObject-s after moving phase
     void UpdateRefs(const GCRootUpdater &gcRootUpdater) override;
@@ -177,6 +185,7 @@ private:
     // Allocator calls our protected ctor
     friend class mem::Allocator;
     friend class SharedReferenceStorageVerifier;
+    friend class ark::ets::interop::js::STSVMInterfaceImpl;
 
     PANDA_PUBLIC_API static SharedReferenceStorage *sharedStorage_;
 
