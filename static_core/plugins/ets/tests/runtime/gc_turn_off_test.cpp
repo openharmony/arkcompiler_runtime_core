@@ -77,9 +77,10 @@ TEST_F(GCTurnOffTest, GCTurnOffTest)
     // In milliseconds
     constexpr uint64_t TIME_TO_WAIT_IN_MS = 2ULL * 1000ULL;
     constexpr uint64_t THRESHOLD_PERCENT = 150ULL;  // If system is highly loaded we can get huge overtime
+    constexpr uint64_t DOWN_THRESHOLD = 5ULL;       // Sometimes the time is slightly less
 
     auto waitedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-    ASSERT_GE(waitedTime, TIME_TO_WAIT_IN_MS);
+    ASSERT_GE(waitedTime, TIME_TO_WAIT_IN_MS * (100ULL - DOWN_THRESHOLD) / 100ULL);
     ASSERT_LT(waitedTime, TIME_TO_WAIT_IN_MS * (100ULL + THRESHOLD_PERCENT) / 100ULL);
 
     auto endLimit = GetGCLimit(gc);
