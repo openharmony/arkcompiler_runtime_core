@@ -2800,6 +2800,8 @@ void G1GC<LanguageConfig>::OnWaitForIdleFail()
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostponeGCStart()
 {
+    // Lock it to ensure that the operations of PostponeGCStart and PostponeGCEnd do not occur concurrently.
+    os::memory::LockHolder lh(postponeGcLock_);
     regionGarbageRateThreshold_ = 0;
     this->SetFastGCFlag(true);
     if (sensitiveSize_ == 0) {
@@ -2813,6 +2815,13 @@ void G1GC<LanguageConfig>::PostponeGCStart()
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostponeGCEnd()
 {
+    // Lock it to ensure that the operations of PostponeGCStart and PostponeGCEnd do not occur concurrently.
+    os::memory::LockHolder lh(postponeGcLock_);
+    if (!GC::IsPostponeEnabled()) {
+        // The PostponeGCStart must be called before PostponeGCEnd.
+        // Otherwise, simply skip it to avoid abnormal GC parameter adjustments.
+        return;
+    }
     ASSERT(!this->IsPostponeEnabled() || (regionGarbageRateThreshold_ == 0 && this->GetFastGCFlag()));
     regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
     this->SetFastGCFlag(false);
