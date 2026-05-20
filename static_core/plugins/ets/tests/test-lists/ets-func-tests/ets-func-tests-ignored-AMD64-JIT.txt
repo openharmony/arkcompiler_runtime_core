@@ -1,2 +1,5 @@
 #34220
 ets_func_tests/std/concurrency/workerlocal_test.ets
+
+#34823
+ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
