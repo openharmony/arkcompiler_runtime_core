@@ -197,6 +197,8 @@ _libarkruntime_calculated_sources = [
   "execution/coroutines/coroutine.cpp",
   "execution/coroutines/coroutine_manager.cpp",
   "execution/coroutines/coroutine_worker.cpp",
+  "execution/dfx/async_stack_helper.cpp",
+  "execution/dfx/async_stack_scope.cpp",
   "execution/coroutines/stackful/stackful_coroutine.cpp",
   "execution/coroutines/stackful/stackful_coroutine_manager.cpp",
   "execution/coroutines/stackful/stackful_coroutine_worker.cpp",

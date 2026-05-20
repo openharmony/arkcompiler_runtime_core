@@ -26,6 +26,7 @@
 #include "runtime/execution/coroutines/coroutine.h"
 #include "runtime/execution/coroutines/stackful/stackful_coroutine.h"
 #include "runtime/execution/coroutines/stackful/stackful_coroutine_manager.h"
+#include "runtime/execution/dfx/async_stack_helper.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
@@ -225,6 +226,9 @@ bool StackfulCoroutineManager::IsJobSwitchDisabled()
 
 void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
+    GetAsyncStackHelper().Initialize();
+    GetAsyncStackHelper().CheckLoadDfxAsyncStackFunc();
+
     // enable stats collection if needed
     if (GetConfig().enablePerfStats) {
         stats_.Enable();
@@ -588,6 +592,11 @@ LaunchResult StackfulCoroutineManager::LaunchImpl(Job *job, const JobWorkerThrea
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
         return LaunchResult::RESOURCE_LIMIT_EXCEED;
     }
+
+    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    job->SetAsyncStackID(stackId);
+    LOG(DEBUG, COROUTINES) << "LaunchImpl: coroutine " << co->GetName() << " with async stack ID " << stackId;
+
     {
         os::memory::LockHolder lkWorkers(workersLock_);
         auto *w = ChooseWorkerForCoroutine(co);
@@ -621,6 +630,12 @@ LaunchResult StackfulCoroutineManager::LaunchImmediatelyImpl(Job *job, const Job
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImmediatelyImpl: failed to create a coroutine!";
         return LaunchResult::RESOURCE_LIMIT_EXCEED;
     }
+
+    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    job->SetAsyncStackID(stackId);
+    LOG(DEBUG, COROUTINES) << "LaunchImmediatelyImpl: coroutine " << co->GetName() << " with async stack ID "
+                           << stackId;
+
     StackfulCoroutineWorker *w = nullptr;
     {
         os::memory::LockHolder lkWorkers(workersLock_);

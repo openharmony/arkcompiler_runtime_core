@@ -20,11 +20,25 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/execution/coroutines/coroutine_worker.h"
+#include "runtime/execution/dfx/async_stack_helper.h"
 #include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_manager.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/runtime.h"
 
 namespace ark::ets::intrinsics::taskpool {
+namespace {
+
+dfx::AsyncStackHelper *GetAsyncStackHelper()
+{
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    if (executionCtx == nullptr || executionCtx->GetManager() == nullptr) {
+        return nullptr;
+    }
+    return &executionCtx->GetManager()->GetAsyncStackHelper();
+}
+
+}  // namespace
 
 static std::atomic<EtsInt> g_taskId = 1;
 static std::atomic<EtsInt> g_taskGroupId = 1;
@@ -103,6 +117,33 @@ extern "C" EtsBoolean CurrentWorkerHasPendingLocalJobs()
     auto *worker = static_cast<CoroutineWorker *>(executionCtx->GetWorker());
     ASSERT(worker != nullptr);
     return ark::ets::ToEtsBoolean(worker->HasPendingLocalJobs());
+}
+
+extern "C" EtsLong CollectAsyncStack()
+{
+    auto *asyncStackHelper = GetAsyncStackHelper();
+    if (asyncStackHelper == nullptr) {
+        return 0;
+    }
+    return static_cast<EtsLong>(asyncStackHelper->CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH));
+}
+
+extern "C" EtsLong GetSubmitterStackId()
+{
+    auto *asyncStackHelper = GetAsyncStackHelper();
+    if (asyncStackHelper == nullptr) {
+        return 0;
+    }
+    return static_cast<EtsLong>(asyncStackHelper->GetStackId());
+}
+
+extern "C" void SetSubmitterStackId(EtsLong stackId)
+{
+    auto *asyncStackHelper = GetAsyncStackHelper();
+    if (asyncStackHelper == nullptr) {
+        return;
+    }
+    asyncStackHelper->SetStackId(static_cast<uint64_t>(stackId));
 }
 
 }  // namespace ark::ets::intrinsics::taskpool
