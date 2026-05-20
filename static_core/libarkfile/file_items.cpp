@@ -25,7 +25,7 @@ namespace ark::panda_file {
 
 #include <libarkfile/include/file_items_gen.inc>
 
-size_t IndexedItem::itemAllocIdNext_ = 0;
+std::atomic_size_t IndexedItem::itemAllocIdNext_ {0};
 
 template <class Tag, class Val>
 static bool WriteUlebTaggedValue(Writer *writer, Tag tag, Val v)

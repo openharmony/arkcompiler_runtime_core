@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,13 @@
 #include "libarkbase/utils/leb128.h"
 #include "securec.h"
 
-#include <cstdint>
+#include <algorithm>
+#include <array>
 #include <cerrno>
+#include <cstdint>
 
 #include <limits>
+#include <type_traits>
 #include <vector>
 
 namespace ark::panda_file {
@@ -33,7 +36,21 @@ class Writer {
 public:
     virtual bool WriteByte(uint8_t byte) = 0;
 
-    virtual bool WriteBytes(const std::vector<uint8_t> &bytes) = 0;
+    virtual bool WriteBytes(const uint8_t *bytes, size_t size)
+    {
+        for (size_t i = 0; i < size; i++) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (!WriteByte(bytes[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    virtual bool WriteBytes(const std::vector<uint8_t> &bytes)
+    {
+        return WriteBytes(bytes.data(), bytes.size());
+    }
 
     virtual size_t GetOffset() const = 0;
 
@@ -48,10 +65,13 @@ public:
     {
         size_t offset = GetOffset();
         size_t n = RoundUp(offset, alignment) - offset;
-        while (n-- > 0) {
-            if (!WriteByte(0)) {
+        static constexpr std::array<uint8_t, 64U> ZERO_PADDING {};
+        while (n > 0) {
+            auto chunkSize = std::min(n, ZERO_PADDING.size());
+            if (!WriteBytes(ZERO_PADDING.data(), chunkSize)) {
                 return false;
             }
+            n -= chunkSize;
         }
         return true;
     }
@@ -77,19 +97,30 @@ public:
     template <class T>
     bool WriteUleb128(T v)
     {
-        size_t n = leb128::UnsignedEncodingSize(v);
-        std::vector<uint8_t> out(n);
-        leb128::EncodeUnsigned(v, out.data());
-        return WriteBytes(out);
+        static_assert(std::is_integral_v<T>, "T must be integral");
+        if constexpr (std::is_signed_v<T>) {
+            ASSERT(v >= 0);
+        }
+        using UnsignedT = std::make_unsigned_t<T>;
+        constexpr size_t MAX_BYTES =
+            (std::numeric_limits<UnsignedT>::digits + leb128::PAYLOAD_WIDTH - 1) / leb128::PAYLOAD_WIDTH;
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        uint8_t out[MAX_BYTES];
+        size_t n = leb128::EncodeUnsigned(static_cast<UnsignedT>(v), out);
+        return WriteBytes(out, n);
     }
 
     template <class T>
     bool WriteSleb128(T v)
     {
-        size_t n = leb128::SignedEncodingSize(v);
-        std::vector<uint8_t> out(n);
-        leb128::EncodeSigned(v, out.data());
-        return WriteBytes(out);
+        static_assert(std::is_signed_v<T>, "T must be signed");
+        using UnsignedT = std::make_unsigned_t<T>;
+        constexpr size_t MAX_BYTES =
+            (std::numeric_limits<UnsignedT>::digits + leb128::PAYLOAD_WIDTH - 1) / leb128::PAYLOAD_WIDTH + 1;
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        uint8_t out[MAX_BYTES];
+        size_t n = leb128::EncodeSigned(v, out);
+        return WriteBytes(out, n);
     }
 
     virtual void ReserveBufferCapacity([[maybe_unused]] size_t size) {}
@@ -111,6 +142,8 @@ class MemoryWriter : public Writer {
 public:
     PANDA_PUBLIC_API MemoryWriter();
 
+    using Writer::WriteBytes;
+
     void CountChecksum(bool counting) override
     {
         countChecksum_ = counting;
@@ -123,12 +156,11 @@ public:
         return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
     }
 
-    bool WriteByte(uint8_t byte) override
-    {
-        return WriteBytes({byte});
-    }
+    bool WriteByte(uint8_t byte) override;
 
     bool WriteBytes(const std::vector<uint8_t> &bytes) override;
+
+    bool WriteBytes(const uint8_t *bytes, size_t size) override;
 
     const std::vector<uint8_t> &GetData()
     {
@@ -152,6 +184,8 @@ public:
 
     ~MemoryBufferWriter() override = default;
 
+    using Writer::WriteBytes;
+
     NO_COPY_SEMANTIC(MemoryBufferWriter);
     NO_MOVE_SEMANTIC(MemoryBufferWriter);
 
@@ -166,12 +200,11 @@ public:
         return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
     }
 
-    bool WriteByte(uint8_t byte) override
-    {
-        return WriteBytes({byte});
-    }
+    bool WriteByte(uint8_t byte) override;
 
     bool WriteBytes(const std::vector<uint8_t> &bytes) override;
+
+    bool WriteBytes(const uint8_t *bytes, size_t size) override;
 
     size_t GetOffset() const override
     {
@@ -191,38 +224,24 @@ public:
 
     PANDA_PUBLIC_API ~FileWriter() override;
 
+    using Writer::WriteBytes;
+
     NO_COPY_SEMANTIC(FileWriter);
     NO_MOVE_SEMANTIC(FileWriter);
 
-    void CountChecksum(bool counting) override
-    {
-        countChecksum_ = counting;
-    }
+    void CountChecksum(bool counting) override;
 
-    bool WriteChecksum(size_t offset) override
-    {
-        static constexpr size_t MASK = 0xff;
-        static constexpr size_t WIDTH = std::numeric_limits<uint8_t>::digits;
-
-        size_t length = sizeof(uint32_t);
-        if (offset + length > buffer_.size()) {
-            return false;
-        }
-        uint32_t temp = checksum_;
-        for (size_t i = 0; i < length; i++) {
-            buffer_[offset + i] = temp & MASK;
-            temp >>= WIDTH;
-        }
-        return true;
-    }
+    bool WriteChecksum(size_t offset) override;
 
     bool WriteByte(uint8_t data) override;
 
     bool WriteBytes(const std::vector<uint8_t> &bytes) override;
 
+    bool WriteBytes(const uint8_t *bytes, size_t size) override;
+
     size_t GetOffset() const override
     {
-        return buffer_.size();
+        return offset_;
     }
 
     uint32_t GetChecksum() const
@@ -237,20 +256,20 @@ public:
 
     void ReserveBufferCapacity(size_t size) override
     {
-        buffer_.reserve(size);
-    }
-
-    const std::vector<uint8_t> &GetBuffer() const
-    {
-        return buffer_;
+        buffer_.reserve(seekable_ ? std::min(size, BUFFER_CAPACITY) : size);
     }
 
     bool FinishWrite() override;
 
 private:
+    bool FlushBuffer();
+
+    static constexpr size_t BUFFER_CAPACITY = 1U << 20U;
     FILE *file_;
     uint32_t checksum_;
     bool countChecksum_ {false};
+    bool seekable_ {false};
+    size_t offset_ {0};
     std::vector<uint8_t> buffer_;
 };
 

@@ -22,13 +22,60 @@
 
 namespace ark::panda_file {
 
+namespace {
+bool HasNestedItems(BaseItem *item)
+{
+    // Keep in sync with BaseItem::Visit overrides. Today only ClassItem owns nested fields/methods.
+    return item->GetItemType() == ItemTypes::CLASS_ITEM;
+}
+
+template <class Callback>
+void VisitNestedItems(BaseItem *item, Callback &&cb)
+{
+    ASSERT(HasNestedItems(item));
+    switch (item->GetItemType()) {
+        case ItemTypes::CLASS_ITEM: {
+            bool visitMore = true;
+            auto visitor = [&cb, &visitMore](BaseItem *paramItem) {
+                visitMore = cb(paramItem);
+                return visitMore;
+            };
+            auto *classItem = static_cast<ClassItem *>(item);
+            classItem->VisitFields(visitor);
+            if (visitMore) {
+                classItem->VisitMethods(visitor);
+            }
+            return;
+        }
+        default:
+            break;
+    }
+    UNREACHABLE();
+}
+
+bool IsReusableRegionBoundary(BaseItem *item, BaseItem *containerEnd)
+{
+    return item == nullptr || item == containerEnd || item->NeedsEmit();
+}
+
+bool IsReusableRegionIndexItem(IndexedItem *item)
+{
+    if (item->NeedsEmit()) {
+        return true;
+    }
+    if (item->GetIndexType() != IndexType::CLASS) {
+        return false;
+    }
+    return static_cast<TypeItem *>(item)->GetType().IsPrimitive();
+}
+}  // namespace
+
 class ItemDeduper {
 public:
     template <class T>
     T *Deduplicate(T *item)
     {
         static_assert(std::is_base_of_v<BaseItem, T>);
-
         if (auto iter = alreadyDedupedItems_.find(item); iter != alreadyDedupedItems_.end()) {
             ASSERT(item->GetItemType() == iter->second->GetItemType());
             return static_cast<T *>(iter->second);
@@ -54,6 +101,13 @@ public:
         return result;
     }
 
+    LineNumberProgramItem *Deduplicate(LineNumberProgramItem *item)
+    {
+        auto *deduplicated = Deduplicate<LineNumberProgramItem>(item);
+        alreadyDedupedItems_.try_emplace(item, deduplicated);
+        return deduplicated;
+    }
+
     size_t GetUniqueCount() const
     {
         return items_.size();
@@ -68,6 +122,8 @@ private:
         NO_COPY_SEMANTIC(ItemWriter);
         NO_MOVE_SEMANTIC(ItemWriter);
 
+        using Writer::WriteBytes;
+
         bool WriteByte(uint8_t byte) override
         {
             buf_->push_back(byte);
@@ -77,8 +133,16 @@ private:
 
         bool WriteBytes(const std::vector<uint8_t> &bytes) override
         {
-            buf_->insert(buf_->end(), bytes.cbegin(), bytes.cend());
-            offset_ += bytes.size();
+            return WriteBytes(bytes.data(), bytes.size());
+        }
+
+        bool WriteBytes(const uint8_t *bytes, size_t size) override
+        {
+            if (size == 0) {
+                return true;
+            }
+            buf_->insert(buf_->end(), bytes, bytes + size);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            offset_ += size;
             return true;
         }
 
@@ -131,6 +195,7 @@ private:
         {
             ASSERT(item_->NeedsEmit());
 
+            data_.reserve(item_->GetSize());
             ItemWriter writer(&data_, item_->GetOffset());
             [[maybe_unused]] auto res = item_->Write(&writer);
             ASSERT(res);
@@ -285,6 +350,7 @@ LineNumberProgramItem *ItemContainer::CreateLineNumberProgramItem()
 {
     auto it = items_.insert(debugItemsEnd_, std::make_unique<LineNumberProgramItem>());
     auto *item = static_cast<LineNumberProgramItem *>(it->get());
+    lineNumberProgramItems_.push_back(item);
     [[maybe_unused]] auto res = lineNumberProgramIndexItem_.Add(item);
     ASSERT(res);
     return item;
@@ -301,8 +367,12 @@ void ItemContainer::DeduplicateLineNumberProgram(DebugInfoItem *item, ItemDedupe
     auto *deduplicated = deduper->Deduplicate(lineNumberProgram);
     if (deduplicated != lineNumberProgram) {
         item->SetLineNumberProgram(deduplicated);
-        lineNumberProgramIndexItem_.IncRefCount(deduplicated);
-        lineNumberProgramIndexItem_.DecRefCount(lineNumberProgram);
+        ASSERT(deduplicated->GetRefCount() > 0);
+        deduplicated->IncRefCount();
+        lineNumberProgram->DecRefCount();
+        if (lineNumberProgram->GetRefCount() == 0) {
+            lineNumberProgram->SetNeedsEmit(false);
+        }
     }
 }
 
@@ -319,7 +389,11 @@ void ItemContainer::DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debugI
     auto *deduplicated = debugInfoDeduper->Deduplicate(debugItem);
     if (deduplicated != debugItem) {
         method->SetDebugInfo(deduplicated);
-        lineNumberProgramIndexItem_.DecRefCount(debugItem->GetLineNumberProgram());
+        auto *lineNumberProgram = debugItem->GetLineNumberProgram();
+        lineNumberProgram->DecRefCount();
+        if (lineNumberProgram->GetRefCount() == 0) {
+            lineNumberProgram->SetNeedsEmit(false);
+        }
     }
 }
 
@@ -343,6 +417,8 @@ void ItemContainer::DeduplicateCodeAndDebugInfo()
     ItemDeduper debugDeduper;
     ItemDeduper codeDeduper;
 
+    lineNumberProgramIndexItem_.ClearItems();
+
     for (auto &p : classMap_) {
         auto *item = p.second;
         if (item->IsForeign()) {
@@ -358,6 +434,8 @@ void ItemContainer::DeduplicateCodeAndDebugInfo()
             return true;
         });
     }
+
+    RebuildLineNumberProgramIndexItems();
 }
 
 static void DeduplicateAnnotationValue(AnnotationItem *annotationItem, ItemDeduper *deduper)
@@ -519,17 +597,25 @@ uint32_t ItemContainer::DeleteItems()
         return !item->GetDependencyMark() && item->NeedsEmit();
     };
     items_.remove_if(shouldRemoveAnnotationItem);
-    items_.remove_if([this](const std::unique_ptr<BaseItem> &item) {
+    std::unordered_set<LineNumberProgramItem *> removedLineNumberPrograms;
+    items_.remove_if([this, &removedLineNumberPrograms](const std::unique_ptr<BaseItem> &item) {
         if (!item->GetDependencyMark()) {
             // lineNumberProgramIndexItem_ reference LineNumberProgramItem.
             // remove from lnp before item deleted if item not necessary.
-            if (item->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM) {
+            if (item->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM && item->NeedsEmit()) {
                 auto lnpitem = static_cast<LineNumberProgramItem *>(item.get());
                 lineNumberProgramIndexItem_.Remove(lnpitem);
+                removedLineNumberPrograms.insert(lnpitem);
             }
         }
         return !item->GetDependencyMark() && item->NeedsEmit();
     });
+    if (!removedLineNumberPrograms.empty()) {
+        auto newEnd = std::remove_if(
+            lineNumberProgramItems_.begin(), lineNumberProgramItems_.end(),
+            [&removedLineNumberPrograms](auto *item) { return removedLineNumberPrograms.count(item) != 0; });
+        lineNumberProgramItems_.erase(newEnd, lineNumberProgramItems_.end());
+    }
     return 0;
 }
 
@@ -553,6 +639,16 @@ void ItemContainer::FillExportMap()
 
 uint32_t ItemContainer::ComputeLayout()
 {
+    return ComputeLayout(true);
+}
+
+uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection)
+{
+    return ComputeLayout(rebuildRegionSection, true);
+}
+
+uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection, bool updateOrderIndexes)
+{
     FillExportMap();
 
     uint32_t numClasses = classMap_.size();
@@ -564,10 +660,17 @@ uint32_t ItemContainer::ComputeLayout()
         File::METADATA_FLAG_SIZE + (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
     uint32_t curOffset = exportDataOffset + (numExportClasses + numLiteralarrays) * ID_SIZE + metadataSize;
 
-    UpdateOrderIndexes();
+    if (updateOrderIndexes) {
+        UpdateOrderIndexes();
+    }
     UpdateLiteralIndexes();
 
-    RebuildRegionSection();
+    if (rebuildRegionSection) {
+        RebuildRegionSection();
+        regionSectionBuilt_ = true;
+    } else {
+        ASSERT(regionSectionBuilt_);
+    }
     RebuildLineNumberProgramIndex();
 
     regionSectionItem_.SetOffset(curOffset);
@@ -609,12 +712,26 @@ void ItemContainer::RebuildLineNumberProgramIndex()
     lineNumberProgramIndexItem_.UpdateItems(nullptr, nullptr);
 }
 
+void ItemContainer::RebuildLineNumberProgramIndexItems()
+{
+    lineNumberProgramIndexItem_.ClearItems();
+    for (auto *lineNumberProgram : lineNumberProgramItems_) {
+        if (!lineNumberProgram->NeedsEmit()) {
+            continue;
+        }
+
+        [[maybe_unused]] auto res = lineNumberProgramIndexItem_.Add(lineNumberProgram);
+        ASSERT(res);
+    }
+}
+
 void ItemContainer::RebuildRegionSection()
 {
     regionSectionItem_.Reset();
+    std::vector<IndexedItem *> addedItems;
 
     for (auto &item : foreignItems_) {
-        ProcessIndexDependecies(item.get());
+        ProcessIndexDependecies(item.get(), &addedItems);
     }
 
     for (auto &item : items_) {
@@ -622,7 +739,7 @@ void ItemContainer::RebuildRegionSection()
             continue;
         }
 
-        ProcessIndexDependecies(item.get());
+        ProcessIndexDependecies(item.get(), &addedItems);
     }
 
     if (!regionSectionItem_.IsEmpty()) {
@@ -632,16 +749,79 @@ void ItemContainer::RebuildRegionSection()
     regionSectionItem_.UpdateItems();
 }
 
+bool ItemContainer::CanReuseRegionSectionForItem(BaseItem *item)
+{
+    auto validateDeps = [](BaseItem *regionItem) {
+        for (auto *dep : regionItem->GetIndexDependencies()) {
+            if (!IsReusableRegionIndexItem(dep) || !dep->HasIndex(regionItem)) {
+                return false;
+            }
+        }
+        return true;
+    };
+    if (!validateDeps(item)) {
+        return false;
+    }
+    if (!HasNestedItems(item)) {
+        return true;
+    }
+
+    bool canReuse = true;
+    auto validateNestedDeps = [&validateDeps, &canReuse](BaseItem *paramItem) {
+        if (canReuse) {
+            canReuse = validateDeps(paramItem);
+        }
+        return canReuse;
+    };
+    VisitNestedItems(item, validateNestedDeps);
+    return canReuse;
+}
+
+bool ItemContainer::CanReuseRegionSection(bool updateOrderIndexes, bool checkDependencies)
+{
+    if (!regionSectionBuilt_ || !regionSectionItem_.CanReuse(end_)) {
+        return false;
+    }
+
+    if (!checkDependencies) {
+        return true;
+    }
+
+    // Re-check with current emission state after final deduplication.
+    if (updateOrderIndexes) {
+        UpdateOrderIndexes();
+    }
+
+    for (auto &item : foreignItems_) {
+        if (!CanReuseRegionSectionForItem(item.get())) {
+            return false;
+        }
+    }
+
+    for (auto &item : items_) {
+        if (!item->NeedsEmit()) {
+            continue;
+        }
+        if (!CanReuseRegionSectionForItem(item.get())) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void ItemContainer::UpdateOrderIndexes()
 {
     size_t idx = 0;
 
     for (auto &item : foreignItems_) {
         item->SetOrderIndex(idx++);
-        item->Visit([&idx](BaseItem *paramItem) {
-            paramItem->SetOrderIndex(idx++);
-            return true;
-        });
+        if (HasNestedItems(item.get())) {
+            VisitNestedItems(item.get(), [&idx](BaseItem *paramItem) {
+                paramItem->SetOrderIndex(idx++);
+                return true;
+            });
+        }
     }
 
     for (auto &item : items_) {
@@ -650,10 +830,12 @@ void ItemContainer::UpdateOrderIndexes()
         }
 
         item->SetOrderIndex(idx++);
-        item->Visit([&idx](BaseItem *paramItem) {
-            paramItem->SetOrderIndex(idx++);
-            return true;
-        });
+        if (HasNestedItems(item.get())) {
+            VisitNestedItems(item.get(), [&idx](BaseItem *paramItem) {
+                paramItem->SetOrderIndex(idx++);
+                return true;
+            });
+        }
     }
 
     end_->SetOrderIndex(idx++);
@@ -673,22 +855,14 @@ void ItemContainer::ReorderItems(ark::panda_file::pgo::ProfileOptimizer *profile
     profileOpt->ProfileGuidedRelayout(items_);
 }
 
-void ItemContainer::ProcessIndexDependecies(BaseItem *item)
+void ItemContainer::ProcessIndexDependecies(BaseItem *item, std::vector<IndexedItem *> *addedItems)
 {
-    auto deps = item->GetIndexDependencies();
-
-    item->Visit([&deps](BaseItem *paramItem) {
-        const auto &itemDeps = paramItem->GetIndexDependencies();
-        deps.insert(deps.end(), itemDeps.cbegin(), itemDeps.cend());
-        return true;
-    });
-
     if (regionSectionItem_.IsEmpty()) {
         regionSectionItem_.AddHeader();
         regionSectionItem_.GetCurrentHeader()->SetStart(item);
     }
 
-    if (regionSectionItem_.GetCurrentHeader()->Add(deps)) {
+    if (regionSectionItem_.GetCurrentHeader()->Add(item, addedItems)) {
         return;
     }
 
@@ -696,8 +870,8 @@ void ItemContainer::ProcessIndexDependecies(BaseItem *item)
     regionSectionItem_.AddHeader();
     regionSectionItem_.GetCurrentHeader()->SetStart(item);
 
-    if (!regionSectionItem_.GetCurrentHeader()->Add(deps)) {
-        LOG(FATAL, PANDAFILE) << "Cannot add " << deps.size() << " items to index";
+    if (!regionSectionItem_.GetCurrentHeader()->Add(item, addedItems)) {
+        LOG(FATAL, PANDAFILE) << "Cannot add item index dependencies";
     }
 }
 
@@ -750,14 +924,14 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
     return writer->Write<uint32_t>(indexSectionOff);
 }
 
-bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset)
+bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset, bool rebuildRegionSection,
+                                bool updateOrderIndexes)
 {
-    uint32_t fileSize = ComputeLayout();
+    uint32_t fileSize = ComputeLayout(rebuildRegionSection, updateOrderIndexes);
     writer->ReserveBufferCapacity(fileSize);
 
-    std::vector<uint8_t> magic;
-    magic.assign(File::MAGIC.cbegin(), File::MAGIC.cend());
-    if (!writer->WriteBytes(magic)) {
+    const auto *magic = reinterpret_cast<const uint8_t *>(File::MAGIC.data());
+    if (!writer->WriteBytes(magic, File::MAGIC.size())) {
         return false;
     }
 
@@ -769,8 +943,7 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset)
     writer->CountChecksum(true);
 
     const auto &version = bytecodeVersion_.has_value() ? bytecodeVersion_.value() : VERSION;
-    std::vector<uint8_t> versionVec(std::begin(version), std::end(version));
-    if (!writer->WriteBytes(versionVec)) {
+    if (!writer->WriteBytes(version.data(), version.size())) {
         return false;
     }
 
@@ -816,19 +989,27 @@ bool ItemContainer::WriteExportData(Writer *writer)
     return isMetadataSkipped || metadataItem_->Write(writer);
 }
 
-bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLayout)
+bool ItemContainer::PrepareRegionSectionForWrite(RegionSectionMode regionSectionMode, bool *rebuildRegionSection,
+                                                 bool *updateOrderIndexes)
 {
-    if (deduplicateItems) {
-        DeduplicateItems(computeLayout);
+    if (regionSectionMode == RegionSectionMode::REBUILD) {
+        return true;
     }
 
-    ssize_t checksumOffset = -1;
-    if (!WriteHeader(writer, &checksumOffset)) {
+    UpdateOrderIndexes();
+    *updateOrderIndexes = false;
+    const bool checkDependencies = regionSectionMode == RegionSectionMode::REUSE_REQUIRED;
+    if (!CanReuseRegionSection(false, checkDependencies)) {
         return false;
     }
-    ASSERT(checksumOffset != -1);
 
-    // Write class idx
+    *rebuildRegionSection = false;
+    return true;
+}
+
+bool ItemContainer::WriteBody(Writer *writer)
+{
+    // Write class index table.
     for (auto &entry : classMap_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
@@ -839,14 +1020,12 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
         return false;
     }
 
-    // Write literalArray idx
+    // Write literal array index table.
     for (auto &entry : literalarrayMap_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
         }
     }
-
-    // Write index section
 
     if (!regionSectionItem_.Write(writer)) {
         return false;
@@ -859,27 +1038,49 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
     }
 
     for (auto &item : items_) {
-        if (!item->NeedsEmit()) {
-            continue;
-        }
-
-        if (!writer->Align(item->Alignment()) || !item->Write(writer)) {
+        if (item->NeedsEmit() && (!writer->Align(item->Alignment()) || !item->Write(writer))) {
             return false;
         }
     }
 
-    if (!writer->Align(lineNumberProgramIndexItem_.Alignment())) {
+    return writer->Align(lineNumberProgramIndexItem_.Alignment()) && lineNumberProgramIndexItem_.Write(writer);
+}
+
+bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLayout)
+{
+    return Write(writer, deduplicateItems, computeLayout, RegionSectionMode::REBUILD);
+}
+
+bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLayout,
+                          RegionSectionMode regionSectionMode)
+{
+    if (regionSectionMode != RegionSectionMode::REBUILD && computeLayout) {
         return false;
     }
 
-    // Write line number program idx
+    if (deduplicateItems) {
+        DeduplicateItems(computeLayout);
+    }
 
-    if (!lineNumberProgramIndexItem_.Write(writer)) {
+    ssize_t checksumOffset = -1;
+    auto rebuildRegionSection = true;
+    auto updateOrderIndexes = true;
+    if (!PrepareRegionSectionForWrite(regionSectionMode, &rebuildRegionSection, &updateOrderIndexes)) {
+        return false;
+    }
+    if (!WriteHeader(writer, &checksumOffset, rebuildRegionSection, updateOrderIndexes)) {
+        return false;
+    }
+    ASSERT(checksumOffset != -1);
+
+    if (!WriteBody(writer)) {
         return false;
     }
 
     writer->CountChecksum(false);
-    writer->WriteChecksum(checksumOffset);
+    if (!writer->WriteChecksum(checksumOffset)) {
+        return false;
+    }
 
     return writer->FinishWrite();
 }
@@ -1014,32 +1215,67 @@ bool ItemContainer::RegionHeaderItem::Write(Writer *writer)
     return true;
 }
 
-bool ItemContainer::RegionHeaderItem::Add(const std::list<IndexedItem *> &items)
+bool ItemContainer::RegionHeaderItem::AddIndexDependency(IndexedItem *item, std::vector<IndexedItem *> *addedItems)
 {
-    std::list<IndexedItem *> addedItems;
+    auto type = item->GetIndexType();
+    ASSERT(type != IndexType::NONE);
 
+    auto *indexItem = GetIndexByType(type);
+
+    if (indexItem->Has(item)) {
+        return true;
+    }
+
+    if (!indexItem->Add(item)) {
+        return false;
+    }
+
+    addedItems->push_back(item);
+    return true;
+}
+
+bool ItemContainer::RegionHeaderItem::AddIndexDependencies(const std::list<IndexedItem *> &items,
+                                                           std::vector<IndexedItem *> *addedItems)
+{
     for (auto *item : items) {
-        auto type = item->GetIndexType();
-        ASSERT(type != IndexType::NONE);
-
-        auto *indexItem = GetIndexByType(type);
-
-        if (indexItem->Has(item)) {
-            continue;
-        }
-
-        if (!indexItem->Add(item)) {
-            Remove(addedItems);
+        if (!AddIndexDependency(item, addedItems)) {
             return false;
         }
+    }
+    return true;
+}
 
-        addedItems.push_back(item);
+bool ItemContainer::RegionHeaderItem::Add(BaseItem *item, std::vector<IndexedItem *> *addedItems)
+{
+    addedItems->clear();
+    addedItems->reserve(item->GetIndexDependencies().size());
+
+    if (!AddIndexDependencies(item->GetIndexDependencies(), addedItems)) {
+        Remove(*addedItems);
+        return false;
+    }
+
+    if (!HasNestedItems(item)) {
+        return true;
+    }
+
+    bool added = true;
+    auto addNestedDeps = [this, &added, addedItems](BaseItem *paramItem) {
+        if (added) {
+            added = AddIndexDependencies(paramItem->GetIndexDependencies(), addedItems);
+        }
+        return true;
+    };
+    VisitNestedItems(item, addNestedDeps);
+    if (!added) {
+        Remove(*addedItems);
+        return false;
     }
 
     return true;
 }
 
-void ItemContainer::RegionHeaderItem::Remove(const std::list<IndexedItem *> &items)
+void ItemContainer::RegionHeaderItem::Remove(const std::vector<IndexedItem *> &items)
 {
     for (auto *item : items) {
         auto type = item->GetIndexType();
@@ -1054,8 +1290,19 @@ bool ItemContainer::IndexItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
 
+    const auto writeItem = [writer](IndexedItem *item) { return writer->Write<uint32_t>(item->GetOffset()); };
+
+    if (useVectorIndex_) {
+        for (auto *item : vectorIndex_) {
+            if (!writeItem(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     for (auto *item : index_) {
-        if (!writer->Write<uint32_t>(item->GetOffset())) {
+        if (!writeItem(item)) {
             return false;
         }
     }
@@ -1085,17 +1332,51 @@ ItemTypes ItemContainer::IndexItem::GetItemType() const
 
 bool ItemContainer::IndexItem::Add(IndexedItem *item)
 {
-    auto size = index_.size();
+    auto size = GetNumItems();
     ASSERT(size <= maxIndex_);
 
     if (size == maxIndex_) {
         return false;
     }
 
+    if (useVectorIndex_) {
+        // RegionHeaderItem checks membership before calling Add; keep this path append-only.
+        ASSERT(!Has(item));
+        vectorIndex_.push_back(item);
+        AddToIndexSet(item->GetItemAllocId());
+        return true;
+    }
+
     auto res = index_.insert(item);
     ASSERT(res.second);
-
+    if (!res.second) {
+        return false;
+    }
+    AddToIndexSet(item->GetItemAllocId());
     return res.second;
+}
+
+bool ItemContainer::IndexItem::CanReuse() const
+{
+    if (useVectorIndex_) {
+        return std::all_of(vectorIndex_.cbegin(), vectorIndex_.cend(),
+                           [](auto *item) { return IsReusableRegionIndexItem(item); });
+    }
+    return std::all_of(index_.cbegin(), index_.cend(), [](auto *item) { return IsReusableRegionIndexItem(item); });
+}
+
+bool ItemContainer::RegionHeaderItem::CanReuse(BaseItem *containerEnd) const
+{
+    if (!IsReusableRegionBoundary(start_, containerEnd) || !IsReusableRegionBoundary(end_, containerEnd)) {
+        return false;
+    }
+    return std::all_of(indexes_.cbegin(), indexes_.cend(), [](const auto *index) { return index->CanReuse(); });
+}
+
+bool ItemContainer::RegionSectionItem::CanReuse(BaseItem *containerEnd) const
+{
+    return std::all_of(headers_.cbegin(), headers_.cend(),
+                       [containerEnd](const auto &header) { return header.CanReuse(containerEnd); });
 }
 
 void ItemContainer::RegionSectionItem::AddHeader()
@@ -1103,7 +1384,7 @@ void ItemContainer::RegionSectionItem::AddHeader()
     std::vector<IndexItem *> indexItems;
     for (size_t i = 0; i < INDEX_COUNT_16; i++) {
         auto type = static_cast<IndexType>(i);
-        indexes_.emplace_back(type, MAX_INDEX_16);
+        indexes_.emplace_back(type, MAX_INDEX_16, true);
         indexItems.push_back(&indexes_.back());
     }
     headers_.emplace_back(indexItems);

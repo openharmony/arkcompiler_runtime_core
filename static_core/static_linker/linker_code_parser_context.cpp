@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,9 @@ class LinkerDebugInfoScrapper : public panda_file::DebugInfoUpdater<LinkerDebugI
 public:
     using Super = panda_file::DebugInfoUpdater<LinkerDebugInfoScrapper>;
 
-    LinkerDebugInfoScrapper(const panda_file::File *file, CodePatcher *patcher, panda_file::ItemContainer *cont)
-        : Super(file), patcher_(patcher), cont_(cont)
+    LinkerDebugInfoScrapper(const panda_file::File *file, CodePatcher *patcher,
+                            const std::map<std::string, panda_file::BaseClassItem *> *classMap)
+        : Super(file), patcher_(patcher), classMap_(classMap)
     {
     }
 
@@ -66,8 +67,7 @@ public:
 
     panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId typeId, const std::string &typeName)
     {
-        auto *cm = cont_->GetClassMap();
-        if (cm->find(typeName) == cm->end()) {
+        if (classMap_->find(typeName) == classMap_->end()) {
             // This action must create a string for primitive types.
             GetOrCreateStringItem(typeName);
         }
@@ -76,8 +76,23 @@ public:
 
 private:
     CodePatcher *patcher_;
-    panda_file::ItemContainer *cont_;
+    const std::map<std::string, panda_file::BaseClassItem *> *classMap_;
 };
+
+void PatchDebugInfo(const CodePatcher::DebugInfoPatch &patch)
+{
+    auto updater = LinkerDebugInfoUpdater(patch.file, patch.cont);
+    auto *constantPool = patch.debugInfo->GetConstantPool();
+    auto *lineNumberProgram = patch.debugInfo->GetLineNumberProgram();
+    if (patch.patchLineNumberProgram || lineNumberProgram->GetData().empty()) {
+        updater.Emit(lineNumberProgram, constantPool, patch.debugInfoId);
+        return;
+    }
+
+    // The shared line-number program is emitted by its owner method; this debug item only needs argument data.
+    panda_file::LineNumberProgramItemBase argumentOnlyProgram;
+    updater.Emit(&argumentOnlyProgram, constantPool, patch.debugInfoId);
+}
 }  // namespace
 
 void CodePatcher::Add(Change c)
@@ -89,46 +104,63 @@ void CodePatcher::Devour(CodePatcher &&p)
 {
     const auto oldSize = changes_.size();
     changes_.insert(changes_.end(), std::move_iterator(p.changes_.begin()), std::move_iterator(p.changes_.end()));
-    const auto newSize = changes_.size();
-    p.changes_.clear();
-
-    ranges_.emplace_back(oldSize, newSize);
+    for (auto range : p.bytecodePatchRanges_) {
+        bytecodePatchRanges_.emplace_back(range.first + oldSize, range.second + oldSize);
+    }
+    ClearAndReleaseStorage(p.changes_);
+    ClearAndReleaseStorage(p.bytecodePatchRanges_);
 }
 
-void CodePatcher::AddRange(std::pair<size_t, size_t> range)
+void CodePatcher::AddBytecodePatchRange(std::pair<size_t, size_t> range)
 {
-    ranges_.push_back(range);
+    if (range.first != range.second) {
+        bytecodePatchRanges_.push_back(range);
+    }
 }
 
-void CodePatcher::ApplyLiteralArrayChange(LiteralArrayChange &lc, Context *ctx)
+void CodePatcher::ApplyStringChange(StringChange *change, Context *ctx)
+{
+    if (change->oldItem != nullptr) {
+        change->it = ctx->StringFromOld(change->oldItem);
+    } else {
+        auto sData = change->file->GetStringData(change->oldId);
+        change->it = ctx->GetContainer().GetOrCreateStringItem(utf::Mutf8AsCString(sData.data));
+    }
+    change->file = nullptr;
+    change->oldItem = nullptr;
+}
+
+void CodePatcher::ApplyLiteralArrayChange(LiteralArrayChange *change, Context *ctx)
 {
     auto id = ctx->literalArrayId_++;
-    lc.it = ctx->GetContainer().GetOrCreateLiteralArrayItem(std::to_string(id));
+    change->it = ctx->cont_.GetOrCreateLiteralArrayItem(std::to_string(id));
+    if (auto cached = ctx->literalArrayCache_.find(change->old); cached != ctx->literalArrayCache_.end()) {
+        change->it->AddItems(cached->second);
+        return;
+    }
 
-    auto &oldIts = lc.old->GetItems();
-    auto newIts = std::vector<panda_file::LiteralItem>();
-    newIts.reserve(oldIts.size());
+    auto &oldItems = change->old->GetItems();
+    auto newItems = std::vector<panda_file::LiteralItem>();
+    newItems.reserve(oldItems.size());
 
-    for (const auto &i : oldIts) {
-        using LIT = panda_file::LiteralItem::Type;
-        switch (i.GetType()) {
-            case LIT::B1:
-            case LIT::B2:
-            case LIT::B4:
-            case LIT::B8:
-                newIts.emplace_back(i);
+    for (const auto &item : oldItems) {
+        using LiteralType = panda_file::LiteralItem::Type;
+        switch (item.GetType()) {
+            case LiteralType::B1:
+            case LiteralType::B2:
+            case LiteralType::B4:
+            case LiteralType::B8:
+                newItems.emplace_back(item);
                 break;
-            case LIT::STRING: {
-                auto str = ctx->StringFromOld(i.GetValue<panda_file::StringItem *>());
-                newIts.emplace_back(str);
+            case LiteralType::STRING:
+                newItems.emplace_back(ctx->StringFromOld(item.GetValue<panda_file::StringItem *>()));
                 break;
-            }
-            case LIT::METHOD: {
-                auto meth = i.GetValue<panda_file::MethodItem *>();
-                auto iter = ctx->knownItems_.find(meth);
-                ASSERT(iter != ctx->knownItems_.end());
-                ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::METHOD_ITEM);
-                newIts.emplace_back(static_cast<panda_file::MethodItem *>(iter->second));
+            case LiteralType::METHOD: {
+                auto *method = item.GetValue<panda_file::MethodItem *>();
+                auto known = ctx->knownItems_.find(method);
+                ASSERT(known != ctx->knownItems_.end());
+                ASSERT(known->second->GetItemType() == panda_file::ItemTypes::METHOD_ITEM);
+                newItems.emplace_back(static_cast<panda_file::MethodItem *>(known->second));
                 break;
             }
             default:
@@ -136,68 +168,108 @@ void CodePatcher::ApplyLiteralArrayChange(LiteralArrayChange &lc, Context *ctx)
         }
     }
 
-    lc.it->AddItems(newIts);
+    change->it->AddItems(newItems);
+    ctx->literalArrayCache_.emplace(change->old, std::move(newItems));
+}
+
+void CodePatcher::ApplyStringDependency(std::string *value, Context *ctx)
+{
+    auto stringItem = ctx->GetContainer().GetOrCreateStringItem(*value);
+    stringItem->SetDependencyMark();
+    std::string().swap(*value);
 }
 
 void CodePatcher::ApplyDeps(Context *ctx)
 {
     for (auto &v : changes_) {
-        std::visit(
-            [this, ctx](auto &a) {
-                using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
-                // IndexedChange, StringChange, LiteralArrayChange, std::string, std::function<bool(bool)>>
-                if constexpr (std::is_same_v<T, IndexedChange>) {
-                    a.mi->AddIndexDependency(a.it);
-                } else if constexpr (std::is_same_v<T, StringChange>) {
-                    a.it = ctx->GetContainer().GetOrCreateStringItem(a.str);
-                } else if constexpr (std::is_same_v<T, LiteralArrayChange>) {
-                    ApplyLiteralArrayChange(a, ctx);
-                } else if constexpr (std::is_same_v<T, std::string>) {
-                    // unreferenced string item should be mark
-                    auto stringItem = ctx->GetContainer().GetOrCreateStringItem(a);
-                    stringItem->SetDependencyMark();
-                } else if constexpr (std::is_same_v<T, std::function<bool(bool)>>) {
-                    // nothing
-                } else {
-                    UNREACHABLE();
-                }
-            },
-            v);
+        if (auto stringChange = std::get_if<StringChange>(&v); stringChange != nullptr) {
+            ApplyStringChange(stringChange, ctx);
+        } else if (auto literalArrayChange = std::get_if<LiteralArrayChange>(&v); literalArrayChange != nullptr) {
+            ApplyLiteralArrayChange(literalArrayChange, ctx);
+        } else if (auto stringDependency = std::get_if<std::string>(&v); stringDependency != nullptr) {
+            ApplyStringDependency(stringDependency, ctx);
+        }
     }
+}
+
+bool CodePatcher::IsBytecodePatchChange(const Change &change)
+{
+    return std::holds_alternative<IndexedChange>(change) || std::holds_alternative<StringChange>(change) ||
+           std::holds_alternative<LiteralArrayChange>(change);
+}
+
+void CodePatcher::RebuildBytecodePatchRanges(const std::vector<size_t> &newIndexes, size_t skippedIndex)
+{
+    auto newRanges = std::vector<std::pair<size_t, size_t>>();
+    newRanges.reserve(bytecodePatchRanges_.size());
+    for (auto [start, end] : bytecodePatchRanges_) {
+        auto newStart = skippedIndex;
+        auto newEnd = skippedIndex;
+        auto hasBytecodePatch = false;
+        for (auto idx = start; idx < end; idx++) {
+            auto mapped = newIndexes[idx];
+            if (mapped == skippedIndex) {
+                continue;
+            }
+            newStart = newStart == skippedIndex ? mapped : newStart;
+            newEnd = mapped + 1U;
+            hasBytecodePatch = hasBytecodePatch || IsBytecodePatchChange(changes_[mapped]);
+        }
+        if (hasBytecodePatch) {
+            newRanges.emplace_back(newStart, newEnd);
+        }
+    }
+    bytecodePatchRanges_.swap(newRanges);
 }
 
 void CodePatcher::TryDeletePatch()
 {
-    auto markDependency = [](auto &a, bool &shouldDelete) {
+    auto shouldDelete = [](auto &a) {
         using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
         if constexpr (std::is_same_v<T, IndexedChange>) {
-            if (!a.mi->GetDependencyMark()) {
-                shouldDelete = true;
-            }
+            return !a.mi->GetDependencyMark();
         } else if constexpr (std::is_same_v<T, StringChange>) {
-            if (!a.mi->GetDependencyMark()) {
-                shouldDelete = true;
-            }
-        } else if constexpr (std::is_same_v<T, std::function<bool(bool)>>) {
-            if (a(true)) {
-                shouldDelete = true;
-            }
+            return !a.mi->GetDependencyMark();
+        } else if constexpr (std::is_same_v<T, LiteralArrayChange>) {
+            return !a.mi->GetDependencyMark();
+        } else if constexpr (std::is_same_v<T, DebugInfoPatch>) {
+            return !a.method->GetDependencyMark();
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return false;
+        } else {
+            UNREACHABLE();
         }
     };
 
-    for (auto it = changes_.begin(); it != changes_.end();) {
-        auto &v = *it;
-        bool shouldDelete = false;
-        std::visit([&](auto &a) { markDependency(a, shouldDelete); }, v);
-        if (shouldDelete) {
-            it = changes_.erase(it);
-        } else {
-            ++it;
+    auto skippedIndex = changes_.size();
+    auto newIndexes = std::vector<size_t>(changes_.size(), skippedIndex);
+    auto out = changes_.begin();
+    size_t newIndex = 0;
+    size_t oldIndex = 0;
+    for (auto it = changes_.begin(); it != changes_.end(); ++it) {
+        if (std::visit(shouldDelete, *it)) {
+            oldIndex++;
+            continue;
         }
+        newIndexes[oldIndex++] = newIndex++;
+        if (out != it) {
+            *out = std::move(*it);
+        }
+        ++out;
     }
+    changes_.erase(out, changes_.end());
+    // Keep strip-unused on the parallel patch path: compaction changes indexes, but method-local bytecode ranges
+    // remain independent after their surviving entries are remapped.
+    RebuildBytecodePatchRanges(newIndexes, skippedIndex);
 }
 
 void CodePatcher::Patch(const std::pair<size_t, size_t> range)
+{
+    PatchBytecode(range);
+    PatchDebug(range);
+}
+
+void CodePatcher::PatchBytecode(const std::pair<size_t, size_t> range)
 {
     for (size_t i = range.first; i < range.second; i++) {
         auto &v = changes_[i];
@@ -208,6 +280,7 @@ void CodePatcher::Patch(const std::pair<size_t, size_t> range)
                     auto idx = a.it->GetIndex(a.mi);
                     a.inst.UpdateId(BytecodeId(idx));
                 } else if constexpr (std::is_same_v<T, StringChange>) {
+                    ASSERT(a.it != nullptr);
                     auto off = a.it->GetOffset();
                     a.inst.UpdateId(BytecodeId(off));
                 } else if constexpr (std::is_same_v<T, LiteralArrayChange>) {
@@ -215,8 +288,35 @@ void CodePatcher::Patch(const std::pair<size_t, size_t> range)
                     a.inst.UpdateId(BytecodeId(off));
                 } else if constexpr (std::is_same_v<T, std::string>) {
                     // nothing
-                } else if constexpr (std::is_same_v<T, std::function<bool(bool)>>) {
-                    a(false);
+                } else if constexpr (std::is_same_v<T, DebugInfoPatch>) {
+                    // Debug info patching mutates debug structures and is handled by PatchDebug().
+                } else {
+                    UNREACHABLE();
+                }
+            },
+            v);
+    }
+}
+
+void CodePatcher::PatchBytecodeRanges(const std::pair<size_t, size_t> range)
+{
+    for (size_t i = range.first; i < range.second; i++) {
+        PatchBytecode(bytecodePatchRanges_[i]);
+    }
+}
+
+void CodePatcher::PatchDebug(const std::pair<size_t, size_t> range)
+{
+    for (size_t i = range.first; i < range.second; i++) {
+        auto &v = changes_[i];
+        std::visit(
+            [](auto &a) {
+                using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
+                if constexpr (std::is_same_v<T, DebugInfoPatch>) {
+                    PatchDebugInfo(a);
+                } else if constexpr (std::is_same_v<T, IndexedChange> || std::is_same_v<T, StringChange> ||
+                                     std::is_same_v<T, LiteralArrayChange> || std::is_same_v<T, std::string>) {
+                    // Bytecode patching is handled by PatchBytecode().
                 } else {
                     UNREACHABLE();
                 }
@@ -231,6 +331,7 @@ void CodePatcher::AddStringDependency()
         using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
         if constexpr (std::is_same_v<T, StringChange>) {
             if (a.mi->GetDependencyMark()) {
+                ASSERT(a.it != nullptr);
                 a.it->SetDependencyMark();
             }
         }
@@ -243,33 +344,81 @@ void CodePatcher::AddStringDependency()
     }
 }
 
-void Context::HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
-                             CodeData *data)
+void Context::HandleStringId(const InstructionIdContext &ctx, const BytecodeInstruction &inst)
 {
     BytecodeId bId = inst.GetId();
     auto oldId = bId.AsFileId();
-    auto sData = filePtr->GetStringData(oldId);
-    auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
-    p.Add(CodePatcher::StringChange {inst, std::move(itemStr), data->nmi});
+    auto iter = ctx.items.find(oldId);
+    if (iter != ctx.items.end()) {
+        ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::STRING_ITEM);
+        ctx.patcher.Add(CodePatcher::StringChange {inst, &ctx.file, oldId,
+                                                   static_cast<panda_file::StringItem *>(iter->second), ctx.data.nmi});
+        return;
+    }
+    ctx.patcher.Add(CodePatcher::StringChange {inst, &ctx.file, oldId, nullptr, ctx.data.nmi});
 }
 
-void Context::HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
-                                   const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items)
+void Context::HandleLiteralArrayId(const InstructionIdContext &ctx, const BytecodeInstruction &inst)
 {
     BytecodeId bId = inst.GetId();
     auto oldIdx = bId.AsRawValue();
-    auto arrs = filePtr->GetLiteralArrays();
+    auto arrs = ctx.file.GetLiteralArrays();
     ASSERT(oldIdx < arrs.size());
     auto off = arrs[oldIdx];
-    auto iter = items->find(panda_file::File::EntityId(off));
-    ASSERT(iter != items->end());
+    auto iter = ctx.items.find(panda_file::File::EntityId(off));
+    ASSERT(iter != ctx.items.end());
     ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::LITERAL_ARRAY_ITEM);
-    p.Add(CodePatcher::LiteralArrayChange {inst, static_cast<panda_file::LiteralArrayItem *>(iter->second)});
+
+    auto *old = static_cast<panda_file::LiteralArrayItem *>(iter->second);
+    ctx.patcher.Add(CodePatcher::LiteralArrayChange {inst, ctx.data.nmi, old});
+}
+
+void Context::HandleIndexedId(const InstructionIdContext &ctx, const BytecodeInstruction &inst, IndexResolver resolve)
+{
+    auto idx = inst.GetId().AsIndex();
+    auto oldId = (ctx.file.*resolve)(ctx.methodId, idx);
+    auto iter = ctx.items.find(oldId);
+    ASSERT(iter != ctx.items.end());
+    auto *asIndexed = static_cast<panda_file::IndexedItem *>(iter->second);
+    auto found = knownItems_.find(asIndexed);
+    ASSERT(found != knownItems_.end());
+    auto *newItem = static_cast<panda_file::IndexedItem *>(found->second);
+    ctx.data.nmi->AddIndexDependency(newItem);
+    ctx.patcher.Add(CodePatcher::IndexedChange {inst, ctx.data.nmi, newItem});
+}
+
+Context::IndexResolver Context::GetIndexResolver(const BytecodeInstruction &inst)
+{
+    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
+    if (inst.HasFlag(Flags::TYPE_ID)) {
+        return &panda_file::File::ResolveClassIndex;
+    }
+    if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
+        return &panda_file::File::ResolveMethodIndex;
+    }
+    if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
+        return &panda_file::File::ResolveFieldIndex;
+    }
+    return nullptr;
+}
+
+void Context::HandleInstructionId(const InstructionIdContext &ctx, const BytecodeInstruction &inst)
+{
+    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
+
+    if (auto resolve = GetIndexResolver(inst); resolve != nullptr) {
+        HandleIndexedId(ctx, inst, resolve);
+        return;
+    }
+    if (inst.HasFlag(Flags::STRING_ID)) {
+        HandleStringId(ctx, inst);
+    } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
+        HandleLiteralArrayId(ctx, inst);
+    }
 }
 
 void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
 {
-    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
     using EntityId = panda_file::File::EntityId;
 
     const auto myId = EntityId(data->omi->GetOffset());
@@ -278,42 +427,26 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
     size_t offset = 0;
     const auto limit = data->code->size();
 
-    auto filePtr = data->fileReader->GetFilePtr();
-
-    using Resolver = EntityId (panda_file::File::*)(EntityId id, panda_file::File::Index idx) const;
-
-    auto makeWithId = [&p, &inst, &filePtr, &items, &myId, &data, this](Resolver resolve) {
-        auto idx = inst.GetId().AsIndex();
-        auto oldId = (filePtr->*resolve)(myId, idx);
-        auto iter = items->find(oldId);
-        ASSERT(iter != items->end());
-        auto asIndexed = static_cast<panda_file::IndexedItem *>(iter->second);
-        auto found = knownItems_.find(asIndexed);
-        ASSERT(found != knownItems_.end());
-        p.Add(CodePatcher::IndexedChange {inst, data->nmi, static_cast<panda_file::IndexedItem *>(found->second)});
-    };
+    const InstructionIdContext idContext {p, *data->fileReader->GetFilePtr(), *items, myId, *data};
 
     while (offset < limit) {
-        if (offset + inst.GetSize() > limit) {
+        const auto format = inst.GetFormat();
+        const auto instSize = BytecodeInstruction::Size(format);
+        if (offset + instSize > limit) {
             LOG(FATAL, STATIC_LINKER) << "Invalid code size: " << limit << ", offset: " << offset
-                                      << ", instruction size: " << inst.GetSize();
+                                      << ", instruction size: " << instSize;
             break;
         }
-        if (inst.HasFlag(Flags::TYPE_ID)) {
-            makeWithId(&panda_file::File::ResolveClassIndex);
-            // inst.UpdateId()
-        } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
-            makeWithId(&panda_file::File::ResolveMethodIndex);
-        } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
-            makeWithId(&panda_file::File::ResolveFieldIndex);
-        } else if (inst.HasFlag(Flags::STRING_ID)) {
-            HandleStringId(p, inst, filePtr, data);
-        } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
-            HandleLiteralArrayId(p, inst, filePtr, items);
+        if (!BytecodeInstruction::HasId(format, 0)) {
+            offset += instSize;
+            inst = inst.JumpTo(instSize);
+            continue;
         }
 
-        offset += inst.GetSize();
-        inst = inst.GetNext();
+        HandleInstructionId(idContext, inst);
+
+        offset += instSize;
+        inst = inst.JumpTo(instSize);
     }
     if (offset != limit) {
         LOG(FATAL, STATIC_LINKER) << "Code size mismatch: expected " << limit << ", got " << offset;
@@ -333,40 +466,14 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
 
     // Collect string items for each method with debug information.
     auto file = data->fileReader->GetFilePtr();
-    auto scrapper = LinkerDebugInfoScrapper(file, &p, &cont_);
+    auto scrapper = LinkerDebugInfoScrapper(file, &p, cont_.GetClassMap());
     auto off = dbg->GetOffset();
     ASSERT(off != 0);
     auto eId = panda_file::File::EntityId(off);
     scrapper.Scrap(eId);
 
     auto newDbg = data->nmi->GetDebugInfo();
-    p.Add([file, this, newDbg, eId, patchLnp = data->patchLnp, nmi = data->nmi](bool peek) -> bool {
-        if (peek) {
-            // peek won't patch lnp, only return method mark for delete judge
-            return !nmi->GetDependencyMark();
-        }
-        auto updater = LinkerDebugInfoUpdater(file, &cont_);
-
-        auto *constantPool = newDbg->GetConstantPool();
-        if (patchLnp) {
-            // Original `LineNumberProgram` - must emit both instructions and their arguments.
-            auto *lnpItem = newDbg->GetLineNumberProgram();
-            updater.Emit(lnpItem, constantPool, eId);
-        } else {
-            auto *lnpItemold = newDbg->GetLineNumberProgram();
-            if (lnpItemold->GetData().empty()) {
-                // emit if lnp size zero after delete item
-                auto *lnpItem = newDbg->GetLineNumberProgram();
-                updater.Emit(lnpItem, constantPool, eId);
-            } else {
-                // `LineNumberProgram` is reused and its instructions will be emitted by owner-method.
-                // Still need to emit instructions' arguments, which are unique for each method.
-                panda_file::LineNumberProgramItemBase lnpItem;
-                updater.Emit(&lnpItem, constantPool, eId);
-            }
-        }
-        return false;
-    });
+    p.Add(CodePatcher::DebugInfoPatch {file, &cont_, newDbg, eId, data->nmi, data->patchLnp});
 }
 
 }  // namespace ark::static_linker

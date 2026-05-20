@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,48 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <chrono>
 
 #include "linker.h"
 #include "linker_context.h"
 
 namespace {
+
+using Clock = std::chrono::steady_clock;
+
+struct LinkTimePoints {
+    Clock::time_point start;
+    Clock::time_point read;
+    Clock::time_point merge;
+    Clock::time_point parse;
+    Clock::time_point tryDelete;
+    Clock::time_point layout;
+    Clock::time_point patch;
+    Clock::time_point cleanup;
+    Clock::time_point end;
+};
+
+uint64_t DiffMicros(Clock::time_point start, Clock::time_point end)
+{
+    if (end <= start) {
+        return 0;
+    }
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
+}
+
+void SaveElapsedStats(ark::static_linker::Result::Stats::Times *elapsed, const LinkTimePoints &points)
+{
+    elapsed->read = DiffMicros(points.start, points.read);
+    elapsed->merge = DiffMicros(points.read, points.merge);
+    elapsed->parse = DiffMicros(points.merge, points.parse);
+    elapsed->trydelete = DiffMicros(points.parse, points.tryDelete);
+    elapsed->layout = DiffMicros(points.tryDelete, points.layout);
+    elapsed->patch = DiffMicros(points.layout, points.patch);
+    elapsed->cleanup = DiffMicros(points.patch, points.cleanup);
+    elapsed->write = DiffMicros(points.cleanup, points.end);
+    elapsed->total = DiffMicros(points.start, points.end);
+}
 
 void PrintTime(std::ostream &o, uint64_t micros)
 {
@@ -47,72 +83,59 @@ Config DefaultConfig()
 Result Link(const Config &conf, const std::string &output, const std::vector<std::string> &input)
 {
     auto ctx = Context(conf);
-
-    using Clock = std::chrono::high_resolution_clock;
-
-    auto tStart = Clock::now();
+    auto points = LinkTimePoints {};
+    points.start = Clock::now();
 
     ctx.Read(input);  // concurrent
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto tRead = Clock::now();
+    points.read = Clock::now();
 
     ctx.Merge();  // sync
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto tMerge = Clock::now();
+    points.merge = Clock::now();
 
     ctx.Parse();  // could be semi concurrent
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto tParse = Clock::now();
+    points.parse = Clock::now();
 
     ctx.TryDelete();
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto tDelete = Clock::now();
+    points.tryDelete = Clock::now();
 
     ctx.ComputeLayout();  // sync
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto tLayout = Clock::now();
+    points.layout = Clock::now();
 
     ctx.Patch();  // concurrent
     if (ctx.HasErrors()) {
         return ctx.GetResult();
     }
 
-    auto tPatch = Clock::now();
+    points.patch = Clock::now();
+
+    ctx.ReleasePreWriteState();
+    points.cleanup = Clock::now();
 
     ctx.Write(output);  // sync
 
-    auto tEnd = std::chrono::high_resolution_clock::now();
-
+    points.end = Clock::now();
     auto res = ctx.GetResult();
-
-    auto delta = [](const auto &s, const auto &e) {
-        return std::chrono::duration_cast<std::chrono::microseconds>(e - s).count();
-    };
-
-    res.stats.elapsed.read = static_cast<uint64_t>(delta(tStart, tRead));
-    res.stats.elapsed.merge = static_cast<uint64_t>(delta(tRead, tMerge));
-    res.stats.elapsed.parse = static_cast<uint64_t>(delta(tMerge, tParse));
-    res.stats.elapsed.trydelete = static_cast<uint64_t>(delta(tParse, tDelete));
-    res.stats.elapsed.layout = static_cast<uint64_t>(delta(tDelete, tLayout));
-    res.stats.elapsed.patch = static_cast<uint64_t>(delta(tLayout, tPatch));
-    res.stats.elapsed.write = static_cast<uint64_t>(delta(tPatch, tEnd));
-    res.stats.elapsed.total = static_cast<uint64_t>(delta(tStart, tEnd));
-
+    SaveElapsedStats(&res.stats.elapsed, points);
     return res;
 }
 
@@ -128,7 +151,7 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
         o << "|";
 
         constexpr uint64_t PARTS = 30;
-        auto dots = s.elapsed.total == 0 ? 0 : t * PARTS / s.elapsed.total;
+        auto dots = s.elapsed.total == 0 ? 0 : std::min(t, s.elapsed.total) * PARTS / s.elapsed.total;
         using CharType = std::remove_reference_t<decltype(o)>::char_type;
         std::fill_n(std::ostream_iterator<CharType>(o), dots, '#');
         std::fill_n(std::ostream_iterator<CharType>(o), PARTS - dots, ' ');
@@ -143,6 +166,7 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
     printTimeHist("delete", s.elapsed.trydelete);
     printTimeHist("layout", s.elapsed.layout);
     printTimeHist("patch", s.elapsed.patch);
+    printTimeHist("cleanup", s.elapsed.cleanup);
     printTimeHist("write", s.elapsed.write);
 
     o << "items: " << s.itemsCount << "\n";
