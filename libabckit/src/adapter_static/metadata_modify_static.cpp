@@ -2144,21 +2144,6 @@ std::unique_ptr<AbckitCoreInterfaceField> CloneInterfaceField(AbckitArktsInterfa
     return newField;
 }
 
-std::string InterfaceFieldNameSplit(AbckitCoreInterfaceField *field)
-{
-    auto fieldName = field->name->impl;
-    std::string splitedFieldName;
-
-    if (fieldName.find(ark::ets::PROPERTY) == 0) {
-        splitedFieldName = fieldName.substr(ark::ets::PROPERTY_PREFIX_LENGTH);
-    } else {
-        LIBABCKIT_LOG(ERROR) << "The input field's name is invalid.\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
-        return "";
-    }
-    return splitedFieldName;
-}
-
 std::unique_ptr<pandasm::Function> CreateAccessorFunction(std::string &fieldTypeName, std::string &accessorName,
                                                           std::string &ifaceName, bool isSetter)
 {
@@ -2197,8 +2182,8 @@ void InterfaceAddFieldAccessor(AbckitArktsInterface *iface, AbckitCoreInterfaceF
 
 bool InterfaceAddFieldAccessors(AbckitArktsInterface *iface, AbckitCoreInterfaceField *field)
 {
-    auto splitedFieldName = InterfaceFieldNameSplit(field);
-    if (splitedFieldName.empty()) {
+    auto fieldName = std::string(field->name->impl);
+    if (fieldName.empty()) {
         return false;
     }
 
@@ -2207,12 +2192,12 @@ bool InterfaceAddFieldAccessors(AbckitArktsInterface *iface, AbckitCoreInterface
     auto addSetter = ((field->flag & ACC_READONLY) == 0U);
 
     if (addGetter) {
-        auto getterName = prefix + ark::ets::GETTER_BEGIN + splitedFieldName;
+        auto getterName = prefix + ark::ets::GETTER_BEGIN + fieldName;
         InterfaceAddFieldAccessor(iface, field, getterName, false);
     }
 
     if (addSetter) {
-        auto setterName = prefix + ark::ets::SETTER_BEGIN + splitedFieldName;
+        auto setterName = prefix + ark::ets::SETTER_BEGIN + fieldName;
         InterfaceAddFieldAccessor(iface, field, setterName, true);
     }
 
@@ -2230,7 +2215,7 @@ AbckitArktsInterfaceField *InterfaceAddFieldStatic(AbckitArktsInterface *iface,
     LIBABCKIT_BAD_ARGUMENT(params->name, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params->type, nullptr);
 
-    std::string fieldName = std::string(ark::ets::PROPERTY) + params->name;
+    std::string fieldName = params->name;
     auto &fields = iface->core->fields;
     auto it = fields.find(fieldName);
     if (it != fields.end()) {
