@@ -15,7 +15,7 @@
 
 package std.concurrency;
 
-type AsyncLockCallback<T> = () => T | Promise<T>;
+type AsyncLockCallback<T> = () => Promise<T>|T;
 
 export enum AsyncLockMode {
     UNLOCKED = 0,

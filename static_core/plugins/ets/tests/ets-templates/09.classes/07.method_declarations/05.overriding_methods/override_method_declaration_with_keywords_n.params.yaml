@@ -41,4 +41,4 @@ cases:
         return 5;
       }
     error: |-
-      Semantic error ESE0136: Method %%async-foo(): Promise<Int> | Int in B not overriding any method
+      Semantic error ESE0136: Method %%async-foo(): Promise<Int>|Int in B not overriding any method
