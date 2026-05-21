@@ -25,7 +25,7 @@ sources_dir=$(realpath "$1")
 EXIT_CODE=0
 
 check_num=$(find "${sources_dir}"/plugins/ets/tests/checked -name "*.ets" | wc -l)
-expected_num=6
+expected_num=8
 
 if [[ $check_num -ne $expected_num ]]; then
     echo -e "Error: Number of checked tests in 'static_core/plugins/ets/tests/checked': expected ${expected_num} found: ${check_num}.

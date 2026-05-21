@@ -16,7 +16,7 @@ add_dependencies(ets_checked_tests ark)
 
 function(panda_add_checked_test_ets)
     set(prefix ARG)
-    set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT_SELF)
+    set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT_SELF FRONTEND_IN_CHECKER)
     set(singleValues NAME FILE LIBCORE OPT_LEVEL ETS_STRINGS_CONCAT)
     set(multiValues AUX_FILES EXT_FILES)
     cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
@@ -128,8 +128,14 @@ function(panda_add_checked_test_ets)
     endif()
 
 #Run checker
+    set(CHECKER_TEST_DIR_ARG "")
+    if (ARG_FRONTEND_IN_CHECKER)
+        set(CHECKER_TEST_DIR_ARG --test-dir ${TEST_DIR})
+    endif()
+
     add_custom_target(${TEST_NAME}
                       COMMAND ${CHECKER} --source ${ARG_FILE}
+                                         ${CHECKER_TEST_DIR_ARG}
                                          --panda $<TARGET_FILE:ark>
                                          --paoc $<TARGET_FILE:ark_aot>
                                          --frontend ${es2panda_bin}
@@ -184,6 +190,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
 #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / string_tlab_allocations.ets JITINTERFACE)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.ets JITINTERFACE)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_builder_deopt1.ets JITINTERFACE ETS_STRINGS_CONCAT "false")
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/form_module_name_hidden_dir/reserve_dot_prefixed_directory.ets FRONTEND_IN_CHECKER)
         endif()
 #LoadAndInitClass in AOT mode for arm32 is not supported
     endif()
