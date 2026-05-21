@@ -177,7 +177,7 @@ public:
     using G1PostBarrierRingBufferType = mem::LockFreeBuffer<mem::CardTable::CardPtr, G1_POST_BARRIER_RING_BUFFER_SIZE>;
 
     GCG1BarrierSet(mem::InternalAllocatorPtr allocator, uint8_t regionSizeBitsCount, CardTable *cardTable,
-                   ThreadLocalCardQueues *updatedRefsQueue, os::memory::Mutex *queueLock);
+                   ThreadLocalCardQueues *updatedRefsQueue, ark::os::memory::Mutex *queueLock);
 
     bool IsPreBarrierEnabled() override;
 
@@ -217,7 +217,7 @@ private:
     /// Minimal address used by VM. Used as a base for card index calculation
     void *minAddr_ {nullptr};
     ThreadLocalCardQueues *updatedRefsQueue_;
-    os::memory::Mutex *queueLock_;
+    ark::os::memory::Mutex *queueLock_;
 };
 
 /// BarrierSet for hybird CMC GC

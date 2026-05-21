@@ -42,7 +42,6 @@ crt_sources = [
   "heap/collector/collector_proxy.cpp",
   "heap/collector/collector_resources.cpp",
   "heap/collector/copy_data_manager.cpp",
-  "heap/collector/finalizer_processor.cpp",
   "heap/collector/gc_request.cpp",
   "heap/collector/gc_stats.cpp",
   "heap/collector/heuristic_gc_policy.cpp",

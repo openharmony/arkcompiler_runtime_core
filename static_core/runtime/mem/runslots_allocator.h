@@ -36,15 +36,15 @@ class RunSlotsAllocatorLockConfig {
 public:
     class CommonLock {
     public:
-        using PoolLock = os::memory::RWLock;
-        using ListLock = os::memory::Mutex;
+        using PoolLock = ark::os::memory::RWLock;
+        using ListLock = ark::os::memory::Mutex;
         using RunSlotsLock = RunSlotsLockConfig::CommonLock;
     };
 
     class DummyLock {
     public:
-        using PoolLock = os::memory::DummyLock;
-        using ListLock = os::memory::DummyLock;
+        using PoolLock = ark::os::memory::DummyLock;
+        using ListLock = ark::os::memory::DummyLock;
         using RunSlotsLock = RunSlotsLockConfig::DummyLock;
     };
 

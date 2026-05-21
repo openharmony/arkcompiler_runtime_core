@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "common_components/common/scoped_object_access.h"
 
 namespace ark::ets::intrinsics {
 
@@ -100,14 +101,10 @@ extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
         return;  // Nothing to wait
     }
     uint64_t target = static_cast<uint64_t>(gcId);
-    auto *mutator = ark::common_vm::Mutator::GetMutator();
-    // Enter saferegion: thread will not access heap objects, GC is able to move them
-    mutator->EnterSaferegion(false);
+    common_vm::ScopedEnterSaferegion enterSaferegion(true);
     // Block on condition variable until gcCompletedCount >= target, or return early on
     // GC shutdown (TASK_INDEX_GC_EXIT sentinel) — no more cycles will fire
     ark::common_vm::BaseRuntime::WaitForGCCompletionCount(target);
-    // Exit saferegion: GC cannot move objects anymore
-    mutator->LeaveSaferegion();
 }
 
 extern "C" EtsLong StdGetFreeHeapSize()

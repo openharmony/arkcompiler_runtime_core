@@ -40,4 +40,9 @@ void FinishCommonRuntime()
     ark::common_vm::BaseRuntime::DestroyInstance();
 }
 
+void SetMutatorLock(MutatorLock *mutatorLock)
+{
+    common_vm::BaseRuntime::GetInstance()->SetMutatorLock(mutatorLock);
+}
+
 }  // namespace ark::common_runtime

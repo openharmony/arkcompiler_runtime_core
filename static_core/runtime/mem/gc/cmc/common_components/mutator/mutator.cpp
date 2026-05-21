@@ -31,7 +31,6 @@
 #include "common_components/mutator/mutator_manager.h"
 
 #include "common_interfaces/thread/mutator-inl.h"
-#include "common_interfaces/thread/mutator_state_transition.h"
 
 namespace ark::common_vm {
 
@@ -100,28 +99,23 @@ void Mutator::HandleSuspensionRequest()
 {
     // CC-OFFNXT(G.CTL.03): false positive
     for (;;) {
-        SetInSaferegion(SAFE_REGION_TRUE);
-        if (HasSuspensionRequest(SUSPENSION_FOR_STW)) {
+        SetInSaferegion(ark::MutatorStatus::NATIVE);
+        if (HasSuspensionRequest(ark::SUSPEND_REQUEST)) {
             SuspendForStw();
-            if (HasSuspensionRequest(SUSPENSION_FOR_GC_PHASE)) {
+            if (HasSuspensionRequest(ark::GC_PHASE_TRANSITION_REQUEST)) {
                 TransitionGCPhase(true);
             }
-        } else if (HasSuspensionRequest(SUSPENSION_FOR_GC_PHASE)) {
+        } else if (HasSuspensionRequest(ark::GC_PHASE_TRANSITION_REQUEST)) {
             TransitionGCPhase(true);
-        } else if (HasSuspensionRequest(SUSPENSION_FOR_EXIT)) {
-            // CC-OFFNXT(G.CTL.03): required by program logic
-            while (true) {
-                sleep(INT_MAX);
-            }
-        } else if (HasSuspensionRequest(SUSPENSION_FOR_PENDING_CALLBACK)) {
+        } else if (HasSuspensionRequest(ark::PENDING_CALLBACK_REQUEST)) {
             TryRunFlipFunction();
-        } else if (HasSuspensionRequest(SUSPENSION_FOR_RUNNING_CALLBACK)) {
+        } else if (HasSuspensionRequest(ark::RUNNING_CALLBACK_REQUEST)) {
             WaitFlipFunctionFinish();
         }
-        SetInSaferegion(SAFE_REGION_FALSE);
+        SetInSaferegion(ark::MutatorStatus::RUNNING);
         // Leave saferegion if current mutator has no suspend request, otherwise try again
         if (LIKELY(!HasAnySuspensionRequestExceptCallbacks())) {
-            if (HasSuspensionRequest(SUSPENSION_FOR_FINALIZE)) {
+            if (HasSuspensionRequest(ark::SUSPEND_FOR_FINALIZE)) {
                 ClearFinalizeRequest();
                 HandleGCCallback();
             }
@@ -137,7 +131,7 @@ void Mutator::HandleGCCallback()
 
 void Mutator::SuspendForStw()
 {
-    ClearSuspensionFlag(SUSPENSION_FOR_STW);
+    ClearSuspensionFlag(ark::SUSPEND_REQUEST);
     // wait until StartTheWorld
     int curCount = static_cast<int>(MutatorManager::Instance().GetStwFutexWordValue());
     // Avoid losing wake-ups
@@ -152,13 +146,13 @@ void Mutator::SuspendForStw()
         (void)Futex(countAddr, FUTEX_WAIT, curCount);
 #endif
     }
-    SetInSaferegion(SAFE_REGION_FALSE);
+    SetInSaferegion(ark::MutatorStatus::NATIVE);
     if (MutatorManager::Instance().StwTriggered()) {
         // entering this branch means a second request has been broadcasted, we need to reset this flag to avoid
         // missing the request. And this must be after the behaviour that set saferegion state to false, because
         // we need to make sure that the mutator can always perceive the gc request when the mutator is not in
         // safe region.
-        SetSuspensionFlag(SUSPENSION_FOR_STW);
+        SetSuspensionFlag(ark::SUSPEND_REQUEST);
     }
 }
 
@@ -200,13 +194,14 @@ void Mutator::ResetMutator()
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
         satbNode_ = nullptr;
     }
-    // Atomic with relaxed order reason: data race with suspensionFlag_ with no synchronization or ordering
-    // constraints imposed on other reads or writes
-    suspensionFlag_.store(0, std::memory_order_relaxed);
     flipFunction_ = nullptr;
     // Atomic with relaxed order reason: data race with transitionState_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     transitionState_.store(NO_TRANSITION, std::memory_order_relaxed);
+    static_cast<ark::Mutator *>(this)->ClearFlag(ark::GC_PHASE_TRANSITION_REQUEST);
+    static_cast<ark::Mutator *>(this)->ClearFlag(ark::PENDING_CALLBACK_REQUEST);
+    static_cast<ark::Mutator *>(this)->ClearFlag(ark::RUNNING_CALLBACK_REQUEST);
+    static_cast<ark::Mutator *>(this)->ClearFlag(ark::SUSPEND_FOR_FINALIZE);
 }
 
 void Mutator::InitTid()
@@ -238,9 +233,9 @@ void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase) {}
 void Mutator::DumpMutator() const
 {
     // Atomic with relaxed order reason: logging only, no synchronization or ordering constraints
-    LOG(ERROR, COMMON) << "mutator " << this << ": inSaferegion " << inSaferegion_.load(std::memory_order_relaxed)
-                       << ", tid " << tid_ << ", gc phase: " << mutatorPhase_.load(std::memory_order_relaxed)
-                       << ", suspension request " << suspensionFlag_.load(std::memory_order_relaxed);
+    LOG(ERROR, COMMON) << "mutator " << this << ": inSaferegion " << InSaferegion() << ", tid " << tid_
+                       << ", gc phase: " << mutatorPhase_.load(std::memory_order_relaxed) << ", suspension request "
+                       << GetSuspensionFlag();
 }
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
@@ -301,38 +296,25 @@ void Mutator::HandleGCPhase(GCPhase newPhase)
 void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
 {
     HandleGCPhase(newPhase);
-    SetSafepointActive(false);
     // Atomic with relaxed order reason: handshake between mutator & mainGC thread, no synchronization or ordering
     // constraints imposed on other reads or writes
     mutatorPhase_.store(newPhase, std::memory_order_relaxed);  // handshake between mutator & mainGC thread
     BaseRuntime::GetInstance()->ForEachVM(
         [m = this, newPhase](VMInterface *vm) { m->UpdateBarrierEntrypoint(newPhase); });
     // Clear mutator's suspend request after phase transition
-    ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE);  // atomic seq-cst
-}
-
-void PreRunManagedCode(Mutator *mutator, int layers, ThreadLocalData *threadData)
-{
-    if (UNLIKELY(MutatorManager::Instance().StwTriggered())) {
-        mutator->SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_STW);
-        mutator->EnterSaferegion(false);
-    }
-    mutator->LeaveSaferegion();
-    mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
+    ClearSuspensionFlag(ark::GC_PHASE_TRANSITION_REQUEST);
 }
 
 void Mutator::RegisterNewMutator(Mutator *mutator)
 {
     auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.MutatorManagementRLock();
     GCPhase phase = Heap::GetHeap().GetGCPhase();
     {
         ark::os::memory::LockHolder<ark::os::memory::Mutex> guard(mutatorManager.allMutatorListLock_);
         DCHECK(std::find(mutatorManager.allMutatorList_.begin(), mutatorManager.allMutatorList_.end(), mutator) ==
                mutatorManager.allMutatorList_.end());
         if (UNLIKELY(mutatorManager.StwTriggered())) {
-            mutator->SetSafepointActive(true);
-            mutator->SetSuspensionFlag(SuspensionType::SUSPENSION_FOR_STW);
+            mutator->SetSuspensionFlag(ark::SUSPEND_REQUEST);
         }
         mutatorManager.allMutatorList_.push_back(mutator);
     }
@@ -342,7 +324,6 @@ void Mutator::RegisterNewMutator(Mutator *mutator)
     if (phase >= GCPhase::GC_PHASE_ENUM) {
         mutator->TransitionToGCPhaseExclusive(phase);
     }
-    mutatorManager.MutatorManagementRUnlock();
 }
 
 bool Mutator::TryBindMutator()
@@ -381,17 +362,16 @@ void Mutator::UnbindMutator()
 
 void Mutator::ReleaseAllocBuffer()
 {
-    MutatorManagedScope scope(this);
     allocBuffer_ = nullptr;
 }
 
 void Mutator::UnregisterMutator(Mutator *mutator)
 {
+    ScopedSTWLock stwLock;
     DCHECK(!mutator->IsInRunningState());
     mutator->ReleaseAllocBuffer();
 
     auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.MutatorManagementRLock();
     {
         ark::os::memory::LockHolder guard(mutatorManager.allMutatorListLock_);
         auto &list = mutatorManager.allMutatorList_;
@@ -401,7 +381,6 @@ void Mutator::UnregisterMutator(Mutator *mutator)
         }
     }
     mutator->ResetMutator();
-    mutatorManager.MutatorManagementRUnlock();
 }
 
 Mutator::TryBindMutatorScope::TryBindMutatorScope(Mutator *mutator) : mutator_(nullptr)
@@ -417,6 +396,42 @@ Mutator::TryBindMutatorScope::~TryBindMutatorScope()
         mutator_->ReleaseAllocBuffer();
         mutator_->UnbindMutator();
         mutator_ = nullptr;
+    }
+}
+
+bool Mutator::TryRunFlipFunction()
+{
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        uint32_t oldFlag = GetSuspensionFlag();
+        if ((oldFlag & ark::PENDING_CALLBACK_REQUEST) != 0) {
+            uint32_t newFlag =
+                Mutator::ConstructSuspensionFlag(oldFlag, ark::PENDING_CALLBACK_REQUEST, ark::RUNNING_CALLBACK_REQUEST);
+            if (CASSetSuspensionFlag(oldFlag, newFlag)) {
+                DCHECK(flipFunction_);
+                (*flipFunction_)(*this);
+                flipFunction_ = nullptr;
+                ark::os::memory::LockHolder lock(flipFunctionMtx_);
+                ClearSuspensionFlag(ark::RUNNING_CALLBACK_REQUEST);
+                flipFunctionCV_.SignalAll();
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+}
+
+void Mutator::WaitFlipFunctionFinish()
+{
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
+        ark::os::memory::LockHolder lock(flipFunctionMtx_);
+        if (HasSuspensionRequest(ark::RUNNING_CALLBACK_REQUEST)) {
+            flipFunctionCV_.Wait(&flipFunctionMtx_);
+        } else {
+            return;
+        }
     }
 }
 

@@ -30,6 +30,7 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/base_object.h"
+#include "runtime/include/mutator_status.h"
 #include "libarkbase/os/mutex.h"
 
 namespace panda::ecmascript {
@@ -70,39 +71,6 @@ public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
 
-    // flag which indicates the reason why mutator should suspend. flag is set by some external thread.
-    enum SuspensionType : uint32_t {
-        SUSPENSION_FOR_GC_PHASE = 1 << 0,
-        SUSPENSION_FOR_STW = 1 << 1,
-        SUSPENSION_FOR_EXIT = 1 << 2,
-        SUSPENSION_FOR_PENDING_CALLBACK = 1 << 4,
-        SUSPENSION_FOR_RUNNING_CALLBACK = 1 << 5,
-        /**
-         * The below ones are not actually suspension request, it's just some callbacks need to process
-         * at the beginning of transfering to RUNNING
-         * So This is equivalent to:
-         * ````    __attribute__((always_inline)) inline void DoLeaveSaferegion()
-         * ````    {
-         * ````        SetInSaferegion(SAFE_REGION_FALSE);
-         * ````        if (UNLIKELY(HasAnySuspensionRequest())) {
-         * ````            HandleSuspensionRequest();
-         * ````        }
-         * ------>     if (UNLIKELY(HasOtherCallback())) {
-         * ------>         ProcessCallback();
-         * ------>     }
-         * ````    }
-         * But this will make `DoLeaveSaferegion` cost more, so we just merge it into suspension request,
-         * and do some extra process at the end of `HandleSuspensionRequest`
-         */
-        SUSPENSION_FOR_FINALIZE = 1U << 31,
-        CALLBACKS_TO_PROCESS = SUSPENSION_FOR_FINALIZE,
-    };
-
-    enum SaferegionState : uint32_t {
-        SAFE_REGION_TRUE = 0x17161514,
-        SAFE_REGION_FALSE = 0x03020100,
-    };
-
     enum GCPhaseTransitionState : uint32_t {
         NO_TRANSITION,
         NEED_TRANSITION,
@@ -129,43 +97,16 @@ public:
         return (flag & ~clearFlag) | setFlag;
     }
 
-    __attribute__((always_inline)) inline void SetSafepointActive(bool state)
-    {
-        safepointActive_ = static_cast<uint32_t>(state);
-    }
-
-    bool GetSafepointActiveState() const
-    {
-        return safepointActive_;
-    }
-
     // Sets saferegion state of this mutator.
-    __attribute__((always_inline)) inline void SetInSaferegion(SaferegionState state)
-    {
-        // Atomic with seq_cst order reason: assure sequential execution of setting insaferegion state and checking
-        // suspended state
-        inSaferegion_.store(state, std::memory_order_seq_cst);
-    }
+    __attribute__((always_inline)) inline void SetInSaferegion(ark::MutatorStatus state);
 
     // Returns true if this mutator is in saferegion, otherwise false.
-    __attribute__((always_inline)) inline bool InSaferegion() const
-    {
-        // Atomic with seq_cst order reason: data race with inSaferegion_ with requirement for sequentially consistent
-        // order where threads observe all modifications in the same order
-        return inSaferegion_.load(std::memory_order_seq_cst) != SAFE_REGION_FALSE;
-    }
+    __attribute__((always_inline)) inline bool InSaferegion() const;
 
     // Force current mutator enter saferegion, internal use only.
-    __attribute__((always_inline)) inline void DoEnterSaferegion();
+    __attribute__((always_inline)) inline void DoEnterSaferegion() NO_THREAD_SAFETY_ANALYSIS;
     // Force current mutator leave saferegion, internal use only.
-    __attribute__((always_inline)) inline void DoLeaveSaferegion()
-    {
-        SetInSaferegion(SAFE_REGION_FALSE);
-        // go slow path if the mutator should suspend
-        if (UNLIKELY(HasAnySuspensionRequest())) {
-            HandleSuspensionRequest();
-        }
-    }
+    __attribute__((always_inline)) inline void DoLeaveSaferegion();
 
     // If current mutator is not in saferegion, enter and return true
     // If current mutator has been in saferegion, return false
@@ -197,68 +138,25 @@ public:
         }
     }
 
-    __attribute__((always_inline)) inline void SetSuspensionFlag(SuspensionType flag)
-    {
-        if (flag == SUSPENSION_FOR_GC_PHASE) {
-            // Atomic with relaxed order reason: data race with transitionState_ with no synchronization or ordering
-            // constraints imposed on other reads or writes
-            transitionState_.store(NEED_TRANSITION, std::memory_order_relaxed);
-        }
-        // Atomic with seq_cst order reason: data race with suspensionFlag_ with requirement for sequentially
-        // consistent order where threads observe all modifications in the same order
-        suspensionFlag_.fetch_or(flag, std::memory_order_seq_cst);
-    }
+    __attribute__((always_inline)) inline void SetSuspensionFlag(ark::MutatorFlag flag);
 
-    __attribute__((always_inline)) inline void ClearSuspensionFlag(SuspensionType flag)
-    {
-        // Atomic with seq_cst order reason: data race with suspensionFlag_ with requirement for sequentially
-        // consistent order where threads observe all modifications in the same order
-        suspensionFlag_.fetch_and(~flag, std::memory_order_seq_cst);
-    }
+    __attribute__((always_inline)) inline void ClearSuspensionFlag(ark::MutatorFlag flag);
 
-    __attribute__((always_inline)) inline uint32_t GetSuspensionFlag() const
-    {
-        // Atomic with acquire order reason: data race with suspensionFlag_ with dependecies on reads after the load
-        return suspensionFlag_.load(std::memory_order_acquire);
-    }
+    __attribute__((always_inline)) inline uint32_t GetSuspensionFlag() const;
 
-    __attribute__((always_inline)) inline bool HasSuspensionRequest(SuspensionType flag) const
-    {
-        // Atomic with acquire order reason: data race with suspensionFlag_ with dependecies on reads after the load
-        return (suspensionFlag_.load(std::memory_order_acquire) & flag) != 0;
-    }
+    __attribute__((always_inline)) inline bool HasSuspensionRequest(ark::MutatorFlag flag) const;
 
     // Check whether current mutator needs to be suspended for GC or other request
-    __attribute__((always_inline)) inline bool HasAnySuspensionRequest() const
-    {
-        // Atomic with acquire order reason: data race with suspensionFlag_ with dependecies on reads after the load
-        return (suspensionFlag_.load(std::memory_order_acquire) != 0);
-    }
+    __attribute__((always_inline)) inline bool HasAnySuspensionRequest() const;
 
-    // Check whether current mutator needs to be suspended for GC or other request, see comments in `SuspensionType`
-    __attribute__((always_inline)) inline bool HasAnySuspensionRequestExceptCallbacks() const
-    {
-        // Atomic with acquire order reason: data race with suspensionFlag_ with dependecies on reads after the load
-        uint32_t flag = suspensionFlag_.load(std::memory_order_acquire);
-        return (flag & ~CALLBACKS_TO_PROCESS) != 0;
-    }
+    // Check whether current mutator needs to be suspended for GC or other request, see comments in `ark::MutatorFlag`
+    __attribute__((always_inline)) inline bool HasAnySuspensionRequestExceptCallbacks() const;
 
-    __attribute__((always_inline)) inline void ClearFinalizeRequest()
-    {
-        ClearSuspensionFlag(SUSPENSION_FOR_FINALIZE);
-    }
+    __attribute__((always_inline)) inline void ClearFinalizeRequest();
 
-    __attribute__((always_inline)) inline void SetFinalizeRequest()
-    {
-        SetSuspensionFlag(SUSPENSION_FOR_FINALIZE);
-    }
+    __attribute__((always_inline)) inline void SetFinalizeRequest();
 
-    __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
-    {
-        // Atomic with seq_cst order reason: data race with suspensionFlag_ with requirement for sequentially
-        // consistent order where threads observe all modifications in the same order
-        return suspensionFlag_.compare_exchange_strong(oldFlag, newFlag, std::memory_order_seq_cst);
-    }
+    __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag);
 
     // Called if current mutator should do corresponding task by suspensionFlag value
     __attribute__((visibility("default"))) void HandleSuspensionRequest();
@@ -307,40 +205,9 @@ public:
 
     void TransitionToGCPhaseExclusive(GCPhase newPhase);
 
-    bool TryRunFlipFunction()
-    {
-        while (true) {
-            uint32_t oldFlag = GetSuspensionFlag();
-            if ((oldFlag & SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK) != 0) {
-                uint32_t newFlag =
-                    Mutator::ConstructSuspensionFlag(oldFlag, SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK,
-                                                     SuspensionType::SUSPENSION_FOR_RUNNING_CALLBACK);
-                if (CASSetSuspensionFlag(oldFlag, newFlag)) {
-                    DCHECK(flipFunction_);
-                    (*flipFunction_)(*this);
-                    flipFunction_ = nullptr;
-                    ark::os::memory::LockHolder lock(flipFunctionMtx_);
-                    ClearSuspensionFlag(SuspensionType::SUSPENSION_FOR_RUNNING_CALLBACK);
-                    flipFunctionCV_.SignalAll();
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        }
-    }
+    bool TryRunFlipFunction();
 
-    void WaitFlipFunctionFinish()
-    {
-        while (true) {
-            ark::os::memory::LockHolder lock(flipFunctionMtx_);
-            if (HasSuspensionRequest(SuspensionType::SUSPENSION_FOR_RUNNING_CALLBACK)) {
-                flipFunctionCV_.Wait(&flipFunctionMtx_);
-            } else {
-                return;
-            }
-        }
-    }
+    void WaitFlipFunctionFinish();
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
     void PushFrameInfoForMarking(const GCInfoNode &frameGCInfo)
@@ -391,50 +258,10 @@ public:
         return obj;
     }
 
-    static constexpr size_t GetSafepointActiveOffset()
-    {
-        return MEMBER_OFFSET(Mutator, safepointActive_);
-    }
-
     // Register an externally constructed mutator (e.g. when ark::Mutator inherits ark::common_vm::Mutator)
     static void RegisterNewMutator(Mutator *mutator);
-    // Transfer to Running no matter in Running or Native.
-    inline void TransferToRunning();
 
-    // Transfer to Native no matter in Running or Native.
-    inline void TransferToNative();
-
-    // If current in Native, transfer to Running and return true;
-    // If current in Running, do nothing and return false.
-    inline bool TransferToRunningIfInNative();
-
-    // If current in Running, transfer to Native and return true;
-    // If current in Native, do nothing and return false.
-    inline bool TransferToNativeIfInRunning();
-
-    bool CheckSafepointIfSuspended()
-    {
-        if (UNLIKELY(HasSuspendRequest())) {
-            WaitSuspension();
-            return true;
-        }
-        return false;
-    }
-
-    void WaitSuspension()
-    {
-        HandleSuspensionRequest();
-    }
-
-    bool HasSuspendRequest() const
-    {
-        return HasAnySuspensionRequest();
-    }
-
-    bool IsInRunningState() const
-    {
-        return !InSaferegion();
-    }
+    __attribute__((always_inline)) inline bool IsInRunningState() const;
 
     // Thread must be binded mutator before to allocate. Otherwise it cannot allocate heap object in this thread.
     // One thread only allow to bind one muatator. If try bind sencond mutator, will be fatal.
@@ -473,14 +300,9 @@ private:
     // Return false if thread has already binded mutator. Otherwise bind a mutator.
     bool TryBindMutator();
 
-    // Indicate whether execution thread should check safepoint suspension request
-    uint32_t safepointActive_ = 0;
     // Indicate the current mutator phase and use which barrier in concurrent gc
     std::atomic<GCPhase> mutatorPhase_ = {GCPhase::GC_PHASE_UNDEF};
-    // in saferegion, it will not access any managed objects and can be visitted by observer
-    std::atomic<uint32_t> inSaferegion_ = {SAFE_REGION_TRUE};
-    // If set implies this mutator should process suspension requests
-    std::atomic<uint32_t> suspensionFlag_ = {0};
+
     // Indicate the state of mutator's phase transition
     std::atomic<GCPhaseTransitionState> transitionState_ = {NO_TRANSITION};
 
@@ -499,10 +321,6 @@ private:
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
     void *allocBuffer_ {nullptr};
 };
-
-// This function is mainly used to initialize the context of mutator.
-// Ensured that updated fa is the caller layer of the managed function to be called.
-void PreRunManagedCode(Mutator *mutator, int layers, ThreadLocalData *threadData);
 
 ThreadLocalData *GetThreadLocalData();
 

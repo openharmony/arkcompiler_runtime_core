@@ -846,10 +846,6 @@ public:
     {
         return ark::cross_values::GetManagedThreadFlagOffset(arch);
     }
-    uint32_t GetMutatorSafepointActiveOffset(Arch arch) const
-    {
-        return ark::cross_values::GetMutatorSafepointActiveOffset(arch);
-    }
     size_t GetTlsFrameOffset(Arch arch) const
     {
         return ark::cross_values::GetManagedThreadFrameOffset(arch);

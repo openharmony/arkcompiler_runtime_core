@@ -167,7 +167,6 @@ public:
     HeapAddress GetSpaceEndAddress() const override;
     bool ForEachObject(const std::function<void(BaseObject *)> &, bool) override;
     void InstallBarrier(const GCPhase phase) override;
-    FinalizerProcessor &GetFinalizerProcessor() override;
     CollectorResources &GetCollectorResources() override;
     void RegisterAllocBuffer(AllocationBuffer &buffer) override;
     void UnregisterAllocBuffer(AllocationBuffer &buffer) override;
@@ -475,11 +474,6 @@ HeapAddress HeapImpl::GetSpaceEndAddress() const
 Heap &Heap::GetHeap()
 {
     return *g_heapInstance;
-}
-
-FinalizerProcessor &HeapImpl::GetFinalizerProcessor()
-{
-    return collectorResources_.GetFinalizerProcessor();
 }
 
 CollectorResources &HeapImpl::GetCollectorResources()

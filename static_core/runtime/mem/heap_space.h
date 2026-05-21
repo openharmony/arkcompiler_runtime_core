@@ -230,9 +230,9 @@ protected:
         return isWorkGc_;
     }
 
-    mutable os::memory::RWLock heapLock_;  // NOLINT(misc-non-private-member-variables-in-classes)
-    ObjectMemorySpace memSpace_;           // NOLINT(misc-non-private-member-variables-in-classes)
-    bool isInitialized_ {false};           // NOLINT(misc-non-private-member-variables-in-classes)
+    mutable ark::os::memory::RWLock heapLock_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ObjectMemorySpace memSpace_;                // NOLINT(misc-non-private-member-variables-in-classes)
+    bool isInitialized_ {false};                // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     // if GC wants allocate memory, but we have not needed memory for this then we increase current heap space

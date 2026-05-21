@@ -451,30 +451,6 @@ bool RegionalHeap::IsHeapObject(HeapAddress addr) const
     return true;
 }
 #endif
-void RegionalHeap::FeedHungryBuffers()
-{
-    ScopedObjectAccess soa;
-    AllocBufferManager::HungryBuffers hungryBuffers;
-    allocBufferManager_->SwapHungryBuffers(hungryBuffers);
-    RegionDesc *region = nullptr;
-    for (auto *buffer : hungryBuffers) {
-        if (buffer->GetPreparedRegion() != nullptr) {
-            continue;
-        }
-        if (region == nullptr) {
-            region = AllocateThreadLocalRegion<AllocBufferType::YOUNG>(true);
-            if (region == nullptr) {
-                return;
-            }
-        }
-        if (buffer->SetPreparedRegion(region)) {
-            region = nullptr;
-        }
-    }
-    if (region != nullptr) {
-        regionManager_.CollectRegion(region);
-    }
-}
 
 void RegionalHeap::MarkRememberSet(const std::function<void(BaseObject *)> &func)
 {

@@ -16,10 +16,15 @@
 #ifndef PANDA_RUNTIME_COMMON_RUNTIME_H
 #define PANDA_RUNTIME_COMMON_RUNTIME_H
 
+namespace ark {
+class MutatorLock;
+}  // namespace ark
+
 namespace ark::common_runtime {
 
 void InitCommonRuntime();
 void FinishCommonRuntime();
+void SetMutatorLock(MutatorLock *mutatorLock);
 
 }  // namespace ark::common_runtime
 

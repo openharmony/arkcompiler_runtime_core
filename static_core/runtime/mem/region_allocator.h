@@ -29,8 +29,8 @@ namespace ark::mem {
 
 class RegionAllocatorLockConfig {
 public:
-    using CommonLock = os::memory::Mutex;
-    using DummyLock = os::memory::DummyLock;
+    using CommonLock = ark::os::memory::Mutex;
+    using DummyLock = ark::os::memory::DummyLock;
 };
 
 using RegionsVisitor = std::function<void(PandaVector<Region *> &vector)>;

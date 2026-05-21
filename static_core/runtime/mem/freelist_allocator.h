@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,8 +40,8 @@ static_assert(FREELIST_ALLOCATOR_MIN_SIZE >= (sizeof(freelist::FreeListHeader) -
 
 class FreeListAllocatorLockConfig {
 public:
-    using CommonLock = os::memory::RWLock;
-    using DummyLock = os::memory::DummyLock;
+    using CommonLock = ark::os::memory::RWLock;
+    using DummyLock = ark::os::memory::DummyLock;
 
     template <MTModeT MT_MODE>
     using ParameterizedLock = typename LockConfigHelper<FreeListAllocatorLockConfig, MT_MODE>::Value;

@@ -429,6 +429,7 @@ bool Runtime::Create(const RuntimeOptions &options)
         instance_ = nullptr;
         return false;
     }
+    common_runtime::SetMutatorLock(instance_->GetPandaVM()->GetMutatorLock());
 
     instance_->GetPandaVM()->StartGC();
 

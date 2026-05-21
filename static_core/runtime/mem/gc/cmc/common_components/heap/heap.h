@@ -31,7 +31,6 @@
 namespace ark::common_vm {
 class Allocator;
 class AllocationBuffer;
-class FinalizerProcessor;
 class CollectorResources;
 class HeuristicGCPolicy;
 using AppSensitiveStatus = ark::common_vm::AppSensitiveStatus;
@@ -215,8 +214,6 @@ public:
     virtual void SetGCPhase(const GCPhase phase) = 0;
 
     virtual bool ForEachObject(const std::function<void(BaseObject *)> &, bool safe) = 0;
-
-    virtual FinalizerProcessor &GetFinalizerProcessor() = 0;
 
     virtual CollectorResources &GetCollectorResources() = 0;
 

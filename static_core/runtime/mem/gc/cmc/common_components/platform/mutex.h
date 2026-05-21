@@ -17,7 +17,6 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_MUTEX_H
 
 #include "common_interfaces/base/common.h"
-#include "common_interfaces/thread/mutator_state_transition.h"
 
 #ifdef DEBUG
 #define FATAL_IF_ERROR(f, rc)                             \

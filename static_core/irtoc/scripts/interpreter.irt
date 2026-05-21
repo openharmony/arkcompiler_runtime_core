@@ -567,12 +567,7 @@ macro(:safepoint) do |acc_type, is_save_acc|
   if defines.SAFEPOINT_TIME_CHECKER_ENABLED
     call_runtime("SafepointCheckerEntrypoint", %tr).void
   end
-  # This code will be unified. Issue #34605
-  if defines.ARK_USE_COMMON_RUNTIME
-    flags := LoadI(%tr).Imm(Constants::MUTATOR_SAFEPOINT_ACTIVE_OFFSET).u32
-  else
-    flags := LoadI(%tr).Imm(Constants::THREAD_FLAG_OFFSET).u16
-  end
+  flags := LoadI(%tr).Imm(Constants::THREAD_FLAG_OFFSET).u16
   If(flags, 0).NE.Unlikely {
     save_acc_var(acc, acc_tag) if is_save_acc
     call_runtime("SafepointEntrypointInterp", %tr).void

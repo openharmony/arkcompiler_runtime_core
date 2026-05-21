@@ -17,6 +17,7 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
 
 #include "common_components/mutator/thread_local.h"
+#include "common_components/mutator/mutator_manager.h"
 
 #include "common_interfaces/thread/mutator-inl.h"
 
@@ -39,8 +40,7 @@ public:
     ~ScopedEnterSaferegion()
     {
         if (LIKELY(stateChanged)) {
-            Mutator *mutator = Mutator::GetMutator();  // state changed, mutator must be not null
-            (void)mutator->LeaveSaferegion();
+            static_cast<ark::Mutator *>(Mutator::GetMutator())->TransitCMCMutatorToRunning();
         }
     }
 
@@ -48,23 +48,6 @@ private:
     bool stateChanged;
 };
 
-class ScopedObjectAccess {
-public:
-    ScopedObjectAccess() : mutator(*Mutator::GetMutator()), leavedSafeRegion(mutator.LeaveSaferegion()) {}
-
-    ~ScopedObjectAccess()
-    {
-        if (LIKELY(leavedSafeRegion)) {
-            // qemu use c++ thread local, it has issue with some cases for ZRT annotation, if reload again
-            // fail on O3 and pass on O0 if load mutator again, not figureout why yet
-            (void)mutator.EnterSaferegion(false);
-        }
-    }
-
-private:
-    Mutator &mutator;
-    bool leavedSafeRegion;
-};
 }  // namespace ark::common_vm
 
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H

@@ -34,7 +34,6 @@ public:
 
     // release physical pages of garbage memory.
     virtual size_t ReclaimGarbageMemory(bool releaseAll) = 0;
-    virtual void FeedHungryBuffers() = 0;
 
     // returns the total size of live large objects, excluding alignment/roundup/header, ...
     // LargeObjects() is missing.

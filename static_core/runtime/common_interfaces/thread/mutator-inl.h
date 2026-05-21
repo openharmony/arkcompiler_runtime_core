@@ -16,15 +16,16 @@
 #ifndef COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_INL_H
 #define COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_INL_H
 
-#include "common_interfaces/thread/mutator.h"
+#include "include/mutator.h"
 
 #include "common_interfaces/base/common.h"
+#include "include/mutator_status.h"
 
 namespace ark::common_vm {
 inline void Mutator::DoEnterSaferegion()
 {
-    // set current mutator in saferegion.
-    SetInSaferegion(SAFE_REGION_TRUE);
+    SetInSaferegion(ark::MutatorStatus::NATIVE);
+    static_cast<ark::Mutator *>(this)->GetMutatorLock()->Unlock();
 }
 
 inline bool Mutator::EnterSaferegion([[maybe_unused]] bool updateUnwindContext) noexcept
@@ -45,24 +46,80 @@ inline bool Mutator::LeaveSaferegion() noexcept
     return false;
 }
 
-void Mutator::TransferToRunning()
+inline void Mutator::SetInSaferegion(ark::MutatorStatus state)
 {
-    DoLeaveSaferegion();
+    static_cast<ark::Mutator *>(this)->StoreStatus(state);
 }
 
-void Mutator::TransferToNative()
+inline bool Mutator::InSaferegion() const
 {
-    DoEnterSaferegion();
+    auto status = static_cast<const ark::Mutator *>(this)->GetStatus();
+    return status != ark::MutatorStatus::RUNNING;
 }
 
-bool Mutator::TransferToRunningIfInNative()
+inline void Mutator::DoLeaveSaferegion()
 {
-    return LeaveSaferegion();
+    SetInSaferegion(ark::MutatorStatus::RUNNING);
+    // go slow path if the mutator should suspend
+    if (UNLIKELY(HasAnySuspensionRequest())) {
+        HandleSuspensionRequest();
+    }
 }
 
-bool Mutator::TransferToNativeIfInRunning()
+inline bool Mutator::IsInRunningState() const
 {
-    return EnterSaferegion(false);
+    return !InSaferegion();
+}
+
+inline void Mutator::SetSuspensionFlag(ark::MutatorFlag flag)
+{
+    if (flag == ark::GC_PHASE_TRANSITION_REQUEST) {
+        // Atomic with relaxed order reason: data race with transitionState_ with no synchronization or ordering
+        // constraints imposed on other reads or writes
+        transitionState_.store(NEED_TRANSITION, std::memory_order_relaxed);
+    }
+    static_cast<ark::Mutator *>(this)->SetFlag(flag);
+}
+
+inline void Mutator::ClearSuspensionFlag(ark::MutatorFlag flag)
+{
+    static_cast<ark::Mutator *>(this)->ClearFlag(flag);
+}
+
+inline uint32_t Mutator::GetSuspensionFlag() const
+{
+    return static_cast<const ark::Mutator *>(this)->ReadFlagsUnsafe();
+}
+
+inline bool Mutator::HasSuspensionRequest(ark::MutatorFlag flag) const
+{
+    return static_cast<const ark::Mutator *>(this)->ReadFlag(flag);
+}
+
+inline bool Mutator::HasAnySuspensionRequest() const
+{
+    return static_cast<const ark::Mutator *>(this)->TestAllFlags();
+}
+
+inline bool Mutator::HasAnySuspensionRequestExceptCallbacks() const
+{
+    uint32_t flag = static_cast<const ark::Mutator *>(this)->ReadFlagsUnsafe();
+    return (flag & ~ark::SUSPEND_FOR_FINALIZE) != 0;
+}
+
+inline bool Mutator::CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
+{
+    return static_cast<ark::Mutator *>(this)->ExchangeFlags((ark::MutatorFlag)oldFlag, (ark::MutatorFlag)newFlag);
+}
+
+inline void Mutator::ClearFinalizeRequest()
+{
+    ClearSuspensionFlag(ark::SUSPEND_FOR_FINALIZE);
+}
+
+inline void Mutator::SetFinalizeRequest()
+{
+    SetSuspensionFlag(ark::SUSPEND_FOR_FINALIZE);
 }
 
 }  // namespace ark::common_vm
