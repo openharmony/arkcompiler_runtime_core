@@ -21,7 +21,7 @@ arktsconfig: arktsconfig-lib.json
 es2panda_options: ['emit-declaration']
 ---*/
 
-export class Box<T extends Object> {
+export class NullableBox<T extends Object> {
     value: T | null
 
     constructor() {
@@ -37,7 +37,7 @@ export class Box<T extends Object> {
     }
 }
 
-export function unwrap<T extends Object>(b: Box<T>, fallback: T): T {
+export function unwrap<T extends Object>(b: NullableBox<T>, fallback: T): T {
     if (b.value != null) {
         return b.value!
     }

@@ -529,5 +529,15 @@
 #34384
 24.build_system/metadata/base_tests/all_combined/main.ets
 24.build_system/metadata/base_tests/diamond_dependency/test_import.ets
-24.build_system/metadata/base_tests/generic_interface/test_import.ets
-24.build_system/metadata/base_tests/nullable_types/test_import.ets
+
+#34675
+24.build_system/metadata/base_tests/cross_module_type_identity/test_assign.ets
+24.build_system/metadata/complex_tests/simultaneous_all_features/test_instanceof.ets
+24.build_system/metadata/complex_tests/simultaneous_all_features/test_upcast.ets
+24.build_system/metadata/complex_tests/simultaneous_methods_dispatch/test_cross_vehicle_override.ets
+24.build_system/metadata/complex_tests/simultaneous_methods_dispatch/test_cross_dynamic_dispatch.ets
+24.build_system/metadata/complex_tests/simultaneous_methods_dispatch/test_cross_polymorphic_array.ets
+24.build_system/metadata/complex_tests/simultaneous_methods_dispatch/test_cross_util_dispatch.ets
+
+#34799
+24.build_system/metadata/complex_tests/simultaneous_methods_dispatch/test_cross_inherited_method_simultaneous.ets

@@ -24,9 +24,9 @@ expected_out:
         - "20"
 ---*/
 
-import {Comparable, maxOf} from '@panda/lib/test_lib'
+import {Rankable, maxOf} from '@panda/lib/test_lib'
 
-class Score implements Comparable<Score> {
+class Score implements Rankable<Score> {
     value: int
     constructor(v: int) {
         this.value = v
