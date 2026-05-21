@@ -28,6 +28,9 @@
 #include "runtime/include/file_manager.h"
 #include "zip_archive.h"
 
+#include <array>
+#include <cstring>
+#include <fstream>
 #include <regex>
 
 using ark::panda_file::File;
@@ -270,6 +273,23 @@ public:
         }
     }
 
+    void CheckGnuHashAndEntrySymbols(const char *tmpfilePn)
+    {
+        auto data = ReadFile(tmpfilePn);
+        ASSERT_GT(data.size(), EI_CLASS);
+        // Dispatch to the matching ELF type layout.
+        switch (data[EI_CLASS]) {
+            case ELFCLASS32:
+                CheckGnuHashAndEntrySymbolsImpl<Elf32_Ehdr, Elf32_Shdr, Elf32_Dyn, Elf32_Sym>(data);
+                break;
+            case ELFCLASS64:
+                CheckGnuHashAndEntrySymbolsImpl<Elf64_Ehdr, Elf64_Shdr, Elf64_Dyn, Elf64_Sym>(data);
+                break;
+            default:
+                FAIL() << "Unexpected ELF class " << static_cast<int>(data[EI_CLASS]);
+        }
+    }
+
     void CheckLinkAotCodeForBoot(AotManager *aotManager, const char *tmpfilePn)
     {
         auto aotFile = aotManager->GetFile(tmpfilePn);
@@ -360,6 +380,119 @@ public:
     };
 
 private:
+    static std::vector<uint8_t> ReadFile(const char *fileName)
+    {
+        std::ifstream file(fileName, std::ios::binary | std::ios::ate);
+        EXPECT_TRUE(file.is_open());
+        if (!file.is_open()) {
+            return {};
+        }
+        auto size = file.tellg();
+        EXPECT_GE(size, 0);
+        if (size < 0) {
+            return {};
+        }
+        std::vector<uint8_t> data(static_cast<size_t>(size));
+        file.seekg(0);
+        file.read(reinterpret_cast<char *>(data.data()), static_cast<std::streamsize>(data.size()));
+        EXPECT_TRUE(file.good());
+        return data;
+    }
+
+    template <class Ehdr, class Shdr, class Dyn, class Sym>
+    void CheckGnuHashAndEntrySymbolsImpl(const std::vector<uint8_t> &data)
+    {
+        // Parse section headers and the section name string table.
+        ASSERT_GE(data.size(), sizeof(Ehdr));
+        auto *ehdr = reinterpret_cast<const Ehdr *>(data.data());
+        ASSERT_EQ(ehdr->e_ident[EI_MAG0], ELFMAG0);
+        ASSERT_EQ(ehdr->e_ident[EI_MAG1], ELFMAG1);
+        ASSERT_EQ(ehdr->e_ident[EI_MAG2], ELFMAG2);
+        ASSERT_EQ(ehdr->e_ident[EI_MAG3], ELFMAG3);
+        ASSERT_LT(ehdr->e_shstrndx, ehdr->e_shnum);
+        ASSERT_LE(ehdr->e_shoff + ehdr->e_shnum * sizeof(Shdr), data.size());
+
+        auto *sections = reinterpret_cast<const Shdr *>(data.data() + ehdr->e_shoff);
+        auto *shstr = GetSectionData<char>(data, sections[ehdr->e_shstrndx]);
+        ASSERT_NE(shstr, nullptr);
+        auto shstrSize = sections[ehdr->e_shstrndx].sh_size;
+
+        auto getSectionName = [shstr, shstrSize](const Shdr &section) {
+            if (section.sh_name >= shstrSize) {
+                return static_cast<const char *>(nullptr);
+            }
+            return shstr + section.sh_name;
+        };
+
+        const Shdr *gnuHash = nullptr;
+        const Shdr *sysvHash = nullptr;
+        const Shdr *dynstr = nullptr;
+        const Shdr *dynsym = nullptr;
+        const Shdr *dynamic = nullptr;
+        // Locate sections used by the dynamic linker.
+        for (size_t i = 0; i < ehdr->e_shnum; i++) {
+            auto *name = getSectionName(sections[i]);
+            ASSERT_NE(name, nullptr);
+            if (strcmp(name, ".gnu.hash") == 0) {
+                gnuHash = &sections[i];
+            } else if (strcmp(name, ".hash") == 0) {
+                sysvHash = &sections[i];
+            } else if (strcmp(name, ".dynstr") == 0) {
+                dynstr = &sections[i];
+            } else if (strcmp(name, ".dynsym") == 0) {
+                dynsym = &sections[i];
+            } else if (strcmp(name, ".dynamic") == 0) {
+                dynamic = &sections[i];
+            }
+        }
+
+        ASSERT_NE(gnuHash, nullptr);
+        EXPECT_EQ(gnuHash->sh_type, SHT_GNU_HASH);
+        EXPECT_EQ(sysvHash, nullptr);
+        ASSERT_NE(dynstr, nullptr);
+        ASSERT_NE(dynsym, nullptr);
+        ASSERT_NE(dynamic, nullptr);
+
+        bool hasGnuHashDynamicTag = false;
+        bool hasSysvHashDynamicTag = false;
+        // Check that the dynamic section points to GNU hash, not SysV hash.
+        auto *dynamicData = GetSectionData<Dyn>(data, *dynamic);
+        ASSERT_NE(dynamicData, nullptr);
+        ASSERT_EQ(dynamic->sh_size % sizeof(Dyn), 0U);
+        for (size_t i = 0; i < dynamic->sh_size / sizeof(Dyn); i++) {
+            hasGnuHashDynamicTag |= dynamicData[i].d_tag == DT_GNU_HASH;
+            hasSysvHashDynamicTag |= dynamicData[i].d_tag == DT_HASH;
+        }
+        EXPECT_TRUE(hasGnuHashDynamicTag);
+        EXPECT_FALSE(hasSysvHashDynamicTag);
+
+        auto *strings = GetSectionData<char>(data, *dynstr);
+        auto *symbols = GetSectionData<Sym>(data, *dynsym);
+        ASSERT_NE(strings, nullptr);
+        ASSERT_NE(symbols, nullptr);
+        ASSERT_EQ(dynsym->sh_size % sizeof(Sym), 0U);
+        ASSERT_GE(dynsym->sh_size / sizeof(Sym), entrySymbols_.size() + 1U);
+
+        // Entry symbols must be the first non-null dynamic symbols.
+        for (size_t i = 0; i < entrySymbols_.size(); i++) {
+            auto &symbol = symbols[i + 1U];
+            ASSERT_LT(symbol.st_name, dynstr->sh_size);
+            EXPECT_STREQ(strings + symbol.st_name, entrySymbols_[i]);
+        }
+    }
+
+    template <class T, class Shdr>
+    static const T *GetSectionData(const std::vector<uint8_t> &data, const Shdr &section)
+    {
+        EXPECT_LE(section.sh_offset + section.sh_size, data.size());
+        if (section.sh_offset + section.sh_size > data.size()) {
+            return nullptr;
+        }
+        return reinterpret_cast<const T *>(data.data() + section.sh_offset);
+    }
+
+private:
+    static constexpr std::array<const char *, 4U> entrySymbols_ {"code", "code_end", "aot", "aot_end"};
     const char *tmpFilePf_ = "test.pf";
     const char *cmdline_ = "cmdline";
     uint32_t method1Id_ = 42;
@@ -385,6 +518,7 @@ TEST_F(AotTestBuildAndCheck, BuildAndLoad)
     const char *tmpfilePn = tmpfile.c_str();
 
     BuildAot(tmpfilePn, mem::GCType::STW_GC);
+    CheckGnuHashAndEntrySymbols(tmpfilePn);
     AotManager aotManager;
     {
         auto res = aotManager.AddFile(tmpfilePn, nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
