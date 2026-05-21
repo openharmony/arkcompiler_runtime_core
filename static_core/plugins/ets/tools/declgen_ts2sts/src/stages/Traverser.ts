@@ -16,9 +16,10 @@
 import * as ts from 'typescript';
 import { isVisitResultNode, isVisitResultNodeArray, visitVisitResult } from './utils/ASTHelpers';
 import { FaultID } from './utils/FaultId';
+import { StageContext } from './Stage';
 
 export interface TraverserState<T, S> {
-  publicState: T;
+  stageContext: StageContext<T>;
   localState: S;
 }
 
