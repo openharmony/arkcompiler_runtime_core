@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +14,18 @@
  */
 
 /*---
-desc: Test the array index access of an empty array.
+desc: "From 2404 Gap 7: Object Literal for Generic Class"
 ---*/
 
-function main(): void {
-  let isPassed: boolean = false;
-  let numbers: Array<number> = new Array<number>();
+class C<T> {
+    value: T
 
-  try {
-    let first: number | undefined = numbers[0];
-  } catch (error) {
-    error = error as Error;
-    arktest.assertEQ('RangeError', error.name);
-    arktest.assertEQ('Out of bounds', error.message);
-    isPassed = true;
-  } finally {
-    if (!isPassed) {
-      throw new Error('No RangeError occurred, but "Out of bounds" expected.');
+    constructor() {
+        this.value = null as T
     }
-  }
+}
+
+function main(): void {
+    let c: C<int> = { value: 23 }
+    arktest.assertEQ(c.value, 23)
 }

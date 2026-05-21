@@ -1,0 +1,85 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# from #2404 Gap 5: Variance(in/out) + Object Literal
+cases:
+  - desc: |-
+      Gap 5a. Covariant (out) -- return position only.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Source<out T> {
+          produce(): T
+      }
+    call: |-
+      let s: Source<Base> = {
+          produce(): Derived { return new Derived() }
+      }
+      arktest.assertTrue(s.produce() instanceof Derived)
+
+  - desc: |-
+      Gap 5b. Contravariant (in) -- parameter position only.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Sink<in T> {
+          consume(value: T): void
+      }
+    call: |-
+      let f = 0
+      let s: Sink<Derived> = {
+          consume(value: Base): void {
+               f = 1
+          }
+      }
+      s.consume(new Derived())
+      arktest.assertEQ(f, 1)
+
+  - desc: |-
+      Gap 5c. Covariant interface assigned to wider type variable.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Source<out T> {
+          produce(): T
+      }
+    call: |-
+      let derived: Source<Derived> = {
+          produce(): Derived { return new Derived() }
+      }
+      let base: Source<Base> = derived
+      arktest.assertTrue(base.produce() instanceof Derived)
+
+  - desc: |-
+      Gap 5d. Contravariant interface assigned to narrower type variable.
+    decl: |-
+      class Base {}
+      class Derived extends Base {}
+
+      interface Sink<in T> {
+          consume(value: T): void
+      }
+    call: |-
+      let f = 0
+      let base: Sink<Base> = {
+          consume(value: Base): void {
+               f = 1
+          }
+      }
+      let derived: Sink<Derived> = base
+      derived.consume(new Derived())
+      arktest.assertEQ(f, 1)

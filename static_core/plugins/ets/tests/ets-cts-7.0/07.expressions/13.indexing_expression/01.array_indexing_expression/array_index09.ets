@@ -35,7 +35,7 @@ function main(): void {
         isError = true;
     } finally {
         if (!isError) {
-            throw new Error('No RangeError occured, but "Out of bounds" expected.');
+            throw new Error('No RangeError occurred, but "Out of bounds" expected.');
         }
     }
 }

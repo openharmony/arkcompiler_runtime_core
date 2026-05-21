@@ -88,8 +88,8 @@ cases:
       main: |-
           arktest.assertTrue(a == b)   // different enumeration types with same values
           arktest.assertTrue(a === b)  // different enumeration types with same values
-          arktest.assertFalse(a == c)  // different enumeration types with diferent vales
-          arktest.assertFalse(a === c) // different enumeration types with diferent vales
+          arktest.assertFalse(a == c)  // different enumeration types with different values
+          arktest.assertFalse(a === c) // different enumeration types with different values
 
     - warning: |-
           Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
