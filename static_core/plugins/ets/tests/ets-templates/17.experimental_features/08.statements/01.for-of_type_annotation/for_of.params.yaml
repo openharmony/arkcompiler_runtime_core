@@ -290,7 +290,7 @@ cases:
               res += v
           }
           arktest.assertEQ(res, "789")
-#28    
+#28
     - decl: |-
           enum Bits{ Zero = 0, One = 1 }
           const arr: Bits[] = [Bits.Zero, Bits.One]
@@ -298,7 +298,7 @@ cases:
           //base enum type
           for (let v: Bits of arr) res += Int.toString(v)
           arktest.assertEQ(res, "01")
-#29    
+#29
     - decl: |-
           enum Bits{ Zero = 0, One = 1 }
           const arr: Bits[] = [Bits.Zero, Bits.One]
@@ -306,3 +306,18 @@ cases:
           //enum explicit type
           for (let v: int of arr) res += Int.toString(v)
           arktest.assertEQ(res, "01")
+#30
+    - decl: |-
+          class C<T> {
+              count: int = 0
+
+              iterate(arr: Array<T>) {
+                  for (let v: T of arr) {
+                      ++this.count
+                  }
+              }
+          }
+      use: |-
+          let c = new C<int>()
+          c.iterate([1,2,34])
+          arktest.assertEQ(c.count, 3)

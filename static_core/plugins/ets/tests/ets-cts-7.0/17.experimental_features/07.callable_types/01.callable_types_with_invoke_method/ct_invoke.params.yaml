@@ -225,7 +225,7 @@ cases:
               return C(p)
           }
       use: |-
-          let checkException = (e: Error): boolean => { return e instanceof Error }  
+          let checkException = (e: Error): boolean => { return e instanceof Error }
           arktest.expectThrow(() => {
               foo(true)
           }, checkException)

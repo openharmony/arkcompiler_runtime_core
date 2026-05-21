@@ -410,6 +410,10 @@
 #34018
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_22.ets
 
+#34834 no CTE on callables with generics
+17.experimental_features/07.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_negative_5.ets
+17.experimental_features/07.callable_types/02.callable_types_with_instantiate_method/ct_inst_negative_6.ets
+
 #33437
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_29.ets
 

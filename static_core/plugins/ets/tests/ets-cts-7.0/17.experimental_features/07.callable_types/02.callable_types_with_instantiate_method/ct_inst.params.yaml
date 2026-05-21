@@ -237,7 +237,7 @@ cases:
               }
           }
       use: |-
-          let checkException = (e: Error): boolean => { return e instanceof MyError }  
+          let checkException = (e: Error): boolean => { return e instanceof MyError }
           arktest.expectThrow(() => {
               C(true)
           }, checkException)
@@ -254,7 +254,7 @@ cases:
               }
           }
       use: |-
-          let checkException = (e: Error): boolean => { return e instanceof MyError }  
+          let checkException = (e: Error): boolean => { return e instanceof MyError }
           arktest.expectThrow(() => {
               C(true)
           }, checkException)

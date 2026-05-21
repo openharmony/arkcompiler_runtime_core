@@ -20,6 +20,7 @@ tags: [compile-only]
 
 abstract class A {
     native run(): void;
+    native gen<T>(): int;
 }
 
 class B extends A {
