@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <unistd.h>
 
+#include "libarkbase/os/mem.h"
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"
@@ -297,7 +298,7 @@ void RegionList::PrependRegionLocked(RegionDesc *region, RegionDesc::RegionType 
     region->SetRegionType(type);
 
     size_t totalRegionSize = region->GetRegionEnd() - region->GetRegionBase();
-    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(region->GetRegionBase()), totalRegionSize,
+    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(region->GetRegionBase()), totalRegionSize,
                                 (std::string("ArkTS Heap CMCGC Region ") + RegionDescRegionTypeToString(type)).c_str());
 
     region->SetPrevRegion(nullptr);

@@ -74,25 +74,19 @@ crt_sources = [
 if (is_mingw) {
   crt_sources += [
     "platform/windows/cpu.cpp",
-    "platform/windows/os.cpp",
-    "platform/windows/thread.cpp",
   ]
 } else {
   if (is_mac) {
     crt_sources += [
       "platform/unix/mac/cpu.cpp",
-      "platform/unix/mac/os.cpp",
-      "platform/unix/mac/thread.cpp",
     ]
   } else if (is_ohos) {
     crt_sources += [
       "platform/unix/linux/cpu.cpp",
-      "platform/unix/linux/os.cpp",
     ]
   } else if (is_linux) {
     crt_sources += [
       "platform/unix/linux/cpu.cpp",
-      "platform/unix/linux/os.cpp",
     ]
   }
 }

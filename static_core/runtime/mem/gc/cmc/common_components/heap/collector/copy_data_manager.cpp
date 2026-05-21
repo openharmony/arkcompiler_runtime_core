@@ -19,11 +19,11 @@
 #include <memoryapi.h>
 #endif
 
+#include "libarkbase/os/mem.h"
 #include "common_components/base/immortal_wrapper.h"
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/heap/collector/region_bitmap.h"
 #include "common_components/heap/collector/copy_data_manager.h"
-#include "common_components/platform/os.h"
 
 namespace ark::common_vm {
 
@@ -61,7 +61,7 @@ void HeapBitmapManager::InitializeHeapBitmap()
     heapBitmapStart_ = reinterpret_cast<uintptr_t>(startAddress);
     heapBitmap_[0].InitializeMemory(heapBitmapStart_, heapBitmapSize, regionUnitCount_);
 
-    ::ark::mem::os::PrctlSetVMA(startAddress, allHeapBitmapSize_, "ArkTS Heap CMCGC HeapBitMap");
+    os::mem::TagAnonymousMemory(startAddress, allHeapBitmapSize_, "ArkTS Heap CMCGC HeapBitMap");
     initialized = true;
 }
 
