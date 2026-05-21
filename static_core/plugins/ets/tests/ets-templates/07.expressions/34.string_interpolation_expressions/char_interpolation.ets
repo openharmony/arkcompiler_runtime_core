@@ -19,6 +19,8 @@ desc: >-
 ---*/
 
 function main() {
+    let a_char: char = c'a'
     let val = `${c'a'}`
-    arktest.assertEQ(val, 'a')
+    let a_char_string: string = a_char.toString()
+    arktest.assertEQ(val, a_char_string)
 }

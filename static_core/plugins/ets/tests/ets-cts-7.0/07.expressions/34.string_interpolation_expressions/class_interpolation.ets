@@ -15,12 +15,14 @@
 
 /*---
 desc: >-
-    Char used in string interpolation expression.
+    Custom class used in string interpolation expression.
 ---*/
 
+class X {}
+
 function main() {
-   let a_char: char = c'a'
-    let val = `${c'a'}`
-    let a_char_string: string = a_char.toString()
-    arktest.assertEQ(val, a_char_string)
+    let x: X = new X
+    let x_string: string = x.toString()
+    let val = `${x}`
+    arktest.assertEQ(val, x_string)
 }

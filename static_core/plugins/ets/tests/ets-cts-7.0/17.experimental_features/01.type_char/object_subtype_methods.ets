@@ -13,14 +13,22 @@
  * limitations under the License.
  */
 
+{% for modifier in ["let", "const"] %}
+
 /*---
-desc: >-
-    Char used in string interpolation expression.
+desc: |-
+  Type char is a subtype of Object, and per chapter 3.9 Type Object it inherits all methods
+  of class Object
+test_suffix: {{modifier}}
 ---*/
 
 function main() {
-   let a_char: char = c'a'
-    let val = `${c'a'}`
-    let a_char_string: string = a_char.toString()
-    arktest.assertEQ(val, a_char_string)
+    {{modifier}} a_char: char = c'a'
+    arktest.assertTrue(a_char instanceof char, "expect a_char instance of char")
+    arktest.assertTrue(a_char instanceof Object, "expect a_char instance of Object")
+
+    // verify Object method toString
+    arktest.assertTrue(a_char.toString() instanceof string, "expect instance of string")
+    arktest.assertEQ(a_char.toString(), "a", "expect equal values of string")
 }
+{% endfor %}
