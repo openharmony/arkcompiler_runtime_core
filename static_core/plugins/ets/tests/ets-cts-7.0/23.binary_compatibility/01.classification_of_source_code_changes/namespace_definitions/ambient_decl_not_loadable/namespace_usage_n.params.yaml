@@ -183,7 +183,6 @@ cases:
       - >-
         E/verifier: Cannot link class: Cannot find class
         Lnamespace_declarations_n_13/Ambient/NestedAmbient;
-        in boot panda files:
     err2:
       - >-
         E/verifier: Cannot link class: Cannot find class

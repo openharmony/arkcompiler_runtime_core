@@ -456,6 +456,13 @@ class ClassLinkerErrorHandler {
 public:
     virtual void OnError(ClassLinker::Error error, const PandaString &message) = 0;
 
+    virtual void OnClassNotFound(const uint8_t *descriptor)
+    {
+        PandaString message("Cannot find class ");
+        message += utf::Mutf8AsCString(descriptor);
+        OnError(ClassLinker::Error::CLASS_NOT_FOUND, message);
+    }
+
 public:
     ClassLinkerErrorHandler() = default;
     virtual ~ClassLinkerErrorHandler() = default;
