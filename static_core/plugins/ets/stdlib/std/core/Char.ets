@@ -101,7 +101,12 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      */
     public toString(radix: int): string {
-        return this.toInt().toString(radix)
+        if (radix == 10) {
+            return Int.toString(this.toInt());
+        } else if (radix == 16) {
+            return Char.toHexImpl(this.value, 0, c'0');
+        }
+        return this.toLong().toString(radix)
     }
 
     /**
@@ -128,10 +133,10 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      */
     public override compareTo(other: Char): int {
-        if (this.value < other) {
+        if (this.value < other.value) {
             return -1;
         }
-        if (this.value == other) {
+        if (this.value == other.value) {
             return 0;
         }
         return 1;
@@ -780,5 +785,85 @@ export final class Char extends Object implements Comparable<Char> {
      */
      public isWhiteSpace(): boolean {
         return Char.isWhiteSpace(this.value);
+    }
+
+    /**
+     * fromHexImpl() converts a hex string representation to Char
+	 *
+     *     - there must be no '0x','0X' prefixes in the hex string
+	 *     - recognized chars are 0,1,2,3,4,5,6,7,8,9,A,a,B,b,C,c,D,d,E,e,F,f
+     *     - empty hex string results into c'\u0000'
+     *     - negative startIndex is reset to zero
+     *     - if startIndex >= hex.getLength() throw 'StringIndexOutOfBoundsError'
+     *     - only 'length' chars starting from 'startIndex' are under consideration
+     *       if length < 0 then it is reset to 0
+     *       if length > 4 then it is reset to 4
+	 *       if length == 0 then convert up to 4 chars until non-convertible char (if any) is encountered
+     *       if length in [1..4] then convert the strictly specified number of chars
+     *           - if (startIndex + length) > hex.getLength() throw 'StringIndexOutOfBoundsError'
+     *           - if non-convertible char is encountered throw 'IllegalArgumentError'
+     *     - if hex is undefined then NullPointerError is thrown
+     *
+     * @param { string } hex - hex string representation
+     * @param { int } startIndex - index of char to start from (zero based)
+     * @param { int } length - number of chars to process, should be in [1,4] range
+     * @returns { char }
+     */
+    private native static fromHexImpl(hex: string, startIndex: int, length: int): char;
+
+    /**
+     * toHex() converts Char to a hex string representation
+     *     - '0x' and '0X' prefixes are not added to the result
+     *     - negative 'numPad' is reset to zero
+     *
+     * @param { char } ch - char to be converted to hex string
+     * @param { int  } numPad - number of padChar to be added to the result
+     * @param { char } padChar - char to be used as a padding symbol
+     * @returns { string }
+     */
+    private native static toHexImpl(thisChar: char, numPad: int, padChar: char): string;
+
+    /**
+     * fromHex() converts a hex string representation to Char
+     *
+     * @param { string } hex - hex string representation
+     * @param { int } startIndex - index of char to start from
+     * @param { int } length - number of chars to process, should be in [1,4] range
+     * @returns { char }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static fromHex(hex: string, startIndex: int = 0, length: int = 0): Char
+    {
+        return new Char(Char.fromHexImpl(hex, startIndex, length));
+    }
+
+    /**
+     * toHex() converts Char to a hex string representation
+     *
+     * @param { char } ch - char to be converted to hex string
+     * @param { int  } numPad - number of padChar to be added to the result
+     * @param { char } padChar - char to be used as a padding symbol
+     * @returns { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public static toHex(ch: Char, numPad: int = 0, padChar: Char = c'0'): string
+    {
+        return Char.toHexImpl(ch.value, numPad, padChar.value);
+    }
+
+    /**
+     * toHex() converts this object to a hex string representation
+     *
+     * @param { int  } numPad - number of padChar to be added to the result
+     * @param { Char } padChar - char to be used as a padding symbol
+     * @returns { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public toHex(numPad: int = 0, padChar: Char = c'0'): string
+    {
+        return Char.toHexImpl(this.value, numPad, padChar.value);
     }
 }

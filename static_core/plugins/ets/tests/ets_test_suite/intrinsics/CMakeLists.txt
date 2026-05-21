@@ -61,6 +61,7 @@ set(intrinsics_tests
     stringbuilder
     typed_arrays_reverse
     char_isuppercase
+    char_hex_conv
     abs
     min
     max

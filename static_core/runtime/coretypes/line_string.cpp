@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "libarkbase/utils/hash.h"
 #include "libarkbase/utils/span.h"
 #include "runtime/arch/memory_helpers.h"
+#include "runtime/common_interfaces/objects/string/base_string.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/runtime.h"
@@ -132,6 +133,58 @@ LineString *LineString::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t mutf8
     ASSERT(utf16Length == utf::MUtf8ToUtf16Size(mutf8Data, mutf8Length));
     auto canBeCompressed = CanBeCompressedMUtf8(mutf8Data, mutf8Length);
     return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable, pinned);
+}
+
+/* static */
+LineString *LineString::CreatePaddedFromMutf8(uint16_t padChar, uint32_t padLength, const uint8_t *mutf8Data,
+                                              uint32_t mutf8Length, const LanguageContext &ctx, PandaVM *vm)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
+    bool compressed = padLength == 0 || ark::mem::BaseString::IsASCIICharacter(padChar);
+    auto strLength = padLength + mutf8Length;
+    size_t size = compressed ? LineString::ComputeSizeMUtf8(strLength) : LineString::ComputeSizeUtf16(strLength);
+    // We do not use AllocLineStringObject to avoid calling FullMemoryBarrier twice.
+    auto str = reinterpret_cast<LineString *>(vm->GetHeapManager()->AllocateObject(
+        // CC-OFFNXT(G.FMT.06-CPP) project code style
+        klass, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT, false));
+    if (str == nullptr) {
+        return str;
+    }
+    // After setting string fields/data we should have a full barrier,
+    // so this write should happens-before barrier
+    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+    str->SetLength(strLength, compressed);
+    str->SetHashcode(0);
+    common_vm::Span<const uint8_t> srcData(mutf8Data, mutf8Length);
+    if (compressed) {
+        ASSERT(padLength <= strLength);
+        auto *dst = str->GetDataMUtf8();
+        if (padLength != 0 && memset_s(dst, strLength, static_cast<uint8_t>(padChar), padLength) != EOK) {
+            UNREACHABLE();
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        dst += padLength;
+        auto len = strLength - padLength;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (len != 0 && memcpy_s(dst, len, &srcData[0], len) != EOK) {
+            UNREACHABLE();
+        }
+    } else {
+        ASSERT(padLength <= strLength);
+        common_vm::Span<uint16_t> strData(str->GetDataUtf16(), strLength);
+        for (uint32_t i = 0; i < padLength; ++i) {
+            strData[i] = padChar;
+        }
+        for (uint32_t i = padLength; i < strLength; ++i) {
+            strData[i] = static_cast<uint16_t>(srcData[i - padLength]);
+        }
+    }
+    TSAN_ANNOTATE_IGNORE_WRITES_END();
+    // Weak memory order arch can try fetching string fields before these are set,
+    // thus Full Memory Barrier.
+    arch::FullMemoryBarrier();
+    return str;
 }
 
 /* static */

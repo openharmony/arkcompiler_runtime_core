@@ -58,6 +58,10 @@ public:
     static LineString *CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length, uint32_t utf16Length,
                                        const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned);
 
+    PANDA_PUBLIC_API static LineString *CreatePaddedFromMutf8(uint16_t padChar, uint32_t padLength,
+                                                              const uint8_t *mutf8Data, uint32_t mutf8Length,
+                                                              const LanguageContext &ctx, PandaVM *vm);
+
     PANDA_PUBLIC_API static LineString *CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length,
                                                        const LanguageContext &ctx, PandaVM *vm, bool movable = true,
                                                        bool pinned = false);
