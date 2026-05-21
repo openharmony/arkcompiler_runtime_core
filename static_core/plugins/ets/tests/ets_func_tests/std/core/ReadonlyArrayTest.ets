@@ -14,42 +14,42 @@
  */
 
 class Arrays {
-  static copy<T>(src: Array<T>): Array<T> {
-    const copy = new Array<T>(src.length, (i: int) => src[i]);
-    return copy;
-  }
-
-  static copy(src: FixedArray<Number>): Array<Number> {
-    const copy = new Array<Number>(src.length, (i: int) => src[i]);
-    return copy;
-  }
-
-  static equals<T>(left: ReadonlyArray<T>, right: ReadonlyArray<T>): boolean {
-    if (left.length != right.length) return false;
-
-    for (let i = 0;i < left.length;i++) {
-      if (left[i] != right[i]) return false;
+    static copy<T>(src: Array<T>): Array<T> {
+        const copy = new Array<T>(src.length, (i: int) => src[i]);
+        return copy;
     }
 
-    return true;
-  }
+    static copy(src: FixedArray<Number>): Array<Number> {
+        const copy = new Array<Number>(src.length, (i: int) => src[i]);
+        return copy;
+    }
 
-  static equals<T>(left: Array<T>, right: Array<T>): boolean {
-    const leftReadOnly = left as ReadonlyArray<T>;
-    const rightReadOnly = right as ReadonlyArray<T>;
-    return Arrays.equals(leftReadOnly, rightReadOnly);
-  }
+    static equals<T>(left: ReadonlyArray<T>, right: ReadonlyArray<T>): boolean {
+        if (left.length != right.length) return false;
+
+        for (let i = 0; i < left.length; i++) {
+            if (left[i] != right[i]) return false;
+        }
+
+        return true;
+    }
+
+    static equals<T>(left: Array<T>, right: Array<T>): boolean {
+        const leftReadOnly = left as ReadonlyArray<T>;
+        const rightReadOnly = right as ReadonlyArray<T>;
+        return Arrays.equals(leftReadOnly, rightReadOnly);
+    }
 
     // NOTE(smirnovandrei) may be left: ArrayLike can help to avoid this code duplication (the same code as equals(ReadonlyArray))
-  static equals<T>(left: FixedArray<Number>, right: Array<T>): boolean {
-    if (left.length != right.length) return false;
+    static equals<T>(left: FixedArray<Number>, right: Array<T>): boolean {
+        if (left.length != right.length) return false;
 
-    for (let i = 0;i < left.length;i++) {
-      if (left[i] != right[i]) return false;
+        for (let i = 0; i < left.length; i++) {
+            if (left[i] != right[i]) return false;
+        }
+
+        return true;
     }
-
-    return true;
-  }
 }
 
 const TEST_ARRAY: FixedArray<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
@@ -77,7 +77,7 @@ function filterPositiveElement(elem: Number, index: int, arr: ReadonlyArray<Numb
 }
 
 function filterNegativeElement(elem: Number, index: int, arr: ReadonlyArray<Number>): boolean {
-     return arr[index] == elem && elem < 0 && index > 0;
+    return arr[index] == elem && elem < 0 && index > 0;
 }
 
 function filterUndefinedElement(elem: Number, index: int, arr: ReadonlyArray<Number>): boolean {
@@ -106,7 +106,7 @@ function findIndexFuncArg3ReadonlyArray() {
 
 function mapFuncArg3ReadonlyArray() {
     let mappingFunc = (v: Number, index: int, arr: ReadonlyArray<Number>): Number =>
-        (index < 4) && (index < arr.length) ? new Number(arr[index] * arr[index]) : new Number(0);
+        index < 4 && index < arr.length ? arr[index] * arr[index] : 0;
 
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
     let res0 = arrEmpty.map<Number>(mappingFunc);
@@ -117,7 +117,7 @@ function mapFuncArg3ReadonlyArray() {
     let res = arr.map<Number>(mappingFunc);
     arktest.assertEQ(res.length, arr.length);
     for (let i: int = 0; i < res.length; ++i) {
-        const expected = i < 4 ? new Number(arr[i] * arr[i]) : new Number(0);
+        const expected: Number = i < 4 ? arr[i] * arr[i] : 0;
         arktest.assertEQ(res[i], expected);
     }
 }
@@ -151,7 +151,7 @@ function filterFuncArg3ReadonlyArray() {
 
 function reduceFunc(a: Number, b: Number, index: int, arr: ReadonlyArray<Number>): Number {
     if (index < 0 || index >= arr.length) {
-        return new Number(-1);
+        return -1;
     }
     return a + b + arr[index];
 }
