@@ -29,6 +29,10 @@
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_7.ets
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_8.ets
 
+#34965
+07.expressions/10.field_access_expressions/03.accessing_superclass_accessors/accessing_by_super_indirect_1.ets
+07.expressions/10.field_access_expressions/03.accessing_superclass_accessors/multiple_interface_access_1.ets
+
 #31822 Optional parameters count are not considered for function type subtyping
 07.expressions/16.instanceof_expression/instanceof_func_15.ets
 07.expressions/16.instanceof_expression/instanceof_func_16.ets
