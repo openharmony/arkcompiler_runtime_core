@@ -21,6 +21,7 @@
 #include "runtime/execution/job_priority.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime_notification.h"
+#include "runtime/include/thread_scopes.h"
 
 #include "libarkbase/os/mutex.h"
 
@@ -32,7 +33,8 @@ StacklessJobWorkerThread::StacklessJobWorkerThread(Runtime *runtime, PandaVM *vm
                                                    bool inExclusiveMode, bool isMainWorker,
                                                    JobExecutionContext *executionCtx)
     : JobWorkerThread(runtime, vm, std::move(workerName), id, inExclusiveMode, isMainWorker),
-      jobManager_(static_cast<StacklessJobManager *>(vm->GetThreadManager()))
+      jobManager_(static_cast<StacklessJobManager *>(vm->GetThreadManager())),
+      allJobsAreExecutedEvt_(jobManager_)
 {
     bool attachToExecCtx = executionCtx != nullptr;
     if (attachToExecCtx) {
@@ -56,16 +58,17 @@ void StacklessJobWorkerThread::ExecuteJobs()
 
 void StacklessJobWorkerThread::ExecuteJobsUntilHappened(JobEvent *awaitee)
 {
-    WaitForEvent(awaitee, true);
+    WaitForEvent(awaitee, true, false);
 }
 
 void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee)
 {
-    WaitForEvent(awaitee, false);
+    WaitForEvent(awaitee, false, false);
 }
 
-void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee, bool executeJobs)
+void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee, bool executeJobs, bool signalFinalization)
 {
+    ASSERT_NATIVE_CODE();
     ASSERT(awaitee->GetType() == JobEvent::Type::BLOCKING);
 
     if (awaitee->Happened()) {
@@ -79,6 +82,10 @@ void StacklessJobWorkerThread::WaitForEvent(JobEvent *awaitee, bool executeJobs)
     while (true) {
         if (executeJobs) {
             ExecuteJobs();
+        }
+
+        if (signalFinalization) {
+            CheckJobsExecution();
         }
 
         waitersLock_.Lock();
@@ -217,13 +224,36 @@ bool StacklessJobWorkerThread::ExecuteRunnableJob()
     Job *nextJob = nullptr;
     {
         os::memory::LockHolder lh(runnablesLock_);
-        if (runnables_.Empty()) {
+        if (nextJob = TakeNextJob(); nextJob == nullptr) {
             return false;
         }
-        nextJob = runnables_.Pop().first;
     }
     ExecuteJob(nextJob);
     return true;
+}
+
+Job *StacklessJobWorkerThread::TakeNextJob()
+{
+    if (runnables_.Empty()) {
+        return nullptr;
+    }
+
+    auto fromSchJob = Job::GetCurrent()->GetType() == Job::Type::SCHEDULER;
+
+    if UNLIKELY (finalizationJob_ != nullptr && fromSchJob) {
+        return std::exchange(finalizationJob_, nullptr);
+    }
+
+    auto [nextJob, priority] = runnables_.Pop();
+
+    if LIKELY (fromSchJob || nextJob->GetType() != Job::Type::FINALIZER) {
+        return nextJob;
+    }
+
+    ASSERT(finalizationJob_ == nullptr);
+    // skip finalization job if current job is not a scheduler
+    finalizationJob_ = nextJob;
+    return TakeNextJob();
 }
 
 void StacklessJobWorkerThread::ExecuteJob(Job *job)
@@ -238,6 +268,8 @@ void StacklessJobWorkerThread::ExecuteJob(Job *job)
 
 void StacklessJobWorkerThread::WaitForRunnables()
 {
+    ASSERT_NATIVE_CODE();
+
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
         {
@@ -328,6 +360,34 @@ void StacklessJobWorkerThread::UpdateMinExpirationTime(JobEvent *blocker)
     if (blocker->GetType() == JobEvent::Type::TIMER) {
         auto *timer = static_cast<TimerEvent *>(blocker);
         minExpirationTime_ = std::min(minExpirationTime_, timer->GetExpirationTime());
+    }
+}
+
+void StacklessJobWorkerThread::CompleteAllAffinedJobs()
+{
+    ASSERT(!IsCrossWorkerCall());
+    ASSERT(Job::GetCurrent()->GetType() == Job::Type::SCHEDULER ||
+           Job::GetCurrent()->GetType() == Job::Type::FINALIZER);
+
+    ScopedNativeCodeThread nativeCode(GetSchedulerExecutionCtx());
+    allJobsAreExecutedEvt_.Lock();
+    allJobsAreExecutedEvt_.SetNotHappened();
+    WaitForEvent(&allJobsAreExecutedEvt_, true, true);
+}
+
+void StacklessJobWorkerThread::CheckJobsExecution()
+{
+    auto allJobsAreExecuted = false;
+    {
+        os::memory::LockHolder wl(waitersLock_);
+        os::memory::LockHolder rl(runnablesLock_);
+        allJobsAreExecuted = (waiters_.size() == 1) && runnables_.Empty();
+        ASSERT(!allJobsAreExecuted || waiters_.begin()->second == Job::GetCurrent());
+        ASSERT(!waiters_.empty());
+    }
+
+    if (allJobsAreExecuted) {
+        allJobsAreExecutedEvt_.Happen();
     }
 }
 

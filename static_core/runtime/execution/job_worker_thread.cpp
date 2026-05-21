@@ -120,4 +120,10 @@ void JobWorkerThread::InitWorkerLocalObjects(PandaVector<LocalObjectData> &&obje
     }
 }
 
+bool JobWorkerThread::IsCrossWorkerCall()
+{
+    ASSERT(JobExecutionContext::GetCurrent() != nullptr);
+    return (this != JobExecutionContext::GetCurrent()->GetWorker());
+}
+
 }  // namespace ark

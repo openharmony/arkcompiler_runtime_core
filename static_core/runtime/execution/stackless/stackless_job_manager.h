@@ -82,11 +82,15 @@ public:
     void RemoveJobFromRegistry(Job *job);
 
 private:
+    StacklessJobWorkerThread *ChooseWorkerForFinalization();
+
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
     bool EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const override;
 
     bool EnumerateJobsImpl(const EnumerateJobsCallback &cb) const override;
+
+    void CalculateWorkerLimits();
 
     void CreateMainExecutionContext(Runtime *runtime, PandaVM *vm);
     void DestroyMainExecutionContext();
@@ -108,9 +112,6 @@ private:
     size_t GetActiveWorkersCount() const;
 
     size_t GetRegisteredJobsCount() const;
-
-    // NOTE(panferovi): generalize limits
-    static constexpr uint32_t COMMON_WORKERS_COUNT = 2;
 
     // job manager config
     JobManagerConfig config_;
@@ -134,6 +135,9 @@ private:
     size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
 
     os::memory::Mutex eWorkerCreationLock_;
+
+    size_t exclusiveWorkersLimit_ = 0;
+    size_t commonWorkersCount_ = 0;
 
     // events that control program completion
     os::memory::Mutex programCompletionLock_;

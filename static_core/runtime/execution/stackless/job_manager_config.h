@@ -15,9 +15,20 @@
 #ifndef PANDA_RUNTIME_EXECUTION_STACKLESS_JOB_MANAGER_CONFIG_H
 #define PANDA_RUNTIME_EXECUTION_STACKLESS_JOB_MANAGER_CONFIG_H
 
+#include <cstdint>
+
 namespace ark {
 
-struct JobManagerConfig {};
+struct JobManagerConfig {
+    static constexpr uint32_t WORKERS_COUNT_AUTO = 0;
+
+    /// Number of job workers threads for the N:M mode
+    const uint32_t workersCount_ = WORKERS_COUNT_AUTO;
+    /// Limit on the number of exclusive job worker threads
+    const uint32_t exclusiveWorkersLimit_ = 0;
+    /// Number of exclusive workers created for runtime needs
+    const uint32_t preallocatedExclusiveWorkersCount_ = 0;
+};
 
 }  // namespace ark
 
