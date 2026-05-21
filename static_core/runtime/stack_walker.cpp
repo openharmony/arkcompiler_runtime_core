@@ -57,23 +57,20 @@ void StackWalker::Reset(const ManagedThread *thread)
 /* static */
 typename StackWalker::FrameVariant StackWalker::GetTopFrameFromFp(void *ptr, bool isFrameCompiled, uintptr_t npc)
 {
-    if (isFrameCompiled) {
-        if (IsBoundaryFrame<FrameKind::INTERPRETER>(ptr)) {
-            auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(ptr);
-            if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) == BYPASS) {
-                return CreateCFrame(GetPrevFromBoundary<FrameKind::COMPILER>(bp),
-                                    GetReturnAddressFromBoundary<FrameKind::COMPILER>(bp),
-                                    GetCalleeStackFromBoundary<FrameKind::COMPILER>(bp));
-            }
-            return CreateCFrame(GetPrevFromBoundary<FrameKind::INTERPRETER>(ptr),
-                                GetReturnAddressFromBoundary<FrameKind::INTERPRETER>(ptr),
-                                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                                reinterpret_cast<SlotType *>(ptr) +
-                                    BoundaryFrame<FrameKind::INTERPRETER>::CALLEES_OFFSET);  // NOLINT
-        }
+    if (!isFrameCompiled) {
+        return reinterpret_cast<Frame *>(ptr);
+    }
+    if (!IsBoundaryFrame<FrameKind::INTERPRETER>(ptr)) {
         return CreateCFrame(reinterpret_cast<SlotType *>(ptr), npc, nullptr);
     }
-    return reinterpret_cast<Frame *>(ptr);
+    auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(ptr);
+    if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) != BYPASS) {
+        return CreateCFrame(
+            GetPrevFromBoundary<FrameKind::INTERPRETER>(ptr), GetReturnAddressFromBoundary<FrameKind::INTERPRETER>(ptr),
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            reinterpret_cast<SlotType *>(ptr) + BoundaryFrame<FrameKind::INTERPRETER>::CALLEES_OFFSET);  // NOLINT
+    }
+    return CreateCFrameFromBypass<true>(bp);
 }
 
 Method *StackWalker::GetInlinedMethod(CFrameType &cframe)
@@ -127,6 +124,17 @@ StackWalker::CFrameType StackWalker::CreateCFrameForC2IBridge(Frame *frame)
                             GetCalleeStackFromBoundary<FrameKind::INTERPRETER>(frame));
     }
     return CFrameType(prev);
+}
+
+template <bool CREATE>
+StackWalker::CFrameType StackWalker::CreateCFrameFromBypass(SlotType *bypassBoundary)
+{
+    auto prevFp = GetPrevFromBoundary<FrameKind::COMPILER>(bypassBoundary);
+    if (IsBoundaryFrame<FrameKind::INTERPRETER>(prevFp)) {
+        return CreateCFrameForC2IBridge<CREATE>(reinterpret_cast<Frame *>(prevFp));
+    }
+    return CreateCFrame(prevFp, GetReturnAddressFromBoundary<FrameKind::COMPILER>(bypassBoundary),
+                        GetCalleeStackFromBoundary<FrameKind::COMPILER>(bypassBoundary));
 }
 
 StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, SlotType *calleeSlots,
@@ -436,18 +444,16 @@ void StackWalker::NextFromIFrame()
         frame_ = nullptr;
         return;
     }
-    if (IsBoundaryFrame<FrameKind::INTERPRETER>(prev)) {
-        auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(prev);
-        if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) == BYPASS) {
-            frame_ = CreateCFrame(GetPrevFromBoundary<FrameKind::COMPILER>(bp),
-                                  GetReturnAddressFromBoundary<FrameKind::COMPILER>(bp),
-                                  GetCalleeStackFromBoundary<FrameKind::COMPILER>(bp));
-        } else {
-            frame_ = CreateCFrameForC2IBridge<true>(prev);
-        }
-    } else {
+    if (!IsBoundaryFrame<FrameKind::INTERPRETER>(prev)) {
         frame_ = reinterpret_cast<Frame *>(prev);
+        return;
     }
+    auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(prev);
+    if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) != BYPASS) {
+        frame_ = CreateCFrameForC2IBridge<true>(prev);
+        return;
+    }
+    frame_ = CreateCFrameFromBypass<true>(bp);
 }
 
 FrameAccessor StackWalker::GetNextFrame()
@@ -480,22 +486,19 @@ FrameAccessor StackWalker::GetNextFrame()
             default:
                 return FrameAccessor(CFrameType(reinterpret_cast<SlotType *>(prev)));
         }
-    } else {
-        auto prev = GetIFrame()->GetPrevFrame();
-        if (prev == nullptr) {
-            return FrameAccessor(nullptr);
-        }
-        if (IsBoundaryFrame<FrameKind::INTERPRETER>(prev)) {
-            auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(prev);
-            if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) == BYPASS) {
-                return FrameAccessor(CreateCFrame(GetPrevFromBoundary<FrameKind::COMPILER>(bp),
-                                                  GetReturnAddressFromBoundary<FrameKind::COMPILER>(bp),
-                                                  GetCalleeStackFromBoundary<FrameKind::COMPILER>(bp)));
-            }
-            return FrameAccessor(CreateCFrameForC2IBridge<false>(prev));
-        }
+    }
+    auto prev = GetIFrame()->GetPrevFrame();
+    if (prev == nullptr) {
+        return FrameAccessor(nullptr);
+    }
+    if (!IsBoundaryFrame<FrameKind::INTERPRETER>(prev)) {
         return FrameAccessor(reinterpret_cast<Frame *>(prev));
     }
+    auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(prev);
+    if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) != BYPASS) {
+        return FrameAccessor(CreateCFrameForC2IBridge<false>(prev));
+    }
+    return FrameAccessor(CreateCFrameFromBypass<false>(bp));
 }
 
 FrameKind StackWalker::GetPreviousFrameKind() const
