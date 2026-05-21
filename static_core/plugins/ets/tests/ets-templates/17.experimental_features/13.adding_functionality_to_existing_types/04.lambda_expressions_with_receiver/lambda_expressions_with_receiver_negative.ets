@@ -16,8 +16,8 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
-    as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
+    Receiver type is the type of the receiver parameter in a function, function type, and lambda with receiver.
+    A receiver type can be an interface type, a class type, or an array type. Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
 expected_out: "{{c.out}}"
 ---*/

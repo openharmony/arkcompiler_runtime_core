@@ -15,10 +15,57 @@
 cases:
     # primitives
     - defs: |-
-          type Rating = double
+        type Rating = double
       use: |-
-          let v: Rating = 1.1
-          let ok = (v as double) == 1.1
+        let v: Rating = 1.1
+        let ok = (v as double) == 1.1
+
+    #1 type alias visible in nested block
+    - defs: |- 
+        type K = int
+        function foo(y: Any) {
+            arktest.assertTrue(y instanceof int)
+            arktest.assertEQ(y, 10)
+        }
+      use: |-
+        { 
+            let y: K = 10
+            arktest.assertTrue(y instanceof int)
+            arktest.assertEQ(y, 10)
+            foo(y)
+        }
+        let ok = new K instanceof int
+    
+    #2 type alias resolved before variable enters scope in nested block
+    - defs: |- 
+        type k = int
+        function foo(k: Any) {
+            arktest.assertTrue(k instanceof int)
+            arktest.assertEQ(k, 4)
+        }
+      use: |-
+        {
+            let k: k = 4
+            arktest.assertEQ(k, 4)
+            foo(k)
+        }
+        let ok = new k instanceof int
+
+    #3 using variable in nested block with same name as type alias - no type ambiguity
+    - defs: |- 
+        type k = float
+        function foo(k: Any) {
+            arktest.assertTrue(k instanceof int)
+            arktest.assertEQ(k, 4)
+        }
+      use: |-
+        {
+            let k = 4
+            arktest.assertTrue(k instanceof int)
+            arktest.assertEQ(k, 4)
+            foo(k)
+        }
+        let ok = new k instanceof float
 
     # arrays
     - defs: |-
@@ -172,3 +219,22 @@ cases:
       use: |-
           let v: BaseColor = BaseColor.Red;
           let ok = true;
+
+    # constructor on type alias for primitive
+    - defs: |- 
+        type k = int
+      use: |-
+        let x = new k(4)
+        let ok = x == 4
+
+    - defs: |- 
+        type K = Int
+      use: |-
+        let x = new K(4)
+        let ok = x == 4
+
+    - defs: |- 
+        type K = Array<int>
+      use: |-
+        let x = new K(1, 3, 10)
+        let ok = x[0] == 1 && x[1] == 3 && x[2] == 10

@@ -21,9 +21,7 @@ desc: >-
     or alternative names for existing types. Type aliases allow one to use meaningful
     and concise notation.
 tags: [compile-only, negative]
-{% if t.expected_out is defined %}
 expected_out: "{{t.expected_out}}"
-{% endif -%}
 ---*/
 {{t.defs}}
 
