@@ -48,6 +48,9 @@ PANDA_PUBLIC_API bool CloseETSToJSScope(EtsExecutionContext *executionCtx);
 /// Experimental API, only for internal usage in runtime.
 PANDA_PUBLIC_API bool CloseETSToJSScope(napi_env env, size_t nValues, napi_value *values, ani_ref *result);
 
+/// Experimental API, only for internal usage in runtime.
+PANDA_PUBLIC_API bool CloseJSToETSScope(ani_env *env, size_t nValues, ani_ref *values, napi_value *result);
+
 }  // namespace ark::ets::interop::js
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NATIVE_API_ARKTS_ESVALUE_H

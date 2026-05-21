@@ -23,6 +23,7 @@ if (PANDA_ETS_INTEROP_JS)
         interop_js/arkts_interop_js_api.cpp
         interop_js/hybridgref_ani.cpp
         interop_js/hybridgref_napi.cpp
+        interop_js/hybridgref_registry.cpp
     )
 endif()
 

@@ -77,3 +77,44 @@ extern "C" bool arkts_napi_scope_close_n(napi_env env, size_t nValues, napi_valu
     }
     return ark::ets::interop::js::CloseETSToJSScope(env, nValues, values, result);
 }
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+extern "C" bool arkts_ani_scope_open(napi_env *env, ani_env **result)
+{
+    if (UNLIKELY(result == nullptr)) {
+        return false;
+    }
+    if (UNLIKELY(env == nullptr)) {
+        LOG(WARNING, RUNTIME) << "Cannot open ani scope, incorrect napi_env";
+        return false;
+    }
+
+    auto optExecCtx = GetCurrentExecutionContext();
+    if (UNLIKELY(!optExecCtx.HasValue())) {
+        LOG(WARNING, RUNTIME) << "Cannot open ani scope, " << optExecCtx.Error();
+        return false;
+    }
+
+    auto *executionCtx = optExecCtx.Value();
+    ani_env *localAniEnv = executionCtx->GetPandaAniEnv();
+    if (UNLIKELY(localAniEnv == nullptr)) {
+        LOG(WARNING, RUNTIME) << "Cannot open ani scope, coroutine cannot get panda environment";
+        return false;
+    }
+    if (UNLIKELY(!ark::ets::interop::js::OpenJSToETSScope(executionCtx, nullptr))) {
+        return false;
+    }
+    *result = localAniEnv;
+    return true;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+extern "C" bool arkts_ani_scope_close_n(ani_env *env, size_t nValues, ani_ref *values, napi_value *result)
+{
+    auto optExecCtx = GetCurrentExecutionContext();
+    if (UNLIKELY(!optExecCtx.HasValue())) {
+        LOG(WARNING, RUNTIME) << "Cannot close ani scope, " << optExecCtx.Error();
+        return false;
+    }
+    return ark::ets::interop::js::CloseJSToETSScope(env, nValues, values, result);
+}

@@ -88,6 +88,37 @@ function testFunctionValues(etsVm: any): void {
     ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckObjectWithMethod')());
 }
 
+function testRegistryLifecycle(etsVm: any): void {
+    nativeSaveRef('same-side napi value');
+    ASSERT_TRUE(nativeCanGetRefFromNapi());
+    ASSERT_EQ(nativeGetRefFromNapi(), 'same-side napi value');
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCanGetNativeGref')());
+
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsDeleteNativeGrefFromAni')());
+    ASSERT_TRUE(!nativeCanGetRefFromNapi());
+    ASSERT_EQ(typeof nativeGetRefFromNapi(), 'undefined');
+    ASSERT_TRUE(!etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCanGetNativeGref')());
+    ASSERT_TRUE(!nativeDeleteRefFromNapi());
+
+    nativeSaveRef('delete from napi');
+    ASSERT_TRUE(nativeDeleteRefFromNapi());
+    ASSERT_TRUE(!nativeCanGetRefFromNapi());
+    ASSERT_EQ(typeof nativeGetRefFromNapi(), 'undefined');
+}
+
+function testMultipleRefsIndependence(): void {
+    ASSERT_TRUE(nativeSavePair('first ref', 'second ref'));
+    ASSERT_EQ(nativeGetFirstPairRef(), 'first ref');
+    ASSERT_EQ(nativeGetSecondPairRef(), 'second ref');
+
+    ASSERT_TRUE(nativeDeleteFirstPairRef());
+    ASSERT_EQ(typeof nativeGetFirstPairRef(), 'undefined');
+    ASSERT_EQ(nativeGetSecondPairRef(), 'second ref');
+
+    ASSERT_TRUE(nativeDeleteSecondPairRef());
+    ASSERT_EQ(typeof nativeGetSecondPairRef(), 'undefined');
+}
+
 function testBuiltInObjects(etsVm: any): void {
     nativeSaveRef(new Date('2025-01-01T12:00:00Z'));
     ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckDateObject')());
@@ -116,6 +147,8 @@ function main(): void {
     testObjectValues(etsVm);
     testArrayValues(etsVm);
     testFunctionValues(etsVm);
+    testRegistryLifecycle(etsVm);
+    testMultipleRefsIndependence();
     // NOTE(www): #ICMNFA, Currently unable to get method object in 1.2.
     // should add testBuiltInObjects(etsVm);
 }
