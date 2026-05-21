@@ -171,7 +171,7 @@ spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_expor
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 
-#30936 (Import-export)
+#34623 (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_01.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_func_takes_t_as_return_value_exported.ets
