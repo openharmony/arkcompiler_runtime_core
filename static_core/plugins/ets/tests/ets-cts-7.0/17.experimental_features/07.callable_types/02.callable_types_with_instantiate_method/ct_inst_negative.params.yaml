@@ -12,6 +12,7 @@
 # limitations under the License.
 
 cases:
+#0
     - decl: |-
           // missing explicit factory
           class C {
@@ -21,7 +22,7 @@ cases:
           }
       use: |-
           let x = C.$_instantiate()
-
+#1
     - decl: |-
           // missing explicit factory with args
           class C {
@@ -31,7 +32,7 @@ cases:
           }
       use: |-
           let x = C.$_instantiate(new C())
-
+#2
     - decl: |-
           // wrong type explicit factory
           class C {
@@ -41,7 +42,7 @@ cases:
           }
       use: |-
           let x = C.$_instantiate(() => { return new Object() })
-
+#3
     - decl: |-
           // wrong type explicit factory
           class C {
@@ -53,7 +54,7 @@ cases:
           let f: FU = (): C => { return new C() }
       use: |-
           let x = C.$_instantiate(f)
-
+#4
     - decl: |-
           // wrong factory definition
           class C {
@@ -63,7 +64,7 @@ cases:
           }
       use: |-
           let x = C(new C())
-
+#5
     - decl: |-
           // the class has no default constructor
           class C {
@@ -74,3 +75,16 @@ cases:
           }
       use: |-
           let x = C()
+#6
+    - decl: |-
+          //generic
+          class C<T> {
+              static $_instantiate<T>(f: () => C<T>): C<T> {
+                  return new C<T>(f)
+              }
+              constructor (f: () => C<T>) {}
+              constructor () {}
+          }
+      use: |-
+          let y = C.$_instantiate<int>(() => { return new C<int>()})
+          arktest.assertTrue(y instanceof C)

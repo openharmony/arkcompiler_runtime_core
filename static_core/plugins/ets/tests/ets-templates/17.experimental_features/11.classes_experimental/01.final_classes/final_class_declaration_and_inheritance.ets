@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,20 @@ desc: Declaration of a final class and inheritance from a parent class
 ---*/
 
 class A {
-  bar(): int {
-    return 5;
-  }
+    bar(): int {
+        return 5;
+    }
 }
 
-final class B extends A {}
+final class B extends A {
+    override bar(): int {
+        return 6;
+    }
+}
 
 function main() {
-  let instance: B = new B();
-  arktest.assertEQ( instance.bar(), 5 );
+    let instance: A = new A();
+    arktest.assertEQ( instance.bar(), 5 );
+    instance = new B()
+    arktest.assertEQ( instance.bar(), 6 );
 }

@@ -561,7 +561,7 @@ cases:
       use: |-
         let c = new C()
         let iref = c.$_iterator();
-        
+
         let next = iref.next();
         let result = ''
         while(!next.done) {
@@ -611,3 +611,41 @@ cases:
             res += x
         }
         arktest.assertEQ(res, 'abc')
+
+    # A union of iterable types is also iterable.
+    - decl: |-
+        class C {
+            data: string[] = ['a', 'b', 'c']
+            $_iterator() {
+                return new CIterator(this)
+            }
+        }
+        class B {
+            data: string[] = ['d', 'f', 'e']
+            $_iterator() {
+                return new CIterator(this)
+            }
+        }
+        class CIterator implements Iterator<string> {
+            index = 0
+            base: C|B
+            constructor (base: C|B) {
+                this.base = base
+            }
+            next(): IteratorResult<string> {
+                return new IteratorResult<string>(this.index >= this.base.data.length,
+                    this.index >= this.base.data.length ? undefined : this.base.data[this.index++])
+            }
+        }
+      use: |-
+        let cb: C|B
+        cb = new B()
+        let res = ''
+        for (let x of cb) {
+            res += x
+        }
+        cb = new C()
+        for (let x of cb) {
+            res += x
+        }
+        arktest.assertEQ(res, 'dfeabc')

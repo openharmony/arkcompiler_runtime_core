@@ -16,9 +16,11 @@ limitations under the License.
 {% for case in cases %}
 
 /*---
-desc: The name of an annotation cannot coincide with another entity name
+desc: >-
+    The name of an annotation cannot coincide with another entity name
+    "{{ case.type }}"
 tags: [compile-only, negative]
-params: "{{ case.type }}"
+expected_out: "{{case.expected}}"
 ---*/
 
 // Annotation declaration:

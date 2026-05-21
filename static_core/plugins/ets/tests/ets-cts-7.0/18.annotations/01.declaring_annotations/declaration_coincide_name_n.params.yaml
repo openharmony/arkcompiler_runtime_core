@@ -13,23 +13,33 @@
 ---
 
 cases:
+#0
   - type: |-
-      class 
+      class
     name: |-
       ClassName
+    expected: "Semantic error ESE0351: Variable 'ClassName' has already been declared."
+#1
   - type: |-
-      type 
+      type
     name: |-
       TypeName
+    expected: "Semantic error ESE0351: Variable 'TypeName' has already been declared."
+#2
   - type: |-
-      interface 
+      interface
     name: |-
       InterfaceName
+    expected: "Semantic error ESE0351: Variable 'InterfaceName' has already been declared."
+#3
   - type: |-
-      enum 
+      enum
     name: |-
       EnumName
+    expected: "Semantic error ESE0351: Variable 'EnumName' has already been declared."
+#4
   - type: |-
-      predefined type 
+      predefined type
     name: |-
       Number
+    expected: "Syntax error ESY0329: Invalid annotation name."

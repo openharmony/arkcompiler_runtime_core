@@ -21,6 +21,7 @@ tags: [compile-only]
 native function foo(a: Object, b?: string, ): int|float; // native with optional parameter
 export native function foo2(b: string, a: int = 1): int; // native with default parameter and export directive
 native function foo3(func: (i: int) => int): string // native with lambda parameter
+native function foo4<T>(param: T): string // native generic
 
 function main() {
 
@@ -28,5 +29,6 @@ function main() {
     let z: int = foo2('');
     const myLambda = (i: int) => 1
     foo3(myLambda)
+    foo4<char>(c'o')
 
 }

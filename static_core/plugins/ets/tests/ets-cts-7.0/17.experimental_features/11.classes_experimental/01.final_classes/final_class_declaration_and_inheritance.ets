@@ -18,14 +18,20 @@ desc: Declaration of a final class and inheritance from a parent class
 ---*/
 
 class A {
-  bar(): int {
-    return 5;
-  }
+    bar(): int {
+        return 5;
+    }
 }
 
-final class B extends A {}
+final class B extends A {
+    override bar(): int {
+        return 6;
+    }
+}
 
 function main() {
-  let instance: B = new B();
-  arktest.assertEQ( instance.bar(), 5 );
+    let instance: A = new A();
+    arktest.assertEQ( instance.bar(), 5 );
+    instance = new B()
+    arktest.assertEQ( instance.bar(), 6 );
 }

@@ -16,13 +16,13 @@ cases:
   # Below tests are based on code examples from chapter 17.15 spec version 1.2.0-alpha2 TECHNICAL PREVIEW 9
   # non-native accessor has no body
   - decl: |-
-      let saved_age = 0        
+      let saved_age = 0
       get age(): number;
       set age(a: number);
     expected_out: "Semantic error ESE0017: Only abstract or native methods can't have body."
 
   - decl: |-
-      let saved_age = 0        
+      let saved_age = 0
       export get age(): number;
       export set age(a: number);
     expected_out: "Semantic error ESE0017: Only abstract or native methods can't have body."
@@ -35,38 +35,37 @@ cases:
 
   # set-accessor without parameters
   - decl: |-
-      let saved_age = 0        
+      let saved_age = 0
       get age(): number {}
       set age() {}
     expected_out: "Semantic error ESE0130: Function age is already declared."
 
   # set-accessor with more than one parameter
   - decl: |-
-      let saved_age = 0        
+      let saved_age = 0
       get age(): number {}
       set age(a: number, b: number) {}
     expected_out: "Syntax error ESY0063: Setter must have exactly one formal parameter."
 
   # set-accessor with return type
   - decl: |-
-      let saved_age = 0        
+      let saved_age = 0
       get age(): number {}
       set age(a: number): number { return 42; }
     expected_out: "Syntax error ESY0241: Setter must not have return type even if it is void."
 
   # set-accessor with optional parameter 1
   - decl: |-
-      let saved_age = 0        
+      let saved_age = 0
       get age(): number {}
       set age(a?: number): {}
     expected_out: "Syntax error ESY0241: Setter must not have return type even if it is void."
 
   # set-accessor with optional parameter 2
   - decl: |-
-      let saved_age = 0        
       get age(): number {}
-      set age(a?: number = 1): {}
-    expected_out: "Syntax error ESY0241: Setter must not have return type even if it is void."
+      set age(a?: number = 1) {}
+    expected_out: "Syntax error ESY13534: Setter cannot have optional parameter."
 
   # getter is used in a call expression (like a function)
   - decl: |-
@@ -126,3 +125,16 @@ cases:
     use: |-
       arktest.assertEQ(randomSeed, 42)
     expected_out: "Semantic error ESE0211: Cannot read from this property because it is writeonly."
+
+  # generic parameters for getter
+  - decl: |-
+       get age<T>(v: T): number {return 1.0}
+       set age<T>(a: T) {}
+    expected_out: "Syntax error ESY0058: Getter must not have formal parameters."
+
+    # all paths check for getter
+  - decl: |-
+         let condition: boolean
+         get age(): number {if (condition) return 1}
+         set age<T>(a: T) {}
+    expected_out: "Semantic error ESE0104: Not all code paths return a value."

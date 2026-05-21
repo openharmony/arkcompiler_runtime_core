@@ -68,7 +68,7 @@ cases:
           arktest.assertEQ(new C().meth(), 'abcabc')
       expected: |-
           Semantic error ESE0127: No matching call signature for $_invoke(\"abc\")
-#4     
+#4
     - decl: |-
           class B<T> {
               static $_invoke(p: T): int { return p; }
@@ -78,3 +78,16 @@ cases:
           B()
       expected: |-
           Semantic error ESE0371: Cannot find type 'T'.
+
+#5
+    - decl: |-
+          //The method $_invoke can be declared, but the type call expression or explicit call of $_invoke() must not use a type parameter
+          class C<T> {
+              static $_invoke<T>(p: T) { return p }
+              static $_invoke() { return C('abc') }
+          }
+      use: |-
+           arktest.assertEQ(C<int>(1), 1)
+           arktest.assertEQ(C(), 'abc')
+      expected: |-
+          TODO after 34834 issue
