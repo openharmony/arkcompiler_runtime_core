@@ -13,13 +13,13 @@ At the current moment it has following segments and sections layout:
 
 | Segment | Flags | Sections |
 |---------|-------|----------|
-| LAOD    | R     | .hash .dynstr .dynsym .aot |
-| LAOD    | R-W   | .aot_got |
-| LAOD    | R-E   | .text    |
+| LOAD    | R     | .gnu.hash .dynstr .dynsym .aot |
+| LOAD    | R-W   | .aot_got |
+| LOAD    | R-E   | .text    |
 | DYNAMIC | R-W   | .dynamic |
-| LAOD    | R-W   | .dynamic |
+| LOAD    | R-W   | .dynamic |
 
-- `.hash`, `.dynstr`, `.dynsym`, `.dynamic` - Standard ELF sections.
+- `.gnu.hash`, `.dynstr`, `.dynsym`, `.dynamic` - Standard ELF sections.
 - `.text` - Contains compiled native code. Code of each compiled method is placed sequentially into this section with
 special alignment, mostly it is 16 bytes (see `CODE_ALIGNMENT` in `libarkbase/utils/arch.h` file).
 - `.aot_got` - Contains table of the runtime's entrypoint handlers. Must be placed right before `.text` section.

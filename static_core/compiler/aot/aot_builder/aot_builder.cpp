@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,7 +150,7 @@ int AotBuilder::WriteImpl(const std::string &cmdline, const std::string &fileNam
 {
     ElfBuilder<ARCH> builder;
 
-    PrepareElfBuilder(builder, cmdline, fileName);
+    PrepareElfBuilder<ARCH>(builder, cmdline, fileName);
     builder.Build(fileName);
     builder.Write(fileName);
 
@@ -186,8 +186,6 @@ int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &
     // We need to fill the whole segment with aot_got section because it is filled from the end.
     gotData.resize(RoundUp(PointerSize(ARCH) * gotDataSize, PAGE_SIZE_BYTES), 0);
 
-    GenerateSymbols(builder);
-
     FillHeader(cmdline, fileName);
 
     aotSection->AppendData(&aotHeader_, sizeof(aotHeader_));
@@ -200,6 +198,9 @@ int AotBuilder::PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &
         aotSection->AppendData(bitmap.data(), bitmap.GetContainerSizeInBytes());
     }
     aotSection->AppendData(stringTable_.data(), stringTable_.size());
+
+    builder.AddAotEntrySymbols();
+    GenerateSymbols(builder);
 
     for (size_t i = 0; i < roDatas_.size(); i++) {
         auto &section = roDatas_.at(i);

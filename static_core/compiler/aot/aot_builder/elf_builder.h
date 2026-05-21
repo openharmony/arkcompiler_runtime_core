@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,17 +17,26 @@
 #define COMPILER_AOT_AOT_BULDER_ELF_BUILDER_H
 
 #include <elf.h>
+#include <algorithm>
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <tuple>
 #include <fstream>
 #include <functional>
+#include <utility>
 #ifdef PANDA_COMPILER_DEBUG_INFO
 #include <libdwarf/libdwarf.h>
 #include <libdwarf/dwarf.h>
 #endif
 
 #include "include/class.h"
+#include "libarkbase/utils/bit_utils.h"
+
+#ifndef SHT_GNU_HASH
+// GNU hash section type may be absent in older elf.h headers.
+#define SHT_GNU_HASH 0x6ffffff6
+#endif
 
 namespace ark::compiler {
 
@@ -280,7 +289,7 @@ public:
 
     ElfBuilder()
     {
-        AddSection(&hashSection_);
+        AddSection(&gnuHashSection_);
         AddSection(&textSection_);
         AddSection(&shstrtabSection_);
         AddSection(&dynstrSection_);
@@ -312,6 +321,27 @@ public:
     template <bool IS_FUNCTION = false>
     void AddSymbol(const std::string &name, ElfWord size, const Section &section,
                    typename SymbolSection::ThunkFunc thunk);
+
+    void AddAotEntrySymbols()
+    {
+        static_assert(!IS_JIT_MODE);
+
+        AddSymbol(methodName_, textSection_.GetDataSize(), textSection_,
+                  [this]() { return this->textSection_.GetAddress(); });
+        AddSymbol("code_end", textSection_.GetDataSize(), textSection_,
+                  [this]() { return this->textSection_.GetAddress() + this->textSection_.GetDataSize(); });
+        AddSymbol("aot", aotSection_.GetDataSize(), aotSection_, [this]() { return this->aotSection_.GetAddress(); });
+        AddSymbol("aot_end", aotSection_.GetDataSize(), aotSection_,
+                  [this]() { return this->aotSection_.GetAddress() + this->aotSection_.GetDataSize(); });
+    }
+
+    void AddJitEntrySymbol()
+    {
+        static_assert(IS_JIT_MODE);
+
+        AddSymbol(methodName_, textSection_.GetDataSize(), textSection_,
+                  [this]() { return this->textSection_.GetAddress(); });
+    }
 
     auto GetTextSection()
     {
@@ -434,11 +464,11 @@ public:
 
 private:
     void MakeHeader();
-    void AddSymbols();
     void SettleSectionsForAot();
     void SettleSectionsForJit();
-    void ConstructHashSection();
+    void ConstructGnuHashSection();
     void ConstructDynamicSection(const std::string &fileName);
+    static uint32_t CalculateGnuHash(const char *name);
 
     struct Segment {
         Segment(ElfAddr addr, ElfOff offset, ElfWord type, ElfWord flags, ElfWord align)
@@ -502,6 +532,7 @@ private:
     static constexpr size_t JIT_TEXT_ALIGNMENT = ArchTraits<ARCH>::CODE_ALIGNMENT;
     static constexpr size_t JIT_DATA_ALIGNMENT = ArchTraits<ARCH>::POINTER_SIZE;
     static constexpr size_t JIT_DYNSTR_ALIGNMENT = 1U;
+    static constexpr size_t GNU_HASH_SECTION_ALIGN = ArchTraits<ARCH>::IS_64_BITS ? sizeof(uint64_t) : sizeof(uint32_t);
     ElfEhdr header_ {};
     std::vector<Section *> sections_;
     std::vector<Segment *> segments_;
@@ -511,8 +542,8 @@ private:
     Segment *currentSegment_ {nullptr};
 
     std::vector<DataSection *> roDataSections_;
-    DataSection hashSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".hash", &dynsymSection_, {SHT_HASH, SHF_ALLOC, 0, sizeof(ElfWord), sizeof(ElfWord)});
+    DataSection gnuHashSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
+        DataSection(*this, ".gnu.hash", &dynsymSection_, {SHT_GNU_HASH, SHF_ALLOC, 0, GNU_HASH_SECTION_ALIGN, 0});
     DataSection textSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         DataSection(
             *this, ".text", nullptr,
@@ -593,9 +624,9 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructDynamicSection(const std::string &f
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ElfDyn dyns[] = {
-        {DT_HASH, {0}},    // will be patched
-        {DT_STRTAB, {0}},  // will be patched
-        {DT_SYMTAB, {0}},  // will be patched
+        {DT_GNU_HASH, {0}},  // will be patched
+        {DT_STRTAB, {0}},    // will be patched
+        {DT_SYMTAB, {0}},    // will be patched
         {DT_SYMENT, {sizeof(ElfSym)}},
         {DT_STRSZ, {static_cast<ElfDynDValType>(dynstrSectionSize)}},
         {DT_SONAME, {static_cast<ElfDynDValType>(soname)}},
@@ -619,7 +650,7 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructDynamicSection(const std::string &f
         reinterpret_cast<ElfAddr *>(reinterpret_cast<uint8_t *>(dynamicSection_.GetData()) +
                                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                                     0U * sizeof(ElfDyn) + offsetof(ElfDyn, d_un.d_ptr));
-    patches_.emplace_back(thirdPatchArgument, [this]() { return hashSection_.GetAddress(); });
+    patches_.emplace_back(thirdPatchArgument, [this]() { return gnuHashSection_.GetAddress(); });
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
@@ -633,9 +664,11 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Build(const std::string &fileName)
         }
     }
 
-    AddSymbols();
+    if constexpr (IS_JIT_MODE) {  // NOLINT
+        AddJitEntrySymbol();
+    }
 
-    ConstructHashSection();
+    ConstructGnuHashSection();
 
     if constexpr (!IS_JIT_MODE) {  // NOLINT
         ConstructDynamicSection(fileName);
@@ -654,20 +687,83 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::Build(const std::string &fileName)
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
-void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructHashSection()
+uint32_t ElfBuilder<ARCH, IS_JIT_MODE>::CalculateGnuHash(const char *name)
 {
-    ElfWord value = 1;
-    auto symCount = dynsymSection_.GetDataSize() / sizeof(ElfSym);
-    hashSection_.AppendData(&value, sizeof(value));
-    hashSection_.AppendData(&symCount, sizeof(value));
-    hashSection_.AppendData(&value, sizeof(value));
-    value = 0;
-    hashSection_.AppendData(&value, sizeof(value));
-    for (auto i = 2U; i < symCount; i++) {
-        hashSection_.AppendData(&i, sizeof(value));
+    constexpr uint_fast32_t GNU_HASH_INITIAL_VALUE = 5381U;
+    constexpr uint_fast32_t GNU_HASH_MULTIPLIER = 32U;
+
+    uint_fast32_t hash = GNU_HASH_INITIAL_VALUE;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (auto str = name; *str != '\0'; str++) {
+        hash += hash * GNU_HASH_MULTIPLIER + static_cast<uint8_t>(*str);
     }
-    value = 0;
-    hashSection_.AppendData(&value, sizeof(value));
+    return hash;
+}
+
+template <Arch ARCH, bool IS_JIT_MODE>
+void ElfBuilder<ARCH, IS_JIT_MODE>::ConstructGnuHashSection()
+{
+    using GnuHashWord = uint32_t;
+    using BloomWord = std::conditional_t<ArchTraits<ARCH>::IS_64_BITS, uint64_t, uint32_t>;
+
+    constexpr auto SYMBOL_OFFSET = 1U;
+    constexpr auto BLOOM_WORD_BITS = sizeof(BloomWord) * 8U;
+    constexpr auto BLOOM_BITS_PER_SYMBOL = 8U;
+    constexpr auto SYMBOLS_PER_BLOOM_WORD = BLOOM_WORD_BITS / BLOOM_BITS_PER_SYMBOL;
+
+    auto getPowerOfTwoBloomSize = [](size_t symbolCount) {
+        auto minBloomSize = (symbolCount + SYMBOLS_PER_BLOOM_WORD - 1U) / SYMBOLS_PER_BLOOM_WORD;
+        return BitCeil(std::max<size_t>(1U, minBloomSize));
+    };
+    auto getLog2PowerOfTwo = [](size_t value) {
+        ASSERT(value != 0U && (value & (value - 1U)) == 0U);
+        return static_cast<GnuHashWord>(MinimumBitsToStore(value) - 1U);
+    };
+
+    const auto symbolCount = dynsymSection_.symbols_.size();
+    const auto hashedSymbolCount = symbolCount > SYMBOL_OFFSET ? symbolCount - SYMBOL_OFFSET : 0U;
+    const auto bloomSize = getPowerOfTwoBloomSize(hashedSymbolCount);
+    const auto bloomShift = getLog2PowerOfTwo(BLOOM_WORD_BITS) + getLog2PowerOfTwo(bloomSize);
+    const auto *dynstr = reinterpret_cast<const char *>(dynstrSection_.GetData());
+
+    constexpr size_t BUCKET_COUNT = 1U;
+    // A single bucket is intentional: it is a valid GNU-hash layout where all hashed symbols form one contiguous
+    // chain, so .dynsym does not need to be reordered. The bloom filter still rejects many missing symbols before
+    // the dynamic linker touches .dynsym/.dynstr.
+    std::vector<BloomWord> bloom(bloomSize, 0);
+    std::vector<GnuHashWord> buckets(BUCKET_COUNT, 0);
+    std::vector<GnuHashWord> chains(hashedSymbolCount, 0);
+    if (hashedSymbolCount != 0) {
+        buckets[0] = SYMBOL_OFFSET;
+    }
+    for (size_t i = SYMBOL_OFFSET; i < symbolCount; i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto *name = dynstr + dynsymSection_.symbols_[i].st_name;
+        auto hash = CalculateGnuHash(name);
+
+        // Fill the GNU-hash bloom word for this symbol.
+        auto bloomIndex = (hash / BLOOM_WORD_BITS) & (bloomSize - 1U);
+        auto firstBit = hash % BLOOM_WORD_BITS;
+        auto secondBit = (hash >> bloomShift) % BLOOM_WORD_BITS;
+        bloom[bloomIndex] |= (static_cast<BloomWord>(1U) << firstBit) | (static_cast<BloomWord>(1U) << secondBit);
+
+        // The last chain entry carries the bucket terminator bit.
+        auto nextIndex = i + 1U;
+        auto isLastInBucket = nextIndex == symbolCount;
+        chains[i - SYMBOL_OFFSET] = (hash & ~static_cast<GnuHashWord>(1U)) | static_cast<GnuHashWord>(isLastInBucket);
+    }
+
+    auto bucketCountWord = static_cast<GnuHashWord>(BUCKET_COUNT);
+    auto symbolOffsetWord = static_cast<GnuHashWord>(SYMBOL_OFFSET);
+    auto bloomSizeWord = static_cast<GnuHashWord>(bloomSize);
+    auto bloomShiftWord = bloomShift;
+    gnuHashSection_.AppendData(&bucketCountWord, sizeof(bucketCountWord));
+    gnuHashSection_.AppendData(&symbolOffsetWord, sizeof(symbolOffsetWord));
+    gnuHashSection_.AppendData(&bloomSizeWord, sizeof(bloomSizeWord));
+    gnuHashSection_.AppendData(&bloomShiftWord, sizeof(bloomShiftWord));
+    gnuHashSection_.AppendData(bloom.data(), bloom.size() * sizeof(BloomWord));
+    gnuHashSection_.AppendData(buckets.data(), buckets.size() * sizeof(GnuHashWord));
+    gnuHashSection_.AppendData(chains.data(), chains.size() * sizeof(GnuHashWord));
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
@@ -719,19 +815,6 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::MakeHeader()
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
-void ElfBuilder<ARCH, IS_JIT_MODE>::AddSymbols()
-{
-    AddSymbol(methodName_, textSection_.GetDataSize(), textSection_, [this]() { return textSection_.GetAddress(); });
-    if constexpr (!IS_JIT_MODE) {  // NOLINT
-        AddSymbol("code_end", textSection_.GetDataSize(), textSection_,
-                  [this]() { return textSection_.GetAddress() + textSection_.GetDataSize(); });
-        AddSymbol("aot", aotSection_.GetDataSize(), aotSection_, [this]() { return aotSection_.GetAddress(); });
-        AddSymbol("aot_end", aotSection_.GetDataSize(), aotSection_,
-                  [this]() { return aotSection_.GetAddress() + aotSection_.GetDataSize(); });
-    }
-}
-
-template <Arch ARCH, bool IS_JIT_MODE>
 void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSectionsForAot()
 {
     static_assert(!IS_JIT_MODE);
@@ -744,9 +827,9 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSectionsForAot()
         SegmentScope segmentScope(*this, PT_LOAD, PF_R, true);  // NOLINT(hicpp-signed-bitwise)
         currentAddress_ = sizeof(ElfEhdr) + sizeof(ElfPhdr) * MAX_SEGMENTS_COUNT;
         currentOffset_ = sizeof(ElfEhdr) + sizeof(ElfPhdr) * MAX_SEGMENTS_COUNT;
+        SettleSection(&gnuHashSection_);
         SettleSection(&dynstrSection_);
         SettleSection(&dynsymSection_);
-        SettleSection(&hashSection_);
         SettleSection(&aotSection_);
         for (auto roDataSection : roDataSections_) {
             ASSERT(roDataSection->GetDataSize() > 0);
@@ -803,8 +886,8 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSectionsForJit()
         SettleSection(&frameSection_);
     }
 #endif
+    SettleSection(&gnuHashSection_);
     SettleSection(&dynsymSection_);
-    SettleSection(&hashSection_);
     SettleSection(&dynstrSection_);
     SettleSection(&shstrtabSection_);
 }
