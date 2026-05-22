@@ -1,3 +1,7 @@
+#34757
+02.lexical_elements/04.line_separators/case_without_semicolon_0.ets
+02.lexical_elements/08.operators_and_punctuators/parentheses_without_semicolon_0.ets
+
 #25512
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
