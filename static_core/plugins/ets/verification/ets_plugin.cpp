@@ -16,6 +16,8 @@
 #include "ets_plugin.h"
 #include "abs_int_inl_compat_checks.h"
 #include <libarkfile/include/source_lang_enum.h>
+#include "include/managed_thread.h"
+#include "runtime/execution/job_manager.h"
 #include "verifier_messages.h"
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -27,20 +29,22 @@ ManagedThread *EtsPlugin::CreateManagedThread() const
     os::memory::LockHolder l(mutex_);
     auto rt = Runtime::GetCurrent();
     auto vm = rt->GetPandaVM();
-    auto coroman = static_cast<CoroutineManager *>(vm->GetThreadManager());
-    auto coro = coroman->CreateEntrypointlessCoroutine(rt, vm, true, "_coro_", Coroutine::Type::MUTATOR,
-                                                       JobPriority::DEFAULT_PRIORITY);
-    ASSERT(coro != nullptr);
-    return coro;
+    auto *jobMan = static_cast<JobManager *>(vm->GetThreadManager());
+    auto *ctx = jobMan->AttachExclusiveWorker(rt, vm);
+    ASSERT(ctx != nullptr);
+    return ctx;
 }
 
-void EtsPlugin::DestroyManagedThread(ManagedThread *thr) const
+void EtsPlugin::DestroyManagedThread([[maybe_unused]] ManagedThread *thr) const
 {
     os::memory::LockHolder l(mutex_);
+    ASSERT(ManagedThread::GetCurrent() == thr);
+
     auto rt = Runtime::GetCurrent();
     auto vm = rt->GetPandaVM();
-    auto coroman = static_cast<CoroutineManager *>(vm->GetThreadManager());
-    coroman->DestroyEntrypointlessCoroutine(Coroutine::CastFromMutator(thr));
+    auto *jobMan = static_cast<JobManager *>(vm->GetThreadManager());
+    [[maybe_unused]] bool ok = jobMan->DetachExclusiveWorker();
+    ASSERT(ok);
 }
 
 void EtsPlugin::TypeSystemSetup(TypeSystem *types) const
