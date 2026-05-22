@@ -222,7 +222,7 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::Intrinsic:
                 // if intrinsic has no side effects and has primitive type, it
                 //  does not move ref inputs anywhere
-                if (!inst->IsNotRemovable() && !inst->IsReferenceOrAny()) {
+                if (userInst->IsNotRemovable() || userInst->IsReferenceOrAny()) {
                     return true;
                 }
                 break;

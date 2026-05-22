@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1458,8 +1458,7 @@ TEST_F(AliasAnalysisTest, VolatileAliasing)
     ASSERT_EQ(alias.CheckInstAlias(&INS(13U), &INS(21U)), AliasType::MAY_ALIAS);
 }
 
-/// LoadObject with ObjectType == MEM_STATIC is treatet the same as LoadStatic
-
+/// LoadObject with ObjectType == MEM_STATIC is treated the same as LoadStatic
 TEST_F(AliasAnalysisTest, LoadObjectStatic)
 {
     GRAPH(GetGraph())
@@ -1613,6 +1612,7 @@ TEST_F(AliasAnalysisTest, LocalObjects)
     EXPECT_EQ(alias.CheckRefAlias(&INS(0U), &INS(4U)), AliasType::MAY_ALIAS);  // can be NO_ALIAS but ok
 }
 
+/// Object escapes through CallStatic.
 TEST_F(AliasAnalysisTest, ComplexEscape)
 {
     GRAPH(GetGraph())
@@ -1634,6 +1634,47 @@ TEST_F(AliasAnalysisTest, ComplexEscape)
             INST(10U, Opcode::LoadObject).ref().Inputs(9U).TypeId(0U);
             INST(5U, Opcode::SaveState).Inputs(0U, 3U, 4U).SrcVregs({0U, 1U, 2U});
             INST(6U, Opcode::CallStatic).ref().InputsAutoType(10U, 5U);
+            INST(25U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    GetGraph()->RunPass<AliasAnalysis>();
+    EXPECT_TRUE(GetGraph()->IsAnalysisValid<AliasAnalysis>());
+    GraphChecker(GetGraph()).Check();
+
+    auto &alias = GetGraph()->GetAnalysis<AliasAnalysis>();
+    EXPECT_TRUE(alias.GetPointerInfo(Pointer::CreateObject(&INS(4U))).IsLocalCreated());
+    // inst 4 escapes: 4 -> 7 -> 9p -> 10 -> 6
+    EXPECT_FALSE(alias.GetPointerInfo(Pointer::CreateObject(&INS(4U))).IsLocal());
+    EXPECT_FALSE(alias.GetPointerInfo(Pointer::CreateObject(&INS(3U))).IsLocal());  // can be true but ok
+
+    EXPECT_EQ(alias.CheckRefAlias(&INS(4U), &INS(6U)), AliasType::MAY_ALIAS);
+    EXPECT_EQ(alias.CheckRefAlias(&INS(3U), &INS(6U)), AliasType::MAY_ALIAS);  // can be NO_ALIAS but ok
+    EXPECT_EQ(alias.CheckRefAlias(&INS(0U), &INS(6U)), AliasType::MAY_ALIAS);
+}
+
+/// Object escapes through Intrinsic.
+TEST_F(AliasAnalysisTest, EscapeInstrinsic)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).TypeId(0U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(7U, Opcode::StoreObject).ref().Inputs(3U, 4U).TypeId(0U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::REFERENCE).CC(CC_NE).Imm(0).Inputs(0U);
+        }
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, -1)
+        {
+            INST(9U, Opcode::Phi).ref().Inputs(3U, 0U);
+            INST(10U, Opcode::LoadObject).ref().Inputs(9U).TypeId(0U);
+            INST(5U, Opcode::SaveState).Inputs(0U, 3U, 4U).SrcVregs({0U, 1U, 2U});
+            INST(6U, Opcode::Intrinsic).ref().InputsAutoType(10U, 5U);
             INST(25U, Opcode::ReturnVoid).v0id();
         }
     }
