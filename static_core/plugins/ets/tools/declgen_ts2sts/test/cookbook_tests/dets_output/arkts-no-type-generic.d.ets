@@ -1,6 +1,6 @@
 'use static'
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ export type Result2 = ConditionalAlias<number, string, boolean>;
 export type MappedAlias<T> = Any;
 export type Person2 = Any;
 export type NewPerson = MappedAlias<Person>;
-export type TemplateLiteralAlias<T extends string> = Any;
+export type TemplateLiteralAlias<T extends string> = string;
 export type Result3 = TemplateLiteralAlias<'A' | 'B'>;
 export type PickAlias<T, K extends Any> = Any;
 export type Person3 = Any;

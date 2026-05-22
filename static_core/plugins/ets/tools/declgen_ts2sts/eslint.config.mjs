@@ -13,20 +13,8 @@
  * limitations under the License.
  */
 
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
-});
 
 export default tseslint.config(
   {
@@ -43,9 +31,10 @@ export default tseslint.config(
       '**/**.js'
     ]
   },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.ts'],
-    extends: [eslint.configs.recommended, tseslint.configs.recommended],
     plugins: {
       '@typescript-eslint': tseslint.plugin
     },
@@ -61,7 +50,7 @@ export default tseslint.config(
     },
 
     rules: {
-      'arrow-body-style': ['error', 'always'],
+      'arrow-body-style': ['warn', 'always'],
       camelcase: 'off',
 
       'class-methods-use-this': [

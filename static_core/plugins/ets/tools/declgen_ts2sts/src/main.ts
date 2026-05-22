@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,75 @@
  * limitations under the License.
  */
 
-import { Logger } from '../utils/logger/Logger';
-import { ConsoleLogger } from '../utils/logger/ConsoleLogger';
+import * as ts from 'typescript';
+import { Logger } from './logger/Logger';
+import { ConsoleLogger } from './logger/ConsoleLogger';
 
 import { CLI } from './cli/CLI';
-import { DeclgenCLI } from './cli/DeclgenCLI';
+import { DeclgenCLI, DeclgenCLIOptions } from './cli/DeclgenCLI';
+import { getSourceFilesFromDir, parseConfigFile, defaultCompilerOptions } from './compiler/Compiler';
 
-import { Declgen } from './Declgen';
+import { Declgen, DeclgenOptions } from './Declgen';
 
 function main(): void {
   Logger.init(new ConsoleLogger());
 
   const parsedCliOptions = CLI.parseCLI(new DeclgenCLI());
 
-  const declgen = new Declgen(parsedCliOptions);
+  const { rootNames, options } = parseDeclgenOptions(parsedCliOptions);
+
+  const declgenOptions: DeclgenOptions = {
+    rootDir: parsedCliOptions.rootDir,
+    inputFiles: rootNames,
+    outDir: parsedCliOptions.outDir,
+    features: {
+      enableInteropTypesFix: parsedCliOptions.enableInteropTypesFix ?? false,
+      removeReservedKeywordIdentifier: parsedCliOptions.removeReservedKeywordIdentifier ?? false
+    }
+  };
+
+  const declgen = new Declgen(declgenOptions, options);
 
   declgen.run();
+  declgen.emit();
+}
+
+function collectInputFiles(opts: DeclgenCLIOptions): string[] {
+  const inputFiles = [] as string[];
+
+  if (opts.inputFiles) {
+    inputFiles.push(...opts.inputFiles);
+  }
+
+  if (opts.inputDirs) {
+    for (const dir of opts.inputDirs) {
+      try {
+        inputFiles.push(...getSourceFilesFromDir(dir));
+      } catch (error) {
+        Logger.error('Failed to read folder: ' + error);
+        process.exit(-1);
+      }
+    }
+  }
+
+  return inputFiles;
+}
+
+function parseDeclgenOptions(opts: DeclgenCLIOptions): ts.CreateProgramOptions {
+  const parsedConfigFile = opts.tsconfig ? parseConfigFile(opts.tsconfig) : undefined;
+
+  if (parsedConfigFile) {
+    return {
+      rootNames: parsedConfigFile.fileNames,
+      options: parsedConfigFile.options,
+      projectReferences: parsedConfigFile.projectReferences,
+      configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(parsedConfigFile)
+    };
+  }
+  return {
+    rootNames: collectInputFiles(opts),
+    options: defaultCompilerOptions()
+  };
 }
 
 main();

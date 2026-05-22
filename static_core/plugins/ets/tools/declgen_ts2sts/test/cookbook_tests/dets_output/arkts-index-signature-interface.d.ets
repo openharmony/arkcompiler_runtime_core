@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 export declare interface StringIndexedObject {
+    [key: string]: number;
     length: number;
 }
 export declare interface NumberIndexedObject {
+    [key: number | string]: string;
 }
 export declare interface MixedIndexObject {
+    [key: string | number]: string | number;
     version: number;
     name: string;
 }
-

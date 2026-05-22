@@ -14,29 +14,20 @@
  */
 
 import * as ts from 'typescript';
-import { Logger } from '../utils/logger/Logger';
-import { logMessages, SilentLogger } from '../utils/logger/SilentLogger';
+import { Logger } from './logger/Logger';
+import { logMessages, SilentLogger } from './logger/SilentLogger';
 import { DeclgenCLIOptions } from './cli/DeclgenCLI';
-import { CodeInput, Declgen } from './Declgen';
-
+import { Declgen } from './Declgen';
+import { ModuleNameResolver } from './compiler/Compiler';
 export interface RunnerParms {
   inputFiles: string[];
   inputDirs: string[];
   outDir: string;
   rootDir?: string;
-  customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[];
+  customResolveModuleNames?: ModuleNameResolver;
   customCompilerOptions?: ts.CompilerOptions;
   includePaths?: string[];
   uiInteropTransformer?: Function;
-}
-
-export interface CodeInputParams {
-  codeInputs: CodeInput[];
-  outDir: string;
-  rootDir?: string;
-  customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[];
-  customCompilerOptions?: ts.CompilerOptions;
-  includePaths?: string[];
 }
 
 export function generateInteropDecls(config: RunnerParms): string[] {
@@ -49,33 +40,9 @@ export function generateInteropDecls(config: RunnerParms): string[] {
     rootDir: config.rootDir,
     tsconfig: undefined,
     includePaths: config.includePaths
-  }
-  const declgen = new Declgen(tsConfig, config.customResolveModuleNames, config.customCompilerOptions, [], config.uiInteropTransformer);
+  };
+  const declgen = new Declgen(tsConfig, config.customCompilerOptions, config.customResolveModuleNames);
   declgen.run();
-  return logMessages;
-}
-
-//Create ArkTS1.2 declaration file based on file contend.
-export function generateInteropDeclsFromCode(config: CodeInputParams): string[] {
-  Logger.init(new SilentLogger());
-
-  const tsConfig: DeclgenCLIOptions = {
-    outDir: config.outDir,
-    inputFiles: [],
-    inputDirs: [],
-    rootDir: config.rootDir,
-    tsconfig: undefined,
-    includePaths: config.includePaths,
-    enableInteropFeatures: true
-  }
-
-  const declgen = new Declgen(
-    tsConfig, 
-    config.customResolveModuleNames, 
-    config.customCompilerOptions,
-    config.codeInputs
-  );
-
-  declgen.run();
+  declgen.emit();
   return logMessages;
 }
