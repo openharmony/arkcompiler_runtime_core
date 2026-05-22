@@ -1086,22 +1086,21 @@ export class RegExp extends Object {
         if (pattern == "") {
             return "(?:)"
         }
-        let s = pattern.replaceAll("/", "\\/")
-        return s.replaceAll("\\", "\\")
+        return pattern.replaceAll("/", "\\/")
     }
 
     private static init(re: RegExp, pattern: String, flags: String): void {
         re.pattern_ = pattern
         re.flags_ = RegExp.normalizeFlags(pattern, flags)
         re.source_ = RegExp.escapePattern(pattern)
-        re.isGlobal = re.flags_.contains("g", 0)
-        re.isUnicode = re.flags_.contains("u", 0)
-        re.isUnicodeSets = re.flags_.contains("v", 0)
-        re.isMultiline = re.flags_.contains("m", 0)
-        re.isSticky = re.flags_.contains("y", 0)
-        re.isIgnoreCase = re.flags_.contains("i", 0)
-        re.isIndices = re.flags_.contains("d", 0)
-        re.isDotAll = re.flags_.contains("s", 0)
+        re.isGlobal = re.flags_.indexOf(c'g', 0) != -1
+        re.isUnicode = re.flags_.indexOf(c'u', 0) != -1
+        re.isUnicodeSets = re.flags_.indexOf(c'v', 0) != -1
+        re.isMultiline = re.flags_.indexOf(c'm', 0) != -1
+        re.isSticky = re.flags_.indexOf(c'y', 0) != -1
+        re.isIgnoreCase = re.flags_.indexOf(c'i', 0) != -1
+        re.isIndices = re.flags_.indexOf(c'd', 0) != -1
+        re.isDotAll = re.flags_.indexOf(c's', 0) != -1
         re.compileFlags_ = RegExp.buildCompileFlags(re)
         re.matchFlags_ = RegExp.buildMatchFlags(re)
         re.extraCompileFlags_ = RegExp.PCRE2_EXTRA_ALT_BSUX
