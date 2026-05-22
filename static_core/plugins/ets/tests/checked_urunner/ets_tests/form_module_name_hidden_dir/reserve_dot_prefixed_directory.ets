@@ -13,8 +13,20 @@
  * limitations under the License.
  */
 
+/*---
+arktsconfig: arktsconfig.json
+files:
+  - arktsconfig.json
+  - entry/.test/a.ets
+  - entry/..test/a.ets
+  - entry/...test/a.ets
+  - entry/test./a.ets
+  - entry/tests../a.ets
+  - entry/test.../a.ets
+---*/
+
 //! CHECKER      Preserve dot-prefixed directory in module name
-//! RUN_FRONTEND options: "--dump-assembly --gen-stdlib=false --stdlib=#{File.expand_path('../../../stdlib', __dir__)} --arktsconfig=#{File.expand_path('arktsconfig.json', __dir__)}", output: "reserve_dot_prefixed_directory.frontend.abc"
+//! RUN_FRONTEND options: "--dump-assembly --gen-stdlib=false --stdlib=#{File.expand_path('plugins/ets/stdlib', (@options.source[%r{.*static_core}] || (ENV['ARKCOMPILER_RUNTIME_CORE_PATH'].to_s + '/static_core')))} --arktsconfig=#{File.expand_path('arktsconfig.json', File.dirname(@options.source))}", output: "reserve_dot_prefixed_directory.frontend.abc"
 //! BC_METHOD    "reserve_dot_prefixed_directory.ETSGLOBAL.main"
 //! INST         "initobj.short entry..test.a.A.<ctor>:void;"
 //! INST_NOT     "initobj.short entry.test.a.A.<ctor>:void;"
