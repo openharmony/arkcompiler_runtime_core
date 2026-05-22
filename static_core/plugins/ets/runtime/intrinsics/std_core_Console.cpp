@@ -30,6 +30,8 @@
 #include <hilog/log.h>
 #elif PANDA_TARGET_ANDROID
 #include <android/log.h>
+#elif PANDA_TARGET_IOS
+#include <stdio.h>
 #endif  // PANDA_TARGET_OHOS
 
 namespace ark::ets::intrinsics {
@@ -94,6 +96,39 @@ void LogPrint(ConsoleLevel level, const char *component, const char *msg)
 }  // namespace
 #endif  // PANDA_TARGET_OHOS
 
+#ifdef PANDA_TARGET_IOS
+namespace {
+
+void LogPrint(ConsoleLevel level, const char *component, const char *msg)
+{
+    switch (level) {
+        case ConsoleLevel::DEBUG:
+            printf("[DEBUG] %s: %s\n", component, msg);
+            break;
+        case ConsoleLevel::LOG:
+        case ConsoleLevel::INFO:
+            printf("[INFO] %s: %s\n", component, msg);
+            break;
+        case ConsoleLevel::WARN:
+            printf("[WARN] %s: %s\n", component, msg);
+            break;
+        case ConsoleLevel::ERROR:
+            fprintf(stderr, "[ERROR] %s: %s\n", component, msg);
+            break;
+        case ConsoleLevel::PRINTLN:
+            printf("%s\n", msg);
+            break;
+        default:
+            printf("[UNKNOWN] %s: %s\n", component, msg);
+            break;
+    }
+    fflush(stdout);
+    fflush(stderr);
+}
+
+}  // namespace
+#endif  // PANDA_TARGET_IOS
+
 extern "C" {
 void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *data, int32_t level)
 {
@@ -102,7 +137,7 @@ void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *dat
 
     auto res = PandaString(data->GetUtf8());
 
-#ifdef PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_TARGET_IOS)
     if (lvl == ConsoleLevel::PRINTLN) {
         std::cout << res << std::flush;
     } else {
@@ -110,7 +145,7 @@ void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *dat
         str.erase(std::remove(str.begin(), str.end(), '\0'), str.end());
         LogPrint(lvl, "arkts.console", str.c_str());
     }
-#elif PANDA_TARGET_ANDROID
+#elif defined(PANDA_TARGET_ANDROID)
     if (lvl == ConsoleLevel::PRINTLN) {
         return;
     }

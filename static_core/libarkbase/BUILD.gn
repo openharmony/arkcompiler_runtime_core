@@ -115,17 +115,10 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libarkbase/system_environment.cpp",
     "$ark_root/platforms/unix/libarkbase/thread.cpp",
     "$ark_root/platforms/unix/libarkbase/trace.cpp",
+    "$ark_root/platforms/unix/libarkbase/library_loader_load.cpp"
   ]
 
-  if (is_mob && !is_android) {
-    libarkbase_sources +=
-        [ "$ark_root/platforms/mobile/libarkbase/library_loader_load.cpp" ]
-  } else {
-    libarkbase_sources +=
-        [ "$ark_root/platforms/unix/libarkbase/library_loader_load.cpp" ]
-  }
-
-  if (!is_mac) {
+  if (!is_darwin) {
     libarkbase_sources += [
       "$ark_root/platforms/unix/libarkbase/exec.cpp",
       "$ark_root/platforms/unix/libarkbase/mem_hooks.cpp",
@@ -178,16 +171,9 @@ if (current_cpu == "arm64" && !is_mac && target_os != "ios") {
   libarkbase_sources += [ "$ark_root/libarkbase/arch/default/cpu_features.cpp" ]
 }
 
-if (is_mob && !is_android) {
-  copy("coherency_line_size_h") {
-    sources = [ "$ark_root/platforms/mobile/libarkbase/coherency_line_size.h" ]
-    outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
-  }
-} else {
-  copy("coherency_line_size_h") {
-    sources = [ "$ark_root/platforms/common/libarkbase/coherency_line_size.h" ]
-    outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
-  }
+copy("coherency_line_size_h") {
+  sources = [ "$ark_root/platforms/common/libarkbase/coherency_line_size.h" ]
+  outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
 }
 
 config("arkbase_public_config") {
@@ -273,7 +259,7 @@ ohos_shared_library("libarktsbase") {
   deps = [ ":libarktsbase_static" ]
   if (is_mingw || is_win) {
     output_extension = "dll"
-  } else if (is_mac) {
+  } else if (is_darwin) {
     output_extension = "dylib"
   } else {
     output_extension = "so"

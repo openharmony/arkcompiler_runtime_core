@@ -125,7 +125,7 @@ ohos_shared_library("libarktsbytecodeopt") {
 
   if (is_mingw || is_win) {
     output_extension = "dll"
-  } else if (is_mac) {
+  } else if (is_darwin) {
     output_extension = "dylib"
   } else {
     output_extension = "so"

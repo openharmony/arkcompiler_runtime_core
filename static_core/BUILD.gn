@@ -251,15 +251,27 @@ config("ark_common_config") {
       defines += [ "PANDA_WITH_CODEGEN" ]
     }
   } else if (is_mob) {
-    defines += [
-      "PANDA_TARGET_UNIX",
-      "PANDA_USE_FUTEX",
-      "PANDA_TARGET_MOBILE",
-      "PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS",
-    ]
+    defines += [ "PANDA_TARGET_UNIX" ]
+
     if (is_android) {
       defines += [
+        "PANDA_TARGET_MOBILE",
+        "PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS",
         "PANDA_TARGET_ANDROID",
+        "PANDA_USE_FUTEX",
+      ]
+    } else if (is_ios) {
+      defines += [
+        "PANDA_TARGET_IOS",
+        "PANDA_TARGET_MACOS",
+        "PANDA_WITH_BYTECODE_OPTIMIZER",
+        "PANDA_WITH_COMPILER",
+      ]
+    } else {
+      defines += [
+        "PANDA_TARGET_MOBILE",
+        "PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS",
+        "PANDA_USE_FUTEX",
       ]
     }
   } else if (is_ohos) {
