@@ -16,21 +16,21 @@
 #include "arkts_interop_js_api.h"
 #include "libarkbase/utils/expected.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"
 
-static ark::Expected<ark::ets::EtsCoroutine *, std::string_view> GetCurrentCoroutine()
+static ark::Expected<ark::ets::EtsExecutionContext *, std::string_view> GetCurrentExecutionContext()
 {
     auto *mutator = ark::Mutator::GetCurrent();
     if (mutator == nullptr) {
         return ark::Unexpected(std::string_view("Thread is unattached"));
     }
     // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine
-    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
-    if (UNLIKELY(coro == nullptr)) {
+    auto *execCtx = ark::ets::EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
         return ark::Unexpected(std::string_view("No current coroutine exists"));
     }
-    return coro;
+    return execCtx;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -44,13 +44,13 @@ extern "C" bool arkts_napi_scope_open(ani_env *env, napi_env *result)
         return false;
     }
 
-    auto optCoro = GetCurrentCoroutine();
-    if (UNLIKELY(!optCoro.HasValue())) {
-        LOG(WARNING, RUNTIME) << "Cannot open napi scope, " << optCoro.Error();
+    auto optExecCtx = GetCurrentExecutionContext();
+    if (UNLIKELY(!optExecCtx.HasValue())) {
+        LOG(WARNING, RUNTIME) << "Cannot open napi scope, " << optExecCtx.Error();
         return false;
     }
     auto *executionCtx = ark::ets::PandaAniEnv::FromAniEnv(env)->GetExecutionContext();
-    if (UNLIKELY(executionCtx->GetMT() != optCoro.Value())) {
+    if (UNLIKELY(executionCtx != optExecCtx.Value())) {
         LOG(WARNING, RUNTIME) << "Cannot open napi scope, input ani_env is taken from another coroutine";
         return false;
     }
@@ -70,9 +70,9 @@ extern "C" bool arkts_napi_scope_open(ani_env *env, napi_env *result)
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern "C" bool arkts_napi_scope_close_n(napi_env env, size_t nValues, napi_value *values, ani_ref *result)
 {
-    auto optCoro = GetCurrentCoroutine();
-    if (UNLIKELY(!optCoro.HasValue())) {
-        LOG(WARNING, RUNTIME) << "Cannot close napi scope, " << optCoro.Error();
+    auto optExecCtx = GetCurrentExecutionContext();
+    if (UNLIKELY(!optExecCtx.HasValue())) {
+        LOG(WARNING, RUNTIME) << "Cannot close napi scope, " << optExecCtx.Error();
         return false;
     }
     return ark::ets::interop::js::CloseETSToJSScope(env, nValues, values, result);

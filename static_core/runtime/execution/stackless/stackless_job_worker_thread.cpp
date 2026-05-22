@@ -185,8 +185,9 @@ void StacklessJobWorkerThread::AttachExecutionContext(JobExecutionContext *execu
 
 void StacklessJobWorkerThread::ThreadProc()
 {
-    auto *schLoopCtx = jobManager_->CreateEntrypointlessExecCtx(GetRuntime(), GetPandaVM(), true, "sch_ctx",
-                                                                Job::Type::SCHEDULER, JobPriority::MEDIUM_PRIORITY);
+    auto *job = jobManager_->CreateJob("sch_ctx", Job::NoEntrypointInfo {}, JobPriority::DEFAULT_PRIORITY,
+                                       Job::Type::SCHEDULER);
+    auto *schLoopCtx = jobManager_->CreateExecutionContext(GetRuntime(), GetPandaVM(), job);
     AttachExecutionContext(schLoopCtx);
 
     jobManager_->OnWorkerStartup(this);
@@ -194,7 +195,7 @@ void StacklessJobWorkerThread::ThreadProc()
     ScheduleLoopBody();
 
     SetSchedulerExecutionCtx(nullptr);
-    jobManager_->DestroyEntrypointlessExecCtx(schLoopCtx);
+    jobManager_->DestroyExecutionContext(schLoopCtx);
     jobManager_->OnWorkerShutdown(this);
 }
 
@@ -210,10 +211,13 @@ void StacklessJobWorkerThread::ScheduleLoopBody()
 void StacklessJobWorkerThread::PushToRunnableQueue(Job *job, JobPriority priority)
 {
     job->SetStatus(Job::Status::RUNNABLE);
-    os::memory::LockHolder lock(runnablesLock_);
-    runnables_.Push(job, priority);
-    UpdateLoadFactorImpl();
-    runnablesCv_.Signal();
+    {
+        os::memory::LockHolder lock(runnablesLock_);
+        runnables_.Push(job, priority);
+        UpdateLoadFactorImpl();
+        runnablesCv_.Signal();
+    }
+    PostSchedulingTask();
 }
 
 void StacklessJobWorkerThread::RegisterIncomingJob(Job *newJob)
@@ -369,9 +373,9 @@ void StacklessJobWorkerThread::CompleteAllAffinedJobs()
 {
     ASSERT(!IsCrossWorkerCall());
     ASSERT(Job::GetCurrent()->GetType() == Job::Type::SCHEDULER ||
-           Job::GetCurrent()->GetType() == Job::Type::FINALIZER);
+           Job::GetCurrent()->GetType() == Job::Type::FINALIZER ||
+           ((Job::GetCurrent()->GetType() == Job::Type::MUTATOR) && !Job::GetCurrent()->HasEntrypoint()));
 
-    ScopedNativeCodeThread nativeCode(GetSchedulerExecutionCtx());
     allJobsAreExecutedEvt_.Lock();
     allJobsAreExecutedEvt_.SetNotHappened();
     WaitForEvent(&allJobsAreExecutedEvt_, true, true);

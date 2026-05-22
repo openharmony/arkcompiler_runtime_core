@@ -159,7 +159,7 @@ public:
 
 static ClassLinkerContext *GetClassLinkerContext(EtsExecutionContext *executionCtx)
 {
-    auto stack = StackWalker::Create(EtsCoroutine::CastFromThread(executionCtx->GetMT()));
+    auto stack = StackWalker::Create(executionCtx->GetMT());
     if (!stack.HasFrame()) {
         return nullptr;
     }

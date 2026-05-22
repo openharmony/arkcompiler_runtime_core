@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
 #include <variant>
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/interop_js/js_convert_base.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -307,7 +308,7 @@ JSCONVERT_WRAP(Any)
 }
 JSCONVERT_UNWRAP(Any)
 {
-    auto *anyClass = EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY);
+    auto *anyClass = EtsExecutionContext::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY);
     auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(anyClass);
     return objectConverter->Unwrap(ctx, jsVal);
 }

@@ -20,7 +20,6 @@
 #include <ostream>
 #include <vector>
 
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "include/mem/panda_containers.h"
 #include "interop_js/interop_common.h"
 #include "interop_js/js_proxy/js_proxy.h"
@@ -590,7 +589,8 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMethod *p
 
     if (hasSquashedProto(this)) {
         // Copy properties of base classes if we have to split prototype chain
-        auto *anyClass = EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY);
+        auto *anyClass =
+            EtsExecutionContext::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY);
         for (auto wclass = baseWrapper_;
              wclass != nullptr && (wclass->etsClass_ != PlatformTypes()->coreObject) && (wclass->etsClass_ != anyClass);
              wclass = wclass->baseWrapper_) {

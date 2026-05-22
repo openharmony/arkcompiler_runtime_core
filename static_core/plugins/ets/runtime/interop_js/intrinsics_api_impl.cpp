@@ -547,9 +547,9 @@ EtsString *GetCallerABCPath()
     constexpr std::string_view ABC_SUFFIX = ".abc";
     constexpr size_t STATIC_ABC_SUFFIX_LEN = STATIC_ABC_SUFFIX.size();
 
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto execCtx = JobExecutionContext::GetCurrent();
     std::string abcPath;
-    auto stack = StackWalker::Create(coroutine);
+    auto stack = StackWalker::Create(execCtx);
     stack.NextFrame();
     if (!stack.HasFrame()) {
         LOG(ERROR, DEBUGGER) << "caller stack has no frame.";

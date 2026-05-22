@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_stacks.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "runtime/execution/job_execution_context.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/include/method.h"
@@ -35,11 +36,11 @@ InteropCallStack::InteropCallStack()
 
 void *InteropCallStack::GetStaticTopFrame() const
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(coro == nullptr)) {
+    auto *execCtx = JobExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
         return nullptr;
     }
-    auto stack = StackWalker::Create(coro);
+    auto stack = StackWalker::Create(execCtx);
     if (!stack.HasFrame()) {
         return nullptr;
     }
@@ -97,12 +98,12 @@ bool InteropCallStack::ForEachStaticFrame(StackWalker *stack, void *toFrame,
 
 bool InteropCallStack::ForEachInteropFrame(const std::function<void(const void *frame, bool isStaticFrame)> &callback)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(coro == nullptr)) {
+    auto *execCtx = JobExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
         return false;
     }
     // Get the current top stack and traverse the stack between the current node and the recorded node.
-    StackWalker staticStack = StackWalker::Create(coro);
+    StackWalker staticStack = StackWalker::Create(execCtx);
     void *dynamicFrameSP = GetDynamicTopFrameSP();
     void *toFrame = nullptr;
 

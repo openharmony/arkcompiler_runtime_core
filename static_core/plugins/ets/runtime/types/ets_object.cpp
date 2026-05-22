@@ -75,9 +75,9 @@ void EtsObject::DropInteropIndex(PandaEtsVM *vm)
 
 bool EtsObject::HasInteropIndex() const
 {
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *vm = co->GetPandaVM();
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(execCtx != nullptr);
+    auto *vm = execCtx->GetPandaVM();
     ASSERT(vm != nullptr);
     return HasInteropIndex(vm);
 }

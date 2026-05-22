@@ -242,7 +242,7 @@ bool StacklessJobManager::DetachExclusiveWorker()
     eWorker->DestroyLocalStorage();
 
     auto *eaExecCtx = eWorker->GetSchedulerExecutionCtx();
-    DestroyEntrypointlessExecCtx(eaExecCtx);
+    DestroyExecutionContext(eaExecCtx);
 
     OnWorkerShutdown(eWorker);
     return true;
@@ -382,22 +382,19 @@ size_t StacklessJobManager::GetExistingWorkersCount() const
     return workers_.size();
 }
 
-JobExecutionContext *StacklessJobManager::CreateEntrypointlessExecCtx(Runtime *runtime, PandaVM *vm, bool makeCurrent,
-                                                                      PandaString name, Job::Type type,
-                                                                      JobPriority priority)
+JobExecutionContext *StacklessJobManager::CreateExecutionContext(Runtime *runtime, PandaVM *vm, Job *job)
 {
-    auto *job = CreateJob(std::move(name), std::monostate(), priority, type);
     ASSERT(job != nullptr);
     auto *execCtx = execCtxFactory_(runtime, vm, job);
     ASSERT(execCtx != nullptr);
-    if (makeCurrent) {
+    if (!job->HasEntrypoint()) {
         JobExecutionContext::SetCurrent(execCtx);
         execCtx->NativeCodeBegin();
     }
     return execCtx;
 }
 
-void StacklessJobManager::DestroyEntrypointlessExecCtx(JobExecutionContext *executionCtx)
+void StacklessJobManager::DestroyExecutionContext(JobExecutionContext *executionCtx)
 {
     ASSERT(executionCtx != nullptr);
     ASSERT(!executionCtx->GetJob()->HasEntrypoint());
@@ -487,8 +484,8 @@ void StacklessJobManager::CalculateWorkerLimits()
 void StacklessJobManager::CreateMainExecutionContext(Runtime *runtime, PandaVM *vm)
 {
     ASSERT(GetMainThread() == nullptr);
-    auto *mainCtx =
-        CreateEntrypointlessExecCtx(runtime, vm, true, "_main_", Job::Type::MUTATOR, JobPriority::DEFAULT_PRIORITY);
+    auto *job = CreateJob("_main_", Job::NoEntrypointInfo {});
+    auto *mainCtx = CreateExecutionContext(runtime, vm, job);
     auto *wMain = CreateWorker(runtime, vm, "[main] worker ", false, true, mainCtx);
     OnWorkerStartup(wMain);
     ASSERT(wMain->GetId() == MAIN_WORKER_ID);
@@ -503,15 +500,15 @@ void StacklessJobManager::DestroyMainExecutionContext()
     ASSERT(GetCurrentWorker()->IsMainWorker());
     OnWorkerShutdown(GetCurrentWorker());
     auto *mainCtx = JobExecutionContext::CastFromMutator(GetMainThread());
-    DestroyEntrypointlessExecCtx(mainCtx);
+    DestroyExecutionContext(mainCtx);
     SetMainThread(nullptr);
 }
 
 JobExecutionContext *StacklessJobManager::CreateExclusiveExecutionContext(Runtime *runtime, PandaVM *vm,
                                                                           PandaString workerName)
 {
-    auto *eaCtx = CreateEntrypointlessExecCtx(runtime, vm, true, "[ea_ctx] " + workerName, Job::Type::MUTATOR,
-                                              JobPriority::MEDIUM_PRIORITY);
+    auto *job = CreateJob("[ea_ctx] " + workerName, Job::NoEntrypointInfo {});
+    auto *eaCtx = CreateExecutionContext(runtime, vm, job);
     auto *eaWorker = CreateWorker(runtime, vm, std::move(workerName), true, false, eaCtx);
     OnWorkerStartup(eaWorker);
     ASSERT(eaWorker->InExclusiveMode());

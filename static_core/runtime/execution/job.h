@@ -142,7 +142,9 @@ public:
         }
     };
 
-    using EntrypointInfo = std::variant<std::monostate, ManagedEntrypointInfo, NativeEntrypointInfo>;
+    using NoEntrypointInfo = std::monostate;
+
+    using EntrypointInfo = std::variant<NoEntrypointInfo, ManagedEntrypointInfo, NativeEntrypointInfo>;
 
     void CleanUp();
     void ReInitialize(PandaString name, EntrypointInfo &&epInfo, JobPriority priority, bool abortFlag);
