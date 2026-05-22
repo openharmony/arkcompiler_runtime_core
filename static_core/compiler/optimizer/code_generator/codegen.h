@@ -451,6 +451,8 @@ private:
     void EmitAtomicByteOr(Reg addr, Reg value);
 
 private:
+    template <typename... Args>
+    void CreateCmcReadViaBarrierCall(Inst *inst, Reg dstReg, bool isVolatile, RegMask preserved, Args &&...params);
     ArenaAllocator *allocator_;
     ArenaAllocator *localAllocator_;
     // Register description

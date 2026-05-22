@@ -239,3 +239,42 @@ PostInterRegionBarrierTwoCardsSlow()
 
 PostInterRegionBarrierMarkSingleFast()
 PostInterRegionBarrierMarkPairFast()
+
+def GenerateCmcReadViaBarrierIrtoc(atomic)
+    function("Cmc#{(atomic ? 'Atomic' : '')}ReadViaBarrierIrtoc".to_sym,
+             params: { obj: 'ref_uint', offset: 'u32'},
+             regmap: $full_regmap,
+             regalloc_set: $panda_mask,
+             mode: [:FastPath]) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.ref_uint
+            next
+        end
+
+        if defines.ARK_USE_COMMON_RUNTIME
+            mem := Bitcast(Add(obj, Cast(offset).u64).ref_uint).ref
+            old_ref := LoadI(mem).Volatile(atomic).ref_uint
+            If(old_ref, 0).EQ {
+                Return(old_ref).ref_uint
+            }
+
+            region := Bitcast(AndI(old_ref).Imm(CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).ref
+            region_type := LoadI(region).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+            If(region_type, CommonRuntimeConstants::REGION_TYPE_FROM_REGION).NE.Likely {
+                Return(old_ref).ref_uint
+            }
+
+            state_class := LoadI(Bitcast(old_ref).ref).u64
+            state := ShrI(state_class).Imm(CommonRuntimeConstants::FORWARD_STATE_SHIFT).u64
+            If(state, CommonRuntimeConstants::FORWARD_STATE_FORWARDED).EQ {
+                fwd := AndI(state_class).Imm(Constants::OBJECT_CLASS_MASK).u64
+                Return(fwd).ref_uint
+            }
+        end
+
+        Return(Call(obj, offset).Method("Cmc#{(atomic ? 'Atomic' : '')}ReadViaBarrier").ref_uint).ref_uint
+    }
+end
+
+GenerateCmcReadViaBarrierIrtoc(false)
+GenerateCmcReadViaBarrierIrtoc(true)

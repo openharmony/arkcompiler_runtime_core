@@ -81,6 +81,7 @@ module Constants
     TLAB_CUR_FREE_POSITION_OFFSET = "cross_values::GetTlabCurFreePositionOffset(GetArch())"
     TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
+    OBJECT_CLASS_MASK = "cross_values::GetObjectHeaderClassPointerMask(GetArch())"
     WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
     ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
     ANNOTATE_SANITIZERS_POISON_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_POISON_NO_BRIDGE)"
@@ -258,6 +259,14 @@ module Constants
     SB_LENGTH_OFFSET = "RuntimeInterface::GetSbLengthOffset()"
     SB_COMPRESS_OFFSET = "RuntimeInterface::GetSbCompressOffset()"
   end
+
+module CommonRuntimeConstants
+    INV_DEFAULT_REGION_UNIT_MASK = "~common_vm::RegionDesc::DEFAULT_REGION_UNIT_MASK"
+    INLINED_REGION_METADATA_REGION_TYPE_OFFSET = "cross_values::GetInlinedRegionMetadataRegionTypeOffset(GetArch())"
+    REGION_TYPE_FROM_REGION = "static_cast<uint64_t>(common_vm::RegionDesc::RegionType::FROM_REGION)"
+    FORWARD_STATE_SHIFT = "cross_values::GetForwardStateShift(GetArch())"
+    FORWARD_STATE_FORWARDED = "static_cast<uint64_t>(common_vm::BaseStateWord::ForwardState::FORWARDED)"
+end
 
 macro(:get_entry) { |entry_offset|
     table := LoadI(%tr).Imm("cross_values::GetManagedThreadEntrypointsTableOffset(GetArch())").ptr

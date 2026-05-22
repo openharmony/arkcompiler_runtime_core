@@ -2381,19 +2381,30 @@ void Codegen::CreatePostWRBForDynamicImpl(Inst *inst, MemRef mem, Reg reg1, Reg 
 
 void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
 {
-    auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
-    live_regs |= preserved;
-    auto entrypointId = isVolatile ? EntrypointId::CMC_ATOMIC_READ_VIA_BARRIER : EntrypointId::CMC_READ_VIA_BARRIER;
-
     if (!mem.HasIndex()) {
-        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), TypedImm(mem.GetDisp()));
+        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase(), TypedImm(mem.GetDisp()));
     } else if (dstReg.GetId() != mem.GetBase().GetId()) {
         MemRefToOffset(dstReg /* as offset */, mem);
-        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), dstReg /* as offset */);
+        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase(), dstReg /* as offset */);
     } else {
         ScopedTmpReg offset(GetEncoder());
         MemRefToOffset(offset, mem);
-        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, mem.GetBase(), offset);
+        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase(), offset);
+    }
+}
+
+template <typename... Args>
+void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, Reg dstReg, bool isVolatile, RegMask preserved, Args &&...params)
+{
+    if (GetGraph()->SupportsIrtocBarriers()) {
+        auto entrypointId =
+            isVolatile ? EntrypointId::CMC_ATOMIC_READ_VIA_BARRIER_IRTOC : EntrypointId::CMC_READ_VIA_BARRIER_IRTOC;
+        CallFastPath(inst, entrypointId, dstReg, preserved, std::forward<Args>(params)...);
+    } else {
+        auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
+        live_regs |= preserved;
+        auto entrypointId = isVolatile ? EntrypointId::CMC_ATOMIC_READ_VIA_BARRIER : EntrypointId::CMC_READ_VIA_BARRIER;
+        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, std::forward<Args>(params)...);
     }
 }
 
