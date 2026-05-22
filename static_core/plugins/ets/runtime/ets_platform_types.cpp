@@ -84,7 +84,13 @@ static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *sign
         return nullptr;
     }
 
-    EtsMethod *method = isStatic ? klass->GetStaticMethod(name, signature) : klass->GetInstanceMethod(name, signature);
+    EtsMethod *method = nullptr;
+    if (name == panda_file_items::CTOR) {
+        method = klass->GetDirectMethod(name, signature);
+    } else {
+        method = isStatic ? klass->GetStaticMethod(name, signature) : klass->GetInstanceMethod(name, signature);
+    }
+
     if (method == nullptr) {
         LOG(ERROR, RUNTIME) << "Method " << name << " is not found in class " << klass->GetDescriptor();
         return nullptr;
