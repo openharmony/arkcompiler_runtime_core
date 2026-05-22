@@ -379,20 +379,6 @@
 17.experimental_features/01.type_char/02.char_operations/cmp_ref_32.ets
 17.experimental_features/01.type_char/02.char_operations/cmp_ref_38.ets
 
-#34455 ets.equals/ets.strictequals returns false for comparison between char and any numeric with same value (spec requires true)
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_8.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_9.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_10.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_11.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_14.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_15.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_17.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_18.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_20.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_21.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_23.ets
-17.experimental_features/01.type_char/02.char_operations/char_erased_equality_25.ets
-
 #34223
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_null_und.ets
@@ -410,8 +396,6 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_generic_type_erasure_n_4.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_generic_type_erasure_n_5.ets
 
-#34018
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_22.ets
 
 #34834 no CTE on callables with generics
 17.experimental_features/07.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_negative_5.ets
