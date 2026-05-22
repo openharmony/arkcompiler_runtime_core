@@ -15,9 +15,9 @@
 
 #include "common_components/heap/allocator/regional_heap.h"
 
+#include "libarkbase/os/mem.h"
 #include "common_components/heap/collector/collector.h"
 #include "common_components/heap/collector/collector_resources.h"
-#include "common_components/platform/os.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
@@ -156,7 +156,7 @@ uintptr_t RegionalHeap::AllocLargeRegion(size_t size)
 uintptr_t RegionalHeap::AllocJitFortRegion(size_t size)
 {
     uintptr_t addr = largeSpace_.Alloc(size, false);
-    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(addr), size, "ArkTS Code");
+    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(addr), size, "ArkTS Code");
     MarkJitFortMemAwaitingInstall(reinterpret_cast<BaseObject *>(addr));
     return addr;
 }
@@ -271,8 +271,8 @@ void RegionalHeap::Init(const RuntimeParam &param)
 
     size_t metadataSize = RegionManager::GetMetadataSize(regionNum);
     uintptr_t baseAddr = reinterpret_cast<uintptr_t>(map_->GetBaseAddr());
-    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(baseAddr), metadataSize, "ArkTS Heap CMCGC Metadata");
-    ::ark::mem::os::PrctlSetVMA(reinterpret_cast<void *>(baseAddr + metadataSize), totalSize - metadataSize,
+    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(baseAddr), metadataSize, "ArkTS Heap CMCGC Metadata");
+    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(baseAddr + metadataSize), totalSize - metadataSize,
                                 "ArkTS Heap CMCGC RegionHeap");
 
 #if defined(COMMON_SANITIZER_SUPPORT)

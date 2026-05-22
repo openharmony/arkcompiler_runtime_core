@@ -24,10 +24,10 @@
 #include <sys/mman.h>
 #endif
 
+#include "libarkbase/os/mem.h"
 #include "common_components/base/globals.h"
 #include "common_components/base/sys_call.h"
 #include "common_components/heap/allocator/treap.h"
-#include "common_components/platform/os.h"
 #include "securec.h"
 #if defined(_WIN64) || defined(__APPLE__)
 #include "common_components/base/mem_utils.h"
@@ -159,7 +159,7 @@ protected:
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS)
         COMMON_PRCTL(result, size, memName);
 #endif
-        ::ark::mem::os::PrctlSetVMA(result, size, (std::string("ArkTS Heap CMCGC PagePool ") + memName).c_str());
+        os::mem::TagAnonymousMemory(result, size, (std::string("ArkTS Heap CMCGC PagePool ") + memName).c_str());
         return reinterpret_cast<uint8_t *>(result);
     }
 
