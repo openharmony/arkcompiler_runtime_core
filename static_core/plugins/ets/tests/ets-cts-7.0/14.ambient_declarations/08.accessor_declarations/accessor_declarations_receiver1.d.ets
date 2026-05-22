@@ -19,11 +19,9 @@ tags: [compile-only, not-a-test]
 ---*/
 
 // getter and setter
-export class ReceiverTest {
+export declare class ReceiverTest {
   value: int
-  constructor (value: int) {
-    this.value = value
-  }
+  constructor (value: int)
 }
 
 export declare get valuePlusOne(this: ReceiverTest): int
@@ -31,21 +29,17 @@ export declare get valuePlusOne(this: ReceiverTest): int
 export declare set valueNew(this: ReceiverTest, newValue: int)
 
 // only getter
-export class ReceiverTest1 {
+export declare class ReceiverTest1 {
   value: int
-  constructor (value: int) {
-    this.value = value
-  }
+  constructor (value: int)
 }
 
 export declare get valuePlusOneGetter(this: ReceiverTest1): int
 
 // only setter
-export class ReceiverTest2 {
+export declare class ReceiverTest2 {
   value: int
-  constructor (value: int) {
-    this.value = value
-  }
+  constructor (value: int)
 }
 
 export declare set valueNewSetter(this: ReceiverTest2, newValue: int)

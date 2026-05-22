@@ -769,10 +769,6 @@
 #33742
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_initializer_n.ets
 
-# 33423
-14.ambient_declarations/08.accessor_declarations/accessor_declarations.ets
-14.ambient_declarations/08.accessor_declarations/accessor_declarations_receiver.ets
-
 #33339
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_n.d.ets
 

@@ -20,6 +20,27 @@ tags: [compile-only, not-a-test]
 
 import { ReceiverTest, ReceiverTest1, ReceiverTest2 } from './accessor_declarations_receiver1.d'
 
+export class ReceiverTest {
+  value: int
+  constructor (value: int) {
+    this.value = value
+  }
+}
+
+export class ReceiverTest1 {
+  value: int
+  constructor (value: int) {
+    this.value = value
+  }
+}
+
+export class ReceiverTest2 {
+  value: int
+  constructor (value: int) {
+    this.value = value
+  }
+}
+
 // setter and getter
 export get valuePlusOne(this: ReceiverTest): int {
   return this.value + 1
