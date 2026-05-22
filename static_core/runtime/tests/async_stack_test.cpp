@@ -21,15 +21,9 @@
 #include <cstddef>
 #include <thread>
 
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-#define ASYNC_STACK_DFX_AVAILABLE 1
-#endif
-
 namespace {
 
 constexpr uint64_t TEST_STACK_ID = 0x1234U;
-
-#if defined(ASYNC_STACK_DFX_AVAILABLE)
 constexpr size_t EXPECTED_STACK_DEPTH = 16U;
 
 uint64_t g_nextCollectedStackId = TEST_STACK_ID;
@@ -39,7 +33,6 @@ uint32_t g_collectCalls = 0U;
 uint32_t g_setCalls = 0U;
 uint32_t g_getCalls = 0U;
 thread_local uint64_t g_submitterStackId = 0U;
-#endif
 
 ark::Job CreateTestJob(uint64_t asyncStackId)
 {
@@ -54,7 +47,6 @@ void InitializeAsyncStackHelper(ark::dfx::AsyncStackHelper &asyncStackHelper)
     asyncStackHelper.Initialize();
 }
 
-#if defined(ASYNC_STACK_DFX_AVAILABLE)
 void ResetDfxState()
 {
     g_nextCollectedStackId = TEST_STACK_ID;
@@ -65,43 +57,51 @@ void ResetDfxState()
     g_getCalls = 0U;
     g_submitterStackId = 0U;
 }
-#endif
+
+class TestAsyncStackHelper final : public ark::dfx::AsyncStackHelper {
+public:
+    void Initialize() override {}
+
+    bool CheckLoadDfxAsyncStackFunc() const override
+    {
+        return true;
+    }
+
+    uint64_t CollectAsyncStack([[maybe_unused]] ark::dfx::StackType stackType, size_t depth) const override
+    {
+        ASSERT(stackType == ark::dfx::StackType::STACK_TYPE_LAUNCH);
+        g_lastCollectType = 1ULL << 26U;
+        g_lastCollectDepth = depth;
+        g_collectCalls++;
+        return g_nextCollectedStackId;
+    }
+
+    void SetStackId(uint64_t stackId) const override
+    {
+        g_submitterStackId = stackId;
+        g_setCalls++;
+    }
+
+    uint64_t GetStackId() const override
+    {
+        g_getCalls++;
+        return g_submitterStackId;
+    }
+};
 
 }  // namespace
 
-#if defined(ASYNC_STACK_DFX_AVAILABLE)
-extern "C" uint64_t DfxCollectStackWithDepth(uint64_t type, size_t depth)
-{
-    g_lastCollectType = type;
-    g_lastCollectDepth = depth;
-    g_collectCalls++;
-    return g_nextCollectedStackId;
-}
-
-extern "C" void DfxSetSubmitterStackId(uint64_t stackId)
-{
-    g_submitterStackId = stackId;
-    g_setCalls++;
-}
-
-extern "C" uint64_t DfxGetSubmitterStackId()
-{
-    g_getCalls++;
-    return g_submitterStackId;
-}
-#endif
-
 namespace ark::test {
 
-#if defined(ASYNC_STACK_DFX_AVAILABLE)
 TEST(AsyncStackTest, HelperForwardsCollectTypeAndDepth)
 {
     ResetDfxState();
 
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
     asyncStackHelper.CheckLoadDfxAsyncStackFunc();
-    auto stackId = asyncStackHelper.CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    auto stackId = asyncStackHelper.CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                      dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH);
 
     ASSERT_EQ(stackId, TEST_STACK_ID);
     ASSERT_EQ(g_collectCalls, 1U);
@@ -114,7 +114,7 @@ TEST(AsyncStackTest, HelperForwardsSetAndGetStackId)
     ResetDfxState();
 
     constexpr uint64_t stackId = 0x5678U;
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
     asyncStackHelper.SetStackId(stackId);
     auto currentId = asyncStackHelper.GetStackId();
@@ -128,7 +128,7 @@ TEST(AsyncStackTest, HelperCanResetStackIdToZero)
 {
     ResetDfxState();
 
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
     asyncStackHelper.SetStackId(TEST_STACK_ID);
     ASSERT_EQ(asyncStackHelper.GetStackId(), TEST_STACK_ID);
@@ -141,13 +141,13 @@ TEST(AsyncStackTest, HelperUsesThreadLocalSubmitterStackId)
 {
     ResetDfxState();
 
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
     asyncStackHelper.SetStackId(TEST_STACK_ID);
     ASSERT_EQ(asyncStackHelper.GetStackId(), TEST_STACK_ID);
 
     std::thread thread([]() {
-        ark::dfx::AsyncStackHelper asyncStackHelper;
+        TestAsyncStackHelper asyncStackHelper;
         InitializeAsyncStackHelper(asyncStackHelper);
         ASSERT_EQ(asyncStackHelper.GetStackId(), 0U);
         asyncStackHelper.SetStackId(0x9999U);
@@ -163,9 +163,10 @@ TEST(AsyncStackTest, HelperAcceptsZeroCollectedStackId)
     ResetDfxState();
     g_nextCollectedStackId = 0U;
 
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
-    auto stackId = asyncStackHelper.CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    auto stackId = asyncStackHelper.CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                      dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH);
     asyncStackHelper.SetStackId(stackId);
 
     ASSERT_EQ(stackId, 0U);
@@ -179,7 +180,7 @@ TEST(AsyncStackTest, ScopeForJobSetsAndRestoresStackId)
     constexpr uint64_t jobStackId = 0x2222U;
     g_submitterStackId = previousStackId;
     auto job = CreateTestJob(jobStackId);
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
 
     {
@@ -199,7 +200,7 @@ TEST(AsyncStackTest, ScopeForJobIgnoresZeroStackId)
     constexpr uint64_t previousStackId = 0x3333U;
     g_submitterStackId = previousStackId;
     auto job = CreateTestJob(0U);
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
 
     {
@@ -217,7 +218,7 @@ TEST(AsyncStackTest, ScopeForJobKeepsCurrentIdWhenItAlreadyMatches)
     constexpr uint64_t jobStackId = 0x4444U;
     g_submitterStackId = jobStackId;
     auto job = CreateTestJob(jobStackId);
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
 
     {
@@ -240,7 +241,7 @@ TEST(AsyncStackTest, NestedJobScopesRestoreStackIdsInOrder)
     g_submitterStackId = outerPreviousStackId;
     auto outerJob = CreateTestJob(outerJobStackId);
     auto innerJob = CreateTestJob(innerJobStackId);
-    ark::dfx::AsyncStackHelper asyncStackHelper;
+    TestAsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
 
     {
@@ -256,14 +257,16 @@ TEST(AsyncStackTest, NestedJobScopesRestoreStackIdsInOrder)
     ASSERT_EQ(g_submitterStackId, outerPreviousStackId);
     ASSERT_EQ(g_setCalls, 4U);
 }
-#else
+
 TEST(AsyncStackTest, HelperStubIsNoop)
 {
     ark::dfx::AsyncStackHelper asyncStackHelper;
     InitializeAsyncStackHelper(asyncStackHelper);
     asyncStackHelper.CheckLoadDfxAsyncStackFunc();
 
-    ASSERT_EQ(asyncStackHelper.CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH), 0U);
+    ASSERT_EQ(asyncStackHelper.CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                 dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH),
+              0U);
     asyncStackHelper.SetStackId(TEST_STACK_ID);
     ASSERT_EQ(asyncStackHelper.GetStackId(), 0U);
 }
@@ -281,7 +284,6 @@ TEST(AsyncStackTest, ScopeWithStubIsNoop)
 
     ASSERT_EQ(asyncStackHelper.GetStackId(), 0U);
 }
-#endif
 
 TEST(AsyncStackTest, ScopeAcceptsEmptyInputs)
 {

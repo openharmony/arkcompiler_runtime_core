@@ -192,7 +192,8 @@ extern "C" EtsLong CollectAsyncStack()
     if (asyncStackHelper == nullptr) {
         return 0;
     }
-    return static_cast<EtsLong>(asyncStackHelper->CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH));
+    return static_cast<EtsLong>(asyncStackHelper->CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                                    dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH));
 }
 
 extern "C" EtsLong GetSubmitterStackId()

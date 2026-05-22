@@ -34,32 +34,17 @@ public:
     AsyncStackHelper() = default;
     NO_COPY_SEMANTIC(AsyncStackHelper);
     NO_MOVE_SEMANTIC(AsyncStackHelper);
-    ~AsyncStackHelper() = default;
+    virtual ~AsyncStackHelper() = default;
 
-    void Initialize();
+    virtual void Initialize();
 
-    void CheckLoadDfxAsyncStackFunc() const;
+    virtual bool CheckLoadDfxAsyncStackFunc() const;
 
-    uint64_t CollectAsyncStack(StackType stackType, size_t depth = DEFAULT_STACK_DEPTH) const;
+    virtual uint64_t CollectAsyncStack(StackType stackType, size_t depth) const;
 
-    void SetStackId(uint64_t id) const;
+    virtual void SetStackId(uint64_t id) const;
 
-    uint64_t GetStackId() const;
-
-private:
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    using CollectAsyncStackFunc = uint64_t (*)(uint64_t, size_t);
-    using SetStackIdFunc = void (*)(uint64_t);
-    using GetStackIdFunc = uint64_t (*)();
-#endif
-
-    bool IsLoaded() const;
-
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    CollectAsyncStackFunc collectAsyncStack_ {nullptr};
-    SetStackIdFunc setStackId_ {nullptr};
-    GetStackIdFunc getStackId_ {nullptr};
-#endif
+    virtual uint64_t GetStackId() const;
 };
 
 }  // namespace ark::dfx

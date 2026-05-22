@@ -21,8 +21,10 @@
 #include "runtime/execution/job.h"
 #include "runtime/execution/job_worker_group.h"
 #include "runtime/execution/job_launch.h"
+#include "runtime/include/mem/panda_smart_pointers.h"
 #include "libarkbase/clang.h"
 #include <type_traits>
+#include <utility>
 
 namespace ark {
 
@@ -213,12 +215,20 @@ public:
 
     dfx::AsyncStackHelper &GetAsyncStackHelper()
     {
-        return asyncStackHelper_;
+        ASSERT(asyncStackHelper_ != nullptr);
+        return *asyncStackHelper_;
     }
 
     const dfx::AsyncStackHelper &GetAsyncStackHelper() const
     {
-        return asyncStackHelper_;
+        ASSERT(asyncStackHelper_ != nullptr);
+        return *asyncStackHelper_;
+    }
+
+    void SetAsyncStackHelper(PandaUniquePtr<dfx::AsyncStackHelper> asyncStackHelper)
+    {
+        ASSERT(asyncStackHelper != nullptr);
+        asyncStackHelper_ = std::move(asyncStackHelper);
     }
 
 protected:
@@ -247,7 +257,7 @@ private:
     std::bitset<MAX_JOB_ID> jobIds_ GUARDED_BY(idsLock_);
     uint32_t lastJobId_ GUARDED_BY(idsLock_) = UNINITIALIZED_JOB_ID;
 
-    dfx::AsyncStackHelper asyncStackHelper_;
+    PandaUniquePtr<dfx::AsyncStackHelper> asyncStackHelper_ {MakePandaUnique<dfx::AsyncStackHelper>()};
 };
 
 }  // namespace ark

@@ -593,7 +593,8 @@ LaunchResult StackfulCoroutineManager::LaunchImpl(Job *job, const JobWorkerThrea
         return LaunchResult::RESOURCE_LIMIT_EXCEED;
     }
 
-    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                               dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH);
     job->SetAsyncStackID(stackId);
     LOG(DEBUG, COROUTINES) << "LaunchImpl: coroutine " << co->GetName() << " with async stack ID " << stackId;
 
@@ -631,7 +632,8 @@ LaunchResult StackfulCoroutineManager::LaunchImmediatelyImpl(Job *job, const Job
         return LaunchResult::RESOURCE_LIMIT_EXCEED;
     }
 
-    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                               dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH);
     job->SetAsyncStackID(stackId);
     LOG(DEBUG, COROUTINES) << "LaunchImmediatelyImpl: coroutine " << co->GetName() << " with async stack ID "
                            << stackId;
