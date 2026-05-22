@@ -69,7 +69,9 @@ export class EAWorker {
     private loopJoined = new AtomicFlag(false);
     private initialTask: Task = () => {};
     private static workers = new containers.ConcurrentHashMap<int, EAWorker>();
+    private static activeUserWorkers = new AtomicInt(0);
     private isTaskpool = false;
+    private userWorkerSlotReserved = new AtomicInt(0);
 
     /**
      * Create EAWorker instance
@@ -86,6 +88,18 @@ export class EAWorker {
      */
     constructor(name: string, needInterop: boolean = false) {
         this.worker = needInterop ? new InteropWorker(name) : new StaticWorker(name);
+    }
+
+    /**
+     * Create EAWorker instance with specified name and whether it is a taskpool worker
+     * Internal usage only
+     * @param { string } name The name of the worker
+     * @param { boolean } supportInterop true if need to create JS runtime
+     * @param { boolean } isTaskpool true if the worker is a taskpool worker
+     */
+    protected constructor(name: string, supportInterop: boolean, isTaskpool: boolean) {
+        this.isTaskpool = isTaskpool;
+        this.worker = supportInterop ? new InteropWorker(name) : new StaticWorker(name);
     }
 
     /**
@@ -165,11 +179,22 @@ export class EAWorker {
         if ((this.loopStarted.get() || this.loopJoined.get()) && !this.isMain()) {
             throw new Error('EAWorker:: Worker already started or quit');
         }
-        this.worker.start(() => {
-            EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
-            let wrappedInitialTask = this.worker.wrapTask<void>(this.initialTask);
-            wrappedInitialTask();
-        });
+        this.reserveUserWorkerSlot();
+        try {
+            this.worker.start(() => {
+                try {
+                    EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
+                    let wrappedInitialTask = this.worker.wrapTask<void>(this.initialTask);
+                    wrappedInitialTask();
+                } catch (e) {
+                    this.releaseUserWorkerSlot();
+                    throw e;
+                }
+            });
+        } catch (e) {
+            this.releaseUserWorkerSlot();
+            throw e;
+        }
         if (this.worker.getWorkerId() != INVALID_WORKER_ID) {
             EAWorker.getWorkers().set(this.worker.getWorkerId(), this);
         }
@@ -296,7 +321,10 @@ export class EAWorker {
         if (!this.loopStarted.get()) {
              throw new Error('EAWorker:: Cannot stop worker before start');
         }
-        let finalTask = () => { EAWorker.getWorkers().delete(this.worker.getWorkerId()); };
+        let finalTask = () => {
+            EAWorker.getWorkers().delete(this.worker.getWorkerId());
+            this.releaseUserWorkerSlot();
+        };
         let joinPromise = this.worker.join(finalTask);
         this.loopStarted.set(false);
         this.loopJoined.set(true);
@@ -322,6 +350,33 @@ export class EAWorker {
         return this === EAWorker.main();
     }
 
+    private reserveUserWorkerSlot(): void {
+        if (this.isTaskpool || this.isMain()) {
+            return;
+        }
+        if (this.userWorkerSlotReserved.compareAndSwap(0, 1) != 0) {
+            throw new Error('EAWorker:: Worker already started or quit');
+        }
+        const limit = CoroutineExtras.getExclusiveWorkersLimit();
+        let reserved = false;
+        while (!reserved) {
+            const current = EAWorker.activeUserWorkers.load();
+            if (current >= limit) {
+                this.userWorkerSlotReserved.store(0);
+                throw new CoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
+            }
+            if (EAWorker.activeUserWorkers.compareAndSwap(current, current + 1) == current) {
+                reserved = true;
+            }
+        }
+    }
+
+    private releaseUserWorkerSlot(): void {
+        if (this.userWorkerSlotReserved.exchange(0) == 1) {
+            EAWorker.activeUserWorkers.fetchSub(1);
+        }
+    }
+
     private static handleInteropEnvError() {
         let currentWorker = EAWorker.current();
         currentWorker?.handleInteropEnvErrorInternal();
@@ -331,6 +386,7 @@ export class EAWorker {
         this.loopStarted.set(false);
         this.loopJoined.set(true);
         EAWorker.getWorkers().delete(this.worker.getWorkerId());
+        this.releaseUserWorkerSlot();
         this.worker.handleCreateInteropEnvError();
         EAWorker.postToMain<void>(() => {
             throw new Error('EAWorker:: Cannot create EAWorker support interop without JsEnv');

@@ -138,6 +138,7 @@
        stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerThreshold)                                                       \
     SM("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerMonitorInterval", "I:V",                                \
        stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerMonitorInterval)                                                 \
+    SM("Lstd/concurrency/taskpool;", "getTaskPoolWorkersLimit", ":I", stdConcurrencyTaskpoolGetTaskPoolWorkersLimit)  \
     SM("Lstd/concurrency/taskpool;", "retriggerTaskPoolBlockedExpandMonitor", ":V",                                   \
        stdConcurrencyTaskpoolRetriggerTaskPoolBlockedExpandMonitor)                                                   \
     TP("Lstd/core/EAWorker;", coreEAWorker)                                                                           \

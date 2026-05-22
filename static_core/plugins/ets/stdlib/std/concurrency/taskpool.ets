@@ -86,7 +86,7 @@ export namespace taskpool {
         }
 
         constructor () {
-            super("managerWorker", false);
+            super("managerWorker", false, true);
             this.start();
         }
 
@@ -2867,6 +2867,14 @@ export namespace taskpool {
     }
 
     /**
+     * @brief Get current taskpool workers limit for debug.
+     * @returns Current TaskPool workers limit.
+     */
+    function getTaskPoolWorkersLimit(): int {
+        return workersLimit;
+    }
+
+    /**
      * @brief Retrigger taskpool shrink in taskpool test suite for debug.
      */
     function retriggerTaskPoolShrink(): void {
@@ -3289,7 +3297,7 @@ export namespace taskpool {
 
     native function isUsingLaunch(): boolean;
     native function isSupportingInterop(): boolean;
-    native function getTaskPoolWorkersLimit(): int;
+    native function getDefaultTaskPoolWorkersLimit(): int;
     native function currentWorkerHasPendingLocalJobs(): boolean;
     native function getTaskId(): int;
     native function setTaskId(taskid: int): void;
@@ -3354,7 +3362,7 @@ export namespace taskpool {
     // Monitor interval (ms) for managerWorker to check blocked workers.
     let blockedWorkerMonitorIntervalMs: int = 1000;
 
-    let workersLimit: int = max(4, getTaskPoolWorkersLimit()); // 4 is the minimum of workers limit.
+    let workersLimit: int = getDefaultTaskPoolWorkersLimit();
     const STEP_SIZE: int = 2;
     const SHRINK_STEP: int = 4; // 4: try to release 4 threads every time.
     const TASK_DURATION: int = 100; // 100: 100ms.

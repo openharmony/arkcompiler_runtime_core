@@ -107,6 +107,9 @@ static std::pair<mem::MemoryManager *, ark::mem::VMInterface *> CreateMM(Runtime
 static CoroutineManagerConfig CreateCoroutineManagerConfig(const RuntimeOptions &options)
 {
     auto &taskPoolMode = options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+    auto taskpoolEWorkersCount = ets::intrinsics::taskpool::GetDefaultTaskPoolEWorkersLimit(options) +
+                                 ets::intrinsics::taskpool::TASKPOOL_MANAGER_EWORKERS_COUNT +
+                                 ets::intrinsics::taskpool::MAIN_EWORKER_RESERVED_COUNT;
     CoroutineManagerConfig cfg {
         // enable drain queue interface
         options.IsCoroutineEnableFeaturesAniDrainQueue(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
@@ -123,9 +126,7 @@ static CoroutineManagerConfig CreateCoroutineManagerConfig(const RuntimeOptions 
         // enable external timer implementation
         options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // number of reserved workers for taskpool
-        taskPoolMode == ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
-            ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
-            : 0};
+        taskPoolMode == ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE ? taskpoolEWorkersCount : 0};
     return cfg;
 }
 

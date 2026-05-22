@@ -423,6 +423,14 @@ extern "C" EtsInt StdSystemGetTaskPoolWorkersNum()
     return res.GetAs<int>();
 }
 
+extern "C" EtsInt StdSystemGetTaskPoolWorkersLimit()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *method = PlatformTypes(coro)->stdConcurrencyTaskpoolGetTaskPoolWorkersLimit;
+    ark::Value res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    return res.GetAs<int>();
+}
+
 extern "C" void StdSystemSetTaskPoolWorkersLimit(int32_t threshold)
 {
     auto *klass = GetTaskPoolClass();
