@@ -10504,3 +10504,17 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSameValueZero
     llvm_codegen_func: EmitSameValueZero
+
+
+####################################
+# std.core.Job #
+####################################
+  - name: StdJobGetId
+    space: ets
+    class_name: std.core.Job
+    method_name: getId
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::StdCoreJobGetId

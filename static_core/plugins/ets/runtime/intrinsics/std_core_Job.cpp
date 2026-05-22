@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-package std.core;
+#include "execution/job_execution_context.h"
+#include "intrinsics.h"
 
-// The Job class holds the helper methods that return various prameters of the current job (e.g. its worker thread ID)   
-export final class Job {
-    /**
-     * Retrieves the id of the current job.
-     *
-     * @returns { long } The id value of the current job
-     * @syscap SystemCapability.Utils.Lang
-     */
-    static native getId(): long;
+namespace ark::ets::intrinsics {
+
+EtsLong StdCoreJobGetId()
+{
+    return JobExecutionContext::GetCurrent()->GetJob()->GetId();
 }
+
+}  // namespace ark::ets::intrinsics
