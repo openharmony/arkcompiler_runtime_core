@@ -53,9 +53,19 @@ function main(): int {
     suite.addTest('lastIndex after replace() with "g" flag', testLastIndexGlobalReplace);
     suite.addTest('lastIndex after test() with "g" flag', testLastIndexGlobalTest);
 
+    suite.addTest('.replace resets index', testReplaceSetLastIndex);
+
     return suite.run();
 }
 
+function testReplaceSetLastIndex(){
+  const str: string = "hello world hello";
+  const regex: RegExp = new RegExp("hello", "y");
+  regex.lastIndex = 6;
+  const result: string = str.replace(regex, "hi");
+  arktest.assertEQ(result, str);
+  arktest.assertEQ(regex.lastIndex, 0)
+}
 
 class CharNumGroups {
     charname: string = 'name';

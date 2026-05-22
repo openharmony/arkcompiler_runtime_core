@@ -106,6 +106,10 @@ SubstituteResult<CharT> DoPcre2Substitute(void *codePtr, const CharT *input, ani
     rc = sub(nullptr, &outLength);
     if (rc == 0) {
         result.valid = true;
+        if (calloutData.lastEndIndex >= 0) {
+            result.matched = true;
+            result.lastEndIndex = calloutData.lastEndIndex;
+        }
         return result;
     }
     if (rc != PCRE2_ERROR_NOMEMORY) {
@@ -118,8 +122,10 @@ SubstituteResult<CharT> DoPcre2Substitute(void *codePtr, const CharT *input, ani
         return result;
     }
     result.valid = true;
-    result.matched = true;
-    result.lastEndIndex = calloutData.lastEndIndex;
+    if (calloutData.lastEndIndex >= 0) {
+        result.matched = true;
+        result.lastEndIndex = calloutData.lastEndIndex;
+    }
     outputBuf.resize(static_cast<size_t>(outLength));
     result.output = std::move(outputBuf);
     return result;

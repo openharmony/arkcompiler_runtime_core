@@ -17,6 +17,11 @@ function main(): int {
     const suite = new arktest.ArkTestsuite("RegExp.MatchAllTest")
     suite.addTest("Test the results of match", matchResultTest)
     suite.addTest("Test the return results of matchAll and match", matchTest)
+
+    suite.addTest("Test matchall regression 1", testMatchAllRegression1)
+    suite.addTest("Test matchall regression 2", testMatchAllRegression2)
+    suite.addTest("Test matchall regression 3", testMatchAllRegression3)
+
     return suite.run()
 }
 
@@ -91,6 +96,29 @@ function matchTest(): void {
     const regexp5 = new RegExp('(b)?', 'gu')
     arktest.assertEQ(Array.from(str5.matchAll(regexp5))[0][1], undefined)
 }
+
+function testMatchAllRegression1() {
+  const str: string = "😀a";
+  const regex: RegExp = new RegExp('(?<x>(?<=😀).)', 'gu');
+  const result = Array.from(str.matchAll(regex));
+  arktest.assertEQ(result[0].groups?.['x'], "a");
+}
+
+function testMatchAllRegression2() {
+  const str: string = "1a";
+  const regex: RegExp = new RegExp('(?<=1)(a)', 'g');
+  const result = Array.from(str.matchAll(regex));
+  arktest.assertEQ(result[0][0], "a");
+  arktest.assertEQ(result[0][1], "a");
+}
+
+function testMatchAllRegression3() {
+  const str: string = "1a";
+  const regex: RegExp = new RegExp('(?=(a)?)', 'g');
+  const result = Array.from(str.matchAll(regex));
+  arktest.assertEQ(result[0][1], undefined);
+}
+
 
 function checkTestResult(actual: boolean, expected: boolean) : int {
     if (actual != expected) return 1;
