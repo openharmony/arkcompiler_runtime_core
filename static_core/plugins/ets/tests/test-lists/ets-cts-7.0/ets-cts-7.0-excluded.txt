@@ -41,3 +41,11 @@
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden_compile_n.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_n_1.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_n_6.ets
+
+#30340 &&= ||= ??= still not supported in code
+07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
+07.expressions/32.assignment/02.compound_assignment_operators/ops_13.ets
+07.expressions/32.assignment/02.compound_assignment_operators/ops_14.ets
+07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_12.ets
+07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
+07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets

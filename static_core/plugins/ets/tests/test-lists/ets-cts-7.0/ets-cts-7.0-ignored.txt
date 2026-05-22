@@ -93,15 +93,6 @@
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
 
-#30340 &&= ||= ??= still not supported in code
-07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
-07.expressions/32.assignment/02.compound_assignment_operators/ops_13.ets
-07.expressions/32.assignment/02.compound_assignment_operators/ops_14.ets
-
-07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_12.ets
-07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
-07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets
-
 #34392 CTE on implicit char to string conversion
 07.expressions/34.string_interpolation_expressions/char_interpolation.ets
 
