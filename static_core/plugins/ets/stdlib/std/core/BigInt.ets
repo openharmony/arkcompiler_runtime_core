@@ -32,9 +32,6 @@ type ToStringHandlerMap = Record<int, (instance: BigInt) => string>
 
 // initialized in _initializerBlock_.ets
 const MAX_REGULAR_INTEGER: BigInt;
-// NOTE(@aendrewpolyakov, #19830): Rewrite using object literal of record type
-// initialized in _initializerBlock_.ets
-const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap;
 
 /**
  * Options for BigInt.toLocaleString method.
@@ -198,6 +195,7 @@ export final class BigInt {
     private static readonly INVALID_RADIX_MESSAGE: string = "toString() radix argument must be between 2 and 36"
     private static readonly BITS_PER_1024_DEC = 3402
     private static readonly BIGINT64_MASK = new BigInt("0xffffffffffffffff")
+    private static readonly FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap = BigInt.createFastToStringHandlerMap()
 
     private static resetBytes(b: ValueArray<int>):void {
         for (let i = 0; i<b.length; i++) {
@@ -559,9 +557,22 @@ export final class BigInt {
         if (this.isZero()) {
             return "0"
         }
-        let fastToStringHandler = FAST_TO_STRING_HANDLER_MAP[radix]
-        // NOTE(@aendrewpolyakov, #19643): Rewrite concat() with '+' operator once it got fixed for string operands
-        return (this.negative() ? "-" : "").concat((fastToStringHandler != undefined) ? fastToStringHandler!(this) : this.toStringAsGenericRadix(radix))
+        let fastToStringHandler = BigInt.FAST_TO_STRING_HANDLER_MAP[radix]
+        if (fastToStringHandler != undefined) {
+            return fastToStringHandler!(this)
+        }
+        return this.addSignToString(this.toStringAsGenericRadix(radix))
+    }
+
+    private static createFastToStringHandlerMap(): ToStringHandlerMap {
+        let result = new ToStringHandlerMap
+        result[2] = (instance: BigInt): string => { return instance.toStringAsBinary() }
+        result[4] = (instance: BigInt): string => { return instance.toStringAsPowerOfTwoRadix(4) }
+        result[8] = (instance: BigInt): string => { return instance.toStringAsPowerOfTwoRadix(8) }
+        result[10] = (instance: BigInt): string => { return instance.toStringAsDecimal() }
+        result[16] = (instance: BigInt): string => { return instance.toStringAsPowerOfTwoRadix(16) }
+        result[32] = (instance: BigInt): string => { return instance.toStringAsPowerOfTwoRadix(32) }
+        return result
     }
 
     /**
@@ -571,7 +582,14 @@ export final class BigInt {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public toStringAsBinary(): string {
+    private toStringAsBinary(): string {
+        if (this.isZero()) {
+            return "0"
+        }
+        return this.addSignToString(this.toStringAsUnsignedBinary())
+    }
+
+    private toStringAsUnsignedBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
         const str = (i: int) => { return intToBinaryString((reversedInts[i]!).toLong() & BigInt.maskSys) }
@@ -589,13 +607,16 @@ export final class BigInt {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public toStringAsDecimal(): string {
+    private toStringAsDecimal(): string {
+        if (this.isZero()) {
+            return "0"
+        }
         let digits = this.bytesToDigits(this.bytes)
         let result = new StringBuilder
         for (let i = 0; i < digits.length; i++) {
             result = result.append(digits[i])
         }
-        return result.toString()
+        return this.addSignToString(result.toString())
     }
 
     private toStringAsGenericRadix(radix: int): string {
@@ -625,21 +646,28 @@ export final class BigInt {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public toStringAsPowerOfTwoRadix(radix: int): string {
-        let chunkSize: int = Math.ceil(Math.log2(radix)).toInt()
-        if (radix < 2) {
+    private toStringAsPowerOfTwoRadix(radix: int): string {
+        if (radix < 2 || radix > 36 || (radix & (radix - 1)) != 0) {
             throw new Error("BigInt::toStringAsPowerOfTwoRadix(): invalid radix: " + radix)
         }
+        if (this.isZero()) {
+            return "0"
+        }
+        let chunkSize: int = Math.ceil(Math.log2(radix)).toInt()
         let result = new StringBuilder
         let bitChunks = this.sliceToBinaryChunks(chunkSize)
         for (let bitChunk of bitChunks) {
             result = result.append(parseInt(bitChunk!, 2).toString(radix))
         }
-        return result.toString()
+        return this.addSignToString(result.toString())
+    }
+
+    private addSignToString(value: string): string {
+        return (this.negative() ? "-" : "").concat(value)
     }
 
     private sliceToBinaryChunks(chunkSize: int): FixedArray<string> {
-        let binaryRepresentation: string = this.toStringAsBinary()
+        let binaryRepresentation: string = this.toStringAsUnsignedBinary()
         if (binaryRepresentation.length % chunkSize != 0) {
             const requiredLength: int = binaryRepresentation.length + (chunkSize - binaryRepresentation.length % chunkSize)
             binaryRepresentation = binaryRepresentation.padStart(requiredLength, '0')
