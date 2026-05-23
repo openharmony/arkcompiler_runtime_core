@@ -16,7 +16,7 @@
 /*---
   files: [./ext_module_final_class/ext_module.ets]
   tags: [negative]
-  negative_steps: [verifier, runtime.ark, ark-with-jit.ark, ark-after-aot.ark, hybrid-ark.ark]
+  negative_steps: [compile.verifier, verifier, runtime.ark, ark-with-jit.ark, ark-after-aot.ark, hybrid-ark.ark]
   expected_error:
       verifier: |-
         E/verifier: Cannot link class: Cannot find method 'foo ()D' in class 'ext_module.B'

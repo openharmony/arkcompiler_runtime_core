@@ -50,7 +50,6 @@ private:
     NO_MOVE_SEMANTIC(EtsBaseEnum);
 
     ObjectPointer<EtsObject> value_;
-    ObjectPointer<EtsString> name_;
 
     friend class test::EtsBaseEnumMembers;
 };

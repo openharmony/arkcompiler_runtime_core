@@ -166,7 +166,7 @@ static ani_int ThrowErrorInNative([[maybe_unused]] ani_env *env, [[maybe_unused]
     }
 
     ani_method errCtor;
-    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std:core.String}C{std.core.ErrorOptions}:", &errCtor)) {
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &errCtor)) {
         std::cerr << "Get Ctor Failed '" << className << "'" << std::endl;
         return 0;
     }

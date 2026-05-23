@@ -96,7 +96,7 @@ cases:
       use: |-
           let v: Fields = new Axis[6];
           let ok = v.length == 6;
-      expected_out: "Semantic error ESE0124: Expected 3 arguments, got 0."
+      expected_out: "Semantic error ESE0124: Expected 2 arguments, got 0."
 
     - defs: |-
         type TStringAlias? = String | undefined
