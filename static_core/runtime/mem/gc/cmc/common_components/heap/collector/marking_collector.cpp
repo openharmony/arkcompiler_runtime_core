@@ -487,20 +487,6 @@ void MarkingCollector::PreGarbageCollection(bool isConcurrent)
 {
     // SatbBuffer should be initialized before concurrent enumeration.
     SatbBuffer::Instance().Init();
-    // prepare thread pool.
-
-    GCStats &gcStats = GetGCStats();
-    gcStats.reason = gcReason_;
-    gcStats.async = !g_gcRequests[gcReason_].IsSyncGC();
-    gcStats.gcType = gcType_;
-    gcStats.isConcurrentMark = isConcurrent;
-    gcStats.collectedBytes = 0;
-    gcStats.smallGarbageSize = 0;
-    gcStats.nonMovableGarbageSize = 0;
-    gcStats.largeGarbageSize = 0;
-    gcStats.gcStartTime = TimeUtil::NanoSeconds();
-    gcStats.totalSTWTime = 0;
-    gcStats.maxSTWTime = 0;
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
     DumpBeforeGC();
 #endif

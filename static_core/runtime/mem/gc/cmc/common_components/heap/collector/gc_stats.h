@@ -88,6 +88,8 @@ public:
         accumulatedFreeSize += size;
     }
 
+    std::string GetFinalStatistics() const;
+
     static uint64_t prevGcStartTime;
     static uint64_t prevGcFinishTime;
 
@@ -99,8 +101,8 @@ public:
     uint64_t gcStartTime;
     uint64_t gcEndTime;
 
-    uint64_t totalSTWTime;  // total stw time(microseconds)
-    uint64_t maxSTWTime;    // max stw time(microseconds)
+    uint64_t totalSTWTime;  // total stw time (nanoseconds)
+    uint64_t maxSTWTime;    // max stw time (nanoseconds)
 
     size_t liveBytesBeforeGC;
     size_t liveBytesAfterGC;
