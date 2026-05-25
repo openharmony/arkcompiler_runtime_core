@@ -217,8 +217,8 @@ cases:
           enum Color { Red, Green, Blue };
           type BaseColor = Color;
       use: |-
-          let v: BaseColor = BaseColor.Red;
-          let ok = true;
+          let v: BaseColor = BaseColor.Blue;
+          let ok = (v == 2);
 
     # constructor on type alias for primitive
     - defs: |- 
