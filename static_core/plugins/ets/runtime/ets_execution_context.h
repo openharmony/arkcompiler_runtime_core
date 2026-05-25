@@ -125,6 +125,10 @@ public:
 
     int32_t GetTaskpoolTaskId() const;
 
+    void SetTaskpoolSubmissionId(int32_t submissionId);
+
+    int32_t GetTaskpoolSubmissionId() const;
+
     /// @brief traverse current unhandled rejected promises with custom handler
     void ProcessUnhandledRejectedPromises(bool listAllObjects);
 
@@ -143,7 +147,9 @@ private:
 
     // NOTE(atlantiswang, #32562): this member variable should be moved to the execution context's local storage
     static constexpr int32_t INVALID_TASKPOOL_TASK_ID = 0;
+    static constexpr int32_t INVALID_TASKPOOL_SUBMISSION_ID = 0;
     int32_t taskpoolTaskid_ {INVALID_TASKPOOL_TASK_ID};
+    int32_t taskpoolSubmissionId_ {INVALID_TASKPOOL_SUBMISSION_ID};
 
     ManagedThread *mThread_;
 };

@@ -4500,6 +4500,26 @@ intrinsics:
       args: [ i32 ]
     impl: ark::ets::intrinsics::taskpool::SetTaskId
 
+  - name: TaskpoolGetSubmissionId
+    space: ets
+    class_name: std.concurrency.taskpool
+    method_name: getSubmissionId
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::taskpool::GetSubmissionId
+
+  - name: TaskpoolSetSubmissionId
+    space: ets
+    class_name: std.concurrency.taskpool
+    method_name: setSubmissionId
+    static: true
+    signature:
+      ret: void
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::taskpool::SetSubmissionId
+
   - name: TaskpoolGenerateGroupId
     space: ets
     class_name: std.concurrency.taskpool.GroupState

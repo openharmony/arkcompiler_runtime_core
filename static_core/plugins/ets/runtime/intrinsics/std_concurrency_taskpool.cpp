@@ -113,6 +113,20 @@ extern "C" void SetTaskId(EtsInt taskId)
     executionCtx->SetTaskpoolTaskId(taskId);
 }
 
+extern "C" EtsInt GetSubmissionId()
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    return executionCtx->GetTaskpoolSubmissionId();
+}
+
+extern "C" void SetSubmissionId(EtsInt submissionId)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    executionCtx->SetTaskpoolSubmissionId(submissionId);
+}
+
 extern "C" EtsInt GenerateGroupId()
 {
     return g_taskGroupId++;

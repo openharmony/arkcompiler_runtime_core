@@ -15,7 +15,7 @@
 
 package std.concurrency;
 
-import { WorkerPriority } from "std/core";
+import { PromiseWithResolvers, WorkerPriority } from "std/core";
 import { InteropSerializeHelper } from "std/interop";
 
 export namespace taskpool {
@@ -74,6 +74,238 @@ export namespace taskpool {
     const TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED: int = 10200116;
     const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_OUTSIDE: int = 10200117;
 
+    function materializeSendDataArgs(args: FixedArray<Any>): Array<Any> {
+        const payload = new Array<Any>();
+        for (let i = 0; i < args.length; i++) {
+            payload.push(args[i]);
+        }
+        return payload;
+    }
+
+    class ReceiveListenerBinding {
+        constructor(callback: Function, hostWorkerId: int) {
+            this.callback = callback;
+            this.hostWorkerId = hostWorkerId;
+        }
+
+        readonly callback: Function;
+        readonly hostWorkerId: int;
+    }
+
+    class ReceiveEvent {
+        constructor(payload: Array<Any>, listener: ReceiveListenerBinding) {
+            this.payload = payload;
+            this.listener = listener;
+        }
+
+        readonly payload: Array<Any>;
+        readonly listener: ReceiveListenerBinding;
+    }
+
+    class ReceiveDispatcher {
+        constructor(onProgress: () => void) {
+            this.onProgress = onProgress;
+        }
+
+        enqueue(event: ReceiveEvent): boolean {
+            const shouldSchedule = this.pendingCount.fetchAdd(1) == 0;
+            try {
+                ConcurrencyHelpers.lockGuard(this.queueMutex, () => {
+                    this.queue.push(event);
+                });
+            } catch (e) {
+                this.complete();
+                throw e;
+            }
+            return shouldSchedule;
+        }
+
+        poll(): ReceiveEvent | undefined {
+            let event: ReceiveEvent | undefined = undefined;
+            ConcurrencyHelpers.lockGuard(this.queueMutex, () => {
+                event = this.queue.shift();
+            });
+            return event;
+        }
+
+        prepend(event: ReceiveEvent): void {
+            ConcurrencyHelpers.lockGuard(this.queueMutex, () => {
+                this.queue.unshift(event);
+            });
+        }
+
+        complete(): void {
+            const previous = this.pendingCount.fetchSub(1);
+            if (previous <= 0) {
+                this.pendingCount.store(0);
+            }
+            this.onProgress();
+        }
+
+        hasPendingAcceptedEvents(): boolean {
+            return this.pendingCount.load() != 0;
+        }
+
+        private readonly onProgress: () => void;
+        private readonly queueMutex: Object = ConcurrencyHelpers.mutexCreate();
+        private readonly queue: Array<ReceiveEvent> = new Array<ReceiveEvent>();
+        private readonly pendingCount: AtomicInt = new AtomicInt(0);
+    }
+
+    const EXECUTION_RECORD_RESULT_READY: int = 1 << 0;
+    const EXECUTION_RECORD_RESULT_IS_ERROR: int = 1 << 1;
+    const EXECUTION_RECORD_FINALIZED: int = 1 << 2;
+    const EXECUTION_RECORD_DISPATCH_CLOSED: int = 1 << 3;
+    const EXECUTION_RECORD_NON_ERROR_MASK: int =
+        EXECUTION_RECORD_RESULT_READY | EXECUTION_RECORD_FINALIZED | EXECUTION_RECORD_DISPATCH_CLOSED;
+
+    class ExecutionRecord {
+        constructor(submissionId: int, onFinalized?: () => void) {
+            this.submissionId = submissionId;
+            this.resultPromise = new PromiseWithResolvers<Any>();
+            this.promise = this.resultPromise.promise;
+            this.receiveDispatcher = new ReceiveDispatcher(() => this.tryFinalize());
+            this.onFinalized = onFinalized;
+        }
+
+        resolvePromise(value: Any): void {
+            this.resultPromise.resolve(value);
+        }
+
+        rejectPromise(error: Error): void {
+            this.resultPromise.reject(error);
+        }
+
+        markTaskResult(value: Any): void {
+            this.resultSlot.store(value);
+            while (true) {
+                const currentState = this.stateFlags.load();
+                const nextState = (currentState & EXECUTION_RECORD_NON_ERROR_MASK) | EXECUTION_RECORD_RESULT_READY;
+                if (this.stateFlags.compareAndSwap(currentState, nextState) == currentState) {
+                    break;
+                }
+            }
+            this.tryFinalize();
+        }
+
+        markTaskError(error: Error): void {
+            this.resultSlot.store(error);
+            while (true) {
+                const currentState = this.stateFlags.load();
+                const nextState = currentState | EXECUTION_RECORD_RESULT_READY | EXECUTION_RECORD_RESULT_IS_ERROR;
+                if (this.stateFlags.compareAndSwap(currentState, nextState) == currentState) {
+                    break;
+                }
+            }
+            this.tryFinalize();
+        }
+
+        markTimedOut(): void {
+            this.closeDispatchToHost();
+        }
+
+        markCanceled(): void {
+            this.closeDispatchToHost();
+        }
+
+        canDispatchToHost(): boolean {
+            return (this.stateFlags.load() & EXECUTION_RECORD_DISPATCH_CLOSED) == 0;
+        }
+
+        tryFinalize(): void {
+            while (true) {
+                const currentState = this.stateFlags.load();
+                if ((currentState & EXECUTION_RECORD_FINALIZED) != 0 ||
+                    (currentState & EXECUTION_RECORD_RESULT_READY) == 0 ||
+                    this.receiveDispatcher.hasPendingAcceptedEvents()) {
+                    return;
+                }
+                const nextState = currentState | EXECUTION_RECORD_FINALIZED;
+                if (this.stateFlags.compareAndSwap(currentState, nextState) != currentState) {
+                    continue;
+                }
+                const result = this.resultSlot.load();
+                if ((currentState & EXECUTION_RECORD_RESULT_IS_ERROR) != 0) {
+                    this.resultPromise.reject(result as Error);
+                } else {
+                    this.resultPromise.resolve(result);
+                }
+                try {
+                    this.onFinalized?.();
+                } catch (e) {
+                    // Keep finalize path non-throwing.
+                    console.error(`taskpool:: execution record finalize hook failed: ${e}`);
+                }
+                return;
+            }
+        }
+
+        readonly submissionId: int;
+        readonly promise: Promise<Any>;
+        readonly receiveDispatcher: ReceiveDispatcher;
+
+        private readonly resultPromise: PromiseWithResolvers<Any>;
+        private readonly stateFlags: AtomicInt = new AtomicInt(0);
+        private readonly resultSlot: AtomicReference<Any> = new AtomicReference<Any>(undefined);
+        private readonly onFinalized?: () => void;
+
+        private closeDispatchToHost(): void {
+            this.stateFlags.fetchOr(EXECUTION_RECORD_DISPATCH_CLOSED);
+        }
+    }
+
+    class QueuedExecution {
+        constructor(task: Task, executionRecord: ExecutionRecord, priority: Priority) {
+            this.task = task;
+            this.executionRecord = executionRecord;
+            this.priority = priority;
+        }
+
+        readonly task: Task;
+        readonly executionRecord: ExecutionRecord;
+        readonly priority: Priority;
+    }
+
+    function tryScheduleOnReceiveDrain(executionRecord: ExecutionRecord, hostWorkerId: int): void {
+        const launchParams: LaunchParams = {
+            abortFlag: false,
+            workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [hostWorkerId])
+        };
+        launch(launchParams) {
+            drainOnReceiveEvents(executionRecord);
+        };
+    }
+
+    function drainOnReceiveEvents(executionRecord: ExecutionRecord): void {
+        const currentWorkerId = CoroutineExtras.getWorkerId();
+        while (true) {
+            const event = executionRecord.receiveDispatcher.poll();
+            if (event === undefined) {
+                if (executionRecord.receiveDispatcher.hasPendingAcceptedEvents()) {
+                    Coroutine.Schedule();
+                    continue;
+                }
+                executionRecord.tryFinalize();
+                return;
+            }
+            if (event.listener.hostWorkerId != currentWorkerId) {
+                executionRecord.receiveDispatcher.prepend(event);
+                tryScheduleOnReceiveDrain(executionRecord, event.listener.hostWorkerId);
+                return;
+            }
+            try {
+                if (!executionRecord.canDispatchToHost()) {
+                    continue;
+                }
+                event.listener.callback.unsafeCall(...event.payload);
+            } catch (e) {
+                console.error(`taskpool:: onReceiveData callback failed: ${e}`);
+            } finally {
+                executionRecord.receiveDispatcher.complete();
+            }
+        }
+    }
+
     class GlobalQueueWorker extends EAWorker {
         public static closingTask: Task = new Task("closingTask", (): void => {});
 
@@ -95,10 +327,11 @@ export namespace taskpool {
                 if (this.tryAdvanceRetireRequest()) {
                     continue;
                 }
-                let task = getTaskFromGlobalQueue(this); // Now handles blocking internally to avoid CPU busy waiting
-                if (task === undefined) {
+                let queuedExecution = getTaskFromGlobalQueue(this); // Now handles blocking internally to avoid CPU busy waiting
+                if (queuedExecution === undefined) {
                     continue;
                 }
+                const task = queuedExecution.task;
                 removeFromIdleWorkers(this);
 
                 const internalTask = InternalTask.of(task);
@@ -120,26 +353,10 @@ export namespace taskpool {
                 this.executingTaskBodyStartTime.store((Chrono.nanoNow() / Chrono.NS_PER_MS).toInt());
 
                 try {
-                    let res: Any = null;
-                    res = internalTask?.execute(this);
-                    ConcurrencyHelpers.lockGuard(internalTask!.taskMutex, () => {
-                        internalTask!.currentDeferred!.resolvePromise(res);
-                        internalTask!.currentDeferred = undefined;
-                        if (internalTask!.pendingDeferreds!.length > 0) {
-                            internalTask!.currentDeferred = internalTask!.pendingDeferreds!.shift();
-                        }
-                    });
-                    //clear reference
-                    res = null;
+                    internalTask?.execute(this, queuedExecution.executionRecord);
                 } catch (e) {
-                    ConcurrencyHelpers.lockGuard(internalTask!.taskMutex, () => {
-                        // if task is seq task may rejected inside the execution, so here using ? to avoid null pointer
-                        internalTask!.currentDeferred?.rejectPromise(e);
-                        internalTask!.currentDeferred = undefined;
-                        if (internalTask!.pendingDeferreds!.length > 0) {
-                            internalTask!.currentDeferred = internalTask!.pendingDeferreds!.shift();
-                        }
-                    });
+                    queuedExecution.executionRecord.markTaskError(e as Error);
+                    internalTask!.finishExecutionRecord(queuedExecution.executionRecord);
                 } finally {
                     // Clear synchronous task body execution mark.
                     this.executingTaskBodyStartTime.store(0);
@@ -873,7 +1090,7 @@ export namespace taskpool {
             this.asyncStackId = collectAsyncStack();
         }
 
-        execute(currentWorker : GlobalQueueWorker | undefined = undefined): Any {
+        execute(currentWorker : GlobalQueueWorker | undefined = undefined, executionRecordArg?: ExecutionRecord): Any {
             initWorkerPoolSync();
             removePendingDependencyTask(this.task);
             this.waitForDependencies();
@@ -886,7 +1103,7 @@ export namespace taskpool {
                 } else {
                     allTasks.set(this.task, count - 1);
                 }
-                this.tryTriggerRunner();
+                this.tryTriggerAsyncRunnerAndGroup();
                 this.throwCancelTaskError();
             }
             // Task timed out during waiting - skip user function execution (promise already rejected)
@@ -903,110 +1120,116 @@ export namespace taskpool {
                 }
             }
             this.callUserCallback(this.onStartCallback);
-            let result: Any = null;
             let executionSucceeded: boolean = false;
+            let taskResultPromise: Promise<Any>;
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
+            const executionRecord = executionRecordArg ?? this.currentExecutionRecord;
+            if (executionRecord === undefined) {
+                throw new Error("taskpool:: missing execution record");
+            }
+            const previousTaskId = getTaskId();
+            const previousSubmissionId = getSubmissionId();
             try {
                 setTaskId(this.task.taskId);
-                result = this.task.taskFunction();
+                setSubmissionId(executionRecord.submissionId);
+                this.registerRunningExecutionRecord(executionRecord);
+                const result = this.task.taskFunction();
                 if (result instanceof Promise) {
-                    result.then(() => {
+                    taskResultPromise = result.then((value: Any) => {
                         executionSucceeded = true;
+                        return value;
                     }).catch((e) => {
                         this.handleTaskFailure(e as Error);
                         throw e;
                     });
                 } else {
                     executionSucceeded = true;
+                    taskResultPromise = Promise.resolve(result);
                 }
             } catch (e) {
                 this.handleTaskFailure(e as Error);
-                throw e;
-            } finally {
-                // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
-                // And we should set ioDuration = 0, totalDuration = cpuDuration here
-                this.task.cpuDuration = ((Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS).toInt();
-                this.task.totalDuration = this.task.cpuDuration;
-                this.task.ioDuration = 0;
-                // Process the task finishing
-                let taskFinishedhandle = () : void => {
-                    if (isTaskPoolUseLaunch) {
-                        this.notifyDependencies();
-                    } else {
-                        totalExecTime.fetchAdd(this.getDuration());
-                        totalExecCount.fetchAdd(1);
-                    }
-                    const count = allTasks.get(this.task) ?? 0;
-                    if (count <= 1) {
-                        allTasks.delete(this.task);
-                        taskSet.delete(this.task);
-                    } else {
-                        allTasks.set(this.task, count - 1);
-                    }
-                    if (currentWorker !== undefined) {
-                        ConcurrencyHelpers.lockGuard(currentWorker!.currentTasksMutex, () => {
-                            const curCount: int | undefined = currentWorker!.currentTasks.get(this.task);
-                            if (curCount == undefined || curCount <= 1) {
-                                currentWorker!.currentTasks.delete(this.task);
-                            } else {
-                                currentWorker!.currentTasks.set(this.task, curCount - 1);
-                            }
-                            currentWorker!.currentPriority = undefined;
-                        });
-                    }
+                taskResultPromise = Promise.reject(e as Error);
+            }
 
-                    // Check if task timed out during execution
-                    // If timed out, skip normal completion logic (promise already rejected)
-                    if (this.isTimeout.load()) {
-                        this.state.store(InternalState.FINISHED.valueOf());
-                        this.tryTriggerRunner();
-                        return;
-                    }
+            // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
+            // And we should set ioDuration = 0, totalDuration = cpuDuration here
+            this.task.cpuDuration = ((Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS).toInt();
+            this.task.totalDuration = this.task.cpuDuration;
+            this.task.ioDuration = 0;
 
-                    this.state.store(InternalState.FINISHED.valueOf());
-                    try {
-                        if (executionSucceeded) {
-                            if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
-                                let group: TaskGroup | undefined = allGroups.get(this.groupId);
-                                if (group !== undefined) {
-                                    let callback: CallbackFunction = this.onSuccessCallback as CallbackFunction;
-                                    GroupState.of(group).successCallbacks.add(callback);
-                                }
-                            } else {
-                                this.callUserCallback(this.onSuccessCallback);
-                            }
-                        }
-                    } catch (e) {
-                        try {
-                            this.onFailCallback?.(e as Error);
-                        } catch (callbackError) {}
-                        throw e;
-                    } finally {
-                        this.tryTriggerRunner();
-                    }
-                };
-                if (result instanceof Promise) {
-                    return result.finally(() => {
-                        try {
-                            taskFinishedhandle();
-                        } finally {
-                            if (shouldRestoreAsyncStackId) {
-                                setSubmitterStackId(previousAsyncStackId);
-                            }
-                        }
-                    });
+            let taskFinishedhandle = (): void => {
+                if (isTaskPoolUseLaunch) {
+                    this.notifyDependencies();
                 } else {
-                    try {
-                        taskFinishedhandle();
-                    } finally {
-                        if (shouldRestoreAsyncStackId) {
-                            setSubmitterStackId(previousAsyncStackId);
+                    totalExecTime.fetchAdd(this.getDuration());
+                    totalExecCount.fetchAdd(1);
+                }
+                const count = allTasks.get(this.task) ?? 0;
+                if (count <= 1) {
+                    allTasks.delete(this.task);
+                    taskSet.delete(this.task);
+                } else {
+                    allTasks.set(this.task, count - 1);
+                }
+                if (currentWorker !== undefined) {
+                    ConcurrencyHelpers.lockGuard(currentWorker!.currentTasksMutex, () => {
+                        const curCount: int | undefined = currentWorker!.currentTasks.get(this.task);
+                        if (curCount == undefined || curCount <= 1) {
+                            currentWorker!.currentTasks.delete(this.task);
+                        } else {
+                            currentWorker!.currentTasks.set(this.task, curCount - 1);
                         }
+                        currentWorker!.currentPriority = undefined;
+                    });
+                }
+                if (this.isTimeout.load()) {
+                    this.state.store(InternalState.FINISHED.valueOf());
+                    this.tryTriggerAsyncRunnerAndGroup();
+                    return;
+                }
+                this.state.store(InternalState.FINISHED.valueOf());
+                try {
+                    if (executionSucceeded) {
+                        if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
+                            let group: TaskGroup | undefined = allGroups.get(this.groupId);
+                            if (group !== undefined) {
+                                let callback: CallbackFunction = this.onSuccessCallback as CallbackFunction;
+                                GroupState.of(group).successCallbacks.add(callback);
+                            }
+                        } else {
+                            this.callUserCallback(this.onSuccessCallback);
+                        }
+                    }
+                } catch (e) {
+                    try {
+                        this.onFailCallback?.(e as Error);
+                    } catch (callbackError) {}
+                    throw e;
+                } finally {
+                    this.tryTriggerAsyncRunnerAndGroup();
+                }
+            };
+
+            return taskResultPromise.finally(() => {
+                try {
+                    this.unregisterRunningExecutionRecord(executionRecord);
+                    setSubmissionId(previousSubmissionId);
+                    setTaskId(previousTaskId);
+                    taskFinishedhandle();
+                    this.finishExecutionRecord(executionRecord);
+                } finally {
+                    if (shouldRestoreAsyncStackId) {
+                        setSubmitterStackId(previousAsyncStackId);
                     }
                 }
-            }
-            return result;
+            }).then((value: Any) => {
+                executionRecord.markTaskResult(value);
+                return executionRecord.promise;
+            }).catch((e) => {
+                executionRecord.markTaskError(e as Error);
+                return executionRecord.promise;
+            });
         }
 
         checkCancellation(): void {
@@ -1049,7 +1272,7 @@ export namespace taskpool {
         }
 
         /// The task is added to taskpool for execution
-        enqueue(priority?: Priority): void {
+        enqueue(priority?: Priority, executionRecordArg?: ExecutionRecord): void {
             priority = priority === undefined ? Priority.MEDIUM : priority;
             this.priority = priority;
             while(true) {
@@ -1062,8 +1285,14 @@ export namespace taskpool {
                 }
             }
             if (!isTaskPoolUseLaunch) {
+                const executionRecord = executionRecordArg ?? this.currentExecutionRecord;
+                if (executionRecord === undefined) {
+                    throw new Error("taskpool:: missing execution record");
+                }
                 initGlobalTaskQueues();
-                while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(this.task)) {
+                while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(
+                    new QueuedExecution(this.task, executionRecord, priority)
+                )) {
                     Coroutine.Schedule();
                 }
                 let count = allTasks.get(this.task) ?? 0;
@@ -1078,40 +1307,112 @@ export namespace taskpool {
             this.callUserCallback(this.onEnqueueCallback);
         }
 
+        createExecutionRecord(): ExecutionRecord {
+            const executionRecord = new ExecutionRecord(
+                this.nextSubmissionId.fetchAdd(1),
+                () => this.tryTriggerSequenceRunner()
+            );
+            ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                if (this.currentExecutionRecord === undefined) {
+                    this.currentExecutionRecord = executionRecord;
+                } else {
+                    this.pendingExecutionRecords.push(executionRecord);
+                }
+            });
+            return executionRecord;
+        }
+
+        /// Caller must not hold seqMutex, implInnerMutex, or other outer locks that may nest with taskMutex.
+        finishExecutionRecord(executionRecord: ExecutionRecord): void {
+            ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                if (this.currentExecutionRecord === executionRecord) {
+                    this.currentExecutionRecord = undefined;
+                    if (this.pendingExecutionRecords.length > 0) {
+                        this.currentExecutionRecord = this.pendingExecutionRecords.shift();
+                    }
+                    return;
+                }
+                const idx = this.pendingExecutionRecords.indexOf(executionRecord);
+                if (idx >= 0) {
+                    this.pendingExecutionRecords.splice(idx, 1);
+                }
+            });
+        }
+
+        registerRunningExecutionRecord(executionRecord: ExecutionRecord): void {
+            ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                this.executionRecordsBySubmissionId.set(executionRecord.submissionId, executionRecord);
+            });
+        }
+
+        unregisterRunningExecutionRecord(executionRecord: ExecutionRecord): void {
+            ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                const registeredRecord = this.executionRecordsBySubmissionId.get(executionRecord.submissionId);
+                if (registeredRecord === executionRecord) {
+                    this.executionRecordsBySubmissionId.delete(executionRecord.submissionId);
+                }
+            });
+        }
+
+        getExecutionRecordBySubmissionId(submissionId: int): ExecutionRecord | undefined {
+            let executionRecord: ExecutionRecord | undefined = undefined;
+            ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                executionRecord = this.executionRecordsBySubmissionId.get(submissionId);
+            });
+            return executionRecord;
+        }
+
+        getOnReceiveListenerBinding(): ReceiveListenerBinding | undefined {
+            return this.onReceiveListener.load();
+        }
+
         /**
          * @see taskpool.execute
          * @see taskpool.SequenceRunner.execute
          * @see taskpool.AsyncRunner.execute
          */
 
-        /// trigger next runner task to execute
-        tryTriggerRunner(): void {
-            // handle sequenceRunner
-            if (this.seqId.load() != 0) {
-                let nextTask: Task | undefined = undefined;
-                ConcurrencyHelpers.lockGuard(this.runnerImpl.seqMutex, () => {
-                    if (this.runnerImpl.tasks.length == 0) {
-                        this.runnerImpl.isRunning = false;
-                    } else {
-                        nextTask = this.runnerImpl.tasks.shift();
-                        while (nextTask !== undefined && InternalTask.of(nextTask!).state.load() == (State.CANCELED.valueOf())) {
-                            const nextInternalTask = InternalTask.of(nextTask!);
-                            ConcurrencyHelpers.lockGuard(nextInternalTask.taskMutex, () => {
-                                nextInternalTask.currentDeferred!.rejectPromise(new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled"));
-                                nextInternalTask.currentDeferred = undefined;
-                            });
-                            nextTask = this.runnerImpl.tasks.shift();
-                        }
-                        if (nextTask === undefined) {
-                            this.runnerImpl.isRunning = false;
-                        }
-                    }
-                });
-                if (nextTask !== undefined) {
-                    InternalTask.of(nextTask!).enqueue(this.runnerImpl.priority);
-                }
-            }
 
+        tryTriggerSequenceRunner(): void {
+            if (this.seqId.load() == 0) {
+                return;
+            }
+            let nextTask: Task | undefined = undefined;
+            const canceledExecutionRecords: Array<ExecutionRecord> = new Array<ExecutionRecord>();
+            const canceledInternalTasks: Array<InternalTask> = new Array<InternalTask>();
+            ConcurrencyHelpers.lockGuard(this.runnerImpl.seqMutex, () => {
+                if (this.runnerImpl.tasks.length == 0) {
+                    this.runnerImpl.isRunning = false;
+                } else {
+                    nextTask = this.runnerImpl.tasks.shift();
+                    while (nextTask !== undefined && InternalTask.of(nextTask!).state.load() == (State.CANCELED.valueOf())) {
+                        const nextInternalTask = InternalTask.of(nextTask!);
+                        const currentExecutionRecord = nextInternalTask.currentExecutionRecord;
+                        if (currentExecutionRecord !== undefined) {
+                            currentExecutionRecord.markCanceled();
+                            currentExecutionRecord.rejectPromise(new Error(
+                                TASKPOOL_ERROR_SEQ_RUNNER_CANCELED,
+                                "taskpool:: sequenceRunner task has been canceled"
+                            ));
+                            canceledExecutionRecords.push(currentExecutionRecord);
+                            canceledInternalTasks.push(nextInternalTask);
+                        }
+                        nextTask = this.runnerImpl.tasks.shift();
+                    }
+                    if (nextTask === undefined) {
+                        this.runnerImpl.isRunning = false;
+                    }
+                }
+            });
+            for (let i = 0; i < canceledExecutionRecords.length; i++) {
+                canceledInternalTasks[i].finishExecutionRecord(canceledExecutionRecords[i]);
+            }
+            if (nextTask !== undefined) {
+                InternalTask.of(nextTask!).enqueue(this.runnerImpl.priority);
+            }
+        }
+
+        tryTriggerAsyncRunnerAndGroup(): void {
             // handle asyncRunner
             if (this.asyncId.load() != 0) {
                 const asyncRunner = AsyncRunnerImpl.getAsyncRunnerById(this.asyncId.load());
@@ -1142,11 +1443,9 @@ export namespace taskpool {
                 }
             }
         }
-
-
-        clearPendingPromiseDeferredUnsafe(): void {
-            while (this.pendingDeferreds.length > 0) {
-                this.pendingDeferreds.shift();
+        clearPendingExecutionRecordsUnsafe(): void {
+            while (this.pendingExecutionRecords.length > 0) {
+                this.pendingExecutionRecords.shift();
             }
         }
 
@@ -1201,8 +1500,9 @@ export namespace taskpool {
         taskMutex: Object;
         condVar: Object;
 
-        currentDeferred: PromiseDeferred | undefined = undefined;
-        pendingDeferreds: Array<PromiseDeferred> = new Array<PromiseDeferred>();
+        currentExecutionRecord: ExecutionRecord | undefined = undefined;
+        pendingExecutionRecords: Array<ExecutionRecord> = new Array<ExecutionRecord>();
+        executionRecordsBySubmissionId: Map<int, ExecutionRecord> = new Map<int, ExecutionRecord>();
 
         priority: Priority;
         state: AtomicInt = new AtomicInt(InternalState.NOT_FOUND);
@@ -1210,8 +1510,9 @@ export namespace taskpool {
         runnerImpl: SeqRunnerImpl;
         runnerAsyncImpl: AsyncRunnerImpl;
 
-        onReceiveCallback?: Function;
-        dataMutex: Object = ConcurrencyHelpers.mutexCreate();
+        readonly onReceiveListener: AtomicReference<ReceiveListenerBinding | undefined> =
+            new AtomicReference<ReceiveListenerBinding | undefined>(undefined);
+        nextSubmissionId: AtomicInt = new AtomicInt(1);
 
         onEnqueueCallback?: CallbackFunction;
         onStartCallback?: CallbackFunction;
@@ -1219,32 +1520,6 @@ export namespace taskpool {
         onSuccessCallback?: CallbackFunction;
         private task: Task;
         private static readonly NOT_STARTED_TIME: long = 0;
-    }
-    
-    class PromiseDeferred {
-        constructor(resolve: (value: Any) => void, reject: (e: Error) => void) {
-            this.resolve = resolve;
-            this.reject = reject;
-        }
-
-        public resolvePromise(value: Any): void {
-            if (this.resolve !== undefined) {
-                this.resolve(value);
-            } else {
-                throw new Error("PromiseDeferred: resolve is undefined");
-            }
-        }
-
-        public rejectPromise(e: Error): void {
-            if (this.reject !== undefined) {
-                this.reject(e);
-            } else {
-                throw new Error("PromiseDeferred: reject is undefined");
-            }
-        }
-
-        public resolve: (value: Any) => void;
-        public reject: (e: Error) => void;
     }
 
     /**
@@ -1463,20 +1738,47 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
             }
             const task: Task = item;
-            if (InternalTask.of(task).onReceiveCallback === undefined) {
+            const internalTask = InternalTask.of(task);
+            const binding = internalTask.getOnReceiveListenerBinding();
+            if (binding === undefined) {
                 throw new Error(TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED, "taskpool:: The callback is not registered on the host side");
             }
-            if (InternalTask.of(task).state.load() == InternalState.TIMEOUT.valueOf()) {
+            const submissionId = getSubmissionId();
+            if (submissionId <= 0) {
+                throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
+            }
+            const executionRecord = internalTask.getExecutionRecordBySubmissionId(submissionId);
+            if (executionRecord === undefined) {
+                throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
+            }
+            if (!executionRecord.canDispatchToHost()) {
                 return;
             }
-            task.createPromise(InternalTask.of(task).onReceiveCallback!, ...args);
+            const payload = materializeSendDataArgs(args);
+            const event = new ReceiveEvent(payload, binding);
+            if (executionRecord.receiveDispatcher.enqueue(event)) {
+                tryScheduleOnReceiveDrain(executionRecord, binding.hostWorkerId);
+            }
         }
 
         /**
          * Register a callback for this task to receive and handle data from the taskpool task
          */
         onReceiveData(callback?: Function): void {
-            InternalTask.of(this).onReceiveCallback = callback;
+            const internalTask = InternalTask.of(this);
+            if (callback === undefined) {
+                internalTask.onReceiveListener.store(undefined);
+                return;
+            }
+            if (callback === null) {
+                throw new TypeError("the type of onReceiveData's parameter must be function.");
+            }
+            if (!(callback instanceof Function)) {
+                throw new TypeError("the type of onReceiveData's parameter must be function.");
+            }
+            internalTask.onReceiveListener.store(
+                new ReceiveListenerBinding(callback, CoroutineExtras.getWorkerId())
+            );
         }
 
         /// Concurrent function to execute in taskpool
@@ -1519,12 +1821,6 @@ export namespace taskpool {
             if (InternalTask.of(this).isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_LISTENER_REGISTRATION, "taskpool:: The executed task does not support the registration of listeners.");
             }
-        }
-
-        private createPromise(callback : Function, ...args: FixedArray<Any> ) : Promise<void> {
-            return new Promise<void>((resolve) => {
-                    callback.unsafeCall(...args);
-          })
         }
 
         /**
@@ -1711,28 +2007,18 @@ export namespace taskpool {
             taskSubmitted(task);
             internalTask.isSubmitted = true;
 
+            const executionRecord = internalTask.createExecutionRecord();
             if (isTaskPoolUseLaunch) {
-                internalTask.enqueue(this.impl.priority);
+                internalTask.enqueue(this.impl.priority, executionRecord);
                 const taskRunner = (value: Any): Any => {
-                    return internalTask.execute();
+                    return launchQueuedExecutionRecord(internalTask, executionRecord);
                 };
                 this.impl.seqPromise = this.impl.seqPromise.then<Any>(taskRunner, (error) => {
                     taskRunner(undefined);
                     return new Promise<never>((resolve, reject) => {});
                 } );
-                return this.impl.seqPromise;
+                return executionRecord.promise;
             }
-
-            const promise = new Promise<Any>((resolve, reject) => {
-                const newDeferred = new PromiseDeferred(resolve, reject);
-                ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
-                    if (internalTask.currentDeferred === undefined) {
-                        internalTask.currentDeferred = newDeferred;
-                    } else {
-                        internalTask.pendingDeferreds.push(newDeferred);
-                    }
-                });
-            });
 
             ConcurrencyHelpers.lockGuard(this.impl.seqMutex, () => {
                 if (this.impl.isRunning) {
@@ -1748,10 +2034,10 @@ export namespace taskpool {
                     this.impl.tasks.push(task);
                 } else {
                     this.impl.isRunning = true;
-                    internalTask.enqueue(this.impl.priority);
+                    internalTask.enqueue(this.impl.priority, executionRecord);
                 }
             });
-            return promise;
+            return executionRecord.promise;
         }
 
         private static native generateSeqRunnerId(): int;
@@ -1813,6 +2099,8 @@ export namespace taskpool {
          */
         handleTaskCompletionFromTryTriggerRunner(): void {
             let toEnqueue: Array<Task> = new Array<Task>();
+            const canceledExecutionRecords: Array<ExecutionRecord> = new Array<ExecutionRecord>();
+            const canceledInternalTasks: Array<InternalTask> = new Array<InternalTask>();
             ConcurrencyHelpers.mutexLock(this.implInnerMutex);
             try {
                 if (this.runningCount > 0) {
@@ -1823,12 +2111,16 @@ export namespace taskpool {
                     let nextTask = this.waitingQueue.shift();
                     if (nextTask == undefined) break;
                     if (InternalTask.of(nextTask).state.load() == State.CANCELED.valueOf()) {
-                        ConcurrencyHelpers.lockGuard(InternalTask.of(nextTask).taskMutex, () => {
-                            InternalTask.of(nextTask).currentDeferred!.rejectPromise(
+                        const canceledInternalTask = InternalTask.of(nextTask!);
+                        const canceledRecord = canceledInternalTask.currentExecutionRecord;
+                        if (canceledRecord !== undefined) {
+                            canceledRecord.markCanceled();
+                            canceledRecord.rejectPromise(
                                 new Error(TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED, "taskpool:: asyncRunner task has been canceled")
                             );
-                            InternalTask.of(nextTask!).currentDeferred = undefined;
-                        });
+                            canceledExecutionRecords.push(canceledRecord);
+                            canceledInternalTasks.push(canceledInternalTask);
+                        }
                         continue;
                     }
                     this.runningCount++;
@@ -1836,6 +2128,10 @@ export namespace taskpool {
                 }
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.implInnerMutex);
+            }
+
+            for (let i = 0; i < canceledExecutionRecords.length; i++) {
+                canceledInternalTasks[i].finishExecutionRecord(canceledExecutionRecords[i]);
             }
 
             for (let t of toEnqueue) {
@@ -1912,19 +2208,12 @@ export namespace taskpool {
             taskSubmitted(task);
             internalTask.isSubmitted = true;
 
-            const promise = new Promise<Any>((resolve, reject) => {
-                const newDeferred = new PromiseDeferred(resolve, reject);
-                ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
-                    if (internalTask.currentDeferred === undefined) {
-                        internalTask.currentDeferred = newDeferred;
-                    } else {
-                        internalTask.pendingDeferreds.push(newDeferred);
-                    }
-                });
-            });
+            const executionRecord = internalTask.createExecutionRecord();
 
             let shouldEnqueue = false;
             let enqueuePriority: Priority = priority == undefined ? this.priority : priority;
+            let droppedHeadExecutionRecord: ExecutionRecord | undefined = undefined;
+            let droppedHeadInternalTask: InternalTask | undefined = undefined;
             ConcurrencyHelpers.mutexLock(this.impl.implInnerMutex);
             try {
                 if (this.impl.runningCount < this.impl.runningCapacity) {
@@ -1949,8 +2238,15 @@ export namespace taskpool {
                             const head = this.impl.waitingQueue.shift();
                             if (head != undefined) {
                                 const headInternalTask = InternalTask.of(head!);
-                                if(headInternalTask.currentDeferred !== undefined) {
-                                    headInternalTask.currentDeferred!.rejectPromise(new Error(TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED, "taskpool:: waiting queue dropped head"));
+                                const currentExecutionRecord = headInternalTask.currentExecutionRecord;
+                                if (currentExecutionRecord !== undefined) {
+                                    currentExecutionRecord.markCanceled();
+                                    currentExecutionRecord.rejectPromise(new Error(
+                                        TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED,
+                                        "taskpool:: waiting queue dropped head"
+                                    ));
+                                    droppedHeadExecutionRecord = currentExecutionRecord;
+                                    droppedHeadInternalTask = headInternalTask;
                                 }
                                 headInternalTask.isSubmitted = false;
                             }
@@ -1962,12 +2258,16 @@ export namespace taskpool {
                 ConcurrencyHelpers.mutexUnlock(this.impl.implInnerMutex);
             }
 
-            // Enqueue outside of implInnerMutex to avoid ABBA deadlock with globalTaskQueuesMutex.
-            if (shouldEnqueue) {
-                internalTask.enqueue(enqueuePriority);
+            if (droppedHeadInternalTask !== undefined && droppedHeadExecutionRecord !== undefined) {
+                droppedHeadInternalTask.finishExecutionRecord(droppedHeadExecutionRecord);
             }
 
-            return promise;
+            // Enqueue outside of implInnerMutex to avoid ABBA deadlock with globalTaskQueuesMutex.
+            if (shouldEnqueue) {
+                internalTask.enqueue(enqueuePriority, executionRecord);
+            }
+
+            return executionRecord.promise;
         }
 
         private static native generateAsyncRunnerId(): int;
@@ -2113,22 +2413,12 @@ export namespace taskpool {
         internalTask.isSubmitted = true;
 
         if (isTaskPoolUseLaunch) {
-            return launchPromise(internalTask.execute);
+            return launchTaskExecution(task).promise;
         }
 
-        const promise = new Promise<Any>((resolve, reject) => {
-            const newDeferred = new PromiseDeferred(resolve, reject);
-            ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
-                if (internalTask.currentDeferred === undefined) {
-                    internalTask.currentDeferred = newDeferred;
-                } else {
-                    internalTask.pendingDeferreds.push(newDeferred);
-                }
-            });
-        });
-
-        internalTask.enqueue(priority);
-        return promise;
+        const executionRecord = internalTask.createExecutionRecord();
+        internalTask.enqueue(priority, executionRecord);
+        return executionRecord.promise;
     }
 
     function executeWithTimeout(task: Task, configs: Configs): Promise<Any> {
@@ -2141,20 +2431,12 @@ export namespace taskpool {
         internalTask.hasTimeout = true;
         internalTask.timeoutMs = configs.timeout ?? Infinity;
 
+        let executionRecord: ExecutionRecord;
         if (isTaskPoolUseLaunch) {
-            return launchPromise(internalTask.execute);
+            executionRecord = launchTaskExecution(task);
+        } else {
+            executionRecord = internalTask.createExecutionRecord();
         }
-
-        const promise = new Promise<Any>((resolve, reject) => {
-            const newDeferred = new PromiseDeferred(resolve, reject);
-            ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
-                if (internalTask.currentDeferred === undefined) {
-                    internalTask.currentDeferred = newDeferred;
-                } else {
-                    internalTask.pendingDeferreds.push(newDeferred);
-                }
-            });
-        });
 
         // Create timeout promise
         let timeoutTimerId: int = -1;
@@ -2162,14 +2444,17 @@ export namespace taskpool {
             timeoutTimerId = setTimeout(() => {
                 if (internalTask.tryTransitionToTimeout() || (internalTask.state.load() == InternalState.CANCELED.valueOf() && internalTask.isRunning)) {
                     internalTask.isTimeout.store(true);
+                    executionRecord.markTimedOut();
                     reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout"));
                 }
             }, internalTask.timeoutMs.toInt());
         });
 
         // Return race result
-        const racePromise = Promise.race<Any>([promise, timeoutPromise]);
-        internalTask.enqueue(configs.priority);
+        const racePromise = Promise.race<Any>([executionRecord.promise, timeoutPromise]);
+        if (!isTaskPoolUseLaunch) {
+            internalTask.enqueue(configs.priority, executionRecord);
+        }
         return racePromise.finally(() => {
             if (timeoutTimerId !== -1) {
                 clearTimeout(timeoutTimerId);
@@ -2219,20 +2504,11 @@ export namespace taskpool {
             internalTask.captureAsyncStack();
             internalTask.isSubmitted = true;
             if (isTaskPoolUseLaunch) {
-                promises.push(launchPromise(internalTask.execute));
+                promises.push(launchTaskExecution(task).promise);
             } else {
-                const promise = new Promise<Any>((resolve, reject) => {
-                    const newDeferred = new PromiseDeferred(resolve, reject);
-                    ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
-                        if (internalTask.currentDeferred === undefined) {
-                            internalTask.currentDeferred = newDeferred;
-                        } else {
-                            internalTask.pendingDeferreds.push(newDeferred);
-                        }
-                    });
-                });
-                internalTask.enqueue(priority);
-                promises.push(promise);
+                const executionRecord = internalTask.createExecutionRecord();
+                internalTask.enqueue(priority, executionRecord);
+                promises.push(executionRecord.promise);
             }
         });
         return promises;
@@ -2374,17 +2650,9 @@ export namespace taskpool {
                         reject(e);
                     })
                 } else {
-                    const p = new Promise<Any>((resolve, reject) => {
-                        const newDeferred = new PromiseDeferred(resolve, reject);
-                        ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                            if (InternalTask.of(task).currentDeferred === undefined) {
-                                InternalTask.of(task).currentDeferred = newDeferred;
-                            } else {
-                                InternalTask.of(task).pendingDeferreds.push(newDeferred);
-                            }
-                        });
-                    })
-                    InternalTask.of(task).enqueue(priority);
+                    const executionRecord = InternalTask.of(task).createExecutionRecord();
+                    const p = executionRecord.promise;
+                    InternalTask.of(task).enqueue(priority, executionRecord);
                     p.then((res: Any) => {
                         resolve(res);
                     }).catch((e) => {
@@ -2431,17 +2699,8 @@ export namespace taskpool {
             if (isTaskPoolUseLaunch) {
                 launchImpl(task, priority);
             } else {
-                const p = new Promise<Any>((resolve, reject) => {
-                    const newDeferred = new PromiseDeferred(resolve, reject);
-                    ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                        if (InternalTask.of(task).currentDeferred === undefined) {
-                            InternalTask.of(task).currentDeferred = newDeferred;
-                        } else {
-                            InternalTask.of(task).pendingDeferreds.push(newDeferred);
-                        }
-                    });
-                })
-                InternalTask.of(task).enqueue(priority);
+                const executionRecord = InternalTask.of(task).createExecutionRecord();
+                InternalTask.of(task).enqueue(priority, executionRecord);
             }
         }, period);
     }
@@ -2741,29 +3000,31 @@ export namespace taskpool {
         let internalTask = InternalTask.of(task);
         let cancelError = getTaskCanceledError(internalTask);
         ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
-            internalTask.currentDeferred?.rejectPromise(cancelError);
-            internalTask.currentDeferred = undefined;
-            while (internalTask.pendingDeferreds.length > 0) {
-                let deferred = internalTask.pendingDeferreds.shift();
-                deferred?.rejectPromise(cancelError);
+            internalTask.currentExecutionRecord?.markCanceled();
+            internalTask.currentExecutionRecord?.rejectPromise(cancelError);
+            internalTask.currentExecutionRecord = undefined;
+            while (internalTask.pendingExecutionRecords.length > 0) {
+                let executionRecord = internalTask.pendingExecutionRecords.shift();
+                executionRecord?.markCanceled();
+                executionRecord?.rejectPromise(cancelError);
             }
         });
     }
 
-    function takePendingDependencyTaskPriority(task: Task): Priority | undefined {
-        let priority: Priority | undefined = undefined;
+    function takePendingDependencyQueuedExecution(task: Task): QueuedExecution | undefined {
+        let queuedExecution: QueuedExecution | undefined = undefined;
         ConcurrencyHelpers.lockGuard(pendingDependencyTasksMutex, () => {
-            priority = pendingDependencyTasks.get(task);
-            if (priority != undefined) {
+            queuedExecution = pendingDependencyTasks.get(task);
+            if (queuedExecution != undefined) {
                 pendingDependencyTasks.delete(task);
             }
         });
-        return priority;
+        return queuedExecution;
     }
 
     function cleanupCanceledPendingDependencyTask(task: Task): boolean {
-        let priority = takePendingDependencyTaskPriority(task);
-        if (priority == undefined) {
+        let queuedExecution = takePendingDependencyQueuedExecution(task);
+        if (queuedExecution == undefined) {
             return false;
         }
         finishCanceledPendingDependencyTask(task);
@@ -3035,11 +3296,11 @@ export namespace taskpool {
         if (isGlobalTaskQueuesInitialized.get()) {
             return;
         }
-        globalTaskQueue = new Map<Priority, containers.stackless.LinkedConcurrentQueue<Task>>();
-        globalTaskQueue.set(Priority.HIGH, new containers.stackless.LinkedConcurrentQueue<Task>());
-        globalTaskQueue.set(Priority.MEDIUM, new containers.stackless.LinkedConcurrentQueue<Task>());
-        globalTaskQueue.set(Priority.LOW, new containers.stackless.LinkedConcurrentQueue<Task>());
-        globalTaskQueue.set(Priority.IDLE, new containers.stackless.LinkedConcurrentQueue<Task>());
+        globalTaskQueue = new Map<Priority, containers.stackless.LinkedConcurrentQueue<QueuedExecution>>();
+        globalTaskQueue.set(Priority.HIGH, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
+        globalTaskQueue.set(Priority.MEDIUM, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
+        globalTaskQueue.set(Priority.LOW, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
+        globalTaskQueue.set(Priority.IDLE, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
 
         isGlobalTaskQueuesInitialized.set(true);
     }
@@ -3057,13 +3318,13 @@ export namespace taskpool {
      * Uses condition variable to wait when no tasks are available to avoid busy waiting
      * @returns Task if task has no dependency, undefined - otherwise.
      */
-    function getTaskFromGlobalQueue(worker: GlobalQueueWorker): Task | undefined {
+    function getTaskFromGlobalQueue(worker: GlobalQueueWorker): QueuedExecution | undefined {
         // First try non-blocking priority selection
         // here get task with attempts is used to avoid missing tasks
-        let task = getTaskWithAttempts();
-        if (task != undefined) {
+        let queuedExecution = getTaskWithAttempts();
+        if (queuedExecution != undefined) {
             waitingTasksNum.fetchSub(1);
-            return task;
+            return queuedExecution;
         }
         
         // No tasks available, wait on condition variable to avoid CPU busy waiting
@@ -3073,11 +3334,11 @@ export namespace taskpool {
         }
         ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
             // Double-check after acquiring lock to avoid race condition
-            task = getTaskWithAttempts();
+            queuedExecution = getTaskWithAttempts();
         });
-        if (task != undefined) {
+        if (queuedExecution != undefined) {
             waitingTasksNum.fetchSub(1);
-            return task;
+            return queuedExecution;
         }
         if (!worker.isWorkerActive()) {
             return undefined;
@@ -3089,27 +3350,27 @@ export namespace taskpool {
         addToIdleWorkers(worker);
         ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
             // Re-check after publishing idle state to avoid missing a wake-up.
-            task = getTaskWithAttempts();
-            if (task === undefined && worker.isWorkerActive() && !worker.hasRetireRequested()) {
+            queuedExecution = getTaskWithAttempts();
+            if (queuedExecution === undefined && worker.isWorkerActive() && !worker.hasRetireRequested()) {
                 Coroutine.Schedule();
                 ConcurrencyHelpers.condVarWait(globalTaskCondVar, globalTaskQueuesMutex);
             }
         });
         // After waking up, try again (task might still be undefined due to spurious wakeup)
-        if (task != undefined) {
+        if (queuedExecution != undefined) {
             waitingTasksNum.fetchSub(1);
-            return task;
+            return queuedExecution;
         }
         worker.tryAdvanceRetireRequest();
         return undefined;
     }
 
-    function getTaskWithAttempts(): Task | undefined {
+    function getTaskWithAttempts(): QueuedExecution | undefined {
         let attempts = continuousExecutionCount;
         while (attempts > 0) {
-            let task = selectTaskByPriorityNonBlocking();
-            if (task != undefined) {
-                return task;
+            let queuedExecution = selectTaskByPriorityNonBlocking();
+            if (queuedExecution != undefined) {
+                return queuedExecution;
             }
             attempts--;
         }
@@ -3119,40 +3380,40 @@ export namespace taskpool {
     * @brief Non-blocking priority-based task selection using LinkedConcurrentQueue.poll()
      * Uses poll() instead of pop() to avoid blocking
      */
-    function selectTaskByPriorityNonBlocking(): Task | undefined {
-        let task: Task | undefined = undefined;
+    function selectTaskByPriorityNonBlocking(): QueuedExecution | undefined {
+        let queuedExecution: QueuedExecution | undefined = undefined;
         
         // HIGH priority tasks (with continuous execution limit)
         if (getGlobalTaskQueueSize(Priority.HIGH) > 0) {
             if (globalHighTaskExecuteCount.load() < continuousExecutionCount) {
                 globalHighTaskExecuteCount.fetchAdd(1);
-                task = getGlobalTaskImplNonBlocking(Priority.HIGH);
+                queuedExecution = getGlobalTaskImplNonBlocking(Priority.HIGH);
             } else {
                 globalHighTaskExecuteCount.store(0);
             }
         }
         
         // MEDIUM priority tasks (with continuous execution limit)
-        if (getGlobalTaskQueueSize(Priority.MEDIUM) > 0 && task === undefined) {
+        if (getGlobalTaskQueueSize(Priority.MEDIUM) > 0 && queuedExecution === undefined) {
             if (globalMediumTaskExecuteCount.load() < continuousExecutionCount) {
                 globalMediumTaskExecuteCount.fetchAdd(1);
-                task = getGlobalTaskImplNonBlocking(Priority.MEDIUM);
+                queuedExecution = getGlobalTaskImplNonBlocking(Priority.MEDIUM);
             } else {
                 globalMediumTaskExecuteCount.store(0);
             }
         }
         
         // LOW priority tasks
-        if (getGlobalTaskQueueSize(Priority.LOW) > 0 && task === undefined) {
-            task = getGlobalTaskImplNonBlocking(Priority.LOW);
+        if (getGlobalTaskQueueSize(Priority.LOW) > 0 && queuedExecution === undefined) {
+            queuedExecution = getGlobalTaskImplNonBlocking(Priority.LOW);
         }
         
         // IDLE priority tasks (non-blocking check)
-        if (getGlobalTaskQueueSize(Priority.IDLE) > 0 && task === undefined) {
-            task = getGlobalTaskImplNonBlocking(Priority.IDLE);
+        if (getGlobalTaskQueueSize(Priority.IDLE) > 0 && queuedExecution === undefined) {
+            queuedExecution = getGlobalTaskImplNonBlocking(Priority.IDLE);
         }
         
-        return task;
+        return queuedExecution;
     }
 
 
@@ -3161,15 +3422,16 @@ export namespace taskpool {
      * @param priority The priority queue to get task from
      * @returns Task if found and executable, undefined otherwise
      */
-    function moveToPendingDependencyQueue(task: Task, priority: Priority): boolean {
+    function moveToPendingDependencyQueue(queuedExecution: QueuedExecution): boolean {
         let moved = false;
+        const task = queuedExecution.task;
         let internalTask = InternalTask.of(task);
         ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
             if (internalTask.taskDependenciesCount == 0) {
                 return;
             }
             ConcurrencyHelpers.lockGuard(pendingDependencyTasksMutex, () => {
-                pendingDependencyTasks.set(task, priority);
+                pendingDependencyTasks.set(task, queuedExecution);
             });
             moved = true;
         });
@@ -3192,8 +3454,8 @@ export namespace taskpool {
             return false;
         }
 
-        let priority = takePendingDependencyTaskPriority(task);
-        if (priority == undefined) {
+        let queuedExecution = takePendingDependencyQueuedExecution(task);
+        if (queuedExecution == undefined) {
             return false;
         }
         if (internalTask.state.load() == InternalState.CANCELED.valueOf()) {
@@ -3201,7 +3463,7 @@ export namespace taskpool {
             return false;
         }
 
-        while (!globalTaskQueue.get(normalizeTaskQueuePriority(priority!))?.add(task)) {
+        while (!globalTaskQueue.get(normalizeTaskQueuePriority(queuedExecution.priority))?.add(queuedExecution)) {
             Coroutine.Schedule();
         }
         ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
@@ -3210,22 +3472,23 @@ export namespace taskpool {
         return true;
     }
 
-    function getGlobalTaskImplNonBlocking(priority: Priority): Task | undefined {
+    function getGlobalTaskImplNonBlocking(priority: Priority): QueuedExecution | undefined {
         let queue = globalTaskQueue.get(normalizeTaskQueuePriority(priority));
         if (queue == undefined || queue.size == 0) {
             return undefined;
         }
         
-        let task = queue.poll(); // Non-blocking poll instead of blocking pop
-        if (task == undefined) {
+        let queuedExecution = queue.poll(); // Non-blocking poll instead of blocking pop
+        if (queuedExecution == undefined) {
             return undefined;
         }
+        const task = queuedExecution.task;
         // Check if task has dependencies
         if (InternalTask.of(task!).taskDependenciesCount == 0) {
-            return task;
+            return queuedExecution;
         } else {
-            if (!moveToPendingDependencyQueue(task, priority)) {
-                return task;
+            if (!moveToPendingDependencyQueue(queuedExecution)) {
+                return queuedExecution;
             }
         }
         return undefined;
@@ -3291,8 +3554,27 @@ export namespace taskpool {
      * @param task submitting task
      * @param priority task execution priority
      */
+    function launchQueuedExecutionRecord(internalTask: InternalTask, executionRecord: ExecutionRecord): Promise<Any> {
+        launch(() => {
+            try {
+                internalTask.execute(undefined, executionRecord);
+            } catch (e) {
+                executionRecord.markTaskError(e as Error);
+                internalTask.finishExecutionRecord(executionRecord);
+            }
+        });
+        return executionRecord.promise;
+    }
+
+    function launchTaskExecution(task: Task): ExecutionRecord {
+        const internalTask = InternalTask.of(task);
+        const executionRecord = internalTask.createExecutionRecord();
+        launchQueuedExecutionRecord(internalTask, executionRecord);
+        return executionRecord;
+    }
+
     function launchImpl(task: Task, priority?: Priority): Promise<Any> {
-        return launch(() => InternalTask.of(task).execute);
+        return launchTaskExecution(task).promise;
     }
 
     native function isUsingLaunch(): boolean;
@@ -3301,6 +3583,8 @@ export namespace taskpool {
     native function currentWorkerHasPendingLocalJobs(): boolean;
     native function getTaskId(): int;
     native function setTaskId(taskid: int): void;
+    native function getSubmissionId(): int;
+    native function setSubmissionId(submissionId: int): void;
     native function setCurrentTaskpoolWorkerPriority(priority: int): void;
     native function collectAsyncStack(): long;
     native function getSubmitterStackId(): long;
@@ -3324,8 +3608,8 @@ export namespace taskpool {
     const taskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
     let isGlobalTaskQueuesInitialized: AtomicFlag = new AtomicFlag(false);
     let taskQueues: Map<Priority, Array<Task>>;
-    let globalTaskQueue: Map<Priority, containers.stackless.LinkedConcurrentQueue<Task>>;
-    let pendingDependencyTasks: Map<Task, Priority> = new Map<Task, Priority>();
+    let globalTaskQueue: Map<Priority, containers.stackless.LinkedConcurrentQueue<QueuedExecution>>;
+    let pendingDependencyTasks: Map<Task, QueuedExecution> = new Map<Task, QueuedExecution>();
 
     // New task queue management variables
     const globalTaskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
@@ -3370,22 +3654,3 @@ export namespace taskpool {
     const WORKERS_MINIMUM: int = 1; // 1: minimum thread num when idle.
 }
 
-function launchPromise(f: Function, ...args: FixedArray<Any>): Promise<Any> {
-    let resolver: (((v: Any | PromiseLike<Any>) => void) | undefined) = undefined;
-    let rejecter: (((error: Error) => void) | undefined) = undefined;
-    let p = new Promise<Any>((res, rej) => {
-        resolver = res
-        rejecter = rej;
-    })
-    let cb = () => {
-        try {
-            let v = f.unsafeCall(...args)
-            resolver!(v)
-        } catch (e) {
-            // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-            rejecter!(e as Error)
-        }
-    }
-    launch(cb)
-    return p;
-}

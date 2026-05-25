@@ -220,6 +220,8 @@ void EtsCoroutine::OnChildCoroutineCreated(Coroutine *child)
 {
     Coroutine::OnChildCoroutineCreated(child);
     EtsCoroutine::CastFromThread(child)->GetExecutionCtx()->SetTaskpoolTaskId(executionCtx_.GetTaskpoolTaskId());
+    EtsCoroutine::CastFromThread(child)->GetExecutionCtx()->SetTaskpoolSubmissionId(
+        executionCtx_.GetTaskpoolSubmissionId());
 }
 
 void EtsCoroutine::HandleUncaughtException()
