@@ -11,4 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Diagnostic-only flag — intentionally non-persistent and restricted to root/group
+# (cf. persist.*=0777 convention used for user-facing toggles in para/*.dac).
 ark.interop.trace.enable = root:root:0775
