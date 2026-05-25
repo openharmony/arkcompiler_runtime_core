@@ -25,7 +25,7 @@ cases:
           type NullableFunc<T> = Func<T>|null;
       use: |-
           let v: NullableFunc<Int> = (p: int): Int => { return new Int(p); };
-          let ok = v(1) == 1;
+          let ok = v!(1) == 1;
 
     - defs: |-
           type Func<T> = (p: int) => T;
@@ -152,7 +152,9 @@ cases:
 
     # interfaces
     - defs: |-
-          interface I<T> {}
+          interface I<T> {
+              ok: boolean
+          }
           class A<T> implements I<T> {
               public ok = true;
           }
@@ -162,7 +164,9 @@ cases:
           let ok: boolean = v.ok;
 
     - defs: |-
-          interface I<T, V> {}
+          interface I<T, V> {
+              ok: boolean
+          }
           class A<T> implements I<T, Int> {
               public ok = true;
           }
@@ -172,7 +176,9 @@ cases:
           let ok: boolean = v.ok;
 
     - defs: |-
-          interface I<out T, in V, U extends Error> {}
+          interface I<out T, in V, U extends Error> {
+              ok: boolean
+          }
           type Intf = I<Int, Long, NullPointerError>;
           class A implements Intf {
               public ok = true;
@@ -182,7 +188,9 @@ cases:
           let ok: boolean = v.ok;
 
     - defs: |-
-          interface I<T, U> {}
+          interface I<T, U> {
+              ok: boolean
+          }
           class A<T> implements I<T, Error> {
               public ok = true;
           }

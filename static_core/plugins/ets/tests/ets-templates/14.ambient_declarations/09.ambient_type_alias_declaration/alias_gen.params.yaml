@@ -1,0 +1,264 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # functions
+  - decl: |-
+      declare type Func<T> = (p: int) => T;
+    use: |-
+      let v: Func<Int> = (p: int): Int => { return new Int(p); };
+      let ok = v(1) == 1;
+
+  - decl: |-
+      declare type Func<T> = (p: int) => T;
+      declare type NullableFunc<T> = Func<T>|null;
+    use: |-
+      let v: NullableFunc<Int> = (p: int): Int => { return new Int(p); };
+      let ok = v!(1) == 1;
+
+  - decl: |-
+      declare type Func<T> = (p: int) => T;
+      declare type NullableFunc<T> = Func<T>|null;
+    use: |-
+      let v: NullableFunc<Int> = null;
+      let ok = v === null;
+
+  - decl: |-
+      declare type Foo<T> = (p: int) => T;
+      declare type Bar<T> = Foo<T>
+      declare type Baz<T> = Bar<T>
+    use: |-
+      let v: Baz<String> = (p: int): String => { return 'a' + p }
+      let ok = v(42) == 'a42'
+
+  - decl: |-
+      declare type Foo<V, T> = (p: V) => T;
+      declare type Bar<V> = Foo<Number, V>
+      declare type Baz = Bar<String>
+    use: |-
+      let v: Baz = (p: Number): String => { return 'a' + p }
+      let ok = v(42.0) == 'a42'
+
+  - decl: |-
+      declare type Func<T> = (p: int) => T;
+      declare type FF = Func<Int>[]
+    use: |-
+      let v: FF = [(p: int): Int => { return new Int(p); }]
+      let ok = v[0](1) == 1;
+
+  - decl: |-
+      declare type Func<T> = (p: int) => T;
+      declare type FF<T> = Func<T>[]
+    use: |-
+      let v: FF<Int> = [(p: int): Int => { return new Int(p); }]
+      let ok = v[0](1) == 1;
+
+  # classes
+  - decl: |-
+      class B<T> {
+          public ok = true;
+      }
+      declare type BetterB<T> = B<T>;
+    use: |-
+      let v: BetterB<Int> = new BetterB<Int>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class B<T> {
+          public ok = true;
+      }
+      declare type BetterB = B<Int>;
+    use: |-
+      let v: BetterB = new BetterB();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class B<T, V> {
+          public ok = true;
+      }
+      declare type BetterB<T> = B<T, Boolean>;
+    use: |-
+      let v: BetterB<Long> = new B<Long, Boolean>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class B<out T, in U, V extends Error> {
+          public ok = true;
+      }
+      declare type BetterB<T, U> = B<T, U, NullPointerError>;
+    use: |-
+      let v: BetterB<Int, Long> = new BetterB<Int, Long>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class Outer {
+          public ok = true;
+      }
+      declare type Shortcut = Outer
+    use: |-
+      let v: Shortcut = new Shortcut();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class B<T> {
+          public ok = true;
+      }
+      declare type BetterB<T> = B<T>;
+      declare type BestB<V> = BetterB<V>
+    use: |-
+      let v: BestB<Int> = new BestB<Int>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class B<T> {
+          public ok = true;
+      }
+      declare type BetterB = B<Boolean>;
+      declare type BestB = BetterB
+    use: |-
+      let v: BestB = new B<Boolean>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      class B<T> {
+          public ok = true;
+      }
+      declare type BetterB<T> = B<T>;
+      declare type BB = BetterB<Int>[]
+    use: |-
+      let v: BB = [new BetterB<Int>()]
+      let ok: boolean = v[0].ok;
+
+  - decl: |-
+      class B<T> {
+          public ok = true;
+      }
+      declare type BetterB<T> = B<T>;
+      declare type BB<T> = BetterB<T>[]
+    use: |-
+      let v: BB<Int> = [new BetterB<Int>()]
+      let ok: boolean = v[0].ok;
+
+  # interfaces
+  - decl: |-
+      interface I<T> {
+          ok: boolean
+      }
+      class A<T> implements I<T> {
+          public ok = true;
+      }
+      declare type Intf<T> = I<T>;
+    use: |-
+      let v: Intf<Error> = new A<Error>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      interface I<T, V> {
+          ok: boolean
+      }
+      class A<T> implements I<T, Int> {
+          public ok = true;
+      }
+      declare type Intf<T> = I<T, Int>;
+    use: |-
+      let v: Intf<Boolean> = new A<Boolean>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      interface I<out T, in V, U extends Error> {
+          ok: boolean
+      }
+      declare type Intf = I<Int, Long, NullPointerError>;
+      class A implements Intf {
+          public ok = true;
+      }
+    use: |-
+      let v: Intf = new A();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      interface I<T, U> {
+          ok: boolean
+      }
+      class A<T> implements I<T, Error> {
+          public ok = true;
+      }
+      declare type Intf<T, U> = I<T, U>
+      declare type Intf2<T> = Intf<Error, T>
+    use: |-
+      let v: Intf2<Error> = new A<Error>();
+      let ok: boolean = v.ok;
+
+  - decl: |-
+      interface I<T> {
+          ok: boolean
+      }
+      class A<T> implements I<T> {
+          public ok = true;
+      }
+      declare type Intf<T> = I<T>
+      declare type II = Intf<Error>[]
+    use: |-
+      let v: II = [new A<Error>()]
+      let ok: boolean = v[0].ok
+
+  - decl: |-
+      interface I<T> {
+          ok: boolean
+      }
+      class A<T> implements I<T> {
+          public ok = true;
+      }
+      declare type Intf<T> = I<T>
+      declare type II<T> = Intf<T>[]
+    use: |-
+      let v: II<Error> = [new A<Error>()]
+      let ok: boolean = v[0].ok
+
+  - decl: |-
+      declare type Func<I, T> = (p: I) => T
+    use: |-
+      let xx: Func<String, Number> = (p: String): Number => p.length
+      let ok = xx('Hello World') == 11;
+
+  - decl: |-
+      final class FinitaLaComedia {}
+      declare type Alias<T extends FinitaLaComedia = FinitaLaComedia> = T
+    use: |-
+      let xx = new Alias
+      let ok = xx instanceof FinitaLaComedia && xx instanceof Alias;
+
+  - decl: |-
+      declare type None = undefined
+      declare type Some<T> = T
+      declare type Maybe<T> = Some<T> | None
+    use: |-
+      let v0: Maybe<string> = undefined
+      let v1: Maybe<string> = 'Hello World'
+      let ok = v0 === undefined && v1 instanceof string && v1 == 'Hello World'
+
+  - decl: |-
+      declare type Lazy<T> = T | () => T
+    use: |-
+      let vl: Lazy<string> = 'Hello World'
+      vl = () => 'Call Me'
+      let ok = vl instanceof Function && vl() == 'Call Me'
+
+  - decl: |-
+      declare type TU<T1, T2> = T1 | T2
+      declare type EX<T1, T2> = Record<string, int | TU<T1, T2> | undefined>
+    use: |-
+      let tv: TU<string, boolean> = 'I am String'
+      let v: EX<string, boolean> = {'s1': 'String', 's2': true, 's3': 42, 's4': undefined, 's5': tv}
+      let ok = v['s1'] == 'String' && v['s2'] == true && v['s3'] == 42 && v['s4'] === undefined && v['s5'] == 'I am String';
