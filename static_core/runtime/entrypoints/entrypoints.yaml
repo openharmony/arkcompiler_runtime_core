@@ -327,6 +327,24 @@ entrypoints:
   - ark::ObjectHeader*
   - size_t
 
+- name: CmcReadViaBarrierIrtoc
+  entrypoint: CmcReadViaBarrierIrtoc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader**
+    - int32_t
+
+- name: CmcAtomicReadViaBarrierIrtoc
+  entrypoint: CmcAtomicReadViaBarrierIrtoc
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader**
+    - int32_t
+
 - name: Safepoint
   entrypoint: SafepointEntrypoint
   bridge: entrypoint

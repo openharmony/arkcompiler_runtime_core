@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,9 @@
 #include "runtime/mem/tlab.h"
 #include "libarkbase/utils/cframe_layout.h"
 #include "runtime/include/flattened_string_cache.h"
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "runtime/common_interfaces/heap/region_desc.h"
+#endif
 
 #include "plugins_defines.h"
 

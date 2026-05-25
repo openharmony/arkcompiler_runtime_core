@@ -59,13 +59,6 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
                 interpreterType = InterpreterType::IRTOC;
             }
 #endif
-#if defined(ARK_USE_COMMON_RUNTIME)
-            // CMC GC will be supported with LLVM interpreter with issue27125
-            if (interpreterType != InterpreterType::CPP) {
-                LOG(INFO, RUNTIME) << "--interpreter-type is downgraded into CPP in CMC GC if no setting";
-                interpreterType = InterpreterType::CPP;
-            }
-#endif  // ARK_USE_COMMON_RUNTIME
 #ifndef PANDA_WITH_IRTOC
             if (interpreterType == InterpreterType::IRTOC) {
                 interpreterType = InterpreterType::CPP;

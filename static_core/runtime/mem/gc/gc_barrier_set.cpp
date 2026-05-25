@@ -23,6 +23,7 @@
 #include "runtime/mem/rem_set.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include "runtime/mem/object_helpers-inl.h"
+#include "runtime/entrypoints/entrypoints.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/heap/region_desc.h"
@@ -359,6 +360,16 @@ void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe
     if constexpr (USE_READ_BARRIERS) {
         return ark::common_vm::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr),
                                                         ToVoidPtr(ToUintPtr(objAddr) + offset));
+    }
+    return nullptr;
+}
+
+void *GCCMCBarrierSet::AtomicReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
+                                         [[maybe_unused]] std::memory_order order)
+{
+    if constexpr (USE_READ_BARRIERS) {
+        return ark::common_vm::BaseRuntime::AtomicReadBarrier(const_cast<void *>(objAddr),
+                                                              ToVoidPtr(ToUintPtr(objAddr) + offset), order);
     }
     return nullptr;
 }

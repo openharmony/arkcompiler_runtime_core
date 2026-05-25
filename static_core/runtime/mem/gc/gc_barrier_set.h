@@ -109,6 +109,13 @@ public:
         return *reinterpret_cast<void **>((ToUintPtr(objAddr) + offset));
     }
 
+    virtual void *AtomicReadBarrier(const void *objAddr, size_t offset, std::memory_order order)
+    {
+        void *p = reinterpret_cast<void **>((ToUintPtr(objAddr) + offset));
+        // Atomic with parameterized order reason: memory order passed as argument
+        return reinterpret_cast<std::atomic<void *> *>(p)->load(order);
+    }
+
     virtual void *ReadBarrier(void **refAddr)
     {
         return *refAddr;
@@ -247,6 +254,7 @@ public:
     bool IsReadBarrierEnabled() override;
 
     void *ReadBarrier(const void *objAddr, size_t offset) override;
+    void *AtomicReadBarrier(const void *objAddr, size_t offset, std::memory_order order) override;
 
     void *ReadBarrier(void **refAddr) override;
 

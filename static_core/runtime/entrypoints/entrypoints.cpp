@@ -452,8 +452,7 @@ extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj,
 extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    return ark::common_vm::BaseRuntime::ReadBarrier(obj, field);
+    return Mutator::GetCurrent()->GetBarrierSet()->ReadBarrier(obj, offset);
 #else
     UNREACHABLE();
     return nullptr;  // No-op
@@ -463,8 +462,7 @@ extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[ma
 extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
-    return ark::common_vm::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
+    return Mutator::GetCurrent()->GetBarrierSet()->AtomicReadBarrier(obj, offset, std::memory_order_acquire);
 #else
     UNREACHABLE();
     return nullptr;  // No-op

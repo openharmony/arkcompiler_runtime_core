@@ -114,6 +114,11 @@ public:
         state.bascClass = address;
     }
 
+    static constexpr size_t GetForwardStateShift()
+    {
+        return BASECLASS_WIDTH + PADDING_WIDTH + LANGUAGE_WIDTH;
+    }
+
 private:
     // Little endian
     struct State {

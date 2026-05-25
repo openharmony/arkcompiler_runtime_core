@@ -22,6 +22,9 @@
 #include "runtime/include/mtmanaged_thread.h"
 #include "runtime/include/flattened_string_cache.h"
 #include "runtime/jit/profiling_data.h"
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "runtime/common_interfaces/heap/region_desc.h"
+#endif
 #include "plugins_defines.h"
 
 namespace ark {
