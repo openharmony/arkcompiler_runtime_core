@@ -13,12 +13,6 @@
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
 
-#33270
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_0.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_1.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_2.ets
-03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_any_3.ets
-
 #33271
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_1.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_3.ets
