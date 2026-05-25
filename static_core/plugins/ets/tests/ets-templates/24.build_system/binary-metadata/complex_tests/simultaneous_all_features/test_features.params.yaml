@@ -1,0 +1,220 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: "Verify generic GenBox with map transformation across packages"
+    imports: "import { testGenBox } from '@panda/app/app_main'"
+    call: "testGenBox()"
+    expected: "4"
+
+  - desc: "Verify readonly Config factory from cross-package types"
+    imports: "import { testConfig } from '@panda/app/app_main'"
+    call: "testConfig()"
+    expected: "42:cfg-42"
+
+  - desc: "Verify enum Color usage across three packages"
+    imports: "import { testColor } from '@panda/app/app_main'"
+    call: "testColor()"
+    expected: "green"
+
+  - desc: "Verify optional parameter default value"
+    imports: "import { testGreet } from '@panda/app/app_main'"
+    call: "testGreet()"
+    expected: "Hello World"
+
+  - desc: "Verify closure returned from lambda factory"
+    imports: "import { testAdder } from '@panda/app/app_main'"
+    call: "testAdder()"
+    expected: "8"
+
+  - desc: "Verify nullable fields with nullish coalescing operator"
+    imports: "import { testWrapper } from '@panda/app/app_main'"
+    call: "testWrapper()"
+    expected: "empty,found"
+
+  - desc: "Verify type inference from initializer expressions"
+    imports: "import { testInference } from '@panda/app/app_main'"
+    call: "testInference()"
+    expected: "inferred100"
+
+  - desc: "Verify abstract class and interface implementation across packages"
+    imports: "import { testCircleDescribe } from '@panda/app/app_main'"
+    call: "testCircleDescribe()"
+    expected: "Circle:circle-1"
+
+  - desc: "Verify generic class extension (NumBox extends GenBox)"
+    imports: "import { testNumBox } from '@panda/app/app_ext'"
+    call: "testNumBox()"
+    expected: "42"
+
+  - desc: "Verify nullish return with ?? operator across packages"
+    imports: "import { testNullish } from '@panda/app/app_ext'"
+    call: "testNullish()"
+    expected: "yes,fallback"
+
+  - desc: "Verify generic callback with type alias from dependency"
+    imports: "import { testCallback } from '@panda/app/app_ext'"
+    call: "testCallback()"
+    expected: "val=42"
+
+  - desc: "Verify getter and setter on generic GenBox class"
+    imports: "import { testGenBoxSetter } from '@panda/app/app_ext'"
+    call: "testGenBoxSetter()"
+    expected: "updated"
+
+  - desc: "Verify lambda function with Mapper type alias across packages"
+    imports: "import { testMapper } from '@panda/app/app_ext'"
+    call: "testMapper()"
+    expected: "21"
+
+  - desc: "Verify Promise creation and resolution across packages"
+    imports: "import { testPromise } from '@panda/app/app_ext'"
+    call: "testPromise()"
+    expected: "resolved-ok"
+    is_async: true
+
+  - desc: "Verify recursive type alias (linked list) across packages"
+    imports: "import { testRecursiveType } from '@panda/app/app_ext'"
+    call: "testRecursiveType()"
+    expected: "15"
+
+  - desc: "Verify ambient type alias declaration across packages"
+    imports: "import { testAmbientType } from '@panda/app/app_ext'"
+    call: "testAmbientType()"
+    expected: "198"
+
+  - desc: "Verify rest parameter function across packages"
+    imports: "import { testRestParam } from '@panda/app/app_ext'"
+    call: "testRestParam()"
+    expected: "10"
+
+  - desc: "Verify named reference (import alias) across packages"
+    imports: "import { testNamedRef } from '@panda/app/app_ext'"
+    call: "testNamedRef()"
+    expected: "7:cfg-7"
+
+  - desc: "Verify numeric widening (int to number) across packages"
+    imports: "import { testWidening } from '@panda/app/app_ext'"
+    call: "testWidening()"
+    expected: "1.75"
+
+  - desc: "Verify enum to int conversion across packages"
+    imports: "import { testEnumToInt } from '@panda/app/app_ext'"
+    call: "testEnumToInt()"
+    expected: "15"
+
+  - desc: "Verify nullable widening (string to string|null) across packages"
+    imports: "import { testNullableWidening } from '@panda/app/app_ext'"
+    call: "testNullableWidening()"
+    expected: "yes"
+
+  - desc: "Verify type alias interchangeability (int to Score) across packages"
+    imports: "import { testScoreAlias } from '@panda/app/app_ext'"
+    call: "testScoreAlias()"
+    expected: "30"
+
+  - desc: "Verify union type (string | number) across packages"
+    imports: "import { testUnion } from '@panda/app/app_ext'"
+    call: "testUnion()"
+    expected: "val:abc,val:42"
+
+  - desc: "Verify primitive-to-Object boxing across packages"
+    imports: "import { testBoxing } from '@panda/app/app_ext'"
+    call: "testBoxing()"
+    expected: "42,true"
+
+  - desc: "Verify void return type across packages"
+    imports: "import { testVoid } from '@panda/app/app_ext'"
+    call: "testVoid()"
+    expected: "2"
+
+  - desc: "Verify never return type (throw) across packages"
+    imports: "import { testNever } from '@panda/app/app_ext'"
+    call: "testNever()"
+    expected: "caught"
+
+  - desc: "Verify Partial<T> utility type across packages"
+    imports: "import { testPartial } from '@panda/app/app_ext'"
+    call: "testPartial()"
+    expected: "bug:none"
+
+  - desc: "Verify Required<T> utility type across packages"
+    imports: "import { testRequired } from '@panda/app/app_ext'"
+    call: "testRequired()"
+    expected: "feat:new"
+
+  - desc: "Verify Readonly<T> utility type across packages"
+    imports: "import { testReadonly } from '@panda/app/app_ext'"
+    call: "testReadonly()"
+    expected: "doc"
+
+  - desc: "Verify Record<K,V> utility type across packages"
+    imports: "import { testRecord } from '@panda/app/app_ext'"
+    call: "testRecord()"
+    expected: "alice"
+
+  - desc: "Verify NonNullable<T> utility type across packages"
+    imports: "import { testNonNullable } from '@panda/app/app_ext'"
+    call: "testNonNullable()"
+    expected: "hi,default"
+
+  - desc: "Verify ReturnType<T> utility type across packages"
+    imports: "import { testReturnType } from '@panda/app/app_ext'"
+    call: "testReturnType()"
+    expected: "produced"
+
+  - desc: "Verify Awaited<T> utility type across packages"
+    imports: "import { testAwaited } from '@panda/app/app_ext'"
+    call: "testAwaited()"
+    expected: "awaited:resolved"
+
+  - desc: "Verify Array<T> parameter across packages"
+    imports: "import { testArray } from '@panda/app/app_ext'"
+    call: "testArray()"
+    expected: "abc"
+
+  - desc: "Verify Tuple return type across packages"
+    imports: "import { testTuple } from '@panda/app/app_ext'"
+    call: "testTuple()"
+    expected: "score:42"
+
+  - desc: "Verify BigInt type across packages"
+    imports: "import { testBigInt } from '@panda/app/app_ext'"
+    call: "testBigInt()"
+    expected: "300"
+
+  - desc: "Verify Object as class field type across packages"
+    imports: "import { testObjectField } from '@panda/app/app_ext'"
+    call: "testObjectField()"
+    expected: "val=99"
+
+  - desc: "Verify interface default method across packages"
+    imports: "import { testDefaultMethod } from '@panda/app/app_main'"
+    call: "testDefaultMethod()"
+    expected: "Circle/circle-1"
+
+  - desc: "Verify static fields and methods across packages"
+    imports: "import { testStaticRegistry } from '@panda/app/app_main'"
+    call: "testStaticRegistry()"
+    expected: "2:alpha,beta"
+
+  - desc: "Verify shadowing across packages"
+    imports: "import { testShadowingVariable } from '@panda/app/app_ext'"
+    call: "testShadowingVariable()"
+    expected: "local-greet"
+
+  - desc: "Verify computed enum values across packages"
+    imports: "import { testComputedEnum } from '@panda/app/app_main'"
+    call: "testComputedEnum()"
+    expected: "20:high"

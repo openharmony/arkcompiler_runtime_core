@@ -418,6 +418,7 @@ class TestStandardFlow(ITestFlow, Test):
                 ('module', '--module', lambda: 0),
                 ('emit-declaration', '--emit-declaration', lambda: 0),
                 ('emit-metadata', '--emit-metadata', lambda: 0),
+                ('read-metadata', '--read-metadata', lambda: 0),
                 # Option simultaneous replaces the last arg - source file
                 ('simultaneous', '--simultaneous', lambda: len(flags) - 1)
             ]

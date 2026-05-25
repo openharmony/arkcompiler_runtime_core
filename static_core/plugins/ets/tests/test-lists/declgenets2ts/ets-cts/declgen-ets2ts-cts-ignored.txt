@@ -2523,6 +2523,12 @@
 24.build_system/metadata/base_tests/decl_rewrite/test_import.ets
 24.build_system/metadata/base_tests/generic_interface/test_import.ets
 24.build_system/metadata/base_tests/nullable_types/test_import.ets
+24.build_system/metadata/base_tests/cross_package_boxing/test_import.ets
+24.build_system/metadata/base_tests/cross_package_narrowing/test_import.ets
+24.build_system/metadata/base_tests/cross_package_widening/test_import.ets
+24.build_system/metadata/base_tests/export_all/test_import.ets
+24.build_system/metadata/base_tests/export_default/test_import.ets
+24.build_system/metadata/base_tests/namespace_import/test_import.ets
 
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL
