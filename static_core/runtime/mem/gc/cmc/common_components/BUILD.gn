@@ -29,6 +29,7 @@ crt_sources = [
   "heap/allocator/region_manager.cpp",
   "heap/allocator/regional_heap.cpp",
   "heap/allocator/treap.cpp",
+  "heap/collector/ark_mutator_container.cpp",
   "heap/collector/collector.cpp",
   "heap/collector/collector_resources.cpp",
   "heap/collector/copy_data_manager.cpp",
@@ -102,6 +103,8 @@ ohos_source_set("libarkcommon_runtime") {
     "..",
     "${runtime_core_root}/static_core",
     "${runtime_core_root}/static_core/runtime",
+    "$root_gen_dir/arkcompiler/runtime_core/static_core/runtime",
+    "$root_gen_dir/arkcompiler/runtime_core/static_core/runtime/generated",
   ]
 
   external_deps = [ "bounds_checking_function:libsec_shared" ]

@@ -100,6 +100,9 @@ public:
     // Sets saferegion state of this mutator.
     __attribute__((always_inline)) inline void SetInSaferegion(ark::MutatorStatus state);
 
+    // Sets saferegion state of this mutator with locks.
+    __attribute__((always_inline)) inline void UpdateStatus(ark::MutatorStatus state);
+
     // Returns true if this mutator is in saferegion, otherwise false.
     __attribute__((always_inline)) inline bool InSaferegion() const;
 

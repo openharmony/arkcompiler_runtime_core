@@ -21,6 +21,7 @@
 
 #include "common_components/common/page_allocator.h"
 #include "common_components/heap/collector/gc_request.h"
+#include "common_components/heap/collector/ark_mutator_container.h"
 #include "common_components/heap/heap.h"
 
 #include "libarkbase/utils/logger.h"
@@ -337,6 +338,7 @@ public:
     {
         while (true) {
             Type task = Dequeue();
+            ArkMutatorContainer mutatorContainer;
             if (!task.Execute(owner)) {
                 Finish();
                 break;
