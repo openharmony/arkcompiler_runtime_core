@@ -16,6 +16,315 @@ cases:
     # generic class
     - decl: |-
           class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+          }
+
+          let obj = ((): object => new A<string>("x"))()
+      use: |-
+          let str = obj as A<string>
+          arktest.assertEQ(str.fld, "x")
+
+          let num = obj as A<number>
+          arktest.expectThrow(
+              () => { num.fld },
+              (e) => e instanceof ClassCastError
+          )
+
+    - decl: |-
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+          }
+
+          let obj = ((): object => new A<string>("x"))()
+      use: |-
+          let str = obj as A<string>|undefined
+          arktest.assertEQ(str!.fld, "x")
+
+          let num = obj as A<number>|undefined
+          arktest.expectThrow(
+              () => { num!.fld },
+              (e) => e instanceof ClassCastError
+          )
+
+    # CCE on using method return
+    - decl: |-
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+              get(): T {
+                  return this.fld
+              }
+          }
+
+          let number_value: number
+      use: |-
+          let obj = ((): Object => new A<string>("x"))()
+          let cs = obj as A<string>
+          arktest.assertEQ(cs.get(), "x")
+
+          let cn = obj as A<number>
+          arktest.expectThrow(
+              () => { number_value = cn.get() },
+              (e) => e instanceof ClassCastError
+          )
+
+    - decl: |-
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+              get(): T {
+                  return this.fld
+              }
+          }
+
+          let number_value: number
+      use: |-
+          let obj = ((): Object => new A<string>("x"))()
+          let objString = obj as A<string>|undefined
+          arktest.assertEQ(objString!.get(), "x")
+
+          let objNumber = obj as A<number>|undefined
+          arktest.expectThrow(
+              () => { number_value = objNumber!.get() },
+              (e) => e instanceof ClassCastError
+          )
+
+    # CCE on accessing array element field
+    - decl: |-
+          class A<T> {
+              fld: Array<T>
+              constructor(...p: Array<T>) {
+                  this.fld = p
+              }
+              get(): Array<T> {
+                  return this.fld
+              }
+          }
+
+          let number_value: number
+      use: |-
+          let a = new A<string>("a", "b", "c")
+          let str = a.get() as Array<string>
+          arktest.assertEQ(str[1], "b")
+
+          let num = a.get() as Array<number> // cast succeeds
+          arktest.expectThrow(
+              () => { number_value = num[0] },
+              (e) => e instanceof ClassCastError
+          )
+
+    - decl: |-
+          class A<T> {
+              fld: Array<T>
+              constructor(...p: Array<T>) {
+                  this.fld = p
+              }
+              get(): Array<T> {
+                  return this.fld
+              }
+          }
+
+          let number_value: number
+      use: |-
+          let a = new A<string>("a", "b", "c")
+          let str = a.get() as Array<string>|undefined
+          arktest.assertEQ(str![1], "b")
+
+          let num = a.get() as Array<number>|undefined
+          arktest.expectThrow(
+              () => { number_value = num![0] },
+              (e) => e instanceof ClassCastError
+          )
+
+    # CCE on calling an interface method
+    - decl: |-
+          interface J {
+              m1(): string { return "J" }
+          }
+
+          interface I {
+              m1(): string { return "I" }
+          }
+
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+              get(): T {
+                  return this.fld
+              }
+          }
+
+          let obj = ((): Object => new A<I>({} as I))()
+      use: |-
+          let ai = obj as A<I>
+          arktest.assertEQ(ai.get().m1(), "I")
+
+          let aj = obj as A<J>
+          arktest.expectThrow(
+              () => { aj.get().m1() },
+              (e) => e instanceof ClassCastError
+          )
+
+    # CCE on nested generic
+    - decl: |-
+          class Outer<T> {
+              inner: Inner<T>
+              constructor(p: Inner<T>) {
+                  this.inner = p
+              }
+          }
+
+          class Inner<T> {
+              value: T
+              constructor(p: T) {
+                  this.value = p
+              }
+          }
+
+          let obj = ((): Object => new Outer<string>(new Inner<string>("x")))()
+      use: |-
+          let outerString = obj as Outer<string>
+          arktest.assertEQ(outerString.inner.value, "x")
+
+          let outerNumber = obj as Outer<number>
+          arktest.expectThrow(
+              () => { outerNumber.inner.value },
+              (e) => e instanceof ClassCastError
+          )
+
+    # CCE on accessing array generic element, nested generic
+    - decl: |-
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+          }
+
+          let arr: Array<A<string>> = [new A<string>('a'), new A<string>('b')]
+          let obj = ((): Object => arr)()
+          let number_value: number
+      use: |-
+          let str = obj as Array<A<string>>
+          arktest.assertEQ(str[0].fld, 'a')
+
+          let num = obj as Array<A<number>>
+          arktest.expectThrow(
+              () => { number_value = num[0].fld },
+              (e) => e instanceof ClassCastError
+          )
+
+    # CCE on accessing record value, nested generic
+    - decl: |-
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+          }
+
+          let rec: Record<string, A<string>> = { '1': new A<string>('a'), '2': new A<string>('b') }
+          let obj = ((): Object => rec)()
+          let number_value: number
+      use: |-
+          let recordString = obj as Record<string, A<string>>
+          arktest.assertEQ(recordString['1']!.fld, 'a')
+
+          let recordNumber = obj as Record<string, A<number>>
+          arktest.expectThrow(
+              () => { number_value = recordNumber['1']!.fld },
+              (e) => e instanceof ClassCastError
+          )
+
+    # interface field access
+    - decl: |-
+          interface Box2<T> {
+              value: T
+          }
+
+          class Box2Impl<T> implements Box2<T> {
+              value: T
+
+              constructor(p: T) {
+                  this.value = p
+              }
+          }
+
+          let number_value: number
+      use: |-
+          let obj: Object = ((): Object => new Box2Impl<string>("x"))()
+          let boxString = obj as Box2<string>
+          arktest.assertEQ(boxString.value, "x")
+
+          let boxNumber = obj as Box2<number>
+          arktest.expectThrow(
+              () => { number_value = boxNumber.value },
+              (e) => e instanceof ClassCastError
+          )
+
+    # interface method return value access
+    - decl: |-
+          interface Supplier<T> {
+              get(): T
+          }
+
+          class SupplierImpl implements Supplier<string> {
+              get(): string {
+                  return "x"
+              }
+          }
+
+          let number_value: number
+      use: |-
+          let obj: Object = ((): Object => new SupplierImpl())()
+          let supplierString = obj as Supplier<string>
+          arktest.assertEQ(supplierString.get(), "x")
+          let supplierNumber = obj as Supplier<number>
+          arktest.expectThrow(
+              () => { number_value = supplierNumber.get() },
+              (e) => e instanceof ClassCastError
+          )
+
+    # interface methods argument value access
+    - decl: |-
+          interface Consumer<T> {
+              accept(p: T): void
+          }
+
+          class ConsumerImpl implements Consumer<string> {
+              accept(p: string): void {
+                  int_value = p.length
+              }
+          }
+
+          let int_value: int
+      use: |-
+          let obj: Object = ((): Object => new ConsumerImpl())()
+          let consumerString = obj as Consumer<string>
+          consumerString.accept("xyz")
+          arktest.assertEQ(int_value, 3)
+
+          let consumerInt = obj as Consumer<int>
+          arktest.expectThrow(
+              () => { consumerInt.accept(42) },
+              (e) => e instanceof ClassCastError
+          )
+
+    # generic class, cast to type parameter
+    - decl: |-
+          class A<T> {
               cast(p: Object): T {
                   return p as T
               }
@@ -27,20 +336,13 @@ cases:
           arktest.assertTrue(x instanceof Error)
           arktest.assertEQ(x.message, 'abc')
 
-    - decl: |-
-          class A<T> {
-              cast(p: Object): T {
-                  return p as T
-              }
-          }
-      use: |-
-          let a = new A<Error>
+          let y = new A<Error>
           arktest.expectThrow(
-              () => { a.cast('abc') },
+              () => { y.cast('abc') },
               (e) => e instanceof ClassCastError
           )
 
-    # generic method
+    # generic method, cast to type parameter
     - decl: |-
           class A {
               cast<T>(p: Object): T {
@@ -54,16 +356,9 @@ cases:
           arktest.assertTrue(x instanceof Error)
           arktest.assertEQ(x.message, 'abc')
 
-    - decl: |-
-          class A {
-              cast<T>(p: Object): T {
-                  return p as T
-              }
-          }
-      use: |-
-          let a = new A
+          let y = new A
           arktest.expectThrow(
-              () => { a.cast<Error>('abc') },
+              () => { y.cast<Error>('abc') },
               (e) => e instanceof ClassCastError
           )
 
@@ -77,13 +372,10 @@ cases:
           x[0] = 'b'
           arktest.assertEQ(x[0], 'b')
 
-    - decl: |-
-          let obj: Array<string> = ['a']
-      use: |-
-          let x = ((): Object => obj)() as Array<number>
+          let y = ((): Object => obj)() as Array<number>
           let num: number
           arktest.expectThrow(
-              () => { num = x[0]  },
+              () => { num = y[0]  },
               (e) => e instanceof ClassCastError
           )
 
@@ -96,14 +388,10 @@ cases:
           x[0] = 'c'
           arktest.assertEQ(x[0], 'c')
 
-
-    - decl: |-
-          let obj: Array<'a'|'b'> = ['a']
-      use: |-
-          let x = ((): Object => obj)() as Array<number>
+          let y = ((): Object => obj)() as Array<number>
           let num: number
           arktest.expectThrow(
-              () => { num = x[0] },
+              () => { num = y[0] },
               (e) => e instanceof ClassCastError
           )
 
@@ -123,10 +411,16 @@ cases:
       decl: |-
           let obj: FixedArray<string> = ['a']
       use: |-
-          let x = ((): Object => obj)() as FixedArray<string>
-          arktest.assertEQ(x[0], 'a')
-          x[0] = 'b'
-          arktest.assertEQ(x[0], 'b')
+          let fixedArrayString = ((): Object => obj)() as FixedArray<string>
+          arktest.assertEQ(fixedArrayString[0], 'a')
+          fixedArrayString[0] = 'b'
+          arktest.assertEQ(fixedArrayString[0], 'b')
+
+          let fixedArrayNumber: FixedArray<number>
+          arktest.expectThrow(
+              () => { fixedArrayNumber = ((): Object => obj)() as FixedArray<number> },
+              (e) => e instanceof ClassCastError
+          )
 
     - tags: no-warmup
       decl: |-
@@ -136,15 +430,6 @@ cases:
           arktest.assertEQ(x[0], 'a')
           x[0] = 'c'
           arktest.assertEQ(x[0], 'c')
-
-    - decl: |-
-          let obj: FixedArray<string> = ['a']
-      use: |-
-          let fn: FixedArray<number>
-          arktest.expectThrow(
-              () => { fn = ((): Object => obj)() as FixedArray<number> },
-              (e) => e instanceof ClassCastError
-          )
 
     # union type
     - tags: no-warmup
@@ -156,15 +441,40 @@ cases:
           v[0] = 'b'
           arktest.assertEQ(v[0], 'b')
 
-    - decl: |-
-          let obj: Array<string>|Promise<number>|undefined = ['a']
-      use: |-
           let x = ((): Any => obj)() as Array<boolean>
           let bool: boolean
           arktest.expectThrow(
               () => { bool = x[0] },
               (e) => e instanceof ClassCastError
           )
+
+    # cast to union with undefined
+    - decl: |-
+          class A<T> {
+              fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+          }
+
+          let obj: Any = undefined
+      use: |-
+          let str = obj as A<string>|undefined
+          arktest.assertEQ(str, undefined)
+
+          let num = obj as A<number>|undefined
+          arktest.assertEQ(num, undefined)
+
+    - tags: no-warmup
+      decl: |-
+          let obj: string|undefined = undefined
+      use: |-
+          let str1 = obj as string|undefined
+          arktest.assertEQ(str1, undefined)
+
+          obj = "abc"
+          let str2 = obj as string|undefined
+          arktest.assertEQ(str2, "abc")
 
     # tuples
     - tags: no-warmup
@@ -232,18 +542,15 @@ cases:
           let x = ((): Any => obj)() as Color
           arktest.assertEQ(x, Color.Red)
 
-    - decl: |-
-          enum Color { Red, Green, Blue }
-          let obj: Color = Color.Red
-      use: |-
-          let x: int
+          let y: int
           arktest.expectThrow(
-              () => { x = ((): Any => obj)() as int },
+              () => { y = ((): Any => obj)() as int },
               (e) => e instanceof ClassCastError
           )
 
     # string literals
-    - decl: |-
+    - tags: no-warmup
+      decl: |-
           let obj: 'a'|'bb' = 'bb'
       use: |-
           let x = ((): Any => obj)() as string
@@ -251,28 +558,13 @@ cases:
           x = 'c'
           arktest.assertEQ(x, 'c')
 
-    - decl: |-
-          let obj: 'a'|'bb' = 'bb'
-      use: |-
-          let x: int
+          let y: int
           arktest.expectThrow(
-              () => { x = ((): Any => obj)() as int },
+              () => { y = ((): Any => obj)() as int },
               (e) => e instanceof ClassCastError
           )
 
     # functions
-    - decl: |-
-          type F1<T, U> = (p: T, q: U) => T
-
-          function foo1<T, U>(p: T, q: U): T {
-              return p
-          }
-
-          let obj: F1<string, number> = foo1<string, number>
-      use: |-
-          let x = ((): Any => obj)() as F1<string, number>
-          arktest.assertEQ(x('a', 1.0), 'a')
-
     - decl: |-
           type F1<T, U> = (p: T, q: U) => T
           type F2<T, U> = (p: T, q: U) => U
@@ -283,9 +575,12 @@ cases:
 
           let obj: F1<string, number> = foo1<string, number>
       use: |-
-          let x = ((): Any => obj)() as F2<string, number>
+          let x = ((): Any => obj)() as F1<string, number>
+          arktest.assertEQ(x('a', 1.0), 'a')
+
+          let y = ((): Any => obj)() as F2<string, number>
           arktest.expectThrow(
-              () => { x('a', 1.0) },
+              () => { y('a', 1.0) },
               (e) => e instanceof ClassCastError
           )
 

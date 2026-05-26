@@ -228,6 +228,10 @@
 15.semantic_rules/11.type_erasure/instanceof_tuple_not_preserved_0.ets
 15.semantic_rules/11.type_erasure/instanceof_tuple_not_preserved_1.ets
 
+#34907 No warning message on type unsafe casting
+15.semantic_rules/11.type_erasure/cast_erasure_warning_w_2.ets
+15.semantic_rules/11.type_erasure/cast_erasure_warning_w_3.ets
+
 #34861
 16.concurrency/04.parallel_execution/02.eaworker_api/eaworker_two_workers_smoke.ets
 
