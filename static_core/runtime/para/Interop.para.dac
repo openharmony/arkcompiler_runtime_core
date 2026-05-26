@@ -12,3 +12,4 @@
 # limitations under the License.
 
 persist.ark.interop.hybridstack.enable = root:root:0777
+persist.ark.interop.trace.enable = root:root:0777

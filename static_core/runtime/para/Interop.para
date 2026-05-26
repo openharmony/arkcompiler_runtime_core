@@ -12,3 +12,4 @@
 # limitations under the License.
 
 persist.ark.interop.hybridstack.enable = false
+persist.ark.interop.trace.enable = false
