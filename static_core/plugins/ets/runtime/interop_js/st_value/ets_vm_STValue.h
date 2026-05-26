@@ -251,12 +251,26 @@ ani_env *GetAniEnv()
         }                                                       \
     } while (0)
 
+// Thread-local cache for STValue class constructor to avoid repeated expensive class definition
+inline napi_value GetSTValueClassCached(napi_env env)
+{
+    napi_value stValueCtor {};
+    thread_local napi_ref stvalueCtorRef {};
+    if (UNLIKELY(stvalueCtorRef != nullptr)) {
+        NAPI_CHECK_FATAL(napi_get_reference_value(env, stvalueCtorRef, &stValueCtor));
+        return stValueCtor;
+    }
+    stValueCtor = GetSTValueClass(env);
+    NAPI_CHECK_FATAL(napi_create_reference(env, stValueCtor, 1, &stvalueCtorRef));
+    return stValueCtor;
+}
+
 template <typename T>
 napi_value CreateSTValueInstance(napi_env env, T &&arg)
 {
     INTEROP_TRACE();
     auto *data = new STValueData(env, std::forward<T>(arg));
-    napi_value stvalueCtor = GetSTValueClass(env);
+    napi_value stvalueCtor = GetSTValueClassCached(env);
     auto ptr = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
     napi_value ptrLow;
     napi_value ptrHigh;

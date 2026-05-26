@@ -386,11 +386,6 @@ napi_value CreateSTypeObject(napi_env env)
 napi_value GetSTValueClass(napi_env env)
 {
     napi_value stValueCtor {};
-    thread_local napi_ref stvalueCtorRef {};
-    if (stvalueCtorRef != nullptr) {
-        NAPI_CHECK_FATAL(napi_get_reference_value(env, stvalueCtorRef, &stValueCtor));
-        return stValueCtor;
-    }
 
     const std::array instanceProperties = {
         napi_property_descriptor {"unwrapToNumber", 0, STValueUnwrapToNumberImpl, 0, 0, 0, napi_default, 0},
@@ -475,8 +470,6 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"isSTMap", 0, STValueIsSTMapImpl, 0, 0, 0, napi_default, 0},
     };
     NAPI_CHECK_FATAL(napi_define_properties(env, stValueCtor, staticProperties.size(), staticProperties.data()));
-
-    NAPI_CHECK_FATAL(napi_create_reference(env, stValueCtor, 1, &stvalueCtorRef));
 
     return stValueCtor;
 }
