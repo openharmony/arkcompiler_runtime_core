@@ -1,0 +1,1120 @@
+{
+  "version": {
+    "major": "2",
+    "minor": "0"
+  },
+  "domains": [
+    {
+      "domain": "Runtime",
+      "types": [
+        {
+          "id": "ScriptId",
+          "type": "string"
+        },
+        {
+          "id": "RemoteObjectId",
+          "type": "string"
+        },
+        {
+          "id": "ExecutionContextId",
+          "type": "integer"
+        },
+        {
+          "id": "UnserializableValue",
+          "type": "string"
+        },
+        {
+          "id": "RemoteObject",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "type": "string",
+              "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "bigint"]
+            },
+            {
+              "name": "subtype",
+              "type": "string",
+              "optional": true,
+              "enum": ["array", "null"]
+            },
+            {
+              "name": "className",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "optional": true
+            },
+            {
+              "name": "unserializableValue",
+              "$ref": "UnserializableValue",
+              "optional": true
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "objectId",
+              "$ref": "RemoteObjectId",
+              "optional": true
+            },
+            {
+              "name": "preview",
+              "$ref": "ObjectPreview",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "ObjectPreview",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "type": "string",
+              "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "bigint"]
+            },
+            {
+              "name": "subtype",
+              "type": "string",
+              "optional": true,
+              "enum": ["array", "null"]
+            },
+            {
+              "name": "overflow",
+              "type": "boolean"
+            },
+            {
+              "name": "properties",
+              "type": "array",
+              "items": {
+                "$ref": "PropertyPreview"
+              }
+            }
+          ]
+        },
+        {
+          "id": "PropertyPreview",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "type": "string",
+              "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "bigint", "accessor"]
+            },
+            {
+              "name": "subtype",
+              "type": "string",
+              "optional": true,
+              "enum": ["array", "null"]
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "PropertyDescriptor",
+          "type": "object",
+          "properties": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "symbol",
+              "$ref": "RemoteObject",
+              "optional": true
+            },
+            {
+              "name": "value",
+              "$ref": "RemoteObject",
+              "optional": true
+            },
+            {
+              "name": "writable",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "get",
+              "$ref": "RemoteObject",
+              "optional": true
+            },
+            {
+              "name": "configurable",
+              "type": "boolean"
+            },
+            {
+              "name": "enumerable",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "id": "ExecutionContextDescription",
+          "type": "object",
+          "properties": [
+            {
+              "name": "id",
+              "$ref": "ExecutionContextId"
+            },
+            {
+              "name": "origin",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "uniqueId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "id": "ExceptionDetails",
+          "type": "object",
+          "properties": [
+            {
+              "name": "exceptionId",
+              "type": "integer"
+            },
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "lineNumber",
+              "type": "integer"
+            },
+            {
+              "name": "columnNumber",
+              "type": "integer"
+            },
+            {
+              "name": "scriptId",
+              "$ref": "ScriptId",
+              "optional": true
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "exception",
+              "$ref": "RemoteObject",
+              "optional": true
+            },
+            {
+              "name": "executionContextId",
+              "$ref": "ExecutionContextId",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "Timestamp",
+          "type": "number"
+        }
+      ],
+      "commands": [
+        {
+          "name": "enable"
+        },
+        {
+          "name": "getProperties",
+          "parameters": [
+            {
+              "name": "objectId",
+              "$ref": "RemoteObjectId"
+            },
+            {
+              "name": "generatePreview",
+              "type": "boolean",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "result",
+              "type": "array",
+              "items": {
+                "$ref": "PropertyDescriptor"
+              }
+            }
+          ]
+        },
+        {
+          "name": "runIfWaitingForDebugger"
+        },
+        {
+          "name": "evaluate",
+          "parameters": [
+            {
+              "name": "expression",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "result",
+              "$ref": "RemoteObject"
+            },
+            {
+              "name": "exceptionDetails",
+              "$ref": "ExceptionDetails",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "name": "consoleAPICalled",
+          "parameters": [
+            {
+              "name": "type",
+              "type": "string",
+              "enum": ["log", "debug", "info", "error", "warning"]
+            },
+            {
+              "name": "args",
+              "type": "array",
+              "items": {
+                "$ref": "RemoteObject"
+              }
+            },
+            {
+              "name": "executionContextId",
+              "$ref": "ExecutionContextId"
+            },
+            {
+              "name": "timestamp",
+              "$ref": "Timestamp"
+            }
+          ]
+        },
+        {
+          "name": "executionContextCreated",
+          "parameters": [
+            {
+              "name": "context",
+              "$ref": "ExecutionContextDescription"
+            }
+          ]
+        },
+        {
+          "name": "executionContextsCleared"
+        }
+      ]
+    },
+    {
+      "domain": "Debugger",
+      "dependencies": ["Runtime"],
+      "types": [
+        {
+          "id": "BreakpointId",
+          "type": "string"
+        },
+        {
+          "id": "CallFrameId",
+          "type": "string"
+        },
+        {
+          "id": "Location",
+          "type": "object",
+          "properties": [
+            {
+              "name": "scriptId",
+              "$ref": "Runtime.ScriptId"
+            },
+            {
+              "name": "lineNumber",
+              "type": "integer"
+            },
+            {
+              "name": "columnNumber",
+              "type": "integer",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "Scope",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "type": "string",
+              "enum": ["global", "local"]
+            },
+            {
+              "name": "object",
+              "$ref": "Runtime.RemoteObject"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "CallFrame",
+          "type": "object",
+          "properties": [
+            {
+              "name": "callFrameId",
+              "$ref": "CallFrameId"
+            },
+            {
+              "name": "functionName",
+              "type": "string"
+            },
+            {
+              "name": "location",
+              "$ref": "Location"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "scopeChain",
+              "type": "array",
+              "items": {
+                "$ref": "Scope"
+              }
+            },
+            {
+              "name": "this",
+              "$ref": "Runtime.RemoteObject"
+            },
+            {
+              "name": "canBeRestarted",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "id": "CustomUrlBreakpointLocation",
+          "type": "object",
+          "properties": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "lineNumber",
+              "type": "integer"
+            },
+            {
+              "name": "columnNumber",
+              "type": "integer"
+            },
+            {
+              "name": "scriptId",
+              "$ref": "Runtime.ScriptId"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "name": "continueToLocation",
+          "parameters": [
+            {
+              "name": "location",
+              "$ref": "Location"
+            }
+          ]
+        },
+        {
+          "name": "enable",
+          "returns": [
+            {
+              "name": "debuggerId",
+              "type": "integer"
+            },
+            {
+              "name": "protocols",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "name": "getPossibleBreakpoints",
+          "parameters": [
+            {
+              "name": "start",
+              "$ref": "Location"
+            },
+            {
+              "name": "end",
+              "$ref": "Location",
+              "optional": true
+            },
+            {
+              "name": "restrictToFunction",
+              "type": "boolean",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "locations",
+              "type": "array",
+              "items": {
+                "$ref": "Location"
+              }
+            }
+          ]
+        },
+        {
+          "name": "getScriptSource",
+          "parameters": [
+            {
+              "name": "scriptId",
+              "$ref": "Runtime.ScriptId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "scriptSource",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "pause"
+        },
+        {
+          "name": "removeBreakpoint",
+          "parameters": [
+            {
+              "name": "breakpointId",
+              "$ref": "BreakpointId"
+            }
+          ]
+        },
+        {
+          "name": "removeBreakpointsByUrl",
+          "parameters": [
+            {
+              "name": "url",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "restartFrame",
+          "parameters": [
+            {
+              "name": "callFrameId",
+              "$ref": "CallFrameId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "callFrames",
+              "type": "array",
+              "items": {
+                "$ref": "CallFrame"
+              }
+            }
+          ]
+        },
+        {
+          "name": "resume"
+        },
+        {
+          "name": "setBreakpoint",
+          "parameters": [
+            {
+              "name": "location",
+              "$ref": "Location"
+            },
+            {
+              "name": "condition",
+              "type": "string",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "breakpointId",
+              "$ref": "BreakpointId"
+            },
+            {
+              "name": "actualLocation",
+              "$ref": "Location"
+            }
+          ]
+        },
+        {
+          "name": "setBreakpointByUrl",
+          "parameters": [
+            {
+              "name": "lineNumber",
+              "type": "integer"
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "urlRegex",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "condition",
+              "type": "string",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "breakpointId",
+              "$ref": "BreakpointId"
+            },
+            {
+              "name": "locations",
+              "type": "array",
+              "items": {
+                "$ref": "Location"
+              }
+            }
+          ]
+        },
+        {
+          "name": "getPossibleAndSetBreakpointByUrl",
+          "parameters": [
+            {
+              "name": "locations",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": [
+                  {
+                    "name": "lineNumber",
+                    "type": "integer"
+                  },
+                  {
+                    "name": "url",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "name": "urlRegex",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "name": "condition",
+                    "type": "string",
+                    "optional": true
+                  }
+                ]
+              }
+            }
+          ],
+          "returns": [
+            {
+              "name": "locations",
+              "type": "array",
+              "items": {
+                "$ref": "CustomUrlBreakpointLocation"
+              }
+            }
+          ]
+        },
+        {
+          "name": "setBreakpointsActive",
+          "parameters": [
+            {
+              "name": "active",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "setSkipAllPauses",
+          "parameters": [
+            {
+              "name": "skip",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "setPauseOnExceptions",
+          "parameters": [
+            {
+              "name": "state",
+              "type": "string",
+              "enum": ["none", "caught", "uncaught", "all"]
+            }
+          ]
+        },
+        {
+          "name": "stepInto"
+        },
+        {
+          "name": "stepOut"
+        },
+        {
+          "name": "stepOver"
+        },
+        {
+          "name": "evaluateOnCallFrame",
+          "parameters": [
+            {
+              "name": "callFrameId",
+              "$ref": "CallFrameId"
+            },
+            {
+              "name": "expression",
+              "type": "string"
+            },
+            {
+              "name": "silent",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "returnByValue",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "generatePreview",
+              "type": "boolean",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "result",
+              "$ref": "Runtime.RemoteObject"
+            },
+            {
+              "name": "exceptionDetails",
+              "$ref": "Runtime.ExceptionDetails",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "callFunctionOn",
+          "parameters": [
+            {
+              "name": "callFrameId",
+              "$ref": "CallFrameId"
+            },
+            {
+              "name": "functionDeclaration",
+              "type": "string"
+            },
+            {
+              "name": "silent",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "returnByValue",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "generatePreview",
+              "type": "boolean",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "result",
+              "$ref": "Runtime.RemoteObject"
+            },
+            {
+              "name": "exceptionDetails",
+              "$ref": "Runtime.ExceptionDetails",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "setMixedDebugEnabled",
+          "parameters": [
+            {
+              "name": "mixedDebugEnabled",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "disable"
+        },
+        {
+          "name": "clientDisconnect"
+        },
+        {
+          "name": "setAsyncCallStackDepth"
+        },
+        {
+          "name": "setBlackboxPatterns"
+        },
+        {
+          "name": "smartStepInto"
+        },
+        {
+          "name": "dropFrame"
+        },
+        {
+          "name": "setNativeRange"
+        },
+        {
+          "name": "replyNativeCalling"
+        }
+      ],
+      "events": [
+        {
+          "name": "scriptParsed",
+          "parameters": [
+            {
+              "name": "executionContextId",
+              "$ref": "Runtime.ExecutionContextId"
+            },
+            {
+              "name": "scriptId",
+              "$ref": "Runtime.ScriptId"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "startLine",
+              "type": "integer"
+            },
+            {
+              "name": "startColumn",
+              "type": "integer"
+            },
+            {
+              "name": "endLine",
+              "type": "integer"
+            },
+            {
+              "name": "endColumn",
+              "type": "integer"
+            },
+            {
+              "name": "hash",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "paused",
+          "parameters": [
+            {
+              "name": "callFrames",
+              "type": "array",
+              "items": {
+                "$ref": "CallFrame"
+              }
+            },
+            {
+              "name": "hitBreakpoints",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "data",
+              "$ref": "Runtime.RemoteObject",
+              "optional": true
+            },
+            {
+              "name": "reason",
+              "type": "string",
+              "enum": ["exception", "Break on start", "other"]
+            }
+          ]
+        },
+        {
+          "name": "resumed"
+        }
+      ]
+    },
+    {
+      "domain": "Profiler",
+      "dependencies": ["Runtime", "Debugger"],
+      "types": [
+        {
+          "id": "ProfileCallFrame",
+          "type": "object",
+          "properties": [
+            {
+              "name": "functionName",
+              "type": "string"
+            },
+            {
+              "name": "moduleName",
+              "type": "string"
+            },
+            {
+              "name": "scriptId",
+              "$ref": "Runtime.ScriptId"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "lineNumber",
+              "type": "integer"
+            },
+            {
+              "name": "columnNumber",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "id": "ProfileNode",
+          "type": "object",
+          "properties": [
+            {
+              "name": "id",
+              "type": "integer"
+            },
+            {
+              "name": "callFrame",
+              "$ref": "ProfileCallFrame"
+            },
+            {
+              "name": "hitCount",
+              "type": "integer"
+            },
+            {
+              "name": "children",
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ProfileEntry",
+          "type": "object",
+          "properties": [
+            {
+              "name": "tid",
+              "type": "integer"
+            },
+            {
+              "name": "startTime",
+              "type": "integer"
+            },
+            {
+              "name": "endTime",
+              "type": "integer"
+            },
+            {
+              "name": "gcTime",
+              "type": "integer"
+            },
+            {
+              "name": "cInterpreterTime",
+              "type": "integer"
+            },
+            {
+              "name": "asmInterpreterTime",
+              "type": "integer"
+            },
+            {
+              "name": "aotTime",
+              "type": "integer"
+            },
+            {
+              "name": "builtinTime",
+              "type": "integer"
+            },
+            {
+              "name": "napiTime",
+              "type": "integer"
+            },
+            {
+              "name": "arkuiEngineTime",
+              "type": "integer"
+            },
+            {
+              "name": "runtimeTime",
+              "type": "integer"
+            },
+            {
+              "name": "otherTime",
+              "type": "integer"
+            },
+            {
+              "name": "nodes",
+              "type": "array",
+              "items": {
+                "$ref": "ProfileNode"
+              }
+            },
+            {
+              "name": "samples",
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "name": "timeDeltas",
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "name": "enable"
+        },
+        {
+          "name": "disable"
+        },
+        {
+          "name": "setSamplingInterval",
+          "parameters": [
+            {
+              "name": "interval",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "name": "start"
+        },
+        {
+          "name": "stop",
+          "returns": [
+            {
+              "name": "profile",
+              "type": "array",
+              "items": {
+                "$ref": "ProfileEntry"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Target",
+      "types": [
+        {
+          "id": "TargetInfo",
+          "type": "object",
+          "properties": [
+            {
+              "name": "targetId",
+              "type": "string"
+            },
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "attached",
+              "type": "boolean"
+            },
+            {
+              "name": "canAccessOpener",
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "name": "attachToTarget",
+          "parameters": [
+            {
+              "name": "targetId",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "name": "attachedToTarget",
+          "parameters": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            },
+            {
+              "name": "targetInfo",
+              "$ref": "TargetInfo"
+            },
+            {
+              "name": "waitingForDebugger",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "detachedFromTarget",
+          "parameters": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

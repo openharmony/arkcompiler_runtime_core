@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -781,7 +781,7 @@ TEST_F(ServerTest, OnCallDebuggerCallFunctionOn)
 
 TEST_F(ServerTest, OnCallDebuggerGetPossibleAndSetBreakpointByUrl)
 {
-    auto scriptId = 0;
+    std::string scriptId = "0";
     size_t start1 = 5;
     size_t start2 = 6;
 
@@ -817,14 +817,14 @@ TEST_F(ServerTest, OnCallDebuggerGetPossibleAndSetBreakpointByUrl)
             GetResult(std::move(res), result);
 
             std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
-            locations.push_back(testing::Pointee(JsonProperties(JsonProperty<JsonObject::NumT> {"scriptId", scriptId},
-                                                                JsonProperty<JsonObject::NumT> {"lineNumber", start1},
-                                                                JsonProperty<JsonObject::NumT> {"columnNumber", 0},
-                                                                JsonProperty<JsonObject::StringT> {"id", "6"})));
-            locations.push_back(testing::Pointee(JsonProperties(JsonProperty<JsonObject::NumT> {"scriptId", scriptId},
-                                                                JsonProperty<JsonObject::NumT> {"lineNumber", start2},
-                                                                JsonProperty<JsonObject::NumT> {"columnNumber", 0},
-                                                                JsonProperty<JsonObject::StringT> {"id", "7"})));
+            locations.push_back(testing::Pointee(JsonProperties(
+                JsonProperty<JsonObject::StringT> {"scriptId", scriptId},
+                JsonProperty<JsonObject::NumT> {"lineNumber", start1},
+                JsonProperty<JsonObject::NumT> {"columnNumber", 0}, JsonProperty<JsonObject::StringT> {"id", "6"})));
+            locations.push_back(testing::Pointee(JsonProperties(
+                JsonProperty<JsonObject::StringT> {"scriptId", scriptId},
+                JsonProperty<JsonObject::NumT> {"lineNumber", start2},
+                JsonProperty<JsonObject::NumT> {"columnNumber", 0}, JsonProperty<JsonObject::StringT> {"id", "7"})));
             auto expected =
                 JsonProperties(JsonProperty<JsonObject::ArrayT> {"locations", JsonElementsAreArray(locations)});
 

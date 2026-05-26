@@ -4,7 +4,7 @@ This file provides guidance for AI agents when working with code in the static c
 
 ## Project Overview
 
-This is the **Static Core Runtime Tooling Module** of the Ark Compiler, part of the OpenHarmony ecosystem. It implements runtime debugging, profiling, and coverage analysis tools for **statically-typed ArkTS** (ArkTS-Sta) code running on the ARK virtual machine.
+This is the **Static Core Runtime Tooling Module** of the Ark Compiler, part of the OpenHarmony ecosystem. It implements runtime debugging, profiling, and coverage analysis plugin-agnostic tools for the code running on the ARK virtual machine.
 
 ## Directory Structure
 
@@ -24,13 +24,17 @@ tooling/
 
 **Inspector System**
 - WebSocket-based debugger using JSON-RPC protocol
+- Supported inspector protocol definition: `runtime/tooling/inspector/inspector_protocol.json`
 - Breakpoint management: conditional breakpoints, URL-based breakpoints
 - Expression evaluation engine, thread state debugging, and object inspection
+- Implementation documentation: `docs/inspector.md`
 
 **Sampler System**
 - Dual-thread architecture: SamplerThread (signal delivery) + ListenerThread (file I/O)
 - POSIX SIGPROF-based sampling profiler
 - Outputs ASPT (Ark Sampling Profiler Trace) binary format
+- Implementation documentation: `runtime/tooling/sampler/docs/sampler.md`
+- User guide: `runtime/tooling/sampler/docs/cpu_profiler.md`
 
 **Coverage System**
 - Python-based code coverage analysis
@@ -72,5 +76,5 @@ For building outside an OHOS local copy, use the CMake-based standalone build fr
 ```bash
 # Configure and build from static_core root
 cmake -B out -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/host_clang_default.cmake -GNinja .
-cmake --build out --target arkruntime
+cmake --build out --target panda_bins arkinspector
 ```
