@@ -31,11 +31,11 @@ from docutils.parsers.rst import directives
 
 # -- Project information -----------------------------------------------------
 
-project = u'{p} Specification 7.0.0'.format(p=sphinx_common_conf.project)
+project = u'{p} Specification'.format(p=sphinx_common_conf.project)
 author = sphinx_common_conf.author
 copyright = sphinx_common_conf.copyright
 version = '7.0.0'
-release = '7.0.0 iteration 1'
+release = '7.0.1'
 
 rst_epilog = sphinx_common_conf.rst_epilog
 
@@ -84,6 +84,10 @@ htmlhelp_basename = 'Documentationdoc'
 latex_elements = {
     'passoptionstopackages': r'\PassOptionsToPackage{bookmarksdepth=2}{hyperref}',
 }
+
+latex_documents = [
+    (master_doc, 'ArkTS-Sta_Specification_en.tex', project, author, 'manual'),
+]
 
 # -- Directive options extension ---------------------------------------------
 

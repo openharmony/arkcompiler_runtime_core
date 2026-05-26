@@ -10,46 +10,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Contributors:
 
-Contributors
-############
+.. _RT Fully Qualified Name:
 
-Language design lead:
+全限定名
+********************************************************************************
 
-- Nedoria Aleksei
-
-Contributors:
-
-- Bronnikov Georgy
-- Cherkashin Vyacheslav
-- Gavrin Evgeny
-- Grebenschikov Konstantin
-- Fang Lou
-- Huo Qingyi
-- Kanatov Alexey
-- Nedoria Aleksei
-- Olshevsky Vladimir
-- Pavlyuk Alexander
-- Pei Jiajun
-- Polyakov Alexander
-- Pukhov Vsevolod
-- Qiu Yu
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Wan Mingxiang
-- Wu Hongfei
-- Xian Yuqiang
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
-
-.. raw:: pdf
-
-   PageBreak
+*全限定名* 用于在运行时和二进制文件中为不同类型和实体创建唯一标识符。某个实体的 *全限定名* 由构建系统根据其 *非限定名* 生成，不同构建系统的具体规则可能不同。不过，对于某些预定义类型，|LANG| 运行时要求使用确定的 *全限定名*。相关情况会在 :ref:`二进制文件中的语言表示 <RT Language Representation in Binary File>` 一节中说明。

@@ -10,16 +10,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+
 .. _Contributors:
 
-Contributors
-############
+贡献者
+################################################################################
 
-Language design lead:
+语言设计负责人：
 
 - Nedoria Aleksei
 
-Contributors:
+贡献者：
 
 - Bronnikov Georgy
 - Cherkashin Vyacheslav
@@ -45,10 +46,9 @@ Contributors:
 - Xian Yuqiang
 - Zouev Evgeniy
 
-Technical writer:
+技术写作者：
 
 - Baranov Dmitry
-
 
 .. raw:: pdf
 
