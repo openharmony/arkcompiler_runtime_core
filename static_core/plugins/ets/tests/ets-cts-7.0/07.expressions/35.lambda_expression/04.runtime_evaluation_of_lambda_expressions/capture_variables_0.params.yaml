@@ -15,16 +15,27 @@
 cases:
   - decl: |-
       function foo() {
-      let y: int = 1
-        let x = () => { return y + 1 } // 'y' is *captured*.
+        let y: int = 1
+        let x = () => { return y + 1 } // 'y' is *captured* from foo local.
         arktest.assertEQ(x(), 2, 'y capture failed')
       }
     use: |-
       foo()
 
   - decl: |-
-      function foo() {
       let y: int = 1
+      function foo() {        
+        let x = () => { return y + 1 } // 'y' is *captured* from global scope.
+        arktest.assertEQ(x(), 2, 'y capture failed')
+      }
+    use: |-
+      y = 1
+      foo()
+      
+
+  - decl: |-
+      function foo() {
+        let y: int = 1
         let x = () => { y++ } // 'y' is *captured*.
         arktest.assertEQ(y, 1, 'y before capture failed')
         x()

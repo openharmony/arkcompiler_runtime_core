@@ -1,0 +1,67 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Cases for variable captures
+cases:
+
+  - outer: "c'a'"
+    expression: outer = c'b'
+    expected: "c'b'"
+
+  - outer: "true"
+    expression: outer = !outer
+    expected: "false"
+
+  - outer: 1
+    expression: outer++
+    expected: 2
+
+  - outer: 1.0f
+    expression: outer = 3.14f
+    expected: 3.14f
+
+  - outer: 1.0
+    expression: outer = 3.14
+    expected: 3.14
+
+  - outer: "'1'"
+    expression: outer = outer + outer
+    expected: "'11'"
+
+  - outer: ByteEnum.A
+    expression: outer = ByteEnum.B
+    expected: ByteEnum.B
+
+  - outer: Color.Red
+    expression: outer = Color.Green
+    expected: Color.Green
+
+  - outer: 0x8000_0000
+    expression: outer = outer + 256
+    expected: 0x8000_0100
+
+  - outer: "bv"
+    expression: outer++
+    expected: 13
+
+  - outer: "sv"
+    expression: outer++
+    expected: 1235
+
+  - outer: "lv"
+    expression: outer = outer + 10
+    expected: 12345678910
+
+  - outer: "ln"
+    expression: outer = 3.14
+    expected: 3.14

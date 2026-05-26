@@ -1,0 +1,130 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Cases
+cases:
+  # UnBoxed inputs to unboxed
+
+  - { typeIn: byte, typeOut: byte }
+  - { typeIn: byte, typeOut: short }
+  - { typeIn: byte, typeOut: int }
+  - { typeIn: byte, typeOut: long }
+  - { typeIn: byte, typeOut: float }
+  - { typeIn: byte, typeOut: double }
+
+  - { typeIn: short, typeOut: short }
+  - { typeIn: short, typeOut: int }
+  - { typeIn: short, typeOut: long }
+  - { typeIn: short, typeOut: float }
+  - { typeIn: short, typeOut: double }
+
+  - { typeIn: int, typeOut: int }
+  - { typeIn: int, typeOut: long }
+  - { typeIn: int, typeOut: float }
+  - { typeIn: int, typeOut: double }
+
+  - { typeIn: long, typeOut: long }
+  - { typeIn: long, typeOut: float }
+  - { typeIn: long, typeOut: double }
+
+  - { typeIn: float, typeOut: float }
+  - { typeIn: float, typeOut: double }
+
+  - { typeIn: double, typeOut: double }
+
+  # UnBoxed inputs to Boxed
+
+  - { typeIn: byte, typeOut: Byte }
+  - { typeIn: byte, typeOut: Short }
+  - { typeIn: byte, typeOut: Int }
+  - { typeIn: byte, typeOut: Long }
+  - { typeIn: byte, typeOut: Float }
+  - { typeIn: byte, typeOut: Double }
+
+  - { typeIn: short, typeOut: Short }
+  - { typeIn: short, typeOut: Int }
+  - { typeIn: short, typeOut: Long }
+  - { typeIn: short, typeOut: Float }
+  - { typeIn: short, typeOut: Double }
+
+  - { typeIn: int, typeOut: Int }
+  - { typeIn: int, typeOut: Long }
+  - { typeIn: int, typeOut: Float }
+  - { typeIn: int, typeOut: Double }
+
+  - { typeIn: long, typeOut: Long }
+  - { typeIn: long, typeOut: Float }
+  - { typeIn: long, typeOut: Double }
+
+  - { typeIn: float, typeOut: Float }
+  - { typeIn: float, typeOut: Double }
+
+  - { typeIn: double, typeOut: Double }
+
+# Boxed inputs to unboxed
+
+  - { typeIn: Byte, typeOut: byte }
+  - { typeIn: Byte, typeOut: short }
+  - { typeIn: Byte, typeOut: int }
+  - { typeIn: Byte, typeOut: long }
+  - { typeIn: Byte, typeOut: float }
+  - { typeIn: Byte, typeOut: double }
+
+  - { typeIn: Short, typeOut: short }
+  - { typeIn: Short, typeOut: int }
+  - { typeIn: Short, typeOut: long }
+  - { typeIn: Short, typeOut: float }
+  - { typeIn: Short, typeOut: double }
+
+  - { typeIn: Int, typeOut: int }
+  - { typeIn: Int, typeOut: long }
+  - { typeIn: Int, typeOut: float }
+  - { typeIn: Int, typeOut: double }
+
+  - { typeIn: Long, typeOut: long }
+  - { typeIn: Long, typeOut: float }
+  - { typeIn: Long, typeOut: double }
+
+  - { typeIn: Float, typeOut: float }
+  - { typeIn: Float, typeOut: double }
+
+  - { typeIn: Double, typeOut: double }
+
+  # Boxed inputs to Boxed
+
+  - { typeIn: Byte, typeOut: Byte }
+  - { typeIn: Byte, typeOut: Short }
+  - { typeIn: Byte, typeOut: Int }
+  - { typeIn: Byte, typeOut: Long }
+  - { typeIn: Byte, typeOut: Float }
+  - { typeIn: Byte, typeOut: Double }
+
+  - { typeIn: Short, typeOut: Short }
+  - { typeIn: Short, typeOut: Int }
+  - { typeIn: Short, typeOut: Long }
+  - { typeIn: Short, typeOut: Float }
+  - { typeIn: Short, typeOut: Double }
+
+  - { typeIn: Int, typeOut: Int }
+  - { typeIn: Int, typeOut: Long }
+  - { typeIn: Int, typeOut: Float }
+  - { typeIn: Int, typeOut: Double }
+
+  - { typeIn: Long, typeOut: Long }
+  - { typeIn: Long, typeOut: Float }
+  - { typeIn: Long, typeOut: Double }
+
+  - { typeIn: Float, typeOut: Float }
+  - { typeIn: Float, typeOut: Double }
+
+  - { typeIn: Double, typeOut: Double }
