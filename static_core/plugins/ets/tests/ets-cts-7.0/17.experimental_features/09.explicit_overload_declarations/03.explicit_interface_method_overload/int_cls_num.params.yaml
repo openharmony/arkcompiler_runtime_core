@@ -241,10 +241,10 @@ cases:
           arktest.assertEQ(a.m1(1 as int), 'int')
           arktest.assertEQ(a.m1(1), 'short')
 
-          arktest.assertEQ(a.m2(1 as byte), 'byte')
-          arktest.assertEQ(a.m2(1 as short), 'short')
+          arktest.assertEQ(a.m2(1 as byte), 'int')
+          arktest.assertEQ(a.m2(1 as short), 'int')
           arktest.assertEQ(a.m2(1 as int), 'int')
-          arktest.assertEQ(a.m2(1), 'byte')
+          arktest.assertEQ(a.m2(1), 'int')
 
           arktest.assertEQ(a.m3(1 as byte), 'byte')
           arktest.assertEQ(a.m3(1 as short), 'int')

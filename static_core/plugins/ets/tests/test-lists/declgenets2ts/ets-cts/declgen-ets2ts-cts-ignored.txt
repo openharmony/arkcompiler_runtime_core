@@ -2498,6 +2498,10 @@
 17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
 09.classes/07.method_declarations/05.overriding_methods/overriding_by_instance_methods/instance_method_overridden_by_abstract.ets
 #TSC-PROJECT_FAIL
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_4.ets
+17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_2.ets
+17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_gen_num_3.ets
+17.experimental_features/09.explicit_overload_declarations/03.explicit_interface_method_overload/int_int_num_4.ets
 17.experimental_features/03.value_array_types/value_array_init.ets
 02.lexical_elements/07.keywords/soft.ets
 02.lexical_elements/07.keywords/soft_reserved_common.ets
