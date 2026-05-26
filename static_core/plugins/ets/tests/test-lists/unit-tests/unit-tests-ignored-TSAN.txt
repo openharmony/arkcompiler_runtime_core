@@ -10,7 +10,7 @@ ets-common-tests/taskpool/asyncrunner_tasks.ets
 #34830
 ets-common-tests/taskpool/common_tasks.ets
 
-#33795
+#34893
 ets-common-tests/taskpool/common_tasks_new.ets
 
 #32560

@@ -6,10 +6,6 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
 #34658
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-operands-negative-number-2.ets
-#34723
-ets_func_tests/spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.7.Return_Type/issue_16080_05.ets
-#34792
-ets-func-tests-templates/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0029.ets
 #33832
 ets_func_tests/std/concurrency/AsyncRWLockTest.ets
 #33585
@@ -18,17 +14,12 @@ ets_func_tests/std/concurrency/AsyncCondVarTest.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 #32636
 ets_func_tests/std/core/dateformat/IntlDateFormatOptionsYearNumericTest.ets
-#34744
-ets_func_tests/std/core/ConsoleAssertTest.ets
 #34745
 ets_func_tests/std/core/get_hash.ets
 #34681
 ets_func_tests/std/core/IntlLocaleThreadSafetyTest.ets
 #34646
 std/core/std_core_typedarrays_methods__Float64Array_001.ets
-
-#33696
-std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets
 
 #34658
 ets_func_tests/algorithms/PrimesTest.ets
@@ -67,6 +58,7 @@ ets_func_tests/spec/03.types/References_Types/unions/union_cast_n_02.ets
 ets_func_tests/spec/03.types/References_Types/unions/union_compare_01_02.ets
 ets_func_tests/spec/03.types/References_Types/unions/union_compare_07.ets
 ets_func_tests/spec/03.types/References_Types/unions/union_literal_02.ets
+ets_func_tests/spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.7.Return_Type/issue_16080_05.ets
 ets_func_tests/spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0001.ets
 ets_func_tests/spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_03.ets
 ets_func_tests/spec/05.Generics/issue15099_3.ets
@@ -120,6 +112,7 @@ ets_func_tests/std/containers/blocking_queue.ets
 ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
 ets_func_tests/std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 ets_func_tests/std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_get_test.ets
+ets_func_tests/std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets
 ets_func_tests/std/containers/concurrent_hash_map/ConcurrentHashMap_HasTest.ets
 ets_func_tests/std/containers/concurrent_hash_map/ConcurrentHashMap_iteratorTest.ets
 ets_func_tests/std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Set.ets
@@ -134,6 +127,7 @@ ets_func_tests/std/core/BigIntToLocaleStringTest.ets
 ets_func_tests/std/core/BigInt64Test.ets
 ets_func_tests/std/core/ClassTypeAllTests.ets
 ets_func_tests/std/core/CollatorTest.ets
+ets_func_tests/std/core/ConsoleAssertTest.ets
 ets_func_tests/std/core/ConsoleFormatSpecTest.ets
 ets_func_tests/std/core/ConsoleTableTest.ets
 ets_func_tests/std/core/DataViewBigIntTest.ets
@@ -164,6 +158,7 @@ ets_func_tests/std/core/sparsearray/SparseArrayTest.ets
 ets_func_tests/std/core/StringGetTest.ets
 ets_func_tests/std/core/tolocalestr/BigIntLocaleStringTest.ets
 ets_func_tests/std/core/TypeClassTypeTest.ets
+ets-func-tests-templates/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0029.ets
 stdlib-templates/spec/expressions/compound_assignment_01_byte_mult_float.ets
 stdlib-templates/spec/expressions/compound_assignment_01_short_mult_int.ets
 stdlib-templates/spec/expressions/compound_assignment_02_only_main_int_mult_byte.ets
@@ -262,7 +257,6 @@ stdlib-templates/std/core/std_core_typedarrays_function2__Int8Array.ets
 stdlib-templates/std/core/std_core_typedarrays_methods__BigInt64Array.ets
 stdlib-templates/std/core/std_core_typedarrays_methods__Float32Array.ets
 stdlib-templates/std/core/std_core_typedarrays_methods__Float64Array.ets
-stdlib-templates/std/core/std_core_typedarrays_methods__Float64Array_001.ets
 stdlib-templates/std/core/std_core_typedarrays_methods__Int16Array.ets
 stdlib-templates/std/core/std_core_typedarrays_methods__Int32Array.ets
 stdlib-templates/std/core/std_core_typedarrays_methods__Int8Array.ets

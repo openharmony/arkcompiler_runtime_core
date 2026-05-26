@@ -1,0 +1,4 @@
+
+#34931
+09.classes/08.class_accessor_declarations/same_name_static_instance_method_0.ets
+09.classes/08.class_accessor_declarations/same_name_static_instance_method_1.ets
