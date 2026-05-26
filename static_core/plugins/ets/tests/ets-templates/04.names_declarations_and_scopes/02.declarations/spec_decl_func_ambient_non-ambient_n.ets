@@ -16,7 +16,9 @@
 /*---
 desc: Declarations must be distinguishable in a declaration space.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0399: Method declaration `foo` must all ambient or non-ambient"
+expected_out: |-
+    Semantic error ESE0018: Native and Declare methods should have explicit return type.
+    Semantic error ESE0130: Function foo is already declared.
 ---*/
 
 // CTE: ambient and non-ambient declarations refer to the same entity in a single module
