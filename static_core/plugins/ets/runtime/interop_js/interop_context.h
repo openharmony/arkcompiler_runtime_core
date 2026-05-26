@@ -158,6 +158,23 @@ private:
     napi_ref recordProtoRef_ {nullptr};
 };
 
+class BuiltinCtorRefsCache {
+public:
+    explicit BuiltinCtorRefsCache(InteropCtx *ctx) : ctx_(ctx) {}
+    ~BuiltinCtorRefsCache();
+    NO_COPY_SEMANTIC(BuiltinCtorRefsCache);
+    NO_MOVE_SEMANTIC(BuiltinCtorRefsCache);
+
+    void Add(napi_ref ref)
+    {
+        refs_.push_back(ref);
+    }
+
+private:
+    InteropCtx *ctx_ = nullptr;
+    PandaVector<napi_ref> refs_ {};
+};
+
 class InteropCtx final {
 public:
     NO_COPY_SEMANTIC(InteropCtx);
@@ -244,6 +261,11 @@ public:
     CommonJSObjectCache *GetCommonJSObjectCache()
     {
         return &commonJSObjectCache_;
+    }
+
+    BuiltinCtorRefsCache *GetBuiltinCtorRefsCache()
+    {
+        return &builtinCtorRefsCache_;
     }
 
     // NOTE(vpukhov): implement in native code
@@ -527,6 +549,7 @@ private:
     JSValueStringStorage jsValueStringStor_ {};
     ConstStringStorage constStringStorage_;
     LocalScopesStorage localScopesStorage_ {};
+    BuiltinCtorRefsCache builtinCtorRefsCache_;
     JSRefConvertCache refconvertCache_;
     CommonJSObjectCache commonJSObjectCache_;
 

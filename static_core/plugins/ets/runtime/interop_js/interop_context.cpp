@@ -244,6 +244,16 @@ CommonJSObjectCache::~CommonJSObjectCache()
     }
 }
 
+BuiltinCtorRefsCache::~BuiltinCtorRefsCache()
+{
+    napi_env env = ctx_->GetJSEnv();
+    for (auto ref : refs_) {
+        if (ref != nullptr) {
+            napi_delete_reference(env, ref);
+        }
+    }
+}
+
 napi_value CommonJSObjectCache::GetProxy() const
 {
     if (proxyRef_ == nullptr) {
@@ -437,6 +447,7 @@ InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJ
       jsEnv_(env),
       isJsEnvCreatedExternally_(isJsEnvCreatedExternally),
       constStringStorage_(this),
+      builtinCtorRefsCache_(this),
       commonJSObjectCache_(this),
       stackInfoManager_(this, executionCtx)
 {
@@ -958,8 +969,9 @@ InteropCallStack &InteropCtx::GetOrCreateCallStack()
     auto *callStk = storage.Get<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR, InteropCallStack *>();
     if (callStk == nullptr) {
         callStk = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCallStack>();
-        storage.Set<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR>(
-            callStk, [](void *param) { Runtime::GetCurrent()->GetInternalAllocator()->Delete(param); });
+        storage.Set<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR>(callStk, [](void *param) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(static_cast<InteropCallStack *>(param));
+        });
     }
     return *callStk;
 }
