@@ -309,9 +309,6 @@
 #33742
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_initializer_n.ets
 
-# 33423
-14.ambient_declarations/08.accessor_declarations/accessor_declarations_receiver.ets
-
 #34114
 15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
 
