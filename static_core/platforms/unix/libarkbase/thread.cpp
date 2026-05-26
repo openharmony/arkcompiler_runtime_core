@@ -224,8 +224,9 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
                 stackSizeLimit = stackSizeLimit == std::numeric_limits<size_t>::max() ? OHOS_DEFAULT_STACK_LIMIT_SIZE
                                                                                       : stackSizeLimit;
 
-                // for some reason pthread interfaces subtract 1 page from size regardless of guard size
-                uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit + ark::os::mem::GetPageSize();
+                // MUSL returns the currently-mmap'd size for the main thread; recompute the
+                // full stack window from RLIMIT_STACK, anchored at the high address pthread reported.
+                uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit;
                 *stackSize = stackSizeLimit;
                 *stackAddr = ToVoidPtr(stackLoAddr);
             }
@@ -236,6 +237,8 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
     void *const stackBottom = pthread_get_stackaddr_np(thread);
     *stackSize = pthread_get_stacksize_np(thread);
     *stackAddr = static_cast<uint8_t *>(stackBottom) - *stackSize;
+    // On Darwin this attr is freshly initialized because pthread_getattr_np is unavailable,
+    // so guardSize is the default guard size, not necessarily this thread's actual guard.
     s += pthread_attr_getguardsize(&attr, guardSize);
 #endif /* PANDA_TARGET_MACOS */
     s += pthread_attr_destroy(&attr);
