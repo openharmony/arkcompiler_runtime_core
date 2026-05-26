@@ -286,9 +286,28 @@ static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, Objec
     }
 }
 
+static bool IsObjectArrayClass(EtsCharArray *arr)
+{
+    return EtsObject::FromCoreType(reinterpret_cast<ObjectHeader *>(arr))
+        ->GetClass()
+        ->GetRuntimeClass()
+        ->IsObjectArrayClass();
+}
+
 template <bool NEED_PRE_WRITE_BARRIER = true, bool CHECKED = true>
 void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart, int32_t srcEnd)
 {
+    if (UNLIKELY(src == nullptr || dst == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
+
+    auto *ctx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(Runtime::GetCurrent()->IsInitialized() && (!IsObjectArrayClass(src) || !IsObjectArrayClass(dst)))) {
+        ThrowEtsException(ctx, "Lstd/core/TypeError;", "Expected FixedArray<Any>");
+        return;
+    }
+
     auto executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     auto srcArray = EtsHandle(executionCtx, src);

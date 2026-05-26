@@ -19,27 +19,43 @@ module ArrayConstants
   PLATFORM_TYPES_STD_CORE_ARRAY_CLASS_OFFSET = "cross_values::GetPlatformTypesStdCoreArrayClassOffset(graph->GetArch())"
 end
 
-function(:StdCoreArrayIsPlatformArrayFast,
-          params: {obj: 'ref'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPathPlus]) {
+def GenerateStdCoreArrayIsPlatformArrayFast(cgmode)
+  function("StdCoreArrayIsPlatformArrayFast#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+            params: {obj: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    next
-  end
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
 
-  arrayClass := get_platform_type_ref_uint(ArrayConstants::PLATFORM_TYPES_STD_CORE_ARRAY_CLASS_OFFSET)
-  klass := load_class(obj).ref_uint
-  etsKlass := SubI(klass).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint
-  If(arrayClass, etsKlass).EQ.Likely {
-    result1 := 1
-  } Else {
-    result2 := 0
+    If(obj, 0).EQ.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    arrayClass := get_platform_type_ref_uint(ArrayConstants::PLATFORM_TYPES_STD_CORE_ARRAY_CLASS_OFFSET)
+    klass := load_class(obj).ref_uint
+    etsKlass := SubI(klass).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint
+    If(arrayClass, etsKlass).EQ.Likely {
+      result1 := 1
+    } Else {
+      result2 := 0
+    }
+    Return(Phi(result1, result2).i32).b
+  Label(:SlowPathEntrypoint)
+    if cgmode == :NativePlus
+      Return(Call(obj).Method('EtsStdCoreArrayIsPlatformArray').b).b
+    else
+      ep_offset = get_entrypoint_offset("STD_CORE_ARRAY_IS_PLATFORM_ARRAY_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, obj).AddImm(ep_offset).MethodAsImm("StdCoreArrayIsPlatformArrayOddSavedBridge").Terminator.b
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    end
   }
-  Return(Phi(result1, result2).i32).b
-}
+end
+GenerateStdCoreArrayIsPlatformArrayFast(:FastPath)
+GenerateStdCoreArrayIsPlatformArrayFast(:NativePlus)
 
 def GenerateArrayFastReverse(sync_type)
   function("StdCoreArrayReverse#{sync_type}".to_sym,
@@ -58,6 +74,10 @@ def GenerateArrayFastReverse(sync_type)
       Intrinsic(:UNREACHABLE).Terminator.void
       next
     end
+
+    If(buf, 0).EQ.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
 
     # if len <= 1 then do nothing
     If(len, 1).BE.Unlikely.b {
@@ -98,6 +118,10 @@ def GenerateArrayFastReverse(sync_type)
     end
   Label(:Done)
     ReturnVoid().void
+  Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("STD_CORE_ARRAY_REVERSE")
+    Intrinsic(:SLOW_PATH_ENTRY, buf, len).AddImm(ep_offset).MethodAsImm("StdCoreArrayReverse3ArgBridge").Terminator.void
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end
 

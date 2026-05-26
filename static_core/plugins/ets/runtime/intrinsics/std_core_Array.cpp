@@ -101,9 +101,24 @@ static bool IsNumericClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
     return (objClass == ptypes->coreDouble || objClass == ptypes->coreFloat);
 }
 
+static bool IsObjectArrayClass(ObjectHeader *objectHeader)
+{
+    return EtsObject::FromCoreType(objectHeader)->GetClass()->GetRuntimeClass()->IsObjectArrayClass();
+}
+
 extern "C" EtsInt EtsStdCoreArrayInternalIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
                                                  EtsInt fromIndex)
 {
+    if (UNLIKELY(bufferObject == nullptr)) {
+        ThrowNullPointerException();
+        return -1;
+    }
+
+    if (UNLIKELY(Runtime::GetCurrent()->IsInitialized() && !IsObjectArrayClass(bufferObject))) {
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), "Lstd/core/TypeError;", "Expected FixedArray<Any>");
+        return -1;
+    }
+
     auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
     fromIndex = NormalizeArrayIndex(fromIndex, actualLength);
     if (actualLength <= fromIndex) {
@@ -152,26 +167,28 @@ extern "C" EtsInt EtsStdCoreArrayInternalIndexOf(ObjectHeader *bufferObject, Ets
 extern "C" EtsInt EtsStdCoreArrayInternalLastIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
                                                      EtsInt fromIndex)
 {
+    if (UNLIKELY(bufferObject == nullptr)) {
+        ThrowNullPointerException();
+        return -1;
+    }
+
+    if (UNLIKELY(Runtime::GetCurrent()->IsInitialized() && !IsObjectArrayClass(bufferObject))) {
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), "Lstd/core/TypeError;", "Expected FixedArray<Any>");
+        return -1;
+    }
+
     if (actualLength == 0) {
         return -1;
     }
-    auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
 
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
-    EtsInt startIndex = 0;
-
-    if (fromIndex >= 0) {
-        startIndex = std::min(actualLength - 1, fromIndex);
-    } else {
-        startIndex = actualLength + fromIndex;
-    }
-
+    EtsInt startIndex = (fromIndex >= 0) ? std::min(actualLength - 1, fromIndex) : actualLength + fromIndex;
     if (startIndex < 0) {
         return -1;
     }
 
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, buffer);
+    EtsHandle<EtsObjectArray> bufferHandle(executionCtx, EtsObjectArray::FromCoreType(bufferObject));
     EtsHandle<EtsObject> valueHandle(executionCtx, value);
 
     auto count = startIndex + 1;
@@ -219,7 +236,16 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
 extern "C" void EtsStdCoreArrayFillImpl(ObjectHeader *bufferHeader, int32_t length, EtsObject *value, int32_t start,
                                         int32_t end)
 {
-    ASSERT(bufferHeader != nullptr);
+    if (UNLIKELY(bufferHeader == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
+
+    if (UNLIKELY(Runtime::GetCurrent()->IsInitialized() && !IsObjectArrayClass(bufferHeader))) {
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), "Lstd/core/TypeError;", "Expected FixedArray<Any>");
+        return;
+    }
+
     auto *buffer = EtsObjectArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
@@ -358,7 +384,16 @@ static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArr
 
 extern "C" void EtsStdCoreArrayReverse(ObjectHeader *bufferHeader, int32_t length)
 {
-    ASSERT(bufferHeader != nullptr);
+    if (UNLIKELY(bufferHeader == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
+
+    if (UNLIKELY(Runtime::GetCurrent()->IsInitialized() && !IsObjectArrayClass(bufferHeader))) {
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), "Lstd/core/TypeError;", "Expected FixedArray<Any>");
+        return;
+    }
+
     auto *buffer = EtsObjectArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
@@ -768,9 +803,23 @@ extern "C" void EtsStdCoreArraySetUnsafe(EtsStdCoreArray *array, int32_t index, 
 extern "C" void EtsStdCoreArrayUnshiftInternal(ObjectHeader *arrayHeader, EtsInt arrayLen, ObjectHeader *bufferHeader,
                                                EtsStdCoreArray *values)
 {
-    ASSERT(arrayHeader != nullptr);
-    ASSERT(bufferHeader != nullptr);
-    ASSERT(values != nullptr);
+    if (UNLIKELY(arrayHeader == nullptr || bufferHeader == nullptr || values == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
+
+    if (UNLIKELY(Runtime::GetCurrent()->IsInitialized())) {
+        auto ctx = EtsExecutionContext::GetCurrent();
+        if (!IsObjectArrayClass(arrayHeader) || !IsObjectArrayClass(bufferHeader)) {
+            ThrowEtsException(ctx, "Lstd/core/TypeError;", "Expected FixedArray<Any>");
+            return;
+        }
+        if (!EtsStdCoreArray::IsExactlyStdCoreArray(values, ctx)) {
+            ThrowEtsException(ctx, "Lstd/core/TypeError;", "Expected std.core.Array");
+            return;
+        }
+    }
+
     auto *buffer = EtsArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
     auto dstLen = buffer->GetLength() * sizeof(ObjectPointerType);
     auto *dst = buffer->GetData<ObjectPointerType>();
@@ -796,12 +845,27 @@ extern "C" void EtsStdCoreArrayUnshiftInternal(ObjectHeader *arrayHeader, EtsInt
 
 extern "C" EtsBoolean EtsStdCoreArrayIsPlatformArray(EtsObject *obj)
 {
+    if (UNLIKELY(obj == nullptr)) {
+        ThrowNullPointerException();
+        return ToEtsBoolean(false);
+    }
+
     return ToEtsBoolean(EtsStdCoreArray::IsExactlyStdCoreArray(obj, EtsExecutionContext::GetCurrent()));
 }
 
 extern "C" ObjectHeader *EtsStdCoreArrayGetBuffer(EtsObject *obj)
 {
-    ASSERT(EtsStdCoreArray::IsExactlyStdCoreArray(obj, EtsExecutionContext::GetCurrent()));
+    if (UNLIKELY(obj == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
+
+    auto ctx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(!EtsStdCoreArray::IsExactlyStdCoreArray(obj, ctx))) {
+        ThrowEtsException(ctx, "Lstd/core/TypeError;", "Expected std.core.Array");
+        return nullptr;
+    }
+
     auto *array = EtsStdCoreArray::FromEtsObject(obj);
     return array->GetDataFromStdCoreArray()->GetCoreType();
 }

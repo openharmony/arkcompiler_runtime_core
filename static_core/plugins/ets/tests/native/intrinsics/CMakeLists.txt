@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(exclusive_worker)
-add_subdirectory(sync_primitives)
-add_subdirectory(array_buffer)
-add_subdirectory(intrinsics)
+panda_add_gtest_with_ani(intrinsic_array_nullptr_ref_args_native_test
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_nullptr_ref_args_test.cpp
+    TEST_GROUP ets_native_gtests
+)
+
+panda_add_gtest_with_ani(intrinsic_array_wrong_types_args_native_test
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_wrong_types_args_test.cpp
+    TEST_GROUP ets_native_gtests
+)
