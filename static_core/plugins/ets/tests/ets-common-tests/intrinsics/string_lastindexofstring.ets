@@ -20,6 +20,8 @@ let RusChars: String = 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМм
 let EngChars: String = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz';               //  8-bit
 let MixedChars: String = 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнAaBbCcDdEeFfGgHhIiJjKkLl';           // 16-bit
 let DupChars: String = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';               //  8-bit
+let EngText: String = ' Lorem piesum dolor sat sapien sapien sapien sapien enit faucibus amet ex sapien sapien sapien sapien?'; //  8-bit
+let RusText: String = 'В чащаx цитрюга цил был цитрус цитрус цитрус цитрус. Да, но это фальшивый цитрус цитрус цитрус цитрус?'; // 16-bit
 let Digits: String = '0123456789';
 let Symbols: String = '`~!@#$%^&*()_-+={}[]:;\"\'\\|/<>,.';
 const CharNotFound: int = -1;
@@ -66,6 +68,36 @@ function testTreeOneCharString() {
     arktest.assertEQ(OneChar.lastIndexOf('l', OneChar.length + 1), CharNotFound);
     arktest.assertEQ(OneChar.lastIndexOf('hi', OneChar.length), CharNotFound);
     arktest.assertEQ(OneChar.lastIndexOf('h'.concat('k'), OneChar.length), CharNotFound);
+}
+
+function testLinearCompressedText() {
+    const shortKey = ' sapien?';
+    arktest.assertEQ(EngText.lastIndexOf(shortKey), 94);
+}
+
+function testLinearNonCompressedText() {
+    const shortKey = ' цитрус?';
+    arktest.assertEQ(RusText.lastIndexOf(shortKey), 94);
+}
+
+function testTreeCompressedText() {
+    const subject = EngText.repeat(10);
+    const shortKey = ' sapien?';
+    arktest.assertEQ(subject.lastIndexOf(shortKey), 1012);
+
+    const longKey = 'en sapien sapien?';
+    arktest.assertLT(16, longKey.length);
+    arktest.assertEQ(subject.lastIndexOf(longKey), 1003);
+}
+
+function testTreeNonCompressedText() {
+    const subject = RusText.repeat(10);
+    const shortKey = ' цитрус?';
+    arktest.assertEQ(subject.lastIndexOf(shortKey), 1012);
+
+    const longKey = 'ус цитрус цитрус?';
+    arktest.assertLT(16, longKey.length);
+    arktest.assertEQ(subject.lastIndexOf(longKey), 1003);
 }
 
 function testShortLinearString() {
@@ -1092,7 +1124,7 @@ function testSymbolsSlicedSubstring() {
     testAllSubstrings(symbolsSlicedChars);
 }
 
-function testVeryLongMixedCompressingLinearString() {
+function testLongMixedCompressingLinearString() {
     let longMixedChars: String = 'нфUghДвгатфLpfdjdOklbZodissborofjЗзИиЙйКкЛлМмНнweflkwlщцшуддцйзжцйэIiJjKkLlйцюцйффыогцуоцуюдйцжйжцхэpwpqwKJisisiYIUЮКОйцьйцйжцхэpwpqwKYIUЮКОйцЮКОйц|АаБбВвГгДдЕеЁёЖжAaBbCcDdEeFfGgHh';
     arktest.assertEQ(180, longMixedChars.length)
     let rusChars = 'АаБбВвГгДдЕеЁёЖж';
@@ -1138,12 +1170,192 @@ function testVeryLongMixedCompressingLinearString() {
         longMixedChars.length - rusChars.length - engChars.length + rusChars.length);
 }
 
+function testHugeMixedCompressingTreeString() {
+    const subjLen = 250000;
+    const keyLen = subjLen / 10;
+    let longMixedSubject: String = 'aЫ'.repeat(subjLen / 4) + 'aЫ'.repeat(subjLen / 4);
+    let longMixedKey: String = 'aЫ'.repeat(keyLen / 4) + 'aЫ'.repeat(keyLen / 4);
+    arktest.assertEQ(longMixedSubject.length, subjLen);
+    arktest.assertEQ(longMixedKey.length, keyLen);
+    arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKey), longMixedSubject.length - longMixedKey.length);
+    for (let i: int = 0; i < longMixedSubject.length - longMixedKey.length; i += 333) {
+        arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKey, i), i - i % 2);
+    }
+    GC.startGC(GC.Cause.FULL);
+    let prefixLen = 1;
+    const gcinterval: int = 50;
+    for (let i: int = 0, j: int = 0; i < longMixedSubject.length - (14 * longMixedKey.length / 15); i += 777, ++j) {
+        prefixLen = ++prefixLen % (longMixedKey.length / 15);
+        let longMixedKeySliced: String = longMixedKey.substring(prefixLen, longMixedKey.length - longMixedKey.length / 15);
+        arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKeySliced), longMixedSubject.length
+            - longMixedKeySliced.length - (longMixedKey.length / 15) % 2);
+        if (j == gcinterval) {
+            let padding: String = 'aЫ'.repeat(100000);
+            GC.startGC(GC.Cause.FULL);
+            j = 0;
+        }
+    }
+
+    longMixedKey = 'x' + longMixedKey;
+    longMixedSubject = 'aЫ'.repeat((subjLen - longMixedKey.length) / 2) + 'x' + 'aЫ'.repeat(longMixedKey.length / 2)
+    arktest.assertEQ(longMixedKey.length, keyLen + 1);
+    arktest.assertEQ(longMixedSubject.length, subjLen - 1);
+    arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKey), longMixedSubject.length - longMixedKey.length);
+    arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKey.substring(0, longMixedKey.length - longMixedKey.length / 15)),
+        longMixedSubject.length - longMixedKey.length);
+}
+
+function testHugeMixedCompressingLineString() {
+    const subjLen = 250000;
+    const keyLen = subjLen / 10;
+    let longMixedSubject: String = 'aЫ'.repeat(subjLen / 2);
+    let longMixedKey: String = 'aЫ'.repeat(keyLen / 2);
+    arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKey), longMixedSubject.length - longMixedKey.length);
+    for (let i: int = 0; i < longMixedSubject.length - longMixedKey.length; i += 333) {
+        arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKey, i), i - i % 2);
+    }
+    GC.startGC(GC.Cause.FULL);
+    let prefixLen = 1;
+    const gcinterval: int = 50;
+    for (let i: int = 0, j: int = 0; i < longMixedSubject.length - (14 * longMixedKey.length / 15); i += 777, ++j) {
+        prefixLen = ++prefixLen % (longMixedKey.length / 15);
+        let longMixedKeySliced: String = longMixedKey.substring(prefixLen, longMixedKey.length - longMixedKey.length / 15);
+        arktest.assertEQ(longMixedSubject.lastIndexOf(longMixedKeySliced), longMixedSubject.length
+            - longMixedKeySliced.length - (longMixedKey.length / 15) % 2);
+        if (j == gcinterval) {
+            let padding: String = 'aЫ'.repeat(100000);
+            GC.startGC(GC.Cause.FULL);
+            j = 0;
+        }
+    }
+}
+
+function testFastNonSafepointedNaiveTreeString() {
+    const iterationsBetweenSafepoints = 345;
+    const maxFastComparisons = 120000;
+    let longSubject: String = 'ц' + 'a'.repeat(iterationsBetweenSafepoints * 2 - 1);
+    let longKey: String = 'ц' + 'a'.repeat(iterationsBetweenSafepoints - 1);
+    arktest.assertEQ(longSubject.length - longKey.length, iterationsBetweenSafepoints);
+    arktest.assertEQ(longKey.length, iterationsBetweenSafepoints);
+    arktest.assertEQ(longSubject.lastIndexOf(longKey), 0);
+
+    let longKey2 = longKey;
+    longKey += 'a';
+    arktest.assertEQ(longKey.length, iterationsBetweenSafepoints + 1);
+    arktest.assertEQ(longKey2.length, iterationsBetweenSafepoints);
+    arktest.assertEQ(longSubject.lastIndexOf(longKey), 0);
+
+    let longSubject2 = longSubject;
+    longSubject += 'a';
+    arktest.assertEQ(longSubject.length, iterationsBetweenSafepoints * 2 + 1);
+    arktest.assertEQ(longSubject.lastIndexOf(longKey2), 0);
+
+    longSubject2 += 'ы';
+    let longKey3: String = 'a'.repeat(iterationsBetweenSafepoints - 1) + 'ы';
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey3), longSubject2.length - longKey3.length);
+
+    let longKey4: String = 'a'.repeat(iterationsBetweenSafepoints - 1) + 'ш';
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey4), -1);
+
+    let longSubject3: String = 'ц' + 'a'.repeat(iterationsBetweenSafepoints) + 'ы' + 'a'.repeat(iterationsBetweenSafepoints - 1);
+    arktest.assertEQ(longSubject3.lastIndexOf(longKey3), 2);
+    let longSubject4 = longSubject3 + 'ш'.repeat(Double.toInt(sqrt(maxFastComparisons - longKey3.length
+        * (longSubject3.length - longKey3.length + 1))));
+    arktest.assertLT(maxFastComparisons, longKey3.length * (longSubject4.length - longKey3.length + 1));
+    arktest.assertEQ(longSubject4.lastIndexOf(longKey3), 2);
+
+    const maxKeyLenForNaive: int = 9;
+    const fastIterationsForShort: int = 13300;
+    let subjForShort: String = 'ц' + 'a'.repeat(fastIterationsForShort / 2) + 'ы' + 'a'.repeat(fastIterationsForShort / 2 - 1);
+    arktest.assertEQ(subjForShort.length, fastIterationsForShort + 1);
+
+    let subjForShort2: String = 'ц' + 'a'.repeat(fastIterationsForShort - 1) + 'ы';
+    arktest.assertEQ(subjForShort2.length, fastIterationsForShort + 1);
+
+    const slowIterationsForShort = fastIterationsForShort  + maxFastComparisons - maxKeyLenForNaive
+        * (fastIterationsForShort - maxKeyLenForNaive + 1);
+    let subjForShort3: String = 'ц' + 'a'.repeat(slowIterationsForShort) + 'ы';
+    arktest.assertLT(maxFastComparisons, maxKeyLenForNaive * (subjForShort3.length - maxKeyLenForNaive + 1));
+
+    let shortKey1: String = 'aaaaaaaaш';
+    arktest.assertEQ(shortKey1.length, maxKeyLenForNaive);
+    arktest.assertEQ(subjForShort.lastIndexOf(shortKey1), -1);
+    arktest.assertEQ(subjForShort2.lastIndexOf(shortKey1), -1);
+    arktest.assertEQ(subjForShort3.lastIndexOf(shortKey1), -1);
+
+    let shortKey2: String = 'aaaaaaaaы';
+    arktest.assertEQ(shortKey2.length, maxKeyLenForNaive);
+    arktest.assertEQ(subjForShort.lastIndexOf(shortKey2), 2 + fastIterationsForShort / 2 - shortKey2.length);
+    arktest.assertEQ(subjForShort2.lastIndexOf(shortKey2), subjForShort2.length - shortKey2.length);
+    arktest.assertEQ(subjForShort3.lastIndexOf(shortKey2), subjForShort3.length - shortKey2.length);
+
+    const keyForPosZeroLength: int = 120000;
+    let posZeroKey: String = 'ц' + 'a'.repeat(keyForPosZeroLength - 2) + 'ы';
+    arktest.assertEQ(posZeroKey.length, keyForPosZeroLength);
+    let subjForPosZero: String = 'ц' + 'a'.repeat(keyForPosZeroLength - 2) + 'ы';
+    arktest.assertEQ(posZeroKey.length, subjForPosZero.length);
+    let subjForPosZero2: String = 'ц' + 'a'.repeat(keyForPosZeroLength - 2) + 'г';
+    arktest.assertEQ(posZeroKey.length, subjForPosZero2.length);
+    arktest.assertEQ(subjForPosZero.lastIndexOf(posZeroKey), 0);
+    arktest.assertEQ(subjForPosZero2.lastIndexOf(posZeroKey), -1);
+    let posZeroKey2 = posZeroKey + 's';
+    let subjForPosZero3 = subjForPosZero + 's';
+    arktest.assertEQ(posZeroKey2.length, subjForPosZero3.length);
+    arktest.assertEQ(subjForPosZero3.lastIndexOf(posZeroKey2), 0);
+    arktest.assertEQ(subjForPosZero3.lastIndexOf(posZeroKey2, 1), 0);
+    arktest.assertEQ(subjForPosZero3.lastIndexOf(posZeroKey2.substring(0, posZeroKey2.length - 1),
+        subjForPosZero3.length - 1), 0);
+
+    let posOneSubj: String = 'ц' + 'a'.repeat(maxFastComparisons / 2 + 100);
+    let posOneKey: String = 'ц' + 'a'.repeat(maxFastComparisons / 2 - 1);
+    arktest.assertEQ(posOneKey.length, maxFastComparisons / 2);
+    arktest.assertEQ(posOneSubj.lastIndexOf(posOneKey, 1), 0);
+    let posOneKey2 = posOneKey + 'a';
+    arktest.assertEQ(posOneKey2.length, maxFastComparisons / 2 + 1);
+    arktest.assertEQ(posOneSubj.lastIndexOf(posOneKey2, 1), 0);
+}
+
+function testFastNonSafepointedKmpTreeString() {
+    const kmpMaxPatternLength = 5000;
+    const kmpMaxSubjectLength = 7000 + kmpMaxPatternLength;
+    let longSubject: String = 'ц' + 'a'.repeat(kmpMaxSubjectLength - 1);
+    let longKey: String = 'ц' + 'a'.repeat(kmpMaxPatternLength - 1);
+    arktest.assertEQ(longKey.length, kmpMaxPatternLength);
+    arktest.assertEQ(longSubject.lastIndexOf(longKey), 0);
+
+    longKey += 'a';
+    arktest.assertEQ(longKey.length, kmpMaxPatternLength + 1);
+    arktest.assertEQ(longSubject.lastIndexOf(longKey), 0);
+
+    let longSubject2: String = 'ц' + 'a'.repeat(kmpMaxSubjectLength / 2 - 1) + 'ы' + 'a'.repeat(kmpMaxSubjectLength / 2 - 2) + 'ы';
+    let longKey2: String = 'a'.repeat(min(kmpMaxSubjectLength / 2, kmpMaxPatternLength) - 2) + 'ы';
+    arktest.assertEQ(longSubject2.length, kmpMaxSubjectLength);
+    arktest.assertLT(longKey2.length, kmpMaxPatternLength);
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey2), longSubject2.length - longKey2.length);
+
+    let longKey3: String = 'a'.repeat(min(kmpMaxSubjectLength / 2, kmpMaxPatternLength) - 2) + 'ш';
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey3), -1);
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey3, longSubject2.length - longKey3.length - 1), -1);
+
+    longSubject2 += 'ы';
+    arktest.assertEQ(longSubject2.length, kmpMaxSubjectLength + 1);
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey2), longSubject2.length - longKey2.length - 1);
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey2, longSubject2.length - longKey2.length - 1),
+        longSubject2.length - longKey2.length - 1);
+    arktest.assertEQ(longSubject2.lastIndexOf(longKey2, longSubject2.length - longKey2.length - 2),
+        kmpMaxSubjectLength / 2 - longKey2.length + 1);
+}
+
 function main(): int {
     /**
      * lastIndexOf(string): int => StdCoreStringlastIndexOfString
      */
     let suite = new arktest.ArkTestsuite('StringLastIndexOfString');
     suite.addTest('testEmptyString', testEmptyString);
+    suite.addTest('testLinearCompressedText', testLinearCompressedText);
+    suite.addTest('testLinearNonCompressedText', testLinearNonCompressedText);
+    suite.addTest('testTreeCompressedText', testTreeCompressedText);
+    suite.addTest('testTreeNonCompressedText', testTreeNonCompressedText);
     suite.addTest('testTreeOneCharString', testTreeOneCharString);
     suite.addTest('testEscapedLinearString', testEscapedLinearString);
     suite.addTest('testEscapedLinearSubstring', testEscapedLinearSubstring);
@@ -1182,6 +1394,10 @@ function main(): int {
     suite.addTest('testSymbolsTreeSubstring', testSymbolsTreeSubstring);
     suite.addTest('testSymbolsSlicedString', testSymbolsSlicedString);
     suite.addTest('testSymbolsSlicedSubstring', testSymbolsSlicedSubstring);
-    suite.addTest('testVeryLongMixedCompressingLinearString', testVeryLongMixedCompressingLinearString);
+    suite.addTest('testLongMixedCompressingLinearString', testLongMixedCompressingLinearString);
+    suite.addTest('testHugeMixedCompressingLineString', testHugeMixedCompressingLineString);
+    suite.addTest('testHugeMixedCompressingTreeString', testHugeMixedCompressingTreeString);
+    suite.addTest('testFastNonSafepointedNaiveTreeString', testFastNonSafepointedNaiveTreeString);
+    suite.addTest('testFastNonSafepointedKmpTreeString', testFastNonSafepointedKmpTreeString);
     return suite.run();
 }

@@ -20,7 +20,6 @@
 #include "libarkbase/utils/span.h"
 #include <limits>
 #include <type_traits>
-#include <utility>
 
 namespace ark::coretypes::algo {
 
@@ -112,6 +111,7 @@ private:
             prefixFun.emplace_back(k);
         }
 
+        ASSERT(prefixFun.size() == pattern.size());
         return prefixFun;
     }
 
