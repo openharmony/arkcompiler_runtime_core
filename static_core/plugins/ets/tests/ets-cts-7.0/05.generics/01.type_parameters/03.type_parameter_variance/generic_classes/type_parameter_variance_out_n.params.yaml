@@ -16,12 +16,12 @@ cases:
   #0
   - case: { type: byte,    value: 1 }
     stdout: |-
-      "Warning W0326: Attempting to cast type 'Int' to 'T' can throw 'CastClassError' exception at runtime"
+      "Warning W0326: Attempting to cast type 'Int' to 'T' can throw 'ClassCastError' exception at runtime"
   #1
   - case: { type: short,   value: 1 }
     stdout: |-
-      "Warning W0326: Attempting to cast type 'Int' to 'T' can throw 'CastClassError' exception at runtime"
+      "Warning W0326: Attempting to cast type 'Int' to 'T' can throw 'ClassCastError' exception at runtime"
   #2
   - case: { type: long,    value: 1 }
     stdout: |-
-      "Warning W0326: Attempting to cast type 'Int' to 'T' can throw 'CastClassError' exception at runtime"
+      "Warning W0326: Attempting to cast type 'Int' to 'T' can throw 'ClassCastError' exception at runtime"

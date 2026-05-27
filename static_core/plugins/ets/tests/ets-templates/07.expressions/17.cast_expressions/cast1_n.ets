@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: >-
     If the result of x instanceof T is false, then x as T causes ClassCastError thrown at runtime
-expected_out: "Warning W0326: Attempting to cast type 'B' to 'A' can throw 'CastClassError' exception at runtime"
+expected_out: "Warning W0326: Attempting to cast type 'B' to 'A' can throw 'ClassCastError' exception at runtime"
 ---*/
 
 class A {}
