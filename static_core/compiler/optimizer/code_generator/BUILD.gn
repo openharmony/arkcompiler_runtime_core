@@ -25,8 +25,9 @@ if (enable_codegen) {
     if (ark_static_standalone_build) {
       ldflags = [ "-ldl" ]
     }
-    if (target_cpu == "amd64" || target_cpu == "x64" ||
-        target_cpu == "x86_64") {
+    if (!is_host_product &&
+        (target_cpu == "amd64" || target_cpu == "x64" ||
+         target_cpu == "x86_64")) {
       configs = [
         "$ark_third_party_root/asmjit:asmjit_public_config",
         "$ark_third_party_root/zydis:zydis_public_config",
@@ -49,7 +50,7 @@ if (enable_codegen) {
 
     external_deps = [ sdk_libc_secshared_dep ]
 
-    if (target_cpu == "x86") {
+    if (!is_host_product && target_cpu == "x86") {
       sources += [
         "target/x86/callconv.cpp",
         "target/x86/encode.cpp",
@@ -57,8 +58,9 @@ if (enable_codegen) {
       ]
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
-    } else if (target_cpu == "amd64" || target_cpu == "x64" ||
-               target_cpu == "x86_64") {
+    } else if (!is_host_product &&
+               (target_cpu == "amd64" || target_cpu == "x64" ||
+                target_cpu == "x86_64")) {
       if (!is_mingw) {
         # Add vixl for cross-compilation
         external_deps += [ vixl_dep ]
@@ -78,7 +80,7 @@ if (enable_codegen) {
           "$ark_third_party_root/zydis:libZydis",
         ]
       }
-    } else if (target_cpu == "arm") {
+    } else if (!is_host_product && target_cpu == "arm") {
       sources += [
         "target/aarch32/callconv.cpp",
         "target/aarch32/encode.cpp",
@@ -89,7 +91,7 @@ if (enable_codegen) {
       defines += [ "USE_VIXL_ARM32" ]
 
       external_deps += [ vixl_dep ]
-    } else if (target_cpu == "arm64") {
+    } else if (!is_host_product && target_cpu == "arm64") {
       sources += [
         "target/aarch64/callconv.cpp",
         "target/aarch64/encode.cpp",
@@ -143,7 +145,7 @@ if (enable_codegen) {
 
     external_deps = [ sdk_libc_secshared_dep ]
 
-    if (target_cpu == "x86") {
+    if (!is_host_product && target_cpu == "x86") {
       sources += [
         "target/x86/callconv.cpp",
         "target/x86/encode.cpp",
@@ -151,8 +153,9 @@ if (enable_codegen) {
       ]
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/x86" ]
-    } else if (target_cpu == "amd64" || target_cpu == "x64" ||
-               target_cpu == "x86_64") {
+    } else if (!is_host_product &&
+               (target_cpu == "amd64" || target_cpu == "x64" ||
+                target_cpu == "x86_64")) {
       if (!is_mingw) {
         external_deps += [ vixl_dep ]
 
@@ -171,7 +174,7 @@ if (enable_codegen) {
           "$ark_third_party_root/zydis:libZydis",
         ]
       }
-    } else if (target_cpu == "arm") {
+    } else if (!is_host_product && target_cpu == "arm") {
       sources += [
         "target/aarch32/callconv.cpp",
         "target/aarch32/encode.cpp",
@@ -181,7 +184,7 @@ if (enable_codegen) {
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch32" ]
       external_deps += [ vixl_dep ]
-    } else if (target_cpu == "arm64") {
+    } else if (!is_host_product && target_cpu == "arm64") {
       sources += [
         "target/aarch64/callconv.cpp",
         "target/aarch64/encode.cpp",

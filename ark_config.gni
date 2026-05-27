@@ -19,6 +19,10 @@ if (is_standard_system) {
   import("$ark_root/platforms/common/ark_config.gni")
 }
 
+if (!defined(is_host_product)) {
+  is_host_product = false
+}
+
 declare_args() {
   enabled_plugins = default_enabled_plugins
   enabled_pac_data_protect = false

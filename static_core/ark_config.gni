@@ -100,6 +100,9 @@ declare_args() {
   if (!defined(is_ohos)) {
     is_ohos = false
   }
+  if (!defined(is_host_product)) {
+    is_host_product = false
+  }
   if (!defined(is_standard_system)) {
     is_standard_system = true
   }
@@ -180,8 +183,9 @@ linux_x64_panda_runtime_codegen_disabled =
 
 enable_irtoc = true
 enable_codegen = true
-if (is_mingw || current_os == "win" || current_os == "mingw" ||
-    current_os == "winuwp" || current_os == "mac" || host_os == "mac" ||
+if (is_host_product || is_mingw || current_os == "win" ||
+    current_os == "mingw" || current_os == "winuwp" ||
+    current_os == "mac" || host_os == "mac" ||
     !runtime_core_enable_codegen ||
     linux_x64_panda_runtime_codegen_disabled) {
   # Disable irtoc and codegen for:
