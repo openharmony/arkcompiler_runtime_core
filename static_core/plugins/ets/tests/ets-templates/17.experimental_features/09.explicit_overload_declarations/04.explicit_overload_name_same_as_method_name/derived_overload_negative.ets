@@ -17,7 +17,7 @@ limitations under the License.
 desc: A compile-time error occurs if the name of an explicit overload is the same 
       as the name of a method that is not listed as an overloaded method.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this medhod."
+expected_out: "Semantic error ESE0397: Method with the same name as overload declaration 'foo', overloadlist must list this method."
 ---*/
 
 class C {

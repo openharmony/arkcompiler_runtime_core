@@ -115,7 +115,7 @@ cases:
               "2": 3,
           } // CTE, duplicate key
       expected: |-
-          Semantic error ESE0263: An object literal cannot multiple properties with same name
+          Semantic error ESE0263: An object literal cannot have multiple properties with same name
 
     - use: |-
           let a: Record<number, number> = {
@@ -124,7 +124,7 @@ cases:
               2: 3,
           } // CTE, duplicate key
       expected: |-
-          Semantic error ESE0263: An object literal cannot multiple properties with same name
+          Semantic error ESE0263: An object literal cannot have multiple properties with same name
 
     - use: |-
           let a: Record<number, number> = {
@@ -178,4 +178,4 @@ cases:
               1.0: "one point zero",
           } // CTE, duplicate key
       expected: |-
-          Semantic error ESE0263: An object literal cannot multiple properties with same name
+          Semantic error ESE0263: An object literal cannot have multiple properties with same name
