@@ -286,6 +286,8 @@ public:
     void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
+    void EncodeAtomicU64Or(Reg addr, Reg value, bool fastEncoding) override;
+    void EncodeAtomicOrImpl(Reg addr, Reg value, TypeInfo type, uint8_t regSize);
 
     void EncodeSelect(const ArgsSelect &args) override;
     void EncodeSelect(const ArgsSelectImm &args) override;

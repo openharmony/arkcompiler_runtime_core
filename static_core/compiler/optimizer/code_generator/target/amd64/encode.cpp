@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2224,6 +2224,11 @@ void Amd64Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc)
 void Amd64Encoder::EncodeAtomicByteOr(Reg addr, Reg value, [[maybe_unused]] bool fastEncoding)
 {
     GetMasm()->lock().or_(asmjit::x86::byte_ptr(ArchReg(addr)), ArchReg(value, ark::compiler::BYTE_SIZE));
+}
+
+void Amd64Encoder::EncodeAtomicU64Or(Reg addr, Reg value, [[maybe_unused]] bool fastEncoding)
+{
+    GetMasm()->lock().or_(asmjit::x86::qword_ptr(ArchReg(addr)), ArchReg(value, DOUBLE_WORD_SIZE));
 }
 
 void Amd64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)

@@ -1618,15 +1618,25 @@ bool LLVMIrConstructor::EmitReverseHalfWords(Inst *inst)
     return true;
 }
 
-bool LLVMIrConstructor::EmitAtomicByteOr(Inst *inst)
+bool LLVMIrConstructor::EmitAtomicOrImpl(Inst *inst, llvm::Type *type)
 {
     auto addr = GetInputValue(inst, 0);
     auto value = GetInputValue(inst, 1);
-    auto byteVal = builder_.CreateTrunc(value, builder_.getInt8Ty());
+    auto typeVal = builder_.CreateZExtOrTrunc(value, type);
     auto op = llvm::AtomicRMWInst::BinOp::Or;
-    builder_.CreateAtomicRMW(op, addr, byteVal, llvm::MaybeAlign(0), llvm::AtomicOrdering::Monotonic);
+    builder_.CreateAtomicRMW(op, addr, typeVal, llvm::MaybeAlign(0), llvm::AtomicOrdering::Monotonic);
 
     return true;
+}
+
+bool LLVMIrConstructor::EmitAtomicByteOr(Inst *inst)
+{
+    return EmitAtomicOrImpl(inst, builder_.getInt8Ty());
+}
+
+bool LLVMIrConstructor::EmitAtomicU64Or(Inst *inst)
+{
+    return EmitAtomicOrImpl(inst, builder_.getInt64Ty());
 }
 
 llvm::Value *LLVMIrConstructor::GetMappedValue(Inst *inst, DataType::Type type)

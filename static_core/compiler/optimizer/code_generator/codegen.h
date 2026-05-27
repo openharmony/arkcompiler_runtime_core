@@ -545,6 +545,8 @@ private:
     void EncodeOnlineIrtocBarrier(Args args);
     void EncodeOnlineIrtocRegionTwoRegsBarrier(Args args);
     void EncodeOnlineIrtocRegionOneRegBarrier(Args args);
+    void EncodeOnlineIrtocCMCRegionOneRegBarrier(Args args);
+    void EncodeOnlineIrtocCMCRegionTwoRegsBarrier(Args args);
 
     // Auxillary methods
     void EncodeCalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1);

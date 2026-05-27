@@ -1,0 +1,10 @@
+#34838 failed on mutator != nullptr (need patch with mutators)
+ets_func_tests/std/concurrency/workerlocal_test.ets
+ets_func_tests/std/containers/WeakMapGCTest.ets
+ets_func_tests/std/containers/WeakSetGCTest.ets
+
+#33648
+ets_func_tests/std/debug/CountInstancesOfClass.ets
+
+#32998
+ets_func_tests/std/core/get_hash.ets

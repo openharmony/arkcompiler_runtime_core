@@ -1,2 +1,7 @@
 ets-common-tests/gc/test_finreg_coros_g1.ets
 ets-common-tests/gc/weak_ref_test_g1.ets
+
+# 33648 excluded because failed by timeout
+ets-common-tests/gc/finalization_registry_coro_test.ets
+ets-common-tests/gc/finalization_registry_test.ets
+ets-common-tests/gc/test_finreg_coros_cmc.ets

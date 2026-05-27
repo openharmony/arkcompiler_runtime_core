@@ -1,7 +1,4 @@
 # 33648
-ets-common-tests/gc/finalization_registry_coro_test.ets
-ets-common-tests/gc/finalization_registry_test.ets
-ets-common-tests/gc/test_finreg_coros_cmc.ets
 ets-common-tests/intrinsics/array_reverse.ets
 ets-common-tests/intrinsics/array_slice.ets
 ets-common-tests/intrinsics/copyTo.ets

@@ -32,12 +32,6 @@ void Barrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) co
     LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
 }
 
-void Barrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
-{
-    LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": " << field.GetTargetObject() << " => "
-                   << ref;
-}
-
 BaseObject *Barrier::ReadRefField(BaseObject *obj, RefField<false> &field) const
 {
     HeapAddress target = field.GetFieldValue();

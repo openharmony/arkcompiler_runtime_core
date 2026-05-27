@@ -28,11 +28,8 @@ public:
     BaseObject *ReadStaticRef(RefField<false> &field) const override;
 
     void PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const override;
-    void WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const override;
 
     BaseObject *AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const override;
-
-    void UpdateRememberSet(BaseObject *object, BaseObject *ref) const;
 };
 }  // namespace ark::common_vm
 

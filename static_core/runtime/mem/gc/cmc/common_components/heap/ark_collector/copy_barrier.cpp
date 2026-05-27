@@ -64,12 +64,4 @@ void YoungCopyBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedO
         LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
     }
 }
-
-void YoungCopyBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
-{
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-        UpdateRememberSet(obj, ref);
-        LOG(DEBUG, GC) << "write obj " << obj << " ref-field@" << &field << ": -> " << ref;
-    }
-}
 }  // namespace ark::common_vm

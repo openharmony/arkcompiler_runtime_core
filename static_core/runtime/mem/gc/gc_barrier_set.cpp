@@ -87,7 +87,7 @@ extern "C" void PreWrbFuncEntrypoint(ObjectPointerType oldval)
     ASSERT(IsAddressInObjectsHeap(reinterpret_cast<const ObjectHeader *>(oldval)->ClassAddr<BaseClass>()));
     LOG(DEBUG, GC) << "G1GC pre barrier val = " << oldval;
     ValidateObject(RootType::SATB_BUFFER, reinterpret_cast<const ObjectHeader *>(oldval));
-    auto *thread = ManagedThread::GetCurrent();
+    auto *thread = Mutator::GetCurrent();
     // thread can't be null here because pre-barrier is called only in concurrent-mark, but we don't process
     // weak-references in concurrent mark
     ASSERT(thread != nullptr);
@@ -279,9 +279,10 @@ extern "C" void PreWriteBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType
 #endif
 }
 
-GCCMCBarrierSet::GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
+GCCMCBarrierSet::GCCMCBarrierSet(mem::InternalAllocatorPtr allocator, uint8_t regionSizeBitsCount)
     : GCBarrierSet(allocator, BarrierType::CMC_READ_BARRIER, BarrierType::PRE_CMC_WRITE_BARRIER,
-                   BarrierType::POST_CMC_WRITE_BARRIER)
+                   BarrierType::POST_CMC_WRITE_BARRIER),
+      regionSizeBitsCount_(regionSizeBitsCount)
 {
     readBarrierFunc_ = &ReadBarrierFuncEntrypoint;
     preWriteBarrierFunc_ = &PreWriteBarrierFuncEntrypoint;
@@ -293,30 +294,21 @@ GCCMCBarrierSet::GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
     AddBarrierOperand(
         BarrierPosition::BARRIER_POSITION_PRE, "PRE_CMC_WRITE_BARRIER",
         BarrierOperand(BarrierOperandType::FUNC_WITH_OBJ_REF_ADDRESS, BarrierOperandValue(preWriteBarrierFunc_)));
-}
-
-bool GCCMCBarrierSet::IsSameRegion([[maybe_unused]] void *field, [[maybe_unused]] void *obj)
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    auto fieldRegion = ToUintPtr(field) & ~ark::mem::RegionDesc::DEFAULT_REGION_UNIT_MASK;
-    auto objRegion = ToUintPtr(obj) & ~ark::mem::RegionDesc::DEFAULT_REGION_UNIT_MASK;
-    if (objRegion == fieldRegion) {
-        return true;
-    }
-#endif  // ARK_USE_COMMON_RUNTIME
-    return false;
+    // POST
+    AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS",
+                      BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(regionSizeBitsCount_)));
 }
 
 bool GCCMCBarrierSet::IsPreBarrierEnabled()
 {
-    return ManagedThread::GetCurrent()->GetPreWrbEntrypoint() != nullptr;
+    return Mutator::GetCurrent()->GetPreWrbEntrypoint() != nullptr;
 }
 
 void GCCMCBarrierSet::PreBarrier(void *preValAddr)
 {
-    ASSERT(ManagedThread::GetCurrent()->GetPreWrbEntrypoint() != nullptr);
+    ASSERT(Mutator::GetCurrent()->GetPreWrbEntrypoint() != nullptr);
     LOG_IF(preValAddr != nullptr, DEBUG, GC) << "GC PreBarrier: with pre-value " << preValAddr;
-    auto *preWriteBarrier = ManagedThread::GetCurrent()->GetPreWrbEntrypoint();
+    auto *preWriteBarrier = Mutator::GetCurrent()->GetPreWrbEntrypoint();
     ASSERT(preWriteBarrier != nullptr);
     reinterpret_cast<ObjRefProcessFunc>(preWriteBarrier)(ToObjPtrType(preValAddr));
 }
@@ -388,6 +380,27 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
     return field.GetTargetObject();
 }
 
+void GCCMCBarrierSet::UpdateRememberSet([[maybe_unused]] void *object, [[maybe_unused]] void *ref) const
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    ASSERT(object != nullptr);
+    RegionDesc::InlinedRegionMetaData *objMetaRegion =
+        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(object));
+    if (objMetaRegion->IsInCollectionSet()) {
+        return;
+    }
+    RegionDesc::InlinedRegionMetaData *refMetaRegion =
+        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(ref));
+    if (refMetaRegion->IsInYoungSpaceForWB()) {
+        if (objMetaRegion->MarkRSetCardTable(reinterpret_cast<ark::common_vm::BaseObject *>(object))) {
+            LOG(DEBUG, GC) << "update point-out remember set of region " << objMetaRegion->GetRegionDesc() << ", obj "
+                           << object << ", ref: " << ref << "<"
+                           << reinterpret_cast<ark::common_vm::BaseObject *>(ref)->GetTypeInfo() << ">";
+        }
+    }
+#endif  // ARK_USE_COMMON_RUNTIME
+}
+
 void GCCMCBarrierSet::WriteBarrier([[maybe_unused]] void *obj, [[maybe_unused]] void *field,
                                    [[maybe_unused]] void *newValue)
 {
@@ -395,10 +408,10 @@ void GCCMCBarrierSet::WriteBarrier([[maybe_unused]] void *obj, [[maybe_unused]] 
     if (newValue == nullptr) {
         return;
     }
-    if (IsSameRegion(field, newValue)) {
+    if (ark::mem::IsSameRegion(obj, newValue, regionSizeBitsCount_)) {
         return;
     }
-    ark::common_vm::BaseRuntime::WriteBarrier(obj, field, newValue, Mutator::GetCurrent());
+    UpdateRememberSet(obj, newValue);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

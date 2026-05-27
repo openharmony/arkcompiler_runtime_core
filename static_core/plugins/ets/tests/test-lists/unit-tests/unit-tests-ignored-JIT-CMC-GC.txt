@@ -1,0 +1,13 @@
+#34838 failed on mutator != nullptr (need patch with mutators)
+ets-common-tests/atomics/base_operation_add.ets
+ets-common-tests/atomics/base_operation_and.ets
+ets-common-tests/atomics/base_operation_exchange.ets
+ets-common-tests/atomics/base_operation_load.ets
+ets-common-tests/atomics/base_operation_or.ets
+ets-common-tests/atomics/base_operation_store.ets
+ets-common-tests/atomics/base_operation_sub.ets
+ets-common-tests/atomics/base_operation_xor.ets
+ets-common-tests/intrinsics/to_string_cache.ets
+ets-common-tests/intrinsics/string_indexof.ets
+#34838 failed on intrinsics (string_concat)
+ets-common-tests/intrinsics/map_new.ets

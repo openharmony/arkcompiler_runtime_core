@@ -354,10 +354,9 @@ static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArr
                                                                          size_t count) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
             // CC-OFFNXT(G.NAM.03) project code style
-            static constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
             const uint32_t size = count * sizeof(T);
-            barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(T), size);
-            barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(T) - size, size);
+            barrierSet->PostBarrier(arr, dstStart * sizeof(T), size);
+            barrierSet->PostBarrier(arr, dstEndMirror * sizeof(T) - size, size);
         }
         executionCtx->GetMT()->Safepoint();
         usePreBarrier = barrierSet->IsPreBarrierEnabled();

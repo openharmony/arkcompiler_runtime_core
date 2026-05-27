@@ -220,13 +220,6 @@ void BaseRuntime::NotifyWarmStart()
     }
 }
 
-void BaseRuntime::WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator)
-{
-    DCHECK(field != nullptr);
-    Heap::GetBarrier().WriteBarrier(mutator, reinterpret_cast<BaseObject *>(obj),
-                                    *reinterpret_cast<RefField<> *>(field), reinterpret_cast<BaseObject *>(ref));
-}
-
 void BaseRuntime::PreWriteBarrier(void *preVal, Mutator *mutator)
 {
     Heap::GetBarrier().PreWriteBarrier(mutator, reinterpret_cast<BaseObject *>(preVal));

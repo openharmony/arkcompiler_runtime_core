@@ -45,36 +45,9 @@ BaseObject *IdleBarrier::AtomicReadRefField(BaseObject *obj, RefField<true> &fie
     return target;
 }
 
-void IdleBarrier::UpdateRememberSet(BaseObject *object, BaseObject *ref) const
-{
-    DCHECK(object != nullptr);
-    RegionDesc::InlinedRegionMetaData *objMetaRegion =
-        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(object));
-    if (objMetaRegion->IsInCollectionSet()) {
-        return;
-    }
-
-    RegionDesc::InlinedRegionMetaData *refMetaRegion =
-        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(ref));
-    if (refMetaRegion->IsInYoungSpaceForWB()) {
-        if (objMetaRegion->MarkRSetCardTable(object)) {
-            LOG(DEBUG, GC) << "update point-out remember set of region " << objMetaRegion->GetRegionDesc() << ", obj "
-                           << object << ", ref: " << ref << "<" << ref->GetTypeInfo() << ">";
-        }
-    }
-}
-
 void IdleBarrier::PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const
 {
     LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << rememberedObject;
 }
 
-void IdleBarrier::WriteBarrier(Mutator *mutator, BaseObject *obj, RefField<false> &field, BaseObject *ref) const
-{
-    if (!Heap::IsTaggedObject((HeapAddress)ref)) {
-        return;
-    }
-    UpdateRememberSet(obj, ref);
-    LOG(DEBUG, GC) << "write obj " << obj << " ref@" << &field << ": " << field.GetTargetObject() << " => " << ref;
-}
 }  // namespace ark::common_vm
