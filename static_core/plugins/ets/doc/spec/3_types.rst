@@ -96,44 +96,6 @@ source code in |LANG|.
    enumeration type
    alias
 
-Most *predefined types* have aliases to improve |TS| compatibility as follows:
-
-
-+--------------+---------------+
-| Primary Name | Alias         |
-+==============+===============+
-| ``number``   |   ``Number``  |
-+--------------+---------------+
-| ``byte``     |   ``Byte``    |
-+--------------+---------------+
-| ``short``    |   ``Short``   |
-+--------------+---------------+
-| ``int``      |   ``Int``     |
-+--------------+---------------+
-| ``long``     |   ``Long``    |
-+--------------+---------------+
-| ``float``    |   ``Float``   |
-+--------------+---------------+
-| ``double``   |   ``Double``  |
-+--------------+---------------+
-| ``boolean``  |   ``Boolean`` |
-+--------------+---------------+
-| ``char``     |   ``Char``    |
-+--------------+---------------+
-| ``string``   |   ``String``  |
-+--------------+---------------+
-| ``bigint``   |   ``BigInt``  |
-+--------------+---------------+
-| ``Object``   |   ``object``  |
-+--------------+---------------+
-
-Using primary names of *predefined types* is recommended in all cases.
-
-.. index::
-   predefined type
-   primary name
-   alias
-   compatibility
 
 |
 
@@ -155,7 +117,7 @@ Predefined types include the following:
 -  :ref:`Type null`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
--  :ref:`Array Types` (``Array<T>`` or ``T[]`` or ``FixedArray<T>``);
+-  :ref:`Array Types`;
 -  :ref:`Type Function`.
 
 .. index::
@@ -171,6 +133,44 @@ Predefined types include the following:
    string
    bigint
    array
+
+Some *predefined types* have aliases to improve |TS| compatibility as follows:
+
++--------------+---------------+
+| Primary Name | Alias         |
++==============+===============+
+| ``bigint``   |   ``BigInt``  |
++--------------+---------------+
+| ``boolean``  |   ``Boolean`` |
++--------------+---------------+
+| ``byte``     |   ``Byte``    |
++--------------+---------------+
+| ``char``     |   ``Char``    |
++--------------+---------------+
+| ``double``   |   ``Double``  |
++--------------+---------------+
+| ``float``    |   ``Float``   |
++--------------+---------------+
+| ``int``      |   ``Int``     |
++--------------+---------------+
+| ``long``     |   ``Long``    |
++--------------+---------------+
+| ``number``   |   ``Number``  |
++--------------+---------------+
+| ``Object``   |   ``object``  |
++--------------+---------------+
+| ``short``    |   ``Short``   |
++--------------+---------------+
+| ``string``   |   ``String``  |
++--------------+---------------+
+
+Using primary names of *predefined types* is recommended in all cases.
+
+.. index::
+   predefined type
+   primary name
+   alias
+   compatibility
 
 |
 
@@ -1302,7 +1302,7 @@ type, function, or method as follows:
    foo<undefined>(undefined) // OK
    foo<void>(undefined)      // OK
    
-   foo<void>(void)// Compile-time error, 'void' cannot used as the value
+   foo<void>(void) // Compile-time error, 'void' cannot be used as a value
 
 .. index::
    keyword undefined
@@ -1606,15 +1606,17 @@ Array Types
 
 *Array type* represents a data structure intended to comprise any non-negative
 number of elements of types that are subtypes of the type specified in the
-array declaration. |LANG| supports the following two predefined array types:
+array declaration. |LANG| supports the following three predefined array types:
 
 - :ref:`Resizable Array Types`; and
 
-- :ref:`Fixed-Size Array Types` as an experimental feature.
+- :ref:`Fixed-Size Array Types` as an experimental feature; and
+
+- :ref:`Value Array Types` as an experimental feature.
 
 *Resizable array types* are recommended for most cases.
-*Fixed-size array types* can be used where performance is the major
-requirement.
+*Fixed-size array types* and *Value array types* can be used where performance
+is the major requirement.
 
 *Fixed-size arrays* differ from *resizable arrays* as follows:
 
@@ -1622,19 +1624,28 @@ requirement.
   performance.
 - *Fixed-Size arrays* have no methods defined.
 
+*Value arrays* differ from *resizable arrays* and *fixed-size arrays* as
+follows:
+
+- *Value arrays* have their length set only once to achieve a better
+  performance.
+- *Value arrays* can be only of numeric, boolean and char element types.
+- *Value arrays* have no methods defined.
+
 Any array type is a class type that has an appropriate class in the
 :ref:`Standard Library`. It means that array types are subtypes of
 ``Object``, and that they can be used at any place where a class
 name is expected. 
-Moreover, array types are iterable (see :ref:`Iterable Types`), and can be
+Moreover, all array types are iterable (see :ref:`Iterable Types`), and can be
 used at any place where an iterable type is expected. 
 
 
 .. note::
-   The term *array type* as used in this Specification applies to both
-   *resizable array type* and *fixed-size array type*. The same holds true for
-   *array value* and *array instance*.
-   *Resizable arrays* and *fixed-size arrays* are not assignable to each other.
+   The term *array type* as used in this Specification applies to 
+   *resizable array type*, *fixed-size array type*, and *value array type*. The
+   same holds true for *array value* and *array instance*.
+   *Resizable arrays*, *fixed-size arrays*, and *value arrays* are not
+   assignable to each other.
 
 .. index::
    array length

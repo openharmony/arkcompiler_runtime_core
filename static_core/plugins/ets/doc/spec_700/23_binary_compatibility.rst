@@ -147,7 +147,7 @@ Some of the changes that break the binary compatibility:
 
 - Changing the name or removing of an *exported* *function* or *variable*.
 
-- Changing the name or removing of an *exported* *class*, *interface*, *enum*, *type alias* or *namespace*.
+- Changing the name or removing of an *exported* *class*, *interface*, *enum* or *type alias*.
 
 
 For *Class* and *Interface Declarations*:

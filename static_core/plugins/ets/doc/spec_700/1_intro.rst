@@ -595,7 +595,13 @@ as used in other languages, application areas, or industries.
 
    fixed-size array type
      -- a built-in type that consists of more than one element, and has its
-     length set only once to achieve a better performance.
+     length set only once. Arrays of this kind deliver better performance than
+     resizable ones.
+
+   value array type
+     -- a built-in type that consists of more than one element of numeric,
+     boolean or character types, and has its length set only once. Arrays of
+     this kind deliver better performance than resizable ones.
 
    array type
      -- a type that consists of more than one element.

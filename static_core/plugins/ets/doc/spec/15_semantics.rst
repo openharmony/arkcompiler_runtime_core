@@ -63,7 +63,7 @@ The type of a *standalone expression* is determined as follows:
 - In case of an :ref:`Array Literal`, the type is inferred from the elements
   (see :ref:`Array Type Inference from Types of Elements`).
 
-- In case of an :ref:`Object Literal`, the type cannot be is inferred and a
+- In case of an :ref:`Object Literal`, the type cannot be inferred and a
   :index:`compile-time error` occurs.
 
 - Otherwise, the type is defined as in :ref:`Type of Expression`.
@@ -976,7 +976,7 @@ are met:
   less than number of optional and required parameters of ``S`` (``n``).
 
 - Number of required parameters of ``F`` is equal or less than number
-  of required paramers of ``S``.
+  of required parameters of ``S``.
 
 - If the rest parameter ``FPrest`` is present then ``SPrest`` is present.
 
@@ -1196,7 +1196,7 @@ Identity relation for types ``A`` and ``B`` is defined as follows:
          data: T
          constructor (p: T) { this.data = p } // OK, as here 'T' is a class type parameter
          method <T>(p: T) {
-             this.data = p // Compile-time error as 'T' of the class is different from 'T' of the method
+             this.data = p // Compile-time error, 'T' of the class is different from 'T' of the method
          }
       }
 
@@ -1727,18 +1727,19 @@ the following conditions:
    the identical type (see :ref:`Type Identity`) expression *R*, then ``R`` is
    the return type.
 -  If there are *k* return statements (where *k* is 2 or more) with
-   expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
-   *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
-   ``T``:sub:`k`), and its normalized version (see :ref:`Union Types Normalization`)
-   is the return type. If at least one of return statements has no expression, then
-   type ``undefined`` is added to the return type union.
--  If a lambda body contains no return statement but at least one throw statement
-   (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
-   :ref:`Type never`).
+   expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is
+   the *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` |
+   ... | ``T``:sub:`k`), and its normalized version (see
+   :ref:`Union Types Normalization`) is the return type. If at least one of
+   return statements has no expression, then type ``undefined`` is added to the
+   return type union.
+-  If a lambda body contains no return statement but all execution paths leads
+   to a throw statement (see :ref:`Throw Statements`) execution, then the
+   lambda return type is ``never`` (see :ref:`Type never`).
 -  If a function, a method, or a lambda is ``async`` (see
    :ref:`Asynchronous execution`), a return type is inferred by applying
-   the above rules, and the return type ``T`` is not ``Promise``, then the return
-   type is assumed to be ``Promise<T>``.
+   the above rules, and the return type ``T`` is not ``Promise``, then the
+   return type is assumed to be ``Promise<T>``.
 
 Return type inference is represented in the example below:
 

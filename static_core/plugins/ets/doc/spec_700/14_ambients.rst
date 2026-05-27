@@ -804,7 +804,7 @@ Implementing Ambient Namespace Declaration
 If an *ambient namespace* is implemented in |LANG|, a namespace with the
 same name must be declared (see :ref:`Namespace Declarations`) as the
 top-level declaration of a module. All namespace names of a nested
-namespace (i.e. a namespace embedded into another namespace) must be the same
+namespace (i.e., a namespace embedded into another namespace) must be the same
 as in ambient context.
 
 

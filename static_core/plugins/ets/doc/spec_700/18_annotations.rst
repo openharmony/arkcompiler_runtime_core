@@ -186,11 +186,11 @@ Types of Annotation Fields
 The choice of *types for annotation fields* is limited to the following:
 
 - :ref:`Numeric Types`;
-- Type ``boolean`` (see :ref:`Type boolean`);
+- :ref:`Type boolean`;
 - :ref:`Type string`;
-- Enumeration types (see :ref:`Enumerations`);
-- Array of the above types (e.g., ``string[]``), including arrays of arrays
-  (e.g., ``string[][]``).
+- Unions (see :ref:`Union Types`) of :ref:`String Literal Types`;
+- Arrays (see :ref:`Array Types`) of the above types (e.g., ``string[]``),
+  including arrays of arrays (e.g., ``string[][]``).
 
 A :index:`compile-time error` occurs if any other type is used as the type of
 an *annotation field*.
@@ -220,7 +220,7 @@ and to define the values of annotation fields:
 .. code-block:: abnf
 
     annotationUsage:
-        AnnotationUsageNoParentheses |
+        annotationUsageNoParentheses |
         annotationUsageWithParentheses
         ;
 
@@ -901,10 +901,11 @@ Runtime Access to Annotations
     frontend_status: None
 
 For an annotation with the "BYTECODE" or "RUNTIME"  *retention policy*
-(see :ref:`Retention Annotation`) an abstract class with the name of
-the annotation is implicitly declared by the compiler.
-All fields of this class are declared ``readonly``.
-If a field is of an array type, the array type is also ``readonly``.
+(see :ref:`Retention Annotation`) a type with the name of
+the annotation is implicitly declared by the compiler. This type cannot be 
+expressed in the language. It behaves like a ``final abstract class`` with
+``readonly`` fields corresponding to the annotation fields.
+If a field is of an array type, its type is also ``readonly``.
 
 .. index::
    runtime
@@ -927,12 +928,12 @@ For the following annotation:
         attrs: number[]
     }
 
--- the abstract class is declared:
+-- the type like the following is declared:
 
 .. code-block:: typescript
    :linenos:
 
-    abstract class MyAnno {
+    final abstract class MyAnno {
         readonly name: string
         readonly attrs: readonly number[]
     }
@@ -955,16 +956,14 @@ The use of such a class is represented in following example:
    readonly name
 
 .. note::
-   - An abstract class **is not** declared for annotations with the "SOURCE"
+   - A type **is not** declared for annotations with the "SOURCE"
      retention policy.
   
-   - The only way to get instance of an implicitly declared abstract class
-     is to call the reflection library.
-     A :index:`compile-time error` occurs if:
-     
-     - *New expression* is used for the class (see :ref:`New Expressions`);
-     
-     - The class is used in a :ref:`Class Extension Clause`.
+   - The only way to get instance of an implicitly declared type
+     is to call the reflection library;
+
+   - A :index:`compile-time error` occurs if a type is used in a
+     *new expression* or :ref:`Class Extension Clause`.
 
 .. raw:: pdf
 

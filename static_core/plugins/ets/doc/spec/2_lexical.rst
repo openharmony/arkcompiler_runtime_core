@@ -221,23 +221,23 @@ characters:
 
 .. code-block:: abnf
 
-    Identifier:
-      IdentifierStart IdentifierPart*
+    identifier:
+      identifierStart identifierPart*
       ;
 
-    IdentifierStart:
-      UnicodeIDStart
+    identifierStart:
+      unicodeIDStart
       | '$'
       | '_'
-      | '\\' EscapeSequence
+      | '\\' escapeSequence
       ;
 
-    IdentifierPart:
-      UnicodeIDContinue
+    identifierPart:
+      unicodeIDContinue
       | '$'
       | ZWNJ
       | ZWJ
-      | '\\' EscapeSequence
+      | '\\' escapeSequence
       ;
 
     ZWJ:
@@ -247,18 +247,18 @@ characters:
      '\u200D'
     ;
 
-    UnicodeIDStart
+    unicodeIDStart
       : Letter
       | ['$']
-      | '\\' UnicodeEscapeSequence;
+      | '\\' unicodeEscapeSequence;
 
-    UnicodeIDContinue
-      : UnicodeIDStart
-      | UnicodeDigit
+    unicodeIDContinue
+      : unicodeIDStart
+      | unicodeDigit
       | '\u200C'
       | '\u200D';
 
-    UnicodeEscapeSequence:
+    unicodeEscapeSequence:
       'u' HexDigit HexDigit HexDigit HexDigit
       | 'u' '{' HexDigit HexDigit+ '}'
       ;
@@ -270,7 +270,7 @@ characters:
       | UNICODE_CLASS_LM
       | UNICODE_CLASS_LO
       ;
-    UnicodeDigit
+    unicodeDigit
       : UNICODE_CLASS_ND
       ;
 
@@ -365,8 +365,8 @@ identifiers:
    +--------------------+-------------------+------------------+------------------+
 
 
-2. Names and aliases of predefined types are also *hard keywords*. They cannot
-be used as identifiers:
+2. Names and aliases of the following :ref:`Predefined Types` are also
+*hard keywords*. They cannot be used as identifiers:
 
 +---------------+---------------+
 | Primary Name  | Alias         |
@@ -388,6 +388,8 @@ be used as identifiers:
 | ``int``       | ``Int``       |
 +---------------+---------------+
 | ``long``      | ``Long``      |
++---------------+---------------+
+| ``never``     |               |
 +---------------+---------------+
 | ``number``    | ``Number``    |
 +---------------+---------------+
@@ -509,7 +511,7 @@ Literals
 
 .. code-block:: abnf
 
-    Literal:
+    literal:
       IntegerLiteral
       | FloatLiteral
       | BigIntLiteral
@@ -654,17 +656,17 @@ but :ref:`Unary Minus` operator):
 .. code-block:: typescript
   :linenos:
 
-   const max_int1 = 21474836477 // OK, type: int, value: max(int)
-   const max_int2 = 0x7FFFFFFF  // OK, type: int, value: max(int)
+   const max_int1 =   2147483647 // OK, type: int, value: max(int)
+   const max_int2 =   0x7FFFFFFF // OK, type: int, value: max(int)
    
    const min_int1 = - 2147483648 // OK, type: int, value: min(int)
    const min_int2 = - 0x80000000 // OK, type: int, value: min(int)
 
    const long1    =   0x80000000 // OK, type: long
    
-   const err1: int = 2147483648 // Compile-time error, the value is out of range for 'int'
+   const err1: int =  2147483648 // Compile-time error, the value is out of range for 'int'
    
-   const max_long = 0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
+   const max_long =   0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
    const min_long = - 0x8000_0000_0000_0000 // OK, type: long, value: min(long)
    
    const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
@@ -887,15 +889,15 @@ for ``string`` (see :ref:`Type string`).
 
     DoubleQuoteCharacter:
         ~["\\\r\n]
-        | '\\' EscapeSequence
+        | '\\' escapeSequence
         ;
 
     SingleQuoteCharacter:
         ~['\\\r\n]
-        | '\\' EscapeSequence
+        | '\\' escapeSequence
         ;
 
-    EscapeSequence:
+    escapeSequence:
         ['"bfnrtv0\\]
         | 'x' HexDigit HexDigit
         | 'u' HexDigit HexDigit HexDigit HexDigit
@@ -987,7 +989,7 @@ Multiline String Literal
     frontend_status: Done
 
 *Multiline strings* can contain arbitrary text enclosed between backtick
-characters ``'`` \` ``'``. The backlash character ``'\'`` is an escape for the
+characters ``'`` \` ``'``. The backslash character ``'\'`` is an escape for the
 next character. Multiline strings can contain any character except an unescaped
 backtick. The end of a line is handled as a newline character:
 
@@ -1011,7 +1013,7 @@ backtick. The end of a line is handled as a newline character:
 
     BackticksContentCharacter:
         ~[`\\\r\n]
-        | '\\' EscapeSequence
+        | '\\' escapeSequence
         | LineContinuation
         ;
 
