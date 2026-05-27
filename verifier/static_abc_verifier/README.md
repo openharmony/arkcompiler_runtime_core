@@ -80,8 +80,8 @@ static_abc_verifier/
 - CMake >= 3.14
 - GCC/G++ with C++17 support
 - JDK 8+ (for JNI and Java wrapper build)
-- Maven 3.x (for packaging the Java wrapper JAR, optional)
-- aarch64-linux-gnu-g++ (for aarch64 cross-compilation)
+- Maven 3.x (optional; default build uses javac + jar and does not require Maven)
+- aarch64-linux-gnu-g++ (for aarch64 cross-compilation; auto-installed via apt when possible)
 
 ### Quick Start
 
@@ -95,8 +95,21 @@ static_abc_verifier/
 # Build JNI library and publish Java wrapper JAR to local Maven repo
 ./build.sh publish-local
 
+# Build JNI for x86_64 and aarch64, then package multi-arch JAR
+./build.sh publish-multiarch
+
+# Force Maven packaging (slower first run; useful for publish-local)
+./build.sh --use-maven java-wrapper
+
 # Clean all artifacts
 ./build.sh clean
+```
+
+`java-wrapper` and `publish-multiarch` use **javac + jar** by default (no Maven download).
+For faster repeat builds, install system tools once:
+
+```bash
+sudo apt-get install -y default-jdk maven gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 ```
 
 ### Manual Build
@@ -121,6 +134,12 @@ cp build/jni/libstaticabcverifier_jni.so java-verifier-wrapper/src/main/resource
 ```
 
 ### Cross-compilation for aarch64
+
+On x86_64 hosts, `./build.sh publish-multiarch` (or `./build.sh jni-all`) builds both
+architectures automatically. On aarch64 hosts, install `gcc-x86-64-linux-gnu` /
+`g++-x86-64-linux-gnu` for the x86_64 cross-build.
+
+Manual cross-compilation for aarch64:
 
 ```bash
 cmake -S . -B build/aarch64-jni \
@@ -155,7 +174,7 @@ Add dependency (after local Maven publish):
 <dependency>
     <groupId>com.oh.ark</groupId>
     <artifactId>static-abc-verifier</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.0</version>
 </dependency>
 ```
 
