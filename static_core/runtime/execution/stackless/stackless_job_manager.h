@@ -110,6 +110,8 @@ private:
 
     size_t GetActiveWorkersCount() const;
 
+    size_t GetExclusiveWorkersCount() const;
+
     size_t GetRegisteredJobsCount() const;
 
     // job manager config

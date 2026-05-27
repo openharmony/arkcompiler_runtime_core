@@ -317,6 +317,29 @@ void StacklessJobWorkerThread::CacheLocalObjectsInExecutionCtx()
     GetSchedulerExecutionCtx()->UpdateCachedObjects();
 }
 
+void StacklessJobWorkerThread::ExecuteJobsUntilIdle()
+{
+    ASSERT(!IsCrossWorkerCall());
+    ASSERT(Job::GetCurrent()->GetType() == Job::Type::SCHEDULER ||
+           Job::GetCurrent()->GetType() == Job::Type::FINALIZER ||
+           ((Job::GetCurrent()->GetType() == Job::Type::MUTATOR) && !Job::GetCurrent()->HasEntrypoint()));
+
+    allJobsAreExecutedEvt_.Lock();
+    allJobsAreExecutedEvt_.SetNotHappened();
+    WaitForEvent(&allJobsAreExecutedEvt_, true, true);
+}
+
+void StacklessJobWorkerThread::CompleteAllAffinedJobs()
+{
+    ASSERT(IsDisabledForCrossWorkersLaunch());
+
+    bool hasAsyncWork = true;
+    while (hasAsyncWork) {
+        ExecuteJobsUntilIdle();
+        hasAsyncWork = GetPandaVM()->RunEventLoop(EventLoopRunMode::RUN_NOWAIT);
+    }
+}
+
 void StacklessJobWorkerThread::ProcessTimerEvents()
 {
     auto currTime = jobManager_->GetCurrentTime();
@@ -367,18 +390,6 @@ void StacklessJobWorkerThread::UpdateMinExpirationTime(JobEvent *blocker)
         auto *timer = static_cast<TimerEvent *>(blocker);
         minExpirationTime_ = std::min(minExpirationTime_, timer->GetExpirationTime());
     }
-}
-
-void StacklessJobWorkerThread::CompleteAllAffinedJobs()
-{
-    ASSERT(!IsCrossWorkerCall());
-    ASSERT(Job::GetCurrent()->GetType() == Job::Type::SCHEDULER ||
-           Job::GetCurrent()->GetType() == Job::Type::FINALIZER ||
-           ((Job::GetCurrent()->GetType() == Job::Type::MUTATOR) && !Job::GetCurrent()->HasEntrypoint()));
-
-    allJobsAreExecutedEvt_.Lock();
-    allJobsAreExecutedEvt_.SetNotHappened();
-    WaitForEvent(&allJobsAreExecutedEvt_, true, true);
 }
 
 void StacklessJobWorkerThread::CheckJobsExecution()

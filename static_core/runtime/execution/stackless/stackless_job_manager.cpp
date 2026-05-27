@@ -213,7 +213,6 @@ JobExecutionContext *StacklessJobManager::AttachExclusiveWorker(Runtime *runtime
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
 
     if (IsExclusiveWorkersLimitReached()) {
-        LOG(DEBUG, EXECUTION) << "The program reached the limit of exclusive workers";
         return nullptr;
     }
 
@@ -238,21 +237,22 @@ bool StacklessJobManager::DetachExclusiveWorker()
 
     eWorker->Deactivate();
 
-    CheckProgramCompletion();
-
     eWorker->DestroyLocalStorage();
 
     auto *eaExecCtx = eWorker->GetSchedulerExecutionCtx();
     DestroyExecutionContext(eaExecCtx);
 
     OnWorkerShutdown(eWorker);
+
+    CheckProgramCompletion();
     return true;
 }
 
 bool StacklessJobManager::IsExclusiveWorkersLimitReached() const
 {
-    LOG(ERROR, EXECUTION) << "This API is not yet supported in the stackless mode";
-    return false;
+    bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ >= exclusiveWorkersLimit_;
+    LOG_IF(limitIsReached, DEBUG, EXECUTION) << "The programm reached the limit of exclusive workers";
+    return limitIsReached;
 }
 
 void StacklessJobManager::CreateGeneralWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
@@ -386,12 +386,11 @@ size_t StacklessJobManager::GetExistingWorkersCount() const
 JobExecutionContext *StacklessJobManager::CreateExecutionContext(Runtime *runtime, PandaVM *vm, Job *job)
 {
     ASSERT(job != nullptr);
+    ASSERT(!job->HasEntrypoint());
     auto *execCtx = execCtxFactory_(runtime, vm, job);
     ASSERT(execCtx != nullptr);
-    if (!job->HasEntrypoint()) {
-        JobExecutionContext::SetCurrent(execCtx);
-        execCtx->NativeCodeBegin();
-    }
+    JobExecutionContext::SetCurrent(execCtx);
+    execCtx->NativeCodeBegin();
     return execCtx;
 }
 
@@ -599,7 +598,7 @@ void StacklessJobManager::WaitForMutatorJobsCompletion()
     while (true) {
         {
             os::memory::LockHolder lkCompletion(programCompletionLock_);
-            if (AllJobsAreExecuted()) {
+            if (AllJobsAreExecuted() && (GetExclusiveWorkersCount() == 0)) {
                 return;
             }
             programCompletionEvent_.SetNotHappened();
@@ -634,6 +633,18 @@ size_t StacklessJobManager::GetActiveWorkersCount() const
 {
     os::memory::LockHolder lkWorkers(workersLock_);
     return activeWorkersCount_;
+}
+
+size_t StacklessJobManager::GetExclusiveWorkersCount() const
+{
+    size_t exclusiveWorkersCount = 0;
+    os::memory::LockHolder lkWorkers(workersLock_);
+    for (auto *worker : workers_) {
+        if (worker->InExclusiveMode()) {
+            exclusiveWorkersCount++;
+        }
+    }
+    return exclusiveWorkersCount;
 }
 
 size_t StacklessJobManager::GetRegisteredJobsCount() const

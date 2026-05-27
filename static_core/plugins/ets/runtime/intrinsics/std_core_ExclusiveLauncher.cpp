@@ -29,9 +29,11 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/intrinsics/helpers/intrinsic_timer_impl.h"
 
 #include <cstdint>
 #include <thread>
+#include <unordered_map>
 
 namespace ark::ets::intrinsics {
 
@@ -48,6 +50,19 @@ static void RunExclusiveTask(mem::Reference *taskRef, mem::GlobalObjectStorage *
     auto *taskObj = EtsObject::FromCoreType(refStorage->Get(taskRef));
     refStorage->Remove(taskRef);
     LambdaUtils::InvokeVoid(ManagedThread::GetCurrent(), taskObj);
+}
+
+static void ResolveJoiningPromise(mem::Reference *joiningPromiseRef, mem::GlobalObjectStorage *refStorage)
+{
+    auto *jobCtx = JobExecutionContext::GetCurrent();
+    ScopedManagedCodeThread managedCode(jobCtx);
+    auto *promise = EtsPromise::FromCoreType(refStorage->Get(joiningPromiseRef));
+    auto *execCtx = EtsExecutionContext::FromMT(jobCtx);
+    refStorage->Remove(joiningPromiseRef);
+    EtsHandleScope s(execCtx);
+    EtsHandle<EtsPromise> joiningPromise(execCtx, promise);
+    EtsMutex::LockHolder lh(joiningPromise);
+    joiningPromise->Resolve(execCtx, nullptr);
 }
 
 static JobExecutionContext *TryCreateEAWorker(PandaEtsVM *etsVM, bool needInterop, bool &limitIsReached,
@@ -72,25 +87,61 @@ static JobExecutionContext *TryCreateEAWorker(PandaEtsVM *etsVM, bool needIntero
     return eaExecCtx;
 }
 
-static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 100 * 1000U;
+class SchedulingHelper {
+public:
+    void StartPeriodicScheduling()
+    {
+        auto schedEntrypoint = [](void *) {
+            auto *jobCtx = JobExecutionContext::GetCurrent();
+            auto *jobMan = jobCtx->GetManager();
 
-void RunTaskOnEAWorker(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
-{
-    RunExclusiveTask(taskRef, etsVM->GetGlobalObjectStorage());
-    if (needInterop) {
-        auto *w = Coroutine::GetCurrent()->GetWorker();
-        while (w->IsExternalSchedulingEnabled()) {
-            w->ProcessAsyncWork();
-            auto *jobMan = JobExecutionContext::GetCurrent()->GetManager();
-            TimerEvent timerEvt(jobMan, 0);
-            timerEvt.Lock();
-            timerEvt.SetExpirationTime(jobMan->GetCurrentTime() + ASYNC_WORK_WAITING_TIME);
-            jobMan->Await(&timerEvt);
+            jobMan->ExecuteJobs();
+            EtsExecutionContext::FromMT(jobCtx)->GetPandaVM()->RunEventLoop(EventLoopRunMode::RUN_NOWAIT);
+        };
+        auto entrypoint = helpers::NativeEntrypoint {schedEntrypoint, nullptr};
+        auto tid = helpers::CreateTimer(std::move(entrypoint), PERIODIC_SCHEDULING_DELAY, true);
+        auto wid = JobExecutionContext::GetCurrent()->GetWorker()->GetId();
+        {
+            os::memory::LockHolder lh(idsLock_);
+            [[maybe_unused]] auto [_, inserted] = schedulingJobIds_.insert({wid, tid});
+            ASSERT(inserted);
         }
     }
+
+    void StopPeriodicScheduling(JobWorkerThread::Id wid)
+    {
+        helpers::TimerId tid = 0;
+        {
+            os::memory::LockHolder lh(idsLock_);
+            auto idIt = schedulingJobIds_.find(wid);
+            ASSERT(idIt != schedulingJobIds_.end());
+            tid = idIt->second;
+            schedulingJobIds_.erase(idIt);
+        }
+        helpers::StopTimer(tid);
+    }
+
+private:
+    static constexpr uint64_t PERIODIC_SCHEDULING_DELAY = 100U;
+
+    os::memory::Mutex idsLock_;
+    std::unordered_map<JobWorkerThread::Id, helpers::TimerId> schedulingJobIds_ GUARDED_BY(idsLock_);
+};
+
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static SchedulingHelper g_eaWorkerHelper = {};
+
+static void EAWorkerLoop(PandaEtsVM *etsVM, mem::Reference *taskRef, [[maybe_unused]] mem::Reference *joiningPromiseRef)
+{
+    auto *refStorage = etsVM->GetGlobalObjectStorage();
+    RunExclusiveTask(taskRef, refStorage);
+
+    JobExecutionContext::GetCurrent()->GetWorker()->ExecuteJobsUntilIdle();
+
+    ResolveJoiningPromise(joiningPromiseRef, refStorage);
 }
 
-bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
+static bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
 {
     if (limitIsReached) {
         ThrowCoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
@@ -131,7 +182,7 @@ static void HandleInteropEnvError()
     executionCtx->GetManager()->DetachExclusiveWorker();
 }
 
-void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
+static void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
 {
     auto *jobMan = etsVM->GetJobManager();
     if (supportInterop) {
@@ -145,22 +196,23 @@ void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
 }
 
 static void SetupAndRunExclusiveWorker(PandaEtsVM *etsVM, JobExecutionContext *eaExecCtx, bool supportInterop,
-                                       mem::Reference *taskRef)
+                                       mem::Reference *taskRef, mem::Reference *joiningPromiseRef)
 {
     bool res = true;
     if (supportInterop) {
         res = PrepareInteropEnv(etsVM, eaExecCtx);
     }
     if (!res) {
+        g_eaWorkerHelper.StopPeriodicScheduling(eaExecCtx->GetWorker()->GetId());
         HandleInteropEnvError();
         etsVM->GetGlobalObjectStorage()->Remove(taskRef);
         return;
     }
-    RunTaskOnEAWorker(etsVM, supportInterop, taskRef);
+    EAWorkerLoop(etsVM, taskRef, joiningPromiseRef);
     DestroyExclusiveWorker(etsVM, supportInterop);
 }
 
-EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
+EtsInt ExclusiveLaunch(EtsObject *task, EtsPromise *joiningPromise, EtsString *name, uint8_t needInterop)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
@@ -172,6 +224,8 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
     auto *refStorage = etsVM->GetGlobalObjectStorage();
     auto *taskRef = refStorage->Add(task->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(taskRef != nullptr);
+    auto *joiningPromiseRef = refStorage->Add(joiningPromise->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    ASSERT(joiningPromiseRef != nullptr);
     auto limitIsReached = false;
     auto jsEnvEmpty = false;
     bool supportInterop = static_cast<bool>(needInterop);
@@ -184,49 +238,34 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
         PandaString nameStr(nameHandle->ConvertToStringView(&nameBuf));
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         auto event = os::memory::Event();
-        auto t = std::thread([&jsEnvEmpty, &limitIsReached, &event, &workerId, etsVM, taskRef, supportInterop]() {
-            auto *eaExecCtx = TryCreateEAWorker(etsVM, supportInterop, limitIsReached, jsEnvEmpty);
-            if (eaExecCtx == nullptr) {
-                LOG(ERROR, COROUTINES) << "Cannot create EAWorker";
+        auto t = std::thread(
+            [&jsEnvEmpty, &limitIsReached, &event, &workerId, etsVM, taskRef, joiningPromiseRef, supportInterop]() {
+                auto *eaExecCtx = TryCreateEAWorker(etsVM, supportInterop, limitIsReached, jsEnvEmpty);
+                if (eaExecCtx == nullptr) {
+                    LOG(ERROR, COROUTINES) << "Cannot create EAWorker";
+                    event.Fire();
+                    return;
+                }
+                workerId = eaExecCtx->GetWorker()->GetId();
+                g_eaWorkerHelper.StartPeriodicScheduling();
                 event.Fire();
-                return;
-            }
-            workerId = eaExecCtx->GetWorker()->GetId();
-            event.Fire();
-            SetupAndRunExclusiveWorker(etsVM, eaExecCtx, supportInterop, taskRef);
-        });
+                SetupAndRunExclusiveWorker(etsVM, eaExecCtx, supportInterop, taskRef, joiningPromiseRef);
+            });
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();
         t.detach();
     }
     if (HasPendingError(limitIsReached, jsEnvEmpty)) {
         refStorage->Remove(taskRef);
+        refStorage->Remove(joiningPromiseRef);
         return INVALID_WORKER_ID;
     }
     return workerId;
 }
 
-void JoinExclusiveWorker(EtsInt workerId, EtsObject *finalTask)
+void JoinExclusiveWorker(EtsInt workerId)
 {
-    auto *executionCtx = JobExecutionContext::GetCurrent();
-    auto *jobMan = executionCtx->GetManager();
-    auto *taskRef = executionCtx->GetVM()->GetGlobalObjectStorage()->Add(finalTask->GetCoreType(),
-                                                                         mem::Reference::ObjectType::GLOBAL);
-    auto eaGroup = JobWorkerThreadGroup::GenerateExactWorkerId(workerId);
-    auto joiningFunc = [](void *param) {
-        auto *ref = static_cast<mem::Reference *>(param);
-        auto *eaExecutionCtx = JobExecutionContext::GetCurrent();
-        RunExclusiveTask(ref, eaExecutionCtx->GetVM()->GetGlobalObjectStorage());
-        eaExecutionCtx->GetWorker()->DestroyCallbackPoster();
-    };
-    auto epInfo = Job::NativeEntrypointInfo {joiningFunc, taskRef};
-    // NOLINTNEXTLINE(performance-move-const-arg)
-    auto *job = jobMan->CreateJob("joining ea-coro", std::move(epInfo), JobPriority::DEFAULT_PRIORITY,
-                                  Job::Type::MUTATOR, true);
-    auto lResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), eaGroup});
-    if (UNLIKELY(lResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
-        jobMan->DestroyJob(job);
-    }
+    g_eaWorkerHelper.StopPeriodicScheduling(workerId);
 }
 
 extern "C" EtsInt StdCoroutineGetExclusiveWorkersLimit()

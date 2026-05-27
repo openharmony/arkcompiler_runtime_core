@@ -28,7 +28,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
     : CoroutineWorker(runtime, vm, name, id, inExclusiveMode, isMainWorker),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
-      hasRunnableCoroEvent_(coroManager),
+      allCoroutinesExecuted_(coroManager),
       stats_(std::move(name))
 {
     LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << GetId() << " name=" << GetName();
@@ -174,9 +174,6 @@ void StackfulCoroutineWorker::UnblockWaiters(JobEvent *blocker)
         coroManager_->MigrateAwakenedCoro(unblockedCoro);
         return;
     }
-    if (blocker != &hasRunnableCoroEvent_) {
-        hasRunnableCoroEvent_.Happen();
-    }
 }
 
 void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
@@ -220,44 +217,43 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
     }
 }
 
-void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
-{
-    ASSERT(IsDisabledForCrossWorkersLaunch());
-
-    while (ProcessAsyncWork()) {
-    }
-}
-
-bool StackfulCoroutineWorker::ProcessAsyncWork()
+void StackfulCoroutineWorker::ExecuteJobsUntilIdle()
 {
     ASSERT_NATIVE_CODE();
-    ASSERT(GetCurrentContext()->GetWorker() == this);
+    ASSERT(!IsCrossWorkerCall());
 
-    bool asyncWorkExists = false;
     // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto lock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Lock(); }(), ...); };
     // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto unlock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Unlock(); }(), ...); };
-    {
+
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
         lock(waitersLock_, runnablesLock_);
         if (runnables_.Size() > 1) {
             unlock(waitersLock_, runnablesLock_);
             coroManager_->ExecuteJobs();
-            asyncWorkExists = true;
         } else if (!waiters_.empty()) {
-            hasRunnableCoroEvent_.Lock();
-            hasRunnableCoroEvent_.SetNotHappened();
+            allCoroutinesExecuted_.Lock();
+            allCoroutinesExecuted_.SetNotHappened();
             unlock(waitersLock_, runnablesLock_);
-            coroManager_->Await(&hasRunnableCoroEvent_);
-            asyncWorkExists = true;
+            coroManager_->Await(&allCoroutinesExecuted_);
         } else {
             unlock(waitersLock_, runnablesLock_);
+            break;
         }
     }
+}
 
-    asyncWorkExists |= GetPandaVM()->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT);
+void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
+{
+    ASSERT(IsDisabledForCrossWorkersLaunch());
 
-    return asyncWorkExists;
+    bool asyncWorkExists = true;
+    while (asyncWorkExists) {
+        ExecuteJobsUntilIdle();
+        asyncWorkExists = GetPandaVM()->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT);
+    }
 }
 
 bool StackfulCoroutineWorker::HasPendingLocalJobs()
@@ -441,6 +437,9 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
         auto [needToWait, waitingTimeMs] = CalculateShortestTimerDelay();
         if (!needToWait) {
             return;
+        }
+        if (waitingTimeMs == WAITING_TIME_UNLIMITED) {
+            allCoroutinesExecuted_.Happen();
         }
 
         bool migrationHappened = coroManager_->MigrateCoroutinesInward(this);

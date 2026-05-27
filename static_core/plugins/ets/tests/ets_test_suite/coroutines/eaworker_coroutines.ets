@@ -210,7 +210,7 @@ async function testNestedEAWorker(): Promise<void> {
         let p2 = e2.run<number>(():number => {
             return foo();
         });
-        e2.quit();
+        await e2.join();
 
         return await p2;
     });
