@@ -23,8 +23,9 @@ if (ark_standalone_build) {
 }
 
 group("ark_packages") {
-  if (enable_static_vm) {
-    deps = plugin_ark_packages
+  deps = []
+  if (!is_host_product && enable_static_vm) {
+    deps += plugin_ark_packages
     deps += [
       "$ark_root/compiler:libarktscompiler",
       "$ark_root/compiler/aot:libarkaotmanager",
@@ -49,81 +50,90 @@ group("ark_packages") {
 }
 
 group("ark_host_linux_tools_packages") {
-  deps = plugin_ark_host_linux_tools_packages
-  deps += [
-    "$ark_root/abc2program:arkts_abc2prog(${host_toolchain})",
-    "$ark_root/abc2program:arkts_abc2program(${host_toolchain})",
-    "$ark_root/assembler:arkts_asm(${host_toolchain})",
-    "$ark_root/compiler:libarktscompiler(${host_toolchain})",
-    "$ark_root/compiler/aot:libarkaotmanager(${host_toolchain})",
-    "$ark_root/libarkbase:libarktsbase(${host_toolchain})",
-    "$ark_root/libarkfile:libarktsfile(${host_toolchain})",
-    "$ark_root/libarkfile/external:libarkfileExt(${host_toolchain})",
-    "$ark_root/libarkfile/external:libarksupport(${host_toolchain})",
-    "$ark_root/libziparchive:libarktsziparchive(${host_toolchain})",
-    "$ark_root/panda:arkts_bin(${host_toolchain})",
-    "$ark_root/runtime:libarkruntime(${host_toolchain})",
-  ]
-  if (enable_codegen && !panda_runtime_sdk_build && host_os != "mac") {
-    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})" ]
-  }
-
-  deps += [ "$ark_root/compiler/tools/aptool:ark_aptool(${host_toolchain})" ]
-
-  # TODO: don't exclude these targets from OHOS build
-  if (ark_static_standalone_build) {
-    if (enable_codegen && !panda_runtime_sdk_build) {
-      deps += [ "$ark_root/compiler/tools/aotdump:ark_aotdump(${host_toolchain})" ]
+  deps = []
+  if (!is_host_product) {
+    deps += plugin_ark_host_linux_tools_packages
+    deps += [
+      "$ark_root/abc2program:arkts_abc2prog(${host_toolchain})",
+      "$ark_root/abc2program:arkts_abc2program(${host_toolchain})",
+      "$ark_root/assembler:arkts_asm(${host_toolchain})",
+      "$ark_root/compiler:libarktscompiler(${host_toolchain})",
+      "$ark_root/compiler/aot:libarkaotmanager(${host_toolchain})",
+      "$ark_root/libarkbase:libarktsbase(${host_toolchain})",
+      "$ark_root/libarkfile:libarktsfile(${host_toolchain})",
+      "$ark_root/libarkfile/external:libarkfileExt(${host_toolchain})",
+      "$ark_root/libarkfile/external:libarksupport(${host_toolchain})",
+      "$ark_root/libziparchive:libarktsziparchive(${host_toolchain})",
+      "$ark_root/panda:arkts_bin(${host_toolchain})",
+      "$ark_root/runtime:libarkruntime(${host_toolchain})",
+    ]
+    if (enable_codegen && !panda_runtime_sdk_build && host_os != "mac") {
+      deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})" ]
     }
 
-    deps += [
-      "$ark_root/compiler/tools/paoc:ark_aot(${host_toolchain})",
-      "$ark_root/disassembler:arkts_disasm(${host_toolchain})",
-      "$ark_root/static_linker:ark_link(${host_toolchain})",
-    ]
+    deps += [ "$ark_root/compiler/tools/aptool:ark_aptool(${host_toolchain})" ]
+
+    # TODO: don't exclude these targets from OHOS build
+    if (ark_static_standalone_build) {
+      if (enable_codegen && !panda_runtime_sdk_build) {
+        deps += [ "$ark_root/compiler/tools/aotdump:ark_aotdump(${host_toolchain})" ]
+      }
+
+      deps += [
+        "$ark_root/compiler/tools/paoc:ark_aot(${host_toolchain})",
+        "$ark_root/disassembler:arkts_disasm(${host_toolchain})",
+        "$ark_root/static_linker:ark_link(${host_toolchain})",
+      ]
+    }
   }
 }
 
 group("ark_host_windows_tools_packages") {
-  deps = plugin_ark_host_windows_tools_packages
-  if (host_os != "mac" && current_cpu != "arm" &&
-      !ark_static_standalone_build && !ark_standalone_build) {
-    deps += [
-      "$ark_root/abc2program:arkts_abc2prog(//build/toolchain/mingw:mingw_x86_64)",
-      "$ark_root/abc2program:arkts_abc2program(//build/toolchain/mingw:mingw_x86_64)",
-      "$ark_root/assembler:arkts_asm(//build/toolchain/mingw:mingw_x86_64)",
-      "$ark_root/disassembler:arkts_disasm(//build/toolchain/mingw:mingw_x86_64)",
-      "$ark_root/static_linker:ark_link(//build/toolchain/mingw:mingw_x86_64)",
-    ]
+  deps = []
+  if (!is_host_product) {
+    deps += plugin_ark_host_windows_tools_packages
+    if (host_os != "mac" && current_cpu != "arm" &&
+        !ark_static_standalone_build && !ark_standalone_build) {
+      deps += [
+        "$ark_root/abc2program:arkts_abc2prog(//build/toolchain/mingw:mingw_x86_64)",
+        "$ark_root/abc2program:arkts_abc2program(//build/toolchain/mingw:mingw_x86_64)",
+        "$ark_root/assembler:arkts_asm(//build/toolchain/mingw:mingw_x86_64)",
+        "$ark_root/disassembler:arkts_disasm(//build/toolchain/mingw:mingw_x86_64)",
+        "$ark_root/static_linker:ark_link(//build/toolchain/mingw:mingw_x86_64)",
+      ]
+    }
   }
 }
 
 group("ark_host_mac_tools_packages") {
-  deps = plugin_ark_host_mac_tools_packages
-  if (host_os == "mac") {
-    if (host_cpu == "arm64") {
-      deps += [
-        "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/libarkbase:libarktsbase($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/libarkfile:libarktsfile($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_arm64)",
-        "$ark_root/panda:arkts_bin($build_root/toolchain/mac:clang_arm64)"
-      ]
-    } else {
-      deps += [
-        "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/libarkbase:libarktsbase($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/libarkfile:libarktsfile($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_x64)",
-        "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_x64)",
-      ]
+  deps = []
+  if (!is_host_product) {
+    deps += plugin_ark_host_mac_tools_packages
+    if (host_os == "mac") {
+      if (host_cpu == "arm64") {
+        deps += [
+          "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/libarkbase:libarktsbase($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/libarkfile:libarktsfile($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_arm64)",
+          "$ark_root/panda:arkts_bin($build_root/toolchain/mac:clang_arm64)"
+        ]
+      } else {
+        deps += [
+          "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/libarkbase:libarktsbase($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/libarkfile:libarktsfile($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_x64)",
+          "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_x64)",
+        ]
+      }
     }
   }
 }
