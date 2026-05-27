@@ -40,6 +40,6 @@ async function startTest() {
   arktest.assertEQ(result.age, 25);
 }
 
-function main(): void {
-  startTest().catch(arktest.crashProgram);
+async function main() {
+  await startTest()
 }

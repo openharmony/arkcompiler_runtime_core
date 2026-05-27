@@ -31,6 +31,6 @@ async function startTest() {
     await example.methodReturnVoidImplicit();
 }
 
-function main(): void {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }

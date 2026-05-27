@@ -33,8 +33,8 @@ async function bar() {
         }), {{c.check}})
 }
 
-function main() {
-    bar().catch(arktest.crashProgram)
+async function main() {
+    await bar()
 }
 
 {% endfor %}

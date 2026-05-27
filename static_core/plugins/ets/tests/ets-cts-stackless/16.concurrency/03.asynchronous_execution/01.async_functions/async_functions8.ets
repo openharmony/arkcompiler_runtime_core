@@ -32,6 +32,6 @@ async function startTest() {
     arktest.assertEQ(res[1] === "testAsync2", true);
 }
 
-function main(): void {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }

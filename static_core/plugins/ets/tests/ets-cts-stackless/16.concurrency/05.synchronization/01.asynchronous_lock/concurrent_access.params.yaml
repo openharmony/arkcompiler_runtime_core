@@ -44,7 +44,7 @@ cases:
         arktest.assertEQ(concurrentCount, 0);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
 
   - desc: Lock prevents data races.
     decl: |-
@@ -78,7 +78,7 @@ cases:
         arktest.assertEQ(sharedCounter, expected);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();
 
   - desc: Multiple locks work independently.
     decl: |-
@@ -113,4 +113,4 @@ cases:
         arktest.assertEQ(lock2Counter, 1);
       }
     logic: |-
-      waitForCompletion(startTest);
+      await startTest();

@@ -86,7 +86,7 @@ cases:
         )
         await promise1;
         await promise2;
-        ea1.quit();
-        ea2.quit();
+        await ea1.join();
+        await ea2.join();
         arktest.assertEQ(counter, cycleCounter * 2)
       }

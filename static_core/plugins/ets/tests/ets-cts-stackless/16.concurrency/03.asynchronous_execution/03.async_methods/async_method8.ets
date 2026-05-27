@@ -34,6 +34,6 @@ async function startTest() {
     arktest.assertEQ(result, "Resolved after 100 ms")
 }
 
-function main(): void {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }

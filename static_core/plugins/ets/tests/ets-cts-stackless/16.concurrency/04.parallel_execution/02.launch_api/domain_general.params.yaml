@@ -71,7 +71,7 @@ cases:
       }
 
       // Cleanup
-      ea.quit();
+      await ea.join();
 
   - desc: >-
       Verify that hint with general worker ID is used in GENERAL domain.
@@ -171,7 +171,7 @@ cases:
       }
 
       // Cleanup
-      ea.quit();
+      await ea.join();
 
   - desc: >-
       Verify that coroutines in GENERAL domain are distributed

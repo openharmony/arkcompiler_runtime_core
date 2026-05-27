@@ -27,7 +27,7 @@ async function startTest() {
 
   arktest.assertEQ(42, result)
 
-  ea.quit()
+  await ea.join()
 }
 
 async function main() {

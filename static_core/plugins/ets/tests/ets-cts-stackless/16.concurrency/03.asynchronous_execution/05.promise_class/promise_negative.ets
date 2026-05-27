@@ -25,7 +25,7 @@ async function runTest() {
     {{c.use|indent}}
 }
 
-function main(){
-    runTest().catch(arktest.crashProgram);
+async function main() {
+    await runTest()
 }
 {% endfor %}

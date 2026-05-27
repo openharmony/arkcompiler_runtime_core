@@ -568,6 +568,7 @@ cases:
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -597,12 +598,13 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(async () => a.field)
+        let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -623,13 +625,14 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(async () => a.field)
+        let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -657,12 +660,13 @@ cases:
         let a: A = new A()
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(async () => a.field)
+        let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -681,13 +685,14 @@ cases:
         let a: A = new A()
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(async () => a.field)
+        let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -712,12 +717,12 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
       - |-
         let a: A = new A()
-        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then(async (): Promise<[check_type]> => await a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -725,6 +730,7 @@ cases:
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -740,13 +746,13 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
       - |-
         let a: A = new A()
-        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then(async (): Promise<[check_type]> => await a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
@@ -756,6 +762,7 @@ cases:
 
   - desc: |-
         Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -787,12 +794,12 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
       - |-
         let a: A = new A()
-        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then(async (): Promise<[check_type]> => await a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -800,6 +807,7 @@ cases:
 
   - desc: |-
       Checking for initialization with asynchronous API usage.
+    async_main: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -822,13 +830,13 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
       - |-
         let a: A = new A()
-        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then(async (): Promise<[check_type]> => await a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])

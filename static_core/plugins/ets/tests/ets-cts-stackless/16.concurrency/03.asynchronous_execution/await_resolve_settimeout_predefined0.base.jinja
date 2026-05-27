@@ -40,8 +40,8 @@ async function startTest() {
     arktest.assertEQ(result, value, `Promise.resolve result should be ${value}`);
 }
 
-function main() {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }
 {% endfor %}
 {% endfor %}

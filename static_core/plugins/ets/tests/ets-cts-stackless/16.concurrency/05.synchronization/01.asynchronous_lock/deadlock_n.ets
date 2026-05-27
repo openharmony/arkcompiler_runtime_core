@@ -24,7 +24,7 @@ tags: [no-warmup, negative]
 
 {{c.decl}}
 
-function main() {
+async function main() {
   {{c.logic}}
 }
 

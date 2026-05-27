@@ -141,6 +141,7 @@ bool StacklessJobManager::TerminateExecutionContext(JobExecutionContext *executi
 LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
 {
     os::memory::LockHolder lh(workersLock_);
+    LOG(DEBUG, EXECUTION) << "Choosing worker for job " << job->GetName();
     auto [w, affinityMask] = ChooseWorkerForJob(params);
     if UNLIKELY (w == nullptr) {
         DestroyJob(job);

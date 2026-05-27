@@ -76,7 +76,7 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLink
     if (wasLinked == 1 && !promise->TryChangeStateFromLinkedToPending()) {
         return;
     }
-    helpers::EtsPromiseResolveImpl(promise, value);
+    helpers::EtsPromiseResolveImpl(executionCtx, promise, value);
 }
 
 void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinked)
@@ -90,7 +90,7 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinke
     if (wasLinked == 1 && !promise->TryChangeStateFromLinkedToPending()) {
         return;
     }
-    helpers::EtsPromiseRejectImpl(promise, error);
+    helpers::EtsPromiseRejectImpl(executionCtx, promise, error);
 }
 
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)

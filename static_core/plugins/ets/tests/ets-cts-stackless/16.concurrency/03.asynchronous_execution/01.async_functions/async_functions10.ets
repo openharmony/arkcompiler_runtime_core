@@ -37,6 +37,6 @@ async function startTest() {
   arktest.assertEQ(result3, "Step 1 completed, Step 2 completed, Step 3 completed");
 }
 
-function main(): void {
-  startTest().catch(arktest.crashProgram);
+async function main() {
+  await startTest()
 }

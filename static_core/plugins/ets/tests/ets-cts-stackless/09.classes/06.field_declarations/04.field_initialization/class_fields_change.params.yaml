@@ -539,7 +539,7 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(() => a.field)
+        let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
 
@@ -591,12 +591,12 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = waitForCompletion(() => a.field)
+        let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [base_value])
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        res = waitForCompletion(() => a.field)
+        res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
 
@@ -646,14 +646,14 @@ cases:
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        let res = waitForCompletion(() => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then(async (): Promise<[check_type]> => await a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -712,14 +712,14 @@ cases:
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        waitForCompletion(a.foo)
+        await a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [new_value])
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [base_value])
-        let res = waitForCompletion(() => a.foo().then((): [check_type] => a.field))
+        let res = await a.foo().then(async (): Promise<[check_type]> => await  a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [new_value])
         arktest.assertTrue(a.field instanceof [check_type])

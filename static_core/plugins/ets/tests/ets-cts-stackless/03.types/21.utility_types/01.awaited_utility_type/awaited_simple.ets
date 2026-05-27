@@ -25,8 +25,8 @@ async function foo() {
     {{c.use|indent}}
 }
 
-function main() {
-  foo().catch(arktest.crashProgram)
+async function main() {
+    await foo()
 }
 
 {% endfor %}

@@ -293,9 +293,9 @@ extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 
 extern "C" int32_t StdSystemGetCoroutineId()
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    JobExecutionContext *coro = JobExecutionContext::GetCurrent();
     ASSERT(coro != nullptr);
-    return coro->GetCoroutineId();
+    return coro->GetJob()->GetId();
 }
 
 extern "C" EtsBoolean StdSystemIsMainWorker()

@@ -21,7 +21,7 @@ desc: {{c.desc}}
 
 {{c.decl}}
 
-function main() {
+async function main(): Promise<void> {
   {{c.logic}}
 }
 

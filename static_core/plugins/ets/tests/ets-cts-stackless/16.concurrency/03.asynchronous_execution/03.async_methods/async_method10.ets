@@ -39,6 +39,6 @@ async function startTest() {
     arktest.assertEQ(result, "Caught error: Something went wrong!")
 }
 
-function main(): void {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }

@@ -20,7 +20,7 @@ tags: [no-warmup]
 ---*/
 
 import { CoroutineExtras } from "std/debug/concurrency"
-import { launch, waitForCompletion, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
+import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
 import { EAWorker } from "std/core"
 
 const MAIN_WORKER_ID: int = 0;
@@ -31,7 +31,7 @@ function getWorkerId(): int {
 
 {{c.decl | default('')}}
 
-function main(): void {
+async function main(): Promise<void> {
     {{c.logic|indent}}
 }
 {% endfor %}

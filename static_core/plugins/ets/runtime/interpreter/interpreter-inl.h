@@ -302,7 +302,8 @@ public:
         }
 
         this->GetAccAsVReg().SetReference(promise->GetCoreType());
-        intrinsics::helpers::EtsPromiseResolveImpl(promise, EtsObject::FromCoreType(frame->GetVReg(v).GetReference()));
+        intrinsics::helpers::EtsPromiseResolveImpl(executionCtx, promise,
+                                                   EtsObject::FromCoreType(frame->GetVReg(v).GetReference()));
         this->template MoveToNextInst<FORMAT, true>();
     }
 
@@ -323,7 +324,8 @@ public:
         }
 
         this->GetAccAsVReg().SetReference(promise->GetCoreType());
-        intrinsics::helpers::EtsPromiseRejectImpl(promise, EtsObject::FromCoreType(frame->GetVReg(v).GetReference()));
+        intrinsics::helpers::EtsPromiseRejectImpl(executionCtx, promise,
+                                                  EtsObject::FromCoreType(frame->GetVReg(v).GetReference()));
         this->template MoveToNextInst<FORMAT, true>();
     }
 

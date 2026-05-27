@@ -25,9 +25,9 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount = -1, int32
 
 EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise);
 
-void EtsPromiseResolveImpl(EtsPromise *promise, EtsObject *value);
+void EtsPromiseResolveImpl(EtsExecutionContext *executionCtx, EtsPromise *promise, EtsObject *value);
 
-void EtsPromiseRejectImpl(EtsPromise *promise, EtsObject *error);
+void EtsPromiseRejectImpl(EtsExecutionContext *executionCtx, EtsPromise *promise, EtsObject *error);
 
 }  // namespace ark::ets::intrinsics::helpers
 

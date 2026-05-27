@@ -27,6 +27,6 @@ async function bar() {
   foo(await Promise.resolve("literal string"), "literal string")
 }
 
-function main() {
-  bar().catch(arktest.crashProgram)
+async function main() {
+  await bar()
 }

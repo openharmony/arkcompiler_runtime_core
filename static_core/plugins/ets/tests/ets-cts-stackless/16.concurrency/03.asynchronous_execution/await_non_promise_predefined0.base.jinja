@@ -27,8 +27,8 @@ async function startTest() {
     arktest.assertEQ(v0, v1)
 }
 
-function main() {
-    startTest().catch(arktest.crashProgram);
+async function main(): Promise<void> {
+    await startTest()
 }
 {% endfor %}
 {% endfor %}

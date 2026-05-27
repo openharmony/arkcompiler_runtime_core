@@ -16,7 +16,7 @@
 /*---
 desc: Simultaneously run task A() (throws an exception) and task B() (successful task).
 assert: Stderr contains error A.
-tags: [negative]
+tags: [negative, no-warmup]
 expected_out:
     runtime:
         - "Task A start"
@@ -25,7 +25,8 @@ expected_error:
     runtime:
         - "Unhandled exception: std.core.Error"
         - "Error: concurrent_nested_n.ets: task A failed"
-        - "at concurrent_nested_n.ETSGLOBAL.%async-taskA (concurrent_nested_n.ets:40:0)"
+        - "at concurrent_nested_n.ETSGLOBAL.taskA (concurrent_nested_n.ets:41:0)"
+        - "at concurrent_nested_n.ETSGLOBAL.main (concurrent_nested_n.ets:51:0)"
 ---*/
 
 async function delay(): Promise<string> {

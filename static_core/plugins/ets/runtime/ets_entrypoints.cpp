@@ -555,7 +555,7 @@ extern "C" EtsObject *EtsAsyncResolveEntrypoint(EtsObject *value)
     }
 
     EtsHandle<EtsPromise> hpromise(executionCtx, promise);
-    intrinsics::helpers::EtsPromiseResolveImpl(hpromise.GetPtr(), hvalue.GetPtr());
+    intrinsics::helpers::EtsPromiseResolveImpl(executionCtx, hpromise.GetPtr(), hvalue.GetPtr());
     return hpromise.GetPtr();
 }
 
@@ -574,7 +574,7 @@ extern "C" EtsObject *EtsAsyncRejectEntrypoint(EtsObject *error)
     }
 
     EtsHandle<EtsPromise> hpromise(executionCtx, promise);
-    intrinsics::helpers::EtsPromiseRejectImpl(hpromise.GetPtr(), herror.GetPtr());
+    intrinsics::helpers::EtsPromiseRejectImpl(executionCtx, hpromise.GetPtr(), herror.GetPtr());
     return hpromise.GetPtr();
 }
 

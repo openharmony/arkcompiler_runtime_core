@@ -35,11 +35,11 @@ class Child extends Parent {
   }
 
   public async greet(): Promise<string> {
-    await this.customFetchMessage();
+    return await this.customFetchMessage();
   }
 
   public async callParentFarewell(): Promise<string> {
-    await this.farewell();
+    return await this.farewell();
   }
 }
 

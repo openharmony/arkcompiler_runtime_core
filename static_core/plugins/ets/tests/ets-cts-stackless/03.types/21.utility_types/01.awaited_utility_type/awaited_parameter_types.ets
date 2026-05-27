@@ -31,8 +31,8 @@ async function bar() {
   foo(await Promise.resolve({{c.expectedVal}}), {{c.expectedVal}})
 }
 
-function main() {
-  bar().catch(arktest.crashProgram)
+async function main() {
+  await bar()
 }
 
 {% endfor %}

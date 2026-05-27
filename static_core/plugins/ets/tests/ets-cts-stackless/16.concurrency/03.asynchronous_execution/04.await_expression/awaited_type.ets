@@ -30,7 +30,7 @@ async function startTest(){
     arktest.assertTrue(promiseResult instanceof Awaited<{{c.type}}>);
 }
 
-function main() {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }
 {% endfor %}

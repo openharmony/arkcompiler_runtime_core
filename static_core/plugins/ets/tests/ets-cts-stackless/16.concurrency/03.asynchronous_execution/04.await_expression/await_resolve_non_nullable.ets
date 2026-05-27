@@ -35,7 +35,7 @@ async function startTest(){
     arktest.assertEQ(awaitedResult, awaitValue, `Awaited result should be ${awaitValue}`);
 }
 
-function main() {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }
 {% endfor %}

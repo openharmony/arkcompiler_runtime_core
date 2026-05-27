@@ -21,7 +21,7 @@ desc: Return statement
 
 {{ case.decl }}
 
-function main(): void {
+async function main(): Promise<void> {
     {{ case.use | indent(4) }}
 }
 

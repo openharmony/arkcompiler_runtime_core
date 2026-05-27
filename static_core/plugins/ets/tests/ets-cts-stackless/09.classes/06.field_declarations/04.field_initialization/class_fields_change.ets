@@ -51,7 +51,7 @@ desc: {{c.desc}}
 namespace testNS{{cv_id}} {
   {{ns.decl|indent(width=2)}}
 
-  export function runTest(): boolean {
+  export async function runTest(): Promise<boolean> {
     {{ns.logic_data|indent(width=4)}}
     return true
   }
@@ -61,13 +61,13 @@ namespace testNS{{cv_id}} {
 
 {{ns.first_decl}}
 
-function main(): void {
+async function main(): Promise<void> {
 {%- for cv in check_variants %}
 {%- set cv_id = loop.index %}
 {%- if cv_id == 1 %}
   {{ns.first_logic_data|indent(width=2)}}
 {% endif %}
-  arktest.assertTrue(testNS{{cv_id}}.runTest())
+  arktest.assertTrue(await testNS{{cv_id}}.runTest())
 {%- endfor %}
 }
 

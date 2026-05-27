@@ -27,6 +27,6 @@ async function startTest() {
    arktest.assertEQ(res, "Generic!")
 }
 
-function main(): void {
-  startTest().catch(arktest.crashProgram);
+async function main() {
+  await startTest()
 }

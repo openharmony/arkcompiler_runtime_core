@@ -72,8 +72,8 @@ async function startTest(){
     arktest.assertTrue(awaited_result instanceof undefined)
 }
 
-function main(){
-    startTest().catch(arktest.crashProgram)
+async function main(){
+    await startTest()
 }
 
 {% endfor %}

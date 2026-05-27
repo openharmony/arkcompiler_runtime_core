@@ -52,9 +52,6 @@
 18.annotations/01.declaring_annotations/declaration_default_values_6.ets
 18.annotations/01.declaring_annotations/declaration_default_values_7.ets
 
-# 28232 runtime timeout only in CI
-03.types/21.utility_types/01.awaited_utility_type/awaited_return_1.ets
-
 # 33715
 03.types/10.type_never/never_class_instance_neg_7.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_8.ets

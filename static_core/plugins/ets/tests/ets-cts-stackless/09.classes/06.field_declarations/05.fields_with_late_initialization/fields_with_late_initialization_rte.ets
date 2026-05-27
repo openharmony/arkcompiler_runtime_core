@@ -42,10 +42,15 @@ desc: {{c.desc}}
 ---*/
 
 {{decl}}
-
+{% if c.async_main|default(false) %}
+async function main(): Promise<void> {
+{{logic_data}}
+}
+{% else %}
 function main(): void {
 {{logic_data}}
 }
+{% endif %}
 
 {% endfor %}
 {% endfor %}

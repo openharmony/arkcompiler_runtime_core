@@ -46,6 +46,7 @@ export class AsyncMutex {
             return;
         }
         await this.waitersList_.suspend();
+        return;
     }
 
     /**

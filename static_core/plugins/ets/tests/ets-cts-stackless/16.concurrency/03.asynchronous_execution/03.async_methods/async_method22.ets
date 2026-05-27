@@ -36,6 +36,6 @@ async function startTest() {
     arktest.assertEQ(result1, "Flag is false!");
 }
 
-function main(): void {
-    startTest().catch(arktest.crashProgram);
+async function main() {
+    await startTest()
 }

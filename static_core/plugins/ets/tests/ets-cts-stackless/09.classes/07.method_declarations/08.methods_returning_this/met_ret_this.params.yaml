@@ -528,10 +528,8 @@ cases:
           }
       use: |-
           let a = new A
-          waitForCompletion(async ()=>{
-              arktest.assertEQ((await a.bar()), a)
-              arktest.assertEQ(a.fld, 3)
-          })
+            arktest.assertEQ((await a.bar()), a)
+            arktest.assertEQ(a.fld, 3)
 
     - decl: |-
           // calling extension function returning 'this' from coroutine
@@ -551,10 +549,8 @@ cases:
           }
       use: |-
           let a = new A
-          waitForCompletion(async () => {
-            arktest.assertEQ((await a.bar()), a)
-            arktest.assertEQ(a.fld, 3)
-          })
+          arktest.assertEQ((await a.bar()), a)
+          arktest.assertEQ(a.fld, 3)
 
     - decl: |-
           // calling async method returning 'this'
@@ -570,10 +566,8 @@ cases:
           }
       use: |-
           let a = new A
-          waitForCompletion(async () => {
-            arktest.assertEQ((await (await a.foo()).foo()), a)
-            arktest.assertEQ(a.fld, 2)
-          })
+          arktest.assertEQ((await (await a.foo()).foo()), a)
+          arktest.assertEQ(a.fld, 2)
 
     - decl: |-
         class A {

@@ -30,6 +30,6 @@ async function startTest() {
     arktest.assertEQ(result, "Nested async!");
 }
 
-function main(): void {
-  startTest().catch(arktest.crashProgram);
+async function main() {
+  await startTest()
 }
