@@ -149,8 +149,8 @@ action("abckit_documentation") {
 action("abckit_force_clang_format") {
   script = "$ark_root_static/scripts/code_style/code_style_check.py"
   args = [
-    rebase_path("$abckit_root"),
     "--reformat",
+    rebase_path("$abckit_root"),
   ]
   outputs = [ "$target_gen_dir/generated/tmp/force_clang_format_status.txt" ]
 }

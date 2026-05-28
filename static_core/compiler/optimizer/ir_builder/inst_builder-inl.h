@@ -1679,6 +1679,7 @@ void InstBuilder::BuildLoadFromAnyByName(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto stringId = bcInst->GetId(0).AsRawValue();
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
 
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
@@ -1688,15 +1689,15 @@ void InstBuilder::BuildLoadFromAnyByName(const BytecodeInstruction *bcInst)
     static constexpr auto ACC_READ = false;
     intrinsic->AppendInput(GetArgDefinition(bcInst, IS_ACC_WRITE ? 0 : 1, ACC_READ));
     intrinsic->AddInputType(DataType::REFERENCE);
-    intrinsic->AppendInput(graph_->FindOrCreateConstant(stringId));
-    intrinsic->AddInputType(DataType::INT32);
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
 
+    intrinsic->AddImm(GetGraph()->GetAllocator(), stringId);
+    intrinsic->SetSlotId(icSlot);
+
     AddInstruction(saveState, intrinsic);
-    UpdateDefinitionAcc(intrinsic);
     if (IS_ACC_WRITE) {
         UpdateDefinitionAcc(intrinsic);
     } else {
@@ -1710,23 +1711,25 @@ void InstBuilder::BuildStoreFromAnyByName(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto stringId = bcInst->GetId(0).AsRawValue();
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
 
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
                                                  RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYNAME);
 
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2U);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3U);
     static constexpr bool ACC_READ = false;
     intrinsic->AppendInput(GetArgDefinition(bcInst, IS_ACC_READ ? 0 : 1, ACC_READ));
     intrinsic->AddInputType(DataType::REFERENCE);
-    intrinsic->AppendInput(graph_->FindOrCreateConstant(stringId));
-    intrinsic->AddInputType(DataType::INT32);
     intrinsic->AppendInput(IS_ACC_READ ? GetDefinitionAcc() : GetArgDefinition(bcInst, 0, ACC_READ));
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
+
+    intrinsic->AddImm(GetGraph()->GetAllocator(), stringId);
+    intrinsic->SetSlotId(icSlot);
 
     AddInstruction(saveState, intrinsic);
 }
@@ -1735,6 +1738,7 @@ void InstBuilder::BuildStoreFromAnyByName(const BytecodeInstruction *bcInst)
 void InstBuilder::BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
 
     const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYIDX;
@@ -1748,6 +1752,8 @@ void InstBuilder::BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst)
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
 
+    intrinsic->SetSlotId(icSlot);
+
     AddInstruction(saveState, intrinsic);
     UpdateDefinitionAcc(intrinsic);
 }
@@ -1756,6 +1762,7 @@ void InstBuilder::BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst)
 void InstBuilder::BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
 
     const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYIDX;
@@ -1771,6 +1778,8 @@ void InstBuilder::BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst)
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
 
+    intrinsic->SetSlotId(icSlot);
+
     AddInstruction(saveState, intrinsic);
 }
 
@@ -1778,6 +1787,7 @@ void InstBuilder::BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst)
 void InstBuilder::BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
 
     const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYVAL;
@@ -1791,6 +1801,8 @@ void InstBuilder::BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst)
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
 
+    intrinsic->SetSlotId(icSlot);
+
     AddInstruction(saveState, intrinsic);
     UpdateDefinitionAcc(intrinsic);
 }
@@ -1799,6 +1811,7 @@ void InstBuilder::BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst)
 void InstBuilder::BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
 
     const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYVAL;
@@ -1813,6 +1826,8 @@ void InstBuilder::BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst)
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
+
+    intrinsic->SetSlotId(icSlot);
 
     AddInstruction(saveState, intrinsic);
 }
@@ -1829,22 +1844,17 @@ void InstBuilder::BuildAnyCallHelper(const BytecodeInstruction *bcInst, RuntimeI
            intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE ||
            intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_RANGE);
 
+    // For range opcodes the bytecode carries (imm0=argc, imm1=ic_slot); for non-range the only imm is ic_slot.
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(isRange ? 1 : 0));
+
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
     static constexpr auto SAVE_STATE_PLUS_FIRST_ARG = 2;
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), argc + SAVE_STATE_PLUS_FIRST_ARG +
-                                                                  static_cast<uint64_t>(IS_THIS) +
-                                                                  static_cast<uint64_t>(isRange));
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(),
+                                  argc + SAVE_STATE_PLUS_FIRST_ARG + static_cast<uint64_t>(isRange));
     // This VReg has different meanings between call opcodes, but its underlying usage is the same
     intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
     intrinsic->AddInputType(DataType::REFERENCE);
-    if constexpr (IS_THIS) {
-        // StringId, also `any.*.this` opcodes require method to resolve string
-        intrinsic->AppendInput(graph_->FindOrCreateConstant(bcInst->GetId(0).AsRawValue()));
-        intrinsic->AddInputType(DataType::INT32);
-        intrinsic->SetMethodFirstInput();
-        intrinsic->SetMethod(GetMethod());
-    }
     if (isRange) {
         // argc
         intrinsic->AppendInput(graph_->FindOrCreateConstant(argc));
@@ -1858,9 +1868,17 @@ void InstBuilder::BuildAnyCallHelper(const BytecodeInstruction *bcInst, RuntimeI
             intrinsic->AddInputType(DataType::REFERENCE);
         }
     }
+    if constexpr (IS_THIS) {
+        // StringId, also `any.*.this` opcodes require method to resolve string
+        intrinsic->AddImm(GetGraph()->GetAllocator(), bcInst->GetId(0).AsRawValue());
+        intrinsic->SetMethodFirstInput();
+        intrinsic->SetMethod(GetMethod());
+    }
     // Savestate
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
+
+    intrinsic->SetSlotId(icSlot);
 
     AddInstruction(saveState, intrinsic);
     UpdateDefinitionAcc(intrinsic);
@@ -1936,6 +1954,7 @@ void InstBuilder::BuildAnyCallNewShort(const BytecodeInstruction *bcInst)
 void InstBuilder::BuildIsInstanceAny(const BytecodeInstruction *bcInst)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
+    auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
     auto intrinsic = graph_->CreateInstIntrinsic(DataType::BOOL, bcAddr,
                                                  RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_ISINSTANCE);
@@ -1947,6 +1966,8 @@ void InstBuilder::BuildIsInstanceAny(const BytecodeInstruction *bcInst)
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->AppendInput(saveState);
     intrinsic->AddInputType(DataType::NO_TYPE);
+
+    intrinsic->SetSlotId(icSlot);
 
     AddInstruction(saveState, intrinsic);
     UpdateDefinitionAcc(intrinsic);

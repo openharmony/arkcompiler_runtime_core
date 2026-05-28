@@ -21,6 +21,19 @@
 <%= Common::include_plugin_files "any", "handlers_path" %>
 
 namespace ark::intrinsics {
+inline void UpdateAnyIcSlot(Frame *frame, ObjectHeader *thisObj, uint32_t icSlot)
+{
+    if (thisObj == nullptr) {
+        return;
+    }
+    ProfilingData *profData = frame->GetMethod()->GetProfilingData();
+    if (profData != nullptr) {
+        auto *cls = thisObj->ClassAddr<Class>();
+        cls = cls->IsXRefClass() ? reinterpret_cast<Class *>(AnyInstInlineCache::MEGAMORPHIC_FLAG) : cls;
+        profData->UpdateAnyInstInlineCache(icSlot, cls);
+    }
+}
+
 inline ObjectHeader *DoAnyLdbyname([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
                                    [[maybe_unused]] panda_file::File::StringData propName)
 {
@@ -46,10 +59,13 @@ inline ObjectHeader *DoAnyLdbyname([[maybe_unused]] ManagedThread *thread, Objec
     }
 }
 
-ObjectHeader *AnyLdbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uint32_t id)
+ObjectHeader *AnyLdbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uint32_t id, uint32_t icSlot)
 {
+    UpdateAnyIcSlot(frame, thisObj, icSlot);
+
     auto file = frame->GetMethod()->GetPandaFile();
     auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
+
     return DoAnyLdbyname(thread, thisObj, propertyName);
 }
 
@@ -78,15 +94,19 @@ inline void DoAnyStbyname([[maybe_unused]] ManagedThread *thread, ObjectHeader *
     }
 }
 
-void AnyStbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uint32_t id, ObjectHeader *val)
+void AnyStbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uint32_t id, ObjectHeader *val,
+                 uint32_t icSlot)
 {
+    UpdateAnyIcSlot(frame, thisObj, icSlot);
+
     auto file = frame->GetMethod()->GetPandaFile();
     auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
+
     return DoAnyStbyname(thread, thisObj, propertyName, val);
 }
 
-extern "C" bool AnyIsinstance([[maybe_unused]] ManagedThread *thread, ObjectHeader *lhs,
-                              [[maybe_unused]] ObjectHeader *rhs)
+inline bool DoAnyIsinstance([[maybe_unused]] ManagedThread *thread, ObjectHeader *lhs,
+                            [[maybe_unused]] ObjectHeader *rhs)
 {
     if (lhs == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
@@ -137,14 +157,14 @@ static inline ObjectHeader *AnyCall([[maybe_unused]] ManagedThread *thread, Obje
     }
 }
 
-ObjectHeader *AnyCall0(ManagedThread *thread, ObjectHeader *func)
+ObjectHeader *AnyCall0(ManagedThread *thread, ObjectHeader *func, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>());
 }
 
 ObjectHeader *AnyCallRange(ManagedThread *thread, Frame *frame, ObjectHeader *func,
-                           uint8_t argStart, uint8_t argc)
+                           uint8_t argStart, uint8_t argc, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     PandaVector<VMHandle<ObjectHeader>> args;
@@ -154,7 +174,7 @@ ObjectHeader *AnyCallRange(ManagedThread *thread, Frame *frame, ObjectHeader *fu
     return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>(args));
 }
 
-ObjectHeader *AnyCallShort(ManagedThread *thread, ObjectHeader *func, ObjectHeader *arg)
+ObjectHeader *AnyCallShort(ManagedThread *thread, ObjectHeader *func, ObjectHeader *arg, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
@@ -189,7 +209,7 @@ static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, 
 }
 
 extern "C" ObjectHeader *AnyCallThis0(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                      uint32_t id)
+                                      uint32_t id, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     auto pf = frame->GetMethod()->GetPandaFile();
@@ -198,7 +218,7 @@ extern "C" ObjectHeader *AnyCallThis0(ManagedThread *thread, Frame *frame, Objec
 }
 
 extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                          uint32_t id, uint8_t argStart, uint8_t argc)
+                                          uint32_t id, uint8_t argStart, uint8_t argc, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     PandaVector<VMHandle<ObjectHeader>> args;
@@ -211,7 +231,7 @@ extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, O
 }
 
 extern "C" ObjectHeader *AnyCallThisShort(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                          uint32_t id, ObjectHeader *arg)
+                                          uint32_t id, ObjectHeader *arg, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
@@ -247,14 +267,14 @@ static inline ObjectHeader *AnyCallNew([[maybe_unused]] ManagedThread *thread, O
     }
 }
 
-extern "C" ObjectHeader *AnyCallNew0(ManagedThread *thread, ObjectHeader *ctor)
+extern "C" ObjectHeader *AnyCallNew0(ManagedThread *thread, ObjectHeader *ctor, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>());
 }
 
 extern "C" ObjectHeader *AnyCallNewRange(ManagedThread *thread, Frame *frame, ObjectHeader *ctor,
-                                         uint8_t argStart, uint8_t argc)
+                                         uint8_t argStart, uint8_t argc, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     PandaVector<VMHandle<ObjectHeader>> args;
@@ -264,14 +284,14 @@ extern "C" ObjectHeader *AnyCallNewRange(ManagedThread *thread, Frame *frame, Ob
     return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>(args));
 }
 
-extern "C" ObjectHeader *AnyCallNewShort(ManagedThread *thread, ObjectHeader *ctor, ObjectHeader *arg)
+extern "C" ObjectHeader *AnyCallNewShort(ManagedThread *thread, ObjectHeader *ctor, ObjectHeader *arg, [[maybe_unused]] uint32_t icSlot)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
     return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>(args));
 }
 
-extern "C" ObjectHeader *CompilerAnyLdbyname(Method *method, ObjectHeader *thisObj, uint32_t id)
+extern "C" ObjectHeader *CompilerAnyLdbyname(Method *method, uint32_t id, ObjectHeader *thisObj)
 {
     ASSERT(method != nullptr);
     auto file = method->GetPandaFile();
@@ -279,7 +299,7 @@ extern "C" ObjectHeader *CompilerAnyLdbyname(Method *method, ObjectHeader *thisO
     return DoAnyLdbyname(ManagedThread::GetCurrent(), thisObj, propertyName);
 }
 
-extern "C" void CompilerAnyStbyname(Method *method, ObjectHeader *thisObj, uint32_t id, ObjectHeader *val)
+extern "C" void CompilerAnyStbyname(Method *method, uint32_t id, ObjectHeader *thisObj, ObjectHeader *val)
 {
     ASSERT(method != nullptr);
     auto file = method->GetPandaFile();
@@ -430,7 +450,7 @@ extern "C" ObjectHeader *CompilerAnyCallShort(ObjectHeader *func, ObjectHeader *
     return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>(args));
 }
 
-extern "C" ObjectHeader *CompilerAnyCallThis0(Method *method, ObjectHeader *thisObj, uint32_t id)
+extern "C" ObjectHeader *CompilerAnyCallThis0(Method *method, uint32_t id, ObjectHeader *thisObj)
 {
     auto *thread = ManagedThread::GetCurrent();
     auto pf = method->GetPandaFile();
@@ -438,8 +458,7 @@ extern "C" ObjectHeader *CompilerAnyCallThis0(Method *method, ObjectHeader *this
     return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>());
 }
 
-extern "C" ObjectHeader *CompilerAnyCallThisRange(Method *method, ObjectHeader *thisObj, uint32_t id, uint32_t argc,
-                                                  void *argv)
+extern "C" ObjectHeader *CompilerAnyCallThisRange(Method *method, uint32_t id, ObjectHeader *thisObj, uint32_t argc, void *argv)
 {
     auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -453,7 +472,7 @@ extern "C" ObjectHeader *CompilerAnyCallThisRange(Method *method, ObjectHeader *
     return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>(args));
 }
 
-extern "C" ObjectHeader *CompilerAnyCallThisShort(Method *method, ObjectHeader *thisObj, uint32_t id,
+extern "C" ObjectHeader *CompilerAnyCallThisShort(Method *method, uint32_t id, ObjectHeader *thisObj,
                                                   ObjectHeader *arg)
 {
     auto *thread = ManagedThread::GetCurrent();
@@ -492,9 +511,14 @@ extern "C" ObjectHeader *CompilerAnyCallNewShort(ObjectHeader *ctor, ObjectHeade
     return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>(args));
 }
 
+extern "C" bool AnyIsinstance(ManagedThread *thread, ObjectHeader *lhs, ObjectHeader *rhs, [[maybe_unused]] uint32_t icSlot)
+{
+    return DoAnyIsinstance(thread, lhs, rhs);
+}
+
 extern "C" uint8_t CompilerAnyIsinstance(ObjectHeader *lhs, ObjectHeader *rhs)
 {
-    return AnyIsinstance(ManagedThread::GetCurrent(), lhs, rhs);
+    return DoAnyIsinstance(ManagedThread::GetCurrent(), lhs, rhs);
 }
 
 extern "C" void CompilerAnyStbyval(ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val)
@@ -502,22 +526,22 @@ extern "C" void CompilerAnyStbyval(ObjectHeader *thisObj, ObjectHeader *key, Obj
     return DoAnyStbyval(ManagedThread::GetCurrent(), thisObj, key, val);
 }
 
-ObjectHeader *AnyLdbyidx(ManagedThread *thread, ObjectHeader *thisObj, double idxFloat)
+ObjectHeader *AnyLdbyidx(ManagedThread *thread, ObjectHeader *thisObj, double idxFloat, [[maybe_unused]] uint32_t icSlot)
 {
     return DoAnyLdbyidx(thread, thisObj, idxFloat);
 }
 
-void AnyStbyidx(ManagedThread *thread, ObjectHeader *thisObj, double key, ObjectHeader *val)
+void AnyStbyidx(ManagedThread *thread, ObjectHeader *thisObj, double key, ObjectHeader *val, [[maybe_unused]] uint32_t icSlot)
 {
     DoAnyStbyidx(thread, thisObj, key, val);
 }
 
-ObjectHeader *AnyLdbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key)
+ObjectHeader *AnyLdbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key, [[maybe_unused]] uint32_t icSlot)
 {
     return DoAnyLdbyval(thread, thisObj, key);
 }
 
-void AnyStbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val)
+void AnyStbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val, [[maybe_unused]] uint32_t icSlot)
 {
     DoAnyStbyval(thread, thisObj, key, val);
 }

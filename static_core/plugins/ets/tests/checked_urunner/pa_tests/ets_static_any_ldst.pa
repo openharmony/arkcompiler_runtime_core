@@ -29,6 +29,37 @@
 #! PASS_AFTER   "IrBuilder"
 #! INST         /Intrinsic.CompilerAnyStbyname/
 
+#! CHECKER      Static Any Ldbyname and Stbyname JIT with IC Slot
+#! RUN          options: "--compiler-hotness-threshold=1 --compiler-profiling-threshold=0 --no-async-jit=true --compiler-enable-jit=true --compiler-regex='.*test.*byname.*'", entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::testLdbyname"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyLdbyname/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /LoadObject.*R\.a.*/
+#! INST_NOT     /Intrinsic.CompilerAnyLdbyname/
+#! METHOD       "_GLOBAL::testStbyname"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyStbyname/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /StoreObject.*R\.a.*/
+#! INST_NOT     /Intrinsic.CompilerAnyStbyname/
+#! METHOD       "_GLOBAL::testLdbynameV"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyLdbyname/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /LoadObject.*R\.a.*/
+#! INST_NOT     /Intrinsic.CompilerAnyLdbyname/
+#! METHOD       "_GLOBAL::testStbynameV"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyStbyname/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /StoreObject.*R\.a.*/
+#! INST_NOT     /Intrinsic.CompilerAnyStbyname/
+
 #! CHECKER      Static Any Ldbyname and Stbyname AOT
 #! RUN_PAOC     options: "--compiler-regex='.*test.*byname.*'"
 #! METHOD       "_GLOBAL::testLdbyname"
@@ -108,7 +139,7 @@
     return
 }
 
-.function i32 main() <static, access.function=public> {
+.function i32 testLdSt() {
     call.short testLdbyname
     jeqz exit_ld
     call.short testStbyname
@@ -130,6 +161,14 @@ exit_ldv:
     return
 exit_stv:
     ldai -4
+    return
+}
+
+.function i32 main() <static, access.function=public> {
+    call.short testLdSt
+    jnez exit
+    call.short testLdSt
+exit:
     return
 }
 

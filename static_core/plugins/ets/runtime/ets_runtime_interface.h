@@ -74,6 +74,8 @@ public:
     bool IsMethodStringConcat(MethodPtr method) const override;
     bool IsMethodStringGetLength(MethodPtr method) const override;
     Field *GetFieldPtrByName(ClassPtr klass, std::string_view name) const override;
+    MethodPtr GetFieldGetterByName(ClassPtr klass, std::string_view name) const override;
+    MethodPtr GetFieldSetterByName(ClassPtr klass, std::string_view name) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override;
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
@@ -181,6 +183,8 @@ public:
     bool IsClassBoxedFloat(ClassPtr klass) const override;
     bool IsClassBoxedDouble(ClassPtr klass) const override;
     compiler::DataType::Type GetBoxedClassDataType(ClassPtr klass) const override;
+    ClassPtr GetDataTypeBoxedClass(compiler::DataType::Type type) const override;
+    MethodPtr GetBoxedClassConstructor(ClassPtr klass) const override;
     bool HasAsyncAnnotation(MethodPtr methodPtr) const override;
     bool IsMethodRequireFlattening(MethodPtr method) const override;
     bool IsIntrinsicRequireFlattening(IntrinsicId id) const override;

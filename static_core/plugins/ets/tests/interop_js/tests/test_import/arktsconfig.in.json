@@ -13,7 +13,7 @@
         "testDecl" : {
             "language": "js",
             "path": "${CMAKE_CURRENT_SOURCE_DIR}/testDecl.d.ets",
-            "ohmUrl": "../../plugins/ets/tests/interop_js/tests/test_function/test_dynamic"
+            "ohmUrl": "../../plugins/ets/tests/interop_js/tests/test_import/test_dynamic"
         }
       }
     }

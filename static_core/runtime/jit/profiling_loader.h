@@ -42,14 +42,15 @@ public:
         // Set branch profiling enabled based on runtime options (auto-enabled when JIT is active)
         bool branchProfilingEnabled = Runtime::GetCurrent()->IsProfileBranches();
         return ProfilingData::Make(
-            allocator, inlineCaches.size(), branches.size(), throws.size(),
-            [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem, void *branchLastSavedMem,
-                void *throwLastSavedMem) {
+            allocator, inlineCaches.size(), branches.size(), throws.size(), 0 /* anyIcSize */,
+            [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem, void *anyIcMem,
+                void *branchLastSavedMem, void *throwLastSavedMem) {
                 return new (data)
                     // CC-OFFNXT(G.FMT.02) project code style
                     ProfilingData(
                         CreateInlineCaches(vcallsMem, inlineCaches, classResolver),
                         CreateBranchData(branchesMem, branches), CreateThrowData(throwsMem, throws),
+                        AnyInstInlineCache::From(anyIcMem, 0),
                         Span<ProfilingData::BranchLastSaved>(
                             reinterpret_cast<ProfilingData::BranchLastSaved *>(branchLastSavedMem), branches.size()),
                         Span<uint64_t>(reinterpret_cast<uint64_t *>(throwLastSavedMem), throws.size()),

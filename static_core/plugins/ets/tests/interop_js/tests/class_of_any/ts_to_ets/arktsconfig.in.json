@@ -8,7 +8,7 @@
 		"dependencies": {
 			"test_object": {
                 "language": "js",
-                "ohmUrl": "../../plugins/ets/tests/interop_js/tests/object/ts_to_ets/test_object"
+                "ohmUrl": "../../plugins/ets/tests/interop_js/tests/class_of_any/ts_to_ets/test_object"
             }
 		}
 	}

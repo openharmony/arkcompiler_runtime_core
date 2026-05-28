@@ -249,32 +249,36 @@ TEST_F(ProfilingRunnerTest, ProfilingDataFlagsConstruction)
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
 
     // Test with branch profiling enabled
-    auto profilingDataEnabled = ProfilingData::Make(
-        allocator, 0, 0, 0,
-        [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
-            [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *branchLastSavedMem,
-            [[maybe_unused]] void *throwLastSavedMem) { return new (data) ProfilingData({}, {}, {}, {}, {}, true); });
+    auto profilingDataEnabled =
+        ProfilingData::Make(allocator, 0, 0, 0, 0,
+                            [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
+                                [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *anyIcMem,
+                                [[maybe_unused]] void *branchLastSavedMem, [[maybe_unused]] void *throwLastSavedMem) {
+                                return new (data) ProfilingData({}, {}, {}, {}, {}, {}, true);
+                            });
 
     ASSERT_NE(nullptr, profilingDataEnabled);
     ASSERT_TRUE(profilingDataEnabled->IsBranchProfilingEnabled());
 
     // Test with branch profiling disabled
-    auto profilingDataDisabled = ProfilingData::Make(
-        allocator, 0, 0, 0,
-        [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
-            [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *branchLastSavedMem,
-            [[maybe_unused]] void *throwLastSavedMem) { return new (data) ProfilingData({}, {}, {}, {}, {}, false); });
+    auto profilingDataDisabled =
+        ProfilingData::Make(allocator, 0, 0, 0, 0,
+                            [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
+                                [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *anyIcMem,
+                                [[maybe_unused]] void *branchLastSavedMem, [[maybe_unused]] void *throwLastSavedMem) {
+                                return new (data) ProfilingData({}, {}, {}, {}, {}, {}, false);
+                            });
 
     ASSERT_NE(nullptr, profilingDataDisabled);
     ASSERT_FALSE(profilingDataDisabled->IsBranchProfilingEnabled());
 
     // Test with default flags (should be disabled)
     auto profilingDataDefault =
-        ProfilingData::Make(allocator, 0, 0, 0,
+        ProfilingData::Make(allocator, 0, 0, 0, 0,
                             [&](void *data, [[maybe_unused]] void *vcallsMem, [[maybe_unused]] void *branchesMem,
-                                [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *branchLastSavedMem,
-                                [[maybe_unused]] void *throwLastSavedMem) {
-                                return new (data) ProfilingData({}, {}, {}, {}, {});  // Use default flag value
+                                [[maybe_unused]] void *throwsMem, [[maybe_unused]] void *anyIcMem,
+                                [[maybe_unused]] void *branchLastSavedMem, [[maybe_unused]] void *throwLastSavedMem) {
+                                return new (data) ProfilingData({}, {}, {}, {}, {}, {});  // Use default flag value
                             });
 
     ASSERT_NE(nullptr, profilingDataDefault);

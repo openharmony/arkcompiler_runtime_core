@@ -20,6 +20,14 @@ export declare class Foo
     public zhcn: string;
 }
 
+export class X {
+    public prop: number;
+    public prop2: string;
+    public prop3: int;
+    public prop4: number | undefined;
+    public prop5: number | undefined;
+}
+
 export declare let fooInstance: Foo;
 
 export declare class NumberMap {
@@ -33,6 +41,7 @@ export declare let stringMapInstance: StringMap;
 export declare function functionArg0(): number;
 export declare function functionArg1(arg1: number): number;
 export declare function functionArg2(arg1: number, arg2: number): number;
+export declare function retX(x: object): X;
 
 export declare class Qux {
     methodArg0(): number;

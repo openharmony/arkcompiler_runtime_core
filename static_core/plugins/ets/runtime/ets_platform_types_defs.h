@@ -33,13 +33,21 @@
     TP("[Lstd/core/String;", coreStringFixedArray)                                                                     \
     /* Builtin numerics */                                                                                             \
     TP("Lstd/core/Boolean;", coreBoolean)                                                                              \
+    IM("Lstd/core/Boolean;", "<ctor>", "Z:V", coreBooleanValueCtor)                                                    \
     TP("Lstd/core/Byte;", coreByte)                                                                                    \
+    IM("Lstd/core/Byte;", "<ctor>", "B:V", coreByteValueCtor)                                                          \
     TP("Lstd/core/Char;", coreChar)                                                                                    \
+    IM("Lstd/core/Char;", "<ctor>", "C:V", coreCharValueCtor)                                                          \
     TP("Lstd/core/Short;", coreShort)                                                                                  \
+    IM("Lstd/core/Short;", "<ctor>", "S:V", coreShortValueCtor)                                                        \
     TP("Lstd/core/Int;", coreInt)                                                                                      \
+    IM("Lstd/core/Int;", "<ctor>", "I:V", coreIntValueCtor)                                                            \
     TP("Lstd/core/Long;", coreLong)                                                                                    \
+    IM("Lstd/core/Long;", "<ctor>", "J:V", coreLongValueCtor)                                                          \
     TP("Lstd/core/Float;", coreFloat)                                                                                  \
+    IM("Lstd/core/Float;", "<ctor>", "F:V", coreFloatValueCtor)                                                        \
     TP("Lstd/core/Double;", coreDouble)                                                                                \
+    IM("Lstd/core/Double;", "<ctor>", "D:V", coreDoubleValueCtor)                                                      \
     /* Builtin language support */                                                                                     \
     TP("Lstd/core/BigInt;", coreBigInt)                                                                                \
     TP("Lescompat/Error;", escompatError)                                                                              \

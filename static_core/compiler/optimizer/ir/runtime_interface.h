@@ -47,6 +47,7 @@ enum class StringCtorType { UNKNOWN = 0, STRING, CHAR_ARRAY, COUNT };
 
 class IClassHierarchyAnalysis;
 class InlineCachesInterface;
+class AnyInstInlineCachesInterface;
 class UnresolvedTypesInterface;
 
 class RuntimeInterface {
@@ -102,6 +103,11 @@ public:
     }
 
     virtual InlineCachesInterface *GetInlineCaches()
+    {
+        return nullptr;
+    }
+
+    virtual AnyInstInlineCachesInterface *GetAnyInstInlineCaches()
     {
         return nullptr;
     }
@@ -435,6 +441,18 @@ public:
     }
 
     virtual Field *GetFieldPtrByName([[maybe_unused]] ClassPtr klass, [[maybe_unused]] std::string_view name) const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetFieldGetterByName([[maybe_unused]] ClassPtr klass,
+                                           [[maybe_unused]] std::string_view name) const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetFieldSetterByName([[maybe_unused]] ClassPtr klass,
+                                           [[maybe_unused]] std::string_view name) const
     {
         return nullptr;
     }
@@ -866,6 +884,16 @@ public:
     virtual DataType::Type GetBoxedClassDataType([[maybe_unused]] ClassPtr klass) const
     {
         return DataType::NO_TYPE;
+    }
+
+    virtual ClassPtr GetDataTypeBoxedClass([[maybe_unused]] DataType::Type type) const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetBoxedClassConstructor([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
     }
 
     virtual std::string GetMethodName([[maybe_unused]] MethodPtr method) const
@@ -2112,6 +2140,16 @@ public:
     DEFAULT_MOVE_SEMANTIC(InlineCachesInterface);
 };
 
+class AnyInstInlineCachesInterface {
+public:
+    virtual RuntimeInterface::ClassPtr GetClass(RuntimeInterface::MethodPtr method, uint32_t icSlot) = 0;
+    virtual ~AnyInstInlineCachesInterface() = default;
+    AnyInstInlineCachesInterface() = default;
+
+    DEFAULT_COPY_SEMANTIC(AnyInstInlineCachesInterface);
+    DEFAULT_MOVE_SEMANTIC(AnyInstInlineCachesInterface);
+};
+
 class UnresolvedTypesInterface {
 public:
     enum class SlotKind { UNKNOWN, CLASS, MANAGED_CLASS, METHOD, VIRTUAL_METHOD, FIELD, STATIC_FIELD_PTR };
@@ -2154,6 +2192,7 @@ enum class DeoptimizeType : uint8_t {
     INLINE_DYN,
     NOT_PROFILED,
     IFIMM_TRY,
+    ANY_IC,
     COUNT
 };
 
@@ -2178,7 +2217,8 @@ inline constexpr std::array<const char *, DEOPT_COUNT> DEOPT_TYPE_NAMES = {"INVA
                                                                            "INLINE_IC",
                                                                            "INLINE_DYN",
                                                                            "NOT_PROFILED",
-                                                                           "IFIMM_TRY"};
+                                                                           "IFIMM_TRY",
+                                                                           "ANY_IC"};
 
 inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)
 {

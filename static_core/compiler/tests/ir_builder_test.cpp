@@ -6779,9 +6779,8 @@ bool IsLargeConstInput(Inst *inst)
 {
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr uint64_t MAX_UINT16 = 0xFFFFU;
-    for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-        auto *input = inst->GetInput(i).GetInst();
-        if (input->IsConst() && input->CastToConstant()->GetIntValue() > MAX_UINT16) {
+    for (auto imm : inst->CastToIntrinsic()->GetImms()) {
+        if (imm > MAX_UINT16) {
             return true;
         }
     }
@@ -6798,15 +6797,10 @@ bool DumpInstConstInputs(Inst *inst)
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr uint64_t MAX_UINT16 = 0xFFFFU;
     bool found = false;
-    for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-        auto *input = inst->GetInput(i).GetInst();
-        if (!input->IsConst()) {
-            continue;
-        }
+    for (auto imm : inst->CastToIntrinsic()->GetImms()) {
         found = true;
-        auto value = input->CastToConstant()->GetIntValue();
-        std::cerr << " 0x" << std::hex << value << std::dec;
-        if (value <= MAX_UINT16) {
+        std::cerr << " 0x" << std::hex << imm << std::dec;
+        if (imm <= MAX_UINT16) {
             std::cerr << " [const input <= MAX_UINT16, may cause test failure; "
                          "increase WARMUP_STRING_COUNT and WARMUP_STRING_LENGTH in test code if this happens]";
         }

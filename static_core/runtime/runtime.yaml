@@ -817,7 +817,7 @@ intrinsics:
   static: true
   signature:
     ret: ref
-    args: [method, ref, u32]
+    args: [method, u32, ref]
   impl: ark::intrinsics::CompilerAnyLdbyname
 
 - name: CompilerAnyStbyname
@@ -826,7 +826,7 @@ intrinsics:
   static: true
   signature:
     ret: void
-    args: [method, ref, u32, ref]
+    args: [method, u32, ref, ref]
   impl: ark::intrinsics::CompilerAnyStbyname
 
 - name: CompilerAnyLdbyidx
@@ -899,7 +899,7 @@ intrinsics:
   static: true
   signature:
     ret: std.core.Object
-    args: [method, ref, u32]
+    args: [method, u32, ref]
   impl: ark::intrinsics::CompilerAnyCallThis0
 
 - name: CompilerAnyCallThisRange
@@ -908,7 +908,7 @@ intrinsics:
   static: true
   signature:
     ret: std.core.Object
-    args: [method, ref, u32, u32]
+    args: [method, u32, ref, u32]
     stackrange: true
   impl: ark::intrinsics::CompilerAnyCallThisRange
 
@@ -918,7 +918,7 @@ intrinsics:
   static: true
   signature:
     ret: std.core.Object
-    args: [method, ref, u32, ref]
+    args: [method, u32, ref, ref]
   impl: ark::intrinsics::CompilerAnyCallThisShort
 
 - name: CompilerAnyCallNew0

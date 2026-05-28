@@ -25,6 +25,7 @@
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/object_type_propagation.h"
+#include "optimizer/optimizations/any_intrinsics_expansion.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/hybrid_strings_optimization.h"
@@ -1486,6 +1487,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     PropagateObjectInfo(graphInl, callInst);
 
     // Run basic optimizations
+    graphInl->RunPass<AnyIntrinsicsExpansion>();
     graphInl->RunPass<Cleanup>(false);
     auto peepholeApplied = graphInl->RunPass<Peepholes>();
     auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();

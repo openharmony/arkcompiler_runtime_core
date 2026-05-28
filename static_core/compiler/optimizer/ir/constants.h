@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ constexpr Register INVALID_REG = std::numeric_limits<uint8_t>::max();
 constexpr StackSlot INVALID_STACK_SLOT = std::numeric_limits<uint8_t>::max();
 constexpr ImmTableSlot INVALID_IMM_TABLE_SLOT = std::numeric_limits<uint8_t>::max();
 constexpr std::uint32_t INVALID_COLUMN_NUM = std::numeric_limits<std::uint32_t>::max();
+constexpr uint8_t INVALID_SLOT_ID = std::numeric_limits<std::uint8_t>::max();
 
 constexpr Register VIRTUAL_FRAME_SIZE = INVALID_REG - 1U;
 

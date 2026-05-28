@@ -72,6 +72,9 @@ EtsObject *GetBoxedValue(EtsExecutionContext *executionCtx, Value value, EtsType
 
 Value GetUnboxedValue(EtsExecutionContext *executionCtx, EtsObject *obj)
 {
+    if (obj == nullptr) {
+        return Value(reinterpret_cast<ObjectHeader *>(obj));
+    }
     auto *cls = obj->GetClass();
     auto ptypes = PlatformTypes(executionCtx);
     if (cls == ptypes->coreBoolean) {

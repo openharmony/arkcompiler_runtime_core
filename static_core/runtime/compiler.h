@@ -76,6 +76,11 @@ public:
                         ArenaVector<RuntimeInterface::ClassPtr> *classes) override;
 };
 
+class PANDA_PUBLIC_API AnyInstInlineCachesWrapper : public compiler::AnyInstInlineCachesInterface {
+public:
+    RuntimeInterface::ClassPtr GetClass(RuntimeInterface::MethodPtr m, uint32_t icSlot) override;
+};
+
 class PANDA_PUBLIC_API UnresolvedTypesWrapper : public UnresolvedTypesInterface {
 public:
     bool AddTableSlot(RuntimeInterface::MethodPtr method, uint32_t typeId, SlotKind kind) override;
@@ -100,6 +105,11 @@ public:
     compiler::InlineCachesInterface *GetInlineCaches() override
     {
         return &inlineCaches_;
+    }
+
+    compiler::AnyInstInlineCachesInterface *GetAnyInstInlineCaches() override
+    {
+        return &anyInstInlineCaches_;
     }
 
     compiler::UnresolvedTypesInterface *GetUnresolvedTypes() override
@@ -711,6 +721,7 @@ private:
 private:
     ClassHierarchyAnalysisWrapper cha_;
     InlineCachesWrapper inlineCaches_;
+    AnyInstInlineCachesWrapper anyInstInlineCaches_;
     UnresolvedTypesWrapper unresolvedTypes_;
 };
 

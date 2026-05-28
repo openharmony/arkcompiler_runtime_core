@@ -2237,7 +2237,7 @@ include_plugin 'interpreter_handlers'
 # Any type support
 macro(:handle_any_ldbyname_v8_id32_imm8) do |vs, id, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id).ref
+  ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2246,7 +2246,7 @@ end
 
 macro(:handle_any_ldbyname_v_v8_v8_id32_imm8) do |vd, vs, id, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id).ref
+  ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2255,7 +2255,7 @@ end
 
 macro(:handle_any_stbyname_v8_id32_imm8) do |vs, id, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  call_runtime("AnyStbyname", %tr, %frame, vs, id, acc.ref).void
+  call_runtime("AnyStbyname", %tr, %frame, vs, id, acc.ref, slot).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2263,7 +2263,7 @@ end
 
 macro(:handle_any_stbyname_v_v8_v8_id32_imm8) do |vs1, vs2, id, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  call_runtime("AnyStbyname", %tr, %frame, vs2, id, vs1).void
+  call_runtime("AnyStbyname", %tr, %frame, vs2, id, vs1, slot).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2271,7 +2271,7 @@ end
 
 macro(:handle_any_ldbyidx_v8_imm8) do |vs, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyLdbyidx", %tr, vs, acc.f64).ref
+  ret := call_runtime("AnyLdbyidx", %tr, vs, acc.f64, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2280,7 +2280,7 @@ end
 
 macro(:handle_any_stbyidx_v8_v8_imm8) do |vs1, vs2, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  call_runtime("AnyStbyidx", %tr, vs1, vs2, acc.ref).void
+  call_runtime("AnyStbyidx", %tr, vs1, vs2, acc.ref, slot).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2288,7 +2288,7 @@ end
 
 macro(:handle_any_ldbyval_v8_v8_imm8) do |vs1, vs2, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyLdbyval", %tr, vs1, vs2).ref
+  ret := call_runtime("AnyLdbyval", %tr, vs1, vs2, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2297,7 +2297,7 @@ end
 
 macro(:handle_any_stbyval_v8_v8_imm8) do |vs1, vs2, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  call_runtime("AnyStbyval", %tr, vs1, vs2, acc.ref).void
+  call_runtime("AnyStbyval", %tr, vs1, vs2, acc.ref, slot).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2305,7 +2305,7 @@ end
 
 macro(:handle_any_isinstance_v8_imm8) do |vs, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := btou8(call_runtime("AnyIsinstance", %tr, acc.ref, vs).b)
+  ret := btou8(call_runtime("AnyIsinstance", %tr, acc.ref, vs, slot).b)
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2314,7 +2314,7 @@ end
 
 macro(:handle_any_call_0_v8_imm8) do |vs, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCall0", %tr, vs).ref
+  ret := call_runtime("AnyCall0", %tr, vs, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2323,7 +2323,7 @@ end
 
 macro(:handle_any_call_short_v4_v4_imm8) do |vs1, vs2, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallShort", %tr, vs1, vs2).ref
+  ret := call_runtime("AnyCallShort", %tr, vs1, vs2, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2332,7 +2332,7 @@ end
 
 macro(:handle_any_call_range_v8_v8_imm8_imm8) do |vs1, first_arg, argc, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallRange", %tr, %frame, vs1, first_arg, argc).ref
+  ret := call_runtime("AnyCallRange", %tr, %frame, vs1, first_arg, argc, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2341,7 +2341,7 @@ end
 
 macro(:handle_any_call_this_0_v8_imm8_id32) do |vs, slot, id|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallThis0", %tr, %frame, vs, id).ref
+  ret := call_runtime("AnyCallThis0", %tr, %frame, vs, id, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2350,7 +2350,7 @@ end
 
 macro(:handle_any_call_this_short_v4_v4_imm8_id32) do |vs1, vs2, slot, id|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallThisShort", %tr, %frame, vs1, id, vs2).ref
+  ret := call_runtime("AnyCallThisShort", %tr, %frame, vs1, id, vs2, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2359,7 +2359,7 @@ end
 
 macro(:handle_any_call_this_range_v8_v8_imm8_imm8_id32) do |vs1, first_arg, argc, slot, id|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallThisRange", %tr, %frame, vs1, id, first_arg, argc).ref
+  ret := call_runtime("AnyCallThisRange", %tr, %frame, vs1, id, first_arg, argc, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2368,7 +2368,7 @@ end
 
 macro(:handle_any_call_new_0_v8_imm8) do |vs, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallNew0", %tr, vs).ref
+  ret := call_runtime("AnyCallNew0", %tr, vs, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2377,7 +2377,7 @@ end
 
 macro(:handle_any_call_new_short_v4_v4_imm8) do |vs1, vs2, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallNewShort", %tr, vs1, vs2).ref
+  ret := call_runtime("AnyCallNewShort", %tr, vs1, vs2, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
@@ -2386,7 +2386,7 @@ end
 
 macro(:handle_any_call_new_range_v8_v8_imm8_imm8) do |vs1, first_arg, argc, slot|
   Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  ret := call_runtime("AnyCallNewRange", %tr, %frame, vs1, first_arg, argc).ref
+  ret := call_runtime("AnyCallNewRange", %tr, %frame, vs1, first_arg, argc, slot).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
   }
