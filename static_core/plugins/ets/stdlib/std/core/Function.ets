@@ -45,7 +45,7 @@ function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
             if (!(fn instanceof FunctionR0)) { break }
             return (fn as FunctionR0<Any, Any>)
                 .invokeR0(
-                r)
+                ...Runtime.removeFrontElementsStub(r, 0))
         case 1:
             if (!(fn instanceof FunctionR1)) { break }
             return (fn as FunctionR1<Any, Any, Any>)
