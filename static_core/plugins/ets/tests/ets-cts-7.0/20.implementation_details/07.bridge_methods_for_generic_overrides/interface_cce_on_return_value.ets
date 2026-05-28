@@ -16,7 +16,7 @@
 /*---
 desc: ClassCastError on return value from bridge method
 expected_out: |-
-    Warning W369037: Cast expression `as B<Boolean|Double>` is type unsafe. 'CastClassError' exception can be thrown at runtime
+    Warning W369037: Cast expression `as B<Boolean|Double>` is type unsafe. 'ClassCastError' exception can be thrown at runtime
 ---*/
 
 interface B<T extends boolean|number> {

@@ -29,4 +29,4 @@ cases:
           a as E
       } catch (e) {
       }
-    expected: "Warning W0326: Attempting to cast type 'D' to 'E' can throw 'CastClassError' exception at runtime"
+    expected: "Warning W0326: Attempting to cast type 'D' to 'E' can throw 'ClassCastError' exception at runtime"

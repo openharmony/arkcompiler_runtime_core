@@ -16,7 +16,7 @@
 /*---
 desc: ClassCastError on return value from bridge method
 expected_out: |-
-    Warning W0326: Attempting to cast type 'D' to 'B<String|Double>' can throw 'CastClassError' exception at runtime
+    Warning W0326: Attempting to cast type 'D' to 'B<String|Double>' can throw 'ClassCastError' exception at runtime
 ---*/
 
 class B<T extends string|number|undefined> {

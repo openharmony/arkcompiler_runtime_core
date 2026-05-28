@@ -21,7 +21,7 @@ desc: >-
     if the actual type of expr is a subtype of target (see Subtyping).
     Otherwise, ClassCastError is thrown.
 expected_out: |-
-    Warning W0326: Attempting to cast type 'Enum1' to 'Enum2' can throw 'CastClassError' exception at runtime
+    Warning W0326: Attempting to cast type 'Enum1' to 'Enum2' can throw 'ClassCastError' exception at runtime
 ---*/
 
 {{c.decl}}

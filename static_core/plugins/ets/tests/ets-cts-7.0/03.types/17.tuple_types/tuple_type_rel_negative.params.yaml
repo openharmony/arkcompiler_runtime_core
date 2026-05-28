@@ -182,7 +182,7 @@ cases:
     - desc: Explicit tuple cast to incompatible type should warn
       tags: [compile-only]
       expected_out: |-
-          Warning W0326: Attempting to cast type '[String]' to '[Double]' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type '[String]' to '[Double]' can throw 'ClassCastError' exception at runtime
       use: |-
           let src: [string] = ['hello']
           let bad = src as [number]

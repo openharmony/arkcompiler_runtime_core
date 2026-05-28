@@ -16,88 +16,88 @@ cases:
     - src_type: char
       src_val: c'A'
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Char' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Char' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: int
       src_val: '1'
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Int' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Int' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: byte
       src_val: '1 as byte'
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Byte' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Byte' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: short
       src_val: '1 as short'
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Short' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Short' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: long
       src_val: '1 as long'
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Long' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Long' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: float
       src_val: 1f
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Float' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Float' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: double
       src_val: '1.0'
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Double' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Double' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: string
       src_val: "'false'"
       expected_out: |-
-          Warning W0326: Attempting to cast type 'String' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'String' to 'Boolean' can throw 'ClassCastError' exception at runtime
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum { Red = 'r', Green = 'g', Blue = 'b' }
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum { Red, Green, Blue }
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum: byte { Red = 1, Green = 2, Blue }
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum: short { Red = 100, Green = 200, Blue }
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum: long { Red = 100, Green = 200, Blue }
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum: float { Red = 0.1f, Green = 0.2f, Blue = 0.3f }
 
     - src_type: Enum
       src_val: Enum.Red
       expected_out: |-
-          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'CastClassError' exception at runtime
+          Warning W0326: Attempting to cast type 'Enum' to 'Boolean' can throw 'ClassCastError' exception at runtime
       decl: |-
           enum Enum: double { Red = 0.1, Green = 0.2, Blue = 0.3 }
