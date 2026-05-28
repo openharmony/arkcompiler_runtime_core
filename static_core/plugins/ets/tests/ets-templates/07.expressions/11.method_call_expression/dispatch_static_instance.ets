@@ -14,31 +14,25 @@
  */
 
 /*---
-desc: Getter/Setter with 'protected' access modifier are inherited by child class.
+desc: Properly dispatch when static and instance method have same name.
 ---*/
 
 class A {
-  private _f: int = 5;
-  protected get f(): int {
-    return this._f;
-  }
-  protected set f(i: int) {
-    this._f = i;
-  }
+    foo(): string { return "instance" };
+    static foo(): string { return "static" }
 }
 
 class B extends A {
-  foo(): int {
-    return this.f
-  }
-  goo(i: int) {
-    this.f = i
-  }
+    foo(): string { return "instance B" };
+    static foo(): string { return "static B" }
 }
 
-function main(): void {
-  let i: B = new B();
-  arktest.assertEQ( i.foo(), 5 );
-  i.goo(6)
-  arktest.assertEQ( i.foo(), 6 );
+function main(): int {
+    let suite = new arktest.ArkTestsuite("static vs instance methods");
+    {% for case in cases %}
+    suite.addTest("test_{{loop.index}}", () => {
+        {{case.use|indent}}
+    });
+    {% endfor %}
+    return suite.run()
 }

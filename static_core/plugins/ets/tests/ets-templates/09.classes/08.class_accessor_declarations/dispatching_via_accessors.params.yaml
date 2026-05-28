@@ -1,0 +1,49 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Dispatching static vs instance methods
+cases:
+  - use: |-
+      let b = new BI
+      let i: I = b.a
+  
+      arktest.assertEQ(i.foo_get(), "instance", "1")
+  
+      b.a = "instance 2"
+      arktest.assertEQ(i.foo_get(), "instance 2", "2")
+
+  - use: |-
+      let b = new B
+  
+      arktest.assertEQ(b.a.foo_get(), "instance", "get basic")
+  
+      b.a = "instance 2"
+      arktest.assertEQ(b.a.foo_get(), "instance 2", "set basic")
+
+  - use: |-
+      arktest.assertEQ(new B1().a.foo(42), 42, "overload resolution")
+
+  - use: |-
+      let b = new B2
+      arktest.assertEQ(b.a.n, 1, "get instance field")
+      b.a = 2
+      arktest.assertEQ(b.a.n, 2, "set instance field")
+  
+      arktest.assertEQ(b.aa.n, 1, "get regular instance field")
+      b.aa.n = 2
+      arktest.assertEQ(b.aa.n, 2, "set regular instance field")
+  
+      let aaa = b.bar()
+      arktest.assertEQ(aaa.n, 1, "get via regular method")
+      aaa.n = 2
+      arktest.assertEQ(aaa.n, 2, "set via regular method")

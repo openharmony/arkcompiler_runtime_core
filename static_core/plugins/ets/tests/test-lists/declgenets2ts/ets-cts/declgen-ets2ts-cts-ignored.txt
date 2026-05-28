@@ -1281,6 +1281,7 @@
 09.classes/08.class_accessor_declarations/accessor_declarations_neg_5.ets
 09.classes/08.class_accessor_declarations/accessor_declarations_neg_8.ets
 09.classes/08.class_accessor_declarations/accessor_declarations_neg_9.ets
+09.classes/08.class_accessor_declarations/dispatching_via_accessors.ets
 09.classes/09.constructor_declaration/cons_parameters_gen_n_6.ets
 09.classes/09.constructor_declaration/cons_parameters_gen_n_7.ets
 09.classes/09.constructor_declaration/cons_parameters_n_6.ets

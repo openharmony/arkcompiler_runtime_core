@@ -13,32 +13,23 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Getter/Setter with 'protected' access modifier are inherited by child class.
+desc: Dispatching via accessor methods and fields of a class member - negative cases.
+tags: [compile-only, negative]
+expected_out: "{{c.exp_out}}"
 ---*/
 
-class A {
-  private _f: int = 5;
-  protected get f(): int {
-    return this._f;
-  }
-  protected set f(i: int) {
-    this._f = i;
-  }
+class A { // all static, ie no instance methods to dispatch to
+    static str_static: string = "static"
+    static foo_get() { return A.str_static }
+    static foo_set(val: string) { A.str_static = val }
 }
 
-class B extends A {
-  foo(): int {
-    return this.f
-  }
-  goo(i: int) {
-    this.f = i
-  }
-}
+{{c.decl}}
 
-function main(): void {
-  let i: B = new B();
-  arktest.assertEQ( i.foo(), 5 );
-  i.goo(6)
-  arktest.assertEQ( i.foo(), 6 );
+function main() {
+    {{c.use}}
 }
+{%- endfor %}
