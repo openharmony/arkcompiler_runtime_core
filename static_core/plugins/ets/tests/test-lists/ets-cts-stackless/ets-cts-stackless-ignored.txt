@@ -459,10 +459,6 @@
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_4.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_11.ets
 
-#33189 Spread argument cannot be passed to ordinary parameter
-09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_3.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/compat_call_args_4.ets
-
 #33800
 10.interfaces/02.superinterfaces_and_subinterfaces/extend_clause_with_not_accessible_type_n.ets
 
@@ -774,9 +770,6 @@
 
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
-
-#33189
-15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 
 #33872 Incorrect type inference for constant expression
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_21.ets

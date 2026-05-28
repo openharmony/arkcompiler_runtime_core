@@ -140,8 +140,8 @@ cases:
               }
           }
           class B extends A {
-            // calling 'super' with multiple spread arguments for one tuple
-            constructor(p: int) { super(...['a', 'b'], ...[p, p]) }
+            // calling 'super' with a tuple spread argument
+            constructor(p: int) { super(...(['a', 'b', p, p] as [Object, Object, int, int])) }
           }
       main: |-
           let b = new B(1)
@@ -158,8 +158,8 @@ cases:
               }
           }
           class B extends A {
-              // calling 'super' with argument and spread argument for one tuple
-              constructor(p: int) { super('a', ...['b', 1, 11]) }
+              // calling 'super' with a tuple spread argument
+              constructor(p: int) { super(...(['a', 'b', 1, 11] as [Object, string, int, int])) }
           }
       main: |-
           let b = new B(1)
