@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +16,11 @@
 {% for c in cases %}
 
 /*---
-desc: |-
-    Tuple type erasure: instanceof with a tuple type checks only the number of elements (arity).
-    Element types are erased at runtime. Only instanceof Tuple is valid
+desc: Array effective type check
+
 ---*/
+function pass(value: Any): Any { return value }
 
-{{c.decl}}
-
-function pass_through(value: Any): Any { return value }
-
-function main() {
-    let a1: {{c.type}} = {{c.init}}
-
-    // Positive: explicit tuple matches Tuple supertype
-    arktest.assertTrue(pass_through(a1) instanceof Tuple, "failed instanceof Tuple for {{c.type}}")
-
-}
+{{c.expr}}
+arktest.assertTrue(t, "Type not preserved")
 {% endfor %}
