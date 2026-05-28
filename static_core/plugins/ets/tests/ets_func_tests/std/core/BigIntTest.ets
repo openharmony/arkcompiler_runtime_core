@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -172,6 +172,22 @@ function testBigIntStringDec() {
     arktest.assertEQ(new BigInt("100.000"), 100n);
 }
 
+function testBigIntToStringFastRadixSign() {
+    arktest.assertEQ(new BigInt(-25).toString(2), "-11001");
+    arktest.assertEQ(new BigInt(-25).toString(4), "-121");
+    arktest.assertEQ(new BigInt(-25).toString(8), "-31");
+    arktest.assertEQ(new BigInt(-25).toString(10), "-25");
+    arktest.assertEQ(new BigInt(-25).toString(16), "-19");
+    arktest.assertEQ(new BigInt(-25).toString(32), "-p");
+    arktest.assertEQ(new BigInt("-18446744073709551616").toString(10), "-18446744073709551616");
+    arktest.assertEQ(new BigInt(25).toString(10), "25");
+    arktest.assertEQ(new BigInt(0).toString(2), "0");
+    arktest.assertEQ(new BigInt(0).toString(10), "0");
+    arktest.assertEQ(new BigInt(0).toString(16), "0");
+    arktest.assertEQ(new BigInt(255).toString(3), "100110");
+    arktest.assertEQ(new BigInt(255).toString(36), "73");
+}
+
 function testBigIntStringHex() {
     arktest.assertEQ(new BigInt("0xa"), 10n);
     arktest.assertEQ(new BigInt("0xff"), 255n);
@@ -208,6 +224,7 @@ function main(): int {
     suite.addTest("Test BigInt String Bin", testBigIntStringBin);
     suite.addTest("Test BigInt String Oct", testBigIntStringOct);
     suite.addTest("Test BigInt String Dec", testBigIntStringDec);
+    suite.addTest("Test BigInt fast radix string sign", testBigIntToStringFastRadixSign);
     suite.addTest("Test BigInt String Hex", testBigIntStringHex);
     suite.addTest("Test BigInt String Error", testBigIntStringError);
 
