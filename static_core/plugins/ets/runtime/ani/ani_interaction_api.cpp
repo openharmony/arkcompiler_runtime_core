@@ -42,7 +42,7 @@
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "runtime/execution/coroutines/coroutine_scopes.h"
+#include "runtime/execution/job_execution_context_scopes.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -251,9 +251,8 @@ static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, M
                                       Args args)
 {
     ASSERT(result != nullptr);
-    // Trigger coroutine manager native call events
-    // NOTE(panferovi, 33937): fix me
-    ScopedCoroutineNativeCall c(EtsCoroutine::CastFromThread(s.GetExecutionContext()->GetMT()));
+    // Trigger job manager native call events
+    ScopedExecutionContextNativeCall c(JobExecutionContext::CastFromMutator(s.GetExecutionContext()->GetMT()));
 
     EtsMethod *m = nullptr;
     if constexpr (std::is_same_v<MethodType, ani_method>) {

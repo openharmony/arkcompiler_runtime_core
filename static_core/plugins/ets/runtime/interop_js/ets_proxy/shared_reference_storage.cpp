@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "runtime/execution/job_execution_context.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -184,7 +185,7 @@ bool SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env env, nap
         if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
             auto ref = currentRef->jsRef_;
             storageLock_.Unlock();
-            ScopedNativeCodeThread s(EtsCoroutine::GetCurrent());
+            ScopedNativeCodeThread s(JobExecutionContext::GetCurrent());
             NAPI_CHECK_FATAL(napi_get_reference_value(env, ref, result));
             return true;
         }

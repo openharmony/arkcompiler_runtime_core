@@ -202,7 +202,7 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
         return ANI_ERROR;
     }
 
-    ASSERT(exclusiveCoro == Coroutine::GetCurrent());
+    ASSERT(exclusiveCoro == JobExecutionContext::GetCurrent());
 
     if (interopEnabled) {
         bool isJsEnvCreatedExternally = true;

@@ -674,7 +674,7 @@ static Expected<int, Runtime::Error> WaitForEntrypointCompletion(Value result)
     EtsHandle<EtsPromise> promise(executionCtx, EtsPromise::FromCoreType(result.GetAs<ObjectHeader *>()));
     ASSERT(promise->GetClass() == PlatformTypes(executionCtx)->corePromise);
 
-    while (promise->IsPending()) {
+    while (promise->IsPending() || promise->IsLinked()) {
         ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
         JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()->ExecuteJobs();
     }

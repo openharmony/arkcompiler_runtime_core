@@ -15,6 +15,7 @@
 
 #include "runtime/include/coretypes/string_flatten.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
@@ -77,8 +78,8 @@ EtsString *EtsString::CreateFromUtf8(const char *utf8, uint32_t length)
 EtsString *EtsString::CreateFromOneByte(const uint8_t *utf8, uint32_t length)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *vm = coro->GetPandaVM();
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    auto *vm = execCtx->GetPandaVM();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     if (length == 0) {
         return reinterpret_cast<EtsString *>(
@@ -96,8 +97,8 @@ EtsString *EtsString::CreateFromOneByte(const uint8_t *utf8, uint32_t length)
 EtsString *EtsString::CreateFromUtf16UnCompressed(const uint16_t *utf16, uint32_t length)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *vm = coro->GetPandaVM();
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    auto *vm = execCtx->GetPandaVM();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     if (length == 0) {
         return reinterpret_cast<EtsString *>(

@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
+#include "runtime/execution/job_execution_context.h"
 
 namespace ark::ets::interop::js {
 
@@ -48,18 +49,18 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
-    auto coro = EtsCoroutine::GetCurrent();
+    auto execCtx = JobExecutionContext::GetCurrent();
     if (IsUndefined(env, jsVal)) {
         storeRes(nullptr);
         return true;
     }
     if (IsNull(env, jsVal)) {
-        if (LIKELY(klass->IsAssignableFrom(PlatformTypes(coro)->coreNull->GetRuntimeClass()))) {
+        if (LIKELY(klass->IsAssignableFrom(PlatformTypes(execCtx)->coreNull->GetRuntimeClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
             return true;
         }
     }
-    if (klass == PlatformTypes(coro)->interopJSValue->GetRuntimeClass()) {
+    if (klass == PlatformTypes(execCtx)->interopJSValue->GetRuntimeClass()) {
         return UnwrapVal<JSConvertJSValue>(ctx, env, jsVal, storeRes);
     }
     if (klass->IsStringClass()) {
@@ -272,9 +273,9 @@ template <typename FRead>
     }
 
     auto klass = ref->template ClassAddr<Class>();
-    auto coro = EtsCoroutine::GetCurrent();
+    auto execCtx = JobExecutionContext::GetCurrent();
     // start fastpath
-    if (klass == PlatformTypes(coro)->interopJSValue->GetRuntimeClass()) {
+    if (klass == PlatformTypes(execCtx)->interopJSValue->GetRuntimeClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
     }
     if (klass->IsStringClass()) {

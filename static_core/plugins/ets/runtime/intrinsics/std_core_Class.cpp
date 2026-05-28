@@ -33,6 +33,7 @@
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
+#include "runtime/execution/job_execution_context.h"
 #include "libarkbase/utils/utf.h"
 
 #include <optional>
@@ -272,7 +273,7 @@ static std::optional<bool> MethodParamsMatchClassArray(ark::Method &m, const Ets
     for (uint32_t i = 0; i < paramCount; ++i) {
         EtsClass *expected = etsMethod->ResolveArgType(i + 1);  // +1: instance method has 'this' at 0
         if (UNLIKELY(expected == nullptr)) {
-            ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+            ASSERT(JobExecutionContext::GetCurrent()->HasPendingException());
             return std::nullopt;
         }
         EtsClass *actual = EtsClass::FromEtsClassObject(signatureArr->Get(i));

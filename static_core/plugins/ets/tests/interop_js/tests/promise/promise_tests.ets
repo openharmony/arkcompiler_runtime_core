@@ -396,13 +396,13 @@ async function asyncFuncAwaitRejected(): Promise<Object | null> {
     return null;
 }
 
-function testAwaitPromise(): int {
+async function testAwaitPromise() {
     globalTest = new Test();
     let p1: Promise<Object | null> = asyncFuncAwait();
     let p2: Promise<Object | null> = asyncLambdaAwait();
     let p3: Promise<Object | null> = asyncFuncAwaitRejected();
     // execute async func (post await part) before check
-    Promise.all([p1, p2, p3]).awaitSync();
+    await Promise.all([p1, p2, p3]);
     if (unresolved1 != "resolved" || unresolved2 != "resolved") {
         globalTest!.fail();
     }

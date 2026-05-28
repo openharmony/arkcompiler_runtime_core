@@ -69,9 +69,8 @@ public:
 
     size_t GetExistingWorkersCount() const;
 
-    JobExecutionContext *CreateEntrypointlessExecCtx(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name,
-                                                     Job::Type type, JobPriority priority);
-    void DestroyEntrypointlessExecCtx(JobExecutionContext *executionCtx);
+    JobExecutionContext *CreateExecutionContext(Runtime *runtime, PandaVM *vm, Job *job);
+    void DestroyExecutionContext(JobExecutionContext *executionCtx);
 
     StacklessJobWorkerThread *GetCurrentWorker();
 
