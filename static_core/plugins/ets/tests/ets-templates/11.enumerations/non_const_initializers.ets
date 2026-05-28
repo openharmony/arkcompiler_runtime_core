@@ -13,25 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Ambient enumeration declarations implementations
-tags: [compile-only, not-a-test]
+desc: Non-constant initializers are not allowed in enums
+tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
-export enum Color { Red, Green, Blue }
+{{c.decl}}
 
-export enum Direction { Up, Down, Left, Right, }
-
-export enum SingleMember { Only }
-
-export enum Severity: byte { Low, Medium, High }
-
-export enum Empty {}
-
-export enum IntEnum { A = 10, B = 20, C = 30 }
-
-export enum StrEnum { X = "x", Y = "y" }
-
-export enum MixedInit { A, B = 5, C }
-
-export enum ByteEnum: byte { Lo = 1, Hi = 127 }
+{% endfor %}

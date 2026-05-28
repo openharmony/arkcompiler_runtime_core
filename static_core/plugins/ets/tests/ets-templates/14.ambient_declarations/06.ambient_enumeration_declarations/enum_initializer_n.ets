@@ -14,24 +14,10 @@
  */
 
 /*---
-desc: Ambient enumeration declarations implementations
-tags: [compile-only, not-a-test]
+desc: Ambient enum member must not have a non-const initializer
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
 ---*/
+const x = 5 // 'x' is not a constant expression per 7.36 Constant Expressions
 
-export enum Color { Red, Green, Blue }
-
-export enum Direction { Up, Down, Left, Right, }
-
-export enum SingleMember { Only }
-
-export enum Severity: byte { Low, Medium, High }
-
-export enum Empty {}
-
-export enum IntEnum { A = 10, B = 20, C = 30 }
-
-export enum StrEnum { X = "x", Y = "y" }
-
-export enum MixedInit { A, B = 5, C }
-
-export enum ByteEnum: byte { Lo = 1, Hi = 127 }
+declare enum E { A = x }
