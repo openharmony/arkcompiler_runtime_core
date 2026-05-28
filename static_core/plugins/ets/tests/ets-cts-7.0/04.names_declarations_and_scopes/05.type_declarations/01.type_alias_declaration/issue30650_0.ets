@@ -14,7 +14,9 @@ limitations under the License.
 */
 
 /*---
- desc: Declare Recursive Type
+desc: Declare Recursive Type
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0311: Circular type alias reference"
  ---*/
 
  type None = undefined

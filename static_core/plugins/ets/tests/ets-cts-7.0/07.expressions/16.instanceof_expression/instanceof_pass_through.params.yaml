@@ -43,9 +43,6 @@ cases:
   - type: 'Color'
     init: "Color.Red"
 
-  - type: FC
-    init: 'returnAsAny'
-
   - type: string[]
     init: ['One', 'Two', 'Three']
 

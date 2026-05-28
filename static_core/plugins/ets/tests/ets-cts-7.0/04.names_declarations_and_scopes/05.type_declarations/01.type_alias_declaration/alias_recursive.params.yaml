@@ -196,17 +196,6 @@ cases:
       arktest.assertEQ(v5.fld.fld.fld, 'X')
 
   - defs: |-
-      type NestedTup = [boolean, NestedTup|undefined, string]
-    use: |-
-      let v1: NestedTup = [true, [false, undefined, 'xyz'], 'abc']
-      arktest.assertEQ(v1[0], true)
-      arktest.assertTrue(v1[1] instanceof NestedTup)
-      arktest.assertEQ((v1[1] as NestedTup)[0], false)
-      arktest.assertEQ((v1[1] as NestedTup)[1], undefined)
-      arktest.assertEQ((v1[1] as NestedTup)[2], 'xyz')
-      arktest.assertEQ(v1[2], 'abc')
-
-  - defs: |-
       type NestedNumArray = number | NestedNumArray[]
     use: |-
       let v1: NestedNumArray = 1.0
@@ -239,24 +228,6 @@ cases:
       arktest.assertEQ(((v3 as NestedFunc[])[2] as Foo)('xyz'), 'xyzxyz')
 
   - defs: |-
-      type Func = (p: int, q: Func) => int;
-    use: |-
-      let a:Func = (p: int, q: Func):int => {return 1};
-      arktest.assertEQ(a(10, a), 1)
-
-  - defs: |-
-      type I = () => I | null
-    use: |-
-      const i: I = () => null
-      arktest.assertEQ(i(), null)
-
-  - defs: |-
-      type I = () => I | null
-    use: |-
-      const i: I = () => (() => null) as I
-      arktest.assertEQ((i() as I)(), null)
-
-  - defs: |-
       type EnvFunction<T> = () => T
       type SimpleType = string | Promise<SimpleType>
     use: |-
@@ -273,10 +244,3 @@ cases:
       let p: RecPromise = new Promise<RecPromise>((resolve: (value: RecPromise) => void) => { resolve(arr) })
       arktest.assertTrue(p instanceof Promise)
       arktest.assertTrue(arr instanceof Array)
-
-  - defs: |-
-      type EffectResult = (() => EffectResult) | Promise<EffectResult>
-    use: |-
-      let inner: EffectResult = new Promise<EffectResult>((resolve: (value: EffectResult) => void) => {})
-      let fn: EffectResult = (): EffectResult => { return inner }
-      arktest.assertTrue(fn instanceof Function)
