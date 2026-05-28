@@ -21,7 +21,7 @@
 
     <groupId>com.oh.ark</groupId>
     <artifactId>static-abc-verifier</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.0</version>
     <packaging>jar</packaging>
 
     <name>Static ABC Verifier Java Wrapper</name>
