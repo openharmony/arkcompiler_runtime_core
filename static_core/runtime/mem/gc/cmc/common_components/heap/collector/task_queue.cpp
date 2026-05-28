@@ -15,13 +15,13 @@
 
 #include "common_components/heap/collector/task_queue.h"
 
-#include "common_components/heap/collector/collector_proxy.h"
+#include "common_components/heap/collector/collector.h"
 
 namespace ark::common_vm {
 bool GCRunner::Execute(void *owner)
 {
     ASSERT_PRINT(owner != nullptr, "task queue owner ptr should not be null!");
-    CollectorProxy *collectorProxy = reinterpret_cast<CollectorProxy *>(owner);
+    auto *collectorProxy = reinterpret_cast<Collector *>(owner);
 
     switch (taskType_) {
         case GCTask::GCTaskType::GC_TASK_TERMINATE_GC: {

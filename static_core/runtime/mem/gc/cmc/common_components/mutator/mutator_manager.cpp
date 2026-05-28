@@ -17,7 +17,7 @@
 #include <thread>
 
 #include "common_components/base/time_utils.h"
-#include "common_components/heap/collector/marking_collector.h"
+#include "common_components/heap/allocator/alloc_buffer.h"
 #include "common_components/heap/heap.h"
 
 #include "common_interfaces/thread/mutator-inl.h"

@@ -28,10 +28,10 @@ public:
     // the collector thread entry routine.
     PANDA_PUBLIC_API static void *GCMainThreadEntry(void *arg);
 
-    // a collectorResources without a collector entity is functionless
-    explicit CollectorResources(CollectorProxy &proxy) : collectorProxy_(proxy) {}
-    NO_INLINE virtual ~CollectorResources() = default;
-
+    void SetCollector(Collector *collector)
+    {
+        collector_ = collector;
+    }
     void Init();
     void Fini();
     void StopGCWork();
@@ -159,8 +159,6 @@ private:
 
     // only gc thread can access it, so we don't use atomic type
     bool isHeapMarked_ = false;
-    // Represent the number of returned raw pointer
-    std::atomic<int> criticalNum_ {0};
     int gcWorking_ = 0;
 #if defined(_WIN64) || defined(__APPLE__)
     ark::os::memory::ConditionVariable gcWorkingCV;
@@ -177,7 +175,7 @@ private:
         gcWorkingCV.SignalAll();
     }
 #endif
-    CollectorProxy &collectorProxy_;
+    Collector *collector_;
     GCStats gcStats_;
     bool hasRelease = false;
 };

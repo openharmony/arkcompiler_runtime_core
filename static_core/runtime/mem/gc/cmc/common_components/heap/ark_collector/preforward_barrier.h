@@ -23,8 +23,6 @@ namespace ark::common_vm {
 // PreforwardBarrier is the barrier for concurrent copying gc in fixup stage
 class PreforwardBarrier : public IdleBarrier {
 public:
-    explicit PreforwardBarrier(Collector &collector) : IdleBarrier(collector) {}
-
     BaseObject *ReadRefField(BaseObject *obj, RefField<false> &field) const override;
     BaseObject *ReadStaticRef(RefField<false> &field) const override;
 

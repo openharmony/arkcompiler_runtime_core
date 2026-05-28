@@ -29,7 +29,9 @@
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
-#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "runtime/mem/gc/cmc/cmc-gc.h"
+#endif
 
 namespace ark::mem {
 
@@ -58,7 +60,11 @@ bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool use
             break;
         }
         case GCType::CMC_GC: {
+#if defined(ARK_USE_COMMON_RUNTIME)
             ret = Initialize<GCType::CMC_GC>(memStats, multithreadingMode, createPygoteSpace);
+#else
+            LOG(FATAL, GC) << "cmc-gc is available with ARK_USE_COMMON_RUNTIME define only";
+#endif
             break;
         }
         default:

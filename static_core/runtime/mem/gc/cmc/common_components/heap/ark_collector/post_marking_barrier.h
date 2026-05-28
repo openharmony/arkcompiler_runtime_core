@@ -23,8 +23,6 @@ namespace ark::common_vm {
 // rename to TracingBarrier. Marking is confusing in consideration of MarkObject.
 class PostMarkingBarrier : public IdleBarrier {
 public:
-    explicit PostMarkingBarrier(Collector &collector) : IdleBarrier(collector) {}
-
     BaseObject *ReadRefField(BaseObject *obj, RefField<false> &field) const override;
     BaseObject *ReadStaticRef(RefField<false> &field) const override;
 

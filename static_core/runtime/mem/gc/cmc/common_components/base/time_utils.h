@@ -22,6 +22,11 @@
 #include "common_interfaces/base/common.h"
 
 namespace ark::common_vm {
+
+// number of nanoseconds in a microsecond / second.
+constexpr uint64_t NS_PER_US = 1000;
+constexpr uint64_t NS_PER_S = 1000000000;
+
 namespace TimeUtil {
 // returns the monotonic time since epoch starting point in milliseconds
 uint64_t MilliSeconds();

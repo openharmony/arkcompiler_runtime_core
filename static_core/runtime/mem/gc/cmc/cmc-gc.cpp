@@ -12,26 +12,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if defined(ARK_USE_COMMON_RUNTIME)
+
 #include <iomanip>
 
-#include "common_components/heap/ark_collector/ark_collector.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
 
 #include "common_components/log/log.h"
+#include "common_components/base/time_utils.h"
 #include "common_components/mutator/mutator_manager-inl.h"
 #include "common_components/heap/verification.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/regional_heap.h"
+#include "common_components/heap/allocator/alloc_buffer.h"
+#include "common_components/heap/collector/heuristic_gc_policy.h"
+#include "common_components/heap/collector/utils.h"
+#include "common_interfaces/base/runtime_param.h"
+#include "common_components/heap/collector/collector_resources.h"
 
 #include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/math_helpers.h"
+#include "runtime/mark_word.h"
+#include "runtime/include/runtime.h"
+#include "runtime/include/panda_vm.h"
+
+#include "common_interfaces/base_runtime.h"
+#include "common_interfaces/heap/region_desc.h"
 
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
 
-namespace ark::common_vm {
-bool ArkCollector::IsUnmovableFromObject(BaseObject *obj) const
+namespace ark::mem {
+using ark::common_vm::AllocationBuffer;
+using ark::common_vm::BaseRuntime;
+using ark::common_vm::FixHeapTask;
+using ark::common_vm::FixHeapWorker;
+using ark::common_vm::FlipFunction;
+using ark::common_vm::GCReason;
+using ark::common_vm::MB;
+using ark::common_vm::MutatorManager;
+using ark::common_vm::PostFixHeapWorker;
+using ark::common_vm::PriorityMode;
+using ark::common_vm::RegionalHeap;
+using ark::common_vm::SatbBuffer;
+using ark::common_vm::ScopedStopTheWorld;
+using ark::common_vm::STWParam;
+using ark::common_vm::Task;
+using ark::common_vm::TaskPackMonitor;
+using ark::common_vm::ThreadLocal;
+using ark::common_vm::ThreadType;
+using ark::common_vm::VisitConcurrentRoots;
+using ark::common_vm::VisitGlobalRoots;
+using ark::common_vm::VisitPreforwardRoots;
+using ark::common_vm::VisitRoots;
+using ark::common_vm::VisitWeakGlobalRoots;
+using ark::common_vm::VisitWeakRoots;
+using ark::common_vm::WVerify;
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsUnmovableFromObject(BaseObject *obj) const
 {
     // filter const string object.
     if (!Heap::IsHeapAddress(obj)) {
@@ -43,7 +85,8 @@ bool ArkCollector::IsUnmovableFromObject(BaseObject *obj) const
     return regionInfo->IsUnmovableFromRegion();
 }
 
-bool ArkCollector::MarkObject(BaseObject *obj) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::MarkObject(BaseObject *obj) const
 {
     bool marked = RegionalHeap::MarkObject(obj);
     if (!marked) {
@@ -57,15 +100,16 @@ bool ArkCollector::MarkObject(BaseObject *obj) const
 }
 
 // this api updates current pointer as well as old pointer, caller should take care of this.
+template <class LanguageConfig>
 template <bool copy>
-bool ArkCollector::TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &field, BaseObject *&fromObj,
-                                         BaseObject *&toObj) const
+bool CmcGC<LanguageConfig>::TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &field, BaseObject *&fromObj,
+                                                  BaseObject *&toObj) const
 {
     RefField<> oldRef(field);
     fromObj = oldRef.GetTargetObject();
     if (IsFromObject(fromObj)) {  // LCOV_EXCL_BR_LINE
         if (copy) {               // LCOV_EXCL_BR_LINE
-            toObj = const_cast<ArkCollector *>(this)->TryForwardObject(fromObj);
+            toObj = const_cast<CmcGC<LanguageConfig> *>(this)->TryForwardObject(fromObj);
         } else {  // LCOV_EXCL_BR_LINE
             toObj = FindToVersion(fromObj);
         }
@@ -105,13 +149,15 @@ bool ArkCollector::TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &field, Bas
     return false;
 }
 
-bool ArkCollector::TryUpdateRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::TryUpdateRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const
 {
     BaseObject *oldRef = nullptr;
     return TryUpdateRefFieldImpl<false>(obj, field, oldRef, newRef);
 }
 
-bool ArkCollector::TryForwardRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::TryForwardRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const
 {
     BaseObject *oldRef = nullptr;
     return TryUpdateRefFieldImpl<true>(obj, field, oldRef, newRef);
@@ -134,7 +180,7 @@ static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMar
 
     auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>((void *)targetObj));
     // cannot skip objects in EXEMPTED_FROM_REGION, because its rset is incomplete
-    if (gcReason == GC_REASON_YOUNG && !targetRegion->IsInYoungSpace()) {
+    if (gcReason == ark::common_vm::GC_REASON_YOUNG && !targetRegion->IsInYoungSpace()) {
         LOG(DEBUG, GC) << "marking: skip non-young object " << obj << "@" << &field << ", target object: " << targetObj
                        << "<" << targetObj->GetTypeInfo() << ">(" << targetObj->GetSize() << ")";
         return;
@@ -169,7 +215,7 @@ static void MarkWeakRefField(BaseObject *obj, RefField<> &field, WeakStack &weak
     RefField<> oldField(field);
     [[maybe_unused]] BaseObject *targetObj = oldField.GetTargetObject();
 
-    if (gcReason == GC_REASON_YOUNG) {
+    if (gcReason == ark::common_vm::GC_REASON_YOUNG) {
         return;
     }
 
@@ -185,7 +231,8 @@ static void MarkWeakRefField(BaseObject *obj, RefField<> &field, WeakStack &weak
     weakStack.emplace_back(&field, reinterpret_cast<uintptr_t>(&field) - reinterpret_cast<uintptr_t>(obj));
 }
 
-MarkingCollector::MarkingRefFieldVisitor ArkCollector::CreateMarkingObjectRefFieldsVisitor(
+template <class LanguageConfig>
+typename CmcGC<LanguageConfig>::MarkingRefFieldVisitor CmcGC<LanguageConfig>::CreateMarkingObjectRefFieldsVisitor(
     ParallelLocalMarkStack &markStack, WeakStack &weakStack)
 {
     MarkingRefFieldVisitor visitor;
@@ -209,7 +256,8 @@ MarkingCollector::MarkingRefFieldVisitor ArkCollector::CreateMarkingObjectRefFie
 
 #ifdef PANDA_JS_ETS_HYBRID_MODE
 // note each ref-field will not be traced twice, so each old pointer the tracer meets must come from previous gc.
-void ArkCollector::MarkingXRef(RefField<> &field, ParallelLocalMarkStack &workStack) const
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkingXRef(RefField<> &field, ParallelLocalMarkStack &workStack) const
 {
     BaseObject *targetObj = field.GetTargetObject();
     auto region = RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(targetObj));
@@ -229,7 +277,8 @@ void ArkCollector::MarkingXRef(RefField<> &field, ParallelLocalMarkStack &workSt
     }
 }
 
-void ArkCollector::MarkingObjectXRef(BaseObject *obj, ParallelLocalMarkStack &workStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkingObjectXRef(BaseObject *obj, ParallelLocalMarkStack &workStack)
 {
     auto refFunc = [this, &workStack](RefField<> &field) { MarkingXRef(field, workStack); };
 
@@ -237,7 +286,8 @@ void ArkCollector::MarkingObjectXRef(BaseObject *obj, ParallelLocalMarkStack &wo
 }
 #endif
 
-void ArkCollector::FixRefField(BaseObject *obj, RefField<> &field) const
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::FixRefField(BaseObject *obj, RefField<> &field) const
 {
     RefField<> oldField(field);
     BaseObject *targetObj = oldField.GetTargetObject();
@@ -282,16 +332,18 @@ void ArkCollector::FixRefField(BaseObject *obj, RefField<> &field) const
     }
 }
 
-void ArkCollector::FixObjectRefFields(BaseObject *obj) const
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::FixObjectRefFields(BaseObject *obj) const
 {
     LOG(DEBUG, GC) << "fix obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")";
     auto refFunc = [this, obj](RefField<> &field) { FixRefField(obj, field); };
     obj->ForEachRefField(refFunc, refFunc);
 }
 
+template <class LanguageConfig>
 class RemarkAndPreforwardVisitor {
 public:
-    RemarkAndPreforwardVisitor(LocalCollectStack &collectStack, ArkCollector *collector)
+    RemarkAndPreforwardVisitor(LocalCollectStack &collectStack, CmcGC<LanguageConfig> *collector)
         : collectStack_(collectStack), collector_(collector)
     {
     }
@@ -320,7 +372,7 @@ public:
             }
             MarkToObject(oldObj, toVersion);
         } else {
-            if (Heap::GetHeap().GetGCReason() != GC_REASON_YOUNG) {
+            if (Heap::GetHeap().GetGCReason() != ark::common_vm::GC_REASON_YOUNG) {
                 MarkObject(oldObj);
             } else if (RegionalHeap::IsYoungSpaceObject(oldObj) && !RegionalHeap::IsNewObjectSinceMarking(oldObj) &&
                        !RegionalHeap::IsMarkedObject(oldObj)) {
@@ -350,12 +402,13 @@ private:
 
 private:
     LocalCollectStack &collectStack_;
-    ArkCollector *collector_;
+    CmcGC<LanguageConfig> *collector_;
 };
 
+template <class LanguageConfig>
 class PreforwardVisitor {
 public:
-    explicit PreforwardVisitor(ArkCollector *collector) : collector_(collector) {}
+    explicit PreforwardVisitor(CmcGC<LanguageConfig> *collector) : collector_(collector) {}
 
     void operator()(RefField<> &refField)
     {
@@ -393,13 +446,15 @@ private:
     }
 
 private:
-    ArkCollector *collector_;
+    CmcGC<LanguageConfig> *collector_;
 };
 
-class RemarkingAndPreforwardTask : public Task {
+template <class LanguageConfig>
+class RemarkingAndPreforwardTask : public ark::common_vm::Task {
 public:
-    RemarkingAndPreforwardTask(ArkCollector *collector, GlobalMarkStack &globalMarkStack, TaskPackMonitor &monitor,
-                               std::function<Mutator *()> &next)
+    RemarkingAndPreforwardTask(CmcGC<LanguageConfig> *collector, GlobalMarkStack &globalMarkStack,
+                               ark::common_vm::TaskPackMonitor &monitor,
+                               std::function<ark::common_vm::Mutator *()> &next)
         : Task(0), collector_(collector), globalMarkStack_(globalMarkStack), monitor_(monitor), getNextMutator_(next)
     {
     }
@@ -408,8 +463,8 @@ public:
     {
         ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
         LocalCollectStack collectStack(&globalMarkStack_);
-        RemarkAndPreforwardVisitor visitor(collectStack, collector_);
-        Mutator *mutator = getNextMutator_();
+        RemarkAndPreforwardVisitor<LanguageConfig> visitor(collectStack, collector_);
+        auto *mutator = getNextMutator_();
         while (mutator != nullptr) {
             mutator->VisitMutatorRoots(visitor);
             mutator = getNextMutator_();
@@ -422,40 +477,41 @@ public:
     }
 
 private:
-    ArkCollector *collector_ {nullptr};
+    CmcGC<LanguageConfig> *collector_ {nullptr};
     GlobalMarkStack &globalMarkStack_;
-    TaskPackMonitor &monitor_;
-    std::function<Mutator *()> &getNextMutator_;
+    ark::common_vm::TaskPackMonitor &monitor_;
+    std::function<ark::common_vm::Mutator *()> &getNextMutator_;
 };
 
-void ArkCollector::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
 {
-    std::vector<Mutator *> taskList;
-    MutatorManager &mutatorManager = MutatorManager::Instance();
-    mutatorManager.VisitAllMutators([&taskList](Mutator &mutator) { taskList.push_back(&mutator); });
+    std::vector<ark::common_vm::Mutator *> taskList;
+    auto &mutatorManager = MutatorManager::Instance();
+    mutatorManager.VisitAllMutators([&taskList](ark::common_vm::Mutator &mutator) { taskList.push_back(&mutator); });
     std::atomic<int> taskIter = 0;
-    std::function<Mutator *()> getNextMutator = [&taskIter, &taskList]() {
+    std::function<ark::common_vm::Mutator *()> getNextMutator = [&taskIter, &taskList]() {
         // Atomic with relaxed order reason: data race with taskIter with no synchronization or ordering constraints
         // imposed on other reads or writes
         uint32_t idx = static_cast<uint32_t>(taskIter.fetch_add(1U, std::memory_order_relaxed));
         if (idx < taskList.size()) {
             return taskList[idx];
         }
-        return (Mutator *)nullptr;
+        return (ark::common_vm::Mutator *)nullptr;
     };
 
     const uint32_t runningWorkers = std::min<uint32_t>(GetGCThreadCount(true), taskList.size());
     uint32_t parallelCount = runningWorkers + 1;  // 1 ：DaemonThread
-    TaskPackMonitor monitor(runningWorkers, runningWorkers);
+    ark::common_vm::TaskPackMonitor monitor(runningWorkers, runningWorkers);
     for (uint32_t i = 1; i < parallelCount; ++i) {
-        GetThreadPool()->PostTask(
-            std::make_unique<RemarkingAndPreforwardTask>(this, globalMarkStack, monitor, getNextMutator));
+        GetThreadPool()->PostTask(std::make_unique<RemarkingAndPreforwardTask<LanguageConfig>>(
+            this, globalMarkStack, monitor, getNextMutator));
     }
     // Run in daemon thread.
     LocalCollectStack collectStack(&globalMarkStack);
-    RemarkAndPreforwardVisitor visitor(collectStack, this);
+    RemarkAndPreforwardVisitor<LanguageConfig> visitor(collectStack, this);
     VisitGlobalRoots(visitor);
-    Mutator *mutator = getNextMutator();
+    auto *mutator = getNextMutator();
     while (mutator != nullptr) {
         mutator->VisitMutatorRoots(visitor);
         mutator = getNextMutator();
@@ -464,7 +520,8 @@ void ArkCollector::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
     monitor.WaitAllFinished();
 }
 
-void ArkCollector::RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack)
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::RemarkAndPreforwardStaticRoots", "");
     const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
@@ -472,20 +529,22 @@ void ArkCollector::RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkSta
         ParallelRemarkAndPreforward(globalMarkStack);
     } else {
         LocalCollectStack collectStack(&globalMarkStack);
-        RemarkAndPreforwardVisitor visitor(collectStack, this);
+        RemarkAndPreforwardVisitor<LanguageConfig> visitor(collectStack, this);
         VisitRoots(visitor);
         collectStack.Publish();
     }
 }
 
-void ArkCollector::PreforwardStaticRoots()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardStaticRoots()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardStaticRoots", "");
-    PreforwardVisitor visitor(this);
+    PreforwardVisitor<LanguageConfig> visitor(this);
     VisitRoots(visitor);
 }
 
-void ArkCollector::PreforwardConcurrentRoots()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardConcurrentRoots()
 {
     RefFieldVisitor visitor = [this](RefField<> &refField) {
         RefField<> oldField(refField);
@@ -507,24 +566,26 @@ void ArkCollector::PreforwardConcurrentRoots()
     VisitConcurrentRoots(visitor);
 }
 
-void ArkCollector::PreforwardStaticWeakRoots()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardStaticWeakRoots()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardStaticRoots", "");
 
     WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
     VisitWeakRoots(weakVisitor);
-    MutatorManager::Instance().VisitAllMutators([](Mutator &mutator) {
+    MutatorManager::Instance().VisitAllMutators([](ark::common_vm::Mutator &mutator) {
         // Request finalize callback in each vm-thread when gc finished.
         mutator.SetFinalizeRequest();
     });
 
-    AllocationBuffer *allocBuffer = AllocationBuffer::GetAllocBuffer();
+    auto *allocBuffer = ark::common_vm::AllocationBuffer::GetAllocBuffer();
     if (LIKELY(allocBuffer != nullptr)) {
         allocBuffer->ClearRegions();
     }
 }
 
-void ArkCollector::PreforwardConcurrencyModelRoots()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardConcurrencyModelRoots()
 {
     LOG(FATAL, COMMON) << "Unresolved fatal";
     UNREACHABLE();
@@ -567,8 +628,9 @@ void EnumRootsBuffer::UpdateBufferSize()
     }
 }
 
-template <ArkCollector::EnumRootsPolicy policy>
-CArrayList<BaseObject *> ArkCollector::EnumRoots()
+template <class LanguageConfig>
+template <typename CmcGC<LanguageConfig>::EnumRootsPolicy policy>
+CArrayList<BaseObject *> CmcGC<LanguageConfig>::EnumRoots()
 {
     STWParam stwParam {"wgc-enumroot"};
     EnumRootsBuffer buffer;
@@ -594,36 +656,39 @@ CArrayList<BaseObject *> ArkCollector::EnumRoots()
     return std::move(*results);
 }
 
-void ArkCollector::MarkingHeap(const CArrayList<BaseObject *> &collectedRoots)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<BaseObject *> &collectedRoots)
 {
     COMMON_PHASE_TIMER("marking live objects");
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     markedObjectCount_.store(0, std::memory_order_relaxed);
-    TransitionToGCPhase(GCPhase::GC_PHASE_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_MARK, true);
 
     MarkingRoots(collectedRoots);
     ExemptFromSpace();
 }
 
-void ArkCollector::PostMarking()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PostMarking()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PostMarking", "");
     COMMON_PHASE_TIMER("PostMarking");
-    TransitionToGCPhase(GC_PHASE_POST_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GC_PHASE_POST_MARK, true);
 
     // clear satb buffer when gc finish tracing.
     SatbBuffer::Instance().ClearBuffer();
 
-    WVerify::VerifyAfterMark(*this);
+    WVerify::VerifyAfterMark();
 }
 
-WeakRefFieldVisitor ArkCollector::GetWeakRefFieldVisitor()
+template <class LanguageConfig>
+WeakRefFieldVisitor CmcGC<LanguageConfig>::GetWeakRefFieldVisitor()
 {
     return [this](RefField<> &refField) -> bool {
         RefField<> oldField(refField);
         BaseObject *oldObj = oldField.GetTargetObject();
-        if (gcReason_ == GC_REASON_YOUNG) {
+        if (gcReason_ == ark::common_vm::GC_REASON_YOUNG) {
             if (RegionalHeap::IsYoungSpaceObject(oldObj) && !IsMarkedObject(oldObj) &&
                 !RegionalHeap::IsNewObjectSinceMarking(oldObj)) {
                 return false;
@@ -652,7 +717,8 @@ WeakRefFieldVisitor ArkCollector::GetWeakRefFieldVisitor()
     };
 }
 
-RefFieldVisitor ArkCollector::GetPrefowardRefFieldVisitor()
+template <class LanguageConfig>
+RefFieldVisitor CmcGC<LanguageConfig>::GetPrefowardRefFieldVisitor()
 {
     return [this](RefField<> &refField) -> void {
         RefField<> oldField(refField);
@@ -673,24 +739,25 @@ RefFieldVisitor ArkCollector::GetPrefowardRefFieldVisitor()
     };
 }
 
-void ArkCollector::PreforwardFlip()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardFlip()
 {
     auto remarkAndForwardGlobalRoot = [this]() {
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
         ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
-        TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
         Remark();
         PostMarking();
         reinterpret_cast<RegionalHeap &>(theAllocator_).PrepareForward();
 
-        TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY, true);
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
-        SetGCThreadQosPriority(PriorityMode::FOREGROUND);
+        SetGCThreadQosPriority(ark::common_vm::PriorityMode::FOREGROUND);
 
-        VisitWeakGlobalRoots(weakVisitor, Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+        VisitWeakGlobalRoots(weakVisitor, Heap::GetHeap().GetGCReason() == ark::common_vm::GC_REASON_YOUNG);
     };
-    FlipFunction forwardMutatorRoot = [this](Mutator &mutator) {
+    FlipFunction forwardMutatorRoot = [this](ark::common_vm::Mutator &mutator) {
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
         mutator.VisitMutatorRoots(weakVisitor);
         RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
@@ -707,13 +774,14 @@ void ArkCollector::PreforwardFlip()
     }
 }
 
-void ArkCollector::Preforward()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::Preforward()
 {
     COMMON_PHASE_TIMER("Preforward");
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Preforward[STW]", "");
-    TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY, true);
 
-    [[maybe_unused]] Taskpool *threadPool = GetThreadPool();
+    [[maybe_unused]] auto *threadPool = GetThreadPool();
     ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
 
     // copy and fix finalizer roots.
@@ -723,13 +791,15 @@ void ArkCollector::Preforward()
     VisitPreforwardRoots(visitor);
 }
 
-void ArkCollector::ConcurrentPreforward()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ConcurrentPreforward()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::ConcurrentPreforward", "");
     PreforwardConcurrentRoots();
 }
 
-void ArkCollector::PrepareFix()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PrepareFix()
 {
     if (Heap::GetHeap().GetGCReason() == GCReason::GC_REASON_YOUNG) {
         // string table objects are always not in young space, skip it
@@ -748,7 +818,8 @@ void ArkCollector::PrepareFix()
     }
 }
 
-void ArkCollector::ParallelFixHeap()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ParallelFixHeap()
 {
     auto &regionalHeap = reinterpret_cast<RegionalHeap &>(theAllocator_);
     auto taskList = regionalHeap.CollectFixTasks();
@@ -765,7 +836,7 @@ void ArkCollector::ParallelFixHeap()
 
     const uint32_t runningWorkers = GetGCThreadCount(true) - 1;
     uint32_t parallelCount = runningWorkers + 1;  // 1 ：DaemonThread
-    FixHeapWorker::Result results[parallelCount];
+    std::vector<FixHeapWorker::Result> results(parallelCount);
     {
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap [Parallel]", "");
         // Fix heap
@@ -798,17 +869,19 @@ void ArkCollector::ParallelFixHeap()
     }
 }
 
-void ArkCollector::FixHeap()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::FixHeap()
 {
-    TransitionToGCPhase(GCPhase::GC_PHASE_FIX, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FIX, true);
     COMMON_PHASE_TIMER("FixHeap");
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap", "");
     ParallelFixHeap();
 
-    WVerify::VerifyAfterFix(*this);
+    WVerify::VerifyAfterFix();
 }
 
-void ArkCollector::CollectGarbageWithXRef()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::CollectGarbageWithXRef()
 {
     const bool isNotYoungGC = gcReason_ != GCReason::GC_REASON_YOUNG;
 #ifdef ENABLE_CMC_RB_DFX
@@ -816,16 +889,16 @@ void ArkCollector::CollectGarbageWithXRef()
 #endif
     STWParam stwParam {"stw-gc"};
     ScopedStopTheWorld stw(stwParam);
-    RemoveXRefFromRoots();
+    ark::common_vm::RemoveXRefFromRoots();
 
     auto collectedRoots = EnumRoots<EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR>();
     MarkingHeap(collectedRoots);
-    TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
     Remark();
-    SweepUnmarkedXRefs();
+    ark::common_vm::SweepUnmarkedXRefs();
     PostMarking();
 
-    AddXRefToRoots();
+    ark::common_vm::AddXRefToRoots();
     Preforward();
     ConcurrentPreforward();
     // reclaim large objects should after preforward(may process weak ref) and
@@ -835,7 +908,7 @@ void ArkCollector::CollectGarbageWithXRef()
     }
 
     CopyFromSpace();
-    WVerify::VerifyAfterForward(*this);
+    WVerify::VerifyAfterForward();
 
     PrepareFix();
     FixHeap();
@@ -843,11 +916,11 @@ void ArkCollector::CollectGarbageWithXRef()
         CollectNonMovableGarbage();
     }
 
-    TransitionToGCPhase(GCPhase::GC_PHASE_IDLE, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
 
     ClearAllGCInfo();
     CollectSmallSpace();
-    UnmarkAllXRefs();
+    ark::common_vm::UnmarkAllXRefs();
 
 #if defined(ENABLE_CMC_RB_DFX)
     WVerify::EnableReadBarrierDFX(*this);
@@ -857,25 +930,27 @@ void ArkCollector::CollectGarbageWithXRef()
 
 class GCTracer final {
 public:
-    GCTracer(GCReason reason, GCType type) : gcReason_(reason), gcType_(type)
+    GCTracer(ark::common_vm::GCReason reason, ark::common_vm::GCType type) : gcReason_(reason), gcType_(type)
     {
-        Heap::GetHeap().GetCollector().NotifyGCListeners([reason, type](GCListener *l) { l->OnGCStart(reason, type); });
+        Heap::GetHeap().GetCollector().NotifyGCListeners(
+            [reason, type](ark::common_vm::GCListener *l) { l->OnGCStart(reason, type); });
     }
 
     ~GCTracer()
     {
         Heap::GetHeap().GetCollector().NotifyGCListeners(
-            [reason = gcReason_, type = gcType_](GCListener *l) { l->OnGCFinish(reason, type); });
+            [reason = gcReason_, type = gcType_](ark::common_vm::GCListener *l) { l->OnGCFinish(reason, type); });
     }
 
 private:
-    GCReason gcReason_;
-    GCType gcType_;
+    ark::common_vm::GCReason gcReason_;
+    ark::common_vm::GCType gcType_;
 };
 
+template <class LanguageConfig>
 class ConcurrentEvacuationTask : public Task {
 public:
-    ConcurrentEvacuationTask(uint32_t id, ArkCollector &tc, ParallelMarkingMonitor &monitor,
+    ConcurrentEvacuationTask(uint32_t id, CmcGC<LanguageConfig> &tc, ParallelMarkingMonitor &monitor,
                              GlobalEvacuationStack &globalStack)
         : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
     {
@@ -901,14 +976,16 @@ public:
     }
 
 private:
-    ArkCollector &collector_;
+    CmcGC<LanguageConfig> &collector_;
     ParallelMarkingMonitor &monitor_;
     GlobalEvacuationStack &globalStack_;
 };
 
+template <class LanguageConfig>
 class RemarkTask : public Task {
 public:
-    RemarkTask(uint32_t id, ArkCollector &tc, ParallelMarkingMonitor &monitor, GlobalEvacuationStack &globalStack)
+    RemarkTask(uint32_t id, CmcGC<LanguageConfig> &tc, ParallelMarkingMonitor &monitor,
+               GlobalEvacuationStack &globalStack)
         : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
     {
     }
@@ -933,17 +1010,20 @@ public:
     }
 
 private:
-    ArkCollector &collector_;
+    CmcGC<LanguageConfig> &collector_;
     ParallelMarkingMonitor &monitor_;
     GlobalEvacuationStack &globalStack_;
 };
 
-void ArkCollector::ProcessReferencesAfterCopy()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ProcessReferencesAfterCopy()
 {
     BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessReferencesAfterCopy(); });
 }
 
-void ArkCollector::DoGarbageCollection()
+template <class LanguageConfig>
+// CC-OFFNXT(G.FUD.05) solid logic
+void CmcGC<LanguageConfig>::DoGarbageCollection()
 {
     GCTracer gcTracer(gcReason_, gcType_);
     const bool isYoungGC = gcReason_ == GCReason::GC_REASON_YOUNG;
@@ -961,7 +1041,7 @@ void ArkCollector::DoGarbageCollection()
             ScopedStopTheWorld stw(stwParam);
             auto collectedRoots = EnumRoots<EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR>();
             MarkingHeap(collectedRoots);
-            TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
+            TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
             Remark();
             PostMarking();
 
@@ -974,7 +1054,7 @@ void ArkCollector::DoGarbageCollection()
             }
 
             CopyFromSpace();
-            WVerify::VerifyAfterForward(*this);
+            WVerify::VerifyAfterForward();
 
             PrepareFix();
             FixHeap();
@@ -982,7 +1062,7 @@ void ArkCollector::DoGarbageCollection()
                 CollectNonMovableGarbage();
             }
 
-            TransitionToGCPhase(GCPhase::GC_PHASE_IDLE, true);
+            TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
 
             ClearAllGCInfo();
             CollectSmallSpace();
@@ -998,7 +1078,7 @@ void ArkCollector::DoGarbageCollection()
         MarkingHeap(collectedRoots);
         STWParam finalMarkStwParam {"final-mark"};
         {
-            ScopedStopTheWorld stw(finalMarkStwParam, true, GCPhase::GC_PHASE_FINAL_MARK);
+            ScopedStopTheWorld stw(finalMarkStwParam, true, ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
             Remark();
             PostMarking();
             reinterpret_cast<RegionalHeap &>(theAllocator_).PrepareForward();
@@ -1013,7 +1093,7 @@ void ArkCollector::DoGarbageCollection()
         }
 
         CopyFromSpace();
-        WVerify::VerifyAfterForward(*this);
+        WVerify::VerifyAfterForward();
 
         PrepareFix();
         FixHeap();
@@ -1021,7 +1101,7 @@ void ArkCollector::DoGarbageCollection()
             CollectNonMovableGarbage();
         }
 
-        TransitionToGCPhase(GCPhase::GC_PHASE_IDLE, true);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
         ClearAllGCInfo();
         CollectSmallSpace();
         return;
@@ -1042,7 +1122,7 @@ void ArkCollector::DoGarbageCollection()
 
         CopyFromSpace();
         ProcessReferencesAfterCopy();
-        WVerify::VerifyAfterForward(*this);
+        WVerify::VerifyAfterForward();
 
         PrepareFix();
         FixHeap();
@@ -1054,7 +1134,7 @@ void ArkCollector::DoGarbageCollection()
         DoGarbageCollectionWithoutConcurrentMarking();
     }
 
-    TransitionToGCPhase(GCPhase::GC_PHASE_IDLE, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
     ClearAllGCInfo();
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
     space.DumpAllRegionSummary("Peak GC log");
@@ -1062,9 +1142,10 @@ void ArkCollector::DoGarbageCollection()
     CollectSmallSpace();
 }
 
-void ArkCollector::DoGarbageCollectionWithoutConcurrentMarking()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::DoGarbageCollectionWithoutConcurrentMarking()
 {
-    CHECK(Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+    CHECK(Heap::GetHeap().GetGCReason() == ark::common_vm::GC_REASON_YOUNG);
     GlobalEvacuationStack globalEvacuationStack;
     PreforwardNonHeapRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>(globalEvacuationStack);
     EnqueueRememberedSetRefs(globalEvacuationStack);
@@ -1074,14 +1155,15 @@ void ArkCollector::DoGarbageCollectionWithoutConcurrentMarking()
     // We do not evacuate objects on remark pause to avoid too long STW
     CopyFromSpace();
 
-    WVerify::VerifyAfterForward(*this);
+    WVerify::VerifyAfterForward();
 
     PrepareFix();
     FixHeap();
 }
 
-template <ArkCollector::EnumRootsPolicy policy>
-void ArkCollector::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
+template <class LanguageConfig>
+template <typename CmcGC<LanguageConfig>::EnumRootsPolicy policy>
+void CmcGC<LanguageConfig>::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
 {
     CArrayList<ark::common_vm::BaseObject *> roots;
 
@@ -1107,21 +1189,23 @@ void ArkCollector::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
     stack.Publish();
 }
 
+template <class LanguageConfig>
 template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
-void ArkCollector::PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots)
+void CmcGC<LanguageConfig>::PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots)
 {
     auto &heap = static_cast<RegionalHeap &>(theAllocator_);
     heap.AssembleGarbageCandidates();
     heap.PrepareMarking();
     heap.PrepareForward();
 
-    TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY, true);
     rootsVisitFunc([this, &forwardedRoots](RefField<> &root) { PreforwardNonHeapRoot(root, forwardedRoots); });
 
-    TransitionToGCPhase(GCPhase::GC_PHASE_YOUNG_COPY, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY, true);
 }
 
-void ArkCollector::PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots)
 {
     auto *obj = root.GetTargetObject();
     auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
@@ -1139,7 +1223,8 @@ void ArkCollector::PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject
     forwardedRoots.push_back(obj);
 }
 
-void ArkCollector::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots)
 {
     const auto enumGlobalRoots = [this, &forwardedRoots]() {
         SetGCThreadQosPriority(PriorityMode::STW);
@@ -1149,7 +1234,7 @@ void ArkCollector::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwarde
 
     ark::os::memory::Mutex stackMutex;
     CArrayList<CArrayList<BaseObject *>> rootSet;  // allocate for each mutator
-    FlipFunction enumMutatorRoot = [this, &rootSet, &stackMutex](Mutator &mutator) {
+    FlipFunction enumMutatorRoot = [this, &rootSet, &stackMutex](ark::common_vm::Mutator &mutator) {
         CArrayList<BaseObject *> roots;
         mutator.VisitMutatorRoots([this, &roots](RefField<> &root) { PreforwardNonHeapRoot(root, roots); });
         ark::os::memory::LockHolder lockGuard(stackMutex);
@@ -1174,12 +1259,13 @@ void ArkCollector::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwarde
     });
 }
 
-void ArkCollector::RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack)
 {
     STWParam param {"remark-young-collection-space"};
     ScopedStopTheWorld stw(param);
 
-    TransitionToGCPhase(GCPhase::GC_PHASE_FINAL_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
 
     RemarkNonHeapRoots(globalStack);
     MarkSatbBuffer(globalStack);
@@ -1189,14 +1275,16 @@ void ArkCollector::RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack
     GetGCStats().recordSTWTime(param.GetElapsedNs());
 }
 
-void ArkCollector::RemarkNonHeapRoots(GlobalEvacuationStack &globalStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::RemarkNonHeapRoots(GlobalEvacuationStack &globalStack)
 {
     LocalEvacuationStack stack(&globalStack);
     VisitRoots([this, &stack](RefField<> &root) { RemarkNonHeapRoot(root, stack); });
     stack.Publish();
 }
 
-void ArkCollector::EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack)
 {
     LocalEvacuationStack stack(&globalStack);
     auto &space = static_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
@@ -1204,10 +1292,11 @@ void ArkCollector::EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack)
     stack.Publish();
 }
 
-void ArkCollector::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
 {
     std::vector<BaseObject *> remarkStack;
-    MutatorManager::Instance().VisitAllMutators([&remarkStack](Mutator &mutator) {
+    MutatorManager::Instance().VisitAllMutators([&remarkStack](ark::common_vm::Mutator &mutator) {
         const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator.GetSatbBufferNode());
         if (node != nullptr) {
             const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
@@ -1232,7 +1321,8 @@ void ArkCollector::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
     localStack.Publish();
 }
 
-void ArkCollector::ProcessEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ProcessEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
 {
     const auto maxWorkers = GetGCThreadCount(true) - 1;
     if (maxWorkers > 0) {
@@ -1241,7 +1331,8 @@ void ArkCollector::ProcessEvacuationStack(GlobalEvacuationStack &globalEvacuatio
 
         auto *threadPool = GetThreadPool();
         for (uint32_t i = 0; i < parallelCount; ++i) {
-            threadPool->PostTask(std::make_unique<ConcurrentEvacuationTask>(0, *this, monitor, globalEvacuationStack));
+            threadPool->PostTask(
+                std::make_unique<ConcurrentEvacuationTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
         }
         ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
         do {
@@ -1263,7 +1354,8 @@ void ArkCollector::ProcessEvacuationStack(GlobalEvacuationStack &globalEvacuatio
     }
 }
 
-void ArkCollector::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
 {
     // NOTE: it is performed concurrently with other GC threads and mutators
     std::vector<BaseObject *> remarkStack;
@@ -1303,7 +1395,8 @@ void ArkCollector::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
     }
 }
 
-void ArkCollector::MarkEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
 {
     const auto maxWorkers = GetGCThreadCount(true) - 1;
     if (maxWorkers > 0) {
@@ -1312,7 +1405,8 @@ void ArkCollector::MarkEvacuationStack(GlobalEvacuationStack &globalEvacuationSt
 
         auto *threadPool = GetThreadPool();
         for (uint32_t i = 0; i < parallelCount; ++i) {
-            threadPool->PostTask(std::make_unique<RemarkTask>(0, *this, monitor, globalEvacuationStack));
+            threadPool->PostTask(
+                std::make_unique<RemarkTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
         }
         ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
         do {
@@ -1334,7 +1428,8 @@ void ArkCollector::MarkEvacuationStack(GlobalEvacuationStack &globalEvacuationSt
     }
 }
 
-void ArkCollector::MarkEvacuationStack(ParallelLocalEvacuationStack &stack)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkEvacuationStack(ParallelLocalEvacuationStack &stack)
 {
     RefField<> *ref;
     while (stack.Pop(&ref)) {
@@ -1342,13 +1437,14 @@ void ArkCollector::MarkEvacuationStack(ParallelLocalEvacuationStack &stack)
     }
 }
 
+template <class LanguageConfig>
 template <typename Stack>
-void ArkCollector::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
+void CmcGC<LanguageConfig>::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
 {
     auto *obj = ref.GetTargetObject();
     auto *region = RegionDesc::GetAliveRegionDescAt(obj);
 
-    CHECK(Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+    CHECK(Heap::GetHeap().GetGCReason() == ark::common_vm::GC_REASON_YOUNG);
     // Root was updated while concurrent copying phase so it cannot be in FromRegion
     CHECK(!region->IsFromRegion());
 
@@ -1365,8 +1461,9 @@ void ArkCollector::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
     }
 }
 
+template <class LanguageConfig>
 template <typename Stack>
-void ArkCollector::ProcessRef(RefField<> &ref, Stack &stack)
+void CmcGC<LanguageConfig>::ProcessRef(RefField<> &ref, Stack &stack)
 {
     RefField<> oldRef(ref);
     auto *obj = oldRef.GetTargetObject();
@@ -1401,13 +1498,14 @@ void ArkCollector::ProcessRef(RefField<> &ref, Stack &stack)
     }
 }
 
+template <class LanguageConfig>
 template <typename Stack>
-void ArkCollector::MarkRef(RefField<> &ref, Stack &stack)
+void CmcGC<LanguageConfig>::MarkRef(RefField<> &ref, Stack &stack)
 {
     auto *obj = ref.GetTargetObject();
     auto *region = RegionDesc::GetAliveRegionDescAt(obj);
 
-    CHECK(Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
+    CHECK(Heap::GetHeap().GetGCReason() == ark::common_vm::GC_REASON_YOUNG);
 
     if (!InYoungCollectionSpace(obj)) {
         return;
@@ -1427,8 +1525,9 @@ void ArkCollector::MarkRef(RefField<> &ref, Stack &stack)
     }
 }
 
+template <class LanguageConfig>
 template <typename Stack>
-void ArkCollector::EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &stack)
+void CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &stack)
 {
     auto fieldHandler = [this, &stack](RefField<> &field) {
         if (InYoungCollectionSpace(field.GetTargetObject())) {
@@ -1439,8 +1538,9 @@ void ArkCollector::EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &sta
     obj->ForEachRefField(fieldHandler, fieldHandler);
 }
 
+template <class LanguageConfig>
 template <typename Stack>
-size_t ArkCollector::EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj, Stack &stack)
+size_t CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj, Stack &stack)
 {
     auto fieldHandler = [this, &stack](RefField<> &field) {
         if (InYoungCollectionSpace(field.GetTargetObject())) {
@@ -1451,31 +1551,36 @@ size_t ArkCollector::EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj
     return obj->ForEachRefFieldAndGetSize(fieldHandler, fieldHandler);
 }
 
-bool ArkCollector::InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region) const
 {
     return InYoungCollectionSpace(region->GetRegionType());
 }
 
-bool ArkCollector::InYoungCollectionSpace(const RegionDesc *region) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc *region) const
 {
     return InYoungCollectionSpace(region->GetRegionType());
 }
 
-bool ArkCollector::InYoungCollectionSpace(const BaseObject *obj) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const BaseObject *obj) const
 {
     return Heap::IsHeapAddress(obj) &&
            InYoungCollectionSpace(RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj));
 }
 
-bool ArkCollector::InYoungCollectionSpace(RegionDesc::RegionType type) const
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(RegionDesc::RegionType type) const
 {
     // During single pass evacuation in young GC objects might be concurrently evacuated by mutator. So we should
     // inspect references which point to them too.
     return RegionDesc::IsInYoungSpace(type) || RegionDesc::IsInToSpace(type);
 }
 
-CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam &param,
-                                                                 const ark::mem::RefFieldVisitor &visitor)
+template <class LanguageConfig>
+CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(STWParam &param,
+                                                                          const ark::mem::RefFieldVisitor &visitor)
 {
     const auto enumGlobalRoots = [this, &visitor]() {
         SetGCThreadQosPriority(PriorityMode::STW);
@@ -1485,7 +1590,7 @@ CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam &param
 
     ark::os::memory::Mutex stackMutex;
     CArrayList<CArrayList<BaseObject *>> rootSet;  // allcate for each mutator
-    FlipFunction enumMutatorRoot = [&rootSet, &stackMutex](Mutator &mutator) {
+    FlipFunction enumMutatorRoot = [&rootSet, &stackMutex](ark::common_vm::Mutator &mutator) {
         CArrayList<BaseObject *> roots;
         RefFieldVisitor localVisitor = [&roots](RefField<> &root) { roots.emplace_back(root.GetTargetObject()); };
         mutator.VisitMutatorRoots(localVisitor);
@@ -1496,29 +1601,34 @@ CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam &param
     return rootSet;
 }
 
-BaseObject *ArkCollector::ForwardObject(BaseObject *obj)
+template <class LanguageConfig>
+BaseObject *CmcGC<LanguageConfig>::ForwardObject(BaseObject *obj)
 {
     BaseObject *to = TryForwardObject(obj);
     return (to != nullptr) ? to : obj;
 }
 
-BaseObject *ArkCollector::TryForwardObject(BaseObject *obj)
+template <class LanguageConfig>
+BaseObject *CmcGC<LanguageConfig>::TryForwardObject(BaseObject *obj)
 {
     return CopyObjectImpl(obj);
 }
 
 // ConcurrentGC
-BaseObject *ArkCollector::CopyObjectImpl(BaseObject *obj)
+template <class LanguageConfig>
+BaseObject *CmcGC<LanguageConfig>::CopyObjectImpl(BaseObject *obj)
 {
     // reconsider phase difference between mutator and GC thread during transition.
-    if (IsGcThread()) {
-        CHECK(GetGCPhase() == GCPhase::GC_PHASE_PRECOPY || GetGCPhase() == GCPhase::GC_PHASE_COPY ||
-              GetGCPhase() == GCPhase::GC_PHASE_YOUNG_COPY || GetGCPhase() == GCPhase::GC_PHASE_FIX ||
-              GetGCPhase() == GCPhase::GC_PHASE_FINAL_MARK);
+    if (ark::common_vm::IsGcThread()) {
+        CHECK(GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_PRECOPY ||
+              GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_COPY ||
+              GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY ||
+              GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_FIX ||
+              GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
     } else {
         auto phase = Mutator::GetMutator()->GetMutatorPhase();
-        CHECK(phase == GCPhase::GC_PHASE_PRECOPY || phase == GCPhase::GC_PHASE_COPY ||
-              phase == GCPhase::GC_PHASE_YOUNG_COPY || phase == GCPhase::GC_PHASE_FIX);
+        CHECK(phase == ark::common_vm::GCPhase::GC_PHASE_PRECOPY || phase == ark::common_vm::GCPhase::GC_PHASE_COPY ||
+              phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY || phase == ark::common_vm::GCPhase::GC_PHASE_FIX);
     }
 
     do {
@@ -1549,13 +1659,14 @@ BaseObject *ArkCollector::CopyObjectImpl(BaseObject *obj)
     return nullptr;
 }
 
-BaseObject *ArkCollector::CopyObjectAfterExclusive(BaseObject *obj)
+template <class LanguageConfig>
+BaseObject *CmcGC<LanguageConfig>::CopyObjectAfterExclusive(BaseObject *obj)
 {
     size_t size = RegionalHeap::GetAllocSize(*obj);
     // 8: size of free object, but free object can not be copied.
     if (size == 8) {
         LOG(FATAL, COMMON) << "forward free obj: " << obj
-                           << "is survived: " << (IsSurvivedObject(obj) ? "true" : "false");
+                           << "is survived: " << (RegionalHeap::IsSurvivedObject(obj) ? "true" : "false");
     }
     BaseObject *toObj = reinterpret_cast<RegionalHeap &>(theAllocator_).RouteObject(obj, size);
     if (toObj == nullptr) {
@@ -1581,7 +1692,8 @@ BaseObject *ArkCollector::CopyObjectAfterExclusive(BaseObject *obj)
     return toObj;
 }
 
-void ArkCollector::ClearAllGCInfo()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ClearAllGCInfo()
 {
     COMMON_PHASE_TIMER("ClearAllGCInfo");
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
@@ -1589,11 +1701,12 @@ void ArkCollector::ClearAllGCInfo()
     reinterpret_cast<RegionalHeap &>(theAllocator_).ClearJitFortAwaitingMark();
 }
 
-void ArkCollector::CollectSmallSpace()
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::CollectSmallSpace()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CollectSmallSpace", "");
-    GCStats &stats = GetGCStats();
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
+    auto &stats = GetGCStats();
+    auto &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
     {
         COMMON_PHASE_TIMER("CollectFromSpaceGarbage");
         stats.collectedBytes += stats.smallGarbageSize;
@@ -1623,7 +1736,8 @@ void ArkCollector::CollectSmallSpace()
             .c_str());
 }
 
-void ArkCollector::SetGCThreadQosPriority(PriorityMode mode)
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::SetGCThreadQosPriority(PriorityMode mode)
 {
 #ifdef ENABLE_QOS
     LOG(DEBUG, COMMON) << "SetGCThreadQosPriority gettid " << gettid();
@@ -1649,8 +1763,932 @@ void ArkCollector::SetGCThreadQosPriority(PriorityMode mode)
 #endif
 }
 
-bool ArkCollector::ShouldIgnoreRequest(GCRequest &request)
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::ShouldIgnoreRequest(ark::common_vm::GCRequest &request)
 {
     return request.ShouldBeIgnored();
 }
-}  // namespace ark::common_vm
+
+template <class LanguageConfig>
+const size_t CmcGC<LanguageConfig>::MAX_MARKING_WORK_SIZE = 16;  // fork task if bigger
+template <class LanguageConfig>
+const size_t CmcGC<LanguageConfig>::MIN_MARKING_WORK_SIZE = 8;  // forbid forking task if smaller
+
+template <class LanguageConfig, bool ProcessXRef>
+class ConcurrentMarkingTask : public Task {
+public:
+    ConcurrentMarkingTask(uint32_t id, CmcGC<LanguageConfig> &tc, ParallelMarkingMonitor &monitor,
+                          GlobalMarkStack &globalMarkStack)
+        : Task(id), collector_(tc), monitor_(monitor), globalMarkStack_(globalMarkStack)
+    {
+    }
+
+    ~ConcurrentMarkingTask() override = default;
+
+    // run concurrent marking task.
+    bool Run([[maybe_unused]] uint32_t threadIndex) override
+    {
+        ParallelLocalMarkStack markStack(&globalMarkStack_, &monitor_);
+        do {
+            if (!monitor_.TryStartStep()) {
+                break;
+            }
+            collector_.template ProcessMarkStack<ProcessXRef>(threadIndex, markStack);
+            monitor_.FinishStep();
+        } while (monitor_.WaitNextStepOrFinished());
+        monitor_.NotifyFinishOne();
+        return true;
+    }
+
+private:
+    CmcGC<LanguageConfig> &collector_;
+    ParallelMarkingMonitor &monitor_;
+    GlobalMarkStack &globalMarkStack_;
+};
+
+static void ClearWeakRef(WeakStack::value_type *begin, WeakStack::value_type *end)
+{
+    for (auto iter = begin; iter != end; ++iter) {
+        RefField<> *fieldPointer = iter->first;
+        size_t offset = iter->second;
+        ASSERT_PRINT(offset % sizeof(RefField<>) == 0, "offset is not aligned");
+
+        RefField<> &field = reinterpret_cast<RefField<> &>(*fieldPointer);
+        RefField<> oldField(field);
+
+        if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
+            continue;
+        }
+        BaseObject *targetObj = oldField.GetTargetObject();
+        DCHECK(Heap::IsHeapAddress(targetObj));
+
+        auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>(targetObj));
+        if (targetRegion->IsMarkedObject(targetObj) || targetRegion->IsNewObjectSinceMarking(targetObj)) {
+            continue;
+        }
+
+        BaseObject *obj = reinterpret_cast<BaseObject *>(reinterpret_cast<uintptr_t>(&field) - offset);
+        if (RegionDesc::GetAliveRegionType(reinterpret_cast<MAddress>(obj)) == RegionDesc::RegionType::FROM_REGION) {
+            BaseObject *toObj = obj->GetForwardingPointer();
+
+            // Make sure even the object that contains the weak reference is trimed before forwarding, the weak ref
+            // field is still within the object
+            if (toObj != nullptr && offset < obj->GetSizeForwarded()) {
+                RefField<> &toField = *reinterpret_cast<RefField<> *>(reinterpret_cast<uintptr_t>(toObj) + offset);
+                toObj->ClearRef(toField);
+            }
+        }
+        obj->ClearRef(field);
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ProcessWeakStack(WeakStack &weakStack)
+{
+    WeakStack::value_type *begin = &(*weakStack.begin());
+    WeakStack::value_type *end = begin + weakStack.size();
+    ClearWeakRef(begin, end);
+}
+
+template <class LanguageConfig>
+template <bool ProcessXRef>
+void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadIndex, ParallelLocalMarkStack &markStack)
+{
+    size_t nNewlyMarked = 0;
+    WeakStack weakStack;
+    auto visitor = CreateMarkingObjectRefFieldsVisitor(markStack, weakStack);
+    std::vector<BaseObject *> remarkStack;
+    auto fetchFromSatbBuffer = [this, &markStack, &remarkStack]() {
+        SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
+        bool needProcess = false;
+        while (!remarkStack.empty()) {
+            BaseObject *obj = remarkStack.back();
+            remarkStack.pop_back();
+            if (Heap::IsHeapAddress(obj) && (!MarkObject(obj))) {
+                markStack.Push(obj);
+                needProcess = true;
+                LOG(DEBUG, GC) << "tracing take from satb buffer: obj " << obj;
+            }
+        }
+        return needProcess;
+    };
+    size_t iterationCnt = 0;
+    constexpr size_t maxIterationLoopNum = 1000;
+    // loop until work stack empty.
+    while (true) {
+        BaseObject *object;
+        while (markStack.Pop(&object)) {
+            ++nNewlyMarked;
+            auto region = RegionDesc::GetAliveRegionDescAt(static_cast<MAddress>(reinterpret_cast<uintptr_t>(object)));
+            visitor.SetMarkingRefFieldArgs(object);
+            auto objSize =
+                object->ForEachRefFieldAndGetSize(visitor.GetRefFieldVisitor(), visitor.GetWeakRefFieldVisitor());
+            region->AddLiveByteCount(objSize);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+            if constexpr (ProcessXRef) {
+                MarkingObjectXRef(object, markStack);
+            }
+#endif
+        }
+        // Try some task from satb buffer, bound the loop to make sure it converges in time
+        if (++iterationCnt >= maxIterationLoopNum) {
+            break;
+        }
+        if (!fetchFromSatbBuffer()) {
+            break;
+        }
+    }
+    DCHECK(markStack.IsEmpty());
+    // newly marked statistics.
+    // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    markedObjectCount_.fetch_add(nNewlyMarked, std::memory_order_relaxed);
+    MergeWeakStack(weakStack);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MergeWeakStack(WeakStack &weakStack)
+{
+    ark::os::memory::LockHolder lock(weakStackLock_);
+
+    // Preprocess the weak stack to minimize work during STW remark.
+    for (const auto &pair : weakStack) {
+        RefField<> oldField(*pair.first);
+
+        if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
+            continue;
+        }
+        auto obj = oldField.GetTargetObject();
+        DCHECK(Heap::IsHeapAddress(obj));
+
+        auto region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>(obj));
+        if (region->IsNewObjectSinceMarking(obj) || region->IsMarkedObject(obj)) {
+            continue;
+        }
+
+        globalWeakStack_.push_back(pair);
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::TracingSerial(GlobalMarkStack &globalMarkStack)
+{
+    // serial marking with a single mark task.
+    // NOTE: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
+    // use monitor, but this need to add template param to `ProcessMarkStack`.
+    // So for convenience just use a fake dummy parallel one.
+    ParallelMarkingMonitor dummyMonitor(0, 0);
+    ParallelLocalMarkStack markStack(&globalMarkStack, &dummyMonitor);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    if (gcReason_ == GCReason::GC_REASON_XREF) {
+        ProcessMarkStack<true>(0, markStack);
+    } else {
+        ProcessMarkStack<false>(0, markStack);
+    }
+#else
+    ProcessMarkStack<false>(0, markStack);
+#endif
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::TracingImpl(GlobalMarkStack &globalMarkStack, bool parallel, bool Remark)
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, ("CMCGC::TracingImpl_" + std::to_string(globalMarkStack.Count())).c_str(),
+                 "");
+
+    // enable parallel marking if we have thread pool.
+    auto *threadPool = GetThreadPool();
+    ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
+    if (parallel) {  // parallel marking.
+        uint32_t parallelCount = 0;
+        // During the STW remark phase, Expect it to utilize all GC threads.
+        if (Remark) {
+            parallelCount = GetGCThreadCount(true);
+        } else {
+            parallelCount = GetGCThreadCount(true) - 1;
+        }
+        ParallelMarkingMonitor monitor(parallelCount, parallelCount);
+        for (uint32_t i = 0; i < parallelCount; ++i) {
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+            if (gcReason_ == GCReason::GC_REASON_XREF) {
+                threadPool->PostTask(
+                    std::make_unique<ConcurrentMarkingTask<LanguageConfig, true>>(0, *this, monitor, globalMarkStack));
+            } else {
+                threadPool->PostTask(
+                    std::make_unique<ConcurrentMarkingTask<LanguageConfig, false>>(0, *this, monitor, globalMarkStack));
+            }
+#else
+            threadPool->PostTask(
+                std::make_unique<ConcurrentMarkingTask<LanguageConfig, false>>(0, *this, monitor, globalMarkStack));
+#endif
+        }
+        ParallelLocalMarkStack markStack(&globalMarkStack, &monitor);
+        do {
+            if (!monitor.TryStartStep()) {
+                break;
+            }
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+            if (gcReason_ == GCReason::GC_REASON_XREF) {
+                ProcessMarkStack<true>(0, markStack);
+            } else {
+                ProcessMarkStack<false>(0, markStack);
+            }
+#else
+            ProcessMarkStack<false>(0, markStack);
+#endif
+            monitor.FinishStep();
+        } while (monitor.WaitNextStepOrFinished());
+        monitor.WaitAllFinished();
+    } else {
+        TracingSerial(globalMarkStack);
+    }
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack, BaseObject *obj)
+{
+    RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+    if (gcReason_ == GCReason::GC_REASON_YOUNG && !regionInfo->IsInYoungSpace()) {
+        LOG(DEBUG, GC) << "enum: skip old object " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")";
+        return false;
+    }
+
+    // inline MarkObject
+    bool marked = regionInfo->MarkObject(obj);
+    if (!marked) {
+        DCHECK(!regionInfo->IsGarbageRegion());
+        LOG(DEBUG, GC) << "mark obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ") in region "
+                       << regionInfo << "(" << static_cast<size_t>(regionInfo->GetRegionType()) << ")@0x" << std::hex
+                       << regionInfo->GetRegionStart() << std::dec << ", live " << regionInfo->GetLiveByteCount();
+        collectStack.Push(obj);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PushRootsToWorkStack(LocalCollectStack &collectStack,
+                                                 const CArrayList<BaseObject *> &collectedRoots)
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL,
+                 ("CMCGC::PushRootsToWorkStack_" + std::to_string(collectedRoots.size())).c_str(), "");
+    for (BaseObject *obj : collectedRoots) {
+        PushRootToWorkStack(collectStack, obj);
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collectedRoots)
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkingRoots", "");
+
+    GlobalMarkStack globalMarkStack;
+
+    {
+        LocalCollectStack collectStack(&globalMarkStack);
+
+        PushRootsToWorkStack(collectStack, collectedRoots);
+
+        if (Heap::GetHeap().GetGCReason() == ark::common_vm::GC_REASON_YOUNG) {
+            OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PushRootInRSet", "");
+            auto func = [this, &collectStack](BaseObject *object) { MarkRememberSetImpl(object, collectStack); };
+            RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+            space.MarkRememberSet(func);
+        }
+
+        collectStack.Publish();
+    }
+
+    COMMON_PHASE_TIMER("MarkingRoots");
+
+    ASSERT_PRINT(GetThreadPool() != nullptr, "null thread pool");
+
+    // use fewer threads and lower priority for concurrent mark.
+    const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
+
+    {
+        COMMON_PHASE_TIMER("Concurrent marking");
+        TracingImpl(globalMarkStack, maxWorkers > 0, false);
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::Remark()
+{
+    GlobalMarkStack globalMarkStack;
+    const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Remark[STW]", "");
+    COMMON_PHASE_TIMER("STW re-marking");
+    ConcurrentRemark(globalMarkStack, maxWorkers > 0);  // Mark enqueue
+    TracingImpl(globalMarkStack, maxWorkers > 0, true);
+    PreforwardStaticRoots();
+    MarkAwaitingJitFort();  // Mark awaiting
+    ClearWeakStack(maxWorkers > 0);
+
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkingRoots END",
+                 // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or
+                 // ordering constraints imposed on other reads or writes
+                 ("mark obejects:" + std::to_string(markedObjectCount_.load(std::memory_order_relaxed))).c_str());
+    // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    LOG(DEBUG, GC) << "mark " << markedObjectCount_.load(std::memory_order_relaxed) << " objects";
+}
+
+class ClearWeakRefTask : public ark::common_vm::ArrayTaskDispatcher::ArrayTask {
+public:
+    using T = WeakStack::value_type;
+    explicit ClearWeakRefTask(CArrayList<T> *inputs) : data_(inputs) {}
+    void Run(void *begin, void *end) override
+    {
+        T *first = reinterpret_cast<T *>(begin);
+        T *last = reinterpret_cast<T *>(end);
+        DCHECK(((uintptr_t)last - (uintptr_t)first) % sizeof(T) == 0 &&
+               ((uintptr_t)first - (uintptr_t)data_->data()) % sizeof(T) == 0);
+        DCHECK(first == last || (first >= data_->data() && last > data_->data()));
+        DCHECK(first == last || (first < (data_->data() + data_->size()) && last <= (data_->data() + data_->size())));
+        ClearWeakRef(first, last);
+    }
+    CArrayList<T> *data_;
+};
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ClearWeakStack(bool parallel)
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::ProcessGlobalWeakStack", "");
+    if (gcReason_ == ark::common_vm::GC_REASON_YOUNG || globalWeakStack_.empty()) {
+        return;
+    }
+    // the globalWeakStack_ cannot be modified during task execution
+    auto *threadPool = GetThreadPool();
+    ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
+    constexpr size_t BATCH_N = 200;
+    if (parallel && globalWeakStack_.size() > BATCH_N) {
+        auto inputs = &globalWeakStack_;
+        ClearWeakRefTask callback(inputs);
+        DCHECK(inputs->size() < (SIZE_MAX / sizeof(WeakStack::value_type)));
+        ark::common_vm::ArrayTaskDispatcher dispatcher(inputs->data(), inputs->size() * sizeof(WeakStack::value_type),
+                                                       BATCH_N * sizeof(WeakStack::value_type), &callback);
+        dispatcher.Dispatch(threadPool, threadPool->GetTotalThreadNum());
+        dispatcher.JoinAndWait();
+    } else {
+        ProcessWeakStack(globalWeakStack_);
+    }
+    globalWeakStack_.clear();
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkSatbBuffer", "");
+    COMMON_PHASE_TIMER("MarkSatbBuffer");
+    auto visitSatbObj = [this, &globalMarkStack]() {
+        std::vector<BaseObject *> remarkStack;
+        auto func = [&remarkStack](ark::common_vm::Mutator &mutator) {
+            const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator.GetSatbBufferNode());
+            if (node != nullptr) {
+                const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
+            }
+        };
+        MutatorManager::Instance().VisitAllMutators(func);
+        SatbBuffer::Instance().GetRetiredObjects(remarkStack);
+
+        LocalCollectStack collectStack(&globalMarkStack);
+        while (!remarkStack.empty()) {  // LCOV_EXCL_BR_LINE
+            BaseObject *obj = remarkStack.back();
+            remarkStack.pop_back();
+            if (Heap::IsHeapAddress(obj) && !this->MarkObject(obj)) {
+                collectStack.Push(obj);
+                LOG(DEBUG, GC) << "satb buffer add obj " << obj;
+            }
+        }
+        collectStack.Publish();
+    };
+
+    visitSatbObj();
+    return true;
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkRememberSetImpl(BaseObject *object, LocalCollectStack &collectStack)
+{
+    auto fieldHandler = [this, &collectStack, &object](RefField<> &field) {
+        (void)object;
+        BaseObject *targetObj = field.GetTargetObject();
+        if (Heap::IsHeapAddress(targetObj)) {
+            RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(targetObj));
+            if (region->IsInYoungSpace() && !region->IsNewObjectSinceMarking(targetObj) &&
+                !this->MarkObject(targetObj)) {
+                collectStack.Push(targetObj);
+                LOG(DEBUG, GC) << "remember set marking obj: " << object << "@" << &field << ", ref: " << targetObj;
+            }
+        }
+    };
+    object->ForEachRefField(fieldHandler, fieldHandler);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel)
+{
+    LOG_IF(UNLIKELY(!MarkSatbBuffer(globalMarkStack)), FATAL, GC) << "not cleared\n";
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkAwaitingJitFort()
+{
+    reinterpret_cast<RegionalHeap &>(theAllocator_).MarkAwaitingJitFort();
+}
+
+#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::DumpHeap(const CString &tag)
+{
+    ASSERT_PRINT(MutatorManager::Instance().WorldStopped(), "Not In STW");
+    LOG(DEBUG, GC) << "DumpHeap " << tag.Str();
+    // dump roots
+    DumpRoots(FRAGMENT);
+    // dump object contents
+    auto dumpVisitor = [](BaseObject *obj) {
+        // support Dump
+        // obj->DumpObject(FRAGMENT)
+    };
+    bool ret = Heap::GetHeap().ForEachObject(dumpVisitor, false);
+    LOG_IF(UNLIKELY(!ret), ERROR, GC) << "theAllocator.ForEachObject() in DumpHeap() return false.";
+
+    // dump object types
+    LOG(DEBUG, GC) << "Print Type information";
+    std::set<TypeInfo *> classinfoSet;
+    auto assembleClassInfoVisitor = [&classinfoSet](BaseObject *obj) {
+        TypeInfo *classInfo = obj->GetTypeInfo();
+        // No need to check the result of insertion, because there are multiple-insertions.
+        (void)classinfoSet.insert(classInfo);
+    };
+    ret = Heap::GetHeap().ForEachObject(assembleClassInfoVisitor, false);
+    LOG_IF(UNLIKELY(!ret), ERROR, GC) << "theAllocator.ForEachObject()#2 in DumpHeap() return false.";
+
+    for (auto it = classinfoSet.begin(); it != classinfoSet.end(); it++) {
+        TypeInfo *classInfo = *it;
+    }
+    LOG(DEBUG, GC) << "Dump Allocator";
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::DumpRoots(LogType logType)
+{
+    LOG(FATAL, COMMON) << "Unresolved fatal";
+    UNREACHABLE();
+}
+#endif
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PreGarbageCollection(bool isConcurrent)
+{
+    // SatbBuffer should be initialized before concurrent enumeration.
+    SatbBuffer::Instance().Init();
+    // prepare thread pool.
+
+    auto &gcStats = GetGCStats();
+    gcStats.reason = gcReason_;
+    gcStats.async = !ark::common_vm::g_gcRequests[gcReason_].IsSyncGC();
+    gcStats.gcType = gcType_;
+    gcStats.isConcurrentMark = isConcurrent;
+    gcStats.collectedBytes = 0;
+    gcStats.smallGarbageSize = 0;
+    gcStats.nonMovableGarbageSize = 0;
+    gcStats.largeGarbageSize = 0;
+    gcStats.gcStartTime = ark::common_vm::TimeUtil::NanoSeconds();
+    gcStats.totalSTWTime = 0;
+    gcStats.maxSTWTime = 0;
+#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
+    DumpBeforeGC();
+#endif
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::PostGarbageCollection(uint64_t gcIndex)
+{
+    SatbBuffer::Instance().ReclaimALLPages();
+    // release pages in PagePool
+    ark::common_vm::PagePool::Instance().Trim();
+    collectorResources_.MarkGCFinish(gcIndex);
+
+#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
+    DumpAfterGC();
+#endif
+}
+
+template <class LanguageConfig>
+// CC-OFFNXT(G.FUD.05) solid logic
+void CmcGC<LanguageConfig>::UpdateGCStats()
+{
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
+    auto &gcStats = GetGCStats();
+    gcStats.Dump();
+
+    size_t oldThreshold = gcStats.heapThreshold;
+    size_t oldTargetFootprint = gcStats.targetFootprint;
+    size_t recentBytes = space.GetRecentAllocatedSize();
+    size_t survivedBytes = space.GetSurvivedSize();
+    size_t bytesAllocated = space.GetAllocatedBytes();
+
+    size_t targetSize;
+    HeapParam &heapParam = BaseRuntime::GetInstance()->GetHeapParam();
+    GCParam &gcParam = BaseRuntime::GetInstance()->GetGCParam();
+    if (!gcStats.isYoungGC()) {
+        gcStats.shouldRequestYoung = true;
+        size_t delta = bytesAllocated * (1.0 / heapParam.heapUtilization - 1.0);
+        size_t growBytes = std::min(delta, gcParam.maxGrowBytes);
+        growBytes = std::max(growBytes, gcParam.minGrowBytes);
+        targetSize = bytesAllocated + growBytes * gcParam.multiplier;
+    } else {
+        gcStats.shouldRequestYoung =
+            gcStats.collectionRate * gcParam.ygcRateAdjustment >= ark::common_vm::g_fullGCMeanRate &&
+            bytesAllocated <= oldThreshold;
+        size_t adjustMaxGrowBytes = gcParam.maxGrowBytes * gcParam.multiplier;
+        if (bytesAllocated + adjustMaxGrowBytes < oldTargetFootprint) {
+            targetSize = bytesAllocated + adjustMaxGrowBytes;
+        } else {
+            targetSize = std::max(bytesAllocated, oldTargetFootprint);
+        }
+    }
+
+    gcStats.targetFootprint = targetSize;
+    size_t remainingBytes = recentBytes;
+    remainingBytes = std::min(remainingBytes, gcParam.kMaxConcurrentRemainingBytes);
+    remainingBytes = std::max(remainingBytes, gcParam.kMinConcurrentRemainingBytes);
+    if (UNLIKELY(remainingBytes > gcStats.targetFootprint)) {
+        remainingBytes = std::min(gcParam.kMinConcurrentRemainingBytes, gcStats.targetFootprint);
+    }
+    gcStats.heapThreshold = std::max(gcStats.targetFootprint - remainingBytes, bytesAllocated);
+    gcStats.heapThreshold = std::max(gcStats.heapThreshold, 20 * MB);  // 20 MB:set 20 MB as min heapThreshold
+    gcStats.heapThreshold = std::min(gcStats.heapThreshold, gcParam.gcThreshold);
+
+    UpdateNativeThreshold(gcParam);
+    Heap::GetHeap().RecordAliveSizeAfterLastGC(bytesAllocated);
+    if (!gcStats.isYoungGC()) {
+        Heap::GetHeap().SetRecordHeapObjectSizeBeforeSensitive(bytesAllocated);
+    }
+
+    if (!gcStats.isYoungGC()) {
+        ark::common_vm::g_gcRequests[ark::common_vm::GC_REASON_HEU].SetMinInterval(gcParam.gcInterval);
+    } else {
+        ark::common_vm::g_gcRequests[ark::common_vm::GC_REASON_YOUNG].SetMinInterval(gcParam.gcInterval);
+    }
+    gcStats.IncreaseAccumulatedFreeSize(bytesAllocated);
+    std::ostringstream oss;
+    oss << "allocated bytes " << bytesAllocated << " (survive bytes " << survivedBytes << ", recent-allocated "
+        << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << gcStats.targetFootprint
+        << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold;
+    LOG(DEBUG, GC) << oss.str();
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::UpdateGCStats END",
+                 ("allocated bytes:" + std::to_string(bytesAllocated) + ";survive bytes:" +
+                  std::to_string(survivedBytes) + ";recent allocated:" + std::to_string(recentBytes) +
+                  ";update target footprint:" + std::to_string(oldTargetFootprint) + ";new target footprint:" +
+                  std::to_string(gcStats.targetFootprint) + ";old gc threshold:" + std::to_string(oldThreshold) +
+                  ";new gc threshold:" + std::to_string(gcStats.heapThreshold) +
+                  ";native size:" + std::to_string(Heap::GetHeap().GetNotifiedNativeSize()) +
+                  ";new native threshold:" + std::to_string(Heap::GetHeap().GetNativeHeapThreshold()))
+                     .c_str());
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::UpdateNativeThreshold(GCParam &gcParam)
+{
+    size_t nativeHeapSize = Heap::GetHeap().GetNotifiedNativeSize();
+    size_t newNativeHeapThreshold = Heap::GetHeap().GetNotifiedNativeSize();
+    if (nativeHeapSize < ark::common_vm::MAX_NATIVE_SIZE_INC) {
+        newNativeHeapThreshold =
+            std::max(nativeHeapSize + gcParam.minGrowBytes, nativeHeapSize * ark::common_vm::NATIVE_MULTIPLIER);
+    } else {
+        newNativeHeapThreshold += ark::common_vm::MAX_NATIVE_STEP;
+    }
+    newNativeHeapThreshold = std::min(newNativeHeapThreshold, ark::common_vm::MAX_GLOBAL_NATIVE_LIMIT);
+    Heap::GetHeap().SetNativeHeapThreshold(newNativeHeapThreshold);
+    collectorResources_.SetIsNativeGCInvoked(false);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::CopyObject(const BaseObject &fromObj, BaseObject &toObj, size_t size) const
+{
+    uintptr_t from = reinterpret_cast<uintptr_t>(&fromObj);
+    uintptr_t to = reinterpret_cast<uintptr_t>(&toObj);
+    LOG_IF(UNLIKELY(memmove_s(reinterpret_cast<void *>(to), size, reinterpret_cast<void *>(from), size) != EOK), ERROR,
+           GC)
+        << "memmove_s fail";
+#if defined(COMMON_TSAN_SUPPORT)
+    Sanitizer::TsanFixShadow(reinterpret_cast<void *>(from), reinterpret_cast<void *>(to), size);
+#endif
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ReclaimGarbageMemory(GCReason reason)
+{
+    if (reason == ark::common_vm::GC_REASON_OOM) {
+        Heap::GetHeap().GetAllocator().ReclaimGarbageMemory(true);
+    } else {
+        Heap::GetHeap().GetAllocator().ReclaimGarbageMemory(false);
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::common_vm::GCReason reason,
+                                                 ark::common_vm::GCType gcType)
+{
+    MarkGCStart();
+    gcReason_ = reason;
+    gcType_ = gcType;
+    auto gcReasonName = std::string(ark::common_vm::g_gcRequests[gcReason_].name);
+    auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
+    auto currentThreshold = GetGCStats().GetThreshold();
+    LOG(DEBUG, GC) << "Begin GC log. GCReason: " << gcReasonName << ", GCType: " << GCTypeToString(gcType)
+                   << ", Current allocated " << ::ark::mem::Pretty(currentAllocatedSize) << ", Current threshold "
+                   << ::ark::mem::Pretty(currentThreshold) << ", gcIndex=" << gcIndex;
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::RunGarbageCollection",
+                 ("GCReason:" + gcReasonName + ";GCType:" + GCTypeToString(gcType) +
+                  ";Sensitive:" + std::to_string(static_cast<int>(Heap::GetHeap().GetSensitiveStatus())) +
+                  ";Startup:" + std::to_string(static_cast<int>(Heap::GetHeap().GetStartupStatus())) +
+                  ";Current Allocated:" + ::ark::mem::Pretty(currentAllocatedSize) +
+                  ";Current Threshold:" + ::ark::mem::Pretty(currentThreshold) +
+                  ";Current Native:" + ::ark::mem::Pretty(Heap::GetHeap().GetNotifiedNativeSize()) +
+                  ";NativeThreshold:" + ::ark::mem::Pretty(Heap::GetHeap().GetNativeHeapThreshold()))
+                     .c_str());
+    // prevent other threads stop-the-world during GC.
+    // this may be removed in the future.
+    ark::common_vm::ScopedSTWLock stwLock;
+    PreGarbageCollection(true);
+    Heap::GetHeap().SetGCReason(reason);
+    auto &gcStats = GetGCStats();
+
+    DoGarbageCollection();
+
+    HeapBitmapManager::GetHeapBitmapManager().ClearHeapBitmap();
+
+    ReclaimGarbageMemory(reason);
+
+    // Call Recalculate byte-level heap footprint after ReclaimGarbageMemory
+    // (garbage regions have been already reclaimed here).
+    // Now safe to call RecalculateFootprint, because no mutator can allocate concurrently
+    Heap::GetHeap().GetAllocator().RecalculateFootprint();
+
+    PostGarbageCollection(gcIndex);
+    MutatorManager::Instance().DestroyExpiredMutators();
+    gcStats.gcEndTime = ark::common_vm::TimeUtil::NanoSeconds();
+
+    UpdateGCCompletionStats(gcStats);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcStats)
+{
+    uint64_t gcTimeNs = gcStats.gcEndTime - gcStats.gcStartTime;
+    double rate =
+        (static_cast<double>(gcStats.collectedBytes) / gcTimeNs) * (static_cast<double>(ark::common_vm::NS_PER_S) / MB);
+    {
+        std::ostringstream oss;
+        const int prec = 3;
+        oss << "total gc time: " << ::ark::mem::Pretty(gcTimeNs / ark::common_vm::NS_PER_US) << " us, collection rate ";
+        oss << std::setprecision(prec) << rate << " MB/s";
+        LOG(DEBUG, GC) << oss.str();
+    }
+
+    ark::common_vm::g_gcCount++;
+    ark::common_vm::g_gcTotalTimeUs += (gcTimeNs / ark::common_vm::NS_PER_US);
+    ark::common_vm::g_gcCollectedTotalBytes += gcStats.collectedBytes;
+    gcStats.collectionRate = rate;
+
+    if (!gcStats.isYoungGC()) {
+        if (ark::common_vm::g_fullGCCount == 0) {
+            ark::common_vm::g_fullGCMeanRate = rate;
+        } else {
+            ark::common_vm::g_fullGCMeanRate =
+                (ark::common_vm::g_fullGCMeanRate * ark::common_vm::g_fullGCCount + rate) /
+                (ark::common_vm::g_fullGCCount + 1);
+        }
+        ark::common_vm::g_fullGCCount++;
+    }
+
+    UpdateGCStats();
+
+    if (Heap::GetHeap().GetForceThrowOOM()) {
+        Heap::throwOOM();
+    }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::CopyFromSpace()
+{
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CopyFromSpace", "");
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_COPY, true);
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
+    auto &stats = GetGCStats();
+    stats.liveBytesBeforeGC = space.GetAllocatedBytes();
+    stats.fromSpaceSize = space.FromSpaceSize();
+    space.CopyFromSpace(GetThreadPool());
+
+    stats.smallGarbageSize = space.FromRegionSize() - space.ToSpaceSize();
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ExemptFromSpace()
+{
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
+    space.ExemptFromSpace();
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsMarkedObject(const BaseObject *obj) const
+{
+    return RegionalHeap::IsMarkedObject(obj);
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsToObject(const BaseObject *obj) const
+{
+    return RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj))->IsToRegion();
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsHeapMarked() const
+{
+    return collectorResources_.IsHeapMarked();
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::SetHeapMarked(bool value)
+{
+    collectorResources_.SetHeapMarked(value);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::SetGcStarted(bool val)
+{
+    collectorResources_.SetGcStarted(val);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkGCStart()
+{
+    collectorResources_.MarkGCStart();
+}
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkGCFinish(uint64_t gcIndex)
+{
+    collectorResources_.MarkGCFinish(gcIndex);
+}
+template <class LanguageConfig>
+ark::common_vm::GCStats &CmcGC<LanguageConfig>::GetGCStats()
+{
+    return collectorResources_.GetGCStats();
+}
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::RequestGCInternal(ark::common_vm::GCReason reason, bool async,
+                                              ark::common_vm::GCType gcType, bool explicitRequest)
+{
+    collectorResources_.RequestGC(reason, async, gcType, explicitRequest);
+}
+template <class LanguageConfig>
+uint32_t CmcGC<LanguageConfig>::GetGCThreadCount(const bool isConcurrent) const
+{
+    return collectorResources_.GetGCThreadCount(isConcurrent);
+}
+template <class LanguageConfig>
+ark::common_vm::Taskpool *CmcGC<LanguageConfig>::GetThreadPool() const
+{
+    return collectorResources_.GetThreadPool();
+}
+
+template <class LanguageConfig>
+CmcGC<LanguageConfig>::CmcGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : GCLang<LanguageConfig>(objectAllocator, settings),
+      Collector(),
+      theAllocator_(Heap::GetHeap().GetAllocator()),
+      collectorResources_(Heap::GetHeap().GetCollectorResources())
+{
+    this->SetType(GCType::CMC_GC);
+    this->SetTLABsSupported();
+    Heap::GetHeap().SetCollector(this);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::InitializeImpl()
+{
+    ark::mem::InternalAllocatorPtr allocator = this->GetInternalAllocator();
+    auto barrierSet =
+        allocator->New<GCCMCBarrierSet>(allocator, ark::helpers::math::GetIntLog2(ark::mem::RegionDesc::UNIT_SIZE));
+    ASSERT(barrierSet != nullptr);
+    this->SetGCBarrierSet(barrierSet);
+    LOG(DEBUG, GC) << "CMC GC adapter initialized...";
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::RunPhasesImpl([[maybe_unused]] ark::GCTask &task)
+{
+    LOG(DEBUG, GC) << "CMC GC adapter RunPhases...";
+    ark::mem::GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
+}
+
+// NOLINTNEXTLINE(misc-unused-parameters)
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::WaitForGC([[maybe_unused]] ark::GCTask task)
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    ark::common_vm::GCReason reason = ark::common_vm::GCReason::GC_REASON_INVALID;
+    ark::common_vm::GCType type = ark::common_vm::GCType::GC_TYPE_FULL;
+    switch (task.reason) {
+        case ark::GCTaskCause::YOUNG_GC_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_YOUNG;
+            type = ark::common_vm::GCType::GC_TYPE_YOUNG;
+            break;
+        case ark::GCTaskCause::PYGOTE_FORK_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_USER;
+            break;
+        case ark::GCTaskCause::STARTUP_COMPLETE_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_HINT;
+            break;
+        case ark::GCTaskCause::NATIVE_ALLOC_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_NATIVE;
+            break;
+        case ark::GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE:
+        case ark::GCTaskCause::MIXED:
+            reason = ark::common_vm::GCReason::GC_REASON_HEU;
+            break;
+        case ark::GCTaskCause::EXPLICIT_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_FORCE;
+            break;
+        case ark::GCTaskCause::OOM_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_OOM;
+            break;
+        case ark::GCTaskCause::CROSSREF_CAUSE:
+            reason = ark::common_vm::GCReason::GC_REASON_BACKUP;
+            break;
+        default:
+            UNREACHABLE();
+    }
+    ark::common_vm::BaseRuntime::RequestGC(reason, false, type);
+#endif  // ARK_USE_COMMON_RUNTIME
+    return false;
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::InitGCBits([[maybe_unused]] ark::ObjectHeader *objHeader)
+{
+    constexpr ark::ClassHelper::ClassWordSize STATIC_OBJECT_MASK = static_cast<ark::ClassHelper::ClassWordSize>(
+        static_cast<uint64_t>(ark::mem::LanguageType::STATIC)
+        << (ark::mem::BaseStateWord::BASECLASS_WIDTH + ark::mem::BaseStateWord::PADDING_WIDTH));
+    auto *classWord = reinterpret_cast<ark::ClassHelper::ClassWordSize *>(ark::ToUintPtr(objHeader) +
+                                                                          ark::ObjectHeader::GetClassOffset());
+    *classWord |= STATIC_OBJECT_MASK;
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::ObjectHeader *objHeader)
+{
+    LOG(FATAL, GC) << "TLABs are not supported by this GC";
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::Trigger([[maybe_unused]] ark::PandaUniquePtr<ark::GCTask> task)
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    ark::common_vm::BaseRuntime::RequestGC(ark::common_vm::GCReason::GC_REASON_OOM, false,
+                                           ark::common_vm::GCType::GC_TYPE_FULL);
+#endif  // ARK_USE_COMMON_RUNTIME
+    return false;
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsPostponeGCSupported() const
+{
+    return false;
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::StopGC()
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    ark::common_vm::BaseRuntime::StopGCWork();
+#endif  // ARK_USE_COMMON_RUNTIME
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkObject([[maybe_unused]] ark::ObjectHeader *object)
+{
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsMarked([[maybe_unused]] const ark::ObjectHeader *object) const
+{
+    return false;
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::MarkReferences([[maybe_unused]] ark::mem::GCMarkingStackType *references,
+                                           [[maybe_unused]] ark::mem::GCPhase gcPhase)
+{
+}
+
+TEMPLATE_CLASS_LANGUAGE_CONFIG(CmcGC);
+
+}  // namespace ark::mem
+
+#endif  // #if defined(ARK_USE_COMMON_RUNTIME)

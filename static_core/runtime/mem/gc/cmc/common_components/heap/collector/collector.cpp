@@ -18,10 +18,6 @@
 #include "common_interfaces/thread/mutator.h"
 
 namespace ark::common_vm {
-namespace {
-const char *const COLLECTOR_NAME[] = {"No Collector", "Proxy Collector", "Regional-Copying Collector",
-                                      "Smooth Collector"};
-}
 
 const char *Collector::GetGCPhaseName(GCPhase phase)
 {
@@ -48,11 +44,6 @@ const char *Collector::GetGCPhaseName(GCPhase phase)
 }
 
 Collector::Collector() {}
-
-const char *Collector::GetCollectorName() const
-{
-    return COLLECTOR_NAME[collectorType_];
-}
 
 void Collector::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
 {

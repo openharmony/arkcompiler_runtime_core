@@ -22,8 +22,7 @@
 #include "common_components/taskpool/task.h"
 namespace ark::common_vm {
 
-class ArkCollector;
-class MarkingCollector;
+class Collector;
 }  // namespace ark::common_vm
 
 namespace ark::mem {
@@ -72,7 +71,7 @@ public:
         size_t numProcessedRegions = 0;
     };
 
-    FixHeapWorker(ArkCollector *collector, TaskPackMonitor &monitor, Result &result,
+    FixHeapWorker(Collector *collector, TaskPackMonitor &monitor, Result &result,
                   std::function<FixHeapTask *()> &next) noexcept
         : Task(0), collector_(collector), monitor_(monitor), result_(result), getNextTask_(next)
     {
@@ -105,7 +104,7 @@ private:
     template <DeadObjectHandlerType HandlerType>
     void FixRecentRegion(RegionDesc *region);
 
-    ArkCollector *collector_;
+    Collector *collector_;
     TaskPackMonitor &monitor_;
     Result &result_;
     std::function<FixHeapTask *()> getNextTask_;

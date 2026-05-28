@@ -16,17 +16,17 @@
 #ifndef VERIFICATION_H
 #define VERIFICATION_H
 
-#include "ark_collector/ark_collector.h"
-
 namespace ark::common_vm {
+
+class RegionalHeap;
 
 class WVerify {
 public:
-    static void VerifyAfterMark(ArkCollector &collector);
-    static void VerifyAfterForward(ArkCollector &collector);
-    static void VerifyAfterFix(ArkCollector &collector);
-    static void EnableReadBarrierDFX(ArkCollector &collector);
-    static void DisableReadBarrierDFX(ArkCollector &collector);
+    static void VerifyAfterMark();
+    static void VerifyAfterForward();
+    static void VerifyAfterFix();
+    static void EnableReadBarrierDFX();
+    static void DisableReadBarrierDFX();
 
 private:
     static void VerifyAfterMarkInternal(RegionalHeap &space);

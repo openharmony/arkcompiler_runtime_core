@@ -31,7 +31,6 @@
 #include "common_components/heap/allocator/slot_list.h"
 
 namespace ark::common_vm {
-class MarkingCollector;
 class CompactCollector;
 class RegionManager;
 class Taskpool;

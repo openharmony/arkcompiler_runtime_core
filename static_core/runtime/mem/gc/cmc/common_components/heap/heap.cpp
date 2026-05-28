@@ -22,7 +22,6 @@
 #include "common_components/heap/ark_collector/post_marking_barrier.h"
 #include "common_components/heap/ark_collector/preforward_barrier.h"
 #include "common_components/heap/ark_collector/copy_barrier.h"
-#include "common_components/heap/collector/collector_proxy.h"
 #include "common_components/heap/collector/collector_resources.h"
 #include "common_components/mutator/mutator_manager.h"
 
@@ -46,19 +45,7 @@ HeapAddress Heap::heapCurrentEnd_ = 0;
 
 class HeapImpl : public Heap {
 public:
-    HeapImpl()
-        : theSpace_(Allocator::CreateAllocator()),
-          collectorResources_(collectorProxy_),
-          collectorProxy_(*theSpace_, collectorResources_),
-          stwBarrier_(collectorProxy_),
-          idleBarrier_(collectorProxy_),
-          enumBarrier_(collectorProxy_),
-          markingBarrier_(collectorProxy_),
-          remarkBarrier_(collectorProxy_),
-          postMarkingBarrier_(collectorProxy_),
-          preforwardBarrier_(collectorProxy_),
-          copyBarrier_(collectorProxy_),
-          youngCopyBarrier_(collectorProxy_)
+    HeapImpl() : theSpace_(Allocator::CreateAllocator())
     {
         // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
         // constraints imposed on other reads or writes
@@ -146,6 +133,25 @@ public:
     {
         isForceThrowOOM_ = val;
     };
+    void SetCollector(Collector *collector) override
+    {
+        collectorResources_.SetCollector(collector);
+        collector_ = collector;
+        stwBarrier_.SetCollector(collector);
+        idleBarrier_.SetCollector(collector);
+        enumBarrier_.SetCollector(collector);
+        markingBarrier_.SetCollector(collector);
+        remarkBarrier_.SetCollector(collector);
+        postMarkingBarrier_.SetCollector(collector);
+        preforwardBarrier_.SetCollector(collector);
+        copyBarrier_.SetCollector(collector);
+        youngCopyBarrier_.SetCollector(collector);
+
+        collector_->Init(runtimeParam_);
+        collectorResources_.Init();
+
+        Heap::GetHeap().EnableGC(runtimeParam_.gcParam.enableGC);
+    }
 
     HeapAddress Allocate(size_t size, AllocType allocType, bool allowGC = true) override;
 
@@ -196,7 +202,7 @@ private:
 
     // collector is closely related to barrier. but we do not put barrier inside collector because even without
     // collector (i.e. no-gc), allocator and barrier (interface to access heap) is still needed.
-    CollectorProxy collectorProxy_;
+    Collector *collector_;
 
     Barrier stwBarrier_;
     IdleBarrier idleBarrier_;
@@ -214,6 +220,7 @@ private:
 
     GCReason gcReason_ = GCReason::GC_REASON_INVALID;
     bool isForceThrowOOM_ = {false};
+    RuntimeParam runtimeParam_;
 };  // end class HeapImpl
 
 static ImmortalWrapper<HeapImpl> g_heapInstance;
@@ -243,17 +250,14 @@ void HeapImpl::Init(const RuntimeParam &param)
         // Hack impl, since HeapImpl is Immortal, this may happen in multi UT case
         new (this) HeapImpl();
     }
+    runtimeParam_ = param;
     theSpace_->Init(param);
-    Heap::GetHeap().EnableGC(param.gcParam.enableGC);
-    collectorProxy_.Init(param);
-    collectorResources_.Init();
     heuristicGCPolicy_.Init();
 }
 
 void HeapImpl::Fini()
 {
     collectorResources_.Fini();
-    collectorProxy_.Fini();
     if (theSpace_ != nullptr) {
         delete theSpace_;
         theSpace_ = nullptr;
@@ -360,7 +364,7 @@ bool HeapImpl::OnStartupEvent() const
 
 Collector &HeapImpl::GetCollector()
 {
-    return collectorProxy_.GetCurrentCollector();
+    return *collector_;
 }
 
 Allocator &HeapImpl::GetAllocator()
@@ -408,12 +412,12 @@ void HeapImpl::InstallBarrier(const GCPhase phase)
 
 GCPhase HeapImpl::GetGCPhase() const
 {
-    return collectorProxy_.GetGCPhase();
+    return collector_->GetGCPhase();
 }
 
 void HeapImpl::SetGCPhase(const GCPhase phase)
 {
-    collectorProxy_.SetGCPhase(phase);
+    collector_->SetGCPhase(phase);
 }
 
 size_t HeapImpl::GetMaxCapacity() const

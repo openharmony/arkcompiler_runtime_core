@@ -17,7 +17,6 @@
 #include <thread>
 
 #include "common_components/base/sys_call.h"
-#include "common_components/heap/collector/collector_proxy.h"
 #include "common_components/common/run_type.h"
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/mutator/mutator_manager.h"
@@ -146,7 +145,7 @@ void CollectorResources::RunTaskLoop()
 {
     // Atomic with release order reason: data race with gcTid_ with dependecies on writes before the store
     gcTid_.store(GetTid(), std::memory_order_release);
-    taskQueue_->DrainTaskQueue(&collectorProxy_);
+    taskQueue_->DrainTaskQueue(collector_);
     NotifyGCFinished(GCTask::TASK_INDEX_GC_EXIT);
 }
 
@@ -215,7 +214,7 @@ void CollectorResources::RequestGC(GCReason reason, bool async, GCType gcType, b
     GCRequest &request = g_gcRequests[reason];
     uint64_t curTime = TimeUtil::NanoSeconds();
     request.SetPrevRequestTime(curTime);
-    if ((!explicitRequest && collectorProxy_.ShouldIgnoreRequest(request)) ||
+    if ((!explicitRequest && collector_->ShouldIgnoreRequest(request)) ||
         (reason == GCReason::GC_REASON_NATIVE && IsNativeGCInvoked())) {
         LOG(DEBUG, GC) << "ignore gc request";
         PostIgnoredGcRequest(reason);

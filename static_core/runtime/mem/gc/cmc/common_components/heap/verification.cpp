@@ -15,7 +15,6 @@
 
 #include "verification.h"
 
-#include "ark_collector/ark_collector.h"
 #include "common_interfaces/heap/region_desc.h"
 #include "allocator/regional_heap.h"
 #include "common/mark_work_stack.h"
@@ -27,6 +26,7 @@
 #include "mutator/mutator_manager.h"
 #include "securec.h"
 #include "common_interfaces/thread/mutator.h"
+#include "common_components/heap/heap.h"
 #include <iomanip>
 #include <sstream>
 #include <unordered_set>
@@ -438,12 +438,12 @@ void WVerify::VerifyAfterMarkInternal(RegionalHeap &space)
                        << verifyConcurrentRoots.VerifyRefCount();
 }
 
-void WVerify::VerifyAfterMark(ArkCollector &collector)
+void WVerify::VerifyAfterMark()
 {
 #if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
     return;
 #endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(collector.GetAllocator());
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!MutatorManager::Instance().WorldStopped()) {
         STWParam stwParam {"WGC-verify-aftermark"};
         ScopedStopTheWorld stw(stwParam);
@@ -466,12 +466,12 @@ void WVerify::VerifyAfterForwardInternal(RegionalHeap &space)
     LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterForward verified ref count: " << visitor.VerifyRefCount();
 }
 
-void WVerify::VerifyAfterForward(ArkCollector &collector)
+void WVerify::VerifyAfterForward()
 {
 #if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
     return;
 #endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(collector.GetAllocator());
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!MutatorManager::Instance().WorldStopped()) {
         STWParam stwParam {"WGC-verify-aftermark"};
         ScopedStopTheWorld stw(stwParam);
@@ -496,12 +496,12 @@ void WVerify::VerifyAfterFixInternal(RegionalHeap &space)
     LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterFix verified ref count: " << visitor.VerifyRefCount();
 }
 
-void WVerify::VerifyAfterFix(ArkCollector &collector)
+void WVerify::VerifyAfterFix()
 {
 #if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
     return;
 #endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(collector.GetAllocator());
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!MutatorManager::Instance().WorldStopped()) {
         STWParam stwParam {"WGC-verify-aftermark"};
         ScopedStopTheWorld stw(stwParam);
@@ -523,12 +523,12 @@ void WVerify::EnableReadBarrierDFXInternal(RegionalHeap &space)
     iter.IterateRoot(unsetter);
 }
 
-void WVerify::EnableReadBarrierDFX(ArkCollector &collector)
+void WVerify::EnableReadBarrierDFX()
 {
 #if !defined(ENABLE_CMC_RB_DFX)
     return;
 #endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(collector.GetAllocator());
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!MutatorManager::Instance().WorldStopped()) {
         STWParam stwParam {"WGC-verify-enable-rb-dfx"};
         ScopedStopTheWorld stw(stwParam);
@@ -547,12 +547,12 @@ void WVerify::DisableReadBarrierDFXInternal(RegionalHeap &space)
     iter.IterateRemarked(unsetter, markSet, true);
 }
 
-void WVerify::DisableReadBarrierDFX(ArkCollector &collector)
+void WVerify::DisableReadBarrierDFX()
 {
 #if !defined(ENABLE_CMC_RB_DFX)
     return;
 #endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(collector.GetAllocator());
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!MutatorManager::Instance().WorldStopped()) {
         STWParam stwParam {"WGC-verify-disable-rb-dfx"};
         ScopedStopTheWorld stw(stwParam);

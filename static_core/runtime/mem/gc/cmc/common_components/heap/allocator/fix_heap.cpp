@@ -15,7 +15,10 @@
 
 #include "common_components/heap/allocator/fix_heap.h"
 
-#include "common_components/heap/ark_collector/ark_collector.h"
+#include "common_components/heap/collector/collector.h"
+#include "common_interfaces/heap/region_desc.h"
+#include "common_components/heap/allocator/region_list.h"
+#include "common_components/heap/allocator/regional_heap.h"
 
 namespace ark::common_vm {
 
@@ -58,7 +61,7 @@ void FixHeapWorker::FixRegion(RegionDesc *region)
     region->VisitAllObjects([this, region, cellCount](BaseObject *object) {
         (void)region;
         (void)cellCount;
-        if (collector_->IsSurvivedObject(object)) {
+        if (RegionalHeap::IsSurvivedObject(object)) {
             collector_->FixObjectRefFields(object);
         } else {
             if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
@@ -84,7 +87,7 @@ void FixHeapWorker::FixRecentRegion(RegionDesc *region)
 
     region->VisitAllObjectsBeforeCopy([this, region, cellCount](BaseObject *object) {
         (void)cellCount;
-        if (region->IsNewObjectSinceMarking(object) || collector_->IsSurvivedObject(object)) {
+        if (region->IsNewObjectSinceMarking(object) || RegionalHeap::IsSurvivedObject(object)) {
             collector_->FixObjectRefFields(object);
         } else {  // handle dead objects in tl-regions for concurrent gc.
             if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {

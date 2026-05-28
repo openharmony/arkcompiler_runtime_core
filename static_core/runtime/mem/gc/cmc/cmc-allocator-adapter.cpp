@@ -15,7 +15,7 @@
 
 #include "runtime/include/runtime.h"
 #include "runtime/include/object_header.h"
-#include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
+#include "runtime/mem/gc/cmc/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/base_runtime.h"

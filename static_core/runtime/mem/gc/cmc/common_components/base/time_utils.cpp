@@ -21,7 +21,7 @@
 #include <iomanip>
 #include <thread>
 
-#include "heap/collector/marking_collector.h"
+#include "libarkbase/os/thread.h"
 #include "securec.h"
 
 namespace ark::common_vm {
