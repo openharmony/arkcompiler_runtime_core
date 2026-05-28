@@ -263,7 +263,7 @@ surrounding scope.
 
     function foo (item: boolean) {
        // this 'item' is of type 'number'
-       let item: number[] = [] // Compile-time error as parameter 'item' and
+       let item: number[] = [] // Compile-time error, parameter 'item' and
                                // local variable 'item' lead to duplication as
                                // they are in the same scope
     }
@@ -612,8 +612,8 @@ The syntax of *for-of statements* is presented below:
         identifier | ('let' | 'const') identifier (':' type)?
         ;
 
-If type of an expression is not iterable, then a :index:`compile-time error`
-occurs.
+If type of an ``expression`` is not iterable (see :ref:`Iterable Types`), then
+a :index:`compile-time error` occurs.
 
 The execution of a ``for-of`` loop starts from the evaluation of ``expression``.
 Then, if the evaluation is successful, for every loop iteration *forVariable*
@@ -629,8 +629,6 @@ loop body (i.e., ``statement``) is executed.
    iterable type
    expression
    type
-   array
-   string
    for-of loop
    evaluation
    loop iteration
@@ -647,12 +645,11 @@ while the modifier ``let`` allows modifications.
 The type of *forVariable* declared inside the loop is inferred to be that
 of the *iterated* elements, namely:
 
--  ``T``, if ``Array<T>`` or ``FixedArray<T>`` instance is iterated;
-
--  ``string``, if a ``string`` value is iterated;
-
 -  Type argument of the *iterator*, if an instance of the *iterable* type
-   is iterated.
+   is iterated;
+
+-  Union of type arguments of *iterators*, if an instance of the union of
+   *iterable* types is iterated.
 
 If *forVariable* is declared outside the loop, then the type of an iterated
 element must be assignable (see :ref:`Assignability`) to the type of the
@@ -699,8 +696,28 @@ variable. Otherwise, a :index:`compile-time error` occurs.
     // as 'const' it cannot be assigned a new value in the loop body
     for (const element of [1, 2, 3]) {
       console.log(element)
-      element = 66 // Compile-time error as 'element' is 'const'
+      element = 66 // Compile-time error, 'element' is 'const'
     }
+
+    let collection: Array<string> | Array<number> = foo (true)
+    print_collection (collection)
+    collection = foo (false)
+    print_collection (collection)
+
+    function print_collection (collection: Array<string> | Array<number>) {
+       for (const element of collection) {
+          // type of 'element' is string|number
+          console.log (element)
+       }
+    }
+    function foo(condition: boolean) {
+        if (condition) {
+             return [1, 2, 3] as Array<number>
+        } else {
+             return ["aa", "bb", "cc"]
+        }
+    }
+
 
 Explicit type annotation of *forVariable* is allowed as an experimental
 feature (see :ref:`For-of Explicit Type Annotation`).

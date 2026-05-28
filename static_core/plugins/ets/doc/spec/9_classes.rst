@@ -303,7 +303,7 @@ A :index:`compile-time error` occurs if:
 
 -  ``typeReference`` refers directly to, or is an alias of any
    non-class type, e.g., of interface, enumeration, union, function,
-   utility type, or any instantiation of ``FixedArray``.
+   utility type, or any instantiation of ``FixedArray`` or ``ValueArray``.
 
 -  ``typeReference`` names a class type that is not accessible (see
    :ref:`Accessible`).
@@ -427,7 +427,7 @@ If ``typeReference`` fails to name an accessible interface type (see
     interface I { } // Not exported
 
     // File2
-    class C implements I {} // Compile-time error I is not accessible
+    class C implements I {} // Compile-time error, 'I' is not accessible
 
 If some interface is repeated as a direct superinterface in a single
 ``implements`` clause (even if that interface is named differently), then all
@@ -1256,8 +1256,8 @@ the following example:
 
     function increment(c: C) {
       c.sayHello()  // OK
-      c.hello()     // Compile-time error - 'hello()' is private
-      c.count++     // Compile-time error - 'count' is private
+      c.hello()     // Compile-time error, 'hello()' is private
+      c.count++     // Compile-time error, 'count' is private
     }
 
     class D1 extends C {
@@ -1764,7 +1764,7 @@ its type has a *default value* which is never used.
 Each time a *field with late initialization* is read, a field initialization
 check is performed. If the compiler identifies that a field is not initialized,
 then a :index:`compile-time error` occurs. Otherwise, the check is performed
-at runtime, and if a uninitialized field is encountered, then
+at runtime, and if an uninitialized field is encountered, then
 a :index:`runtime error` occurs:
 
 .. code-block:: typescript
@@ -1868,7 +1868,7 @@ A :index:`compile-time error` occurs if:
     }
 
 Overridden fields, except those with late initialization (see
-:ref:Fields with Late Initialization), must be explicitly initialized either
+:ref:`Fields with Late Initialization`), must be explicitly initialized either
 with a field initializer or in a constructor. Otherwise,
 a :index:`compile-time error` occurs.
 Implicit initialization is not used, even though the type of the field has
@@ -2530,7 +2530,7 @@ Class Accessor Declarations
 
 Class accessors are declared in the form of getters or setters, i.e., methods
 with predefined signatures that suport using field access syntax to call such
-methods. 
+methods. A class can define a getter, a setter, or both with the same name.
 
 Class accessors are often used instead of fields to add additional control for
 operations of getting or setting a field value.
@@ -2659,12 +2659,6 @@ If a getter has no return type specified, then the type is inferred as in
       get age() { return this._age } // return type is inferred as number
     }
 
-
-A class can define a getter, a setter, or both with the same name.
-If both a getter and a setter with a particular name are defined,
-then both must have the same accessor modifiers. Otherwise, a
-:index:`compile-time error` occurs.
-
 Any accessor implementation can use a private or non-private field or fields to
 store the data as in the examples above and below.
 
@@ -2680,9 +2674,11 @@ store the data as in the examples above and below.
     }
     console.log (new Person().fullName)
 
-A name of an accessor cannot be the same as that of a non-static field, or of a
-method of class or interface. Otherwise, a :index:`compile-time error`
-occurs:
+A :index:`compile-time error` occurs if:
+
+- A name of a static accessor is the same as that of a static member; 
+
+- A name of a non-static accessor is the same as that of an instance member.
 
 .. index::
    getter
@@ -3321,11 +3317,11 @@ parameters.
    class A {
        private constructor () {}
    }
-   class B0 extends A {} // Compile-time error as default constructor for B0
+   class B0 extends A {} // Compile-time error, default constructor for B0
                          // cannot call super() as it is private
    class B1 extends A {
         constructor () {
-            super ()   // Compile-time error as super() is private
+            super ()   // Compile-time error, super() is private
         }
    }
 

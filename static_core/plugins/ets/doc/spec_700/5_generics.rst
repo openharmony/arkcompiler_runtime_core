@@ -214,7 +214,7 @@ also non-nullish.
     }
     class B <T extends keyof A> {}
     let b1 = new B<'f1'>    // OK
-    let b2 = new B<'f0'>    // Compile-time error as 'f0' does not fit the constraint
+    let b2 = new B<'f0'>    // Compile-time error, 'f0' does not fit the constraint
     let b3 = new B<keyof A> // OK
 
 A type parameter of a generic can *depend* on an earlier type parameter

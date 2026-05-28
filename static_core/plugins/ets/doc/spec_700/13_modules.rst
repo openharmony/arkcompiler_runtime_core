@@ -294,13 +294,13 @@ The usage of namespaces is represented in the example below:
        // File2
        import {Space2 as Space1} from "File1"
 
-       // Compile-time error - there is no variable or constant called 'constant'
+       // Compile-time error, there is no variable or constant called 'constant'
        if (Space1.variable == Space1.constant) {
-            // Compile-time error - incorrect assignment as type 'number'
+            // Compile-time error, incorrect assignment as type 'number'
             // is not compatible with type 'string'
            Space1.variable = 4321
        }
-       Space1.foo()     // Compile-time error - there is no function 'foo()'
+       Space1.foo()     // Compile-time error, there is no function 'foo()'
        Space1.foo(1234) // OK
 
 .. index::
@@ -373,10 +373,10 @@ The usage of namespaces is represented in the example below:
             A.C.moo()
         }
         //export function foo(): void {  }
-        // Compile-time error as foo() was already defined
+        // Compile-time error, foo() was already defined
 
         // function foo() { console.log ("2nd A.foo() non-exported") }
-        // Compile-time error as foo() was already defined as exported
+        // Compile-time error, foo() was already defined as exported
     }
 
     namespace A.C {
@@ -396,7 +396,7 @@ The usage of namespaces is represented in the example below:
 
     namespace A {
         function goo() { bar() }  // exported bar() is accessible in the same namespace
-        export function foo(): void { ... }  // Compile-time error as foo() was already defined
+        export function foo(): void { ... }  // Compile-time error, foo() was already defined
     }
 
 .. index::
@@ -1340,8 +1340,8 @@ constant variable that is exported by using this export directive. Otherwise, a
     // File2
     import {default as a} from "File1"
 
-    a.foo()  // Calling method foo() of class A where 'a' is an instance of type A
-    a = new A // Compile-time error as 'a' is a constant variable
+    a.foo()   // Calling method foo() of class A where 'a' is an instance of type A
+    a = new A // Compile-time error, 'a' is a constant variable
 
     // File3
     import * as a from "File1" /* compile-time error, such form of import
@@ -1416,10 +1416,10 @@ Here is the series of examples representing that cases:
 
       // // functions, variables, constants
       export let a: int = 1 // OK
-      export let b = 1 // Compile-time error - no explicit type
+      export let b = 1 // Compile-time error, no explicit type
 
       export const c: int = 1 // OK
-      export const d = 1 // Compile-time error - no explicit type
+      export const d = 1 // Compile-time error, no explicit type
 
       export function foo(): void {} // OK
 
@@ -1566,7 +1566,7 @@ Here is the series of examples representing that cases:
 
       type Version = number[];
 
-      // compile time error, ``Version`` not exported
+      // Compile-time error, ``Version`` not exported
       export @interface deprecated {
                         fromVersion: Version;
                      }
@@ -1819,8 +1819,8 @@ The *export type directive* syntax is presented below:
         'export' 'type' selectiveBindings
         ;
 
-If a binding refers to anything other than type, a :index:compile-time error
-occurs. 
+If a binding refers to anything other than type, a
+:index:`compile-time error` occurs. 
 
 |LANG| does not provide any other additional semantic checks for entities
 exported by using *export type* directives in comparison to *export* directives.
@@ -1883,6 +1883,10 @@ If re-exported declarations are not distinguishable (see :ref:`Declarations`)
 within the scope of the current module, then a :index:`compile-time error`
 occurs.
 
+If a re-export directive uses ``selectiveBinding``, then the name it re-exports
+supersedes the name that was re-exported via a star ``*`` re-export if any are
+present. The same is done by the exported declarations of the current module. 
+
 The re-exporting practices are represented in the following examples:
 
 .. code-block:: typescript
@@ -1897,6 +1901,80 @@ The re-exporting practices are represented in the following examples:
        // re-export default declaration from the other module
     export {default as name} from "path_to_the_module"
        // re-export default declaration from the other module under 'name'
+
+    // a.ets
+    export interface Item {} // Item from a.ets exported
+
+    // b.ets
+    export interface Item {} // Item from b.ets exported
+
+    // c.ets
+    export {Item} from "./a.ets" // Item from a.ets re-exported
+
+    // d.ets
+    export function AnotherItem() { // AnotherItem from d.ets exported
+        console.log ("AnotherItem")
+    }
+    export function foo() { // foo from d.ets exported
+        console.log ("foo")
+    }
+
+    // re-export1.ets
+    export * from "./a.ets"
+    export * from "./b.ets"
+      /* Compile-time error as two diffrent re-exported declarations are not
+         distinguishable */
+
+    // re-export2.ets
+    export * from "./a.ets"
+    export * from "./b.ets"
+    export {Item} from "./a.ets" 
+      /* Item from ./a.ets supersedes conflicitng Items from the star re-exports
+         from a and b modules */
+
+    // re-export3.ets
+    export * from "./a.ets"
+    export * from "./b.ets"
+    export class Item {}
+      /* Item declared in the current module supersedes conflicitng Items from
+         the star re-exports from a and b modules */
+
+    // re-export4.ets
+    export {Item} from "./a.ets"
+    export {Item} from "./b.ets"
+      /* Compile-time error as two diffrent re-exported declarations are not
+         distinguishable */
+
+    // re-export5.ets
+    export * from "./a.ets"
+    export * from "./c.ets"
+      // The same and only Item is re-exported from a and c modules
+
+    // re-export6.ets
+    export * from "./a.ets"
+    export * from "./b.ets"
+    export {Item as AnotherItem} from "./a.ets" 
+      /* Compile-time error as two different re-exported declarations are not
+         distinguishable, and then Item renamed as AnotherItem does not affect
+         the name clash created by the star export */ 
+
+    // re-export7.ets
+    export * from "./d.ets"
+    export {Item as AnotherItem} from "./a.ets" 
+      /* Item from a.ets renamed as AnotherItem supersedes AnotherItem from
+         d.ets */ 
+
+    // re-export8.ets
+    export * from "./d.ets"
+    export {foo as AnotherItem} from "./d.ets" 
+      /* foo from d.ets renamed as AnotherItem supersedes AnotherItem from
+         d.ets */ 
+
+    // re-export9.ets
+    import * as x from "./re-export8.ets"
+    x.foo()          // foo is printed
+    x.AnotherItem()  // foo is printed
+
 
 .. index::
    import path
@@ -2104,19 +2182,7 @@ A correct *multifile module* is represented in the example below:
 .. code-block:: typescript
    :linenos:
 
-    // file1
-    export module "x"
-    import {A} from "some module"
-    export a
-
-    // file2
-    export module "mod1"
-    let a = new A()
-
-.. code-block:: typescript
-   :linenos:
-
-    // file1
+    // file1 - 1st file with the module 'x' source code
     module "x"
     function foo() {}
     function bar() {}
@@ -2125,7 +2191,7 @@ A correct *multifile module* is represented in the example below:
         function bar() {}
     }
 
-    // file2
+    // file2 - 2nd file with the module 'x' source code
     module "x"
     class A {}
 
@@ -2150,45 +2216,6 @@ An incorrect *multifile module* is represented in the example below:
 
 .. index::
     multifile module
-
-|
-
-.. _Standard Library Usage:
-
-Standard Library Usage
-**********************
-
-.. meta:
-    frontend_status: Done
-    todo: now core, containers, math and time are also imported because of stdlib internal dependencies
-    todo: fix stdlib and tests, then import only core by default
-    todo: add escompat to spec and default
-
-A set of entities exported from the standard library (see
-:ref:`Standard Library`)
-is accessible as simple names (see :ref:`Accessible`) at module scope and
-in nested scopes if not redefined.
-Using these names as names of programmer-defined entities at the module scope
-causes a :index:`compile-time error` as discussed in :ref:`Declarations`.
-
-.. code-block:: typescript
-   :linenos:
-
-    console.log("Hello, world!") // OK, 'console' is defined in the standard library
-
-    let console = 5 // Compile-time error
-
-.. index::
-   entity
-   export
-   scope
-   name
-   accessibility
-   access
-   simple name
-   standard library
-   access
-   declaration
 
 |
 

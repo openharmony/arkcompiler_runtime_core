@@ -492,7 +492,7 @@ declared in:
    :linenos:
 
     function foo() {
-        let x = y // Compile-time error - y is not accessible yet
+        let x = y // Compile-time error, 'y' is not accessible yet
         let y = 1
     }
 
@@ -607,9 +607,35 @@ following:
 -  Names for anonymous types (array, function, and union types); or
 -  Alternative names for existing types.
 
-Scopes of type aliases are module or namespace level scopes. Names of all type
-aliases must follow the uniqueness rules of :ref:`Declarations` in the current
-context.
+The syntax of *type alias* is presented below:
+
+.. code-block:: abnf
+
+    typeAlias:
+        'type' identifier typeParameters? '=' type
+        ;
+
+Scopes of type aliases are module or namespace level scopes (see
+:ref:`Scopes`). Names of all type aliases must follow the uniqueness rules of
+:ref:`Declarations` in the current context. If a type alias is exported, then
+it can be used in other modules that import it. If a type alias is exported,
+but original type is not, then a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    // source1
+    export class OriginalName {}
+    export type AliasName = OriginalName
+    // Both 'OriginalName' and 'AliasName' can be used
+
+    interface I1 {}
+    export type I2 = I1 // Compile-time error, I1 is not exported
+
+
+    // source2
+    import {AliasName} from "source1"    // OK
+
 
 .. index::
    type alias
@@ -622,14 +648,6 @@ context.
    context
    alias
    name
-
-The syntax of *type alias* is presented below:
-
-.. code-block:: abnf
-
-    typeAlias:
-        'type' identifier typeParameters? '=' type
-        ;
 
 Meaningful names can be provided for anonymous types as follows:
 
@@ -1177,7 +1195,11 @@ The syntax of *signature* is presented below:
 .. code-block:: abnf
 
     signature:
-        '(' parameterList? ')' returnType?
+        parameters returnType?
+        ;
+
+    parameters: 
+        '(' parameterList? ')'
         ;
 
 .. index::
@@ -1416,12 +1438,13 @@ The syntax of *rest parameter* is presented below:
 A :index:`compile-time error` occurs if a *rest parameter*:
 
 -  Is followed by a parameter, which is not a *rest parameter* ;
--  Has a type that is not an array type, a tuple type, nor a type
-   parameter constrained by an array or a tuple type.
+-  Has a type that is not an array type (see :ref:`Array Types`), a tuple type
+   (see :ref:`Tuple Types`), nor a type parameter constrained by an array or
+   a tuple type.
 
-A call of entity with a *rest parameter* of array type ``T[]``
-(or ``FixedArray<T>``) can accept any number of arguments
-of types that are assignable (see :ref:`Assignability`) to ``T``:
+A call of entity with a *rest parameter* of array type with elements of type ``T``
+can accept any number of arguments of types that are assignable (see
+:ref:`Assignability`) to ``T``:
 
 .. index::
    rest parameter
@@ -1556,10 +1579,11 @@ prefix before the tuple argument:
    tuple argument
    spread operator
 
-If an argument of fixed-size array type ``FixedArray<T>`` is to be passed to a
-function or a method with the rest parameter, then the spread expression (see
-:ref:`Spread Expression`) must be used with the ``spread`` operator ``'...'``
-as a prefix before the fixed-size array argument:
+If an argument of fixed-size array type ``FixedArray<T>`` or value array type
+``ValueArray<T>`` is to be passed to a function or a method with the rest
+parameter, then the spread expression (see :ref:`Spread Expression`) must be
+used with the ``spread`` operator ``'...'`` as a prefix before the fixed-size
+array argument:
 
 .. code-block-meta:
 
@@ -1574,7 +1598,11 @@ as a prefix before the fixed-size array argument:
     }
 
     let x: FixedArray<number> = [1, 2, 3]
-    sum(...x) // spread an fixed-size array 'x'
+    sum(...x) // spread a fixed-size array 'x'
+       // returns 6
+
+    let y: ValueArray<number> = [1, 2, 3]
+    sum(...y) // spread a value-array 'y'
        // returns 6
 
 
@@ -1627,6 +1655,7 @@ generics as a *rest parameter*.
 .. index::
    argument
    fixed-size array type
+   value array
    rest parameter
    prefix
    spread operator
@@ -1714,7 +1743,8 @@ method, or lambda body has neither a ``return`` statement (see
 
 If a function, a method, or a lambda return type is ``never`` (see
 :ref:`Type never`), and there is an execution path in which all statements
-execute normally (see :ref:`Normal and Abrupt Statement Execution`), then a
+execute normally (see :ref:`Normal and Abrupt Statement Execution`), except the
+case when this execution path executes an infinite loop, then a
 :index:`compile-time error` occurs.
 
 A special form of return type with the keyword ``this`` as type annotation can
@@ -1729,20 +1759,23 @@ then the function, method, or lambda return type is ``void`` (see
 .. code-block:: typescript
    :linenos:
 
-    function foo1 (): number {}  // Compile-time error, return or throw missing
-    let foo2 =  (): number => {} // Compile-time error, return or throw missing
+    function foo1 (): number {} // Compile-time error, return or throw missing
+    let foo2 = (): number => {} // Compile-time error, return or throw missing
 
-    function foo3 (): undefined {}  // OK, it returns 'undefined' value
-    let foo4 =  (): undefined => {} // OK, it returns 'undefined' value
+    function foo3 (): undefined {} // OK, it returns 'undefined' value
+    let foo4 = (): undefined => {} // OK, it returns 'undefined' value
 
-    function foo5 (): never {}  // Compile-time error, no throw or return never type function call
-    let foo6 =  (): never => {} // Compile-time error, no throw or return never type function call
+    function foo5 (): void {}      // OK, it returns 'undefined' value
+    let foo6 = (): void => {}      // OK, it returns 'undefined' value
 
-    function foo7 (): void {}  // OK, it returns undefined value
-    let foo8 =  (): void => {} // OK, it returns undefined value
+    function foo7 () {}  // OK, return type is void and return value is 'undefined'
+    let foo8 = () => {} // OK, return type is void and return value is 'undefined'
 
-    function foo9 () {}   // OK, return type is void and return value is 'undefined'
-    let foo10 =  () => {} // OK, return type is void and return value is 'undefined'
+    function foo9 (): never {}   // Compile-time error, no throw or return never type
+    let foo10 = (): never => {} // Compile-time error, no throw or return never type
+
+    function foo11 (): never { while (true) {} } // OK, no return occurs
+    let foo12 = (): never => { for (;;) {} }     // OK, no return occurs
 
 
 .. index::

@@ -682,8 +682,8 @@ The same scheme applies to properties and accessors:
        i3.prop1 = 5 // Setter for prop1 is called
        i3.prop1     // Getter for prop1 is called
        i3.prop2 = 5 // Setter for prop2 is called
-       i3.prop2     // Compile-time error as no getter for prop2
-       i3.prop3 = 5 // Compile-time error as no getter for prop3
+       i3.prop2     // Compile-time error, no getter for prop2
+       i3.prop3 = 5 // Compile-time error, no getter for prop3
        i3.prop3     // Getter for prop3 is called
     }
 

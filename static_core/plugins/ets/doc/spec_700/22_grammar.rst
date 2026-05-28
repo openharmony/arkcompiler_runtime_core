@@ -17,10 +17,6 @@ Grammar Summary
 
 .. code-block:: abnf
 
-    literal: Literal;
-
-    identifier: Identifier;
-
     type:
         annotationUsage?
         ( typeReference
@@ -130,11 +126,15 @@ Grammar Summary
         ;
 
     signature:
-        '(' parameterList? ')' returnType?
+        parameters returnType?
         ;
 
     returnType:
         ':' (type | 'this')
+        ;
+
+    parameters: 
+        '(' parameterList? ')'
         ;
 
     parameterList:
@@ -317,6 +317,10 @@ Grammar Summary
         '(' argumentSequence? ')' trailingLambda?
         ;
 
+    constructorCallArguments:
+        '(' argumentSequence? ')' 
+        ;
+
     argumentSequence:
         expression (',' expression)* ','?
         ;
@@ -335,7 +339,7 @@ Grammar Summary
         ;
 
     newClassInstance:
-        'new' typeArguments? typeReference arguments?
+        'new' typeArguments? typeReference constructorCallArguments?
         ;
 
     castExpression:
@@ -1075,7 +1079,7 @@ Grammar Summary
         ;
 
     annotationUsage:
-        AnnotationUsageNoParentheses |
+        annotationUsageNoParentheses |
         annotationUsageWithParentheses
         ;
 
@@ -1095,50 +1099,47 @@ Grammar Summary
         'declare' annotationDeclaration
         ;
 
-    Identifier:
-      IdentifierStart IdentifierPart*
+    identifier:
+      identifierStart identifierPart*
       ;
 
-    IdentifierStart:
-      UnicodeIDStart
-      | '$'
+    identifierStart:
+      unicodeIDStart
       | '_'
-      | '\\' EscapeSequence
+      | '\\' escapeSequence
       ;
 
-    IdentifierPart:
-      UnicodeIDContinue
+    identifierPart:
+      unicodeIDContinue
       | '$'
       | ZWNJ
       | ZWJ
-      | '\\' EscapeSequence
+      | '\\' escapeSequence
       ;
 
     ZWJ:
-     '\u200C'
-    ;
+      '\u200D'
+      ;
 
     ZWNJ:
-     '\u200D'
-    ;
+      '\u200C'
+      ;
 
-    UnicodeIDStart
-      : Letter
-      | ['$']
-      | '\\' UnicodeEscapeSequence;
+    unicodeIDStart
+      : unicodeLetter
+      | '\\' unicodeEscapeSequence;
 
-    UnicodeIDContinue
-      : UnicodeIDStart
-      | UnicodeDigit
-      | '\u200C'
-      | '\u200D';
+    unicodeIDContinue
+      : unicodeIDStart
+      | unicodeDigit
+      ;
 
-    UnicodeEscapeSequence:
+    unicodeEscapeSequence:
       'u' HexDigit HexDigit HexDigit HexDigit
       | 'u' '{' HexDigit HexDigit+ '}'
       ;
 
-    Letter
+    unicodeLetter
       : UNICODE_CLASS_LU
       | UNICODE_CLASS_LL
       | UNICODE_CLASS_LT
@@ -1146,12 +1147,12 @@ Grammar Summary
       | UNICODE_CLASS_LO
       ;
 
-    UnicodeDigit
+    unicodeDigit
       : UNICODE_CLASS_ND
       ;
 
 
-    Literal:
+    literal:
       IntegerLiteral
       | FloatLiteral
       | BigIntLiteral
@@ -1245,15 +1246,15 @@ Grammar Summary
 
     DoubleQuoteCharacter:
         ~["\\\r\n]
-        | '\\' EscapeSequence
+        | '\\' escapeSequence
         ;
 
     SingleQuoteCharacter:
         ~['\\\r\n]
-        | '\\' EscapeSequence
+        | '\\' escapeSequence
         ;
 
-    EscapeSequence:
+    escapeSequence:
         ['"bfnrtv0\\]
         | 'x' HexDigit HexDigit
         | 'u' HexDigit HexDigit HexDigit HexDigit
@@ -1267,11 +1268,11 @@ Grammar Summary
 
     BackticksContentCharacter:
         ~[`\\\r\n]
-        | '\\' EscapeSequence
+        | '\\' escapeSequence
         | LineContinuation
         ;
 
-     LineContinuation:
+    LineContinuation:
         '\\' [\r\n\u2028\u2029]+
         ;
 

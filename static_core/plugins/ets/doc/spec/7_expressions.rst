@@ -415,7 +415,7 @@ In some cases, the type of an expression cannot be inferred (see
 
     class P { x: number, y: number }
 
-    let x = { x: 10, y: 10 } // standalone object literal - compile time error
+    let x = { x: 10, y: 10 }    // Compile-time error, standalone object literal
     let y: P = { x: 10, y: 10 } // OK, type of object literal is inferred
 
 The evaluation of an expression type requires completing the following steps:
@@ -2007,7 +2007,7 @@ implementation is used:
 
 An interface property is set within an object literal by a value. It is
 independent of the form it is defined in (see :ref:`Interface Properties`).
-The definition within the interface determines how the the property is used:
+The definition within the interface determines how the property is used:
 
 .. code-block:: typescript
    :linenos:
@@ -2016,20 +2016,20 @@ The definition within the interface determines how the the property is used:
         set attr (attr: number)
     }
     const i1: I1 = {attr: 42} // OK, 'attr' is writable property
-    console.log (i1.attr) // Compile-time error as attr has no getter
+    console.log (i1.attr) // Compile-time error, 'attr' has no getter
 
     interface I2 {
         get attr (): number
     }
     const i2: I2 = {attr: 42} /* OK, 'attr' is in fact a getter which always returns 42 */
-    i2.attr = 666 // Compile-time error as attr is readonly
+    i2.attr = 666 // Compile-time error, 'attr' is readonly
     console.log (i2.attr) // OK, output is 42
 
     interface I3 {
         readonly attr: number
     }
     const i3: I3 = {attr: 42} /* OK, same as above */
-    i3.attr = 666 // Compile-time error as attr is readonly
+    i3.attr = 666 // Compile-time error, 'attr' is readonly
     console.log (i3.attr) // OK, output is 42
 
     interface I4 {
@@ -2141,7 +2141,7 @@ occurs:
 When a *recordLiteralElement* is represented as a spread expression, its type
 must be ``Record<Key, Value>``, where the Key type matches the Key type of the
 current Record type. Additionally, the Value type must be a subtype of the
-Value type of the current Record type.If these conditions are not met, a
+Value type of the current Record type. If these conditions are not met, a
 :index:`compile-time error` occurs. The purpose of the spread expression is to
 populate the current Record with elements from the Record being spread.
 
@@ -3074,9 +3074,9 @@ Type of a *method call expression* is the return type of the method.
     }
 
 
-    let x = A.method()     // Compile-time error as void cannot be used as type annotation
+    let x = A.method()     // Compile-time error, void cannot be used as type annotation
     A.method ()            // OK
-    let y = new A().method() // Compile-time error as void cannot be used as type annotation
+    let y = new A().method() // Compile-time error, void cannot be used as type annotation
     new A().method()         // OK
 
 .. index::
@@ -3201,7 +3201,7 @@ Various forms of function calls are represented in the example below:
 
     ((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
 
-    let x = foo() // Compile-time error as void cannot be used as type annotation
+    let x = foo() // Compile-time error, void cannot be used as type annotation
 
 Type of a *function call expression* is the return type of the function.
 
@@ -3858,7 +3858,11 @@ The syntax of *new class instance expression* is presented below:
 .. code-block:: abnf
 
     newClassInstance:
-        'new' typeReference typeArguments? arguments?
+        'new' typeReference typeArguments? constructorCallArguments?
+        ;
+
+    constructorCallArguments:
+        '(' argumentSequence? ')' 
         ;
 
 *Class instance creation expression* specifies a class to be instantiated.
@@ -3891,11 +3895,16 @@ It optionally lists all actual arguments for the constructor.
    initialization
 
 A *class instance creation expression* that refers to classes ``FixedArray``,
-``Array``, or classes derived from ``Array``, instantiated with an array element
-type of some class type, is a special form of *array creation expression*.
+``Array``, or classes derived from ``Array``, instantiated with an array
+element type of some class type, is a special form of *array creation
+expression*.
 
-Attempting to create a *FixedArray* of elements of which the type is a type parameter
-causes a :index:`compile-time error`.
+Attempting to create a *FixedArray* of elements of which the type is a type
+parameter causes a :index:`compile-time error`.
+
+Attempting to create a *ValueArray* of elements of type different from numeric,
+boolean, or char type causes a :index:`compile-time error`.
+
 
 .. code-block:: typescript
    :linenos:
@@ -3907,6 +3916,9 @@ causes a :index:`compile-time error`.
           const a2 = new FixedArray<T> (5, element) // compile-time error, fixed-size
                                          // array with 5 elements of type T cannot be
                                          // created
+          const a3 = new ValueArray<T> (5, element) // compile-time error, value array
+                                         // may be created only with numeric, boolean,
+                                         // or char type elements
        }
     }
 
@@ -7144,7 +7156,7 @@ Extended Equality with ``null`` or ``undefined``
 to ensure better alignment with |TS|.
 
 If one operand in an equality expression is ``null``, and other is ``undefined``,
-then the operator ``'!='`` returns ``true``, and the operator ``'!=='`` returns
+then the operator ``'=='`` returns ``true``, and the operator ``'==='`` returns
 ``false``:
 
 .. index::

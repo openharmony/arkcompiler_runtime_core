@@ -968,3 +968,23 @@ but the same access modifer must be retained in |LANG|:
 
 |
 
+
+.. Exported type alias implies exported original type
+
+Exported type alias implies exported original type
+--------------------------------------------------
+
+.. meta:
+    frontend_status: Done
+
+|TS| supports export of the type alias for the non-exported type, while |LANG|
+reports a compile-time error for such cases.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {}
+    export type I2 = I1 // OK in TypeScript, compile-time error in ArkTS
+
+
+|
