@@ -211,8 +211,8 @@ static_core/plugins/ets/tests/interop_js/                                     @i
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis @zengmanyi @LeechyLiang
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
-static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg ^luobohua @luchenxu ^Wangyuzhong11
-static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya @nazarovkonstantin ^luobohua ^luchenxu @Wangyuzhong11
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg @luchenxu @CptH
+static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg ^shimenkovmikhail ^v-cherkashin ^trubachevilya ^nazarovkonstantin @luchenxu @CptH
 static_core/plugins/ets/tools/migration_visualizer/                           @oatuwwutao @fouckttt @cy917474985 @Nojpg
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
