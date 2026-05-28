@@ -14,7 +14,7 @@
     "postinstall": "npm run install_tsc",
     "webpack": "webpack -t node --config webpack.config.js",
     "clean": "rimraf build dist bundle",
-    "compile": "npm run tsc",
+    "compile": "npm run tsc && node script/write-impl-hash.js",
     "build": "npm run clean && npm run compile",
     "pack:declgen": "rimraf bundle && mkdir bundle && npm pack --pack-destination bundle",
     "eslint-check": "npx eslint",
@@ -22,10 +22,13 @@
     "prettier-fix": "npx prettier --write .",
     "fix": "npm run prettier-fix && npm run eslint-fix",
     "declgen": "node ./build/src/main.js",
-    "test": "npm run compile && npm run test:cookbook",
-    "test:unit": "npm run compile && mocha \"build/test/unit/**/*.test.js\"",
+    "test": "npm run compile && npm run test:cookbook && npm run test:unit",
+    "test:unit": "mocha \"build/test/unit/**/*.test.js\"",
     "test:cookbook-one": "node build/test/framework/CookbookExecutor.js",
-    "test:cookbook": "TEST_OUT=build/test_artifacts_parallel && rimraf ${TEST_OUT} && node build/test/framework/CookbookRunner.js --test-dir test/cookbook_tests -t ts_source -t dts_declarations -t package_source --test-out-dir ${TEST_OUT}"
+    "test:cookbook": "TEST_OUT=build/test_artifacts_parallel && rimraf ${TEST_OUT} && node build/test/framework/CookbookRunner.js --test-dir test/cookbook_tests -t ts_source -t dts_declarations -t package_source --test-out-dir ${TEST_OUT}",
+    "bench:build": "tsc -p benchmark/tsconfig.json",
+    "bench:fetch": "bash benchmark/scripts/fetch-fixtures.sh",
+    "bench": "npm run bench:build && node build/benchmark/src/runner.js"
   },
   "dependencies": {
     "commander": "^9.4.0",

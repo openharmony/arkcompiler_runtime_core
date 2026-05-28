@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-export { generateInteropDecls } from './generateInteropDecls';
-export * as stages from './stages';
-export * from './Declgen';
-export * as logger from './logger';
-export * from './plugin/Plugin';
-export { sha256 as hash } from './cache/Hash';
+/** Bump when the manifest schema or on-disk layout changes (rare). */
+export const CACHE_FORMAT_VERSION = 1;
+
+/** Bump when the cache-hit decision logic changes (uncommon). */
+export const CACHE_LOGIC_VERSION = 1;
+
+export { DECLGEN_IMPL_HASH } from './ImplHash.generated';

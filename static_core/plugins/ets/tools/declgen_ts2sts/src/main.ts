@@ -37,13 +37,16 @@ function main(): void {
     features: {
       enableInteropTypesFix: parsedCliOptions.enableInteropTypesFix ?? false,
       removeReservedKeywordIdentifier: parsedCliOptions.removeReservedKeywordIdentifier ?? false
-    }
+    },
+    incremental: parsedCliOptions.incremental,
+    cacheDir: parsedCliOptions.cacheDir,
+    noCache: parsedCliOptions.noCache,
+    verifyOutputs: parsedCliOptions.verifyOutputs
   };
 
   const declgen = new Declgen(declgenOptions, options);
 
-  declgen.run();
-  declgen.emit();
+  declgen.run().emit();
 }
 
 function collectInputFiles(opts: DeclgenCLIOptions): string[] {

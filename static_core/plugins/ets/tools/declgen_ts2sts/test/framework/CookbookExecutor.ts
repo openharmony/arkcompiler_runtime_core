@@ -249,12 +249,12 @@ async function test(testDir: string, suite: string, testCase: string, testOutDir
   }
 
   const declgen = new Declgen(declgenOptions, compilerOptions);
-  const { checkResult } = declgen.run();
-  declgen.emit();
+  const result = declgen.run();
+  result.emit();
 
   // Compare outputs
   const outputRes = await compareOutputs(suite, testCase, expectedOutput, outDir);
-  const reportRes = await compareReports(checkResult, expectedReport, outDir, testCase);
+  const reportRes = await compareReports(result.checkResult, expectedReport, outDir, testCase);
 
   const allPass = outputRes.length === 0 && reportRes.length === 0;
 

@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-export { generateInteropDecls } from './generateInteropDecls';
-export * as stages from './stages';
-export * from './Declgen';
-export * as logger from './logger';
-export * from './plugin/Plugin';
-export { sha256 as hash } from './cache/Hash';
+export * from './CacheVersion';
+export * from './CacheStore';
+export * from './CacheKey';
+export * from './Hash';
+export * from './InteropSignature';

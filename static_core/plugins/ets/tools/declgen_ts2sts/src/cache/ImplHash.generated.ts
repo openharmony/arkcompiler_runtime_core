@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-export { generateInteropDecls } from './generateInteropDecls';
-export * as stages from './stages';
-export * from './Declgen';
-export * as logger from './logger';
-export * from './plugin/Plugin';
-export { sha256 as hash } from './cache/Hash';
+// AUTO-GENERATED at build time by scripts/write-impl-hash.js. Do not edit by hand.
+// The development-time placeholder below is overwritten in build/src/cache/ImplHash.generated.js
+// every time `npm run build` runs.
+export const DECLGEN_IMPL_HASH = 'dev-uncommitted';

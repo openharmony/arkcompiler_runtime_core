@@ -13,9 +13,23 @@
  * limitations under the License.
  */
 
-export { generateInteropDecls } from './generateInteropDecls';
-export * as stages from './stages';
-export * from './Declgen';
-export * as logger from './logger';
-export * from './plugin/Plugin';
-export { sha256 as hash } from './cache/Hash';
+import { BenchCase, BenchFn, BenchHook } from './types';
+
+const registry: BenchCase[] = [];
+
+export interface DefineBenchOptions {
+  setup?: BenchHook;
+  teardown?: BenchHook;
+}
+
+export function defineBench(name: string, fn: BenchFn, options: DefineBenchOptions = {}): void {
+  registry.push({ name, fn, setup: options.setup, teardown: options.teardown });
+}
+
+export function getRegistry(): readonly BenchCase[] {
+  return registry;
+}
+
+export function clearRegistry(): void {
+  registry.length = 0;
+}

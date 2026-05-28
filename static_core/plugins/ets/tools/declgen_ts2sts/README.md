@@ -62,6 +62,13 @@ Options:
 npm run test
 ```
 
+## Plugins
+
+declgen exposes a small plugin API so out-of-tree code can add custom
+pipeline stages without breaking the incremental cache. See
+[src/plugin/README.md](src/plugin/README.md) for the API, extension points,
+and the rules for choosing `dependencyKind`.
+
 Test one case:
 
 ```bash

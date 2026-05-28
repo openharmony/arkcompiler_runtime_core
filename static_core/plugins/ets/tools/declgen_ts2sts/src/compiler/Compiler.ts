@@ -20,7 +20,7 @@ import * as path from 'node:path';
 import { logTscDiagnostics } from '../utils/LogTscDiagnostics';
 import { LogLevel, Logger } from '../logger/Logger';
 import { Extension } from '../utils/Extension';
-import { VirtualFileHost, File, resolvePath, convertToDetsFileName, INTERNAL_PREFIX } from './VirtualFileHost';
+import { VirtualFileHost, File, normalizePath, convertToDetsFileName, INTERNAL_PREFIX } from './VirtualFileHost';
 
 /**
  * This is a workaround to make typechecker to be valid for arkts-sta builtins types.
@@ -72,8 +72,8 @@ export class Compiler {
   ) {
     this.rootFileNames = rootFileNames;
     this.rootDir = this.computeCommonSourceDirectory(rootFileNames);
-    this.rootFileNames = rootFileNames.map((file) => resolvePath(file));
-    this.libFileNames = libFileNames.map((file) => resolvePath(file));
+    this.rootFileNames = rootFileNames.map((file) => normalizePath(file));
+    this.libFileNames = libFileNames.map((file) => normalizePath(file));
     this.compilerOptions = compilerOptions;
     this.fileHost = new VirtualFileHost(compilerOptions);
     this.compilerHost = this.fileHost.getCompilerHost();
@@ -201,7 +201,7 @@ export class Compiler {
       diagnostics.push(...next.result);
       const target = next.affected as ts.SourceFile | ts.Program;
       if ((target as ts.SourceFile).fileName !== undefined) {
-        affected.add(resolvePath((target as ts.SourceFile).fileName));
+        affected.add(normalizePath((target as ts.SourceFile).fileName));
       } else {
         // Whole program affected - fall back to non-incremental emit.
         allAffected = true;
@@ -220,7 +220,59 @@ export class Compiler {
     if (!this.affectedFiles) {
       return true;
     }
-    return this.affectedFiles.has(resolvePath(fileName));
+    return this.affectedFiles.has(normalizePath(fileName));
+  }
+
+  /** All files tsc considered affected during the last incremental compile, or undefined for full builds. */
+  getTscAffectedFiles(): ReadonlySet<string> | undefined {
+    return this.affectedFiles;
+  }
+
+  /**
+   * Cached export signature of a file as computed by tsc's BuilderProgram
+   * (sha of the file's emitted declaration text). Returns undefined when no
+   * builder program is available (non-incremental mode).
+   */
+  getSignatureOfFile(file: ts.SourceFile | string): string | undefined {
+    const builder = this.builderProgram;
+    if (!builder) {
+      return undefined;
+    }
+    const sf = typeof file === 'string' ? this.getSourceFile(file) : file;
+    if (!sf) {
+      return undefined;
+    }
+    const api = builder as unknown as {
+      getSignatureOfFile?: (sf: ts.SourceFile) => string | undefined;
+    };
+    return api.getSignatureOfFile?.(sf);
+  }
+
+  /**
+   * Resolved absolute paths of all modules imported by `file`. Used to build
+   * the per-file cache key and the forward import graph for affected-closure
+   * computation.
+   */
+  getResolvedImports(file: ts.SourceFile): string[] {
+    const out: string[] = [];
+    const seen = new Set<string>();
+    const resolved = (
+      file as ts.SourceFile & {
+        resolvedModules?: Map<string, ts.ResolvedModuleFull | undefined>;
+      }
+    ).resolvedModules;
+    if (resolved && typeof resolved.forEach === 'function') {
+      resolved.forEach((mod) => {
+        if (mod?.resolvedFileName) {
+          const abs = normalizePath(mod.resolvedFileName);
+          if (!seen.has(abs)) {
+            seen.add(abs);
+            out.push(abs);
+          }
+        }
+      });
+    }
+    return out;
   }
 
   /**
@@ -244,11 +296,21 @@ export class Compiler {
   }
 
   updateFile(fileName: string, content: ts.SourceFile): void {
-    this.sourceFilesCache.set(resolvePath(fileName), content);
+    this.sourceFilesCache.set(normalizePath(fileName), content);
   }
 
-  emit(writeFile?: (fileName: string, sourceFile: ts.SourceFile) => void): void {
-    const defaultWriter = (fileName: string, sourceFile: ts.SourceFile): void => {
+  emit(
+    writeFile?: (
+      fileName: string,
+      sourceFile: ts.SourceFile
+    ) => void | { artifactPath?: string; finalContent?: string },
+    onEmitted?: (absSrc: string, info: { path: string; finalContent: string }) => void,
+    filesToEmit?: ReadonlySet<string>
+  ): void {
+    const defaultWriter = (
+      fileName: string,
+      sourceFile: ts.SourceFile
+    ): { artifactPath: string; finalContent: string } => {
       const printer = this.printer;
       const printed = printer.printFile(sourceFile);
       const rootDir = this.rootDir;
@@ -262,12 +324,27 @@ export class Compiler {
         fs.mkdirSync(outPath, { recursive: true });
       }
       fs.writeFileSync(dEtsFilePath, finalCode, { encoding: 'utf8' });
+      return { artifactPath: dEtsFilePath, finalContent: finalCode };
     };
-    const writter = writeFile ?? defaultWriter;
     for (const fileName of this.rootFileNames) {
+      // Skip files outside the affected set when incremental filtering is active.
+      if (filesToEmit && !filesToEmit.has(normalizePath(fileName))) {
+        continue;
+      }
       const sourceFile = this.getSourceFile(fileName);
-      if (sourceFile) {
-        writter(fileName, sourceFile);
+      if (!sourceFile) {
+        continue;
+      }
+      if (writeFile) {
+        const result = writeFile(fileName, sourceFile);
+        if (onEmitted && result && result.artifactPath && typeof result.finalContent === 'string') {
+          onEmitted(fileName, { path: result.artifactPath, finalContent: result.finalContent });
+        }
+      } else {
+        const result = defaultWriter(fileName, sourceFile);
+        if (onEmitted) {
+          onEmitted(fileName, { path: result.artifactPath, finalContent: result.finalContent });
+        }
       }
     }
     // Persist incremental state (no-op when incremental is disabled).
@@ -325,7 +402,7 @@ export class Compiler {
   }
 
   getSourceFile(fileName: string): ts.SourceFile | undefined {
-    const resolved = resolvePath(fileName);
+    const resolved = normalizePath(fileName);
     if (this.sourceFilesCache.has(resolved)) {
       return this.sourceFilesCache.get(resolved);
     }

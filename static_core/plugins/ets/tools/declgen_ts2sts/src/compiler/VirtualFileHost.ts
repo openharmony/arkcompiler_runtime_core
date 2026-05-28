@@ -33,11 +33,21 @@ export interface File {
 
 export const INTERNAL_PREFIX = '?internal';
 
-export function resolvePath(fileName: string): string {
+/**
+ * Normalize an input path to an absolute path using forward slashes.
+ *
+ * TypeScript stores all `SourceFile.fileName` values with forward slashes
+ * regardless of platform. Node's `path.resolve` on Windows uses backslashes,
+ * which would cause map / set lookups keyed by `normalizePath(...)` to miss
+ * when compared against a `SourceFile.fileName`. We normalize here so every
+ * caller that funnels paths through `normalizePath` ends up with the same
+ * representation that TypeScript uses internally.
+ */
+export function normalizePath(fileName: string): string {
   if (fileName.startsWith(INTERNAL_PREFIX)) {
     return fileName;
   }
-  return path.resolve(fileName);
+  return path.resolve(fileName).replace(/\\/g, '/');
 }
 
 export function convertToDetsFileName(fileName: string): string {
@@ -71,7 +81,7 @@ export class VirtualFileHost {
    * @param meta The metadata associated with the file.
    */
   cache(content: string, meta: FileMeta): void {
-    const filePath = resolvePath(meta.filePath);
+    const filePath = normalizePath(meta.filePath);
     this.files.set(filePath, {
       meta,
       content
@@ -91,7 +101,7 @@ export class VirtualFileHost {
    * @returns The content of the file, or undefined if the file does not exist.
    */
   readFile(fileName: string): string | undefined {
-    fileName = resolvePath(fileName);
+    fileName = normalizePath(fileName);
     const file = this.files.get(fileName);
     if (!file) {
       const content = this.baseHost.readFile(fileName);
@@ -117,7 +127,7 @@ export class VirtualFileHost {
    * @param content The new content of the file.
    */
   updateFile(fileName: string, content: string): void {
-    fileName = resolvePath(fileName);
+    fileName = normalizePath(fileName);
     const file = this.files.get(fileName);
     if (file) {
       if (file.meta.noChange) {
@@ -142,7 +152,7 @@ export class VirtualFileHost {
    * @returns True if the file exists, false otherwise.
    */
   fileExists(fileName: string): boolean {
-    fileName = resolvePath(fileName);
+    fileName = normalizePath(fileName);
     return this.files.has(fileName) || this.baseHost.fileExists(fileName);
   }
 
@@ -192,7 +202,7 @@ export class VirtualFileHost {
     const host: ts.CompilerHost = {
       ...this.baseHost,
       getSourceFile: (fileName, languageVersion, onError) => {
-        fileName = resolvePath(fileName);
+        fileName = normalizePath(fileName);
         return (
           getOrCreateSourceFile(fileName, languageVersion) ??
           this.baseHost.getSourceFile(fileName, languageVersion, onError)
@@ -202,8 +212,13 @@ export class VirtualFileHost {
       fileExists: (fileName) => this.fileExists(fileName),
       writeFile: (fileName, text, _writeByteOrderMark, onError) => {
         // Allow tsc to persist its incremental build info on disk so that
-        // subsequent runs can reuse parse / type-check results.
-        if (fileName.endsWith(TSBUILDINFO_EXT)) {
+        // subsequent runs can reuse parse / type-check results. The configured
+        // `compilerOptions.tsBuildInfoFile` may use any basename (e.g. the
+        // declgen cache layout writes it as `<cacheDir>/tsbuildinfo` with no
+        // extension), so accept it by path equality in addition to the default
+        // `.tsbuildinfo` extension probe.
+        const configured = this.compilerOptions.tsBuildInfoFile;
+        if (fileName.endsWith(TSBUILDINFO_EXT) || (configured && path.resolve(fileName) === path.resolve(configured))) {
           writeBuildInfo(fileName, text, onError);
         }
         return null;
