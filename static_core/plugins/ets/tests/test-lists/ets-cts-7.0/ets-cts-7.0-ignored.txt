@@ -452,22 +452,6 @@
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_12.ets
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_14.ets
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_15.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_0.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_1.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_10.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_11.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_12.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_13.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_14.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_15.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_2.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_3.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_4.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_5.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_6.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_7.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_8.ets
-18.annotations/06.runtime_access_to_annotations/readonly_fields_9.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_type_0.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_type_1.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_type_2.ets
@@ -478,6 +462,22 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_0.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_1.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_2.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_3.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_4.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_5.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_6.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_7.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_8.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_9.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_10.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_11.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_12.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_13.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_14.ets
+18.annotations/06.runtime_access_to_annotations/readonly_fields_15.ets
 
 #34624 Unexpected LinkerAbstractMethodError on extending generic class or interface
 20.implementation_details/07.bridge_methods_for_generic_overrides/class_bridge4.ets
