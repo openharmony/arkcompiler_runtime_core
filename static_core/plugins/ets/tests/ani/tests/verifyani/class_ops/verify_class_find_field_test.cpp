@@ -61,7 +61,7 @@ TEST_F(ClassFindFieldTest, lookup_status_is_forwarded_without_verify_abort)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong field"},
+        {"name", "const char *", "field not found"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -74,7 +74,7 @@ TEST_F(ClassFindFieldTest, interface_property_name_is_rejected)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong field"},
+        {"name", "const char *", "field not found"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);

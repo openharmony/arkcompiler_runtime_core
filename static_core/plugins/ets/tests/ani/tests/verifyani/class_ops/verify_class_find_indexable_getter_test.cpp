@@ -47,7 +47,7 @@ TEST_F(ClassFindIndexableGetterTest, lookup_status_is_forwarded_without_verify_a
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "wrong indexable getter"},
+        {"signature", "const char *", "indexable getter not found"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableGetter", missingLines);
@@ -56,7 +56,7 @@ TEST_F(ClassFindIndexableGetterTest, lookup_status_is_forwarded_without_verify_a
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "wrong method signature"},
+        {"signature", "const char *", "method signature descriptor is invalid"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableGetter", invalidDescriptorLines);

@@ -81,7 +81,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_too_large_length_forwards
     ASSERT_EQ(env_->CreateArrayBuffer(TOO_LARGE_LENGTH, &data, &arraybuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"length", "ani_size", "wrong arraybuffer length"},
+        {"length", "ani_size", "arraybuffer length is too large"},
         {"data_result", "void **"},
         {"arraybuffer_result", "ani_arraybuffer *"},
     };

@@ -53,7 +53,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_wrong_arraybuffer)
     ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, &length), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"arraybuffer", "ani_arraybuffer", "wrong reference type: undefined"},
+        {"arraybuffer", "ani_arraybuffer", "wrong reference type: undefined, expected: ani_arraybuffer"},
         {"data_result", "void **"},
         {"length_result", "ani_size *"},
     };

@@ -50,7 +50,7 @@ TEST_F(ClassFindStaticFieldTest, lookup_status_is_forwarded_without_verify_abort
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong static field"},
+        {"name", "const char *", "static field not found"},
         {"result", "ani_static_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticField", testLines);

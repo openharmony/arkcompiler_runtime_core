@@ -62,7 +62,7 @@ TEST_F(ClassFindGetterTest, lookup_status_is_forwarded_without_verify_abort)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong getter"},
+        {"name", "const char *", "getter not found"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindGetter", testLines);

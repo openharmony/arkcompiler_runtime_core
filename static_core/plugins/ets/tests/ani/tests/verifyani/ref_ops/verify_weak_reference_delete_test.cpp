@@ -24,7 +24,7 @@ TEST_F(WeakReferenceDeleteTest, wrong_wref)
     ASSERT_EQ(env_->c_api->WeakReference_Delete(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"wref", "ani_wref", "wrong weak reference"},
+        {"wref", "ani_wref", "reference is null, expected: weak reference"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("WeakReference_Delete", testLines);
 }

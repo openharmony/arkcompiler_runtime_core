@@ -68,7 +68,8 @@ TEST_F(FixedArrayGetRegion{{ Type }}Test, wrong_array_type)
               ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_{{ type }}", "wrong reference type: ani_fixedarray_{{ wrong_type }}"},
+        {"array", "ani_fixedarray_{{ type }}",
+         "wrong reference type: ani_fixedarray_{{ wrong_type }}, expected: ani_fixedarray_{{ type }}"},
         {"offset", "ani_size"},
         {"length", "ani_size"},
         {"native_buffer", "const void *"},
@@ -87,7 +88,7 @@ TEST_F(FixedArrayGetRegion{{ Type }}Test, wrong_native_buffer)
         {"array", "ani_fixedarray_{{ type }}"},
         {"offset", "ani_size"},
         {"length", "ani_size"},
-        {"native_buffer", "const void *", "wrong native buffer"},
+        {"native_buffer", "const void *", "native buffer is null"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetRegion_{{ Type }}", testLines);
 }
@@ -103,7 +104,7 @@ TEST_F(FixedArrayGetRegion{{ Type }}Test, zero_length_null_native_buffer)
         {"array", "ani_fixedarray_{{ type }}"},
         {"offset", "ani_size"},
         {"length", "ani_size"},
-        {"native_buffer", "const void *", "wrong native buffer"},
+        {"native_buffer", "const void *", "native buffer is null"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetRegion_{{ Type }}", testLines);
 }

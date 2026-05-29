@@ -201,7 +201,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference type: null"},
+        {"class", "ani_class", "wrong reference type: null, expected: ani_class"},
         {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
@@ -873,7 +873,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference type: null"},
+        {"class", "ani_class", "wrong reference type: null, expected: ani_class"},
         {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},

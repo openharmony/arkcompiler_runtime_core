@@ -52,7 +52,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong static method"},
+        {"signature", "const char *", "static method not found"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", missingLines);
@@ -62,7 +62,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "ambiguous method"},
+        {"signature", "const char *", "method lookup is ambiguous"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", ambiguousLines);
@@ -72,7 +72,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong method signature"},
+        {"signature", "const char *", "method signature descriptor is invalid"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", invalidDescriptorLines);
@@ -82,7 +82,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong static method"},
+        {"signature", "const char *", "static method not found"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", instanceMethodLines);
@@ -96,7 +96,7 @@ TEST_F(ClassFindStaticMethodTest, old_static_getter_name_is_rejected)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong static method"},
+        {"signature", "const char *", "static method not found"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", testLines);

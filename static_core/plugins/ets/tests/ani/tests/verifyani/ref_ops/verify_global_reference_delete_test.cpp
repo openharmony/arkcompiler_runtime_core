@@ -39,11 +39,21 @@ TEST_F(GlobalReferenceDeleteTest, wrong_ref_kind)
     ASSERT_EQ(env_->c_api->GlobalReference_Delete(env_, ref), ANI_INCORRECT_REF);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"gref", "ani_ref", "wrong global reference"},
+        {"gref", "ani_ref", "wrong reference type: local reference, expected: global reference"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GlobalReference_Delete", testLines);
 
     ASSERT_EQ(env_->Reference_Delete(ref), ANI_OK);
+}
+
+TEST_F(GlobalReferenceDeleteTest, wrong_null_ref)
+{
+    ASSERT_EQ(env_->c_api->GlobalReference_Delete(env_, nullptr), ANI_INVALID_ARGS);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"gref", "ani_ref", "reference is null, expected: global reference"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("GlobalReference_Delete", testLines);
 }
 
 TEST_F(GlobalReferenceDeleteTest, success_with_pending_error)

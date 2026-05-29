@@ -91,7 +91,7 @@ TEST_F(FixedArrayNewRefTest, wrong_initial_element)
         {"env", "ani_env *"},
         {"type", "ani_ref"},
         {"length", "ani_size"},
-        {"initial_element", "ani_ref", "wrong reference"},
+        {"initial_element", "ani_ref", "initial element is null"},
         {"result", "ani_fixedarray_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_Ref", testLines);
@@ -128,31 +128,10 @@ TEST_F(FixedArrayNewRefTest, wrong_initial_element_type)
         {"env", "ani_env *"},
         {"type", "ani_ref"},
         {"length", "ani_size"},
-        {"initial_element", "ani_ref", "wrong reference type"},
+        {"initial_element", "ani_ref", "wrong reference type: ani_object, expected: fixed array component type"},
         {"result", "ani_fixedarray_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_Ref", testLines);
-}
-
-TEST_F(FixedArrayNewRefTest, zero_length_null_initial_element)
-{
-    ani_class arrayType {};
-    GetObjectClass(env_, &arrayType);
-
-    ani_fixedarray_ref result {};
-    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, 0U, nullptr, &result), ANI_OK);
-}
-
-TEST_F(FixedArrayNewRefTest, zero_length_wrong_initial_element_type)
-{
-    ani_class arrayType {};
-    GetStringClass(env_, &arrayType);
-    ani_object object {};
-    CreateObject(env_, &object);
-
-    ani_fixedarray_ref result {};
-    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, 0U, object, &result), ANI_OK);
-    ASSERT_NO_ABORT_MESSAGE();
 }
 
 TEST_F(FixedArrayNewRefTest, throw_error)

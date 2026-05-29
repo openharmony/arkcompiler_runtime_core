@@ -153,7 +153,7 @@ TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_lookup_status
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
-        {"functions", "const ani_native_function *", "wrong native function at index 0"},
+        {"functions", "const ani_native_function *", "native function not found at index 0"},
         {"nr_functions", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_BindNativeFunctions", missingLines);
@@ -228,7 +228,7 @@ TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_lookup_sta
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
-        {"functions", "const ani_native_function *", "wrong native function at index 0"},
+        {"functions", "const ani_native_function *", "native function not found at index 0"},
         {"nr_functions", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_BindNativeFunctions", testLines);
@@ -247,7 +247,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_wrong_class)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference is nullptr"},
-        {"methods", "const ani_native_function *", "wrong class for native function"},
+        {"methods", "const ani_native_function *", "wrong class for native method"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindNativeMethods", testLines);
@@ -272,7 +272,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_lookup_status_is
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong native method at index 0"},
+        {"methods", "const ani_native_function *", "native method not found at index 0"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindNativeMethods", missingLines);
@@ -283,7 +283,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_lookup_status_is
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong native function signature at index 0"},
+        {"methods", "const ani_native_function *", "wrong native method signature at index 0"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindNativeMethods", invalidDescriptorLines);
@@ -328,7 +328,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_cla
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference is nullptr"},
-        {"methods", "const ani_native_function *", "wrong class for native function"},
+        {"methods", "const ani_native_function *", "wrong class for static native method"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindStaticNativeMethods", testLines);
@@ -353,7 +353,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_lookup_st
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong static native method at index 0"},
+        {"methods", "const ani_native_function *", "static native method not found at index 0"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindStaticNativeMethods", missingLines);
@@ -363,7 +363,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_lookup_st
     std::vector<TestLineInfo> wrongKindLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong static native method at index 0"},
+        {"methods", "const ani_native_function *", "static native method not found at index 0"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindStaticNativeMethods", wrongKindLines);
@@ -376,7 +376,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_bin
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong static native method at index 0"},
+        {"methods", "const ani_native_function *", "static native method not found at index 0"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindStaticNativeMethods", testLines);

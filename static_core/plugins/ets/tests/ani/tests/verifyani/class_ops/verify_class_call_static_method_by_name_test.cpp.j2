@@ -219,7 +219,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference type: null"},
+        {"class", "ani_class", "wrong reference type: null, expected: ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
     };
@@ -936,7 +936,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, cross_thread_method_call_from
     ASSERT_EQ(env_->FindClass("ani_verify_test_class_call_static_method_by_name_{{ type }}.Parent", &class_), ANI_OK);
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
-        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ClassCallStaticMethodByName{{ Type }}ATest>)}}; 
+        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ClassCallStaticMethodByName{{ Type }}ATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     std::thread([this]() {
@@ -966,7 +966,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, method_call_from_native_metho
     ASSERT_EQ(env_->FindClass("ani_verify_test_class_call_static_method_by_name_{{ type }}.Parent", &class_), ANI_OK);
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
-        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ClassCallStaticMethodByName{{ Type }}ATest>)}}; 
+        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ClassCallStaticMethodByName{{ Type }}ATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     ani_method ctor {};
