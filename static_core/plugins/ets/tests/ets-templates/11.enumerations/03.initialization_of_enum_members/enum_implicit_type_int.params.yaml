@@ -43,8 +43,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -77,8 +76,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -116,8 +114,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -187,8 +184,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -225,8 +221,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -260,8 +255,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -295,8 +289,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -327,8 +320,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -359,8 +351,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -391,8 +382,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -423,80 +413,7 @@ cases:
         If some but not all members have their values set explicitly,
         then the values of the members are set by the following rules:
         • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
-        • The member which is the first and has no explicit initializer
-        gets zero value.
-        • Member with an explicit initializer has that explicit value.
-        • Member that is not the first and has no explicit initializer
-        takes the value of the immediately preceding constant
-        plus one.
-    params: |-
-      >-
-        all have not a constant expression initializers,
-        using const variables in initializer expressions
-    decl_variants:
-      - |-
-        const a: int = 2147483647
-        const b: int = 2147483647 - 1
-        enum Enum { first = a, second = b, third = b - 1 }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum.first instanceof Enum)
-        arktest.assertTrue(Enum.second instanceof Enum)
-        arktest.assertTrue(Enum.third instanceof Enum)
-        arktest.assertTrue(Enum.first.valueOf() instanceof int)
-        arktest.assertTrue(Enum.second.valueOf() instanceof int)
-        arktest.assertTrue(Enum.third.valueOf() instanceof int)
-        arktest.assertEQ(Enum.first.valueOf(), a)
-        arktest.assertEQ(Enum.second.valueOf(), b)
-        arktest.assertEQ(Enum.third.valueOf(), b - 1)
-    test_suffix: "ahnacei1"
-    ids: "13"
-
-  - desc: |-
-      >-
-        If some but not all members have their values set explicitly,
-        then the values of the members are set by the following rules:
-        • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
-        • The member which is the first and has no explicit initializer
-        gets zero value.
-        • Member with an explicit initializer has that explicit value.
-        • Member that is not the first and has no explicit initializer
-        takes the value of the immediately preceding constant
-        plus one.
-    params: |-
-      >-
-        all have not a constant expression initializers,
-        using variables in initializer expressions
-    decl_variants:
-      - |-
-        let a: int = 2147483647
-        let b: int = 2147483647 - 1
-        enum Enum { first = a, second = b, third = b - 1 }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum.first instanceof Enum)
-        arktest.assertTrue(Enum.second instanceof Enum)
-        arktest.assertTrue(Enum.third instanceof Enum)
-        arktest.assertTrue(Enum.first.valueOf() instanceof int)
-        arktest.assertTrue(Enum.second.valueOf() instanceof int)
-        arktest.assertTrue(Enum.third.valueOf() instanceof int)
-        arktest.assertEQ(Enum.first.valueOf(), a)
-        arktest.assertEQ(Enum.second.valueOf(), b)
-        arktest.assertEQ(Enum.third.valueOf(), b - 1)
-    test_suffix: "ahnacei2"
-    ids: "14"
-
-  - desc: |-
-      >-
-        If some but not all members have their values set explicitly,
-        then the values of the members are set by the following rules:
-        • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
+        Expressions), a compile-time error occurs.
         • The member which is the first and has no explicit initializer
         gets zero value.
         • Member with an explicit initializer has that explicit value.
@@ -555,154 +472,3 @@ cases:
         arktest.assertEQ(Enum.L, 1073741822)
     test_suffix: "ahei"
     ids: "15"
-
-  - desc: |-
-      >-
-        If some but not all members have their values set explicitly,
-        then the values of the members are set by the following rules:
-        • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
-        • The member which is the first and has no explicit initializer
-        gets zero value.
-        • Member with an explicit initializer has that explicit value.
-        • Member that is not the first and has no explicit initializer
-        takes the value of the immediately preceding constant
-        plus one.
-    params: |-
-      >-
-        part have not a constant expression initializers,
-        part do not have initializers,
-        values can be the same
-    decl_variants:
-      - |-
-        let a: int = 2147483647
-        let b: int = 2147483647 - 1
-        enum Enum { A, B, C = a, D = a - b }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum.A instanceof Enum)
-        arktest.assertTrue(Enum.B instanceof Enum)
-        arktest.assertTrue(Enum.C instanceof Enum)
-        arktest.assertTrue(Enum.D instanceof Enum)
-        arktest.assertTrue(Enum.A.valueOf() instanceof int)
-        arktest.assertTrue(Enum.B.valueOf() instanceof int)
-        arktest.assertTrue(Enum.C.valueOf() instanceof int)
-        arktest.assertTrue(Enum.D.valueOf() instanceof int)
-        arktest.assertEQ(Enum.A.valueOf(), 0)
-        arktest.assertEQ(Enum.B.valueOf(), 1)
-        arktest.assertEQ(Enum.C.valueOf(), a)
-        arktest.assertEQ(Enum.D.valueOf(), 1)
-    test_suffix: "phnacei1"
-    ids: "16"
-
-  - desc: |-
-      >-
-        If some but not all members have their values set explicitly,
-        then the values of the members are set by the following rules:
-        • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
-        • The member which is the first and has no explicit initializer
-        gets zero value.
-        • Member with an explicit initializer has that explicit value.
-        • Member that is not the first and has no explicit initializer
-        takes the value of the immediately preceding constant
-        plus one.
-    params: |-
-      >-
-        part have not a constant expression initializers,
-        part do not have initializers,
-        using other enum members values as enum members initializers
-    decl_variants:
-      - |-
-        enum Enum1 { first = 123, second, third }
-        enum Enum2 { first = Enum1.second, second = Enum1.third, third = Enum1.first }
-      - |-
-        enum Enum1 { first = 123, second, third }
-        enum Enum2 { first = Enum1.second.valueOf(), second = Enum1.third.valueOf(), third = Enum1.first }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum1.first instanceof Enum1)
-        arktest.assertTrue(Enum1.second instanceof Enum1)
-        arktest.assertTrue(Enum1.third instanceof Enum1)
-        arktest.assertFalse(Enum1.first instanceof Enum2)
-        arktest.assertFalse(Enum1.second instanceof Enum2)
-        arktest.assertFalse(Enum1.third instanceof Enum2)
-        arktest.assertTrue(Enum1.first.valueOf() instanceof int)
-        arktest.assertTrue(Enum1.second.valueOf() instanceof int)
-        arktest.assertTrue(Enum1.third.valueOf() instanceof int)
-        arktest.assertEQ(Enum1.first.valueOf(), 123)
-        arktest.assertEQ(Enum1.second.valueOf(), 124)
-        arktest.assertEQ(Enum1.third.valueOf(), 125)
-        arktest.assertTrue(Enum2.first instanceof Enum2)
-        arktest.assertTrue(Enum2.second instanceof Enum2)
-        arktest.assertTrue(Enum2.third instanceof Enum2)
-        arktest.assertFalse(Enum2.first instanceof Enum1)
-        arktest.assertFalse(Enum2.second instanceof Enum1)
-        arktest.assertFalse(Enum2.third instanceof Enum1)
-        arktest.assertTrue(Enum2.first.valueOf() instanceof int)
-        arktest.assertTrue(Enum2.second.valueOf() instanceof int)
-        arktest.assertTrue(Enum2.third.valueOf() instanceof int)
-        arktest.assertEQ(Enum2.first.valueOf(), 124)
-        arktest.assertEQ(Enum2.second.valueOf(), 125)
-        arktest.assertEQ(Enum2.third.valueOf(), 123)
-    test_suffix: "phnacei2"
-    ids: "17-18"
-
-  - desc: |-
-      >-
-        If some but not all members have their values set explicitly,
-        then the values of the members are set by the following rules:
-        • If an initializer is not a constant expression (see Constant
-        Expressions), all subsequent members must be explicitly initialized.
-        Otherwise, a compile-time error occurs.
-        • The member which is the first and has no explicit initializer
-        gets zero value.
-        • Member with an explicit initializer has that explicit value.
-        • Member that is not the first and has no explicit initializer
-        takes the value of the immediately preceding constant
-        plus one.
-    params: |-
-      >-
-        part have not a constant expression initializers,
-        part do not have initializers,
-        using different expression values types assignable to type int
-    decl_variants:
-      - |-
-        function foo_byte(): byte {
-            return 5
-        }
-        function foo_short(): short {
-            return 7
-        }
-        function foo_int(): int {
-            return 9
-        }
-        function foo_long(): long {
-            return 13
-        }
-        enum Enum { A, B, C = foo_byte(), D = foo_short(),
-          E = foo_int(), F = foo_long().toInt() }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum.A instanceof Enum)
-        arktest.assertTrue(Enum.B instanceof Enum)
-        arktest.assertTrue(Enum.C instanceof Enum)
-        arktest.assertTrue(Enum.D instanceof Enum)
-        arktest.assertTrue(Enum.E instanceof Enum)
-        arktest.assertTrue(Enum.F instanceof Enum)
-        arktest.assertTrue(Enum.A.valueOf() instanceof int)
-        arktest.assertTrue(Enum.B.valueOf() instanceof int)
-        arktest.assertTrue(Enum.C.valueOf() instanceof int)
-        arktest.assertTrue(Enum.D.valueOf() instanceof int)
-        arktest.assertTrue(Enum.E.valueOf() instanceof int)
-        arktest.assertTrue(Enum.F.valueOf() instanceof int)
-        arktest.assertEQ(Enum.A, 0)
-        arktest.assertEQ(Enum.B, 1)
-        arktest.assertEQ(Enum.C, 5)
-        arktest.assertEQ(Enum.D, 7)
-        arktest.assertEQ(Enum.E, 9)
-        arktest.assertEQ(Enum.F, 13)
-    test_suffix: "phnacei3"
-    ids: "19"

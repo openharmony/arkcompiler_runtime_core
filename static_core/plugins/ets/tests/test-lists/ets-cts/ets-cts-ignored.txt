@@ -315,11 +315,7 @@
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_str_ufiie_0_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_str_ufiie_1_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_str_ufiie_2_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_13.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_14.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_16.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_18.ets
-11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int_19.ets
+11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int1_n_phnacei2_0_0_17.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_3.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_4.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_5.ets
@@ -356,9 +352,6 @@
 
 #33736
 14.ambient_declarations/06.ambient_enumeration_declarations/enum_const_prefix_n.ets
-
-#33742
-14.ambient_declarations/06.ambient_enumeration_declarations/enum_initializer_n.ets
 
 #34114
 15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
