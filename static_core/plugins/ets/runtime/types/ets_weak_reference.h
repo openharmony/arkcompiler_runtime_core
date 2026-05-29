@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,28 @@ public:
         return MEMBER_OFFSET(EtsWeakReference, referent_);
     }
 
-    template <bool NEED_READ_BARRIER = true>
+    template <bool NEED_PREWRITE_BARRIER = true>
     ALWAYS_INLINE EtsObject *GetReferent() const
     {
-        return EtsObject::FromCoreType(
-            ObjectAccessor::GetObject<false, NEED_READ_BARRIER, false>(this, GetReferentOffset()));
+        // G1GC uses SATB approach. It requires to put WeakRef's target to SATB buffer on `deref` during concurrent mark
+        // because we can miss object like below:
+        //     1. GC thread in ConcurrentMarkPhase marks WeakRef instance, but not the target object
+        //     2. Mutator gets the target object via deref and saves it to roots or marked object
+        //     3. If PREWRB was not applied in deref target would not be saved to SATB
+        //     4. GC thread goes to Remark: if object was not saved to SATB - it is marked as dead (even though it is
+        //     accessible from roots via not WeakRef)
+        //     5. GC thread removes dead objects, including target and set up WeakRef to nullptr
+        //     6. We have the garbage accessible from roots
+        //  To resolve it we make `deref` native and add the target object to SATB on each `deref`
+        EtsObject *obj = EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetReferentOffset()));
+        if constexpr (NEED_PREWRITE_BARRIER) {
+            ASSERT(Mutator::GetCurrent() != nullptr);
+            auto *preWrb = Mutator::GetCurrent()->GetPreWrbEntrypoint();
+            if (preWrb != nullptr && obj != nullptr) {
+                reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(ToObjPtr(obj));
+            }
+        }
+        return obj;
     }
 
     template <bool NEED_WRITE_BARRIER = true>

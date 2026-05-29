@@ -5866,6 +5866,20 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdGCRegisterNativeFree
 
+
+########################
+# std.core.BaseWeakRef #
+########################
+  - name: StdWeakReferenceDeref
+    space: ets
+    class_name: std.core.BaseWeakRef
+    method_name: deref
+    static: false
+    signature:
+      ret: Y
+      args: [ ]
+    impl: ark::ets::intrinsics::StdWeakReferenceDeref
+
 #################################
 # std.core.FinalizationRegistry #
 #################################

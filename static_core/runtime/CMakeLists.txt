@@ -1001,6 +1001,17 @@ add_gtests(
     tests/g1_analytics_test.cpp
 )
 
+
+add_gtests(
+	string_table_satb_lost_test
+	tests/string_table_satb_lost_test.cpp
+)
+
+add_gtests(
+	global_storage_satb_lost_test
+	tests/global_storage_satb_lost_test.cpp
+)
+
 add_gtests(
     arkruntime_sa_object_helpers_test
     tests/static_analyzer_test.cpp

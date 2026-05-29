@@ -129,6 +129,17 @@ panda_ets_add_gtest(
 
 panda_ets_add_gtest(
     NO_CORES
+    NAME weak_ref_satb_lost_test
+    SOURCES weak_ref_satb_lost_test.cpp
+    LIBRARIES arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+    DEPS_TARGETS etsstdlib
+)
+
+panda_ets_add_gtest(
+    NO_CORES
     NAME gc_turn_off_test
     SOURCES gc_turn_off_test.cpp
     LIBRARIES arkruntime
