@@ -22,6 +22,10 @@ function main(): int {
     suite.addTest("Test matchall regression 2", testMatchAllRegression2)
     suite.addTest("Test matchall regression 3", testMatchAllRegression3)
 
+    suite.addTest("Test matchAll with large repeated latin1 input", testMatchAllLargeLatin1)
+    suite.addTest("Test matchAll with large repeated utf16 input", testMatchAllLargeUtf16)
+    suite.addTest("Test matchAll with large input and named groups", testMatchAllLargeNamedGroups)
+
     return suite.run()
 }
 
@@ -119,6 +123,43 @@ function testMatchAllRegression3() {
   arktest.assertEQ(result[0][1], undefined);
 }
 
+
+function testMatchAllLargeLatin1(): void {
+    const str = "test".repeat(10000)
+    const regexp = new RegExp('test', 'g')
+    const matches = Array.from(str.matchAll(regexp))
+    arktest.assertEQ(matches.length, 10000)
+    arktest.assertEQ(matches[0][0], "test")
+    arktest.assertEQ(matches[0].index, 0)
+    arktest.assertEQ(matches[9999][0], "test")
+    arktest.assertEQ(matches[9999].index, 39996)
+}
+
+function testMatchAllLargeUtf16(): void {
+    const str = "测试".repeat(5000)
+    const regexp = new RegExp('测试', 'g')
+    const matches = Array.from(str.matchAll(regexp))
+    arktest.assertEQ(matches.length, 5000)
+    arktest.assertEQ(matches[0][0], "测试")
+    arktest.assertEQ(matches[0].index, 0)
+    arktest.assertEQ(matches[4999][0], "测试")
+    arktest.assertEQ(matches[4999].index, 9998)
+}
+
+function testMatchAllLargeNamedGroups(): void {
+    let parts: string = ""
+    for (let i = 0; i < 1000; i++) {
+        parts += "a" + i.toString() + "b "
+    }
+    const str = parts
+    const regexp = new RegExp('(?<char>a)(?<num>\\d+)(?<last>b)', 'g')
+    const matches = Array.from(str.matchAll(regexp))
+    arktest.assertEQ(matches.length, 1000)
+    arktest.assertEQ(matches[0].groups?.['char'], "a")
+    arktest.assertEQ(matches[0].groups?.['num'], "0")
+    arktest.assertEQ(matches[0].groups?.['last'], "b")
+    arktest.assertEQ(matches[999].groups?.['num'], "999")
+}
 
 function checkTestResult(actual: boolean, expected: boolean) : int {
     if (actual != expected) return 1;
