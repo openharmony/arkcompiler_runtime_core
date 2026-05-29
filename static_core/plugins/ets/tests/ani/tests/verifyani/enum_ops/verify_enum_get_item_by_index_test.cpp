@@ -61,7 +61,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_enm_null)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(nullptr, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "wrong reference"},
+        {"enm", "ani_enum", "reference is nullptr"},
         {"index", "ani_size"},
         {"result", "ani_enum_item *"},
     };
@@ -89,7 +89,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_result_null)
         {"env", "ani_env *"},
         {"enm", "ani_enum"},
         {"index", "ani_size"},
-        {"result", "ani_enum_item *", "wrong pointer for storing 'ani_enum_item'"},
+        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByIndex", testLines);
 }
@@ -99,9 +99,9 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, nullptr, 0U, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"enm", "ani_enum", "wrong reference"},
+        {"enm", "ani_enum", "reference is nullptr"},
         {"index", "ani_size"},
-        {"result", "ani_enum_item *", "wrong pointer for storing 'ani_enum_item'"},
+        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByIndex", testLines);
 }
@@ -140,7 +140,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_enm_from_local_scope)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(localEnum, 0U, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "wrong reference"},
+        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"index", "ani_size"},
         {"result", "ani_enum_item *"},
     };
@@ -161,7 +161,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, cross_thread_enum_ref)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(crossThreadEnum, 0U, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "wrong reference"},
+        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"index", "ani_size"},
         {"result", "ani_enum_item *"},
     };

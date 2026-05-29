@@ -898,7 +898,7 @@ public:
     {
         if (value == nullptr) {
             PandaStringStream ss;
-            ss << "wrong pointer for storing '" << typeName << "'";
+            ss << "nullptr for storing '" << typeName << "'";
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
@@ -912,9 +912,9 @@ public:
         return {};
     }
 
-    VerificationResult VerifyFixedArrayLength(ani_size length)
+    VerificationResult VerifyArrayCreateLength(ani_size length)
     {
-        skipFixedArrayInitialElement_ = length == 0;
+        skipInitialElement_ = length == 0;
         return {};
     }
 
@@ -931,7 +931,7 @@ public:
     {
         if (value == nullptr) {
             PandaStringStream ss;
-            ss << "wrong pointer to use as argument in '" << typeName << "'";
+            ss << "argument is nullptr, expected " << typeName;
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
@@ -961,10 +961,10 @@ public:
     VerificationResult VerifyRef(VRef *vref)
     {
         if (vref == nullptr) {
-            return {"wrong reference", ANIErrorSeverity::ERROR};
+            return {"reference is nullptr", ANIErrorSeverity::ERROR};
         }
         if (!GetEnvANIVerifier()->IsValidRef(vref)) {
-            return {"wrong reference", ANIErrorSeverity::FATAL};
+            return {"reference not found (may be deleted, out of scope, or corrupted)", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -1185,7 +1185,7 @@ public:
         std::optional<PandaString> enumDesc = Mangle::ConvertDescriptor(enumDescriptor);
         if (!enumDesc.has_value()) {
             PandaStringStream ss;
-            ss << "invalid enum descriptor";
+            ss << "enum descriptor is invalid";
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
 
@@ -1373,8 +1373,6 @@ public:
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
-        // Set as current array for subsequent index validation
-        currentArray_ = varray;
         return {};
     }
 
@@ -1467,9 +1465,17 @@ public:
         return {};
     }
 
+    VerificationResult VerifyArrayInitialRef(VRef *vref)
+    {
+        if (skipInitialElement_) {
+            return {};
+        }
+        return VerifyRef(vref);
+    }
+
     VerificationResult VerifyFixedArrayInitialRef(VRef *vref)
     {
-        if (skipFixedArrayInitialElement_) {
+        if (skipInitialElement_) {
             return {};
         }
 
@@ -1528,8 +1534,11 @@ public:
         auto *executionCtx = s.GetExecutionContext();
         EtsHandleScope scope(executionCtx);
         EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(currentTupleValue_->GetRef()));
-        if (index >= DoGetTupleLength(executionCtx, internalTuple)) {
-            return {"out of range", ANIErrorSeverity::ERROR};
+        auto tupleLength = DoGetTupleLength(executionCtx, internalTuple);
+        if (index >= tupleLength) {
+            PandaStringStream ss;
+            ss << "tuple index out of range: index " << index << ", length " << tupleLength;
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
 
         EtsClass *klass = internalTuple->GetClass();
@@ -1540,17 +1549,6 @@ public:
         if (!IsCorrectTupleElementType(executionCtx, resultField, tupleElementType)) {
             return {"wrong tuple element type at this index", ANIErrorSeverity::ERROR};
         }
-        return {};
-    }
-
-    VerificationResult VerifyArrayIndex([[maybe_unused]] ani_size index)
-    {
-        if (currentArray_ == nullptr) {
-            PandaStringStream ss;
-            ss << "no array context for index validation";
-            return {ss.str(), ANIErrorSeverity::ERROR};
-        }
-
         return {};
     }
 
@@ -1661,7 +1659,10 @@ public:
 
         EtsType methodReturnType = vmethod->GetEtsMethod()->GetReturnValueType();
         if (methodReturnType != returnType) {
-            return {"wrong return type", ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << "wrong return type: " << EtsTypeToString(methodReturnType)
+               << ", expected: " << EtsTypeToString(returnType);
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1697,26 +1698,26 @@ public:
     template <bool IS_STATIC, typename FieldHandle>
     VerificationResult VerifyReadFieldImpl(FieldHandle *vfield, EtsType fieldType)
     {
+        constexpr const char *ARG_NAME = IS_STATIC ? "static_field" : "field";
+        constexpr const char *EXPECTED_TYPE = IS_STATIC ? "ani_static_field" : "ani_field";
+        constexpr const char *OWNER_NAME = IS_STATIC ? "class" : "object";
+
         if (vfield == nullptr) {
-            if constexpr (IS_STATIC) {
-                return {"wrong static field", ANIErrorSeverity::ERROR};
-            } else {
-                return {"wrong field", ANIErrorSeverity::ERROR};
-            }
+            PandaStringStream ss;
+            ss << ARG_NAME << " is nullptr, expected " << EXPECTED_TYPE;
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
+
         if (class_ == nullptr) {
-            if constexpr (IS_STATIC) {
-                return {"wrong class for static field", ANIErrorSeverity::ERROR};
-            } else {
-                return {"wrong object for field", ANIErrorSeverity::ERROR};
-            }
+            PandaStringStream ss;
+            ss << OWNER_NAME << " is nullptr or invalid while verifying " << ARG_NAME;
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
+
         if (!GetEnvANIVerifier()->IsValidField(vfield)) {
-            if constexpr (IS_STATIC) {
-                return {"wrong static field", ANIErrorSeverity::FATAL};
-            } else {
-                return {"wrong field", ANIErrorSeverity::FATAL};
-            }
+            PandaStringStream ss;
+            ss << ARG_NAME << " is not a verified " << EXPECTED_TYPE << " handle or has the wrong ANI handle type";
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         constexpr auto FIELD_KIND =
@@ -1727,11 +1728,9 @@ public:
         }
 
         if (!vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            if constexpr (IS_STATIC) {
-                return {"wrong class for static field", ANIErrorSeverity::FATAL};
-            } else {
-                return {"wrong object for field", ANIErrorSeverity::FATAL};
-            }
+            PandaStringStream ss;
+            ss << ARG_NAME << " does not belong to the " << OWNER_NAME;
+            return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -2082,7 +2081,8 @@ public:
         EtsMethod *method = class_->GetInstanceMethod((PandaString(GETTER_BEGIN) + name).c_str(), nullptr);
         if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 1 ||
             method->GetArgType(0) != EtsType::OBJECT) {
-            return {"wrong property", ANIErrorSeverity::ERROR};
+            return {"wrong property: expected an instance getter with receiver object argument",
+                    ANIErrorSeverity::ERROR};
         }
         if (method->GetReturnValueType() != propertyType) {
             PandaStringStream ss;
@@ -2119,7 +2119,8 @@ public:
         EtsMethod *method = class_->GetInstanceMethod((PandaString(SETTER_BEGIN) + name).c_str(), nullptr);
         if (method == nullptr || method->IsStatic() || method->GetNumArgs() != 2U ||
             method->GetArgType(0) != EtsType::OBJECT) {
-            return {"wrong property", ANIErrorSeverity::ERROR};
+            return {"wrong property: expected an instance setter with receiver object argument and value argument",
+                    ANIErrorSeverity::ERROR};
         }
         if (method->GetArgType(1U) != propertyType) {
             PandaStringStream ss;
@@ -2128,7 +2129,10 @@ public:
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
         if (method->GetReturnValueType() != EtsType::VOID && method->GetReturnValueType() != EtsType::NOVALUE) {
-            return {"wrong property", ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << "wrong property: setter return type is " << EtsTypeToString(method->GetReturnValueType())
+               << ", expected: " << EtsTypeToString(EtsType::VOID) << " or " << EtsTypeToString(EtsType::NOVALUE);
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -2136,11 +2140,12 @@ public:
     VerificationResult VerifyReadVariable(VVariable *vvariable, EtsType variableType)
     {
         if (vvariable == nullptr) {
-            return {"wrong variable", ANIErrorSeverity::ERROR};
+            return {"variable is nullptr", ANIErrorSeverity::ERROR};
         }
 
         if (!GetEnvANIVerifier()->IsValidField(vvariable)) {
-            return {"wrong variable", ANIErrorSeverity::FATAL};
+            return {"variable is not a verified ani_variable handle or has the wrong ANI handle type",
+                    ANIErrorSeverity::FATAL};
         }
 
         auto err = DoVerifyField(vvariable, impl::VField::ANIFieldType::VARIABLE, variableType);
@@ -2152,15 +2157,7 @@ public:
 
     VerificationResult VerifyWriteVariable(VVariable *vvariable, EtsType variableType)
     {
-        if (vvariable == nullptr) {
-            return {"wrong variable", ANIErrorSeverity::ERROR};
-        }
-
-        if (!GetEnvANIVerifier()->IsValidField(vvariable)) {
-            return {"wrong variable", ANIErrorSeverity::FATAL};
-        }
-
-        auto err = DoVerifyField(vvariable, impl::VField::ANIFieldType::VARIABLE, variableType);
+        auto err = VerifyReadVariable(vvariable, variableType);
         if (err) {
             return err;
         }
@@ -2179,13 +2176,14 @@ public:
     VerificationResult VerifyMethod(VMethod *vmethod, EtsType returnType)
     {
         if (vmethod == nullptr) {
-            return {"wrong method", ANIErrorSeverity::ERROR};
+            return {"method is nullptr", ANIErrorSeverity::ERROR};
         }
         if (class_ == nullptr) {
-            return {"wrong object for method", ANIErrorSeverity::ERROR};
+            return {"object is nullptr or invalid while verifying method", ANIErrorSeverity::ERROR};
         }
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
-            return {"wrong method", ANIErrorSeverity::FATAL};
+            return {"ani_method handle not found (may be deleted, out of scope, or corrupted)",
+                    ANIErrorSeverity::FATAL};
         }
 
         auto err = DoVerifyMethod(vmethod, impl::VMethod::ANIMethodType::METHOD, returnType);
@@ -2198,7 +2196,7 @@ public:
         }
 
         if (!vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
-            return {"wrong object for method", ANIErrorSeverity::FATAL};
+            return {"method does not belong to the object", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -2253,7 +2251,10 @@ public:
 
         EtsType fieldReturnType = vfield->GetEtsField()->GetEtsType();
         if (fieldReturnType != returnType) {
-            return {"wrong return type", ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << "wrong value type: " << EtsTypeToString(fieldReturnType)
+               << ", expected: " << EtsTypeToString(returnType);
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -2562,9 +2563,8 @@ private:
     bool isStaticMethodResolve_ {false};
     EtsMethod *resolvedMethod_ {nullptr};
     std::optional<ANIArg::AniMethodArgs> methodArgsForExtInfo_ {};
-    VArray *currentArray_ {};
     VTupleValue *currentTupleValue_ {};
-    bool skipFixedArrayInitialElement_ {false};
+    bool skipInitialElement_ {false};
     bool canReadFunctionalObjectArgv_ {true};
 };
 
@@ -2828,6 +2828,12 @@ static VerificationResult VerifyArray(Verifier &v, const ANIArg &arg)
     return v.VerifyArray(arg.GetValueArray());
 }
 
+static VerificationResult VerifyArrayInitialRef(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_INITIAL_REF);
+    return v.VerifyArrayInitialRef(arg.GetValueRef());
+}
+
 static VerificationResult VerifyTupleValue(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_TUPLE_VALUE);
@@ -2922,12 +2928,6 @@ static VerificationResult VerifyRegionBuffer(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REGION_BUFFER);
     return v.VerifyRegionBuffer(arg.GetValueConstVoidPtr(), arg.GetNativeFunctionCount());
-}
-
-static VerificationResult VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
-{
-    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_INDEX);
-    return v.VerifyArrayIndex(arg.GetValueSize());
 }
 
 static VerificationResult VerifyDelLocalRef(Verifier &v, const ANIArg &arg)
@@ -3260,10 +3260,10 @@ static VerificationResult VerifySize([[maybe_unused]] Verifier &v, [[maybe_unuse
     return {};
 }
 
-static VerificationResult VerifyFixedArrayLength(Verifier &v, const ANIArg &arg)
+static VerificationResult VerifyArrayCreateLength(Verifier &v, const ANIArg &arg)
 {
-    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIXED_ARRAY_LENGTH);
-    return v.VerifyFixedArrayLength(arg.GetValueSize());
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_CREATE_LENGTH);
+    return v.VerifyArrayCreateLength(arg.GetValueSize());
 }
 
 static VerificationResult VerifyNativeFunctions(Verifier &v, const ANIArg &arg)

@@ -72,7 +72,7 @@ TEST_F(ClassFindIteratorTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindIterator(env_, nullptr, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIterator", testLines);
@@ -84,7 +84,7 @@ TEST_F(ClassFindIteratorTest, wrong_result_storage)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"result", "ani_method *", "wrong pointer for storing 'ani_method'"},
+        {"result", "ani_method *", "nullptr for storing 'ani_method'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIterator", testLines);
 }
@@ -100,7 +100,7 @@ TEST_F(ClassFindIteratorTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindIterator(env_, localClass, &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIterator", testLines);

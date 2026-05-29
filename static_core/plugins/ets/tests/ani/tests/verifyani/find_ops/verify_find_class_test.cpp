@@ -33,7 +33,7 @@ TEST_F(FindClassTest, find_class_wrong_descriptor)
     ASSERT_EQ(env_->FindClass(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> nullDescriptorLines {
         {"env", "ani_env *"},
-        {"class_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"class_descriptor", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindClass", nullDescriptorLines);
@@ -53,7 +53,7 @@ TEST_F(FindClassTest, find_class_wrong_result_storage)
     std::vector<TestLineInfo> classLines {
         {"env", "ani_env *"},
         {"class_descriptor", "const char *"},
-        {"result", "ani_class *", "wrong pointer for storing 'ani_class'"},
+        {"result", "ani_class *", "nullptr for storing 'ani_class'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindClass", classLines);
 }

@@ -221,7 +221,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"function", "ani_function"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -384,7 +384,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"function", "ani_function", "wrong function"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
         {"...", "       ", "wrong method"},
     };
     // clang-format on
@@ -402,7 +402,11 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_return_type)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong return type"},
+        {% if type == "ref" %}
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {% else %}
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {% endif %}
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -623,7 +627,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"function", "ani_function"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -664,7 +668,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"function", "ani_function", "wrong function"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
         {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on
@@ -710,7 +714,11 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_return_type)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong return type"},
+        {% if type == "ref" %}
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {% else %}
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {% endif %}
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -744,7 +752,7 @@ TEST_F(FunctionCall{{ Type }}ATest, class_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"function", "ani_function", "wrong class"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},

@@ -78,7 +78,7 @@ TEST_F(VariableSetValue{{ Type }}Test, null_variable)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"variable", "ani_variable", "wrong variable"},
+        {"variable", "ani_variable", "variable is nullptr"},
         {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
@@ -97,7 +97,7 @@ TEST_F(VariableSetValue{{ Type }}Test, wrong_variable)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"variable", "ani_variable", "wrong variable"},
+        {"variable", "ani_variable", "variable is not a verified ani_variable handle or has the wrong ANI handle type"},
         {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
@@ -118,7 +118,13 @@ TEST_F(VariableSetValue{{ Type }}Test, wrong_type)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"variable", "ani_variable", "wrong return type"},
+        {% if type == "int" %}
+        {"variable", "ani_variable", "wrong value type: byte, expected: int"},
+        {% elif type == "ref" %}
+        {"variable", "ani_variable", "wrong value type: int, expected: object"},
+        {% else %}
+        {"variable", "ani_variable", "wrong value type: int, expected: {{ type }}"},
+        {% endif %}
         {"value", "ani_{{ type }}"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
@@ -172,7 +178,7 @@ TEST_F(VariableSetValue{{ Type }}Test, null_value)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable"},
-        {"value", "ani_ref", "wrong reference"},
+        {"value", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }

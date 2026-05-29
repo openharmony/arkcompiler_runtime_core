@@ -42,7 +42,7 @@ TEST_F(TypeGetSuperClassTest, wrong_type_null)
     ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"type", "ani_ref", "wrong reference"},
+        {"type", "ani_ref", "reference is nullptr"},
         {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
@@ -74,7 +74,7 @@ TEST_F(TypeGetSuperClassTest, wrong_result_ptr)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref"},
-        {"result", "ani_class *", "wrong pointer for storing 'ani_class'"},
+        {"result", "ani_class *", "nullptr for storing 'ani_class'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 

@@ -122,7 +122,7 @@ TEST_F(AttachCurrentThreadTest, wrong_result_ptr)
         {"vm", "ani_vm *"},
         {"options", "ani_options *"},
         {"version", "uint32_t"},
-        {"result", "ani_env **", "wrong pointer for storing 'ani_env *'"},
+        {"result", "ani_env **", "nullptr for storing 'ani_env *'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("AttachCurrentThread", testLines);
 }
@@ -136,7 +136,7 @@ TEST_F(AttachCurrentThreadTest, invalid_all_args)
         {"vm", "ani_vm *", "wrong VM pointer"},
         {"options", "ani_options *", "wrong 'options' pointer, options->options == NULL"},
         {"version", "uint32_t", "unsupported ANI version"},
-        {"result", "ani_env **", "wrong pointer for storing 'ani_env *'"},
+        {"result", "ani_env **", "nullptr for storing 'ani_env *'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("AttachCurrentThread", testLines);
 }

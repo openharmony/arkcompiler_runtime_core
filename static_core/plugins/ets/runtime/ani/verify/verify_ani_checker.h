@@ -46,6 +46,7 @@
     X(VERIFY_STRING,                        VerifyString)                         \
     X(VERIFY_ERROR,                         VerifyError)                          \
     X(VERIFY_ARRAY,                         VerifyArray)                          \
+    X(VERIFY_ARRAY_INITIAL_REF,             VerifyArrayInitialRef)                \
     X(VERIFY_TUPLE_VALUE,                   VerifyTupleValue)                     \
     X(VERIFY_TUPLE_INDEX,                   VerifyTupleIndex)                     \
     X(VERIFY_ARRAYBUFFER,                   VerifyArrayBuffer)                    \
@@ -120,7 +121,7 @@
     X(VERIFY_U32_STORAGE,                   VerifyU32Storage)                     \
     X(VERIFY_PRIMITIVE_VALUE,               VerifyPrimitiveValue)                 \
     X(VERIFY_ARRAYBUFFER_LENGTH,            VerifyArrayBufferLength)              \
-    X(VERIFY_FIXED_ARRAY_LENGTH,            VerifyFixedArrayLength)               \
+    X(VERIFY_ARRAY_CREATE_LENGTH,           VerifyArrayCreateLength)              \
     X(VERIFY_NATIVE_FUNCTIONS,              VerifyNativeFunctions)                \
     X(VERIFY_NATIVE_METHODS,                VerifyNativeMethods)                  \
     X(VERIFY_STATIC_NATIVE_METHODS,         VerifyStaticNativeMethods)            \
@@ -145,7 +146,6 @@
     X(VERIFY_FIND_ITERATOR,                 VerifyFindIterator)                   \
     X(VERIFY_METHOD_RETURN_TYPE,            VerifyMethodReturnType)               \
     X(VERIFY_SIGNATURE,                     VerifySignature)                      \
-    X(VERIFY_ARRAY_INDEX,                   VerifyArrayIndex)                     \
     X(VERIFY_SIZE,                          VerifySize)                           \
     X(VERIFY_RESOLVER,                      VerifyResolver)                       \
     X(VERIFY_ERROR_STORAGE,                 VerifyErrorStorage)                   \
@@ -826,6 +826,11 @@ public:
         return ANIArg(ArgValueByArray(varray), name, Action::VERIFY_ARRAY);
     }
 
+    static ANIArg MakeForArrayInitialRef(VRef *vref, std::string_view name)
+    {
+        return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_ARRAY_INITIAL_REF);
+    }
+
     static ANIArg MakeForTupleValue(VTupleValue *vtupleValue, std::string_view name)
     {
         return ANIArg(ArgValueByTupleValue(vtupleValue), name, Action::VERIFY_TUPLE_VALUE);
@@ -904,11 +909,6 @@ public:
     static ANIArg MakeForRegionBuffer(const void *buffer, ani_size length, std::string_view name)
     {
         return ANIArg(ArgValueByConstVoidPtr(buffer), name, Action::VERIFY_REGION_BUFFER, length);
-    }
-
-    static ANIArg MakeForArrayIndex(ani_size index, std::string_view name)
-    {
-        return ANIArg(ArgValueBySize(index), name, Action::VERIFY_ARRAY_INDEX);
     }
 
     // NOLINTNEXTLINE(readability-non-const-parameter)
@@ -1059,9 +1059,9 @@ public:
         return ANIArg(ArgValueBySize(length), name, Action::VERIFY_ARRAYBUFFER_LENGTH);
     }
 
-    static ANIArg MakeForFixedArrayLength(ani_size length, std::string_view name)
+    static ANIArg MakeForArrayCreateLength(ani_size length, std::string_view name)
     {
-        return ANIArg(ArgValueBySize(length), name, Action::VERIFY_FIXED_ARRAY_LENGTH);
+        return ANIArg(ArgValueBySize(length), name, Action::VERIFY_ARRAY_CREATE_LENGTH);
     }
 
     static ANIArg MakeForNativeFunctions(const ani_native_function *functions, ani_size nrFunctions,

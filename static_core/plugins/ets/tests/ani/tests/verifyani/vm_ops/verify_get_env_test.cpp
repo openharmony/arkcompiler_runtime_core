@@ -50,7 +50,7 @@ TEST_F(GetEnvTest, wrong_result_ptr)
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
         {"version", "uint32_t"},
-        {"result", "ani_env **", "wrong pointer for storing 'ani_env *'"},
+        {"result", "ani_env **", "nullptr for storing 'ani_env *'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetEnv", testLines);
 }
@@ -62,7 +62,7 @@ TEST_F(GetEnvTest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *", "wrong VM pointer"},
         {"version", "uint32_t", "unsupported ANI version"},
-        {"result", "ani_env **", "wrong pointer for storing 'ani_env *'"},
+        {"result", "ani_env **", "nullptr for storing 'ani_env *'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetEnv", testLines);
 }

@@ -46,7 +46,8 @@ TEST_F(AnyNewTest, wrong_ctor_null)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_New(env_, nullptr, 0U, nullptr, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},    {"ctor", "ani_ref", "wrong reference"}, {"argc", "ani_size"}, {"argv", "ani_ref *"},
+        {"env", "ani_env *"},    {"ctor", "ani_ref", "reference is nullptr"},
+        {"argc", "ani_size"},    {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_New", testLines);
@@ -61,8 +62,8 @@ TEST_F(AnyNewTest, wrong_result_null)
 
     ASSERT_EQ(env_->c_api->Any_New(env_, cls, 0U, nullptr, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},  {"ctor", "ani_ref", "Static types are not supported"},          {"argc", "ani_size"},
-        {"argv", "ani_ref *"}, {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"env", "ani_env *"},  {"ctor", "ani_ref", "Static types are not supported"},    {"argc", "ani_size"},
+        {"argv", "ani_ref *"}, {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_New", testLines);
 

@@ -86,7 +86,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference"},
+        {"string", "ani_string", "reference is nullptr"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -203,7 +203,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_res)
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     // clang-format on
 
@@ -219,7 +219,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_buf)
         {"string", "ani_string"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
-        {"{{ format }}Buffer", "{{ type }} *", "wrong pointer to use as argument in '{{ type }} *'"},
+        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} *"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}SubString", testLines);
@@ -232,11 +232,11 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_all_args)
         ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"string", "ani_string", "wrong reference"},
+        {"string", "ani_string", "reference is nullptr"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
-        {"{{ format }}Buffer", "{{ type }} *", "wrong pointer to use as argument in '{{ type }} *'"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} *"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}SubString", testLines);
 }

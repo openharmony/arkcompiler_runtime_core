@@ -46,7 +46,7 @@ TEST_F(AnyInstanceOfTest, wrong_ref_null)
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, nullptr, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference is nullptr"},
         {"type", "ani_ref", "Static types are not supported"},
         {"result", "ani_boolean *"},
     };
@@ -65,7 +65,7 @@ TEST_F(AnyInstanceOfTest, wrong_type_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "Static types are not supported"},
-        {"type", "ani_ref", "wrong reference"},
+        {"type", "ani_ref", "reference is nullptr"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
@@ -83,7 +83,7 @@ TEST_F(AnyInstanceOfTest, wrong_result_ptr)
         {"env", "ani_env *"},
         {"ref", "ani_ref", "Static types are not supported"},
         {"type", "ani_ref", "Static types are not supported"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
 

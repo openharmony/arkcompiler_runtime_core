@@ -113,7 +113,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_object)
     ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"obj", "ani_object", "wrong reference"},
+        {"obj", "ani_object", "reference is nullptr"},
         {"result", "ani_{{ type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
@@ -178,7 +178,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"obj", "ani_object"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
 }
@@ -188,8 +188,8 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"obj", "ani_object", "wrong reference"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"obj", "ani_object", "reference is nullptr"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
 }

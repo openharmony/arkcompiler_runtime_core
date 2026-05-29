@@ -101,7 +101,7 @@ TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_wrong_module)
     ASSERT_EQ(env_->Module_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"module", "ani_module", "wrong reference"},
+        {"module", "ani_module", "reference is nullptr"},
         {"functions", "const ani_native_function *", "wrong class for native function"},
         {"nr_functions", "ani_size"},
     };
@@ -114,8 +114,7 @@ TEST_F(BindNativeFunctionsVerifyTest, module_bind_native_functions_wrong_functio
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
-        {"functions", "const ani_native_function *",
-         "wrong pointer to use as argument in 'const ani_native_function *'"},
+        {"functions", "const ani_native_function *", "argument is nullptr, expected const ani_native_function *"},
         {"nr_functions", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_BindNativeFunctions", testLines);
@@ -203,7 +202,7 @@ TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_wrong_name
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ns", "ani_namespace", "wrong reference"},
+        {"ns", "ani_namespace", "reference is nullptr"},
         {"functions", "const ani_native_function *", "wrong class for native function"},
         {"nr_functions", "ani_size"},
     };
@@ -216,8 +215,7 @@ TEST_F(BindNativeFunctionsVerifyTest, namespace_bind_native_functions_wrong_func
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
-        {"functions", "const ani_native_function *",
-         "wrong pointer to use as argument in 'const ani_native_function *'"},
+        {"functions", "const ani_native_function *", "argument is nullptr, expected const ani_native_function *"},
         {"nr_functions", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_BindNativeFunctions", testLines);
@@ -248,7 +246,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_wrong_class)
     ASSERT_EQ(env_->Class_BindNativeMethods(nullptr, methods.data(), methods.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"methods", "const ani_native_function *", "wrong class for native function"},
         {"nr_methods", "ani_size"},
     };
@@ -261,7 +259,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_native_methods_wrong_methods)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong pointer to use as argument in 'const ani_native_function *'"},
+        {"methods", "const ani_native_function *", "argument is nullptr, expected const ani_native_function *"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindNativeMethods", testLines);
@@ -329,7 +327,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_cla
     ASSERT_EQ(env_->Class_BindStaticNativeMethods(nullptr, methods.data(), methods.size()), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"methods", "const ani_native_function *", "wrong class for native function"},
         {"nr_methods", "ani_size"},
     };
@@ -342,7 +340,7 @@ TEST_F(BindNativeFunctionsVerifyTest, class_bind_static_native_methods_wrong_met
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"methods", "const ani_native_function *", "wrong pointer to use as argument in 'const ani_native_function *'"},
+        {"methods", "const ani_native_function *", "argument is nullptr, expected const ani_native_function *"},
         {"nr_methods", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_BindStaticNativeMethods", testLines);

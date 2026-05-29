@@ -107,8 +107,8 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
-        {"field", "ani_field", "wrong object for field"},
+        {"object", "ani_object", "reference is nullptr"},
+        {"field", "ani_field", "object is nullptr or invalid while verifying field"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -129,7 +129,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_object_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference type: null"},
-        {"field", "ani_field", "wrong object for field"},
+        {"field", "ani_field", "object is nullptr or invalid while verifying field"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -168,7 +168,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_field_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"field", "ani_field", "wrong field"},
+        {"field", "ani_field", "field is not a verified ani_field handle or has the wrong ANI handle type"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -185,7 +185,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_field_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"field", "ani_field", "wrong field"},
+        {"field", "ani_field", "field is nullptr, expected ani_field"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -224,8 +224,8 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "wrong reference"},
-        {"field", "ani_field", "wrong field"},
+        {"object", "ani_object", "reference is nullptr"},
+        {"field", "ani_field", "field is nullptr, expected ani_field"},
 {% if type == "boolean" %}
         {"value", "ani_{{ type }}", "wrong value for ani_{{ type }}"},
 {% else %}
@@ -248,7 +248,11 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"field", "ani_field", "wrong return type"},
+        {% if type == "ref" %}
+        {"field", "ani_field", "wrong value type: {{ wrong_ret }}, expected: object"},
+        {% else %}
+        {"field", "ani_field", "wrong value type: {{ wrong_ret }}, expected: {{ type }}"},
+        {% endif %}
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -268,7 +272,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_object_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"field", "ani_field", "wrong object for field"},
+        {"field", "ani_field", "field does not belong to the object"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -289,8 +293,8 @@ TEST_F(ObjectSetField{{ Type }}Test, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
-        {"field", "ani_field", "wrong object for field"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"field", "ani_field", "object is nullptr or invalid while verifying field"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on

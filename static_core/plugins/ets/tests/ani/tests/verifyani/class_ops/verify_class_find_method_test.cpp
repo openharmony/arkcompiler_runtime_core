@@ -110,7 +110,7 @@ TEST_F(ClassFindMethodTest, wrong_class)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindMethod(env_, nullptr, "method", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},       {"class", "ani_class", "wrong reference"},
+        {"env", "ani_env *"},       {"class", "ani_class", "reference is nullptr"},
         {"name", "const char *"},   {"signature", "const char *", "wrong class for method"},
         {"result", "ani_method *"},
     };
@@ -124,7 +124,7 @@ TEST_F(ClassFindMethodTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"signature", "const char *"},
         {"result", "ani_method *"},
     };
@@ -139,7 +139,7 @@ TEST_F(ClassFindMethodTest, wrong_result_storage)
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"result", "ani_method *", "wrong pointer for storing 'ani_method'"},
+        {"result", "ani_method *", "nullptr for storing 'ani_method'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", testLines);
 }
@@ -154,8 +154,10 @@ TEST_F(ClassFindMethodTest, local_class_reference_is_rejected)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindMethod(env_, localClass, "method", ":i", &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},       {"class", "ani_class", "wrong reference"},
-        {"name", "const char *"},   {"signature", "const char *", "wrong class for method"},
+        {"env", "ani_env *"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"name", "const char *"},
+        {"signature", "const char *", "wrong class for method"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", testLines);

@@ -64,7 +64,7 @@ TEST_F(ArrayPopTest, wrong_array)
     ASSERT_EQ(env_->Array_Pop(nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference"},
+        {"array", "ani_array", "reference is nullptr"},
         {"result", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Pop", testLines);
@@ -166,7 +166,7 @@ TEST_F(ArrayPopTest, wrong_res)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
-        {"result", "ani_ref", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Pop", testLines);
 }
@@ -176,8 +176,8 @@ TEST_F(ArrayPopTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Array_Pop(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"array", "ani_array", "wrong reference"},
-        {"result", "ani_ref", "wrong pointer for storing 'ani_ref'"},
+        {"array", "ani_array", "reference is nullptr"},
+        {"result", "ani_ref", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Pop", testLines);
 }

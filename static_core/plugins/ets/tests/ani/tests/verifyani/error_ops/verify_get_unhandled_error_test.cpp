@@ -35,7 +35,7 @@ TEST_F(GetUnhandledErrorTest, wrong_err)
     ASSERT_EQ(env_->c_api->GetUnhandledError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "ani_error *", "wrong pointer for storing 'ani_error'"},
+        {"result", "ani_error *", "nullptr for storing 'ani_error'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetUnhandledError", testLines);
 }

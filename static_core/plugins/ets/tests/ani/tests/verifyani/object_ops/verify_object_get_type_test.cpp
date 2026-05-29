@@ -42,7 +42,7 @@ TEST_F(ObjectGetTypeTest, wrong_object_null)
     ASSERT_EQ(env_->c_api->Object_GetType(env_, nullptr, &resultType), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference is nullptr"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetType", testLines);
@@ -57,7 +57,7 @@ TEST_F(ObjectGetTypeTest, wrong_result_ptr)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_type'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_type'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetType", testLines);
 

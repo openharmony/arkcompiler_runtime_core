@@ -49,7 +49,7 @@ TEST_F(FixedArrayGetRegion{{ Type }}Test, wrong_array)
     ASSERT_EQ(env_->FixedArray_GetRegion_{{ Type }}(nullptr, 0U, LENGTH, nativeBuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_{{ type }}", "wrong reference"},
+        {"array", "ani_fixedarray_{{ type }}", "reference is nullptr"},
         {"offset", "ani_size"},
         {"length", "ani_size"},
         {"native_buffer", "const void *"},

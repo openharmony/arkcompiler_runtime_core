@@ -184,7 +184,7 @@ TEST_F(PromiseResolverRejectTest, bad_rejection)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
-        {"rejection", "ani_error", "wrong reference"},
+        {"rejection", "ani_error", "reference not found (may be deleted, out of scope, or corrupted)"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Reject", testLines);
 }

@@ -205,7 +205,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference is nullptr"},
         {"name", "const char *"},
         {"signature", "const char *"},
     };
@@ -303,7 +303,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_result)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -536,8 +536,8 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "wrong reference"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"object", "ani_object", "reference is nullptr"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"signature", "const char *"},
     };
     // clang-format on
@@ -563,7 +563,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_return_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "wrong return type"},
+        {% if type == "ref" %}
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {% else %}
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {% endif %}
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
@@ -619,7 +623,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *"},
         {"signature", "const char *"},
     };
@@ -819,7 +823,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference is nullptr"},
         {"name", "const char *"},
         {"signature", "const char *"}
     };
@@ -880,7 +884,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_result)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -990,7 +994,11 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_return_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "wrong return type"},
+        {% if type == "ref" %}
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {% else %}
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {% endif %}
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
@@ -1043,7 +1051,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *"},
         {"signature", "const char *"},
     };

@@ -47,7 +47,7 @@ TEST_F(AnyCallMethodTest, wrong_self_null)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_CallMethod(env_, nullptr, "hashCode", 0U, nullptr, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},     {"self", "ani_ref", "wrong reference"},
+        {"env", "ani_env *"},     {"self", "ani_ref", "reference is nullptr"},
         {"name", "const char *"}, {"argc", "ani_size"},
         {"argv", "ani_ref *"},    {"result", "ani_ref *"},
     };
@@ -66,7 +66,7 @@ TEST_F(AnyCallMethodTest, wrong_name_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"self", "ani_ref", "Static types are not supported"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -85,7 +85,7 @@ TEST_F(AnyCallMethodTest, wrong_result_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},     {"self", "ani_ref", "Static types are not supported"},
         {"name", "const char *"}, {"argc", "ani_size"},
-        {"argv", "ani_ref *"},    {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"argv", "ani_ref *"},    {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_CallMethod", testLines);
 

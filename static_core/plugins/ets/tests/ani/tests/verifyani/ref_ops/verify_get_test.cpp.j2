@@ -35,7 +35,7 @@ TEST_F(Get{{ Suff }}Test, wrong_ref)
     ASSERT_EQ(env_->c_api->Get{{ Suff }}(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Get{{ Suff }}", testLines);
 }
@@ -45,7 +45,7 @@ TEST_F(Get{{ Suff }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Get{{ Suff }}(nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Get{{ Suff }}", testLines);
 }

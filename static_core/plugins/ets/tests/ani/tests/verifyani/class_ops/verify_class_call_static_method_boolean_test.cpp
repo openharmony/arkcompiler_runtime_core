@@ -166,7 +166,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
@@ -346,7 +346,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_result)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -534,9 +534,9 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"static_method", "ani_static_method", "wrong static method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
         {"...", "       ", "wrong method"},
     };
     // clang-format on
@@ -558,7 +558,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_return_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong return type"},
+        {"static_method", "ani_static_method", "wrong return type: int, expected: boolean"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -593,7 +593,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, class_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
@@ -840,7 +840,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
@@ -1011,7 +1011,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_result)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -1056,9 +1056,9 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"static_method", "ani_static_method", "wrong static method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
         {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on
@@ -1112,7 +1112,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_return_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong return type"},
+        {"static_method", "ani_static_method", "wrong return type: int, expected: boolean"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -1145,7 +1145,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, class_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},

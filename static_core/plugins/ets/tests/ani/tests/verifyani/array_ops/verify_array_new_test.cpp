@@ -45,7 +45,7 @@ TEST_F(ArrayNewTest, wrong_ref)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
-        {"initial_element", "ani_ref", "wrong reference"},
+        {"initial_element", "ani_ref", "reference is nullptr"},
         {"result", "ani_array *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_New", testLines);
@@ -60,7 +60,7 @@ TEST_F(ArrayNewTest, wrong_result)
         {"env", "ani_env *"},
         {"length", "ani_size"},
         {"initial_element", "ani_ref"},
-        {"result", "ani_array *", "wrong pointer for storing 'ani_array'"},
+        {"result", "ani_array *", "nullptr for storing 'ani_array'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_New", testLines);
 }
@@ -71,8 +71,8 @@ TEST_F(ArrayNewTest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"length", "ani_size"},
-        {"initial_element", "ani_ref", "wrong reference"},
-        {"result", "ani_array *", "wrong pointer for storing 'ani_array'"},
+        {"initial_element", "ani_ref", "reference is nullptr"},
+        {"result", "ani_array *", "nullptr for storing 'ani_array'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_New", testLines);
 }
@@ -101,6 +101,17 @@ TEST_F(ArrayNewTest, zero_length)
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ani_array res {};
     ASSERT_EQ(env_->Array_New(0U, undefinedRef, &res), ANI_OK);
+    ASSERT_NE(res, nullptr);
+
+    ani_size length;
+    ASSERT_EQ(env_->Array_GetLength(res, &length), ANI_OK);
+    ASSERT_EQ(length, 0U);
+}
+
+TEST_F(ArrayNewTest, zero_length_null_initial_element)
+{
+    ani_array res {};
+    ASSERT_EQ(env_->Array_New(0U, nullptr, &res), ANI_OK);
     ASSERT_NE(res, nullptr);
 
     ani_size length;

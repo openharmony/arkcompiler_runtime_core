@@ -125,7 +125,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_ref)
     ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference is nullptr"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
@@ -137,7 +137,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_res)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
@@ -147,8 +147,8 @@ TEST_F(ReferenceIs{{ Suff }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"ref", "ani_ref", "wrong reference"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"ref", "ani_ref", "reference is nullptr"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
@@ -197,7 +197,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, anotherFrame)
     ASSERT_EQ(res, ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
@@ -213,7 +213,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, funcAddress)
     ASSERT_EQ(res, ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_boolean"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
@@ -230,7 +230,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, bad_stack_ref1)
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_boolean"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
@@ -245,7 +245,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, bad_stack_ref2)
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_boolean"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
@@ -260,7 +260,7 @@ TEST_F(ReferenceIs{{ Suff }}Test, bad_local_ref)
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_boolean"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);

@@ -99,7 +99,7 @@ TEST_F(ClassFindFieldTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindField(env_, nullptr, "field", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"name", "const char *", "wrong class for field"},
         {"result", "ani_field *"},
     };
@@ -113,7 +113,7 @@ TEST_F(ClassFindFieldTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -126,7 +126,7 @@ TEST_F(ClassFindFieldTest, wrong_result_storage)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"result", "ani_field *", "wrong pointer for storing 'ani_field'"},
+        {"result", "ani_field *", "nullptr for storing 'ani_field'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
 }
@@ -142,7 +142,7 @@ TEST_F(ClassFindFieldTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindField(env_, localClass, "field", &field), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *", "wrong class for field"},
         {"result", "ani_field *"},
     };

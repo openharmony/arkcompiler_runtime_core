@@ -64,8 +64,8 @@ TEST_F(ArraySetTest, wrong_input_array)
     ASSERT_EQ(env_->Array_Set(nullptr, index, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference"},
-        {"index", "ani_size", "no array context for index validation"},
+        {"array", "ani_array", "reference is nullptr"},
+        {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
@@ -83,7 +83,7 @@ TEST_F(ArraySetTest, null_input_array)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference type: null"},
-        {"index", "ani_size", "no array context for index validation"},
+        {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
@@ -101,7 +101,7 @@ TEST_F(ArraySetTest, undef_input_array)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference type: undefined"},
-        {"index", "ani_size", "no array context for index validation"},
+        {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
@@ -125,7 +125,7 @@ TEST_F(ArraySetTest, err_input_array)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference type: ani_error"},
-        {"index", "ani_size", "no array context for index validation"},
+        {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
@@ -147,7 +147,7 @@ TEST_F(ArraySetTest, obj_input_array)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference type: ani_object"},
-        {"index", "ani_size", "no array context for index validation"},
+        {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
@@ -166,7 +166,7 @@ TEST_F(ArraySetTest, str_input_array)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array", "wrong reference type: ani_string"},
-        {"index", "ani_size", "no array context for index validation"},
+        {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
@@ -184,7 +184,7 @@ TEST_F(ArraySetTest, wrong_ref)
         {"env", "ani_env *"},
         {"array", "ani_array"},
         {"index", "ani_size"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
 }
@@ -195,9 +195,9 @@ TEST_F(ArraySetTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Array_Set(nullptr, nullptr, index, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"array", "ani_array", "wrong reference"},
-        {"index", "ani_size", "no array context for index validation"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"array", "ani_array", "reference is nullptr"},
+        {"index", "ani_size"},
+        {"ref", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Set", testLines);
 }

@@ -40,7 +40,7 @@ TEST_F(FixedArrayNew{{ Type }}Test, wrong_res)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
-        {"result", "ani_fixedarray_{{ type }} *", "wrong pointer for storing 'ani_fixedarray_{{ type }}'"},
+        {"result", "ani_fixedarray_{{ type }} *", "nullptr for storing 'ani_fixedarray_{{ type }}'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_{{ Type }}", testLines);
 }
@@ -51,7 +51,7 @@ TEST_F(FixedArrayNew{{ Type }}Test, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"length", "ani_size"},
-        {"result", "ani_fixedarray_{{ type }} *", "wrong pointer for storing 'ani_fixedarray_{{ type }}'"},
+        {"result", "ani_fixedarray_{{ type }} *", "nullptr for storing 'ani_fixedarray_{{ type }}'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_{{ Type }}", testLines);
 }

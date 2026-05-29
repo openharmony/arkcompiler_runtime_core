@@ -68,7 +68,7 @@ TEST_F(WeakReferenceGetReferenceTest, wrong_was_released_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"wref", "ani_wref"},
-        {"was_released_result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"was_released_result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("WeakReference_GetReference", testLines);
@@ -91,7 +91,7 @@ TEST_F(WeakReferenceGetReferenceTest, wrong_result)
         {"env", "ani_env *"},
         {"wref", "ani_wref"},
         {"was_released_result", "ani_boolean *"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("WeakReference_GetReference", testLines);
 

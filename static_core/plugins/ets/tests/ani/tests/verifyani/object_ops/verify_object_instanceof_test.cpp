@@ -46,7 +46,7 @@ TEST_F(ObjectInstanceOfTest, wrong_object_null)
     ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference is nullptr"},
         {"type", "ani_ref"},
         {"result", "ani_boolean *"},
     };
@@ -86,7 +86,7 @@ TEST_F(ObjectInstanceOfTest, wrong_type_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"type", "ani_ref", "wrong reference"},
+        {"type", "ani_ref", "reference is nullptr"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_InstanceOf", testLines);
@@ -125,7 +125,7 @@ TEST_F(ObjectInstanceOfTest, wrong_result_ptr)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"type", "ani_ref"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_InstanceOf", testLines);
 

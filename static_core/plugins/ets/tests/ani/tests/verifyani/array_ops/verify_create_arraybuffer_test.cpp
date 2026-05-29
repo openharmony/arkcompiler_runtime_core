@@ -54,7 +54,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_data_storage)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
-        {"data_result", "void **", "wrong pointer for storing 'void *'"},
+        {"data_result", "void **", "nullptr for storing 'void *'"},
         {"arraybuffer_result", "ani_arraybuffer *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateArrayBuffer", testLines);
@@ -68,7 +68,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_arraybuffer_storage
         {"env", "ani_env *"},
         {"length", "ani_size"},
         {"data_result", "void **"},
-        {"arraybuffer_result", "ani_arraybuffer *", "wrong pointer for storing 'ani_arraybuffer'"},
+        {"arraybuffer_result", "ani_arraybuffer *", "nullptr for storing 'ani_arraybuffer'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateArrayBuffer", testLines);
 }

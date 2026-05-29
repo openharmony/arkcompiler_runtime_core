@@ -35,7 +35,7 @@ TEST_F(GetVMTest, wrong_result_ptr)
     ASSERT_EQ(env_->c_api->GetVM(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "ani_vm **", "wrong pointer for storing 'ani_vm *'"},
+        {"result", "ani_vm **", "nullptr for storing 'ani_vm *'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetVM", testLines);
 }

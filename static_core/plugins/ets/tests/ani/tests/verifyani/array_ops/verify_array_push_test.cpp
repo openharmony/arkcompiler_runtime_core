@@ -70,7 +70,7 @@ TEST_F(ArrayPushTest, wrong_array)
     ASSERT_EQ(env_->Array_Push(nullptr, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference"},
+        {"array", "ani_array", "reference is nullptr"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -177,7 +177,7 @@ TEST_F(ArrayPushTest, wrong_ref)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
 }
@@ -187,8 +187,8 @@ TEST_F(ArrayPushTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Array_Push(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"array", "ani_array", "wrong reference"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"array", "ani_array", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
 }

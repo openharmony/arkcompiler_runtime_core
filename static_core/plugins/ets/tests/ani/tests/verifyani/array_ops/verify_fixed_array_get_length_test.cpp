@@ -46,7 +46,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_array)
     ASSERT_EQ(env_->FixedArray_GetLength(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray", "wrong reference"},
+        {"array", "ani_fixedarray", "reference is nullptr"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
@@ -61,7 +61,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_fixedarray"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
 }
