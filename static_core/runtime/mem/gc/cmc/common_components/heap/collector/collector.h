@@ -31,14 +31,6 @@
 #include "common_interfaces/base_runtime.h"
 
 namespace ark::common_vm {
-enum CollectorType {
-    NO_COLLECTOR = 0,  // No Collector
-    PROXY_COLLECTOR,   // Proxy of Collector
-    COPY_COLLECTOR,    // Regional-Copying GC
-    SMOOTH_COLLECTOR,  // wgc
-    COLLECTOR_TYPE_COUNT,
-};
-
 // Central garbage identification algorithm.
 class Collector {
 public:
@@ -58,17 +50,9 @@ public:
     //         In order to prevent deadlocks, async trigger only add one async gc task and will not block.
     void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
 
-    virtual GCPhase GetGCPhase() const
-    {
-        // Atomic with acquire order reason: data race with gcPhase_ with dependecies on reads after the load
-        return gcPhase_.load(std::memory_order_acquire);
-    }
+    virtual GCPhase GetGCPhase() const = 0;
 
-    virtual void SetGCPhase(const GCPhase phase)
-    {
-        // Atomic with release order reason: data race with gcPhase_ with dependecies on writes before the store
-        gcPhase_.store(phase, std::memory_order_release);
-    }
+    virtual void SetGCPhase(const GCPhase phase) = 0;
 
     virtual void FixObjectRefFields(BaseObject *) const {}
 
@@ -90,9 +74,6 @@ public:
     virtual bool TryUpdateRefField(BaseObject *, RefField<> &, BaseObject *&) const = 0;
     virtual bool TryForwardRefField(BaseObject *, RefField<> &, BaseObject *&) const = 0;
 
-    virtual bool IsOldPointer(RefField<> &) const = 0;
-    virtual bool IsCurrentPointer(RefField<> &) const = 0;
-
     BaseObject *FindLatestVersion(BaseObject *obj) const
     {
         if (obj == nullptr) {
@@ -106,23 +87,9 @@ public:
         return obj;
     };
 
-    void AddGCListener(GCListener *listener)
-    {
-        ark::os::memory::LockHolder gcListenersLock(gcListenersLock_);
-        gcListeners_.push_back(listener);
-    }
-
-    void RemoveGCListener(GCListener *listener)
-    {
-        ark::os::memory::LockHolder gcListenersLock(gcListenersLock_);
-        gcListeners_.erase(std::remove(gcListeners_.begin(), gcListeners_.end(), listener), gcListeners_.end());
-    }
-
-    void NotifyGCListeners(std::function<void(GCListener *)> notifier)
-    {
-        ark::os::memory::LockHolder gcListenersLock(gcListenersLock_);
-        std::for_each(gcListeners_.begin(), gcListeners_.end(), notifier);
-    }
+    virtual void AddGCListener(GCListener *listener) = 0;
+    virtual void RemoveGCListener(GCListener *listener) = 0;
+    virtual void NotifyGCListeners(std::function<void(GCListener *)> notifier) = 0;
 
 protected:
     virtual void RequestGCInternal(GCReason, bool, GCType, bool explicitRequest)
@@ -130,13 +97,6 @@ protected:
         LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
-
-    CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
-    std::atomic<GCPhase> gcPhase_ = {GCPhase::GC_PHASE_IDLE};
-
-private:
-    std::vector<GCListener *> gcListeners_;
-    ark::os::memory::Mutex gcListenersLock_;
 };
 }  // namespace ark::common_vm
 

@@ -17,7 +17,6 @@
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/collector/collector.h"
-#include "common_components/heap/collector/marking_collector.h"
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/heap/space/nonmovable_space.h"
@@ -47,7 +46,7 @@ void NonMovableSpace::AssembleGarbageCandidates()
     }
 }
 
-void CollectFixHeapTaskForFullRegion(MarkingCollector &collector, RegionList &list, FixHeapTaskList &taskList)
+void CollectFixHeapTaskForFullRegion(RegionList &list, FixHeapTaskList &taskList)
 {
     RegionDesc *region = list.GetHeadRegion();
     while (region != nullptr) {
@@ -75,11 +74,10 @@ void NonMovableSpace::CollectFixTasks(FixHeapTaskList &taskList)
         }
     } else {
         FixHeapWorker::CollectFixHeapTasks(taskList, recentPolySizeRegionList_, FIX_RECENT_REGION);
-        MarkingCollector &collector = reinterpret_cast<MarkingCollector &>(Heap::GetHeap().GetCollector());
-        CollectFixHeapTaskForFullRegion(collector, polySizeRegionList_, taskList);
+        CollectFixHeapTaskForFullRegion(polySizeRegionList_, taskList);
         for (size_t i = 0; i < NONMOVABLE_OBJECT_SIZE_COUNT; i++) {
             FixHeapWorker::CollectFixHeapTasks(taskList, *recentMonoSizeRegionList_[i], FIX_RECENT_REGION);
-            CollectFixHeapTaskForFullRegion(collector, *monoSizeRegionList_[i], taskList);
+            CollectFixHeapTaskForFullRegion(*monoSizeRegionList_[i], taskList);
         }
     }
 }

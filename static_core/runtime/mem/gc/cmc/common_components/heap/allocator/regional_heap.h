@@ -436,6 +436,11 @@ public:
         return regionInfo->EnqueueObject(obj);
     }
 
+    static bool IsSurvivedObject(const BaseObject *obj)
+    {
+        return IsMarkedObject(obj) || IsResurrectedObject(obj);
+    }
+
     static bool IsMarkedObject(const BaseObject *obj)
     {
         RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));

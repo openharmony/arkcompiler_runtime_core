@@ -22,8 +22,6 @@ namespace ark::common_vm {
 // CopyBarrier is the barrier for concurrent forwarding.
 class CopyBarrier : public IdleBarrier {
 public:
-    explicit CopyBarrier(Collector &collector) : IdleBarrier(collector) {}
-
     BaseObject *ReadRefField(BaseObject *obj, RefField<false> &field) const override;
     BaseObject *ReadStaticRef(RefField<false> &field) const override;
 
@@ -32,7 +30,6 @@ public:
 
 class YoungCopyBarrier : public CopyBarrier {
 public:
-    explicit YoungCopyBarrier(Collector &collector) : CopyBarrier(collector) {}
     void PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const override;
 };
 }  // namespace ark::common_vm

@@ -230,6 +230,7 @@ public:
     virtual bool InRecentSpace(const void *addr) = 0;
     virtual bool GetForceThrowOOM() const = 0;
     virtual void SetForceThrowOOM(bool val) = 0;
+    virtual void SetCollector(Collector *collector) = 0;
 
     static void OnHeapCreated(HeapAddress startAddr)
     {

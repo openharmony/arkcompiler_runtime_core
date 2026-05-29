@@ -26,7 +26,7 @@
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/base/c_string.h"
 #include "common_components/heap/collector/collector.h"
-#include "common_components/heap/collector/marking_collector.h"
+#include "common_components/base/time_utils.h"
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/heap.h"
 #include "common_components/mutator/mutator_manager.h"
@@ -82,7 +82,6 @@ constexpr size_t HUGE_PAGE_UNIT_NUM = (2048 * KB) / RegionDesc::UNIT_SIZE;
 }  // namespace ark::common_vm
 
 namespace ark::mem {
-using ::ark::common_vm::MarkingCollector;
 using ::ark::common_vm::RegionalHeap;
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
@@ -168,7 +167,6 @@ bool RegionDesc::VisitLiveObjectsUntilFalse(const std::function<bool(BaseObject 
         return true;
     }
 
-    MarkingCollector &collector = reinterpret_cast<MarkingCollector &>(Heap::GetHeap().GetCollector());
     if (IsLargeRegion()) {
         if (IsJitFortAwaitInstallFlag()) {
             return true;
@@ -180,7 +178,7 @@ bool RegionDesc::VisitLiveObjectsUntilFalse(const std::function<bool(BaseObject 
         uintptr_t allocPtr = GetRegionAllocPtr();
         while (position < allocPtr) {
             BaseObject *obj = reinterpret_cast<BaseObject *>(position);
-            if (collector.IsSurvivedObject(obj) && !func(obj)) {
+            if (RegionalHeap::IsSurvivedObject(obj) && !func(obj)) {
                 return false;
             }
             position += RegionalHeap::GetAllocSize(*obj);

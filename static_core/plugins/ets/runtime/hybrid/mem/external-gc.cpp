@@ -15,7 +15,7 @@
 
 #include "libarkbase/utils/logger.h"
 #include "runtime/mem/gc/gc_root.h"
-#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"

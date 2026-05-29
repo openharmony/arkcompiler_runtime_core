@@ -22,7 +22,7 @@
 #include "runtime/include/mem/panda_containers.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
 #endif
 
 namespace ark {
@@ -438,7 +438,7 @@ void Mutator::VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor)
 void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase)
 {
     auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
-    auto *gc = static_cast<mem::CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
+    auto *gc = static_cast<ark::mem::CmcGC<EtsLanguageConfig> *>(vm->GetGC());
     auto *managedThread = ManagedThread::CastFromMutator(this);
     if (phase >= ark::common_vm::GCPhase::GC_PHASE_ENUM && phase < ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK) {
         gc->EnablePreWriteBarrier(managedThread);

@@ -18,7 +18,7 @@
 #include "common_components/base/sys_call.h"
 #include "common_components/common/scoped_object_lock.h"
 #include "common_interfaces/thread/mutator.h"
-#include "heap/collector/collector_proxy.h"
+#include "heap/collector/collector.h"
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
@@ -29,14 +29,14 @@ BaseObject *PreforwardBarrier::ReadRefField(BaseObject *obj, RefField<false> &fi
     do {
         RefField<> tmpField(field);
         BaseObject *oldRef = reinterpret_cast<BaseObject *>(tmpField.GetAddress());
-        if (LIKELY(!static_cast<CollectorProxy *>(&theCollector)->IsFromObject(oldRef))) {
+        if (LIKELY(!theCollector->IsFromObject(oldRef))) {
             return oldRef;
         }
 
         auto weakMask = reinterpret_cast<MAddress>(oldRef) & TAG_WEAK;
         oldRef = reinterpret_cast<BaseObject *>(reinterpret_cast<MAddress>(oldRef) & (~TAG_WEAK));
         BaseObject *toObj = nullptr;
-        if (static_cast<CollectorProxy *>(&theCollector)->TryForwardRefField(obj, field, toObj)) {
+        if (theCollector->TryForwardRefField(obj, field, toObj)) {
             return (BaseObject *)((uintptr_t)toObj | weakMask);
         }
     } while (true);

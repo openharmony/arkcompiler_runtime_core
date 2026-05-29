@@ -22,8 +22,6 @@ namespace ark::common_vm {
 // IdleBarrier is the barrier for concurrent enum phase
 class IdleBarrier : public Barrier {
 public:
-    explicit IdleBarrier(Collector &collector) : Barrier(collector) {}
-
     BaseObject *ReadRefField(BaseObject *obj, RefField<false> &field) const override;
     BaseObject *ReadStaticRef(RefField<false> &field) const override;
 

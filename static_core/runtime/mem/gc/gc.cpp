@@ -34,7 +34,7 @@
 #include "runtime/mem/gc/gc_root-inl.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
-#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
 #include "runtime/mem/gc/workers/gc_workers_task_queue.h"
 #include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
 #include "runtime/mem/pygote_space_allocator-inl.h"
@@ -439,9 +439,12 @@ GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettin
         case GCType::G1_GC:
             ret = allocator->New<G1GC<LanguageConfig>>(objectAllocator, settings);
             break;
-        case GCType::CMC_GC:
-            ret = allocator->New<CMCGCAdapter<LanguageConfig>>(objectAllocator, settings);
+#if defined(ARK_USE_COMMON_RUNTIME)
+        case GCType::CMC_GC: {
+            ret = allocator->New<CmcGC<LanguageConfig>>(objectAllocator, settings);
             break;
+        }
+#endif
         default:
             LOG(FATAL, GC) << "Unknown GC type";
             break;

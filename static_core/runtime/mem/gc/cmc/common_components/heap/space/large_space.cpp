@@ -16,7 +16,7 @@
 #include "common_components/heap/space/large_space.h"
 #include "heap/allocator/region_manager.h"
 #include "common_components/heap/collector/collector.h"
-#include "common_components/heap/collector/marking_collector.h"
+#include "common_components/heap/allocator/regional_heap.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
 #endif
@@ -42,7 +42,6 @@ size_t LargeSpace::CollectLargeGarbage()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CollectLargeGarbage", "");
     size_t garbageSize = 0;
-    MarkingCollector &collector = reinterpret_cast<MarkingCollector &>(Heap::GetHeap().GetCollector());
     RegionDesc *region = largeRegionList_.GetHeadRegion();
     while (region != nullptr) {
         HeapAddress addr = region->GetRegionStart();
@@ -52,7 +51,7 @@ size_t LargeSpace::CollectLargeGarbage()
             region = region->GetNextRegion();
             continue;
         }
-        if (!collector.IsSurvivedObject(obj) && !region->IsNewObjectSinceMarking(obj)) {
+        if (!RegionalHeap::IsSurvivedObject(obj) && !region->IsNewObjectSinceMarking(obj)) {
             LOG(DEBUG, GC) << "reclaim large region " << region << "@0x" << std::hex << region->GetRegionStart() << "+"
                            << std::dec << region->GetRegionAllocatedSize() << " type "
                            << static_cast<size_t>(region->GetRegionType());

@@ -26,7 +26,6 @@ class Collector;
 class Barrier {
 public:
     static constexpr uint64_t TAG_WEAK = 0x01ULL;
-    explicit Barrier(Collector &collector) : theCollector(collector) {}
     virtual ~Barrier() {}
 
     virtual BaseObject *ReadRefField(BaseObject *obj, RefField<false> &field) const;
@@ -35,6 +34,11 @@ public:
     virtual void PreWriteBarrier(Mutator *mutator, BaseObject *rememberedObject) const;
 
     virtual BaseObject *AtomicReadRefField(BaseObject *obj, RefField<true> &field, MemoryOrder order) const;
+
+    void SetCollector(Collector *collector)
+    {
+        theCollector = collector;
+    }
 
 protected:
     class LocalRefFieldContainer {
@@ -66,7 +70,7 @@ protected:
         size_t size_ {0};
         std::vector<RefField<> *> excessive_;
     };
-    Collector &theCollector;
+    Collector *theCollector;
 };
 }  // namespace ark::common_vm
 
