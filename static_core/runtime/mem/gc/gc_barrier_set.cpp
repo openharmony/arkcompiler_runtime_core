@@ -266,8 +266,8 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
 extern "C" void *ReadBarrierFuncEntrypoint(ObjectPointerType *fieldPtr)
 {
     if constexpr (GCCMCBarrierSet::USE_READ_BARRIERS) {
-        auto field = reinterpret_cast<ark::mem::RefField<false> &>(*fieldPtr);
-        return ark::common_vm::BaseRuntime::ReadBarrier(field.GetTargetObject(), fieldPtr);
+        // The object that owns the field is unknown here
+        return ark::common_vm::BaseRuntime::ReadBarrier(nullptr, fieldPtr);
     }
     return nullptr;
 }
@@ -371,13 +371,11 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
     if constexpr (USE_READ_BARRIERS) {
         auto *readBarrier = Mutator::GetCurrent()->GetReadBarrierEntrypoint();
         if (readBarrier != nullptr) {
-            reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(refAddr));
-            auto field = reinterpret_cast<ark::mem::RefField<false> &>(*refAddr);
-            return field.GetTargetObject();
+            return reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(refAddr));
         }
     }
-    auto field = reinterpret_cast<ark::mem::RefField<false> &>(*refAddr);
-    return field.GetTargetObject();
+    auto *field = reinterpret_cast<ark::mem::RefField<true> *>(refAddr);
+    return field->GetTargetObject();
 }
 
 void GCCMCBarrierSet::UpdateRememberSet([[maybe_unused]] void *object, [[maybe_unused]] void *ref) const
