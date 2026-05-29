@@ -41,7 +41,7 @@ class ClassWithMethod {
     }
 }
 
-function verifyGenericClass<T>(a: FixedArray<GenericClass<T>>) {
+function verifyGenericClass<T>(a: Array<GenericClass<T>>) {
     arktest.assertEQ(a.length, 2)
 }
 
@@ -239,7 +239,7 @@ function main(): int {
     })
 
     suite.addTest("F_array", () => {
-        let verify = (a: FixedArray<F>) => {
+        let verify = (a: Array<F>) => {
             arktest.assertEQ(a[0](Color.Red), 0)
             arktest.assertEQ(a[1](Color.Red), 1)
             arktest.assertEQ(a[2](Color.Blue), 4)
@@ -249,7 +249,7 @@ function main(): int {
     })
 
     suite.addTest("F_array_of_arrays", () => {
-        let verify = (a: FixedArray<FixedArray<F>>) => {
+        let verify = (a: Array<Array<F>>) => {
             arktest.assertEQ(a[0][0](Color.Red), 0)
             arktest.assertEQ(a[1][0](Color.Red), 1)
             arktest.assertEQ(a[2][0](Color.Blue), 4)
@@ -296,7 +296,7 @@ function main(): int {
 
     suite.addTest("error_func_value_union", () => {
         let e = new Error
-        let verify = (a: FixedArray<Number|Error|((p: string)=>string)|Boolean>) => {
+        let verify = (a: Array<Number|Error|((p: string)=>string)|Boolean>) => {
             arktest.assertEQ(a[0] as Error, e)
             arktest.assertEQ(a[1] as Boolean, false)
             arktest.assertEQ((a[2] as ((p: string) => string))('a'), 'aa')
@@ -308,7 +308,7 @@ function main(): int {
 
     suite.addTest("error_func_value_union_arrays", () => {
         let e = new Error
-        let verify = (a: FixedArray<FixedArray<Number|Error|((p: string)=>string)|Boolean>>) => {
+        let verify = (a: Array<Array<Number|Error|((p: string)=>string)|Boolean>>) => {
             arktest.assertEQ(a[0][0] as Error, e)
             arktest.assertEQ(a[1][0] as Boolean, false)
             arktest.assertEQ((a[2][0] as ((p: string) => string))('a'), 'aa')

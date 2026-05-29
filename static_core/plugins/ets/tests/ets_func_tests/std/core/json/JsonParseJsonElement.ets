@@ -37,7 +37,7 @@ function main(): int {
 }
 
 function stringTests(): void {
-    const testData: FixedArray<[string, (elem: jsonx.JsonElement) => boolean]> = [
+    const testData: [string, (elem: jsonx.JsonElement) => boolean][] = [
         [`[]`, elem => elem.asArray().length == 0],
         [`[null, "a", "b"]`, elem => elem[0].jsonType == jsonx.JsonType.JsonNull],
         [`[-1, -3, -5]`, elem => elem[2].asInteger() == -5],
@@ -148,7 +148,7 @@ function createDeepNested(): string {
 }
 
 function reviverTests(): void {
-    const testData: FixedArray<[string, string, (key: string, value: jsonx.JsonElement) => jsonx.JsonElement]> = [
+    const testData: [string, string, (key: string, value: jsonx.JsonElement) => jsonx.JsonElement][] = [
         [`{"a":5,"b":10}`, `{"a":10,"b":20}`, mul2],
         [`{"name":"hello","type":"world"}`, `{"name":"HELLO","type":"WORLD"}`, uppercase],
         [`{"level1":{"level2":{"value":42}}}`, `{"level1":{"level2":{"value":999}}}`, num999],

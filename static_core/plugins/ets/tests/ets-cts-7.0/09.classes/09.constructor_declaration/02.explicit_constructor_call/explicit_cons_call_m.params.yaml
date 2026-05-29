@@ -486,14 +486,14 @@ cases:
           // All optional parameters
           class A {
               p1: Array<() => string>|undefined
-              p2: FixedArray<() => number>
+              p2: Array<() => number>
               p3: [string, number]|undefined
               p4: Record<string, number>
               p5: string[]|undefined
 
               constructor(
                   p1?: Array<() => string>,
-                  p2: FixedArray<() => number> = [],
+                  p2: Array<() => number> = [],
                   p3?: [string, number],
                   p4: Record<string, number> = { '': 0 },
                   p5?: string[]
@@ -547,14 +547,14 @@ cases:
         // All optional parameters with 'this' constructor
         class A {
             p1: Array<() => string>|undefined
-            p2: FixedArray<() => number>
+            p2: Array<() => number>
             p3: [string, number]|undefined
             p4: Record<string, number>
             p5: string[]|undefined
 
             constructor(
                 p1?: Array<() => string>,
-                p2: FixedArray<() => number> = [],
+                p2: Array<() => number> = [],
                 p3?: [string, number],
                 p4: Record<string, number> = { '': 0 },
                 p5?: string[]
@@ -582,14 +582,14 @@ cases:
         // All optional parameters with 'super' constructor
         class A {
             p1: Array<() => string>|undefined
-            p2: FixedArray<() => number>
+            p2: Array<() => number>
             p3: [string, number]|undefined
             p4: Record<string, number>
             p5: string[]|undefined
 
             constructor(
                 p1?: Array<() => string>,
-                p2: FixedArray<() => number> = [],
+                p2: Array<() => number> = [],
                 p3?: [string, number],
                 p4: Record<string, number> = { '': 0 },
                 p5?: string[]

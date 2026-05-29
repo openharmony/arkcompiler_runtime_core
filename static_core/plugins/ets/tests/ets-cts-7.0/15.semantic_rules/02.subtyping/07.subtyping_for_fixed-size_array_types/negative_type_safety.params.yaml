@@ -54,22 +54,6 @@ cases:
       newValue: |-
           1
     - stype: |-
-          [Base, J, string]
-      value: |-
-          [[new Base(), {j: 1}, 'a'], [new Derived(), {j: 2}, 'b']]
-      dtype: |-
-          Object
-      newValue: |-
-          new Object
-    - stype: |-
-          string[]
-      value: |-
-          [["a", "b"],["a", "b"]]
-      dtype: |-
-          Object
-      newValue: |-
-          new Object()
-    - stype: |-
           Derived
       value: |-
           [new Derived, new Derived]

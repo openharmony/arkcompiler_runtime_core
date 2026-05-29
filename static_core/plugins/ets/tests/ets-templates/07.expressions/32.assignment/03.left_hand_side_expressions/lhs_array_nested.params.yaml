@@ -15,5 +15,4 @@
 cases:
   - number[][] = [[0, 0], [0, 0]];
   - FixedArray<FixedArray<number>> = [[0, 0], [0, 0]]
-  - FixedArray<number[]> = [[0, 0], [0, 0]]
   - FixedArray<number>[] = [[0, 0], [0, 0]]

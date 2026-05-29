@@ -31,7 +31,7 @@ cases:
     retrieve: a[0]
     literal: '"a"'
   - decl: type tuple = ["a", int]
-    test_type: 'a: FixedArray<tuple>'
+    test_type: 'a: tuple[]'
     rh_value: '[["a", 1]]'
     retrieve: a[0][0]
     literal: '"a"'
