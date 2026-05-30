@@ -19,6 +19,8 @@
 #include <gmock/gmock.h>
 
 #include "ani_gtest.h"
+#include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vm_options.h"
 
@@ -98,10 +100,21 @@ public:
         ASSERT_NE(PandaEtsVM::GetCurrent()->GetANIVerifier(), nullptr);
         PandaEtsVM::GetCurrent()->GetANIVerifier()->SetAbortHook(AbortHook, this);
         PandaEtsVM::GetCurrent()->GetANIVerifier()->SetErrorHook(AbortHook, this);
+
+        // VerifyANI gtests call ANI APIs directly and do not enter through the normal native-call entry path.
+        // Push one native frame to model a valid native scope for each test; TearDown pops it and checks leaked scopes.
+        auto *pandaEnv = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
+        pandaEnv->GetEnvANIVerifier()->PushNativeFrame(pandaEnv);
+        env_ = pandaEnv->GetEnvANIVerifier()->GetEnv();
     }
 
     void TearDown() override
     {
+        auto *pandaEnv = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
+        auto popErr = pandaEnv->GetEnvANIVerifier()->PopNativeFrame();
+        ASSERT_FALSE(popErr.has_value()) << "Leaked scope detected in test: " << popErr.value();
+        env_ = pandaEnv->GetEnvANIVerifier()->GetEnv();
+
         PandaEtsVM::GetCurrent()->GetANIVerifier()->SetAbortHook(nullptr, nullptr);
         PandaEtsVM::GetCurrent()->GetANIVerifier()->SetErrorHook(nullptr, nullptr);
         AniTest::TearDown();

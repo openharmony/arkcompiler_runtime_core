@@ -146,6 +146,9 @@ TEST_F(AttachCurrentThreadTest, success)
     std::thread([this]() {
         ani_env *env {};
         ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, nullptr, ANI_VERSION_1, &env), ANI_OK);
+        ani_class cls {};
+        ASSERT_EQ(env->FindClass("std.core.String", &cls), ANI_OK);
+        ASSERT_NE(cls, nullptr);
         ASSERT_NO_ABORT_MESSAGE();
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
     }).join();

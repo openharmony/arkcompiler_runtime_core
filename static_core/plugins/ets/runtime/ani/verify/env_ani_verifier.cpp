@@ -17,14 +17,18 @@
 
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
+#include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets::ani::verify {
+
+constexpr ani_size VERIFICATION_BOTTOM_FRAME = 0;
+constexpr ani_size DEFAULT_NATIVE_FRAME_CAPACITY = 4096;
 
 EnvANIVerifier::EnvANIVerifier(PandaAniEnv *ownerEnv, ANIVerifier *verifier,
                                const __ani_interaction_api *interactionAPI)
     : verifier_(verifier), interactionAPI_(interactionAPI)
 {
-    DoPushNativeFrame(ownerEnv);
+    DoPushNativeFrame(ownerEnv, VERIFICATION_BOTTOM_FRAME);
 }
 
 VEnv *EnvANIVerifier::GetEnv()
@@ -36,10 +40,27 @@ VEnv *EnvANIVerifier::GetEnv()
 VEnv *EnvANIVerifier::AttachThread()
 {
     ASSERT(!frames_.empty());
+    VEnv *curEnv = frames_.back().venv;
+    // Threads attached through ANI do not pass through a managed native-call bridge, so verifyANI creates the
+    // native frame explicitly and uses it to track local references until DetachCurrentThread().
+    PushNativeFrame(PandaAniEnv::FromAniEnv(curEnv->GetEnv()));
     return frames_.back().venv;
 }
 
-void EnvANIVerifier::DoPushNativeFrame(PandaAniEnv *ownerEnv)
+void EnvANIVerifier::DetachThread()
+{
+    auto err = PopNativeFrame();
+    if (err) {
+        verifier_->Report(*err);
+    }
+}
+
+void EnvANIVerifier::ReportDetachOnUnattachedThread(ani_vm *vm)
+{
+    PandaEtsVM::FromAniVM(vm)->GetANIVerifier()->Report("Cannot detach current thread, thread is not attached");
+}
+
+void EnvANIVerifier::DoPushNativeFrame(PandaAniEnv *ownerEnv, ani_size capacity)
 {
     Frame frame {SubFrameType::NATIVE_FRAME,
                  0,
@@ -47,7 +68,8 @@ void EnvANIVerifier::DoPushNativeFrame(PandaAniEnv *ownerEnv)
                  MakePandaUnique<ArenaAllocator>(SpaceType::SPACE_TYPE_INTERNAL),
                  nullptr,
                  VEnv::Create(ownerEnv),
-                 nullptr};
+                 nullptr,
+                 capacity};
     frame.refsAllocator = frame.refsAllocatorHolder.get();
     frame.venv = frame.venvHolder.get();
     frames_.push_back(std::move(frame));
@@ -56,7 +78,7 @@ void EnvANIVerifier::DoPushNativeFrame(PandaAniEnv *ownerEnv)
 void EnvANIVerifier::PushNativeFrame(PandaAniEnv *ownerEnv)
 {
     ASSERT(!frames_.empty());
-    DoPushNativeFrame(ownerEnv);
+    DoPushNativeFrame(ownerEnv, DEFAULT_NATIVE_FRAME_CAPACITY);
 }
 
 std::optional<PandaString> EnvANIVerifier::PopNativeFrame()
@@ -75,12 +97,12 @@ std::optional<PandaString> EnvANIVerifier::PopNativeFrame()
     return "Verification logic was broken";
 }
 
-void EnvANIVerifier::CreateLocalScope()
+void EnvANIVerifier::CreateLocalScope(ani_size capacity)
 {
     ASSERT(!frames_.empty());
     ArenaAllocator *allocator = frames_.back().refsAllocator;
     VEnv *venv = frames_.back().venv;
-    frames_.push_back(Frame {SubFrameType::LOCAL_SCOPE, 0, {}, {}, allocator, {}, venv});
+    frames_.push_back(Frame {SubFrameType::LOCAL_SCOPE, 0, {}, {}, allocator, {}, venv, capacity});
 }
 
 std::optional<PandaString> EnvANIVerifier::DestroyLocalScope()
@@ -99,12 +121,12 @@ std::optional<PandaString> EnvANIVerifier::DestroyLocalScope()
     return "Verification logic was broken";
 }
 
-void EnvANIVerifier::CreateEscapeLocalScope()
+void EnvANIVerifier::CreateEscapeLocalScope(ani_size capacity)
 {
     ASSERT(!frames_.empty());
     ArenaAllocator *allocator = frames_.back().refsAllocator;
     VEnv *venv = frames_.back().venv;
-    frames_.push_back(Frame {SubFrameType::ESCAPE_LOCAL_SCOPE, 0, {}, {}, allocator, {}, venv});
+    frames_.push_back(Frame {SubFrameType::ESCAPE_LOCAL_SCOPE, 0, {}, {}, allocator, {}, venv, capacity});
 }
 
 std::optional<PandaString> EnvANIVerifier::DestroyEscapeLocalScope([[maybe_unused]] VRef *vref)
@@ -128,7 +150,22 @@ std::optional<PandaString> EnvANIVerifier::DestroyEscapeLocalScope([[maybe_unuse
 VRef *EnvANIVerifier::AddLocalVerifiedRef(ani_ref ref)
 {
     ASSERT(!frames_.empty());
+
+    // frames_ always keeps one bottom frame for verifier-owned state; real native scopes are pushed above it.
+    if (UNLIKELY(frames_.size() == 1)) {
+        PandaStringStream ss;
+        ss << "Local reference created outside of any native scope";
+        verifier_->Report(ss.str());
+    }
+
     Frame &frame = frames_.back();
+
+    // The verification bottom frame is not a real ANI scope and does not participate in capacity checks.
+    if (UNLIKELY(frame.capacity != VERIFICATION_BOTTOM_FRAME && frame.refs.size() >= frame.capacity)) {
+        PandaStringStream ss;
+        ss << "Creating " << (frame.refs.size() + 1) << "th local reference in scope with capacity " << frame.capacity;
+        verifier_->Report(ss.str());
+    }
 
     InternalRef *iref = frame.refsAllocator->New<InternalRef>(ref);
     auto vref = InternalRef::CastToVRef(iref);

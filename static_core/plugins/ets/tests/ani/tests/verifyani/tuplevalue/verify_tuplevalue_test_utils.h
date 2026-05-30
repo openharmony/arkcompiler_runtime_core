@@ -27,6 +27,8 @@ namespace ark::ets::ani::verify::testing {
 
 class VerifyAniTupleValueTestBase : public VerifyAniTest {
 protected:
+    static constexpr ani_size LOCAL_SCOPE_CAPACITY = 2;
+
     ani_tuple_value GetTupleWithCheck(std::string_view moduleName, std::string_view tupleGetterName)
     {
         auto ref = CallEtsFunction<ani_ref>(moduleName.data(), tupleGetterName.data());
@@ -44,7 +46,7 @@ protected:
 
     ani_tuple_value GetTupleFromExpiredLocalScope(std::string_view moduleName, std::string_view tupleGetterName)
     {
-        if (env_->CreateLocalScope(1) != ANI_OK) {
+        if (env_->CreateLocalScope(LOCAL_SCOPE_CAPACITY) != ANI_OK) {
             ADD_FAILURE() << "CreateLocalScope failed";
             return nullptr;
         }

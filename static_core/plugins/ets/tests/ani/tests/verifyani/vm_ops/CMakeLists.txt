@@ -22,3 +22,7 @@ ani_verify_add_gtest(ani_verify_test_get_vm
 ani_verify_add_gtest(ani_verify_test_attach_current_thread
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_attach_current_thread_test.cpp
 )
+
+ani_verify_add_gtest(ani_verify_test_detach_current_thread
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_detach_current_thread_test.cpp
+)

@@ -55,9 +55,9 @@ VEnv *VEnv::FromAniEnv(ani_env *env)
     return static_cast<VEnv *>(env);
 }
 
-void VEnv::CreateLocalScope()
+void VEnv::CreateLocalScope(ani_size capacity)
 {
-    GetEnvANIVerifier()->CreateLocalScope();
+    GetEnvANIVerifier()->CreateLocalScope(capacity);
 }
 
 std::optional<PandaString> VEnv::DestroyLocalScope()
@@ -65,9 +65,9 @@ std::optional<PandaString> VEnv::DestroyLocalScope()
     return GetEnvANIVerifier()->DestroyLocalScope();
 }
 
-void VEnv::CreateEscapeLocalScope()
+void VEnv::CreateEscapeLocalScope(ani_size capacity)
 {
-    GetEnvANIVerifier()->CreateEscapeLocalScope();
+    GetEnvANIVerifier()->CreateEscapeLocalScope(capacity);
 }
 
 std::optional<PandaString> VEnv::DestroyEscapeLocalScope(VRef *vref)

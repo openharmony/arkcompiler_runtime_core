@@ -697,7 +697,7 @@ NO_UB_SANITIZE static ani_status CreateLocalScope(VEnv *venv, ani_size nrRefs)
 
     ani_status status = GetInteractionAPI(venv)->CreateLocalScope(venv->GetEnv(), nrRefs);
     if (LIKELY(status == ANI_OK)) {
-        venv->CreateLocalScope();
+        venv->CreateLocalScope(nrRefs);
     }
     return status;
 }
@@ -730,7 +730,7 @@ NO_UB_SANITIZE static ani_status CreateEscapeLocalScope(VEnv *venv, ani_size nrR
 
     ani_status status = GetInteractionAPI(venv)->CreateEscapeLocalScope(venv->GetEnv(), nrRefs);
     if (LIKELY(status == ANI_OK)) {
-        venv->CreateEscapeLocalScope();
+        venv->CreateEscapeLocalScope(nrRefs);
     }
     return status;
 }

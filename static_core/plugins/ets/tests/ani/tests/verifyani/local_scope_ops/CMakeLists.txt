@@ -14,3 +14,7 @@
 ani_verify_add_gtest(ani_verify_test_ensure_enough_references
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_ensure_enough_references_test.cpp
 )
+
+ani_verify_add_gtest(ani_verify_test_local_ref_leak
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_local_ref_leak_test.cpp
+)
