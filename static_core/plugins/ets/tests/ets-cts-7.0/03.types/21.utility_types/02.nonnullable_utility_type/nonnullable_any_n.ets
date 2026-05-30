@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
+{% for c in cases %}
 
 /*---
 desc: Type NonNullable<T> constructs a type by excluding null and undefined types -
       NonNullable<Any> = Any - null - undefined
 tags: [compile-only, negative]
-expected_out: "TODO: throw CTE for null or undefined to NonNullable<Any> assignment"
+expected_out: "{{ c.expected }}"
 ---*/
 
 type NNANY = NonNullable<Any>
@@ -34,6 +34,6 @@ function main() {
     let ynnnn: NNNNANY = new Object
 
     // should fail since NonNullable<Any> = Any - null - undefined
-    {{ case }}
+    {{ c.code }}
 }
 {% endfor %}

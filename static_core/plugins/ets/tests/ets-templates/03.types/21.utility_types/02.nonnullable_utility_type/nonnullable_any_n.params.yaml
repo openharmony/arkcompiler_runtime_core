@@ -13,7 +13,15 @@
 
 ---
 cases:
-    - 'ynn = u'
-    - 'ynnnn = u'
-    - 'ynn = n'
-    - 'ynnnn = n'
+    - code: 'ynn = u'
+      expected: |-
+          Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'NonNullable<Any>'
+    - code: 'ynnnn = u'
+      expected: |-
+          Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'NonNullable<Any>'
+    - code: 'ynn = n'
+      expected: |-
+          Semantic error ESE0318: Type 'null' cannot be assigned to type 'NonNullable<Any>'
+    - code: 'ynnnn = n'
+      expected: |-
+          Semantic error ESE0318: Type 'null' cannot be assigned to type 'NonNullable<Any>'
