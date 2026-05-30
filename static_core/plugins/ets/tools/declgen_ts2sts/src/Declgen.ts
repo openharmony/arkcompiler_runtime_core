@@ -18,7 +18,7 @@ import * as ts from 'typescript';
 import { defaultCompilerOptions, Compiler, ModuleNameResolver } from './compiler/Compiler';
 import { Pipeline } from './Pipeline';
 
-import { IStage, StageContext } from './stages/Stage';
+import { IStage, StageContext, buildInitialStageContext } from './stages/Stage';
 import { DeclarationConversionStage } from './stages/declaration-conversion-stage/DeclarationConversionStage';
 import { RecheckStage } from './stages/recheck-stage/RecheckStage';
 import { ConversionStage } from './stages/conversion-stage/ConversionStage';
@@ -39,12 +39,26 @@ export interface DeclgenFeatureOptions {
 export interface DeclgenOptions {
   rootDir?: string;
   inputFiles: readonly string[];
+  libFiles?: readonly string[];
   outDir?: string;
   features?: DeclgenFeatureOptions;
+  /**
+   * Enable incremental compilation backed by tsc's `.tsbuildinfo`.
+   * When enabled, the second and subsequent runs reuse parse / type-check
+   * results and skip re-emitting `.d.ets` outputs for files that were not
+   * affected by any changes since the previous run.
+   */
+  incremental?: boolean;
+  /**
+   * Custom path to the `.tsbuildinfo` file. When omitted, tsc derives a
+   * default location from `outDir`.
+   */
+  tsBuildInfoFile?: string;
 }
 
 export class Declgen {
   private readonly rootFiles: readonly string[];
+  private readonly libFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
   private readonly compiler: Compiler;
   private readonly pipeline: Pipeline<IStage<unknown, unknown>[]>;
@@ -57,6 +71,7 @@ export class Declgen {
   ) {
     const options = defaultCompilerOptions();
     this.rootFiles = declgenOptions.inputFiles;
+    this.libFiles = declgenOptions.libFiles?? [];
     this.features = Object.assign(
       {
         enableInteropTypesFix: false,
@@ -69,13 +84,15 @@ export class Declgen {
       emitDeclarationOnly: true,
       outDir: declgenOptions.outDir,
       ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {}),
-      ...(compilerOptions ?? {})
+      ...(compilerOptions ?? {}),
+      ...(declgenOptions.incremental ? { incremental: true } : {}),
+      ...(declgenOptions.tsBuildInfoFile ? { tsBuildInfoFile: declgenOptions.tsBuildInfoFile } : {})
     });
     // Prevent the noemit of the passed compilerOptions from being true
     this.compilerOptions.noEmit = false;
     this.compilerOptions.experimentalDecorators = true;
 
-    this.compiler = new Compiler(this.rootFiles, this.compilerOptions, customResolveModuleNames);
+    this.compiler = new Compiler(this.rootFiles, this.libFiles, this.compilerOptions, customResolveModuleNames);
 
     /**
      * The transformation process contains many stages.
@@ -119,11 +136,7 @@ export class Declgen {
 
     this.compiler.compile();
 
-    const initialContext: StageContext<undefined> = {
-      compiler: this.compiler,
-      prevState: undefined
-    };
-
+    const initialContext: StageContext<undefined> = buildInitialStageContext(this.compiler, this.rootFiles);
     pipeline.run(initialContext);
     return {} as DeclgenResult;
   }
