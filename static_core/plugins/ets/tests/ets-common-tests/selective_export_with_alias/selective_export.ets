@@ -22,7 +22,7 @@ function testFunc(): void {}
 let msg: string = 'hello';
 
 class TestClass {
-    public testMember = 'test_member';
+    public testMember: string = 'test_member';
 
     testMethod(): void {}
 }
