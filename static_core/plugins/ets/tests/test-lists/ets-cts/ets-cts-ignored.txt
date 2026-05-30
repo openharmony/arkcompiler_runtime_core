@@ -481,12 +481,6 @@
 17.experimental_features/07.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_negative_5.ets
 17.experimental_features/07.callable_types/02.callable_types_with_instantiate_method/ct_inst_negative_6.ets
 
-#29122
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_18.ets
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_19.ets
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_32.ets
-17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over2_9.ets
-
 #34639
 15.semantic_rules/10.overloading/first_match/first_match_2c_4i.ets
 15.semantic_rules/10.overloading/first_match/first_match_3c_8i.ets
