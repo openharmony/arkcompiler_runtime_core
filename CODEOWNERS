@@ -15,7 +15,7 @@
 .* @klooer
 
 [StaticCore]
-static_core/ @egavrin
+static_core/ @egavrin @wanzixuan330
 
 [ArkPlatform]
-arkplatform/ @egavrin
+arkplatform/ @egavrin @wanzixuan330
