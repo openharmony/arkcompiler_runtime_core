@@ -96,22 +96,30 @@ ohos_executable("ark_aot") {
 }
 
 # OHOS build Host target
-ohos_executable("ark_aot_host") {
-  sources = _ark_aot_sources
+if (current_toolchain == host_toolchain) {
+  ohos_executable("ark_aot_host") {
+    sources = _ark_aot_sources
 
-  configs = _ark_aot_configs
+    configs = _ark_aot_configs
 
-  deps = _ark_aot_deps
-  deps += [
-    "$ark_root/compiler:libarktscompiler_host",
-    "$ark_root/runtime:libarkruntime_host",
-  ]
+    deps = _ark_aot_deps
+    deps += [
+      "$ark_root/compiler:libarktscompiler_host",
+      "$ark_root/runtime:libarkruntime_host",
+    ]
 
-  external_deps = _ark_aot_external_deps
+    external_deps = _ark_aot_external_deps
 
-  install_enable = true
-  part_name = ark_part_name
-  subsystem_name = "$ark_subsystem_name"
+    install_enable = true
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+} else {
+  # Keep the public target available for phone builds.
+  # The host tool is built only when the host toolchain is requested.
+  group("ark_aot_host") {
+    deps = []
+  }
 }
 
 # Copy host AOT configuration file to output directory
