@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: Implementing class has private field of same name and type in superclass.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0136: Method code_(): Int in MyCL not overriding any method"
+expected_out: "Semantic error ESE0188: MyCL is not abstract and does not implement getter for code_ property in I"
 ---*/
 
 class X {
