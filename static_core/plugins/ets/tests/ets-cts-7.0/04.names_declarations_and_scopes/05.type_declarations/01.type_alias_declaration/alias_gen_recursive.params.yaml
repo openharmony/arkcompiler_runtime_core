@@ -172,14 +172,6 @@ cases:
       arktest.assertEQ((v2.value as A<B, Stuff<B, Char>>).value, true)
 
   - defs: |-
-      type Matrix<T> = (p: Matrix<Long>) => T;
-    use: |-
-      let a: Matrix<Boolean> = (p: Matrix<Long>):Boolean => {return true};
-      let b: Matrix<Long> = (p: Matrix<Long>):Long => {return 1};
-      arktest.assertEQ(a(b), true)
-      arktest.assertEQ(b(b), 1)
-
-  - defs: |-
       type A<T> = FixedArray<B<T> | T>
       type B<T> = Array<A<T> | T | string>
       function func1(): A<number> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: 03.8.10 Tuple Types
-name: recursive0.ets
+desc: >-
+    Type Alias Declaration, disallowed recursive references: {{c.desc}}
 tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
-type TEmpty = [TEmpty]; // CTE: Circular type alias reference
+{{c.defs}}
+
+function main(): void {
+    {{c.use|indent}}
+}
+{% endfor %}
