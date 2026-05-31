@@ -70,7 +70,7 @@ protected:
     }
 
 private:
-    void RunAotMode(const ark::Span<const char *> &args);
+    bool RunAotMode(const ark::Span<const char *> &args);
     void StartAotFile(const panda_file::File &pfileRef);
     bool CompileFiles();
     bool TryLoadPandaFile(const std::string &fileName, PandaVM *vm);

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,7 @@ public:
     }
 
     int Write(const std::string &cmdline, const std::string &fileName);
+    int Write(int anFd, const std::string &cmdline, const std::string &fileName);
 
     void StartFile(const std::string &name, uint32_t checksum);
     void EndFile();
@@ -144,7 +145,7 @@ protected:
 
 private:
     template <Arch ARCH>
-    int WriteImpl(const std::string &cmdline, const std::string &fileName);
+    int WriteImpl(const std::string &cmdline, const std::string &fileName, int anFd = -1);
 
     template <Arch ARCH>
     void GenerateSymbols(ElfBuilder<ARCH> &builder);

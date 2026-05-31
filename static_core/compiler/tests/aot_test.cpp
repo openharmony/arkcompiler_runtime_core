@@ -30,8 +30,12 @@
 
 #include <array>
 #include <cstring>
+#include <fcntl.h>
 #include <fstream>
 #include <regex>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using ark::panda_file::File;
 
@@ -91,6 +95,38 @@ public:
                                   aotFilename.c_str());
         ASSERT_TRUE(res) << "aotdump failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U) << "aotdump return error code: " << res.Value();
+    }
+
+    void CreateTestZip(const char *archivename, const char *pandaFilename, std::vector<uint8_t> &pfData)
+    {
+        pandasm::Parser parser;
+        auto source = R"(
+            .function void f1() {
+                return.void
+            }
+        )";
+        auto res = parser.Parse(source, pandaFilename);
+        ASSERT_TRUE(res);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        pfData.assign(headerPtr, headerPtr + pf->GetHeader()->fileSize);
+        ASSERT_EQ(CreateOrAddFileIntoZip(archivename, pandaFilename, &pfData, APPEND_STATUS_CREATE, Z_NO_COMPRESSION),
+                  0);
+    }
+
+    void SpliceMemfdToDisk(int memfd, const char *diskPath)
+    {
+        lseek(memfd, 0, SEEK_SET);
+        int diskFd = open(diskPath, O_RDWR | O_CREAT | O_TRUNC, 0644);
+        ASSERT_GE(diskFd, 0);
+        char buf[4096];
+        ssize_t n;
+        while ((n = read(memfd, buf, sizeof(buf))) > 0) {
+            ASSERT_EQ(write(diskFd, buf, n), n);
+        }
+        fsync(diskFd);
+        close(diskFd);
     }
 
 private:
@@ -1602,5 +1638,198 @@ TEST_F(AotTest, PaocCompilationLimitLargeTimeout)
 }
 
 // NOLINTEND(readability-magic-numbers)
+
+TEST_F(AotTest, PaocWriteToAnFd)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+    TmpFile pandaFname("test_anfd.pf");
+    TmpFile aotFname("./test_anfd.an");
+
+    auto source = R"(
+        .function void f1() {
+            return.void
+        }
+        .function void f2() {
+            return.void
+        }
+    )";
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+
+    // Open a file descriptor for the output .an file
+    int anFd = open(aotFname.GetFileName(), O_RDWR | O_CREAT | O_TRUNC, 0644);
+    ASSERT_GE(anFd, 0);
+
+    // Run paoc with --paoc-an-fd
+    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), "--paoc-an-fd", std::to_string(anFd).c_str());
+    close(anFd);
+    ASSERT_TRUE(execRes) << "paoc failed with error: " << execRes.Error().ToString();
+    ASSERT_EQ(execRes.Value(), 0U) << "paoc returned error code: " << execRes.Value();
+
+    // Verify the .an file was written correctly (should be a valid ELF)
+    auto res2 = os::exec::Exec(GetAotdumpFile(), "--show-code=disasm", aotFname.GetFileName());
+    ASSERT_TRUE(res2) << "aotdump failed: " << res2.Error().ToString();
+    ASSERT_EQ(res2.Value(), 0U) << "aotdump return error: " << res2.Value();
+
+    unlink(aotFname.GetFileName());
+}
+
+TEST_F(AotTest, PaocWriteToInvalidFd)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+    TmpFile pandaFname("test_invalid_fd.pf");
+    TmpFile aotFname("./test_invalid_fd.an");
+
+    auto source = R"(
+        .function void f1() {
+            return.void
+        }
+    )";
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+
+    // Open the .pf file read-only and pass as --paoc-an-fd.
+    // The fd is valid (lseek succeeds) but not writable (ftruncate/write fail),
+    // so paoc should detect the write failure and return non-zero.
+    int readOnlyFd = open(pandaFname.GetFileName(), O_RDONLY);
+    ASSERT_GE(readOnlyFd, 0);
+
+    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                  aotFname.GetFileName(), "--paoc-an-fd", std::to_string(readOnlyFd).c_str());
+    close(readOnlyFd);
+    ASSERT_TRUE(execRes) << "paoc execution failed: " << execRes.Error().ToString();
+    // Write to a read-only fd should fail — paoc must return non-zero exit code
+    ASSERT_NE(execRes.Value(), 0U) << "paoc should fail when --paoc-an-fd is a read-only fd";
+
+    unlink(aotFname.GetFileName());
+}
+
+TEST_F(AotTest, PaocWriteToAnFdAndPathProduceSameOutput)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+    TmpFile pandaFname("test_anfd_cmp.pf");
+    TmpFile aotFnameFd("./test_anfd_cmp_fd.an");
+    TmpFile aotFnamePath("./test_anfd_cmp_path.an");
+
+    auto source = R"(
+        .function void f1() {
+            return.void
+        }
+    )";
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+
+    // Compile with fd
+    int anFd = open(aotFnameFd.GetFileName(), O_RDWR | O_CREAT | O_TRUNC, 0644);
+    ASSERT_GE(anFd, 0);
+    auto execRes1 = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                   aotFnameFd.GetFileName(), "--paoc-an-fd", std::to_string(anFd).c_str());
+    close(anFd);
+    ASSERT_TRUE(execRes1);
+    ASSERT_EQ(execRes1.Value(), 0U);
+
+    // Compile with path (default)
+    auto execRes2 = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(), "--paoc-output",
+                                   aotFnamePath.GetFileName());
+    ASSERT_TRUE(execRes2);
+    ASSERT_EQ(execRes2.Value(), 0U);
+
+    // Compare file sizes (ELF content should be functionally equivalent)
+    struct stat stFd;
+    struct stat stPath;
+    ASSERT_EQ(stat(aotFnameFd.GetFileName(), &stFd), 0);
+    ASSERT_EQ(stat(aotFnamePath.GetFileName(), &stPath), 0);
+    ASSERT_EQ(stFd.st_size, stPath.st_size) << "FD and path output sizes differ";
+
+    unlink(aotFnameFd.GetFileName());
+    unlink(aotFnamePath.GetFileName());
+}
+
+TEST_F(AotTest, PaocLoadZipFromHapFd)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+    // Create a zip archive containing a panda file, simulating a HAP
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser parser;
+        auto source = R"(
+            .function void f1() {
+                return.void
+            }
+        )";
+        auto res = parser.Parse(source, "test.abc");
+        ASSERT_TRUE(res);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        pfData.assign(headerPtr, headerPtr + pf->GetHeader()->fileSize);
+    }
+
+    const char *archivename = "__TestPaocHapFd__.zip";
+    const char *pandaFilename = "test.abc";
+    int ret = CreateOrAddFileIntoZip(archivename, pandaFilename, &pfData, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
+    ASSERT_EQ(ret, 0);
+
+    // Open the zip file and pass its fd to paoc via --paoc-hap-fd
+    int hapFd = open(archivename, O_RDONLY);
+    ASSERT_GE(hapFd, 0);
+
+    std::string hapFdArg = "--paoc-hap-fd=" + std::to_string(hapFd);
+    std::string zipPath = std::string(archivename) + "/" + pandaFilename;
+    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", zipPath.c_str(), "--paoc-zip-panda-file",
+                                  pandaFilename, "--paoc-location", "./", hapFdArg.c_str());
+    close(hapFd);
+    ASSERT_TRUE(execRes) << "paoc failed with error: " << execRes.Error().ToString();
+    ASSERT_EQ(execRes.Value(), 0U) << "paoc returned error with hapFd";
+
+    unlink(archivename);
+}
+
+TEST_F(AotTest, PaocFullFdPipeline)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP() << "AOT isn't supported on Aarch32";
+    }
+    std::vector<uint8_t> pfData;
+    const char *archivename = "__TestFullFdPipeline__.zip";
+    const char *pandaFilename = "test.abc";
+    CreateTestZip(archivename, pandaFilename, pfData);
+
+    int hapFd = open(archivename, O_RDONLY);
+    ASSERT_GE(hapFd, 0);
+    int anFd = memfd_create("an_file", MFD_ALLOW_SEALING);
+    ASSERT_GE(anFd, 0);
+
+    std::string hapFdArg = "--paoc-hap-fd=" + std::to_string(hapFd);
+    std::string anFdArg = "--paoc-an-fd=" + std::to_string(anFd);
+    TmpFile aotFname("./test_full_fd.an");
+    std::string zipPath = std::string(archivename) + "/" + pandaFilename;
+    auto execRes = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", zipPath.c_str(), "--paoc-zip-panda-file",
+                                  pandaFilename, "--paoc-location", "./", "--paoc-output", aotFname.GetFileName(),
+                                  hapFdArg.c_str(), anFdArg.c_str());
+    close(hapFd);
+    ASSERT_TRUE(execRes) << "paoc failed with error: " << execRes.Error().ToString();
+    ASSERT_EQ(execRes.Value(), 0U) << "paoc returned error in full fd pipeline";
+
+    SpliceMemfdToDisk(anFd, aotFname.GetFileName());
+    close(anFd);
+    RunAotdump(aotFname.GetFileName());
+    unlink(archivename);
+}
 
 }  // namespace ark::compiler

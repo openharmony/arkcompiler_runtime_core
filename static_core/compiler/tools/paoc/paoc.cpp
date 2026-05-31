@@ -28,6 +28,9 @@
 #include "optimizer/ir_builder/ir_builder.h"
 #include "libarkbase/os/filesystem.h"
 #include "libarkbase/panda_gen_options/generated/logger_options.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <memory>
 
 #include "paoc.h"
 #ifdef PANDA_LLVM_AOT
@@ -37,6 +40,8 @@
 using namespace ark::compiler;  // NOLINT(*-build-using-namespace)
 
 namespace ark::paoc {
+
+using FilePtr = std::unique_ptr<FILE, int (*)(FILE *)>;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PAOC(level) LOG(level, COMPILER) << "PAOC: "
@@ -380,7 +385,10 @@ int Paoc::Run(const ark::Span<const char *> &args)
     if (IsAotMode()) {
         if (aotBuilder_->GetCurrentCodeAddress() != 0 || !aotBuilder_->GetClassHashTableSize()->empty() ||
             IsLLVMAotMode()) {
-            RunAotMode(args);
+            if (!RunAotMode(args)) {
+                Clear(allocator);
+                return 1;
+            }
         }
         if (aotBuilder_->GetCurrentCodeAddress() == 0 && aotBuilder_->GetClassHashTableSize()->empty()) {
             LOG_PAOC(ERROR) << "There are no compiled methods";
@@ -413,7 +421,7 @@ std::string Paoc::BuildClassContext()
     return classCtx;
 }
 
-void Paoc::RunAotMode(const ark::Span<const char *> &args)
+bool Paoc::RunAotMode(const ark::Span<const char *> &args)
 {
     std::string cmdline;
     for (auto arg : args) {
@@ -433,13 +441,21 @@ void Paoc::RunAotMode(const ark::Span<const char *> &args)
     if (IsLLVMAotMode()) {
         bool writeAot = EndLLVM();
         if (!writeAot) {
-            return;
+            return false;
         }
     }
 
-    aotBuilder_->Write(cmdline, outputFile);
+    // Use FD-based write if compiler_service passed --paoc-an-fd
+    int anFd = paocOptions_->GetPaocAnFd();
+    int writeResult;
+    if (anFd >= 0) {
+        writeResult = aotBuilder_->Write(anFd, cmdline, outputFile);
+    } else {
+        writeResult = aotBuilder_->Write(cmdline, outputFile);
+    }
     LOG_PAOC(INFO) << "METHODS COMPILED (success/all): " << successMethods_ << '/' << successMethods_ + failedMethods_;
     LOG_PAOC(DEBUG) << "Successfully compiled to " << outputFile;
+    return writeResult == 0;
 }
 
 void Paoc::Clear(ark::mem::InternalAllocatorPtr allocator)
@@ -675,13 +691,46 @@ std::unique_ptr<const panda_file::File> Paoc::TryLoadZipPandaFile(const std::str
     }
 
     std::string location = fileName.substr(0, pos - 1);  // 1: for '/'
-    FILE *fp = fopen(location.c_str(), "rbe");
-    if (fp == nullptr) {
-        LOG_PAOC(ERROR) << "Can't fopen location: " << location;
-        return nullptr;
+
+    int hapFd = paocOptions_->GetPaocHapFd();
+    // OpenZipPandaFile may fclose(fp) on some error paths. To protect the caller's hapFd,
+    // dup() it first so fclose only closes the duplicate.
+    int rawFd = -1;
+    FilePtr fp(nullptr, fclose);
+    if (hapFd >= 0) {
+        int dupFd = dup(hapFd);
+        if (dupFd < 0) {
+            LOG_PAOC(ERROR) << "dup failed for hapFd=" << hapFd << " errno=" << errno;
+            return nullptr;
+        }
+        fp.reset(fdopen(dupFd, "rbe"));
+        if (fp == nullptr) {
+            LOG_PAOC(ERROR) << "Can't fdopen dupFd=" << dupFd << " errno=" << errno;
+            close(dupFd);
+            return nullptr;
+        }
+        rawFd = dupFd;
+    } else {
+        fp.reset(fopen(location.c_str(), "rbe"));
+        if (fp == nullptr) {
+            LOG_PAOC(ERROR) << "Can't fopen location: " << location;
+            return nullptr;
+        }
+        rawFd = fileno(fp.get());
     }
-    std::unique_ptr<const panda_file::File> file = panda_file::OpenZipPandaFile(fp, fileName, zipPandaFilePath);
-    fclose(fp);
+    auto file = panda_file::OpenZipPandaFile(fp.get(), fileName, zipPandaFilePath);
+    if (file != nullptr) {
+        // Success: OpenZipPandaFile didn't fclose. Guard closes on destruction.
+    } else {
+        // OpenZipPandaFile's fclose behavior is inconsistent across nullptr paths:
+        // only the "entry not found" path calls fclose, others do not.
+        // Check whether the underlying fd was already closed to avoid double-fclose or leak.
+        if (fcntl(rawFd, F_GETFD) == -1) {
+            // Already closed by OpenZipPandaFile — release to prevent double-fclose.
+            fp.release();
+        }
+        // If fd is still valid, the RAII guard will close it properly.
+    }
     return file;
 }
 
