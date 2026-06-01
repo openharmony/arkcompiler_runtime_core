@@ -23,22 +23,22 @@ template <class STWFunction>
 void MutatorManager::FlipMutators(STWParam &param, STWFunction &&stwFunction, FlipFunction *flipFunction)
 {
     std::list<Mutator *> undoneMutators;
-    {
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "Waiting-STW", "");
-        ScopedStopTheWorld stw(param);
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, param.stwReason, "");
 
-        stwFunction();
-        bool ignoreFinalizer = true;
-        // Hope process ui thread's flipFunction at last, so add the ui mutator at the end of undoeMuators list.
-        VisitAllMutators(
-            [&undoneMutators, flipFunction](Mutator &mutator) {
-                mutator.SetFlipFunction(flipFunction);
-                mutator.SetSuspensionFlag(ark::PENDING_CALLBACK_REQUEST);
-                undoneMutators.push_front(&mutator);
-            },
-            ignoreFinalizer);
-    }
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "Waiting-STW", "");
+    ScopedStopTheWorld stw(param);
+    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, param.stwReason, "");
+
+    stwFunction();
+    bool ignoreFinalizer = true;
+    // Hope process ui thread's flipFunction at last, so add the ui mutator at the end of undoeMuators list.
+    VisitAllMutators(
+        [&undoneMutators, flipFunction](Mutator &mutator) {
+            mutator.SetFlipFunction(flipFunction);
+            mutator.SetSuspensionFlag(ark::PENDING_CALLBACK_REQUEST);
+            undoneMutators.push_front(&mutator);
+        },
+        ignoreFinalizer);
+
     for (auto *mutator : undoneMutators) {
         mutator->TryRunFlipFunction();
     }

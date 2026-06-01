@@ -141,7 +141,7 @@ void MutatorManager::VisitAllMutators(MutatorVisitor func, bool ignoreFinalizer)
     }
 }
 
-void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
+void MutatorManager::StopTheWorld(GCPhase phase)
 {
     ASSERT(IsGcThread());
     // Block if another thread is holding the stwMutex.
@@ -156,9 +156,6 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
         AcquireMutatorLockW();
         // Atomic with release order reason: data race with worldStopped_ with dependecies on writes before the store
         worldStopped_.store(true, std::memory_order_release);
-        if (syncGCPhase) {
-            TransitionAllMutatorsToGCPhase(phase);
-        }
         return;
     }
     // set mutatorCount as countOfMutatorsToStop.
@@ -169,9 +166,6 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
     // the world is stopped.
     // Atomic with release order reason: data race with worldStopped_ with dependecies on writes before the store
     worldStopped_.store(true, std::memory_order_release);
-    if (syncGCPhase) {
-        TransitionAllMutatorsToGCPhase(phase);
-    }
 }
 
 void MutatorManager::StartTheWorld() noexcept
@@ -197,63 +191,6 @@ void MutatorManager::StartTheWorld() noexcept
 
     // Release stwMutex to allow other thread call STW.
     stwMutex_.Unlock();
-}
-
-void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &undoneMutators)
-{
-    // Traverse through undoneMutators to select mutators that have not yet completed transition
-    // 1. ignore mutators which have completed transition
-    // 2. gc compete phase transition with mutators which are in saferegion
-    // 3. fill mutators which are running state in undoneMutators
-    while (undoneMutators.size() > 0) {
-        for (auto it = undoneMutators.begin(); it != undoneMutators.end();) {
-            Mutator *mutator = *it;
-            if (mutator->GetMutatorPhase() == phase && mutator->FinishedTransition()) {
-                it = undoneMutators.erase(it);
-                continue;
-            }
-            if (mutator->InSaferegion() && mutator->TransitionGCPhase(false)) {
-                it = undoneMutators.erase(it);
-                continue;
-            }
-            ++it;
-        }
-
-        if (undoneMutators.empty()) {
-            return;
-        }
-
-        // Yield CPU to let running mutators reach their next safepoint and process
-        (void)sched_yield();
-    }
-}
-
-void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
-{
-    // Prevent mutators from unregistering
-    bool worldStopped = WorldStopped();
-    if (!worldStopped) {
-        stwMutex_.Lock();
-    }
-
-    GCPhase prevPhase = Heap::GetHeap().GetGCPhase();
-    // Set global gc phase in the scope of mutatorlist lock
-    Heap::GetHeap().InstallBarrier(phase);
-    Heap::GetHeap().SetGCPhase(phase);
-
-    LOG(DEBUG, GC) << "transition gc phase: " << Collector::GetGCPhaseName(prevPhase) << "(" << prevPhase << ") -> "
-                   << Collector::GetGCPhaseName(phase) << "(" << phase << ")";
-
-    std::list<Mutator *> undoneMutators;
-    // Broadcast mutator phase transition signal to all mutators
-    VisitAllMutators([&undoneMutators](Mutator &mutator) {
-        mutator.SetSuspensionFlag(ark::GC_PHASE_TRANSITION_REQUEST);
-        undoneMutators.push_back(&mutator);
-    });
-    EnsurePhaseTransition(phase, undoneMutators);
-    if (!worldStopped) {
-        stwMutex_.Unlock();
-    }
 }
 
 void MutatorManager::DumpMutators(uint32_t timeoutTimes)

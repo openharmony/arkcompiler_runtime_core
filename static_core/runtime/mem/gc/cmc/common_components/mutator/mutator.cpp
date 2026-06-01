@@ -47,53 +47,6 @@ ThreadLocalData *GetThreadLocalData()
     return reinterpret_cast<ThreadLocalData *>(tlDataAddr);
 }
 
-// Ensure that mutator phase is changed only once by mutator itself or GC
-bool Mutator::TransitionGCPhase(bool bySelf)
-{
-    // CC-OFFNXT(G.CTL.03): false positive
-    do {
-        // Atomic with acquire order reason: data race with transitionState_ with dependecies on reads after the load
-        GCPhaseTransitionState state = transitionState_.load(std::memory_order_acquire);
-        // If this mutator phase transition has finished, just return
-        if (state == FINISH_TRANSITION) {
-            // Atomic with acquire order reason: data race with mutatorPhase_ with dependecies on reads after the load
-            bool result = mutatorPhase_.load(std::memory_order_acquire) == Heap::GetHeap().GetGCPhase();
-            if (!bySelf && !result) {  // why check bySelf?
-                LOG(FATAL, COMMON) << "Unresolved fatal";
-                UNREACHABLE();
-            }
-            return result;
-        }
-
-        // If this mutator is executing phase transition by other thread, mutator should wait but GC just return
-        if (state == IN_TRANSITION) {
-            if (bySelf) {
-                WaitForPhaseTransition();
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        if (!bySelf && state == NO_TRANSITION) {
-            return true;
-        }
-
-        // Current thread set atomic variable to ensure atomicity of phase transition
-        CHECK(state == NEED_TRANSITION);
-        // Atomic with acq_rel/acquire order reason: data race with transitionState_ with acquire-release semantics
-        // on success and acquire on failure to ensure phase transition atomicity
-        if (transitionState_.compare_exchange_weak(state, IN_TRANSITION, std::memory_order_acq_rel,
-                                                   std::memory_order_acquire)) {
-            TransitionToGCPhaseExclusive(Heap::GetHeap().GetGCPhase());
-            // Atomic with release order reason: data race with transitionState_ with dependecies on writes before
-            // the store
-            transitionState_.store(FINISH_TRANSITION, std::memory_order_release);
-            return true;
-        }
-    } while (true);
-}
-
 void Mutator::HandleSuspensionRequest()
 {
     // CC-OFFNXT(G.CTL.03): false positive
@@ -101,11 +54,6 @@ void Mutator::HandleSuspensionRequest()
         SetInSaferegion(ark::MutatorStatus::NATIVE);
         if (HasSuspensionRequest(ark::SUSPEND_REQUEST)) {
             SuspendForStw();
-            if (HasSuspensionRequest(ark::GC_PHASE_TRANSITION_REQUEST)) {
-                TransitionGCPhase(true);
-            }
-        } else if (HasSuspensionRequest(ark::GC_PHASE_TRANSITION_REQUEST)) {
-            TransitionGCPhase(true);
         } else if (HasSuspensionRequest(ark::PENDING_CALLBACK_REQUEST)) {
             TryRunFlipFunction();
         } else if (HasSuspensionRequest(ark::RUNNING_CALLBACK_REQUEST)) {
@@ -197,7 +145,6 @@ void Mutator::ResetMutator()
     // Atomic with relaxed order reason: data race with transitionState_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     transitionState_.store(NO_TRANSITION, std::memory_order_relaxed);
-    static_cast<ark::Mutator *>(this)->ClearFlag(ark::GC_PHASE_TRANSITION_REQUEST);
     static_cast<ark::Mutator *>(this)->ClearFlag(ark::PENDING_CALLBACK_REQUEST);
     static_cast<ark::Mutator *>(this)->ClearFlag(ark::RUNNING_CALLBACK_REQUEST);
     static_cast<ark::Mutator *>(this)->ClearFlag(ark::SUSPEND_FOR_FINALIZE);
@@ -226,8 +173,6 @@ void Mutator::ClearSatbBufferNode()
 }
 
 void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
-
-void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase) {}
 
 void Mutator::DumpMutator() const
 {
@@ -292,39 +237,6 @@ void Mutator::HandleGCPhase(GCPhase newPhase)
     }
 }
 
-void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
-{
-    HandleGCPhase(newPhase);
-    // Atomic with relaxed order reason: handshake between mutator & mainGC thread, no synchronization or ordering
-    // constraints imposed on other reads or writes
-    mutatorPhase_.store(newPhase, std::memory_order_relaxed);  // handshake between mutator & mainGC thread
-    BaseRuntime::GetInstance()->ForEachVM(
-        [m = this, newPhase](VMInterface *vm) { m->UpdateBarrierEntrypoint(newPhase); });
-    // Clear mutator's suspend request after phase transition
-    ClearSuspensionFlag(ark::GC_PHASE_TRANSITION_REQUEST);
-}
-
-void Mutator::RegisterNewMutator(Mutator *mutator)
-{
-    auto &mutatorManager = MutatorManager::Instance();
-    GCPhase phase = Heap::GetHeap().GetGCPhase();
-    {
-        ark::os::memory::LockHolder<ark::os::memory::Mutex> guard(mutatorManager.allMutatorListLock_);
-        DCHECK(std::find(mutatorManager.allMutatorList_.begin(), mutatorManager.allMutatorList_.end(), mutator) ==
-               mutatorManager.allMutatorList_.end());
-        if (UNLIKELY(mutatorManager.StwTriggered())) {
-            mutator->SetSuspensionFlag(ark::SUSPEND_REQUEST);
-        }
-        mutatorManager.allMutatorList_.push_back(mutator);
-    }
-    mutator->SetMutatorPhase(phase);
-    // Enable pre write barrier for mutators created during concurrent marking and enable read barrier for mutators
-    // created during concurrent copy/fix.
-    if (phase >= GCPhase::GC_PHASE_ENUM) {
-        mutator->TransitionToGCPhaseExclusive(phase);
-    }
-}
-
 bool Mutator::TryBindMutator()
 {
     if (ThreadLocal::IsArkProcessor()) {
@@ -362,24 +274,6 @@ void Mutator::UnbindMutator()
 void Mutator::ReleaseAllocBuffer()
 {
     allocBuffer_ = nullptr;
-}
-
-void Mutator::UnregisterMutator(Mutator *mutator)
-{
-    ScopedSTWLock stwLock;
-    DCHECK(!mutator->IsInRunningState());
-    mutator->ReleaseAllocBuffer();
-
-    auto &mutatorManager = MutatorManager::Instance();
-    {
-        ark::os::memory::LockHolder guard(mutatorManager.allMutatorListLock_);
-        auto &list = mutatorManager.allMutatorList_;
-        auto it = std::find(list.begin(), list.end(), mutator);
-        if (it != list.end()) {
-            list.erase(it);
-        }
-    }
-    mutator->ResetMutator();
 }
 
 Mutator::TryBindMutatorScope::TryBindMutatorScope(Mutator *mutator) : mutator_(nullptr)

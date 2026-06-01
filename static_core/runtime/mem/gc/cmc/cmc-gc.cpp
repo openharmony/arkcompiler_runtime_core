@@ -663,7 +663,11 @@ void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<BaseObject *> &collecte
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     markedObjectCount_.store(0, std::memory_order_relaxed);
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_MARK, true);
+    STWParam stwParam {"GC_PHASE_MARK transition"};
+    {
+        ScopedStopTheWorld stw(stwParam);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_MARK);
+    }
 
     MarkingRoots(collectedRoots);
     ExemptFromSpace();
@@ -674,7 +678,7 @@ void CmcGC<LanguageConfig>::PostMarking()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PostMarking", "");
     COMMON_PHASE_TIMER("PostMarking");
-    TransitionToGCPhase(ark::common_vm::GC_PHASE_POST_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_POST_MARK);
 
     // clear satb buffer when gc finish tracing.
     SatbBuffer::Instance().ClearBuffer();
@@ -746,12 +750,12 @@ void CmcGC<LanguageConfig>::PreforwardFlip()
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
         ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
-        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
         Remark();
         PostMarking();
         reinterpret_cast<RegionalHeap &>(theAllocator_).PrepareForward();
 
-        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY, true);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY);
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::FOREGROUND);
 
@@ -779,7 +783,7 @@ void CmcGC<LanguageConfig>::Preforward()
 {
     COMMON_PHASE_TIMER("Preforward");
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Preforward[STW]", "");
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY);
 
     [[maybe_unused]] auto *threadPool = GetThreadPool();
     ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
@@ -872,7 +876,11 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::FixHeap()
 {
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FIX, true);
+    STWParam stwParam {"GC_PHASE_FIX transition"};
+    {
+        ScopedStopTheWorld stw(stwParam);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FIX);
+    }
     COMMON_PHASE_TIMER("FixHeap");
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap", "");
     ParallelFixHeap();
@@ -893,7 +901,7 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef()
 
     auto collectedRoots = EnumRoots<EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR>();
     MarkingHeap(collectedRoots);
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
     Remark();
     ark::common_vm::SweepUnmarkedXRefs();
     PostMarking();
@@ -916,7 +924,7 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef()
         CollectNonMovableGarbage();
     }
 
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE);
 
     ClearAllGCInfo();
     CollectSmallSpace();
@@ -1041,7 +1049,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
             ScopedStopTheWorld stw(stwParam);
             auto collectedRoots = EnumRoots<EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR>();
             MarkingHeap(collectedRoots);
-            TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
+            TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
             Remark();
             PostMarking();
 
@@ -1062,7 +1070,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
                 CollectNonMovableGarbage();
             }
 
-            TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
+            TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE);
 
             ClearAllGCInfo();
             CollectSmallSpace();
@@ -1072,38 +1080,6 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
 #endif
         }
         GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
-        return;
-    } else if (gcMode_ == GCMode::CONCURRENT_MARK) {  // 1: concurrent-mark
-        auto collectedRoots = EnumRoots<EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR>();
-        MarkingHeap(collectedRoots);
-        STWParam finalMarkStwParam {"final-mark"};
-        {
-            ScopedStopTheWorld stw(finalMarkStwParam, true, ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
-            Remark();
-            PostMarking();
-            reinterpret_cast<RegionalHeap &>(theAllocator_).PrepareForward();
-            Preforward();
-        }
-        GetGCStats().recordSTWTime(finalMarkStwParam.GetElapsedNs());
-        ConcurrentPreforward();
-        // reclaim large objects should after preforward(may process weak ref) and
-        // before fix heap(may clear live bit)
-        if (!isYoungGC) {
-            CollectLargeGarbage();
-        }
-
-        CopyFromSpace();
-        WVerify::VerifyAfterForward();
-
-        PrepareFix();
-        FixHeap();
-        if (!isYoungGC) {
-            CollectNonMovableGarbage();
-        }
-
-        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
-        ClearAllGCInfo();
-        CollectSmallSpace();
         return;
     }
 
@@ -1134,7 +1110,11 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
         DoGarbageCollectionWithoutConcurrentMarking();
     }
 
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE, true);
+    STWParam stwParam {"GC_PHASE_IDLE transition"};
+    {
+        ScopedStopTheWorld stw(stwParam);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE);
+    }
     ClearAllGCInfo();
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
     space.DumpAllRegionSummary("Peak GC log");
@@ -1198,10 +1178,10 @@ void CmcGC<LanguageConfig>::PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> 
     heap.PrepareMarking();
     heap.PrepareForward();
 
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_PRECOPY);
     rootsVisitFunc([this, &forwardedRoots](RefField<> &root) { PreforwardNonHeapRoot(root, forwardedRoots); });
 
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY);
 }
 
 template <class LanguageConfig>
@@ -1265,7 +1245,7 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace(GlobalEvacuationStack &gl
     STWParam param {"remark-young-collection-space"};
     ScopedStopTheWorld stw(param);
 
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK, true);
+    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
 
     RemarkNonHeapRoots(globalStack);
     MarkSatbBuffer(globalStack);
@@ -1761,6 +1741,82 @@ void CmcGC<LanguageConfig>::SetGCThreadQosPriority(PriorityMode mode)
     }
     Taskpool::GetCurrentTaskpool()->SetThreadPriority(mode);
 #endif
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::UpdateBarrierEntrypoint(ark::common_vm::Mutator *mutator, ark::common_vm::GCPhase phase)
+{
+    if (phase >= ark::common_vm::GCPhase::GC_PHASE_ENUM && phase < ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK) {
+        EnablePreWriteBarrier(static_cast<ark::Mutator *>(mutator));
+    } else if (phase >= ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK &&
+               phase < ark::common_vm::GCPhase::GC_PHASE_PRECOPY) {
+        DisableReadBarrier(static_cast<ark::Mutator *>(mutator));
+        DisablePreWriteBarrier(static_cast<ark::Mutator *>(mutator));
+    } else if (phase >= ark::common_vm::GCPhase::GC_PHASE_PRECOPY &&
+               phase < ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
+        EnableReadBarrier(static_cast<ark::Mutator *>(mutator));
+    } else if (phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
+        EnableReadBarrier(static_cast<ark::Mutator *>(mutator));
+        EnablePreWriteBarrier(static_cast<ark::Mutator *>(mutator));
+    } else if (phase == ark::common_vm::GCPhase::GC_PHASE_IDLE) {
+        DisableReadBarrier(static_cast<ark::Mutator *>(mutator));
+        DisablePreWriteBarrier(static_cast<ark::Mutator *>(mutator));
+    }
+    // Check if a new phase has been added
+    ASSERT(phase == ark::common_vm::GCPhase::GC_PHASE_ENUM || phase == ark::common_vm::GCPhase::GC_PHASE_MARK ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_PRECOPY || phase == ark::common_vm::GCPhase::GC_PHASE_COPY ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_FIX || phase == ark::common_vm::GCPhase::GC_PHASE_IDLE ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_POST_MARK ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_REMARK_SATB ||
+           phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]] MutatorUnregistrationMode mode,
+                                               [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
+{
+    GC::OnMutatorTerminate(mutator, mode, keepBuffers);
+
+    DCHECK(!mutator->IsInRunningState());
+    mutator->ReleaseAllocBuffer();
+
+    if (mutator->GetMutatorType() == ark::Mutator::MutatorType::MANAGED) {
+        auto &mutatorManager = MutatorManager::Instance();
+        ark::os::memory::LockHolder guard(mutatorManager.allMutatorListLock_);
+        auto &list = mutatorManager.allMutatorList_;
+        auto it = std::find(list.begin(), list.end(), mutator);
+        if (it != list.end()) {
+            list.erase(it);
+        }
+    }
+    UpdateBarrierEntrypoint(mutator, ark::common_vm::GCPhase::GC_PHASE_IDLE);
+    mutator->SetMutatorPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE);
+    mutator->ResetMutator();
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
+{
+    ark::common_vm::GCPhase phase = GetGCPhase();
+    if (mutator->GetMutatorType() == ark::Mutator::MutatorType::MANAGED) {
+        auto &mutatorManager = MutatorManager::Instance();
+        ark::os::memory::LockHolder<ark::os::memory::Mutex> guard(mutatorManager.allMutatorListLock_);
+        DCHECK(std::find(mutatorManager.allMutatorList_.begin(), mutatorManager.allMutatorList_.end(), mutator) ==
+               mutatorManager.allMutatorList_.end());
+        if (UNLIKELY(mutatorManager.StwTriggered())) {
+            mutator->SetSuspensionFlag(ark::SUSPEND_REQUEST);
+        }
+        mutatorManager.allMutatorList_.push_back(mutator);
+    }
+    mutator->SetMutatorPhase(phase);
+    // Enable pre write barrier for mutators created during concurrent marking and enable read barrier for mutators
+    // created during concurrent copy/fix.
+    if (phase >= ark::common_vm::GCPhase::GC_PHASE_ENUM) {
+        mutator->HandleGCPhase(phase);
+        UpdateBarrierEntrypoint(mutator, phase);
+    }
+    GC::OnMutatorCreate(mutator);
 }
 
 template <class LanguageConfig>
@@ -2478,7 +2534,11 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::CopyFromSpace()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CopyFromSpace", "");
-    TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_COPY, true);
+    STWParam stwParam {"GC_PHASE_COPY transition"};
+    {
+        ScopedStopTheWorld stw(stwParam);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_COPY);
+    }
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
     auto &stats = GetGCStats();
     stats.liveBytesBeforeGC = space.GetAllocatedBytes();

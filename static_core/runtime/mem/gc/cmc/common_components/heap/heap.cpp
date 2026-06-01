@@ -15,14 +15,9 @@
 
 #include "common_components/heap/heap.h"
 
-#include "common_components/heap/ark_collector/idle_barrier.h"
-#include "common_components/heap/ark_collector/enum_barrier.h"
-#include "common_components/heap/ark_collector/marking_barrier.h"
-#include "common_components/heap/ark_collector/remark_barrier.h"
-#include "common_components/heap/ark_collector/post_marking_barrier.h"
-#include "common_components/heap/ark_collector/preforward_barrier.h"
-#include "common_components/heap/ark_collector/copy_barrier.h"
+#include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/collector/collector_resources.h"
+#include "common_components/common/scoped_object_access.h"
 #include "common_components/mutator/mutator_manager.h"
 
 #if defined(_WIN64)
@@ -38,8 +33,6 @@ static_assert(Heap::NORMAL_UNIT_SIZE == RegionDesc::UNIT_SIZE);
 static_assert(Heap::NORMAL_UNIT_HEADER_SIZE == RegionDesc::UNIT_HEADER_SIZE);
 static_assert(Heap::NORMAL_UNIT_AVAILABLE_SIZE == RegionDesc::UNIT_AVAILABLE_SIZE);
 
-std::atomic<Barrier *> *Heap::currentBarrierPtr_ = nullptr;
-Barrier *Heap::stwBarrierPtr_ = nullptr;
 HeapAddress Heap::heapStartAddr_ = 0;
 HeapAddress Heap::heapCurrentEnd_ = 0;
 
@@ -47,11 +40,6 @@ class HeapImpl : public Heap {
 public:
     HeapImpl() : theSpace_(Allocator::CreateAllocator())
     {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes
-        currentBarrier_.store(&stwBarrier_, std::memory_order_relaxed);
-        stwBarrierPtr_ = &stwBarrier_;
-        Heap::currentBarrierPtr_ = &currentBarrier_;
         RunType::InitRunTypeMap();
     }
 
@@ -137,15 +125,6 @@ public:
     {
         collectorResources_.SetCollector(collector);
         collector_ = collector;
-        stwBarrier_.SetCollector(collector);
-        idleBarrier_.SetCollector(collector);
-        enumBarrier_.SetCollector(collector);
-        markingBarrier_.SetCollector(collector);
-        remarkBarrier_.SetCollector(collector);
-        postMarkingBarrier_.SetCollector(collector);
-        preforwardBarrier_.SetCollector(collector);
-        copyBarrier_.SetCollector(collector);
-        youngCopyBarrier_.SetCollector(collector);
 
         collector_->Init(runtimeParam_);
         collectorResources_.Init();
@@ -172,7 +151,6 @@ public:
     HeapAddress GetStartAddress() const override;
     HeapAddress GetSpaceEndAddress() const override;
     bool ForEachObject(const std::function<void(BaseObject *)> &, bool) override;
-    void InstallBarrier(const GCPhase phase) override;
     CollectorResources &GetCollectorResources() override;
     void RegisterAllocBuffer(AllocationBuffer &buffer) override;
     void UnregisterAllocBuffer(AllocationBuffer &buffer) override;
@@ -204,16 +182,6 @@ private:
     // collector (i.e. no-gc), allocator and barrier (interface to access heap) is still needed.
     Collector *collector_;
 
-    Barrier stwBarrier_;
-    IdleBarrier idleBarrier_;
-    EnumBarrier enumBarrier_;
-    MarkingBarrier markingBarrier_;
-    RemarkBarrier remarkBarrier_;
-    PostMarkingBarrier postMarkingBarrier_;
-    PreforwardBarrier preforwardBarrier_;
-    CopyBarrier copyBarrier_;
-    YoungCopyBarrier youngCopyBarrier_;
-    std::atomic<Barrier *> currentBarrier_ = nullptr;
     HeuristicGCPolicy heuristicGCPolicy_;
 
     std::atomic<bool> isGCEnabled_ = {true};
@@ -370,44 +338,6 @@ Collector &HeapImpl::GetCollector()
 Allocator &HeapImpl::GetAllocator()
 {
     return *theSpace_;
-}
-
-void HeapImpl::InstallBarrier(const GCPhase phase)
-{
-    if (phase == GCPhase::GC_PHASE_ENUM) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&enumBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_MARK) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&markingBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_PRECOPY) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&preforwardBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_COPY || phase == GCPhase::GC_PHASE_FIX) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&copyBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_YOUNG_COPY) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&youngCopyBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_IDLE) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&idleBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_POST_MARK) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&postMarkingBarrier_, std::memory_order_relaxed);
-    } else if (phase == GCPhase::GC_PHASE_FINAL_MARK || phase == GCPhase::GC_PHASE_REMARK_SATB) {
-        // Atomic with relaxed order reason: data race with currentBarrier_ with no synchronization or ordering
-        // constraints imposed on other reads or writes, barrier is installed under STW or handshake
-        currentBarrier_.store(&remarkBarrier_, std::memory_order_relaxed);
-    }
-    LOG(DEBUG, GC) << "install barrier for gc phase " << phase;
 }
 
 GCPhase HeapImpl::GetGCPhase() const

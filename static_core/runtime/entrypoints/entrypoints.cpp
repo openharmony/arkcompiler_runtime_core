@@ -429,17 +429,18 @@ extern "C" ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj)
     return ObjectHeader::Clone(obj);
 }
 
-extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
+extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] uint32_t offset)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    return Mutator::GetCurrent()->GetBarrierSet()->ReadBarrier(obj, offset);
+    auto **refAddr = reinterpret_cast<void **>(ToUintPtr(obj) + offset);
+    return Mutator::GetCurrent()->GetBarrierSet()->ReadBarrier(refAddr);
 #else
     UNREACHABLE();
     return nullptr;  // No-op
 #endif
 }
 
-extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
+extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] uint32_t offset)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return Mutator::GetCurrent()->GetBarrierSet()->AtomicReadBarrier(obj, offset, std::memory_order_acquire);

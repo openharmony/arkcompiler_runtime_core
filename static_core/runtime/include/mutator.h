@@ -253,7 +253,6 @@ public:
 
 #if defined(ARK_USE_COMMON_RUNTIME)
     void VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor) override;
-    void UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase) override;
 #endif
 
     void MakeTSANHappyForThreadState();

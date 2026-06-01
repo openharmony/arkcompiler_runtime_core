@@ -326,7 +326,7 @@ entrypoints:
   signature:
     - void*
     - ark::ObjectHeader*
-    - int32_t
+    - uint32_t
 
 - name: CmcAtomicReadViaBarrier
   entrypoint: CmcAtomicReadViaBarrier
@@ -335,7 +335,7 @@ entrypoints:
   signature:
     - void*
     - ark::ObjectHeader*
-    - int32_t
+    - uint32_t
 
 - name: PostBarrierWrite
   entrypoint: PostBarrierWriteEntrypoint
