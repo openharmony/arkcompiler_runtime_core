@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,9 @@
 /*---
 desc: {{c.desc}}
 params: {{c.params}}
-test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}_{{c.ids}}"
 ---*/
 
 {{decl}}

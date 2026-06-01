@@ -24,10 +24,8 @@
 /*---
 desc: {{c.desc}}
 params: {{c.params}}
+test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
 ---*/
-
-//#4097 (urunner2) note: use this after declgen run support
-//test suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
 
 {{decl}}
 

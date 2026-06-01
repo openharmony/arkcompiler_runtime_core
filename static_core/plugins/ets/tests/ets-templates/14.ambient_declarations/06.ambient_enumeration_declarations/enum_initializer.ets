@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,9 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
-{% for decl in c.decl_variants %}
-{% set decl_id = loop.index0 %}
-
-{% for scl in c.sub_cases_logic %}
-{% set scl_id = loop.index0 %}
-
 /*---
-desc: {{c.desc}}
-params: {{c.params}}
-test_suffix: "{{c.test_suffix}}_{{decl_id}}_{{scl_id}}"
+desc: Ambient enumeration declarations implementations
+tags: [compile-only, not-a-test]
 ---*/
 
-{{decl}}
-
-function main(): void {
-  {{scl|indent(width=2)}}
-}
-
-{% endfor %}
-{% endfor %}
-{% endfor %}
+export enum Err1 { A = 5 }
