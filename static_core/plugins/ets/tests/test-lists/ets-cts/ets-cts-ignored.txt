@@ -29,9 +29,6 @@
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/05.array_literal/arr_n_2.ets
 
-#34513 RTE on object literal of generic interface with default type parameter
-07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_interface_3.ets
-
 #34493 CTE on object literal of interface with generic method
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_1.ets
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_2.ets
@@ -519,10 +516,6 @@
 18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
-
-#34624 Unexpected LinkerAbstractMethodError on extending generic class or interface
-20.implementation_details/07.bridge_methods_for_generic_overrides/class_bridge4.ets
-20.implementation_details/07.bridge_methods_for_generic_overrides/interface_bridge4.ets
 
 #34323 No verifier error on abstract method call
 23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/access_method/make_method_abstract_n.ets
