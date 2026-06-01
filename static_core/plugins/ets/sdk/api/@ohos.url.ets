@@ -34,6 +34,10 @@ export namespace url {
 
     export type UrlCbFn = (value: string, key: string, searchParams: URLParams) => void;
 
+    // Module-level pre-compiled RegExp constants to avoid repeated compilation
+    const REG_TAB_NEWLINE: RegExp = new RegExp('\\t|\\r|\\n', 'g');
+    const REG_IPV6: RegExp = new RegExp("(::|(:((:[0-9A-Fa-f]{1,4}){1,7}))|(([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|:))|(((:(:[0-9A-Fa-f]{1,4}){0,5}:)|(([0-9A-Fa-f]{1,4}:){1}(:[0-9A-Fa-f]{1,4}){0,4}:)|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}:)|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}:)|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4})?:)|(([0-9A-Fa-f]{1,4}:){5}:)|(([0-9A-Fa-f]{1,4}:){6}))((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)))(%[a-zA-Z0-9._]+)?");
+
     /**
     * Store some constants and arrays
     * @class Helper
@@ -205,8 +209,11 @@ export namespace url {
     }
 
     function deleteTabOrNewline(input: string): string {
-        let reg = new RegExp('\\t|\\r|\\n', 'g');
-        return input.replaceAll(reg, '');
+        // Fast path: 3 native indexOf calls avoid PCRE2 compile+match for common case
+        if (input.indexOf('\t') == -1 && input.indexOf('\r') == -1 && input.indexOf('\n') == -1) {
+            return input;
+        }
+        return input.replaceAll(REG_TAB_NEWLINE, '');
     }
 
     function isAlphaNum(ch: char): boolean {
@@ -550,8 +557,7 @@ export namespace url {
         }
 
         private analysizeIPv6Host(input: string) {
-            let regex: RegExp = new RegExp("(::|(:((:[0-9A-Fa-f]{1,4}){1,7}))|(([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|:))|(((:(:[0-9A-Fa-f]{1,4}){0,5}:)|(([0-9A-Fa-f]{1,4}:){1}(:[0-9A-Fa-f]{1,4}){0,4}:)|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}:)|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}:)|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4})?:)|(([0-9A-Fa-f]{1,4}:){5}:)|(([0-9A-Fa-f]{1,4}:){6}))((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)))(%[a-zA-Z0-9._]+)?")
-            if (!regex.test(input)) {
+            if (!REG_IPV6.test(input)) {
                 this.flags[INDEX_INVALID] = true;
                 return;
             }
@@ -640,6 +646,17 @@ export namespace url {
         }
 
         private analysizeIPv4(input: string) {
+            // Fast path: if first char is not a digit, it's not an IPv4 address
+            if (input.length > 0 && !Char.isDecDigit(input.charAt(0))) {
+                let host = input.toLowerCase();
+                // Strip trailing dots (WHATWG URL spec: normalize host by removing trailing dots)
+                while (host.length > 0 && host.charAt(host.length - 1) == c'.') {
+                    host = host.substring(0, host.length - 1);
+                }
+                this.cHost = host;
+                this.flags[INDEX_HOST] = true;
+                return;
+            }
             let isIPv4: boolean = false;
             isIPv4 = this.removalIPv4(input);
             let temp = this.ipv4Array;
@@ -711,7 +728,7 @@ export namespace url {
                 this.analysizeOpaqueHost(input);
                 return;
             }
-            let decodedInput = DecodeSpecialChars(input);
+            let decodedInput = input.indexOf('%') == -1 ? input : DecodeSpecialChars(input);
             if (!checkCharacter(decodedInput)) {
                 this.flags[INDEX_INVALID] = true;
                 return;
@@ -958,6 +975,7 @@ export namespace url {
             return;
         }
 
+
         private analysizeNoDefaultProtocol(input: string) {
             if (this.cScheme.length == 2) {
                 this.analysizeFilescheme(input);
@@ -1011,23 +1029,52 @@ export namespace url {
 
         private analysizeHostAndPath(input: string) {
             if (this.flags[INDEX_SPECIAL]) {
-                let pos: int = 0;
                 let inputLen: int = input.length;
-                while (pos < inputLen) {
-                    if (input.charAt(pos) == c'/' || input.charAt(pos) == c'\\') {
-                        pos++;
-                        continue;
-                    }
-                    break;
+                let start = 0;
+                // Skip leading slashes in single pass, then find host/path boundary
+                while (start < inputLen) {
+                    let ch = input.charCodeAt(start);
+                    if (ch != 0x2F && ch != 0x5C) { break; }
+                    start++;
                 }
-                input = input.substring(pos);
-                if (input.length == 0) {
+                if (start >= inputLen) {
                     this.flags[INDEX_INVALID] = true;
                     return;
-                } else if (input.indexOf('/') != -1 || input.indexOf('\\') != -1) {
-                    this.parsingHostAndPath(input, pos);
-                } else if (input.length != 0 && input.indexOf('/') == -1 && input.indexOf('\\') == -1) {
-                    this.analysizeOnlyHost(input, pos);
+                }
+
+                // Find first / or \ after start to split host/path
+                let slashPos = -1;
+                for (let i = start; i < inputLen; i++) {
+                    let ch = input.charCodeAt(i);
+                    if (ch == 0x2F || ch == 0x5C) { slashPos = i; break; }
+                }
+
+                if (slashPos == -1) {
+                    // Only host, no path
+                    this.analysizeOnlyHost(input.slice(start), -1);
+                } else {
+                    let strHost: string = input.slice(start, slashPos);
+                    let strPath: string = input.slice(slashPos + 1);
+                    if (strHost.indexOf('@') != -1) {
+                        strHost = this.analysizeUsernameAndPasswd(strHost);
+                    }
+                    if (strHost.length == 0) {
+                        this.flags[INDEX_INVALID] = true;
+                        return;
+                    }
+                    if (strHost.charAt(strHost.length - 1) != c']' && strHost.lastIndexOf(':') != -1) {
+                        let portPos = strHost.lastIndexOf(':');
+                        let port: string = strHost.substring(portPos + 1);
+                        strHost = strHost.substring(0, portPos);
+                        this.analysizePort(port);
+                    }
+                    if (strHost.charAt(strHost.length - 1) != c']' && strHost.lastIndexOf(':') != -1 &&
+                        this.flags[INDEX_INVALID])
+                    {
+                        return;
+                    }
+                    this.analysizeHost(strHost, true);
+                    this.analysizePath(strPath, true);
                 }
             } else {
                 let inputLen: number = input.length;
@@ -1046,35 +1093,55 @@ export namespace url {
                 this.flags[INDEX_INVALID] = true;
                 return input;
             }
-            let tempInput = input;
-            if (tempInput.indexOf(':') != -1) {
-                let pos = tempInput.indexOf(':')
-                pos++;
-                this.flags[INDEX_DOUBLE_SLASH] = ((pos + 1 < tempInput.length) && (input.charAt(pos) == c'/') && (input.charAt(pos + 1) == c'/'));
-                let scheme: string = tempInput.substring(0, pos);
-                if (!this.analysizeScheme(scheme)) {
-                    return tempInput;
-                }
-                if (tempInput.indexOf('#') != -1) {
-                    let posTemp = tempInput.indexOf('#');
-                    let fragment: string = tempInput.substring(posTemp);
-                    this.analysizeFragment(fragment);
-                    tempInput = tempInput.substring(0, posTemp);
-                }
-                if (tempInput.indexOf('?') != -1) {
-                    let posTemp = tempInput.indexOf('?');
-                    let query: string = tempInput.substring(posTemp);
-                    this.analysizeQuery(query);
-                    tempInput = tempInput.substring(0, posTemp);
-                }
-                let restInput: string = tempInput.substring(pos);
-                if (this.cScheme == "file:") {
-                    this.analysizeFile(restInput);
-                } else {
-                    this.analysizeHostAndPath(restInput);
-                }
-            } else {
+            // Single pass to locate ':', '#', '?'
+            let colonPos = -1;
+            let hashPos = -1;
+            let queryPos = -1;
+            for (let i = 0; i < input.length; i++) {
+                let ch = input.charCodeAt(i);
+                if (ch == 0x3A && colonPos == -1) colonPos = i;        // ':'
+                else if (ch == 0x23 && hashPos == -1) hashPos = i;      // '#'
+                else if (ch == 0x3F && queryPos == -1) queryPos = i;    // '?'
+            }
+
+            if (colonPos == -1) {
                 this.flags[INDEX_INVALID] = true;
+                return input;
+            }
+
+            let pos = colonPos + 1;
+            this.flags[INDEX_DOUBLE_SLASH] =
+                (pos + 1 < input.length) && (input.charAt(pos) == c'/') && (input.charAt(pos + 1) == c'/');
+
+            let scheme: string = input.substring(0, pos);
+            if (!this.analysizeScheme(scheme)) {
+                return input;
+            }
+
+            let tempInput = input;
+            // Effective positions must be after colon
+            let effectiveHash = (hashPos != -1 && hashPos > colonPos) ? hashPos : -1;
+            let effectiveQuery = (queryPos != -1 && queryPos > colonPos &&
+                                  (effectiveHash == -1 || queryPos < effectiveHash)) ? queryPos : -1;
+
+            if (effectiveHash != -1) {
+                this.analysizeFragment(input.substring(effectiveHash));
+                tempInput = input.substring(0, effectiveHash);
+                // Recalculate queryPos relative to tempInput if needed
+                if (effectiveQuery != -1 && effectiveQuery < effectiveHash) {
+                    this.analysizeQuery(tempInput.substring(effectiveQuery));
+                    tempInput = tempInput.substring(0, effectiveQuery);
+                }
+            } else if (effectiveQuery != -1) {
+                this.analysizeQuery(input.substring(effectiveQuery));
+                tempInput = input.substring(0, effectiveQuery);
+            }
+
+            let restInput: string = tempInput.substring(pos);
+            if (this.cScheme == "file:") {
+                this.analysizeFile(restInput);
+            } else {
+                this.analysizeHostAndPath(restInput);
             }
 
             return tempInput;
@@ -1415,27 +1482,17 @@ export namespace url {
         }
 
         getPath(): string {
-            let temp: string = "/";
-            if (this.cIsSpecialPath) {
-                temp = "";
-            }
+            let temp: string;
             if (this.flags[INDEX_PATH]) {
-                let len: number = this.cPath.length;
-                for (let i = 0; i < len; i++) {
-                    if (i < len - 1) {
-                        temp += this.cPath[i] + "/";
-                    } else {
-                        temp += this.cPath[i];
-                    }
+                temp = this.cPath.join('/');
+                if (!this.cIsSpecialPath) {
+                    temp = '/' + temp;
                 }
             } else {
                 let special: boolean = Helper.head.has(this.cScheme);
-                if (!special) {
-                    temp = "";
-                }
+                temp = special ? "/" : "";
             }
-            temp = encodePercentEncoding(temp, Helper.PATH_PERCENT_SIGN_CHARS);
-            return temp;
+            return encodePercentEncoding(temp, Helper.PATH_PERCENT_SIGN_CHARS);
         }
 
         getPort(): string {
@@ -1446,13 +1503,10 @@ export namespace url {
         }
 
         getHost(): string {
-            let temp: string = this.cHost;
-            if (this.flags[INDEX_PORT]) {
+            let temp: string = this.getHostName();
+            if (this.flags[INDEX_PORT] && temp.length > 0) {
                 temp += ":";
                 temp += Number.toString(this.cPort);
-            }
-            if (!this.flags[INDEX_IPV6]) {
-                temp = encodePercentEncoding(temp, Helper.URL_ENCODED_PERCENT_SIGN_CHARS);
             }
             return temp;
         }
@@ -1528,25 +1582,41 @@ export namespace url {
     }
 
     function setEncodedData(dst: URL, src: InnerURL): void {
-        dst.cSearch = src.getEncodeSearch();
+        let encodedHostname = src.getHostName();
+        let encodedHost = src.getHost();
+        let encodedSearch = src.getEncodeSearch();
+        dst.cSearch = encodedSearch;
         dst.cUsername = src.getUsername();
         dst.cPassword = src.getPassword();
-        dst.cHostname = src.getHostName();
-        dst.cHost = src.getHost();
+        dst.cHostname = encodedHostname;
+        dst.cHost = encodedHost;
         dst.cHash = src.getFragment();
         dst.cProtocol = src.getScheme();
         dst.cPathname = src.getPath();
         dst.cPort = src.getPort();
-        dst.cOrigin = src.getScheme() + '//' + src.getHost();
-        dst.cParams = new URLParams(src.getEncodeSearch());
-        dst.cParams.parentUrl = dst;
+        dst.cOrigin = src.getScheme() + '//' + encodedHost;
         dst.cHasDoubleSlash = src.hasDoubleSlash();
         dst.setHref();
     }
 
     function containIllegalCode(str: string): Boolean {
-        const regex = new RegExp("(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])");
-        return regex.test(str);
+        let len = str.length;
+        for (let i = 0; i < len; i++) {
+            let code: int = str.charCodeAt(i);
+            if (code >= 0xD800 && code <= 0xDBFF) {  // high surrogate
+                if (i + 1 >= len) {
+                    return true;
+                }
+                let nextCode: int = str.charCodeAt(i + 1);
+                if (nextCode < 0xDC00 || nextCode > 0xDFFF) {
+                    return true;
+                }
+                i++;
+            } else if (code >= 0xDC00 && code <= 0xDFFF) {  // lone low surrogate
+                return true;
+            }
+        }
+        return false;
     }
 
     function fixIllegalString(str: string): string {
@@ -1578,7 +1648,7 @@ export namespace url {
         cPathname: string = '';
         cPort: string = '';
         cHasDoubleSlash: boolean = false;
-        cParams: URLParams = new URLParams();
+        private cParamsLazy: URLParams | null = null;
         /**
         * URL constructor, which is used to instantiate a URL object.
         *
@@ -1754,7 +1824,10 @@ export namespace url {
         set search(query: string) {
             this.urlInner.setEncodeSearch(fixIllegalString(query));
             this.cSearch = this.urlInner.getEncodeSearch();
-            this.cParams.updateParams(this.cSearch);
+            let p = this.cParamsLazy;
+            if (p != null) {
+                p.updateParams(this.cSearch);
+            }
             this.setHref();
         }
 
@@ -1851,7 +1924,13 @@ export namespace url {
         * @return  {URLParams} Returns the params portion of the URL.
         */
         get params(): URLParams {
-            return this.cParams;
+            let p = this.cParamsLazy;
+            if (p == null) {
+                p = new URLParams(this.cSearch);
+                p.parentUrl = this;
+                this.cParamsLazy = p;
+            }
+            return p;
         }
 
         /**
