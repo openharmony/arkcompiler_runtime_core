@@ -56,7 +56,8 @@ public:
     PANDA_PUBLIC_API bool WaitForRemark(const NoWorkPred &func) override;
     PANDA_PUBLIC_API void FinishXGCBarrier() override;
 
-    PANDA_PUBLIC_API void NotifyWaiters();
+    PANDA_PUBLIC_API bool TriggerXGC() override;
+    PANDA_PUBLIC_API void NotifyWaiters() override;
 
     PandaEtsVM *GetVM() const
     {

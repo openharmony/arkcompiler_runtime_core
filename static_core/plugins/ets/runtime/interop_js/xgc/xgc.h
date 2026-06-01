@@ -64,6 +64,12 @@ public:
     /// @return current instance of XGC
     static XGC *GetInstance();
 
+    /// @return true if XGC instance has been created and is available
+    static bool IsEnabled() noexcept
+    {
+        return instance_ != nullptr;
+    }
+
     /**
      * Destroy the current instance of XGC if the instance is existed. Runtime should be existed before the XGC
      * destruction
@@ -77,6 +83,13 @@ public:
      * @param gc GC using in the current VM
      */
     void TriggerGcIfNeeded(mem::GC *gc) override;
+
+    /// @return true if an XGC cycle is currently in progress
+    bool IsXGcInProgress() const
+    {
+        // Atomic with relaxed order reason: status check does not require synchronization with stores
+        return isXGcInProgress_.load(std::memory_order_relaxed);
+    }
 
     /**
      * Notify XGC about the new interop context attached to STS VM

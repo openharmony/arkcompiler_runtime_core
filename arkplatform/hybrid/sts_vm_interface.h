@@ -83,6 +83,17 @@ public:
     virtual bool WaitForRemark(const NoWorkPred &func) = 0;
     /// @brief Method waits for all threads would call FinishXGCBarrier
     virtual void FinishXGCBarrier() = 0;
+    /**
+     * @brief Request the static (ETS) VM to trigger GC for cross-reference collection.
+     * Called from the dynamic (JS) side when memory is critically low.
+     * @return true if the ETS GC task was successfully posted, false otherwise.
+     */
+    virtual bool TriggerXGC() = 0;
+    /**
+     * @brief Wake up threads waiting on the XGC barrier.
+     * Used to interrupt the barrier when XGC cannot proceed (e.g. ETS GC task rejected).
+     */
+    virtual void NotifyWaiters() = 0;
 };
 
 }  // namespace arkplatform

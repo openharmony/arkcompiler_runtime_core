@@ -268,3 +268,43 @@ export function stsGCTest6(): void {
         throw new Error('STS GC should collect garbage object!');
     }
 }
+
+// --- ETS class C holds cross-language reference to JS object D ---
+
+export class C extends Object {
+    cRef: Promise<Object>|null = null;   // holds cross-language reference to JS D object
+    data: number[];
+    constructor() {
+        super();
+        this.data = new Array<number>(10 * 1024 * 1024 / 4);
+    }
+}
+
+let g_objC: C|null = null;
+let g_weakC: WeakRef<C>|null = null;
+
+/**
+ * Create ETS object C, set C.cRef = d (d is a JS object passed from JS side),
+ * store C as an ETS root reference, and create a WeakRef for C.
+ * Returns C so JS side can also create a WeakRef on it.
+ */
+export function createCAndRefD(d: Promise<Object>): C {
+    let objC = new C();
+    objC.cRef = d;
+    g_objC = objC;
+    g_weakC = new WeakRef<C>(objC);
+    return objC;
+}
+
+/** Clear ETS root reference to C */
+export function killC(): void {
+    g_objC = null;
+}
+
+/** Trigger STS full GC and verify that C has been collected */
+export function verifyCCollected(): void {
+    triggerFullGC();
+    if (g_weakC != null && g_weakC!.deref() != null) {
+        throw new Error('STS GC should collect ETS object C after XGC!');
+    }
+}

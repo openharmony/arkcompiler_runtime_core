@@ -15,6 +15,9 @@
 
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "libarkbase/utils/time.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "runtime/mem/gc/gc.h"
 
 namespace ark::ets::interop::js {
 
@@ -90,6 +93,23 @@ void STSVMInterfaceImpl::FinishXGCBarrier()
 void STSVMInterfaceImpl::NotifyWaiters()
 {
     xgcBarrier_.Signal();
+}
+
+bool STSVMInterfaceImpl::TriggerXGC()
+{
+    if (!XGC::IsEnabled()) {
+        return false;
+    }
+    auto *gc = vm_->GetGC();
+    if (gc == nullptr) {
+        return false;
+    }
+    if (XGC::GetInstance()->IsXGcInProgress()) {
+        return false;
+    }
+    auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, ark::time::GetCurrentTimeInNanos());
+    // isManaged=false since this is called from a JS thread, not an ETS managed thread
+    return gc->AddGCTask(false, std::move(task));
 }
 
 STSVMInterfaceImpl::VMBarrier::VMBarrier(size_t vmsCount)
