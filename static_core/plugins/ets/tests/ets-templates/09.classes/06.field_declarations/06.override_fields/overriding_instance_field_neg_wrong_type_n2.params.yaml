@@ -12,9 +12,6 @@
 # limitations under the License.
 
 cases:
-  - {base_type: "Animal", override_type: "Dog",
-      expected_out: "Expected CTE output is unknown"}
-  - {base_type: "Dog", override_type: "Animal",
-      expected_out: "Expected CTE output is unknown"}
-  - {base_type: "Dog", override_type: "Cat",
-      expected_out: "Expected CTE output is unknown"}
+  - {base_type: "Animal", override_type: "Dog"}
+  - {base_type: "Dog", override_type: "Animal"}
+  - {base_type: "Dog", override_type: "Cat"}
