@@ -42,41 +42,36 @@ Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size)
     return allocBuffer->FastAllocateInTlab<AllocBufferType::OLD>(size);
 }
 
-Address HeapAllocator::AllocateInYoungOrHuge(size_t size, LanguageType language)
+Address HeapAllocator::AllocateInYoungOrHuge(size_t size)
 {
     auto address = HeapManager::Allocate(size);
-    BaseObject::Cast(address)->SetLanguageType(language);
     return address;
 }
 
-Address HeapAllocator::AllocateInNonmoveOrHuge(size_t size, LanguageType language)
+Address HeapAllocator::AllocateInNonmoveOrHuge(size_t size)
 {
     auto address = HeapManager::Allocate(size, AllocType::NONMOVABLE_OBJECT);
-    BaseObject::Cast(address)->SetLanguageType(language);
     return address;
 }
 
-Address HeapAllocator::AllocateInOldOrHuge(size_t size, LanguageType language)
+Address HeapAllocator::AllocateInOldOrHuge(size_t size)
 {
     auto address = HeapManager::Allocate(size, AllocType::MOVEABLE_OLD_OBJECT);
-    BaseObject::Cast(address)->SetLanguageType(language);
     return address;
 }
 
-Address HeapAllocator::AllocateInHuge(size_t size, LanguageType language)
+Address HeapAllocator::AllocateInHuge(size_t size)
 {
     auto address = HeapManager::Allocate(size);
     if (address != 0) {
-        BaseObject::Cast(address)->SetLanguageType(language);
     }
     return address;
 }
 
-uintptr_t HeapAllocator::AllocateLargeJitFortRegion(size_t size, LanguageType language)
+uintptr_t HeapAllocator::AllocateLargeJitFortRegion(size_t size)
 {
     RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     auto address = allocator.AllocJitFortRegion(size);
-    BaseObject::Cast(address)->SetLanguageType(language);
     return address;
 }
 

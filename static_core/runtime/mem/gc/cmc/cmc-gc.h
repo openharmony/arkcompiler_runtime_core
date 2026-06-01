@@ -219,7 +219,6 @@ public:
 #endif
 
     bool ShouldIgnoreRequest(ark::common_vm::GCRequest &request) override;
-    bool MarkObject(BaseObject *obj) const;
 
     template <bool ProcessXRef>
     void ProcessMarkStack(uint32_t threadIndex, ParallelLocalMarkStack &workStack);
@@ -344,9 +343,6 @@ public:
 
     void SetGCThreadQosPriority(ark::common_vm::PriorityMode mode);
 
-    BaseObject *CopyObjectImpl(BaseObject *obj);
-    BaseObject *CopyObjectAfterExclusive(BaseObject *obj);
-
     BaseObject *TryForwardObject(BaseObject *fromVersion);
 
     bool TryUpdateRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const override;
@@ -358,6 +354,10 @@ public:
     void RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack);
     void MarkEvacuationStack(GlobalEvacuationStack &globalStack);
     void MarkEvacuationStack(ParallelLocalEvacuationStack &markStack);
+
+    void MarkObject(ObjectHeader *object) override;
+    bool MarkObjectIfNotMarked(ObjectHeader *object) override;
+    bool IsMarked(const ark::ObjectHeader *object) const override;
 
     static const size_t MAX_MARKING_WORK_SIZE;
     static const size_t MIN_MARKING_WORK_SIZE;
@@ -435,8 +435,6 @@ protected:
 
     void UpdateGCCompletionStats(ark::common_vm::GCStats &gcStats);
 
-    void MarkObject(ark::ObjectHeader *object) override;
-    bool IsMarked(const ark::ObjectHeader *object) const override;
     void InitializeImpl() override;
     void RunPhasesImpl(GCTask &task) override;
     void MarkReferences(ark::mem::GCMarkingStackType *references, ark::mem::GCPhase gcPhase) override;
@@ -526,6 +524,9 @@ private:
         thread->SetPreWrbEntrypoint(entrypointFuncUntyped);
     }
 
+    ObjectHeader *CopyObjectImpl(ObjectHeader *object);
+    ObjectHeader *CopyObjectAfterExclusive(ObjectHeader *object, MarkWord markWord);
+    void UnlockObject(ObjectHeader *object);
     void MarkRememberSetImpl(BaseObject *object, LocalCollectStack &markStack);
     void ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel);
     void MarkAwaitingJitFort();

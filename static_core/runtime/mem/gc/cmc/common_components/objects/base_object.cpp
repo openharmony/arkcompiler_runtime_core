@@ -18,11 +18,6 @@
 namespace ark::common_vm {
 BaseObjectOperator BaseObject::operator_;
 
-void BaseObject::RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp)
-{
-    operator_.dynamicObjOp_ = dynamicObjOp;
-}
-
 void BaseObject::RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp)
 {
     operator_.staticObjOp_ = staticObjOp;

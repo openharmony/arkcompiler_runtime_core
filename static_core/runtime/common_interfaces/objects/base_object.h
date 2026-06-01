@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstdio>
 
+#include "runtime/include/object_header.h"
 #include "common_interfaces/objects/base_class.h"
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/objects/base_object_operator.h"
@@ -26,15 +27,13 @@
 namespace ark::common_vm {
 
 using MemoryOrder = std::memory_order;
-using ::ark::mem::BaseStateWord;
-using ::ark::mem::LanguageType;
 using ::ark::mem::MAddress;
 using ::ark::mem::RefField;
 using ::ark::mem::TypeInfo;
 
-class BaseObject {
+class BaseObject : public ObjectHeader {
 public:
-    BaseObject() : state_(0) {}
+    BaseObject() = default;
     static BaseObject *Cast(MAddress address)
     {
         return reinterpret_cast<BaseObject *>(address);
@@ -44,15 +43,12 @@ public:
 
     inline size_t GetSize() const
     {
-        if (IsForwarded()) {
-            return GetSizeForwarded();
-        }
-        return GetOperator()->GetSize(this);
+        return reinterpret_cast<const ObjectHeader *>(this)->ObjectSize();
     }
 
     inline bool IsValidObject() const
     {
-        return GetOperator()->IsValidObject(this);
+        return true;
     }
 
     void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
@@ -74,83 +70,15 @@ public:
     inline BaseObject *GetForwardingPointer() const
     {
         if (IsForwarded()) {
-            return GetOperator()->GetForwardingPointer(this);
+            return reinterpret_cast<BaseObject *>(
+                reinterpret_cast<const ObjectHeader *>(this)->GetMark().GetForwardingAddress());
         }
         return nullptr;
     }
 
-    inline void SetForwardingPointerAfterExclusive(BaseObject *fwdPtr)
-    {
-        CHECK(IsForwarding());
-        GetOperator()->SetForwardingPointerAfterExclusive(this, fwdPtr);
-        state_.SetForwarded();
-    }
-
-    inline void SetSizeForwarded(size_t size)
-    {
-        // Set size in old obj when forwarded, forwardee obj size may changed.
-        size_t objectHeaderSize = sizeof(BaseStateWord);
-        DCHECK(size >= objectHeaderSize + sizeof(size_t));
-        auto addr = reinterpret_cast<MAddress>(this) + objectHeaderSize;
-        *reinterpret_cast<size_t *>(addr) = size;
-    }
-
-    inline size_t GetSizeForwarded() const
-    {
-        auto addr = reinterpret_cast<MAddress>(this) + sizeof(BaseStateWord);
-        return *reinterpret_cast<size_t *>(addr);
-    }
-
     inline bool IsForwarding() const
     {
-        return state_.IsForwarding();
-    }
-
-    inline bool IsForwarded() const
-    {
-        return state_.IsForwarded();
-    }
-
-    ALWAYS_INLINE bool IsDynamic() const
-    {
-        return state_.IsDynamic();
-    }
-
-    ALWAYS_INLINE bool IsStatic() const
-    {
-        return state_.IsStatic();
-    }
-
-    inline bool IsToVersion() const
-    {
-        return state_.IsToVersion();
-    }
-
-    inline void SetLanguageType(LanguageType language)
-    {
-        state_.SetLanguageType(language);
-    }
-
-    BaseStateWord GetBaseStateWord() const
-    {
-        return state_.AtomicGetBaseStateWord();
-    }
-
-    void SetForwardState(BaseStateWord::ForwardState state)
-    {
-        state_.SetForwardState(state);
-    }
-
-    // Locking means that this object forwardstate is forwarding.
-    // Any other gc coping thread or mutator thread will be wait if copy the same object.
-    bool TryLockExclusive(const BaseStateWord state)
-    {
-        return state_.TryLockBaseStateWord(state);
-    }
-
-    void UnlockExclusive(const BaseStateWord::ForwardState newState)
-    {
-        state_.UnlockStateWord(newState);
+        return reinterpret_cast<const ObjectHeader *>(this)->GetMark().IsReadBarrierSet();
     }
 
     static inline intptr_t FieldOffset(BaseObject *object, const void *field)
@@ -183,17 +111,10 @@ public:
                             [[maybe_unused]] MAddress aggEnd)
     {
     }
-    // The interfaces above only use for common code compiler. It will be deleted later.
-
-    void SetFullBaseClassWithoutBarrier(BaseClass *cls)
-    {
-        state_ = BaseStateWord {0};
-        state_.SetFullBaseClassAddress(reinterpret_cast<ark::mem::StateWordType>(cls));
-    }
 
     BaseClass *GetBaseClass() const
     {
-        return reinterpret_cast<BaseClass *>(state_.GetBaseClassAddress());
+        return ClassAddr<BaseClass>();
     }
 
     // Size of object header
@@ -205,19 +126,11 @@ public:
 protected:
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
-        if (state_.IsStatic()) {
-            return operator_.staticObjOp_;
-        }
-        return operator_.dynamicObjOp_;
+        return operator_.staticObjOp_;
     }
 
     static PANDA_PUBLIC_API BaseObjectOperator operator_;
-
-private:
-    BaseStateWord state_;
 };
-
-static_assert(sizeof(BaseObject) == sizeof(BaseClass::HeaderType));
 
 using ObjectPtr = BaseObject *;
 using ObjectVisitor = std::function<void(ObjectPtr)>;

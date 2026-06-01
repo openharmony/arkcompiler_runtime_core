@@ -23,18 +23,17 @@
 #include "common_interfaces/mem/tlab.h"
 
 namespace ark::common_vm {
-using ::ark::mem::LanguageType;
 using Address32 = uint32_t;
 using Address = uint64_t;
 
 class PANDA_PUBLIC_API HeapAllocator {
 public:
-    static Address AllocateInYoungOrHuge(size_t size, LanguageType language);
-    static Address AllocateInNonmoveOrHuge(size_t size, LanguageType language);
-    static Address32 Allocate32(size_t size, LanguageType language);
-    static Address AllocateInOldOrHuge(size_t size, LanguageType language);
-    static Address AllocateInHuge(size_t size, LanguageType language);
-    static uintptr_t AllocateLargeJitFortRegion(size_t size, LanguageType language);
+    static Address AllocateInYoungOrHuge(size_t size);
+    static Address AllocateInNonmoveOrHuge(size_t size);
+    static Address32 Allocate32(size_t size);
+    static Address AllocateInOldOrHuge(size_t size);
+    static Address AllocateInHuge(size_t size);
+    static uintptr_t AllocateLargeJitFortRegion(size_t size);
     // below are interfaces used for serialize
     static Address AllocateNoGC(size_t size);
     static Address AllocateOldOrLargeNoGC(size_t size);
