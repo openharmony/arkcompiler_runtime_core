@@ -33,10 +33,32 @@
 
 namespace ark::ets::intrinsics {
 
+static bool ThrowAtomicBoundaryError(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, size_t elementSize)
+{
+    return mem->DoAtomicBoundaryCheck(index, byteOffset, elementSize);
+}
+
+template <typename InType, typename RealType>
+std::pair<bool, RealType> DoCmpXchg(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, InType expectedValue,
+                                    InType replacementValue)
+{
+    return mem->CompareAndExchangeElement<RealType>(index, byteOffset, static_cast<RealType>(expectedValue),
+                                                    static_cast<RealType>(replacementValue), true);
+}
+
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02) code generation
+#define SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, defaultValue)   \
+    if (UNLIKELY(!(mem)->IsAtomicInBounds((index), (byteOffset), sizeof(realType)))) { \
+        ThrowAtomicBoundaryError((mem), (index), (byteOffset), sizeof(realType));      \
+        /* CC-OFFNXT(G.PRE.05) code generation */                                      \
+        return defaultValue;                                                           \
+    }
+
 #define SHARED_MEMORY_AT(inType, realType, postfix)                                                            \
     extern "C" EtsDouble ArrayBufferAt##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset) \
     {                                                                                                          \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsDouble {0})                          \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                 \
         return mem->GetElement<realType>(index, byteOffset);                                                   \
     }
@@ -45,6 +67,7 @@ namespace ark::ets::intrinsics {
     extern "C" void ArrayBufferSet##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                             inType value)                                                  \
     {                                                                                                      \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, )                                   \
         auto newValue = static_cast<realType>(value);                                                      \
         mem->SetElement<realType>(index, byteOffset, newValue);                                            \
     }
@@ -53,6 +76,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferAdd##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                inType value)                                                  \
     {                                                                                                         \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                           \
         auto newValue = static_cast<realType>(value);                                                         \
         auto result = mem->GetAndAdd<realType>(index, byteOffset, newValue);                                  \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
@@ -63,6 +87,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferAnd##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                inType value)                                                  \
     {                                                                                                         \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, inType, EtsLong {0})                             \
         auto result = mem->GetAndBitwiseAnd<inType>(index, byteOffset, value);                                \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
         return result;                                                                                        \
@@ -72,6 +97,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferAnd##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                inType value)                                                  \
     {                                                                                                         \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                           \
         auto newValue = static_cast<realType>(value);                                                         \
         auto result = mem->GetAndBitwiseAnd<realType>(index, byteOffset, newValue);                           \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
@@ -82,10 +108,8 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferCompareExchange##postfix(                                                           \
         EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, inType expectedValue, inType replacementValue) \
     {                                                                                                                 \
-        auto newExpectedValue = static_cast<realType>(expectedValue);                                                 \
-        auto newReplacementValue = static_cast<realType>(replacementValue);                                           \
-        auto result =                                                                                                 \
-            mem->CompareAndExchangeElement<realType>(index, byteOffset, newExpectedValue, newReplacementValue, true); \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                                   \
+        auto result = DoCmpXchg<inType, realType>(mem, index, byteOffset, expectedValue, replacementValue);           \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                        \
         return result.second;                                                                                         \
     }
@@ -94,6 +118,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferExchange##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                     inType value)                                                  \
     {                                                                                                              \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                                \
         auto newValue = static_cast<realType>(value);                                                              \
         auto result = mem->ExchangeElement<realType>(index, byteOffset, newValue);                                 \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                     \
@@ -103,6 +128,7 @@ namespace ark::ets::intrinsics {
 #define SHARED_MEMORY_LOAD(inType, realType, postfix)                                                          \
     extern "C" EtsLong ArrayBufferLoad##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset) \
     {                                                                                                          \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                            \
         auto result = mem->GetVolatileElement<realType>(index, byteOffset);                                    \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                 \
         return result;                                                                                         \
@@ -113,6 +139,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferOr##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                               inType value)                                                  \
     {                                                                                                        \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, inType, EtsLong {0})                            \
         auto result = mem->GetAndBitwiseOr<inType>(index, byteOffset, value);                                \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                               \
         return result;                                                                                       \
@@ -122,6 +149,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferOr##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                               inType value)                                                  \
     {                                                                                                        \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                          \
         auto newValue = static_cast<realType>(value);                                                        \
         auto result = mem->GetAndBitwiseOr<realType>(index, byteOffset, newValue);                           \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                               \
@@ -133,6 +161,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferStore##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                  inType value)                                                  \
     {                                                                                                           \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                             \
         auto newValue = static_cast<realType>(value);                                                           \
         mem->SetVolatileElement<realType>(index, byteOffset, newValue);                                         \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                  \
@@ -143,6 +172,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferSub##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                inType value)                                                  \
     {                                                                                                         \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                           \
         auto newValue = static_cast<realType>(value);                                                         \
         auto result = mem->GetAndSub<realType>(index, byteOffset, newValue);                                  \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
@@ -153,6 +183,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferXor##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                inType value)                                                  \
     {                                                                                                         \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, inType, EtsLong {0})                             \
         auto result = mem->GetAndBitwiseXor<inType>(index, byteOffset, value);                                \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
         return result;                                                                                        \
@@ -162,6 +193,7 @@ namespace ark::ets::intrinsics {
     extern "C" EtsLong ArrayBufferXor##postfix(EtsStdCoreArrayBuffer *mem, int32_t index, int32_t byteOffset, \
                                                inType value)                                                  \
     {                                                                                                         \
+        SHARED_MEMORY_BOUNDARY_CHECK(mem, index, byteOffset, realType, EtsLong {0})                           \
         auto newValue = static_cast<realType>(value);                                                         \
         auto result = mem->GetAndBitwiseXor<realType>(index, byteOffset, newValue);                           \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
@@ -217,6 +249,7 @@ FOR_UNSIGNED_TYPES(XOR_UNSIGNED)
 #undef SHARED_MEMORY_SUB
 #undef SHARED_MEMORY_XOR_SIGNED
 #undef SHARED_MEMORY_XOR_UNSIGNED
+#undef SHARED_MEMORY_BOUNDARY_CHECK
 #undef FOR_ALL_TYPES
 #undef FOR_SIGNED_TYPES
 #undef FOR_UNSIGNED_TYPES

@@ -65,8 +65,12 @@ function createArrayBufferFrom(): void {
     a = ArrayBuffer.from(a, 0, bytes.length)
     checkCreatedArrayBuffer(a, bytes)
 
+    a = ArrayBuffer.from(a, 1)
+    const expectedBytesFromOffset: FixedArray<byte> = [bytes[1], bytes[2]]
+    checkCreatedArrayBuffer(a, expectedBytesFromOffset)
+
     a = ArrayBuffer.from(a, 1, 1)
-    const expectedBytes: FixedArray<byte> = [bytes[1]]
+    const expectedBytes: FixedArray<byte> = [expectedBytesFromOffset[1]]
     checkCreatedArrayBuffer(a, expectedBytes)
 }
 

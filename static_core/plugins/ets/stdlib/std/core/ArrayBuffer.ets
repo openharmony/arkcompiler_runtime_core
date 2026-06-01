@@ -460,9 +460,11 @@ export class ArrayBuffer
      * @FaAndStageModel
      */
     public static from(buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBuffer {
-        const resolvedByteOffset = byteOffset ?? 0;
-        const resolvedLength = length ?? buffer.byteLength.toDouble();
-        return ArrayBuffer.from(buffer, resolvedByteOffset.toInt(), resolvedLength.toInt());
+        const resolvedByteOffset: number = byteOffset ?? 0;
+        const resolvedByteOffsetInt: int = resolvedByteOffset.toInt();
+        const resolvedLengthInt: int =
+            length != undefined ? length.toInt() : buffer.byteLength - resolvedByteOffsetInt;
+        return ArrayBuffer.from(buffer, resolvedByteOffsetInt, resolvedLengthInt);
     }
 
     /**
