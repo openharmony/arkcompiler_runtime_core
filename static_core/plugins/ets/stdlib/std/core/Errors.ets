@@ -156,7 +156,7 @@ export class RangeError extends Error {
      * @syscap SystemCapability.Utils.Lang
      */
     constructor(message?: String, options?: ErrorOptions) {
-        super("RangeError", 401, message, options)
+        super("RangeError", message, options)
     }
 
     /**
