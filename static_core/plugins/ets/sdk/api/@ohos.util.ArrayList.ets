@@ -22,7 +22,7 @@ const EmptyContainerId: int = 10200010;
 const CapacityErrorCodeId: int = 10200062;
 const INT_MAX_VALUE_OFFSET: int = 2147483647;
 
-export type ArrayListComparatorFn<T> = (firstValue: T, secondValue: T) => int;
+export type ArrayListComparatorFn<T> = (firstValue: T, secondValue: T) => double;
 export type ArrayListForEachCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => void;
 export type ArrayListReplaceCb<T> =  (value: T, index: int, arrlist: ArrayList<T>) => T;
 
@@ -247,7 +247,14 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
 
     public sort(comparator?: ArrayListComparatorFn<T>): void {
-        this.buffer.sort(comparator);
+        if (comparator == undefined) {
+            this.buffer.sort(comparator);
+        } else {
+            let fn = (firstValue: T, secondValue: T): int => {
+                return comparator!(firstValue, secondValue).toInt()
+            }
+            this.buffer.sort(fn);
+        }
     }
 
     /**

@@ -153,7 +153,7 @@ function testSortDifferentTypesAscending() {
     let arrayList4 = new ArrayList<object>();
     initializeArrayList(arrayList4, TestData.forObject);
     let array4 = arrayList4.convertToArray();
-    arrayList4.sort((a: object, b: object): int => {
+    arrayList4.sort((a: object, b: object): double => {
         let sa = new String(a);
         let sb = new String(b);
         return sa.compareTo(sb);
@@ -207,7 +207,7 @@ function testSortDifferentTypesDescending() {
     let arrayList4 = new ArrayList<object>();
     initializeArrayList(arrayList4, TestData.forObject);
     let array4 = arrayList4.convertToArray();
-    arrayList4.sort((a: object, b: object): int => {
+    arrayList4.sort((a: object, b: object): double => {
         let sa = new String(a);
         let sb = new String(b);
         return sb.compareTo(sa);
