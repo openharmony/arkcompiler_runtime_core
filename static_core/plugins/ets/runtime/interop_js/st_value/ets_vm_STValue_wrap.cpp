@@ -309,6 +309,7 @@ napi_value WrapStringImpl(napi_env env, napi_callback_info info)
     std::string variableName = GetString(env, variableNameNapiValue);
 
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     ani_string aniString;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->String_NewUTF8(variableName.c_str(), variableName.length(), &aniString));
 
@@ -345,6 +346,7 @@ napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
     static constexpr const char *CLASS_NAME = "std.core.BigInt";
     ani_class bigIntClass;
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(CLASS_NAME, &bigIntClass));
     ani_method bigIntCtor {};
@@ -373,6 +375,7 @@ napi_value GetNullImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     ani_ref result;
     ani_status status = aniEnv->GetNull(&result);
     ANI_CHECK_ERROR_RETURN(env, status);
@@ -394,6 +397,7 @@ napi_value GetUndefinedImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     ani_ref result;
     ani_status status = aniEnv->GetUndefined(&result);
     ANI_CHECK_ERROR_RETURN(env, status);

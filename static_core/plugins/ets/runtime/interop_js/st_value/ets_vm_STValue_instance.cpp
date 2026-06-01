@@ -17,6 +17,7 @@
 #include <js_native_api.h>
 #include <js_native_api_types.h>
 #include <node_api.h>
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -61,6 +62,7 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info)
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -107,7 +109,6 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(clsClass, ctorMethod, &newObject));
     }
-
     return CreateSTValueInstance(env, newObject);
 }
 
@@ -117,6 +118,7 @@ napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info in
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -137,57 +139,94 @@ napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info in
         STValueThrowJSError(env, "length type is not number type;");
         return nullptr;
     }
-    uint32_t arrLength;
-    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &arrLength));
+    int32_t arrLength;
+    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsArgv[0], &arrLength));
+    if (arrLength < 0) {
+        STValueThrowJSError(env, "length must be non-negative;");
+        return nullptr;
+    }
 
     SType arrayType = GetTypeFromType(env, jsArgv[1]);
+
+    // Element size mapping table
+    static constexpr std::array<size_t, 8> ELEMENT_SIZES = {
+        sizeof(ani_boolean),  // SType::BOOLEAN
+        sizeof(ani_byte),     // SType::BYTE
+        sizeof(ani_char),     // SType::CHAR
+        sizeof(ani_short),    // SType::SHORT
+        sizeof(ani_int),      // SType::INT
+        sizeof(ani_long),     // SType::LONG
+        sizeof(ani_float),    // SType::FLOAT
+        sizeof(ani_double)    // SType::DOUBLE
+    };
+
+    if (arrayType < SType::BOOLEAN || arrayType > SType::DOUBLE) {
+        ThrowUnsupportedSTypeError(env, arrayType);
+        return nullptr;
+    }
+
+    size_t elementSize = ELEMENT_SIZES[static_cast<int>(arrayType)];
+    size_t bindingSize = std::max(elementSize * arrLength, COMPUTED_STVALUE_BINDING_SIZE);
+    auto [jsValue, stvalueData] = CreateSTValueInstance(env, bindingSize);
+
+    ani_fixedarray fixArray {};
     switch (arrayType) {
         case SType::BOOLEAN: {
-            ani_fixedarray_boolean fixArray;
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Boolean(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_boolean boolArray;
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Boolean(arrLength, &boolArray));
+            fixArray = boolArray;
+            break;
         }
         case SType::CHAR: {
-            ani_fixedarray_char fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Char(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_char charArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Char(arrLength, &charArray));
+            fixArray = charArray;
+            break;
         }
         case SType::BYTE: {
-            ani_fixedarray_byte fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Byte(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_byte byteArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Byte(arrLength, &byteArray));
+            fixArray = byteArray;
+            break;
         }
         case SType::SHORT: {
-            ani_fixedarray_short fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Short(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_short shortArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Short(arrLength, &shortArray));
+            fixArray = shortArray;
+            break;
         }
         case SType::INT: {
-            ani_fixedarray_int fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Int(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_int intArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Int(arrLength, &intArray));
+            fixArray = intArray;
+            break;
         }
         case SType::LONG: {
-            ani_fixedarray_long fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Long(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_long longArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Long(arrLength, &longArray));
+            fixArray = longArray;
+            break;
         }
         case SType::FLOAT: {
-            ani_fixedarray_float fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Float(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_float floatArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Float(arrLength, &floatArray));
+            fixArray = floatArray;
+            break;
         }
         case SType::DOUBLE: {
-            ani_fixedarray_double fixArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Double(arrLength, &fixArray));
-            return CreateSTValueInstance(env, fixArray);
+            ani_fixedarray_double doubleArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Double(arrLength, &doubleArray));
+            fixArray = doubleArray;
+            break;
         }
         default: {
             ThrowUnsupportedSTypeError(env, arrayType);
             return nullptr;
         }
     }
-    return nullptr;
+
+    stvalueData->SetAniRef(env, static_cast<ani_ref>(fixArray));
+    return jsValue;
 }
 
 // static newFixedArrayReference(len: number, elementType: STValue, initialElement: STValue): STValue
@@ -196,6 +235,7 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -208,8 +248,13 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
 
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
 
-    uint32_t arrLength;
-    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &arrLength));
+    int32_t arrLength;
+    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsArgv[0], &arrLength));
+    if (arrLength < 0) {
+        STValueThrowJSError(env, "length must be non-negative;");
+        return nullptr;
+    }
+    size_t bindingSize = std::max(sizeof(ani_ref) * arrLength, COMPUTED_STVALUE_BINDING_SIZE);
 
     auto *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
     if (typeData == nullptr || !typeData->IsAniRef() || typeData->IsAniNullOrUndefined(env)) {
@@ -222,12 +267,16 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
         return nullptr;
     }
 
+    auto [jsSTValue, stvalueData] = CreateSTValueInstance(env, bindingSize);
+
     auto arrayType = static_cast<ani_type>(typeData->GetAniRef());
     auto initValue = static_cast<ani_ref>(initData->GetAniRef());
 
     ani_fixedarray_ref fixRefArray {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Ref(arrayType, arrLength, initValue, &fixRefArray));
-    return CreateSTValueInstance(env, fixRefArray);
+
+    stvalueData->SetAniRef(env, static_cast<ani_ref>(fixRefArray));
+    return jsSTValue;
 }
 
 napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info)
@@ -356,6 +405,7 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -384,6 +434,8 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    size_t bindingSize = std::max(sizeof(ani_ref) * arrLength, COMPUTED_STVALUE_BINDING_SIZE);
+
     napi_value jsElement = jsArgv[1];
     auto *elementData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
 
@@ -392,10 +444,13 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    auto [jsValue, stvalueData] = CreateSTValueInstance(env, bindingSize);
+
     auto initValue = static_cast<ani_ref>(elementData->GetAniRef());
     ani_array newArray {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_New(arrLength, initValue, &newArray));
 
-    return CreateSTValueInstance(env, newArray);
+    stvalueData->SetAniRef(env, static_cast<ani_ref>(newArray));
+    return jsValue;
 }
 }  // namespace ark::ets::interop::js

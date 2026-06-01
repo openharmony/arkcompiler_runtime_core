@@ -99,6 +99,7 @@ static napi_value STValueTemplateInvokeFunction(
     // 5. invoke func according to returnType
     // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean invokeResult = ANI_FALSE;
@@ -206,6 +207,7 @@ napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -255,6 +257,7 @@ napi_value ObjectInvokeMethodWithNoArgs(napi_env env, ani_object invokeObj, cons
 {
     INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
     switch (returnType) {
@@ -332,6 +335,7 @@ napi_value ObjectInvokeMethodWithArgs(napi_env env, ani_object invokeObj, const 
 {
     INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
     auto argArrayData = argArray.data();
@@ -461,6 +465,7 @@ napi_value ClassInvokeStaticMethodWithNoArgs(napi_env env, ani_class clsClass, c
 {
     INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
     switch (returnType) {
@@ -536,6 +541,7 @@ napi_value ClassInvokeStaticMethodWitArgs(napi_env env, ani_class clsClass, cons
 {
     INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
     auto argArrayData = argArray.data();

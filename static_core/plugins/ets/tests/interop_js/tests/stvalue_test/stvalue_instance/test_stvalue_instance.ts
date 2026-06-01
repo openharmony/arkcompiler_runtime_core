@@ -55,7 +55,7 @@ function testNewFixedArrayPrimitive(): void {
     try {
         STValue.newFixedArrayPrimitive(-1, SType.DOUBLE);
     } catch (e: Error) {
-        checkRes = e.message.includes('ANI error occurred');
+        checkRes = e.message.includes('length must be non-negative');
     }
     ASSERT_TRUE(checkRes);
 
@@ -105,7 +105,7 @@ function testNewFixedArrayReference(): void {
     try {
         STValue.newFixedArrayReference(-3, intClass, intObj);
     } catch (e: Error) {
-        checkRes = e.message.includes('ANI error occurred');
+        checkRes = e.message.includes('length must be non-negative');
     }
     ASSERT_TRUE(checkRes);
 
