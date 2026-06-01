@@ -24,6 +24,11 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
+#include <array>
+#include <optional>
+#include <type_traits>
+#include <variant>
+
 // Explicitly instantiation for arm.
 template class ark::ets::EtsBoxPrimitive<ark::ets::EtsDouble>;
 template class ark::ets::EtsBoxPrimitive<ark::ets::EtsLong>;
@@ -53,80 +58,44 @@ const void *GetEtsProxyEntryPoint()
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-class BoxerBase {
+static constexpr size_t ARG_INLINE_CAPACITY = 8U;
+
+// Variant holding either a GC-rooted handle (reference arg, created eagerly in phase 1)
+// or a raw primitive value (boxed in phase 2, after all refs are already rooted).
+// Types mirror exactly what ARCH_COPY_METHOD_ARGS dispatches to Write (U32/U64 excluded —
+// those are not valid ETS argument types and are caught in ArgValueWriter::Write).
+using ArgRaw = std::variant<EtsHandle<EtsObject>, int8_t, uint8_t, int16_t, uint16_t, int32_t, float, double, int64_t>;
+
+class ArgValueWriter final {
 public:
-    virtual std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() = 0;
-    BoxerBase() = default;
-    NO_COPY_SEMANTIC(BoxerBase);
-    NO_MOVE_SEMANTIC(BoxerBase);
-    virtual ~BoxerBase() = default;
-};
+    NO_COPY_SEMANTIC(ArgValueWriter);
+    NO_MOVE_SEMANTIC(ArgValueWriter);
 
-template <typename T>
-class Boxer final : public BoxerBase {
-public:
-    explicit Boxer(T other, EtsExecutionContext *executionCtx) : BoxerBase(), executionCtx_(executionCtx)
-    {
-        static_assert(!std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, ObjectHeader **>);
-        value_ = other;
-    }
-
-    std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() override
-    {
-        auto *boxPrimitive = EtsBoxPrimitive<T>::Create(executionCtx_, value_);
-        if (UNLIKELY(boxPrimitive == nullptr)) {
-            ASSERT(executionCtx_->GetMT()->HasPendingException());
-            return std::nullopt;
-        }
-        EtsHandle<EtsObject> handle(executionCtx_, boxPrimitive->AsObject());
-        return handle;
-    }
-
-private:
-    EtsExecutionContext *executionCtx_ {nullptr};
-
-    T value_;
-};
-
-template <>
-class Boxer<ObjectHeader **> final : public BoxerBase {
-public:
-    explicit Boxer(ObjectHeader **other, EtsExecutionContext *executionCtx)
-    {
-        value_ = EtsHandle<EtsObject>(executionCtx, EtsObject::FromCoreType(*other));
-    }
-
-    std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() override
-    {
-        return value_;
-    }
-
-private:
-    EtsHandle<EtsObject> value_;
-};
-
-class BoxValueWriter final {
-public:
-    explicit BoxValueWriter(PandaVector<PandaUniquePtr<BoxerBase>> *values, EtsExecutionContext *executionCtx)
-        : executionCtx_(executionCtx), allocator_(Runtime::GetCurrent()->GetInternalAllocator()), values_(values)
+    explicit ArgValueWriter(PandaSmallVector<ArgRaw, ARG_INLINE_CAPACITY> *args, EtsExecutionContext *executionCtx)
+        : args_(args), executionCtx_(executionCtx)
     {
     }
-    ~BoxValueWriter() = default;
+
+    ~ArgValueWriter() = default;
 
     template <class T>
     ALWAYS_INLINE void Write(T v)
     {
-        PandaUniquePtr<BoxerBase> obj(allocator_->New<Boxer<T>>(v, executionCtx_));
-        values_->push_back(std::move(obj));
+        if constexpr (std::is_same_v<T, ObjectHeader **>) {
+            // Reference arg: root the handle immediately so GC cannot move the object
+            // before phase-2 boxing allocations run.
+            args_->emplace_back(EtsHandle<EtsObject>(executionCtx_, EtsObject::FromCoreType(*v)));
+        } else if constexpr (std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>) {
+            // U32/U64 are not valid ETS argument types;
+            LOG(FATAL, ETS) << "Unexpected unsigned argument type in proxy dispatch";
+        } else {
+            args_->emplace_back(v);
+        }
     }
 
-    NO_COPY_SEMANTIC(BoxValueWriter);
-    NO_MOVE_SEMANTIC(BoxValueWriter);
-
 private:
-    EtsExecutionContext *executionCtx_ {nullptr};
-    mem::InternalAllocatorPtr allocator_;
-    PandaVector<PandaUniquePtr<BoxerBase>> *values_ {nullptr};
+    PandaSmallVector<ArgRaw, ARG_INLINE_CAPACITY> *args_;
+    EtsExecutionContext *executionCtx_;
 };
 
 static bool UnboxValue(EtsObject *boxedValue, EtsType type, Value *unboxedValue, EtsExecutionContext *executionCtx)
@@ -211,8 +180,27 @@ static int64_t UnboxResult(EtsExecutionContext *executionCtx, EtsMethod *ifaceMe
     return unboxedResult.GetAsLong();
 }
 
-Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *ifaceMethod,
-                                const PandaVector<EtsHandle<EtsObject>> &handledArgs, EtsExecutionContext *executionCtx)
+static std::optional<EtsHandle<EtsObject>> BoxArg(const ArgRaw &arg, EtsExecutionContext *executionCtx)
+{
+    return std::visit(
+        [executionCtx](auto v) -> std::optional<EtsHandle<EtsObject>> {
+            using T = std::decay_t<decltype(v)>;
+            if constexpr (std::is_same_v<T, EtsHandle<EtsObject>>) {
+                return v;
+            } else {
+                auto *box = EtsBoxPrimitive<T>::Create(executionCtx, v);
+                if (UNLIKELY(box == nullptr)) {
+                    return std::nullopt;
+                }
+                return EtsHandle<EtsObject>(executionCtx, box->AsObject());
+            }
+        },
+        arg);
+}
+
+static Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *ifaceMethod,
+                                       const PandaSmallVector<ArgRaw, ARG_INLINE_CAPACITY> &rawArgs,
+                                       EtsExecutionContext *executionCtx)
 {
     auto *platformTypes = PlatformTypes(executionCtx);
 
@@ -223,39 +211,47 @@ Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *if
         return Value(0U);
     }
 
-    PandaVector<Value> invokeArgs;
-    invokeArgs.reserve(3U);
+    std::array<Value, 3U> invokeArgs;
 
     EtsMethod *methodToInvoke = nullptr;
 
     if (ifaceMethod->IsSetter()) {
-        ASSERT(handledArgs.size() == 1U);
-        invokeArgs.push_back(Value(thisH->GetCoreType()));
-        invokeArgs.push_back(Value(reflectMethodH->AsObject()->GetCoreType()));
+        ASSERT(rawArgs.size() == 1U);
+        auto boxed = BoxArg(rawArgs[0], executionCtx);
+        if (UNLIKELY(!boxed.has_value())) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return Value(0U);
+        }
         // nullptr in case of arg = `undefined`.
-        Value arg = (handledArgs[0].GetPtr() == nullptr) ? Value(nullptr) : Value(handledArgs[0]->GetCoreType());
-        invokeArgs.emplace_back(arg);
+        auto *boxedPtr = boxed->GetPtr();
+        invokeArgs[2U] = boxedPtr == nullptr ? Value(nullptr) : Value(boxedPtr->GetCoreType());
         methodToInvoke = platformTypes->coreReflectProxyInvokeSet;
     } else if (ifaceMethod->IsGetter()) {
-        ASSERT(handledArgs.empty());
-        invokeArgs.push_back(Value(thisH->GetCoreType()));
-        invokeArgs.push_back(Value(reflectMethodH->AsObject()->GetCoreType()));
+        ASSERT(rawArgs.empty());
         methodToInvoke = platformTypes->coreReflectProxyInvokeGet;
     } else {
-        auto *argsArrayRaw = EtsObjectArray::Create(platformTypes->coreObject, handledArgs.size());
-        if (UNLIKELY(argsArrayRaw == nullptr)) {
+        EtsHandle<EtsObjectArray> argsArrayH(executionCtx,
+                                             EtsObjectArray::Create(platformTypes->coreObject, rawArgs.size()));
+        if (UNLIKELY(argsArrayH.GetPtr() == nullptr)) {
             ASSERT(executionCtx->GetMT()->HasPendingException());
             return Value(0U);
         }
 
-        for (size_t idx = 0; idx < handledArgs.size(); ++idx) {
-            argsArrayRaw->Set(idx, handledArgs[idx].GetPtr());
+        for (size_t idx = 0; idx < rawArgs.size(); ++idx) {
+            auto boxed = BoxArg(rawArgs[idx], executionCtx);
+            if (UNLIKELY(!boxed.has_value())) {
+                ASSERT(executionCtx->GetMT()->HasPendingException());
+                return Value(0U);
+            }
+            argsArrayH->Set(idx, boxed->GetPtr());
         }
-        invokeArgs.push_back(Value(thisH->GetCoreType()));
-        invokeArgs.push_back(Value(reflectMethodH->AsObject()->GetCoreType()));
-        invokeArgs.push_back(Value(argsArrayRaw->AsObject()->GetCoreType()));
+        invokeArgs[2U] = Value(argsArrayH->AsObject()->GetCoreType());
         methodToInvoke = platformTypes->coreReflectProxyInvoke;
     }
+
+    // Read this/method from handles after all allocations.
+    invokeArgs[0U] = Value(thisH->GetCoreType());
+    invokeArgs[1U] = Value(reflectMethodH->AsObject()->GetCoreType());
 
     auto proxyFlag = CallFlags {CallFlags::IS_PROXY};
     return methodToInvoke->GetPandaMethod()->Invoke(executionCtx->GetMT(), invokeArgs.data(), proxyFlag);
@@ -325,26 +321,15 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
 
     EtsHandle<EtsObject> thisH(executionCtx, thisObj);
 
-    // Collect values from stack and create handles for reference types. It should be done before any allocation.
-    PandaVector<PandaUniquePtr<BoxerBase>> values;
-    BoxValueWriter writer(&values, executionCtx);
+    // Phase 1: read all args from registers/stack — no managed allocation.
+    // Reference args create their handle immediately (GC-rooted before phase-2 boxing).
+    PandaSmallVector<ArgRaw, ARG_INLINE_CAPACITY> rawArgs;
+    ArgValueWriter writer(&rawArgs, executionCtx);
 
     ARCH_COPY_METHOD_ARGS(ifaceMethod->GetPandaMethod(), argReader, writer);
 
-    PandaVector<EtsHandle<EtsObject>> handledArgs;
-    handledArgs.reserve(values.size());
-
-    for (auto &entry : values) {
-        auto obj = entry->BoxIfNeededAndCreateHandle();
-        if (UNLIKELY(!obj.has_value())) {
-            ASSERT(executionCtx->GetMT()->HasPendingException());
-            return 0;
-        }
-        handledArgs.emplace_back(*obj);
-    }
-
-    // After all handles are created we can do allocations.
-    Value result = PrepareArgumentsAndInvoke(thisH, ifaceMethod, handledArgs, executionCtx);
+    // Phase 2: box primitives and invoke; reference args are already rooted from phase 1.
+    Value result = PrepareArgumentsAndInvoke(thisH, ifaceMethod, rawArgs, executionCtx);
     // result is boxed Any value.
     return UnboxResult(executionCtx, ifaceMethod, result);
 }

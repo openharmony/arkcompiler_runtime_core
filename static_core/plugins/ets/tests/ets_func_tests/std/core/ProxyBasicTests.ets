@@ -878,6 +878,44 @@ function testGetHandlerProxy3() {
     arktest.assertEQ(Class.of(proxyInstance).getInstanceMethods().length, 2)
 }
 
+interface IWide {
+    invoke10(b: boolean, by: byte, c: char, s: short,
+             i: int, l: long, f: float, d: double,
+             i2: int, s2: string): int
+}
+
+class WideHandler implements reflect.InvocationHandler {
+    invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
+        arktest.assertEQ(args.length, 10)
+        arktest.assertEQ(args[0] as boolean, true)
+        arktest.assertEQ(args[1] as byte,    (11).toByte())
+        arktest.assertEQ(args[2] as char,    c'Z')
+        arktest.assertEQ(args[3] as short,   (333).toShort())
+        arktest.assertEQ(args[4] as int,     444)
+        arktest.assertEQ(args[5] as long,    (555).toLong())
+        arktest.assertEQ(args[6] as float,   6.6f)
+        arktest.assertEQ(args[7] as double,  7.7)
+        arktest.assertEQ(args[8] as int,     999)
+        arktest.assertEQ(args[9] as string,  "WideArgs")
+        return 1
+    }
+    get(proxy: reflect.Proxy, method: reflect.InstanceMethod): Any { return 0 }
+    set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {}
+}
+
+const WIDE_PROXY: IWide = reflect.Proxy.create(
+    Class.current().getLinker(), [Class.from<IWide>()], new WideHandler()
+) as IWide
+
+function testWideArgs(): void {
+    arktest.assertEQ(
+        WIDE_PROXY.invoke10(true, (11).toByte(), c'Z', (333).toShort(),
+                            444, (555).toLong(), 6.6f, 7.7,
+                            999, "WideArgs"),
+        1
+    )
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Proxy test')
 
@@ -904,6 +942,8 @@ function main() {
     suite.addTest('Interface with method `getHandler: reflect.InvocationHandler`', testGetHandlerProxy1)
     suite.addTest('Interface with default implementation of method `getHandler: reflect.InvocationHandler`', testGetHandlerProxy2)
     suite.addTest('Interface with method `getHandler: char`', testGetHandlerProxy3)
+
+    suite.addTest('10-arg method dispatch (>8 triggers SmallVector spill)', testWideArgs)
 
     return suite.run()
 }
