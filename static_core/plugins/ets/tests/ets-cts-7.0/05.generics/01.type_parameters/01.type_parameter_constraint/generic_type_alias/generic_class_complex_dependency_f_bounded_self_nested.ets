@@ -21,8 +21,10 @@ params: >-
 
 class U<S> {
     field0: S
-    constructor(v: S){
-        this.field0 = v
+    constructor(v?: S) {
+        if (v !== undefined) {
+            this.field0 = v
+        }
     }
 }
 
@@ -45,8 +47,11 @@ abstract class Aa<T extends U<U<T>>> {
 }
 
 class B extends U<U<B>> {
-    constructor(){
-        super(new U<B>(this))
+    constructor() {
+        super()
+        const inner = new U<B>()
+        inner.field0 = this
+        this.field0 = inner
     }
 }
 
@@ -110,4 +115,3 @@ function main(): int {
     testSuite.addTest("testClassAbstractGeneric", testClassAbstractGeneric)
     return testSuite.run()
 }
-

@@ -151,15 +151,33 @@ cases:
             }
         }
 
+        class RoArrayStrings implements RoArray<string> {
+            s: string[]
+            constructor(s: string[]) {
+                this.s = s
+            }
+            val(i: int): string {
+                return this.s[i]
+            }
+            len(): int {
+                return this.s.length
+            }
+        }
+
         class C extends D implements RoArray<string> {
             arr: string[] = ['a', 'b', 'c']
+            valCalls: int = 0
+            lenCalls: int = 0
             constructor() {
-                super(this)
+                super(new RoArrayStrings([]))
+                this.data = this
             }
             override val(i: int): string {
+                this.valCalls++
                 return this.arr[i]
             }
             override len(): int {
+                this.lenCalls++
                 return this.arr.length
             }
         }
@@ -170,6 +188,8 @@ cases:
             res += x
         }
         arktest.assertEQ(res, 'abc')
+        arktest.assertEQ(c.valCalls, 3)
+        arktest.assertTrue(c.lenCalls > 0)
 
     # protected iterator
     - decl: |-

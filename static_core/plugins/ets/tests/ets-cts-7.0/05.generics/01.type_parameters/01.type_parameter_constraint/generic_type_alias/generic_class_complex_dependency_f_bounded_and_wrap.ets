@@ -21,15 +21,19 @@ params: >-
 
 class U<S> {
     field0: S
-    constructor(v: S){
-        this.field0 = v
+    constructor(v?: S) {
+        if (v !== undefined) {
+            this.field0 = v
+        }
     }
 }
 
 abstract class W<R> {
     fieldW: R
-    constructor(v: R){
-        this.fieldW = v
+    constructor(v?: R) {
+        if (v !== undefined) {
+            this.fieldW = v
+        }
     }
 }
 
@@ -52,14 +56,17 @@ abstract class Aa<T extends U<W<T>>> {
 }
 
 class D<R> extends W<R> {
-    constructor(p: R){
+    constructor(p?: R) {
         super(p)
     }
-} 
+}
 
 class B extends U<W<B>> {
-    constructor(){
-        super(new D<B>(this))
+    constructor() {
+        super()
+        const w = new D<B>()
+        w.fieldW = this
+        this.field0 = w
     }
 }
 
@@ -110,4 +117,3 @@ function main(): int {
     testSuite.addTest("testClassAbstractGeneric", testClassAbstractGeneric)
     return testSuite.run()
 }
-

@@ -310,7 +310,8 @@ export namespace taskpool {
         public static closingTask: Task = new Task("closingTask", (): void => {});
 
         constructor (supportInterop: boolean) {
-            super((() => this.workerBody()) as Object, "taskpool", supportInterop, true);
+            super(((): void => {}) as Object, "taskpool", supportInterop, true);
+            this.setInitialTask((() => this.workerBody()) as Object);
             initGlobalTaskQueues();
             this.needInterop = supportInterop;
             this.start();
