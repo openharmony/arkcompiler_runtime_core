@@ -132,6 +132,33 @@ function(test_runtime_linker_extensions test)
         DEPENDS ${additional_hap_source_abc}
     )
 
+    set(additional_invalid_hap_stage_dir "${additional_abc_dir}/additional1_invalid_hap")
+    set(additional_invalid_hap_file "${additional_abc_dir}/additional1_invalid.ets.hap")
+    add_custom_command(
+        OUTPUT ${additional_invalid_hap_file}
+        COMMENT "Create ${additional_invalid_hap_file}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf ${additional_invalid_hap_stage_dir}
+        COMMAND ${CMAKE_COMMAND} -E rm -f ${additional_invalid_hap_file}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${additional_invalid_hap_stage_dir}/ets
+        COMMAND ${CMAKE_COMMAND} -E touch ${additional_invalid_hap_stage_dir}/ets/not_modules_static.abc
+        COMMAND ${CMAKE_COMMAND} -E chdir ${additional_invalid_hap_stage_dir} zip -r -0 ${additional_invalid_hap_file} ets
+    )
+
+    set(additional_hsp_stage_dir "${linker_tests_out_dir}/additional1_hsp")
+    set(additional_hsp_file "${linker_tests_out_dir}/additional1.ets.hsp")
+    set(additional_hsp_relative_file "additional1.ets.hsp")
+    add_custom_command(
+        OUTPUT ${additional_hsp_file}
+        COMMENT "Create ${additional_hsp_file}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf ${additional_hsp_stage_dir}
+        COMMAND ${CMAKE_COMMAND} -E rm -f ${additional_hsp_file}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${additional_hsp_stage_dir}/additional1.ets/ets
+        COMMAND ${CMAKE_COMMAND} -E copy ${additional_hap_source_abc}
+                ${additional_hsp_stage_dir}/additional1.ets/ets/modules_static.abc
+        COMMAND ${CMAKE_COMMAND} -E chdir ${additional_hsp_stage_dir} zip -r -0 ${additional_hsp_file} additional1.ets
+        DEPENDS ${additional_hap_source_abc}
+    )
+
     # Build rules for native shared library
     set(native_lib ${test}-shared-lib)
     panda_add_library(${native_lib} SHARED ${linker_tests_in_dir}/native/${test}.cpp)
@@ -153,9 +180,12 @@ function(test_runtime_linker_extensions test)
         LD_LIBRARY_PATH=${native_lib_dir}
         ADDITIONAL_ABC_FILES=${additional_abc_files}
         ADDITIONAL_HAP_FILE=${additional_hap_file}
+        ADDITIONAL_INVALID_HAP_FILE=${additional_invalid_hap_file}
+        ADDITIONAL_HSP_FILE=${additional_hsp_relative_file}
         ${PANDA_RUN_PREFIX})
 
-    add_custom_target(${test}-add-deps DEPENDS ${compilations_targets_list} ${native_lib} ${additional_hap_file})
+    add_custom_target(${test}-add-deps DEPENDS ${compilations_targets_list} ${native_lib}
+                      ${additional_hap_file} ${additional_invalid_hap_file} ${additional_hsp_file})
     # Note that some functions must be deliberately not inlined due to tests purposes.
     # For more information please refer to definitions of those methods
     add_linker_test(${test} ${test}-add-deps

@@ -92,6 +92,8 @@ static bool GetPackagePath(const std::string &pathStr, EtsExecutionContext *exec
     auto safeData = isHsp ? extractor->GetSafeDataForHsp(abcPath) : extractor->GetSafeData(PACKAGE_ABC_ENTRY);
     if (safeData == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to get safe data from ABC package: " << abcPath;
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
+                               "Failed to get abc file from package: " + abcPath);
         return false;
     }
     pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
@@ -122,20 +124,23 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
 
     const auto path = filePath->GetMutf8();
     std::unique_ptr<const panda_file::File> pf {nullptr};
-    {
+
+    auto pathStr = std::string(path.begin(), path.end());
+    // HAP/HSP packages store the ABC under the package-specific entry, while OpenPandaFileOrZip first tries the default
+    // classes.abc entry. Handle packages before the generic path to avoid redundant archive lookups.
+    if (IsHspPath(pathStr) && !GetHspPath(pathStr, executionCtx, pf)) {
+        return nullptr;
+    }
+    if (IsHapPath(pathStr) && !GetHapPackagePath(pathStr, executionCtx, pf)) {
+        return nullptr;
+    }
+    if (pf == nullptr) {
         // Loading panda-file might be time-consuming, which would affect GC
         // unless being executed in native scope
         ScopedNativeCodeThread etsNativeScope(executionCtx->GetMT());
         pf = panda_file::OpenPandaFileOrZip(path);
     }
 
-    auto pathStr = std::string(path.begin(), path.end());
-    if (pf == nullptr && IsHspPath(pathStr) && !GetHspPath(pathStr, executionCtx, pf)) {
-        return nullptr;
-    }
-    if (pf == nullptr && IsHapPath(pathStr) && !GetHapPackagePath(pathStr, executionCtx, pf)) {
-        return nullptr;
-    }
     if (pf == nullptr) {
         ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
                                PandaString("Abc file not found: ") + path);
