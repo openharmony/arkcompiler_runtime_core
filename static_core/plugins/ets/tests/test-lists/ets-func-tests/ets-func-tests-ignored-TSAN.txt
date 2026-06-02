@@ -1,7 +1,7 @@
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
-#34745
+#34920
 ets_func_tests/std/core/get_hash.ets
 
 #33832

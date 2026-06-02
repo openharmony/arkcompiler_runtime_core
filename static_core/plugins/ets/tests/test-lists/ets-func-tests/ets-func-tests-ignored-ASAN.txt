@@ -14,7 +14,7 @@ ets_func_tests/std/concurrency/AsyncCondVarTest.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 #32636
 ets_func_tests/std/core/dateformat/IntlDateFormatOptionsYearNumericTest.ets
-#34745
+#34920
 ets_func_tests/std/core/get_hash.ets
 #34681
 ets_func_tests/std/core/IntlLocaleThreadSafetyTest.ets

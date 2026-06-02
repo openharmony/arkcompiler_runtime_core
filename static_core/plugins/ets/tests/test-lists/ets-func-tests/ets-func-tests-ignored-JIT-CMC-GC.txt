@@ -6,5 +6,8 @@ ets_func_tests/std/containers/WeakSetGCTest.ets
 #33648
 ets_func_tests/std/debug/CountInstancesOfClass.ets
 
+#34968
+ets_func_tests/std/core/regexp/RegExpMatchAllTest.ets
+
 #32998
 ets_func_tests/std/core/get_hash.ets
