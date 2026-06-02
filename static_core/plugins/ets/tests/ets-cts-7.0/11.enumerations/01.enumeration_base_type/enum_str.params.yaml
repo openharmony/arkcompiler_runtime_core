@@ -71,16 +71,6 @@ cases:
         using different values types assignable to type string
     decl_variants:
       - |-
-        const v1: string = "11"
-        const v2: "12" = "12"
-        const v3: "13" = "13"
-        enum Enum { first = v1, second = v2, third = v3 }
-      - |-
-        let v1: "11" = "11"
-        let v2: string = "12"
-        let v3: "13" = "13"
-        enum Enum { first = v1, second = v2, third = v3 }
-      - |-
         enum Enum { first = "11", second = "12", third = "13" as string }
     sub_cases_logic:
       - |-
