@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Implementing class has private field of same name and type in superclass.
+desc: Implementing class has same name but different type field inherited from superclass.
 tags: [compile-only, negative]
 expected_out: "Semantic error ESE0188: MyCL is not abstract and does not implement getter for code_ property in I"
 ---*/
 
 class X {
-    private code_: int = 1
+    private code_: string = "1"
 }
 
 interface I {
@@ -34,7 +34,4 @@ function main(): void {
 
     arktest.assertTrue(instance instanceof I, "expect instance of I")
     arktest.assertTrue(instance instanceof X, "expect instance of X")
-
-    let i: I = instance
-    arktest.assertEQ(i.code_, 1, "field via interface")
 }

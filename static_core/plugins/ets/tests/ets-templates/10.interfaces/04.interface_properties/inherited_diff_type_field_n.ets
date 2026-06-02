@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for modifier in ['private', '', 'protected', 'public'] %}
+{% for modifier in ['', 'protected', 'public'] %}
 
 /*---
 desc: Implementing class has same name but different type field inherited from superclass.
