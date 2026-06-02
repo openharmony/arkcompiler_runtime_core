@@ -378,6 +378,53 @@ ani_array RunMatchAllLoop(EtsRegExp &re, uint32_t matchFlags, const CharT *input
     return status == ANI_OK ? arr : nullptr;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
+ani_array RunWithStableLatin1Input(EtsRegExp &re, const ExecData &execData, ani_env *env, uint32_t matchFlags,
+                                   ani_method regexpMatchArrayCtor, int32_t inputSize)
+{
+    std::vector<uint8_t> inputStorage;
+    {
+        ark::ets::ani::ScopedManagedCodeFix scope(env);
+        auto *patternEtsStr = scope.ToInternalType(execData.pattern);
+        RegExpStringAccessor patternAccessor(patternEtsStr);
+        if (!re.Compile(patternAccessor.GetDataUtf8(), static_cast<int>(execData.patternSize))) {
+            return {};
+        }
+
+        auto *inputEtsStr = scope.ToInternalType(execData.input);
+        RegExpStringAccessor inputAccessor(inputEtsStr);
+        const auto *inputData = inputAccessor.GetDataUtf8();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        inputStorage.assign(inputData, inputData + execData.inputSize);
+    }
+    return RunMatchAllLoop<uint8_t>(re, matchFlags, inputStorage.data(), inputSize, false, env,
+                                    refs::g_regexpMatchArrayClass, regexpMatchArrayCtor, execData.lastIndex);
+}
+
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
+ani_array RunWithStableUtf16Input(EtsRegExp &re, const ExecData &execData, ani_env *env,
+                                  InputExecutionKind executionKind, uint32_t matchFlags,
+                                  ani_method regexpMatchArrayCtor, int32_t inputSize)
+{
+    std::vector<uint16_t> inputStorage;
+    {
+        ark::ets::ani::ScopedManagedCodeFix scope(env);
+        const bool needsMaterialization = executionKind == InputExecutionKind::LATIN1_TO_UTF16;
+        const uint16_t *inputData =
+            AcquireUtf16Input(scope, execData.input, inputSize, needsMaterialization, inputStorage);
+        if (!needsMaterialization) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            inputStorage.assign(inputData, inputData + execData.inputSize);
+        }
+        auto &patternUtf16 = GetUtf16ScratchA();
+        if (!CompileUtf16Pattern(re, scope, execData, patternUtf16)) {
+            return {};
+        }
+    }
+    return RunMatchAllLoop<uint16_t>(re, matchFlags, inputStorage.data(), inputSize, re.HasUnicodeOrUnicodeSetsFlag(),
+                                     env, refs::g_regexpMatchArrayClass, regexpMatchArrayCtor, execData.lastIndex);
+}
+
 }  // namespace
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
@@ -396,17 +443,12 @@ ani_array MatchAllNativeImpl(ani_env *env, [[maybe_unused]] ani_object regexp, a
 
     const InputExecutionKind executionKind = SelectExecutionKind(re, execData);
     const uint32_t matchFlags = re.GetMatchFlags();
-    auto result = PrepareInputAndRun<ani_array>(
-        re, execData, env, executionKind,
-        [&](const uint8_t *inputData) -> ani_array {
-            return RunMatchAllLoop<uint8_t>(re, matchFlags, inputData, inputSize, false, env,
-                                            refs::g_regexpMatchArrayClass, regexpMatchArrayCtor, execData.lastIndex);
-        },
-        [&](const uint16_t *inputData) -> ani_array {
-            return RunMatchAllLoop<uint16_t>(re, matchFlags, inputData, inputSize, re.HasUnicodeOrUnicodeSetsFlag(),
-                                             env, refs::g_regexpMatchArrayClass, regexpMatchArrayCtor,
-                                             execData.lastIndex);
-        });
+    ani_array result = nullptr;
+    if (executionKind == InputExecutionKind::LATIN1_DIRECT) {
+        result = RunWithStableLatin1Input(re, execData, env, matchFlags, regexpMatchArrayCtor, inputSize);
+    } else {
+        result = RunWithStableUtf16Input(re, execData, env, executionKind, matchFlags, regexpMatchArrayCtor, inputSize);
+    }
 
     if (re.HasCompiledRe()) {
         re.Destroy();
