@@ -175,7 +175,7 @@ public:
 private:
     ALWAYS_INLINE ObjectPointer<EtsByteArray> GetManagedDataImpl() const
     {
-        return ObjectAccessor::GetPrimitive<ObjectPointer<EtsByteArray>>(this, GetManagedDataOffset());
+        return EtsByteArray::FromCoreType(ObjectAccessor::GetObject(this, GetManagedDataOffset()));
     }
 
     ALWAYS_INLINE void *GetNativeDataImpl() const
