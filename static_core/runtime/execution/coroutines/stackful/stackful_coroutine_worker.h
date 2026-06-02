@@ -131,6 +131,12 @@ public:
     void FinalizeFiberScheduleLoop();
 
     /// @brief schedule runnable coroutines and wait for blocked coroutines
+    void ExecuteJobsUntilIdle() NO_THREAD_SAFETY_ANALYSIS override;
+
+    /**
+     * @brief schedule runnable coroutines and wait for blocked coroutines
+     * NOTE: precondition: worker is disabled for cross-worker launch
+     */
     void CompleteAllAffinedCoroutines();
 
     /* debugging tools */
@@ -172,7 +178,6 @@ public:
     /// check whether the worker is idle
     bool IsIdle();
 
-    bool ProcessAsyncWork() NO_THREAD_SAFETY_ANALYSIS override;
     bool HasPendingLocalJobs() NO_THREAD_SAFETY_ANALYSIS override;
     void OnNewCoroutineStartup(Coroutine *co) override;
 
@@ -282,7 +287,7 @@ private:  // data members
      */
     uint32_t disableCoroSwitchCounter_ = 0;
 
-    GenericEvent hasRunnableCoroEvent_;
+    GenericEvent allCoroutinesExecuted_;
 
     // stats
     JobWorkerStats stats_;

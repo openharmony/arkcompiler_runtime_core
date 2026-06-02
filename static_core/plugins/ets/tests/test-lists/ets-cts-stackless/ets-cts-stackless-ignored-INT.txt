@@ -1,14 +1,5 @@
 #34487 EAWorker is not supported
-16.concurrency/04.parallel_execution/02.launch_api/domain_general_1.ets
-16.concurrency/04.parallel_execution/02.launch_api/domain_general_4.ets
 16.concurrency/04.parallel_execution/02.launch_api/domain_main_2.ets
-16.concurrency/04.parallel_execution/02.launch_api/launch_api_1.ets
-16.concurrency/04.parallel_execution/02.launch_api/launch_api_3.ets
-16.concurrency/04.parallel_execution/02.launch_api/launch_api_4.ets
-16.concurrency/04.parallel_execution/02.launch_api/launch_api_5.ets
-16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_0.ets
-16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_1.ets
-16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_3.ets
 16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_4.ets
 16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_hint_ignored_0.ets
 16.concurrency/04.parallel_execution/03.eaworker_api/domain_ea_hint_ignored_1.ets
@@ -18,8 +9,6 @@
 16.concurrency/04.parallel_execution/03.eaworker_api/eaworker_api_1.ets
 16.concurrency/04.parallel_execution/03.eaworker_api/eaworker_basic_run.ets
 16.concurrency/04.parallel_execution/03.eaworker_api/eaworker_two_workers_smoke.ets
-16.concurrency/04.parallel_execution/03.eaworker_api/lifetime_0.ets
-16.concurrency/04.parallel_execution/03.eaworker_api/lifetime_1.ets
 16.concurrency/05.synchronization/02.asynchronous_mutex/asynchronous_mutex_1.ets
 16.concurrency/05.synchronization/03.asynchronous_read_write_lock/asynchronous_read_write_lock.ets
 16.concurrency/05.synchronization/04.asynchronous_condition_variable/asynchronous_condition_variable.ets

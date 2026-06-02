@@ -74,6 +74,8 @@ public:
 
     void CacheLocalObjectsInExecutionCtx() override;
 
+    void ExecuteJobsUntilIdle() override;
+
     void CompleteAllAffinedJobs();
 
 private:

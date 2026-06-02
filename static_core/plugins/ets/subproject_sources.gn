@@ -203,6 +203,7 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/json_helper.cpp",
   "runtime/intrinsics/helpers/regexp_preparser.cpp",
   "runtime/intrinsics/helpers/intrinsic_promise_impl.cpp",
+  "runtime/intrinsics/helpers/intrinsic_timer_impl.cpp",
   "runtime/main_worker_external_scheduler.cpp",
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",

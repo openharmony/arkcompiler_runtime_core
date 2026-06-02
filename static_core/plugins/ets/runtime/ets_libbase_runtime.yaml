@@ -10119,7 +10119,7 @@ intrinsics:
     static: true
     signature:
       ret: i32
-      args: [std.core.Object, u1, std.core.String]
+      args: [std.core.Object, std.core.Promise, std.core.String, u1]
     impl: ark::ets::intrinsics::ExclusiveLaunch
 
 ###################
@@ -10145,7 +10145,6 @@ intrinsics:
       ret: void
       args:
         - i32
-        - std.core.Object
     impl: ark::ets::intrinsics::JoinExclusiveWorker
 
 ###################

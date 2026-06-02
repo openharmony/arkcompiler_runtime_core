@@ -952,7 +952,6 @@ JobExecutionContext *StackfulCoroutineManager::AttachExclusiveWorker(Runtime *ru
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
 
     if (IsExclusiveWorkersLimitReached()) {
-        LOG(DEBUG, COROUTINES) << "The program reached the limit of exclusive workers";
         return nullptr;
     }
 

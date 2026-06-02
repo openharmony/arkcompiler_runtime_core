@@ -141,6 +141,8 @@ public:
     /// @return true if current method is called from another worker instance
     bool IsCrossWorkerCall();
 
+    virtual void ExecuteJobsUntilIdle() = 0;
+
 private:
     /// should be called once the VM is ready to create managed objects in the managed heap
     void InitializeManagedStructures(const CreatePluginObjFunc &createEtsObj = nullptr);

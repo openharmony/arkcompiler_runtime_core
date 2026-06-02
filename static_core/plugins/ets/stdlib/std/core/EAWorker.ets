@@ -51,11 +51,7 @@ class ExclusiveLauncher {
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      * @returns { int } the id of the worker
      */
-    public static elaunch(task: Task,  name: string, needInterop: boolean = false): int {
-        return ExclusiveLauncher.elaunch(task as Object, needInterop, name);
-    }
-
-    private static native elaunch(task: Object, needInterop: boolean, name: string): int;
+    static native elaunch(task: Object, joiningPromise: Promise<void>, name: string, needInterop: boolean): int;
 };
 
 /**
@@ -402,6 +398,7 @@ export abstract class InternalWorker {
     private readonly name: string;
     protected workerId: int;
     private errorHandler: ErrorHandlerType | undefined = undefined;
+    private joiningPromise = new Promise<void>((res) => {});
 
     constructor(name: string, workerId: int) {
         this.name = name;
@@ -414,7 +411,19 @@ export abstract class InternalWorker {
 
     abstract start(initialTask: Task): void;
 
-    abstract join(finalTask: Task): Promise<void>;
+    protected startImpl(initialTask: Task, needInterop: boolean): void {
+        let wrappedTask = () => {
+            this.workerId = CoroutineExtras.getWorkerId();
+            initialTask();
+        }
+        this.workerId = ExclusiveLauncher.elaunch(wrappedTask, this.joiningPromise, this.getName(), needInterop);
+    }
+
+    join(finalTask: Task): Promise<void> {
+        this.runImpl<void>(finalTask);
+        InternalWorker.join(this.workerId);
+        return this.joiningPromise;
+    }
 
     abstract handleCreateInteropEnvError(): void;
 
@@ -464,7 +473,7 @@ export abstract class InternalWorker {
      */
     private static native setCurrentWorkerPriority(priority: int): void;
 
-    protected static native join(workerId: int, finalTask: Object): void;
+    private static native join(workerId: int): void;
 }
 
 class InteropWorker extends InternalWorker {
@@ -485,7 +494,7 @@ class InteropWorker extends InternalWorker {
                 this.processPendingTasks();
             }
         }
-        this.workerId = ExclusiveLauncher.elaunch(wrappedTask, this.getName(), true);
+        super.startImpl(wrappedTask, true);
     }
 
     private processPendingTasks() { 
@@ -528,20 +537,6 @@ class InteropWorker extends InternalWorker {
         return super.runImpl<R>(wrappedTask);
     }
 
-    public join(finalTask: Task): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            let finTask = () => {
-                try {
-                    finalTask();
-                    resolve(undefined);
-                } catch (e) {
-                    reject(e as Error);
-                }
-            }
-            InternalWorker.join(this.workerId, finTask as Object);
-        });
-    }
-
     handleCreateInteropEnvError() {
         let err = new Error('EAWorker:: Cannot create EAWorker support interop without JsEnv');
         while (this.pendingTasks.size > 0) {
@@ -573,27 +568,12 @@ class PendingTaskHandler {
 }
 
 class StaticWorker extends InternalWorker {
-    private joiningEvent = new Event();
-
     constructor(name: string) {
         super(name, INVALID_WORKER_ID);
     }
 
     start(initialTask: Task) {
-        let initTask = () => {
-            try {
-                initialTask();
-            } finally {
-                this.joiningEvent.wait();
-            }
-        }
-        this.workerId = ExclusiveLauncher.elaunch(initTask, this.getName(), false);
-    }
-
-    public join(finalTask: Task): Promise<void> {
-        let joinPromise = this.runImpl(finalTask);
-        this.joiningEvent.fire();
-        return joinPromise;
+        super.startImpl(initialTask, false);
     }
 
     handleCreateInteropEnvError() {
