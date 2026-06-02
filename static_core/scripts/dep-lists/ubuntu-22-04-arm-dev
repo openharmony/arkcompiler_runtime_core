@@ -32,6 +32,7 @@ unzip=6.0-*                                  # For unpacking jar
 parallel=20210822*                           # For rt.jar test
 libdwarf-dev=20210528-*                      # For printing function names and line numbers
 gdb-multiarch=12.*                           # GDB with support for multiple architectures
+zlib1g-dev=1:1.2.11*
 
 llvm=1:14*                                   # For Thread Sanitizer
 
