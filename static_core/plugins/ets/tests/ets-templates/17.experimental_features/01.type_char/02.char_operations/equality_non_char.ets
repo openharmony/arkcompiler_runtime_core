@@ -18,18 +18,25 @@
 
 /*---
 desc: >-
-    The equality operator checking a value of char type against a value of
-    a non-char type returns false. If the result is known at compile time
-    to always evaluate as false, a compile-time warning is issued
+    The equality operator checking a value of char type against a numeric type
+    compares numeric values.
 test_suffix: "{{modifier}}_{{u_value}}"
 ---*/
 
-function check<T>(a0: char, x: T, assert_message: string): void {
-    arktest.assertFalse(a0 == x, assert_message)
+function check<T>(a0: char, x: T, expected: boolean, assert_message: string): void {
+    if (expected) {
+        arktest.assertTrue(a0 == x, assert_message)
+    } else {
+        arktest.assertFalse(a0 == x, assert_message)
+    }
 }
 
-function checkNE<T>(a0: char, x: T, assert_message: string): void {
-    arktest.assertNE(a0, x, assert_message)
+function checkNE<T>(a0: char, x: T, expected: boolean, assert_message: string): void {
+    if (expected) {
+        arktest.assertFalse(a0 != x, assert_message)
+    } else {
+        arktest.assertTrue(a0 != x, assert_message)
+    }
 }
 
 function main() {
@@ -39,13 +46,19 @@ function main() {
         testSuite.addTest("equality_non_char_{{modifier}}_{{u_value}}_{{v.type}}", () => {
             {{modifier}} a0: char = c'\{{u_value}}'
             {{modifier}} x: {{v.type}} = {{v.init}}
-            let assert_message: string = "expect not equal char and {{v.type}} type values for \\{{u_value}}"
-            // test via function call, both equality operator and assertNE
-            check<{{v.type}}>(a0, x, assert_message)
-            checkNE<{{v.type}}>(a0, x, assert_message + " NE")
-            // test inline, both equality operator and assertNE
-            arktest.assertFalse(a0 == x, assert_message + " inline")
-            arktest.assertNE(a0, x, assert_message + " inline NE")
+            let expected: boolean = {{ "true" if u_value == "u0001" else "false" }}
+            let assert_message: string = "expect char and {{v.type}} numeric comparison for \\{{u_value}}"
+            // test via function call, both equality and inequality operators
+            check<{{v.type}}>(a0, x, expected, assert_message)
+            checkNE<{{v.type}}>(a0, x, expected, assert_message + " NE")
+            // test inline, both equality and inequality operators
+            if (expected) {
+                arktest.assertTrue(a0 == x, assert_message + " inline")
+                arktest.assertFalse(a0 != x, assert_message + " inline NE")
+            } else {
+                arktest.assertFalse(a0 == x, assert_message + " inline")
+                arktest.assertTrue(a0 != x, assert_message + " inline NE")
+            }
         });
     {%- endfor %}
 

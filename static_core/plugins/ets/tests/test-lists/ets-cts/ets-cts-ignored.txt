@@ -378,10 +378,6 @@
 #34861
 16.concurrency/04.parallel_execution/02.eaworker_api/eaworker_two_workers_smoke.ets
 
-#33790
-17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
-17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
-
 #34223
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_null_und.ets
