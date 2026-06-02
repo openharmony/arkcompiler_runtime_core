@@ -6,10 +6,6 @@
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
 
-#29971
-04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
-04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
-
 #34603
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_46.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_47.ets
@@ -138,10 +134,6 @@
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_conditional.ets
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_enum.ets
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_local.ets
-
-#29971
-08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
-08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
 
 #34631
 09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_0.ets
