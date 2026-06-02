@@ -3755,8 +3755,9 @@ function createIntFromJSONValue(json: JSONValue): Int {
 function createLongFromJSONValue(json: JSONValue): Long {
     if (json instanceof JSONNumber) {
         let num = (json as JSONNumber).value
-        if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
-            return num.toLong()
+        let value = (json as JSONNumber).bigintValue
+        if (Double.isInteger(num) && Long.MIN_VALUE <= value && value <= Long.MAX_VALUE) {
+            return value.getLong()
         }
     }
     throw new JSONTypeError('Cannot create Long from JSON', {cause: json as Object} as ErrorOptions)
