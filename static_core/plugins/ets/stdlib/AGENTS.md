@@ -1,319 +1,112 @@
-# AGENTS.md
-
-This file provides guidance to AI agents when working with code in this repository.
+# ETS Standard Library Guide
 
 ## Project Overview
 
-This is the **ETS (Extended TypeScript) Standard Library** for the **ArkCompiler runtime**, which is part of the OpenHarmony application development framework. The stdlib provides core types, collections, concurrency primitives, and ECMAScript compatibility layers for ArkTS applications.
+This directory contains the ArkTS-Sta standard library within ArkCompiler Runtime Core, located at `static_core/plugins/ets/stdlib/`.
 
-> **💡 Note**: Language reference for ArkTS 1.2 should be available in project documentation or OpenHarmony SDK docs.
+### Directory Routing
 
-### Architecture
+| Directory | Responsibility | Implicit Import | Special Constraints |
+| --- | --- | --- | --- |
+| `std/core/` | Core types: Array, String, Promise, Error, TypedArrays, Functions, Global, primitive wrappers, reflection, JsonElement | Yes | Most native/intrinsic-dense area |
+| `std/concurrency/` | Concurrency primitives: taskpool, workers, AsyncLock, Atomics, SyncPrimitives | Yes | Concurrency primitives involve lock semantics, task scheduling, and memory ordering — high-risk area |
+| `std/containers/` | Data structures: HashMap, TreeMap (AVL tree), TreeSet, HashSet, Queue, LinkedList | Yes | TreeMap/TreeSet are generated from Jinja2 templates for generics |
+| `std/interop/` | JS-ETS interoperability: JSValue, JSRuntime, serialization, Promise interop | Yes | InteropTransferHelper is generated from templates (see `code_generation.md`) |
+| `std/testing/` | ArkTest unit testing framework | Yes | |
+| `std/debug/` | Debugging tools, logging | Yes | |
+| `std/math/consts/` | Mathematical constants | **No** | Requires explicit import |
+| `arkruntime/` | ArkRuntime API | **No** | Requires explicit import |
+| `native/core/` | C++ native implementations: Intl (ICU4C), RegExp (PCRE2), Process | N/A | Connected to ETS layer via ANI |
 
-The stdlib is organized into several layers:
+Module configuration: `stdconfig.json` (defines the `"std"` to `"ets/stdlib/std"` path mapping)
 
-- **`std/core/`** - Core ArkTS types (Array, String, Promise, Error, primitive wrappers, reflection types, TypedArrays, Functions, Global)
-- **`std/concurrency/`** - Multi-threading primitives (taskpool, workers, AsyncLock, Atomics)
-- **`std/containers/`** - Data structures (HashMap, TreeMap, TreeSet, Queue, LinkedList)
-- **`std/interop/`** - JavaScript-ETS interoperation bridge
-- **`std/testing/`** - ArkTest unit testing framework
-- **`std/debug/`** - Debug utilities (not implicitly imported)
-- **`arkruntime/`** - ArkRuntime related api (not implicitly imported)
-- **`native/core/`** - C++ native implementations (Intl, RegExp, Process)
+## Build and Verification
 
-### Module System
+Build commands are executed from `static_core/` (i.e., `../../../`), not from this subdirectory.
 
-- Every file declares a package, e.g. `package std.core;`
-- Module imports use path mappings from `stdconfig.json`:
-  - `"std"` maps to `"ets/stdlib/std"`
-- Files in `std/` provide ArkTS-specific enhancements
-- **Import syntax**: `import { HashMap } from 'std.containers'`
+### Minimal Verification
 
-## ArkTS Type System
-
-**CRITICAL**: ArkTS has **no primitive types**. All types are reference types (classes).
-
-- `int`, `long`, `double`, `float`, `boolean`, `byte`, `short`, `char` are **classes**, not primitives
-- `Int`, `Long`, `Double`, `Float`, `Boolean`, `Byte`, `Short`, `Char` are boxed wrappers
-- `int` and `Int` are the same type
-- Lowercase type names (e.g., `double`) are type aliases to their boxed equivalents (e.g., `Double`)
-
-**Implications for coding:**
-- `new Double(value.value)` is redundant if `value.value` is already a `Double` - just use `value.value`
-- `new BigInt(bigintValue.toString())` is redundant if `bigintValue` is already a `BigInt` - just use `bigintValue`
-- Method calls on "primitive-like" values (e.g., `5.toInt()`) work because they're objects
-
-## Build System
-
-This project uses **dual build systems**:
-
-
-### CMake Build (Primary to project)
-```bash
-# Build Panda runtime from static_core root
-cd ../../../
+```sh
+# Configure
 cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja \
     -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
-    -S . -Werror=dev  -DPANDA_WITH_TESTS=ON\
-    -DPANDA_ETS_INTEROP_JS=ON
+    -S . -Werror=dev -DPANDA_WITH_TESTS=ON -DPANDA_ETS_INTEROP_JS=ON
+
+# Build
 cmake --build build --target panda_bins etssdk
 ```
 
-**IMPORTANT**: After any changes to stdlib files (*.ets), you MUST rebuild before running tests:
-```bash
-cmake --build build --target panda_bins etssdk
-```
-Then run tests to verify changes.
-
-### GN Build
-```bash
-gn gen out/default
-ninja -C out/default
-```
-
-Key targets:
-- `copy_stdlib` - Copies and processes stdlib files using `package_stdlib.py`
-
-### Python Packaging
-```bash
-python3 package_stdlib.py --std-dir std --target-dir out/arkcompiler/stdlib --json-file hiddable_APIs.json
-```
-
-The `package_stdlib.py` script filters APIs based on `hiddable_APIs.json` (located in the build tree), removing `export` keywords from specified interfaces to hide them in certain builds.
-
-## Code Style Guidelines
-
-### Spacing
-- **4-space indentation** (no tabs)
-- Every file must start with: `package std.core;` (or appropriate package path)
-- Remove trailing whitespaces
-- File must end with **single empty line**
-- Space after colon in type annotations: `let x: number | null = null`
-- Spaces around operators: `a * b + c`
-- Space after `if`, `while` before `(`: `if (condition) {`
-
-### Braces
-- Open brace `{` on same line, space before it: `if (ok) {`
-- Close brace `}` on new line
-- Single-line blocks: `if (status == 200) { return true; }`
-- `else` placement:
-  ```typescript
-  if (ok) { console.log('123') }
-  else { console.log('345') }
-  ```
-- Empty braces on same line: `function nop(): void {}`
-
-### Vertical Spaces
-- Max 2 lines in declarations, 1 line in code
-- Group related fields without space, separate logical groups with 1 line
-
-### Naming Conventions
-- **Types**: PascalCase - `VeryLongTypeName`
-- **Methods/properties**: camelCase - `myMethod`, `xmlParser`
-- **Constants**: UPPER_SNAKE_CASE - `NOT_USED`
-- **No prefixes/suffixes** (no Hungarian notation, no `_` prefix)
-
-### Visibility Modifiers
-- Explicit `public` and `override` required
-- Prefer most restrictive applicable: `public` < `protected` < `private`
-
-### Local Variables
-- Prefer `const` over `let`
-- Add explicit type annotations: `let item: string = "foo"`
-- Avoid shadowing
-
-### Exception Handling
-- Use `Error` for bugs (e.g., invalid arguments) and for expected exceptional paths (e.g., file not found)
-- Minimize code in `try`-`catch`-`finally` blocks
-- Never `return` from `finally`
-
-### Comments
-- Doc comments start with `/**` ends with `*/`
-- Code comments: `// Comment` (space after `//`)
-- Commented out code: `//if` (no space after `//`)
-
-### Switch Statements
-- Always add `default` case if not exhaustive
-- Use `arktest.assertFalse(true)` in unreachable cases with comments why it added
-- Mark fallthrough: `// fallthrough`
-
-## Code Generation
-
-Many files are **autogenerated from templates**. These files start with:
-```typescript
-// NOTE: autogenerated file
-```
-
-**DO NOT edit autogenerated files directly.** Instead, modify the corresponding template in `../templates/stdlib/`:
-
-### Template Types
-- **Jinja2** (`.j2`): `TypedArray.ets.j2` → `TypedArrays.ets`
-
-### Regeneration Script
-After modifying templates, regenerate files:
-```bash
-export PROJECT=/path/to/static_core
-chmod +x $PROJECT/plugins/ets/templates/stdlib/genlib.sh
-$PROJECT/plugins/ets/templates/stdlib/genlib.sh
-```
-
-**Commit both template changes AND generated files together.** The build system validates consistency between templates and generated files.
-
-### Key Template Mappings
-- `TypedArray.ets.j2` → `std/core/TypedArrays.ets`
-- `TypedUArray.ets.j2` → `std/core/TypedUArrays.ets`
-- `Function.ets.j2` → `std/core/Functions.ets`
-- `Tuple.ets.j2` → `std/core/Tuple.ets`
-- `DataView.ets.j2` → `std/core/DataView.ets`
-- `InteropTransferHelper.ets.j2` → `std/interop/js/InteropTransferHelper.ets`
-
-## File Headers
-
-All ETS files must include the Apache 2.0 license header:
-```typescript
-/*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-```
-
-## Testing
-
-The built-in **ArkTest** framework is defined in `std/testing/`. Usage pattern:
-
-```typescript
-function main(): int {
-    let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
-    myTestsuite.addTest("TestName", () => {
-        arktest.assertEQ(actual, expected);
-        arktest.expectError(() => { throw new Error() }, new Error());
-    });
-    return myTestsuite.run(); // MUST return the count of failed tests
-}
-```
-
-**Critical**: Always return the test suite result from `main()`. Never return constant values like `true` or `0`.
-
-## Native Integration
-
-- Native methods marked with `native` keyword
-- C++ implementations in `native/core/`
-- ANI (Ark Native Interface) native interface for FFI
-- Native layer provides: Intl (ICU4C integration), RegExp engine, Process management and other things like Reflect
-
-## Managed-First Performance Rule
-
-- Keep stdlib behavior in ETS by default; do not escalate an API to a C++ intrinsic or `irtoc` only because it is frequently called
-- Before proposing a native or `irtoc` implementation, check whether the ETS version is small enough to inline or whether a compiler or runtime fix would remove the need
-- `irtoc` is usually appropriate only for tiny hot constructors or helpers, or very small low-level sequences with measured benefits that ETS or C++ cannot lower well
-- If a large stdlib rewrite seems to need `irtoc` to be fast, escalate that as a compiler or runtime investigation rather than moving the logic blindly
-- For intrinsic or fastpath work that escapes stdlib code, follow `../compiler/AGENTS.md`, `../runtime/AGENTS.md`, and `../../../irtoc/AGENTS.md`
-
-## Module-Specific Notes
-
-### Concurrency (`std/concurrency/`)
-- Task pool for thread-based execution
-- Worker support for multi-threading
-- AsyncLock, Atomics, SyncPrimitives for synchronization
-- Message passing primitives
-
-### Interop (`std/interop/`)
-- JSValue, JSRuntime for JavaScript bridge
-- Serialization/deserialization helpers
-- Promise interop layer
-
-### Containers (`std/containers/`)
-- AVL tree-based TreeMap/TreeSet (uses Jinja2 for generics)
-- HashMap, HashSet, LinkedList, Queue, Stack
-- See `std/containers/README.md` for template usage
-
-### Debug (`std/debug/`)
-- Provide api for debug and log
-
-## Troubleshooting
-
-- **Build fails after template changes**: Ensure you ran `genlib.sh` and committed both template and generated files
-- **Import errors**: Check `stdconfig.json` for path mappings; use full import paths like `std.core.Array`
-- **Test suite returns wrong value**: Always return `myTestsuite.run()` from `main()`, not constants and fix tests
-- **Autogenerated file edits lost**: Files starting with `// NOTE: autogenerated file` are regenerated from templates in `../templates/stdlib/`
-- **Missing hiddable_APIs.json**: This file is provided by the build system, not tracked in stdlib
-
-## Local Development Tools
-
-### SKILLS Directory
-
-The `SKILLS/` folder contains custom AI agent skills for stdlib development. Each skill includes reference documentation, automation scripts, and specialized workflows.
-
-#### Available Skills
-
-- **arktest-generator** - Generate ArkTest unit tests for stdlib APIs
-- **build-stdlib** - Build stdlib using CMake from project root (../../../)
-- **concurrent-programming** - Multi-threading, async/await, synchronization, concurrent data structures, concurrency safety checking
-- **copyright** - Manage Apache 2.0 license headers in source files
-- **internationalization** - Unicode, ICU, locale handling, i18n APIs
-- **native-integration** - C++ programming, FFI, ANI, ICU4C integration, native integration validation
-- **urunner-stdlib** - Run ets_func_tests using Universal Runner from tests/tests-u-runner-2/
-
-For detailed skill documentation and learning paths, see `SKILLS/README.md`.
-
-### CMake Build (Local Development)
-For local development, CMake can be used instead of GN:
-```bash
-cd ../../../  # to runtime_core root
-cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja \
-    -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
-    -S . -Werror=dev  -DPANDA_WITH_TESTS=ON\
-    -DPANDA_ETS_INTEROP_JS=ON
-cmake --build build --target panda_bins etssdk
-```
-
-### Universal Runner (urunner)
-Requires `~/.urunner.env` with ARKCOMPILER_RUNTIME_CORE_PATH, PANDA_BUILD, and WORK_DIR variables.
-
-Always use `--filter` option to filter affected api, to check which tests are affected need to check `../tests/ets_func_tests/std/`.
-Example: `--filter **/std/core/json` if changed json api. If changed `Intl` need to use `--filter **/std/core/Intl*`.
-
-Execute ets_func_tests from `../../../tests/tests-u-runner-2/`:
-```bash
-cd ../../../ # from current dir
+```sh
+# Run ets_func_tests (execute from static_core/tests/tests-u-runner-2/)
 PANDA_BUILD="build" ARKCOMPILER_RUNTIME_CORE_PATH="../" ARKCOMPILER_ETS_FRONTEND_PATH="tools/es2panda/" ./runner.sh \
-  panda-int ets-func-tests --show-progress --force-generate --processes=all
-```
+  panda-int ets-func-tests --show-progress --force-generate --processes=all --filter **/std/core/json
 
-Execute checker_tests from `../../../tests/tests-u-runner-2/`:
-```bash
-cd ../../../tests/tests-u-runner-2/
+# Run checker tests (execute from static_core/tests/tests-u-runner-2/)
 ./runner.sh checker compiler_checker_suite --show-progress --force-generate --processes=all
 ```
 
-## Copyright Headers
+### Verification by Task Type
 
-### Shell Scripts (.sh files)
-Shell scripts use `#` comment prefix for Apache 2.0 header:
-```bash
-#!/bin/bash
-#
-# Copyright (c) 2026 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-```
+| Task Type | Verification Method |
+| --- | --- |
+| Modifying Intl behavior | Build, then run ets_func_tests with `--filter "**/intl/**"` |
+| Modifying RegExp behavior | Build, then run ets_func_tests with `--filter "**/regexp/**"` |
+| Modifying Map/Set behavior | Build, then run ets_func_tests with `--filter "**/*Map*"` and `--filter "**/*Set*"` |
+| Modifying JsonElement/Json behavior | Build, then run ets_func_tests with `--filter "**/json/**"` and `--filter "**/Json*"` |
+| Modifying Proxy behavior | Build, then run ets_func_tests with `--filter "**/Proxy*"` |
+| Modifying Reflect behavior | Build, then run ets_func_tests with `--filter "**/Reflect*"` |
+
+### Completion Criteria
+
+A task is considered complete when:
+- The behavior has been implemented
+- Relevant builds and tests have passed, or reasons for inability to verify have been documented
+- Test cases in the ignore list are allowed to fail if they have known issues
+- The final response includes: list of changed files, verification commands and results, and remaining risks
+
+For behaviors involving real hardware, devices, display, or service integration, board-side evidence must be provided.
+
+## Knowledge Routing
+
+Before making changes, locate the relevant code paths by scenario and read the corresponding knowledge documents. Before making changes, you must declare in your response: the task category, the knowledge documents you have read, and the constraints extracted from them.
+
+| Scenario | Code Path | Read First |
+| --- | --- | --- |
+| Types, primitives, boxed types, int/Int, type conversion | `std/core/` | `docs/knowledge/type_system.md` |
+| Templates, Jinja2, codegen, autogenerated, genlib | Generated files in `std/containers/`, `std/interop/` | `docs/knowledge/code_generation.md` |
+| Build, CMake, GN, testing, urunner, ArkTest | `../../../` (build root), `static_core/tests/` | `docs/knowledge/build_and_test.md` |
+| Performance, intrinsics, safepoint | `static_core/plugins/ets/runtime/intrinsics/` | `docs/knowledge/performance.md` |
+| Performance, irtoc, managed-first | `static_core/irtoc/`, `static_core/plugins/ets/irtoc_scripts/` | `docs/knowledge/performance.md` |
+| Regex, RegExp, PCRE2, matching, replace, split | `native/core/regexp/`, `std/core/RegExp.ets` | `docs/knowledge/regexp.md` |
+| Internationalization, Intl, ICU4C, Locale, NumberFormat, DateTimeFormat, Collator | `native/core/intl/`, `std/core/` | `docs/knowledge/intl.md` |
+| Proxy, ReflectProxy, InvocationHandler, dynamic proxy, assembly bridge | `std/core/ReflectProxy.ets` | `docs/knowledge/proxy.md` |
+| Map, Set, Record, hash table, double array, tombstone, resizing | `std/core/Map.ets`, `std/core/Set.ets` | `docs/knowledge/map_set_record.md` |
+| Reflection, Class, Method, Field, Constructor | `std/core/Reflect*.ets` | `docs/knowledge/reflection.md` |
+| Deep copy, DeepCloner, Cloneable, circular references, deep cloning | `std/core/deepcopy.ets` | `docs/knowledge/deepcopy.md` |
+| JsonElement, JsonType, jsonx, JSON deserialization, BigIntMode | `std/core/Jsonx.ets`, `std/core/json.ets` | `docs/knowledge/json_element.md` |
+
+## Project Constraints
+
+### Architectural Invariants
+
+- With the exception of `arkruntime/` and `std/math/consts/`, all `std/` directories are implicitly imported. The frontend compiler automatically inserts import directives, allowing user code to use them directly — do not change implicitly imported modules to explicit imports or vice versa
+- Native calls involving third-party C libraries (PCRE2, ICU4C, etc.) must go through ANI bindings to `native/core/` — third-party library execution times are unpredictable and their source code cannot be modified, so they cannot use intrinsics
+- High-frequency hot-path native calls use intrinsics (YAML bindings), but the intrinsic execution time must be reasonable — see `docs/knowledge/performance.md` for rationale
+
+### Do Not
+
+- All `.ets` files **must** include the Apache 2.0 license header (year `2021-2026`). Shell scripts use the `#` prefix
+- Do not directly edit files that begin with `// NOTE: autogenerated file` — you must modify the corresponding template instead (see `docs/knowledge/code_generation.md`)
+- Do not `return` from a `finally` block
+- Do not return a constant from `main()` — you must return `myTestsuite.run()`
+- Do not unconditionally promote frequently called APIs to C++ intrinsics or irtoc implementations (see `docs/knowledge/performance.md`)
+- After modifying `.ets` files, you must rebuild before running tests
+- Template changes and generated files must be committed together
+
+### Ask Before
+
+- Modifying the public API signatures or semantics of implicitly imported modules (std/core, std/containers, etc.) — this affects all ArkTS users and downstream impact cannot be fully assessed
+- Deleting or renaming exported APIs — these may be compile-time dependencies for other modules or external code
+- Adding or modifying intrinsic registrations (`ets_compiler_intrinsics.yaml`, etc.) — this affects safepoint/GC behavior and requires performance evaluation
+- Adding third-party library dependencies — not all third-party libraries are approved for use; license, security, and size impact must be reviewed
+
