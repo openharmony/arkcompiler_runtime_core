@@ -342,6 +342,10 @@ if (ark_ets_interop_js) {
     srcs_runtime += [ "runtime/interop_js/handshake.cpp" ]
   }
 
+  if (is_ohos && is_standard_system) {
+    srcs_runtime += [ "runtime/dfx/async_stack_helper.cpp" ]
+  }
+
   if (current_cpu == "amd64" || current_cpu == "x64" ||
       current_cpu == "x86_64") {
     srcs_runtime += [ "runtime/interop_js/arch/amd64/call_bridge_amd64.S" ]

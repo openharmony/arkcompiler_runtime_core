@@ -39,6 +39,10 @@
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 #include "plugins/ets/runtime/interop_js/timer_helper/interop_timer_helper.h"
 
+#if defined(PANDA_TARGET_OHOS)
+#include "plugins/ets/runtime/dfx/async_stack_helper.h"
+#endif
+
 #if defined(PANDA_USE_ETS_UTILS)
 #include "console.h"
 #endif
@@ -138,6 +142,14 @@ static void RegisterEventLoopModule(EtsExecutionContext *executionCtx)
 {
     ASSERT(executionCtx != nullptr);
     ASSERT(executionCtx->GetMT() == executionCtx->GetPandaVM()->GetJobManager()->GetMainThread());
+#if defined(PANDA_TARGET_OHOS)
+    auto asyncStackHelper = MakePandaUnique<ark::ets::dfx::OhosAsyncStackHelper>();
+    ASSERT(asyncStackHelper != nullptr);
+    asyncStackHelper->Initialize();
+    if (asyncStackHelper->CheckLoadDfxAsyncStackFunc()) {
+        executionCtx->GetPandaVM()->GetJobManager()->SetAsyncStackHelper(std::move(asyncStackHelper));
+    }
+#endif
     executionCtx->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
     executionCtx->GetPandaVM()->SetRunEventLoopFunction(
         [](EventLoopRunMode mode) { return EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });

@@ -15,101 +15,32 @@
 
 #include "runtime/execution/dfx/async_stack_helper.h"
 
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-#include <dlfcn.h>
-#endif
-
 #include "runtime/include/runtime.h"
 
 namespace ark::dfx {
 
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-namespace {
-
-constexpr uint64_t ARKTS_STA_LAUNCH_DFX_TYPE = 1ULL << 26ULL;
-
-uint64_t MapToDfxType(StackType stackType)
-{
-    ASSERT(stackType == StackType::STACK_TYPE_LAUNCH);
-    static_cast<void>(stackType);
-    return ARKTS_STA_LAUNCH_DFX_TYPE;
-}
-
-}  // namespace
-#endif
-
 void AsyncStackHelper::Initialize()
 {
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    // libasync_stack.z.so has dlopen in appspawn, so dlsym directly.
-    collectAsyncStack_ = reinterpret_cast<CollectAsyncStackFunc>(dlsym(RTLD_DEFAULT, "DfxCollectStackWithDepth"));
-    setStackId_ = reinterpret_cast<SetStackIdFunc>(dlsym(RTLD_DEFAULT, "DfxSetSubmitterStackId"));
-    getStackId_ = reinterpret_cast<GetStackIdFunc>(dlsym(RTLD_DEFAULT, "DfxGetSubmitterStackId"));
-#else
-    LOG(DEBUG, COROUTINES) << "DFX async stack is not available in this build.";
-#endif
+    LOG(DEBUG, DFX) << "DFX async stack is not available in this build.";
 }
 
-bool AsyncStackHelper::IsLoaded() const
+bool AsyncStackHelper::CheckLoadDfxAsyncStackFunc() const
 {
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    return collectAsyncStack_ != nullptr && setStackId_ != nullptr && getStackId_ != nullptr;
-#else
+    LOG(DEBUG, DFX) << "DfxAsyncStackFunc is not available in this build.";
     return false;
-#endif
 }
 
-void AsyncStackHelper::CheckLoadDfxAsyncStackFunc() const
-{
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    if (!IsLoaded()) {
-        LOG(DEBUG, COROUTINES) << "DfxAsyncStackFunc failed to load.";
-    }
-#else
-    LOG(DEBUG, COROUTINES) << "DfxAsyncStackFunc is not available in this build.";
-#endif
-}
-
-uint64_t AsyncStackHelper::CollectAsyncStack(StackType stackType, size_t depth) const
+uint64_t AsyncStackHelper::CollectAsyncStack([[maybe_unused]] StackType stackType, [[maybe_unused]] size_t depth) const
 {
     ASSERT(stackType == StackType::STACK_TYPE_LAUNCH);
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    if (!IsLoaded()) {
-        LOG(DEBUG, COROUTINES) << "DfxCollectStackWithDepth is not loaded.";
-        return 0U;
-    }
-    auto type = MapToDfxType(stackType);
-    uint64_t stackId = collectAsyncStack_(type, depth);
-    LOG(DEBUG, COROUTINES) << "CollectAsyncStack: type=" << type << " depth=" << depth << " stackId=" << stackId;
-    return stackId;
-#else
-    static_cast<void>(stackType);
-    static_cast<void>(depth);
     return 0U;
-#endif
 }
 
-void AsyncStackHelper::SetStackId(uint64_t id) const
-{
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    if (setStackId_ != nullptr) {
-        setStackId_(id);
-    }
-    LOG(DEBUG, COROUTINES) << "SetStackId: " << id;
-#else
-    static_cast<void>(id);
-#endif
-}
+void AsyncStackHelper::SetStackId([[maybe_unused]] uint64_t id) const {}
 
 uint64_t AsyncStackHelper::GetStackId() const
 {
-#if defined(PANDA_BUILD_IN_OHOS_TREE) || defined(PANDA_TARGET_OHOS)
-    uint64_t id = getStackId_ == nullptr ? 0U : getStackId_();
-    LOG(DEBUG, COROUTINES) << "GetStackId: " << id;
-    return id;
-#else
     return 0U;
-#endif
 }
 
 }  // namespace ark::dfx

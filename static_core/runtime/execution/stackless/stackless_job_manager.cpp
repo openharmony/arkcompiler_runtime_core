@@ -150,7 +150,8 @@ LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
     }
     job->SetAffinityMask(affinityMask);
 
-    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH);
+    uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
+                                                               dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH);
     job->SetAsyncStackID(stackId);
     LOG(DEBUG, EXECUTION) << "Launch: job " << job->GetName() << " with async stack ID " << stackId;
 

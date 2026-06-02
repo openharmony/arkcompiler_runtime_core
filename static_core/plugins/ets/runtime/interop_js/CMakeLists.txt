@@ -32,6 +32,7 @@ set(ETS_INTEROP_JS_NAPI_LIBRARIES
     arkruntime
 )
 set(ETS_INTEROP_HYBRID_SOURCES)
+set(ETS_INTEROP_JS_OHOS_SOURCES)
 
 add_runtime_options(${CMAKE_CURRENT_SOURCE_DIR}/runtime_options.yaml)
 
@@ -47,6 +48,12 @@ if (PANDA_JS_ETS_HYBRID_MODE)
     )
     panda_target_compile_definitions(ets_interop_js_napi PRIVATE PANDA_JS_ETS_HYBRID_MODE)
 endif(PANDA_JS_ETS_HYBRID_MODE)
+
+if (PANDA_TARGET_OHOS)
+    list(APPEND ETS_INTEROP_JS_OHOS_SOURCES
+        ${ETS_EXT_SOURCES}/dfx/async_stack_helper.cpp
+    )
+endif()
 
 panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/intrinsics/std_js_jsruntime.cpp
@@ -96,6 +103,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/tooling/internal_api.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
+        ${ETS_INTEROP_JS_OHOS_SOURCES}
 )
 
 if(PANDA_TARGET_OHOS)
