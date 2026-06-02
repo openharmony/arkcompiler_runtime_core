@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ets_to_ts)
-add_subdirectory(ts_to_ets)
-add_subdirectory(invalid_sharedref)
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+
+panda_ets_interop_js_gtest(ets_interop_js__shared_reference_invalid_sharedref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_invalid_sharedref.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_invalid_sharedref.ets
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_ts_invalid_sharedref.ts
+    ETS_CONFIG ${ETS_CONFIG}
+)
