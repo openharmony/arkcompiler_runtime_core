@@ -596,11 +596,6 @@
 11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_decl_udvt_long_2_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_integer_types_common_decl_udvt_short_2_0.ets
 
-#29682
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomin1_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax2_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_uemviie_long_0_0.ets
-
 #29683
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax1_0_0.ets
 

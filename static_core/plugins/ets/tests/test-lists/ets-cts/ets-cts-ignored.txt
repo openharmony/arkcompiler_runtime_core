@@ -217,11 +217,6 @@
 #33978
 11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_2_0.ets
 
-#29682
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomin1_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax2_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_uemviie_long_0_0.ets
-
 #29683
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax1_0_0.ets
 
@@ -397,12 +392,6 @@
 #33790
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_const_u0001.ets
 17.experimental_features/01.type_char/02.char_operations/equality_non_char_let_u0001.ets
-
-#34354 Compiler sign-extension bug: const char >= 32768 sign-extended to negative int/long during constant folding with union types
-17.experimental_features/01.type_char/02.char_operations/cmp_ref_16.ets
-17.experimental_features/01.type_char/02.char_operations/cmp_ref_25.ets
-17.experimental_features/01.type_char/02.char_operations/cmp_ref_32.ets
-17.experimental_features/01.type_char/02.char_operations/cmp_ref_38.ets
 
 #34223
 17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_number_und.ets
