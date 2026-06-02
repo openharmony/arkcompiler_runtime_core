@@ -19,7 +19,7 @@ desc: >-
     Constants and variables are accessible from their respective points 
     of declaration to the end of the module.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0365: Variable 'y' is accessed before it's initialization."
+expected_out: "Semantic error ESE0375: Variable 'y' is used before being assigned."
 ---*/
 
 {{c.decl_type}} x = y

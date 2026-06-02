@@ -13,32 +13,22 @@
 
 cases:
   - {base_type: "Object|undefined", override_type: "Any",
-      base_value: "123", override_value: "7n",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "123", override_value: "7n"}
   - {base_type: "Any", override_type: "Object|undefined",
-      base_value: "123", override_value: "7n",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "123", override_value: "7n"}
   - {base_type: "number", override_type: "int",
-      base_value: "15.7", override_value: "123",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "15.7", override_value: "123"}
   - {base_type: "int", override_type: "number",
-      base_value: "123", override_value: "15.7",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "123", override_value: "15.7"}
   - {base_type: "float", override_type: "int",
-      base_value: "7.8f", override_value: "123",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "7.8f", override_value: "123"}
   - {base_type: "int", override_type: "float",
-      base_value: "123", override_value: "7.8f",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "123", override_value: "7.8f"}
   - {base_type: "number", override_type: "bigint",
-      base_value: "15.7", override_value: "7n",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "15.7", override_value: "7n"}
   - {base_type: "bigint", override_type: "number",
-      base_value: "7n", override_value: "15.7",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "7n", override_value: "15.7"}
   - {base_type: "string", override_type: "char",
-      base_value: "\"abc\"", override_value: "c'z'",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "\"abc\"", override_value: "c'z'"}
   - {base_type: "char", override_type: "string",
-      base_value: "c'z'", override_value: "\"abc\"",
-      expected_out: "Expected CTE output is unknown"}
+      base_value: "c'z'", override_value: "\"abc\""}

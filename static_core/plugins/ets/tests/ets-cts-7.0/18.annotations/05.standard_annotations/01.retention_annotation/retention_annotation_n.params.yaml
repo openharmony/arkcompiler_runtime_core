@@ -83,7 +83,7 @@ cases:
     use: |-
       let a = new I()
     error: |-
-      TBD: abstract class cannot be initialized
+      Semantic error ESE0159: Annotations cannot be used as a type.
   - decl: |-
       @Retention("BYTECODE")
       @interface I {
@@ -93,7 +93,7 @@ cases:
       type T = Type.from<I>
       class C implements T {}
     error: |-
-      TBD: abstract class requires extends key
+      Semantic error ESE0179: Interface expected here.
   - decl: |-
       @Retention("BYTECODE")
       @interface I {
@@ -103,7 +103,7 @@ cases:
       type T = Type.from<I>
       class C extends T {}
     error: |-
-      Semantic error ESE0176: The super type of 'C' class is not extensible
+      Semantic error ESE0176: The super type of 'C' class is not extensible.
   - decl: |-
       @Retention("RUNTIME")
       @interface I {

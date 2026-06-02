@@ -406,6 +406,33 @@ cases:
           enum LongEnum { A = 0x7FFF_FFFF_1 }
       - decl_data: |-
           enum LongEnum { A = 5 as long }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Semantic error ESE2501: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+    test_suffix: "leibt"
+    ids: "81-82"
+
+  - desc: |-
+      >-
+        An enumeration member has a value that can be set explicitly
+        by an initializer expression or implicitly.
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: long enum implicit base type
+    check_variants:
       - decl_data: |-
           enum LongEnum { A = (5).toLong() }
       - decl_data: |-
@@ -419,9 +446,9 @@ cases:
     logic: ""
     stdout:
       - |-
-        "Expected CTE output is unknown"
-    test_suffix: "leibt"
-    ids: "81-85"
+        "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+    test_suffix: "leibt1"
+    ids: "83-85"
 
   - desc: |-
       >-
@@ -447,8 +474,6 @@ cases:
           enum Enum { A = 10, B = 5.5f }
       - decl_data: |-
           enum Enum { A = 5.5f, B = 10 }
-      - decl_data: |-
-          enum Enum { A = 10, B = 0x7FFF_FFFF_1 }
       - decl_data: |-
           enum Enum { A = 10, B = 5n }
       - decl_data: |-
@@ -478,6 +503,33 @@ cases:
       - |-
         "Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
     test_suffix: "mot"
+    ids: "86-100"
+
+  - desc: |-
+      >-
+        Each enumeration has a enumeration base type.
+        A base type can be set explicitly (see Enumeration with Explicit Base
+        Type) or inferred from initializers as follows:
+        • If at least one member does not have an initializer,
+        the inferred type is int. Types of all initializers must be are
+        assignable to type int (see Assignability). Otherwise, a compile-time
+        error occurs.
+        • If types of all initializer expressions are assignable to type int
+        then the inferred type is int;
+        • If types of all initializer expressions are assignable to type string
+        then the inferred type is string;
+        • Otherwise, a compile-time error occurs.
+        params: mixing of types
+    check_variants:
+      - decl_data: |-
+          enum Enum { A = 10, B = 0x7FFF_FFFF_1 }
+    decl: |-
+      [decl_data]
+    logic: ""
+    stdout:
+      - |-
+        "Semantic error ESE2501: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type."
+    test_suffix: "mot1"
     ids: "86-100"
 
   - desc: |-

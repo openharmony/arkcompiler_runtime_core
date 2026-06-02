@@ -149,21 +149,6 @@
 09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_3.ets
 09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_4.ets
 
-#32586
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_0.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_1.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_2.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_3.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_4.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_5.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_6.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_7.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_8.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n1_9.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n2_0.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n2_1.ets
-09.classes/06.field_declarations/06.override_fields/overriding_instance_field_neg_wrong_type_n2_2.ets
-
 #27886 Issues with default values
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_n_1.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_n_2.ets
@@ -185,23 +170,12 @@
 11.enumerations/enum_decl_28.ets
 11.enumerations/enum_decl_29.ets
 
-#33640
-11.enumerations/enum_cte_n_leibt_0_0.ets
-11.enumerations/enum_cte_n_leibt_1_0.ets
-11.enumerations/enum_cte_n_leibt_2_0.ets
-11.enumerations/enum_cte_n_leibt_3_0.ets
-11.enumerations/enum_cte_n_leibt_4_0.ets
-11.enumerations/enum_cte_n_mot_4_0.ets
-
 #33639
 11.enumerations/01.enumeration_base_type/enum_int_3.ets
 11.enumerations/01.enumeration_base_type/enum_int_4.ets
 11.enumerations/01.enumeration_base_type/enum_str_1.ets
 11.enumerations/01.enumeration_base_type/enum_str_2.ets
 11.enumerations/01.enumeration_base_type/enum_str_3.ets
-
-#33640
-11.enumerations/01.enumeration_base_type/enum_int_n_2.ets
 
 #33639
 11.enumerations/02.enumeration_with_explicit_base_type/enum_double_decl_udvt_0_0.ets
@@ -310,14 +284,8 @@
 #33474
 13.modules_and_namespaces/02.module_header/module_header_declare.ets
 
-#33475
-13.modules_and_namespaces/02.module_header/module_header_declare_nonambient_n.ets
-
 #33476
 13.modules_and_namespaces/09.multifile_module/multifile_module_mismatched_export_n.ets
-
-#33736
-14.ambient_declarations/06.ambient_enumeration_declarations/enum_const_prefix_n.ets
 
 #34114
 15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
@@ -434,9 +402,6 @@
 
 #34397 retention annotations are not implemented fully
 18.annotations/05.standard_annotations/01.retention_annotation/default_retention_annotation.ets
-18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_10.ets
-18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_11.ets
-18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_12.ets
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_14.ets
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_15.ets
 18.annotations/06.runtime_access_to_annotations/readonly_fields_0.ets
