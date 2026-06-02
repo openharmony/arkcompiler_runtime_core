@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,11 @@
 #ifndef PANDA_RUNTIME_SIGNAL_HANDLER_H
 #define PANDA_RUNTIME_SIGNAL_HANDLER_H
 
+#include <array>
 #include <csignal>
 #include <cstdint>
 #include <iostream>
+#include <climits>
 #include <vector>
 #include <libarkbase/macros.h>
 #include "runtime/include/mem/panda_containers.h"
@@ -229,14 +231,14 @@ public:
 
     static void SetEscaped(bool isEscape);
 
-    static void SetEscapedFlagFilePath(std::string &escapeFlagPath);
+    static void SetEscapedFlagFilePath(const std::string &escapeFlagPath);
 
 private:
-    static bool NotTheTargetSignal(int sig);
+    static bool IsTargetSignal(int sig);
 
-    static std::string escapeSignalFlagFilePath_;
+    static std::array<char, PATH_MAX> escapeSignalFlagFilePath_;
     static bool isEscaped_;
-    static constexpr int CRASH_SIGNAL_THREASHOLD = 3;
+    static constexpr int CRASH_SIGNAL_THRESHOLD = 3;
 };
 
 }  // namespace ark

@@ -335,6 +335,7 @@ _libarkruntime_calculated_sources = [
 
 if (!is_mingw) {
   _libarkruntime_calculated_sources += [
+    "aot_escape_signal_handler.cpp",
     "dprofiler/dprofiler.cpp",
     "signal_handler.cpp",
   ]
