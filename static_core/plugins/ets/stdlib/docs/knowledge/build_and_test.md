@@ -60,15 +60,14 @@ function main(): int {
 
 ### Universal Runner (urunner)
 
-Requires `~/.urunner.env` to configure ARKCOMPILER_RUNTIME_CORE_PATH, PANDA_BUILD, and WORK_DIR.
-
 ```bash
-# Run ets_func_tests from static_core/tests/tests-u-runner-2/
-PANDA_BUILD="build" ARKCOMPILER_RUNTIME_CORE_PATH="../" ARKCOMPILER_ETS_FRONTEND_PATH="tools/es2panda/" ./runner.sh \
-  panda-int ets-func-tests --show-progress --force-generate --processes=all --filter **/std/core/json
+# Run ets_func_tests (execute from static_core/)
+PANDA_BUILD="./build" ARKCOMPILER_RUNTIME_CORE_PATH=".." ARKCOMPILER_ETS_FRONTEND_PATH="../../ets_frontend" \
+  WORK_DIR="/tmp/ets" ./tests/tests-u-runner-2/runner.sh \
+  panda-int ets-func-tests --show-progress --force-generate --processes=all --filter '**/std/core/json'
 
-# Run checker_tests from static_core/tests/tests-u-runner-2/
-./runner.sh checker compiler_checker_suite --show-progress --force-generate --processes=all
+# Run checker tests (execute from static_core/)
+./tests/tests-u-runner-2/runner.sh checker compiler_checker_suite --show-progress --force-generate --processes=all
 ```
 
 ## Constraints

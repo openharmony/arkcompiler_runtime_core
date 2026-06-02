@@ -22,28 +22,7 @@ Module configuration: `stdconfig.json` (defines the `"std"` to `"ets/stdlib/std"
 
 ## Build and Verification
 
-Build commands are executed from `static_core/` (i.e., `../../../`), not from this subdirectory.
-
-### Minimal Verification
-
-```sh
-# Configure
-cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja \
-    -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
-    -S . -Werror=dev -DPANDA_WITH_TESTS=ON -DPANDA_ETS_INTEROP_JS=ON
-
-# Build
-cmake --build build --target panda_bins etssdk
-```
-
-```sh
-# Run ets_func_tests (execute from static_core/tests/tests-u-runner-2/)
-PANDA_BUILD="build" ARKCOMPILER_RUNTIME_CORE_PATH="../" ARKCOMPILER_ETS_FRONTEND_PATH="tools/es2panda/" ./runner.sh \
-  panda-int ets-func-tests --show-progress --force-generate --processes=all --filter **/std/core/json
-
-# Run checker tests (execute from static_core/tests/tests-u-runner-2/)
-./runner.sh checker compiler_checker_suite --show-progress --force-generate --processes=all
-```
+For build commands, test framework usage, and urunner invocation, see `docs/knowledge/build_and_test.md`. Build commands are executed from `static_core/` (i.e., `../../../`), not from this subdirectory.
 
 ### Verification by Task Type
 
@@ -55,6 +34,7 @@ PANDA_BUILD="build" ARKCOMPILER_RUNTIME_CORE_PATH="../" ARKCOMPILER_ETS_FRONTEND
 | Modifying JsonElement/Json behavior | Build, then run ets_func_tests with `--filter "**/json/**"` and `--filter "**/Json*"` |
 | Modifying Proxy behavior | Build, then run ets_func_tests with `--filter "**/Proxy*"` |
 | Modifying Reflect behavior | Build, then run ets_func_tests with `--filter "**/Reflect*"` |
+| Adding/modifying mirror class fields | Build, then run corresponding offset tests in `static_core/plugins/ets/tests/runtime/types/` |
 
 ### Completion Criteria
 
@@ -92,6 +72,7 @@ Before making changes, locate the relevant code paths by scenario and read the c
 - With the exception of `arkruntime/` and `std/math/consts/`, all `std/` directories are implicitly imported. The frontend compiler automatically inserts import directives, allowing user code to use them directly — do not change implicitly imported modules to explicit imports or vice versa
 - Native calls involving third-party C libraries (PCRE2, ICU4C, etc.) must go through ANI bindings to `native/core/` — third-party library execution times are unpredictable and their source code cannot be modified, so they cannot use intrinsics
 - High-frequency hot-path native calls use intrinsics (YAML bindings), but the intrinsic execution time must be reasonable — see `docs/knowledge/performance.md` for rationale
+- The declaration order of fields in an ETS class does **not** necessarily match the actual memory layout of the corresponding native mirror class (`EtsType*`) — the frontend compiler and runtime reorder and align fields for layout optimization. When adding or modifying mirror class fields, you must verify the field offsets match between the managed class and the C++ mirror class via offset tests. Reference: `static_core/plugins/ets/tests/runtime/types/` contains mirror class offset self-tests (e.g., `ets_map_test.cpp` — see `MapMemoryLayout` test using `MirrorFieldInfo::CompareMemberOffsets`)
 
 ### Do Not
 
@@ -102,6 +83,7 @@ Before making changes, locate the relevant code paths by scenario and read the c
 - Do not unconditionally promote frequently called APIs to C++ intrinsics or irtoc implementations (see `docs/knowledge/performance.md`)
 - After modifying `.ets` files, you must rebuild before running tests
 - Template changes and generated files must be committed together
+- Do not add or modify mirror class fields without adding/updating corresponding field offset tests — see Architectural Invariants above; reference tests are in `static_core/plugins/ets/tests/runtime/types/` (e.g., `ets_map_test.cpp` `MapMemoryLayout` using `MirrorFieldInfo::CompareMemberOffsets`)
 
 ### Ask Before
 

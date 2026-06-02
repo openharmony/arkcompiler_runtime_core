@@ -54,7 +54,7 @@ Need native implementation?
 - Native logic involving third-party library calls **must** be implemented through ANI; **intrinsic is prohibited**
 - **No** continuous execution interval exceeding 500μs is allowed within an intrinsic; heavy logic **must** manually insert safepoints
 - irtoc is **only suitable** for extremely small hot constructors/helper functions, or for low-level sequences with measurement proving that ETS/C++ cannot effectively lower them
-- If intrinsic or fastpath work overflows beyond stdlib code, follow `../compiler/AGENTS.md`, `../runtime/AGENTS.md`, `../../../irtoc/AGENTS.md`
+- If intrinsic or fastpath work overflows beyond stdlib code, follow `../../../compiler/AGENTS.md`, `../../../runtime/AGENTS.md`, `../../../../../irtoc/AGENTS.md`
 
 ## Pre-Modification Checklist
 
@@ -67,7 +67,7 @@ Need native implementation?
 
 ## Code and Tests
 
-- Compiler guidance: `../compiler/AGENTS.md`
-- Runtime guidance: `../runtime/AGENTS.md`
-- irtoc guidance: `../../../irtoc/AGENTS.md`
-- ANI native implementation reference: `docs/knowledge/regexp.md`, `docs/knowledge/intl.md`
+- Compiler guidance: `../../../compiler/AGENTS.md`
+- Runtime guidance: `../../../runtime/AGENTS.md`
+- irtoc guidance: `../../../../../irtoc/AGENTS.md`
+- ANI native implementation reference: `regexp.md`, `intl.md`
