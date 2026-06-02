@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -276,7 +276,7 @@ def check_file_list(file_list: list, panda_dir: str, build_dir: str, header_filt
         msg = "Done clang-tidy: %s" % (src)
 
         proc = pool.apply_async(func=run_clang_tidy, args=(
-            src, panda_dir, build_dir, header_filter, args))
+            src, os.path.abspath(panda_dir), build_dir, header_filter, args))
         jobs.append((proc, msg))
 
     # Wait for jobs to complete before exiting
