@@ -19,26 +19,28 @@
 /*---
 desc: >-
     For an annotation with retention policy (see Retention Annotation) BYTECODE or RUNTIME 
-    an abstract class with the name of the annotation is implicitly declared. 
+    an abstract class with the name of the annotation is implicitly declared.
+    An abstract class is not declared for annotations with the "SOURCE" retention policy
+    The only way to get instance of an implicitly declared abstract class is to call the reflection library.
     All fields of this class are readonly. If a field is of an array type, the array type is also readonly
 tags: [compile-only, negative]
 expected_out: "Semantic error ESE4002: Cannot assign to a readonly field f"
 ---*/
 
-const initVal = {{c.init}}
-const editVal = {{c.editVal}}
 
 @Retention({{ p.option }})
 @interface ClassAnnotation {
   f: {{c.type}}
 }
 
-@ClassAnnotation({ f: initVal })
+@ClassAnnotation({ f: {{c.init}} })
 class C {}
 
+function test(cav: ClassAnnotation) {
+    cav.f{{c.array_index}} = {{c.editVal}}
+}
+
 function main() {
-    let i = new C()
-    i.f{{c.array_index}} = editVal
 }
 
 {% endfor %}
