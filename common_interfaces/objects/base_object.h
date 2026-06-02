@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,21 @@ public:
         } else {
             return GetOperator()->GetSize(this);
         }
+    }
+
+    bool IsInOld() const
+    {
+        return state_.IsInOld();
+    }
+
+    bool IsInYoung() const
+    {
+        return state_.IsInYoung();
+    }
+
+    void SetObjectState(ObjectState state)
+    {
+        state_.SetObjectState(state);
     }
 
     inline bool IsValidObject() const
@@ -196,7 +211,7 @@ public:
 
     void SetFullBaseClassWithoutBarrier(BaseClass *cls)
     {
-        state_ = 0;
+        state_ = 0; //  todo why set0 here
         state_.SetFullBaseClassAddress(reinterpret_cast<common::StateWordType>(cls));
     }
 
