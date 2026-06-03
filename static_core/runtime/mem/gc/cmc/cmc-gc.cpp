@@ -2526,7 +2526,15 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcS
     UpdateGCStats();
 
     if (Heap::GetHeap().GetForceThrowOOM()) {
-        Heap::throwOOM();
+        // NOTE (shemetov.philip, #34958) Workaround to fix OOM for GC with JIT enabled
+        RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
+        auto gcStats = GetGCStats();
+        size_t maxCapacity = space.GetMaxCapacity();
+        if (gcStats.liveBytesAfterGC * 2U > maxCapacity) {
+            Heap::throwOOM();
+        } else {
+            Heap::GetHeap().SetForceThrowOOM(false);
+        }
     }
 }
 
