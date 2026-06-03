@@ -144,12 +144,12 @@ class Consumer {
         Consumer.consumeDouble(v);
     }
 
-    public static consume(v: Any): void {
-        Consumer.consumeObj(v);
-    }
-
     public static consume(v: Object[]): void {
         Consumer.consumeObjs(v);
+    }
+
+    public static consume(v: Any): void {
+        Consumer.consumeObj(v);
     }
 
 }
