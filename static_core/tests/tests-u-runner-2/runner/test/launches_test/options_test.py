@@ -272,6 +272,35 @@ class OptionsTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111116")
+    def test_expand_last_call_read_metadata(self) -> None:
+        test_env, test_root = self.prepare()
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+        test.metadata.es2panda_options = ['read-metadata']
+        try:
+            for step in test_env.config.workflow.steps:
+                match step.step_kind:
+                    case StepKind.COMPILER:
+                        expanded_step = test.configure_step_last_call(step)
+                        self.assertIn("--read-metadata", expanded_step.args)
+
+        finally:
+            clear_after_test()
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
     @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--is-panda", "False"])
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",

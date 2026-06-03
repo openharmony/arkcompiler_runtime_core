@@ -1,0 +1,32 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: 0.0.0.1
+type: test-suite
+suite-name: ets-cts-ch24-metadata-parity
+test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets-templates
+# Isolated list-roots — points at a parity-specific directory that has only
+# chapters.yaml to avoid influence of ets-cts's ignored-lists
+list-roots:
+    - root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-cts-metadata-parity
+      name: ets-cts-metadata-parity
+workflows: [panda-metadata-parity]
+
+parameters:
+    extension: ets
+    load-runtimes: ets
+    # Isolated work-dir to avoid intersection with tests
+    work-dir: ${WORK_DIR}/ets-cts-metadata-parity
+
+collections:
+    24.build_system/metadata: >-

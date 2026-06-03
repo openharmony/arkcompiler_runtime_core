@@ -105,3 +105,46 @@ class CheckWfTsTest(unittest.TestCase):
             stderr_output = mock_stderr.getvalue()
             self.assertIn("that might require additional actions before. See its description", stderr_output)
             self.assertIn("Make sure that the required ABC files are prepared", stderr_output)
+
+    @patch.dict(os.environ, env(), clear=True)
+    def test_metadata_parity_workflow_accepted(self) -> None:
+        """panda-metadata-parity is listed in the ets-cts-ch24-metadata-parity suite's workflows."""
+        args = {
+            "test-suite": "ets-cts-ch24-metadata-parity",
+            "workflow": "panda-metadata-parity"
+        }
+        result = check_mapping_ts_vs_wf(args)
+        self.assertTrue(result)
+
+    @patch.dict(os.environ, env(), clear=True)
+    def test_metadata_parity_workflow_rejected_on_main_ets_cts(self) -> None:
+        """panda-metadata-parity must NOT be silently usable against the main ets-cts suite —
+        running parity logic on tests outside 24.build_system/metadata would either fail
+        (missing binary-metadata counterparts) or pass vacuously. The dedicated suite
+        ets-cts-ch24-metadata-parity is the only valid pairing."""
+        args = {
+            "test-suite": "ets-cts",
+            "workflow": "panda-metadata-parity"
+        }
+        with patch('sys.stderr', new=StringIO()) as mock_stderr:
+            result = check_mapping_ts_vs_wf(args)
+            self.assertFalse(result)
+            stderr_output = mock_stderr.getvalue()
+            self.assertIn("workflow is not supported for the", stderr_output)
+            self.assertIn("ets-cts-ch24-metadata-parity", stderr_output)
+
+    @patch.dict(os.environ, env(), clear=True)
+    def test_metadata_parity_suite_rejects_unrelated_workflow(self) -> None:
+        """The ets-cts-ch24-metadata-parity suite lists only panda-metadata-parity —
+        passing a runtime workflow like panda-int must be rejected so that a typo
+        does not silently run a 0-step compile/runtime cycle on these test files."""
+        args = {
+            "test-suite": "ets-cts-ch24-metadata-parity",
+            "workflow": "panda-int"
+        }
+        with patch('sys.stderr', new=StringIO()) as mock_stderr:
+            result = check_mapping_ts_vs_wf(args)
+            self.assertFalse(result)
+            stderr_output = mock_stderr.getvalue()
+            self.assertIn("workflow is not supported for the", stderr_output)
+            self.assertIn("panda-metadata-parity", stderr_output)
