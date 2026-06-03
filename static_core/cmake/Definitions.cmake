@@ -146,6 +146,12 @@ if (PANDA_TARGET_MOBILE AND PANDA_TARGET_ARM64)
     set(PANDA_LLVM_REGALLOC pbqp)
 endif()
 
+# Strip debug info for mobile Release builds to reduce binary size
+if (PANDA_TARGET_MOBILE AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(-g0)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--strip-all")
+endif()
+
 if (PANDA_TARGET_OHOS AND PANDA_TARGET_ARM64)
     set(PANDA_ENABLE_LTO true)
 endif()
