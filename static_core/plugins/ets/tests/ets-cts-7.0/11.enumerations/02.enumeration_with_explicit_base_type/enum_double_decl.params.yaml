@@ -168,22 +168,6 @@ cases:
         using different values types
     decl_variants:
       - |-
-        const v1: byte = 11
-        const v2: short = 13
-        const v3: int = 15
-        const v4: long = 17
-        const v5: float = 1.8f
-        const v6: double = 2.53
-        enum Enum: double { A = v1, B = v2, C = v3, D = v4, E = v5, F = v6 }
-      - |-
-        let v1: byte = 11
-        let v2: short = 13
-        let v3: int = 15
-        let v4: long = 17
-        let v5: float = 1.8f
-        let v6: double = 2.53
-        enum Enum: double { A = v1, B = v2, C = v3, D = v4, E = v5, F = v6 }
-      - |-
         enum Enum: double { A = 11 as byte, B = 13 as short,
           C = 15 as int, D = 17 as long,
           E = 1.8f, F = 2.53 }

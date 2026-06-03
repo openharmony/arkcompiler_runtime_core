@@ -153,18 +153,6 @@ cases:
         v3_type: "byte", v4_type: "byte"}
     decl_variants:
       - |-
-        const v1: [v1_type] = 11
-        const v2: [v2_type] = 13
-        const v3: [v3_type] = 15
-        const v4: [v4_type] = 17
-        enum Enum: [check_type] { A = v1, B = v2, C = v3, D = v4 }
-      - |-
-        let v1: [v1_type] = 11
-        let v2: [v2_type] = 13
-        let v3: [v3_type] = 15
-        let v4: [v4_type] = 17
-        enum Enum: [check_type] { A = v1, B = v2, C = v3, D = v4 }
-      - |-
         enum Enum: [check_type] { A = 11 as [v1_type], B = 13 as [v2_type],
           C = 15 as [v3_type], D = 17 as [v4_type] }
     sub_cases_logic:

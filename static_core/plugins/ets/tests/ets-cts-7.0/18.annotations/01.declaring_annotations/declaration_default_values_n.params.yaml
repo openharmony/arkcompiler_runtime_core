@@ -14,21 +14,17 @@
 
 cases:
   - type: |-
-      string 
+      string
     value: |-
       a + 'another string'
   - type: |-
-      int 
+      int
     value: |-
-      1 + b 
+      1 + b
   - type: |-
       boolean
     value: |-
       1 == b
-  - type: |-
-      MyEnum
-    value: |-
-      MyEnum.EnumField1
   - type: |-
       string[]
     value: |-

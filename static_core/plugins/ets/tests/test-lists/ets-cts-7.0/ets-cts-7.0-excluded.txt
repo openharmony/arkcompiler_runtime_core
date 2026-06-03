@@ -22,16 +22,6 @@
 18.annotations/04.ambient_annotations/ambient_annotations_n/import_ambient_annotation_n_1.ets
 18.annotations/04.ambient_annotations/ambient_annotations_n/import_ambient_annotation_n_2.ets
 
-# TODO(dkofanov): Stdlib variable redeclaration:
-18.annotations/01.declaring_annotations/declaration_default_values_0.ets
-18.annotations/01.declaring_annotations/declaration_default_values_1.ets
-18.annotations/01.declaring_annotations/declaration_default_values_2.ets
-18.annotations/01.declaring_annotations/declaration_default_values_3.ets
-18.annotations/01.declaring_annotations/declaration_default_values_4.ets
-18.annotations/01.declaring_annotations/declaration_default_values_5.ets
-18.annotations/01.declaring_annotations/declaration_default_values_6.ets
-18.annotations/01.declaring_annotations/declaration_default_values_7.ets
-
 # 28232 runtime timeout only in CI
 03.types/21.utility_types/01.awaited_utility_type/awaited_return_1.ets
 
