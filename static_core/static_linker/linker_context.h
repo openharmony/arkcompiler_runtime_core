@@ -18,6 +18,7 @@
 
 #include <forward_list>
 #include <functional>
+#include <array>
 #include <unordered_map>
 #include <vector>
 
@@ -138,6 +139,8 @@ struct CodeData {
 class Helpers {
 public:
     static std::vector<panda_file::Type> BreakProto(panda_file::ProtoItem *p);
+
+    static void FillProtoTypes(panda_file::ProtoItem *p, std::vector<panda_file::Type> &out);
 };
 
 class Context {
@@ -378,6 +381,13 @@ private:
     std::unordered_map<const panda_file::StringItem *, panda_file::StringItem *> stringCache_;
     std::unordered_map<panda_file::LiteralArrayItem *, std::vector<panda_file::LiteralItem>> literalArrayCache_;
 
+    std::vector<panda_file::Type> protoTypsScratch_;
+
+    static constexpr size_t K_PRIMITIVE_TYPE_CACHE_SIZE = 16U;
+    std::array<panda_file::PrimitiveTypeItem *, K_PRIMITIVE_TYPE_CACHE_SIZE> primitiveTypeCache_ {};
+
+    panda_file::PrimitiveTypeItem *PrimitiveTypeFromCache(panda_file::Type::TypeId id);
+
     // The initial merge scan gathers counts for reserve() and records foreign items for the required deterministic
     // merge order: regular class declarations, foreign classes, regular bodies, then foreign members.
     struct MergeItemBuckets {
@@ -465,8 +475,6 @@ private:
     size_t EstimatePatchChanges(size_t start, size_t end) const;
 
     void ProcessCodeDataRange(CodePatcher *patcher, size_t start, size_t end);
-
-    void ParseConcurrently();
 
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
 

@@ -14,9 +14,13 @@
  */
 
 #include "libarkfile/file_item_container.h"
+#include <atomic>
 #include <cstdint>
+#include <cstdlib>
+#include <thread>
 #include <type_traits>
 #include "libarkbase/macros.h"
+#include "libarkbase/utils/span.h"
 #include <libarkfile/include/file_format_version.h>
 #include "libarkfile/pgo.h"
 
@@ -650,6 +654,7 @@ uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection)
 uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection, bool updateOrderIndexes)
 {
     FillExportMap();
+    BuildEmitItems();
 
     uint32_t numClasses = classMap_.size();
     uint32_t numLiteralarrays = literalarrayMap_.size();
@@ -684,11 +689,7 @@ uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection, bool updateOrde
         curOffset += item->GetSize();
     }
 
-    for (auto &item : items_) {
-        if (!item->NeedsEmit()) {
-            continue;
-        }
-
+    for (auto *item : emitItems_) {
         curOffset = RoundUp(curOffset, item->Alignment());
         item->SetOffset(curOffset);
         item->ComputeLayout();
@@ -734,12 +735,8 @@ void ItemContainer::RebuildRegionSection()
         ProcessIndexDependecies(item.get(), &addedItems);
     }
 
-    for (auto &item : items_) {
-        if (!item->NeedsEmit()) {
-            continue;
-        }
-
-        ProcessIndexDependecies(item.get(), &addedItems);
+    for (auto *item : emitItems_) {
+        ProcessIndexDependecies(item, &addedItems);
     }
 
     if (!regionSectionItem_.IsEmpty()) {
@@ -824,14 +821,10 @@ void ItemContainer::UpdateOrderIndexes()
         }
     }
 
-    for (auto &item : items_) {
-        if (!item->NeedsEmit()) {
-            continue;
-        }
-
+    for (auto *item : emitItems_) {
         item->SetOrderIndex(idx++);
-        if (HasNestedItems(item.get())) {
-            VisitNestedItems(item.get(), [&idx](BaseItem *paramItem) {
+        if (HasNestedItems(item)) {
+            VisitNestedItems(item, [&idx](BaseItem *paramItem) {
                 paramItem->SetOrderIndex(idx++);
                 return true;
             });
@@ -968,6 +961,150 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset, bool re
     return WriteHeaderIndexInfo(writer);
 }
 
+void ItemContainer::BuildEmitItems()
+{
+    emitItems_.clear();
+    emitItems_.reserve(items_.size());
+    for (auto &item : items_) {
+        if (item->NeedsEmit()) {
+            emitItems_.push_back(item.get());
+        }
+    }
+}
+
+namespace {
+
+constexpr unsigned ITEM_WRITE_MAX_THREADS = 8U;
+constexpr int STRTOL_BASE = 10;
+
+unsigned ParseItemWriteThreadCountFromEnv()
+{
+    const char *env = std::getenv("ARK_WRITE_ITEM_THREADS");
+    if (env == nullptr) {
+        return 0U;
+    }
+    char *endp = nullptr;
+    const int64_t v = std::strtoll(env, &endp, STRTOL_BASE);
+    if (endp == env || v < 0) {
+        return 0U;
+    }
+    if (v == 0) {
+        return 1U;
+    }
+    return static_cast<unsigned>(std::min<int64_t>(v, ITEM_WRITE_MAX_THREADS));
+}
+
+unsigned GetItemWriteThreadCount()
+{
+    static const unsigned CACHED = []() -> unsigned {
+        const unsigned fromEnv = ParseItemWriteThreadCountFromEnv();
+        if (fromEnv != 0U) {
+            return fromEnv;
+        }
+        unsigned hc = std::thread::hardware_concurrency();
+        if (hc == 0U) {
+            hc = 2U;
+        }
+        return std::min(hc, ITEM_WRITE_MAX_THREADS);
+    }();
+    return CACHED;
+}
+
+size_t GetItemWriteMinBytes()
+{
+    static const size_t CACHED = []() -> size_t {
+        constexpr size_t DEFAULT_MIN = 64U * 1024U;
+        const char *env = std::getenv("ARK_WRITE_ITEM_MIN_BYTES");
+        if (env == nullptr) {
+            return DEFAULT_MIN;
+        }
+        char *endp = nullptr;
+        const int64_t v = std::strtoll(env, &endp, STRTOL_BASE);
+        if (endp == env || v < 0) {
+            return DEFAULT_MIN;
+        }
+        return static_cast<size_t>(v);
+    }();
+    return CACHED;
+}
+
+}  // namespace
+
+bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseItem *> &itemsArr)
+{
+    if (itemsArr.empty()) {
+        return true;
+    }
+
+    const size_t sectionStart = itemsArr.front()->GetOffset();
+    const size_t sectionEnd = itemsArr.back()->GetOffset() + itemsArr.back()->GetSize();
+    if (sectionEnd <= sectionStart) {
+        return true;
+    }
+    ASSERT(writer->GetOffset() == sectionStart);
+
+    const size_t sectionSize = sectionEnd - sectionStart;
+    std::vector<uint8_t> sectionBuf(sectionSize, 0);
+
+    const unsigned nThreads = std::max(1U, std::min<unsigned>(GetItemWriteThreadCount(), itemsArr.size()));
+    std::atomic<bool> ok {true};
+
+    auto runRange = [&itemsArr, sectionStart, sectionSize, &sectionBuf, &ok](size_t begin, size_t end) {
+        for (size_t i = begin; i < end; ++i) {
+            // Atomic with relaxed order reason: best-effort early exit; thread join provides synchronization
+            if (!ok.load(std::memory_order_relaxed)) {
+                return;
+            }
+            BaseItem *item = itemsArr[i];
+            const size_t absOff = item->GetOffset();
+            const size_t sz = item->GetSize();
+            if (absOff < sectionStart || absOff + sz > sectionStart + sectionSize) {
+                // Atomic with relaxed order reason: failure flag with no ordering constraints between workers
+                ok.store(false, std::memory_order_relaxed);
+                return;
+            }
+            auto sectionSp = ark::Span<uint8_t>(sectionBuf);
+            OffsetWriter w(sectionSp.SubSpan(absOff - sectionStart, sz).data(), absOff, sz);
+            if (!item->Write(&w)) {
+                // Atomic with relaxed order reason: failure flag with no ordering constraints between workers
+                ok.store(false, std::memory_order_relaxed);
+                return;
+            }
+        }
+    };
+
+    if (nThreads <= 1U) {
+        runRange(0, itemsArr.size());
+    } else {
+        const size_t n = itemsArr.size();
+        const size_t chunk = (n + nThreads - 1U) / nThreads;
+        std::vector<std::thread> workers;
+        workers.reserve(nThreads - 1U);
+        for (unsigned t = 0; t + 1U < nThreads; ++t) {
+            const size_t b = static_cast<size_t>(t) * chunk;
+            const size_t e = std::min(b + chunk, n);
+            if (b >= e) {
+                continue;
+            }
+            workers.emplace_back([runRange, b, e]() { runRange(b, e); });
+        }
+        const size_t lastBegin = static_cast<size_t>(nThreads - 1U) * chunk;
+        if (lastBegin < n) {
+            runRange(lastBegin, n);
+        }
+        for (auto &t : workers) {
+            t.join();
+        }
+    }
+
+    // Atomic with relaxed order reason: read result after worker threads joined
+    if (!ok.load(std::memory_order_relaxed)) {
+        return false;
+    }
+
+    return writer->AppendRange(sectionBuf.data(), sectionBuf.size());
+}
+
 bool ItemContainer::WriteExportData(Writer *writer)
 {
     // Write export class idx and metadata
@@ -1037,9 +1174,23 @@ bool ItemContainer::WriteBody(Writer *writer)
         }
     }
 
-    for (auto &item : items_) {
-        if (item->NeedsEmit() && (!writer->Align(item->Alignment()) || !item->Write(writer))) {
+    const auto &emittedItems = emitItems_;
+    const size_t itemsSectionBytes =
+        emittedItems.empty()
+            ? 0U
+            : (emittedItems.back()->GetOffset() + emittedItems.back()->GetSize() - emittedItems.front()->GetOffset());
+    if (GetItemWriteThreadCount() > 1U && emittedItems.size() > 1U && itemsSectionBytes > GetItemWriteMinBytes()) {
+        if (!writer->Align(emittedItems.front()->Alignment())) {
             return false;
+        }
+        if (!WriteItemsParallel(writer, emittedItems)) {
+            return false;
+        }
+    } else {
+        for (auto *item : emittedItems) {
+            if (!writer->Align(item->Alignment()) || !item->Write(writer)) {
+                return false;
+            }
         }
     }
 
@@ -1078,7 +1229,8 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
     }
 
     writer->CountChecksum(false);
-    if (!writer->WriteChecksum(checksumOffset)) {
+    const size_t contentBegin = static_cast<size_t>(checksumOffset) + sizeof(uint32_t);
+    if (!writer->FinalizeChecksum(contentBegin, static_cast<size_t>(checksumOffset))) {
         return false;
     }
 

@@ -1184,8 +1184,19 @@ public:
     template <class... Args>
     MethodItem *AddMethod(Args... args)
     {
-        // insert new method to set ordered by method name
-        return methods_.insert(std::make_unique<MethodItem>(this, std::forward<Args>(args)...))->get();
+        methods_.emplace_back(std::make_unique<MethodItem>(this, std::forward<Args>(args)...));
+        methodsSorted_ = false;
+        return methods_.back().get();
+    }
+
+    void FinalizeMethodsOrder() const
+    {
+        if (methodsSorted_) {
+            return;
+        }
+        auto &mut = const_cast<std::vector<std::unique_ptr<MethodItem>> &>(methods_);
+        std::stable_sort(mut.begin(), mut.end(), MethodCompByName {});
+        methodsSorted_ = true;
     }
 
     StringItem *GetSourceFile() const
@@ -1280,6 +1291,14 @@ public:
     }
     void SetDependencyMark() override;
 
+    using FindMethodIterator = typename std::vector<std::unique_ptr<MethodItem>>::const_iterator;
+
+    std::pair<FindMethodIterator, FindMethodIterator> FindMethod(StringItem *name) const
+    {
+        FinalizeMethodsOrder();
+        return std::equal_range(methods_.cbegin(), methods_.cend(), name, MethodCompByName {});
+    }
+
     DEFAULT_MOVE_SEMANTIC(ClassItem);
     DEFAULT_COPY_SEMANTIC(ClassItem);
 
@@ -1327,15 +1346,8 @@ private:
     std::vector<AnnotationItem *> runtimeTypeAnnotations_;
     StringItem *sourceFile_ {nullptr};
     std::vector<std::unique_ptr<FieldItem>> fields_;
-    std::multiset<std::unique_ptr<MethodItem>, MethodCompByName> methods_;
-
-public:
-    using FindMethodIterator = typename std::multiset<std::unique_ptr<MethodItem>, MethodCompByName>::const_iterator;
-
-    std::pair<FindMethodIterator, FindMethodIterator> FindMethod(StringItem *name) const
-    {
-        return methods_.equal_range(name);
-    }
+    std::vector<std::unique_ptr<MethodItem>> methods_;
+    mutable bool methodsSorted_ {true};
 
 private:
     template <class Callback>
