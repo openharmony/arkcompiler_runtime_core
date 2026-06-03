@@ -126,6 +126,31 @@ public:
     NO_MOVE_SEMANTIC(StackOverflowTest);
 };
 
+class StackInfoTestThread : public ManagedThread {
+public:
+    StackInfoTestThread(void *stackBase, size_t stackSize, size_t guardSize)
+        : ManagedThread(os::thread::GetCurrentThreadId(), Runtime::GetCurrent()->GetInternalAllocator(),
+                        Runtime::GetCurrent()->GetPandaVM(), ManagedThread::ThreadType::THREAD_TYPE_MANAGED),
+          stackBase_(stackBase),
+          stackSize_(stackSize),
+          guardSize_(guardSize)
+    {
+    }
+
+    bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) override
+    {
+        stackAddr = stackBase_;
+        stackSize = stackSize_;
+        guardSize = guardSize_;
+        return true;
+    }
+
+private:
+    void *stackBase_ {nullptr};
+    size_t stackSize_ {0};
+    size_t guardSize_ {0};
+};
+
 TEST_F(StackOverflowTest, StackMappingIsSingleVma)
 {
     auto vmas = ParseStackVmas();
@@ -227,6 +252,59 @@ TEST_F(StackOverflowTest, NoGapBetweenSystemGuardAndProtectedZone)
             << " bytes gap between PROT_NONE regions [" << std::hex << protNoneVmas[i - 1].end << ", "
             << protNoneVmas[i].start << "). This indicates a hole between system guard and runtime protected zone.";
     }
+}
+
+TEST_F(StackOverflowTest, NativeStackBeginMatchesStackBasePlusGuard)
+{
+    size_t pageSize = ark::os::mem::GetPageSize();
+    size_t stackSize = 1_MB;
+    size_t guardSize = pageSize / 2;
+    size_t effectiveGuardSize = pageSize;
+
+    void *stackBase = ark::os::mem::MapRWAnonymousRaw(stackSize);
+    ASSERT_NE(stackBase, nullptr);
+
+    StackInfoTestThread thread(stackBase, stackSize, guardSize);
+    thread.InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
+                                     ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
+
+    uintptr_t expectedNativeStackBegin = ToUintPtr(stackBase) + effectiveGuardSize;
+    uintptr_t actualNativeStackBegin = thread.GetNativeStackBegin();
+
+    ASSERT_GT(stackSize,
+              effectiveGuardSize + ManagedThread::STACK_OVERFLOW_RESERVED_SIZE + thread.GetNativeStackProtectedSize());
+    EXPECT_EQ(actualNativeStackBegin, expectedNativeStackBegin)
+        << "native stack begin does not match stackBase + effective guard size";
+    EXPECT_LT(ToUintPtr(stackBase), actualNativeStackBegin) << "native stack begin should be above the raw stack base";
+
+    thread.DisableStackOverflowCheck();
+    auto unmapError = ark::os::mem::UnmapRaw(stackBase, stackSize);
+    EXPECT_FALSE(unmapError.has_value()) << "failed to unmap synthetic stack";
+}
+
+TEST_F(StackOverflowTest, NativeStackBeginUsesReportedGuardWhenLargerThanPage)
+{
+    size_t pageSize = ark::os::mem::GetPageSize();
+    size_t stackSize = 1_MB;
+    size_t guardSize = pageSize * 2;
+
+    void *stackBase = ark::os::mem::MapRWAnonymousRaw(stackSize);
+    ASSERT_NE(stackBase, nullptr);
+
+    StackInfoTestThread thread(stackBase, stackSize, guardSize);
+    thread.InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
+                                     ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
+
+    uintptr_t expectedNativeStackBegin = ToUintPtr(stackBase) + guardSize;
+
+    ASSERT_GT(stackSize,
+              guardSize + ManagedThread::STACK_OVERFLOW_RESERVED_SIZE + thread.GetNativeStackProtectedSize());
+    EXPECT_EQ(thread.GetNativeStackBegin(), expectedNativeStackBegin)
+        << "native stack begin should use the reported guard size when it is larger than one page";
+
+    thread.DisableStackOverflowCheck();
+    auto unmapError = ark::os::mem::UnmapRaw(stackBase, stackSize);
+    EXPECT_FALSE(unmapError.has_value()) << "failed to unmap synthetic stack";
 }
 
 }  // namespace ark::test
