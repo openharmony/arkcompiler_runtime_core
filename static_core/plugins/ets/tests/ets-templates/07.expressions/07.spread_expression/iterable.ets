@@ -37,13 +37,9 @@ class ArrayIteratorT<T> implements Iterator<T> {
         this.data = data
     }
     next(): IteratorResult<T> {
-        return {
-            done: this.index >= this.data.length,
-            value:
-                this.index >= this.data.length
-                    ? undefined
-                    : this.data[this.index++],
-        }
+        return this.index >= this.data.length
+            ? new IteratorResult<T>()
+            : new IteratorResult<T>(this.data[this.index++])
     }
 }
 
@@ -60,13 +56,9 @@ class SelfIterableArrayT<T> implements Iterable<T>, Iterator<T> {
     }
 
     next(): IteratorResult<T> {
-        return {
-            done: this.index >= this.data.length,
-            value:
-                this.index >= this.data.length
-                    ? undefined
-                    : this.data[this.index++],
-        }
+        return this.index >= this.data.length
+            ? new IteratorResult<T>()
+            : new IteratorResult<T>(this.data[this.index++])
     }
 }
 
@@ -87,13 +79,9 @@ class ArrayIteratorCls<T> implements Iterator<T> {
         this.data = data
     }
     next(): IteratorResult<T> {
-        return {
-            done: this.index >= this.data.length,
-            value:
-                this.index >= this.data.length
-                    ? undefined
-                    : this.data[this.index++],
-        }
+        return this.index >= this.data.length
+            ? new IteratorResult<T>()
+            : new IteratorResult<T>(this.data[this.index++])
     }
 }
 
@@ -110,13 +98,9 @@ class SelfIterableFixedArray<T> implements Iterable<T>, Iterator<T> {
     }
 
     next(): IteratorResult<T> {
-        return {
-            done: this.index >= this.data.length,
-            value:
-                this.index >= this.data.length
-                    ? undefined
-                    : this.data[this.index++],
-        }
+        return this.index >= this.data.length
+            ? new IteratorResult<T>()
+            : new IteratorResult<T>(this.data[this.index++])
     }
 }
 
@@ -137,13 +121,35 @@ class FixedArrayIteratorCls<T> implements Iterator<T> {
         this.data = data
     }
     next(): IteratorResult<T> {
-        return {
-            done: this.index >= this.data.length,
-            value:
-                this.index >= this.data.length
-                    ? undefined
-                    : this.data[this.index++],
-        }
+        return this.index >= this.data.length
+            ? new IteratorResult<T>()
+            : new IteratorResult<T>(this.data[this.index++])
+    }
+}
+
+class RestBase {
+    value: string = ""
+
+    constructor(...parts: string[]) {
+        this.value = parts[0] + parts[1]
+    }
+}
+
+class RestDerived extends RestBase {
+    constructor(parts: Iterable<string>) {
+        super(...parts)
+    }
+}
+
+class RestDelegating {
+    value: string = ""
+
+    constructor(parts: Iterable<string>) {
+        this(...parts)
+    }
+
+    constructor(...parts: string[]) {
+        this.value = parts[0] + parts[1]
     }
 }
 
@@ -197,6 +203,18 @@ function main(): int {
         arktest.assertEQ(r[0], 1.0)
         arktest.assertEQ(r[1], 2.0)
         arktest.assertEQ(r[2], 3.0)
+    })
+
+    suite.addTest("iterable spread in explicit super constructor call", () => {
+        let it: Iterable<string> = new IterableArrayT<string>(["A", "B"])
+        let derived = new RestDerived(it)
+        arktest.assertEQ(derived.value, "AB")
+    })
+
+    suite.addTest("iterable spread in explicit this constructor call", () => {
+        let it: Iterable<string> = new IterableArrayT<string>(["A", "B"])
+        let delegating = new RestDelegating(it)
+        arktest.assertEQ(delegating.value, "AB")
     })
 
     return suite.run()

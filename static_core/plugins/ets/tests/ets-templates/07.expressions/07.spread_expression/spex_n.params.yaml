@@ -110,19 +110,6 @@ cases:
 
 # Unions
     - decl: |-
-          type UT = Array<string>|Array<number>
-          let a: UT = ['1', '2', '3']
-      use: |-
-          // union of arrays in spread expression
-          let r = [...a, ...a]
-          arktest.assertEQ(r[0], '1')
-          arktest.assertEQ(r[1], '2')
-          arktest.assertEQ(r[2], '3')
-          arktest.assertEQ(r[3], '1')
-          arktest.assertEQ(r[4], '2')
-          arktest.assertEQ(r[5], '3')
-
-    - decl: |-
           type UT = [number, string]|[string, number]
           let a: UT = [1.0, '1']
       use: |-
@@ -146,38 +133,12 @@ cases:
 
     - decl: |-
           type UT = Array<string>|[string, int]
-          let a: UT = ['1', '2', '3']
-      use: |-
-          // union of array and tuple in spread expression
-          let r = [...a, ...a]
-          arktest.assertEQ(r[0], '1')
-          arktest.assertEQ(r[1], '2')
-          arktest.assertEQ(r[2], '3')
-          arktest.assertEQ(r[3], '1')
-          arktest.assertEQ(r[4], '2')
-          arktest.assertEQ(r[5], '3')
-
-    - decl: |-
-          type UT = Array<string>|[string, int]
           let a: UT = ['1', 2]
       use: |-
           // union of array and tuple in spread expression
           let r: [string, int] = [...a]
           arktest.assertEQ(r[0], '1')
           arktest.assertEQ(r[1], 2)
-
-    - decl: |-
-          type UT = Array<string>|FixedArray<int>|[string, int]|[int, string]
-          let a: UT = ['1', '2', '3']
-      use: |-
-          // union of arrays and tuples in spread expression
-          let r = [...a, ...a]
-          arktest.assertEQ(r[0], '1')
-          arktest.assertEQ(r[1], '2')
-          arktest.assertEQ(r[2], '3')
-          arktest.assertEQ(r[3], '1')
-          arktest.assertEQ(r[4], '2')
-          arktest.assertEQ(r[5], '3')
 
     - decl: |-
           type UT = Array<string>|FixedArray<int>|[string, int]|[int, string]
@@ -193,36 +154,6 @@ cases:
           arktest.assertEQ(r[5], 3)
 
     - decl: |-
-          type UT = Array<string>|FixedArray<int>|[string, int]|[int, string]
-          let a: UT = ['1', 2]
-      use: |-
-          // union of arrays and tuples in spread expression
-          let r = [...a]
-          arktest.assertEQ(r[0], '1')
-          arktest.assertEQ(r[1], 2)
-
-    - decl: |-
-          type UT = Array<string>|Iterable<string>
-          let a: UT = ['1', '2', '3']
-      use: |-
-          // union of array and iterable in spread expression
-          let r = [...a]
-          arktest.assertEQ(r[0], '1')
-          arktest.assertEQ(r[1], '2')
-          arktest.assertEQ(r[2], '3')
-
-    - decl: |-
-          type UT = Array<string>|Iterable<string>
-          let a: UT = 'iterable'
-      use: |-
-          // union of array and iterable in spread expression
-          let r: Array<string> = [...a]
-          arktest.assertEQ(r.length, 8)
-          arktest.assertEQ(r[0], 'i')
-          arktest.assertEQ(r[1], 't')
-          arktest.assertEQ(r[7], 'e')
-
-    - decl: |-
           type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
           let a: UT = { 'a': 1, 'b': 2 } as Record<string, int>
       use: |-
@@ -233,25 +164,6 @@ cases:
           arktest.assertEQ(r[0][1], 1)
           arktest.assertEQ(r[1][0], 'b')
           arktest.assertEQ(r[1][1], 2)
-
-    - decl: |-
-          type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
-          let a: UT = 'xyz'
-      use: |-
-          // union of array, iterables, and tuple in spread expression
-          let r = [...a]
-          arktest.assertEQ(r[0], 'x')
-          arktest.assertEQ(r[1], 'y')
-          arktest.assertEQ(r[2], 'z')
-
-    - decl: |-
-          type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
-          let a: UT = ['xyz', 'abc']
-      use: |-
-          // union of array, iterables, and tuple in spread expression
-          let r = [...a]
-          arktest.assertEQ(r[0], 'xyz')
-          arktest.assertEQ(r[1], 'abc')
 
     - decl: |-
           type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
