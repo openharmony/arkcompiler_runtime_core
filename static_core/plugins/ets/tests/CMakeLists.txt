@@ -551,6 +551,7 @@ endif()
 
 add_subdirectory(common)
 add_subdirectory(equals)
+add_subdirectory(lookup_by_name)
 add_subdirectory(ets_test_suite)
 add_subdirectory(runtime)
 add_subdirectory(ani)
@@ -670,7 +671,7 @@ endfunction()
 
 add_target_to_group(ets_time01_tests ets_deterministic_tests)
 add_target_to_group(ets_time01_tests ets_run_jit_osr_ets_code_tests)
-
+add_target_to_group(ets_time01_tests ets_tests_lookup_by_name)
 if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
     add_target_to_group(ets_time01_tests es2panda_tests)
 endif()

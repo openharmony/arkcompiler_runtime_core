@@ -126,6 +126,7 @@ TEST(BuilderTest, SpecialNames)
     ASSERT_EQ(Builder::GetGetterNamePrefix(), "%%get-");
     ASSERT_EQ(Builder::GetPartialNamePrefix(), "%%partial-");
     ASSERT_EQ(Builder::GetAsyncNamePrefix(), "%%async-");
+    ASSERT_EQ(Builder::GetUnionPropertyNamePrefix(), "%%union_prop-");
     ASSERT_EQ(Builder::GetLambdaPrefix(), "%%lambda-");
     ASSERT_EQ(Builder::GetLambdaInvokePrefix(), "lambda_invoke-");
 }

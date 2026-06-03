@@ -122,6 +122,7 @@ public:
     static std::string GetGetterNamePrefix();
     static std::string GetPartialNamePrefix();
     static std::string GetAsyncNamePrefix();
+    static std::string GetUnionPropertyNamePrefix();
     static std::string GetLambdaPrefix();
     static std::string GetLambdaInvokePrefix();
 };

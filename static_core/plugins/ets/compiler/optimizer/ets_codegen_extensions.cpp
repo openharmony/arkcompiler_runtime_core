@@ -272,4 +272,21 @@ void Codegen::EtsAsyncDispatch(Inst *inst)
     EmitAsyncStubCall(this, inst, RuntimeInterface::EntrypointId::ETS_ASYNC_DISPATCH_STUB);
 }
 
+bool Codegen::ResolveCallByNameCodegen(ResolveVirtualInst *resolver)
+{
+    SCOPED_DISASM_STR(this, "Create runtime call to resolve a call by name");
+    ASSERT(resolver->GetOpcode() == Opcode::ResolveByName);
+    ASSERT(resolver->GetCallMethod() != nullptr);
+
+    auto methodReg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
+    auto objectReg = ConvertRegister(resolver->GetSrcReg(0), DataType::REFERENCE);
+    ScopedTmpReg tmpMethodReg(GetEncoder());
+    LoadMethod(tmpMethodReg);
+
+    CallRuntime(resolver, EntrypointId::RESOLVE_CALL_BY_NAME, tmpMethodReg, {}, tmpMethodReg, objectReg,
+                TypedImm(resolver->GetCallMethodId()));
+    GetEncoder()->EncodeMov(methodReg, tmpMethodReg);
+    return true;
+}
+
 }  // namespace ark::compiler
