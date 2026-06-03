@@ -197,8 +197,14 @@ static int64_t UnboxResult(EtsExecutionContext *executionCtx, EtsMethod *ifaceMe
     Value unboxedResult;
     if (!UnboxValue(EtsObject::FromCoreType(boxedResult), effectiveReturnType, &unboxedResult, executionCtx)) {
         PandaOStringStream msg;
-        msg << "result has type " << EtsTypeToString(effectiveReturnType) << ", but got "
-            << EtsObject::FromCoreType(boxedResult)->GetClass()->GetName()->GetMutf8();
+        msg << "result has type " << EtsTypeToString(effectiveReturnType) << ", but got ";
+        if (boxedResult == nullptr) {
+            msg << "undefined";
+        } else if (boxedResult == executionCtx->GetNullValue()) {
+            msg << "null";
+        } else {
+            msg << EtsObject::FromCoreType(boxedResult)->GetClass()->GetName()->GetMutf8();
+        }
         ark::ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError,
                                     msg.str().c_str());
     }
