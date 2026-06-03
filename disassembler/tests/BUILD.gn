@@ -51,6 +51,10 @@ disasm_test_js_files = [
   "script-string2",
 ]
 
+disasm_security_test_js_files = [ "many-params" ]
+
+disasm_security_test_annotation_files = [ "declaration-3d-array-number" ]
+
 test_js_path = "//arkcompiler/runtime_core/disassembler/tests/js/"
 
 foreach(file, disasm_column_test_js_files) {
@@ -191,6 +195,17 @@ foreach(file, disasm_test_js_files) {
     test_abc = "$target_out_dir/${file}.abc"
     src_js = rebase_path(test_js)
 
+    dst_file = rebase_path(test_abc)
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, disasm_security_test_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+    src_js = rebase_path(test_js)
     dst_file = rebase_path(test_abc)
     in_puts = [ test_js ]
     out_puts = [ test_abc ]
@@ -386,6 +401,25 @@ host_unittest_action("DisasmSourceLangTest") {
   ]
 }
 
+host_unittest_action("DisasmSecurityTest") {
+  module_out_path = module_output_path
+  sources = [ "disassembler_security_test.cpp" ]
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+
+  foreach(file, disasm_security_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, disasm_security_test_annotation_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+}
+
 group("host_unittest") {
   testonly = true
   deps = [
@@ -394,6 +428,7 @@ group("host_unittest") {
     ":DisasmModuleTestAction",
     ":DisasmReleaseTestAction",
     ":DisasmScriptTestAction",
+    ":DisasmSecurityTestAction",
     ":DisasmSourceLangTestAction",
     ":DisasmUserAnnotationsTestAction",
   ]
