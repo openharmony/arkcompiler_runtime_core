@@ -169,6 +169,9 @@
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_n_5.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_n_6.ets
 
+#34934 No error reported on enum initializer with a non-constant expression
+11.enumerations/non_const_initializers_2.ets
+
 #33639
 11.enumerations/enum_decl_25.ets
 11.enumerations/enum_decl_26.ets
@@ -416,7 +419,7 @@
 #34098
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/same_names.ets
 
-#34442 
+#34442
 17.experimental_features/13.adding_functionality_to_existing_types/04.lambda_expressions_with_receiver/lambda_expressions_with_receiver_25.ets
 
 #33744
