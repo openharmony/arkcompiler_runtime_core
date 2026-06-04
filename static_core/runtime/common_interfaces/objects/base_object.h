@@ -19,16 +19,18 @@
 #include <cstdint>
 #include <cstdio>
 
+#include "common_interfaces/objects/ref_field.h"
 #include "runtime/include/object_header.h"
 #include "common_interfaces/objects/base_class.h"
-#include "common_interfaces/base/common.h"
-#include "common_interfaces/objects/base_object_operator.h"
 #include "common_interfaces/objects/base_state_word.h"
+#include "common_interfaces/heap/visitor.h"
+
 namespace ark::common_vm {
 
 using MemoryOrder = std::memory_order;
 using ::ark::mem::MAddress;
 using ::ark::mem::RefField;
+using ::ark::mem::RefFieldVisitor;
 using ::ark::mem::TypeInfo;
 
 class BaseObject : public ObjectHeader {
@@ -38,8 +40,6 @@ public:
     {
         return reinterpret_cast<BaseObject *>(address);
     }
-    static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
-    static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
 
     inline size_t GetSize() const
     {
@@ -51,21 +51,10 @@ public:
         return true;
     }
 
-    void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
-    {
-        GetOperator()->ForEachRefField(this, fieldHandler, weakFieldHandler);
-    }
-
-    size_t ForEachRefFieldAndGetSize(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
-    {
-        return GetOperator()->ForEachRefFieldAndGetSize(this, fieldHandler, weakFieldHandler);
-    }
+    void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler);
 
     // Clear the specified field
-    void ClearRef(RefField<> &field)
-    {
-        GetOperator()->ClearRef(this, field);
-    }
+    void ClearRef(RefField<> &field);
 
     inline BaseObject *GetForwardingPointer() const
     {
@@ -122,14 +111,6 @@ public:
     {
         return sizeof(BaseObject);
     }
-
-protected:
-    inline BaseObjectOperatorInterfaces *GetOperator() const
-    {
-        return operator_.staticObjOp_;
-    }
-
-    static PANDA_PUBLIC_API BaseObjectOperator operator_;
 };
 
 using ObjectPtr = BaseObject *;

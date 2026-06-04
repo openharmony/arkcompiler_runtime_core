@@ -52,7 +52,6 @@ cmc_sources = [
   "${_cmc_dir}/heap/heap.cpp",
   "${_cmc_dir}/heap/heap_allocator.cpp",
   "${_cmc_dir}/heap/heap_manager.cpp",
-  "${_cmc_dir}/heap/heap_visitor.cpp",
   "${_cmc_dir}/heap/space/from_space.cpp",
   "${_cmc_dir}/heap/space/large_space.cpp",
   "${_cmc_dir}/heap/space/nonmovable_space.cpp",

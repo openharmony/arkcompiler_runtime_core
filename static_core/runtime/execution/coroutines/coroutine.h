@@ -26,17 +26,8 @@
 #include "runtime/execution/coroutines/coroutine_priority.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
-#if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/thread/mutator.h"
-#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
-#if defined(ARK_USE_COMMON_RUNTIME)
-using CommonRootVisitor = ark::common_vm::CommonRootVisitor;
-
-extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
-#endif  // ARK_USE_COMMON_RUNTIME
-
 class CoroutineManager;
 class CoroutineContext;
 class CompletionEvent;
@@ -176,13 +167,6 @@ public:
     virtual void OnChildCoroutineCreated([[maybe_unused]] Coroutine *child) {};
 
     void ExecuteJob(Job *job) override;
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-    void Visit(CommonRootVisitor visitor)
-    {
-        visitor(nullptr);
-    }
-#endif  // ARK_USE_COMMON_RUNTIME
 
     /// Get coroutine name.
     const PandaString &GetName() const

@@ -25,12 +25,6 @@
 #include "runtime/trace.h"
 
 namespace ark {
-#if defined(ARK_USE_COMMON_RUNTIME)
-extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
-{
-    reinterpret_cast<Coroutine *>(coroutine)->Visit(visitor);
-}
-#endif  // ARK_USE_COMMON_RUNTIME
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, Job *job, CoroutineContext *context)
 {

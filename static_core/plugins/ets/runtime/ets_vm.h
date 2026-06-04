@@ -69,7 +69,6 @@
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "plugins/ets/runtime/ets_stdlib_cache.h"
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
-#include "common_interfaces/vm_interface.h"
 
 namespace ark::ets {
 class EtsAbcRuntimeLinker;
@@ -436,8 +435,7 @@ private:
 
     void InitializeANI(const RuntimeOptions &options);
 
-    explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
-                        ark::mem::VMInterface *vmIface);
+    explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
 
     // Time to turn off GC for cold startup on PostFork
     static constexpr uint64_t DISABLE_GC_DURATION_MS = 2ULL * 1000;
@@ -477,7 +475,6 @@ private:
     RunEventLoopFunction runEventLoop_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
     PandaUniquePtr<StdlibCache> stdLibCache_ {nullptr};
-    std::unique_ptr<ark::mem::VMInterface> vmIface_;
 
     size_t preForkWorkerCount_ = 0;
 

@@ -218,7 +218,7 @@ _libarkruntime_calculated_sources = [
   "mem/allocator.cpp",
   "mem/gc/bitmap.cpp",
   "mem/gc/card_table.cpp",
-  "mem/gc/cmc/cmc-allocator-adapter.cpp",
+  "mem/gc/cmc/cmc-allocator.cpp",
   "mem/gc/cmc/cmc-gc.cpp",
   "mem/gc/epsilon-g1/epsilon-g1.cpp",
   "mem/gc/epsilon/epsilon.cpp",

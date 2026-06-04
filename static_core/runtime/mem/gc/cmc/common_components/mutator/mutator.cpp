@@ -20,8 +20,11 @@
 #include "mutator/satb_buffer.h"
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/common/scoped_object_access.h"
-#include "common_interfaces/vm_interface.h"
 #include "runtime/include/mutator.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/mutator.h"
+#include "common_components/mutator/thread_local.h"
+#include "plugins/ets/runtime/mem/ets_reference_processor.h"
 
 namespace ark::common_vm {
 
@@ -51,7 +54,10 @@ ScopedGcThreadType::~ScopedGcThreadType()
 
 void Mutator::HandleGCCallback()
 {
-    Heap::GetHeap().GetCollector().ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
+    auto vm = static_cast<ark::Mutator *>(this)->GetVM();
+    ASSERT(static_cast<ark::Mutator *>(this)->GetMutatorLock()->HasLock());
+    static_cast<mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor())->ProcessClearedReferences();
+    vm->HandleGCRoutineInMutator();
 }
 
 static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)

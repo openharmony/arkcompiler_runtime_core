@@ -225,9 +225,9 @@ void EtsReferenceProcessor::ProcessClearedReferences()
     }
 }
 
+#if defined(ARK_USE_COMMON_RUNTIME)
 void EtsReferenceProcessor::ProcessReferencesAfterCopy()
 {
-#if defined(ARK_USE_COMMON_RUNTIME)
     weakReferences_.FlushSets();
     while (!weakReferences_.IsEmpty()) {
         auto *weakRefObj = weakReferences_.Extract();
@@ -238,7 +238,7 @@ void EtsReferenceProcessor::ProcessReferencesAfterCopy()
             weakReferences_.Insert(weakRefObj);
         }
     }
-#endif  // ARK_USE_COMMON_RUNTIME
 }
+#endif  // ARK_USE_COMMON_RUNTIME
 
 }  // namespace ark::mem::ets

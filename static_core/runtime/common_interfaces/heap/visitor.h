@@ -26,8 +26,14 @@ namespace ark::mem {
 // using GCRootVisitor = std::function<void(BaseObject *object)>;
 using RefFieldVisitor = std::function<void(RefField<> &)>;
 using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
+using CommonRootVisitor = void (*)(void *root);
 
 // For ArkTS1.1
 // using WeakRootVisitor = std::function<BaseObject *(BaseObject *p)>;
 }  // namespace ark::mem
+namespace ark::common_vm {
+using ::ark::mem::CommonRootVisitor;
+using ::ark::mem::RefFieldVisitor;
+using ::ark::mem::WeakRefFieldVisitor;
+}  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H

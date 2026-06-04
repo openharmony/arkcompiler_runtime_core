@@ -58,23 +58,17 @@
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
-#include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "libarkbase/taskmanager/task_manager.h"
-
-namespace ark::mem::ets {
-ark::mem::VMInterface *RegisterCmcGcCallbacks();
-}  // namespace ark::mem::ets
 
 namespace ark::ets {
 
 static PandaEtsVM *g_pandaEtsVM = nullptr;
 
 // Create MemoryManager by RuntimeOptions
-static std::pair<mem::MemoryManager *, ark::mem::VMInterface *> CreateMM(Runtime *runtime,
-                                                                         const RuntimeOptions &options)
+static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &options)
 {
     mem::MemoryManager::HeapOptions heapOptions {
         nullptr,                                      // is_object_finalizeble_func
@@ -95,13 +89,8 @@ static std::pair<mem::MemoryManager *, ark::mem::VMInterface *> CreateMM(Runtime
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
 
-    ark::mem::VMInterface *vmIface {nullptr};
-#if defined(ARK_USE_COMMON_RUNTIME)
-    vmIface = ark::mem::ets::RegisterCmcGcCallbacks();
-#endif
-
     auto *memMgr = mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
-    return std::make_pair(memMgr, vmIface);
+    return memMgr;
 }
 
 static CoroutineManagerConfig CreateCoroutineManagerConfig(const RuntimeOptions &options)
@@ -167,22 +156,16 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         return Unexpected(PandaString("Cannot create TaskManager"));
     }
 
-    auto [mm, vmIface] = CreateMM(runtime, options);
+    auto mm = CreateMM(runtime, options);
     if (mm == nullptr) {
         return Unexpected(PandaString("Cannot create MemoryManager"));
     }
 
-    if (vmIface != nullptr) {
-        vmIface->Init();
-    }
-
     auto allocator = mm->GetHeapManager()->GetInternalAllocator();
-    auto vm = allocator->New<PandaEtsVM>(runtime, options, mm, vmIface);
+    auto vm = allocator->New<PandaEtsVM>(runtime, options, mm);
     if (vm == nullptr) {
         return Unexpected(PandaString("Cannot create PandaCoreVM"));
     }
-
-    mem::StaticObjectOperator::Initialize();
 
     auto classLinker = EtsClassLinker::Create(runtime->GetClassLinker());
     if (!classLinker) {
@@ -242,9 +225,8 @@ void PandaEtsVM::InitializeANI(const RuntimeOptions &options)
 }
 
 // CC-OFFNXT(G.FUD.05) solid logic
-PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm,
-                       ark::mem::VMInterface *vmIface)
-    : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm), vmIface_(vmIface)
+PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm)
+    : ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm)
 {
     ASSERT(runtime_ != nullptr);
     ASSERT(mm_ != nullptr);
