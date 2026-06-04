@@ -1,0 +1,115 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+.function i32 attachDebugSession() <native>
+.function void waitForDebugSession() <native>
+.function void throwErrorFromNative() <native>
+.function void getDispatchTablesImpl() <native>
+
+.record A {}
+.record B {}
+.record E {}
+
+.function void getDispatchTables() {
+    call getDispatchTablesImpl
+    return.void
+}
+
+.function i32 A.aCompiledMethod() {
+    ldai 1
+    return
+}
+
+.function i32 B.bCompiledMethod() {
+    ldai 2
+    return
+}
+
+.function i32 simpleMethod() {
+    ldai 10
+    return
+}
+
+.function i32 attachInMainThreadImpl() {
+    call attachDebugSession
+    return
+}
+
+.function i32 attachInMainThread() {
+    call attachInMainThreadImpl
+    return
+}
+
+.function i32 managedWaitLeaf() {
+    call waitForDebugSession
+    ldai 3
+    return
+}
+
+.function i32 managedWaitMid() {
+    call managedWaitLeaf
+    return
+}
+
+.function i32 managedWaitMain() {
+    call managedWaitMid
+    return
+}
+
+.function i32 loopWithDebugAttach() {
+    movi v0, 2
+    call waitForDebugSession
+loop_with_attach_head:
+    lda v0
+    jeqz loop_with_attach_exit
+    lda v0
+    addi -1
+    sta v0
+    jmp loop_with_attach_head
+loop_with_attach_exit:
+    ldai 7
+    return
+}
+
+.function i32 throwError() {
+    newobj v0, E
+    throw v0
+    ldai 1
+    return
+}
+
+.function i32 catchFromManagedThrow() {
+try_with_attach_begin:
+    call waitForDebugSession
+    call throwError
+    ldai 0
+    return
+try_with_attach_end:
+catch_with_attach_begin:
+    ldai 1
+    return
+    .catch E, try_with_attach_begin, try_with_attach_end, catch_with_attach_begin
+}
+
+.function i32 catchFromNativeThrow() {
+try_with_attach_begin:
+    call waitForDebugSession
+    call throwErrorFromNative
+    ldai 0
+    return
+try_with_attach_end:
+catch_with_attach_begin:
+    ldai 1
+    return
+    .catch E, try_with_attach_begin, try_with_attach_end, catch_with_attach_begin
+}

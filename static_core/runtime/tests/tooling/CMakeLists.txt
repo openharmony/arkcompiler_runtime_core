@@ -33,6 +33,8 @@ panda_target_include_directories(debugtest PUBLIC
 
 panda_add_sanitizers(TARGET debugtest SANITIZERS ${PANDA_SANITIZERS_LIST})
 
+add_subdirectory(debug_session_attach)
+
 # Sampling profiler tests
 # Currently profiler is not supported for arm64
 # TODO(m.strizhak): support for device

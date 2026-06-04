@@ -163,6 +163,7 @@ end
     end
     If(field, 0).NE.Likely {
       acc_fast := send(:"load_field_#{flavor}", field, klass)
+      table_old := table
     } Else {
       method := send(:"lookup_getter_by_name_#{flavor}", klass, id)
       If(method, 0).EQ.Unlikely {
@@ -176,6 +177,7 @@ end
       end)
       dec_pc := SubI(pc).Imm(size).ptr
     }
+    table := Phi(table_old, table).ptr
     if flavor != 'obj'
       set_acc_primitive(Phi(acc_fast.u64, acc.u64).u64)
     else
@@ -227,6 +229,7 @@ end
     field := lookup_field_by_name(klass, id)
     If(field, 0).NE.Likely {
       send(:"store_field_#{flavor}", field, klass)
+      table_old := table
       Goto(:Exit_)
     } Else {
       method := send(:"lookup_setter_by_name_#{flavor}", klass, id)
@@ -240,6 +243,7 @@ end
         copy_reg(new_frame, num_vregs, v, new_moffset)
         copy_acc_to_reg(new_frame, frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(1).word), new_moffset)
       end)
+      table_new := table
       dec_pc := SubI(pc).Imm(size).ptr
     }
     Label(:Exit_)
@@ -251,6 +255,7 @@ end
       acc := Phi(%acc, %acc, acc).ref
     end
     acc_tag := Phi(%acc_tag, %acc_tag, acc_tag).u64
+    table := Phi(table_old, table_old, table_new).ptr
     frame := Phi(%frame, %frame, frame).ptr
     if Options.arm64?
       moffset := Phi(%moffset, %moffset, moffset).word
@@ -459,6 +464,7 @@ macro(:ets_async_return_from_suspend) do |return_value|
       method_ptr := get_method_ptr_frame(frame)
     end
     pc := next_pc
+    table := load_dispatch_table()
   } Else {
     load_to_acc_reg(return_value, Constants::OBJECT_TAG)
     save_acc_var(acc, acc_tag)

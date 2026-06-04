@@ -567,7 +567,9 @@ std::optional<Error> Debugger::NotifyFramePop(PtThread thread, uint32_t depth) c
 void Debugger::BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset)
 {
     ASSERT(bcOffset < method->GetCodeSize() && "code size of current method less then bc_offset");
-    PtLocation location(method->GetPandaFile()->GetFilename().c_str(), method->GetFileId(), bcOffset);
+    const auto *pf = method->GetPandaFile();
+    const PandaString filename = pf == nullptr ? "" : pf->GetFilename().c_str();
+    PtLocation location(filename.c_str(), method->GetFileId(), bcOffset);
 
     // Step event is reported before breakpoint, according to the spec.
     HandleStep(thread, method, location);

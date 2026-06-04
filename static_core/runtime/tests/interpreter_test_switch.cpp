@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,6 +119,7 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
     std::vector<Value> args;
     Value v;
     Method *mainMethod;
+    Method *gMethod;
 
     auto *thread = ManagedThread::GetCurrent();
 
@@ -132,6 +133,9 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
         mainMethod = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
         ASSERT_NE(mainMethod, nullptr);
 
+        gMethod = klass->GetDirectMethod(utf::CStringAsMutf8("g"));
+        ASSERT_NE(gMethod, nullptr);
+
         Method *fMethod = klass->GetDirectMethod(utf::CStringAsMutf8("f"));
         ASSERT_NE(fMethod, nullptr);
 
@@ -143,12 +147,17 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
     notificationManager->RemoveListener(&listener, RuntimeNotificationManager::BYTECODE_PC_CHANGED);
 
     ASSERT_EQ(v.GetAs<int32_t>(), RET);
-    ASSERT_EQ(listener.GetEvents().size(), 1U);
+    ASSERT_EQ(listener.GetEvents().size(), 2U);
 
-    auto &event = listener.GetEvents()[0];
-    EXPECT_EQ(event.thread, thread);
-    EXPECT_EQ(event.method, mainMethod);
-    EXPECT_EQ(event.bcOffset, BytecodeInstruction::Size(BytecodeInstruction::Format::V4_V4_ID16));
+    const auto &gEvent = listener.GetEvents()[0];
+    EXPECT_EQ(gEvent.thread, thread);
+    EXPECT_EQ(gEvent.method, gMethod);
+    EXPECT_EQ(gEvent.bcOffset, BytecodeInstruction::Size(BytecodeInstruction::Format::V4_V4_ID16));
+
+    const auto &mainEvent = listener.GetEvents()[1];
+    EXPECT_EQ(mainEvent.thread, thread);
+    EXPECT_EQ(mainEvent.method, mainMethod);
+    EXPECT_EQ(mainEvent.bcOffset, BytecodeInstruction::Size(BytecodeInstruction::Format::V4_V4_ID16));
 }
 
 }  // namespace ark::interpreter::test

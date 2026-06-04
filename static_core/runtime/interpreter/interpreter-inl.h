@@ -381,7 +381,7 @@ public:
     {
         int32_t imm = this->GetInst().template GetImm<FORMAT>();
         LOG_INST() << "jmp " << std::hex << "0x" << imm;
-        if (!this->InstrumentBranches(imm)) {
+        if (!this->template InstrumentBranches<IS_DEBUG>(imm)) {
             this->template JumpToInst<false>(imm);
         }
     }
@@ -3617,6 +3617,7 @@ public:
 
         this->GetThread()->SetCurrentFrameKind(CurrentFrameKind::INTERPRETER);
         this->GetThread()->SetCurrentFrame(this->GetFrame());
+        this->SetDispatchTable(this->GetThread()->template GetCurrentDispatchTable<IS_DEBUG>());
 
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
@@ -3681,7 +3682,7 @@ public:
 
         if (Op<int32_t>()(v1, 0)) {
             this->template UpdateBranchStatistics<true>();
-            if (!this->InstrumentBranches(imm)) {
+            if (!this->template InstrumentBranches<IS_DEBUG>(imm)) {
                 this->template JumpToInst<false>(imm);
             }
         } else {
@@ -3704,7 +3705,7 @@ public:
 
         if (Op<int32_t>()(v1, v2)) {
             this->template UpdateBranchStatistics<true>();
-            if (!this->InstrumentBranches(imm)) {
+            if (!this->template InstrumentBranches<IS_DEBUG>(imm)) {
                 this->template JumpToInst<false>(imm);
             }
         } else {
@@ -3724,7 +3725,7 @@ public:
 
         if (Op<ObjectHeader *>()(v1, nullptr)) {
             this->template UpdateBranchStatistics<true>();
-            if (!this->InstrumentBranches(imm)) {
+            if (!this->template InstrumentBranches<IS_DEBUG>(imm)) {
                 this->template JumpToInst<false>(imm);
             }
         } else {
@@ -3747,7 +3748,7 @@ public:
 
         if (Op<ObjectHeader *>()(v1, v2)) {
             this->template UpdateBranchStatistics<true>();
-            if (!this->InstrumentBranches(imm)) {
+            if (!this->template InstrumentBranches<IS_DEBUG>(imm)) {
                 this->template JumpToInst<false>(imm);
             }
         } else {

@@ -429,6 +429,13 @@ public:
         return MEMBER_OFFSET(ManagedThread, unwindingDepth_);
     }
 
+#ifndef PANDA_WITH_QUICKENER
+    static constexpr uint32_t GetDispatchTableOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, dispatchTable_);
+    }
+#endif  // PANDA_WITH_QUICKENER
+
     void *GetLanguageExtensionsData() const
     {
         return languageExtensionData_;
@@ -882,6 +889,7 @@ private:
     uint32_t callDepth_ {0};
 #ifndef PANDA_WITH_QUICKENER
     void *const *debugDispatchTable_ {nullptr};
+    // NOTE(dslynko): `debugStubDispatchTable_` might be redundant, consider removing it
     void *const *debugStubDispatchTable_ {nullptr};
     void *const *dispatchTable_ {nullptr};
 #endif

@@ -566,9 +566,12 @@ bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::Cl
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
 
-    auto aotPfile = aotManager_->FindPandaFile(klass->GetPandaFile()->GetFullFileName());
-    if (aotPfile != nullptr) {
-        EVENT_AOT_LOADED_FOR_CLASS(PandaString(aotPfile->GetFileName()), PandaString(klass->GetName()));
+    const compiler::AotPandaFile *aotPfile = nullptr;
+    if (CanLinkAotEntrypoints()) {
+        aotPfile = aotManager_->FindPandaFile(klass->GetPandaFile()->GetFullFileName());
+        if (aotPfile != nullptr) {
+            EVENT_AOT_LOADED_FOR_CLASS(PandaString(aotPfile->GetFileName()), PandaString(klass->GetName()));
+        }
     }
 
     compiler::AotClass aotClass =
@@ -2039,6 +2042,10 @@ void ClassLinker::RemoveCreatedClassInExtension(Class *klass)
 void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const compiler::AotPandaFile *aotPfile,
                                           panda_file::SourceLang language)
 {
+    if (!this->CanLinkAotEntrypoints()) {
+        return;
+    }
+
     auto bootContext = GetExtension(language)->GetBootContext();
 
     bootContext->EnumerateClasses([pf, aotPfile](Class *klass) {
@@ -2063,6 +2070,11 @@ void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const comp
             });
         return true;
     });
+}
+
+bool ClassLinker::CanLinkAotEntrypoints() const
+{
+    return !Runtime::GetCurrent()->IsDebugMode();
 }
 
 }  // namespace ark

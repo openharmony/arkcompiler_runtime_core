@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,27 @@
 
 #include <memory>
 #include "libarkbase/macros.h"
-#include "sampler/sample_writer.h"
+
+namespace ark {
+class Runtime;
+}  // namespace ark
 
 namespace ark::tooling {
 class CoverageListener;
 
 namespace sampler {
 class Sampler;
+class StreamWriter;
 }  // namespace sampler
 
-class Tools {
+enum class DebugSessionAttachErrorCode {
+    OK = 0,
+    ALREADY_ATTACHED,
+    NOT_ALLOWED,
+    INVALID,
+};
+
+class Tools final {
 public:
     Tools() = default;
     ~Tools() = default;
@@ -42,6 +53,17 @@ public:
     void CreateCoverageListener(const std::string &filePath);
     CoverageListener *GetCoverageListener();
     void DestroyCoverageListener();
+
+    /**
+     * @brief Creates a new debug session for a running application.
+     * This function creates a new debug session and prepares runtime for execution with debug events.
+     * Pre-conditions:
+     *  This function must be invoked from a native thread.
+     *  JIT must be globally disabled.
+     */
+    DebugSessionAttachErrorCode AttachDebugSession();
+
+    bool IsDebugSessionAttachAllowed() const;
 
 private:
     NO_COPY_SEMANTIC(Tools);

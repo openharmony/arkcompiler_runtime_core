@@ -204,9 +204,6 @@ public:
         return AtomicGetMark().GetState() == MarkWord::ObjectState::STATE_GC;
     }
 
-    // Type test methods
-    inline bool IsInstance() const;
-
     // Get field address in Class
     inline void *FieldAddr(int offset) const;
 

@@ -30,6 +30,7 @@ namespace ark::interpreter {
 % end
     static constexpr void (*HANDLE_FAST_INVALID)() = nullptr;
     static constexpr void (*HANDLE_FAST_EXCEPTION)() = nullptr;
+    static constexpr void (*HANDLE_FAST_DEBUG_SWITCH)() = nullptr;
 
 % Panda::instructions.each do |i|
     static constexpr void (*HANDLE_FAST_<%= i.handler_name %>_LLVM)() = nullptr;
@@ -39,6 +40,7 @@ namespace ark::interpreter {
 % end
     static constexpr void (*HANDLE_FAST_INVALID_LLVM)() = nullptr;
     static constexpr void (*HANDLE_FAST_EXCEPTION_LLVM)() = nullptr;
+    static constexpr void (*HANDLE_FAST_DEBUG_SWITCH_LLVM)() = nullptr;
 
 #else
 % Panda::instructions.each do |i|
@@ -49,6 +51,7 @@ namespace ark::interpreter {
 % end
     extern "C" void HANDLE_FAST_INVALID();
     extern "C" void HANDLE_FAST_EXCEPTION();
+    extern "C" void HANDLE_FAST_DEBUG_SWITCH();
 
 % Panda::instructions.each do |i|
     extern "C" void HANDLE_FAST_<%= i.handler_name %>_LLVM();
@@ -58,6 +61,7 @@ namespace ark::interpreter {
 % end
     extern "C" void HANDLE_FAST_INVALID_LLVM();
     extern "C" void HANDLE_FAST_EXCEPTION_LLVM();
+    extern "C" void HANDLE_FAST_DEBUG_SWITCH_LLVM();
 #endif
 
 // NOLINTNEXTLINE(readability-function-size)
@@ -68,6 +72,7 @@ inline void* SetupDispatchTableImpl()
 % Panda::dispatch_table.handler_names.each do |name|
         HANDLE_FAST_<%= name %>,
 % end
+        HANDLE_FAST_EXCEPTION
 #else
 % Panda::dispatch_table.handler_names.each do |name|
         &HANDLE_FAST_<%= name %>,
@@ -86,6 +91,7 @@ inline void* SetupLLVMDispatchTableImpl()
 % Panda::dispatch_table.handler_names.each do |name|
         HANDLE_FAST_<%= name %>_LLVM,
 % end
+        HANDLE_FAST_EXCEPTION_LLVM
 #else
 % Panda::dispatch_table.handler_names.each do |name|
         &HANDLE_FAST_<%= name %>_LLVM,
@@ -94,6 +100,44 @@ inline void* SetupLLVMDispatchTableImpl()
 #endif
     };
     return (void *)dispatch_table.data();
+}
+
+// NOLINTNEXTLINE(readability-function-size)
+inline void *SetupDebugDispatchTableImpl()
+{
+    static const std::array<void (*)(), <%= Panda::dispatch_table.handler_names.size() + 1 %>> dispatch_table {
+#if defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64)
+% Panda::dispatch_table.handler_names.each do |name|
+        HANDLE_FAST_DEBUG_SWITCH,
+% end
+        HANDLE_FAST_EXCEPTION
+#else
+% Panda::dispatch_table.handler_names.each do |name|
+        &HANDLE_FAST_DEBUG_SWITCH,
+% end
+        &HANDLE_FAST_EXCEPTION
+#endif
+    };
+    return (void *)(dispatch_table.data());
+}
+
+// NOLINTNEXTLINE(readability-function-size)
+inline void *SetupLLVMDebugDispatchTableImpl()
+{
+    static const std::array<void (*)(), <%= Panda::dispatch_table.handler_names.size() + 1 %>> dispatch_table {
+#if defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64)
+% Panda::dispatch_table.handler_names.each do |name|
+        HANDLE_FAST_DEBUG_SWITCH_LLVM,
+% end
+        HANDLE_FAST_EXCEPTION_LLVM
+#else
+% Panda::dispatch_table.handler_names.each do |name|
+        &HANDLE_FAST_DEBUG_SWITCH_LLVM,
+% end
+        &HANDLE_FAST_EXCEPTION_LLVM
+#endif
+    };
+    return (void *)(dispatch_table.data());
 }
 
 }  // namespace ark::interpreter
