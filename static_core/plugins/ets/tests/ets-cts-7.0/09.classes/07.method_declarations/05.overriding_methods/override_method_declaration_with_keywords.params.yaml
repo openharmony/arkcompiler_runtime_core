@@ -35,3 +35,9 @@ cases:
         }
         arktest.expectThrow(() => { a.foo() }, checkException)
       }
+
+  - modifier: "async"
+    function: |-
+      override async foo(): Promise<int> {
+        return 5;
+      }
