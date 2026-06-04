@@ -154,4 +154,15 @@ TEST_F(AttachCurrentThreadTest, success)
     }).join();
 }
 
+TEST_F(AttachCurrentThreadTest, success_empty_options)
+{
+    std::thread([this]() {
+        ani_options opts = {0, nullptr};
+        ani_env *env {};
+        ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, &opts, ANI_VERSION_1, &env), ANI_OK);
+        ASSERT_NO_ABORT_MESSAGE();
+        ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
+    }).join();
+}
+
 }  // namespace ark::ets::ani::verify::testing

@@ -1820,13 +1820,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, an
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtype);
+    ani_ref initialElement = nullptr;
     if (LIKELY(length != 0)) {
         CHECK_PTR_ARG(vinitialElement);
+        initialElement = vinitialElement->GetRef();
     }
     CHECK_PTR_ARG(vresult);
     ani_fixedarray_ref result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), vtype->GetRef(), length,
-                                                                    vinitialElement->GetRef(), &result);
+    ani_status status =
+        GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), vtype->GetRef(), length, initialElement, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
