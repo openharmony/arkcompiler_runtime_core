@@ -231,10 +231,15 @@ private:
         ASSERT(wTypeError_ != nullptr);
 
         ctorRangeError_ = StdCtorRef(ctx_, "RangeError");
+        ctx_->GetBuiltinCtorRefsCache()->Add(ctorRangeError_);
         ctorReferenceError_ = StdCtorRef(ctx_, "ReferenceError");
+        ctx_->GetBuiltinCtorRefsCache()->Add(ctorReferenceError_);
         ctorSyntaxError_ = StdCtorRef(ctx_, "SyntaxError");
+        ctx_->GetBuiltinCtorRefsCache()->Add(ctorSyntaxError_);
         ctorURIError_ = StdCtorRef(ctx_, "URIError");
+        ctx_->GetBuiltinCtorRefsCache()->Add(ctorURIError_);
         ctorTypeError_ = StdCtorRef(ctx_, "TypeError");
+        ctx_->GetBuiltinCtorRefsCache()->Add(ctorTypeError_);
         ASSERT(ctorRangeError_ != nullptr);
         ASSERT(ctorReferenceError_ != nullptr);
         ASSERT(ctorSyntaxError_ != nullptr);
