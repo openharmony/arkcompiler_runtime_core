@@ -23,21 +23,18 @@ action("ets_func_tests_int_jit_aot") {
 
   outputs = [ "$target_out_dir/ets_func_tests" ]
 
-  deps = []
-  if (!is_host_product) {
-    deps += [
-      "$ark_root/compiler/tools/paoc:ark_aot",
-      "$ark_root/panda:arkts_bin",
-      "$ark_root/plugins/ets:ets-compile-stdlib-default",
-      "$ark_root/plugins/ets:etsstdlib",
-      "$ark_root/verification/verifier:verifier_bin",
-    ]
+  deps = [
+    "$ark_root/compiler/tools/paoc:ark_aot",
+    "$ark_root/panda:arkts_bin",
+    "$ark_root/plugins/ets:ets-compile-stdlib-default",
+    "$ark_root/plugins/ets:etsstdlib",
+    "$ark_root/verification/verifier:verifier_bin",
+  ]
 
-    if (ark_standalone_build || ark_static_standalone_build) {
-      deps += [ "$ark_es2panda_root/aot:ets2panda" ]
-    } else {
-      external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
-    }
+  if (ark_standalone_build || ark_static_standalone_build) {
+    deps += [ "$ark_es2panda_root/aot:ets2panda" ]
+  } else {
+    external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
   }
 
   runner_path = rebase_path("$ark_root/tests/tests-u-runner/runner.sh")

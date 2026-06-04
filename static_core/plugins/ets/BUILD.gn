@@ -27,11 +27,9 @@ if (!(ark_standalone_build ||
 
 # NB! Standard library is built only if the front-end is available.
 with_stdlib = false
-if (!is_host_product) {
-  foreach(plugin, ark_enabled_plugins) {
-    if (plugin == "ecmascript" || plugin == "ets") {
-      with_stdlib = true
-    }
+foreach(plugin, ark_enabled_plugins) {
+  if (plugin == "ecmascript" || plugin == "ets") {
+    with_stdlib = true
   }
 }
 
@@ -53,8 +51,7 @@ group("ark_packages") {
   if (ark_ets_interop_js) {
     deps += [ "runtime/interop_js:ets_interop_js_napi" ]
   }
-  if (!is_host_product &&
-      !(ark_standalone_build ||
+  if (!(ark_standalone_build ||
         (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) ||
         (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
     deps += [
@@ -64,8 +61,7 @@ group("ark_packages") {
   }
 }
 
-if (!is_host_product &&
-    !(ark_standalone_build ||
+if (!(ark_standalone_build ||
       (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) ||
       (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
   generate_static_abc("ets2abc_etsstdlib_bootabc") {
@@ -254,12 +250,6 @@ ark_isa_gen("isa_gen_ets_bytecodeopt") {
   sources = "$ark_root/plugins/ets/bytecode_optimizer/templates/"
   destination = "$target_gen_dir/"
   requires = [ "$ark_root/assembler/asm_isapi.rb" ]
-}
-
-if (!with_stdlib) {
-  group("etsstdlib") {
-    deps = []
-  }
 }
 
 if (with_stdlib) {
