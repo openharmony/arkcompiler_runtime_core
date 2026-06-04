@@ -14,7 +14,6 @@
  */
 
 import { foo } from 'testDecl';
-initModule('testDecl')
 
 function bar1() {
     return foo() == 10;
