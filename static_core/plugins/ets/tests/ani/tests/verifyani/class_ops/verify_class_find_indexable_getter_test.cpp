@@ -81,7 +81,7 @@ TEST_F(ClassFindIndexableGetterTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindIndexableGetter(env_, nullptr, signature, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"signature", "const char *", "wrong class for indexable getter"},
         {"result", "ani_method *"},
     };
@@ -102,7 +102,7 @@ TEST_F(ClassFindIndexableGetterTest, wrong_result_storage)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"signature", "const char *"},
-        {"result", "ani_method *", "wrong pointer for storing 'ani_method'"},
+        {"result", "ani_method *", "nullptr for storing 'ani_method'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableGetter", testLines);
 }
@@ -118,7 +118,7 @@ TEST_F(ClassFindIndexableGetterTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindIndexableGetter(env_, localClass, signature, &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"signature", "const char *", "wrong class for indexable getter"},
         {"result", "ani_method *"},
     };

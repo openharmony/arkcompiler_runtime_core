@@ -58,7 +58,7 @@ TEST_F(StringGet{{ Format }}Test, wrong_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference"},
+        {"string", "ani_string", "reference is nullptr"},
         {"{{ format }}Buffer", "{{ type }} *"},
         {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
@@ -114,7 +114,7 @@ TEST_F(StringGet{{ Format }}Test, wrong_res)
         {"string", "ani_string"},
         {"{{ format }}Buffer", "{{ type }} *"},
         {"{{ format }}BufferSize", "ani_size"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
@@ -124,10 +124,10 @@ TEST_F(StringGet{{ Format }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}(nullptr, nullptr, nullptr, size_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"string", "ani_string", "wrong reference"},
-        {"{{ format }}Buffer", "{{ type }} *", "wrong pointer to use as argument in '{{ type }} *'"},
+        {"string", "ani_string", "reference is nullptr"},
+        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} *"},
         {"{{ format }}BufferSize", "ani_size"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }

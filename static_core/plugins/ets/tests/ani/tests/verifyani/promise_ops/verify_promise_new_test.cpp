@@ -39,7 +39,7 @@ TEST_F(PromiseNewTest, wrong_promise)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"result_resolver", "ani_resolver *"},
-        {"result_promise", "ani_object *", "wrong pointer for storing 'ani_object'"},
+        {"result_promise", "ani_object *", "nullptr for storing 'ani_object'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Promise_New", testLines);
 }
@@ -50,7 +50,7 @@ TEST_F(PromiseNewTest, wrong_resolver)
     ASSERT_EQ(env_->c_api->Promise_New(env_, nullptr, &promise), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result_resolver", "ani_resolver *", "wrong pointer for storing 'ani_resolver'"},
+        {"result_resolver", "ani_resolver *", "nullptr for storing 'ani_resolver'"},
         {"result_promise", "ani_object *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Promise_New", testLines);
@@ -61,8 +61,8 @@ TEST_F(PromiseNewTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Promise_New(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"result_resolver", "ani_resolver *", "wrong pointer for storing 'ani_resolver'"},
-        {"result_promise", "ani_object *", "wrong pointer for storing 'ani_object'"},
+        {"result_resolver", "ani_resolver *", "nullptr for storing 'ani_resolver'"},
+        {"result_promise", "ani_object *", "nullptr for storing 'ani_object'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Promise_New", testLines);
 }

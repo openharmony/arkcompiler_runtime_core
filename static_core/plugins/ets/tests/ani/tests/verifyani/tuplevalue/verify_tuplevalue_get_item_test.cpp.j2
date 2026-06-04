@@ -55,7 +55,7 @@ TEST_F(TupleValueGetItem{{ Type }}Test, wrong_tuple)
     ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(nullptr, VALID_INDEX, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"tuple_value", "ani_tuple_value", "reference is nullptr"},
         {"index", "ani_size"},
         {"result", "ani_{{ type }} *"},
     };
@@ -69,7 +69,7 @@ TEST_F(TupleValueGetItem{{ Type }}Test, expired_local_scope_tuple)
     ASSERT_EQ(env_->TupleValue_GetItem_{{ Type }}(tupleValue, VALID_INDEX, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"tuple_value", "ani_tuple_value", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"index", "ani_size"},
         {"result", "ani_{{ type }} *"},
     };
@@ -183,7 +183,7 @@ TEST_F(TupleValueGetItem{{ Type }}Test, wrong_result)
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value"},
         {"index", "ani_size"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
 }
@@ -211,9 +211,9 @@ TEST_F(TupleValueGetItem{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->TupleValue_GetItem_{{ Type }}(nullptr, nullptr, VALID_INDEX, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"tuple_value", "ani_tuple_value", "reference is nullptr"},
         {"index", "ani_size"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);
 }
@@ -244,7 +244,7 @@ TEST_F(TupleValueGetItem{{ Type }}Test, index_out_of_range)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value"},
-        {"index", "ani_size", "out of range"},
+        {"index", "ani_size", "tuple index out of range: index 3, length 3"},
         {"result", "ani_{{ type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetItem_{{ Type }}", testLines);

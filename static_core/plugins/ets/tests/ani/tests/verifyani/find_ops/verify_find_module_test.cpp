@@ -33,7 +33,7 @@ TEST_F(FindModuleTest, find_module_wrong_descriptor)
     ASSERT_EQ(env_->FindModule(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> nullDescriptorLines {
         {"env", "ani_env *"},
-        {"module_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"module_descriptor", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_module *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindModule", nullDescriptorLines);
@@ -53,7 +53,7 @@ TEST_F(FindModuleTest, find_module_wrong_result_storage)
     std::vector<TestLineInfo> moduleLines {
         {"env", "ani_env *"},
         {"module_descriptor", "const char *"},
-        {"result", "ani_module *", "wrong pointer for storing 'ani_module'"},
+        {"result", "ani_module *", "nullptr for storing 'ani_module'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindModule", moduleLines);
 }

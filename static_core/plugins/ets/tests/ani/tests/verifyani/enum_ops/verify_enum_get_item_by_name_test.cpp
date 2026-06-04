@@ -77,7 +77,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_name_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enm", "ani_enum"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_enum_item *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
@@ -97,7 +97,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_result_null)
         {"env", "ani_env *"},
         {"enm", "ani_enum"},
         {"name", "const char *"},
-        {"result", "ani_enum_item *", "wrong pointer for storing 'ani_enum_item'"},
+        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
 }
@@ -107,9 +107,9 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByName(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"enm", "ani_enum", "wrong reference"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
-        {"result", "ani_enum_item *", "wrong pointer for storing 'ani_enum_item'"},
+        {"enm", "ani_enum", "reference is nullptr"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
 }
@@ -137,7 +137,7 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error_with_wrong_name_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"enm", "ani_enum"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_enum_item *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
@@ -171,7 +171,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_enm_from_local_scope)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(localEnum, "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "wrong reference"},
+        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
     };
@@ -192,7 +192,7 @@ TEST_F(VerifyEnumGetItemByNameTest, cross_thread_enum_ref)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(crossThreadEnum, "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "wrong reference"},
+        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
     };

@@ -55,7 +55,7 @@ TEST_F(PromiseResolverResolveTest, wrong_resolution)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
-        {"resolution", "ani_ref", "wrong reference"},
+        {"resolution", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);
 }
@@ -77,7 +77,7 @@ TEST_F(PromiseResolverResolveTest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"resolver", "ani_resolver", "wrong resolver"},
-        {"resolution", "ani_ref", "wrong reference"},
+        {"resolution", "ani_ref", "reference is nullptr"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);
 }

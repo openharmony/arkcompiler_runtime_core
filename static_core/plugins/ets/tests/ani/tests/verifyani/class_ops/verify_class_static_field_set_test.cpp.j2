@@ -95,8 +95,8 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_class)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
-        {"static_field", "ani_static_field", "wrong class for static field"},
+        {"class", "ani_class", "reference is nullptr"},
+        {"static_field", "ani_static_field", "class is nullptr or invalid while verifying static_field"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -117,7 +117,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_field)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_field", "ani_static_field", "wrong static field"},
+        {"static_field", "ani_static_field", "static_field is nullptr, expected ani_static_field"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -141,7 +141,11 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_wrong_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_field", "ani_static_field", "wrong return type"},
+        {% if type == "ref" %}
+        {"static_field", "ani_static_field", "wrong value type: {{ wrong_ets_type }}, expected: object"},
+        {% else %}
+        {"static_field", "ani_static_field", "wrong value type: {{ wrong_ets_type }}, expected: {{ type }}"},
+        {% endif %}
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -161,7 +165,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_invalid_args
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field"},
-        {"value", "ani_ref", "wrong reference"},
+        {"value", "ani_ref", "reference is nullptr"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticField_{{ Type }}", testLines);

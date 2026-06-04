@@ -46,7 +46,7 @@ TEST_F(AnyGetByValueTest, wrong_ref_null)
     ASSERT_EQ(env_->c_api->Any_GetByValue(env_, nullptr, cls, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference is nullptr"},
         {"key", "ani_ref"},
         {"result", "ani_ref *"},
     };
@@ -65,7 +65,7 @@ TEST_F(AnyGetByValueTest, wrong_key_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "Static types are not supported"},
-        {"key", "ani_ref", "wrong reference"},
+        {"key", "ani_ref", "reference is nullptr"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_GetByValue", testLines);
@@ -83,7 +83,7 @@ TEST_F(AnyGetByValueTest, wrong_result_null)
         {"env", "ani_env *"},
         {"ref", "ani_ref", "Static types are not supported"},
         {"key", "ani_ref"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_GetByValue", testLines);
 

@@ -104,7 +104,7 @@ TEST_F(DestroyEscapeLocalScopeTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DestroyEscapeLocalScope", testLines);
     DestroyEscapeLocalScope();
@@ -117,7 +117,7 @@ TEST_F(DestroyEscapeLocalScopeTest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref", "ani_ref", "wrong reference"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DestroyEscapeLocalScope", testLines);
     DestroyEscapeLocalScope();
@@ -146,7 +146,7 @@ TEST_F(DestroyEscapeLocalScopeTest, invalid_ref_after_destroy_scope)
     ASSERT_EQ(env_->Reference_IsUndefined(ref, &isUndefined), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
@@ -194,7 +194,7 @@ TEST_F(DestroyEscapeLocalScopeTest, call_without_scope_and_wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DestroyEscapeLocalScope", testLines);
 }
@@ -255,7 +255,7 @@ TEST_F(DestroyEscapeLocalScopeTest, call_with_wrong_scope_and_wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DestroyEscapeLocalScope", testLines);
 

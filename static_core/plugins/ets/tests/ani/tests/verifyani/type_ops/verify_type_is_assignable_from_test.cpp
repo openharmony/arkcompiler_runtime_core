@@ -46,7 +46,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_from_type_null)
     ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"from_type", "ani_ref", "wrong reference"},
+        {"from_type", "ani_ref", "reference is nullptr"},
         {"to_type", "ani_ref"},
         {"result", "ani_boolean *"},
     };
@@ -86,7 +86,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_to_type_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"from_type", "ani_ref"},
-        {"to_type", "ani_ref", "wrong reference"},
+        {"to_type", "ani_ref", "reference is nullptr"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_IsAssignableFrom", testLines);
@@ -125,7 +125,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_result_ptr)
         {"env", "ani_env *"},
         {"from_type", "ani_ref"},
         {"to_type", "ani_ref"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_IsAssignableFrom", testLines);
 

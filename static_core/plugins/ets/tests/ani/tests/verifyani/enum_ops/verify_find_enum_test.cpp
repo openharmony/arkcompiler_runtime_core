@@ -46,7 +46,7 @@ TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_null)
     ASSERT_EQ(env_->FindEnum(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"enum_descriptor", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
@@ -58,7 +58,7 @@ TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_invalid)
     ASSERT_EQ(env_->FindEnum("Lverify_find_enum_test/Color;", &result), ANI_INVALID_DESCRIPTOR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_descriptor", "const char *", "invalid enum descriptor"},
+        {"enum_descriptor", "const char *", "enum descriptor is invalid"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
@@ -89,7 +89,7 @@ TEST_F(VerifyFindEnumTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enum_descriptor", "const char *"},
-        {"result", "ani_enum *", "wrong pointer for storing 'ani_enum'"},
+        {"result", "ani_enum *", "nullptr for storing 'ani_enum'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
 }
@@ -99,8 +99,8 @@ TEST_F(VerifyFindEnumTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->FindEnum(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"enum_descriptor", "const char *", "wrong pointer to use as argument in 'const char *'"},
-        {"result", "ani_enum *", "wrong pointer for storing 'ani_enum'"},
+        {"enum_descriptor", "const char *", "argument is nullptr, expected const char *"},
+        {"result", "ani_enum *", "nullptr for storing 'ani_enum'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
 }

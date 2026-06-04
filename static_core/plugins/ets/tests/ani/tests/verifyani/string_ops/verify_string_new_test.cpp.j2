@@ -47,7 +47,7 @@ TEST_F(StringNew{{ Format }}Test, wrong_input_string)
     ASSERT_EQ(env_->c_api->String_New{{ Format }}(env_, nullptr, size_, &res_), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"{{ format }}String", "const {{ type }} *", "wrong pointer to use as argument in 'const {{ type }} *'"},
+        {"{{ format }}String", "const {{ type }} *", "argument is nullptr, expected const {{ type }} *"},
         {"{{ format }}Size", "ani_size"},
         {"result", "ani_string *"},
     };
@@ -61,7 +61,7 @@ TEST_F(StringNew{{ Format }}Test, wrong_res)
         {"env", "ani_env *"},
         {"{{ format }}String", "const {{ type }} *"},
         {"{{ format }}Size", "ani_size"},
-        {"result", "ani_string *", "wrong pointer for storing 'ani_string'"},
+        {"result", "ani_string *", "nullptr for storing 'ani_string'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_New{{ Format }}", testLines);
 }
@@ -71,9 +71,9 @@ TEST_F(StringNew{{ Format }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->String_New{{ Format }}(nullptr, nullptr, size_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"{{ format }}String", "const {{ type }} *", "wrong pointer to use as argument in 'const {{ type }} *'"},
+        {"{{ format }}String", "const {{ type }} *", "argument is nullptr, expected const {{ type }} *"},
         {"{{ format }}Size", "ani_size"},
-        {"result", "ani_string *", "wrong pointer for storing 'ani_string'"},
+        {"result", "ani_string *", "nullptr for storing 'ani_string'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_New{{ Format }}", testLines);
 }

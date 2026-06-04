@@ -25,7 +25,7 @@ TEST_F(WeakReferenceCreateTest, wrong_ref)
     ASSERT_EQ(env_->c_api->WeakReference_Create(env_, nullptr, &wref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "wrong reference"},
+        {"ref", "ani_ref", "reference is nullptr"},
         {"result", "ani_wref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("WeakReference_Create", testLines);
@@ -40,7 +40,7 @@ TEST_F(WeakReferenceCreateTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
-        {"result", "ani_wref *", "wrong pointer for storing 'ani_wref'"},
+        {"result", "ani_wref *", "nullptr for storing 'ani_wref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("WeakReference_Create", testLines);
 

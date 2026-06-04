@@ -54,7 +54,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"tuple_value", "ani_tuple_value", "reference is nullptr"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -67,7 +67,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, expired_local_scope_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference"},
+        {"tuple_value", "ani_tuple_value", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -165,7 +165,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
 }
@@ -175,8 +175,8 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"tuple_value", "ani_tuple_value", "wrong reference"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"tuple_value", "ani_tuple_value", "reference is nullptr"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
 }

@@ -74,7 +74,7 @@ TEST_F(FixedArrayNewRefTest, wrong_type)
     ani_fixedarray_ref result {};
     ASSERT_EQ(env_->FixedArray_New_Ref(nullptr, LENGTH, initialElement, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},           {"type", "ani_ref", "wrong reference"}, {"length", "ani_size"},
+        {"env", "ani_env *"},           {"type", "ani_ref", "reference is nullptr"}, {"length", "ani_size"},
         {"initial_element", "ani_ref"}, {"result", "ani_fixedarray_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_Ref", testLines);
@@ -110,7 +110,7 @@ TEST_F(FixedArrayNewRefTest, wrong_result)
         {"type", "ani_ref"},
         {"length", "ani_size"},
         {"initial_element", "ani_ref"},
-        {"result", "ani_fixedarray_ref *", "wrong pointer for storing 'ani_fixedarray_ref'"},
+        {"result", "ani_fixedarray_ref *", "nullptr for storing 'ani_fixedarray_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_Ref", testLines);
 }

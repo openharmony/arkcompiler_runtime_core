@@ -92,7 +92,7 @@ TEST_F(FunctionalObjectCallTest, wrong_functional_object)
     // clang-format off
     std::vector<TestLineInfo> nullLines {
         {"env", "ani_env *"},
-        {"fn", "ani_fn_object", "wrong reference"},
+        {"fn", "ani_fn_object", "reference is nullptr"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -163,7 +163,7 @@ TEST_F(FunctionalObjectCallTest, wrong_result_storage)
         {"fn", "ani_fn_object"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
-        {"result", "ani_ref *", "wrong pointer for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FunctionalObject_Call", testLines);
 }

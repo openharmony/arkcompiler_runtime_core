@@ -67,7 +67,7 @@ TEST_F(PrimitiveBox{{ Type }}Test, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"value", "ani_{{ type }}"},
-        {"result", "ani_object *", "wrong pointer for storing 'ani_object'"},
+        {"result", "ani_object *", "nullptr for storing 'ani_object'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Box_{{ Type }}", testLines);
 }
@@ -78,7 +78,7 @@ TEST_F(PrimitiveBox{{ Type }}Test, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"value", "ani_{{ type }}"},
-        {"result", "ani_object *", "wrong pointer for storing 'ani_object'"},
+        {"result", "ani_object *", "nullptr for storing 'ani_object'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Box_{{ Type }}", testLines);
 }

@@ -1167,8 +1167,8 @@ NO_UB_SANITIZE static ani_status Array_New(VEnv *venv, ani_size length, VRef *vi
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForSize(length, "length"),
-        ANIArg::MakeForRef(vinitialElement, "initial_element"),
+        ANIArg::MakeForArrayCreateLength(length, "length"),
+        ANIArg::MakeForArrayInitialRef(vinitialElement, "initial_element"),
         ANIArg::MakeForArrayStorage(vresult, "result")
     );
     // clang-format on
@@ -1179,7 +1179,8 @@ NO_UB_SANITIZE static ani_status Array_New(VEnv *venv, ani_size length, VRef *vi
     CHECK_PTR_ARG(vresult);
 
     ani_array result {};
-    ani_status status = GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, vinitialElement->GetRef(), &result);
+    ani_ref initialElement = vinitialElement == nullptr ? nullptr : vinitialElement->GetRef();
+    ani_status status = GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, initialElement, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1191,7 +1192,7 @@ NO_UB_SANITIZE static ani_status Array_Set(VEnv *venv, VArray *varray, ani_size 
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForArray(varray, "array"),
-        ANIArg::MakeForArrayIndex(index, "index"),
+        ANIArg::MakeForSize(index, "index"),
         ANIArg::MakeForRef(vref, "ref")
     );
     // clang-format on
@@ -1209,7 +1210,7 @@ NO_UB_SANITIZE static ani_status Array_Get(VEnv *venv, VArray *varray, ani_size 
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForArray(varray, "array"),
-        ANIArg::MakeForArrayIndex(index, "index"),
+        ANIArg::MakeForSize(index, "index"),
         ANIArg::MakeForRefStorage(vresult, "result")
     );
     // clang-format on
@@ -1812,7 +1813,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, an
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForType(vtype, "type"),
-        ANIArg::MakeForFixedArrayLength(length, "length"),
+        ANIArg::MakeForArrayCreateLength(length, "length"),
         ANIArg::MakeForFixedArrayInitialRef(vinitialElement, "initial_element"),
         ANIArg::MakeForArrayRefStorage(vresult, "result")
     );

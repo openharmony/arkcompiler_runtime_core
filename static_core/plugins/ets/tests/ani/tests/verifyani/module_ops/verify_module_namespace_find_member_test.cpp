@@ -194,7 +194,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
     std::vector<TestLineInfo> functionLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"signature", "const char *"},
         {"result", "ani_function *"},
     };
@@ -205,7 +205,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_variable *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindVariable", variableLines);
@@ -219,7 +219,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_result_storage_is_rejected)
         {"module", "ani_module"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"result", "ani_function *", "wrong pointer for storing 'ani_function'"},
+        {"result", "ani_function *", "nullptr for storing 'ani_function'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", functionLines);
 
@@ -228,7 +228,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_result_storage_is_rejected)
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
         {"name", "const char *"},
-        {"result", "ani_variable *", "wrong pointer for storing 'ani_variable'"},
+        {"result", "ani_variable *", "nullptr for storing 'ani_variable'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindVariable", variableLines);
 }

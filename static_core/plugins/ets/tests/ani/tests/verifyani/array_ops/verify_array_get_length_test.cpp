@@ -53,7 +53,7 @@ TEST_F(ArrayGetLengthTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
 }
@@ -68,7 +68,7 @@ TEST_F(ArrayGetLengthTest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"array", "ani_array"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
 }

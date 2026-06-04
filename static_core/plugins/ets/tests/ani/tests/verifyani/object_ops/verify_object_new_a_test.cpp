@@ -96,7 +96,7 @@ TEST_F(ObjectNewATest, wrong_cls_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "wrong reference"},
+        {"cls", "ani_class", "reference is nullptr"},
         {"ctor", "ani_method", "wrong class for ctor"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
@@ -222,7 +222,7 @@ TEST_F(ObjectNewATest, wrong_result)
         {"env", "ani_env *"},
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
-        {"result", "ani_object *", "wrong pointer for storing 'ani_object'"},
+        {"result", "ani_object *", "nullptr for storing 'ani_object'"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -378,9 +378,9 @@ TEST_F(ObjectNewATest, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"cls", "ani_class", "wrong reference"},
+        {"cls", "ani_class", "reference is nullptr"},
         {"ctor", "ani_method", "wrong ctor"},
-        {"result", "ani_object *", "wrong pointer for storing 'ani_object'"},
+        {"result", "ani_object *", "nullptr for storing 'ani_object'"},
         {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on

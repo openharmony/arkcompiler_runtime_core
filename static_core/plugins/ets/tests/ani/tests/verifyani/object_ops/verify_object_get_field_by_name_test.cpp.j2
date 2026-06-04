@@ -84,7 +84,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference is nullptr"},
         {"name", "const char *", "wrong object for field"},
         {"result", "ani_{{ type }} *"},
     };
@@ -123,7 +123,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"result", "ani_{{ type }} *"},
     };
     // clang-format on
@@ -141,7 +141,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_result)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetFieldByName_{{ Type }}", testLines);
@@ -154,9 +154,9 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "wrong reference"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
-        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+        {"object", "ani_object", "reference is nullptr"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetFieldByName_{{ Type }}", testLines);
@@ -219,7 +219,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *", "wrong object for field"},
         {"result", "ani_{{ type }} *"},
     };

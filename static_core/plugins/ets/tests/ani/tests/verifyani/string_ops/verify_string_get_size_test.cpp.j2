@@ -73,7 +73,7 @@ TEST_F(StringGetUtf8SizeTest, wrong_input_string)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(env_, nullptr, &size_), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference"},
+        {"string", "ani_string", "reference is nullptr"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
@@ -141,7 +141,7 @@ TEST_F(StringGetUtf8SizeTest, wrong_res)
 
         {"env", "ani_env *"},
         {"string", "ani_string"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
 }
@@ -151,8 +151,8 @@ TEST_F(StringGetUtf8SizeTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"string", "ani_string", "wrong reference"},
-        {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
+        {"string", "ani_string", "reference is nullptr"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
 }

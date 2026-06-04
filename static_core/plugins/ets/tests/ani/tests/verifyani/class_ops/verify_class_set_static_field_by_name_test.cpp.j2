@@ -86,7 +86,7 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, wrong_class)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference is nullptr"},
         {"name", "const char *", "wrong class for static field"},
         {"value", "ani_{{ type }}"},
     };
@@ -102,7 +102,7 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -120,10 +120,10 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"class", "ani_class", "wrong reference"},
-        {"name", "const char *", "wrong pointer to use as argument in 'const char *'"},
+        {"class", "ani_class", "reference is nullptr"},
+        {"name", "const char *", "argument is nullptr, expected const char *"},
 {% if type == "ref" %}
-        {"value", "ani_ref", "wrong reference"},
+        {"value", "ani_ref", "reference is nullptr"},
 {% else %}
         {"value", "ani_{{ type }}"},
 {% endif %}
@@ -214,7 +214,7 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, class_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong reference"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
         {"name", "const char *", "wrong class for static field"},
         {"value", "ani_{{ type }}"},
     };
@@ -302,7 +302,7 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, wrong_ref)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"value", "ani_ref", "wrong reference"},
+        {"value", "ani_ref", "reference is nullptr"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_SetStaticFieldByName_Ref", testLines);
