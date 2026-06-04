@@ -6,10 +6,6 @@
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
 
-#29971
-04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
-04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
-
 #34603
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_46.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_47.ets
@@ -155,9 +151,6 @@
 #34934 No error reported on enum initializer with a non-constant expression
 11.enumerations/non_const_initializers_2.ets
 
-#33977
-11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udil_0_0.ets
-
 #33978
 11.enumerations/01.enumeration_base_type/enum_str_1.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_0_0.ets
@@ -170,15 +163,9 @@
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_int1_n_phnacei2_0_0_17.ets
 
 
-#33977
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_uemviie_0_0.ets
-
 #33979
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_byte_0_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_short_0_0.ets
-
-#33981
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_double_uemviie_0_0.ets
 
 #33476
 13.modules_and_namespaces/02.module_header/module_header.ets
