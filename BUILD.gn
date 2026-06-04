@@ -111,13 +111,11 @@ group("ark_host_mac_tools_packages") {
 if (!ark_standalone_build) {
   group("ark_host_ohos_tools_packages") {
     deps = []
-    if (!is_host_product) {
-      if (host_os != "mac") {
-        deps += [ "$ark_root/disassembler:ark_disasm($build_root/toolchain/ohos:ohos_clang_arm64)" ]
-      }
-      foreach(plugin, enabled_plugins) {
-        deps += [ "$ark_root/plugins/$plugin:ark_host_ohos_tools_packages" ]
-      }
+    if (host_os != "mac") {
+      deps += [ "$ark_root/disassembler:ark_disasm($build_root/toolchain/ohos:ohos_clang_arm64)" ]
+    }
+    foreach(plugin, enabled_plugins) {
+      deps += [ "$ark_root/plugins/$plugin:ark_host_ohos_tools_packages" ]
     }
   }
 }
@@ -353,35 +351,33 @@ concat_yamls("concat_inst_templates_yamls") {
 
 group("ark_host_defectscanaux_tools") {
   deps = []
-  if (!is_host_product) {
-    if (host_os == "linux") {
-      deps += [ ":ark_host_linux_defectscanaux_unittest" ]
-      if (host_cpu != "arm64") {
-        deps += [ ":ark_host_win_defectscanaux_unittest" ]
-      }
-    } else if (host_os == "mac") {
-      deps += [ ":ark_host_mac_defectscanaux_unittest" ]
+  if (host_os == "linux") {
+    deps += [ ":ark_host_linux_defectscanaux_unittest" ]
+    if (host_cpu != "arm64") {
+      deps += [ ":ark_host_win_defectscanaux_unittest" ]
     }
+  } else if (host_os == "mac") {
+    deps += [ ":ark_host_mac_defectscanaux_unittest" ]
   }
 }
 
 group("ark_host_linux_defectscanaux_unittest") {
   deps = []
-  if (!is_host_product && host_os == "linux") {
+  if (host_os == "linux") {
     deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo(${host_toolchain})" ]
   }
 }
 
 group("ark_host_win_defectscanaux_unittest") {
   deps = []
-  if (!is_host_product && host_os == "linux") {
+  if (host_os == "linux") {
     deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo($build_root/toolchain/mingw:mingw_x86_64)" ]
   }
 }
 
 group("ark_host_mac_defectscanaux_unittest") {
   deps = []
-  if (!is_host_product && host_os == "mac") {
+  if (host_os == "mac") {
     if (host_cpu == "arm64") {
       deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo($build_root/toolchain/mac:clang_arm64)" ]
     } else {
@@ -392,74 +388,56 @@ group("ark_host_mac_defectscanaux_unittest") {
 
 group("runtime_core_host_unittest") {
   testonly = true
-  deps = []
-  if (!is_host_product) {
+  deps = [
+    "$ark_root/abc2program/tests:host_unittest",
+    "$ark_root/arkplatform/tests:host_unittest",
+    "$ark_root/assembler/tests:host_unittest",
+    "$ark_root/bytecode_optimizer/tests:host_unittest",
+    "$ark_root/compiler/tests:host_unittest",
+    "$ark_root/disassembler/tests:host_unittest",
+    "$ark_root/libark_defect_scan_aux/tests/unittest:host_unittest",
+    "$ark_root/libpandafile/tests:host_unittest",
+    "$ark_root/libziparchive/tests:host_unittest",
+    "$ark_root/platforms/tests:host_unittest",
+    "$ark_root/verifier/tests:host_unittest",
+  ]
+  if (!ark_standalone_build) {
     deps += [
-      "$ark_root/abc2program/tests:host_unittest",
-      "$ark_root/arkplatform/tests:host_unittest",
-      "$ark_root/assembler/tests:host_unittest",
-      "$ark_root/bytecode_optimizer/tests:host_unittest",
-      "$ark_root/compiler/tests:host_unittest",
-      "$ark_root/disassembler/tests:host_unittest",
-      "$ark_root/libark_defect_scan_aux/tests/unittest:host_unittest",
-      "$ark_root/libpandafile/tests:host_unittest",
-      "$ark_root/libziparchive/tests:host_unittest",
-      "$ark_root/platforms/tests:host_unittest",
-      "$ark_root/verifier/tests:host_unittest",
+      "$ark_root/libpandabase/tests:host_unittest",
+      "$ark_root/panda_guard/tests:host_unittest",
     ]
-    if (!ark_standalone_build) {
-      deps += [
-        "$ark_root/libpandabase/tests:host_unittest",
-        "$ark_root/panda_guard/tests:host_unittest",
-      ]
-    }
   }
 }
 
 if (!ark_standalone_build) {
   group("runtime_core_unittest") {
     testonly = true
-    deps = []
-    if (!is_host_product) {
-      deps += [
-        "$ark_root/arkplatform/tests:unittest",
-        "$ark_root/libpandabase/tests:unittest",
-        "$ark_root/libpandafile/tests:unittest",
-        "$ark_root/libziparchive/tests:unittest",
-      ]
-    }
+    deps = [
+      "$ark_root/arkplatform/tests:unittest",
+      "$ark_root/libpandabase/tests:unittest",
+      "$ark_root/libpandafile/tests:unittest",
+      "$ark_root/libziparchive/tests:unittest",
+    ]
   }
 
   group("verifier_host_unittest") {
     testonly = true
-    deps = []
-    if (!is_host_product) {
-      deps += [ "$ark_root/verifier/tests:host_unittest" ]
-    }
+    deps = [ "$ark_root/verifier/tests:host_unittest" ]
   }
 
   group("compiler_host_unittest") {
     testonly = true
-    deps = []
-    if (!is_host_product) {
-      deps += [ "$ark_root/compiler/tests:host_unittest" ]
-    }
+    deps = [ "$ark_root/compiler/tests:host_unittest" ]
   }
 
   group("arkplatform_host_unittest") {
     testonly = true
-    deps = []
-    if (!is_host_product) {
-      deps += [ "$ark_root/arkplatform/tests:host_unittest" ]
-    }
+    deps = [ "$ark_root/arkplatform/tests:host_unittest" ]
   }
 
   group("arkplatform_unittest") {
     testonly = true
-    deps = []
-    if (!is_host_product) {
-      deps += [ "$ark_root/arkplatform/tests:unittest" ]
-    }
+    deps = [ "$ark_root/arkplatform/tests:unittest" ]
   }
 }
 

@@ -473,7 +473,7 @@ _libarkruntime_calculated_external_deps = [
   zlib_dep,
 ]
 
-if (!is_host_product && ark_ets_interop_js) {
+if (ark_ets_interop_js) {
   _libarkruntime_calculated_external_deps += [
     "napi:ace_napi",
     "node:node_header_notice",
@@ -483,7 +483,7 @@ if (!is_host_product && ark_ets_interop_js) {
 _libarkruntime_calculated_defines = []
 _libarkruntime_calculated_include_dirs = []
 
-if (!is_host_product && !ark_standalone_build) {
+if (!ark_standalone_build) {
   _libarkruntime_calculated_external_deps += [ "napi:ace_napi" ]
 }
 
