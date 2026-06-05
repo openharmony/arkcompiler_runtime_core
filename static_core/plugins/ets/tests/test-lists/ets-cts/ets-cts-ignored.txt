@@ -195,12 +195,6 @@
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_1_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_2_0.ets
 
-#33977
-11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udil_0_0.ets
-
-#33978
-11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_2_0.ets
-
 #29683
 11.enumerations/03.initialization_of_enum_members/enum_explicit_type_long_cioomax1_0_0.ets
 
@@ -263,15 +257,9 @@
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_11.ets
 11.enumerations/03.initialization_of_enum_members/enum_implicit_type_str_12.ets
 
-#33977
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_float_uemviie_0_0.ets
-
 #33979
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_byte_0_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_short_0_0.ets
-
-#33981
-11.enumerations/03.initialization_of_enum_members/enum_explicit_type_double_uemviie_0_0.ets
 
 #33476
 13.modules_and_namespaces/02.module_header/module_header.ets
