@@ -29,4 +29,10 @@ collections:
         generator-class: runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler.GTestEtsCompiler
     mock:
         generator-class: runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler.GTestEtsCompiler
-        
+    # #35015
+    # The proxy ANI gtest lives under ets_test_suite/proxy instead of ani/tests,
+    # so its ETS sources are outside the collections scanned above. Without this
+    # entry urunner never compiles proxy_invoke_test.ets, ANI_GTEST_ABC_PATH stays
+    # unset, and the test fails with ANI_NOT_FOUND on FindModule.
+    ets_test_suite/proxy:
+        generator-class: runner.extensions.generators.gtests_ets_compiler.gtests_ets_compiler.GTestEtsCompiler
