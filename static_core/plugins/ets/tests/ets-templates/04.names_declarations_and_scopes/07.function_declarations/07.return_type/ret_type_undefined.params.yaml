@@ -18,21 +18,24 @@ function_decls:
           function foo(): undefined {}
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # function: explicit 'return' — OK
     - decl: |-
           function foo(): undefined { return }
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # function: explicit 'return undefined' — OK
     - decl: |-
           function foo(): undefined { return undefined }
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # function: conditional with return undefined on all paths
     - decl: |-
@@ -43,28 +46,32 @@ function_decls:
           }
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # lambda: empty body — OK per spec foo4
     - decl: |-
           let foo = (): undefined => {}
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # lambda: explicit 'return' — OK
     - decl: |-
           let foo = (): undefined => { return }
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # lambda: explicit 'return undefined' — OK
     - decl: |-
           let foo = (): undefined => { return undefined }
       call: |-
           let v = foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # class instance method: empty body — OK
     - decl: |-
@@ -74,7 +81,8 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # class instance method: explicit 'return' — OK
     - decl: |-
@@ -84,7 +92,8 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # class instance method: explicit 'return undefined' — OK
     - decl: |-
@@ -94,7 +103,8 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # static class method: empty body — OK
     - decl: |-
@@ -103,7 +113,8 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # static class method: explicit 'return undefined' — OK
     - decl: |-
@@ -112,7 +123,8 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # abstract class method: empty body — OK
     - decl: |-
@@ -122,7 +134,8 @@ function_decls:
       call: |-
           let a: A = {}
           let v = a.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)
 
     # interface default method: empty body — OK
     - decl: |-
@@ -133,4 +146,5 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v == undefined)
+          arktest.assertEQ(v, undefined)
+          arktest.assertNE(v, null)

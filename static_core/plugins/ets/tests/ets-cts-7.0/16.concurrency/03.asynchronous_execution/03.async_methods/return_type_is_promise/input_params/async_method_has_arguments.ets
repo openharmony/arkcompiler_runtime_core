@@ -13,6 +13,22 @@
  * limitations under the License.
  */
 
-{% from '16.concurrency/03.asynchronous_execution/async_has_arguments.base.jinja' import generate_complete_test %}
+{% for c in cases %}
+/*---
+desc: >-
+    Async methods can be called as regular methods.
+---*/
 
-{{ generate_complete_test('method') }}
+class AsyncMethodReturnClass {
+    async asyncWithArguments({{c.params}}): Promise<void> {
+    }
+}
+
+async function startTest(){
+    arktest.assertEQ(await new AsyncMethodReturnClass().asyncWithArguments({{c.args}}), undefined)
+}
+
+async function main(): Promise<void> {
+    await startTest()
+}
+{% endfor %}

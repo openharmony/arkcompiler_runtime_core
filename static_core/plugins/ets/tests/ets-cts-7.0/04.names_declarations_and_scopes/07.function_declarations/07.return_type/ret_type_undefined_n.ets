@@ -16,7 +16,7 @@
 {% for fd in function_decls %}
 /*---
 desc: >-
-  Function/method/lambda with return type undefined can't return value.
+  Function/method/lambda with return type undefined can't return a value other than undefined.
 tags: [compile-only, negative]
 expected_out: "{{fd.expected_out}}"
 ---*/

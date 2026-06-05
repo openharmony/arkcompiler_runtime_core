@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-{% for fd in function_decls %}
+{% for c in cases %}
 /*---
-desc: >-
-  An omitted function or method return type can be inferred from the function or the method body.
-tags: [compile-only, negative]
-expected_out: "{{fd.expected_out}}"
+desc: Async functions are implicit coroutines that can be called as regular functions.
 ---*/
 
-{{fd.decl}}
+{{c.decl}}
 
-function main() {
-    {{fd.call|indent}}
+async function startTest() {
+    {{c.use|indent}}
+}
+
+async function main(): Promise<void> {
+    await startTest()
 }
 {% endfor %}

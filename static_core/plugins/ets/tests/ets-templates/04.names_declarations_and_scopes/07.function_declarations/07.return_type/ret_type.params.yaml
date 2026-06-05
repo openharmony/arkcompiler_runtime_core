@@ -209,3 +209,11 @@ function_decls:
           }
       call: |-
           let v = foo<Boolean>();
+#17
+    - decl: |-
+          function foo(): null {
+              return null
+          }
+      call: |-
+          arktest.assertEQ(foo(), null);
+          arktest.assertNE(foo(), undefined);

@@ -15,7 +15,7 @@
 function_decls:
     # function: empty body (no return statement) — OK per spec foo3
     - decl: |-
-          function foo(): undefined {}
+          function foo(): void {}
       call: |-
           let v = foo()
           arktest.assertEQ(v, undefined)
@@ -23,7 +23,7 @@ function_decls:
 
     # function: explicit 'return' — OK
     - decl: |-
-          function foo(): undefined { return }
+          function foo(): void { return }
       call: |-
           let v = foo()
           arktest.assertEQ(v, undefined)
@@ -31,7 +31,7 @@ function_decls:
 
     # function: explicit 'return undefined' — OK
     - decl: |-
-          function foo(): undefined { return undefined }
+          function foo(): void { return undefined }
       call: |-
           let v = foo()
           arktest.assertEQ(v, undefined)
@@ -40,7 +40,7 @@ function_decls:
     # function: conditional with return undefined on all paths
     - decl: |-
           let flag = true
-          function foo(): undefined {
+          function foo(): void {
               if (flag) return undefined
               else return undefined
           }
@@ -51,7 +51,7 @@ function_decls:
 
     # lambda: empty body — OK per spec foo4
     - decl: |-
-          let foo = (): undefined => {}
+          let foo = (): void => {}
       call: |-
           let v = foo()
           arktest.assertEQ(v, undefined)
@@ -59,7 +59,7 @@ function_decls:
 
     # lambda: explicit 'return' — OK
     - decl: |-
-          let foo = (): undefined => { return }
+          let foo = (): void => { return }
       call: |-
           let v = foo()
           arktest.assertEQ(v, undefined)
@@ -67,7 +67,7 @@ function_decls:
 
     # lambda: explicit 'return undefined' — OK
     - decl: |-
-          let foo = (): undefined => { return undefined }
+          let foo = (): void => { return undefined }
       call: |-
           let v = foo()
           arktest.assertEQ(v, undefined)
@@ -76,7 +76,7 @@ function_decls:
     # class instance method: empty body — OK
     - decl: |-
           class A {
-              foo(): undefined {}
+              foo(): void {}
           }
       call: |-
           let a = new A()
@@ -87,7 +87,7 @@ function_decls:
     # class instance method: explicit 'return' — OK
     - decl: |-
           class A {
-              foo(): undefined { return }
+              foo(): void { return }
           }
       call: |-
           let a = new A()
@@ -98,7 +98,7 @@ function_decls:
     # class instance method: explicit 'return undefined' — OK
     - decl: |-
           class A {
-              foo(): undefined { return undefined }
+              foo(): void { return undefined }
           }
       call: |-
           let a = new A()
@@ -109,7 +109,7 @@ function_decls:
     # static class method: empty body — OK
     - decl: |-
           class A {
-              static foo(): undefined {}
+              static foo(): void {}
           }
       call: |-
           let v = A.foo()
@@ -119,7 +119,7 @@ function_decls:
     # static class method: explicit 'return undefined' — OK
     - decl: |-
           class A {
-              static foo(): undefined { return undefined }
+              static foo(): void { return undefined }
           }
       call: |-
           let v = A.foo()
@@ -129,7 +129,7 @@ function_decls:
     # abstract class method: empty body — OK
     - decl: |-
           abstract class A {
-              foo(): undefined {}
+              foo(): void {}
           }
       call: |-
           let a: A = {}
@@ -140,7 +140,7 @@ function_decls:
     # interface default method: empty body — OK
     - decl: |-
           interface I {
-              foo(): undefined {}
+              foo(): void {}
           }
           class A implements I {}
       call: |-

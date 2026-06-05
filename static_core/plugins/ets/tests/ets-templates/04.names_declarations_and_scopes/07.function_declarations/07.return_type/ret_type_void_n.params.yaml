@@ -15,7 +15,7 @@
 function_decls:
     # function: return value
     - decl: |-
-          function foo(): undefined {
+          function foo(): void {
               return 42
           }
       expected_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
@@ -23,7 +23,7 @@ function_decls:
     # function: conditional return value
     - decl: |-
           let flag = true
-          function foo(): undefined {
+          function foo(): void {
               if (flag) return undefined
               else return 42
           }
@@ -31,14 +31,14 @@ function_decls:
 
     # lambda: return value
     - decl: |-
-          let foo = (): undefined => {
+          let foo = (): void => {
               return "abc"
           }
       expected_out: "Semantic error ESE0091: Type '\\\"abc\\\"' is not compatible with the enclosing method's return type 'undefined'"
 
     # lambda: conditional return value
     - decl: |-
-          let foo = (p: int): undefined => {
+          let foo = (p: int): void => {
               if (p > 0) {
                   return undefined;
               }
@@ -49,7 +49,7 @@ function_decls:
     # class instance method: return value
     - decl: |-
           class A {
-              foo(): undefined {
+              foo(): void {
                   return true
               }
           }
@@ -58,7 +58,7 @@ function_decls:
     # class instance method: conditional return value
     - decl: |-
           class A {
-              foo(p: int): undefined {
+              foo(p: int): void {
                   if (p == 0) {
                       return undefined
                   } else if (p > 0) {
@@ -71,7 +71,7 @@ function_decls:
 
     # function: return value, returning null
     - decl: |-
-          function foo(): undefined {
+          function foo(): void {
               return null
           }
       expected_out: "Semantic error ESE0091: Type 'null' is not compatible with the enclosing method's return type 'undefined'"

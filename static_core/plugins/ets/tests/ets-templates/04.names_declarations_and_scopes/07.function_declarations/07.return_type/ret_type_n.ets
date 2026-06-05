@@ -18,7 +18,7 @@
 desc: >-
   An omitted function or method return type can be inferred from the function or the method body.
 tags: [compile-only, negative]
-expected_out: [{{fd.expected_out}}]
+expected_out: "{{fd.expected_out}}"
 ---*/
 
 {{fd.decl}}

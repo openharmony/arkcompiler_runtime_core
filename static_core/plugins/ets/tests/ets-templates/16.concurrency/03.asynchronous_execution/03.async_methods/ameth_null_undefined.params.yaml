@@ -1,0 +1,154 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          async m1(): Promise<undefined> {
+              return undefined;
+          }
+          async m2(): Promise<undefined> {
+              return;
+          }
+          async m3(): Promise<undefined> {
+          }
+          async m4(): Promise<undefined> {
+              return Promise.resolve(undefined);
+          }
+          async m5(): Promise<undefined> {
+              return Promise.resolve();
+          }
+      use: |-
+          arktest.assertEQ(await a.m1(), undefined)
+          arktest.assertEQ(await a.m2(), undefined)
+          arktest.assertEQ(await a.m3(), undefined)
+          arktest.assertEQ(await a.m4(), undefined)
+          arktest.assertEQ(await a.m5(), undefined)
+
+    - decl: |-
+          async m1(): Promise<void> {
+              return;
+          }
+          async m2(): Promise<void> {
+              return undefined;
+          }
+          async m3(): Promise<void> {
+          }
+          async m4(): Promise<void> {
+              return Promise.resolve()
+          }
+          async m5(): Promise<void> {
+              return Promise.resolve(undefined)
+          }
+      use: |-
+          arktest.assertEQ(await a.m1(), undefined)
+          arktest.assertEQ(await a.m2(), undefined)
+          arktest.assertEQ(await a.m3(), undefined)
+          arktest.assertEQ(await a.m4(), undefined)
+          arktest.assertEQ(await a.m5(), undefined)
+
+    - decl: |-
+          async m1(): Promise<null> {
+              return null;
+          }
+          async m2(): Promise<null> {
+              return Promise.resolve(null);
+          }
+      use: |-
+          arktest.assertEQ(await a.m1(), null);
+          arktest.assertEQ(await a.m2(), null);
+
+    - decl: |-
+          async m<T>(value: T): Promise<T|null> {
+              if (value !== "null") {
+                  return value
+              }
+              return null
+          }
+      use: |-
+          arktest.assertEQ(await a.m("Generic!"), "Generic!")
+          arktest.assertEQ(await a.m(27), 27)
+          arktest.assertEQ(await a.m(undefined), undefined)
+          arktest.assertEQ(await a.m(null), null)
+          arktest.assertEQ(await a.m("null"), null)
+
+    - decl: |-
+          async m<T>(value: T): Promise<T|undefined> {
+              if (value !== "undefined") {
+                  return value
+              }
+          }
+      use: |-
+          arktest.assertEQ(await a.m("Generic!"), "Generic!")
+          arktest.assertEQ(await a.m(27), 27)
+          arktest.assertEQ(await a.m(undefined), undefined)
+          arktest.assertEQ(await a.m("undefined"), undefined)
+          arktest.assertEQ(await a.m(null), null)
+
+    - decl: |-
+          async m(p?: string): Promise<string|int|undefined|null> {
+              switch (p) {
+                  case 'string': return 'hello';
+                  case 'int': return 42;
+                  case 'undefined': return undefined;
+                  case 'void': return;
+                  case 'null': return null;
+              }
+          }
+      use: |-
+          let result = await a.m('undefined')
+          arktest.assertEQ(result, undefined)
+
+          result = await a.m('string')
+          arktest.assertEQ(result, 'hello')
+
+          result = await a.m('int');
+          arktest.assertEQ(result, 42)
+
+          result = await a.m('void');
+          arktest.assertEQ(result, undefined)
+
+          result = await a.m('null');
+          arktest.assertEQ(result, null)
+
+          result = await a.m();
+          arktest.assertEQ(result, undefined)
+
+    - decl: |-
+          async m(p?: string): Promise<string|int|undefined|null> {
+              switch (p) {
+                  case 'string': return Promise.resolve('hello');
+                  case 'int': return Promise.resolve(42);
+                  case 'undefined': return Promise.resolve(undefined);
+                  case 'void': return Promise.resolve();
+                  case 'null': return Promise.resolve(null);
+              }
+          }
+      use: |-
+          let result = await a.m('undefined')
+          arktest.assertEQ(result, undefined)
+
+          result = await a.m('string')
+          arktest.assertEQ(result, 'hello')
+
+          result = await a.m('int');
+          arktest.assertEQ(result, 42)
+
+          result = await a.m('void');
+          arktest.assertEQ(result, undefined)
+
+          result = await a.m('null');
+          arktest.assertEQ(result, null)
+
+          result = await a.m();
+          arktest.assertEQ(result, undefined)

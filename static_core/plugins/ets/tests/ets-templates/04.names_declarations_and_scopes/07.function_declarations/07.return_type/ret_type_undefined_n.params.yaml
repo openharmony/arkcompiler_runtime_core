@@ -18,7 +18,7 @@ function_decls:
           function foo(): undefined {
               return 42
           }
-      expected_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"    
+      expected_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
 
     # function: conditional return value
     - decl: |-
@@ -27,14 +27,14 @@ function_decls:
               if (flag) return undefined
               else return 42
           }
-      expected_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"    
+      expected_out: "Semantic error ESE0091: Type 'Int' is not compatible with the enclosing method's return type 'undefined'"
 
     # lambda: return value
     - decl: |-
           let foo = (): undefined => {
               return "abc"
           }
-      expected_out: "Semantic error ESE0091: Type '\\\"abc\\\"' is not compatible with the enclosing method's return type 'undefined'"    
+      expected_out: "Semantic error ESE0091: Type '\\\"abc\\\"' is not compatible with the enclosing method's return type 'undefined'"
 
     # lambda: conditional return value
     - decl: |-
@@ -44,7 +44,7 @@ function_decls:
               }
               return "abc"
           }
-      expected_out: "Semantic error ESE0091: Type '\\\"abc\\\"' is not compatible with the enclosing method's return type 'undefined'"    
+      expected_out: "Semantic error ESE0091: Type '\\\"abc\\\"' is not compatible with the enclosing method's return type 'undefined'"
 
     # class instance method: return value
     - decl: |-
@@ -53,7 +53,7 @@ function_decls:
                   return true
               }
           }
-      expected_out: "Semantic error ESE0091: Type 'Boolean' is not compatible with the enclosing method's return type 'undefined'"    
+      expected_out: "Semantic error ESE0091: Type 'Boolean' is not compatible with the enclosing method's return type 'undefined'"
 
     # class instance method: conditional return value
     - decl: |-
@@ -67,4 +67,11 @@ function_decls:
                   return undefined
               }
           }
-      expected_out: "Semantic error ESE0091: Type 'Double' is not compatible with the enclosing method's return type 'undefined'"    
+      expected_out: "Semantic error ESE0091: Type 'Double' is not compatible with the enclosing method's return type 'undefined'"
+
+    # function: return value, returning null
+    - decl: |-
+          function foo(): undefined {
+              return null
+          }
+      expected_out: "Semantic error ESE0091: Type 'null' is not compatible with the enclosing method's return type 'undefined'"
