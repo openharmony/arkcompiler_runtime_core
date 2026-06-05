@@ -2042,7 +2042,7 @@ void ClassLinker::RemoveCreatedClassInExtension(Class *klass)
 void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const compiler::AotPandaFile *aotPfile,
                                           panda_file::SourceLang language)
 {
-    if (!this->CanLinkAotEntrypoints()) {
+    if (!CanLinkAotEntrypoints()) {
         return;
     }
 
