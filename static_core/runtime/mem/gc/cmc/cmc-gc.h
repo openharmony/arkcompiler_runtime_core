@@ -146,12 +146,12 @@ public:
         UpdateReadBarrierEntrypointInMutator<false>(thread);
     }
 
-    void EnablePreWriteBarrier(ark::ManagedThread *thread)
+    void EnablePreWriteBarrier(ark::Mutator *thread)
     {
         UpdatePreWriteBarrierEntrypointInMutator<true>(thread);
     }
 
-    void DisablePreWriteBarrier(ark::ManagedThread *thread)
+    void DisablePreWriteBarrier(ark::Mutator *thread)
     {
         UpdatePreWriteBarrierEntrypointInMutator<false>(thread);
     }
@@ -163,7 +163,6 @@ public:
     {
         HeapBitmapManager::GetHeapBitmapManager().InitializeHeapBitmap();
         DCHECK(GetGCPhase() == ark::common_vm::GC_PHASE_IDLE);
-        Heap::GetHeap().InstallBarrier(ark::common_vm::GC_PHASE_IDLE);
 #ifdef PANDA_TARGET_32
         // cmc is not adapted for 32-bit systems
         gcMode_ = GCMode::STW;
@@ -308,12 +307,20 @@ public:
 
     void ReclaimGarbageMemory(ark::common_vm::GCReason reason);
 
-    void TransitionToGCPhase(const ark::common_vm::GCPhase phase, const bool)
+    void TransitionToGCPhase(const ark::common_vm::GCPhase phase)
     {
+        ASSERT(ark::common_vm::MutatorManager::Instance().WorldStopped());
         using ark::common_vm::GCListener;
         const auto currentPhase = Heap::GetHeap().GetGCPhase();
         NotifyGCListeners([currentPhase](GCListener *l) { l->OnGCPhaseEnd(currentPhase); });
-        ark::common_vm::MutatorManager::Instance().TransitionAllMutatorsToGCPhase(phase);
+        SetGCPhase(phase);
+        LOG(DEBUG, GC) << "transition gc phase: " << Collector::GetGCPhaseName(currentPhase) << "(" << currentPhase
+                       << ") -> " << Collector::GetGCPhaseName(phase) << "(" << phase << ")";
+        ark::common_vm::MutatorManager::Instance().VisitAllMutators([this, phase](ark::common_vm::Mutator &mutator) {
+            mutator.HandleGCPhase(phase);
+            mutator.SetMutatorPhase(phase);
+            UpdateBarrierEntrypoint(&mutator, phase);
+        });
         NotifyGCListeners([phase](GCListener *l) { l->OnGCPhaseStart(phase); });
     }
 
@@ -383,6 +390,11 @@ public:
         // Atomic with release order reason: data race with gcPhase_ with dependecies on writes before the store
         gcPhase_.store(phase, std::memory_order_release);
     }
+
+    void UpdateBarrierEntrypoint(ark::common_vm::Mutator *mutator, ark::common_vm::GCPhase phase);
+    void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
+                            mem::BuffersKeepingFlag keepBuffers) override;
+    void OnMutatorCreate(Mutator *mutator) override;
 
 protected:
     void CollectLargeGarbage()
@@ -498,7 +510,7 @@ private:
     }
 
     template <bool ENABLE_BARRIER>
-    void UpdatePreWriteBarrierEntrypointInMutator(ark::ManagedThread *thread)
+    void UpdatePreWriteBarrierEntrypointInMutator(ark::Mutator *thread)
     {
         ark::mem::ObjRefProcessFunc entrypointFunc = nullptr;
 
@@ -535,7 +547,7 @@ private:
         reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_).PrepareMarking();
 
         COMMON_PHASE_TIMER("enum roots & update old pointers within");
-        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_ENUM, true);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_ENUM);
 
         rootsVisitFunc(visitor);
     }

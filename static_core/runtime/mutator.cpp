@@ -435,33 +435,6 @@ void Mutator::VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor)
     });
 }
 
-void Mutator::UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase)
-{
-    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
-    auto *gc = static_cast<ark::mem::CmcGC<EtsLanguageConfig> *>(vm->GetGC());
-    auto *managedThread = ManagedThread::CastFromMutator(this);
-    if (phase >= ark::common_vm::GCPhase::GC_PHASE_ENUM && phase < ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK) {
-        gc->EnablePreWriteBarrier(managedThread);
-    } else if (phase >= ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK &&
-               phase < ark::common_vm::GCPhase::GC_PHASE_PRECOPY) {
-        gc->DisablePreWriteBarrier(managedThread);
-    } else if (phase >= ark::common_vm::GCPhase::GC_PHASE_PRECOPY &&
-               phase < ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
-        gc->EnableReadBarrier(managedThread);
-    } else if (phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY) {
-        gc->EnablePreWriteBarrier(managedThread);
-    } else if (phase == ark::common_vm::GCPhase::GC_PHASE_IDLE) {
-        gc->DisableReadBarrier(managedThread);
-    }
-    // Check if a new phase has been added
-    ASSERT(phase == ark::common_vm::GCPhase::GC_PHASE_ENUM || phase == ark::common_vm::GCPhase::GC_PHASE_MARK ||
-           phase == ark::common_vm::GCPhase::GC_PHASE_PRECOPY || phase == ark::common_vm::GCPhase::GC_PHASE_COPY ||
-           phase == ark::common_vm::GCPhase::GC_PHASE_FIX || phase == ark::common_vm::GCPhase::GC_PHASE_IDLE ||
-           phase == ark::common_vm::GCPhase::GC_PHASE_POST_MARK ||
-           phase == ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK ||
-           phase == ark::common_vm::GCPhase::GC_PHASE_REMARK_SATB ||
-           phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY);
-}
 #endif
 
 void Mutator::MakeTSANHappyForThreadState()

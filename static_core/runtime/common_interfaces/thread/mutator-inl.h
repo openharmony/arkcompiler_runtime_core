@@ -73,11 +73,6 @@ inline bool Mutator::IsInRunningState() const
 
 inline void Mutator::SetSuspensionFlag(ark::MutatorFlag flag)
 {
-    if (flag == ark::GC_PHASE_TRANSITION_REQUEST) {
-        // Atomic with relaxed order reason: data race with transitionState_ with no synchronization or ordering
-        // constraints imposed on other reads or writes
-        transitionState_.store(NEED_TRANSITION, std::memory_order_relaxed);
-    }
     static_cast<ark::Mutator *>(this)->SetFlag(flag);
 }
 

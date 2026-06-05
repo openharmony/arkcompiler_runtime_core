@@ -135,7 +135,7 @@ public:
     void VisitAllMutators(MutatorVisitor func, bool ignoreFinalizer = false);
 
     // Some functions about stw
-    void StopTheWorld(bool syncGCPhase, GCPhase phase) ACQUIRE(stwMutex_);
+    void StopTheWorld(GCPhase phase) ACQUIRE(stwMutex_);
     void StartTheWorld() noexcept RELEASE(stwMutex_);
     void DumpMutators(uint32_t timeoutTimes);
     void DemandSuspensionForStw()
@@ -178,9 +178,6 @@ public:
     {
         stwMutex_.Unlock();
     }
-
-    void EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &undoneMutators);
-    void TransitionAllMutatorsToGCPhase(GCPhase phase) NO_THREAD_SAFETY_ANALYSIS;
 
     template <class STWFunction>
     void FlipMutators(STWParam &param, STWFunction &&stwFunction, FlipFunction *flipFunction);
@@ -297,12 +294,11 @@ private:
 // Scoped stop the world.
 class ScopedStopTheWorld {
 public:
-    __attribute__((always_inline)) explicit ScopedStopTheWorld(STWParam &param, bool syncGCPhase = false,
-                                                               GCPhase phase = GC_PHASE_IDLE)
+    __attribute__((always_inline)) explicit ScopedStopTheWorld(STWParam &param, GCPhase phase = GC_PHASE_IDLE)
         : stwParam_(param)
     {
         reason_ = param.stwReason;
-        MutatorManager::Instance().StopTheWorld(syncGCPhase, phase);
+        MutatorManager::Instance().StopTheWorld(phase);
         startTime_ = TimeUtil::NanoSeconds();
     }
 

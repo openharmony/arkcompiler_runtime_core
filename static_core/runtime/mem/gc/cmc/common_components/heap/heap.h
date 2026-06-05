@@ -21,7 +21,6 @@
 
 #include "common_components/base/immortal_wrapper.h"
 #include "common_components/common/type_def.h"
-#include "common_components/heap/barrier/barrier.h"
 #include "common_components/heap/collector/collector.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_interfaces/base/runtime_param.h"
@@ -65,20 +64,6 @@ public:
         UNREACHABLE();
     }
     static Heap &GetHeap();
-    static Barrier &GetBarrier()
-    {
-        // Atomic with relaxed order reason: data race with currentBarrierPtr_ with no synchronization or ordering
-        // constraints imposed on other reads or writes
-        return *currentBarrierPtr_->load(std::memory_order_relaxed);
-    }
-
-    // concurrent gc uses barrier to access heap.
-    static bool UseBarrier()
-    {
-        // Atomic with relaxed order reason: data race with currentBarrierPtr_ with no synchronization or ordering
-        // constraints imposed on other reads or writes
-        return currentBarrierPtr_->load(std::memory_order_relaxed) != stwBarrierPtr_;
-    }
 
     // should be removed after HeapParam is supported
     virtual void Init(const RuntimeParam &param) = 0;
@@ -207,8 +192,6 @@ public:
         return IsHeapAddress(reinterpret_cast<HeapAddress>(addr));
     }
 
-    virtual void InstallBarrier(const GCPhase) = 0;
-
     virtual GCPhase GetGCPhase() const = 0;
 
     virtual void SetGCPhase(const GCPhase phase) = 0;
@@ -244,8 +227,7 @@ public:
     }
 
     virtual ~Heap() {}
-    static std::atomic<Barrier *> *currentBarrierPtr_;  // record ptr for fast access
-    static Barrier *stwBarrierPtr_;                     // record nonGC barrier
+
     static HeapAddress heapStartAddr_;
     static HeapAddress heapCurrentEnd_;
 };  // class Heap

@@ -121,23 +121,6 @@ public:
         return transitionState_.load(std::memory_order_acquire) == FINISH_TRANSITION;
     }
 
-    // Spin wait phase transition finished when GC is tranverting this mutator's phase
-    __attribute__((always_inline)) inline void WaitForPhaseTransition() const
-    {
-        // Atomic with acquire order reason: data race with transitionState_ with dependecies on reads after the load
-        GCPhaseTransitionState state = transitionState_.load(std::memory_order_acquire);
-        while (state != FINISH_TRANSITION) {
-            if (state != IN_TRANSITION) {
-                return;
-            }
-            // Give up CPU to avoid overloading
-            (void)sched_yield();
-            // Atomic with acquire order reason: data race with transitionState_ with dependecies on reads after
-            // the load
-            state = transitionState_.load(std::memory_order_acquire);
-        }
-    }
-
     __attribute__((always_inline)) inline void SetSuspensionFlag(ark::MutatorFlag flag);
 
     __attribute__((always_inline)) inline void ClearSuspensionFlag(ark::MutatorFlag flag);
@@ -183,11 +166,7 @@ public:
     void GCPhasePreForward(GCPhase newPhase);
     void HandleGCPhase(GCPhase newPhase);
 
-    // Ensure that mutator phase is changed only once by mutator itself or GC
-    bool TransitionGCPhase(bool bySelf);
-
     virtual void VisitMutatorRoots(const RefFieldVisitor &visitor);
-    virtual void UpdateBarrierEntrypoint(ark::common_vm::GCPhase phase);
 
     void DumpMutator() const;
 
@@ -202,8 +181,6 @@ public:
     {
         flipFunction_ = flipFunction;
     }
-
-    void TransitionToGCPhaseExclusive(GCPhase newPhase);
 
     bool TryRunFlipFunction();
 
@@ -258,9 +235,6 @@ public:
         return obj;
     }
 
-    // Register an externally constructed mutator (e.g. when ark::Mutator inherits ark::common_vm::Mutator)
-    static void RegisterNewMutator(Mutator *mutator);
-
     __attribute__((always_inline)) inline bool IsInRunningState() const;
 
     // Thread must be binded mutator before to allocate. Otherwise it cannot allocate heap object in this thread.
@@ -276,8 +250,6 @@ public:
     }
 
     void ReleaseAllocBuffer();
-
-    static void UnregisterMutator(Mutator *mutator);
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
     class TryBindMutatorScope {

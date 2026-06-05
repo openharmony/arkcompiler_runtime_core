@@ -253,7 +253,6 @@ public:
 
     bool IsReadBarrierEnabled() override;
 
-    void *ReadBarrier(const void *objAddr, size_t offset) override;
     void *AtomicReadBarrier(const void *objAddr, size_t offset, std::memory_order order) override;
 
     void *ReadBarrier(void **refAddr) override;

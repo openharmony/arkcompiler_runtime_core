@@ -220,28 +220,6 @@ void BaseRuntime::NotifyWarmStart()
     }
 }
 
-void BaseRuntime::PreWriteBarrier(void *preVal, Mutator *mutator)
-{
-    Heap::GetBarrier().PreWriteBarrier(mutator, reinterpret_cast<BaseObject *>(preVal));
-}
-
-void *BaseRuntime::ReadBarrier(void *obj, void *field)
-{
-    return reinterpret_cast<void *>(Heap::GetBarrier().ReadRefField(reinterpret_cast<BaseObject *>(obj),
-                                                                    *reinterpret_cast<RefField<false> *>(field)));
-}
-
-void *BaseRuntime::ReadBarrier(void **field)
-{
-    return reinterpret_cast<void *>(Heap::GetBarrier().ReadStaticRef(reinterpret_cast<RefField<false> &>(*field)));
-}
-
-void *BaseRuntime::AtomicReadBarrier(void *obj, void *field, std::memory_order order)
-{
-    return reinterpret_cast<void *>(Heap::GetBarrier().AtomicReadRefField(
-        reinterpret_cast<BaseObject *>(obj), *reinterpret_cast<RefField<true> *>(field), order));
-}
-
 void BaseRuntime::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
 {
     if (reason < GC_REASON_BEGIN || reason > GC_REASON_END || gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {

@@ -27,6 +27,7 @@
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/heap/region_desc.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {
@@ -263,19 +264,35 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
     updatedRefsQueue_->push_back(card);
 }
 
-extern "C" void *ReadBarrierFuncEntrypoint(ObjectPointerType *fieldPtr)
+extern "C" void *ReadBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType *fieldPtr)
 {
-    if constexpr (GCCMCBarrierSet::USE_READ_BARRIERS) {
-        // The object that owns the field is unknown here
-        return ark::common_vm::BaseRuntime::ReadBarrier(nullptr, fieldPtr);
-    }
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto *gc = static_cast<ark::mem::CmcGC<EtsLanguageConfig> *>(Mutator::GetCurrent()->GetVM()->GetGC());
+    auto &field = reinterpret_cast<ark::mem::RefField<false> &>(*fieldPtr);
+    do {
+        auto *targetObj = field.GetTargetObject();
+        if (LIKELY(!gc->IsFromObject(targetObj))) {
+            return targetObj;
+        }
+
+        ark::common_vm::BaseObject *toObj = nullptr;
+        if (gc->TryForwardRefField(nullptr, field, toObj)) {
+            return toObj;
+        }
+    } while (true);
+#else
+    UNREACHABLE();
     return nullptr;
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 extern "C" void PreWriteBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType preVal)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::BaseRuntime::PreWriteBarrier(reinterpret_cast<void *>(preVal), Mutator::GetCurrent());
+    if (preVal != 0) {
+        Mutator::GetCurrent()->RememberObjectInSatbBuffer(reinterpret_cast<ark::common_vm::BaseObject *>(preVal));
+        LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << preVal;
+    }
 #endif
 }
 
@@ -347,21 +364,14 @@ bool GCCMCBarrierSet::IsReadBarrierEnabled()
     return Mutator::GetCurrent()->GetReadBarrierEntrypoint() != nullptr;
 }
 
-void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
-{
-    if constexpr (USE_READ_BARRIERS) {
-        return ark::common_vm::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr),
-                                                        ToVoidPtr(ToUintPtr(objAddr) + offset));
-    }
-    return nullptr;
-}
-
 void *GCCMCBarrierSet::AtomicReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                          [[maybe_unused]] std::memory_order order)
 {
     if constexpr (USE_READ_BARRIERS) {
-        return ark::common_vm::BaseRuntime::AtomicReadBarrier(const_cast<void *>(objAddr),
-                                                              ToVoidPtr(ToUintPtr(objAddr) + offset), order);
+        auto *fieldPtr = reinterpret_cast<ObjectPointerType *>(ToUintPtr(objAddr) + offset);
+        auto &atomicField = reinterpret_cast<ark::mem::RefField<true> &>(*fieldPtr);
+        ark::mem::RefField<false> tmpField(atomicField.GetFieldValue(order));
+        return ReadBarrier(reinterpret_cast<void **>(&tmpField));
     }
     return nullptr;
 }
