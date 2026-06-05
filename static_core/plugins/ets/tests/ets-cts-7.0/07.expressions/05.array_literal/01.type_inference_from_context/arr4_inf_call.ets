@@ -24,8 +24,8 @@ type F = (p: Color) => int
 function main(): int {
     let suite = new arktest.ArkTestsuite("arr4_inf_call")
 
-    suite.addTest("FixedArray<Array<int>>", () => {
-        let verify = (a: FixedArray<Array<int>>) => {
+    suite.addTest("Array<Array<int>>", () => {
+        let verify = (a: Array<Array<int>>) => {
             arktest.assertEQ(a.length, 4)
             arktest.assertEQ(a[0][0], -2147483647)
             arktest.assertEQ(a[2][2], 2147483647)
@@ -33,8 +33,8 @@ function main(): int {
         verify([[-2147483647, 2, ], [3, ], [2 + 2, 5, 2147483646 + 1, ], [], ])
     })
 
-    suite.addTest("FixedArray<int[]>", () => {
-        let verify = (a: FixedArray<int[]>) => {
+    suite.addTest("Array<int[]>", () => {
+        let verify = (a: Array<int[]>) => {
             arktest.assertEQ(a.length, 4)
             arktest.assertEQ(a[0][0], -2147483647)
             arktest.assertEQ(a[2][2], 2147483647)
@@ -60,8 +60,8 @@ function main(): int {
         verify([[-2147483647, 2, ], [3, ], [2 + 2, 5, 2147483646 + 1, ], [], ])
     })
 
-    suite.addTest("FixedArray<Array<number>>", () => {
-        let verify = (a: FixedArray<Array<number>>) => {
+    suite.addTest("Array<Array<number>>", () => {
+        let verify = (a: Array<Array<number>>) => {
             arktest.assertEQ(a.length, 4)
             arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
             arktest.assertEQ(a[2][2], 6.0)
@@ -69,8 +69,8 @@ function main(): int {
         verify([[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ])
     })
 
-    suite.addTest("FixedArray<number[]>", () => {
-        let verify = (a: FixedArray<number[]>) => {
+    suite.addTest("Array<number[]>", () => {
+        let verify = (a: Array<number[]>) => {
             arktest.assertEQ(a.length, 4)
             arktest.assertEQ(a[0][0], 1.7976931348623157e+308)
             arktest.assertEQ(a[2][2], 6.0)
@@ -96,9 +96,9 @@ function main(): int {
         verify([[1.7976931348623157e+308, 2, ], [3, ], [4, 5, 6, ], [], ])
     })
 
-    suite.addTest("FixedArray<Array<string>>", () => {
+    suite.addTest("Array<Array<string>>", () => {
         let s = '1'
-        let verify = (a: FixedArray<Array<string>>) => {
+        let verify = (a: Array<Array<string>>) => {
             arktest.assertEQ(a[0][0], '1')
             arktest.assertEQ(a[0][1], '11')
             arktest.assertEQ(a[1][0], '')
@@ -108,9 +108,9 @@ function main(): int {
         verify([[s, s + s,], ['', '-9223372036854775808',], ])
     })
 
-    suite.addTest("FixedArray<string[]>", () => {
+    suite.addTest("Array<string[]>", () => {
         let s = '1'
-        let verify = (a: FixedArray<string[]>) => {
+        let verify = (a: Array<string[]>) => {
             arktest.assertEQ(a[0][0], '1')
             arktest.assertEQ(a[0][1], '11')
             arktest.assertEQ(a[1][0], '')
@@ -144,8 +144,8 @@ function main(): int {
         verify([[s, s + s,], ['', '-9223372036854775808',], ])
     })
 
-    suite.addTest("FixedArray<Array<bigint>>", () => {
-        let verify = (a: FixedArray<Array<bigint>>) => {
+    suite.addTest("Array<Array<bigint>>", () => {
+        let verify = (a: Array<Array<bigint>>) => {
             arktest.assertEQ(a[0][0], 11111111111111111111111111111111111111111111111n)
             arktest.assertEQ(a[2][0], 33333333333333333333333333333333333333333333333333n)
             arktest.assertEQ(a.length, 3)
@@ -153,8 +153,8 @@ function main(): int {
         verify([[11111111111111111111111111111111111111111111111n], [2n], [33333333333333333333333333333333333333333333333333n]])
     })
 
-    suite.addTest("FixedArray<bigint[]>", () => {
-        let verify = (a: FixedArray<bigint[]>) => {
+    suite.addTest("Array<bigint[]>", () => {
+        let verify = (a: Array<bigint[]>) => {
             arktest.assertEQ(a[0][0], 11111111111111111111111111111111111111111111111n)
             arktest.assertEQ(a[2][0], 33333333333333333333333333333333333333333333333333n)
             arktest.assertEQ(a.length, 3)
@@ -180,8 +180,8 @@ function main(): int {
         verify([[11111111111111111111111111111111111111111111111n], [2n], [33333333333333333333333333333333333333333333333333n]])
     })
 
-    suite.addTest("FixedArray<Array<Any>>", () => {
-        let verify = (a: FixedArray<Array<Any>>) => {
+    suite.addTest("Array<Array<Any>>", () => {
+        let verify = (a: Array<Array<Any>>) => {
             arktest.assertEQ(a[0][0] as string,  "a")
             arktest.assertEQ(a[0][1] as int,  1)
             arktest.assertEQ(a[0][2] as boolean,  true)
@@ -193,8 +193,8 @@ function main(): int {
         verify([["a", 1, true, 2n, null, undefined]])
     })
 
-    suite.addTest("FixedArray<Any[]>", () => {
-        let verify = (a: FixedArray<Any[]>) => {
+    suite.addTest("Array<Any[]>", () => {
+        let verify = (a: Array<Any[]>) => {
             arktest.assertEQ(a[0][0] as string,  "a")
             arktest.assertEQ(a[0][1] as int,  1)
             arktest.assertEQ(a[0][2] as boolean,  true)
@@ -232,8 +232,8 @@ function main(): int {
         verify([["a", 1, true, 2n, null, undefined]])
     })
 
-    suite.addTest("FixedArray<Array<Color>>", () => {
-        let verify = (a: FixedArray<Array<Color>>) => {
+    suite.addTest("Array<Array<Color>>", () => {
+        let verify = (a: Array<Array<Color>>) => {
             arktest.assertEQ(a[0][0], Color.Red)
             arktest.assertEQ(a[0][1], Color.Blue)
             arktest.assertEQ(a.length, 1)
@@ -241,8 +241,8 @@ function main(): int {
         verify([[Color.Red, Color.Blue]])
     })
 
-    suite.addTest("FixedArray<Color[]>", () => {
-        let verify = (a: FixedArray<Color[]>) => {
+    suite.addTest("Array<Color[]>", () => {
+        let verify = (a: Array<Color[]>) => {
             arktest.assertEQ(a[0][0], Color.Red)
             arktest.assertEQ(a[0][1], Color.Blue)
             arktest.assertEQ(a.length, 1)
@@ -268,8 +268,8 @@ function main(): int {
         verify([[Color.Red, Color.Blue]])
     })
 
-    suite.addTest("FixedArray<Array<F>>", () => {
-        let verify = (a: FixedArray<Array<F>>) => {
+    suite.addTest("Array<Array<F>>", () => {
+        let verify = (a: Array<Array<F>>) => {
             arktest.assertEQ(a[0][0](Color.Red), 0)
             arktest.assertEQ(a[1][0](Color.Red), 1)
             arktest.assertEQ(a[2][0](Color.Blue), 4)
@@ -278,8 +278,8 @@ function main(): int {
         verify([[(p: Color): int => p.valueOf()], [(p: Color): int => p.valueOf() + 1], [(p: Color): int => p.valueOf() + 2]])
     })
 
-    suite.addTest("FixedArray<F[]>", () => {
-        let verify = (a: FixedArray<F[]>) => {
+    suite.addTest("Array<F[]>", () => {
+        let verify = (a: Array<F[]>) => {
             arktest.assertEQ(a[0][0](Color.Red), 0)
             arktest.assertEQ(a[1][0](Color.Red), 1)
             arktest.assertEQ(a[2][0](Color.Blue), 4)
@@ -288,8 +288,8 @@ function main(): int {
         verify([[(p: Color): int => p.valueOf()], [(p: Color): int => p.valueOf() + 1], [(p: Color): int => p.valueOf() + 2]])
     })
 
-    suite.addTest("Array<FixedArray<F>>", () => {
-        let verify = (a: Array<FixedArray<F>>) => {
+    suite.addTest("Array<Array<F>>", () => {
+        let verify = (a: Array<Array<F>>) => {
             arktest.assertEQ(a[0][0](Color.Red), 0)
             arktest.assertEQ(a[1][0](Color.Red), 1)
             arktest.assertEQ(a[2][0](Color.Blue), 4)
@@ -298,8 +298,8 @@ function main(): int {
         verify([[(p: Color): int => p.valueOf()], [(p: Color): int => p.valueOf() + 1], [(p: Color): int => p.valueOf() + 2]])
     })
 
-    suite.addTest("FixedArray<F>[]", () => {
-        let verify = (a: FixedArray<F>[]) => {
+    suite.addTest("Array<F>[]", () => {
+        let verify = (a: Array<F>[]) => {
             arktest.assertEQ(a[0][0](Color.Red), 0)
             arktest.assertEQ(a[1][0](Color.Red), 1)
             arktest.assertEQ(a[2][0](Color.Blue), 4)
@@ -308,8 +308,8 @@ function main(): int {
         verify([[(p: Color): int => p.valueOf()], [(p: Color): int => p.valueOf() + 1], [(p: Color): int => p.valueOf() + 2]])
     })
 
-    suite.addTest("FixedArray<Array<boolean|int|string|null>>", () => {
-        let verify = (a: FixedArray<Array<boolean|int|string|null>>) => {
+    suite.addTest("Array<Array<boolean|int|string|null>>", () => {
+        let verify = (a: Array<Array<boolean|int|string|null>>) => {
             arktest.assertEQ(a[0][0], true)
             arktest.assertEQ(a[0][1], 1)
             arktest.assertEQ(a[0][2], 'a')
@@ -319,8 +319,8 @@ function main(): int {
         verify([[true, 1, 'a', null]])
     })
 
-    suite.addTest("FixedArray<(boolean|int|string|null)[]>", () => {
-        let verify = (a: FixedArray<(boolean|int|string|null)[]>) => {
+    suite.addTest("Array<(boolean|int|string|null)[]>", () => {
+        let verify = (a: Array<(boolean|int|string|null)[]>) => {
             arktest.assertEQ(a[0][0], true)
             arktest.assertEQ(a[0][1], 1)
             arktest.assertEQ(a[0][2], 'a')
@@ -352,9 +352,9 @@ function main(): int {
         verify([[true, 1, 'a', null]])
     })
 
-    suite.addTest("FixedArray<Array<Number|Error|((p: string)=>string)|Boolean>>", () => {
+    suite.addTest("Array<Array<Number|Error|((p: string)=>string)|Boolean>>", () => {
         let e = new Error
-        let verify = (a: FixedArray<Array<Number|Error|((p: string)=>string)|Boolean>>) => {
+        let verify = (a: Array<Array<Number|Error|((p: string)=>string)|Boolean>>) => {
             arktest.assertEQ(a[0][0] as Error, e)
             arktest.assertEQ(a[1][0] as Boolean, false)
             arktest.assertEQ((a[2][0] as ((p: string) => string))('a'), 'aa')
@@ -364,9 +364,9 @@ function main(): int {
         verify([[e], [false], [(p: string): string => p + p], [42]])
     })
 
-    suite.addTest("FixedArray<(Number|Error|((p: string)=>string)|Boolean)[]>", () => {
+    suite.addTest("Array<(Number|Error|((p: string)=>string)|Boolean)[]>", () => {
         let e = new Error
-        let verify = (a: FixedArray<(Number|Error|((p: string)=>string)|Boolean)[]>) => {
+        let verify = (a: Array<(Number|Error|((p: string)=>string)|Boolean)[]>) => {
             arktest.assertEQ(a[0][0] as Error, e)
             arktest.assertEQ(a[1][0] as Boolean, false)
             arktest.assertEQ((a[2][0] as ((p: string) => string))('a'), 'aa')
@@ -376,9 +376,9 @@ function main(): int {
         verify([[e], [false], [(p: string): string => p + p], [42]])
     })
 
-    suite.addTest("Array<FixedArray<Number|Error|((p: string)=>string)|Boolean>>", () => {
+    suite.addTest("Array<Array<Number|Error|((p: string)=>string)|Boolean>>", () => {
         let e = new Error
-        let verify = (a: Array<FixedArray<Number|Error|((p: string)=>string)|Boolean>>) => {
+        let verify = (a: Array<Array<Number|Error|((p: string)=>string)|Boolean>>) => {
             arktest.assertEQ(a[0][0] as Error, e)
             arktest.assertEQ(a[1][0] as Boolean, false)
             arktest.assertEQ((a[2][0] as ((p: string) => string))('a'), 'aa')
@@ -388,9 +388,9 @@ function main(): int {
         verify([[e], [false], [(p: string): string => p + p], [42]])
     })
 
-    suite.addTest("FixedArray<Number|Error|((p: string)=>string)|Boolean>[]", () => {
+    suite.addTest("Array<Number|Error|((p: string)=>string)|Boolean>[]", () => {
         let e = new Error
-        let verify = (a: FixedArray<Number|Error|((p: string)=>string)|Boolean>[]) => {
+        let verify = (a: Array<Number|Error|((p: string)=>string)|Boolean>[]) => {
             arktest.assertEQ(a[0][0] as Error, e)
             arktest.assertEQ(a[1][0] as Boolean, false)
             arktest.assertEQ((a[2][0] as ((p: string) => string))('a'), 'aa')

@@ -46,14 +46,6 @@ cases:
       check: |-
           FixedArray<BigInt>
     - stype: |-
-          string[]
-      value: |-
-          [["a", "b"],["a", "b"]]
-      dtype: |-
-          Object
-      check: |-
-          FixedArray<Array>
-    - stype: |-
           null
       value: |-
           [null, null, null]
@@ -117,14 +109,6 @@ cases:
           Object
       check: |-
           FixedArray<Object>
-    - stype: |-
-          [Base, J, string]
-      value: |-
-          [[new Base(), {j: 1}, 'a'], [new Derived(), {j: 2}, 'b']]
-      dtype: |-
-          Object
-      check: |-
-          FixedArray<[Base, J, string]>
     - stype: |-
           Derived
       value: |-

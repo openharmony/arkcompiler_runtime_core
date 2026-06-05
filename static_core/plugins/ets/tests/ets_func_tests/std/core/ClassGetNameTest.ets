@@ -16,7 +16,6 @@
 function main() {
     const suite = new arktest.ArkTestsuite('Class.getName tests')
     suite.addTest('Class.getName FixedArray', testClassGetNameFixedArray)
-    suite.addTest('Class.getName nested FixedArray', testClassGetNameNestedFixedArray)
     suite.addTest('Class.getName Objects', testClassGetNameObjects)
     suite.addTest('Class.getName Union', testClassGetNameUnion)
     suite.addTest('Class.getName with RuntimeLinker', testClassGetNameWithRuntimeLinker)
@@ -42,7 +41,6 @@ function testClassGetNameFixedArray() {
     let fnumber: FixedArray<number> = [1]
     let fchar: FixedArray<char> = [c'a']
     let fobject: FixedArray<Object> = [new Object]
-    let ffunc: FixedArray<() => void> = [() => {}]
     let fa: FixedArray<A> = [new A]
 
     arktest.assertEQ(getName(fbool), "std.core.Boolean[]")
@@ -55,17 +53,10 @@ function testClassGetNameFixedArray() {
     arktest.assertEQ(getName(fnumber), "std.core.Double[]")
     arktest.assertEQ(getName(fchar), "std.core.Char[]")
     arktest.assertEQ(getName(fobject), "std.core.Object[]")
-    arktest.assertEQ(getName(ffunc), "std.core.Function0[]")
     arktest.assertEQ(getName(fa), "ClassGetNameTest.A[]")
 
     arktest.assertEQ(getBootRuntimeLinker().findLoadedClass(getName(fdouble))!.getName(), getName(fdouble))
     arktest.assertEQ(getBootRuntimeLinker().findLoadedClass(getName(fobject))!.getName(), getName(fobject))
-}
-
-function testClassGetNameNestedFixedArray() {
-    let f: FixedArray<FixedArray<FixedArray<Array<int>>>> = [[[[123]]]]
-    arktest.assertEQ(getName(f), "std.core.Array[][][]")
-    arktest.assertEQ(getBootRuntimeLinker().findLoadedClass(getName(f))!.getName(), getName(f))
 }
 
 function testClassGetNameObjects() {

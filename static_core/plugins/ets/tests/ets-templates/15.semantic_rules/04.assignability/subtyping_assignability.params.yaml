@@ -21,16 +21,6 @@ cases:
     value: '[new B(), new B("John")]'
     type2: 'FixedArray<A>'
   
-  - decl:  'class E<in T> {}'
-    type1: 'FixedArray<E<A>>'
-    value: '[new E<A>(), new E<A>()]'
-    type2: 'FixedArray<E<B>>'
-  
-  - decl:  'class E2<out T> {}'
-    type1: 'FixedArray<E2<B>>'
-    value: '[new E2<B>(), new E2<B>()]'
-    type2: 'FixedArray<E2<A>>'
-
   # Union Type Subtyping
   - type1: 'string'
     value: '"hello"'

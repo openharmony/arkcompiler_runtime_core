@@ -188,7 +188,7 @@ cases:
       let v: A<A<FixedArray<X>>> = new A<A<FixedArray<X>>>(new A<FixedArray<X>>([new X()]))
 
   - use: |-
-      let v: A<FixedArray<A<X>>> = new A<FixedArray<A<X>>>([new A<X>(new X())])
+      let v: A<Array<A<X>>> = new A<Array<A<X>>>([new A<X>(new X())])
 
   # type argument is specific type
   - use: |-

@@ -177,8 +177,8 @@ cases:
       function func1(): A<number> {
         return [2.0] as A<number>
       }
-      function func2(): FixedArray<B<number> | string> {
-        return [] as FixedArray<B<number> | string>
+      function func2(): Array<B<number> | string> {
+        return [] as Array<B<number> | string>
       }
     use: |-
       let a = func1()

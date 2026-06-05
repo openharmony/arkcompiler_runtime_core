@@ -203,45 +203,4 @@ cases:
       arktest.assertEQ((animals[1] as Dog).bark(), "dog")
       arktest.assertTrue(animals[2] instanceof Cat)
 
-  - desc: Create 1D FixedArray with covariant function subtypes
-    decl: |-
-      class A {
-        v: int
-        constructor(v: int = 0) {
-          this.v = v
-        }
-      }
-      class B extends A {
-        constructor(v: int = 0) {
-          super(-v)
-        }
-        f(): int {
-          return 13
-        }
-      }
-      type HandlerBInt = (a: B, b: int) => A
-      type HandlerAInt = (a: A, b: int) => B
-      const handlerAInt: HandlerAInt = (a: A, b: int): B => {
-        if (a instanceof B){
-          return new B(a.f() + b)
-        } else {
-          return new B(b)
-        }
-      }
-      type HandlerA = (a: A) => A
-      const handlerA: HandlerA = (a: A): A => {
-        if (a instanceof B){
-          return new A(a.f())
-        } else {
-          return new A
-        }
-      }
-      type HandlerNothing = () => B
-      const handlerNothing: HandlerNothing = (): B => {
-        return new B(567)
-      }
-    logic: |-
-      let a: FixedArray<HandlerBInt> = [handlerAInt, handlerA, handlerNothing]
-      arktest.assertEQ(a[0](new B, 7).v, -20)
-      arktest.assertEQ(a[1](new B, 7).v, 13)
-      arktest.assertEQ(a[2](new B, 7).v, -567)
+

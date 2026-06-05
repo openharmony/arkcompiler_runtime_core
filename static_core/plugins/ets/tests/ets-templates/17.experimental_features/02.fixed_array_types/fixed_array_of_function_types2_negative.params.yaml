@@ -16,21 +16,21 @@ cases:
     - logic: |-
         let fs: FixedArray<HandlerReq> = [handlerB]
       expected_out: |-
-        "Semantic error ESE0227: Array element at index 0 with type '((p1: B) => A)' is not compatible with the target array element type '((p1: B) => B)'"
+        "Semantic error ESE461884: Type '((p1: B) => B)' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 
     - logic: |-
         let fs: FixedArray<HandlerReq|null> = [null]
         fs[0] = handlerB
       expected_out: |-
-        "Semantic error ESE0318: Type '((p1: B) => A)' cannot be assigned to type '(((p1: B) => B))|null'"
+        "Semantic error ESE461884: Type '(((p1: B) => B))|null' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations.\nSemantic error ESE0318: Type '((p1: B) => A)' cannot be assigned to type '(((p1: B) => B))|null'"
 
     - logic: |-
         let fs: FixedArray<HandlerReq> = [handlerNothing]
       expected_out: |-
-        "Semantic error ESE0227: Array element at index 0 with type '(() => A)' is not compatible with the target array element type '((p1: B) => B)'"
+        "Semantic error ESE461884: Type '((p1: B) => B)' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 
     - logic: |-
         let fs: FixedArray<HandlerReq|null> = [null]
         fs[0] = handlerNothing
       expected_out: |-
-        "Semantic error ESE0318: Type '(() => A)' cannot be assigned to type '(((p1: B) => B))|null'"
+        "Semantic error ESE461884: Type '(((p1: B) => B))|null' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations.\nSemantic error ESE0318: Type '(() => A)' cannot be assigned to type '(((p1: B) => B))|null'"

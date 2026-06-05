@@ -21,7 +21,7 @@ tags: [no-warmup]
 
 class MethodWithAllSettled {
     async methodWithAllSettled(): Promise<PromiseSettledResult<string>[]> {
-        const promises: FixedArray<string | PromiseLike<string>> = [
+        const promises: Array<string | PromiseLike<string>> = [
             Promise.resolve("Resolved!"), 
             Promise.reject(new Error("Rejected!"))
         ]

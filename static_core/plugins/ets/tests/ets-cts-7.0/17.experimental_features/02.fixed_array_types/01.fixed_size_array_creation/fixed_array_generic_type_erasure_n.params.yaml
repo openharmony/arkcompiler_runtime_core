@@ -19,7 +19,7 @@ cases:
         }
       use: |-
         let arr: FixedArray<string | number> = foo("a")
-      exp_out: "Expected_CTE"
+      exp_out: "Semantic error ESE461884: Type 'T|Double' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 #1
     - decl: |-
         function bar<T>(v: T): FixedArray<string | T> {
@@ -27,22 +27,22 @@ cases:
         }
       use: |-
         let arr: FixedArray<string | number> = bar("a")
-      exp_out: "Expected_CTE"
+      exp_out: "Semantic error ESE461884: Type 'String|T' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 #2
     - use: |-
         let arr: FixedArray<Array<int>> = [[1], [2]]
-      exp_out: "Expected_CTE"
+      exp_out: "Semantic error ESE461884: Type 'Array<Int>' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 #3
     - use: |-
         let arr: FixedArray<(p: number) => void> = [(x: number) => {}]
-      exp_out: "Expected_CTE"
+      exp_out: "Semantic error ESE461884: Type '((p1: Double) => undefined)' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 #4
     - use: |-
         let arr: FixedArray<[int, string]> = [[1, "a"]]
-      exp_out: "Expected_CTE"
+      exp_out: "Semantic error ESE461884: Type '[Int, String]' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."
 #5
     - decl: |-
         class G<T> {};
       use: |-
         let arr: FixedArray<G<number>> = [new G<number>()]
-      exp_out: "Expected_CTE"
+      exp_out: "Semantic error ESE461884: Type 'G<Double>' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations."

@@ -189,10 +189,10 @@ function main(): int {
         arktest.assertEQ(a.length, 1)
     })
 
-    suite.addTest("FixedArray<GenericClass<Number>>", () => {
+    suite.addTest("Array<GenericClass<Number>>", () => {
         let v = new GenericClass<Number>
         let q = new GenericClass<Number>
-        let a: FixedArray<GenericClass<Number>> = []
+        let a: Array<GenericClass<Number>> = []
         a = [v, q]
         arktest.assertEQ(a[0], v)
         arktest.assertEQ(a[1], q)
@@ -225,8 +225,8 @@ function main(): int {
         arktest.assertEQ(a.length, 1)
     })
 
-    suite.addTest("FixedArray<F>", () => {
-        let a: FixedArray<F> = []
+    suite.addTest("Array<F>", () => {
+        let a: Array<F> = []
         a = [(p: Color): int => p.valueOf(), (p: Color): int => p.valueOf() + 1, (p: Color): int => p.valueOf() + 2]
         arktest.assertEQ(a[0](Color.Red), 0)
         arktest.assertEQ(a[1](Color.Red), 1)
@@ -234,8 +234,8 @@ function main(): int {
         arktest.assertEQ(a.length, 3)
     })
 
-    suite.addTest("FixedArray<FixedArray<F>>", () => {
-        let a: FixedArray<FixedArray<F>> = []
+    suite.addTest("Array<Array<F>>", () => {
+        let a: Array<Array<F>> = []
         a = [[(p: Color): int => p.valueOf()], [(p: Color): int => p.valueOf() + 1], [(p: Color): int => p.valueOf() + 2]]
         arktest.assertEQ(a[0][0](Color.Red), 0)
         arktest.assertEQ(a[1][0](Color.Red), 1)
@@ -316,9 +316,9 @@ function main(): int {
         arktest.assertEQ(a.length, 1)
     })
 
-    suite.addTest("FixedArray<Number|Error|fn|Boolean>", () => {
+    suite.addTest("Array<Number|Error|fn|Boolean>", () => {
         let e = new Error
-        let a: FixedArray<Number|Error|((p: string)=>string)|Boolean> = []
+        let a: Array<Number|Error|((p: string)=>string)|Boolean> = []
         a = [e, false, (p: string): string => p + p, 42]
         arktest.assertEQ(a[0] as Error, e)
         arktest.assertEQ(a[1] as Boolean, false)
@@ -327,9 +327,9 @@ function main(): int {
         arktest.assertEQ(a.length, 4)
     })
 
-    suite.addTest("FixedArray<FixedArray<Number|Error|fn|Boolean>>", () => {
+    suite.addTest("Array<Array<Number|Error|fn|Boolean>>", () => {
         let e = new Error
-        let a: FixedArray<FixedArray<Number|Error|((p: string)=>string)|Boolean>> = []
+        let a: Array<Array<Number|Error|((p: string)=>string)|Boolean>> = []
         a = [[e], [false], [(p: string): string => p + p], [42]]
         arktest.assertEQ(a[0][0] as Error, e)
         arktest.assertEQ(a[1][0] as Boolean, false)

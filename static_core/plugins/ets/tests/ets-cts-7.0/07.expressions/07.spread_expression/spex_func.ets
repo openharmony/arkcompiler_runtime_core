@@ -183,8 +183,6 @@ function f44RecArr(...p: Record<int, string>[]): number {
     return p.length
 }
 
-type FFAFunc = (p: number) => number
-
 function f46FAObjArr(...p: Array<Object>): number { return p.length }
 function f47FACharArr(...p: FixedArray<char>): number { return p.length }
 function f48FAByteArr(a: int, ...p: Array<byte>): int { return a + reduce(p, (prev: int, next: byte) => prev + next, 0) }
@@ -192,11 +190,6 @@ function f49FAShortArr(a: int, ...p: FixedArray<short>): int { return a + reduce
 function f50FALongArr(a: long, ...p: FixedArray<long>): long { return a + reduce(p, (prev: long, next: long) => prev + next, (0).toLong()) }
 function f51FAFloatArr(a: float, ...p: FixedArray<float>): float { return a + reduce(p, (prev: float, next: float) => prev + next, 0.0f) }
 function f52FANumArr(a: number, ...p: number[]): number { return a + reduce(p, (prev: number, next: number) => prev + next, 0.0) }
-function f53FAFArr(a: number, ...p: FixedArray<FFAFunc>): number {
-    let res = a
-    for (let el of p) res += el(res)
-    return res
-}
 function f54FAColorArr(...p: ColorFunc[]): ColorFunc { return p.length ? p[p.length - 1] : ColorFunc.Red }
 function f55FAParen(...p: FixedArray<Object>): number { return (p.length ? p[p.length - 1] : -1.0) as number }
 function f56FAEnsure(a: int, ...p: FixedArray<Object>): int { return a + p.length }
@@ -233,7 +226,6 @@ function f73FAUnion(...p: Array<Double|Short|Byte>): double {
     return res
 }
 function f74FAUnionRef(...p: FixedArray<Int|Number|String|undefined>): number { return p.length }
-function f75FAGenerics<T, U, V>(...p: FixedArray<GenAFunc<T>|GenBFunc<U>|GenCFunc<V>|null>): number { return p.length }
 function f76FAStrLambda(...p: FixedArray<string>): string { return [...p].reduce((p: string, c: string) => p + c, '') }
 function f77FAStrLambda2(...p: Array<string>): string { return p.reduce((p: string, c: string) => p + c, '') }
 
@@ -523,12 +515,6 @@ function main(): int {
         arktest.assertEQ(f52FANumArr(42, ...a), 48.0)
     })
 
-    suite.addTest("FixedArray spread of function array", () => {
-        let a: FixedArray<FFAFunc> = [(p: number) => p * 2, (p: number) => p * 3]
-        let b: FixedArray<FFAFunc> = [(p: number) => p * 4, (p: number) => p * 5]
-        arktest.assertEQ(f53FAFArr(1.0, ...[...a, ...b]), 360.0)
-    })
-
     suite.addTest("FixedArray spread of enums array", () => {
         let a: FixedArray<ColorFunc> = [ColorFunc.Red, ColorFunc.Blue, ColorFunc.Green]
         arktest.assertEQ(f54FAColorArr(...a), ColorFunc.Green)
@@ -624,11 +610,6 @@ function main(): int {
     suite.addTest("FixedArray union of reference types", () => {
         let a1: FixedArray<Int|Number|String|undefined> = [new Int(), new Int(), undefined, 'Z', 42.0]
         arktest.assertEQ(f74FAUnionRef(...a1), 5)
-    })
-
-    suite.addTest("FixedArray use generics", () => {
-        let a1: FixedArray<GenAFunc<String>|GenBFunc<Long>|GenCFunc<Error>|null> = [new GenAFunc<String>, new GenBFunc<Long>, new GenCFunc<Error>]
-        arktest.assertEQ(f75FAGenerics<String, Long, Error>(...a1), 3)
     })
 
     suite.addTest("FixedArray lambda expression", () => {

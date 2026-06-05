@@ -25,6 +25,7 @@
 {% macro generate_complete_test(cases, declaration_type='function') %}
 {% for c in cases %}
 {% for arr_type in ['Array', 'FixedArray', '[]'] %}
+{% if c.no_fixed_array is not defined or arr_type != 'FixedArray' %}
 
 {% set type_name = generate_type_name(arr_type, c.type) %}
 {% set async_body %}
@@ -61,10 +62,11 @@ async function startTest(){
     {% endif %}
 }
 
-async function main(){
+async function main(): Promise<void> {
     await startTest()
 }
 
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% endmacro %}

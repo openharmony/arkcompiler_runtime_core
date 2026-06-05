@@ -23,4 +23,4 @@ cases:
         let a: FixedArray<FixedArray<int>> = [[1]]
 #3
     - use: |-
-        let a: FixedArray<Array<Any>> = [new Array<Any>()]
+        let a: FixedArray<Any> = [1, "a", true]

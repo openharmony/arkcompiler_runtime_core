@@ -497,7 +497,7 @@ async function testAsyncVoidNothing() {}
 
 function testPromiseAllEmpty(): void {
     globalTest = new Test();
-    let promises: FixedArray<Promise<Object>> = [];
+    let promises: Promise<Object>[] = [];
     Promise.all<Object>(promises).then<void>((values: Array<Object>): void => {
         if (values == null || values.length != 0) {
             globalTest!.fail();
@@ -601,7 +601,7 @@ function testPromiseAllIterable(): void {
 
 function testPromiseAllSettledEmpty(): void {
     globalTest = new Test();
-    let promises: FixedArray<Promise<Object>> = [];
+    let promises: Promise<Object>[] = [];
     Promise.allSettled<Object>(promises).then<void, void>((values: PromiseSettledResult<Object>[]): void => {
         if (values.length != 0) {
             globalTest!.fail();
@@ -652,7 +652,7 @@ function testPromiseAllSettled(): void {
 
 function testPromiseAnyEmpty(): void {
     globalTest = new Test();
-    let promises: FixedArray<Promise<Object>> = [];
+    let promises: Promise<Object>[] = [];
     Promise.any(promises).then<void, void>((v: Object): void => {
         globalTest!.fail();
     }, (err: Error): void => {
