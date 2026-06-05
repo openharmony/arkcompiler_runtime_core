@@ -17,10 +17,6 @@
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_1.ets
 03.types/21.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_3.ets
 
-#29971
-04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_0.ets
-04.names_declarations_and_scopes/03.scopes/module_level_scope/point_of_declaration_n_1.ets
-
 #27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
@@ -300,10 +296,6 @@
 07.expressions/36.constant_expression/check_array/constant_shift_n_2.ets
 07.expressions/36.constant_expression/check_array/constant_unary_minus_n.ets
 07.expressions/36.constant_expression/check_array/constant_unary_plus_n.ets
-
-#29971
-08.statements/04.constant_or_variable_declarations/post_declaration_func_n_1.ets
-08.statements/04.constant_or_variable_declarations/post_declaration_n_1.ets
 
 #33488
 08.statements/12.return_statements/return_5.ets
