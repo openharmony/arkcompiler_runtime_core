@@ -19,6 +19,16 @@ repository-wide documentation hub.
 - `aot_pgo.md` - compiler-facing AOT PGO workflow
 - `performance_workflows.md` - benchmark, GC-control, `perf`, and AOT PGO investigation workflow
 
+### Workflow Knowledge
+
+- `knowledge/compiler-workflows.md` - shared JIT, OSR, AOT, LLVM AOT, and paoc validation routing
+- `knowledge/jit-workflow.md` - JIT selection, installation, execution evidence, and boundary checks
+- `knowledge/osr-workflow.md` - OSR trigger, live-state transfer, and transition validation
+- `knowledge/aot-workflow.md` - AOT input context, product inspection, runtime matching, and execution
+- `knowledge/llvm-aot-workflow.md` - LLVM AOT eligibility, fallback, and backend-specific evidence
+- `knowledge/compiler-pipeline-debugging.md` - shared compiler pipeline, generated-source, and pass-debug routing
+- `knowledge/compiled-runtime-boundary.md` - runtime entrypoint, bridge, stack-map, deopt, and class-linker boundary
+
 ### Codegen and Compiler-Side Runtime Boundary
 
 - `codegen_doc.md` - backend structure, slow paths, and disassembly workflow

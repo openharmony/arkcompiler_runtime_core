@@ -1,155 +1,58 @@
-# AGENTS.md
+# irtoc Agent Guide
 
-This file provides guidance to AI when working with code in this repository.
+## 1. Code Map
 
-## Project Metadata
+This AGENTS.md applies to `static_core/irtoc/`. This directory generates interpreter handlers, runtime/compiler fastpaths, nativeplus boundary code, and selected low-overhead intrinsic entry points.
 
-- **name**: irtoc
-- **purpose**: Generates optimized interpreter handlers and fastpath/nativeplus entrypoints for the runtime; also provides intrinsic-specific code generation support
-- **primary language**: Ruby, C++
+Key areas:
 
-## About irtoc
+| Path | Responsibility | Risk |
+|---|---|---|
+| `scripts/` | `.irt` source describing interpreter handlers and helpers | Complex semantic logic should not be moved into irtoc casually |
+| `backend/` | Backend from irtoc to compiler IR/codegen | ABI, register, and boundary constraints affect generated code |
+| `lang/` | DSL and validation | Looser validation can hide code-size, spill, and shape risks |
+| `../plugins/ets/irtoc_scripts/` | ETS-specific irtoc extensions | ETS behavior must first respect language and runtime semantics |
 
-**irtoc** is the IR-to-Code toolchain used to generate:
+## 2. Knowledge Routing
 
-- interpreter handlers
-- fastpath entrypoints used by compiler-generated `CallFastPath`
-- nativeplus/boundary entrypoints
-- helper intrinsics used by the runtime/compiler boundary
+| Scenario / Keywords | Read first |
+|---|---|
+| `.irt` / generated interpreter / generated helper / validation / DSL | `docs/knowledge/irtoc-generated-code.md` |
+| fastpath / nativeplus / FastPathPlus / CallFastPath / boundary entry | `docs/knowledge/irtoc-fastpath.md` |
+| FastPathPlus / NativePlus / interpreter intrinsic ABI | `docs/knowledge/irtoc-fastpath.md`, `../docs/irtoc-intrinsics-for-interpreter.md` |
+| compiler intrinsic / CallFastPath / runtime entrypoint | `../compiler/docs/knowledge/jit-workflow.md`, `../compiler/docs/knowledge/compiled-runtime-boundary.md` |
+| OSR trigger / generated interpreter interaction | `../compiler/docs/knowledge/osr-workflow.md`, `../runtime/osr.*`, `../runtime/arch/*/osr_*` |
+| ETS intrinsic / ETS fastpath | `../plugins/ets/compiler/AGENTS.md` |
+| tests / checked / interpreter validation | `../tests/AGENTS.md` |
 
-## Current Implementation Notes
+In the plan, state the matched scenario, documents read, and generated-code or ABI constraints found.
 
-- the front-end is a Ruby DSL; it does not maintain a separate custom parser
-- the DSL is backed by `compiler/optimizer/ir/instructions.yaml`
-- current generation targets include `ir-constructor`, `ir-builder`, and `ir-inline`
-- runtime builds generate `irtoc_code.cpp` and optionally `irtoc_code_llvm.cpp`, then lower them through the normal
-  compiler backend into final object files
-- compiler-side generation also reuses irtoc sources through `irtoc_generate(... IR_API ir-builder|ir-inline ...)`
+## 3. Pre-coding Safety Checks
 
-## Modes And ABI Variants
+- Must prove pointer safety and GC visibility for fastpath/nativeplus/generated-code boundaries; avoid UAF, leaks, and null dereference, or cite ownership/lifetime and `SaveState`/roots/stack-map evidence.
+- Must keep object/reference values visible across runtime calls, safepoints, bridges, OSR triggers, and generated fastpaths.
+- Must identify whether boundary ownership is `CallRuntime`, `CallFastPath`, `FastPathPlus`, `NativePlus`, managed lowering, or runtime metadata.
+- Must preserve irtoc validation, matching/rejection diagnostics, generated ABI, stack walking, exception, GC, class-init, deopt, and OSR checks.
 
-- `FastPath` is the normal low-overhead mode for compiler/runtime entrypoints
-- `NativePlus` is the native-ABI variant used when interpreter/runtime bridges call irtoc code directly
-- `FastPathPlus` is the convenience macro-mode that emits both `FastPath` and `NativePlus` variants
-- arm32 still has irtoc codegen branches and register maps, but the runtime keeps interpreter selection on the C++
-  path there; do not collapse those two facts into "arm32 unsupported"
+## 4. Boundaries
 
-## Directory Structure
+- Do not treat irtoc as the default optimization mechanism; first check whether managed code, C++ runtime, compiler pass, or codegen is more appropriate.
+- irtoc is suitable only for short, hot, clearly bounded low-overhead paths; do not move long logic, complex branches, or broad business semantics into it.
+- Do not hand-edit generated outputs; change the `.irt` or generator source and regenerate.
+- Do not loosen validation only to make code generation pass unless ABI, code size, and target-architecture impact are also explained.
+- Fastpath/nativeplus changes must consider runtime entrypoints, compiler codegen, and GC/exception/stack visibility.
+- Do not bypass stack walking, exception, GC, class-init, deopt, OSR, or fastpath ABI checks.
 
-Main File Directories
+Ask before loosening validation, changing ABI-visible generated code, weakening matching/rejection/fallback diagnostics, moving broad runtime/language behavior into irtoc, adding new `FastPath`/`FastPathPlus`/`NativePlus` entrypoints, or replacing existing managed/C++ logic with irtoc.
 
-```
-irtoc/
-├── backend/                    # C++ backend for lowering IRtoC output to compiler IR/code
-│   ├── compilation.*          # compilation driver
-│   ├── function.*             # IRtoC function model
-│   ├── options.yaml           # backend options
-│   └── compiler/
-│       ├── codegen_interpreter.h   # interpreter codegen
-│       ├── codegen_fastpath.*      # fastpath codegen
-│       ├── codegen_nativeplus.*    # nativeplus codegen
-│       └── constants.h
-│
-├── lang/                       # Ruby DSL and validation logic
-│   └── validation.rb          # validates generated methods against spill/code-size limits
-│
-├── scripts/                    # IR source files (.irt)
-│   ├── common.irt             # Common definitions and utilities
-│   ├── interpreter.irt         # Core interpreter handlers
-│   ├── allocation.irt         # Object allocation handlers
-│   ├── arrays.irt             # Array operations
-│   ├── strings.irt            # String operations
-│   ├── string_builder.irt     # StringBuilder operations
-│   ├── string_helpers.irt     # String helper functions
-│   ├── gc.irt                 # Garbage collection helpers
-│   ├── memcopy.irt            # Memory copy operations
-│   ├── array_helpers.irt      # Array helper functions
-│   ├── resolvers.irt          # Symbol resolution
-│   ├── monitors.irt           # Synchronization/monitors
-│   ├── check_cast.irt         # Type checking and casting
-│   └── tests.irt              # Test handlers
-│
-├── templates/                  # Build templates
-│
-├── intrinsics.yaml             # Intrinsic function definitions
-├── irtoc.gni                   # GN build configuration
-├── BUILD.gn                    # GN build file
-├── CMakeLists.txt              # CMake build configuration
-└── README.md                   # Basic documentation
-```
+## 5. Verification Loop
 
-## Generated Targets and Build
+| Change type | Minimum verification |
+|---|---|
+| DSL/source change | `irtoc_unit_tests` |
+| backend/ABI change | `irtoc_compiler_unit_tests` plus runtime/compiler boundary validation |
+| interpreter handler | `irtoc-interpreter-tests` |
+| compiler fastpath | compiler checked/gtest + runtime execution |
+| ETS fastpath | ETS compiler/checked/runtime execution layer |
 
-- core runtime build consumes generated `irtoc_interpreter` and `irtoc_fastpath` objects from `runtime/CMakeLists.txt`
-- ETS runtime additionally builds and links `irtoc_ets_fastpath` from `plugins/ets/runtime/CMakeLists.txt`
-- `irtoc_unit_tests` runs Ruby frontend tests (`lang/tests/*`)
-- `irtoc_compiler_unit_tests` covers backend/compiler-side logic
-- `irtoc-interpreter-tests` in `tests/` validates generated interpreter behavior against PA tests
-
-## IR Language (.irt files)
-
-The IR language is a Ruby-based DSL for describing bytecode handler logic.
-
-Key script groups:
-
-- `scripts/interpreter.irt` - interpreter handlers and JIT/OSR trigger points
-- `scripts/allocation.irt`, `gc.irt`, `monitors.irt`, `check_cast.irt` - common fast paths and slow-path glue
-- `scripts/string_helpers.irt`, `strings.irt`, `string_builder.irt`, `arrays.irt` - string/array helpers that compiler intrinsics often reach through fast paths
-- `scripts/tests.irt` - irtoc-focused test handlers
-- `plugins/ets/irtoc_scripts/` - ETS-specific interpreter and fastpath additions wired through plugin options
-
-## Fast Paths and Validation
-
-- `backend/compiler/codegen_fastpath.*` implements fastpath code generation used by runtime/compiler entrypoints
-- fastpath code has stricter constraints than normal compiled code; validation in `lang/validation.rb` checks limits such as maximum spill count and code size
-- `runtime/CMakeLists.txt` wires core `irtoc_fastpath` into the runtime and may skip validation for some LLVM fastpath configurations; ETS builds additionally wire `irtoc_ets_fastpath` from `plugins/ets/runtime/CMakeLists.txt`
-- if a compiler intrinsic calls `CallFastPath`, the generated entrypoint is typically in `irtoc/` or runtime entrypoints, not in `compiler/` alone
-- current fastpath code generally relies on explicit `SLOW_PATH_ENTRY` or `TAIL_CALL` transfers instead of arbitrary
-  nested calls
-- `LiveIn`, `LiveOut`, `Label`, `Goto`, `Else`, `macro`, `scoped_macro`, `word`, and `ref_uint` are part of normal
-  current irtoc work, not historical one-offs
-
-## Choosing irtoc
-
-- `irtoc` is primarily for short critical paths where reducing `FastPath` or boundary-call overhead matters more than the optimizer flexibility lost by the special `irtoc` compilation mode
-- Evaluate each candidate against the competing implementation choices: inline managed code, a regular managed call, a C++ runtime or intrinsic implementation, and an `irtoc` fastpath
-- The most common good fits are extremely hot trivial constructors or allocation helpers, and tiny low-level sequences where managed source or C++ cannot be lowered into the desired machine instructions
-- In the second case, treat `irtoc` as a constrained assembler wrapper and keep the low-level sequence as small as possible
-- Keep `irtoc` bodies small; long, branch-heavy, or general-purpose logic usually belongs in managed code or C++
-- If a larger `irtoc` implementation materially outperforms the high-level or C++ version, investigate algorithmic issues or missing optimizer or codegen support before making `irtoc` the long-term solution
-
-## Review Checklist
-
-- Why is inlining or a normal runtime or native call not sufficient here?
-- Is the code path both hot enough and small enough for `FastPath` overhead reduction to matter?
-- Is the expected win tied to a specific target, ABI, or instruction-selection gap? Validate on the relevant architecture and build mode
-- Did you keep the semantic complexity in managed or C++ code where possible and limit `irtoc` to the performance-critical core?
-- Did you add or update coverage in `irtoc_unit_tests`, `irtoc_compiler_unit_tests`, interpreter tests, and the compiler or runtime execution layer?
-
-## Debugging Hints
-
-- For interpreter bugs, correlate `scripts/interpreter.irt` with `runtime/interpreter/`
-- For fastpath bugs, correlate `codegen_fastpath.*` with `compiler/optimizer/code_generator/codegen-inl.h`, `runtime/compiler.cpp`, and runtime entrypoints
-- For nativeplus/boundary issues, inspect `codegen_nativeplus.*` and runtime bridge/entrypoint code
-- For OSR/JIT trigger bugs, inspect `scripts/interpreter.irt`, `runtime/interpreter/instruction_handler_base.h`, and `runtime/osr.cpp`
-- For compiler-generated fastpath issues, also inspect `tests/checked/osr_irtoc_test.pa` and `tests/checked/compiler_to_interpreter.pa`
-- generated outputs usually live in the build directory as `irtoc_code.cpp`, optional `irtoc_code_llvm.cpp`, and
-  `disasm.txt`
-
-## Testing
-
-Useful targets:
-
-- `ninja irtoc_unit_tests`
-- `ninja irtoc_compiler_unit_tests`
-- `ninja irtoc-interpreter-tests`
-
-See also `tests/AGENTS.md` for interpreter/runner-based validation.
-
-## Documentation
-
-- `README.md` - basic build/context for irtoc
-- `../docs/irtoc.md` - current irtoc pipeline, modes, validation, and debugging outputs
-- `../docs/irtoc-intrinsics-for-interpreter.md` - interpreter-facing intrinsic generation details
-- `../docs/flaky_debugging.md` - current repro and asm/IR localization workflow
-- `../compiler/docs/README.md` - compiler/runtime boundary map when irtoc fast paths are involved
+Done evidence must name generated outputs inspected, tests run, and runtime/compiler boundary risk.

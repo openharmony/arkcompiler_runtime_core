@@ -1,111 +1,61 @@
-# ETS Compiler Plugin
+# ETS Compiler Plugin Agent Guide
 
-ETS language compiler plugin that extends the core compiler via generated and handwritten `.inl` / `.inl.h` hooks. It
-adds ETS-specific bytecode lowering, intrinsic recognition, JS interop, native call optimization, and fastpath-aware
-codegen.
+## 1. Code Map
 
-## Directory Structure
+This AGENTS.md applies to `static_core/plugins/ets/compiler/`. This directory owns ETS language-plugin extensions to the core compiler, including ETS bytecode lowering, intrinsic recognition, ETS-specific optimization, JS interop, native calls, and fastpath-aware codegen.
 
-- `optimizer/ir_builder/ets_inst_builder.{cpp,h}` - ETS bytecode to IR translation (LdObjByName, StObjByName, CallByName, Equals, Typeof, Nullcheck, etc.), templates generated from `ets_inst_templates.yaml`
-- `optimizer/ir_builder/js_interop/` - JS interop IR building (conditional: `PANDA_ETS_INTEROP_JS`)
-- `optimizer/optimizations/interop_js/` - JS interop optimization pass `InteropIntrinsicOptimization` (scope merging, wrap/unwrap elimination, partial redundancy elimination)
-- `optimizer/ets_intrinsics_peephole.cpp` - ETS intrinsic peephole optimizations (StringEquals, Typeof, Equals, Nullcheck, etc.)
-- `optimizer/ets_intrinsics_inlining_expansion.cpp` - Intrinsic inlining expansion (StdCoreArrayGet/Set)
-- `optimizer/ets_codegen_extensions.{cpp,h}` - Native call code generation (JIT uses direct pointers / AOT uses AOT data table lookup, deoptimizes on null)
-- `ir_build_intrinsics_ets.cpp` - Intrinsic IR building (IsFinite, Signbit, TypedArray operations, Unsafe operations, etc.)
-- `codegen_intrinsics_ets.cpp` - Intrinsic target code generation (Math, ArrayCopy, StringBuilder, etc.)
-- `compiler_intrinsic_id_mapping_inl.h` - mapping between ETS intrinsics and compiler/runtime ids
-- `runtime_adapter_ets.{cpp,h}` - `EtsBytecodeOptimizerRuntimeAdapter`, provides ETS runtime queries (String/StringBuilder identification, constructor detection, etc.)
-- `ets_compiler_interface.h` - Compiler extension interface (virtual methods for StdCoreArray, TypedArray, ArrayBuffer)
-- `tools/paoc_compile_stdlib.sh` - helper script used by ETS tests to compile stdlib in AOT/JIT/LLVM/OSR modes
-- `product_options.h` - Only `compiler-inline-external-methods` and `compiler-regex` are allowed in production builds
+Key areas:
 
-## Plugin Injection Points
+| Path | Responsibility | Risk |
+|---|---|---|
+| `optimizer/ir_builder/` | ETS bytecode to IR | Frontend/bytecode semantic mistakes can affect all workflows |
+| `optimizer/optimizations/`, `optimizer/*intrinsics*` | ETS-specific optimization and intrinsic handling | Shared JIT/AOT/LLVM/OSR impact must be evaluated explicitly |
+| `optimizer/ets_codegen_extensions.*`, `codegen_intrinsics_ets.cpp` | ETS codegen/runtime-call boundary | Native call, entrypoint, and AOT data semantics must stay consistent |
+| `runtime_adapter_ets.*`, `ets_compiler_interface.h` | ETS runtime semantic queries | Do not hard-code runtime state assumptions into the compiler |
 
-Injected into the core compiler via `.inl.h` (declarations) and `.inl` (implementation/switch cases):
+## 2. Knowledge Routing
 
-- IR building: `intrinsics_ir_build_ets.inl.h`, `intrinsics_ir_build_static_call_ets.inl`, `intrinsics_ir_build_virtual_call_ets.inl`
-- Peephole: `intrinsics_peephole_ets.inl.h`
-- Inlining expansion: `intrinsics_inlining_expansion_ets.inl.h`, `intrinsics_inlining_expansion_switch_case_ets.inl`
-- Codegen: `codegen_intrinsics_ets_ext.inl.h`
-- Pipeline: `ets_pipeline_includes.inl.h`, `ets_optimizations_after_unroll.inl`
-- Loop optimizations: `loop_idioms_memmove_intrinsic_id_switch_case_ets.inl`, `loop_idioms_customize_memmove_intrinsic_switch_case_ets.inl`
-- StringBuilder: `optimizer/optimizations/need_to_run_simplify_string_builder.inl`
+| Scenario / Keywords | Read first |
+|---|---|
+| ETS IR build / intrinsic / native call / JS interop / ETS codegen extension | `docs/knowledge/ets-compiler-plugin.md` |
+| JIT / OSR / AOT / LLVM AOT workflow impact | `../../../compiler/docs/knowledge/compiler-workflows.md` |
+| irtoc / fastpath / CallFastPath | `../../../irtoc/AGENTS.md`, `../../../irtoc/docs/knowledge/irtoc-fastpath.md` |
+| runtime entrypoint / ETS runtime boundary | `../runtime/AGENTS.md`, `../../../compiler/docs/knowledge/compiled-runtime-boundary.md` |
+| tests / checked / jitinterface / interop validation | `../../../tests/AGENTS.md` |
 
-## Runtime and FastPath Boundary
+In the plan, state the matched scenario, documents read, and ETS/runtime/compiler constraints found.
 
-ETS compiler work often crosses plugin/runtime boundaries:
+## 3. Pre-coding Safety Checks
 
-- many ETS intrinsics lower to `CallFastPath` or `CallRuntime` in `codegen_intrinsics_ets.cpp`
-- native call optimization is implemented partly in ETS codegen extensions and partly in runtime entrypoints
-- `runtime_adapter_ets.*` answers ETS-specific semantic questions used by optimizer passes
-- runtime/compiler metadata for ETS intrinsics lives in `plugins/ets/runtime/ets_compiler_intrinsics.yaml`
-- ETS runtime entrypoints and bridges live in `plugins/ets/runtime/ets_entrypoints.yaml`, `plugins/ets/runtime/ets_entrypoints.cpp`, and `plugins/ets/runtime/entrypoints/`
-- fastpath and entrypoint work usually also touches `compiler/optimizer/code_generator/`, `runtime/compiler.cpp`, and `plugins/ets/runtime/`
-- follow the repo-level `irtoc` policy in `../../../AGENTS.md` and the detailed irtoc guide in `../../../irtoc/AGENTS.md`
-- ETS-specific rule of thumb: start from the ETS implementation first; if a stdlib helper is small and inlineable, prefer keeping it in ETS instead of adding a new `irtoc` fastpath
-- when an ETS intrinsic crosses this boundary, expect to touch metadata, codegen, runtime entrypoints, and possibly `plugins/ets/irtoc_scripts/` together
+- Must prove pointer safety and GC visibility at ETS compiler/runtime/irtoc boundaries; avoid UAF, leaks, and null dereference, or cite ownership/lifetime and `SaveState`/roots/stack-map evidence.
+- Must treat `CodeInfo`, stack maps, inline info, roots masks, bridge frames, and deopt metadata as correctness data when ETS lowering reaches compiled/runtime boundaries.
+- Must identify ETS intrinsic boundary ownership: managed lowering, `CallRuntime`, `CallFastPath`, `FastPathPlus`, `NativePlus`, ANI/native-call optimization, or ETS runtime metadata.
+- Must state JIT, OSR, AOT, and LLVM AOT impact for intrinsic, native-call, fastpath, or runtime metadata changes.
 
-When debugging a regression, decide first whether the issue starts in:
+## 4. Boundaries
 
-- ETS IR building - `optimizer/ir_builder/ets_inst_builder.*`, `ir_build_intrinsics_ets.cpp`
-- ETS-only optimization - `optimizer/ets_intrinsics_peephole.cpp`, `optimizer/ets_intrinsics_inlining_expansion.cpp`, `optimizer/optimizations/interop_js/`
-- ETS codegen / runtime-call lowering - `optimizer/ets_codegen_extensions.*`, `codegen_intrinsics_ets.cpp`
-- runtime or entrypoint side - `plugins/ets/runtime/`, `runtime/compiler.cpp`, `irtoc/`
+- Do not judge correctness only from the ETS plugin locally; ETS compiler changes often cross the core compiler, runtime, and irtoc.
+- Do not change observable ETS language behavior for compiler coverage.
+- Intrinsic, native call, and fastpath changes must consider JIT/AOT/LLVM AOT/OSR differences together.
+- Do not re-home an ETS intrinsic between managed lowering, `CallRuntime`, `CallFastPath`, `FastPathPlus`, `NativePlus`, ANI/native-call optimization, or ETS runtime metadata without naming the owning runtime/irtoc boundary and the affected JIT/AOT/OSR coverage.
+- JS interop changes must explicitly separate normal ETS compiler behavior from interop-enabled build behavior.
+- Explain compatibility and verification scope before changing production-available options, runtime metadata, entrypoints, or generated hooks.
+- Do not bypass runtime boundary checks or weaken fastpath/NativePlus ABI requirements for ETS intrinsic coverage.
 
-## Build
+Ask before:
 
-Automatically compiled into the `arkcompiler` target with ETS plugin enabled. CMake is the primary local workflow, but
-GN integration also exists through the plugin-level build.
+- changing production-available options, runtime metadata, entrypoints, generated hooks, or JS interop boundary assumptions;
+- re-homing an intrinsic between managed lowering, `CallRuntime`, `CallFastPath`, `FastPathPlus`, `NativePlus`, ANI/native-call optimization, or ETS runtime metadata;
+- weakening null checks, runtime metadata requirements, boundary diagnostics, or JS interop boundary ownership.
 
-JS interop work requires both `-DPANDA_ETS_INTEROP_JS=ON` and `-DPANDA_JS_ETS_HYBRID_MODE=ON`.
+## 5. Verification Loop
 
-```bash
-ninja ets_tests_compiler_optimizer && ./bin-gtests/ets_tests_compiler_optimizer
-ninja interop_compiler_unit_tests && ./bin-gtests/interop_compiler_unit_tests
-ninja compiler_wrong_boot_context_test
-ninja compiler_tests
-ninja ets_interop_tests
-```
+| Change type | Minimum verification |
+|---|---|
+| ETS IR/intrinsic shape | ETS compiler gtest or checked coverage |
+| ETS codegen/runtime-call | ETS execution test plus runtime/compiler boundary validation |
+| JS interop | interop compiler gtest + interop execution/checked |
+| workflow smoke coverage | Smoke or focused case for affected JIT/AOT/LLVM/OSR modes |
+| fastpath | Three-sided irtoc/runtime/compiler validation |
 
-`plugins/ets/tests/CMakeLists.txt` also defines stdlib compilation smoke targets that exercise compiler modes such as
-AOT, JIT, LLVM AOT, and arm64 OSR through `tools/paoc_compile_stdlib.sh`.
-
-Generated wiring for ETS compiler extensions comes from `plugins/ets/ets_plugin_options.yaml` and conditional
-generation in `plugins/ets/compiler/CMakeLists.txt` such as `interop_intrinsic_kinds.h`.
-
-## Validation
-
-When changing ETS compiler logic, use more than one test layer:
-
-- focused ETS compiler gtests in `plugins/ets/tests/compiler/optimizer/`
-- boot/runtime context coverage in `plugins/ets/tests/compiler/wrong_boot_context_test/`
-- ETS checked layers in `plugins/ets/tests/checked/` and `plugins/ets/tests/ets_es_checked/`
-- runtime-facing execution layers such as `plugins/ets/tests/jitinterface/`, `ets_run_jit_ets_code_tests`,
-  `ets_run_jit_osr_ets_code_tests`, and `ets_run_aot_ets_code_tests`
-- JS interop coverage through `interop_compiler_unit_tests`, `ets_interop_tests`, and
-  `ets_interop_js_checked_tests` when interop code changed
-
-Use `docs/README.md` as the ETS compiler documentation and validation map when you need the full ETS-specific matrix.
-Use `../../../tests/AGENTS.md` for runner workflows instead of duplicating URunner details here.
-
-If you add or modify an intrinsic, usually you want:
-
-1. a focused compiler gtest or interop gtest for IR/codegen shape,
-2. a checked test for pass/disasm/event validation,
-3. an execution test in ETS checked / interop / jitinterface if runtime interaction changed.
-4. a baseline-vs-`irtoc` performance sanity check if the change was motivated by call-overhead savings; do not claim a
-   win without comparing against the ETS or C++ baseline on the target configuration.
-
-JS interop changes usually also need:
-
-1. `interop_compiler_unit_tests`,
-2. `ets_interop_tests` or a focused `*_gtests` subsuite from `plugins/ets/tests/interop_js/README.MD`,
-3. both required build flags enabled: `PANDA_ETS_INTEROP_JS` and `PANDA_JS_ETS_HYBRID_MODE`.
-
-For generic core-compiler validation, also use `../../../compiler/AGENTS.md`.
-
-## Documentation
-
-`docs/README.md` is the ETS compiler documentation index. Use it for the doc catalog, then open the focused note such as
-`interop_intrinsic_opt_doc.md`, `native_call_opt_doc.md`, or `interop_string_constpool_doc.md`.
+Done evidence must name ETS behavior impact, workflow coverage, validation run, and any runtime/irtoc boundary risk.
