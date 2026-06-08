@@ -450,6 +450,18 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
+     * toString
+     *
+     * @param { double } r
+     * @returns { String } return the string value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public toString(r: double): String {
+        return Double.toString(this.value, r.toInt());
+    }
+
+    /**
      * Converts this object to a string
      *
      * @returns { String } return the string value

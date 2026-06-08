@@ -296,6 +296,18 @@ export final class Short extends Integral implements Comparable<Short> {
     }
 
     /**
+     * Converts this object to a string
+     *
+     * @param { double } radix the radix base for string representation
+     * @returns { string } result of the conversion
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public toString(radix: double): string {
+        return this.toString(radix.toInt());
+    }
+
+    /**
     * Checks for equality this instance with provided object, treated as a Short
     *
     * @param { Any } other object to be checked against

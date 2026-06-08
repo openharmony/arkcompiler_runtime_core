@@ -539,7 +539,7 @@ export final class BigInt {
     public override toString(): string {
         return this.toString(10)
     }
-
+    
     /**
      * Returns a string representation of the BigInt object.
      *
@@ -562,6 +562,20 @@ export final class BigInt {
             return fastToStringHandler!(this)
         }
         return this.addSignToString(this.toStringAsGenericRadix(radix))
+    }
+
+    /**
+     * Returns a string representation of the BigInt object.
+     *
+     * @param { double | undefined } [radix] An integer in the range 2 through 36 specifying the base to use for
+     *     representing numeric values.
+     * @returns { string } A string representing the specified BigInt object.
+     * @throws { RangeError } Throw RangeError when radix is not between 2 and 36
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public toString(radix: double): string {
+        return this.toString(radix.toInt())
     }
 
     private static createFastToStringHandlerMap(): ToStringHandlerMap {
