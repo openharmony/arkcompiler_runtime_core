@@ -166,7 +166,7 @@ function testReplaceAllGroupCallbacks(): void {
         namedRegex,
         (
             match: string,
-            args: Object[],
+            args: (Object | undefined)[],
         ): string => {
             const groups = args[4] as Record<string, string>;
             const myGroups: CharNumGroups = {
@@ -184,7 +184,7 @@ function testReplaceAllGroupCallbacks(): void {
         indexedRegex,
         (
             _: string,
-            args: Object[],
+            args: (Object | undefined)[],
         ): String => {
             const charGroup = args[0] as String;
             const numGroup = args[1] as String;
