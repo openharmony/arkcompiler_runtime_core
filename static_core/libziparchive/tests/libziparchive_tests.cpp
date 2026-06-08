@@ -531,6 +531,31 @@ static void ModifyCentralDirEntryNameSize(const char *archivename, uint16_t over
     (void)fclose(fp);
 }
 
+// Modify compressedSize field of the first local file header.
+// LocalHeader is packed, compressedSize is at byte offset 18.
+static void ModifyFirstLocalHeaderCompressedSize(const char *archivename, uint32_t newValue)
+{
+    FILE *fp = fopen(archivename, "rbe");
+    ASSERT_NE(fp, nullptr);
+    (void)fseek(fp, 0, SEEK_END);
+    auto fileSize = ftell(fp);
+    (void)fseek(fp, 0, SEEK_SET);
+    std::vector<uint8_t> buffer(fileSize);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT_EQ(fread(buffer.data(), 1, fileSize, fp), static_cast<size_t>(fileSize));
+    (void)fclose(fp);
+
+    constexpr size_t COMPRESSED_SIZE_OFFSET = 18U;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    *reinterpret_cast<uint32_t *>(buffer.data() + COMPRESSED_SIZE_OFFSET) = newValue;
+
+    fp = fopen(archivename, "wbe");
+    ASSERT_NE(fp, nullptr);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT_EQ(fwrite(buffer.data(), 1, fileSize, fp), static_cast<size_t>(fileSize));
+    (void)fclose(fp);
+}
+
 TEST(LIBZIPARCHIVE, ZipFile)
 {
     /*
@@ -995,6 +1020,43 @@ TEST(LIBZIPARCHIVE, IsEntryDataConsistent_006)
     ASSERT_TRUE(zipFile.Open());
     auto result = zipFile.IsEntryDataConsistent("classes.abc");
     EXPECT_EQ(result, ark::extractor::ConsistencyResult::CONSISTENT);
+
+    (void)remove(archivename);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: IsEntryDataConsistent
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Test IsEntryDataConsistent with nextOffset overflow
+ */
+TEST(LIBZIPARCHIVE, IsEntryDataConsistent_007)
+{
+    std::vector<uint8_t> pfData;
+    {
+        pandasm::Parser p;
+        auto source = R"()";
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__CONSISTENCY_TEST_007__.zip";
+    GenerateZipfile(FILLER_TEXT, archivename, 3, pfData);
+    // Corrupt the first local header's compressedSize to test overflow
+    ModifyFirstLocalHeaderCompressedSize(archivename, UINT32_MAX);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    // Use "classes.abc" with non-zero offset to trigger the overflow guard
+    auto result = zipFile.IsEntryDataConsistent("classes.abc");
+    EXPECT_EQ(result, ark::extractor::ConsistencyResult::ENTRY_NOT_FOUND);
 
     (void)remove(archivename);
 }
