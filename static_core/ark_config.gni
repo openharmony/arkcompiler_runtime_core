@@ -140,6 +140,10 @@ declare_args() {
   is_ark_dfx_memory = false
 }
 
+if (is_host_product) {
+  ark_ets_interop_js = false
+}
+
 declare_args() {
   if (!defined(is_llvm_interpreter)) {
     is_llvm_interpreter = is_llvmbackend
@@ -201,7 +205,7 @@ if (panda_runtime_sdk_build) {
   enable_irtoc = false
 }
 
-if (current_os == "win" ||
+if (is_host_product || current_os == "win" ||
     current_os == "mingw" || current_os == "winuwp" || current_os == "mac" ||
     is_emulator || ark_use_common_runtime) {
   is_llvmbackend = false
