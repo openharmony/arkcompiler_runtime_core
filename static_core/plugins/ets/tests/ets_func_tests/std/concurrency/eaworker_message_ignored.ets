@@ -13,59 +13,9 @@
  * limitations under the License.
  */
 
-class Event {
-    constructor() {
-        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
-            this.resolveFn = resolve;
-        })
-    }
 
-    public wait(): boolean {
-        return this.promise.awaitSync();
-    }
-
-    public fire(val: boolean = true) {
-        this.resolveFn!(val);
-    }
-
-    private promise: Promise<boolean>;
-    private resolveFn: ((val: boolean) => void) | null = null;
-}
-
-function testTaskPool() {
-    let event = new Event();
-    taskpool.execute(() => {
-        arktest.expectError(() => {
-            EAWorker.current();
-        }, new Error('EAWorker:: Cannot get current worker in taskpool'));
-        event.fire();
-    });
-    event.wait();
-    CoroutineExtras.stopTaskpool();
-}
-
-function testWrapTaskErrorHandling() {
-    let errorCaught = false;
-    let waiter = new Event();
-    let eaw = new EAWorker(() => {
-        throw new Error('This is an uncaught exception!');
-    });
-    eaw.setUncaughtExceptionHandler((e: Error) => {
-        arktest.assertEQ(e.message, 'This is an uncaught exception!');
-        errorCaught = true;
-        waiter.fire();
-    });
-    eaw.start();
-    waiter.wait();
-    arktest.assertTrue(errorCaught);
-    arktest.expectError(() => {
-        eaw.join();
-    }, 'Unable to launch coroutine: no suitable worker was found');
-}
-
+// This test file is intended to be ignored and store failing tests from `eaworker_message.ets`
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
-    suite.addTest('testWrapTaskErrorHandling', testWrapTaskErrorHandling);
-    suite.addTest('testTaskPool', testTaskPool);
     return suite.run();
 }

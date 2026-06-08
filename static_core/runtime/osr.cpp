@@ -29,7 +29,7 @@ namespace ark {
 using compiler::CodeInfo;
 using compiler::VRegInfo;
 
-static void UnpoisonAsanStack([[maybe_unused]] void *ptr)
+static void NO_ADDRESS_SANITIZE UnpoisonAsanStack([[maybe_unused]] void *ptr)
 {
 #ifdef PANDA_ASAN_ON
     uint8_t sp;
