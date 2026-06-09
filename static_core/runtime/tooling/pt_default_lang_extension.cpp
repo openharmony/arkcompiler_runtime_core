@@ -23,6 +23,10 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/runtime.h"
+#if defined(PANDA_WITH_ETS)
+#include "plugins/ets/runtime/types/ets_bigint.h"
+#endif
+#include "runtime/tooling/bigint_helper.h"
 
 namespace ark::tooling {
 
@@ -133,6 +137,35 @@ std::optional<size_t> PtStaticDefaultExtension::GetLengthIfArray(const ObjectHea
     return coretypes::Array::Cast(const_cast<ObjectHeader *>(object))->GetLength();
 }
 
+std::optional<std::string> PtStaticDefaultExtension::GetAsBigIntString([[maybe_unused]] const ObjectHeader *object)
+{
+#if defined(PANDA_WITH_ETS)
+    auto cls = object->ClassAddr<Class>();
+    if (cls == nullptr) {
+        return {};
+    }
+    auto className = GetClassName(object);
+    if (className != ETS_BIGINT_CLASSNAME) {
+        return {};
+    }
+    auto *etsBigInt = reinterpret_cast<const ark::ets::EtsBigInt *>(object);
+    auto sign = etsBigInt->GetSign();
+    auto *bytes = etsBigInt->GetBytes();
+    if (bytes == nullptr || bytes->GetLength() == 0) {
+        return "0n";
+    }
+    auto length = bytes->GetLength();
+    PandaVector<uint32_t> bytesVec;
+    bytesVec.reserve(length);
+    for (size_t i = 0; i < length; i++) {
+        bytesVec.push_back(static_cast<uint32_t>(bytes->Get(i)));
+    }
+    return BigIntBytesToDecimalString(bytesVec, sign);
+#else
+    return {};
+#endif
+}
+
 void PtStaticDefaultExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
     ASSERT(object != nullptr);
@@ -153,6 +186,11 @@ void PtStaticDefaultExtension::EnumerateProperties(const ObjectHeader *object, c
                     false);
         }
     } else {
+        // std.core.BigInt will be displayed as a single number, not its internal structure
+        auto className = GetClassName(object);
+        if (className == ETS_BIGINT_CLASSNAME) {
+            return;
+        }
         do {
             for (const auto &field : cls->GetInstanceFields()) {
                 handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(object, field), field.IsFinal(),
