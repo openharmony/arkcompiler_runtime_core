@@ -24,8 +24,7 @@
 namespace ark::common_vm {
 inline void Mutator::DoEnterSaferegion()
 {
-    SetInSaferegion(ark::MutatorStatus::NATIVE);
-    static_cast<ark::Mutator *>(this)->GetMutatorLock()->Unlock();
+    UpdateStatus(ark::MutatorStatus::NATIVE);
 }
 
 inline bool Mutator::EnterSaferegion([[maybe_unused]] bool updateUnwindContext) noexcept
@@ -51,6 +50,11 @@ inline void Mutator::SetInSaferegion(ark::MutatorStatus state)
     static_cast<ark::Mutator *>(this)->StoreStatus(state);
 }
 
+inline void Mutator::UpdateStatus(ark::MutatorStatus state)
+{
+    static_cast<ark::Mutator *>(this)->UpdateStatus(state);
+}
+
 inline bool Mutator::InSaferegion() const
 {
     auto status = static_cast<const ark::Mutator *>(this)->GetStatus();
@@ -59,7 +63,7 @@ inline bool Mutator::InSaferegion() const
 
 inline void Mutator::DoLeaveSaferegion()
 {
-    SetInSaferegion(ark::MutatorStatus::RUNNING);
+    UpdateStatus(ark::MutatorStatus::RUNNING);
     // go slow path if the mutator should suspend
     if (UNLIKELY(HasAnySuspensionRequest())) {
         HandleSuspensionRequest();
