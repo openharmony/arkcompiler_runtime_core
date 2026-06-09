@@ -17,15 +17,19 @@
 
 #include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/include/oom_stats.h"
+#include "runtime/include/runtime.h"
+
+#include <string>
 
 namespace ark::ets {
 
-void EtsVmOutOfMemoryListener::OutOfMemory(size_t size)
+void EtsVmOutOfMemoryListener::OutOfMemory(size_t size, SpaceType spaceType)
 {
     mem::HeapManager *heapManager = vm_->GetHeapManager();
     auto *memStats = vm_->GetMemStats();
     const size_t activeMemory = (memStats != nullptr) ? memStats->GetFootprintHeap() : 0U;
-    ark::oom_stats::OomNotifier::NotifyBeforeManagedOom(heapManager->GetMaxMemory(), activeMemory, size);
+    ark::oom_stats::OomNotifier::NotifyBeforeManagedOom(heapManager->GetMaxMemory(), activeMemory, size,
+                                                        Runtime::GetOptions().GetProcessPackageName(), spaceType);
 }
 
 }  // namespace ark::ets

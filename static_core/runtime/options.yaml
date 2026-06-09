@@ -910,6 +910,11 @@ options:
   default: "profile.ap"
   description: Specify the location the collected profile information
 
+- name: process-package-name
+  type: std::string
+  default: ""
+  description: Process package name for DFX reporting (e.g. OOM HiSysEvent)
+
 - name: call-profiling-table-size
   type: uint32_t
   default: 1000

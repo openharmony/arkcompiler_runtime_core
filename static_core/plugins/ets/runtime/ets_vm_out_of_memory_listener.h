@@ -27,7 +27,7 @@ class EtsVmOutOfMemoryListener final : public RuntimeListener {
 public:
     explicit EtsVmOutOfMemoryListener(PandaEtsVM *vm) : vm_(vm) {}
 
-    void OutOfMemory(size_t size) override;
+    void OutOfMemory(size_t size, SpaceType spaceType) override;
 
 private:
     PandaEtsVM *vm_;
