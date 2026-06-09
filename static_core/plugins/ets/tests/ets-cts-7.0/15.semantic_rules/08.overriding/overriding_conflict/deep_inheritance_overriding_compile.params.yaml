@@ -30,8 +30,9 @@ cases:
     call: |-
       let c1 = new C1();
       (c1 as I1).foo().foo();
-      (c1 as I2).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
+      (c1 as I2).foo().foo();
+      arktest.assertTrue((c1 as I1) instanceof I1);
+      arktest.assertTrue((c1 as I2) instanceof I2);
 
   - hierarchy: |-
      |  I1 I2     
@@ -58,8 +59,9 @@ cases:
     call: |-
       let c2 = new C2();
       (c2 as I1).foo();
-      (c2 as I2).foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
+      (c2 as I2).foo();
+      arktest.assertTrue((c2 as I1) instanceof I1);
+      arktest.assertTrue((c2 as I2) instanceof I2);
 
   - hierarchy: |-
      |  I1 I2 I3   
@@ -88,8 +90,9 @@ cases:
     call: |-
       let c2 = new C2();
       (c2 as I1).foo().foo();
-      (c2 as I2).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I1 and I2 interfaces."
+      (c2 as I2).foo().foo();
+      arktest.assertTrue((c2 as I1) instanceof I1);
+      arktest.assertTrue((c2 as I2) instanceof I2);
 
   - descr: "Conflicting implementations in interfaces I3, I5"
     decl: |-
@@ -109,8 +112,9 @@ cases:
     call: |-
       let c2 = new C2();
       (c2 as I3).foo().foo();
-      (c2 as I5).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I3 and I5 interfaces."
+      (c2 as I5).foo().foo();
+      arktest.assertTrue((c2 as I3) instanceof I3);
+      arktest.assertTrue((c2 as I5) instanceof I5);
 
   - descr: "Conflicting implementations in interfaces I4, I5"
     decl: |-
@@ -130,8 +134,9 @@ cases:
     call: |-
       let c2 = new C2();
       (c2 as I4).foo().foo();
-      (c2 as I5).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I4 and I5 interfaces."
+      (c2 as I5).foo().foo();
+      arktest.assertTrue((c2 as I4) instanceof I4);
+      arktest.assertTrue((c2 as I5) instanceof I5);
 
   - hierarchy: |-
      |  I1 I2 I3   
@@ -170,8 +175,9 @@ cases:
     call: |-
       let c3 = new C3();
       (c3 as I1).foo().foo();
-      (c3 as I2).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I3 and I5 interfaces."
+      (c3 as I2).foo().foo();
+      arktest.assertTrue((c3 as I1) instanceof I1);
+      arktest.assertTrue((c3 as I2) instanceof I2);
 
   - descr: "Conflicting implementations in interfaces I3, I5"
     decl: |-
@@ -199,8 +205,9 @@ cases:
     call: |-
       let c3 = new C3();
       (c3 as I3).foo().foo();
-      (c3 as I5).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I3 and I5 interfaces."
+      (c3 as I5).foo().foo();
+      arktest.assertTrue((c3 as I3) instanceof I3);
+      arktest.assertTrue((c3 as I5) instanceof I5);
 
   - descr: "Conflicting implementations in interfaces I4, I5"
     decl: |-
@@ -226,8 +233,9 @@ cases:
     call: |-
       let c3 = new C3();
       (c3 as I4).foo().foo();
-      (c3 as I5).foo().foo()
-    expected_out: "Semantic error ESE0187: Method 'foo' is declared in I4 and I5 interfaces."
+      (c3 as I5).foo().foo();
+      arktest.assertTrue((c3 as I4) instanceof I4);
+      arktest.assertTrue((c3 as I5) instanceof I5);
 
   - descr: "Conflicting implementations in interfaces I6, I7"
     decl: |-
@@ -253,4 +261,6 @@ cases:
     call: |-
       let c3 = new C3();
       (c3 as I6).foo().foo();
-      (c3 as I7).foo().foo()
+      (c3 as I7).foo().foo();
+      arktest.assertTrue((c3 as I6) instanceof I6);
+      arktest.assertTrue((c3 as I7) instanceof I7);
