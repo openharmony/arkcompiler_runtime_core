@@ -27,6 +27,7 @@
 #include "optimizer/analysis/object_type_propagation.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/branch_elimination.h"
+#include "optimizer/optimizations/hybrid_strings_optimization.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
 #include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
@@ -160,6 +161,10 @@ bool Inlining::RunImpl()
         blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetStringBuilderConstructorWithStringArg());
         blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetStringBuilderConstructorWithCharArrayArg());
         blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetGetterStringBuilderStringLength());
+    }
+
+    if (ark::compiler::g_options.IsCompilerHybridStringsOptimization()) {
+        blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetMethodStringBuilderConcatStrings());
     }
 
     return Do();

@@ -474,6 +474,11 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringBuilderConcatStrings([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsClassStdCoreArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
@@ -620,7 +625,167 @@ public:
         return nullptr;
     }
 
-    virtual MethodPtr GetMethodStringBuilderAppendString([[maybe_unused]] ClassPtr klass) const
+    virtual MethodPtr GetMethodStringBuilderAppendString() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringBuilderToString() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringBuilderConcatStrings() const
+    {
+        return nullptr;
+    }
+
+    virtual bool IsClassString([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassConsole([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual MethodPtr GetMethodStringLength() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringGetLength() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringIsEmpty() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSubstringInt() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSubstringIntInt() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSubstr() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringConcat() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringConcatString2() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringConcatString3() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringConcatString4() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringValueOf() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringToString() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringCreateHTMLString() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringBig() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSmall() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringBlink() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringBold() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringItalics() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringStrike() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSub() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSup() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringFixed() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringFontColor() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringFontSizeInt() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringFontSizeString() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringLink() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringSlice() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringIsCompressed() const
     {
         return nullptr;
     }
@@ -1906,6 +2071,16 @@ public:
     }
 
     virtual bool IsUseAllStrings() const
+    {
+        return false;
+    }
+
+    virtual bool IsMethodRequireFlattening([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsIntrinsicRequireFlattening([[maybe_unused]] IntrinsicId id) const
     {
         return false;
     }

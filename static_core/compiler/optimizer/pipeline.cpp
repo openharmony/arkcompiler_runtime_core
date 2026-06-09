@@ -37,6 +37,7 @@
 #include "optimizer/optimizations/escape.h"
 #include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/optimizations/fill_savestate_suspend_inputs.h"
+#include "optimizer/optimizations/hybrid_strings_optimization.h"
 #include "optimizer/optimizations/if_conversion.h"
 #include "optimizer/optimizations/inlining.h"
 #include "optimizer/optimizations/licm.h"
@@ -193,6 +194,7 @@ bool Pipeline::RunOptimizations()
         graph->RunPass<Inlining>();
     }
 
+    graph->RunPass<HybridStringsOptimization>();
     graph->RunPass<SimplifyStringBuilder>();
     graph->RunPass<CatchInputs>();
     graph->RunPass<TryCatchResolving>();

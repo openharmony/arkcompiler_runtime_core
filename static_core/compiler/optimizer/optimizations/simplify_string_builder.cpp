@@ -58,22 +58,6 @@ bool IsInliningEnabled()
     return ark::compiler::g_options.IsCompilerInlining();
 }
 
-bool IsMethodInInliningBlackList(RuntimeInterface *runtime, Inst *inst)
-{
-    ASSERT(inst->GetOpcode() == Opcode::CallStatic);
-    CallInst *callInst = inst->CastToCallStatic();
-
-    auto &skipList = ark::compiler::g_options.GetCompilerInliningBlacklist();
-    if (!skipList.empty()) {
-        std::string methodName = runtime->GetMethodFullName(callInst->GetCallMethod());
-        if (std::find(skipList.begin(), skipList.end(), methodName) != skipList.end()) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 bool IsSafeToProceed(Graph *graph)
 {
     for (auto *bb : graph->GetBlocksRPO()) {
@@ -281,6 +265,7 @@ bool SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
             if (IsStringBuilderToString(*inst)) {
                 (*inst)->ReplaceUsers(arg);
                 (*inst)->ClearFlag(compiler::inst_flags::NO_DCE);
+                FixBrokenSaveStates(arg);
                 COMPILER_LOG(DEBUG, SIMPLIFY_SB)
                     << "Remove StringBuilder toString()-call (id=" << (*inst)->GetId() << ")";
                 isApplied_ = true;
@@ -316,33 +301,6 @@ InstIter SimplifyStringBuilder::SkipToStringBuilderDefaultOrStringArgConstructor
     return std::find_if(std::move(begin), std::move(end), [](auto inst) {
         return IsMethodStringBuilderDefaultConstructor(inst) || IsMethodStringBuilderConstructorWithStringArg(inst);
     });
-}
-
-IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
-    const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics, size_t appendCount, DataType::Type type,
-    SaveStateInst *saveState)
-{
-    auto concatIntrinsic =
-        GetGraph()->CreateInstIntrinsic(GetGraph()->GetRuntime()->GetStringConcatStringsIntrinsicId(appendCount));
-    ASSERT(concatIntrinsic->RequireState());
-
-    concatIntrinsic->SetType(type);
-    // Allocate input types (+1 input for save state)
-    concatIntrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), appendCount + 1);
-
-    for (size_t index = 0; index < appendCount; ++index) {
-        auto arg = appendIntrinsics[index]->GetInput(1).GetInst();
-        concatIntrinsic->AppendInput(arg);
-        concatIntrinsic->AddInputType(arg->GetType());
-    }
-
-    auto saveStateClone = CopySaveState(GetGraph(), saveState);
-    concatIntrinsic->AppendInput(saveStateClone);
-    concatIntrinsic->AddInputType(saveStateClone->GetType());
-
-    concatIntrinsic->SetPc(saveState->GetPc());
-
-    return concatIntrinsic;
 }
 
 bool CheckUnsupportedCases(Inst *instance, Inst *ctorCall)
@@ -435,6 +393,14 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
     return true;
 }
 
+void SimplifyStringBuilder::FixBrokenSaveStates(Inst *source)
+{
+    for (auto &user : source->GetUsers()) {
+        auto userInst = user.GetInst();
+        FixBrokenSaveStates(source, userInst);
+    }
+}
+
 void SimplifyStringBuilder::FixBrokenSaveStates(Inst *source, Inst *target)
 {
     if (source->IsMovableObject()) {
@@ -488,7 +454,11 @@ void SimplifyStringBuilder::ReplaceWithConcatIntrinsic(const ConcatenationMatch 
     auto &appendIntrinsics = match.appendIntrinsics;
     auto toStringCall = match.toStringCall;
 
-    auto concatIntrinsic = CreateConcatIntrinsic(appendIntrinsics, match.appendCount, toStringCall->GetType(),
+    std::array<Inst *, ARGS_NUM_4> args;
+    for (size_t index = 0; index < match.appendCount; ++index) {
+        args[index] = appendIntrinsics[index]->GetInput(1).GetInst();
+    };
+    auto concatIntrinsic = CreateConcatIntrinsic(GetGraph(), args, match.appendCount, toStringCall->GetType(),
                                                  toStringCall->GetSaveState());
     InsertIntrinsicAndFixSaveStates(concatIntrinsic, appendIntrinsics, match.appendCount, toStringCall);
     toStringCall->ReplaceUsers(concatIntrinsic);
@@ -630,19 +600,20 @@ bool SimplifyStringBuilder::HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Inst *ct
     // Release clang-tidy-14 claims match.exit.toStringCall as nullable ignorring IsInstanceHoistable checks
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
     auto fnCheckUser = [loop = inst->GetBasicBlock()->GetLoop(), ctorCall, appendInstructionVisited](auto &user) {
-        bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == loop;
-        bool isSaveState = user.GetInst()->IsSaveState();
-        bool isCheckCast = IsCheckCastWithoutUsers(user.GetInst());
-        bool isPhi = user.GetInst()->IsPhi();
-        bool isVisited = user.GetInst()->IsMarked(appendInstructionVisited);
-        bool isStringLength = IsStringLengthAccessorChain(user.GetInst());
+        auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
+        bool sameLoop = userInst->GetBasicBlock()->GetLoop() == loop;
+        bool isSaveState = userInst->IsSaveState();
+        bool isCheckCast = IsCheckCastWithoutUsers(userInst);
+        bool isPhi = userInst->IsPhi();
+        bool isVisited = userInst->IsMarked(appendInstructionVisited);
+        bool isStringLength = IsStringLengthAccessorChain(userInst);
         if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
-            bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
+            bool isAppendInstruction = IsStringBuilderAppend(userInst);
             return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
                    !(isAppendInstruction && isVisited);
         }
         if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
-            bool isSbCtorStrInstruction = IsMethodStringBuilderConstructorWithStringArg(user.GetInst());
+            bool isSbCtorStrInstruction = IsMethodStringBuilderConstructorWithStringArg(userInst);
             return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
                    !(isSbCtorStrInstruction && isVisited);
         }
@@ -695,15 +666,48 @@ bool SimplifyStringBuilder::IsToStringHoistable(const ConcatenationLoopMatch &ma
     return HasPhiOrAppendOrLengthUsersOnly(match.exit.toStringCall, match.preheader.ctorCall, appendInstructionVisited);
 }
 
+SaveStateInst *FindLastSaveStateInDominators(BasicBlock *block, uint32_t loopInliningDepth)
+{
+    auto *dominator = block->GetDominator();
+    while (dominator != nullptr) {
+        for (auto inst : dominator->InstsReverse()) {
+            if (inst->GetOpcode() == Opcode::SaveState) {
+                return inst->CastToSaveState()->GetInliningDepth() == loopInliningDepth ? inst->CastToSaveState()
+                                                                                        : nullptr;
+            }
+        }
+        dominator = dominator->GetDominator();
+    }
+    return nullptr;
+}
+
+uint32_t GetLoopInliningDepth(Loop *loop)
+{
+    uint32_t inliningDepth = UINT32_MAX;
+    for (auto block : loop->GetBlocks()) {
+        for (auto inst : block->Insts()) {
+            if (!inst->IsSaveState()) {
+                continue;
+            }
+
+            inliningDepth = std::min(inliningDepth, static_cast<SaveStateInst *>(inst)->GetInliningDepth());
+        }
+    }
+
+    return inliningDepth;
+}
+
 SaveStateInst *FindPreHeaderSaveState(Loop *loop)
 {
     auto preheader = loop->GetPreHeader();
+    auto loopInliningDepth = GetLoopInliningDepth(loop);
     for (const auto &inst : preheader->InstsReverse()) {
         if (inst->GetOpcode() == Opcode::SaveState) {
-            return inst->CastToSaveState();
+            return inst->CastToSaveState()->GetInliningDepth() == loopInliningDepth ? inst->CastToSaveState() : nullptr;
         }
     }
-    return FindFirstSaveStateInDominators(preheader);
+
+    return FindLastSaveStateInDominators(preheader, loopInliningDepth);
 }
 
 size_t CountOuterLoopSuccs(BasicBlock *block)
@@ -719,6 +723,34 @@ BasicBlock *GetOuterLoopSucc(BasicBlock *block)
     return found != block->GetSuccsBlocks().end() ? *found : nullptr;
 }
 
+bool HasStringBuilderToStringUser(BasicBlock *block, Loop *loop, Marker visited)
+{
+    if (block->IsEndBlock()) {
+        return false;
+    }
+
+    if (block->SetMarker(visited)) {
+        return false;
+    }
+
+    for (auto succ : block->GetSuccsBlocks()) {
+        for (auto inst : block->Insts()) {
+            if (HasInputPhiRecursively(inst, visited, [loop](auto &input) {
+                    auto inputInst = input.GetInst();
+                    auto sameLoop = inputInst->GetBasicBlock()->GetLoop() == loop;
+                    return sameLoop && IsStringBuilderToString(inputInst);
+                }))
+                return true;
+        }
+
+        if (HasStringBuilderToStringUser(succ, loop, visited)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 BasicBlock *GetLoopPostExit(Loop *loop)
 {
     // Find a block immediately following after loop
@@ -729,14 +761,25 @@ BasicBlock *GetLoopPostExit(Loop *loop)
     // Loop structures different from the one described above are not supported in current implementation
 
     BasicBlock *postExit = nullptr;
+    MarkerHolder visited {loop->GetHeader()->GetGraph()};
     for (auto block : loop->GetBlocks()) {
         size_t count = CountOuterLoopSuccs(block);
         if (count == 0) {
             continue;
         }
-        if (count == 1 && postExit == nullptr) {
-            postExit = GetOuterLoopSucc(block);
-            continue;
+        if (count == 1) {
+            auto candidate = GetOuterLoopSucc(block);
+            if (candidate->GetLoop() != loop->GetOuterLoop()) {
+                // Unsupported case
+                return nullptr;
+            }
+            if (!HasStringBuilderToStringUser(candidate, loop, visited.GetMarker())) {
+                continue;
+            }
+            if (postExit == nullptr) {
+                postExit = candidate;
+                continue;
+            }
         }
         // Unsupported case
         return nullptr;
@@ -756,7 +799,7 @@ CallInst *SimplifyStringBuilder::CreateStringBuilderAppendString(Inst *instance,
 {
     auto graph = GetGraph();
     auto runtime = graph->GetRuntime();
-    auto methodPtr = runtime->GetMethodStringBuilderAppendString(runtime->GetStringBuilderClass());
+    auto methodPtr = runtime->GetMethodStringBuilderAppendString();
     ASSERT(methodPtr != nullptr);
     auto methodId = runtime->GetMethodId(methodPtr);
     auto newAppend =
@@ -1153,6 +1196,14 @@ Inst *SimplifyStringBuilder::HoistInstructionToPreHeader(BasicBlock *preHeader, 
             inst->InsertAfter(target);
         }
     }
+
+    CallInst *caller = nullptr;
+    uint32_t depth = UINT32_MAX;
+    if (inst->RequireState()) {
+        caller = inst->GetSaveState()->GetCallerInst();
+        depth = inst->GetSaveState()->GetInliningDepth();
+    }
+
     inst->GetBasicBlock()->EraseInst(inst, true);
     if (lastInst == nullptr || lastInst->IsPhi()) {
         preHeader->AppendInst(inst);
@@ -1171,9 +1222,11 @@ Inst *SimplifyStringBuilder::HoistInstructionToPreHeader(BasicBlock *preHeader, 
     if (inst->RequireState()) {
         ASSERT(saveState != nullptr);
         auto saveStateClone = CopySaveState(GetGraph(), saveState);
-        if (saveStateClone->GetBasicBlock() == nullptr) {
-            inst->InsertBefore(saveStateClone);
-        }
+        saveStateClone->SetCallerInst(caller);
+        ASSERT(depth != UINT32_MAX);
+        saveStateClone->SetInliningDepth(depth);
+        ASSERT(saveStateClone->GetBasicBlock() == nullptr);
+        inst->InsertBefore(saveStateClone);
         inst->SetSaveState(saveStateClone);
         inst->SetPc(saveStateClone->GetPc());
     }
@@ -1254,14 +1307,14 @@ void HoistCheckInstructionInputs(Inst *inst, BasicBlock *loopBlock, BasicBlock *
     }
 }
 
-void SimplifyStringBuilder::HoistCheckCastInstructionUsers(Inst *inst, BasicBlock *loopBlock, BasicBlock *postExit)
+void SimplifyStringBuilder::HoistCheckCastInstructionUsers(Inst *inst, BasicBlock *loopBlock)
 {
     // Hoist CheckCast instruction to post exit block
 
     // Start with CheckCast instruction itself
     ASSERT(instructionsStack_.empty());
     for (auto &user : inst->GetUsers()) {
-        auto userInst = user.GetInst();
+        auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
         if (userInst->GetBasicBlock() == loopBlock && IsCheckCastWithoutUsers(userInst)) {
             instructionsStack_.push(userInst);
         }
@@ -1297,7 +1350,7 @@ void SimplifyStringBuilder::HoistCheckCastInstructionUsers(Inst *inst, BasicBloc
         COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Hoist instruction id=" << userInst->GetId() << " ("
                                          << GetOpcodeString(userInst->GetOpcode())
                                          << ") from loop block id=" << loopBlock->GetId()
-                                         << " to post exit block id=" << postExit->GetId()
+                                         << " to post exit block id=" << postExit_->GetId()
                                          << " after inst id=" << inst->GetId();
     }
 }
@@ -1307,10 +1360,9 @@ void SimplifyStringBuilder::HoistInstructionsToPostExit(const ConcatenationLoopM
     // Move toString()-call and its inputs/users (null-checks, etc) out of the loop
     // and place them in the loop exit successor block
 
-    auto postExit = GetLoopPostExit(match.block->GetLoop());
-    ASSERT(postExit != nullptr);
-    ASSERT(!postExit->IsEmpty());
-    ASSERT(saveState->GetBasicBlock() == postExit);
+    ASSERT(postExit_ != nullptr);
+    ASSERT(!postExit_->IsEmpty());
+    ASSERT(saveState->GetBasicBlock() == postExit_);
     ASSERT(match.exit.toStringCall->RequireState());
 
     auto loopBlock = match.exit.toStringCall->GetBasicBlock();
@@ -1324,18 +1376,20 @@ void SimplifyStringBuilder::HoistInstructionsToPostExit(const ConcatenationLoopM
     } else {
         // Duplicate save state and prepend both instructions
         match.exit.toStringCall->SetSaveState(CopySaveState(GetGraph(), saveState));
-        InsertBeforeWithSaveState(match.exit.toStringCall, postExit->GetFirstInst());
+        InsertBeforeWithSaveState(match.exit.toStringCall, postExit_->GetFirstInst());
     }
+
+    FixBrokenSaveStates(match.exit.toStringCall);
 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Hoist toString()-call instruction id=" << match.exit.toStringCall->GetId()
                                      << " from loop block id=" << loopBlock->GetId()
-                                     << " to post exit block id=" << postExit->GetId();
+                                     << " to post exit block id=" << postExit_->GetId();
 
     // Hoist all the toString-call Check instructions inputs
-    HoistCheckInstructionInputs(match.exit.toStringCall, loopBlock, postExit);
+    HoistCheckInstructionInputs(match.exit.toStringCall, loopBlock, postExit_);
 
     // Hoist toString-call instructions users
-    HoistCheckCastInstructionUsers(match.exit.toStringCall, loopBlock, postExit);
+    HoistCheckCastInstructionUsers(match.exit.toStringCall, loopBlock);
 }
 
 void SimplifyStringBuilder::Cleanup(const ConcatenationLoopMatch &match)
@@ -1479,7 +1533,10 @@ void SimplifyStringBuilder::RemoveUnusedPhiInstructions(Loop *loop)
 void SimplifyStringBuilder::FixBrokenSaveStates(Loop *loop)
 {
     ssb_.FixSaveStatesInBB(loop->GetPreHeader());
-    ssb_.FixSaveStatesInBB(GetLoopPostExit(loop));
+    ssb_.FixSaveStatesInBB(postExit_);
+    for (auto inst : GetGraph()->GetStartBlock()->Insts()) {
+        ssb_.FixInstUsageInSS(GetGraph(), inst);
+    }
 }
 
 void SimplifyStringBuilder::Cleanup(Loop *loop)
@@ -1586,7 +1643,7 @@ bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
     // (2)
     bool toStringCallInputUsedAnywhereExceptPhiOrLength = HasInput(phi, [phi](auto &input) {
         return IsStringBuilderToString(input.GetInst()) && HasUser(input.GetInst(), [phi](auto &user) {
-                   auto userInst = user.GetInst();
+                   auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
                    bool isPhi = userInst == phi;
                    bool isSaveState = userInst->IsSaveState();
                    bool isCheckCast = IsCheckCastWithoutUsers(userInst);
@@ -2086,12 +2143,12 @@ bool SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
 
     // Check if basic block for instructions to hoist exist
     // Alternative way maybe to create one
-    auto postExit = GetLoopPostExit(loop);
-    if (postExit == nullptr) {
+    postExit_ = GetLoopPostExit(loop);
+    if (postExit_ == nullptr) {
         return isAppliedLocal;
     }
 
-    auto postExitSaveState = FindFirstSaveState(postExit);
+    auto postExitSaveState = FindFirstSaveState(postExit_);
     ASSERT(postExitSaveState);  // IR Builder must create empty save states for loop exits
 
     for (auto &match : MatchLoopConcatenation(loop)) {
@@ -2442,6 +2499,9 @@ void SimplifyStringBuilder::Cleanup(Inst *instance, Inst *instanceFirstAppendCal
 
     // Mark 'instance' itself as dead
     instance->ClearFlag(inst_flags::NO_DCE);
+    auto loadClass = instance->GetInput(0).GetInst();
+    ASSERT(loadClass->IsClassInst() || loadClass->GetOpcode() == Opcode::LoadImmediate);
+    loadClass->ClearFlag(inst_flags::NO_DCE);
 
     // Remove instructions marked dead from save states
     RemoveFromSaveStateInputs(instance);
@@ -2479,7 +2539,7 @@ void SimplifyStringBuilder::FixBrokenSaveStatesForStringBuilderCalls(Inst *insta
 {
     for (auto &user : instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (userInst->IsSaveState()) {
+        if (userInst->IsSaveState() || !userInst->GetFlag(inst_flags::NO_DCE)) {
             continue;
         }
 
@@ -2632,10 +2692,8 @@ bool SimplifyStringBuilder::OptimizeStringBuilderChain()
         auto &calls = instanceCalls.second;
 
         for (auto call : calls) {
-            // Switch call to new instance only if it is not marked for removal
-            if (call->GetFlag(inst_flags::NO_DCE)) {
-                call->SetInput(0U, inputInstance);
-            }
+            // Switch call to new instance
+            call->SetInput(0U, inputInstance);
         }
 
         FixBrokenSaveStatesForStringBuilderCalls(inputInstance);

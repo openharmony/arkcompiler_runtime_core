@@ -233,6 +233,12 @@ options:
   description: Enable Branch Elimination Pass
   tags: [perf]
 
+- name: compiler-hybrid-strings-optimization
+  type: bool
+  default: true
+  description: Enable Hybrid Strings Optimization Pass
+  tags: [perf]
+
 - name: compiler-optimize-string-concat
   type: bool
   default: true

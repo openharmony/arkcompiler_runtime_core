@@ -199,6 +199,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/licm_conditions.cpp
         optimizer/optimizations/condition_chain_manager.cpp
         optimizer/optimizations/condition_chain_cache.cpp
+        optimizer/optimizations/hybrid_strings_optimization.cpp
         optimizer/optimizations/locations_builder.cpp
         optimizer/optimizations/loop_idioms.cpp
         optimizer/optimizations/loop_peeling.cpp
