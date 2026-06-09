@@ -124,6 +124,8 @@ public:
     void Set(EtsInt pos, EtsByte val);
 
     void SetValues(EtsStdCoreArrayBuffer *other, EtsInt begin);
+    bool IsAtomicInBounds(EtsInt index, EtsInt byteOffset, size_t elementSize) const;
+    bool DoAtomicBoundaryCheck(EtsInt index, EtsInt byteOffset, size_t elementSize) const;
 
     static constexpr size_t GetByteLengthOffset()
     {

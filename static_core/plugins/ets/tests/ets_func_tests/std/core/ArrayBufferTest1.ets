@@ -19,6 +19,7 @@ function main(): int {
   failures += test(createEmptyArrayBuffer(), "Create empty ArrayBuffer");
   failures += test(createArrayBufferOfVariousLengths(), "Create ArrayBuffer of Various lengths");
   failures += test(sliceArrayBufferInt(), "Slice ArrayBuffer with various int parameters");
+  failures += test(arrayBufferAtomicBoundaryCheck(), "ArrayBuffer atomic boundary check");
 
   return failures == 0 ? 0 : 1;
 }
@@ -93,6 +94,33 @@ function sliceArrayBufferInt(): int {
   end = 8;
   if (a.slice(start, end).byteLength != 4)
     return 1;
+
+  return 0;
+}
+
+/**
+ * Check atomic ArrayBuffer methods with out-of-range index and byteOffset parameters.
+ */
+function arrayBufferAtomicBoundaryCheck(): int {
+  let a = new ArrayBuffer(4);
+  a.atomicStoreI8(3, 0, (7).toByte());
+  if (a.atomicLoadI8(3, 0) != 7)
+    return 1;
+
+  arktest.expectError((): void => { a.atomicLoadI8(100, 0); },
+                      new IndexOutOfBoundsError("ArrayBuffer atomic position 100 with byte offset 0 is out of bounds"));
+  arktest.expectError((): void => { a.atomicLoadI8(-1, 0); },
+                      new IndexOutOfBoundsError("ArrayBuffer atomic position -1 with byte offset 0 is out of bounds"));
+  arktest.expectError((): void => { a.atomicLoadI8(0, -1); },
+                      new IndexOutOfBoundsError("ArrayBuffer atomic position 0 with byte offset -1 is out of bounds"));
+  arktest.expectError((): void => { a.atomicStoreI8(100, 0, (1).toByte()); },
+                      new IndexOutOfBoundsError("ArrayBuffer atomic position 100 with byte offset 0 is out of bounds"));
+  arktest.expectError((): void => { a.atomicStoreI32(0, 2, 1); },
+                      new IndexOutOfBoundsError("ArrayBuffer atomic position 0 with byte offset 2 is out of bounds"));
+
+  let small = new ArrayBuffer(2);
+  arktest.expectError((): void => { small.atomicLoadI32(0, 0); },
+                      new IndexOutOfBoundsError("ArrayBuffer atomic position 0 with byte offset 0 is out of bounds"));
 
   return 0;
 }

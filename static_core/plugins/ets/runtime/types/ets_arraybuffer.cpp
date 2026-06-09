@@ -191,4 +191,29 @@ bool EtsStdCoreArrayBuffer::DoBoundaryCheck(EtsInt pos) const
     return true;
 }
 
+bool EtsStdCoreArrayBuffer::IsAtomicInBounds(EtsInt index, EtsInt byteOffset, size_t elementSize) const
+{
+    ASSERT(elementSize > 0);
+    auto byteLength = static_cast<int64_t>(GetByteLength());
+    auto elementSizeSigned = static_cast<int64_t>(elementSize);
+    auto indexSigned = static_cast<int64_t>(index);
+    auto byteOffsetSigned = static_cast<int64_t>(byteOffset);
+    auto bytePosition = byteOffsetSigned + indexSigned * elementSizeSigned;
+
+    return indexSigned >= 0 && byteOffsetSigned >= 0 && bytePosition + elementSizeSigned <= byteLength;
+}
+
+bool EtsStdCoreArrayBuffer::DoAtomicBoundaryCheck(EtsInt index, EtsInt byteOffset, size_t elementSize) const
+{
+    if (!IsAtomicInBounds(index, byteOffset, elementSize)) {
+        PandaString message = "ArrayBuffer atomic position ";
+        message.append(ToPandaString(index)).append(" with byte offset ").append(ToPandaString(byteOffset));
+        message.append(" is out of bounds");
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreIndexOutOfBoundsError,
+                          message.c_str());
+        return false;
+    }
+    return true;
+}
+
 }  // namespace ark::ets
