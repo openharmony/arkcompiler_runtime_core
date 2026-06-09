@@ -155,8 +155,12 @@ public:
 
         AddListenerIfMatches(listener, eventMask, &loadModuleListeners_, Event::LOAD_MODULE, &hasLoadModuleListeners_);
 
-        AddListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
-                             &hasThreadEventsListeners_);
+        {
+            // ThreadEnd events can be issued concurrently during threads termination
+            os::memory::WriteLockHolder rwLock(threadEventLock_);
+            AddListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
+                                 &hasThreadEventsListeners_);
+        }
 
         AddListenerIfMatches(listener, eventMask, &exceptionListeners_, Event::EXCEPTION_EVENTS,
                              &hasExceptionListeners_);
@@ -194,8 +198,12 @@ public:
         RemoveListenerIfMatches(listener, eventMask, &loadModuleListeners_, Event::LOAD_MODULE,
                                 &hasLoadModuleListeners_);
 
-        RemoveListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
-                                &hasThreadEventsListeners_);
+        {
+            // ThreadEnd events can be issued concurrently during threads termination
+            os::memory::WriteLockHolder rwLock(threadEventLock_);
+            RemoveListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
+                                    &hasThreadEventsListeners_);
+        }
 
         RemoveListenerIfMatches(listener, eventMask, &exceptionListeners_, Event::EXCEPTION_EVENTS,
                                 &hasExceptionListeners_);
@@ -238,6 +246,7 @@ public:
     void ThreadStartEvent(ManagedThread *managedThread)
     {
         if (UNLIKELY(hasThreadEventsListeners_)) {
+            os::memory::ReadLockHolder rwlock(threadEventLock_);
             for (auto *listener : threadEventsListeners_) {
                 if (listener != nullptr) {
                     listener->ThreadStart(managedThread);
@@ -249,6 +258,7 @@ public:
     void ThreadEndEvent(ManagedThread *managedThread)
     {
         if (UNLIKELY(hasThreadEventsListeners_)) {
+            os::memory::ReadLockHolder rwlock(threadEventLock_);
             for (auto *listener : threadEventsListeners_) {
                 if (listener != nullptr) {
                     listener->ThreadEnd(managedThread);
@@ -612,7 +622,7 @@ private:
 
     bool hasBytecodePcListeners_ = false;
     bool hasLoadModuleListeners_ = false;
-    bool hasThreadEventsListeners_ = false;
+    std::atomic<bool> hasThreadEventsListeners_ = false;
     std::atomic<bool> hasGarbageCollectorListeners_ = false;
     bool hasExceptionListeners_ = false;
     bool hasVmEventsListeners_ = false;
@@ -625,6 +635,7 @@ private:
     Rendezvous *rendezvous_ {nullptr};
 
     os::memory::RWLock debuggerLock_;
+    os::memory::RWLock threadEventLock_;
     os::memory::RWLock gcEventLock_;
     PandaList<DebuggerListener *> debuggerListeners_;
 };

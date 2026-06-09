@@ -116,30 +116,29 @@ bool Tools::IsDebugSessionAttachAllowed() const
     return Runtime::GetCurrent()->GetOptions().IsDebuggerAttachAllowed();
 }
 
-static void DeoptimizeAllCompiledMethods(Runtime *runtime, ManagedThread *thread)
+static void CollectCompiledMethods(Runtime *runtime, PandaSet<Method *> &compiledMethods)
 {
-    PandaSet<Method *> compiledMethods;
-    runtime->GetClassLinker()->EnumerateClasses([&](Class *klass) {
+    if (UNLIKELY(!runtime->GetClassLinker()->GetAotManager()->HasAotFiles())) {
+        return;
+    }
+    // NOTE(dslynko, #34959): this collection will conflict with enabled JIT, which is able to load classes
+    // and cannot be suspended
+    runtime->GetClassLinker()->EnumerateClasses([&compiledMethods](Class *klass) {
         ASSERT(klass != nullptr);
         for (auto &method : klass->GetMethodsWithCopied()) {
-            // Note special handling for proxy methods
             if (method.HasCompiledCode() && !method.IsIntrinsic() && !method.IsNative() && !method.IsProxy()) {
                 compiledMethods.insert(&method);
             }
         }
         return true;
     });
-    if (!compiledMethods.empty()) {
-        ScopedManagedCodeThread smct(thread);
-        InvalidateCompiledEntryPoint(compiledMethods, false);
-    }
 }
 
 DebugSessionAttachErrorCode Tools::AttachDebugSession()
 {
     auto *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    ASSERT(!ManagedThread::IsManagedScope());
+    ASSERT_NATIVE_CODE();
 
     auto *runtime = Runtime::GetCurrent();
     if (UNLIKELY(runtime->IsDebugMode())) {
@@ -149,33 +148,40 @@ DebugSessionAttachErrorCode Tools::AttachDebugSession()
         return DebugSessionAttachErrorCode::NOT_ALLOWED;
     }
 
-    // NOTE(dslynko): support JIT: suspend and disable it during attach
+    // NOTE(dslynko, #34959): support JIT: suspend and disable it during attach
     if (UNLIKELY(runtime->IsJitEnabled())) {
         return DebugSessionAttachErrorCode::NOT_ALLOWED;
     }
 
-    // 1. Enable debug mode globally.
+    // 1. Enable debug mode globally. This will disable linkage of AOT methods during class loading
     runtime->SetDebugMode(true);
 
-    // 2. Clear all JIT and AOT compiled methods and trigger deoptimization
-    // for compiled frames corresponding to those methods.
-    if (LIKELY(runtime->GetClassLinker()->GetAotManager()->HasAotFiles())) {
-        DeoptimizeAllCompiledMethods(runtime, thread);
-    }
-
-    // 3. Create the debug session.
+    // 2. Create the debug session.
     const auto session = runtime->StartDebugSession();
     if (UNLIKELY(!session)) {
         return DebugSessionAttachErrorCode::INVALID;
     }
 
-    // 4. Suspend all threads and switch each to use debug dispatch table.
-    auto *vm = thread->GetVM();
-    ScopedSuspendAllThreads ssat(vm->GetRendezvous());
-    vm->GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
-        interpreter::SwitchToDebugMode(thread);
-        return true;
-    });
+    PandaSet<Method *> compiledMethods;
+    {
+        auto *vm = thread->GetVM();
+        [[maybe_unused]] ScopedSuspendAllThreads ssat(vm->GetRendezvous());
+
+        // 3. Switch all threads to use debug dispatch table.
+        vm->GetThreadManager()->EnumerateThreads([](ManagedThread *t) {
+            interpreter::SwitchToDebugMode(t);
+            return true;
+        });
+
+        // 4. Collect all compiled methods for deoptimization
+        CollectCompiledMethods(runtime, compiledMethods);
+    }
+
+    // 5. Deoptimize compiled methods
+    if (!compiledMethods.empty()) {
+        [[maybe_unused]] ScopedManagedCodeThread smct(thread);
+        InvalidateCompiledEntryPoint(compiledMethods, false);
+    }
 
     return DebugSessionAttachErrorCode::OK;
 }

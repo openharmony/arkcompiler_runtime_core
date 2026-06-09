@@ -100,7 +100,6 @@ void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, con
     if (interpreterType == InterpreterType::LLVM) {
 #ifdef PANDA_LLVM_INTERPRETER
         LOG(DEBUG, RUNTIME) << "Setting up LLVM Irtoc dispatch table";
-        ASSERT(!Runtime::GetCurrent()->IsDebugMode() && "Debug mode execution must be done in CPP interpreter");
         auto dispatchTable = SetupLLVMDispatchTableImpl();
         thread->SetCurrentDispatchTable<false>(static_cast<const void *const *>(dispatchTable));
         auto *debugDispatchTable = SetupLLVMDebugDispatchTableImpl();
@@ -116,7 +115,6 @@ void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, con
     } else if (interpreterType == InterpreterType::IRTOC) {
 #ifdef PANDA_WITH_IRTOC
         LOG(DEBUG, RUNTIME) << "Setting up Irtoc dispatch table";
-        ASSERT(!Runtime::GetCurrent()->IsDebugMode() && "Debug mode execution must be done in CPP interpreter");
         auto dispatchTable = SetupDispatchTableImpl();
         thread->SetCurrentDispatchTable<false>(static_cast<const void *const *>(dispatchTable));
         auto *debugDispatchTable = SetupDebugDispatchTableImpl();
