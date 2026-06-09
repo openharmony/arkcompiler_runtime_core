@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-{% for i in default_value %}
-
 /*---
-desc: Default values for nullable types
+desc: >-
+    Default value of optional class member.
 ---*/
 
-function main(): void {
-  let x: {{i.type}};
-  arktest.assertEQ( x, {{i.value}} )
+class C {
+    f?: number = undefined
+    g?: number
 }
 
-{% endfor %}
+function main() {
+  let c = new C
+  arktest.assertEQ(c.f, c.g)
+}
