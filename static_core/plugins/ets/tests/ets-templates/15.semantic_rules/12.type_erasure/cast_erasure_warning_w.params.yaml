@@ -1,0 +1,82 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - desc: Generic class type args not preserved
+      decl: |-
+          class A<out T> {
+              readonly fld: T
+              constructor(p: T) {
+                  this.fld = p
+              }
+          }
+      main: |-
+          let c = new A<string>('abc')
+          let t = c as A<number>
+      expected_out: |-
+          Warning W0326: Attempting to cast type 'A<String>' to 'A<Double>' can throw 'ClassCastError' exception at runtime
+
+    - desc: Array element type is not preserved
+      main: |-
+          let obj = ((): Object => new Array<string>('abc'))()
+          let t = obj as Array<number>
+      expected_out: |-
+          Warning W369037: Cast expression `as Array<Double>` is type unsafe. 'ClassCastError' exception can be thrown at runtime
+
+    - desc: Function type is not preserved
+      decl: |-
+          let fun: (p: number) => string = (p: number): string => '=' + p
+          let obj = ((): Any => fun)()
+      main: |-
+          let t = obj as ((p: number) => string)
+      expected_out: |-
+          Warning W369037: Cast expression `as (p: Double)=>String` is type unsafe. 'ClassCastError' exception can be thrown at runtime
+
+    - desc: Tuple element types not preserved
+      decl: |-
+          let tup: [number, string] = [1.0, 'a']
+          let obj = ((): Any => tup)()
+      main: |-
+          let t = obj as [number, string]
+      expected_out: |-
+          Warning W369037: Cast expression `as [Double,String]` is type unsafe. 'ClassCastError' exception can be thrown at runtime
+
+    - desc: Record type args not preserved
+      decl: |-
+          let rec: Record<string, number> = { '1': 1.0 }
+          let obj = ((): Any => rec)()
+      main: |-
+          let t = obj as Record<string, number>
+      expected_out: |-
+          Warning W369037: Cast expression `as Record<String,Double>` is type unsafe. 'ClassCastError' exception can be thrown at runtime
+
+    - desc: String type is preserved
+      decl: |-
+          let obj = ((): Any => 'abc')()
+      main: |-
+          let str = obj as string
+      expected_out: ''
+
+    - desc: Non-generic class is preserved
+      decl: |-
+          let obj = ((): Any => new Error())()
+      main: |-
+          let str = obj as Error
+      expected_out: ''
+
+    - desc: Fixed array element type is preserved
+      main: |-
+          let obj = ((): Object => new FixedArray<int>(1))()
+          let t = obj as FixedArray<int>
+      expected_out: ''
