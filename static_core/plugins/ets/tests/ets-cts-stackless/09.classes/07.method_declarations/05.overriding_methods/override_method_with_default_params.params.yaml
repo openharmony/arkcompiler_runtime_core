@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,13 @@ cases:
       let b: A = new B()
       arktest.assertEQ(b.foo(5), 5)
 
+  - base_params: "a: int"
+    overridden_params: "a: int = 3"
+    return_type: int
+    main: |-
+      let b: B = new B()
+      arktest.assertEQ(b.foo(), 3)
+
   # form: identifier '?' ':' type
 
   - base_params: "a?: int"
@@ -45,6 +52,20 @@ cases:
       let b: A = new B()
       arktest.assertEQ(b.foo(5), 5)
 
+  - base_params: "a: int | undefined"
+    overridden_params: "a?: int"
+    return_type: int | undefined
+    main: |-
+      let b: A = new B()
+      arktest.assertEQ(b.foo(), undefined)
+
+  - base_params: "a?: int"
+    overridden_params: "a: int | undefined"
+    return_type: int | undefined
+    main: |-
+      let b: A = new B()
+      arktest.assertEQ(b.foo(undefined), undefined)
+
   # mixed forms
   - base_params: "a?: int"
     overridden_params: "a: int | undefined = undefined"
@@ -60,3 +81,23 @@ cases:
       let b: A = new B()
       arktest.assertEQ(b.foo(), undefined)
 
+  - base_params: "a: int = 2"
+    overridden_params: "a: int = 3"
+    return_type: int
+    main: |-
+      let b: B = new B()
+      arktest.assertEQ(b.foo(), 3)
+
+  - base_params: "a?: int"
+    overridden_params: "a: int | undefined = 5"
+    return_type: int | undefined
+    main: |-
+      let b: B = new B()
+      arktest.assertEQ(b.foo(), 5)
+
+  - base_params: "a: int | undefined = 5"
+    overridden_params: "a?: int"
+    return_type: int | undefined
+    main: |-
+      let b: B = new B()
+      arktest.assertEQ(b.foo(), undefined)
