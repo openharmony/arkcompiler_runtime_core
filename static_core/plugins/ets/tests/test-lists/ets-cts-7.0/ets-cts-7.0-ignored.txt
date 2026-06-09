@@ -263,9 +263,6 @@
 #34442
 17.experimental_features/13.adding_functionality_to_existing_types/04.lambda_expressions_with_receiver/lambda_expressions_with_receiver_25.ets
 
-#33744
-17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
-
 #34397 retention annotations are not implemented fully
 18.annotations/05.standard_annotations/01.retention_annotation/default_retention_annotation.ets
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_14.ets

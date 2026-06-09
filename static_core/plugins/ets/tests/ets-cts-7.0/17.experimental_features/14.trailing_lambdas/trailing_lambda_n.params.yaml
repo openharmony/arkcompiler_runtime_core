@@ -23,7 +23,7 @@ cases:
     use: |-
       let a = new A()
       a.foo() {}
-    exp_out: "TBD"
+    exp_out: "Semantic error ESE0127: No matching call signature for foo()"
 
   # No parameter can be specified for the type of a trailing lambda. Case with using parameter
   - decl: |- 
@@ -35,7 +35,7 @@ cases:
     use: |-
       let a = new A()
       a.foo() { arktest.assertEQ(i, 5) }
-    exp_out: "Semantic error ESE0143: Unresolved reference i"
+    exp_out: "Semantic error ESE0127: No matching call signature for foo()"
 
   # call without trailing lambda block
   - decl: |- 

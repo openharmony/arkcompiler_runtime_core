@@ -953,9 +953,6 @@
 #31311
 17.experimental_features/13.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_8.ets
 
-#33744
-17.experimental_features/14.trailing_lambdas/trailing_lambda_n_0.ets
-
 #33360
 18.annotations/06.runtime_access_to_annotations/runtime_access_0.ets
 18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
