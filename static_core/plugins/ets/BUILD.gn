@@ -286,22 +286,94 @@ if (with_stdlib) {
     } else {
       outputs = [ "$target_gen_dir/etsstdlib.abc" ]
     }
-    abs_ark_root = rebase_path(ark_root)
-    json_array = [
-      "{",
-      "  \"compilerOptions\": {",
-      "    \"baseUrl\": \"$abs_ark_root\",",
-      "    \"paths\": {",
-      "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
-      "      \"api\": [\"$abs_ark_root" + "/plugins/ets/sdk/api\"],",
-      "      \"arkts\": [\"$abs_ark_root" + "/plugins/ets/sdk/arkts\"],",
-      "      \"import_tests\": [\"$abs_ark_root" +
-          "$ark_es2panda_root/test/parser/ets/import_tests\"]",
-      "    },",
-      "    \"dependencies\": {}",
-      "  }",
-      "}",
-    ]
+    if (ark_use_common_runtime) {
+      if (is_win) {
+        delim = "\\"
+      } else {
+        delim = "/"
+      }
+      sdk_src_dir = rebase_path("./sdk")
+      etsgen_relative_path = "./gen/arkcompiler/runtime_core/static_core/plugins/ets"
+      json_array = [
+        "{",
+        "  \"compilerOptions\": {",
+        "    \"baseUrl\": \"../..\",",
+        "    \"cacheDir\": \"${etsgen_relative_path}/decls\",",
+        "    \"paths\": {",
+        "      \"@ohos.buffer\": [\"${sdk_src_dir}${delim}api${delim}@ohos.buffer.ets\"],",
+        "      \"@ohos.util.ArrayList\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.ArrayList.ets\"],",
+        "      \"@ohos.util.Deque\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.Deque.ets\"],",
+        "      \"@ohos.util.HashMap\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.HashMap.ets\"],",
+        "      \"@ohos.util.HashSet\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.HashSet.ets\"],",
+        "      \"@ohos.util.LightWeightMap\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.LightWeightMap.ets\"],",
+        "      \"@ohos.util.LightWeightSet\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.LightWeightSet.ets\"],",
+        "      \"@ohos.util.LinkedList\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.LinkedList.ets\"],",
+        "      \"@ohos.util.List\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.List.ets\"],",
+        "      \"@ohos.util.PlainArray\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.PlainArray.ets\"],",
+        "      \"@ohos.util.Queue\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.Queue.ets\"],",
+        "      \"@ohos.util.Stack\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.Stack.ets\"],",
+        "      \"@ohos.util.stream\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.stream.ets\"],",
+        "      \"@ohos.util\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.ets\"],",
+        "      \"@ohos.util.TreeMap\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.TreeMap.ets\"],",
+        "      \"@ohos.util.TreeSet\": [\"${sdk_src_dir}${delim}api${delim}@ohos.util.TreeSet.ets\"],",
+        "      \"@ohos.uri\": [\"${sdk_src_dir}${delim}api${delim}@ohos.uri.ets\"],",
+        "      \"@ohos.url\": [\"${sdk_src_dir}${delim}api${delim}@ohos.url.ets\"],",
+        "      \"@ohos.xml\": [\"${sdk_src_dir}${delim}api${delim}@ohos.xml.ets\"],",
+        "      \"@ohos.base\": [\"${sdk_src_dir}${delim}api${delim}@ohos.base.ets\"],",
+        "      \"@arkts.math.Decimal\": [\"${sdk_src_dir}${delim}arkts${delim}@arkts.math.Decimal.ets\"],",
+        "      \"@arkts.collections\": [\"${sdk_src_dir}${delim}arkts${delim}@arkts.collections.ets\"],",
+        "      \"import_tests\": [\"" + rebase_path("${ark_es2panda_root}/test/parser/ets/import_tests") + "\"]",
+        "    },",
+        "    \"dependencies\": {",
+        "      \"std/core\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/math\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/math/consts\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/containers\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/interop/js\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/time\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/debug\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/debug/concurrency\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/dfx\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/testing\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/concurrency\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/annotations\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"std/interop\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"arkruntime\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"dynamic_import_tests\": {\"language\": \"js\", \"ohmUrl\": \"dynamic_import_tests\"},",
+        "      \"dynamic_import_tests/modules/instanceof\": {",
+        "        \"language\": \"js\", \"path\": \"" + rebase_path(
+                "${ark_es2panda_root}/test/parser/ets/dynamic_import_tests/modules/instanceof.ets") + "\",",
+        "        \"ohmUrl\": \"" + rebase_path(
+                "${ark_es2panda_root}/test/parser/ets/dynamic_import_tests/modules/instanceof.ets") + "\"",
+        "      },",
+        "      \"dynamic_import_tests/modules/module\": {",
+        "        \"language\": \"js\", \"path\": \"" + rebase_path(
+                "${ark_es2panda_root}/test/parser/ets/dynamic_import_tests/modules/module.ets") + "\",",
+        "        \"ohmUrl\": \"" + rebase_path(
+                "${ark_es2panda_root}/test/parser/ets/dynamic_import_tests/modules/module.ets") + "\"",
+        "      }",
+        "    }",
+        "  }",
+        "}",
+      ]
+    } else {
+      abs_ark_root = rebase_path(ark_root)
+      json_array = [
+        "{",
+        "  \"compilerOptions\": {",
+        "    \"baseUrl\": \"$abs_ark_root\",",
+        "    \"paths\": {",
+        "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
+        "      \"api\": [\"$abs_ark_root" + "/plugins/ets/sdk/api\"],",
+        "      \"arkts\": [\"$abs_ark_root" + "/plugins/ets/sdk/arkts\"],",
+        "      \"import_tests\": [\"$abs_ark_root" +
+            "$ark_es2panda_root/test/parser/ets/import_tests\"]",
+        "    },",
+        "    \"dependencies\": {}",
+        "  }",
+        "}",
+      ]
+    }
 
     default_arktsconfig =
         get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
@@ -331,6 +403,9 @@ if (with_stdlib) {
       "--gen-stdlib=true",
       "--output=" + rebase_path(outputs[0], root_build_dir),
     ]
+    if (ark_use_common_runtime) {
+      args += [ "--arktsconfig=" + rebase_path("./stdlib/stdconfig.json") ]
+    }
   }
 
   if (!ark_standalone_build && !ark_static_standalone_build) {

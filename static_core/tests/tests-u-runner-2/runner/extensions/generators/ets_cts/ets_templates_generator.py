@@ -136,6 +136,8 @@ class EtsTemplatesGenerator(IGenerator):
                         if work_dir:
                             json_string = replace_macro(json_string, Macro("WORK_DIR"), work_dir)
                         if build_dir:
+                            if self._config.general.gn_build:
+                                build_dir = build_dir + "/gen/arkcompiler/runtime_core/static_core"
                             json_string = replace_macro(json_string, Macro("PANDA_BUILD"), build_dir)
                         if suite_name and isinstance(suite_name, str):
                             json_string = replace_macro(json_string, Macro("SUITE_NAME"), suite_name)
