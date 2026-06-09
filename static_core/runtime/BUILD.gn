@@ -61,6 +61,7 @@ config("arkruntime_public_config") {
     "$ark_root/libarkfile:arkfile_public_config",
     "$ark_root/verification/gen:verification_public_config",
     "$ark_root/compiler:arkcompiler_public_config",
+    "$arkplatform_root:arkplatform_public_config",
   ]
   configs += plugin_runtime_configs
   if (defined(ark_static_standalone_build) && ark_static_standalone_build) {
@@ -75,6 +76,7 @@ if (!ark_static_standalone_build) {
     include_dirs = [
       "$ark_root/runtime",
       "$ark_root/plugins/ets/runtime/ani/",
+      "$arkplatform_root",
       "$target_gen_dir",
       "$target_gen_dir/generated",
       "$target_gen_dir/include",
@@ -330,6 +332,7 @@ _libarkruntime_calculated_sources = [
   "tooling/sampler/stack_walker_base.cpp",
   "tooling/sampler/thread_communicator.cpp",
   "tooling/tools.cpp",
+  "tooling/hprof/heap_dump.cpp",
   "vtable_builder_base.cpp",
 ]
 

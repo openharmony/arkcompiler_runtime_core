@@ -18,11 +18,27 @@
 #include "libarkbase/utils/time.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/mem/gc/gc.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
+#include "plugins/ets/runtime/types/ets_weak_reference.h"
+#include "plugins/ets/runtime/ani/ani.h"
+#include "runtime/include/field.h"
+#include "runtime/include/language_config.h"
+#include "runtime/include/managed_thread.h"
+#include "runtime/include/mutator.h"
+#include "runtime/include/runtime.h"
+#include "runtime/mem/rendezvous.h"
+#include "runtime/thread_manager.h"
+#include "runtime/tooling/hprof/heap_dump.h"
 
 namespace ark::ets::interop::js {
 
+using HeapDump = ark::tooling::hprof::HeapDump;
+
 thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ =
     STSVMInterfaceImpl::XGCSyncState::NONE;
+thread_local bool STSVMInterfaceImpl::dumpManagedScopeActive_ = false;
 
 void STSVMInterfaceImpl::MarkFromObject(void *obj)
 {
@@ -211,6 +227,192 @@ void STSVMInterfaceImpl::VMBarrier::Wake()
     currentWaitersCount_ = 0;
     weakCount_++;
     condVar_.SignalAll();
+}
+
+// --- Hybrid Heapdump Methods ---
+
+bool STSVMInterfaceImpl::TriggerXGCAndWait()
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (executionCtx == nullptr) {
+        return false;
+    }
+    ani_env *env = executionCtx->GetPandaAniEnv();
+    if (env == nullptr) {
+        return false;
+    }
+
+    // JSRuntime.xgc() -> long
+    ani_class jsRuntimeCls {};
+    if (env->FindClass("std.interop.js.JSRuntime", &jsRuntimeCls) != ANI_OK) {
+        return false;
+    }
+    ani_static_method xgcMethod {};
+    if (env->Class_FindStaticMethod(jsRuntimeCls, "xgc", ":l", &xgcMethod) != ANI_OK) {
+        return false;
+    }
+    ani_long taskId = 0;
+    ani_value xgcArgs {};
+    if (env->Class_CallStaticMethod_Long_A(jsRuntimeCls, xgcMethod, &taskId, &xgcArgs) != ANI_OK) {
+        return false;
+    }
+
+    // GC.waitForFinishGC(taskId)
+    ani_namespace gcNamespace {};
+    if (env->FindNamespace("std.core.GC", &gcNamespace) != ANI_OK) {
+        return false;
+    }
+    ani_function waitForFinishFunc {};
+    if (env->Namespace_FindFunction(gcNamespace, "waitForFinishGC", "l:", &waitForFinishFunc) != ANI_OK) {
+        return false;
+    }
+    ani_value waitForFinishArgs {};
+    waitForFinishArgs.l = taskId;
+    return env->Function_Call_Void_A(waitForFinishFunc, &waitForFinishArgs) == ANI_OK;
+}
+
+void STSVMInterfaceImpl::EtsForceFullGC()
+{
+    HeapDump::ForceFullGC(vm_);
+}
+
+void STSVMInterfaceImpl::SuspendEtsThreads() NO_THREAD_SAFETY_ANALYSIS
+{
+    ASSERT(vm_ != nullptr);
+
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    if (!thread->IsManagedCode()) {
+        thread->ManagedCodeBegin();
+        dumpManagedScopeActive_ = true;
+    }
+
+    auto *rendezvous = vm_->GetRendezvous();
+    ASSERT(rendezvous != nullptr);
+    ASSERT(rendezvous->GetMutatorLock()->HasLock());
+#if defined(ARK_USE_COMMON_RUNTIME)
+    Mutator::GetCurrent()->StoreStatus(MutatorStatus::NATIVE);
+#endif
+    rendezvous->GetMutatorLock()->Unlock();
+    rendezvous->SafepointBegin();
+}
+
+void STSVMInterfaceImpl::ResumeEtsThreads() NO_THREAD_SAFETY_ANALYSIS
+{
+    ASSERT(vm_ != nullptr);
+
+    auto *rendezvous = vm_->GetRendezvous();
+    ASSERT(rendezvous != nullptr);
+    rendezvous->SafepointEnd();
+    rendezvous->GetMutatorLock()->ReadLock();
+#if defined(ARK_USE_COMMON_RUNTIME)
+    Mutator::GetCurrent()->StoreStatus(MutatorStatus::RUNNING);
+#endif
+
+    if (dumpManagedScopeActive_) {
+        auto *thread = ManagedThread::GetCurrent();
+        ASSERT(thread != nullptr);
+        thread->ManagedCodeEnd();
+        dumpManagedScopeActive_ = false;
+    }
+}
+
+std::vector<arkplatform::NodeInfo> STSVMInterfaceImpl::GetEtsVMRoots()
+{
+    std::vector<arkplatform::NodeInfo> roots;
+    auto collectRoot = [&roots](const mem::GCRoot &gcRoot) {
+        ObjectHeader *rootObject = gcRoot.GetObjectHeader();
+        if (rootObject != nullptr) {
+            roots.push_back(HeapDump::ObjectToNodeInfo(rootObject));
+        }
+    };
+    mem::RootManager<EtsLanguageConfig> rootManager(vm_);
+    rootManager.VisitNonHeapRoots(collectRoot, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    vm_->VisitStringTable(collectRoot, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    return roots;
+}
+
+std::vector<arkplatform::NodeInfo> STSVMInterfaceImpl::GetAllEtsObjects()
+{
+    return HeapDump::GetAllEtsObjects(vm_);
+}
+
+void STSVMInterfaceImpl::IterateEtsObjects(const std::function<void(uint64_t)> &callback)
+{
+    HeapDump::IterateAllObjects(vm_, callback);
+}
+
+void STSVMInterfaceImpl::GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges)
+{
+    auto checker = [](ObjectHeader *obj, const Field &field) -> bool {
+        return EtsObject::FromCoreType(obj)->GetClass()->IsWeakReference() &&
+               field.GetOffset() == EtsWeakReference::GetReferentOffset();
+    };
+    HeapDump::DumpReferences(etsAddr, edges, checker);
+}
+
+arkplatform::NodeInfo STSVMInterfaceImpl::GetEtsNodeInfo(uint64_t etsAddr)
+{
+    auto *object = reinterpret_cast<ObjectHeader *>(etsAddr);
+    return HeapDump::ObjectToNodeInfo(object);
+}
+
+void STSVMInterfaceImpl::GetXRefMaps(uintptr_t ecmaVM, std::unordered_map<uint64_t, uint64_t> &jsToEts,
+                                     std::unordered_map<uint64_t, uint64_t> &etsToJs)
+{
+    auto *storage = ets_proxy::SharedReferenceStorage::GetCurrent();
+    if (storage == nullptr) {
+        return;
+    }
+    auto collectXRef = [&](ets_proxy::SharedReference *ref) {
+        napi_ref jsRef = ref->GetJsRef();
+        EtsObject *etsObj = ref->GetEtsObject();
+        if (jsRef == nullptr || etsObj == nullptr) {
+            return;
+        }
+        uintptr_t refVm = 0;
+        if (napi_ref_get_vm(jsRef, refVm) != napi_ok || refVm != ecmaVM) {
+            return;
+        }
+        uintptr_t jsAddr = 0;
+        if (napi_ref_get_value(jsRef, jsAddr) != napi_ok || jsAddr == 0) {
+            return;
+        }
+        auto etsAddr = reinterpret_cast<uint64_t>(etsObj->GetCoreType());
+        if (ref->HasETSFlag()) {
+            jsToEts[jsAddr] = etsAddr;
+        }
+        if (ref->HasJSFlag()) {
+            etsToJs[etsAddr] = jsAddr;
+        }
+    };
+    storage->VisitAllRefs(collectXRef);
+}
+
+bool STSVMInterfaceImpl::AttachCurrentThread()
+{
+    auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
+    if (etsVm == nullptr) {
+        return false;
+    }
+    ani_env *env {nullptr};
+    auto status = etsVm->AttachCurrentThread(nullptr, ANI_VERSION_1, &env);
+    return status == ANI_OK;
+}
+
+bool STSVMInterfaceImpl::DetachCurrentThread()
+{
+    auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
+    if (etsVm == nullptr) {
+        return false;
+    }
+    auto status = etsVm->DetachCurrentThread();
+    return status == ANI_OK;
+}
+
+bool STSVMInterfaceImpl::IsCurrentThreadAttached()
+{
+    return Mutator::GetCurrent() != nullptr;
 }
 
 }  // namespace ark::ets::interop::js

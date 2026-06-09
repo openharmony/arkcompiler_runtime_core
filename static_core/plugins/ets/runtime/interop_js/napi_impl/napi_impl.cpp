@@ -137,6 +137,22 @@ napi_wrap_hybrid_s([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js
     return napi_ok;
 }
 
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_ref_get_vm([[maybe_unused]] napi_ref ref, [[maybe_unused]] uintptr_t &result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_ref_get_value([[maybe_unused]] napi_ref ref, [[maybe_unused]] uintptr_t &result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
 // NOLINTEND(readability-identifier-naming)
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 

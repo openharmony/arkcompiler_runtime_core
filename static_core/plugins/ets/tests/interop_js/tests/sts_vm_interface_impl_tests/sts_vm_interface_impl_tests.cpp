@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,10 @@
 
 #include "ets_interop_js_gtest.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
+#include "hybrid/hybrid_heap_snapshot_info.h"
 
+#include <algorithm>
+#include <unordered_map>
 #include <vector>
 #include <queue>
 
@@ -26,6 +29,20 @@ namespace ark::ets::interop::js::testing {
 class STSVMInterfaceImplTest : public EtsInteropTest {
 public:
     using VMBarrier = STSVMInterfaceImpl::VMBarrier;
+
+    STSVMInterfaceImplTest()
+    {
+        etsVm_ = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
+    }
+
+protected:
+    PandaEtsVM *GetEtsVm() const
+    {
+        return etsVm_;
+    }
+
+private:
+    PandaEtsVM *etsVm_ {nullptr};
 };
 
 class BarrierTests : public STSVMInterfaceImplTest {
@@ -310,6 +327,175 @@ TEST_F(BarrierTests, StartXGCBarrierWithoutPredicate)
     stsVMIface.FinishXGCBarrier();
 
     thread.join();
+}
+
+// --- Hybrid Heapdump Tests ---
+
+TEST_F(STSVMInterfaceImplTest, IsCurrentThreadAttached)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    bool isAttached = stsVm.IsCurrentThreadAttached();
+    EXPECT_EQ(isAttached, Mutator::GetCurrent() != nullptr);
+}
+
+TEST_F(STSVMInterfaceImplTest, GetEtsVMRoots)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    auto roots = stsVm.GetEtsVMRoots();
+    EXPECT_GT(roots.size(), 0);
+    for (const auto &root : roots) {
+        EXPECT_NE(root.addr, 0);
+        EXPECT_GT(root.size, 0);
+        bool isValidType = (root.nodeType == arkplatform::StaticNodeType::ARRAY ||
+                            root.nodeType == arkplatform::StaticNodeType::STRING ||
+                            root.nodeType == arkplatform::StaticNodeType::OBJECT ||
+                            root.nodeType == arkplatform::StaticNodeType::CLASS);
+        EXPECT_TRUE(isValidType);
+    }
+}
+
+TEST_F(STSVMInterfaceImplTest, GetAllEtsObjects)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    auto objects = stsVm.GetAllEtsObjects();
+    EXPECT_GT(objects.size(), 0);
+    for (const auto &obj : objects) {
+        EXPECT_NE(obj.addr, 0);
+        EXPECT_GT(obj.size, 0);
+        bool isValidType =
+            (obj.nodeType == arkplatform::StaticNodeType::ARRAY ||
+             obj.nodeType == arkplatform::StaticNodeType::STRING ||
+             obj.nodeType == arkplatform::StaticNodeType::OBJECT || obj.nodeType == arkplatform::StaticNodeType::CLASS);
+        EXPECT_TRUE(isValidType);
+    }
+}
+
+TEST_F(STSVMInterfaceImplTest, IterateEtsObjects)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    std::vector<uint64_t> addresses;
+    stsVm.IterateEtsObjects([&addresses](uint64_t addr) { addresses.push_back(addr); });
+    ASSERT_GT(addresses.size(), 0);
+    for (uint64_t addr : addresses) {
+        EXPECT_NE(addr, 0);
+    }
+
+    // Verify uniqueness
+    std::sort(addresses.begin(), addresses.end());
+    EXPECT_EQ(std::unique(addresses.begin(), addresses.end()), addresses.end());
+}
+
+TEST_F(STSVMInterfaceImplTest, IterateMatchesGetAll)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    std::vector<uint64_t> iterateAddrs;
+    stsVm.IterateEtsObjects([&](uint64_t addr) { iterateAddrs.push_back(addr); });
+    auto allObjs = stsVm.GetAllEtsObjects();
+    std::vector<uint64_t> allAddrs;
+    allAddrs.reserve(allObjs.size());
+    for (const auto &obj : allObjs) {
+        allAddrs.push_back(obj.addr);
+    }
+    std::sort(iterateAddrs.begin(), iterateAddrs.end());
+    std::sort(allAddrs.begin(), allAddrs.end());
+    EXPECT_EQ(iterateAddrs, allAddrs);
+}
+
+TEST_F(STSVMInterfaceImplTest, GetEtsNodeInfo)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    auto allObjs = stsVm.GetAllEtsObjects();
+    ASSERT_GT(allObjs.size(), 0);
+    auto info = stsVm.GetEtsNodeInfo(allObjs[0].addr);
+    EXPECT_EQ(info.addr, allObjs[0].addr);
+    EXPECT_GT(info.size, 0);
+    // Verify nodeType is valid
+    bool isValidType =
+        (info.nodeType == arkplatform::StaticNodeType::ARRAY || info.nodeType == arkplatform::StaticNodeType::STRING ||
+         info.nodeType == arkplatform::StaticNodeType::OBJECT || info.nodeType == arkplatform::StaticNodeType::CLASS);
+    EXPECT_TRUE(isValidType);
+}
+
+TEST_F(STSVMInterfaceImplTest, GetEtsNodeEdges)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    auto allObjs = stsVm.GetAllEtsObjects();
+    ASSERT_GT(allObjs.size(), 0);
+    // Find an object with edges
+    for (const auto &obj : allObjs) {
+        std::vector<arkplatform::EdgeInfo> edges;
+        stsVm.GetEtsNodeEdges(obj.addr, edges);
+        for (const auto &edge : edges) {
+            EXPECT_EQ(edge.fromAddr, obj.addr);
+            EXPECT_NE(edge.toAddr, 0);
+            bool isValidType = (edge.edgeType == arkplatform::StaticEdgeType::ELEMENT ||
+                                edge.edgeType == arkplatform::StaticEdgeType::PROPERTY ||
+                                edge.edgeType == arkplatform::StaticEdgeType::WEAK);
+            EXPECT_TRUE(isValidType);
+            // Verify name/index field based on edge type
+            if (edge.edgeType == arkplatform::StaticEdgeType::PROPERTY) {
+                EXPECT_FALSE(edge.name.empty()) << "Property edge should have a name";
+            } else if (edge.edgeType == arkplatform::StaticEdgeType::ELEMENT) {
+                EXPECT_GE(edge.index, 0U);
+            }
+        }
+        if (!edges.empty()) {
+            return;
+        }
+    }
+}
+
+TEST_F(STSVMInterfaceImplTest, GetEtsNodeEdgesZeroAddr)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    std::vector<arkplatform::EdgeInfo> edges;
+    stsVm.GetEtsNodeEdges(0, edges);
+    EXPECT_EQ(edges.size(), 0);
+}
+
+TEST_F(STSVMInterfaceImplTest, GetXRefMaps)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    auto ecmaVM = reinterpret_cast<uintptr_t>(GetJsEnv());
+    std::unordered_map<uint64_t, uint64_t> jsToEts;
+    std::unordered_map<uint64_t, uint64_t> etsToJs;
+    stsVm.GetXRefMaps(ecmaVM, jsToEts, etsToJs);
+    // Verify all collected mappings have valid addresses
+    for (const auto &[jsAddr, etsAddr] : jsToEts) {
+        EXPECT_NE(jsAddr, 0);
+        EXPECT_NE(etsAddr, 0);
+    }
+    for (const auto &[etsAddr, jsAddr] : etsToJs) {
+        EXPECT_NE(etsAddr, 0);
+        EXPECT_NE(jsAddr, 0);
+    }
+    // Cross-VM refs may be empty if no interop objects were created in this test
+}
+
+TEST_F(STSVMInterfaceImplTest, GetXRefMapsZeroEcmaVM)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    std::unordered_map<uint64_t, uint64_t> jsToEts;
+    std::unordered_map<uint64_t, uint64_t> etsToJs;
+    stsVm.GetXRefMaps(0, jsToEts, etsToJs);
+    // Zero ecmaVM should not match any ref's VM
+    EXPECT_EQ(jsToEts.size(), 0);
+    EXPECT_EQ(etsToJs.size(), 0);
+}
+
+TEST_F(STSVMInterfaceImplTest, EtsForceFullGC)
+{
+    STSVMInterfaceImpl stsVm(GetEtsVm());
+    auto objectsBefore = stsVm.GetAllEtsObjects();
+    ASSERT_GT(objectsBefore.size(), 0);
+
+    stsVm.EtsForceFullGC();
+    auto objectsAfter = stsVm.GetAllEtsObjects();
+    EXPECT_GT(objectsAfter.size(), 0) << "Heap should still contain objects after FullGC";
+    for (const auto &obj : objectsAfter) {
+        EXPECT_NE(obj.addr, 0);
+        EXPECT_GT(obj.size, 0);
+    }
 }
 
 }  // namespace ark::ets::interop::js::testing
