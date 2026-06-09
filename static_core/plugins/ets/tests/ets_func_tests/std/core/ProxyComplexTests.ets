@@ -126,7 +126,8 @@ interface E6 extends E5 {
 }
 
 class EImpl implements E4, E6 {
-    foo(x: Object): double { return 777.111 }
+    foo(x: Base): double { return 777.111 }
+    foo(x: int): double { return 777.111 }
     foo(x: char): double { return 777.222 }
 }
 

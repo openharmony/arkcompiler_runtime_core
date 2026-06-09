@@ -172,30 +172,11 @@
 #34114
 15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
 
-#33447 Verifier error on 2 methods in subclass override same method in superclass
-15.semantic_rules/08.overriding/01.overriding_in_classes/several_methods_override_negative.ets
-
-#34401 No CTE when more than one method in subclass overrides the same method of superclass
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_0.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_1.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_2.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_3.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_4.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_5.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_6.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_7.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_8.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/generic_complex_hierarchy_multiple_overrides_n_9.ets
-15.semantic_rules/08.overriding/01.overriding_in_classes/inherited_and_declared_methods_override_same_superclass_n.ets
-
 #33245 Wrong CTE for generic extends union type (spec 15.9.3)
 15.semantic_rules/08.overriding/03.override-compatible_signatures/override_generic_extends_union.ets
 
 #33246 Wrong CTE for generic method type parameter in implementing class (spec 15.9.3)
 15.semantic_rules/08.overriding/03.override-compatible_signatures/override_generic_method_type_param.ets
-
-#33255 No CTE on double override with generic interface and default implementation
-15.semantic_rules/08.overriding/03.override-compatible_signatures/interface_with_default_impl_double_overrides_n.ets
 
 #34493 CTE on object literal of interface with generic method
 15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_5.ets

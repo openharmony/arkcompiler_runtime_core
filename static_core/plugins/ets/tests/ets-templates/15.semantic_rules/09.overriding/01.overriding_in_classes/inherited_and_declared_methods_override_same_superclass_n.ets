@@ -18,7 +18,11 @@ desc: If more than one method of the subclass overrides the same method
       of the superclass, a compile-time error occurs even when one of the
       conflicting overriding methods is inherited.
 tags: [compile-only, negative]
-expected_out: "TODO: expected out is unknown"
+expected_out: >-
+    Semantic error ESE602430: Method foo(p: B): undefined from class or interface Derived,
+    inherited into class or interface Derived, conflicts with the previous declaration of method
+    foo(p: A): undefined from class or interface Mid because both declarations override method
+    foo(p: B): undefined from class or interface Base
 ---*/
 
 class A {}

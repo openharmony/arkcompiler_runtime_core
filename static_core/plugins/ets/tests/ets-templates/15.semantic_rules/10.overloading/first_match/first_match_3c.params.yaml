@@ -246,32 +246,3 @@ cases:
         arktest.assertEQ(c3.foo(a1), 'foo1', 'foo1 call expected');
         arktest.assertEQ(c3.foo(a2), 'foo3', 'foo3 call expected');
         arktest.assertEQ(c3.foo(a3), 'foo3', 'foo3 call expected');
-
-    - descr: Override and overload
-      decl: |-
-        class A1 {}
-        class A2 extends A1 {}
-        class A3 extends A2 {}
-        class C1 {
-          foo(v: A3): string { return 'foo1' }
-        }
-        class C2 extends C1 {
-          foo(v: A1): string { return 'foo2' }
-        }
-        class C3 extends C2 {
-          foo(v: A2): string { return 'foo3' } // override foo1
-        }
-      call: |-
-        let a1 = new A1;
-        let a2 = new A2;
-        let a3 = new A3;
-        let c1 = new C1;
-        let c2 = new C2;
-        let c3 = new C3;
-        arktest.assertEQ(c1.foo(a3), 'foo1', 'foo1 call expected');
-        arktest.assertEQ(c2.foo(a1), 'foo2', 'foo2 call expected');
-        arktest.assertEQ(c2.foo(a2), 'foo2', 'foo2 call expected');
-        arktest.assertEQ(c2.foo(a3), 'foo2', 'foo2 call expected');
-        arktest.assertEQ(c3.foo(a1), 'foo2', 'foo2 call expected');
-        arktest.assertEQ(c3.foo(a2), 'foo3', 'foo3 call expected');
-        arktest.assertEQ(c3.foo(a3), 'foo3', 'foo3 call expected');

@@ -17,7 +17,11 @@ limitations under the License.
 desc: If more than one method of the subclass overrides the same method 
       of the superclass a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "TODO: expected out is unknown"
+expected_out: >-
+    Semantic error ESE602430: Method foo(p: A): undefined from class or interface Derived,
+    inherited into class or interface Derived, conflicts with the previous declaration of method
+    foo(p: B): undefined from class or interface Derived because both declarations override method
+    foo(p: B): undefined from class or interface Base
 ---*/
 
 class A {}

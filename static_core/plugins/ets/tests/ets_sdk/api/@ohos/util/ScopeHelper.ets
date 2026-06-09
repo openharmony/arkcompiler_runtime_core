@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,14 +21,8 @@ class NumberType implements util.ScopeType<NumberType> {
       this.n = n
     }
     
-    // NOTE (aleksander-sotov): Remove after internal issue #22930 fix
-
     compareTo(other: NumberType): boolean {
        	return this.n >= other.n
-    }
-
-    compareTo(other: Object): boolean {
-       return this.compareTo(other as NumberType)
     }
    
     toString(): string {

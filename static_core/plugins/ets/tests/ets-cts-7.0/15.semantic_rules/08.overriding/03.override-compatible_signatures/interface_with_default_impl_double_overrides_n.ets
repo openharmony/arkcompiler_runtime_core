@@ -18,7 +18,11 @@ desc: >-
     If more than one method of the class overrides the same method of the
     superinterface with default implementation, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "TODO: fill correct expected out"
+expected_out: >-
+    Semantic error ESE602430: Method foo(t: Any): String from class or interface A, inherited into
+    class or interface A, conflicts with the previous declaration of method foo(t: String): String|undefined
+    from class or interface A because both declarations override method foo(t: String): String|undefined
+    from class or interface X<T,S>
 ---*/
 
 interface X<T, S extends T> {
