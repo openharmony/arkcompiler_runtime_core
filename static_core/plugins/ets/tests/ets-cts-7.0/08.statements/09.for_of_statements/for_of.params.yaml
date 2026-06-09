@@ -264,3 +264,100 @@ cases:
               res += v
           }
           arktest.assertEQ('67abctrue42', res)
+
+    # iterate over union of arrays
+    - decl: |-
+          let union: Array<string>|Array<number>|Array<boolean> = [1.0, 2.0, 3.0]
+      use: |-
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123')
+
+          union = ['a', 'b', 'c']
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123abc')
+
+          union = [true, false]
+          for (let v of union) res += v ? 'T' : 'F'
+          arktest.assertEQ(res, '123abcTF')
+
+    # iterate over union of fixed arrays
+    - decl: |-
+          let union: FixedArray<string>|FixedArray<number>|FixedArray<boolean> = [1.0, 2.0, 3.0]
+      use: |-
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123')
+
+          union = ['a', 'b', 'c']
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123abc')
+
+          union = [true, false]
+          for (let v of union) res += v ? 'T' : 'F'
+          arktest.assertEQ(res, '123abcTF')
+
+    # iterate over union of value arrays
+    - decl: |-
+          let union: ValueArray<char>|ValueArray<number>|ValueArray<boolean> = [1.0, 2.0, 3.0]
+      use: |-
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123')
+
+          union = [c'a', c'b', c'c']
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123abc')
+
+          union = [true, false]
+          for (let v of union) res += v ? 'T' : 'F'
+          arktest.assertEQ(res, '123abcTF')
+
+    # iterate over union of different arrays
+    - decl: |-
+          let union: Array<char>|ValueArray<number>|FixedArray<boolean> = [1.0, 2.0, 3.0]
+      use: |-
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123')
+
+          union = [c'a', c'b', c'c']
+          for (let v of union) res += v
+          arktest.assertEQ(res, '123abc')
+
+          union = [true, false]
+          for (let v of union) res += v ? 'T' : 'F'
+          arktest.assertEQ(res, '123abcTF')
+
+    # iterate over array of union
+    - decl: |-
+          let arr: Array<string|number|boolean> = ['x', 42.0, true]
+      use: |-
+          for (let v of arr) res += v
+          arktest.assertEQ(res, 'x42true')
+
+    # iterate over fixed array of union
+    - decl: |-
+          let arr: FixedArray<string|number|boolean> = ['x', 42.0, true]
+      use: |-
+          for (let v of arr) res += v
+          arktest.assertEQ(res, 'x42true')
+
+    # iterate over union of unions
+    - decl: |-
+          let union: Array<int|float>|FixedArray<char|string>|ValueArray<boolean> = [true, false]
+      use: |-
+          for (let v of union) res += v === true ? 'T' : 'F'
+          arktest.assertEQ(res, 'TF')
+
+          union = [c'*', c'=']
+          for (let v of union) res += v
+          arktest.assertEQ(res, 'TF*=')
+
+          union = [42, 0]
+          for (let v of union) res += v
+          arktest.assertEQ(res, 'TF*=420')
+
+          union = [1f]
+          for (let v of union) res += v
+          arktest.assertEQ(res, 'TF*=4201')
+
+          union = ['XYZ']
+          for (let v of union) res += v
+          arktest.assertEQ(res, 'TF*=4201XYZ')
