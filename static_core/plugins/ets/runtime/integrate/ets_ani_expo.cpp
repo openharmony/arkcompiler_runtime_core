@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 #include "plugins/ets/runtime/integrate/ets_ani_expo.h"
+#ifdef PANDA_ETS_INTEROP_JS
+#include "interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#endif
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/file_manager.h"
 #include "runtime/include/thread_scopes.h"
@@ -32,6 +35,10 @@ PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napie
     if (!interop::js::CreateMainInteropContext(executionCtx, napienv)) {
         LOG(ERROR, RUNTIME) << "Cannot create interop context";
     }
+    // Need use isHybridVM to distinguish between pure JS and ETS/JS interop.
+    if (!interop::js::SetInteropContextHybridVMFlag(executionCtx, napienv, false)) {
+        LOG(ERROR, RUNTIME) << "Cannot set isHybridVM to false";
+    }
 #endif
 }
 
@@ -40,7 +47,15 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
     PandaSmallVector<std::string> appAnFiles;
     for (auto &opt : options) {
         std::string option(opt.option);
-        if (option.rfind(AOT_FILES_OPTION_PREFIX, 0) == 0) {
+        if (option == INTEROP_OPTION_PREFIX) {
+#ifdef PANDA_ETS_INTEROP_JS
+            auto *executionCtx = EtsExecutionContext::GetCurrent();
+            auto *napiEnv = interop::js::InteropCtx::Current()->GetJSEnv();
+            interop::js::SetInteropContextHybridVMFlag(executionCtx, napiEnv, true);
+#else
+            UNREACHABLE();
+#endif
+        } else if (option.rfind(AOT_FILES_OPTION_PREFIX, 0) == 0) {
             std::string aotFilesRawInput = option.substr(AOT_FILES_OPTION_PREFIX.size());
             size_t start = 0;
             size_t end = aotFilesRawInput.find(':');
