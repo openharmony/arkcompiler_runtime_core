@@ -553,9 +553,7 @@ export native function log10(v: double): double;
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
  */
-export function log1p(v: float): float {
-    return log(1.0f + v);
-}
+export native function log1p(v: float): float;
 
 /**
  * Natural logarithm of (1 + `v`)
@@ -569,9 +567,7 @@ export function log1p(v: float): float {
  * log1p(doubleInf) = inf
  * log1p(doubleNegInf) = nan
  */
-export function log1p(v: double): double {
-    return log((1.0).toDouble() + v);
-}
+export native function log1p(v: double): double;
 
 /**
  * Base 2 logarithm of `v`

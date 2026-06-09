@@ -300,6 +300,16 @@ extern "C" float StdMathLogFloat(float val)
     return std::log(val);
 }
 
+extern "C" double StdMathLog1p(double val)
+{
+    return std::log1p(val);
+}
+
+extern "C" float StdMathLog1pFloat(float val)
+{
+    return std::log1p(val);
+}
+
 extern "C" double StdMathRem(double val, double val2)
 {
     return std::remainder(val, val2);
