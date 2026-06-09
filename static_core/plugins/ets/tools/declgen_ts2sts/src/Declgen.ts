@@ -19,6 +19,7 @@ import { defaultCompilerOptions, Compiler, ModuleNameResolver } from './compiler
 import { Pipeline } from './Pipeline';
 
 import { IStage, StageContext, buildInitialStageContext } from './stages/Stage';
+import { InteropTagsStage } from './stages/interop-tags-stage/InteropTagsStage';
 import { DeclarationConversionStage } from './stages/declaration-conversion-stage/DeclarationConversionStage';
 import { RecheckStage } from './stages/recheck-stage/RecheckStage';
 import { ConversionStage } from './stages/conversion-stage/ConversionStage';
@@ -71,7 +72,7 @@ export class Declgen {
   ) {
     const options = defaultCompilerOptions();
     this.rootFiles = declgenOptions.inputFiles;
-    this.libFiles = declgenOptions.libFiles?? [];
+    this.libFiles = declgenOptions.libFiles ?? [];
     this.features = Object.assign(
       {
         enableInteropTypesFix: false,
@@ -105,6 +106,7 @@ export class Declgen {
      */
     this.pipeline = new Pipeline();
     this.pipeline.add(new DeclarationConversionStage());
+    this.pipeline.add(new InteropTagsStage());
     this.pipeline.add(new RecheckStage());
     this.pipeline.add(new ConversionStage(this.features.removeReservedKeywordIdentifier));
     this.pipeline.add(new RecheckStage());

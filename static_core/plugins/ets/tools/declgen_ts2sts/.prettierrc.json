@@ -6,5 +6,6 @@
   "tabWidth": 2,
   "useTabs": false,
   "semi": true,
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "quoteProps": "consistent"
 }

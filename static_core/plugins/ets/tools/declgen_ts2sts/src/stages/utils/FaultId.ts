@@ -171,6 +171,7 @@ export enum FaultID {
   NoReservedKeywordAsIdentifier,
   NoDefaultAccess,
   FixRestParamArrayConflict,
+  InteropTags,
   // this should always be last enum
   LAST_ID
 }

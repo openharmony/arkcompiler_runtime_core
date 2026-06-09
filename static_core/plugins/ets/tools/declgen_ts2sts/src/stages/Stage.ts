@@ -17,20 +17,49 @@ import * as ts from 'typescript';
 import { TraverserConstructor } from './Traverser';
 import { Compiler } from '../compiler/Compiler';
 import { resolvePath } from '../compiler/VirtualFileHost';
+import { TransformationDiagnostic } from './TransformationDiagnostic';
 
 export interface TransformTargetInfo {
   fileName: string;
   affected: boolean;
 }
 
+export class StageStack {
+  private readonly stack: string[] = [];
+
+  push(name: string): void {
+    this.stack.push(name);
+  }
+
+  pop(): void {
+    this.stack.pop();
+  }
+
+  /** Returns the name of the innermost active stage, or `undefined` if the stack is empty. */
+  top(): string | undefined {
+    return this.stack[this.stack.length - 1];
+  }
+
+  toArray(): readonly string[] {
+    return this.stack;
+  }
+}
+
 export interface StageContext<S = unknown> {
   compiler: Compiler;
+  stageStack: StageStack;
   prevState: S;
+  diagnostics: TransformationDiagnostic[];
   transformTargetInfos: Map<string, TransformTargetInfo>;
 }
 
-export function buildInitialStageContext(compiler: Compiler, transformTargets?: readonly string[]): StageContext<undefined> {
-  const transformedFiles = transformTargets ? transformTargets.map((file) => resolvePath(file)) : compiler.rootFileNames;
+export function buildInitialStageContext(
+  compiler: Compiler,
+  transformTargets?: readonly string[]
+): StageContext<undefined> {
+  const transformedFiles = transformTargets
+    ? transformTargets.map((file) => resolvePath(file))
+    : compiler.rootFileNames;
 
   const transformTargetInfos = new Map<string, TransformTargetInfo>();
   for (const file of transformedFiles) {
@@ -39,7 +68,9 @@ export function buildInitialStageContext(compiler: Compiler, transformTargets?: 
 
   return {
     compiler,
+    stageStack: new StageStack(),
     prevState: undefined,
+    diagnostics: [],
     transformTargetInfos
   };
 }
@@ -69,14 +100,17 @@ export abstract class Stage<I = unknown, Q = unknown> implements IStage<I, Q> {
   abstract execute(stageContext: StageContext<I>): StageContext<Q>;
 
   run(stageContext: StageContext<I>): StageContext<Q> {
-    return this.execute(stageContext);
+    stageContext.stageStack.push(this.name);
+    const next = this.execute(stageContext);
+    stageContext.stageStack.pop();
+    return next;
   }
 }
 export abstract class TransformationStage<I, Q, S> extends Stage<I, Q> {
   constructor(
     private traversers: TraverserConstructor<I, S>[],
     private traverserStateFactory: () => S,
-    private traverserReturnStateFactory: (publicState: I, localState: Map<string, S>) => Q,
+    private traverserReturnStateFactory: (stageContext: StageContext<I>, localState: Map<string, S>) => Q,
     private readonly: boolean = false,
     options?: StageOptions
   ) {
@@ -96,7 +130,6 @@ export abstract class TransformationStage<I, Q, S> extends Stage<I, Q> {
       }
     });
 
-    const publicState = stageContext.prevState;
     const uniqueStateMap = new Map<string, S>();
 
     const visiters = this.traversers.map((traverser) => {
@@ -107,7 +140,7 @@ export abstract class TransformationStage<I, Q, S> extends Stage<I, Q> {
           }
 
           const traverserInstance = new traverser(context, program.getTypeChecker(), {
-            publicState,
+            stageContext,
             localState: uniqueStateMap.get(sourceFile.fileName)!
           });
           return traverserInstance.traverse(sourceFile) as ts.SourceFile;
@@ -126,7 +159,7 @@ export abstract class TransformationStage<I, Q, S> extends Stage<I, Q> {
 
     const nextContext: StageContext<Q> = {
       ...stageContext,
-      prevState: this.traverserReturnStateFactory(publicState, uniqueStateMap)
+      prevState: this.traverserReturnStateFactory(stageContext, uniqueStateMap)
     };
 
     return nextContext;
@@ -167,12 +200,15 @@ export class StageList<Stages extends readonly IStage<unknown, unknown>[]>
   }
 
   run(stageContext: StageContext<StageInput<Stages>>): StageContext<StageOutput<Stages>> {
+    stageContext.stageStack.push(this.name);
     let currentContext: StageContext<unknown> = stageContext;
 
     for (const stage of this.stages) {
       currentContext = stage.run(currentContext);
     }
 
-    return currentContext as StageContext<StageOutput<Stages>>;
+    const next = currentContext as StageContext<StageOutput<Stages>>;
+    stageContext.stageStack.pop();
+    return next;
   }
 }

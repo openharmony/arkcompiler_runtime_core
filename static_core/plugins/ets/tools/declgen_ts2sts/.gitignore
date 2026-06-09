@@ -16,3 +16,4 @@ dist
 bundle
 node_modules
 out
+.tsbuildinfo
