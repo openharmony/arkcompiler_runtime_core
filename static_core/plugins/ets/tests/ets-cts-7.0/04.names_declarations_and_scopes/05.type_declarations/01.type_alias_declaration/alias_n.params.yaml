@@ -283,27 +283,3 @@ cases:
         let v: NumArray2[] = new Number[1][1][1]
         let ok = v.length == 1
       expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Array<Array<Array<Double>>>'"
-
-    #46-48 type alias shadowing
-    - defs: |- 
-        type k = int
-      use: |-
-        {
-          let k = 4
-          let b: k = k
-        }
-      expected_out: "Semantic error ESE0371: Cannot find type 'k'."
-
-    - defs: |- 
-        type k = int
-        function foo(k: string) { let b: k = 5 }
-      expected_out: "Semantic error ESE0371: Cannot find type 'k'."
-
-    - defs: |- 
-        type k = int
-      use: |-
-        {
-          const k = "test"
-          let b: k = 5
-        }
-      expected_out: "Semantic error ESE0371: Cannot find type 'k'."

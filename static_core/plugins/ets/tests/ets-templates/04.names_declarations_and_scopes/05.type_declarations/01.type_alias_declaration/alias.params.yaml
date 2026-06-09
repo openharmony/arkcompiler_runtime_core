@@ -233,8 +233,41 @@ cases:
         let x = new K(4)
         let ok = x == 4
 
-    - defs: |- 
+    - defs: |-
         type K = Array<int>
       use: |-
         let x = new K(1, 3, 10)
         let ok = x[0] == 1 && x[1] == 3 && x[2] == 10
+
+    #4 type alias not shadowed by let variable — type annotation resolves to alias, value to local
+    - defs: |-
+        type k = int
+      use: |-
+        {
+          let k = 4
+          let b: k = k
+          arktest.assertEQ(b, 4)
+        }
+        let ok = new k instanceof int
+
+    #5 type alias visible inside function even when parameter has same name
+    - defs: |-
+        type k = int
+        function foo(k: string) {
+            let b: k = 5
+            arktest.assertEQ(b, 5)
+        }
+      use: |-
+        foo("test")
+        let ok = new k instanceof int
+
+    #6 type alias not shadowed by const variable — type annotation resolves to alias
+    - defs: |-
+        type k = int
+      use: |-
+        {
+          const k = "test"
+          let b: k = 5
+          arktest.assertEQ(b, 5)
+        }
+        let ok = new k instanceof int
