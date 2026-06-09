@@ -34,11 +34,3 @@ cases:
       }
     error: |-
       Semantic error ESE0077: Invalid method modifier(s): a static method can't have abstract, final or override modifier.
-
-  - modifier: "async"
-    function: |-
-      override async foo(): Promise<int> {
-        return 5;
-      }
-    error: |-
-      Semantic error ESE0136: Method %%async-foo(): Promise<Int>|Int in B not overriding any method

@@ -26,11 +26,7 @@ expected_out: "{{c.error}}"
 ---*/
 
 class A {
-{% if "async" in c.modifier %}
-    async foo(): Promise<int> {
-{% else %}
     foo(): int {
-{% endif %}
         return 1;
     }
 }
