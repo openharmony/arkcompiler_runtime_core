@@ -209,6 +209,9 @@
 15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_7.ets
 15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_11.ets
 
+#34276
+15.semantic_rules/08.overriding/03.override-compatible_signatures/void_return_overrides_any.ets
+
 #31862 verifier error on conflicting default implementations in interfaces
 15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
 
