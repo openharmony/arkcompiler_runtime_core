@@ -1,0 +1,261 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#! CHECKER      String.copyTo.NullPtr.Array gJIT
+#! RUN          force_jit: true, options: "--compiler-regex='.*testCopyTo.*'", entry: "_GLOBAL::main"
+
+.language eTS
+
+.record arkruntime.annotation.Module <external>
+.record std.core.Byte <external>
+.record std.core.Short <external>
+.record std.core.Int <external>
+.record std.core.Long <external>
+.record std.core.String <external>
+.record std.core.Error <external>
+.record std.core.NullPointerError <external>
+.record std.core.ETSGLOBAL <external>
+
+.function i32 testCopyToByteNullFirst() <static, access.function=public> {
+try_begin_label_0:
+        mov.null v2
+        movi v0, 1
+        newarr v3, v0, std.core.Byte[]
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Byte[],std.core.Byte[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testCopyToShortNullFirst() <static, access.function=public> {
+try_begin_label_0:
+        mov.null v2
+        movi v0, 1
+        newarr v3, v0, std.core.Short[]
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Short[],std.core.Short[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testCopyToIntNullFirst() <static, access.function=public> {
+try_begin_label_0:
+        mov.null v2
+        movi v0, 1
+        newarr v3, v0, std.core.Int[]
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Int[],std.core.Int[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testCopyToLongNullFirst() <static, access.function=public> {
+try_begin_label_0:
+        mov.null v2
+        movi v0, 1
+        newarr v3, v0, std.core.Long[]
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Long[],std.core.Long[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testCopyToByteNullSecond() <static, access.function=public> {
+try_begin_label_0:
+        movi v0, 1
+        newarr v2, v0, std.core.Byte[]
+        mov.null v3
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Byte[],std.core.Byte[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 testCopyToShortNullSecond() <static, access.function=public> {
+try_begin_label_0:
+        movi v0, 1
+        newarr v2, v0, std.core.Short[]
+        mov.null v3
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Short[],std.core.Short[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+
+.function i32 testCopyToIntNullSecond() <static, access.function=public> {
+try_begin_label_0:
+        movi v0, 1
+        newarr v2, v0, std.core.Int[]
+        mov.null v3
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Int[],std.core.Int[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+
+.function i32 testCopyToLongNullSecond() <static, access.function=public> {
+try_begin_label_0:
+        movi v0, 1
+        newarr v2, v0, std.core.Long[]
+        mov.null v3
+        movi v4, 0
+        movi v5, 0
+        movi v6, 1
+        call.range std.core.ETSGLOBAL.copyTo:(std.core.Long[],std.core.Long[],i32,i32,i32), v2
+        ldai 0x1
+        return
+try_end_label_0:
+        sta.obj v0
+        lda.obj v0
+        isinstance std.core.NullPointerError
+        jeqz jump_label_2
+        ldai 0x0
+        return
+jump_label_2:
+        ldai 0x2
+        return
+
+.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+}
+
+.function i32 main() <static, access.function=public> {
+    call.short testCopyToByteNullFirst:()
+    sta v0
+    call.short testCopyToShortNullFirst:()
+    add2 v0
+    sta v0
+    call.short testCopyToIntNullFirst:()
+    add2 v0
+    sta v0
+    call.short testCopyToLongNullFirst:()
+    add2 v0
+    sta v0
+    call.short testCopyToByteNullSecond:()
+    add2 v0
+    sta v0
+    call.short testCopyToShortNullSecond:()
+    add2 v0
+    sta v0
+    call.short testCopyToIntNullSecond:()
+    add2 v0
+    sta v0
+    call.short testCopyToLongNullSecond:()
+    add2 v0
+    sta v0
+    return
+}
+
+.function void std.core.ETSGLOBAL.copyTo(std.core.Byte[] a0, std.core.Byte[] a1, i32 a2, i32 a3, i32 a4) <external, static, access.function=public>
+.function void std.core.ETSGLOBAL.copyTo(std.core.Short[] a0, std.core.Short[] a1, i32 a2, i32 a3, i32 a4) <external, static, access.function=public>
+.function void std.core.ETSGLOBAL.copyTo(std.core.Int[] a0, std.core.Int[] a1, i32 a2, i32 a3, i32 a4) <external, static, access.function=public>
+.function void std.core.ETSGLOBAL.copyTo(std.core.Long[] a0, std.core.Long[] a1, i32 a2, i32 a3, i32 a4) <external, static, access.function=public>

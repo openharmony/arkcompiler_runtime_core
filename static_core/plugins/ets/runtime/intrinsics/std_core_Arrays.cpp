@@ -26,16 +26,15 @@
 
 namespace ark::ets::intrinsics {
 
-static const char *CheckCopyToPreConditions(int32_t srcStart, int32_t srcLen, int32_t srcEnd, int32_t dstStart,
-                                            int32_t dstLen)
+static const char *CheckBounds(uint32_t srcLen, uint32_t dstLen, int32_t srcStart, int32_t srcEnd, int32_t dstStart)
 {
-    if (srcStart < 0 || srcStart > srcEnd || srcEnd > srcLen) {
+    if (srcStart < 0 || srcStart > srcEnd || static_cast<uint32_t>(srcEnd) > srcLen) {
         return "copyTo: src bounds verification failed";
     }
-    if (dstStart < 0 || dstStart > dstLen) {
+    if (dstStart < 0 || static_cast<uint32_t>(dstStart) > dstLen) {
         return "copyTo: dst bounds verification failed";
     }
-    if ((srcEnd - srcStart) > (dstLen - dstStart)) {
+    if (static_cast<uint32_t>(srcEnd - srcStart) > (dstLen - static_cast<uint32_t>(dstStart))) {
         return "copyTo: Destination array doesn't have enough space";
     }
     return nullptr;
@@ -45,10 +44,11 @@ template <typename T>
 static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dstStart, int32_t srcStart,
                           int32_t srcEnd)
 {
-    auto srcLen = static_cast<int32_t>(src->GetLength());
-    auto dstLen = static_cast<int32_t>(dst->GetLength());
-    const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
-
+    if (UNLIKELY(src == nullptr || dst == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
+    const char *errmsg = CheckBounds(src->GetLength(), dst->GetLength(), srcStart, srcEnd, dstStart);
     if (errmsg == nullptr) {
         auto srcAddr = ToVoidPtr(ToUintPtr(src->GetData()) + srcStart * sizeof(T));
         auto dstAddr = ToVoidPtr(ToUintPtr(dst->GetData()) + dstStart * sizeof(T));
@@ -59,7 +59,6 @@ static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t 
             }
         }
     }
-
     if (errmsg != nullptr) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreArrayIndexOutOfBoundsError, errmsg);
@@ -301,36 +300,27 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
         ThrowNullPointerException();
         return;
     }
-
     auto *ctx = EtsExecutionContext::GetCurrent();
     if (UNLIKELY(Runtime::GetCurrent()->IsInitialized() && (!IsObjectArrayClass(src) || !IsObjectArrayClass(dst)))) {
         ThrowEtsException(ctx, "Lstd/core/TypeError;", "Expected FixedArray<Any>");
         return;
     }
-
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    auto srcArray = EtsHandle(executionCtx, src);
-    auto dstArray = EtsHandle(executionCtx, dst);
-
-    auto srcLen = static_cast<int32_t>(srcArray->GetLength());
-    auto dstLen = static_cast<int32_t>(dstArray->GetLength());
-    auto length = srcEnd - srcStart;
     if constexpr (CHECKED) {
-        const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
+        const char *errmsg = CheckBounds(src->GetLength(), dst->GetLength(), srcStart, srcEnd, dstStart);
         if (errmsg != nullptr) {
-            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreArrayIndexOutOfBoundsError, errmsg);
+            ThrowEtsException(ctx, PlatformTypes(ctx)->coreArrayIndexOutOfBoundsError, errmsg);
             return;
         }
     }
-
-    /* the result will be exactly the same as it is */
-    if (length == 0 || (srcArray.GetPtr() == dstArray.GetPtr() && srcStart == dstStart)) {
+    // Do nothing if the result will be exactly the same as it is
+    auto len = srcEnd - srcStart;
+    if (len == 0 || (src == dst && srcStart == dstStart)) {
         return;
     }
-
-    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(executionCtx->GetMT(), {srcArray, srcStart},
-                                                       {dstArray, dstStart}, length);
+    [[maybe_unused]] EtsHandleScope scope(ctx);
+    auto srcArray = EtsHandle(ctx, src);
+    auto dstArray = EtsHandle(ctx, dst);
+    RefCopy<ObjectPointerType, NEED_PRE_WRITE_BARRIER>(ctx->GetMT(), {srcArray, srcStart}, {dstArray, dstStart}, len);
 }
 
 extern "C" void StdCoreObjectCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,

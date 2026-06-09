@@ -18,25 +18,28 @@
 include_relative 'array_helpers.irt'
 
 macro(:do_checks_ets) do
+    # Check NullPointer
+    If(src_obj, 0).EQ.Unlikely.b {
+        Goto(:FallToIntrinsic)
+    }
+    If(dst_obj, 0).EQ.Unlikely.b {
+        Goto(:FallToIntrinsic)
+    }
+    # Check OutOfBound
     src_size := LoadI(src_obj).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
     dst_size := LoadI(dst_obj).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
-
     If(src_start, src_end).GT.Unlikely.b {
         Goto(:FallToIntrinsic)
     }
-
     If(src_end, src_size).GT.Unlikely.b {
         Goto(:FallToIntrinsic)
     }
-
     IfImm(Compare(src_start, 0).LT.b).Imm(0).NE.Unlikely.b {
         Goto(:FallToIntrinsic)
     }
-
     IfImm(Compare(dst_start, 0).LT.b).Imm(0).NE.Unlikely.b {
         Goto(:FallToIntrinsic)
     }
-    
     data_length := Sub(src_end, src_start).u32
     available_space := Sub(dst_size, dst_start).u32
     IfImm(Compare(data_length, available_space).GT.b).Imm(0).NE.Unlikely.b {
