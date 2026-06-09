@@ -24,10 +24,10 @@
 #include <libarkfile/include/file_format_version.h>
 #include <libarkfile/include/source_lang_enum.h>
 
+#include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
-
-#include <algorithm>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -293,7 +293,8 @@ class IndexedItem : public BaseItem {
 public:
     IndexedItem()
     {
-        itemAllocId_ = itemAllocIdNext_++;
+        // Atomic with relaxed order reason: counter only provides unique allocation ids and does not publish item state
+        itemAllocId_ = itemAllocIdNext_.fetch_add(1, std::memory_order_relaxed);
     }
 
     uint32_t GetIndex(const BaseItem *item) const
@@ -389,7 +390,7 @@ private:
 
     // needed for keeping same layout of panda file after rebuilding it,
     // even if same `IndexedItem` was allocated at different addresses
-    static size_t itemAllocIdNext_;
+    static std::atomic_size_t itemAllocIdNext_;
 };
 
 class TypeItem : public IndexedItem {
@@ -769,6 +770,11 @@ public:
     void AddParameter(StringItem *name)
     {
         parameters_.push_back(name);
+    }
+
+    void ReserveParameters(size_t size)
+    {
+        parameters_.reserve(size);
     }
 
     const std::vector<StringItem *> *GetParameters() const
@@ -1207,20 +1213,24 @@ public:
 
     void VisitFields(const VisitorCallBack &cb)
     {
-        for (auto &field : fields_) {
-            if (!cb(field.get())) {
-                break;
-            }
-        }
+        VisitFieldsImpl(cb);
+    }
+
+    template <class Callback>
+    void VisitFields(Callback &&cb)
+    {
+        VisitFieldsImpl(cb);
     }
 
     void VisitMethods(const VisitorCallBack &cb)
     {
-        for (auto &method : methods_) {
-            if (!cb(method.get())) {
-                break;
-            }
-        }
+        VisitMethodsImpl(cb);
+    }
+
+    template <class Callback>
+    void VisitMethods(Callback &&cb)
+    {
+        VisitMethodsImpl(cb);
     }
 
     void Visit(const VisitorCallBack &cb) override
@@ -1325,6 +1335,27 @@ public:
     std::pair<FindMethodIterator, FindMethodIterator> FindMethod(StringItem *name) const
     {
         return methods_.equal_range(name);
+    }
+
+private:
+    template <class Callback>
+    void VisitFieldsImpl(Callback &cb)
+    {
+        for (auto &field : fields_) {
+            if (!cb(field.get())) {
+                break;
+            }
+        }
+    }
+
+    template <class Callback>
+    void VisitMethodsImpl(Callback &cb)
+    {
+        for (auto &method : methods_) {
+            if (!cb(method.get())) {
+                break;
+            }
+        }
     }
 };
 

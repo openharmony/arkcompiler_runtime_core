@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include <forward_list>
 #include <functional>
+#include <unordered_map>
+#include <vector>
 
 #include "libarkfile/bytecode_instruction.h"
 #include "libarkfile/file_items.h"
@@ -28,6 +30,15 @@
 #include "libarkbase/macros.h"
 
 namespace ark::static_linker {
+
+template <class Container>
+void ClearAndReleaseStorage(Container &container)
+{
+    // clear() keeps capacity; swapping with an empty container releases the backing storage.
+    container.clear();
+    Container empty;
+    container.swap(empty);
+}
 
 class Context;
 
@@ -41,20 +52,31 @@ public:
 
     struct StringChange {
         BytecodeInstruction inst;
-        std::string str;
+        const panda_file::File *file;
+        panda_file::File::EntityId oldId;
+        const panda_file::StringItem *oldItem;
         panda_file::MethodItem *mi;
         panda_file::StringItem *it {};
     };
 
     struct LiteralArrayChange {
         BytecodeInstruction inst;
+        panda_file::MethodItem *mi;
         panda_file::LiteralArrayItem *old;
 
         panda_file::LiteralArrayItem *it {};
     };
 
-    using Change =
-        std::variant<IndexedChange, StringChange, LiteralArrayChange, std::string, std::function<bool(bool peek)>>;
+    struct DebugInfoPatch {
+        const panda_file::File *file;
+        panda_file::ItemContainer *cont;
+        panda_file::DebugInfoItem *debugInfo;
+        panda_file::File::EntityId debugInfoId;
+        panda_file::MethodItem *method;
+        bool patchLineNumberProgram;
+    };
+
+    using Change = std::variant<IndexedChange, StringChange, LiteralArrayChange, std::string, DebugInfoPatch>;
 
     void Add(Change c);
 
@@ -62,21 +84,23 @@ public:
 
     void TryDeletePatch();
     void Patch(const std::pair<size_t, size_t> range);
+    void PatchBytecode(const std::pair<size_t, size_t> range);
+    void PatchDebug(const std::pair<size_t, size_t> range);
+    void PatchBytecodeRanges(const std::pair<size_t, size_t> range);
     void AddStringDependency();
 
     void Devour(CodePatcher &&p);
+    void AddBytecodePatchRange(std::pair<size_t, size_t> range);
 
-    void AddRange(std::pair<size_t, size_t> range);
-
-    const std::vector<std::pair<size_t, size_t>> &GetRanges() const
+    void ReserveChanges(size_t size)
     {
-        return ranges_;
+        changes_.reserve(size);
     }
 
     void Clear()
     {
-        changes_.clear();
-        ranges_.clear();
+        ClearAndReleaseStorage(changes_);
+        ClearAndReleaseStorage(bytecodePatchRanges_);
     }
 
     size_t GetSize() const
@@ -84,11 +108,22 @@ public:
         return changes_.size();
     }
 
-private:
-    std::vector<Change> changes_;
-    std::vector<std::pair<size_t, size_t>> ranges_;
+    size_t GetBytecodePatchRangeCount() const
+    {
+        return bytecodePatchRanges_.size();
+    }
 
-    void ApplyLiteralArrayChange(LiteralArrayChange &lc, Context *ctx);
+private:
+    static void ApplyStringChange(StringChange *change, Context *ctx);
+    static void ApplyLiteralArrayChange(LiteralArrayChange *change, Context *ctx);
+    static void ApplyStringDependency(std::string *value, Context *ctx);
+    static bool IsBytecodePatchChange(const Change &change);
+    void RebuildBytecodePatchRanges(const std::vector<size_t> &newIndexes, size_t skippedIndex);
+
+    std::vector<Change> changes_;
+    // Per-method ranges inside changes_ used to patch bytecode ids in parallel.  DebugInfoPatch entries may be present
+    // inside these ranges, but PatchBytecode() ignores them; debug info is patched later by PatchDebug().
+    std::vector<std::pair<size_t, size_t>> bytecodePatchRanges_;
 };
 
 struct CodeData {
@@ -128,8 +163,13 @@ public:
 
     void TryDelete();
 
+    void ReleasePreWriteState();
+
     const std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> &GetKnownItems() const
     {
+        if (preWriteStateReleased_) {
+            return emptyKnownItems_;
+        }
         return knownItems_;
     }
 
@@ -166,15 +206,189 @@ private:
     CodePatcher patcher_;
 
     std::forward_list<panda_file::FileReader> readers_;
+    bool preWriteStateReleased_ {false};
     std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> knownItems_;
-    std::multimap<const panda_file::BaseItem *, const panda_file::FileReader *> cameFrom_;
+    std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> emptyKnownItems_;
+
+    // Output item provenance used to add source file names to diagnostics.
+    std::vector<std::pair<const panda_file::BaseItem *, const panda_file::FileReader *>> cameFrom_;
     size_t literalArrayId_ {};
-    std::map<std::tuple<panda_file::BaseClassItem *, panda_file::StringItem *, panda_file::TypeItem *>,
-             panda_file::ForeignFieldItem *>
-        foreignFields_;
-    std::map<std::tuple<panda_file::BaseClassItem *, panda_file::StringItem *, panda_file::ProtoItem *, uint32_t>,
-             panda_file::ForeignMethodItem *>
-        foreignMethods_;
+
+    // Foreign member resolution is keyed by item identity.  Ordering is irrelevant, so typed hash keys avoid
+    // std::map tuple comparisons in the merge hot path.
+    static constexpr size_t HASH_MAGIC = 0x9E3779B9U;  // CC-OFF(G.NAM.03-CPP) project code style
+    static constexpr size_t HASH_LEFT_SHIFT = 6U;      // CC-OFF(G.NAM.03-CPP) project code style
+    static constexpr size_t HASH_RIGHT_SHIFT = 2U;     // CC-OFF(G.NAM.03-CPP) project code style
+
+    class ForeignFieldKey {
+    public:
+        ForeignFieldKey(panda_file::BaseClassItem *klass, panda_file::StringItem *name, panda_file::TypeItem *type)
+            : klass_(klass), name_(name), type_(type)
+        {
+        }
+
+        bool operator==(const ForeignFieldKey &other) const
+        {
+            return klass_ == other.klass_ && name_ == other.name_ && type_ == other.type_;
+        }
+
+        panda_file::BaseClassItem *GetClass() const
+        {
+            return klass_;
+        }
+
+        panda_file::StringItem *GetName() const
+        {
+            return name_;
+        }
+
+        panda_file::TypeItem *GetType() const
+        {
+            return type_;
+        }
+
+    private:
+        panda_file::BaseClassItem *klass_;
+        panda_file::StringItem *name_;
+        panda_file::TypeItem *type_;
+    };
+
+    class ForeignMethodKey {
+    public:
+        ForeignMethodKey(panda_file::BaseClassItem *klass, panda_file::StringItem *name, panda_file::ProtoItem *proto,
+                         uint32_t accessFlags)
+            : klass_(klass), name_(name), proto_(proto), accessFlags_(accessFlags)
+        {
+        }
+
+        bool operator==(const ForeignMethodKey &other) const
+        {
+            return klass_ == other.klass_ && name_ == other.name_ && proto_ == other.proto_ &&
+                   accessFlags_ == other.accessFlags_;
+        }
+
+        panda_file::BaseClassItem *GetClass() const
+        {
+            return klass_;
+        }
+
+        panda_file::StringItem *GetName() const
+        {
+            return name_;
+        }
+
+        panda_file::ProtoItem *GetProto() const
+        {
+            return proto_;
+        }
+
+        uint32_t GetAccessFlags() const
+        {
+            return accessFlags_;
+        }
+
+    private:
+        panda_file::BaseClassItem *klass_;
+        panda_file::StringItem *name_;
+        panda_file::ProtoItem *proto_;
+        uint32_t accessFlags_;
+    };
+
+    class ForeignFieldKeyHash {
+    public:
+        size_t operator()(const ForeignFieldKey &key) const
+        {
+            return CombineHash(CombineHash(CombineHash(0, key.GetClass()), key.GetName()), key.GetType());
+        }
+    };
+
+    class ForeignMethodKeyHash {
+    public:
+        size_t operator()(const ForeignMethodKey &key) const
+        {
+            auto hash = CombineHash(CombineHash(CombineHash(0, key.GetClass()), key.GetName()), key.GetProto());
+            return hash ^ (std::hash<uint32_t> {}(key.GetAccessFlags()) + HASH_MAGIC + (hash << HASH_LEFT_SHIFT) +
+                           (hash >> HASH_RIGHT_SHIFT));
+        }
+    };
+
+    class MethodResolutionKey {
+    public:
+        MethodResolutionKey(panda_file::BaseClassItem *klass, panda_file::StringItem *name,
+                            panda_file::ProtoItem *proto)
+            : klass_(klass), name_(name), proto_(proto)
+        {
+        }
+
+        bool operator==(const MethodResolutionKey &other) const
+        {
+            return klass_ == other.klass_ && name_ == other.name_ && proto_ == other.proto_;
+        }
+
+        panda_file::BaseClassItem *GetClass() const
+        {
+            return klass_;
+        }
+
+        panda_file::StringItem *GetName() const
+        {
+            return name_;
+        }
+
+        panda_file::ProtoItem *GetProto() const
+        {
+            return proto_;
+        }
+
+    private:
+        panda_file::BaseClassItem *klass_;
+        panda_file::StringItem *name_;
+        panda_file::ProtoItem *proto_;
+    };
+
+    class MethodResolutionKeyHash {
+    public:
+        size_t operator()(const MethodResolutionKey &key) const
+        {
+            return CombineHash(CombineHash(CombineHash(0, key.GetClass()), key.GetName()), key.GetProto());
+        }
+    };
+
+    static size_t CombineHash(size_t seed, const void *ptr)
+    {
+        return seed ^
+               (std::hash<const void *> {}(ptr) + HASH_MAGIC + (seed << HASH_LEFT_SHIFT) + (seed >> HASH_RIGHT_SHIFT));
+    }
+
+    struct ProtoData {
+        panda_file::ProtoItem *proto;
+        std::vector<panda_file::MethodParamItem> params;
+    };
+
+    std::unordered_map<ForeignFieldKey, panda_file::ForeignFieldItem *, ForeignFieldKeyHash> foreignFields_;
+    std::unordered_map<ForeignMethodKey, panda_file::ForeignMethodItem *, ForeignMethodKeyHash> foreignMethods_;
+    std::unordered_map<MethodResolutionKey, panda_file::MethodItem *, MethodResolutionKeyHash> resolvedMethods_;
+    using ResolvedField = std::variant<panda_file::FieldItem *, panda_file::ForeignClassItem *>;
+
+    std::unordered_map<ForeignFieldKey, ResolvedField, ForeignFieldKeyHash> resolvedFields_;
+
+    // Merge repeatedly converts old-file entities into output-container entities.  These caches keep that conversion
+    // single-pass for common proto/string/literal-array references.
+    std::unordered_map<panda_file::ProtoItem *, ProtoData> protoCache_;
+    std::unordered_map<const panda_file::StringItem *, panda_file::StringItem *> stringCache_;
+    std::unordered_map<panda_file::LiteralArrayItem *, std::vector<panda_file::LiteralItem>> literalArrayCache_;
+
+    // The initial merge scan gathers counts for reserve() and records foreign items for the required deterministic
+    // merge order: regular class declarations, foreign classes, regular bodies, then foreign members.
+    struct MergeItemBuckets {
+        size_t totalItems {};
+        size_t methodItems {};
+        size_t cameFromItems {};
+        std::vector<std::pair<panda_file::BaseItem *, const panda_file::FileReader *>> foreignClasses;
+        std::vector<std::pair<panda_file::BaseItem *, const panda_file::FileReader *>> foreignMembers;
+    };
+
+    MergeItemBuckets CollectMergeItemBuckets();
 
     panda_file::BaseClassItem *ClassFromOld(panda_file::BaseClassItem *old);
 
@@ -186,9 +400,9 @@ private:
 
     void MergeClass(const panda_file::FileReader *reader, panda_file::ClassItem *ni, panda_file::ClassItem *oi);
 
-    void AddRegularClasses();
+    panda_file::ClassItem *GetOrCreateRegularClass(const std::string &name, const panda_file::FileReader *reader);
 
-    void CheckClassRedifinition(const std::string &name, panda_file::FileReader *reader);
+    void AddRegularClasses();
 
     void FillRegularClasses();
 
@@ -199,12 +413,24 @@ private:
     void MergeForeignMethod(const panda_file::FileReader *reader, panda_file::ForeignMethodItem *fm);
 
     void MergeForeignMethodCreate(const panda_file::FileReader *reader, panda_file::BaseClassItem *clz,
-                                  panda_file::ForeignMethodItem *fm);
+                                  panda_file::ForeignMethodItem *fm, panda_file::StringItem *name,
+                                  panda_file::ProtoItem *proto);
 
     void MergeForeignField(const panda_file::FileReader *reader, panda_file::ForeignFieldItem *ff);
 
     void MergeForeignFieldCreate(const panda_file::FileReader *reader, panda_file::BaseClassItem *clz,
-                                 panda_file::ForeignFieldItem *ff);
+                                 panda_file::ForeignFieldItem *ff, panda_file::StringItem *name,
+                                 panda_file::TypeItem *type);
+
+    struct FieldResolutionData {
+        const panda_file::FileReader *reader;
+        panda_file::ForeignFieldItem *oldField;
+        ForeignFieldKey key;
+        panda_file::StringItem *name;
+        panda_file::TypeItem *type;
+    };
+
+    void ApplyResolvedField(const FieldResolutionData &data, ResolvedField resolvedField, bool cacheResult);
 
     std::pair<bool, bool> UpdateDebugInfo(panda_file::MethodItem *ni, panda_file::MethodItem *oi);
 
@@ -228,19 +454,44 @@ private:
     template <typename T>
     void TransferAnnotations(const panda_file::FileReader *reader, T *ni, T *oi);
 
-    std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> GetProto(panda_file::ProtoItem *p);
+    const ProtoData &GetProto(panda_file::ProtoItem *p);
 
     bool IsSameType(ark::panda_file::TypeItem *nevv, ark::panda_file::TypeItem *old);
 
     void ProcessCodeData(CodePatcher &p, CodeData *data);
 
+    void ApplyPatchDependencies();
+
+    size_t EstimatePatchChanges(size_t start, size_t end) const;
+
+    void ProcessCodeDataRange(CodePatcher *patcher, size_t start, size_t end);
+
+    void ParseConcurrently();
+
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
 
-    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
-                        CodeData *data);
+    using ItemsMap = std::map<panda_file::File::EntityId, panda_file::BaseItem *>;
 
-    void HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
-                              const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items);
+    using IndexResolver = panda_file::File::EntityId (panda_file::File::*)(panda_file::File::EntityId,
+                                                                           panda_file::File::Index) const;
+
+    struct InstructionIdContext {
+        CodePatcher &patcher;
+        const panda_file::File &file;
+        const ItemsMap &items;
+        panda_file::File::EntityId methodId;
+        CodeData &data;
+    };
+
+    void HandleStringId(const InstructionIdContext &ctx, const BytecodeInstruction &inst);
+
+    void HandleIndexedId(const InstructionIdContext &ctx, const BytecodeInstruction &inst, IndexResolver resolve);
+
+    static IndexResolver GetIndexResolver(const BytecodeInstruction &inst);
+
+    void HandleInstructionId(const InstructionIdContext &ctx, const BytecodeInstruction &inst);
+
+    void HandleLiteralArrayId(const InstructionIdContext &ctx, const BytecodeInstruction &inst);
 
     void AddItemToKnown(panda_file::BaseItem *item, const std::map<std::string, panda_file::BaseClassItem *> &cm,
                         const panda_file::FileReader &reader);
@@ -300,6 +551,10 @@ private:
         friend std::ostream &operator<<(std::ostream &o, const ErrorToStringWrapper &self);
 
     private:
+        void Print(std::ostream &o) const;
+        void PrintInfo(std::ostream &o, const std::string &info) const;
+        void PrintInfo(std::ostream &o, const panda_file::BaseItem *info) const;
+
         ErrorDetail error_;
         size_t indent_;
         Context *ctx_;
@@ -315,13 +570,15 @@ private:
     void Error(const std::string &msg, const std::vector<ErrorDetail> &details,
                const panda_file::FileReader *reader = nullptr);
 
-    std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassItem *> TryFindField(
-        panda_file::BaseClassItem *klass, const std::string &name, panda_file::TypeItem *expectedType,
-        std::vector<panda_file::FieldItem *> *badCandidates);
+    using FieldSearchResult = std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassItem *>;
+    using MethodSearchResult = std::variant<bool, panda_file::MethodItem *>;
 
-    std::variant<bool, panda_file::MethodItem *> TryFindMethod(panda_file::BaseClassItem *klass,
-                                                               panda_file::ForeignMethodItem *fm,
-                                                               std::vector<ErrorDetail> *relatedItems);
+    FieldSearchResult TryFindField(panda_file::BaseClassItem *klass, const std::string &name,
+                                   panda_file::TypeItem *expectedType,
+                                   std::vector<panda_file::FieldItem *> *badCandidates);
+
+    MethodSearchResult TryFindMethod(panda_file::BaseClassItem *klass, panda_file::StringItem *name,
+                                     panda_file::ProtoItem *proto, std::vector<ErrorDetail> *relatedItems);
 
     std::variant<panda_file::AnnotationItem *, ErrorDetail> AnnotFromOld(panda_file::AnnotationItem *oa);
 

@@ -1154,6 +1154,128 @@ TEST(ItemContainer, AnnotationDeduplicationReading)
     reader.GetContainerPtr()->DeduplicateItems(true);
 }
 
+TEST(ItemContainer, RegionSectionReuseRequiresPrebuiltRegion)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseRequiresPrebuiltRegion");
+    auto *methodName = container.GetOrCreateStringItem("main");
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+    auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+    std::vector<uint8_t> code = {static_cast<uint8_t>(BytecodeInstruction::Opcode::RETURN_VOID)};
+    method->SetCode(container.CreateItem<CodeItem>(0, 0, code));
+
+    MemoryWriter writer;
+    ASSERT_FALSE(container.Write(&writer, true, false, ItemContainer::RegionSectionMode::REUSE_REQUIRED));
+}
+
+TEST(ItemContainer, RegionSectionReuseRejectsComputeLayout)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseRejectsComputeLayout");
+    auto *methodName = container.GetOrCreateStringItem("main");
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+    auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+    std::vector<uint8_t> code = {static_cast<uint8_t>(BytecodeInstruction::Opcode::RETURN_VOID)};
+    method->SetCode(container.CreateItem<CodeItem>(0, 0, code));
+
+    MemoryWriter writer;
+    ASSERT_FALSE(container.Write(&writer, true, true, ItemContainer::RegionSectionMode::REUSE_REQUIRED));
+}
+
+TEST(ItemContainer, RegionSectionReuseKeepsOldWriteSemantics)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseKeepsOldWriteSemantics");
+    auto *methodName = container.GetOrCreateStringItem("main");
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+    auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+    std::vector<uint8_t> code = {static_cast<uint8_t>(BytecodeInstruction::Opcode::RETURN_VOID)};
+    method->SetCode(container.CreateItem<CodeItem>(0, 0, code));
+
+    MemoryWriter writer;
+    ASSERT_TRUE(container.Write(&writer, true, false));
+}
+
+TEST(ItemContainer, RegionSectionReuseAllowsPrimitiveTypeIndexEntries)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseAllowsPrimitiveTypeIndexEntries");
+    auto *methodName = container.GetOrCreateStringItem("main");
+    std::vector<MethodParamItem> params;
+    params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), params);
+    auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, params);
+    std::vector<uint8_t> code = {static_cast<uint8_t>(BytecodeInstruction::Opcode::RETURN_VOID)};
+    method->SetCode(container.CreateItem<CodeItem>(0, 0, code));
+
+    container.ComputeLayout();
+
+    MemoryWriter writer;
+    ASSERT_TRUE(container.Write(&writer, true, false, ItemContainer::RegionSectionMode::REUSE_REQUIRED));
+}
+
+TEST(ItemContainer, RegionSectionReuseRejectsNewDependency)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseRejectsNewDependency");
+    auto *methodName = container.GetOrCreateStringItem("main");
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+    auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+    std::vector<uint8_t> code = {static_cast<uint8_t>(BytecodeInstruction::Opcode::RETURN_VOID)};
+    method->SetCode(container.CreateItem<CodeItem>(0, 0, code));
+
+    container.ComputeLayout();
+    method->AddIndexDependency(container.GetOrCreateClassItem("AddedAfterLayout"));
+
+    MemoryWriter writer;
+    ASSERT_FALSE(container.Write(&writer, true, false, ItemContainer::RegionSectionMode::REUSE_REQUIRED));
+}
+
+TEST(ItemContainer, RegionSectionReuseRejectsNewFieldDependency)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseRejectsNewFieldDependency");
+    auto *fieldName = container.GetOrCreateStringItem("field");
+    auto *fieldType = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    auto *field = klass->AddField(fieldName, fieldType, ACC_PUBLIC);
+
+    container.ComputeLayout();
+    field->AddIndexDependency(container.GetOrCreateClassItem("AddedAfterFieldLayout"));
+
+    MemoryWriter writer;
+    ASSERT_FALSE(container.Write(&writer, true, false, ItemContainer::RegionSectionMode::REUSE_REQUIRED));
+}
+
+TEST(ItemContainer, RegionSectionReuseUnchangedDependenciesAllowsFinalDedup)
+{
+    ItemContainer container;
+    auto *klass = container.GetOrCreateClassItem("ReuseUnchangedDependenciesAllowsFinalDedup");
+    auto *proto = container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID), {});
+    std::vector<uint8_t> code = {static_cast<uint8_t>(BytecodeInstruction::Opcode::RETURN_VOID)};
+
+    auto addMethod = [&container, klass, proto, &code](std::string_view name) {
+        auto *methodName = container.GetOrCreateStringItem(std::string(name));
+        auto *method = klass->AddMethod(methodName, proto, ACC_PUBLIC | ACC_STATIC, std::vector<MethodParamItem> {});
+        method->SetCode(container.CreateItem<CodeItem>(0, 0, code));
+
+        auto *lineNumberProgram = container.CreateLineNumberProgramItem();
+        auto *debugInfo = container.CreateItem<DebugInfoItem>(lineNumberProgram);
+        lineNumberProgram->EmitEnd();
+        debugInfo->SetLineNumber(1);
+        method->SetDebugInfo(debugInfo);
+        return method;
+    };
+
+    addMethod("first");
+    addMethod("second");
+
+    container.ComputeLayout();
+
+    MemoryWriter writer;
+    ASSERT_TRUE(
+        container.Write(&writer, true, false, ItemContainer::RegionSectionMode::REUSE_REQUIRED_UNCHANGED_DEPENDENCIES));
+}
+
 TEST(ItemContainer, CodeSizeZeroShouldFatal)
 {
     EXPECT_DEATH(

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include <tuple>
+#include <algorithm>
+#include <atomic>
+#include <thread>
 #include <type_traits>
 #include <variant>
 
@@ -48,7 +50,7 @@ void Context::AddItemToKnown(panda_file::BaseItem *item, const std::map<std::str
         knownItems_[fc] = iter->second;
     } else {
         auto clz = cont_.GetOrCreateForeignClassItem(name);
-        cameFrom_.emplace(clz, &reader);
+        cameFrom_.emplace_back(clz, &reader);
         knownItems_[fc] = clz;
     }
 }
@@ -68,48 +70,31 @@ void Context::MergeItem(panda_file::BaseItem *item, const panda_file::FileReader
 
 void Context::Merge()
 {
-    // types can reference types only
-    // methods can reference types
-    // code items can reference everything
-
-    // parse regular classes as forward declarations
-    // parse all foreign classes
-    // parse classes with fields and methods
-    // iterate all known indexed entities and create
-    //   appropriate mappings for them
-    //   oldEntity -> newEntity
-
+    // Dependency scope widens through the file: types can reference types, methods can reference types, and code can
+    // reference any indexed item.  Build old item -> new item mappings before users of those mappings are merged.
+    // Merge has to preserve this order:
+    //   1. forward-declare regular classes,
+    //   2. map referenced foreign classes,
+    //   3. fill regular class bodies,
+    //   4. resolve foreign members.
+    // Later stages rely on old item -> new item mappings built here.
     auto &cm = *cont_.GetClassMap();
-
-    // set offsets of all entities
-    for (auto &reader : readers_) {
-        for (auto [o, i] : *reader.GetItems()) {
-            i->SetOffset(o.GetOffset());
-        }
-    }
+    auto buckets = CollectMergeItemBuckets();
+    knownItems_.reserve(buckets.totalItems);
+    cameFrom_.reserve(buckets.cameFromItems);
+    codeDatas_.reserve(buckets.methodItems);
+    protoCache_.reserve(buckets.methodItems);
 
     AddRegularClasses();
 
-    // find all referenced foreign classes
-    for (auto &reader : readers_) {
-        auto *items = reader.GetItems();
-        for (auto &itPair : *items) {
-            auto *item = itPair.second;
-            if (item->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
-                AddItemToKnown(item, cm, reader);
-            }
-        }
+    for (const auto &[item, reader] : buckets.foreignClasses) {
+        AddItemToKnown(item, cm, *reader);
     }
 
     FillRegularClasses();
 
-    // scrap all indexable items
-    for (auto &reader : readers_) {
-        auto *items = reader.GetItems();
-        for (auto [offset, item] : *items) {
-            item->SetOffset(offset.GetOffset());
-            MergeItem(item, reader);
-        }
+    for (const auto &[item, reader] : buckets.foreignMembers) {
+        MergeItem(item, *reader);
     }
 
     for (const auto &f : deferredFailedAnnotations_) {
@@ -118,14 +103,54 @@ void Context::Merge()
     deferredFailedAnnotations_.clear();
 }
 
-void Context::CheckClassRedifinition(const std::string &name, panda_file::FileReader *reader)
+Context::MergeItemBuckets Context::CollectMergeItemBuckets()
 {
-    auto &cm = *cont_.GetClassMap();
-    if (conf_.partial.count(name) == 0) {
-        if (auto iter = cm.find(name); iter != cm.end()) {
-            Error("Class redefinition", {ErrorDetail("original", iter->second)}, reader);
+    auto buckets = MergeItemBuckets {};
+    for (auto &reader : readers_) {
+        for (const auto &[o, i] : *reader.GetItems()) {
+            // Keep old entity offsets available for bytecode/debug id resolution, and collect the work lists used by
+            // the ordered merge below.
+            i->SetOffset(o.GetOffset());
+            buckets.totalItems++;
+            switch (i->GetItemType()) {
+                case panda_file::ItemTypes::CLASS_ITEM:
+                    buckets.cameFromItems++;
+                    break;
+                case panda_file::ItemTypes::FIELD_ITEM:
+                    buckets.cameFromItems++;
+                    break;
+                case panda_file::ItemTypes::METHOD_ITEM:
+                    buckets.methodItems++;
+                    buckets.cameFromItems++;
+                    break;
+                case panda_file::ItemTypes::FOREIGN_CLASS_ITEM:
+                    buckets.cameFromItems++;
+                    buckets.foreignClasses.emplace_back(i, &reader);
+                    break;
+                case panda_file::ItemTypes::FOREIGN_METHOD_ITEM:
+                case panda_file::ItemTypes::FOREIGN_FIELD_ITEM:
+                    buckets.cameFromItems++;
+                    buckets.foreignMembers.emplace_back(i, &reader);
+                    break;
+                default:
+                    break;
+            }
         }
     }
+    return buckets;
+}
+
+panda_file::ClassItem *Context::GetOrCreateRegularClass(const std::string &name, const panda_file::FileReader *reader)
+{
+    auto &cm = *cont_.GetClassMap();
+    if (auto iter = cm.find(name); iter != cm.end()) {
+        if (conf_.partial.count(name) == 0) {
+            Error("Class redefinition", {ErrorDetail("original", iter->second)}, reader);
+        }
+        ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
+        return static_cast<panda_file::ClassItem *>(iter->second);
+    }
+    return cont_.GetOrCreateClassItem(name);
 }
 
 void Context::AddRegularClasses()
@@ -134,37 +159,32 @@ void Context::AddRegularClasses()
         auto *ic = reader.GetContainerPtr();
         auto &classes = *ic->GetClassMap();
 
-        knownItems_.reserve(reader.GetItems()->size());
-
-        for (auto [name, i] : classes) {
+        for (const auto &[name, i] : classes) {
             if (i->IsForeign()) {
                 continue;
             }
             ASSERT(name == GetStr(i->GetNameItem()));
 
-            CheckClassRedifinition(name, &reader);
-
-            auto clz = cont_.GetOrCreateClassItem(name);
+            auto *clz = GetOrCreateRegularClass(name, &reader);
             knownItems_[i] = clz;
-            cameFrom_.emplace(clz, &reader);
+            cameFrom_.emplace_back(clz, &reader);
         }
     }
 }
 
 void Context::FillRegularClasses()
 {
-    auto &cm = *cont_.GetClassMap();
-
     for (auto &reader : readers_) {
         auto *ic = reader.GetContainerPtr();
         auto &classes = *ic->GetClassMap();
 
-        for (auto [name, i] : classes) {
+        for (const auto &[name, i] : classes) {
             if (i->IsForeign()) {
                 continue;
             }
-            ASSERT(cm.find(name) != cm.end());
-            auto ni = static_cast<panda_file::ClassItem *>(cm[name]);
+            auto found = knownItems_.find(i);
+            ASSERT(found != knownItems_.end());
+            auto ni = static_cast<panda_file::ClassItem *>(found->second);
             auto oi = static_cast<panda_file::ClassItem *>(i);
             MergeClass(&reader, ni, oi);
         }
@@ -203,7 +223,7 @@ void Context::MergeField(const panda_file::FileReader *reader, panda_file::Class
 {
     auto ni = clz->AddField(StringFromOld(oi->GetNameItem()), TypeFromOld(oi->GetTypeItem()), oi->GetAccessFlags());
     knownItems_[oi] = ni;
-    cameFrom_.emplace(ni, reader);
+    cameFrom_.emplace_back(ni, reader);
 
     if (oi->GetValue() != nullptr) {
         auto newVal = ValueFromOld(oi->GetValue());
@@ -220,11 +240,12 @@ void Context::MergeField(const panda_file::FileReader *reader, panda_file::Class
 
 void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::ClassItem *clz, panda_file::MethodItem *oi)
 {
-    auto [proto, params] = GetProto(oi->GetProto());
+    const auto &protoData = GetProto(oi->GetProto());
     auto &oldParams = oi->GetParams();
-    auto *ni = clz->AddMethod(StringFromOld(oi->GetNameItem()), proto, oi->GetAccessFlags(), params);
+    auto *ni =
+        clz->AddMethod(StringFromOld(oi->GetNameItem()), protoData.proto, oi->GetAccessFlags(), protoData.params);
     knownItems_[oi] = ni;
-    cameFrom_.emplace(ni, reader);
+    cameFrom_.emplace_back(ni, reader);
     ni->SetProfileSize(oi->GetProfileSize());
 
     for (size_t i = 0; i < oldParams.size(); i++) {
@@ -290,7 +311,9 @@ std::pair<bool, bool> Context::UpdateDebugInfo(panda_file::MethodItem *ni, panda
         auto *ndbg = cont_.CreateItem<panda_file::DebugInfoItem>(lnpItem);
         ndbg->SetLineNumber(odbg->GetLineNumber());
         ni->SetDebugInfo(ndbg);
-        for (auto *s : *odbg->GetParameters()) {
+        auto *parameters = odbg->GetParameters();
+        ndbg->ReserveParameters(parameters->size());
+        for (auto *s : *parameters) {
             ndbg->AddParameter(StringFromOld(s));
         }
     }
@@ -331,9 +354,8 @@ bool Context::IsSameType(ark::panda_file::TypeItem *nevv, ark::panda_file::TypeI
     return iter != knownItems_.end() && iter->second == nevv;
 }
 
-std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::BaseClassItem *klass,
-                                                                    panda_file::ForeignMethodItem *fm,
-                                                                    std::vector<ErrorDetail> *relatedItems)
+Context::MethodSearchResult Context::TryFindMethod(panda_file::BaseClassItem *klass, panda_file::StringItem *name,
+                                                   panda_file::ProtoItem *proto, std::vector<ErrorDetail> *relatedItems)
 {
     if (klass == nullptr) {
         return false;
@@ -343,17 +365,15 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
     }
     ASSERT(klass->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
     auto kls = static_cast<panda_file::ClassItem *>(klass);
-    auto op = fm->GetProto();
 
-    auto [new_meth_beg, new_meth_end] = kls->FindMethod(fm->GetNameItem());
+    auto [new_meth_beg, new_meth_end] = kls->FindMethod(name);
 
     for (auto beg = new_meth_beg; beg != new_meth_end; ++beg) {
         auto nm = beg->get();
-        auto np = nm->GetProto();
 
         relatedItems->emplace_back("candidate", nm);
 
-        if (IsSameProto(op, np)) {
+        if (nm->GetProto() == proto) {
             return nm;
         }
     }
@@ -362,21 +382,22 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
     if (klass == searchIn) {
         LOG(FATAL, STATIC_LINKER) << "TryFindMethod Error: Current class same as SuperClass";
     }
-    size_t idx = 0;
-    while (true) {
-        auto res = TryFindMethod(searchIn, fm, relatedItems);
+    auto hasSearchResult = [](const MethodSearchResult &res) {
         if (std::holds_alternative<bool>(res)) {
-            if (std::get<bool>(res)) {
-                return res;
-            }
+            return std::get<bool>(res);
         }
-        if (std::holds_alternative<panda_file::MethodItem *>(res)) {
+        return std::holds_alternative<panda_file::MethodItem *>(res);
+    };
+
+    auto res = TryFindMethod(searchIn, name, proto, relatedItems);
+    if (hasSearchResult(res)) {
+        return res;
+    }
+    for (auto *iface : kls->GetInterfaces()) {
+        res = TryFindMethod(iface, name, proto, relatedItems);
+        if (hasSearchResult(res)) {
             return res;
         }
-        if (idx >= kls->GetInterfaces().size()) {
-            return false;
-        }
-        searchIn = kls->GetInterfaces()[idx++];
     }
     return false;
 }
@@ -403,50 +424,60 @@ bool Context::IsSameProto(panda_file::ProtoItem *op1, panda_file::ProtoItem *op2
 void Context::MergeForeignMethod(const panda_file::FileReader *reader, panda_file::ForeignMethodItem *fm)
 {
     ASSERT(knownItems_.find(fm) == knownItems_.end());
-    ASSERT(knownItems_.find(fm->GetClassItem()) != knownItems_.end());
-    auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[fm->GetClassItem()]);
+    auto clzIt = knownItems_.find(fm->GetClassItem());
+    ASSERT(clzIt != knownItems_.end());
+    auto *clz = static_cast<panda_file::BaseClassItem *>(clzIt->second);
+    auto *name = StringFromOld(fm->GetNameItem());
+    auto *proto = GetProto(fm->GetProto()).proto;
+    auto resolutionKey = MethodResolutionKey {clz, name, proto};
+    if (auto cached = resolvedMethods_.find(resolutionKey); cached != resolvedMethods_.end()) {
+        knownItems_[fm] = cached->second;
+        return;
+    }
+
     std::vector<ark::static_linker::Context::ErrorDetail> details = {{"method", fm}};
-    auto res = TryFindMethod(clz, fm, &details);
-    if (std::holds_alternative<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
-        if (std::get<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
-            MergeForeignMethodCreate(reader, clz, fm);
-        } else {
-            Error("Unresolved method", details, reader);
-        }
-    } else {
+    auto res = TryFindMethod(clz, name, proto, &details);
+    if (std::holds_alternative<panda_file::MethodItem *>(res)) {
         ASSERT(std::holds_alternative<panda_file::MethodItem *>(res));
-        auto meth = std::get<panda_file::MethodItem *>(res);
-        if (meth->GetClassItem() != ClassFromOld(fm->GetClassItem())) {
+        auto *meth = std::get<panda_file::MethodItem *>(res);
+        if (meth->GetClassItem() != clz) {
             LOG(DEBUG, STATIC_LINKER) << "Resolved method\n"
                                       << ErrorToString({"old method", fm}, 1) << '\n'
                                       << ErrorToString({"new method", meth}, 1);
         }
+        resolvedMethods_.emplace(resolutionKey, meth);
         knownItems_[fm] = meth;
+        return;
+    }
+
+    ASSERT(std::holds_alternative<bool>(res));
+    if (std::get<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
+        MergeForeignMethodCreate(reader, clz, fm, name, proto);
+    } else {
+        Error("Unresolved method", details, reader);
     }
 }
 
 void Context::MergeForeignMethodCreate(const panda_file::FileReader *reader, panda_file::BaseClassItem *clz,
-                                       panda_file::ForeignMethodItem *fm)
+                                       panda_file::ForeignMethodItem *fm, panda_file::StringItem *name,
+                                       panda_file::ProtoItem *proto)
 {
     auto *fc = static_cast<panda_file::BaseClassItem *>(clz);
-    auto name = StringFromOld(fm->GetNameItem());
-    auto proto = GetProto(fm->GetProto()).first;
     auto access = fm->GetAccessFlags();
-    auto [iter, was_inserted] = foreignMethods_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(fc, name, proto, access), std::forward_as_tuple(nullptr));
+    auto [iter, was_inserted] = foreignMethods_.emplace(ForeignMethodKey {fc, name, proto, access}, nullptr);
     if (was_inserted) {
         iter->second = cont_.CreateItem<panda_file::ForeignMethodItem>(fc, name, proto, access);
     } else {
         result_.stats.deduplicatedForeigners++;
     }
-    auto nfm = iter->second;
-    cameFrom_.emplace(nfm, reader);
+    auto *nfm = iter->second;
+    cameFrom_.emplace_back(nfm, reader);
     knownItems_[fm] = nfm;
 }
 
-std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassItem *> Context::TryFindField(
-    panda_file::BaseClassItem *klass, const std::string &name, panda_file::TypeItem *expectedType,
-    std::vector<panda_file::FieldItem *> *badCandidates)
+Context::FieldSearchResult Context::TryFindField(panda_file::BaseClassItem *klass, const std::string &name,
+                                                 panda_file::TypeItem *expectedType,
+                                                 std::vector<panda_file::FieldItem *> *badCandidates)
 {
     if (klass == nullptr) {
         return std::monostate {};
@@ -454,11 +485,11 @@ std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassIt
     if (klass->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
         return static_cast<panda_file::ForeignClassItem *>(klass);
     }
-    auto kls = static_cast<panda_file::ClassItem *>(klass);
+    auto *kls = static_cast<panda_file::ClassItem *>(klass);
     panda_file::FieldItem *newFld = nullptr;
-    kls->VisitFields([&](panda_file::BaseItem *bi) {
+    kls->VisitFields([&name, expectedType, badCandidates, &newFld](panda_file::BaseItem *bi) {
         ASSERT(bi->GetItemType() == panda_file::ItemTypes::FIELD_ITEM);
-        auto fld = static_cast<panda_file::FieldItem *>(bi);
+        auto *fld = static_cast<panda_file::FieldItem *>(bi);
         if (fld->GetNameItem()->GetData() != name) {
             return true;
         }
@@ -494,50 +525,67 @@ void Context::HandleCandidates(const panda_file::FileReader *reader,
 void Context::MergeForeignField(const panda_file::FileReader *reader, panda_file::ForeignFieldItem *ff)
 {
     ASSERT(knownItems_.find(ff) == knownItems_.end());
-    ASSERT(knownItems_.find(ff->GetClassItem()) != knownItems_.end());
+    auto clzIt = knownItems_.find(ff->GetClassItem());
+    ASSERT(clzIt != knownItems_.end());
 
-    auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[ff->GetClassItem()]);
+    auto *clz = static_cast<panda_file::BaseClassItem *>(clzIt->second);
+    auto *name = StringFromOld(ff->GetNameItem());
+    auto *type = TypeFromOld(ff->GetTypeItem());
     if (clz->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
-        MergeForeignFieldCreate(reader, clz, ff);
+        MergeForeignFieldCreate(reader, clz, ff, name, type);
         return;
     }
 
     ASSERT(clz->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
-    auto rclz = static_cast<panda_file::ClassItem *>(clz);
-    std::vector<panda_file::FieldItem *> candidates;
-    auto res = TryFindField(rclz, ff->GetNameItem()->GetData(), TypeFromOld(ff->GetTypeItem()), &candidates);
+    auto *rclz = static_cast<panda_file::ClassItem *>(clz);
+    auto resolutionKey = ForeignFieldKey {rclz, name, type};
+    auto resolutionData = FieldResolutionData {reader, ff, resolutionKey, name, type};
+    if (auto cached = resolvedFields_.find(resolutionKey); cached != resolvedFields_.end()) {
+        ApplyResolvedField(resolutionData, cached->second, false);
+        return;
+    }
 
-    auto visitor = [&reader, &clz, &ff, &candidates, this](auto el) {
-        using T = decltype(el);
-        if constexpr (std::is_same_v<T, std::monostate>) {
-            if (conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
-                MergeForeignFieldCreate(reader, clz, ff);
-            } else {
-                HandleCandidates(reader, candidates, ff);
-            }
-        } else if constexpr (std::is_same_v<T, panda_file::FieldItem *>) {
-            knownItems_[ff] = el;
-        } else {
-            ASSERT((std::is_same_v<T, panda_file::ForeignClassItem *>));
-            // el or klass? propagate field to base or not?
-            auto fieldKlass = el;
-            LOG(DEBUG, STATIC_LINKER) << "Propagating foreign field to base\n"
-                                      << ErrorToString({"field", ff}, 1) << '\n'
-                                      << ErrorToString({"new base", fieldKlass}, 1);
-            MergeForeignFieldCreate(reader, fieldKlass, ff);
+    std::vector<panda_file::FieldItem *> candidates;
+    auto res = TryFindField(rclz, name->GetData(), type, &candidates);
+    if (std::holds_alternative<std::monostate>(res)) {
+        if (conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
+            MergeForeignFieldCreate(reader, clz, ff, name, type);
+            return;
         }
-    };
-    std::visit(visitor, res);
+        HandleCandidates(reader, candidates, ff);
+        return;
+    }
+    if (auto field = std::get_if<panda_file::FieldItem *>(&res); field != nullptr) {
+        ApplyResolvedField(resolutionData, ResolvedField {*field}, true);
+        return;
+    }
+
+    auto foreignClass = std::get<panda_file::ForeignClassItem *>(res);
+    LOG(DEBUG, STATIC_LINKER) << "Propagating foreign field to base\n"
+                              << ErrorToString({"field", ff}, 1) << '\n'
+                              << ErrorToString({"new base", foreignClass}, 1);
+    ApplyResolvedField(resolutionData, ResolvedField {foreignClass}, true);
+}
+
+void Context::ApplyResolvedField(const FieldResolutionData &data, ResolvedField resolvedField, bool cacheResult)
+{
+    if (cacheResult) {
+        resolvedFields_.emplace(data.key, resolvedField);
+    }
+    if (auto field = std::get_if<panda_file::FieldItem *>(&resolvedField); field != nullptr) {
+        knownItems_[data.oldField] = *field;
+        return;
+    }
+    auto foreignClass = std::get<panda_file::ForeignClassItem *>(resolvedField);
+    MergeForeignFieldCreate(data.reader, foreignClass, data.oldField, data.name, data.type);
 }
 
 void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, panda_file::BaseClassItem *clz,
-                                      panda_file::ForeignFieldItem *ff)
+                                      panda_file::ForeignFieldItem *ff, panda_file::StringItem *name,
+                                      panda_file::TypeItem *typ)
 {
     auto *fc = static_cast<panda_file::ForeignClassItem *>(clz);
-    auto name = StringFromOld(ff->GetNameItem());
-    auto typ = TypeFromOld(ff->GetTypeItem());
-    auto [iter, was_inserted] = foreignFields_.emplace(std::piecewise_construct, std::forward_as_tuple(fc, name, typ),
-                                                       std::forward_as_tuple(nullptr));
+    auto [iter, was_inserted] = foreignFields_.emplace(ForeignFieldKey {fc, name, typ}, nullptr);
     if (was_inserted) {
         iter->second = cont_.CreateItem<panda_file::ForeignFieldItem>(fc, name, typ, ff->GetAccessFlags());
     } else {
@@ -545,7 +593,7 @@ void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, pand
     }
 
     auto nff = iter->second;
-    cameFrom_.emplace(nff, reader);
+    cameFrom_.emplace_back(nff, reader);
     knownItems_[ff] = nff;
 }
 
@@ -597,8 +645,12 @@ std::vector<panda_file::Type> Helpers::BreakProto(panda_file::ProtoItem *p)
     return ret;
 }
 
-std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> Context::GetProto(panda_file::ProtoItem *p)
+const Context::ProtoData &Context::GetProto(panda_file::ProtoItem *p)
 {
+    if (auto cached = protoCache_.find(p); cached != protoCache_.end()) {
+        return cached->second;
+    }
+
     auto &refs = p->GetRefTypes();
 
     auto typs = Helpers::BreakProto(p);
@@ -631,7 +683,9 @@ std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> Con
 
     auto proto = cont_.GetOrCreateProtoItem(ret, params);
 
-    return std::make_pair(proto, std::move(params));
+    auto [it, inserted] = protoCache_.emplace(p, ProtoData {proto, std::move(params)});
+    ASSERT(inserted);
+    return it->second;
 }
 
 template <typename T, typename Getter, typename Adder>
@@ -658,7 +712,8 @@ void Context::AddAnnotationImpl(AddAnnotationImplData<T> ad, Getter getter, Adde
 
         LOG(DEBUG, STATIC_LINKER) << "defer annotation transferring due to" << ErrorToString(ed, 1);
         ad.from = ind;
-        deferredFailedAnnotations_.emplace_back([=]() { AddAnnotationImpl<T>(ad, getter, adder); });
+        deferredFailedAnnotations_.emplace_back(
+            [this, ad, getter, adder]() { AddAnnotationImpl<T>(ad, getter, adder); });
         return;
     }
 }
@@ -777,10 +832,84 @@ std::variant<panda_file::BaseItem *, Context::ErrorDetail> Context::ScalarValueI
 
 void Context::Parse()
 {
-    for (auto &codeData : codeDatas_) {
-        ProcessCodeData(patcher_, &codeData);
+    const auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    const auto threadCount = std::min(codeDatas_.size(), static_cast<size_t>(hardwareThreads));
+    if (threadCount <= 1) {
+        patcher_.ReserveChanges(EstimatePatchChanges(0, codeDatas_.size()));
+        ProcessCodeDataRange(&patcher_, 0, codeDatas_.size());
+        ApplyPatchDependencies();
+        return;
     }
+
+    ParseConcurrently();
+}
+
+void Context::ApplyPatchDependencies()
+{
     patcher_.ApplyDeps(this);
+    ClearAndReleaseStorage(protoCache_);
+    ClearAndReleaseStorage(stringCache_);
+    ClearAndReleaseStorage(literalArrayCache_);
+}
+
+size_t Context::EstimatePatchChanges(size_t start, size_t end) const
+{
+    size_t patchChanges = end - start;
+    for (auto idx = start; idx < end; idx++) {
+        auto *code = codeDatas_[idx].nmi->GetCode();
+        if (code == nullptr) {
+            continue;
+        }
+        patchChanges += std::min(code->GetNumInstructions(), code->GetCodeSize());
+    }
+    return patchChanges;
+}
+
+void Context::ProcessCodeDataRange(CodePatcher *patcher, size_t start, size_t end)
+{
+    for (auto idx = start; idx < end; idx++) {
+        auto changeStart = patcher->GetSize();
+        ProcessCodeData(*patcher, &codeDatas_[idx]);
+        // Keep one patch range per method.  Bytecode id updates inside different methods are independent and can be
+        // patched in parallel; debug info changes collected in the same range are skipped here and handled serially.
+        patcher->AddBytecodePatchRange({changeStart, patcher->GetSize()});
+    }
+}
+
+void Context::ParseConcurrently()
+{
+    const auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    const auto threadCount = std::min(codeDatas_.size(), static_cast<size_t>(hardwareThreads));
+    ASSERT(threadCount > 1);
+
+    std::vector<CodePatcher> patchers(threadCount);
+    std::vector<std::thread> threads;
+    threads.reserve(threadCount);
+    const auto chunkSize = (codeDatas_.size() + threadCount - 1U) / threadCount;
+    for (size_t i = 0; i < threadCount; i++) {
+        auto start = i * chunkSize;
+        auto end = std::min(codeDatas_.size(), start + chunkSize);
+        if (start >= end) {
+            break;
+        }
+        patchers[i].ReserveChanges(EstimatePatchChanges(start, end));
+        // Keep chunk order deterministic: local patchers are merged by increasing start index.
+        threads.emplace_back(
+            [this, start, end, &patcher = patchers[i]]() { ProcessCodeDataRange(&patcher, start, end); });
+    }
+    for (auto &thread : threads) {
+        thread.join();
+    }
+
+    size_t totalChanges = 0;
+    for (const auto &patcher : patchers) {
+        totalChanges += patcher.GetSize();
+    }
+    patcher_.ReserveChanges(totalChanges);
+    for (auto &patcher : patchers) {
+        patcher_.Devour(std::move(patcher));
+    }
+    ApplyPatchDependencies();
 }
 
 void Context::ComputeLayout()
@@ -911,13 +1040,50 @@ void Context::TryDelete()
 
 void Context::Patch()
 {
-    patcher_.Patch({0, patcher_.GetSize()});
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr size_t BYTECODE_PATCH_CHUNK_SIZE = 256;
+
+    auto patchSize = patcher_.GetSize();
+    auto rangeCount = patcher_.GetBytecodePatchRangeCount();
+    auto chunkCount = (rangeCount + BYTECODE_PATCH_CHUNK_SIZE - 1U) / BYTECODE_PATCH_CHUNK_SIZE;
+    auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    auto threadCount = std::min(chunkCount, static_cast<size_t>(hardwareThreads));
+    if (threadCount <= 1) {
+        patcher_.Patch({0, patchSize});
+        return;
+    }
+
+    std::vector<std::thread> threads;
+    threads.reserve(threadCount);
+    std::atomic_size_t nextRange {0};
+    for (size_t i = 0; i < threadCount; i++) {
+        threads.emplace_back([this, rangeCount, &nextRange]() {
+            // Atomic with relaxed order reason: counter only gives each thread a separate bytecode range
+            for (auto start = nextRange.fetch_add(BYTECODE_PATCH_CHUNK_SIZE, std::memory_order_relaxed);
+                 start < rangeCount;
+                 // Atomic with relaxed order reason: counter only gives each thread a separate bytecode range
+                 start = nextRange.fetch_add(BYTECODE_PATCH_CHUNK_SIZE, std::memory_order_relaxed)) {
+                auto end = std::min(rangeCount, start + BYTECODE_PATCH_CHUNK_SIZE);
+                patcher_.PatchBytecodeRanges({start, end});
+            }
+        });
+    }
+    for (auto &thread : threads) {
+        thread.join();
+    }
+    // Debug info patching mutates shared debug structures, so it stays serial after parallel bytecode patching.
+    patcher_.PatchDebug({0, patchSize});
 }
 
 panda_file::BaseClassItem *Context::ClassFromOld(panda_file::BaseClassItem *old)
 {
     if (old == nullptr) {
         return old;
+    }
+    if (auto known = knownItems_.find(old); known != knownItems_.end()) {
+        ASSERT(known->second->GetItemType() == panda_file::ItemTypes::CLASS_ITEM ||
+               known->second->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM);
+        return static_cast<panda_file::BaseClassItem *>(known->second);
     }
     auto &cm = *cont_.GetClassMap();
     if (auto iter = cm.find(GetStr(old->GetNameItem())); iter != cm.end()) {
@@ -947,6 +1113,11 @@ panda_file::StringItem *Context::StringFromOld(const panda_file::StringItem *s)
     if (s == nullptr) {
         return nullptr;
     }
-    return cont_.GetOrCreateStringItem(GetStr(s));
+    if (auto known = stringCache_.find(s); known != stringCache_.end()) {
+        return known->second;
+    }
+    auto *item = cont_.GetOrCreateStringItem(GetStr(s));
+    stringCache_.emplace(s, item);
+    return item;
 }
 }  // namespace ark::static_linker

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
@@ -286,6 +287,16 @@ TEST(linkertests, HelloWorld)
     TestSingle("hello_world");
 }
 
+TEST(linkertests, OutputWriteFailure)
+{
+    const auto pathPrefix = std::string {"data/single/"};
+    ASSERT_EQ(Build(pathPrefix + "hello_world"), std::nullopt);
+
+    auto linkRes = Link(DefaultConfig(), pathPrefix, {pathPrefix + "hello_world.abc"});
+    ASSERT_FALSE(linkRes.errors.empty());
+    EXPECT_NE(linkRes.errors.front().find("Can't write"), std::string::npos);
+}
+
 TEST(linkertests, LitArray)
 {
     TestSingle("lit_array");
@@ -385,6 +396,47 @@ TEST(linkertests, FieldOverload)
     auto conf = DefaultConfig();
     conf.partial.emplace("LFor;");
     TestMultiple("ffield_overloaded", {"1", "2"}, true, conf);
+}
+
+TEST(linkertests, StripUnusedKeepsLiveBytecodePatchRanges)
+{
+    ark::panda_file::ItemContainer container;
+    auto *deadClass = container.GetOrCreateClassItem("DeadPatchRanges");
+    auto *liveClass = container.GetOrCreateClassItem("LivePatchRanges");
+    auto *proto =
+        container.GetOrCreateProtoItem(container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::VOID), {});
+    auto *deadMethod = deadClass->AddMethod(container.GetOrCreateStringItem("dead"), proto, ark::ACC_PUBLIC,
+                                            std::vector<ark::panda_file::MethodParamItem> {});
+    auto *liveMethod = liveClass->AddMethod(container.GetOrCreateStringItem("live"), proto, ark::ACC_PUBLIC,
+                                            std::vector<ark::panda_file::MethodParamItem> {});
+    liveMethod->SetDependencyMark();
+    ASSERT_FALSE(deadMethod->GetDependencyMark());
+
+    std::array<uint8_t, 1U> code {};
+    auto inst = ark::BytecodeInstruction(code.data());
+    auto *target = container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::I32);
+    ark::static_linker::CodePatcher patcher;
+    auto addPatch = [&patcher, inst, target](ark::panda_file::MethodItem *method) {
+        patcher.Add(ark::static_linker::CodePatcher::IndexedChange {inst, method, target});
+    };
+
+    auto firstRange = patcher.GetSize();
+    addPatch(deadMethod);
+    patcher.Add(std::string("dead debug string"));
+    patcher.AddBytecodePatchRange({firstRange, patcher.GetSize()});
+
+    auto secondRange = patcher.GetSize();
+    addPatch(liveMethod);
+    patcher.Add(std::string("live debug string"));
+    patcher.AddBytecodePatchRange({secondRange, patcher.GetSize()});
+
+    auto thirdRange = patcher.GetSize();
+    addPatch(deadMethod);
+    patcher.AddBytecodePatchRange({thirdRange, patcher.GetSize()});
+
+    ASSERT_EQ(patcher.GetBytecodePatchRangeCount(), 3U);
+    patcher.TryDeletePatch();
+    EXPECT_EQ(patcher.GetBytecodePatchRangeCount(), 1U);
 }
 
 constexpr uint32_t I = 32;

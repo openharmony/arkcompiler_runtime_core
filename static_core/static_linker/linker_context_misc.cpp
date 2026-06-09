@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include <numeric>
+#include <algorithm>
+#include <atomic>
 #include <sstream>
+#include <thread>
 
 #include "libarkfile/file_items.h"
 #include "libarkfile/file_reader.h"
@@ -26,6 +28,23 @@
 namespace ark::static_linker {
 
 namespace {
+
+using ReaderEntry = std::pair<const std::string *, ark::panda_file::FileReader *>;
+
+struct ReadWorkerData {
+    const std::vector<ReaderEntry> *readers;
+    std::vector<uint8_t> *readResults;
+    std::atomic<size_t> *nextReader;
+};
+
+void ReadContainers(ReadWorkerData *data)
+{
+    // Atomic with relaxed order reason: counter only gives each thread a separate reader index
+    for (auto idx = data->nextReader->fetch_add(1, std::memory_order_relaxed); idx < data->readers->size();
+         idx = data->nextReader->fetch_add(1, std::memory_order_relaxed)) {
+        (*data->readResults)[idx] = (*data->readers)[idx].second->ReadContainer(false) ? 1U : 0U;
+    }
+}
 
 void DemangleName(std::ostream &o, std::string_view s)
 {
@@ -259,6 +278,20 @@ Context::Context(Config conf) : conf_(std::move(conf)) {}
 
 Context::~Context() = default;
 
+void Context::ReleasePreWriteState()
+{
+    result_.stats.itemsCount = knownItems_.size();
+    result_.stats.classCount = cont_.GetClassMap()->size();
+
+    // Drop input-owned buffers before the final write, but leave hash maps to Context destruction.
+    // Releasing thousands of hash nodes here adds allocator churn and does not materially lower peak RSS.
+    preWriteStateReleased_ = true;
+    deferredFailedAnnotations_.clear();
+    ClearAndReleaseStorage(codeDatas_);
+    patcher_.Clear();
+    readers_.clear();
+}
+
 void Context::Write(const std::string &out)
 {
     auto writer = panda_file::FileWriter(out);
@@ -266,53 +299,97 @@ void Context::Write(const std::string &out)
         Error("Can't write", {ErrorDetail("file", out)});
         return;
     }
-    cont_.Write(&writer, true, false);
+    if (!cont_.Write(&writer, true, false,
+                     panda_file::ItemContainer::RegionSectionMode::REUSE_REQUIRED_UNCHANGED_DEPENDENCIES)) {
+        Error("Can't write", {ErrorDetail("file", out)});
+        return;
+    }
 
-    result_.stats.itemsCount = knownItems_.size();
+    if (result_.stats.itemsCount == 0) {
+        result_.stats.itemsCount = knownItems_.size();
+    }
     result_.stats.classCount = cont_.GetClassMap()->size();
 }
 
 void Context::Read(const std::vector<std::string> &input)
 {
-    for (const auto &f : input) {
-        auto rd = panda_file::File::Open(f);
+    std::vector<ReaderEntry> readers;
+    readers.reserve(input.size());
+
+    for (const auto &i : input) {
+        auto rd = panda_file::File::Open(i);
         if (rd == nullptr) {
-            Error("Can't open file", {ErrorDetail("location", f)});
+            Error("Can't open file", {ErrorDetail("location", i)});
             break;
         }
         auto reader = &readers_.emplace_front(std::move(rd));
-        if (!reader->ReadContainer(false)) {
-            Error("can't read container", {}, reader);
-            break;
+        readers.emplace_back(&i, reader);
+    }
+
+    if (HasErrors() || readers.empty()) {
+        return;
+    }
+
+    auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    auto threadCount = std::min(readers.size(), static_cast<size_t>(hardwareThreads));
+    std::atomic<size_t> nextReader {0};
+    std::vector<uint8_t> readResults(readers.size(), 0);
+    ReadWorkerData workerData {&readers, &readResults, &nextReader};
+    if (threadCount <= 1) {
+        ReadContainers(&workerData);
+    } else {
+        std::vector<std::thread> threads;
+        threads.reserve(threadCount);
+        for (size_t i = 0; i < threadCount; i++) {
+            threads.emplace_back(ReadContainers, &workerData);
+        }
+        for (auto &thread : threads) {
+            thread.join();
         }
     }
 
-    ASSERT(input.size() ==
-           std::accumulate(readers_.begin(), readers_.end(), (size_t)0, [](size_t c, const auto &) { return c + 1; }));
+    for (size_t i = 0; i < readers.size(); i++) {
+        if (readResults[i] != 0) {
+            continue;
+        }
+        Error("can't read container", {ErrorDetail("location", *readers[i].first)}, readers[i].second);
+        break;
+    }
+
+    ASSERT(input.size() == readers.size());
+}
+
+void Context::ErrorToStringWrapper::PrintInfo(std::ostream &o, const std::string &info) const
+{
+    if (!info.empty()) {
+        o << ": " << info;
+    }
+}
+
+void Context::ErrorToStringWrapper::PrintInfo(std::ostream &o, const panda_file::BaseItem *info) const
+{
+    o << ": ";
+    ReprItem(o, info);
+    for (const auto &[item, reader] : ctx_->cameFrom_) {
+        if (item != info) {
+            continue;
+        }
+        o << "\n";
+        std::fill_n(std::ostream_iterator<char>(o), indent_ + 1, '\t');
+        o << "declared at `" << reader->GetFilePtr()->GetFilename() << "`";
+    }
+}
+
+void Context::ErrorToStringWrapper::Print(std::ostream &o) const
+{
+    std::fill_n(std::ostream_iterator<char>(o), indent_, '\t');
+    o << error_.GetName();
+    std::visit([this, &o](const auto &info) { PrintInfo(o, info); }, error_.GetInfo());
 }
 
 std::ostream &operator<<(std::ostream &o, const static_linker::Context::ErrorToStringWrapper &self)
 {
-    std::fill_n(std::ostream_iterator<char>(o), self.indent_, '\t');
-    o << self.error_.GetName();
-    std::visit(
-        [&](const auto &v) {
-            using T = std::remove_cv_t<std::remove_reference_t<decltype(v)>>;
-            if constexpr (std::is_same_v<T, std::string>) {
-                if (!v.empty()) {
-                    o << ": " << v;
-                }
-            } else {
-                o << ": ";
-                ReprItem(o, v);
-                for (auto [beg, end] = self.ctx_->cameFrom_.equal_range(v); beg != end; ++beg) {
-                    o << "\n";
-                    std::fill_n(std::ostream_iterator<char>(o), self.indent_ + 1, '\t');
-                    o << "declared at `" << beg->second->GetFilePtr()->GetFilename() << "`";
-                }
-            }
-        },
-        self.error_.GetInfo());
+    self.Print(o);
     return o;
 }
 

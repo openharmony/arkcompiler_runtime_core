@@ -20,7 +20,9 @@
 #include "libarkfile/file_writer.h"
 #include "libarkfile/pgo.h"
 
+#include <algorithm>
 #include <array>
+#include <limits>
 #include <list>
 #include <map>
 #include <memory>
@@ -30,6 +32,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 namespace ark::panda_file {
 
@@ -37,6 +40,8 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
+    enum class RegionSectionMode { REBUILD, REUSE_REQUIRED, REUSE_REQUIRED_UNCHANGED_DEPENDENCIES };
+
     using BytecodeVersion = std::array<uint8_t, File::VERSION_SIZE>;
 
     PANDA_PUBLIC_API ItemContainer();
@@ -122,6 +127,7 @@ public:
 
     PANDA_PUBLIC_API void FillExportMap();
     PANDA_PUBLIC_API uint32_t ComputeLayout();
+
     PANDA_PUBLIC_API void MarkLiteralarrayMap();
     PANDA_PUBLIC_API void DeleteReferenceFromAnno(AnnotationItem *annoItem);
     PANDA_PUBLIC_API void CleanupArrayValueItems(ValueItem *value);
@@ -129,6 +135,9 @@ public:
     PANDA_PUBLIC_API uint32_t DeleteForeignItems();
 
     PANDA_PUBLIC_API bool Write(Writer *writer, bool deduplicateItems = true, bool computeLayout = true);
+
+    PANDA_PUBLIC_API bool Write(Writer *writer, bool deduplicateItems, bool computeLayout,
+                                RegionSectionMode regionSectionMode);
 
     PANDA_PUBLIC_API std::map<std::string, size_t> GetStat();
 
@@ -242,7 +251,8 @@ private:
 
     class PANDA_PUBLIC_API IndexItem : public BaseItem {
     public:
-        IndexItem(IndexType type, size_t maxIndex) : type_(type), maxIndex_(maxIndex)
+        IndexItem(IndexType type, size_t maxIndex, bool useVectorIndex = false)
+            : type_(type), maxIndex_(maxIndex), useVectorIndex_(useVectorIndex)
         {
             ASSERT(type_ != IndexType::NONE);
         }
@@ -265,39 +275,74 @@ private:
 
         bool Has(IndexedItem *item) const
         {
-            auto res = index_.find(item);
-            return res != index_.cend();
+            return HasInIndexSet(item->GetItemAllocId());
         }
 
         void Remove(IndexedItem *item)
         {
-            index_.erase(item);
+            if (useVectorIndex_) {
+                auto it = std::find(vectorIndex_.begin(), vectorIndex_.end(), item);
+                ASSERT(it != vectorIndex_.end());
+                vectorIndex_.erase(it);
+            } else {
+                [[maybe_unused]] auto erased = index_.erase(item);
+                ASSERT(erased == 1U);
+            }
+            RemoveFromIndexSet(item->GetItemAllocId());
         }
 
         size_t GetNumItems() const
         {
-            return index_.size();
+            return useVectorIndex_ ? vectorIndex_.size() : index_.size();
         }
+
+        bool CanReuse() const;
 
         void UpdateItems(BaseItem *start, BaseItem *end)
         {
+            if (useVectorIndex_) {
+                std::sort(vectorIndex_.begin(), vectorIndex_.end(), Comparator());
+                UpdateIndexItems(vectorIndex_, start, end);
+                return;
+            }
+
+            UpdateIndexItems(index_, start, end);
+        }
+
+        template <class Range>
+        void UpdateIndexItems(const Range &items, BaseItem *start, BaseItem *end)
+        {
             size_t i = 0;
-            for (auto *item : index_) {
+            for (auto *item : items) {
                 item->SetIndex(start, end, i++);
             }
         }
 
         void Reset()
         {
+            if (useVectorIndex_) {
+                for (auto *item : vectorIndex_) {
+                    item->ClearIndexes();
+                }
+                return;
+            }
+
             for (auto *item : index_) {
                 item->ClearIndexes();
             }
         }
 
+        void ClearItems()
+        {
+            index_.clear();
+            vectorIndex_.clear();
+            indexSet_.clear();
+        }
+
     protected:
         size_t CalculateSize() const override
         {
-            return index_.size() * ID_SIZE;
+            return GetNumItems() * ID_SIZE;
         }
 
     private:
@@ -330,7 +375,41 @@ private:
 
         IndexType type_;
         size_t maxIndex_;
+        bool useVectorIndex_;
         std::set<IndexedItem *, Comparator> index_;
+        std::vector<IndexedItem *> vectorIndex_;
+        std::unordered_map<size_t, uint64_t> indexSet_;
+
+        static constexpr size_t BITSET_WORD_BITS = std::numeric_limits<uint64_t>::digits;
+
+        bool HasInIndexSet(size_t id) const
+        {
+            auto word = id / BITSET_WORD_BITS;
+            auto it = indexSet_.find(word);
+            if (it == indexSet_.cend()) {
+                return false;
+            }
+            return (it->second & (1ULL << (id % BITSET_WORD_BITS))) != 0;
+        }
+
+        void AddToIndexSet(size_t id)
+        {
+            auto word = id / BITSET_WORD_BITS;
+            indexSet_[word] |= 1ULL << (id % BITSET_WORD_BITS);
+        }
+
+        void RemoveFromIndexSet(size_t id)
+        {
+            auto word = id / BITSET_WORD_BITS;
+            auto it = indexSet_.find(word);
+            if (it == indexSet_.end()) {
+                return;
+            }
+            it->second &= ~(1ULL << (id % BITSET_WORD_BITS));
+            if (it->second == 0) {
+                indexSet_.erase(it);
+            }
+        }
     };
 
     class LineNumberProgramIndexItem : public IndexItem {
@@ -386,9 +465,9 @@ private:
             return ItemTypes::REGION_HEADER;
         }
 
-        bool Add(const std::list<IndexedItem *> &items);
+        bool Add(BaseItem *item, std::vector<IndexedItem *> *addedItems);
 
-        void Remove(const std::list<IndexedItem *> &items);
+        void Remove(const std::vector<IndexedItem *> &items);
 
         void SetStart(BaseItem *item)
         {
@@ -407,6 +486,8 @@ private:
             }
         }
 
+        bool CanReuse(BaseItem *containerEnd) const;
+
     protected:
         size_t CalculateSize() const override
         {
@@ -419,6 +500,10 @@ private:
             auto i = static_cast<size_t>(type);
             return indexes_[i];
         }
+
+        bool AddIndexDependency(IndexedItem *item, std::vector<IndexedItem *> *addedItems);
+
+        bool AddIndexDependencies(const std::list<IndexedItem *> &items, std::vector<IndexedItem *> *addedItems);
 
         BaseItem *start_ {nullptr};
         BaseItem *end_ {nullptr};
@@ -475,6 +560,8 @@ private:
                 header.UpdateItems();
             }
         }
+
+        bool CanReuse(BaseItem *containerEnd) const;
 
     protected:
         size_t CalculateSize() const override;
@@ -553,7 +640,16 @@ private:
         }
     };
 
-    bool WriteHeader(Writer *writer, ssize_t *checksumOffset);
+    uint32_t ComputeLayout(bool rebuildRegionSection);
+
+    uint32_t ComputeLayout(bool rebuildRegionSection, bool updateOrderIndexes);
+
+    bool WriteHeader(Writer *writer, ssize_t *checksumOffset, bool rebuildRegionSection, bool updateOrderIndexes);
+
+    bool WriteBody(Writer *writer);
+
+    bool PrepareRegionSectionForWrite(RegionSectionMode regionSectionMode, bool *rebuildRegionSection,
+                                      bool *updateOrderIndexes);
 
     bool WriteHeaderIndexInfo(Writer *writer);
 
@@ -561,13 +657,19 @@ private:
 
     void RebuildRegionSection();
 
+    bool CanReuseRegionSection(bool updateOrderIndexes = true, bool checkDependencies = true);
+
+    bool CanReuseRegionSectionForItem(BaseItem *item);
+
     void RebuildLineNumberProgramIndex();
+
+    void RebuildLineNumberProgramIndexItems();
 
     void UpdateOrderIndexes();
 
     void UpdateLiteralIndexes();
 
-    void ProcessIndexDependecies(BaseItem *item);
+    void ProcessIndexDependecies(BaseItem *item, std::vector<IndexedItem *> *addedItems);
 
     size_t GetForeignOffset() const;
 
@@ -603,10 +705,12 @@ private:
     std::list<std::unique_ptr<BaseItem>>::iterator annotationItemsEnd_;
     std::list<std::unique_ptr<BaseItem>>::iterator codeItemsEnd_;
     std::list<std::unique_ptr<BaseItem>>::iterator debugItemsEnd_;
+    std::vector<LineNumberProgramItem *> lineNumberProgramItems_;
 
     BaseItem *end_;
 
     bool isQuickened_ = false;
+    bool regionSectionBuilt_ = false;
     std::optional<BytecodeVersion> bytecodeVersion_;
 };
 
