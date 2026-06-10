@@ -49,6 +49,16 @@ group("ark_packages") {
   }
 }
 
+group("ark_host_product_packages") {
+  deps = []
+  if (is_host_product && enable_static_vm) {
+    deps += [
+      "$ark_root/panda:arkts_bin",
+      "$ark_root/runtime:libarkruntime",
+    ]
+  }
+}
+
 group("ark_host_linux_tools_packages") {
   deps = []
   if (!is_host_product) {
