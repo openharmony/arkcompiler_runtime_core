@@ -393,7 +393,7 @@ def GenerateSameValueZero(cgmode)
     }
 
     If(isString(klass1), 0).NE.b {
-      If(isString(klass1), 0).EQ.b {
+      If(isString(klass2), 0).EQ.b {
         Goto(:SlowPathEntrypoint)
       }
       ep_offset = get_entrypoint_offset("ETS_STRING_EQUALS")

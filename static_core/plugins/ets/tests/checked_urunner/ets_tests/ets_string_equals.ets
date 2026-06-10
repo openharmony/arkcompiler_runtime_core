@@ -16,7 +16,7 @@
 // NOTE(vpukhov): #16340 Build specialized string comparison intrinsic
 
 //! CHECKER      AOT IR Builder, check string equality and intrinsic optimizations
-//! RUN_PAOC     options: "--compiler-regex='.*(eliminate|equalsStr|Equals).*'"
+//! RUN_PAOC     options: "--compiler-regex='.*(eliminate|equalsStr|equalsNonStringObject|Equals).*'"
 //!
 //! METHOD       "ets_string_equals.ETSGLOBAL::equalsStrStr"
 //! PASS_AFTER   "IrBuilder"
@@ -92,7 +92,13 @@
 //! INST_NOT        /Intrinsic.StdCoreStringEquals/
 //! INST_COUNT      /Intrinsic.CompilerEtsEquals/, 1
 //!
+//! METHOD       "ets_string_equals.ETSGLOBAL::equalsNonStringObject"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     /Intrinsic.CompilerEtsEquals/
+//! INST         /Intrinsic.StdCoreStringEquals/
+//!
 //! RUN          entry: "ets_string_equals.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex='.*(main|equalsNonStringObject).*'", entry: "ets_string_equals.ETSGLOBAL::main", aot_file: ""
 
 // Prevents comparison elimination by frontend type inference
 function getnull(): String | null {
@@ -162,6 +168,22 @@ function genericEqualsObjCaller(obj1: String, obj2: Object): boolean {
     return genericEqualsObjObj(obj1, obj2);
 }
 
+class LengthLikeObject {
+    value: int;
+
+    constructor(value: int) {
+        this.value = value;
+    }
+}
+
+const STRING_LENGTH_SHIFT: int = 2;
+const STRING_UNCOMPRESSED_FLAG: int = 1;
+const STRING_INTERN_FLAG: int = 2;
+
+function equalsNonStringObject(str: String, obj: Object): boolean {
+    return str.equals(obj);
+}
+
 // NOTE: Intrinsic.StdCoreStringEquals is NOT safe and may NOT be eliminated by GVN
 function eliminate(str1: String, str2: String): boolean {
     let count: int = 0;
@@ -196,4 +218,15 @@ function main() {
     arktest.assertFalse(genericEqualsUndefinedStringCaller(Size.LONG));
     arktest.assertFalse(genericEqualsStringUndefinedCaller(Size.LONG));
     arktest.assertTrue(genericEqualsObjCaller(str, str));
+    arktest.assertFalse(equalsNonStringObject(str, new Object()));
+
+    // The runtime packs String length as:
+    //   bit 0: compression-status flag, bit 1: intern flag, bits [2..31]: character length.
+    // Use every possible flag combination so one LengthLikeObject.value matches str's packed length.
+    let packedLengthBase = str.length << STRING_LENGTH_SHIFT;
+    arktest.assertFalse(equalsNonStringObject(str, new LengthLikeObject(packedLengthBase)));
+    arktest.assertFalse(equalsNonStringObject(str, new LengthLikeObject(packedLengthBase | STRING_UNCOMPRESSED_FLAG)));
+    arktest.assertFalse(equalsNonStringObject(str, new LengthLikeObject(packedLengthBase | STRING_INTERN_FLAG)));
+    arktest.assertFalse(equalsNonStringObject(str,
+        new LengthLikeObject(packedLengthBase | STRING_UNCOMPRESSED_FLAG | STRING_INTERN_FLAG)));
 }

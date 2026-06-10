@@ -14,6 +14,7 @@
 # limitations under the License.
 
 include_relative 'common.irt'
+include_relative 'string_helpers.irt'
 
 function(:IrtocTestCfg, params: {"buf" => 'ptr', "size" => 'u64'}, mode: [:Native]) {
     if Options.arch == :arm32
@@ -201,4 +202,42 @@ Label(:Exit1)
     Return(1).word
 Label(:Exit2)
     Return(2).word
+}
+
+function(:IrtocTestUtf16SubstringCompressible, params: {str_ptr: 'ptr', start_index: 'u32', char_count: 'u64'},
+         mode: [:Native]) {
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
+
+    char_byte_offset := ShlI(start_index).Imm(1).u32
+    sub_str_ptr := Add(str_ptr, Cast(char_byte_offset).u64).ptr
+    compressible := is_array_of_compressable_chars(sub_str_ptr, char_count)
+    If(compressible, 0).NE.b {
+      Return(1).u32
+    }
+    Return(0).u32
+}
+
+function(:IrtocTestStringEqualsPackedDecision, params: {str1_len_packed: 'u32', str2_len_packed: 'u32'},
+         mode: [:Native]) {
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
+
+    str1_len := ShrI(str1_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    str2_len := ShrI(str2_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    If(str1_len, str2_len).NE.Unlikely.b {
+      Return(0).u32
+    }
+
+    str1_uncompressed := is_string_uncompressed_u32(str1_len_packed)
+    str2_uncompressed := is_string_uncompressed_u32(str2_len_packed)
+    If(str1_uncompressed, str2_uncompressed).NE.Unlikely.b {
+      Return(2).u32
+    }
+
+    Return(1).u32
 }

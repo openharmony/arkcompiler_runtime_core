@@ -3380,8 +3380,9 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, cgmode = :FastPath)
       # If chars within the specified range could be compressed then route through fast_substring.
       # Otherwise we could create uncompressed sliced string of compressible chars, which is wrong.
       If(uncompressed, 1).EQ.Unlikely.b {
+        resultByteOffset := Shl(resultStartIndex, uncompressed).u32
         fromStrData := Add(Cast(fromStr).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
-        fromStrData := Add(fromStrData, resultStartIndex).ptr
+        fromStrData := Add(fromStrData, Cast(resultByteOffset).u64).ptr
         compressible := is_array_of_compressable_chars(fromStrData, Cast(charCount).u64)
         If(compressible, 1).EQ.Likely.b {
           Goto(:CreateLineString)
