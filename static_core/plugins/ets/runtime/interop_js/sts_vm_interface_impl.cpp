@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
+#include "plugins/ets/runtime/interop_js/tooling/internal_api.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "libarkbase/utils/time.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -126,6 +127,17 @@ bool STSVMInterfaceImpl::TriggerXGC()
     auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, ark::time::GetCurrentTimeInNanos());
     // isManaged=false since this is called from a JS thread, not an ETS managed thread
     return gc->AddGCTask(false, std::move(task));
+}
+
+bool STSVMInterfaceImpl::UnionStackIsEmpty(bool *isEmpty)
+{
+    return ark::ets::interop::js::UnionStackIsEmpty(isEmpty);
+}
+
+bool STSVMInterfaceImpl::ForEachFrameInUnionStack(
+    const std::function<void(const void *frame, bool isStaticFrame)> &callback)
+{
+    return ark::ets::interop::js::ForEachFrameInUnionStack(callback);
 }
 
 STSVMInterfaceImpl::VMBarrier::VMBarrier(size_t vmsCount)

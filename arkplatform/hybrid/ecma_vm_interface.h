@@ -57,6 +57,11 @@ public:
     {
         return false;
     }
+
+    virtual const void *GetEcmaVM() const
+    {
+        return nullptr;
+    }
 };
 
 }  // namespace arkplatform
