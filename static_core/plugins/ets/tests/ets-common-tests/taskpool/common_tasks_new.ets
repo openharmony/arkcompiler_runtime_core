@@ -459,6 +459,35 @@ async function asyncRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
     arktest.assertEQ(completedCount, 2);
 }
 
+async function seqRunnerExecuteInOnEnqueuedNoDeadlock(): Promise<void> {
+    let completedCount: int = 0;
+    let event = new PromiseWithResolvers<void>();
+    let emptyFunc = () => {};
+
+    let seqRunner: taskpool.SequenceRunner = new taskpool.SequenceRunner('seq');
+    let mainTask: taskpool.Task = new taskpool.Task(emptyFunc);
+
+    mainTask.onEnqueued(() => {
+        let innerTask: taskpool.Task = new taskpool.Task(emptyFunc);
+        seqRunner.execute(innerTask).then(() => {
+            completedCount++;
+            if (completedCount == 2) {
+                event.resolve(undefined);
+            }
+        });
+    });
+
+    seqRunner.execute(mainTask).then(() => {
+        completedCount++;
+        if (completedCount == 2) {
+            event.resolve(undefined);
+        }
+    });
+
+    await event.promise;
+    arktest.assertEQ(completedCount, 2);
+}
+
 async function sendDataWorkerLocalPayloadReadableAfterScope(): Promise<void> {
     let receivedFlag: int = -1;
     let callbackInvoked: boolean = false;
@@ -819,6 +848,73 @@ async function asyncStackSubmissionKeepsTaskpoolSemantics(): Promise<void> {
     arktest.assertLE(1, periodicCount);
 }
 
+async function cancelPeriodicTaskStopsExecution(): Promise<void> {
+    let cancelPeriodicCount = new AtomicInt(0);
+    let firstExecution = new PromiseWithResolvers<void>();
+    let countAfterCancel: int = 0;
+    let canceled = new AtomicBoolean(false);
+    let task = new taskpool.Task(() => {
+        cancelPeriodicCount.fetchAdd(1);
+        if (cancelPeriodicCount.load() == 1) {
+            firstExecution.resolve(undefined);
+        }
+    });
+
+    task.onExecutionSucceeded(() => {
+        if (canceled.load()) {
+            // Allow at most 1 more execution after cancel.
+            arktest.assertLE(cancelPeriodicCount.load(), countAfterCancel + 1);
+        }
+    });
+    taskpool.executePeriodically(0, task, taskpool.Priority.MEDIUM);
+
+    await firstExecution.promise;
+    taskpool.cancel(task);
+    countAfterCancel = cancelPeriodicCount.load();
+    canceled.store(true);
+    arktest.assertLE(cancelPeriodicCount.load(), countAfterCancel + 1);
+}
+
+async function verifyCancelPeriodicTaskAfterExecution(cancelByTaskId: boolean): Promise<void> {
+    let executions = new AtomicInt(0);
+    let firstExecution = new PromiseWithResolvers<void>();
+    let countAfterCancel: int = 0;
+    let canceled = new AtomicBoolean(false);
+    let task = new taskpool.LongTask(() => {
+        executions.fetchAdd(1);
+        if (executions.load() == 1) {
+            firstExecution.resolve(undefined);
+        }
+    });
+
+    task.onExecutionSucceeded(() => {
+        if (canceled.load()) {
+            // Allow at most 1 more execution after cancel.
+            arktest.assertLE(executions.load(), countAfterCancel + 1);
+        }
+    });
+
+    taskpool.executePeriodically(100, task);
+
+    await firstExecution.promise;
+    if (cancelByTaskId) {
+        taskpool.cancel(task.taskId);
+    } else {
+        taskpool.cancel(task);
+    }
+    countAfterCancel = executions.load();
+    canceled.store(true);
+    arktest.assertLE(executions.load(), countAfterCancel + 1);
+}
+
+async function cancelPeriodicTaskByTaskAfterExecution(): Promise<void> {
+    await verifyCancelPeriodicTaskAfterExecution(false);
+}
+
+async function cancelPeriodicTaskByIdAfterExecution(): Promise<void> {
+    await verifyCancelPeriodicTaskAfterExecution(true);
+}
+
 async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -837,6 +933,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('onEnqueuedNestedExecuteTest', onEnqueuedNestedExecuteTest);
     commonTaskSuite.addAsyncTest('onEnqueuedNestedRunnerExecuteTest', onEnqueuedNestedRunnerExecuteTest);
     commonTaskSuite.addAsyncTest('asyncRunnerExecuteInOnEnqueuedNoDeadlock', asyncRunnerExecuteInOnEnqueuedNoDeadlock);
+    commonTaskSuite.addAsyncTest('seqRunnerExecuteInOnEnqueuedNoDeadlock', seqRunnerExecuteInOnEnqueuedNoDeadlock);
     commonTaskSuite.addAsyncTest(
         'sendDataWorkerLocalPayloadReadableAfterScope', sendDataWorkerLocalPayloadReadableAfterScope);
     commonTaskSuite.addAsyncTest('sendDataRecordSharesReferenceWithHost', sendDataRecordSharesReferenceWithHost);
@@ -869,6 +966,9 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('taskpoolScalingShouldNotOverExpand', taskpoolScalingShouldNotOverExpand);
     commonTaskSuite.addAsyncTest(
         'asyncStackSubmissionKeepsTaskpoolSemantics', asyncStackSubmissionKeepsTaskpoolSemantics);
+    commonTaskSuite.addAsyncTest('cancelPeriodicTaskStopsExecution', cancelPeriodicTaskStopsExecution);
+    commonTaskSuite.addAsyncTest('cancelPeriodicTaskByTaskAfterExecution', cancelPeriodicTaskByTaskAfterExecution);
+    commonTaskSuite.addAsyncTest('cancelPeriodicTaskByIdAfterExecution', cancelPeriodicTaskByIdAfterExecution);
 
     let res = await commonTaskSuite.runAsync();
     
