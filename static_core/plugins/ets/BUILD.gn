@@ -169,9 +169,17 @@ if (!is_host_product &&
       "openssl:libcrypto_shared",
       icuuc_dep,
     ]
+    if (path_exists("//third_party/libxml2")) {
+      defines = ["IMPORT_LIBXML2"]
+      sources += ["$ark_root/plugins/ets/sdk/native/api/ani_xmlsaxparser.cpp"]
+      external_deps += [
+          "libxml2:libxml2",
+        ]
+    }
     deps = [
       "$ark_root/libarkbase:libarktsbase_static",
       "$ark_root/plugins/ets/runtime/ani:ani",
+      "$ark_root/plugins/ets/runtime/libani_helpers:ani_helpers",
     ]
     subsystem_name = "arkcompiler"
     part_name = "runtime_core"

@@ -21,6 +21,9 @@
 #include "api/ani_textencoder.h"
 #include "api/ani_stringdecoder.h"
 #include "api/ani_xmlpullparser.h"
+#ifdef IMPORT_LIBXML2
+#include "api/ani_xmlsaxparser.h"
+#endif
 #include "api/Util.h"
 #include "ohos/init_data.h"
 #include "tools/format_logger.h"
@@ -29,6 +32,9 @@
 using TextDecoder = ark::ets::sdk::util::TextDecoder;
 using StringDecoder = ark::ets::sdk::util::StringDecoder;
 using XmlPullParser = ark::ets::sdk::util::XmlPullParser;
+#ifdef IMPORT_LIBXML2
+using XmlSAXParser = ark::ets::sdk::util::XmlSAXParserHelper;
+#endif
 
 struct ArrayBufferInfo {
     void *data;
@@ -311,6 +317,34 @@ static ani_status BindXmlPullParser(ani_env *env)
     return ANI_OK;
 }
 
+#ifdef IMPORT_LIBXML2
+static ani_status BindXmlSAXParserHelper(ani_env *env)
+{
+    ani_class saxCls;
+    const char *saxClassName = "@ohos.xml.xml.XmlSAXParserHelper";
+    if (ANI_OK != env->FindClass(saxClassName, &saxCls)) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("%{public}s:: Not found %{public}s", __FUNCTION__, saxClassName);
+        return ANI_ERROR;
+    }
+    std::array saxMethods = {
+        ani_native_function {"bindNative", ":l", reinterpret_cast<void *>(XmlSAXParser::BindNative)},
+        ani_native_function {"releaseNative", "l:z", reinterpret_cast<void *>(XmlSAXParser::ReleaseNative)},
+        ani_native_function {
+            "parseInner",
+            "lC{@ohos.xml.xml.XmlSAXParser}C{@ohos.xml.xml.XmlSAXHandler}C{std.core.String}z:C{std.core.String}",
+            reinterpret_cast<void *>(XmlSAXParser::ParseInner)},
+    };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(saxCls, saxMethods.data(), saxMethods.size())) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("%{public}s:: Cannot bind native methods to %{public}s", __FUNCTION__, saxClassName);
+        return ANI_ERROR;
+    }
+
+    return ANI_OK;
+}
+#endif
+
 extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
@@ -318,9 +352,17 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
         return ANI_ERROR;
     }
-    // NOLINTNEXTLINE(hicpp-signed-bitwise,-warnings-as-errors)
-    auto status = static_cast<ani_status>(BindUtilHelper(env) | BindTextDecoder(env) | BindTextEncoder(env) |
-                                          BindStringDecoder(env) | BindXmlPullParser(env));
+    auto status =
+        // NOLINTNEXTLINE(hicpp-signed-bitwise,-warnings-as-errors)
+        static_cast<ani_status>(BindUtilHelper(env) | BindTextDecoder(env) | BindTextEncoder(env) |
+                                BindStringDecoder(env) | BindXmlPullParser(env));
+
+#ifdef IMPORT_LIBXML2
+    if (BindXmlSAXParserHelper(env) != ANI_OK) {
+        return ANI_ERROR;
+    }
+#endif
+
     if (status != ANI_OK) {
         return ANI_ERROR;
     }
