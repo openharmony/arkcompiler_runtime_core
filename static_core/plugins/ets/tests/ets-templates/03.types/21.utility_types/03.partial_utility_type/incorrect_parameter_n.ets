@@ -16,7 +16,7 @@ limitations under the License.
 {% for t in types %}
 {% for c in cases %}
 
-{% set response = c.out | default("Semantic error ESE0065: type %%partial-C has no property named i") %}
+{% set response = c.out | default("Semantic error ESE0065: type Partial<C> has no property named i") %}
 /*---
 desc: variables of Partial<T> are to be initialized with valid object literals.
         - {{t}}, {{c.doc}}
