@@ -15,14 +15,14 @@
 
 function test(result: boolean, name: String): int {
     if (result) {
-        console.log("PASSED: " + name)
+        console.log('PASSED: ' + name)
         return 0
     }
-    console.log("FAILED: " + name)
+    console.log('FAILED: ' + name)
     return 1
 }
 
-function testTrace(name: String, fun: () => void, expected: string[]): int {
+function testTrace(name: String, fun: () => void, expected: string[], notExpected?: string[]): int {
     let threw = false
     let failures = 0
     try {
@@ -30,28 +30,34 @@ function testTrace(name: String, fun: () => void, expected: string[]): int {
     } catch (e) {
         for (let i = 0; i < expected.length; ++i) {
             failures += test((e as Error).stack!.indexOf(expected[i]) != -1,
-                        name + " has to contain expected[" + i + "] stack = " + (e as Error).stack)
+                        name + ' has to contain expected[' + i + '] stack = ' + (e as Error).stack)
+        }
+        if (notExpected != undefined) {
+            for (let i = 0; i < notExpected.length; ++i) {
+                failures += test((e as Error).stack!.indexOf(notExpected[i]) == -1,
+                            name + ' should NOT contain ' + notExpected[i] + ' in stack')
+            }
         }
     }
     threw = true;
-    failures += test(threw, name + " threw")
+    failures += test(threw, name + ' threw')
     return failures
 }
 
 function testArrayNative() {
     let array = Array.of<number>(1, 2, 3)
-    array.forEach((v: number): void => { throw new Error("FAIL") })
+    array.forEach((v: number): void => { throw new Error('FAIL') })
 }
 
 class Nirk {
     override toString(): String {
-        throw new Error("FAIL")
+        throw new Error('FAIL')
     }
 }
 
 class Plonk {
     constructor() {
-        throw new Error("FAIL")
+        throw new Error('FAIL')
     }
 }
 
@@ -60,12 +66,12 @@ function outerFoo() {
 }
 
 function foo() {
-    throw new Error("FAIL")
+    throw new Error('FAIL')
 }
 
 function rec(n : int) {
     if (n == 0) {
-        throw new Error("FAIL")
+        throw new Error('FAIL')
     } else {
         rec(n - 1)
     }
@@ -73,7 +79,7 @@ function rec(n : int) {
 
 function testImplicitConversion() {
     let cl = new Nirk();
-    let str : String = "a" + cl;
+    let str : String = 'a' + cl;
     arktest.assertTrue((!!str))
 }
 
@@ -90,13 +96,19 @@ function testRecursion() {
     rec(2)
 }
 
+function throwErrorDirectly(): void {
+    throw new Error('FAIL')
+}
+
 function main(): int {
     let failures = 0;
-    failures += testTrace("testArrayNative", testArrayNative, ["Array.forEach"])
-    failures += testTrace("testImplicitConversion", testImplicitConversion, ["Nirk.toString"])
-    failures += testTrace("testConstructor", testConstructor, ["Plonk.<ctor>"])
-    failures += testTrace("testNestedFunc", testNestedFunc, ["foo", "outerFoo"])
-    failures += testTrace("testRecursion", testRecursion, ["rec"])
+    failures += testTrace('testArrayNative', testArrayNative, ['Array.forEach'])
+    failures += testTrace('testImplicitConversion', testImplicitConversion, ['Nirk.toString'])
+    failures += testTrace('testConstructor', testConstructor, ['Plonk.<ctor>'])
+    failures += testTrace('testNestedFunc', testNestedFunc, ['foo', 'outerFoo'])
+    failures += testTrace('testRecursion', testRecursion, ['rec'])
+    failures += testTrace('testErrorConstructorSkipping', throwErrorDirectly, 
+                        ['throwErrorDirectly'], ['Error.<ctor>'])
 
     return failures
 }
