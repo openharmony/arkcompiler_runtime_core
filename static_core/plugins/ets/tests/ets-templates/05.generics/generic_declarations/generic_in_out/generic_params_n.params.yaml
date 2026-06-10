@@ -1,0 +1,233 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+hard_keywords:
+    - keyword: 'Any'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Any' cannot be used as identifier"
+
+    - keyword: 'BigInt'
+      expected_out: "Syntax error ESY0316: Hard keyword 'BigInt' cannot be used as identifier"
+
+    - keyword: 'Boolean'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Boolean' cannot be used as identifier"
+
+    - keyword: 'Byte'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Byte' cannot be used as identifier"
+
+    - keyword: 'Char'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Char' cannot be used as identifier"
+
+    - keyword: 'Double'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Double' cannot be used as identifier"
+
+    - keyword: 'Float'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Float' cannot be used as identifier"
+
+    - keyword: 'Int'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Int' cannot be used as identifier"
+
+    - keyword: 'Long'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Long' cannot be used as identifier"
+
+    - keyword: 'Number'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Number' cannot be used as identifier"
+
+    - keyword: 'Object'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Object' cannot be used as identifier"
+
+    - keyword: 'Short'
+      expected_out: "Syntax error ESY0316: Hard keyword 'Short' cannot be used as identifier"
+
+    - keyword: 'String'
+      expected_out: "Syntax error ESY0316: Hard keyword 'String' cannot be used as identifier"
+
+    - keyword: 'abstract'
+      expected_out: "Syntax error ESY0316: Hard keyword 'abstract' cannot be used as identifier"
+
+    - keyword: 'as'
+      expected_out: "Syntax error ESY0316: Hard keyword 'as' cannot be used as identifier"
+
+    - keyword: 'async'
+      expected_out: "Syntax error ESY0316: Hard keyword 'async' cannot be used as identifier"
+
+    - keyword: 'await'
+      expected_out: "Syntax error ESY0316: Hard keyword 'await' cannot be used as identifier"
+
+    - keyword: 'bigint'
+      expected_out: "Syntax error ESY0316: Hard keyword 'bigint' cannot be used as identifier"
+
+    - keyword: 'boolean'
+      expected_out: "Syntax error ESY0316: Hard keyword 'boolean' cannot be used as identifier"
+
+    - keyword: 'break'
+      expected_out: "Syntax error ESY0316: Hard keyword 'break' cannot be used as identifier"
+
+    - keyword: 'byte'
+      expected_out: "Syntax error ESY0316: Hard keyword 'byte' cannot be used as identifier"
+
+    - keyword: 'case'
+      expected_out: "Syntax error ESY0316: Hard keyword 'case' cannot be used as identifier"
+
+    - keyword: 'char'
+      expected_out: "Syntax error ESY0316: Hard keyword 'char' cannot be used as identifier"
+
+    - keyword: 'class'
+      expected_out: "Syntax error ESY0316: Hard keyword 'class' cannot be used as identifier"
+
+    - keyword: 'const'
+      expected_out: "Syntax error ESY0316: Hard keyword 'const' cannot be used as identifier"
+
+    - keyword: 'constructor'
+      expected_out: "Syntax error ESY0316: Hard keyword 'constructor' cannot be used as identifier"
+
+    - keyword: 'continue'
+      expected_out: "Syntax error ESY0316: Hard keyword 'continue' cannot be used as identifier"
+
+    - keyword: 'default'
+      expected_out: "Syntax error ESY0316: Hard keyword 'default' cannot be used as identifier"
+
+    - keyword: 'do'
+      expected_out: "Syntax error ESY0316: Hard keyword 'do' cannot be used as identifier"
+
+    - keyword: 'double'
+      expected_out: "Syntax error ESY0316: Hard keyword 'double' cannot be used as identifier"
+
+    - keyword: 'else'
+      expected_out: "Syntax error ESY0316: Hard keyword 'else' cannot be used as identifier"
+
+    - keyword: 'enum'
+      expected_out: "Syntax error ESY0316: Hard keyword 'enum' cannot be used as identifier"
+
+    - keyword: 'export'
+      expected_out: "Syntax error ESY0316: Hard keyword 'export' cannot be used as identifier"
+
+    - keyword: 'extends'
+      expected_out: "Syntax error ESY0316: Hard keyword 'extends' cannot be used as identifier"
+
+    - keyword: 'false'
+      expected_out: "Syntax error ESY0224: Identifier expected, got 'false'."
+
+    - keyword: 'final'
+      expected_out: "Syntax error ESY0316: Hard keyword 'final' cannot be used as identifier"
+
+    - keyword: 'float'
+      expected_out: "Syntax error ESY0316: Hard keyword 'float' cannot be used as identifier"
+
+    - keyword: 'for'
+      expected_out: "Syntax error ESY0316: Hard keyword 'for' cannot be used as identifier"
+
+    - keyword: 'function'
+      expected_out: "Syntax error ESY0316: Hard keyword 'function' cannot be used as identifier"
+
+    - keyword: 'if'
+      expected_out: "Syntax error ESY0316: Hard keyword 'if' cannot be used as identifier"
+
+    - keyword: 'implements'
+      expected_out: "Syntax error ESY0316: Hard keyword 'implements' cannot be used as identifier"
+
+    - keyword: 'import'
+      expected_out: "Syntax error ESY0316: Hard keyword 'import' cannot be used as identifier"
+
+    - keyword: 'in'
+      expected_out: "Syntax error ESY0224: Identifier expected, got 'in'."
+
+    - keyword: 'instanceof'
+      expected_out: "Syntax error ESY0316: Hard keyword 'instanceof' cannot be used as identifier"
+
+    - keyword: 'int'
+      expected_out: "Syntax error ESY0316: Hard keyword 'int' cannot be used as identifier"
+
+    - keyword: 'interface'
+      expected_out: "Syntax error ESY0316: Hard keyword 'interface' cannot be used as identifier"
+
+    - keyword: 'let'
+      expected_out: "Syntax error ESY0316: Hard keyword 'let' cannot be used as identifier"
+
+    - keyword: 'long'
+      expected_out: "Syntax error ESY0316: Hard keyword 'long' cannot be used as identifier"
+
+    - keyword: 'native'
+      expected_out: "Syntax error ESY0316: Hard keyword 'native' cannot be used as identifier"
+
+    - keyword: 'new'
+      expected_out: "Syntax error ESY0316: Hard keyword 'new' cannot be used as identifier"
+
+    - keyword: 'null'
+      expected_out: "Syntax error ESY0224: Identifier expected, got 'null'."
+
+    - keyword: 'number'
+      expected_out: "Syntax error ESY0316: Hard keyword 'number' cannot be used as identifier"
+
+    - keyword: 'object'
+      expected_out: "Syntax error ESY0316: Hard keyword 'object' cannot be used as identifier"
+
+    - keyword: 'overload'
+      expected_out: "Syntax error ESY0316: Hard keyword 'overload' cannot be used as identifier"
+
+    - keyword: 'override'
+      expected_out: "Syntax error ESY0316: Hard keyword 'override' cannot be used as identifier"
+
+    - keyword: 'private'
+      expected_out: "Syntax error ESY0316: Hard keyword 'private' cannot be used as identifier"
+
+    - keyword: 'protected'
+      expected_out: "Syntax error ESY0316: Hard keyword 'protected' cannot be used as identifier"
+
+    - keyword: 'public'
+      expected_out: "Syntax error ESY0316: Hard keyword 'public' cannot be used as identifier"
+
+    - keyword: 'return'
+      expected_out: "Syntax error ESY0316: Hard keyword 'return' cannot be used as identifier"
+
+    - keyword: 'short'
+      expected_out: "Syntax error ESY0316: Hard keyword 'short' cannot be used as identifier"
+
+    - keyword: 'static'
+      expected_out: "Syntax error ESY0316: Hard keyword 'static' cannot be used as identifier"
+
+    - keyword: 'string'
+      expected_out: "Syntax error ESY0316: Hard keyword 'string' cannot be used as identifier"
+
+    - keyword: 'super'
+      expected_out: "Syntax error ESY0316: Hard keyword 'super' cannot be used as identifier"
+
+    - keyword: 'switch'
+      expected_out: "Syntax error ESY0316: Hard keyword 'switch' cannot be used as identifier"
+
+    - keyword: 'this'
+      expected_out: "Syntax error ESY0316: Hard keyword 'this' cannot be used as identifier"
+
+    - keyword: 'throw'
+      expected_out: "Syntax error ESY0316: Hard keyword 'throw' cannot be used as identifier"
+
+    - keyword: 'true'
+      expected_out: "Syntax error ESY0224: Identifier expected, got 'true'."
+
+    - keyword: 'try'
+      expected_out: "Syntax error ESY0316: Hard keyword 'try' cannot be used as identifier"
+
+    - keyword: 'typeof'
+      expected_out: "Syntax error ESY0316: Hard keyword 'typeof' cannot be used as identifier"
+
+    - keyword: 'undefined'
+      expected_out: "Syntax error ESY0316: Hard keyword 'undefined' cannot be used as identifier"
+
+    - keyword: 'void'
+      expected_out: "Syntax error ESY0316: Hard keyword 'void' cannot be used as identifier"
+
+    - keyword: 'while'
+      expected_out: "Syntax error ESY0316: Hard keyword 'while' cannot be used as identifier"
+
+    - keyword: 'never'
+      expected_out: "Syntax error ESY0316: Hard keyword 'never' cannot be used as identifier"

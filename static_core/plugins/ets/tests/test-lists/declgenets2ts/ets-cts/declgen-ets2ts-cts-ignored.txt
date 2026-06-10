@@ -2257,6 +2257,36 @@
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_genparams.ets
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_union.ets
 
+#TSC-PROJECT_FAIL
+05.generics/generic_declarations/generic_classes/generic_params_0.ets
+05.generics/generic_declarations/generic_classes/generic_params_13.ets
+05.generics/generic_declarations/generic_classes/generic_params_15.ets
+05.generics/generic_declarations/generic_classes/generic_params_2.ets
+05.generics/generic_declarations/generic_functions/generic_params_0.ets
+05.generics/generic_declarations/generic_functions/generic_params_13.ets
+05.generics/generic_declarations/generic_functions/generic_params_15.ets
+05.generics/generic_declarations/generic_functions/generic_params_2.ets
+05.generics/generic_declarations/generic_in_out/generic_params_in_0.ets
+05.generics/generic_declarations/generic_in_out/generic_params_in_13.ets
+05.generics/generic_declarations/generic_in_out/generic_params_in_15.ets
+05.generics/generic_declarations/generic_in_out/generic_params_in_2.ets
+05.generics/generic_declarations/generic_in_out/generic_params_out_0.ets
+05.generics/generic_declarations/generic_in_out/generic_params_out_13.ets
+05.generics/generic_declarations/generic_in_out/generic_params_out_15.ets
+05.generics/generic_declarations/generic_in_out/generic_params_out_2.ets
+05.generics/generic_declarations/generic_interfaces/generic_params_0.ets
+05.generics/generic_declarations/generic_interfaces/generic_params_13.ets
+05.generics/generic_declarations/generic_interfaces/generic_params_15.ets
+05.generics/generic_declarations/generic_interfaces/generic_params_2.ets
+05.generics/generic_declarations/generic_methods/generic_params_0.ets
+05.generics/generic_declarations/generic_methods/generic_params_13.ets
+05.generics/generic_declarations/generic_methods/generic_params_15.ets
+05.generics/generic_declarations/generic_methods/generic_params_2.ets
+05.generics/generic_declarations/generic_type_alias/generic_params_0.ets
+05.generics/generic_declarations/generic_type_alias/generic_params_13.ets
+05.generics/generic_declarations/generic_type_alias/generic_params_15.ets
+05.generics/generic_declarations/generic_type_alias/generic_params_2.ets
+
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
