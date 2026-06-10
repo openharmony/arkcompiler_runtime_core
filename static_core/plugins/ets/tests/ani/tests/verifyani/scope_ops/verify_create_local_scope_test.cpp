@@ -34,7 +34,7 @@ TEST_F(CreateLocalScopeTest, wrong_nr_refs_0)
     ASSERT_EQ(env_->c_api->CreateLocalScope(env_, 0), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"nr_refs", "ani_size", "wrong value"},
+        {"nr_refs", "ani_size", "nr_refs must be greater than 0"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateLocalScope", testLines);
 }
@@ -46,7 +46,7 @@ TEST_F(CreateLocalScopeTest, wrong_nr_refs_1)
     ASSERT_EQ(env_->c_api->CreateLocalScope(env_, nrRefs), ANI_OUT_OF_MEMORY);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"nr_refs", "ani_size", "it is too big"},
+        {"nr_refs", "ani_size", "nr_refs is too large"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateLocalScope", testLines);
 #endif
@@ -57,7 +57,7 @@ TEST_F(CreateLocalScopeTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->CreateLocalScope(nullptr, 0), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
-        {"nr_refs", "ani_size", "wrong value"},
+        {"nr_refs", "ani_size", "nr_refs must be greater than 0"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateLocalScope", testLines);
 }

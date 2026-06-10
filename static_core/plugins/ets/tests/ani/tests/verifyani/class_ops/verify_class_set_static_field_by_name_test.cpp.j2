@@ -141,7 +141,7 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, wrong_name_not_found)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong static field"},
+        {"name", "const char *", "static field not found"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -178,7 +178,7 @@ TEST_F(ClassSetStaticFieldByName{{ Type }}Test, wrong_field_kind)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong static field"},
+        {"name", "const char *", "static field not found"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on

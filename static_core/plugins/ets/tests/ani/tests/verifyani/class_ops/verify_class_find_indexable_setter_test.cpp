@@ -47,7 +47,7 @@ TEST_F(ClassFindIndexableSetterTest, lookup_status_is_forwarded_without_verify_a
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "wrong indexable setter"},
+        {"signature", "const char *", "indexable setter not found"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", missingLines);
@@ -56,7 +56,7 @@ TEST_F(ClassFindIndexableSetterTest, lookup_status_is_forwarded_without_verify_a
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "wrong method signature"},
+        {"signature", "const char *", "method signature descriptor is invalid"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", invalidDescriptorLines);
@@ -95,7 +95,7 @@ TEST_F(ClassFindIndexableSetterTest, null_signature_reports_ambiguous_method)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "ambiguous method"},
+        {"signature", "const char *", "method lookup is ambiguous"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", testLines);

@@ -41,7 +41,7 @@ TEST_F(EnsureEnoughRef, wrong_nr_refs_0)
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, 0), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"nrRefs", "ani_size", "wrong value"},
+        {"nrRefs", "ani_size", "nr_refs must be greater than 0"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
 }
@@ -53,7 +53,7 @@ TEST_F(EnsureEnoughRef, wrong_nr_refs_too_big)
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, nrRefs), ANI_OUT_OF_MEMORY);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"nrRefs", "ani_size", "it is too big"},
+        {"nrRefs", "ani_size", "nr_refs is too large"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
 #endif

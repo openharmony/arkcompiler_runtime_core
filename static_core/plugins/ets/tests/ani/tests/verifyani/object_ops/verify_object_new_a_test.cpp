@@ -124,7 +124,7 @@ TEST_F(ObjectNewATest, wrong_cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "wrong reference type: null"},
+        {"cls", "ani_class", "wrong reference type: null, expected: ani_class"},
         {"ctor", "ani_method", "wrong class for ctor"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
@@ -354,7 +354,7 @@ TEST_F(ObjectNewATest, cls_undefined)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "wrong reference type: undefined"},
+        {"cls", "ani_class", "wrong reference type: undefined, expected: ani_class"},
         {"ctor", "ani_method", "wrong class for ctor"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},

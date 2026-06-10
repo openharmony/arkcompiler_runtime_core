@@ -76,7 +76,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_reference_type)
     ASSERT_EQ(env_->FixedArray_GetLength(reinterpret_cast<ani_fixedarray>(string), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray", "wrong reference type: ani_string"},
+        {"array", "ani_fixedarray", "wrong reference type: ani_string, expected: ani_fixedarray"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);

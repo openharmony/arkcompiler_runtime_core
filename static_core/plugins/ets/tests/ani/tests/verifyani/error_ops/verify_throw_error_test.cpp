@@ -48,7 +48,7 @@ TEST_F(ThrowErrorTest, wrong_error)
     ASSERT_EQ(env_->c_api->ThrowError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"error", "ani_error", "wrong reference"},
+        {"error", "ani_error", "error reference is null"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ThrowError", testLines);
 }
@@ -61,7 +61,7 @@ TEST_F(ThrowErrorTest, wrong_error_type)
     ASSERT_EQ(env_->c_api->ThrowError(env_, reinterpret_cast<ani_error>(undef)), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"error", "ani_error", "wrong reference type: undefined"},
+        {"error", "ani_error", "wrong reference type: undefined, expected: ani_error"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ThrowError", testLines);
 

@@ -60,7 +60,7 @@ TEST_F(ClassFindSetterTest, lookup_status_is_forwarded_without_verify_abort)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "wrong setter"},
+        {"name", "const char *", "setter not found"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindSetter", testLines);

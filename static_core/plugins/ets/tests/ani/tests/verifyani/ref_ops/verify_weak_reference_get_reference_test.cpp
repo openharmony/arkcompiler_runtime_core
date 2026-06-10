@@ -27,7 +27,7 @@ TEST_F(WeakReferenceGetReferenceTest, wrong_wref)
     ASSERT_EQ(env_->c_api->WeakReference_GetReference(env_, nullptr, &wasReleased, &ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"wref", "ani_wref", "wrong weak reference"},
+        {"wref", "ani_wref", "reference is null, expected: weak reference"},
         {"was_released_result", "ani_boolean *"},
         {"result", "ani_ref *"},
     };

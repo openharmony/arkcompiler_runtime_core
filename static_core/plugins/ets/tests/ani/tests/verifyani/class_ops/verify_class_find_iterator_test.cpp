@@ -48,7 +48,7 @@ TEST_F(ClassFindIteratorTest, lookup_status_is_forwarded_without_verify_abort)
     ASSERT_EQ(env_->Class_FindIterator(noIteratorClass_, &method), ANI_NOT_FOUND);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "wrong iterator"},
+        {"class", "ani_class", "iterator not found"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIterator", testLines);

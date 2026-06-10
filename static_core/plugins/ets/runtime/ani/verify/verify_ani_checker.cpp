@@ -267,6 +267,33 @@ static std::string_view FixedArrayTypeToString(EtsClass *klass)
     }
 }
 
+static std::string_view FixedArrayTypeIdToString(panda_file::Type::TypeId type)
+{
+    switch (type) {
+        case panda_file::Type::TypeId::U1:
+            return "ani_fixedarray_boolean";
+        case panda_file::Type::TypeId::U16:
+            return "ani_fixedarray_char";
+        case panda_file::Type::TypeId::I8:
+            return "ani_fixedarray_byte";
+        case panda_file::Type::TypeId::I16:
+            return "ani_fixedarray_short";
+        case panda_file::Type::TypeId::I32:
+            return "ani_fixedarray_int";
+        case panda_file::Type::TypeId::I64:
+            return "ani_fixedarray_long";
+        case panda_file::Type::TypeId::F32:
+            return "ani_fixedarray_float";
+        case panda_file::Type::TypeId::F64:
+            return "ani_fixedarray_double";
+        case panda_file::Type::TypeId::REFERENCE:
+            return "ani_fixedarray_ref";
+        default:
+            UNREACHABLE();
+            return "";
+    }
+}
+
 static bool IsExpectedFixedArrayType(EtsClass *klass, panda_file::Type::TypeId expectedType)
 {
     if (klass == nullptr || !klass->IsArrayClass()) {
@@ -907,7 +934,7 @@ public:
     VerificationResult VerifyArrayBufferLength(size_t length)
     {
         if (length > static_cast<size_t>(std::numeric_limits<ani_int>::max())) {
-            return {"wrong arraybuffer length", ANIErrorSeverity::ERROR};
+            return {"arraybuffer length is too large", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -948,11 +975,11 @@ public:
     VerificationResult VerifyNrRefs(ani_size nrRefs)
     {
         if (nrRefs == 0) {
-            return {"wrong value", ANIErrorSeverity::ERROR};
+            return {"nr_refs must be greater than 0", ANIErrorSeverity::ERROR};
         }
         if (nrRefs > std::numeric_limits<uint32_t>::max()) {
             PandaStringStream ss;
-            ss << "it is too big";
+            ss << "nr_refs is too large";
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
@@ -972,21 +999,21 @@ public:
     VerificationResult VerifyEscapeRef(VRef *vref)
     {
         if (vref == nullptr) {
-            return {"wrong reference", ANIErrorSeverity::ERROR};
+            return {"escape reference is null", ANIErrorSeverity::ERROR};
         }
         if (GetEnvANIVerifier()->IsValidRef(vref)) {
             if (GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vref)) {
-                return {"not local reference", ANIErrorSeverity::ERROR};
+                return {"wrong reference type: global reference, expected: local reference", ANIErrorSeverity::ERROR};
             }
             if (GetEnvANIVerifier()->IsValidWeakRef(reinterpret_cast<VWRef *>(vref))) {
-                return {"not local reference", ANIErrorSeverity::ERROR};
+                return {"wrong reference type: weak reference, expected: local reference", ANIErrorSeverity::ERROR};
             }
             if (!GetEnvANIVerifier()->IsValidRefInCurrentScope(vref)) {
                 return {"the reference was not created in the current EscapeLocalScope", ANIErrorSeverity::ERROR};
             }
             return {};
         }
-        return {"wrong reference", ANIErrorSeverity::FATAL};
+        return {"escape reference is invalid", ANIErrorSeverity::FATAL};
     }
 
     VerificationResult VerifyAnyApiRefIsXRefClass(ani_ref ref)
@@ -1058,7 +1085,7 @@ public:
     VerificationResult VerifyGlobalRef(VRef *vgref)
     {
         if (UNLIKELY(vgref == nullptr)) {
-            return {"wrong global reference", ANIErrorSeverity::ERROR};
+            return {"reference is null, expected: global reference", ANIErrorSeverity::ERROR};
         }
         auto *envVerifier = GetEnvANIVerifier();
         if (envVerifier->IsValidGlobalVerifiedRef(vgref)) {
@@ -1069,7 +1096,7 @@ public:
             if (ManagedCodeAccessor::IsUndefined(vgref->GetRef())) {
                 return {};
             }
-            return {"wrong global reference", ANIErrorSeverity::ERROR};
+            return {"wrong reference type: local reference, expected: global reference", ANIErrorSeverity::ERROR};
         }
         return {"wrong global reference", ANIErrorSeverity::FATAL};
     }
@@ -1077,7 +1104,7 @@ public:
     VerificationResult VerifyWRef(VWRef *vwref)
     {
         if (UNLIKELY(vwref == nullptr)) {
-            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+            return {"reference is null, expected: weak reference", ANIErrorSeverity::ERROR};
         }
         auto *envVerifier = GetEnvANIVerifier();
         if (envVerifier->IsValidWeakRef(vwref)) {
@@ -1162,7 +1189,7 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsClass(s, vref->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vref->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vref->GetRef()) << ", expected: ani_class";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -1342,7 +1369,7 @@ public:
     VerificationResult VerifyError(VError *verr)
     {
         if (verr == nullptr) {
-            return {"wrong reference", ANIErrorSeverity::ERROR};
+            return {"error reference is null", ANIErrorSeverity::ERROR};
         }
 
         auto errMessage = VerifyRef(verr);
@@ -1353,7 +1380,7 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsError(s, verr->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, verr->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, verr->GetRef()) << ", expected: ani_error";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
@@ -1405,7 +1432,8 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsArrayBuffer(s, varraybuffer->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, varraybuffer->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, varraybuffer->GetRef())
+               << ", expected: ani_arraybuffer";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -1434,13 +1462,14 @@ public:
         EtsClass *klass = s.ToInternalType(varray->GetRef())->GetClass();
         if (!klass->IsArrayClass()) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, varray->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, varray->GetRef()) << ", expected: ani_fixedarray";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         if (expectedType.has_value() && !IsExpectedFixedArrayType(klass, expectedType.value())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << FixedArrayTypeToString(klass);
+            ss << "wrong reference type: " << FixedArrayTypeToString(klass)
+               << ", expected: " << FixedArrayTypeIdToString(expectedType.value());
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
@@ -1458,7 +1487,8 @@ public:
         if (!IsFixedArrayRefType(klass)) {
             PandaStringStream ss;
             ss << "wrong reference type: "
-               << (klass->IsArrayClass() ? FixedArrayTypeToString(klass) : ANIRefTypeToString(s, varray->GetRef()));
+               << (klass->IsArrayClass() ? FixedArrayTypeToString(klass) : ANIRefTypeToString(s, varray->GetRef()))
+               << ", expected: ani_fixedarray_ref";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
         class_ = klass;
@@ -1480,7 +1510,7 @@ public:
         }
 
         if (vref == nullptr) {
-            return {"wrong reference", ANIErrorSeverity::ERROR};
+            return {"initial element is null", ANIErrorSeverity::ERROR};
         }
 
         return VerifyFixedArrayRefAssignable(vref, class_, ANIErrorSeverity::FATAL);
@@ -1510,7 +1540,10 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         EtsClass *klass = s.ToInternalType(vref->GetRef())->GetClass();
         if (!targetClass->IsAssignableFrom(klass)) {
-            return {"wrong reference type", wrongTypeSeverity};
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vref->GetRef())
+               << ", expected: fixed array component type";
+            return {ss.str(), wrongTypeSeverity};
         }
         return {};
     }
@@ -1519,7 +1552,7 @@ public:
     {
         static_cast<void>(length);
         if (buffer == nullptr) {
-            return {"wrong native buffer", ANIErrorSeverity::ERROR};
+            return {"native buffer is null", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1760,7 +1793,7 @@ public:
 
         if (field == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong static field", ANIErrorSeverity::ERROR};
+                return {"static field not found", ANIErrorSeverity::ERROR};
             } else {
                 return {};
             }
@@ -1812,7 +1845,7 @@ public:
 
         if (field == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong static field", ANIErrorSeverity::ERROR};
+                return {"static field not found", ANIErrorSeverity::ERROR};
             } else {
                 return {};
             }
@@ -1902,9 +1935,9 @@ public:
         }
 
         if constexpr (IS_STATIC) {
-            return {"wrong static field", ANIErrorSeverity::ERROR};
+            return {"static field not found", ANIErrorSeverity::ERROR};
         } else {
-            return {"wrong field", ANIErrorSeverity::ERROR};
+            return {"field not found", ANIErrorSeverity::ERROR};
         }
     }
 
@@ -1924,9 +1957,9 @@ public:
         }
 
         if constexpr (IS_STATIC) {
-            return VerifyFindMethod(name_, signature_, true, "wrong static method");
+            return VerifyFindMethod(name_, signature_, true, "static method not found");
         } else {
-            return VerifyFindMethod(name_, signature_, false, "wrong method");
+            return VerifyFindMethod(name_, signature_, false, "method not found");
         }
     }
 
@@ -1948,9 +1981,9 @@ public:
         PandaString methodName(IS_SETTER ? "%%set-" : "%%get-");
         methodName += name;
         if constexpr (IS_SETTER) {
-            return VerifyFindMethod(methodName.c_str(), nullptr, false, "wrong setter");
+            return VerifyFindMethod(methodName.c_str(), nullptr, false, "setter not found");
         } else {
-            return VerifyFindMethod(methodName.c_str(), nullptr, false, "wrong getter");
+            return VerifyFindMethod(methodName.c_str(), nullptr, false, "getter not found");
         }
     }
 
@@ -1967,9 +2000,9 @@ public:
         }
 
         if constexpr (IS_SETTER) {
-            return VerifyFindMethod("$_set", signature_, false, "wrong indexable setter");
+            return VerifyFindMethod("$_set", signature_, false, "indexable setter not found");
         } else {
-            return VerifyFindMethod("$_get", signature_, false, "wrong indexable getter");
+            return VerifyFindMethod("$_get", signature_, false, "indexable getter not found");
         }
     }
 
@@ -1998,7 +2031,7 @@ public:
         if (field != nullptr) {
             return {};
         }
-        return {"wrong variable", ANIErrorSeverity::ERROR};
+        return {"variable not found", ANIErrorSeverity::ERROR};
     }
 
     VerificationResult VerifyFindFunctionName(const char *name)
@@ -2025,7 +2058,7 @@ public:
         if (name_ == nullptr) {
             return {};
         }
-        return VerifyFindMethod(name_, signature_, true, "wrong function");
+        return VerifyFindMethod(name_, signature_, true, "function not found");
     }
 
     VerificationResult VerifyFindSetterName(const char *name)
@@ -2055,7 +2088,7 @@ public:
             return err;
         }
 
-        return VerifyFindMethod("$_iterator", nullptr, false, "wrong iterator");
+        return VerifyFindMethod("$_iterator", nullptr, false, "iterator not found");
     }
 
     VerificationResult VerifyReadPropertyByName(const char *name, EtsType propertyType)
@@ -2270,8 +2303,12 @@ public:
             return {};
         }
 
-        if (etsMethod->GetReturnValueType() != returnType) {
-            return {"wrong return type", ANIErrorSeverity::ERROR};
+        EtsType methodReturnType = etsMethod->GetReturnValueType();
+        if (methodReturnType != returnType) {
+            PandaStringStream ss;
+            ss << "wrong return type: " << EtsTypeToString(methodReturnType)
+               << ", expected: " << EtsTypeToString(returnType);
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -2311,10 +2348,10 @@ public:
             return {};
         }
         if (status == ANI_INVALID_DESCRIPTOR) {
-            return {"wrong method signature", ANIErrorSeverity::ERROR};
+            return {"method signature descriptor is invalid", ANIErrorSeverity::ERROR};
         }
         if (status == ANI_AMBIGUOUS) {
-            return {"ambiguous method", ANIErrorSeverity::ERROR};
+            return {"method lookup is ambiguous", ANIErrorSeverity::ERROR};
         }
         return {PandaString(errorMessage), ANIErrorSeverity::ERROR};
     }
@@ -2360,7 +2397,9 @@ public:
             return {};
         }
         if (class_ == nullptr) {
-            return {"wrong class for native function", ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << "wrong class for " << GetNativeMethodKind(isStaticMethod, isClassMethod);
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
 
         for (ani_size i = 0; i < nrFunctions; ++i) {
@@ -2373,49 +2412,64 @@ public:
         return {};
     }
 
-    VerificationResult VerifyNativeFunction(const ani_native_function &function, ani_size index, bool isStaticMethod,
-                                            bool isClassMethod)
+    VerificationResult VerifyResolvedNativeFunction(EtsMethod *method, ani_status status, ani_size index,
+                                                    std::string_view nativeMethodKind)
     {
-        if (function.name == nullptr) {
-            return {GetNativeFunctionError(index, "wrong native function name"), ANIErrorSeverity::FATAL};
-        }
-        if (function.pointer == nullptr) {
-            return {GetNativeFunctionError(index, "wrong native function pointer"), ANIErrorSeverity::FATAL};
-        }
-
-        std::optional<EtsMethodSignature> methodSignature;
-        if (function.signature != nullptr) {
-            Mangle::ConvertSignatureToProto(methodSignature, function.signature);
-            if (!methodSignature.has_value()) {
-                return {GetNativeFunctionError(index, "wrong native function signature"), ANIErrorSeverity::ERROR};
-            }
-        }
-
-        EtsMethod *method = nullptr;
-        ani_status status =
-            ResolveNativeCallable(function.name, methodSignature, isStaticMethod, isClassMethod, &method);
         if (status == ANI_AMBIGUOUS) {
             PandaStringStream ss;
-            ss << "ambiguous " << GetNativeMethodKind(isStaticMethod, isClassMethod);
+            ss << "ambiguous " << nativeMethodKind;
             return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
         }
         if (method == nullptr) {
             PandaStringStream ss;
-            ss << "wrong " << GetNativeMethodKind(isStaticMethod, isClassMethod);
+            ss << nativeMethodKind << " not found";
             return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
         }
         if (!method->IsNative()) {
             PandaStringStream ss;
-            ss << GetNativeMethodKind(isStaticMethod, isClassMethod) << " is not native";
+            ss << nativeMethodKind << " is not native";
             return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
         }
         if (method->IsIntrinsic()) {
-            return {GetNativeFunctionError(index, "native function is intrinsic"), ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << nativeMethodKind << " is intrinsic";
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
         }
         if (method->IsBoundNativeFunction()) {
-            return {GetNativeFunctionError(index, "native function is already bound"), ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << nativeMethodKind << " is already bound";
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
         }
         return {};
+    }
+
+    VerificationResult VerifyNativeFunction(const ani_native_function &function, ani_size index, bool isStaticMethod,
+                                            bool isClassMethod)
+    {
+        std::string_view nativeMethodKind = GetNativeMethodKind(isStaticMethod, isClassMethod);
+        if (function.name == nullptr) {
+            PandaStringStream ss;
+            ss << "wrong " << nativeMethodKind << " name";
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::FATAL};
+        }
+        if (function.pointer == nullptr) {
+            PandaStringStream ss;
+            ss << "wrong " << nativeMethodKind << " pointer";
+            return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::FATAL};
+        }
+        std::optional<EtsMethodSignature> methodSignature;
+        if (function.signature != nullptr) {
+            Mangle::ConvertSignatureToProto(methodSignature, function.signature);
+            if (!methodSignature.has_value()) {
+                PandaStringStream ss;
+                ss << "wrong " << nativeMethodKind << " signature";
+                return {GetNativeFunctionError(index, ss.str()), ANIErrorSeverity::ERROR};
+            }
+        }
+        EtsMethod *method = nullptr;
+        ani_status status =
+            ResolveNativeCallable(function.name, methodSignature, isStaticMethod, isClassMethod, &method);
+        return VerifyResolvedNativeFunction(method, status, index, nativeMethodKind);
     }
 
     ani_status ResolveNativeCallable(const char *name, std::optional<EtsMethodSignature> &methodSignature,
