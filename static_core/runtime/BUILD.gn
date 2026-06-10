@@ -273,6 +273,7 @@ _libarkruntime_calculated_sources = [
   "mem/heap_space.cpp",
   "mem/heap_verifier.cpp",
   "mem/internal_allocator.cpp",
+  "mem/internal_arena_allocator.cpp",
   "mem/mem_stats.cpp",
   "mem/mem_stats_additional_info.cpp",
   "mem/mem_stats_default.cpp",

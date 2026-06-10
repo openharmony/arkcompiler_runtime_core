@@ -22,12 +22,12 @@
 #include <vector>
 
 #include "compiler/aot/aot_manager.h"
-#include "libarkbase/mem/arena_allocator.h"
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"
+#include "mem/internal_arena_allocator.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class.h"
 #include "runtime/include/class_index.h"
@@ -289,6 +289,11 @@ public:
         return allocator_;
     }
 
+    mem::InternalArenaPool &GetAllocatorPool()
+    {
+        return internalArenaPool_;
+    }
+
     bool IsInitialized() const
     {
         return isInitialized_;
@@ -396,7 +401,8 @@ private:
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
                                                 ClassLinkerErrorHandler *errorHandler);
 
-    [[nodiscard]] bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
+    [[nodiscard]] bool LinkFields(Class *klass, mem::InternalArenaAllocator &allocator,
+                                  ClassLinkerErrorHandler *errorHandler);
 
     [[nodiscard]] bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,
                                   ClassLinkerErrorHandler *errorHandler);
@@ -414,7 +420,8 @@ private:
                                       Span<Class *> interfaces, bool isInterface,
                                       ClassLinkerErrorHandler *errorHandler);
 
-    static bool LayoutFields(Class *klass, Span<Field> fields, bool isStatic, ClassLinkerErrorHandler *errorHandler);
+    static bool LayoutFields(Class *klass, Span<Field> fields, bool isStatic, mem::InternalArenaAllocator &allocator,
+                             ClassLinkerErrorHandler *errorHandler);
 
     void BuildBootClassIndexLocked() REQUIRES(bootPandaFilesLock_);
 
@@ -425,6 +432,7 @@ private:
     bool CanLinkAotEntrypoints() const;
 
     mem::InternalAllocatorPtr allocator_;
+    mem::InternalArenaPool internalArenaPool_;
 
     PandaVector<const panda_file::File *> bootPandaFiles_ GUARDED_BY(bootPandaFilesLock_);
     ClassIndex bootClassIndex_;

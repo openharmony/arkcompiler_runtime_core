@@ -20,10 +20,9 @@
 
 namespace ark {
 
-template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IsOverriddenBy(const ClassLinkerContext *ctx,
-                                                                             Method::ProtoId const &base,
-                                                                             Method::ProtoId const &derv)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::IsOverriddenBy(
+    const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv)
 {
     if (&base.GetPandaFile() == &derv.GetPandaFile() && base.GetEntityId() == derv.GetEntityId()) {
         return true;  // same-file same-entityId bypasses proto compat
@@ -31,10 +30,10 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IsOverriddenBy(con
     return ProtoCompatibility {}(ctx, base, derv);
 }
 
-template <class ProtoCompatibility, class OverridePred>
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
 // CC-OFFNXT(G.FMT.07, G.FUD.05) solid logic
-typename VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ClassOverrideResult
-VarianceVTableBuilder<ProtoCompatibility, OverridePred>::HasClassMethodOverride(Method &imethod)
+typename VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ClassOverrideResult
+VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::HasClassMethodOverride(Method &imethod)
 {
     auto *ctx = imethod.GetClass()->GetLoadContext();
     auto imethodProto = imethod.GetProtoId();
@@ -44,7 +43,7 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::HasClassMethodOverride(
     MethodInfo const *superclassResolved = nullptr;
     size_t superclassVtableIdx = 0;
     if (numVmethods_ == 0) {
-        for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), &imethodInfo); !it.IsEmpty(); it.Next()) {
+        for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), &imethodInfo); !it.IsEmpty(); it.Next()) {
             auto &[info, entry] = it.Value();
             if (info->IsInterfaceMethod() || !info->IsBase() || entry.GetCandidate() != nullptr) {
                 continue;
@@ -55,8 +54,8 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::HasClassMethodOverride(
         }
         return {ClassOverrideResult::Kind::NONE, 0};
     }
-    InternalArenaVector<std::pair<MethodInfo const *, size_t>> ownMethods(allocator_);
-    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), &imethodInfo); !it.IsEmpty(); it.Next()) {
+    InternalArenaVector<std::pair<MethodInfo const *, size_t>> ownMethods(*allocator_);
+    for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), &imethodInfo); !it.IsEmpty(); it.Next()) {
         auto &[info, entry] = it.Value();
         MethodInfo const *effective = entry.CandidateOr(info);
         if (UNLIKELY(effective->IsInterfaceMethod())) {
@@ -76,7 +75,7 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::HasClassMethodOverride(
         ownMethods.push_back({effective, entry.GetIndex()});
     }
 
-    if (ownMethodNameHashes_.find(imethodNameHash) == ownMethodNameHashes_.end()) {
+    if (ownMethodNameHashes_->find(imethodNameHash) == ownMethodNameHashes_->end()) {
         if (superclassResolved != nullptr) {
             return {ClassOverrideResult::Kind::SINGLE, superclassVtableIdx};
         }
@@ -119,17 +118,18 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::HasClassMethodOverride(
     return {ClassOverrideResult::Kind::NONE, 0};
 }
 
-template <class ProtoCompatibility, class OverridePred>
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
 // CC-OFFNXT(G.FMT.07) project code style
-typename VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ClassOverrideResult
-VarianceVTableBuilder<ProtoCompatibility, OverridePred>::GetInheritedClassOverride(Method *inherited) const
+typename VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ClassOverrideResult
+VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::GetInheritedClassOverride(
+    Method *inherited) const
 {
     auto idx = inherited->GetVTableIndex();
-    if (idx >= baseMethodInfoByIndex_.size()) {
+    if (idx >= baseMethodInfoByIndex_->size()) {
         return {ClassOverrideResult::Kind::NONE, 0};
     }
-    auto it = vtable_.Methods().find(baseMethodInfoByIndex_[idx]);
-    if (it == vtable_.Methods().end()) {
+    auto it = vtable_->Methods().find((*baseMethodInfoByIndex_)[idx]);
+    if (it == vtable_->Methods().end()) {
         return {ClassOverrideResult::Kind::NONE, 0};
     }
     if (it->second.GetCandidate() == nullptr) {
@@ -138,29 +138,30 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::GetInheritedClassOverri
     return {ClassOverrideResult::Kind::SINGLE, it->second.GetIndex()};
 }
 
-template <class ProtoCompatibility, class OverridePred>
-void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::RebuildOwnMethodNameHashes()
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+void VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::RebuildOwnMethodNameHashes()
 {
-    ownMethodNameHashes_.clear();
-    for (auto const &[info, entry] : vtable_.Methods()) {
+    ownMethodNameHashes_->clear();
+    for (auto const &[info, entry] : vtable_->Methods()) {
         MethodInfo const *effective = entry.CandidateOr(info);
         if (effective->IsInterfaceMethod()) {
             continue;
         }
         if (!info->IsBase() || entry.GetCandidate() != nullptr) {
-            ownMethodNameHashes_.insert(GetHash32String(info->GetName().data));
+            ownMethodNameHashes_->insert(GetHash32String(info->GetName().data));
         }
     }
 }
 
-template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::OwnMethodsShadowInterface(ITable itable)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::OwnMethodsShadowInterface(
+    ITable itable)
 {
     for (size_t i = 0; i < itable.Size(); i++) {
         auto *iface = itable[i].GetInterface();
         for (auto &method : iface->GetVirtualMethods()) {
             uint32_t nameHash = GetHash32String(method.GetName().data);
-            if (ownMethodNameHashes_.count(nameHash) > 0) {
+            if (ownMethodNameHashes_->count(nameHash) > 0) {
                 return true;
             }
         }
@@ -177,13 +178,14 @@ static inline uint32_t InterfaceDepth(Class *iface)
     return depth;
 }
 
-template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod(const MethodInfo *info)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ProcessClassMethod(
+    const MethodInfo *info)
 {
     auto *ctx = info->GetLoadContext();
     bool compatibleFound = false;
 
-    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), info); !it.IsEmpty(); it.Next()) {
         auto &[itInfo, itEntry] = it.Value();
 
         if (!itInfo->IsBase()) {
@@ -204,24 +206,25 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod
     }
 
     if (!compatibleFound) {
-        vtable_.AddEntry(info);
+        vtable_->AddEntry(info);
     } else {
         vtableAppendedOnly_ = false;
     }
     return true;
 }
 
-template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessProxyClassMethod(const MethodInfo *info)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ProcessProxyClassMethod(
+    const MethodInfo *info)
 {
     auto *ctx = info->GetLoadContext();
 
     bool compatibleExists = false;
-    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), info); !it.IsEmpty(); it.Next()) {
         auto &[itInfo, itEntry] = it.Value();
 
         if (IsOverriddenBy(ctx, itInfo->GetProtoId(), info->GetProtoId())) {
-            vtable_.ReplaceEntryWith(itInfo, info);
+            vtable_->ReplaceEntryWith(itInfo, info);
             compatibleExists = true;
             break;
         }
@@ -232,20 +235,19 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessProxyClassM
     }
 
     if (!compatibleExists) {
-        vtable_.AddEntry(info);
+        vtable_->AddEntry(info);
     }
 
     return true;
 }
 
-template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessDefaultMethod([[maybe_unused]] ITable itable,
-                                                                                   [[maybe_unused]] size_t itableIdx,
-                                                                                   MethodInfo *methodInfo)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ProcessDefaultMethod(
+    ITable itable [[maybe_unused]], size_t itableIdx [[maybe_unused]], MethodInfo *methodInfo)
 {
     auto *ctx = methodInfo->GetLoadContext();
 
-    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), methodInfo); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), methodInfo); !it.IsEmpty(); it.Next()) {
         MethodInfo const *itinfo = it.Value().second.CandidateOr(it.Value().first);
         if (itinfo->IsInterfaceMethod()) {
             continue;
@@ -255,24 +257,24 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessDefaultMeth
         }
     }
 
-    for (auto it = SameNameMethodInfoIterator(vtable_.CopiedMethods(), methodInfo); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->CopiedMethods(), methodInfo); !it.IsEmpty(); it.Next()) {
         if (it.Value().first->GetMethod() == methodInfo->GetMethod()) {
             return true;  // ptr identity not proto, same default already placed from another iface
         }
     }
 
-    vtable_.AddCopiedEntry(methodInfo);
+    vtable_->AddCopiedEntry(methodInfo);
     return true;
 }
 
-template <class ProtoCompatibility, class OverridePred>
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
 // CC-OFFNXT(G.FUD.05) perf critical, solid logic
-void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMethods(ITable itable,
-                                                                                      size_t superItableSize)
+void VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ResolveInterfaceMethods(
+    ITable itable, size_t superItableSize)
 {
     static constexpr size_t INTERFACE_METHOD_CANDIDATE_INDEX_THRESHOLD = 64U;
 
-    ASSERT(dispatches_.empty());
+    ASSERT(dispatches_->empty());
     if (itable.Size() == 0) {
         return;
     }
@@ -285,9 +287,9 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
     if (numVmethods_ > 0) {
         RebuildOwnMethodNameHashes();
     } else {
-        ownMethodNameHashes_.clear();
+        ownMethodNameHashes_->clear();
     }
-    interfaceMethodCandidatesByName_.clear();
+    interfaceMethodCandidatesByName_->clear();
     useInterfaceMethodCandidateIndex_ = itable.Size() >= INTERFACE_METHOD_CANDIDATE_INDEX_THRESHOLD;
     if (useInterfaceMethodCandidateIndex_) {
         for (size_t i = 0; i < itable.Size(); i++) {
@@ -295,11 +297,11 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
             uint32_t depth = InterfaceDepth(iface);
             for (auto &method : iface->GetVirtualMethods()) {
                 uint32_t nameHash = GetHash32String(method.GetName().data);
-                auto it = interfaceMethodCandidatesByName_.find(nameHash);
+                auto it = interfaceMethodCandidatesByName_->find(nameHash);
                 InternalArenaVector<IfaceMethodCandidate> *bucket = nullptr;
-                if (it == interfaceMethodCandidatesByName_.end()) {
-                    bucket = allocator_.New<InternalArenaVector<IfaceMethodCandidate>>(allocator_);
-                    interfaceMethodCandidatesByName_.insert({nameHash, bucket});
+                if (it == interfaceMethodCandidatesByName_->end()) {
+                    allocator_->MakeContainer(bucket);
+                    interfaceMethodCandidatesByName_->insert({nameHash, bucket});
                 } else {
                     bucket = it->second;
                 }
@@ -310,14 +312,14 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
 
     bool stableInherited = false;
     if (itable.Size() == superItableSize) {
-        if (vtable_.GetVTableSize() == baseVTableSize_) {
+        if (vtable_->GetVTableSize() == baseVTableSize_) {
             stableInherited = true;
         } else if (vtableAppendedOnly_ && numVmethods_ > 0 && !OwnMethodsShadowInterface(itable)) {
             stableInherited = true;
         }
     }
     if (stableInherited) {
-        dispatches_.push_back({IfaceMethodDispatch::Kind::REMAP_VTABLE, nullptr, 0, 0, 0});
+        dispatches_->push_back({IfaceMethodDispatch::Kind::REMAP_VTABLE, nullptr, 0, 0, 0});
     }
 
     for (size_t i = 0; i < itable.Size(); i++) {
@@ -330,7 +332,7 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
                 // CC-OFFNXT(G.FUN.01-CPP) solid logic
                 if (itable.Size() == superItableSize && numVmethods_ > 0 && !stableInherited) {
                     uint32_t nameHash = GetHash32String(method.GetName().data);
-                    if (ownMethodNameHashes_.count(nameHash) == 0) {
+                    if (ownMethodNameHashes_->count(nameHash) == 0) {
                         continue;
                     }
                 }
@@ -345,7 +347,7 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
                     if (classOverride.kind == ClassOverrideResult::Kind::NONE) {
                         continue;
                     }
-                    dispatches_.push_back(
+                    dispatches_->push_back(
                         {IfaceMethodDispatch::Kind::CLASS_METHOD, &method, classOverride.vtableIndex, i, j});
                     continue;
                 }
@@ -362,8 +364,8 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveInterfaceMe
     }
 }
 
-template <class ProtoCompatibility, class OverridePred>
-void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveSingleInterfaceMethod(
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+void VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ResolveSingleInterfaceMethod(
     ITable itable, size_t itableIndex, Class *iface, size_t methodIndex, Method &imethod, ClassLinkerContext *ctx,
     ClassOverrideResult classOverride)
 {
@@ -372,12 +374,12 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveSingleInter
     }
     if (classOverride.kind == ClassOverrideResult::Kind::CONFLICT) {
         auto *cm = FindOrCreateConflictCopiedMethod(&imethod);
-        dispatches_.push_back(
+        dispatches_->push_back(
             {IfaceMethodDispatch::Kind::COPIED_CONFLICT, cm, GetCopiedMethodIndex(cm), itableIndex, methodIndex});
         return;
     }
     if (classOverride.kind == ClassOverrideResult::Kind::SINGLE) {
-        dispatches_.push_back(
+        dispatches_->push_back(
             {IfaceMethodDispatch::Kind::CLASS_METHOD, &imethod, classOverride.vtableIndex, itableIndex, methodIndex});
         return;
     }
@@ -388,27 +390,28 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveSingleInter
     }
     disp.itableIndex = itableIndex;
     disp.methodIndex = methodIndex;
-    dispatches_.push_back(disp);
+    dispatches_->push_back(disp);
 }
 
-template <class ProtoCompatibility, class OverridePred>
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
 // CC-OFFNXT(G.FMT.07) project code style
-auto VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(Class *iface, Method &imethod,
-                                                                                ClassLinkerContext *ctx, ITable itable)
-    -> InternalArenaVector<typename VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IfaceMethodCandidate>
+auto VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::CollectCandidates(
+    Class *iface, Method &imethod, ClassLinkerContext *ctx, ITable itable)
+    -> InternalArenaVector<
+        typename VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::IfaceMethodCandidate>
 {
-    InternalArenaVector<IfaceMethodCandidate> candidates(allocator_);
+    InternalArenaVector<IfaceMethodCandidate> candidates(*allocator_);
     if (!useInterfaceMethodCandidateIndex_) {
         for (size_t k = 0; k < itable.Size(); k++) {
             auto *otherIface = itable[k].GetInterface();
             uint32_t depth = InterfaceDepth(otherIface);
             for (auto &method : otherIface->GetVirtualMethods()) {
                 uint32_t nameHash = GetHash32String(method.GetName().data);
-                auto it = interfaceMethodCandidatesByName_.find(nameHash);
+                auto it = interfaceMethodCandidatesByName_->find(nameHash);
                 InternalArenaVector<IfaceMethodCandidate> *bucket = nullptr;
-                if (it == interfaceMethodCandidatesByName_.end()) {
-                    bucket = allocator_.New<InternalArenaVector<IfaceMethodCandidate>>(allocator_);
-                    interfaceMethodCandidatesByName_.insert({nameHash, bucket});
+                if (it == interfaceMethodCandidatesByName_->end()) {
+                    allocator_->MakeContainer(bucket);
+                    interfaceMethodCandidatesByName_->insert({nameHash, bucket});
                 } else {
                     bucket = it->second;
                 }
@@ -418,8 +421,8 @@ auto VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(
         useInterfaceMethodCandidateIndex_ = true;
     }
     uint32_t nameHash = GetHash32String(imethod.GetName().data);
-    auto bucketIt = interfaceMethodCandidatesByName_.find(nameHash);
-    if (bucketIt == interfaceMethodCandidatesByName_.end()) {
+    auto bucketIt = interfaceMethodCandidatesByName_->find(nameHash);
+    if (bucketIt == interfaceMethodCandidatesByName_->end()) {
         return candidates;
     }
     auto targetDepth = InterfaceDepth(iface);
@@ -438,14 +441,14 @@ auto VarianceVTableBuilder<ProtoCompatibility, OverridePred>::CollectCandidates(
 }
 
 // deepest-first with back-pruning, order-independent maximal set
-template <class ProtoCompatibility, class OverridePred>
-void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::EliminateCandidates(
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+void VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::EliminateCandidates(
     InternalArenaVector<IfaceMethodCandidate> &candidates, ClassLinkerContext *ctx)
 {
     std::sort(candidates.begin(), candidates.end(),
               [](const IfaceMethodCandidate &a, const IfaceMethodCandidate &b) { return a.depth > b.depth; });
 
-    InternalArenaVector<IfaceMethodCandidate> survivors(allocator_);
+    InternalArenaVector<IfaceMethodCandidate> survivors(*allocator_);
     for (auto &c : candidates) {
         bool eliminated = false;
         for (auto &s : survivors) {
@@ -475,8 +478,8 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred>::EliminateCandidate
 }
 
 // mixed abstract+default is conflict, all-abstract is AME
-template <class ProtoCompatibility, class OverridePred>
-IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ClassifySurvivors(
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ClassifySurvivors(
     InternalArenaVector<IfaceMethodCandidate> &survivors, Method *imethod)
 {
     bool hasAbstract = false;
@@ -494,7 +497,7 @@ IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred>::Cla
     }
     if (survivors.size() == 1) {
         auto *survivor = survivors[0].method;
-        for (auto &[info, entry] : vtable_.CopiedMethods()) {
+        for (auto &[info, entry] : vtable_->CopiedMethods()) {
             if (info->GetMethod() == survivor) {
                 return {IfaceMethodDispatch::Kind::COPIED_ORDINARY, survivor};
             }
@@ -512,8 +515,8 @@ IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred>::Cla
     return {IfaceMethodDispatch::Kind::COPIED_CONFLICT, FindOrCreateConflictCopiedMethod(imethod)};
 }
 
-template <class ProtoCompatibility, class OverridePred>
-IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ResolveByElimination(
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::ResolveByElimination(
     Class *iface, Method &imethod, ClassLinkerContext *ctx, ITable itable)
 {
     auto candidates = CollectCandidates(iface, imethod, ctx, itable);
@@ -534,10 +537,11 @@ IfaceMethodDispatch VarianceVTableBuilder<ProtoCompatibility, OverridePred>::Res
     return ClassifySurvivors(candidates, &imethod);
 }
 
-template <class ProtoCompatibility, class OverridePred>
-size_t VarianceVTableBuilder<ProtoCompatibility, OverridePred>::GetCopiedMethodIndex(Method *method)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+size_t VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::GetCopiedMethodIndex(
+    Method *method)
 {
-    for (auto &[info, entry] : vtable_.CopiedMethods()) {
+    for (auto &[info, entry] : vtable_->CopiedMethods()) {
         if (info->GetMethod() == method) {
             return entry.GetIndex();
         }
@@ -546,18 +550,19 @@ size_t VarianceVTableBuilder<ProtoCompatibility, OverridePred>::GetCopiedMethodI
 }
 
 // never upgrades ORDINARY to CONFLICT, per-interface independence
-template <class ProtoCompatibility, class OverridePred>
-Method *VarianceVTableBuilder<ProtoCompatibility, OverridePred>::FindOrCreateConflictCopiedMethod(Method *imethod)
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
+Method *VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::FindOrCreateConflictCopiedMethod(
+    Method *imethod)
 {
-    for (auto &[info, entry] : vtable_.CopiedMethods()) {
+    for (auto &[info, entry] : vtable_->CopiedMethods()) {
         if (info->GetMethod() == imethod && entry.GetStatus() == CopiedMethod::Status::CONFLICT) {
             return imethod;
         }
     }
 
-    auto *info = allocator_.New<MethodInfo>(imethod);
+    auto *info = allocator_->New<MethodInfo>(imethod);
     // stack MethodInfo would dangle as CopiedMethods key
-    vtable_.AddCopiedEntry(info).SetStatus(CopiedMethod::Status::CONFLICT);
+    vtable_->AddCopiedEntry(info).SetStatus(CopiedMethod::Status::CONFLICT);
     return imethod;
 }
 

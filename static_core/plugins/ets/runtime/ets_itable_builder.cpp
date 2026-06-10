@@ -34,13 +34,13 @@ struct VTableDiff {
     InternalArenaVector<ChangedSlot> changed;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-static VTableDiff ComputeVTableDiff(mem::InternalArenaAllocator *allocator, Span<Method *> superVtable,
-                                    Span<Method *> vtable)
+static VTableDiff *ComputeVTableDiff(mem::InternalArenaAllocator *allocator, Span<Method *> superVtable,
+                                     Span<Method *> vtable)
 {
-    VTableDiff diff(allocator);
+    VTableDiff *diff = allocator->New<VTableDiff>(allocator);
     for (size_t k = 0; k < superVtable.size(); k++) {
         if (superVtable[k] != vtable[k]) {
-            diff.changed.push_back({superVtable[k], vtable[k]});
+            diff->changed.push_back({superVtable[k], vtable[k]});
         }
     }
     return diff;
@@ -183,7 +183,7 @@ bool EtsITableBuilder::Resolve(Class *klass)
             auto *base = klass->GetBase();
             ASSERT(base != nullptr);
             auto diff = ComputeVTableDiff(allocator_, base->GetVTable(), vtable);
-            RemapInheritedClassEntries(itable_, diff);
+            RemapInheritedClassEntries(itable_, *diff);
             continue;
         }
         ASSERT(disp.itableIndex < itable_.Size());

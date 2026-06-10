@@ -544,10 +544,10 @@ void UpdateOffsets(std::vector<FieldData> *fields, size_t offset)
 static std::vector<FieldData> GetFieldLayoutSortedSfields()
 {
     return {{"sf_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
-            {"sf_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
             {"sf_f64", sizeof(double), 0},
             {"sf_i64", sizeof(int64_t), 0},
             {"sf_u64", sizeof(uint64_t), 0},
+            {"sf_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
             {"sf_i32", sizeof(int32_t), 0},
             {"sf_u32", sizeof(uint32_t), 0},
             {"sf_f32", sizeof(float), 0},
@@ -561,10 +561,10 @@ static std::vector<FieldData> GetFieldLayoutSortedSfields()
 static std::vector<FieldData> GetFieldLayoutSortedIfields()
 {
     return {{"if_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
-            {"if_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
             {"if_f64", sizeof(double), 0},
             {"if_i64", sizeof(int64_t), 0},
             {"if_u64", sizeof(uint64_t), 0},
+            {"if_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
             {"if_i32", sizeof(int32_t), 0},
             {"if_u32", sizeof(uint32_t), 0},
             {"if_f32", sizeof(float), 0},
