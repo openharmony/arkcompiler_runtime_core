@@ -21,6 +21,38 @@
 
 namespace ark::ets::interop::js::testing {
 static hybridgref g_jsToEtsRef = nullptr;
+static hybridgref g_firstRef = nullptr;
+static hybridgref g_secondRef = nullptr;
+
+static void DeleteRefFromNapi(napi_env env, hybridgref *ref)
+{
+    if (*ref != nullptr) {
+        hybridgref_delete_from_napi(env, *ref);
+        *ref = nullptr;
+    }
+}
+
+static bool CanGetNapiValue(napi_env env, hybridgref ref)
+{
+    napi_value result {};
+    return ref != nullptr && hybridgref_get_napi_value(env, ref, &result);
+}
+
+static napi_value GetRefValueOrUndefined(napi_env env, hybridgref ref)
+{
+    napi_value result {};
+    if (ref == nullptr || !hybridgref_get_napi_value(env, ref, &result)) {
+        napi_get_undefined(env, &result);
+    }
+    return result;
+}
+
+static napi_value BoolResult(napi_env env, bool value)
+{
+    napi_value result {};
+    napi_get_boolean(env, value, &result);
+    return result;
+}
 
 static napi_value NativeSaveRef(napi_env env, napi_callback_info info)
 {
@@ -34,15 +66,78 @@ static napi_value NativeSaveRef(napi_env env, napi_callback_info info)
         return undefined;
     }
 
-    if (g_jsToEtsRef != nullptr) {
-        hybridgref_delete_from_napi(env, g_jsToEtsRef);
-        g_jsToEtsRef = nullptr;
-    }
+    DeleteRefFromNapi(env, &g_jsToEtsRef);
 
     bool ok = hybridgref_create_from_napi(env, argv[0], &g_jsToEtsRef);
-    napi_value result;
-    napi_get_boolean(env, ok, &result);
-    return result;
+    return BoolResult(env, ok);
+}
+
+static napi_value NativeGetRefFromNapi(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return GetRefValueOrUndefined(env, g_jsToEtsRef);
+}
+
+static napi_value NativeCanGetRefFromNapi(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return BoolResult(env, CanGetNapiValue(env, g_jsToEtsRef));
+}
+
+static napi_value NativeDeleteRefFromNapi(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    bool ok = g_jsToEtsRef != nullptr && hybridgref_delete_from_napi(env, g_jsToEtsRef);
+    if (ok) {
+        g_jsToEtsRef = nullptr;
+    }
+    return BoolResult(env, ok);
+}
+
+static napi_value NativeSavePair(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2U;
+    napi_value argv[2U];  // NOLINT(modernize-avoid-c-arrays)
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2U) {
+        return BoolResult(env, false);
+    }
+
+    DeleteRefFromNapi(env, &g_firstRef);
+    DeleteRefFromNapi(env, &g_secondRef);
+
+    bool ok = hybridgref_create_from_napi(env, argv[0], &g_firstRef) &&
+              hybridgref_create_from_napi(env, argv[1U], &g_secondRef);
+    if (!ok) {
+        DeleteRefFromNapi(env, &g_firstRef);
+        DeleteRefFromNapi(env, &g_secondRef);
+    }
+    return BoolResult(env, ok);
+}
+
+static napi_value NativeDeleteFirstPairRef(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    bool ok = g_firstRef != nullptr && hybridgref_delete_from_napi(env, g_firstRef);
+    if (ok) {
+        g_firstRef = nullptr;
+    }
+    return BoolResult(env, ok);
+}
+
+static napi_value NativeDeleteSecondPairRef(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    bool ok = g_secondRef != nullptr && hybridgref_delete_from_napi(env, g_secondRef);
+    if (ok) {
+        g_secondRef = nullptr;
+    }
+    return BoolResult(env, ok);
+}
+
+static napi_value NativeGetFirstPairRef(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return GetRefValueOrUndefined(env, g_firstRef);
+}
+
+static napi_value NativeGetSecondPairRef(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return GetRefValueOrUndefined(env, g_secondRef);
 }
 
 static ani_object NativeGetRef(ani_env *env)
@@ -50,6 +145,21 @@ static ani_object NativeGetRef(ani_env *env)
     ani_object result {};
     hybridgref_get_esvalue(env, g_jsToEtsRef, &result);
     return result;
+}
+
+static ani_boolean NativeCanGetRefFromAni(ani_env *env)
+{
+    ani_object result {};
+    return hybridgref_get_esvalue(env, g_jsToEtsRef, &result) ? ANI_TRUE : ANI_FALSE;
+}
+
+static ani_boolean NativeDeleteRefFromAni(ani_env *env)
+{
+    bool ok = g_jsToEtsRef != nullptr && hybridgref_delete_from_ani(env, g_jsToEtsRef);
+    if (ok) {
+        g_jsToEtsRef = nullptr;
+    }
+    return ok ? ANI_TRUE : ANI_FALSE;
 }
 
 class NativeGrefTsToEtsTest : public EtsInteropTest {
@@ -68,6 +178,15 @@ public:
         return status == ANI_OK && *env != nullptr;
     }
 
+    static bool RegisterFunction(napi_env env, napi_value global, const char *name, napi_callback cb)
+    {
+        napi_value fn {};
+        if (napi_create_function(env, name, NAPI_AUTO_LENGTH, cb, nullptr, &fn) != napi_ok) {
+            return false;
+        }
+        return napi_set_named_property(env, global, name, fn) == napi_ok;
+    }
+
     static bool RegisterNativeSaveRef(napi_env env)
     {
         napi_value global;
@@ -75,12 +194,15 @@ public:
             return false;
         }
 
-        napi_value fn;
-        if (napi_create_function(env, "nativeSaveRef", NAPI_AUTO_LENGTH, NativeSaveRef, nullptr, &fn) != napi_ok) {
-            return false;
-        }
-
-        return napi_set_named_property(env, global, "nativeSaveRef", fn) == napi_ok;
+        return RegisterFunction(env, global, "nativeSaveRef", NativeSaveRef) &&
+               RegisterFunction(env, global, "nativeGetRefFromNapi", NativeGetRefFromNapi) &&
+               RegisterFunction(env, global, "nativeCanGetRefFromNapi", NativeCanGetRefFromNapi) &&
+               RegisterFunction(env, global, "nativeDeleteRefFromNapi", NativeDeleteRefFromNapi) &&
+               RegisterFunction(env, global, "nativeSavePair", NativeSavePair) &&
+               RegisterFunction(env, global, "nativeDeleteFirstPairRef", NativeDeleteFirstPairRef) &&
+               RegisterFunction(env, global, "nativeDeleteSecondPairRef", NativeDeleteSecondPairRef) &&
+               RegisterFunction(env, global, "nativeGetFirstPairRef", NativeGetFirstPairRef) &&
+               RegisterFunction(env, global, "nativeGetSecondPairRef", NativeGetSecondPairRef);
     }
 
     bool RegisterETSGetter(ani_env *env)
@@ -92,6 +214,8 @@ public:
 
         std::array methods = {
             ani_native_function {"nativeGetRef", nullptr, reinterpret_cast<void *>(NativeGetRef)},
+            ani_native_function {"nativeCanGetRefFromAni", nullptr, reinterpret_cast<void *>(NativeCanGetRefFromAni)},
+            ani_native_function {"nativeDeleteRefFromAni", nullptr, reinterpret_cast<void *>(NativeDeleteRefFromAni)},
         };
         return env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size()) ==
                ANI_OK;

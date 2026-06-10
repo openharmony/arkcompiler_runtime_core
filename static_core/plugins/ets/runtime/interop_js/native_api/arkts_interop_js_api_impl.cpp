@@ -157,12 +157,6 @@ PANDA_PUBLIC_API bool CloseETSToJSScope(EtsExecutionContext *executionCtx)
     return CloseInteropCodeScope<false>(executionCtx);
 }
 
-static bool CreateAnyRef(ani::ScopedManagedCodeFix &s, JSValue *anyRef, ani_ref *result)
-{
-    EtsObject *etsObj = anyRef->AsObject();
-    return s.AddLocalRef(etsObj, result) == ANI_OK;
-}
-
 static bool ConvertNativeReferences(EtsExecutionContext *executionCtx, InteropCtx *ctx, Span<napi_value> values,
                                     Span<ani_ref> results)
 {
@@ -175,12 +169,15 @@ static bool ConvertNativeReferences(EtsExecutionContext *executionCtx, InteropCt
 
     std::vector<ani_ref> localResults(values.size(), nullptr);
     for (size_t i = 0, end = values.size(); i < end; ++i) {
-        auto optAnyRef = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, values[i]);
-        if (UNLIKELY(!optAnyRef || optAnyRef.value() == nullptr)) {
-            ctx->ForwardJSException(executionCtx);
+        auto optAnyRef = JSConvertAny::UnwrapWithNullCheck(ctx, env, values[i]);
+        if (UNLIKELY(!optAnyRef)) {
             return false;
         }
-        if (UNLIKELY(!CreateAnyRef(s, optAnyRef.value(), &localResults[i]))) {
+        if (optAnyRef.value() == nullptr) {
+            if (UNLIKELY(ani::ManagedCodeAccessor::GetUndefinedRef(&localResults[i]) != ANI_OK)) {
+                return false;
+            }
+        } else if (UNLIKELY(s.AddLocalRef(optAnyRef.value(), &localResults[i]) != ANI_OK)) {
             return false;
         }
     }
@@ -212,6 +209,55 @@ PANDA_PUBLIC_API bool CloseETSToJSScope(napi_env env, size_t nValues, napi_value
         return false;
     }
     return CloseJsScopeImpl(env, Span(values, nValues), Span(result, nValues));
+}
+
+static bool ConvertAniReferences(EtsExecutionContext *executionCtx, InteropCtx *ctx, Span<ani_ref> values,
+                                 Span<napi_value> results)
+{
+    ASSERT(values.size() == results.size());
+
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    auto napiEnv = ctx->GetJSEnv();
+    ani::ScopedManagedCodeFix s(executionCtx->GetPandaAniEnv());
+    EtsHandleScope scope(executionCtx);
+
+    std::vector<napi_value> localResults(values.size(), nullptr);
+    for (size_t i = 0, end = values.size(); i < end; ++i) {
+        auto *etsObject = s.ToInternalType(values[i]);
+        EtsHandle<EtsObject> etsHandle(executionCtx, etsObject);
+        localResults[i] = JSConvertAny::WrapWithNullCheck(napiEnv, etsHandle.GetPtr());
+        if (UNLIKELY(localResults[i] == nullptr)) {
+            return false;
+        }
+    }
+    std::copy(localResults.begin(), localResults.end(), results.begin());
+    return true;
+}
+
+static bool CloseEtsScopeImpl(ani_env *env, Span<ani_ref> values, Span<napi_value> results)
+{
+    ASSERT(values.size() == results.size());
+
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr || env != executionCtx->GetPandaAniEnv())) {
+        return false;
+    }
+
+    if (!values.empty()) {
+        if (UNLIKELY(!ConvertAniReferences(executionCtx, ctx, values, results))) {
+            return false;
+        }
+    }
+    return CloseJSToETSScope(executionCtx);
+}
+
+PANDA_PUBLIC_API bool CloseJSToETSScope(ani_env *env, size_t nValues, ani_ref *values, napi_value *result)
+{
+    if (UNLIKELY(env == nullptr || (nValues != 0 && (values == nullptr || result == nullptr)))) {
+        return false;
+    }
+    return CloseEtsScopeImpl(env, Span(values, nValues), Span(result, nValues));
 }
 
 }  // namespace ark::ets::interop::js

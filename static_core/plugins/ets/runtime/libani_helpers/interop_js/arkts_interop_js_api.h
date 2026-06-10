@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,36 @@ __attribute__((visibility("default"))) bool arkts_napi_scope_open(ani_env *env, 
  */
 __attribute__((visibility("default"))) bool arkts_napi_scope_close_n(napi_env env, size_t nValues, napi_value *values,
                                                                      ani_ref *result);
+
+/**
+ * @brief Opens scope where ANI usage is allowed.
+ *
+ * This function creates a scope where ANI usage is allowed. It must be called from N-API code
+ * to allow ANI usage. After the scope is opened, usage of N-API and other runtime APIs is not allowed.
+ * Every opened scope must be destroyed via call to `arkts_ani_scope_close_n`.
+ *
+ * @param[in] env A pointer to the N-API environment structure.
+ * @param[out] result A pointer to store `ani_env` corresponding to the opened scope.
+ * @returns true if the scope was opened successful, false otherwise.
+ */
+__attribute__((visibility("default"))) bool arkts_ani_scope_open(napi_env *env, ani_env **result);
+
+/**
+ * @brief Destroys the current ANI scope and propagates references.
+ *
+ * This function destroys the scope which was previously opened via `arkts_ani_scope_open`.
+ * After the scope is destroyed, usage of ANI is not allowed. Additionally it returns N-API compatible
+ * `napi_value` references to the objects given in `ani_ref` array to save results from the closed scope.
+ *
+ * @param[in] env A pointer to the ANI environment structure of the closed scope.
+ * @param[in] nValues A size of `values` array. Might be 0, in this case `values` and `result` are ignored.
+ * @param[in] values References to ArkTS objects which must be returned in `result`.
+ * Must be non null if `nValues` is not 0.
+ * @param[out] result A pointer to store napi values to `values`. Must be non null if `nValues` is not 0.
+ * @returns true if the scope was destroyed successful, false otherwise.
+ */
+__attribute__((visibility("default"))) bool arkts_ani_scope_close_n(ani_env *env, size_t nValues, ani_ref *values,
+                                                                    napi_value *result);
 
 #ifdef __cplusplus
 }

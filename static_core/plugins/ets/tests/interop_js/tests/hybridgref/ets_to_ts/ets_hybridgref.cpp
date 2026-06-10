@@ -21,6 +21,14 @@
 
 namespace ark::ets::interop::js::testing {
 static hybridgref g_ref = nullptr;
+
+static napi_value BoolResult(napi_env env, bool value)
+{
+    napi_value result {};
+    napi_get_boolean(env, value, &result);
+    return result;
+}
+
 static napi_value NativeGetRef(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
     napi_value result {};
@@ -30,9 +38,34 @@ static napi_value NativeGetRef(napi_env env, [[maybe_unused]] napi_callback_info
     return result;
 }
 
+static napi_value NativeCanGetRef(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    napi_value result {};
+    return BoolResult(env, g_ref != nullptr && hybridgref_get_napi_value(env, g_ref, &result));
+}
+
+static napi_value NativeDeleteRefFromNapi(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    bool ok = g_ref != nullptr && hybridgref_delete_from_napi(env, g_ref);
+    if (ok) {
+        g_ref = nullptr;
+    }
+    return BoolResult(env, ok);
+}
+
 static void NativeSaveHybridGref(ani_env *env, ani_object ref)
 {
+    if (g_ref != nullptr) {
+        hybridgref_delete_from_ani(env, g_ref);
+        g_ref = nullptr;
+    }
     ASSERT_TRUE(hybridgref_create_from_ani(env, static_cast<ani_ref>(ref), &g_ref));
+}
+
+static ani_boolean NativeCanGetHybridGrefFromAni(ani_env *env)
+{
+    ani_object result {};
+    return g_ref != nullptr && hybridgref_get_esvalue(env, g_ref, &result) ? ANI_TRUE : ANI_FALSE;
 }
 
 class HybridGrefPrimitiveEtsToTsTest : public EtsInteropTest {
@@ -51,22 +84,25 @@ public:
         return status == ANI_OK && *env != nullptr;
     }
 
+    static bool RegisterFunction(napi_env env, napi_value global, const char *name, napi_callback cb)
+    {
+        napi_value fn {};
+        if (napi_create_function(env, name, NAPI_AUTO_LENGTH, cb, nullptr, &fn) != napi_ok) {
+            return false;
+        }
+        return napi_set_named_property(env, global, name, fn) == napi_ok;
+    }
+
     static bool RegisterNativeGetRef(napi_env env)
     {
         napi_value global;
         if (napi_get_global(env, &global) != napi_ok) {
             return false;
         }
-        napi_value fn;
-        if (napi_create_function(env, "nativeGetRef", NAPI_AUTO_LENGTH, NativeGetRef, nullptr, &fn) != napi_ok) {
-            return false;
-        }
 
-        if (napi_set_named_property(env, global, "nativeGetRef", fn) != napi_ok) {
-            return false;
-        }
-
-        return true;
+        return RegisterFunction(env, global, "nativeGetRef", NativeGetRef) &&
+               RegisterFunction(env, global, "nativeCanGetRef", NativeCanGetRef) &&
+               RegisterFunction(env, global, "nativeDeleteRefFromNapi", NativeDeleteRefFromNapi);
     }
 
     bool RegisterNativeSaveRef(ani_env *env)
@@ -77,6 +113,8 @@ public:
         }
         std::array methods = {
             ani_native_function {"saveHybridGref", nullptr, reinterpret_cast<void *>(NativeSaveHybridGref)},
+            ani_native_function {"canGetHybridGrefFromAni", nullptr,
+                                 reinterpret_cast<void *>(NativeCanGetHybridGrefFromAni)},
         };
         ani_status status =
             env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size());

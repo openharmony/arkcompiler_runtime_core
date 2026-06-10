@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,153 +13,122 @@
  * limitations under the License.
  */
 
-#include "libarkbase/os/thread.h"
 #include "hybridgref_napi.h"
+
+#include "arkts_interop_js_api.h"
+#include "hybridgref_registry.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::hygref {
 
-using SharedRefIndex = uint32_t;
-
-/// @brief Returns storage array
-static bool GetStorage(napi_env env, napi_value *storage)
-{
-    static constexpr std::string_view HYBRIDGREF_STORAGE_NAME = "__hybridgref_internal_storage__";
-
-    napi_value global;
-    napi_status status;
-    if (status = napi_get_global(env, &global); status != napi_ok) {
-        return false;
-    }
-
-    napi_value tmpStorage;
-    status = napi_get_named_property(env, global, HYBRIDGREF_STORAGE_NAME.data(), &tmpStorage);
-
-    napi_valuetype type;
-    bool shouldCreate =
-        (status != napi_ok) || (napi_typeof(env, tmpStorage, &type) == napi_ok && type == napi_undefined);
-    if (shouldCreate) {
-        napi_value storageArray;
-        if (napi_create_array(env, &storageArray) != napi_ok) {
-            return false;
-        }
-        if (napi_set_named_property(env, global, HYBRIDGREF_STORAGE_NAME.data(), storageArray) != napi_ok) {
-            return false;
-        }
-
-        napi_value tid;
-        if (napi_create_uint32(env, ark::os::thread::GetCurrentThreadId(), &tid) != napi_ok) {
-            return false;
-        }
-        if (napi_set_element(env, storageArray, 0, tid) != napi_ok) {
-            return false;
-        }
-        *storage = storageArray;
-        return true;
-    }
-    *storage = tmpStorage;
-    return true;
-}
-
 bool HybridGrefCreateRefFromNapi(napi_env env, napi_value value, hybridgref *result)
 {
-    if (env == nullptr || result == nullptr) {
+    EtsExecutionContext *executionCtx {};
+    interop::js::InteropCtx *ctx {};
+    if (value == nullptr || result == nullptr || !ValidateNapiEnv(env, &executionCtx, &ctx)) {
         return false;
     }
-    napi_value storage;
-    if (!GetStorage(env, &storage)) {
-        return false;
-    }
-    uint32_t arrayLength;
-    if (napi_get_array_length(env, storage, &arrayLength) != napi_ok) {
-        return false;
-    }
-    if (UNLIKELY(arrayLength == 0)) {
-        // Element at 0 position must always present and contain thread-id
-        return false;
-    }
-    if (napi_set_element(env, storage, arrayLength, value) != napi_ok) {
-        return false;
-    }
-    *result = reinterpret_cast<hybridgref>(arrayLength);
-    return true;
-}
 
-static bool CheckCorrectThread(napi_env env, napi_value storage)
-{
-    napi_value tidHolder;
-    if (napi_get_element(env, storage, 0, &tidHolder) != napi_ok) {
+    napi_ref napiRef {};
+    if (napi_create_reference(env, value, 1, &napiRef) != napi_ok) {
         return false;
     }
-    uint32_t tid;
-    if (napi_get_value_uint32(env, tidHolder, &tid) != napi_ok) {
+
+    if (!RegisterHybridRefCleanupHook(executionCtx->GetPandaAniEnv(), env)) {
+        [[maybe_unused]] auto status = napi_delete_reference(env, napiRef);
         return false;
     }
-    // Check that reference was created by the same JS VM instance
-    return tid == ark::os::thread::GetCurrentThreadId();
+
+    if (InsertHybridRef(NapiHybridRef {env, napiRef}, result)) {
+        return true;
+    }
+
+    [[maybe_unused]] auto status = napi_delete_reference(env, napiRef);
+    return false;
 }
 
 bool HybridGrefDeleteRefFromNapi(napi_env env, hybridgref ref)
 {
-    if (env == nullptr) {
-        return false;
-    }
-    napi_value storage;
-    if (!GetStorage(env, &storage)) {
-        return false;
-    }
-
-    uint32_t arrayLength;
-    napi_get_array_length(env, storage, &arrayLength);
-    if (UNLIKELY(arrayLength == 0)) {
-        // Element at 0 position must always present and contain thread-id
+    EtsExecutionContext *executionCtx {};
+    interop::js::InteropCtx *ctx {};
+    if (ref == nullptr || !ValidateNapiEnv(env, &executionCtx, &ctx)) {
         return false;
     }
 
-    if (!CheckCorrectThread(env, storage)) {
+    HybridRefValue value;
+    if (!DeleteHybridRef(ref, &value)) {
         return false;
     }
 
-    SharedRefIndex refIndex = reinterpret_cast<uintptr_t>(ref);
-    if (refIndex == 0 || refIndex >= arrayLength) {
+    if (auto *napiRef = std::get_if<NapiHybridRef>(&value); napiRef != nullptr) {
+        if (!IsOwnedByEnv(*napiRef, env)) {
+            [[maybe_unused]] auto restored = RestoreHybridRef(ref, value);
+            return false;
+        }
+        if (napi_delete_reference(env, napiRef->ref) == napi_ok) {
+            return true;
+        }
+        [[maybe_unused]] auto restored = RestoreHybridRef(ref, value);
         return false;
     }
 
-    napi_value undefinedValue;
-    if (napi_get_undefined(env, &undefinedValue) != napi_ok) {
+    auto aniRef = std::get<AniHybridRef>(value);
+    ani_env *aniEnv {};
+    if (!arkts_ani_scope_open(&env, &aniEnv)) {
+        [[maybe_unused]] auto restored = RestoreHybridRef(ref, value);
         return false;
     }
-
-    return napi_set_element(env, storage, refIndex, undefinedValue) == napi_ok;
+    if (!IsOwnedByEnv(aniRef, aniEnv)) {
+        [[maybe_unused]] auto closed = arkts_ani_scope_close_n(aniEnv, 0, nullptr, nullptr);
+        [[maybe_unused]] auto restored = RestoreHybridRef(ref, value);
+        return false;
+    }
+    auto deleteStatus = aniEnv->GlobalReference_Delete(aniRef.ref);
+    auto closeStatus = arkts_ani_scope_close_n(aniEnv, 0, nullptr, nullptr);
+    if (deleteStatus == ANI_OK) {
+        return closeStatus;
+    }
+    [[maybe_unused]] auto restored = RestoreHybridRef(ref, value);
+    return false;
 }
 
 bool HybridGrefGetNapiValue(napi_env env, hybridgref ref, napi_value *result)
 {
-    if (env == nullptr || result == nullptr) {
-        return false;
-    }
-    napi_value storage;
-    if (!GetStorage(env, &storage)) {
-        return false;
-    }
-    uint32_t arrayLength;
-    napi_get_array_length(env, storage, &arrayLength);
-    if (UNLIKELY(arrayLength == 0)) {
-        // Element at 0 position must always present and contain thread-id
+    EtsExecutionContext *executionCtx {};
+    interop::js::InteropCtx *ctx {};
+    if (ref == nullptr || result == nullptr || !ValidateNapiEnv(env, &executionCtx, &ctx)) {
         return false;
     }
 
-    if (!CheckCorrectThread(env, storage)) {
+    HybridRefValue value;
+    if (!GetHybridRef(ref, &value)) {
         return false;
     }
 
-    SharedRefIndex refIndex = reinterpret_cast<uintptr_t>(ref);
-    if (refIndex == 0 || refIndex >= arrayLength) {
+    if (auto *napiRef = std::get_if<NapiHybridRef>(&value); napiRef != nullptr) {
+        if (!IsOwnedByEnv(*napiRef, env)) {
+            return false;
+        }
+        return napi_get_reference_value(env, napiRef->ref, result) == napi_ok;
+    }
+
+    auto aniRef = std::get<AniHybridRef>(value);
+    ani_env *aniEnv {};
+    if (!arkts_ani_scope_open(&env, &aniEnv)) {
         return false;
     }
-    if (napi_get_element(env, storage, refIndex, result) != napi_ok) {
+    if (!IsOwnedByEnv(aniRef, aniEnv)) {
+        [[maybe_unused]] auto closed = arkts_ani_scope_close_n(aniEnv, 0, nullptr, nullptr);
         return false;
     }
-    return true;
+
+    ani_ref aniValue {};
+    if (!UnwrapLocalRefFromAniRef(aniEnv, aniRef.ref, &aniValue)) {
+        [[maybe_unused]] auto closed = arkts_ani_scope_close_n(aniEnv, 0, nullptr, nullptr);
+        return false;
+    }
+    return arkts_ani_scope_close_n(aniEnv, 1, &aniValue, result);
 }
 
 }  // namespace ark::ets::hygref

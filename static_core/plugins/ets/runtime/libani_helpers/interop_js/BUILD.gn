@@ -33,6 +33,7 @@ ohos_source_set("hybridgref_static") {
     "arkts_interop_js_api.cpp",
     "hybridgref_ani.cpp",
     "hybridgref_napi.cpp",
+    "hybridgref_registry.cpp",
   ]
   deps = [
     "$ark_root/libarkbase:libarktsbase",

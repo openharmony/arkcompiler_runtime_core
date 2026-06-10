@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 native function nativeGetRef(): ESValue;
+native function nativeCanGetRefFromAni(): boolean;
+native function nativeDeleteRefFromAni(): boolean;
+
+export function etsCanGetNativeGref(): boolean {
+    return nativeCanGetRefFromAni();
+}
+
+export function etsDeleteNativeGrefFromAni(): boolean {
+    return nativeDeleteRefFromAni();
+}
 
 export function etsCheckNativeGrefString(): boolean {
     let value = nativeGetRef();

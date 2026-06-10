@@ -74,6 +74,19 @@ function testFunctionCallback(etsVm: any): void {
     ASSERT_TRUE(fn === plusOne);
 }
 
+function testRegistryLifecycle(etsVm: any): void {
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefString")();
+    ASSERT_TRUE(nativeCanGetRef());
+    ASSERT_TRUE(etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsCanGetNativeGrefFromAni")());
+    ASSERT_EQ(nativeGetRef(), "hello world");
+
+    ASSERT_TRUE(nativeDeleteRefFromNapi());
+    ASSERT_TRUE(!nativeCanGetRef());
+    ASSERT_TRUE(!etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsCanGetNativeGrefFromAni")());
+    ASSERT_EQ(typeof nativeGetRef(), "undefined");
+    ASSERT_TRUE(!nativeDeleteRefFromNapi());
+}
+
 function testBufferAndViewTypes(etsVm: any): void {
     etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefArrayBuffer")();
     const arrbuf = nativeGetRef();
@@ -129,6 +142,7 @@ function main(): void {
     testArrayAndObjectTypes(etsVm);
     testMapAndSetTypes(etsVm);
     testFunctionCallback(etsVm);
+    testRegistryLifecycle(etsVm);
     testBufferAndViewTypes(etsVm);
     testPromiseAndErrorTypes(etsVm);
     testDateType(etsVm);

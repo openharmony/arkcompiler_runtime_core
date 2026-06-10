@@ -15,6 +15,11 @@
 
 type refType = ESValue | Any;
 native function saveHybridGref(ref: refType):void;
+native function canGetHybridGrefFromAni(): boolean;
+
+export function etsCanGetNativeGrefFromAni(): boolean {
+    return canGetHybridGrefFromAni();
+}
 
 export function etsSaveNativeGrefChar(): void {
     let value : char = c'A'
