@@ -60,7 +60,7 @@ static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, Ets
 
     auto const getValue = [obj](auto typeId) {
         using Type = typename decltype(typeId)::type;
-        return static_cast<T>(EtsBoxPrimitive<Type>::FromCoreType(obj)->GetValue());
+        return static_cast<T>(EtsBoxPrimitive<Type>::Unbox(obj));
     };
 
     if (cls == ptypes->coreDouble) {
@@ -931,24 +931,200 @@ EtsObject *EtsCall([[maybe_unused]] ManagedThread *mThread, EtsObject *funcObj,
     }
 }
 
-EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, [[maybe_unused]] panda_file::File::StringData name,
-                       [[maybe_unused]] Span<VMHandle<ObjectHeader>> args)
+template <typename T>
+static bool CheckAndUnpackBoxedType(EtsClassLinkerExtension *linkExt, EtsObject *arg, EtsClass *paramClass,
+                                    Value *argValue, ClassRoot primitiveRoot)
+{
+    if (paramClass != EtsClass::FromRuntimeClass(linkExt->GetClassRoot(primitiveRoot))) {
+        return false;
+    }
+    *argValue = Value(EtsBoxPrimitive<T>::Unbox(arg));
+    return true;
+}
+
+static bool ValidatePrimitiveReceiverType(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *paramClass,
+                                          Value *argValue)
+{
+    EtsClass *argClass = arg->GetClass();
+    if (!argClass->IsBoxed()) {
+        ThrowEtsInvalidType(executionCtx, argClass);
+        return false;
+    }
+
+    bool checked = false;
+    auto *linkExt = executionCtx->GetPandaVM()->GetEtsClassLinkerExtension();
+
+    switch (argClass->GetBoxedType()) {
+        case EtsClass::BoxedType::BOOLEAN:
+            checked = CheckAndUnpackBoxedType<EtsBoolean>(linkExt, arg, paramClass, argValue, ClassRoot::U1);
+            break;
+        case EtsClass::BoxedType::BYTE:
+            checked = CheckAndUnpackBoxedType<EtsByte>(linkExt, arg, paramClass, argValue, ClassRoot::I8);
+            break;
+        case EtsClass::BoxedType::CHAR:
+            checked = CheckAndUnpackBoxedType<EtsChar>(linkExt, arg, paramClass, argValue, ClassRoot::U16);
+            break;
+        case EtsClass::BoxedType::DOUBLE:
+            checked = CheckAndUnpackBoxedType<EtsDouble>(linkExt, arg, paramClass, argValue, ClassRoot::F64);
+            break;
+        case EtsClass::BoxedType::FLOAT:
+            checked = CheckAndUnpackBoxedType<EtsFloat>(linkExt, arg, paramClass, argValue, ClassRoot::F32);
+            break;
+        case EtsClass::BoxedType::INT:
+            checked = CheckAndUnpackBoxedType<EtsInt>(linkExt, arg, paramClass, argValue, ClassRoot::I32);
+            break;
+        case EtsClass::BoxedType::LONG:
+            checked = CheckAndUnpackBoxedType<EtsLong>(linkExt, arg, paramClass, argValue, ClassRoot::I64);
+            break;
+        case EtsClass::BoxedType::SHORT:
+            checked = CheckAndUnpackBoxedType<EtsShort>(linkExt, arg, paramClass, argValue, ClassRoot::I16);
+            break;
+        default:
+            ThrowEtsInvalidType(executionCtx, argClass);
+            return false;
+    }
+
+    if (!checked) {
+        ThrowEtsInvalidType(executionCtx, argClass);
+        return false;
+    }
+
+    return true;
+}
+
+static bool ValidateReceiverType(EtsExecutionContext *executionCtx, EtsObject *arg, EtsClass *paramClass,
+                                 Value *argValue)
+{
+    if (arg == nullptr) {
+        if (paramClass->IsPrimitive()) {
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
+                              "undefined argument is not allowed for primitive receiver");
+            return false;
+        }
+        *argValue = Value(nullptr);
+        return true;
+    }
+
+    EtsClass *argClass = arg->GetClass();
+
+    if (paramClass->IsAssignableFrom(argClass)) {
+        *argValue = Value(arg->GetCoreType());
+        return true;
+    }
+
+    if (paramClass->IsPrimitive()) {
+        return ValidatePrimitiveReceiverType(executionCtx, arg, paramClass, argValue);
+    }
+
+    ThrowEtsInvalidType(executionCtx, argClass);
+    return false;
+}
+
+static EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, EtsMethod *method, EtsHandle<EtsObject> &thisObj,
+                               Span<VMHandle<ObjectHeader>> args)
+{
+    ASSERT(!method->IsStatic());
+    ASSERT(method->GetClass()->IsAssignableFrom(thisObj->GetClass()) && "thisObj is subtype of method owner");
+
+    const size_t numParams = method->GetParametersNum();
+    const size_t numArgs = method->GetNumArgs();
+    ASSERT(numParams != numArgs && "method has implicit this");
+
+    size_t argsSize = args.Size();
+    if (argsSize != numParams) {
+        PandaStringStream pss;
+        pss << "Expected " << numParams << " arguments, " << argsSize << " given.";
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, pss.str());
+        return nullptr;
+    }
+
+    // Resolve argument types separately from building the `ObjectHeader*`
+    // invoke arguments to avoid potential use-after-move of relocated GC
+    // objects.
+    PandaVector<EtsClass *> argTypes;
+    argTypes.reserve(numArgs);
+    for (size_t i = 0; i < argsSize; ++i) {
+        auto argType = method->ResolveArgType(i + 1);
+        if (UNLIKELY(argType == nullptr)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return nullptr;
+        }
+        argTypes.emplace_back(argType);
+    }
+
+    PandaVector<Value> invokeArgs;
+    invokeArgs.reserve(numArgs);
+    // Add 'this' argument for instance methods
+    invokeArgs.emplace_back(Value(thisObj->GetCoreType()));
+
+    for (size_t i = 0; i < argsSize; ++i) {
+        Value argValue;
+        auto argType = argTypes[i];
+        auto argObj = EtsObject::FromCoreType(args[i].GetPtr());
+        if (!ValidateReceiverType(executionCtx, argObj, argType, &argValue)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return nullptr;
+        }
+        invokeArgs.emplace_back(argValue);
+    }
+
+    Value result = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), invokeArgs.data());
+    if (executionCtx->GetMT()->HasPendingException()) {
+        return nullptr;
+    }
+    EtsClass *returnType = method->ResolveReturnType();
+    if (returnType->IsPrimitive() && !returnType->IsVoid()) {
+        return GetBoxedValue(executionCtx, result, method->GetReturnValueType());
+    }
+    return EtsObject::FromCoreType((result.GetAs<ObjectHeader *>()));
+}
+
+static EtsObject *EtsCallThisStatic(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &thisObjHandle,
+                                    panda_file::File::StringData name, Span<VMHandle<ObjectHeader>> args)
+{
+    auto methodName = utf::Mutf8AsCString(name.data);
+    auto *cls = thisObjHandle->GetClass();
+    auto vtable = cls->GetRuntimeClass()->GetVTable();
+    const MethodNameComp comp;
+    EtsMethod *selectedMethod = nullptr;
+    for (auto *method : vtable) {
+        if (method->IsPublic() && comp.equal(*method, name)) {
+            if (selectedMethod == nullptr) {
+                selectedMethod = EtsMethod::FromRuntimeMethod(method);
+            } else {
+                PandaString message =
+                    "Method " + PandaString(methodName) + "(...) is overloaded in " + PandaString(cls->GetDescriptor());
+                ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
+                return nullptr;
+            }
+        }
+    }
+
+    if (selectedMethod == nullptr) {
+        ThrowEtsMethodNotFoundException(executionCtx, cls->GetDescriptor(), methodName, "...");
+        return nullptr;
+    }
+
+    return InvokeMethod(executionCtx, selectedMethod, thisObjHandle, args);
+}
+
+EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, panda_file::File::StringData name,
+                       Span<VMHandle<ObjectHeader>> args)
 {
     auto *executionCtx = EtsExecutionContext::FromMT(mThread);
-    [[maybe_unused]] auto fieldName = utf::Mutf8AsCString(name.data);
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsObject> thisObjHandle(executionCtx, thisObj);
+
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
             INTEROP_TRACE();
-            [[maybe_unused]] EtsHandleScope s(executionCtx);
-            EtsHandle<EtsObject> thisObjHandle(executionCtx, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
             std::string methodName = utf::Mutf8AsCString(name.data);
             return xRefObjectOperator.InvokeMethod(executionCtx, methodName, args);
         });
+        UNREACHABLE();
     } else {
-        // Not supported yet, need rethink for overload case
-        ThrowEtsInvalidType(executionCtx, thisObj->GetClass());
-        return nullptr;
+        return EtsCallThisStatic(executionCtx, thisObjHandle, name, args);
     }
 }
 
