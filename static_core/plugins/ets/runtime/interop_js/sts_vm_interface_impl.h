@@ -59,6 +59,10 @@ public:
     PANDA_PUBLIC_API bool TriggerXGC() override;
     PANDA_PUBLIC_API void NotifyWaiters() override;
 
+    PANDA_PUBLIC_API bool UnionStackIsEmpty(bool *isEmpty) override;
+    PANDA_PUBLIC_API bool ForEachFrameInUnionStack(
+        const std::function<void(const void *frame, bool isStaticFrame)> &callback) override;
+
     PandaEtsVM *GetVM() const
     {
         return vm_;

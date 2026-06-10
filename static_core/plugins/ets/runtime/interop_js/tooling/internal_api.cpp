@@ -53,4 +53,25 @@ bool UnionStackIsEmpty(bool *isEmpty)
     return true;
 }
 
+const void *GetEcmaVM()
+{
+    auto *mutator = Mutator::GetCurrent();
+    if (UNLIKELY(mutator == nullptr)) {
+        return nullptr;
+    }
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
+        return nullptr;
+    }
+    auto *ctx = interop::js::InteropCtx::Current(execCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        return nullptr;
+    }
+    auto *ecmaInterface = ctx->GetECMAInterface();
+    if (UNLIKELY(ecmaInterface == nullptr)) {
+        return nullptr;
+    }
+    return ecmaInterface->GetEcmaVM();
+}
+
 }  // namespace ark::ets::interop::js

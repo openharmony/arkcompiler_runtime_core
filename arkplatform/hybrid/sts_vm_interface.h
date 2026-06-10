@@ -129,6 +129,10 @@ public:
     virtual bool DetachCurrentThread() = 0;
     /// @brief Check if the current thread is attached to the VM
     virtual bool IsCurrentThreadAttached() = 0;
+
+    virtual bool UnionStackIsEmpty(bool *isEmpty) = 0;
+    virtual bool ForEachFrameInUnionStack(
+        const std::function<void(const void *frame, bool isStaticFrame)> &callback) = 0;
 };
 
 }  // namespace arkplatform

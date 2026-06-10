@@ -26,6 +26,8 @@ PANDA_PUBLIC_API bool ForEachFrameInUnionStack(
 
 PANDA_PUBLIC_API bool UnionStackIsEmpty(bool *isEmpty);
 
+PANDA_PUBLIC_API const void *GetEcmaVM();
+
 }  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTERNAL_API_H
