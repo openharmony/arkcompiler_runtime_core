@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import * as ts from 'typescript';
-import { Stage, StageContext } from '../Stage';
+import { Stage, StageContext, getAffectedSet } from '../Stage';
 
 /**
  * This stage is to convert all files into declaration files.
@@ -27,44 +27,46 @@ export class DeclarationConversionStage extends Stage<undefined, undefined> {
     const compiler = stageContext.compiler;
     const program = stageContext.compiler.program;
 
-    const rootFiles = program.getRootFileNames();
-    const declarationFiles = rootFiles
-      .filter((file) => {
-        const sourceFile = program.getSourceFile(file);
-        return sourceFile?.isDeclarationFile;
-      })
-      .map((file) => program.getSourceFile(file)!) as ts.SourceFile[];
+    // Only the files marked affected go through declaration emit; the rest
+    // were already injected from cache by an upstream `CacheLoadStage`.
+    const affected = getAffectedSet(stageContext);
+    const rootFiles = compiler.rootFileNames;
 
-    declarationFiles.forEach((sourceFile) => {
-      if (ts.isSourceFile(sourceFile)) {
-        compiler.updateFile(sourceFile.fileName, sourceFile);
+    // Inject already-declaration root files into the compiler's virtual FS.
+    for (const file of rootFiles) {
+      const sf = program.getSourceFile(file);
+      if (sf?.isDeclarationFile && affected.has(sf.fileName)) {
+        compiler.updateFile(sf.fileName, sf);
       }
-    });
+    }
+
+    // Hoist the per-file capture callback so the transformer factory stays flat.
+    const captureIntoCompiler = (sf: ts.SourceFile): ts.SourceFile => {
+      if (affected.has(sf.fileName)) {
+        compiler.updateFile(sf.fileName, sf);
+      }
+      return sf;
+    };
 
     const afterDeclarations: ts.CustomTransformerFactory[] = [
       (ctx: ts.TransformationContext): ts.CustomTransformer => {
         void ctx;
-        return {
-          transformSourceFile: (sourceFile: ts.SourceFile): ts.SourceFile => {
-            compiler.updateFile(sourceFile.fileName, sourceFile);
-            return sourceFile;
-          },
-          transformBundle: (bundle: ts.Bundle): ts.Bundle => bundle
-        };
+        return { transformSourceFile: captureIntoCompiler, transformBundle: (b: ts.Bundle) => b };
       }
     ];
 
-    program.emit(undefined, undefined, undefined, true, {
-      before: [],
-      after: [],
-      afterDeclarations
-    });
+    // Per-file emit so we don't waste work on non-affected files. Passing
+    // `targetSourceFile` to `program.emit` restricts emission to one file
+    // (tsc does NOT use BuilderProgram-style skipping here, but the cost
+    // becomes proportional to |affected| instead of |all root files|).
+    for (const file of rootFiles) {
+      const sf = program.getSourceFile(file);
+      if (!sf || sf.isDeclarationFile || !affected.has(sf.fileName)) {
+        continue;
+      }
+      program.emit(sf, undefined, undefined, true, { before: [], after: [], afterDeclarations });
+    }
 
-    const nextContext: StageContext<undefined> = {
-      ...stageContext,
-      prevState: undefined
-    };
-
-    return nextContext;
+    return { ...stageContext, prevState: undefined };
   }
 }

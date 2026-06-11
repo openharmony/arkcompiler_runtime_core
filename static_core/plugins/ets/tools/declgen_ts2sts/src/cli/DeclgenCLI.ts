@@ -34,13 +34,15 @@ export interface DeclgenCLIOptions {
   enableInteropTypesFix?: boolean;
   removeReservedKeywordIdentifier?: boolean;
   /**
-   * Enable incremental builds backed by tsc's `.tsbuildinfo`.
+   * Enable incremental builds backed by the declgen cache + tsc tsbuildinfo.
    */
   incremental?: boolean;
-  /**
-   * Custom path for the generated `.tsbuildinfo` file.
-   */
-  tsBuildInfoFile?: string;
+  /** Override the cache directory (default: `<outDir>/.declgen-cache/`). */
+  cacheDir?: string;
+  /** Force a full rebuild, ignoring any existing cache. */
+  noCache?: boolean;
+  /** When false, skip verifying previously-emitted outputs still exist (default: true). */
+  verifyOutputs?: boolean;
 }
 
 export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
@@ -90,16 +92,21 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
     cliParser.option('--remove-reserved-keyword-identifier', 'Remove reserved keyword identifier.');
     cliParser.option(
       '--incremental',
-      'Enable incremental compilation. Reuses tsc .tsbuildinfo across runs to skip unchanged files.'
+      'Enable incremental compilation. Reuses declgen cache + tsc .tsbuildinfo across runs to skip unchanged files.'
     );
-    cliParser.option('--ts-build-info-file <path>', 'Path to the .tsbuildinfo file used for incremental builds.');
+    cliParser.option('--cache-dir <path>', 'Cache directory (default: <outDir>/.declgen-cache).');
+    cliParser.option('--no-cache', 'Disable cache use for this run (equivalent to DECLGEN_NO_CACHE=1).');
+    cliParser.option(
+      '--no-verify-outputs',
+      'Skip verifying previously-emitted .d.ets files still exist on disk. Speeds up startup at the cost of not detecting externally deleted/modified outputs.'
+    );
 
     return cliParser;
   }
 
   doOptions(opts: OptionValues): DeclgenCLIOptions {
     void this;
-    return {
+    const options = {
       outDir: opts.out,
       inputFiles: opts.file,
       tsconfig: opts.project,
@@ -108,8 +115,13 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       enableInteropTypesFix: opts.interopTypes,
       removeReservedKeywordIdentifier: opts.removeReservedKeywordIdentifier,
       incremental: opts.incremental,
-      tsBuildInfoFile: opts.tsBuildInfoFile
+      cacheDir: opts.cacheDir,
+      // commander's `--no-cache` flips `opts.cache` to false; map back.
+      noCache: opts.cache === false,
+      // commander's `--no-verify-outputs` flips `opts.verifyOutputs` to false.
+      verifyOutputs: opts.verifyOutputs !== false
     };
+    return options;
   }
 
   doValidate(opts: DeclgenCLIOptions): Error | undefined {

@@ -14,14 +14,34 @@
  */
 
 import * as ts from 'typescript';
+import { performance } from 'perf_hooks';
 import { TraverserConstructor } from './Traverser';
 import { Compiler } from '../compiler/Compiler';
-import { resolvePath } from '../compiler/VirtualFileHost';
+import { normalizePath } from '../compiler/VirtualFileHost';
 import { TransformationDiagnostic } from './TransformationDiagnostic';
+import type { CacheSession } from '../cache/CacheStore';
 
 export interface TransformTargetInfo {
   fileName: string;
   affected: boolean;
+  /**
+   * When true, `AffectedAnalysisStage` must NOT narrow this file out of the
+   * affected set. Set when the file is affected for a reason that requires
+   * the full pipeline to re-run end-to-end even though the per-stage output
+   * hash would otherwise match the previous run — currently: the user-visible
+   * `.d.ets` artifact was deleted/modified, so the file must traverse every
+   * transformation stage so the final printed text is well-formed.
+   */
+  forceFullPipeline?: boolean;
+}
+
+export interface StageTiming {
+  /** Stage class name. */
+  name: string;
+  /** Full path through the stage stack, e.g. `Outer/Inner`. */
+  path: string;
+  /** Wall-clock duration in milliseconds. */
+  durationMs: number;
 }
 
 export class StageStack {
@@ -51,27 +71,51 @@ export interface StageContext<S = unknown> {
   prevState: S;
   diagnostics: TransformationDiagnostic[];
   transformTargetInfos: Map<string, TransformTargetInfo>;
+  stageTimings: StageTiming[];
+  /**
+   * Cache session for the current run, present only when the cache is enabled.
+   * CacheLoad/Save stages, AffectedAnalysisStage and InitialAffectedAnalysisStage
+   * all access it through here.
+   */
+  cacheSession?: CacheSession;
+  /**
+   * Reverse-import graph (`dependency → importers`) over the root files.
+   * Populated by `InitialAffectedAnalysisStage` and reused by every
+   * `AffectedAnalysisStage` to expand a per-stage "actually changed" set
+   * into its cross-file closure. Absent on the no-cache / first-run path.
+   */
+  reverseImporters?: Map<string, Set<string>>;
 }
 
-export function buildInitialStageContext(
-  compiler: Compiler,
-  transformTargets?: readonly string[]
-): StageContext<undefined> {
-  const transformedFiles = transformTargets
-    ? transformTargets.map((file) => resolvePath(file))
-    : compiler.rootFileNames;
+/**
+ * Convenience helpers to view / mutate the set of affected root files via the
+ * existing `transformTargetInfos` map without duplicating state.
+ */
+export function getAffectedSet(ctx: StageContext<unknown>): Set<string> {
+  const set = new Set<string>();
+  ctx.transformTargetInfos.forEach((info) => {
+    if (info.affected) {
+      set.add(info.fileName);
+    }
+  });
+  return set;
+}
 
-  const transformTargetInfos = new Map<string, TransformTargetInfo>();
-  for (const file of transformedFiles) {
-    transformTargetInfos.set(file, { fileName: file, affected: true });
+export function setAffected(ctx: StageContext<unknown>, fileName: string, affected: boolean): void {
+  const info = ctx.transformTargetInfos.get(fileName);
+  if (info) {
+    info.affected = affected;
   }
+}
 
+export function buildInitialStageContext(compiler: Compiler): StageContext<undefined> {
   return {
     compiler,
     stageStack: new StageStack(),
     prevState: undefined,
     diagnostics: [],
-    transformTargetInfos
+    transformTargetInfos: new Map<string, TransformTargetInfo>(),
+    stageTimings: []
   };
 }
 
@@ -80,6 +124,14 @@ export function buildInitialStageContext(
  */
 export interface IStage<I = unknown, Q = unknown> {
   get name(): string;
+  /**
+   * Per-stage cache version. Combined into Pipeline's globalKey so changing
+   * a stage's behaviour can selectively invalidate cached artefacts without
+   * forcing a full wipe (the auto-generated DECLGEN_IMPL_HASH already covers
+   * unbumped code changes, this is only used for explicit, finer-grained
+   * invalidation by Step 5 / 6 stages).
+   */
+  readonly cacheVersion?: string;
   run(stageContext: StageContext<I>): StageContext<Q>;
 }
 
@@ -89,6 +141,8 @@ export interface StageOptions {}
 
 export abstract class Stage<I = unknown, Q = unknown> implements IStage<I, Q> {
   options: StageOptions;
+  /** Override in subclasses to bump the per-stage cache signature. */
+  readonly cacheVersion: string = '1';
   constructor(options?: StageOptions) {
     this.options = options || {};
   }
@@ -101,8 +155,19 @@ export abstract class Stage<I = unknown, Q = unknown> implements IStage<I, Q> {
 
   run(stageContext: StageContext<I>): StageContext<Q> {
     stageContext.stageStack.push(this.name);
-    const next = this.execute(stageContext);
-    stageContext.stageStack.pop();
+    const start = performance.now();
+    let next: StageContext<Q>;
+    try {
+      next = this.execute(stageContext);
+    } finally {
+      const durationMs = performance.now() - start;
+      stageContext.stageTimings.push({
+        name: this.name,
+        path: stageContext.stageStack.toArray().join('/'),
+        durationMs
+      });
+      stageContext.stageStack.pop();
+    }
     return next;
   }
 }
@@ -119,50 +184,65 @@ export abstract class TransformationStage<I, Q, S> extends Stage<I, Q> {
 
   execute(stageContext: StageContext<I>): StageContext<Q> {
     const compiler = stageContext.compiler;
-    const program = stageContext.compiler.program;
+    const program = compiler.program;
+    const sourceFiles = this.collectAffectedSourceFiles(stageContext, compiler);
+    const uniqueStateMap = new Map<string, S>();
+    const visitors = this.buildVisitors(uniqueStateMap, program, stageContext);
+    const result = ts.transform(sourceFiles, visitors, program.getCompilerOptions());
+    if (!this.readonly) {
+      this.applyTransformResults(result.transformed, compiler);
+    }
+    return { ...stageContext, prevState: this.traverserReturnStateFactory(stageContext, uniqueStateMap) };
+  }
+
+  private collectAffectedSourceFiles(stageContext: StageContext<I>, compiler: Compiler): ts.SourceFile[] {
     const sourceFiles: ts.SourceFile[] = [];
     stageContext.transformTargetInfos.forEach((info) => {
       if (info.affected) {
-        const sourceFile = compiler.getSourceFile(info.fileName);
-        if (sourceFile) {
-          sourceFiles.push(sourceFile);
+        const sf = compiler.getSourceFile(info.fileName);
+        if (sf) {
+          sourceFiles.push(sf);
         }
       }
     });
+    return sourceFiles;
+  }
 
-    const uniqueStateMap = new Map<string, S>();
+  private buildVisitors(
+    uniqueStateMap: Map<string, S>,
+    program: ts.Program,
+    stageContext: StageContext<I>
+  ): ts.TransformerFactory<ts.SourceFile>[] {
+    return this.traversers.map((traverser) => (context: ts.TransformationContext) =>
+      this.makeTransformer(traverser, context, program, stageContext, uniqueStateMap)
+    );
+  }
 
-    const visiters = this.traversers.map((traverser) => {
-      return (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
-        return (sourceFile: ts.SourceFile): ts.SourceFile => {
-          if (!uniqueStateMap.has(sourceFile.fileName)) {
-            uniqueStateMap.set(sourceFile.fileName, this.traverserStateFactory());
-          }
-
-          const traverserInstance = new traverser(context, program.getTypeChecker(), {
-            stageContext,
-            localState: uniqueStateMap.get(sourceFile.fileName)!
-          });
-          return traverserInstance.traverse(sourceFile) as ts.SourceFile;
-        };
-      };
-    });
-
-    const result = ts.transform(sourceFiles, visiters, program.getCompilerOptions());
-    if (!this.readonly) {
-      result.transformed.forEach((sourceFile) => {
-        if (ts.isSourceFile(sourceFile)) {
-          compiler.updateFile(sourceFile.fileName, sourceFile);
-        }
+  private makeTransformer(
+    traverser: TraverserConstructor<I, S>,
+    context: ts.TransformationContext,
+    program: ts.Program,
+    stageContext: StageContext<I>,
+    uniqueStateMap: Map<string, S>
+  ): ts.Transformer<ts.SourceFile> {
+    return (sourceFile: ts.SourceFile): ts.SourceFile => {
+      if (!uniqueStateMap.has(sourceFile.fileName)) {
+        uniqueStateMap.set(sourceFile.fileName, this.traverserStateFactory());
+      }
+      const traverserInstance = new traverser(context, program.getTypeChecker(), {
+        stageContext,
+        localState: uniqueStateMap.get(sourceFile.fileName)!
       });
-    }
-
-    const nextContext: StageContext<Q> = {
-      ...stageContext,
-      prevState: this.traverserReturnStateFactory(stageContext, uniqueStateMap)
+      return traverserInstance.traverse(sourceFile) as ts.SourceFile;
     };
+  }
 
-    return nextContext;
+  private applyTransformResults(transformed: ts.Node[], compiler: Compiler): void {
+    for (const sourceFile of transformed) {
+      if (ts.isSourceFile(sourceFile)) {
+        compiler.updateFile(sourceFile.fileName, sourceFile);
+      }
+    }
   }
 }
 
@@ -201,14 +281,21 @@ export class StageList<Stages extends readonly IStage<unknown, unknown>[]>
 
   run(stageContext: StageContext<StageInput<Stages>>): StageContext<StageOutput<Stages>> {
     stageContext.stageStack.push(this.name);
+    const start = performance.now();
     let currentContext: StageContext<unknown> = stageContext;
-
-    for (const stage of this.stages) {
-      currentContext = stage.run(currentContext);
+    try {
+      for (const stage of this.stages) {
+        currentContext = stage.run(currentContext);
+      }
+    } finally {
+      const durationMs = performance.now() - start;
+      stageContext.stageTimings.push({
+        name: this.name,
+        path: stageContext.stageStack.toArray().join('/'),
+        durationMs
+      });
+      stageContext.stageStack.pop();
     }
-
-    const next = currentContext as StageContext<StageOutput<Stages>>;
-    stageContext.stageStack.pop();
-    return next;
+    return currentContext as StageContext<StageOutput<Stages>>;
   }
 }

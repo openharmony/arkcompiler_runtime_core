@@ -19,7 +19,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as ts from 'typescript';
 import { describe, it } from 'mocha';
-import { VirtualFileHost } from '../../src/compiler/VirtualFileHost';
+import { VirtualFileHost, normalizePath, INTERNAL_PREFIX } from '../../src/compiler/VirtualFileHost';
 
 function createVirtualHost(): VirtualFileHost {
   return new VirtualFileHost({
@@ -105,5 +105,41 @@ describe('VirtualFileHost', () => {
     const virtualHost = createVirtualHost();
     const input = 'hash-input';
     assert.strictEqual(virtualHost.createHash(input), ts.sys.createHash!(input));
+  });
+});
+
+describe('normalizePath', () => {
+  it('should return an absolute path with forward slashes only', () => {
+    const resolved = normalizePath('foo/bar/baz.ts');
+    assert.strictEqual(resolved.includes('\\'), false, `normalizePath returned a backslash: ${resolved}`);
+    assert.strictEqual(path.isAbsolute(resolved), true);
+  });
+
+  it('should normalize Windows-style backslashes to forward slashes', () => {
+    // Use posix.resolve to construct a deterministic absolute path, then convert
+    // separators so the input mimics what path.resolve would produce on Windows.
+    const posixAbs = path.posix.resolve('/some/project/src/foo.ts');
+    const winStyle = posixAbs.replace(/\//g, '\\');
+    // Round-trip through normalizePath: even if the OS-native path.resolve
+    // returns backslashes, normalizePath must surface forward slashes.
+    const resolved = normalizePath(winStyle);
+    assert.strictEqual(resolved.includes('\\'), false, `normalizePath returned a backslash: ${resolved}`);
+  });
+
+  it('should produce keys consistent with TypeScript SourceFile.fileName on the same input', () => {
+    // ts.createSourceFile stores fileName as-is, but when TypeScript emits a
+    // path it always uses forward slashes (see ts.normalizePath). Our
+    // normalizePath must produce the same forward-slash representation so that
+    // Map/Set lookups keyed by normalizePath(...) match SourceFile.fileName.
+    const input = 'src/foo.ts';
+    const resolved = normalizePath(input);
+    const sf = ts.createSourceFile(resolved, '', ts.ScriptTarget.ES2021);
+    assert.strictEqual(sf.fileName, resolved);
+    assert.strictEqual(sf.fileName.includes('\\'), false);
+  });
+
+  it('should leave INTERNAL_PREFIX paths unchanged', () => {
+    const internal = `${INTERNAL_PREFIX}/lib.foo.d.ts`;
+    assert.strictEqual(normalizePath(internal), internal);
   });
 });

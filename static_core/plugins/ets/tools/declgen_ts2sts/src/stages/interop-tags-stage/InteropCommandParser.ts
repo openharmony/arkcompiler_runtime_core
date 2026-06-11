@@ -90,7 +90,10 @@ const paramSpec: SubcommandSpec = {
     if (tokens.length < 3) {
       return { ok: false, diagnostics: [DiagnosticMessages.interopTagMissingTargetType('param')] };
     }
-    return { ok: true, command: { type: 'interop', subcommand: 'param', index, targetType: tokens.slice(2).join(' ') } };
+    return {
+      ok: true,
+      command: { type: 'interop', subcommand: 'param', index, targetType: tokens.slice(2).join(' ') }
+    };
   }
 };
 
@@ -188,7 +191,12 @@ export const COMMAND_ALLOWED_KINDS: Record<CommandKey, readonly ts.SyntaxKind[]>
   ],
   'any': [ts.SyntaxKind.ClassDeclaration, ts.SyntaxKind.InterfaceDeclaration, ts.SyntaxKind.EnumDeclaration],
   'ret': [ts.SyntaxKind.MethodDeclaration, ts.SyntaxKind.MethodSignature, ts.SyntaxKind.FunctionDeclaration],
-  'param': [ts.SyntaxKind.MethodDeclaration, ts.SyntaxKind.MethodSignature, ts.SyntaxKind.Constructor, ts.SyntaxKind.FunctionDeclaration],
+  'param': [
+    ts.SyntaxKind.MethodDeclaration,
+    ts.SyntaxKind.MethodSignature,
+    ts.SyntaxKind.Constructor,
+    ts.SyntaxKind.FunctionDeclaration
+  ],
   'break-extends': [ts.SyntaxKind.ClassDeclaration, ts.SyntaxKind.InterfaceDeclaration],
   'break-implements': [ts.SyntaxKind.ClassDeclaration]
 };

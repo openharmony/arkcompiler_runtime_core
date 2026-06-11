@@ -21,7 +21,7 @@ ROOT_DIR="${1:-$(pwd)}"
 
 # Clone the repository and checkout the current Git branch
 TYPESCRIPT_REPO="https://gitcode.com/openharmony/third_party_typescript.git"  # Replace with your correct Typescript repository URL
-CURRENT_BRANCH="master"
+CURRENT_BRANCH="master" # fetch from master
 
 # Define the third_party directory
 THIRD_PARTY_DIR="$ROOT_DIR/third_party"

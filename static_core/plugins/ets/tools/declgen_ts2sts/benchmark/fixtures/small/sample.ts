@@ -13,9 +13,24 @@
  * limitations under the License.
  */
 
-export { generateInteropDecls } from './generateInteropDecls';
-export * as stages from './stages';
-export * from './Declgen';
-export * as logger from './logger';
-export * from './plugin/Plugin';
-export { sha256 as hash } from './cache/Hash';
+// Sample small fixture used by benchmark/scenarios/declgen.bench.ts.
+// Keep this file small and self-contained.
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export class Shape<T extends Point> {
+  constructor(public readonly origin: T) {}
+
+  translate(dx: number, dy: number): Shape<T> {
+    return new Shape({ ...this.origin, x: this.origin.x + dx, y: this.origin.y + dy });
+  }
+}
+
+export function distance(a: Point, b: Point): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}

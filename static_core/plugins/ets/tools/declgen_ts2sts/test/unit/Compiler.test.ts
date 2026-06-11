@@ -178,5 +178,83 @@ describe('Compiler', function () {
 
 		fs.rmSync(tempDir, { recursive: true, force: true });
 	});
+
+	describe('emit onEmitted hook', () => {
+		it('invokes onEmitted with the default-writer path and final content', () => {
+			const tempDir = createTempDir('compiler-emit-default-');
+			const entryFile = path.join(tempDir, 'entry.ts');
+			const outDir = path.join(tempDir, 'out');
+
+			writeFile(entryFile, 'export const value: number = 1;');
+
+			const compiler = new Compiler([entryFile], [], createCompilerOptions(outDir));
+			compiler.compile();
+
+			const calls: Array<{ absSrc: string; path: string; finalContent: string }> = [];
+			compiler.emit(undefined, (absSrc, info) => {
+				calls.push({ absSrc, ...info });
+			});
+
+			assert.strictEqual(calls.length, 1);
+			assert.strictEqual(calls[0].absSrc, entryFile);
+			assert.ok(calls[0].path.startsWith(outDir));
+			assert.strictEqual(fs.existsSync(calls[0].path), true);
+			assert.strictEqual(fs.readFileSync(calls[0].path, 'utf8'), calls[0].finalContent);
+
+			fs.rmSync(tempDir, { recursive: true, force: true });
+		});
+
+		it('skips onEmitted when a custom writeFile returns void', () => {
+			const tempDir = createTempDir('compiler-emit-custom-void-');
+			const entryFile = path.join(tempDir, 'entry.ts');
+			const outDir = path.join(tempDir, 'out');
+
+			writeFile(entryFile, 'export const value: number = 1;');
+
+			const compiler = new Compiler([entryFile], [], createCompilerOptions(outDir));
+			compiler.compile();
+
+			let onEmittedCalls = 0;
+			compiler.emit(
+				() => {
+					return;
+				},
+				() => {
+					onEmittedCalls++;
+				}
+			);
+
+			assert.strictEqual(onEmittedCalls, 0);
+			fs.rmSync(tempDir, { recursive: true, force: true });
+		});
+
+		it('invokes onEmitted when a custom writeFile opts in via { artifactPath, finalContent }', () => {
+			const tempDir = createTempDir('compiler-emit-custom-optin-');
+			const entryFile = path.join(tempDir, 'entry.ts');
+			const outDir = path.join(tempDir, 'out');
+
+			writeFile(entryFile, 'export const value: number = 1;');
+
+			const compiler = new Compiler([entryFile], [], createCompilerOptions(outDir));
+			compiler.compile();
+
+			const calls: Array<{ absSrc: string; path: string; finalContent: string }> = [];
+			compiler.emit(
+				() => {
+					return { artifactPath: '/virtual/foo.d.ets', finalContent: '<<final>>' };
+				},
+				(absSrc, info) => {
+					calls.push({ absSrc, ...info });
+				}
+			);
+
+			assert.strictEqual(calls.length, 1);
+			assert.strictEqual(calls[0].absSrc, entryFile);
+			assert.strictEqual(calls[0].path, '/virtual/foo.d.ets');
+			assert.strictEqual(calls[0].finalContent, '<<final>>');
+
+			fs.rmSync(tempDir, { recursive: true, force: true });
+		});
+	});
 });
 

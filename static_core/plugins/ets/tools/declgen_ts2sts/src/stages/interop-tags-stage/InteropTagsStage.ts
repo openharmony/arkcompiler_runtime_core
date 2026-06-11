@@ -17,7 +17,13 @@ import * as ts from 'typescript';
 import { FaultID } from '../utils/FaultId';
 import { StageOptions, TransformationStage } from '../Stage';
 import { VisitorTraverser, DepthFirstAlgorithm, TraverserState } from '../Traverser';
-import { InteropCommand, InteropTokens, parseInteropCommand, validateCommandForNode, COMMAND_ALLOWED_KINDS } from './InteropCommandParser';
+import {
+  InteropCommand,
+  InteropTokens,
+  parseInteropCommand,
+  validateCommandForNode,
+  COMMAND_ALLOWED_KINDS
+} from './InteropCommandParser';
 import { TransformationDiagnostic } from '../TransformationDiagnostic';
 import { DiagnosticMessages } from '../TransformationDiagnosticMessages';
 import * as typeUtils from '../utils/TypeUtils';
@@ -48,7 +54,7 @@ class InteropTagsTraverser extends VisitorTraverser<PrevState, LocalState> {
   }
 
   protected buildVisitors(): Map<ts.SyntaxKind, ts.Visitor[]> {
-    const interopTagsVisitor = [ this[FaultID.InteropTags].bind(this) ];
+    const interopTagsVisitor = [this[FaultID.InteropTags].bind(this)];
     const allKinds: Set<ts.SyntaxKind> = new Set();
     Object.entries(COMMAND_ALLOWED_KINDS).forEach(([, allowedKinds]) => {
       for (const kind of allowedKinds) {
@@ -144,11 +150,25 @@ class InteropTagsTraverser extends VisitorTraverser<PrevState, LocalState> {
   private handleBreakExtends(node: ts.Node): ts.VisitResult<ts.Node> {
     if (ts.isClassDeclaration(node)) {
       const clauses = node.heritageClauses?.filter((c) => c.token !== ts.SyntaxKind.ExtendsKeyword);
-      return this.context.factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, clauses, node.members);
+      return this.context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        clauses,
+        node.members
+      );
     }
     if (ts.isInterfaceDeclaration(node)) {
       const clauses = node.heritageClauses?.filter((c) => c.token !== ts.SyntaxKind.ExtendsKeyword);
-      return this.context.factory.updateInterfaceDeclaration(node, node.modifiers, node.name, node.typeParameters, clauses, node.members);
+      return this.context.factory.updateInterfaceDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        clauses,
+        node.members
+      );
     }
     return node;
   }
@@ -157,7 +177,14 @@ class InteropTagsTraverser extends VisitorTraverser<PrevState, LocalState> {
   private handleBreakImplements(node: ts.Node): ts.VisitResult<ts.Node> {
     if (ts.isClassDeclaration(node)) {
       const clauses = node.heritageClauses?.filter((c) => c.token !== ts.SyntaxKind.ImplementsKeyword);
-      return this.context.factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, clauses, node.members);
+      return this.context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        clauses,
+        node.members
+      );
     }
     return node;
   }
@@ -252,12 +279,7 @@ class InteropTagsTraverser extends VisitorTraverser<PrevState, LocalState> {
       );
     }
     if (ts.isConstructorDeclaration(node)) {
-      return this.context.factory.updateConstructorDeclaration(
-        node,
-        node.modifiers,
-        newParameters,
-        node.body
-      );
+      return this.context.factory.updateConstructorDeclaration(node, node.modifiers, newParameters, node.body);
     }
     if (ts.isMethodDeclaration(node)) {
       return this.context.factory.updateMethodDeclaration(
@@ -303,10 +325,7 @@ class InteropTagsTraverser extends VisitorTraverser<PrevState, LocalState> {
     return ts.factory.createNodeArray(arr);
   }
 
-  private reportDiagnostics(
-    partials: Array<Omit<TransformationDiagnostic, 'range' | 'stage'>>,
-    node: ts.Node
-  ): void {
+  private reportDiagnostics(partials: Array<Omit<TransformationDiagnostic, 'range' | 'stage'>>, node: ts.Node): void {
     const sourceFile = node.getSourceFile();
     const range = sourceFile
       ? { fileName: sourceFile.fileName, start: node.getStart(sourceFile), length: node.getWidth(sourceFile) }

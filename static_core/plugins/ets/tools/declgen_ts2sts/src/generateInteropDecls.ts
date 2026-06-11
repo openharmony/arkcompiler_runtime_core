@@ -16,9 +16,10 @@
 import * as ts from 'typescript';
 import { Logger } from './logger/Logger';
 import { logMessages, SilentLogger } from './logger/SilentLogger';
-import { DeclgenCLIOptions } from './cli/DeclgenCLI';
-import { Declgen } from './Declgen';
+import { Declgen, DeclgenOptions } from './Declgen';
 import { ModuleNameResolver } from './compiler/Compiler';
+import { getSourceFilesFromDir } from './compiler/Compiler';
+
 export interface RunnerParms {
   inputFiles: string[];
   inputDirs: string[];
@@ -26,23 +27,44 @@ export interface RunnerParms {
   rootDir?: string;
   customResolveModuleNames?: ModuleNameResolver;
   customCompilerOptions?: ts.CompilerOptions;
-  includePaths?: string[];
-  uiInteropTransformer?: Function;
 }
 
 export function generateInteropDecls(config: RunnerParms): string[] {
   Logger.init(new SilentLogger());
 
-  const tsConfig: DeclgenCLIOptions = {
+  const intputFiles = collectInputFiles(config);
+
+  const tsConfig: DeclgenOptions = {
     outDir: config.outDir,
-    inputFiles: config.inputFiles,
-    inputDirs: config.inputDirs,
+    inputFiles: intputFiles,
     rootDir: config.rootDir,
-    tsconfig: undefined,
-    includePaths: config.includePaths
+    features: {
+      enableInteropTypesFix: true,
+      removeReservedKeywordIdentifier: true
+    }
   };
   const declgen = new Declgen(tsConfig, config.customCompilerOptions, config.customResolveModuleNames);
-  declgen.run();
-  declgen.emit();
+  declgen.run().emit();
   return logMessages;
+}
+
+function collectInputFiles(opts: RunnerParms): string[] {
+  const inputFiles = [] as string[];
+
+  if (opts.inputFiles) {
+    inputFiles.push(...opts.inputFiles);
+  }
+
+  if (opts.inputDirs) {
+    for (const dir of opts.inputDirs) {
+      try {
+        inputFiles.push(...getSourceFilesFromDir(dir));
+      } catch (error) {
+        Logger.error('Failed to read folder: ' + error);
+        process.exit(-1);
+      }
+    }
+  }
+
+  return inputFiles;
 }

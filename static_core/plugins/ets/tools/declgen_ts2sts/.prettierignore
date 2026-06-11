@@ -22,3 +22,5 @@
 /test/**
 **.json
 **.js
+/benchmark/fixtures/external
+/eslint.config.mjs
