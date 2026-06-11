@@ -765,6 +765,28 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathLogFloat
     safe_intrinsic: true
 
+  - name: StdMathLog1p
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: log1p
+    static: true
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdMathLog1p
+    safe_intrinsic: true
+
+  - name: StdMathLog1pFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: log1p
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathLog1pFloat
+    safe_intrinsic: true
+
   - name: StdMathRem
     space: ets
     class_name: std.math.ETSGLOBAL
