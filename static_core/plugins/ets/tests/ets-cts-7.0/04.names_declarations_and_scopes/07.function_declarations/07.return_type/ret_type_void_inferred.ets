@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,8 @@
 {% for fd in function_decls %}
 /*---
 desc: >-
-  An omitted function or method return type can be inferred from the function or the method body.
-tags: [compile-only, negative]
-expected_out: "{{fd.expected_out}}"
+  Function/method/lambda with inferred return type void can have empty body or no return statement.
+  It returns 'undefined' value.
 ---*/
 
 {{fd.decl}}

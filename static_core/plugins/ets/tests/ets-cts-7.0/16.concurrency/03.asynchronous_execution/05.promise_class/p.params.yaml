@@ -205,6 +205,7 @@ cases:
           ).catch(
               (p: Error): void => {}
           );
+
     - decl: |-
           const neverPromise: Promise<never> = new Promise<never>( (): void => {} )
       use: "//stub"
