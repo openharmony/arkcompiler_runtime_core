@@ -134,6 +134,17 @@ TEST_F(FixedArrayNewRefTest, wrong_initial_element_type)
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_Ref", testLines);
 }
 
+TEST_F(FixedArrayNewRefTest, zero_length_null_initial_element)
+{
+    ani_class arrayType {};
+    GetObjectClass(env_, &arrayType);
+
+    ani_fixedarray_ref result {};
+    ASSERT_EQ(env_->FixedArray_New_Ref(arrayType, 0U, nullptr, &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+    ASSERT_NO_ABORT_MESSAGE();
+}
+
 TEST_F(FixedArrayNewRefTest, throw_error)
 {
     ani_class arrayType {};

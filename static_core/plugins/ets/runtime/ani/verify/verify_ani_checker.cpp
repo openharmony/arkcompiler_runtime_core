@@ -900,6 +900,9 @@ public:
         if (options == nullptr) {
             return {};
         }
+        if (options->nr_options == 0) {
+            return {};
+        }
         if (options->options == nullptr) {
             return {"wrong 'options' pointer, options->options == NULL", ANIErrorSeverity::FATAL};
         }
