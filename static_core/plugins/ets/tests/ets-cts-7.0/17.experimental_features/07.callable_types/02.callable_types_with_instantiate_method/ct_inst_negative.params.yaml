@@ -79,12 +79,12 @@ cases:
     - decl: |-
           //generic
           class C<T> {
-              static $_instantiate<T>(f: () => C<T>): C<T> {
+              static $_instantiate(f: () => C<T>): C<T> {
                   return new C<T>(f)
               }
               constructor (f: () => C<T>) {}
               constructor () {}
           }
       use: |-
-          let y = C.$_instantiate<int>(() => { return new C<int>()})
+          let y = C.$_instantiate(() => { return new C<int>()})
           arktest.assertTrue(y instanceof C)

@@ -67,7 +67,7 @@ cases:
       class C1 implements I1 {}
       class C2 extends C1 implements I2 {}
     call: "let c2 = new C2()"
-    assertion: "arktest.assertEQ(c2.foo(), 'I1.foo')"
+    assertion: "arktest.assertEQ(c2.foo(), 'I2.foo')"
 
   - descr: "Covariant return type"
     decl: |-

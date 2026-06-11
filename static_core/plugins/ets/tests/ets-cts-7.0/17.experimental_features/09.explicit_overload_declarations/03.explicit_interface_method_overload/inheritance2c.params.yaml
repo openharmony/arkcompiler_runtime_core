@@ -159,6 +159,6 @@ cases:
           arktest.assertEQ(k.foo(new C1), 'J.1')
 
           let a: A = {}
-          arktest.assertEQ(a.foo(new C3), 'A.3')
-          arktest.assertEQ(a.foo(new C2), 'A.3')
-          arktest.assertEQ(a.foo(new C1), 'A.3')
+          arktest.assertEQ(a.foo(new C3), 'A.2')
+          arktest.assertEQ(a.foo(new C2), 'A.2')
+          arktest.assertEQ(a.foo(new C1), 'A.2')

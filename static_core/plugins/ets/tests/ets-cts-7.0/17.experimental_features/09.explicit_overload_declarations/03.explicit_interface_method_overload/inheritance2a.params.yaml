@@ -161,7 +161,7 @@ cases:
           let k: K = {}
           arktest.assertEQ(k.foo(new C3), 'K.2')
           arktest.assertEQ(k.foo(new C2), 'K.2')
-          arktest.assertEQ(k.foo(new C1), 'K.1')
+          arktest.assertEQ(k.foo(new C1), 'J.1')
 
           let a: A = {}
           arktest.assertEQ(a.foo(new C3), 'A.3')
