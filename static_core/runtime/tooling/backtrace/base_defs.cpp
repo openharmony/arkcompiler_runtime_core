@@ -15,13 +15,114 @@
 
 #include "runtime/tooling/backtrace/base_defs.h"
 
+#include <string>
+#include <string_view>
+
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/class_data_accessor.h"
 #include "libarkfile/code_data_accessor.h"
 #include "libarkfile/debug_helpers.h"
 #include "runtime/include/class.h"
-#include "runtime/include/class_helper.h"
 
 namespace ark::tooling {
+
+namespace {
+
+class BacktraceDescriptorParser final {
+public:
+    explicit BacktraceDescriptorParser(std::string_view inputStr) : name_(inputStr) {}
+
+    NO_COPY_SEMANTIC(BacktraceDescriptorParser);
+    NO_MOVE_SEMANTIC(BacktraceDescriptorParser);
+
+    ~BacktraceDescriptorParser() = default;
+
+    std::string Parse() &&
+    {
+        result_.reserve(name_.size());
+        ParseFixedArray();
+        return result_;
+    }
+
+private:
+    void ParseRef()
+    {
+        while (pos_ < name_.size() && name_[pos_] != ';') {
+            char curSym = name_[pos_];
+            result_.push_back((curSym != '/') ? curSym : '.');
+            pos_++;
+        }
+        if (pos_ < name_.size()) {
+            pos_++;
+        }
+    }
+
+    void ParseUnion()
+    {
+        result_.append("{U");
+        while (pos_ < name_.size() && name_[pos_] != '}') {
+            ParseFixedArray();
+            if (pos_ < name_.size() && name_[pos_] != '}') {
+                result_.push_back(',');
+            }
+        }
+        if (pos_ < name_.size()) {
+            pos_++;
+        }
+        result_.push_back('}');
+    }
+
+    void ParseFixedArray()
+    {
+        const size_t i = name_.find_first_not_of('[', pos_);
+        const size_t rank = (i != std::string_view::npos) ? i - pos_ : name_.size() - pos_;
+        pos_ = (i != std::string_view::npos) ? i : name_.size();
+
+        if (pos_ >= name_.size()) {
+            return;
+        }
+
+        const char typeChar = name_[pos_];
+        if (typeChar == 'L') {
+            pos_++;
+            ParseRef();
+        } else if (typeChar == '{') {
+            pos_++;
+            if (pos_ < name_.size() && name_[pos_] == 'U') {
+                pos_++;
+            }
+            ParseUnion();
+        } else {
+            auto it = PRIMITIVE_RUNTIME_NAMES.find(typeChar);
+            if (it != PRIMITIVE_RUNTIME_NAMES.end()) {
+                result_.append(it->second);
+            }
+            pos_++;
+        }
+
+        for (size_t k = 0; k < rank; ++k) {
+            result_.append("[]");
+        }
+    }
+
+    static inline const std::unordered_map<char, std::string> PRIMITIVE_RUNTIME_NAMES = {
+        {'V', "void"}, {'Z', "u1"},  {'B', "i8"},  {'H', "u8"},     {'S', "i16"}, {'C', "u16"},
+        {'I', "i32"},  {'U', "u32"}, {'J', "i64"}, {'Q', "u64"},    {'F', "f32"}, {'D', "f64"},
+        {'A', "any"},  {'Y', "Y"},   {'N', "N"},   {'X', "novalue"},
+    };
+
+    std::string result_;
+    std::string_view name_;
+    size_t pos_ {0};
+};
+
+}  // namespace
+
+static std::string GetNameFromDescriptor(const uint8_t *descriptor)
+{
+    BacktraceDescriptorParser parser(utf::Mutf8AsCString(descriptor));
+    return std::move(parser).Parse();
+}
 
 std::optional<MethodInfo> ReadMethodInfo(panda_file::MethodDataAccessor &mda)
 {
@@ -83,7 +184,7 @@ bool SymbolizeByNativeFrameImpl(uintptr_t pc, uintptr_t mapBase, uintptr_t loadO
             panda_file::ClassDataAccessor cda(*file, mda.GetClassId());
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             int size = snprintf_s(function->functionName, FUNCTIONNAME_MAX, FUNCTIONNAME_MAX - 1, "%s.%s",
-                                  ClassHelper::GetName(cda.GetDescriptor()).c_str(), mda.GetName().data);
+                                  GetNameFromDescriptor(cda.GetDescriptor()).c_str(), mda.GetName().data);
             if (size < 0) {
                 LOG(ERROR, RUNTIME) << "copy funtionname failed!";
             }
