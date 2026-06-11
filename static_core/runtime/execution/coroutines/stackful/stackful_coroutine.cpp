@@ -170,17 +170,11 @@ bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
 
 void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 {
-#if defined(ARK_USE_COMMON_RUNTIME)
-    GetCoroutine()->UnbindMutator();
-#endif  // ARK_USE_COMMON_RUNTIME
     SetStatus(getsBlocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
 }
 
 void StackfulCoroutineContext::RequestResume()
 {
-#if defined(ARK_USE_COMMON_RUNTIME)
-    GetCoroutine()->BindMutator();
-#endif  // ARK_USE_COMMON_RUNTIME
     UpdateId(os::thread::GetCurrentThreadId(), GetCoroutine());
     SetStatus(Coroutine::Status::RUNNING);
 }

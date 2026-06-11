@@ -53,11 +53,9 @@ void MutatorManager::RegisterMutator(Mutator *mutator, const MutatorCallback &ca
     // We need to propagate SUSPEND_REQUEST under the mutatorsLock_.
     // It guarantees that the flag is already set for the current mutator and we need to propagate it
     // or GC will see the new mutator in ForEachMutator.
-#if !defined(ARK_USE_COMMON_RUNTIME)
     for (size_t i = suspendForNewMutatorsCounter_; i > 0U; --i) {
         mutator->SuspendImpl(true);
     }
-#endif  // !ARK_USE_COMMON_RUNTIME
     if (callback != nullptr) {
         callback(mutator);
     }

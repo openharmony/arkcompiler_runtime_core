@@ -213,6 +213,11 @@ public:
         return ReadFlag(RUNTIME_TERMINATION_REQUEST);
     }
 
+    ALWAYS_INLINE bool HasFinalizationRequest() const
+    {
+        return ReadFlag(SUSPEND_FOR_FINALIZE);
+    }
+
     ALWAYS_INLINE void SetRuntimeTerminated()
     {
         SetFlag(RUNTIME_TERMINATION_REQUEST);
@@ -247,11 +252,6 @@ public:
     PANDA_PUBLIC_API void WaitSuspension() NO_THREAD_SAFETY_ANALYSIS;
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    // CMC-GC specific transition: TestAllFlags + HandleSuspensionRequest
-    PANDA_PUBLIC_API void TransitCMCMutatorToRunning() NO_THREAD_SAFETY_ANALYSIS;
-#endif
-
-#if defined(ARK_USE_COMMON_RUNTIME)
     void VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor) override;
 #endif
 
@@ -260,12 +260,6 @@ public:
 #if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
     virtual void ResetSafepointTimer([[maybe_unused]] bool needRecord) {}
 #endif  // SAFEPOINT_TIME_CHECKER_ENABLED
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-    void BindMutator();
-
-    void UnbindMutator();
-#endif  // ARK_USE_COMMON_RUNTIME
 
 #if !defined(NDEBUG)
     MutatorLock::MutatorLockState GetLockState() const
@@ -289,6 +283,7 @@ public:
 private:
     // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
     void TransitionFromRunningToSuspended(enum MutatorStatus status) NO_THREAD_SAFETY_ANALYSIS;
+    void TransitionFromSuspendedToRunning();
 
     void InitCardTableData(mem::GCBarrierSet *barrier);
 
@@ -316,6 +311,11 @@ public:
     enum SafepointFlag : bool { DONT_CHECK_SAFEPOINT = false, CHECK_SAFEPOINT = true };
     enum ReadlockFlag : bool { NO_READLOCK = false, READLOCK = true };
 
+    bool CheckSafepoint(uint16_t flags)
+    {
+        return (flags & static_cast<uint16_t>(~SUSPEND_FOR_FINALIZE)) != initialMutatorFlag_;
+    }
+
     // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
     template <SafepointFlag SAFEPOINT = DONT_CHECK_SAFEPOINT, ReadlockFlag READLOCK_FLAG = NO_READLOCK>
     void StoreStatus(MutatorStatus status) NO_THREAD_SAFETY_ANALYSIS
@@ -330,7 +330,7 @@ public:
 
             // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
             if constexpr (SAFEPOINT == CHECK_SAFEPOINT) {  // NOLINT(bugprone-suspicious-semicolon)
-                if (oldFms.asStructNonvolatile.flags != initialMutatorFlag_) {
+                if (CheckSafepoint(oldFms.asStructNonvolatile.flags)) {
                     // someone requires a safepoint
                     SafepointPoll();
                     continue;

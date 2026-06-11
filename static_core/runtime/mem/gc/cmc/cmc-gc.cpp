@@ -22,7 +22,6 @@
 
 #include "common_components/log/log.h"
 #include "common_components/base/time_utils.h"
-#include "common_components/mutator/mutator_manager-inl.h"
 #include "common_components/heap/verification.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/ref_field.h"
@@ -33,6 +32,7 @@
 #include "common_components/heap/collector/utils.h"
 #include "common_interfaces/base/runtime_param.h"
 #include "common_components/heap/collector/collector_resources.h"
+#include "common_components/mutator/satb_buffer.h"
 
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/math_helpers.h"
@@ -53,7 +53,6 @@ using ark::common_vm::FixHeapWorker;
 using ark::common_vm::FlipFunction;
 using ark::common_vm::GCReason;
 using ark::common_vm::MB;
-using ark::common_vm::MutatorManager;
 using ark::common_vm::PostFixHeapWorker;
 using ark::common_vm::PriorityMode;
 using ark::common_vm::RegionalHeap;
@@ -473,8 +472,7 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
 {
     PandaVector<ark::common_vm::Mutator *> taskList;
-    auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.VisitAllMutators([&taskList](ark::common_vm::Mutator &mutator) { taskList.push_back(&mutator); });
+    ForEachManagedMutator([&taskList](Mutator *mutator) { taskList.push_back(mutator); });
     std::atomic<int> taskIter = 0;
     std::function<ark::common_vm::Mutator *()> getNextMutator = [&taskIter, &taskList]() {
         // Atomic with relaxed order reason: data race with taskIter with no synchronization or ordering constraints
@@ -559,10 +557,7 @@ void CmcGC<LanguageConfig>::PreforwardStaticWeakRoots()
 
     WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
     VisitWeakRoots(weakVisitor);
-    MutatorManager::Instance().VisitAllMutators([](ark::common_vm::Mutator &mutator) {
-        // Request finalize callback in each vm-thread when gc finished.
-        mutator.SetFinalizeRequest();
-    });
+    ForEachManagedMutator([](Mutator *mutator) { mutator->SetFlag(ark::SUSPEND_FOR_FINALIZE); });
 
     auto *allocBuffer = ark::common_vm::AllocationBuffer::GetAllocBuffer();
     if (LIKELY(allocBuffer != nullptr)) {
@@ -669,7 +664,7 @@ void CmcGC<LanguageConfig>::PostMarking()
     // clear satb buffer when gc finish tracing.
     SatbBuffer::Instance().ClearBuffer();
 
-    WVerify::VerifyAfterMark();
+    WVerify::VerifyAfterMark(true);
 }
 
 template <class LanguageConfig>
@@ -732,7 +727,10 @@ RefFieldVisitor CmcGC<LanguageConfig>::GetPrefowardRefFieldVisitor()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardFlip()
 {
-    auto remarkAndForwardGlobalRoot = [this]() {
+    {
+        STWParam stwParam {"final-mark"};
+        ScopedStopTheWorld stw(stwParam);
+
         OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
         ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
@@ -746,18 +744,18 @@ void CmcGC<LanguageConfig>::PreforwardFlip()
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::FOREGROUND);
 
         VisitWeakGlobalRoots(weakVisitor, Heap::GetHeap().GetGCReason() == ark::common_vm::GC_REASON_YOUNG);
-    };
-    FlipFunction forwardMutatorRoot = [this](ark::common_vm::Mutator &mutator) {
-        WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
-        mutator.VisitMutatorRoots(weakVisitor);
-        RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
-        VisitMutatorPreforwardRoot(visitor, mutator);
-        // Request finalize callback in each vm-thread when gc finished.
-        mutator.SetFinalizeRequest();
-    };
-    STWParam stwParam {"final-mark"};
-    MutatorManager::Instance().FlipMutators(stwParam, remarkAndForwardGlobalRoot, &forwardMutatorRoot);
-    GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
+
+        ForEachManagedMutator([this](Mutator *mutator) {
+            WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
+            mutator->VisitMutatorRoots(weakVisitor);
+            RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
+            VisitMutatorPreforwardRoot(visitor, *mutator);
+            // Request finalize callback in each vm-thread when gc finished.
+            mutator->SetFlag(ark::SUSPEND_FOR_FINALIZE);
+        });
+        GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
+    }
+
     AllocationBuffer *allocBuffer = AllocationBuffer::GetAllocBuffer();
     if (LIKELY(allocBuffer != nullptr)) {
         allocBuffer->ClearRegions();
@@ -786,26 +784,6 @@ void CmcGC<LanguageConfig>::ConcurrentPreforward()
 {
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::ConcurrentPreforward", "");
     PreforwardConcurrentRoots();
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::PrepareFix()
-{
-    if (Heap::GetHeap().GetGCReason() == GCReason::GC_REASON_YOUNG) {
-        // string table objects are always not in young space, skip it
-        return;
-    }
-
-    COMMON_PHASE_TIMER("PrepareFix");
-
-    // we cannot re-enter STW, check it first
-    if (!MutatorManager::Instance().WorldStopped()) {
-        STWParam prepareFixStwParam {"wgc-preparefix"};
-        ScopedStopTheWorld stw(prepareFixStwParam);
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PrepareFix[STW]", "");
-
-        GetGCStats().recordSTWTime(prepareFixStwParam.GetElapsedNs());
-    }
 }
 
 template <class LanguageConfig>
@@ -860,18 +838,20 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::FixHeap()
+void CmcGC<LanguageConfig>::FixHeap(bool isWorldStopped)
 {
-    STWParam stwParam {"GC_PHASE_FIX transition"};
-    {
+    if (!isWorldStopped) {
+        STWParam stwParam {"GC_PHASE_FIX transition"};
         ScopedStopTheWorld stw(stwParam);
+        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FIX);
+    } else {
         TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_FIX);
     }
     COMMON_PHASE_TIMER("FixHeap");
     OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap", "");
     ParallelFixHeap();
 
-    WVerify::VerifyAfterFix();
+    WVerify::VerifyAfterFix(isWorldStopped);
 }
 
 template <class LanguageConfig>
@@ -879,7 +859,7 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef()
 {
     const bool isNotYoungGC = gcReason_ != GCReason::GC_REASON_YOUNG;
 #ifdef ENABLE_CMC_RB_DFX
-    WVerify::DisableReadBarrierDFX(*this);
+    WVerify::DisableReadBarrierDFX(*this, false);
 #endif
     STWParam stwParam {"stw-gc"};
     ScopedStopTheWorld stw(stwParam);
@@ -902,10 +882,9 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef()
     }
 
     CopyFromSpace();
-    WVerify::VerifyAfterForward();
+    WVerify::VerifyAfterForward(true);
 
-    PrepareFix();
-    FixHeap();
+    FixHeap(true);
     if (isNotYoungGC) {
         CollectNonMovableGarbage();
     }
@@ -917,7 +896,7 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef()
     ark::common_vm::UnmarkAllXRefs();
 
 #if defined(ENABLE_CMC_RB_DFX)
-    WVerify::EnableReadBarrierDFX(*this);
+    WVerify::EnableReadBarrierDFX(*this, true);
 #endif
     GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
 }
@@ -1016,6 +995,17 @@ void CmcGC<LanguageConfig>::ProcessReferencesAfterCopy()
 }
 
 template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ForEachManagedMutator(const ManagedMutatorCallback &callback)
+{
+    Mutator::GetCurrent()->GetVM()->GetMutatorManager()->ForEachMutator([&callback](Mutator *mutator) {
+        if (mutator->GetMutatorType() == Mutator::MutatorType::MANAGED) {
+            callback(mutator);
+        }
+        return true;
+    });
+}
+
+template <class LanguageConfig>
 // CC-OFFNXT(G.FUD.05) solid logic
 void CmcGC<LanguageConfig>::DoGarbageCollection()
 {
@@ -1028,7 +1018,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
     }
     if (gcMode_ == GCMode::STW) {  // 2: stw-gc
 #ifdef ENABLE_CMC_RB_DFX
-        WVerify::DisableReadBarrierDFX(*this);
+        WVerify::DisableReadBarrierDFX(*this, false);
 #endif
         STWParam stwParam {"stw-gc"};
         {
@@ -1048,10 +1038,9 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
             }
 
             CopyFromSpace();
-            WVerify::VerifyAfterForward();
+            WVerify::VerifyAfterForward(true);
 
-            PrepareFix();
-            FixHeap();
+            FixHeap(true);
             if (!isYoungGC) {
                 CollectNonMovableGarbage();
             }
@@ -1062,7 +1051,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
             CollectSmallSpace();
 
 #if defined(ENABLE_CMC_RB_DFX)
-            WVerify::EnableReadBarrierDFX(*this);
+            WVerify::EnableReadBarrierDFX(*this, true);
 #endif
         }
         GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
@@ -1083,10 +1072,9 @@ void CmcGC<LanguageConfig>::DoGarbageCollection()
 
         CopyFromSpace();
         ProcessReferencesAfterCopy();
-        WVerify::VerifyAfterForward();
+        WVerify::VerifyAfterForward(false);
 
-        PrepareFix();
-        FixHeap();
+        FixHeap(false);
 
         if (!isYoungGC) {
             CollectNonMovableGarbage();
@@ -1120,10 +1108,9 @@ void CmcGC<LanguageConfig>::DoGarbageCollectionWithoutConcurrentMarking()
     // We do not evacuate objects on remark pause to avoid too long STW
     CopyFromSpace();
 
-    WVerify::VerifyAfterForward();
+    WVerify::VerifyAfterForward(false);
 
-    PrepareFix();
-    FixHeap();
+    FixHeap(false);
 }
 
 template <class LanguageConfig>
@@ -1191,24 +1178,24 @@ void CmcGC<LanguageConfig>::PreforwardNonHeapRoot(RefField<> &root, CArrayList<B
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots)
 {
-    const auto enumGlobalRoots = [this, &forwardedRoots]() {
+    ark::os::memory::Mutex stackMutex;
+    CArrayList<CArrayList<BaseObject *>> rootSet;  // allocate for each mutator
+    {
+        STWParam param {"preforward-non-heap-roots"};
+        ScopedStopTheWorld stw(param);
+
         SetGCThreadQosPriority(PriorityMode::STW);
         PreforwardNonHeapRootsImpl<VisitGlobalRoots>(forwardedRoots);
         SetGCThreadQosPriority(PriorityMode::FOREGROUND);
-    };
 
-    ark::os::memory::Mutex stackMutex;
-    CArrayList<CArrayList<BaseObject *>> rootSet;  // allocate for each mutator
-    FlipFunction enumMutatorRoot = [this, &rootSet, &stackMutex](ark::common_vm::Mutator &mutator) {
-        CArrayList<BaseObject *> roots;
-        mutator.VisitMutatorRoots([this, &roots](RefField<> &root) { PreforwardNonHeapRoot(root, roots); });
-        ark::os::memory::LockHolder lockGuard(stackMutex);
-        rootSet.emplace_back(std::move(roots));
-    };
-
-    STWParam param {"preforward-non-heap-roots"};
-    MutatorManager::Instance().FlipMutators(param, enumGlobalRoots, &enumMutatorRoot);
-    GetGCStats().recordSTWTime(param.GetElapsedNs());
+        ForEachManagedMutator([this, &rootSet, &stackMutex](Mutator *mutator) {
+            CArrayList<BaseObject *> roots;
+            mutator->VisitMutatorRoots([this, &roots](RefField<> &root) { PreforwardNonHeapRoot(root, roots); });
+            ark::os::memory::LockHolder lockGuard(stackMutex);
+            rootSet.emplace_back(std::move(roots));
+        });
+        GetGCStats().recordSTWTime(param.GetElapsedNs());
+    }
 
     for (const auto &roots : rootSet) {
         std::copy(roots.begin(), roots.end(), std::back_inserter(forwardedRoots));
@@ -1261,8 +1248,8 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
 {
     PandaStack<BaseObject *> remarkStack;
-    MutatorManager::Instance().VisitAllMutators([&remarkStack](ark::common_vm::Mutator &mutator) {
-        const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator.GetSatbBufferNode());
+    ForEachManagedMutator([&remarkStack](Mutator *mutator) {
+        const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator->GetSatbBufferNode());
         if (node != nullptr) {
             const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
         }
@@ -1546,22 +1533,24 @@ template <class LanguageConfig>
 CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(STWParam &param,
                                                                           const ark::mem::RefFieldVisitor &visitor)
 {
-    const auto enumGlobalRoots = [this, &visitor]() {
+    ark::os::memory::Mutex stackMutex;
+    CArrayList<CArrayList<BaseObject *>> rootSet;  // allcate for each mutator
+    {
+        ScopedStopTheWorld stw(param);
+
         SetGCThreadQosPriority(PriorityMode::STW);
         EnumRootsImpl<VisitGlobalRoots>(visitor);
         SetGCThreadQosPriority(PriorityMode::FOREGROUND);
-    };
 
-    ark::os::memory::Mutex stackMutex;
-    CArrayList<CArrayList<BaseObject *>> rootSet;  // allcate for each mutator
-    FlipFunction enumMutatorRoot = [&rootSet, &stackMutex](ark::common_vm::Mutator &mutator) {
-        CArrayList<BaseObject *> roots;
-        RefFieldVisitor localVisitor = [&roots](RefField<> &root) { roots.emplace_back(root.GetTargetObject()); };
-        mutator.VisitMutatorRoots(localVisitor);
-        ark::os::memory::LockHolder lockGuard(stackMutex);
-        rootSet.emplace_back(std::move(roots));
-    };
-    MutatorManager::Instance().FlipMutators(param, enumGlobalRoots, &enumMutatorRoot);
+        ForEachManagedMutator([&rootSet, &stackMutex](Mutator *mutator) {
+            CArrayList<BaseObject *> roots;
+            RefFieldVisitor localVisitor = [&roots](RefField<> &root) { roots.emplace_back(root.GetTargetObject()); };
+            mutator->VisitMutatorRoots(localVisitor);
+            ark::os::memory::LockHolder lockGuard(stackMutex);
+            rootSet.emplace_back(std::move(roots));
+        });
+    }
+
     return rootSet;
 }
 
@@ -1590,7 +1579,7 @@ ObjectHeader *CmcGC<LanguageConfig>::CopyObjectImpl(ObjectHeader *object)
               GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_FIX ||
               GetGCPhase() == ark::common_vm::GCPhase::GC_PHASE_FINAL_MARK);
     } else {
-        auto phase = Mutator::GetMutator()->GetMutatorPhase();
+        auto phase = ark::Mutator::GetCurrent()->GetMutatorPhase();
         CHECK(phase == ark::common_vm::GCPhase::GC_PHASE_PRECOPY || phase == ark::common_vm::GCPhase::GC_PHASE_COPY ||
               phase == ark::common_vm::GCPhase::GC_PHASE_YOUNG_COPY || phase == ark::common_vm::GCPhase::GC_PHASE_FIX);
     }
@@ -1759,18 +1748,9 @@ void CmcGC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]
 {
     GC::OnMutatorTerminate(mutator, mode, keepBuffers);
 
-    DCHECK(!mutator->IsInRunningState());
+    DCHECK(static_cast<const ark::Mutator *>(mutator)->GetStatus() != ark::MutatorStatus::RUNNING);
     mutator->ReleaseAllocBuffer();
 
-    if (mutator->GetMutatorType() == ark::Mutator::MutatorType::MANAGED) {
-        auto &mutatorManager = MutatorManager::Instance();
-        ark::os::memory::LockHolder guard(mutatorManager.allMutatorListLock_);
-        auto &list = mutatorManager.allMutatorList_;
-        auto it = std::find(list.begin(), list.end(), mutator);
-        if (it != list.end()) {
-            list.erase(it);
-        }
-    }
     UpdateBarrierEntrypoint(mutator, ark::common_vm::GCPhase::GC_PHASE_IDLE);
     mutator->SetMutatorPhase(ark::common_vm::GCPhase::GC_PHASE_IDLE);
     mutator->ResetMutator();
@@ -1780,16 +1760,6 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
 {
     ark::common_vm::GCPhase phase = GetGCPhase();
-    if (mutator->GetMutatorType() == ark::Mutator::MutatorType::MANAGED) {
-        auto &mutatorManager = MutatorManager::Instance();
-        ark::os::memory::LockHolder<ark::os::memory::Mutex> guard(mutatorManager.allMutatorListLock_);
-        DCHECK(std::find(mutatorManager.allMutatorList_.begin(), mutatorManager.allMutatorList_.end(), mutator) ==
-               mutatorManager.allMutatorList_.end());
-        if (UNLIKELY(mutatorManager.StwTriggered())) {
-            mutator->SetSuspensionFlag(ark::SUSPEND_REQUEST);
-        }
-        mutatorManager.allMutatorList_.push_back(mutator);
-    }
     mutator->SetMutatorPhase(phase);
     // Enable pre write barrier for mutators created during concurrent marking and enable read barrier for mutators
     // created during concurrent copy/fix.
@@ -2181,13 +2151,14 @@ bool CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
     COMMON_PHASE_TIMER("MarkSatbBuffer");
     auto visitSatbObj = [this, &globalMarkStack]() {
         PandaStack<BaseObject *> remarkStack;
-        auto func = [&remarkStack](ark::common_vm::Mutator &mutator) {
-            const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator.GetSatbBufferNode());
+        auto func = [&remarkStack](Mutator *mutator) {
+            const SatbBuffer::TreapNode *node =
+                static_cast<const SatbBuffer::TreapNode *>(mutator->GetSatbBufferNode());
             if (node != nullptr) {
                 const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
             }
         };
-        MutatorManager::Instance().VisitAllMutators(func);
+        ForEachManagedMutator(func);
         SatbBuffer::Instance().GetRetiredObjects(remarkStack);
 
         LocalCollectStack collectStack(&globalMarkStack);
@@ -2236,47 +2207,6 @@ void CmcGC<LanguageConfig>::MarkAwaitingJitFort()
     reinterpret_cast<RegionalHeap &>(theAllocator_).MarkAwaitingJitFort();
 }
 
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::DumpHeap(const CString &tag)
-{
-    ASSERT_PRINT(MutatorManager::Instance().WorldStopped(), "Not In STW");
-    LOG(DEBUG, GC) << "DumpHeap " << tag.Str();
-    // dump roots
-    DumpRoots(FRAGMENT);
-    // dump object contents
-    auto dumpVisitor = [](BaseObject *obj) {
-        // support Dump
-        // obj->DumpObject(FRAGMENT)
-    };
-    bool ret = Heap::GetHeap().ForEachObject(dumpVisitor, false);
-    LOG_IF(UNLIKELY(!ret), ERROR, GC) << "theAllocator.ForEachObject() in DumpHeap() return false.";
-
-    // dump object types
-    LOG(DEBUG, GC) << "Print Type information";
-    PandaSet<TypeInfo *> classinfoSet;
-    auto assembleClassInfoVisitor = [&classinfoSet](BaseObject *obj) {
-        TypeInfo *classInfo = obj->GetTypeInfo();
-        // No need to check the result of insertion, because there are multiple-insertions.
-        (void)classinfoSet.insert(classInfo);
-    };
-    ret = Heap::GetHeap().ForEachObject(assembleClassInfoVisitor, false);
-    LOG_IF(UNLIKELY(!ret), ERROR, GC) << "theAllocator.ForEachObject()#2 in DumpHeap() return false.";
-
-    for (auto it = classinfoSet.begin(); it != classinfoSet.end(); it++) {
-        TypeInfo *classInfo = *it;
-    }
-    LOG(DEBUG, GC) << "Dump Allocator";
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::DumpRoots(LogType logType)
-{
-    LOG(FATAL, COMMON) << "Unresolved fatal";
-    UNREACHABLE();
-}
-#endif
-
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreGarbageCollection(bool isConcurrent)
 {
@@ -2296,9 +2226,6 @@ void CmcGC<LanguageConfig>::PreGarbageCollection(bool isConcurrent)
     gcStats.gcStartTime = ark::common_vm::TimeUtil::NanoSeconds();
     gcStats.totalSTWTime = 0;
     gcStats.maxSTWTime = 0;
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    DumpBeforeGC();
-#endif
 }
 
 template <class LanguageConfig>
@@ -2308,10 +2235,6 @@ void CmcGC<LanguageConfig>::PostGarbageCollection(uint64_t gcIndex)
     // release pages in PagePool
     ark::common_vm::PagePool::Instance().Trim();
     collectorResources_.MarkGCFinish(gcIndex);
-
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    DumpAfterGC();
-#endif
 }
 
 template <class LanguageConfig>
@@ -2450,9 +2373,6 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::common_v
                   ";Current Native:" + ::ark::mem::Pretty(Heap::GetHeap().GetNotifiedNativeSize()) +
                   ";NativeThreshold:" + ::ark::mem::Pretty(Heap::GetHeap().GetNativeHeapThreshold()))
                      .c_str());
-    // prevent other threads stop-the-world during GC.
-    // this may be removed in the future.
-    ark::common_vm::ScopedSTWLock stwLock;
     PreGarbageCollection(true);
     Heap::GetHeap().SetGCReason(reason);
     auto &gcStats = GetGCStats();
@@ -2469,7 +2389,6 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::common_v
     Heap::GetHeap().GetAllocator().RecalculateFootprint();
 
     PostGarbageCollection(gcIndex);
-    MutatorManager::Instance().DestroyExpiredMutators();
     gcStats.gcEndTime = ark::common_vm::TimeUtil::NanoSeconds();
 
     UpdateGCCompletionStats(gcStats);

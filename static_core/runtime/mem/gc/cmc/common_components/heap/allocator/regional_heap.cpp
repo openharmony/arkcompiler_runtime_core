@@ -461,7 +461,6 @@ void RegionalHeap::MarkRememberSet(const std::function<void(BaseObject *)> &func
 
 void RegionalHeap::ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObject *)> &visitor) const
 {
-    DCHECK(common_vm::MutatorManager::Instance().WorldStopped());
     for (const auto jitFort : awaitingJitFort_) {
         visitor(jitFort);
     }

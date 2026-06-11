@@ -85,23 +85,17 @@ bool MutatorLock::TryWriteLock()
     bool ret = LockT::TryWriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryWriteLock";
     if (ret) {
-        if (LIKELY(Mutator::GetCurrent() != nullptr)) {
-            Mutator::GetCurrent()->SetLockState(WRLOCK);
-        }
+        Mutator::GetCurrent()->SetLockState(WRLOCK);
     }
     return ret;
 }
 
 void MutatorLock::Unlock()
 {
-    if (LIKELY(Mutator::GetCurrent() != nullptr)) {
-        ASSERT(HasLock());
-    }
+    ASSERT(HasLock());
     LockT::Unlock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::Unlock";
-    if (LIKELY(Mutator::GetCurrent() != nullptr)) {
-        Mutator::GetCurrent()->SetLockState(UNLOCKED);
-    }
+    Mutator::GetCurrent()->SetLockState(UNLOCKED);
 }
 
 MutatorLock::MutatorLockState MutatorLock::GetState() const

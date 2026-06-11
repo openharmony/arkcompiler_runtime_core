@@ -29,31 +29,13 @@ enum class ThreadType { ARK_PROCESSOR = 0, GC_THREAD, FP_THREAD, HOT_UPDATE_THRE
 struct ThreadLocalData {
     // External thread local var.
     AllocationBuffer *buffer;
-    Mutator *mutator {nullptr};
-    uint8_t *thread;
-    uint8_t *schedule;
-    uint8_t *preemptFlag;
-    uint8_t *protectAddr;
-    uint64_t tid;
-    void *foreignThread;
     // Internal thread local var.
     ThreadType threadType;
-    bool isArkProcessor;
 };
 
 class ThreadLocal {  // merge this to ThreadLocalData.
 public:
     static ThreadLocalData *GetThreadLocalData();
-
-    static void SetMutator(Mutator *newMutator)
-    {
-        GetThreadLocalData()->mutator = newMutator;
-    }
-
-    static Mutator *GetMutator()
-    {
-        return GetThreadLocalData()->mutator;
-    }
 
     static AllocationBuffer *GetAllocBuffer()
     {
@@ -66,16 +48,6 @@ public:
         GetThreadLocalData()->buffer = buffer;
     }
 
-    static uint8_t *GetPreemptFlag()
-    {
-        return GetThreadLocalData()->preemptFlag;
-    }
-
-    static void SetProtectAddr(uint8_t *addr)
-    {
-        GetThreadLocalData()->protectAddr = addr;
-    }
-
     static void SetThreadType(ThreadType type)
     {
         GetThreadLocalData()->threadType = type;
@@ -84,36 +56,6 @@ public:
     static ThreadType GetThreadType()
     {
         return GetThreadLocalData()->threadType;
-    }
-
-    static void SetProcessorFlag(bool flag)
-    {
-        GetThreadLocalData()->isArkProcessor = flag;
-    }
-
-    static bool IsArkProcessor()
-    {
-        return GetThreadLocalData()->isArkProcessor;
-    }
-
-    static void SetForeignThread(void *thread)
-    {
-        GetThreadLocalData()->foreignThread = thread;
-    }
-
-    static void *GetForeignThread()
-    {
-        return GetThreadLocalData()->foreignThread;
-    }
-
-    static void SetArkThread(void *thread)
-    {
-        GetThreadLocalData()->thread = reinterpret_cast<uint8_t *>(thread);
-    }
-
-    static void SetSchedule(void *schedule)
-    {
-        GetThreadLocalData()->schedule = reinterpret_cast<uint8_t *>(schedule);
     }
 };
 }  // namespace ark::common_vm

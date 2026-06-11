@@ -17,7 +17,6 @@
 // For shared intrinsics see std_core_gc.cpp
 // For default GC (static_core) implementations see std_core_default_gc.cpp
 #include "common_components/heap/heap_manager.h"
-#include "common_interfaces/thread/mutator-inl.h"
 #include "common_components/heap/heap.h"
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"

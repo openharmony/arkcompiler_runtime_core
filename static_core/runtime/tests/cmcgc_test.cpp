@@ -265,7 +265,7 @@ public:
 
     ~CMCGCTest()
     {
-        bool success = Runtime::Destroy();
+        [[maybe_unused]] bool success = Runtime::Destroy();
         ASSERT(success);
         Logger::Destroy();
         cvm::ThreadLocal::SetAllocBuffer(nullptr);
@@ -510,12 +510,7 @@ TEST_F(CMCGCTest, PreBarrierCheck)
 
     {
         cvm::ScopedEnterSaferegion safeRegion(true);
-        checker.OnStartPhaseMark([&arrHandle, &obj2Handle] {
-            auto *mutator = cvm::Mutator::GetMutator();
-            mutator->LeaveSaferegion();
-            arrHandle.GetPtr()->Set(0, obj2Handle.GetPtr());
-            mutator->EnterSaferegion(true);
-        });
+        checker.OnStartPhaseMark([&arrHandle, &obj2Handle] { arrHandle.GetPtr()->Set(0, obj2Handle.GetPtr()); });
     }
 
     PandaStack<cvm::BaseObject *> objects;

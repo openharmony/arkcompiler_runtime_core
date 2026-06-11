@@ -74,10 +74,6 @@ public:
 
     RegionManager &operator=(const RegionManager &) = delete;
 
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    void DumpRegionDesc() const;
-#endif
-
     void DumpRegionStats() const;
 
     uintptr_t GetInactiveZone() const

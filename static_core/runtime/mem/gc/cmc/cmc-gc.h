@@ -31,17 +31,62 @@
 #include "common_components/heap/collector/collector.h"
 #include "common_components/taskpool/runner.h"
 #include "common_components/taskpool/taskpool.h"
-#include "common_components/mutator/mutator_manager.h"  // STWParam
 #include "common_components/heap/allocator/regional_heap.h"
 
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/cmc/cmc-allocator-adapter.h"
-#include "runtime/mem/gc/cmc/common_components/mutator/mutator_manager.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/mem/rendezvous.h"
+#include "include/panda_vm.h"
 
 namespace ark::common_vm {
 class Allocator;
 class CollectorResources;
+
+struct STWParam {
+    const char *stwReason;
+    uint64_t elapsedTimeNs = 0;
+
+    uint64_t GetElapsedNs() const
+    {
+        return elapsedTimeNs;
+    }
+    uint64_t GetElapsedUs() const
+    {
+        return elapsedTimeNs / 1000U;
+    }
+};
+
+// Scoped stop the world.
+class ScopedStopTheWorld {
+public:
+    __attribute__((always_inline)) explicit ScopedStopTheWorld(STWParam &param, GCPhase phase = GC_PHASE_IDLE)
+        : stwParam_(param), suspensionScope_(ScopedSuspendAllThreads(ark::PandaVM::GetCurrent()->GetRendezvous()))
+    {
+        reason_ = param.stwReason;
+        startTime_ = TimeUtil::NanoSeconds();
+    }
+
+    __attribute__((always_inline)) ~ScopedStopTheWorld()
+    {
+        uint64_t elapsedTimeNs = GetElapsedTime();
+        stwParam_.elapsedTimeNs = elapsedTimeNs;
+        const uint64_t elapsedTimeUs = elapsedTimeNs / 1000UL;
+        LOG(DEBUG, GC) << reason_ << " stw time " << elapsedTimeUs << " us";  // 1000:nsec per usec
+    }
+
+    uint64_t GetElapsedTime() const
+    {
+        return TimeUtil::NanoSeconds() - startTime_;
+    }
+
+private:
+    uint64_t startTime_ = 0;
+    const char *reason_ = nullptr;
+    STWParam &stwParam_;
+    ScopedSuspendAllThreads suspensionScope_;
+};
+
 }  // namespace ark::common_vm
 
 namespace ark::mem {
@@ -180,44 +225,12 @@ public:
 #ifdef ENABLE_CMC_RB_DFX
         gcMode_ = GCMode::STW;
 #endif
-        common_vm::MutatorManager::Create();
     }
 
     void Fini() override
     {
-        common_vm::MutatorManager::Destroy();
         HeapBitmapManager::GetHeapBitmapManager().DestroyHeapBitmap();
     }
-
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    void DumpRoots(LogType logType);
-    void DumpHeap(const CString &tag);
-    void DumpBeforeGC()
-    {
-        if (ENABLE_LOG(FRAGMENT)) {
-            if (common_vm::MutatorManager::Instance().WorldStopped()) {
-                DumpHeap("before_gc");
-            } else {
-                STWParam stwParam {"dump-heap-before-gc"};
-                ScopedStopTheWorld stw(stwParam);
-                DumpHeap("before_gc");
-            }
-        }
-    }
-
-    void DumpAfterGC()
-    {
-        if (ENABLE_LOG(FRAGMENT)) {
-            if (common_vm::MutatorManager::Instance().WorldStopped()) {
-                DumpHeap("after_gc");
-            } else {
-                STWParam stwParam {"dump-heap-after-gc"};
-                ScopedStopTheWorld stw(stwParam);
-                DumpHeap("after_gc");
-            }
-        }
-    }
-#endif
 
     bool ShouldIgnoreRequest(ark::common_vm::GCRequest &request) override;
 
@@ -312,17 +325,16 @@ public:
 
     void TransitionToGCPhase(const ark::common_vm::GCPhase phase)
     {
-        ASSERT(ark::common_vm::MutatorManager::Instance().WorldStopped());
         using ark::common_vm::GCListener;
         const auto currentPhase = Heap::GetHeap().GetGCPhase();
         NotifyGCListeners([currentPhase](GCListener *l) { l->OnGCPhaseEnd(currentPhase); });
         SetGCPhase(phase);
         LOG(DEBUG, GC) << "transition gc phase: " << Collector::GetGCPhaseName(currentPhase) << "(" << currentPhase
                        << ") -> " << Collector::GetGCPhaseName(phase) << "(" << phase << ")";
-        ark::common_vm::MutatorManager::Instance().VisitAllMutators([this, phase](ark::common_vm::Mutator &mutator) {
-            mutator.HandleGCPhase(phase);
-            mutator.SetMutatorPhase(phase);
-            UpdateBarrierEntrypoint(&mutator, phase);
+        ForEachManagedMutator([this, phase](Mutator *mutator) {
+            mutator->HandleGCPhase(phase);
+            mutator->SetMutatorPhase(phase);
+            UpdateBarrierEntrypoint(mutator, phase);
         });
         NotifyGCListeners([phase](GCListener *l) { l->OnGCPhaseStart(phase); });
     }
@@ -569,9 +581,8 @@ private:
     void PreforwardStaticWeakRoots();
     void PreforwardConcurrencyModelRoots();
 
-    void PrepareFix();
     void ParallelFixHeap();
-    void FixHeap();  // roots and ref-fields
+    void FixHeap(bool isWorldStopped);  // roots and ref-fields
     WeakRefFieldVisitor GetWeakRefFieldVisitor();
     RefFieldVisitor GetPrefowardRefFieldVisitor();
     void PreforwardFlip();
@@ -607,6 +618,9 @@ private:
     void MarkRef(RefField<> &ref, Stack &stack);
 
     void ProcessReferencesAfterCopy();
+
+    using ManagedMutatorCallback = std::function<void(Mutator *)>;
+    void ForEachManagedMutator(const ManagedMutatorCallback &callback);
 
     GCMode gcMode_ = GCMode::CMC;
     std::atomic<ark::common_vm::GCPhase> gcPhase_ = {ark::common_vm::GCPhase::GC_PHASE_IDLE};

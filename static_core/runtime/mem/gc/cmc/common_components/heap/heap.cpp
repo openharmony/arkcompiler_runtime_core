@@ -18,7 +18,6 @@
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/collector/collector_resources.h"
 #include "common_components/common/scoped_object_access.h"
-#include "common_components/mutator/mutator_manager.h"
 
 #if defined(_WIN64)
 #include <windows.h>

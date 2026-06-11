@@ -30,16 +30,6 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/base_object.h"
-#include "runtime/include/mutator_status.h"
-#include "libarkbase/os/mutex.h"
-
-namespace panda::ecmascript {
-class JSThread;
-}
-
-namespace ark {
-class Coroutine;
-}
 
 namespace ark::common_vm {
 class Mutator;
@@ -63,89 +53,16 @@ enum GCPhase : uint8_t {
     GC_PHASE_YOUNG_COPY = 17,
 };
 
+bool IsRuntimeThread();
+bool IsGcThread();
+
 class Mutator;
 using FlipFunction = std::function<void(Mutator &)>;
 class PANDA_PUBLIC_API Mutator {
 public:
-    // NOTE(ivagin): language specififc code will be removed in the next patches
-    using JSThread = panda::ecmascript::JSThread;
-    using Coroutine = ark::Coroutine;
-
-    enum GCPhaseTransitionState : uint32_t {
-        NO_TRANSITION,
-        NEED_TRANSITION,
-        IN_TRANSITION,
-        FINISH_TRANSITION,
-    };
-
     virtual ~Mutator();
 
-    static Mutator *NewMutator();
-
     void ResetMutator();
-
-    static Mutator *GetMutator() noexcept;
-
-    void InitTid();
-    uint32_t GetTid() const
-    {
-        return tid_;
-    }
-
-    static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
-    {
-        return (flag & ~clearFlag) | setFlag;
-    }
-
-    // Sets saferegion state of this mutator.
-    __attribute__((always_inline)) inline void SetInSaferegion(ark::MutatorStatus state);
-
-    // Sets saferegion state of this mutator with locks.
-    __attribute__((always_inline)) inline void UpdateStatus(ark::MutatorStatus state);
-
-    // Returns true if this mutator is in saferegion, otherwise false.
-    __attribute__((always_inline)) inline bool InSaferegion() const;
-
-    // Force current mutator enter saferegion, internal use only.
-    __attribute__((always_inline)) inline void DoEnterSaferegion() NO_THREAD_SAFETY_ANALYSIS;
-    // Force current mutator leave saferegion, internal use only.
-    __attribute__((always_inline)) inline void DoLeaveSaferegion();
-
-    // If current mutator is not in saferegion, enter and return true
-    // If current mutator has been in saferegion, return false
-    __attribute__((always_inline)) inline bool EnterSaferegion(bool updateUnwindContext) noexcept;
-    // If current mutator is in saferegion, leave and return true
-    // If current mutator has left saferegion, return false
-    __attribute__((always_inline)) inline bool LeaveSaferegion() noexcept;
-
-    __attribute__((always_inline)) inline bool FinishedTransition() const
-    {
-        // Atomic with acquire order reason: data race with transitionState_ with dependecies on reads after the load
-        return transitionState_.load(std::memory_order_acquire) == FINISH_TRANSITION;
-    }
-
-    __attribute__((always_inline)) inline void SetSuspensionFlag(ark::MutatorFlag flag);
-
-    __attribute__((always_inline)) inline void ClearSuspensionFlag(ark::MutatorFlag flag);
-
-    __attribute__((always_inline)) inline uint32_t GetSuspensionFlag() const;
-
-    __attribute__((always_inline)) inline bool HasSuspensionRequest(ark::MutatorFlag flag) const;
-
-    // Check whether current mutator needs to be suspended for GC or other request
-    __attribute__((always_inline)) inline bool HasAnySuspensionRequest() const;
-
-    // Check whether current mutator needs to be suspended for GC or other request, see comments in `ark::MutatorFlag`
-    __attribute__((always_inline)) inline bool HasAnySuspensionRequestExceptCallbacks() const;
-
-    __attribute__((always_inline)) inline void ClearFinalizeRequest();
-
-    __attribute__((always_inline)) inline void SetFinalizeRequest();
-
-    __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag);
-
-    // Called if current mutator should do corresponding task by suspensionFlag value
-    __attribute__((visibility("default"))) void HandleSuspensionRequest();
 
     __attribute__((always_inline)) inline void SetMutatorPhase(const GCPhase newPhase)
     {
@@ -159,9 +76,6 @@ public:
         return mutatorPhase_.load(std::memory_order_acquire);
     }
 
-    // Called if current mutator should handle stw request
-    void SuspendForStw();
-
     // temporary impl to clean GC callback, and need to refact to flip function
     __attribute__((visibility("default"))) void HandleGCCallback();
 
@@ -173,50 +87,6 @@ public:
 
     void DumpMutator() const;
 
-    // Init after fork.
-    void InitAfterFork()
-    {
-        // tid changed after fork, so we re-initialize it.
-        InitTid();
-    }
-
-    void SetFlipFunction(FlipFunction *flipFunction)
-    {
-        flipFunction_ = flipFunction;
-    }
-
-    bool TryRunFlipFunction();
-
-    void WaitFlipFunctionFinish();
-
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    void PushFrameInfoForMarking(const GCInfoNode &frameGCInfo)
-    {
-        gcInfos_.PushFrameInfoForMarking(frameGCInfo);
-    }
-
-    void PushFrameInfoForMarking(const GCInfoNode &&frameGCInfo)
-    {
-        gcInfos_.PushFrameInfoForMarking(frameGCInfo);
-    }
-
-    void PushFrameInfoForFix(const GCInfoNodeForFix &frameGCInfo)
-    {
-        gcInfos_.PushFrameInfoForFix(frameGCInfo);
-    }
-
-    void PushFrameInfoForFix(const GCInfoNodeForFix &&frameGCInfo)
-    {
-        gcInfos_.PushFrameInfoForFix(frameGCInfo);
-    }
-
-    void DumpGCInfos() const
-    {
-        LOG(DEBUG, GC) << "dump mutator gc info thread id: " << tid;
-        gcInfos_.DumpGCInfos();
-    }
-#endif
-
     NO_INLINE void RememberObjectInSatbBuffer(const BaseObject *obj)
     {
         RememberObjectImpl(obj);
@@ -226,26 +96,6 @@ public:
 
     void ClearSatbBufferNode();
 
-    void PushRawObject(BaseObject *obj)
-    {
-        rawObject_.object = obj;
-    }
-
-    BaseObject *PopRawObject()
-    {
-        BaseObject *obj = rawObject_.object;
-        rawObject_.object = nullptr;
-        return obj;
-    }
-
-    __attribute__((always_inline)) inline bool IsInRunningState() const;
-
-    // Thread must be binded mutator before to allocate. Otherwise it cannot allocate heap object in this thread.
-    // One thread only allow to bind one muatator. If try bind sencond mutator, will be fatal.
-    void BindMutator();
-    // One thread only allow to bind one muatator. So it must be unbinded mutator before bind another one.
-    void UnbindMutator();
-
     void *GetAllocBuffer() const
     {
         DCHECK(allocBuffer_ != nullptr);
@@ -254,44 +104,13 @@ public:
 
     void ReleaseAllocBuffer();
 
-    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
-    class TryBindMutatorScope {
-    public:
-        TryBindMutatorScope(Mutator *mutator);
-        ~TryBindMutatorScope();
-
-    private:
-        Mutator *mutator_ {nullptr};
-    };
-
-protected:
-    // for exception ref
-    void VisitRawObjects(const RootVisitor &func);
-    void CreateCurrentGCInfo();
-
 private:
     void RememberObjectImpl(const BaseObject *obj);
-
-    // Return false if thread has already binded mutator. Otherwise bind a mutator.
-    bool TryBindMutator();
 
     // Indicate the current mutator phase and use which barrier in concurrent gc
     std::atomic<GCPhase> mutatorPhase_ = {GCPhase::GC_PHASE_UNDEF};
 
-    // Indicate the state of mutator's phase transition
-    std::atomic<GCPhaseTransitionState> transitionState_ = {NO_TRANSITION};
-
-    // thread id
-    uint32_t tid_ = 0;
-
-    ObjectRef rawObject_ {nullptr};
-    ark::os::memory::Mutex flipFunctionMtx_;
-    ark::os::memory::ConditionVariable flipFunctionCV_;
-    FlipFunction *flipFunction_ {nullptr};
     void *satbNode_ = nullptr;
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    GCInfos gcInfos_;
-#endif
 
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
     void *allocBuffer_ {nullptr};

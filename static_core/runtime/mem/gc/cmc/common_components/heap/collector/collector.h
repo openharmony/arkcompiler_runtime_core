@@ -53,8 +53,6 @@ public:
     NO_MOVE_SEMANTIC(GCListener);
 };
 
-class MutatorManager;
-
 // Central garbage identification algorithm.
 class Collector {
 public:

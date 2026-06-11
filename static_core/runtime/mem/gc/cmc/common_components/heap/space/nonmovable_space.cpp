@@ -90,7 +90,7 @@ void NonMovableSpace::DumpRegionStats() const
 
 uintptr_t NonMovableSpace::AllocInMonoSizeList(size_t cellCount)
 {
-    GCPhase mutatorPhase = Mutator::GetMutator()->GetMutatorPhase();
+    GCPhase mutatorPhase = ark::Mutator::GetCurrent()->GetMutatorPhase();
     // workaround: make sure collector doesn't fix newly allocated incomplete objects
     if (mutatorPhase == GC_PHASE_MARK || mutatorPhase == GC_PHASE_FIX) {
         return 0;

@@ -22,11 +22,11 @@ class RegionalHeap;
 
 class WVerify {
 public:
-    static void VerifyAfterMark();
-    static void VerifyAfterForward();
-    static void VerifyAfterFix();
-    static void EnableReadBarrierDFX();
-    static void DisableReadBarrierDFX();
+    static void VerifyAfterMark(bool isWorldStopped);
+    static void VerifyAfterForward(bool isWorldStopped);
+    static void VerifyAfterFix(bool isWorldStopped);
+    static void EnableReadBarrierDFX(bool isWorldStopped);
+    static void DisableReadBarrierDFX(bool isWorldStopped);
 
 private:
     static void VerifyAfterMarkInternal(RegionalHeap &space);
