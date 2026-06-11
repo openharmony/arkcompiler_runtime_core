@@ -1,4 +1,4 @@
-/*---
+/*
 Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,7 +11,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
----*/
+*/
+
+{% yaml "overriding_instance_field_neg_wrong_am_n.params.yaml" as data %}
+
+{% for c in data.cases %}
 
 /*---
 desc: >-
@@ -22,19 +26,18 @@ expected_out: "Semantic error ESE1600001: Access modifier of field 'f' in class 
 ---*/
 
 class Base<T> {
-  protected f: T
+  {{c.from}} f: T
   constructor(v: T) {
     this.f = v
   }
 }
 
 class D<T> extends Base<T> {
-  private f: T
+  {{c.to}} f: T
   constructor(v: T) {
     super(v)
     this.f = v
   }
 }
 
-function main(): void {
-}
+{% endfor %}
