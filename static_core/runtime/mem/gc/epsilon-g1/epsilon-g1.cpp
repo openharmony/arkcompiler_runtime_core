@@ -63,14 +63,17 @@ void EpsilonG1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUn
     LOG(DEBUG, GC) << "Call OnMutatorTerminate";
     // Clearing buffers to remove memory leaks in internal allocator
     GC::OnMutatorTerminate(mutator, mode, keepBuffers);
-    auto preBuff = mutator->MovePreBuff();
-    ASSERT(preBuff != nullptr);
-    this->GetInternalAllocator()->Delete(preBuff);
-
+    auto satbBuff = mutator->MoveSatbBuff();
+    ASSERT(satbBuff != nullptr);
+    auto allocator = this->GetInternalAllocator();
+    allocator->DeleteArray(satbBuff);
+    if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
+        mutator->AllocateSatbBuff(allocator);
+    }
     auto *localBuffer = mutator->GetG1PostBarrierBuffer();
     mutator->ResetG1PostBarrierBuffer();
     ASSERT(localBuffer != nullptr);
-    this->GetInternalAllocator()->Delete(localBuffer);
+    allocator->Delete(localBuffer);
 }
 
 template <class LanguageConfig>
