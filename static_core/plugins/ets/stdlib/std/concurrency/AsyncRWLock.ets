@@ -29,7 +29,7 @@ export namespace concurrency.stackless {
  * @interface AsyncBaseLock
  * @syscap SystemCapability.Utils.Lang
  */
-export interface AsyncBaseLock {
+interface AsyncBaseLock {
     lock(): Promise<void>;
     unlock(): void;
 }
@@ -40,7 +40,7 @@ export interface AsyncBaseLock {
  * @interface AsyncRWLock
  * @syscap SystemCapability.Utils.Lang
  */
-export interface AsyncRWLock {
+interface AsyncRWLock {
     readLock(): AsyncReadLock;
     writeLock(): AsyncWriteLock;
 }
@@ -250,7 +250,7 @@ class State {
  * @implements AsyncRWLock
  * @syscap SystemCapability.Utils.Lang
  */
-export class AsyncReadWriteLock implements AsyncRWLock {
+class AsyncReadWriteLock implements AsyncRWLock {
     constructor() {
         this.rLock_ = new AsyncReadLock(this);
         this.wLock_ = new AsyncWriteLock(this);
@@ -376,7 +376,7 @@ export class AsyncReadWriteLock implements AsyncRWLock {
  * @implements AsyncBaseLock
  * @syscap SystemCapability.Utils.Lang
  */
-export class AsyncReadLock implements AsyncBaseLock {
+class AsyncReadLock implements AsyncBaseLock {
     constructor(rwl: AsyncReadWriteLock) {
         this.rwl_ = rwl;
     }
@@ -410,7 +410,7 @@ export class AsyncReadLock implements AsyncBaseLock {
  * @implements AsyncBaseLock
  * @syscap SystemCapability.Utils.Lang
  */
-export class AsyncWriteLock implements AsyncBaseLock {
+class AsyncWriteLock implements AsyncBaseLock {
     constructor(rwl: AsyncReadWriteLock) {
         this.rwl_ = rwl;
     }

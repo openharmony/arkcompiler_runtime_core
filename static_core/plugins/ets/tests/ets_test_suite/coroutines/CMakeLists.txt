@@ -37,7 +37,7 @@ function(add_ets_coroutines_test)
     set(prefix ARG)
     set(noValues SKIP_ARM32_COMPILER LIST_UNHANDLED)
     set(singleValues FILE)
-    set(multiValues OPTIONS IMPL OPTION_SETS_STACKFUL OPTION_SETS_STACKLESS WORKERS MODE)
+    set(multiValues OPTIONS IMPL OPTION_SETS_STACKFUL WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # NOTE(26403) Profilesaver is turned off beause of integer overflow
@@ -53,8 +53,6 @@ function(add_ets_coroutines_test)
         list(APPEND list_unhandled_option "--list-unhandled-on-exit:promises=throw")
     endif()
 
-    get_target_property(STACKLESS_STDLIB etsstdlib.stackless FILE)
-
     foreach(impl ${ARG_IMPL})
         string(TOLOWER "${impl}" impl_name)
         set(impl_option "--coroutine-impl=${impl_name}")
@@ -62,13 +60,6 @@ function(add_ets_coroutines_test)
            (CMAKE_BUILD_TYPE STREQUAL "Debug" OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
             list(APPEND impl_option "--coroutine-stack-size-pages=128")
         endif()
-        set(fe_options "")
-        if (impl STREQUAL "STACKLESS")
-            list(APPEND fe_options "--stackless-coros=true")
-            set(BOOT_PANDA_FILES_OLD ${BOOT_PANDA_FILES})
-            set(BOOT_PANDA_FILES ${STACKLESS_STDLIB})
-        endif()
-
         foreach(workers_count ${ARG_WORKERS})
             set(workers_option "--coroutine-workers-count=0")
             if (workers_count STREQUAL "ONE")
@@ -98,14 +89,9 @@ function(add_ets_coroutines_test)
                              TEST_NAME "${test_name}_${impl_name}_${options_name}_workers_${workers_count}"
                              OPTIONS ${ARG_OPTIONS} ${impl_option} ${additional_options} ${workers_option} ${list_unhandled_option}
                              MODE ${ARG_MODE}
-                             COMPILER_EXTRA_OPTIONS ${fe_options}
                 )
             endforeach()
         endforeach()
-
-        if (impl STREQUAL "STACKLESS")
-            set(BOOT_PANDA_FILES ${BOOT_PANDA_FILES_OLD})
-        endif()
     endforeach()
 endfunction()
 
@@ -179,14 +165,6 @@ add_ets_coroutines_test(FILE launch_instruction.ets
                         MODE "INT" "JIT"
 )
 
-add_ets_coroutines_test(FILE launch_instruction.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKLESS"
-                        OPTION_SETS_STACKLESS "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
 add_ets_coroutines_test(FILE launch_launch.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL" # Issue 24058
@@ -233,14 +211,6 @@ if (NOT PANDA_TARGET_ARM32)
                             OPTION_SETS_STACKFUL "NO_POOL"
                             WORKERS "ONE"
                             MODE "AOT"
-    )
-
-    add_ets_coroutines_test(FILE launch_instr_array.ets
-                            SKIP_ARM32_COMPILER
-                            IMPL "STACKLESS"
-                            OPTION_SETS_STACKLESS "DEFAULT"
-                            WORKERS "AUTO"
-                            MODE "INT" "JIT" "AOT"
     )
 
     add_ets_coroutines_test(FILE class_load_race.ets
@@ -377,14 +347,6 @@ add_ets_coroutines_test(FILE launch_return.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE launch_return.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKLESS"
-                        OPTION_SETS_STACKLESS "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
 add_ets_coroutines_test(FILE launch_yield.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -401,14 +363,6 @@ add_ets_coroutines_test(FILE launch_yield.ets
                         MODE "INT" "JIT"
 )
 
-add_ets_coroutines_test(FILE launch_yield.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKLESS"
-                        OPTION_SETS_STACKLESS "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
 add_ets_coroutines_test(FILE affinity.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -421,14 +375,6 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
-add_ets_coroutines_test(FILE wake_for_another_event.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKLESS"
-                        OPTION_SETS_STACKLESS "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
 )

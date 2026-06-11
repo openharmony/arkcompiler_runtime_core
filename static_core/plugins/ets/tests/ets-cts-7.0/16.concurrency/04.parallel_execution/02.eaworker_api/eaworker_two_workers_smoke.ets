@@ -26,7 +26,7 @@ tags: [no-warmup]
 ---*/
 
 async function startTest() {
-  let rwLock = new concurrency.stackless.AsyncReadWriteLock()
+  let rwLock = new RWLock()
   let readLock = rwLock.readLock()
   let writeLock = rwLock.writeLock()
 
@@ -42,7 +42,7 @@ async function startTest() {
 
   let job1 = ea1.run<undefined>( async () => {
       console.log("S1=" + readRun) // To ensure the async function has started.
-      await readLock.lock()
+      readLock.lock()
       readRun = true
       i++
       arktest.assertEQ(1, i)
@@ -53,7 +53,7 @@ async function startTest() {
 
   let job2 = ea2.run<undefined>(async () => {
       console.log("S2=" + writeRun) // To ensure the async function has started.
-      await writeLock.lock()
+      writeLock.lock()
       writeRun = true
       i++
       arktest.assertEQ(1, i)

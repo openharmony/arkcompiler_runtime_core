@@ -478,8 +478,8 @@ export abstract class InternalWorker {
 
 class InteropWorker extends InternalWorker {
     private interopInitialized: AtomicFlag = new AtomicFlag(false);
-    private pendingTasks: containers.stackless.ConcurrentQueue<PendingTaskHandler> =
-        new containers.stackless.LinkedConcurrentQueue<PendingTaskHandler>();
+    private pendingTasks: containers.BlockingQueue<PendingTaskHandler> =
+        new containers.LinkedBlockingQueue<PendingTaskHandler>();
 
     constructor(name: string) {
         super(name, INVALID_WORKER_ID);

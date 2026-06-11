@@ -31,7 +31,7 @@ export namespace containers.stackless {
     * @class ArrayConcurrentQueue
     * @syscap SystemCapability.Utils.Lang
     */
-    export class ArrayConcurrentQueue<T extends Object> implements ConcurrentQueue<T> {
+    class ArrayConcurrentQueue<T extends Object> implements ConcurrentQueue<T> {
         /**
         * Constructs a ArrayConcurrentQueue with provided capacity.
         *
@@ -46,7 +46,7 @@ export namespace containers.stackless {
             this.capacitySize = capacity;
             this.array = Array.create<T|undefined>(this.capacitySize, undefined);
             this.mutex = ConcurrencyHelpers.mutexCreate();
-            this.condVar = new concurrency.stackless.AsyncCondVarBasedMutex();
+            this.condVar = new CondVarBasedMutex();
         }
 
         /**
@@ -288,7 +288,7 @@ export namespace containers.stackless {
         private curHeadIdx: int = 0;                           // Index of the first element in a ArrayConcurrentQueue
         private curTailIdx: int = 0;                           // Index of the last element in a ArrayConcurrentQueue
         private mutex: Object;                                 // push/pop Mutex
-        private condVar: concurrency.stackless.AsyncCondVarBasedMutex; // push/pop CondVar
+        private condVar: CondVarBasedMutex; // push/pop CondVar
         private capacitySize: int = 0;
         private isQueueFull: boolean = false;
         private isQueueEmpty: boolean = true;

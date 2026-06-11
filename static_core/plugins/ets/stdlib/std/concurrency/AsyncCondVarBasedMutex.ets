@@ -31,7 +31,7 @@ export namespace concurrency.stackless {
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
  */
-export final class AsyncCondVarBasedMutex {
+final class AsyncCondVarBasedMutex {
     constructor() {
         this.waitersList_ = new WaitersList();
         this.waiters_ = 0;

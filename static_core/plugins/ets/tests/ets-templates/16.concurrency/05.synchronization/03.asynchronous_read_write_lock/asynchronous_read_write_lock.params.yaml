@@ -16,7 +16,7 @@ cases:
   - desc: Asynchronous read/write lock basic functionality.
     logic: |-
       async function startTest(): Promise<void> {
-        let rwLock = new concurrency.stackless.AsyncReadWriteLock();
+        let rwLock = new RWLock();
         let readLock = rwLock.readLock();
         let writeLock = rwLock.writeLock();
         let i = 0;
@@ -24,7 +24,7 @@ cases:
         const ea1 = new EAWorker();
         ea1.start();
         await ea1.run<undefined>(async () => {
-          await readLock.lock();
+          readLock.lock();
           try {
             i++;
             arktest.assertEQ(i, 1);
@@ -37,7 +37,7 @@ cases:
         const ea2 = new EAWorker();
         ea2.start();
         await ea2.run<undefined>(async () => {
-          await writeLock.lock();
+          writeLock.lock();
           try {
             i++;
             arktest.assertEQ(i, 1);
