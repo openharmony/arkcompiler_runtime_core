@@ -28,13 +28,6 @@
 07.expressions/10.field_access_expressions/03.accessing_superclass_accessors/accessing_by_super_indirect_1.ets
 07.expressions/10.field_access_expressions/03.accessing_superclass_accessors/multiple_interface_access_1.ets
 
-#31822 Optional parameters count are not considered for function type subtyping
-07.expressions/16.instanceof_expression/instanceof_func_15.ets
-07.expressions/16.instanceof_expression/instanceof_func_16.ets
-
-#31831 Rest parameter checked with last, not with the same place
-07.expressions/16.instanceof_expression/instanceof_func_27.ets
-
 #33798: Proper CTE for type-erased instanceof
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_0.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_1.ets
@@ -167,7 +160,6 @@
 
 #33978
 11.enumerations/01.enumeration_base_type/enum_str_1.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_float_decl_udvt_0_0.ets
 11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_0_0.ets
 
 #29683
@@ -248,9 +240,6 @@
 #34907 No warning message on type unsafe casting
 15.semantic_rules/11.type_erasure/cast_erasure_warning_w_2.ets
 15.semantic_rules/11.type_erasure/cast_erasure_warning_w_3.ets
-
-#34861
-16.concurrency/04.parallel_execution/02.eaworker_api/eaworker_two_workers_smoke.ets
 
 #34056 Wrong CTE on creating FixedArray with non-default constructor type
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con2_23.ets
