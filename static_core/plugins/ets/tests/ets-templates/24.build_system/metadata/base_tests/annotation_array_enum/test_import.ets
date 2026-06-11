@@ -15,9 +15,6 @@
 /*---
 desc: >-
     Test annotation with array and enum property values.
-    Covers ETSemitter ProcessArrayType, ProcessETSEnumType,
-    CreateLiteralArray, ChooseETSEnumType, CreateEnumProp,
-    ProcessEnumExpression (enum values inside array annotation).
 files: [lib_meta.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

@@ -100,6 +100,7 @@
 17.experimental_features/packages/import_and_overloading_of_function_names/pkg_a/pkg_9.ets
 17.experimental_features/packages/package_declarations_0.ets
 17.experimental_features/packages/package_declarations_1.ets
+24.build_system/metadata/base_tests/import_default_with_named/test_import.ets
 #FailKind.DECLGEN_ETS2TS_FAIL - 24 tests:
 03.types/18.function_types/incorrect_function_name_43.ets
 03.types/18.function_types/incorrect_function_name_50.ets
@@ -2256,6 +2257,15 @@
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_enum.ets
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_genparams.ets
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_union.ets
+24.build_system/metadata/base_tests/generic_readonly_cross_package/test_import.ets
+24.build_system/metadata/base_tests/tuple_as_field_type_cross_package/test_import.ets
+24.build_system/metadata/base_tests/returntype_utility_cross_package/test_import.ets
+24.build_system/metadata/base_tests/reexport_star_chain/test_import.ets
+24.build_system/metadata/base_tests/generic_returntype_cross_package/test_import.ets
+24.build_system/metadata/base_tests/tuple_cross_package/test_import.ets
+24.build_system/metadata/base_tests/readonly_utility_cross_package/test_import.ets
+24.build_system/metadata/base_tests/reexport_chain_three_packages/test_import.ets
+24.build_system/metadata/base_tests/partial_utility_cross_package/test_import.ets
 
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL

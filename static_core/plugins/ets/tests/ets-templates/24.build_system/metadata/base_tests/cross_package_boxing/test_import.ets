@@ -15,9 +15,6 @@
 /*---
 desc: >-
     Test boxing/unboxing conversions across packages.
-    Covers conversion.cpp Boxing, Unboxing, BoxingWideningReference,
-    UnboxingWideningPrimitive.
-    Also covers ETSAnalyzer HasParameterlessConstructor via object literal.
 files: [lib_box.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

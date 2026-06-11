@@ -16,7 +16,7 @@
 /*---
 desc: >-
     Test import of aliased exports (export { X as Y }).
-    Covers exportSpecifier.cpp code paths.
+    Covers export specifier.
 files: [lib_spec.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

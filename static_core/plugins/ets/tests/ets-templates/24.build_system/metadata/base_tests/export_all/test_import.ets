@@ -16,7 +16,6 @@
 /*---
 desc: >-
     Test export * from re-export.
-    Covers exportAllDeclaration.cpp code paths.
 files: [lib_origin.ets, lib_reexport.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

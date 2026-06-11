@@ -16,7 +16,7 @@
 /*---
 desc: >-
     Test default import (import Calc from ...).
-    Covers importDefaultSpecifier.cpp and exportDefaultDeclaration.cpp code paths.
+    Covers import default specifier and export default declaration.
 files: [lib_default.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

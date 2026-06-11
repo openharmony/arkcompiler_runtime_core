@@ -16,7 +16,6 @@
 /*---
 desc: >-
     Library using export specifiers with aliases (export { X as Y }).
-    Covers exportSpecifier.cpp Dump branches with aliased local exports.
 tags: [not-a-test, compile-only]
 name: lib_spec
 arktsconfig: arktsconfig-lib.json

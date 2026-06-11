@@ -2,6 +2,8 @@
 13.modules_and_namespaces/07.export_directives/04.re-export_directive/reexported_default.ets
 13.modules_and_namespaces/07.export_directives/04.re-export_directive/reexported_default_2.ets
 13.modules_and_namespaces/07.export_directives/04.re-export_directive/reexported_default_3.ets
+24.build_system/metadata/base_tests/reexport_named_as_default/test_import.ets
+24.build_system/metadata/base_tests/reexport_default_renamed/test_import.ets
 
 #34565
 15.semantic_rules/12.type_erasure/instanceof_n_1.ets

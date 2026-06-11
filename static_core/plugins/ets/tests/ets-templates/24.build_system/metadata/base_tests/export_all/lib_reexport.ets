@@ -16,7 +16,6 @@
 /*---
 desc: >-
     Proxy library re-exporting everything from origin using export * from.
-    Covers exportAllDeclaration.cpp code paths.
 tags: [not-a-test, compile-only]
 name: lib_reexport
 arktsconfig: arktsconfig-reexport.json

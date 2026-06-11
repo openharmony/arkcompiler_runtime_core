@@ -15,7 +15,6 @@
 /*---
 desc: >-
     Test narrowing reference conversion across packages.
-    Covers conversion.cpp NarrowingReference, IsAllowedNarrowingReferenceConversion.
 files: [lib_shapes.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

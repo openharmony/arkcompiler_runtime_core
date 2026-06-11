@@ -16,7 +16,7 @@
 /*---
 desc: >-
     Cross-module type identity should work with relative imports.
-    lib_child.etscache uses relative import (from ./lib_base).
+    lib_child serialization uses relative import (from ./lib_base).
     Assigning Child to Base should work because the compiler
     should resolve same type identities for Base accessed via package path
     vs through the relative-import declaration file.

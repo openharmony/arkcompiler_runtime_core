@@ -497,6 +497,8 @@
 
 #34836
 24.build_system/metadata/base_tests/export_specifier_dump/test_import.ets
+24.build_system/metadata/base_tests/export_type_directive_rename/test_import.ets
+24.build_system/binary-metadata/base_tests/export_type_directive_rename/test_import.ets
 
 #34837
 24.build_system/metadata/base_tests/simultaneous_glob_dets/test_main.ets
@@ -515,6 +517,19 @@
 #35170
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_extends_cycle.ets
 24.build_system/binary-metadata/complex_tests/stress_limits_cross_package/test_extends_cycle.ets
+#35050
+24.build_system/metadata/base_tests/type_alias_across_packages_via_utility/test_import.ets
+24.build_system/binary-metadata/base_tests/type_alias_across_packages_via_utility/test_import.ets
+24.build_system/metadata/base_tests/generic_partial_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/generic_partial_cross_package/test_import.ets
+
+#35068
+24.build_system/metadata/base_tests/stdlib_function_redefine_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/stdlib_function_redefine_cross_package/test_import.ets
+24.build_system/metadata/base_tests/stdlib_variable_redefine_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/stdlib_variable_redefine_cross_package/test_import.ets
+24.build_system/metadata/base_tests/stdlib_class_redefine_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/stdlib_class_redefine_cross_package/test_import.ets
 
 #34886
 24.build_system/binary-metadata/base_tests/abstract_class/test_import.ets
@@ -579,6 +594,20 @@
 24.build_system/binary-metadata/complex_tests/stress_limits_cross_package/test_deepnest.ets
 24.build_system/binary-metadata/complex_tests/stress_limits_cross_package/test_multi_import.ets
 24.build_system/binary-metadata/complex_tests/stress_limits_cross_package/test_multi_import_index_overflow.ets
+24.build_system/binary-metadata/base_tests/generic_readonly_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/import_default_with_named/test_import.ets
+24.build_system/binary-metadata/base_tests/import_default_with_namespace/test_import.ets
+24.build_system/binary-metadata/base_tests/imported_annotation_extra_field_n/test_import_n.ets
+24.build_system/binary-metadata/base_tests/imported_annotation_single_field/test_import.ets
+24.build_system/binary-metadata/base_tests/imported_function_local_var_shadow/test_import.ets
+24.build_system/binary-metadata/base_tests/nested_shadow_stdlib_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/partial_utility_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/readonly_utility_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/reexport_chain_three_packages/test_import.ets
+24.build_system/binary-metadata/base_tests/reexport_default_renamed/test_import.ets
+24.build_system/binary-metadata/base_tests/reexport_named_as_default/test_import.ets
+24.build_system/binary-metadata/base_tests/reexport_rename_multiple_aliases/test_import.ets
+24.build_system/binary-metadata/base_tests/reexport_star_chain/test_import.ets
 
 #34887
 24.build_system/binary-metadata/base_tests/all_combined/main.ets
@@ -627,3 +656,14 @@
 24.build_system/binary-metadata/complex_tests/simultaneous_all_features/test_features_9.ets
 24.build_system/binary-metadata/complex_tests/simultaneous_all_features/test_instanceof.ets
 24.build_system/binary-metadata/complex_tests/simultaneous_all_features/test_upcast.ets
+24.build_system/binary-metadata/base_tests/import_alias_stdlib_collision_n/test_alias_class_n.ets
+24.build_system/binary-metadata/base_tests/tuple_in_generic_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/generic_returntype_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/imported_annotation_unknown_field_n/test_import_n.ets
+24.build_system/binary-metadata/base_tests/tuple_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/import_alias_stdlib_collision_n/test_alias_function_n.ets
+24.build_system/binary-metadata/base_tests/returntype_utility_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/namespace_stdlib_named_func_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/import_alias_stdlib_collision_n/test_alias_var_n.ets
+24.build_system/binary-metadata/base_tests/tuple_as_field_type_cross_package/test_import.ets
+24.build_system/binary-metadata/base_tests/local_var_shadows_stdlib_function/test_import.ets
