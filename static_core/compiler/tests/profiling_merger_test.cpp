@@ -122,7 +122,9 @@ bool Equals(const Span<T> &lhs, const Span<T> &rhs)
 
 bool Equals(const ProfilingData &lhs, const ProfilingData &rhs)
 {
-    return Equals(lhs.GetBranchData(), rhs.GetBranchData()) && Equals(lhs.GetThrowData(), rhs.GetThrowData()) &&
+    bool branchesMatch =
+        lhs.IsBranchProfilingEnabled() ? Equals(lhs.GetBranchData(), rhs.GetBranchData()) : rhs.GetBranchData().empty();
+    return branchesMatch && Equals(lhs.GetThrowData(), rhs.GetThrowData()) &&
            Equals(lhs.GetInlineCaches(), rhs.GetInlineCaches());
 }
 

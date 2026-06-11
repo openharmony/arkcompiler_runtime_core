@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,12 +30,7 @@ public:
     public:
         Buffer() : buffer_(0), bufferSize_(0), currSize_(0) {}
 
-        explicit Buffer(uint32_t size)
-            : buffer_(size > 1_MB ? LOG(FATAL, RUNTIME) << "Allocated of huge memory is not allowed" : size),
-              bufferSize_(size),
-              currSize_(0)
-        {
-        }
+        explicit Buffer(uint32_t size) : buffer_(size), bufferSize_(size), currSize_(0) {}
 
         Span<uint8_t> GetBuffer()
         {
@@ -88,6 +83,8 @@ private:
     enum ProfileType : uint32_t { NO = 0x00, VCALL = 0x01, BRANCH = 0x02, THROW = 0x04, ALL = 0xFFFFFFFF };
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     static constexpr uint32_t PROFILE_TYPE = ProfileType::VCALL | ProfileType::BRANCH | ProfileType::THROW;
+    static constexpr uint64_t PROFILE_SIZE_WARNING_LIMIT = 5_MB;
+    static constexpr uint64_t PROFILE_SIZE_HARD_LIMIT = 15_MB;
 
     enum FileType : uint32_t { PFILE = 0, BOOT = 1, APP = 2 };
 
@@ -102,16 +99,20 @@ private:
     // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
     static uint32_t WriteFileHeader(std::ofstream &fd, const std::array<char, MAGIC_SIZE> &magic,
                                     const std::array<char, VERSION_SIZE> &version, uint32_t versionPType,
-                                    uint32_t savedPType, const PandaString &classCtxStr);
+                                    uint32_t savedPType, const PandaString &classCtxStr, uint32_t headerSize);
 
     static uint32_t WriteSectionInfosSection(std::ofstream &fd, PandaVector<SectionInfo> &sectionInfos);
 
-    static uint32_t GetSectionInfosSectionSize(uint32_t sectionNumer)
-    {
-        return sectionNumer * sizeof(SectionInfo) + sizeof(SectionsInfoSectionHeader);
-    }
-
     static uint32_t GetMaxMethodSectionSize(AotProfilingData::MethodsMap &methods);
+
+    struct ProfileSizeInfo {
+        uint64_t totalSize;
+        uint64_t headerSize;
+        uint64_t pandaFilesSize;
+        uint64_t sectionInfosSize;
+    };
+
+    static ProfileSizeInfo GetProfileSizeInfo(AotProfilingData *profObject, const PandaString &classCtxStr);
     static uint32_t GetMethodSectionProf(AotProfilingData::MethodsMap &methods);
     static uint32_t WriteInlineCachesToStream(uint32_t streamBegin, Buffer *buffer,
                                               Span<AotProfilingData::AotCallSiteInlineCache> inlineCaches);
@@ -126,8 +127,8 @@ private:
 
     using FileToMethodsMap = PandaMap<PandaFileIdxType, AotProfilingData::MethodsMap>;
     uint32_t WriteAllMethodsSections(std::ofstream &fd, FileToMethodsMap &methods);
-    uint32_t WritePandaFilesSection(std::ofstream &fd, PandaMap<int32_t, std::string_view> &pandaFileMap);
-    uint32_t GetSectionNumbers(FileToMethodsMap &methods);
+    uint32_t WritePandaFilesSection(std::ofstream &fd, PandaMap<int32_t, std::string_view> &pandaFileMap,
+                                    uint32_t sectionSize);
     uint32_t GetSavedTypes(FileToMethodsMap &allMethodsMap);
 
     PandaVector<SectionInfo> sectionInfos_;

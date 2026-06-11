@@ -49,14 +49,10 @@ static_assert(sizeof(MethodDataHeader) == 16, "Header of one method data sub-sec
 // NOLINTNEXTLINE(readability-magic-numbers)
 static_assert(sizeof(AotProfileDataHeader) == 12, "Header of one profile data sub-section is 12 bytes");
 
-uint32_t AotPgoFile::WritePandaFilesSection(std::ofstream &fd, PandaMap<int32_t, std::string_view> &pandaFileMap)
+uint32_t AotPgoFile::WritePandaFilesSection(std::ofstream &fd, PandaMap<int32_t, std::string_view> &pandaFileMap,
+                                            uint32_t sectionSize)
 {
-    PandaFilesSectionHeader sectionHeader = {static_cast<uint32_t>(pandaFileMap.size()),
-                                             static_cast<uint32_t>(sizeof(PandaFilesSectionHeader))};
-
-    for (auto &fileInfo : pandaFileMap) {
-        sectionHeader.sectionSize += sizeof(PandaFileInfoHeader) + fileInfo.second.size() + 1;
-    }
+    PandaFilesSectionHeader sectionHeader = {static_cast<uint32_t>(pandaFileMap.size()), sectionSize};
     AotPgoFile::Buffer buffer(sectionHeader.sectionSize);
 
     uint32_t currPos = 0;
@@ -126,32 +122,51 @@ uint32_t AotPgoFile::WriteAllMethodsSections(std::ofstream &fd, FileToMethodsMap
 
 uint32_t AotPgoFile::GetMaxMethodSectionSize(AotProfilingData::MethodsMap &methods)
 {
-    uint32_t size = 0;
+    if (methods.empty()) {
+        return 0;
+    }
+
+    uint32_t size = sizeof(MethodsHeader);
     for (auto &[methodIdx, methodProfData] : methods) {
-        bool empty = true;
+        size += sizeof(MethodDataHeader);
         auto inlineCaches = methodProfData.GetInlineCaches();
         auto branches = methodProfData.GetBranchData();
         auto throws = methodProfData.GetThrowData();
         if (!inlineCaches.empty()) {
             size += sizeof(AotProfileDataHeader) + inlineCaches.SizeBytes();
-            empty = false;
         }
         if (!branches.empty()) {
             size += sizeof(AotProfileDataHeader) + branches.SizeBytes();
-            empty = false;
         }
         if (!throws.empty()) {
             size += sizeof(AotProfileDataHeader) + throws.SizeBytes();
-            empty = false;
         }
-        if (!empty) {
-            size += sizeof(MethodDataHeader);
-        }
-    }
-    if (size > 0) {
-        size += sizeof(MethodsHeader);
     }
     return size;
+}
+
+AotPgoFile::ProfileSizeInfo AotPgoFile::GetProfileSizeInfo(AotProfilingData *profObject, const PandaString &classCtxStr)
+{
+    ProfileSizeInfo info {};
+    info.sectionInfosSize = sizeof(SectionsInfoSectionHeader);
+    uint64_t methodsSize = 0;
+
+    for (auto &methods : profObject->GetAllMethods()) {
+        auto sectionSize = GetMaxMethodSectionSize(methods.second);
+        if (sectionSize == 0) {
+            continue;
+        }
+        info.sectionInfosSize += sizeof(SectionInfo);
+        methodsSize += sectionSize;
+    }
+
+    info.headerSize = sizeof(PgoHeader) + classCtxStr.size() + 1;
+    info.pandaFilesSize = sizeof(PandaFilesSectionHeader);
+    for (auto &fileInfo : profObject->GetPandaFileMapReverse()) {
+        info.pandaFilesSize += sizeof(PandaFileInfoHeader) + fileInfo.second.size() + 1;
+    }
+    info.totalSize = info.headerSize + info.pandaFilesSize + info.sectionInfosSize + methodsSize;
+    return info;
 }
 
 uint32_t AotPgoFile::GetMethodSectionProf(AotProfilingData::MethodsMap &methods)
@@ -180,7 +195,7 @@ uint32_t AotPgoFile::WriteMethodsSection(std::ofstream &fd, int32_t pandaFileIdx
     MethodsHeader methodsSectionHeader = {static_cast<uint32_t>(methods.size()), pandaFileIdx};
 
     uint32_t sectionSize = GetMaxMethodSectionSize(methods);
-    Buffer buffer(sectionSize);
+    AotPgoFile::Buffer buffer(sectionSize);
 
     uint32_t writtenBytes = 0;
     uint32_t currPos = 0;
@@ -243,14 +258,10 @@ uint32_t AotPgoFile::WriteMethodSubSection(uint32_t &currPos, Buffer *buffer, ui
         currPos += thSize;
     }
 
-    if (methodHeader.chunkSize > sizeof(MethodDataHeader)) {
-        if (buffer->CopyToBuffer(&methodHeader, sizeof(MethodDataHeader), currMethodHeaderPos) == 0) {
-            return 0;
-        }
-        writtenBytes += sizeof(MethodDataHeader);
-    } else {
-        currPos -= sizeof(MethodDataHeader);
+    if (buffer->CopyToBuffer(&methodHeader, sizeof(MethodDataHeader), currMethodHeaderPos) == 0) {
+        return 0;
     }
+    writtenBytes += sizeof(MethodDataHeader);
     return writtenBytes;
 }
 
@@ -317,17 +328,6 @@ uint32_t AotPgoFile::WriteThrowDataToStream(uint32_t streamBegin, Buffer *buffer
     return writtenBytes;
 }
 
-uint32_t AotPgoFile::GetSectionNumbers(FileToMethodsMap &methods)
-{
-    uint32_t count = 0;
-    for (auto &method : methods) {
-        if (GetMaxMethodSectionSize(method.second) > 0) {
-            count++;
-        }
-    }
-    return count;
-}
-
 uint32_t AotPgoFile::GetSavedTypes(FileToMethodsMap &allMethodsMap)
 {
     uint32_t savedType = 0;
@@ -343,12 +343,11 @@ uint32_t AotPgoFile::GetSavedTypes(FileToMethodsMap &allMethodsMap)
 // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
 uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, MAGIC_SIZE> &magic,
                                      const std::array<char, VERSION_SIZE> &version, uint32_t versionPType,
-                                     uint32_t savedPType, const PandaString &classCtxStr)
+                                     uint32_t savedPType, const PandaString &classCtxStr, uint32_t headerSize)
 {
     uint32_t cha = classCtxStr.size() + 1;
-    uint32_t headerSize = sizeof(PgoHeader) + cha;
     PgoHeader header = {magic, version, versionPType, savedPType, headerSize, cha};
-    Buffer buffer(headerSize);
+    AotPgoFile::Buffer buffer(headerSize);
 
     if (buffer.CopyToBuffer(&header, sizeof(PgoHeader), 0) == 0) {
         return 0;
@@ -380,6 +379,17 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
 
 uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr)
 {
+    auto sizeInfo = GetProfileSizeInfo(profObject, classCtxStr);
+    if (sizeInfo.totalSize > PROFILE_SIZE_HARD_LIMIT) {
+        LOG(ERROR, RUNTIME) << "[profile_saver] Profile data size exceeds limit, skip saving: totalSize="
+                            << sizeInfo.totalSize << ", limit=" << PROFILE_SIZE_HARD_LIMIT;
+        return 0;
+    }
+    if (sizeInfo.totalSize > PROFILE_SIZE_WARNING_LIMIT) {
+        LOG(WARNING, RUNTIME) << "[profile_saver] Profile data size exceeds warning limit: totalSize="
+                              << sizeInfo.totalSize << ", warningLimit=" << PROFILE_SIZE_WARNING_LIMIT;
+    }
+
     // Atomic with relaxed order reason: counter only needs uniqueness, not synchronization with other data
     auto counter = PandaString(std::to_string(g_saveCounter.fetch_add(1, std::memory_order_relaxed)));
     auto tmpFileName = fileName + "." + counter + ".tmp";
@@ -394,18 +404,17 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
     uint32_t writtenBytes = 0;
 
     auto savedProf = GetSavedTypes(profObject->GetAllMethods());
-    auto headerBytes = WriteFileHeader(fd, MAGIC, VERSION, PROFILE_TYPE, savedProf, classCtxStr);
+    auto headerBytes = WriteFileHeader(fd, MAGIC, VERSION, PROFILE_TYPE, savedProf, classCtxStr,
+                                       static_cast<uint32_t>(sizeInfo.headerSize));
     CheckAndAddBytes(fd, tmpFileName, headerBytes, writtenBytes, "Failed to write profile header");
 
-    auto pandaFilesBytes = WritePandaFilesSection(fd, profObject->GetPandaFileMapReverse());
+    auto pandaFilesBytes = WritePandaFilesSection(fd, profObject->GetPandaFileMapReverse(),
+                                                  static_cast<uint32_t>(sizeInfo.pandaFilesSize));
     CheckAndAddBytes(fd, tmpFileName, pandaFilesBytes, writtenBytes, "Failed to write panda files section");
 
     uint32_t offset = writtenBytes;
-    auto sectionNum = GetSectionNumbers(profObject->GetAllMethods());
-    auto sectionInfosSize = GetSectionInfosSectionSize(sectionNum);
 
-    fd.seekp(sectionInfosSize, std::ios::cur);
-
+    fd.seekp(sizeInfo.sectionInfosSize, std::ios::cur);
     auto methodsBytes = WriteAllMethodsSections(fd, profObject->GetAllMethods());
     CheckAndAddBytes(fd, tmpFileName, methodsBytes, writtenBytes, "Failed to write methods sections");
 
