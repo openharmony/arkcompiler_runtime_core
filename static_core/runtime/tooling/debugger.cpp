@@ -651,6 +651,11 @@ void Debugger::MonitorContendedEntered(ObjectHeader *object)
     hooks_.MonitorContendedEntered(PtThread(ManagedThread::GetCurrent()), object);
 }
 
+void Debugger::NativeMethodCall(ManagedThread *managedThread, Method *method)
+{
+    hooks_.NativeMethodCall(PtThread(managedThread), method->GetNativePointer());
+}
+
 bool Debugger::HandleBreakpoint(ManagedThread *managedThread, Method *method, const PtLocation &location)
 {
     {

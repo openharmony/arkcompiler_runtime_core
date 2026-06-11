@@ -3639,6 +3639,12 @@ public:
     {
         HandleCallPrologue<IS_DYNAMIC_T>(method);
 
+        if constexpr (IS_DEBUG) {
+            if (method->IsNative()) {
+                Runtime::GetCurrent()->GetNotificationManager()->NativeMethodCallEvent(this->GetThread(), method);
+            }
+        }
+
         if (method->HasCompiledCode()) {
             CallCompiledCode<FORMAT, IS_DYNAMIC_T>(method);
         } else {

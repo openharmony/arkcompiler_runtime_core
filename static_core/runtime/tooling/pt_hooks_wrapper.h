@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -431,6 +431,18 @@ public:
         // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
         ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
         loadedHooks->ObjectAlloc(klass, object, thread, size);
+    }
+
+    void NativeMethodCall(PtThread thread, const void *nativeAddress) override
+    {
+        // Atomic with acquire order reason: data race with hooks_
+        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
+        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_NATIVE_METHOD_CALL)) {
+            return;
+        }
+        // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
+        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
+        loadedHooks->NativeMethodCall(thread, nativeAddress);
     }
 
 private:

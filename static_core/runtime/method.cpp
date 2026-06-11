@@ -24,7 +24,6 @@
 #include "runtime/include/method-inl.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
-#include "runtime/include/runtime_notification.h"
 #include "runtime/include/value-inl.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/interpreter/interpreter.h"

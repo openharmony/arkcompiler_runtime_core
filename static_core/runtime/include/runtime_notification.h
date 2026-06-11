@@ -92,6 +92,8 @@ public:
 
     virtual void OutOfMemory([[maybe_unused]] size_t size) {}
 
+    virtual void NativeMethodCall([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Method *method) {}
+
     // Deprecated events
     virtual void ThreadStart([[maybe_unused]] ManagedThread::ThreadId threadId) {}
     virtual void ThreadEnd([[maybe_unused]] ManagedThread::ThreadId threadId) {}
@@ -116,6 +118,7 @@ public:
 
 class RuntimeNotificationManager {
 public:
+    // Each event is a single bit in a bitmask, values follow the pattern 1 << n (0x01, 0x02, 0x04, ...)
     enum Event : uint32_t {
         BYTECODE_PC_CHANGED = 0x01,
         LOAD_MODULE = 0x02,
@@ -129,6 +132,7 @@ public:
         ALLOCATION_EVENTS = 0x200,
         CONSOLE_EVENTS = 0x400,
         OUT_OF_MEMORY_EVENTS = 0x800,
+        NATIVE_METHOD_CALL_EVENTS = 0x1000,
         ALL = 0xFFFFFFFF
     };
 
@@ -143,7 +147,8 @@ public:
           methodListeners_(allocator->Adapter()),
           classListeners_(allocator->Adapter()),
           monitorListeners_(allocator->Adapter()),
-          allocationFailedListeners_(allocator->Adapter())
+          allocationFailedListeners_(allocator->Adapter()),
+          nativeMethodCallListeners_(allocator->Adapter())
     {
     }
 
@@ -180,6 +185,9 @@ public:
 
         AddListenerIfMatches(listener, eventMask, &allocationFailedListeners_, Event::OUT_OF_MEMORY_EVENTS,
                              &hasAllocationFailedListeners_);
+
+        AddListenerIfMatches(listener, eventMask, &nativeMethodCallListeners_, Event::NATIVE_METHOD_CALL_EVENTS,
+                             &hasNativeMethodCallListeners_);
 
         {
             // We cannot stop GC thread, so holding lock to avoid data race
@@ -223,6 +231,9 @@ public:
 
         RemoveListenerIfMatches(listener, eventMask, &allocationFailedListeners_, Event::OUT_OF_MEMORY_EVENTS,
                                 &hasAllocationFailedListeners_);
+
+        RemoveListenerIfMatches(listener, eventMask, &nativeMethodCallListeners_, Event::NATIVE_METHOD_CALL_EVENTS,
+                                &hasNativeMethodCallListeners_);
 
         {
             // We cannot stop GC thread, so holding lock to avoid data race
@@ -515,6 +526,17 @@ public:
         }
     }
 
+    void NativeMethodCallEvent(ManagedThread *thread, Method *method)
+    {
+        if (UNLIKELY(hasNativeMethodCallListeners_)) {
+            for (auto *listener : nativeMethodCallListeners_) {
+                if (listener != nullptr) {
+                    listener->NativeMethodCall(thread, method);
+                }
+            }
+        }
+    }
+
     void StartDebugger()
     {
         os::memory::ReadLockHolder holder(debuggerLock_);
@@ -619,6 +641,7 @@ private:
     PandaList<RuntimeListener *> allocationListeners_;
     PandaList<RuntimeListener *> consoleListeners_;
     PandaList<RuntimeListener *> allocationFailedListeners_;
+    PandaList<RuntimeListener *> nativeMethodCallListeners_;
 
     bool hasBytecodePcListeners_ = false;
     bool hasLoadModuleListeners_ = false;
@@ -632,6 +655,7 @@ private:
     bool hasAllocationListeners_ = false;
     bool hasConsoleListeners_ = false;
     bool hasAllocationFailedListeners_ = false;
+    bool hasNativeMethodCallListeners_ = false;
     Rendezvous *rendezvous_ {nullptr};
 
     os::memory::RWLock debuggerLock_;
