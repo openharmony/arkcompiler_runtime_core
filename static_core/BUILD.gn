@@ -24,7 +24,7 @@ if (ark_standalone_build) {
 
 group("ark_packages") {
   deps = []
-  if (!is_host_product && enable_static_vm) {
+  if (!ark_is_host_product && enable_static_vm) {
     deps += plugin_ark_packages
     deps += [
       "$ark_root/compiler:libarktscompiler",
@@ -51,7 +51,7 @@ group("ark_packages") {
 
 group("ark_host_product_packages") {
   deps = []
-  if (is_host_product && enable_static_vm) {
+  if (ark_is_host_product && enable_static_vm) {
     deps += [
       "$ark_root/panda:arkts_bin",
       "$ark_root/runtime:libarkruntime",

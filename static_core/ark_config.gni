@@ -38,10 +38,10 @@ enable_hitrace =
 enable_qos =
     !ark_standalone_build && is_standard_system && current_os == "ohos" &&
     (current_cpu == "arm64" || current_cpu == "arm")
-    
+
 enable_hisysevent =
-    !ark_static_standalone_build && !ark_standalone_build && 
-    !(defined(is_arkui_x) && is_arkui_x) && is_ohos && is_standard_system    
+    !ark_static_standalone_build && !ark_standalone_build &&
+    !(defined(is_arkui_x) && is_arkui_x) && is_ohos && is_standard_system
 
 if (enable_hilog) {
   hiviewdfx_ext_deps += [ "hilog:libhilog" ]
@@ -140,7 +140,8 @@ declare_args() {
   is_ark_dfx_memory = false
 }
 
-if (is_host_product) {
+ark_is_host_product = defined(is_host_product) && is_host_product
+if (ark_is_host_product) {
   ark_ets_interop_js = false
 }
 
@@ -205,7 +206,7 @@ if (panda_runtime_sdk_build) {
   enable_irtoc = false
 }
 
-if (is_host_product || current_os == "win" ||
+if (ark_is_host_product || current_os == "win" ||
     current_os == "mingw" || current_os == "winuwp" || current_os == "mac" ||
     is_emulator || ark_use_common_runtime) {
   is_llvmbackend = false
