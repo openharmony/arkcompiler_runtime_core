@@ -15,12 +15,14 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <string_view>
 #include <utility>
 #include "include/class.h"
 #include "jit/profiling_data.h"
 #include "gmock/gmock.h"
 #include "panda_runner.h"
 #include "libarkbase/utils/string_helpers.h"
+#include "runtime/jit/libprofile/pgo_file_builder.h"
 #include "runtime/jit/profiling_saver.h"
 #include "runtime/jit/profiling_loader.h"
 
@@ -164,7 +166,9 @@ bool Equals(const Span<T> &lhs, const Span<T> &rhs)
 
 bool Equals(const ProfilingData &lhs, const ProfilingData &rhs)
 {
-    return Equals(lhs.GetBranchData(), rhs.GetBranchData()) && Equals(lhs.GetThrowData(), rhs.GetThrowData()) &&
+    bool branchesMatch =
+        lhs.IsBranchProfilingEnabled() ? Equals(lhs.GetBranchData(), rhs.GetBranchData()) : rhs.GetBranchData().empty();
+    return branchesMatch && Equals(lhs.GetThrowData(), rhs.GetThrowData()) &&
            Equals(lhs.GetInlineCaches(), rhs.GetInlineCaches());
 }
 
@@ -215,6 +219,51 @@ public:
         }
         ASSERT_TRUE(profileCtxOrError.HasValue());
         ASSERT_EQ(*profileCtxOrError, PandaString(classCtxStr_));
+    }
+
+    void SaveHeaderOnlyMethodProfile(uint32_t methodIdx, uint32_t classIdx)
+    {
+        pgo::AotProfilingData profileData;
+        PandaVector<std::string_view> pandaFiles;
+        pandaFiles.emplace_back("");
+        profileData.AddPandaFiles(pandaFiles);
+
+        pgo::AotProfilingData::AotMethodProfilingData methodProfile(methodIdx, classIdx, 0U, 0U, 0U);
+        profileData.AddMethod(0, methodIdx, std::move(methodProfile));
+
+        classCtxStr_ = "header-only-method.ctx";
+        pgo::AotPgoFile pgoFile;
+        ASSERT_NE(pgoFile.Save(PandaString(pgoFilePath_), &profileData, PandaString(classCtxStr_)), 0U);
+    }
+
+    void CheckHeaderOnlyMethodProfile(uint32_t methodIdx, uint32_t classIdx)
+    {
+        using ::testing::ElementsAre;
+
+        PandaString classCtx;
+        PandaVector<PandaString> pandaFiles;
+        auto profileOrError = pgo::AotPgoFile::Load(PandaString(pgoFilePath_), classCtx, pandaFiles);
+        if (!profileOrError) {
+            std::cerr << profileOrError.Error();
+        }
+        ASSERT_TRUE(profileOrError.HasValue());
+        ASSERT_EQ(classCtx, PandaString(classCtxStr_));
+        EXPECT_THAT(pandaFiles, ElementsAre(PandaString("")));
+
+        auto &allMethods = profileOrError.Value().GetAllMethods();
+        ASSERT_EQ(allMethods.size(), 1U);
+        auto fileIt = allMethods.find(0);
+        ASSERT_NE(fileIt, allMethods.end());
+        ASSERT_EQ(fileIt->second.size(), 1U);
+        auto methodIt = fileIt->second.find(methodIdx);
+        ASSERT_NE(methodIt, fileIt->second.end());
+
+        const auto &methodProfile = methodIt->second;
+        EXPECT_EQ(methodProfile.GetMethodIdx(), methodIdx);
+        EXPECT_EQ(methodProfile.GetClassIdx(), classIdx);
+        EXPECT_TRUE(methodProfile.GetInlineCaches().empty());
+        EXPECT_TRUE(methodProfile.GetBranchData().empty());
+        EXPECT_TRUE(methodProfile.GetThrowData().empty());
     }
 
     ark::Class *ClassResolver(uint32_t classIdx, [[maybe_unused]] size_t fileIdx)
@@ -425,6 +474,25 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithoutJitAndProfiler)
     {
         ProfilingLoader profilingLoader;
         LoadProfileFail(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, HeaderOnlyMethodProfileRoundTrip)
+{
+    InitPGOFilePath();
+    CreateRunner();
+    CollectProfile();
+
+    // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr uint32_t METHOD_IDX = 42U;
+    // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr uint32_t CLASS_IDX = 7U;
+    SaveHeaderOnlyMethodProfile(METHOD_IDX, CLASS_IDX);
+
+    {
+        CheckHeaderOnlyMethodProfile(METHOD_IDX, CLASS_IDX);
     }
 
     Runtime::Destroy();

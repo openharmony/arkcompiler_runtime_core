@@ -16,7 +16,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -29,9 +31,11 @@
 #include "include/runtime.h"
 #include "jit/libprofile/aot_profiling_data.h"
 #include "jit/libprofile/pgo_class_context_utils.h"
+#include "jit/libprofile/pgo_file_builder.h"
 #include "jit/profiling_loader.h"
 #include "jit/profiling_saver.h"
 #include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "panda_runner.h"
 #include "runtime/jit/profiling_data.h"
 #include "unit_test.h"
@@ -175,7 +179,7 @@ void AssertMergedCounters(const pgo::AotProfilingData::AotMethodProfilingData &m
                           const pgo::AotProfilingData::AotMethodProfilingData *oldProfile)
 {
     std::unordered_map<uint32_t, std::pair<uint64_t, uint64_t>> expectedBranches;
-    if (runtimeProfile != nullptr) {
+    if (runtimeProfile != nullptr && runtimeProfile->IsBranchProfilingEnabled()) {
         for (const auto &br : runtimeProfile->GetBranchData()) {
             expectedBranches[static_cast<uint32_t>(br.GetPc())] = {static_cast<uint64_t>(br.GetTakenCounter()),
                                                                    static_cast<uint64_t>(br.GetNotTakenCounter())};
@@ -229,6 +233,8 @@ class ProfilingRuntimeSaveMergeTest : public ::testing::Test {
 public:
     void SetUp() override
     {
+        Logger::InitializeDummyLogging();
+
         std::error_code ec;
         auto tmpDir = std::filesystem::temp_directory_path(ec);
         ASSERT_FALSE(ec);
@@ -354,6 +360,50 @@ private:
     std::string classCtxStr_;
     std::filesystem::path artifactsDir_;
 };
+
+TEST_F(ProfilingRuntimeSaveMergeTest, ProfileHardLimitKeepsOldProfile)
+{
+    auto filePath = std::filesystem::temp_directory_path() / "ark_profile_size_limit.ap";
+    std::filesystem::remove(filePath);
+
+    constexpr auto OLD_PROFILE = "old profile";
+    {
+        std::ofstream oldFile(filePath, std::ios::binary | std::ios::out);
+        ASSERT_TRUE(oldFile.is_open());
+        oldFile << OLD_PROFILE;
+    }
+
+    CollectProfile();
+
+    {
+        pgo::AotProfilingData profileData;
+        std::vector<std::string> pandaFiles {"large_profile.abc"};
+        profileData.AddPandaFiles(pandaFiles);
+        auto pandaFileIdx = profileData.GetPandaFileIdxByName(pandaFiles[0]);
+        ASSERT_GE(pandaFileIdx, 0);
+
+        constexpr uint32_t METHOD_IDX = 1U;
+        constexpr uint32_t CLASS_IDX = 2U;
+        constexpr size_t THROW_COUNT = 1400000U;
+        PandaVector<pgo::AotProfilingData::AotCallSiteInlineCache> inlineCaches;
+        PandaVector<pgo::AotProfilingData::AotBranchData> branches;
+        PandaVector<pgo::AotProfilingData::AotThrowData> throws(THROW_COUNT);
+        pgo::AotProfilingData::AotMethodProfilingData methodData(METHOD_IDX, CLASS_IDX, std::move(inlineCaches),
+                                                                 std::move(branches), std::move(throws));
+        profileData.AddMethod(pandaFileIdx, METHOD_IDX, std::move(methodData));
+
+        pgo::AotPgoFile pgoFile;
+        EXPECT_EQ(pgoFile.Save(PandaString(filePath.string()), &profileData, PandaString("ctx")), 0U);
+    }
+
+    std::ifstream oldFile(filePath, std::ios::binary | std::ios::in);
+    ASSERT_TRUE(oldFile.is_open());
+    std::string content((std::istreambuf_iterator<char>(oldFile)), std::istreambuf_iterator<char>());
+    EXPECT_EQ(content, OLD_PROFILE);
+
+    std::filesystem::remove(filePath);
+    DestroyRuntime();
+}
 
 TEST_F(ProfilingRuntimeSaveMergeTest, ProfileAddAndMergeTest)
 {

@@ -332,14 +332,18 @@ public:
     int64_t GetBranchTakenCounter(uintptr_t pc)
     {
         auto branch = FindBranchData(pc);
-        ASSERT(branch != nullptr);
+        if (branch == nullptr) {
+            return 0;
+        }
         return branch->GetTakenCounter();
     }
 
     int64_t GetBranchNotTakenCounter(uintptr_t pc)
     {
         auto branch = FindBranchData(pc);
-        ASSERT(branch != nullptr);
+        if (branch == nullptr) {
+            return 0;
+        }
         return branch->GetNotTakenCounter();
     }
 

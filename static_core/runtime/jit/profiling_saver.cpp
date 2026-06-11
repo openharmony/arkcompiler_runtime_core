@@ -188,7 +188,8 @@ void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, Method *metho
     uint32_t vcallsCount = runtimeICs.size();
 
     auto runtimeBrs = runtimeProfData->GetBranchData();
-    uint32_t branchCount = runtimeBrs.size();
+    bool saveBranchProfile = runtimeProfData->IsBranchProfilingEnabled();
+    uint32_t branchCount = saveBranchProfile ? runtimeBrs.size() : 0;
 
     auto runtimeThs = runtimeProfData->GetThrowData();
     uint32_t throwCount = runtimeThs.size();
@@ -200,7 +201,9 @@ void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, Method *metho
     currentLastSaved.branches.resize(branchCount);
     currentLastSaved.throws.resize(throwCount);
     CreateInlineCaches(&profilingData, runtimeICs, profileData);
-    CreateBranchData(&profilingData, runtimeBrs, currentLastSaved, *runtimeProfData, applyLastSaved);
+    if (saveBranchProfile) {
+        CreateBranchData(&profilingData, runtimeBrs, currentLastSaved, *runtimeProfData, applyLastSaved);
+    }
     CreateThrowData(&profilingData, runtimeThs, currentLastSaved, *runtimeProfData, applyLastSaved);
 
     auto methodIdx = method->GetFileId().GetOffset();
