@@ -1132,12 +1132,8 @@ public:
             }
         }
         if constexpr (inst_flags::HasFlags(OPCODE, inst_flags::GC_BARRIER | inst_flags::STORE)) {
-            auto reference = DataType::IsReference(inst->GetType());
-            if (reference && GetRuntime()->NeedsPreWriteBarrier()) {
-                inst->SetNeedPreWriteBarrier(true);
-            }
-            if (reference && GetRuntime()->NeedsPostWriteBarrier()) {
-                inst->SetNeedPostWriteBarrier(true);
+            if (DataType::IsReference(inst->GetType()) || DataType::IsAny(inst->GetType())) {
+                inst->SetNeedWriteBarrier(true);
             }
         }
         return inst;

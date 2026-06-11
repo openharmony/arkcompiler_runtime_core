@@ -760,8 +760,7 @@ Inst *InstBuilder::BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataT
         }
         // 2. Create an instruction to store a value to the resolved field
         auto storeField = graph_->CreateInstStoreResolvedObjectField(type, pc, nullptr, nullptr, nullptr,
-                                                                     TypeIdMixin {fieldId, GetGraph()->GetMethod()},
-                                                                     type == DataType::REFERENCE);
+                                                                     TypeIdMixin {fieldId, GetGraph()->GetMethod()});
         *resolveInst = resolveField;
         return storeField;
     }
@@ -769,7 +768,7 @@ Inst *InstBuilder::BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataT
     ASSERT(field != nullptr);
     auto storeField =
         graph_->CreateInstStoreObject(type, pc, nullptr, nullptr, TypeIdMixin {fieldId, GetGraph()->GetMethod()}, field,
-                                      GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
+                                      GetRuntime()->IsFieldVolatile(field));
     *resolveInst = nullptr;  // resolver is not needed in this case
     return storeField;
 }
@@ -836,13 +835,8 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
         }
         AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved static field address
-        //
-        // Note (electro.nick1, #33607): this 'needBarrier' parameter (and all the other cases below)
-        // seems to be redundant. The reason is that CreateInst(Args &&...args) from ir-builder API
-        // explicitly sets barrier flags (based on runtime, instruction type etc).
-        auto needsBarrier = DataType::IsReference(type) && GetRuntime()->NeedsReadBarrier();
-        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(
-            type, pc, resolveField, TypeIdMixin {typeId, GetGraph()->GetMethod()}, false, needsBarrier);
+        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc, resolveField,
+                                                                         TypeIdMixin {typeId, GetGraph()->GetMethod()});
         return loadField;
     }
 
@@ -852,9 +846,8 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
 
-    auto needsBarrier = DataType::IsReference(type) && GetRuntime()->NeedsReadBarrier();
     auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, TypeIdMixin {typeId, GetGraph()->GetMethod()},
-                                                  field, GetRuntime()->IsFieldVolatile(field), needsBarrier);
+                                                  field, GetRuntime()->IsFieldVolatile(field));
     // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
     // `IsInConstructor` check should not be necessary, but need proper frontend support first
     constexpr bool IS_STATIC = true;
@@ -907,9 +900,8 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
             // 2. GC Pre/Post write barriers may be needed.
             // Just call runtime EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED,
             // which performs all the necessary steps (see codegen.cpp for the details).
-            auto inst = graph_->CreateInstUnresolvedStoreStatic(type, pc, storeInput, saveState,
-                                                                TypeIdMixin {typeId, GetGraph()->GetMethod()}, true);
-            return inst;
+            return graph_->CreateInstUnresolvedStoreStatic(type, pc, storeInput, saveState,
+                                                           TypeIdMixin {typeId, GetGraph()->GetMethod()});
         }
         ASSERT(type != DataType::REFERENCE);
         // 1. Create an instruction to resolve an object's static field.
@@ -934,7 +926,7 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
                                                         GetRuntime()->GetClassForField(field));
     auto storeField =
         graph_->CreateInstStoreStatic(type, pc, initClass, storeInput, TypeIdMixin {typeId, GetGraph()->GetMethod()},
-                                      field, GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
+                                      field, GetRuntime()->IsFieldVolatile(field));
     AddInstruction(initClass);
     return storeField;
 }

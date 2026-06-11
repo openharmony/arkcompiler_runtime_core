@@ -108,7 +108,7 @@ void InstBuilder::BuildCoreArraySetUnsafeIntrinsic(const BytecodeInstruction *bc
         DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), GetGraph()->GetMethod()},
         bufferField, runtime->IsFieldVolatile(bufferField));
     AddInstruction(buffer);
-    auto *result = GetGraph()->CreateInstStoreArray(DataType::REFERENCE, bcAddr, buffer, pos, value, true);
+    auto *result = GetGraph()->CreateInstStoreArray(DataType::REFERENCE, bcAddr, buffer, pos, value);
     AddInstruction(result);
 }
 
