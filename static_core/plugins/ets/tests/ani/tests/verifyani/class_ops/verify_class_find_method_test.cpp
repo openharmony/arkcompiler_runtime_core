@@ -61,7 +61,7 @@ TEST_F(ClassFindMethodTest, lookup_status_is_forwarded_without_verify_abort)
     ASSERT_EQ(env_->Class_FindMethod(class_, "missingMethod", ":i", &method), ANI_NOT_FOUND);
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},       {"class", "ani_class"},
-        {"name", "const char *"},   {"signature", "const char *", "method not found"},
+        {"name", "const char *"},   {"signature", "const char *", "method not found [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", missingLines);
@@ -69,7 +69,7 @@ TEST_F(ClassFindMethodTest, lookup_status_is_forwarded_without_verify_abort)
     ASSERT_EQ(env_->Class_FindMethod(class_, "overloaded", nullptr, &method), ANI_AMBIGUOUS);
     std::vector<TestLineInfo> ambiguousLines {
         {"env", "ani_env *"},       {"class", "ani_class"},
-        {"name", "const char *"},   {"signature", "const char *", "method lookup is ambiguous"},
+        {"name", "const char *"},   {"signature", "const char *", "method lookup is ambiguous [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", ambiguousLines);
@@ -77,7 +77,7 @@ TEST_F(ClassFindMethodTest, lookup_status_is_forwarded_without_verify_abort)
     ASSERT_EQ(env_->Class_FindMethod(class_, "method", "X", &method), ANI_INVALID_DESCRIPTOR);
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},       {"class", "ani_class"},
-        {"name", "const char *"},   {"signature", "const char *", "method signature descriptor is invalid"},
+        {"name", "const char *"},   {"signature", "const char *", "method signature descriptor is invalid [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", invalidDescriptorLines);
@@ -85,7 +85,7 @@ TEST_F(ClassFindMethodTest, lookup_status_is_forwarded_without_verify_abort)
     ASSERT_EQ(env_->Class_FindMethod(class_, "staticMethod", ":i", &method), ANI_NOT_FOUND);
     std::vector<TestLineInfo> staticMethodLines {
         {"env", "ani_env *"},       {"class", "ani_class"},
-        {"name", "const char *"},   {"signature", "const char *", "method not found"},
+        {"name", "const char *"},   {"signature", "const char *", "method not found [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", staticMethodLines);
@@ -96,7 +96,7 @@ TEST_F(ClassFindMethodTest, wrong_env)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindMethod(nullptr, class_, "method", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
@@ -110,8 +110,8 @@ TEST_F(ClassFindMethodTest, wrong_class)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindMethod(env_, nullptr, "method", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},       {"class", "ani_class", "reference is nullptr"},
-        {"name", "const char *"},   {"signature", "const char *", "wrong class for method"},
+        {"env", "ani_env *"},       {"class", "ani_class", "reference is nullptr [ERROR]"},
+        {"name", "const char *"},   {"signature", "const char *", "wrong class for method [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", testLines);
@@ -124,7 +124,7 @@ TEST_F(ClassFindMethodTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"signature", "const char *"},
         {"result", "ani_method *"},
     };
@@ -139,7 +139,7 @@ TEST_F(ClassFindMethodTest, wrong_result_storage)
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"result", "ani_method *", "nullptr for storing 'ani_method'"},
+        {"result", "ani_method *", "nullptr for storing 'ani_method' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", testLines);
 }
@@ -155,9 +155,9 @@ TEST_F(ClassFindMethodTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindMethod(env_, localClass, "method", ":i", &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong class for method"},
+        {"signature", "const char *", "wrong class for method [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindMethod", testLines);
@@ -170,7 +170,7 @@ TEST_F(ClassFindMethodTest, pending_error_is_rejected)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindMethod(env_, class_, "method", ":i", &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},

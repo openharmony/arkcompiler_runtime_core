@@ -23,7 +23,7 @@ TEST_F(ResetErrorTest, wrong_env)
 {
     ASSERT_EQ(env_->c_api->ResetError(nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ResetError", testLines);
 }

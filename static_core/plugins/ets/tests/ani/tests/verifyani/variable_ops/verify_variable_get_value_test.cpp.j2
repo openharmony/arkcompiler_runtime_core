@@ -65,7 +65,7 @@ TEST_F(VariableGetValue{{ Type }}Test, null_env)
     ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(nullptr, variable, &result), ANI_INVALID_ARGS);
 {% endif %}
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"variable", "ani_variable"},
         {"result", "ani_{{ "ref" if type == "ref" else type }} *"},
     };
@@ -83,7 +83,7 @@ TEST_F(VariableGetValue{{ Type }}Test, null_variable)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"variable", "ani_variable", "variable is nullptr"},
+        {"variable", "ani_variable", "variable is nullptr [ERROR]"},
         {"result", "ani_{{ "ref" if type == "ref" else type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_GetValue_{{ Type }}", testLines);
@@ -102,7 +102,7 @@ TEST_F(VariableGetValue{{ Type }}Test, wrong_variable)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"variable", "ani_variable", "variable is not a verified ani_variable handle or has the wrong ANI handle type"},
+        {"variable", "ani_variable", "variable is not a verified ani_variable handle or has the wrong ANI handle type [FATAL]"},
         {"result", "ani_{{ "ref" if type == "ref" else type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_GetValue_{{ Type }}", testLines);
@@ -124,11 +124,11 @@ TEST_F(VariableGetValue{{ Type }}Test, wrong_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {% if type == "int" %}
-        {"variable", "ani_variable", "wrong value type: byte, expected: int"},
+        {"variable", "ani_variable", "wrong value type: byte, expected: int [ERROR]"},
         {% elif type == "ref" %}
-        {"variable", "ani_variable", "wrong value type: int, expected: object"},
+        {"variable", "ani_variable", "wrong value type: int, expected: object [ERROR]"},
         {% else %}
-        {"variable", "ani_variable", "wrong value type: int, expected: {{ type }}"},
+        {"variable", "ani_variable", "wrong value type: int, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ "ref" if type == "ref" else type }} *"},
     };
@@ -146,7 +146,7 @@ TEST_F(VariableGetValue{{ Type }}Test, null_result)
         {"env", "ani_env *"},
         {"variable", "ani_variable"},
         {"result", "ani_{{ "ref" if type == "ref" else type }} *",
-         "nullptr for storing 'ani_{{ "ref" if type == "ref" else type }}'"},
+         "nullptr for storing 'ani_{{ "ref" if type == "ref" else type }}' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_GetValue_{{ Type }}", testLines);
 }

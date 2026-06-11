@@ -44,7 +44,7 @@ TEST_F(FixedArrayGetRefTest, wrong_env)
     ani_ref result {};
     ASSERT_EQ(env_->c_api->FixedArray_Get_Ref(nullptr, array, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
         {"result", "ani_ref"},
@@ -58,7 +58,7 @@ TEST_F(FixedArrayGetRefTest, wrong_array)
     ASSERT_EQ(env_->FixedArray_Get_Ref(nullptr, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref", "reference is nullptr"},
+        {"array", "ani_fixedarray_ref", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"result", "ani_ref"},
     };
@@ -74,7 +74,8 @@ TEST_F(FixedArrayGetRefTest, wrong_array_type)
     ASSERT_EQ(env_->FixedArray_Get_Ref(reinterpret_cast<ani_fixedarray_ref>(array), 0U, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref", "wrong reference type: ani_fixedarray_int, expected: ani_fixedarray_ref"},
+        {"array", "ani_fixedarray_ref",
+         "wrong reference type: ani_fixedarray_int, expected: ani_fixedarray_ref [FATAL]"},
         {"index", "ani_size"},
         {"result", "ani_ref"},
     };
@@ -91,7 +92,7 @@ TEST_F(FixedArrayGetRefTest, wrong_result)
         {"env", "ani_env *"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
-        {"result", "ani_ref", "nullptr for storing 'ani_ref'"},
+        {"result", "ani_ref", "nullptr for storing 'ani_ref' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Get_Ref", testLines);
 }
@@ -116,7 +117,7 @@ TEST_F(FixedArrayGetRefTest, throw_error)
     ani_ref result {};
     ASSERT_EQ(env_->FixedArray_Get_Ref(array, 0U, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
         {"result", "ani_ref"},

@@ -24,7 +24,7 @@ TEST_F(GetVMTest, wrong_env)
     ani_vm *resultVm {};
     ASSERT_EQ(env_->c_api->GetVM(nullptr, &resultVm), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"result", "ani_vm **"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetVM", testLines);
@@ -35,7 +35,7 @@ TEST_F(GetVMTest, wrong_result_ptr)
     ASSERT_EQ(env_->c_api->GetVM(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "ani_vm **", "nullptr for storing 'ani_vm *'"},
+        {"result", "ani_vm **", "nullptr for storing 'ani_vm *' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetVM", testLines);
 }

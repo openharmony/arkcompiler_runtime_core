@@ -47,7 +47,7 @@ TEST_F(ClassFindIndexableSetterTest, lookup_status_is_forwarded_without_verify_a
     std::vector<TestLineInfo> missingLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "indexable setter not found"},
+        {"signature", "const char *", "indexable setter not found [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", missingLines);
@@ -56,7 +56,7 @@ TEST_F(ClassFindIndexableSetterTest, lookup_status_is_forwarded_without_verify_a
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "method signature descriptor is invalid"},
+        {"signature", "const char *", "method signature descriptor is invalid [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", invalidDescriptorLines);
@@ -67,7 +67,7 @@ TEST_F(ClassFindIndexableSetterTest, wrong_env)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(nullptr, class_, signature, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"class", "ani_class"},
         {"signature", "const char *"},
         {"result", "ani_method *"},
@@ -81,8 +81,8 @@ TEST_F(ClassFindIndexableSetterTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, nullptr, signature, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference is nullptr"},
-        {"signature", "const char *", "wrong class for indexable setter"},
+        {"class", "ani_class", "reference is nullptr [ERROR]"},
+        {"signature", "const char *", "wrong class for indexable setter [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", testLines);
@@ -95,7 +95,7 @@ TEST_F(ClassFindIndexableSetterTest, null_signature_reports_ambiguous_method)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"signature", "const char *", "method lookup is ambiguous"},
+        {"signature", "const char *", "method lookup is ambiguous [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", testLines);
@@ -108,7 +108,7 @@ TEST_F(ClassFindIndexableSetterTest, wrong_result_storage)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"signature", "const char *"},
-        {"result", "ani_method *", "nullptr for storing 'ani_method'"},
+        {"result", "ani_method *", "nullptr for storing 'ani_method' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", testLines);
 }
@@ -124,8 +124,8 @@ TEST_F(ClassFindIndexableSetterTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, localClass, signature, &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"signature", "const char *", "wrong class for indexable setter"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"signature", "const char *", "wrong class for indexable setter [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindIndexableSetter", testLines);
@@ -138,7 +138,7 @@ TEST_F(ClassFindIndexableSetterTest, pending_error_is_rejected)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindIndexableSetter(env_, class_, signature, &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"class", "ani_class"},
         {"signature", "const char *"},
         {"result", "ani_method *"},

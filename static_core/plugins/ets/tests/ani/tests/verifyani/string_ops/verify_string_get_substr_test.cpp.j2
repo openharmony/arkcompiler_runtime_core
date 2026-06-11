@@ -69,7 +69,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_env)
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(nullptr, string_, substrOffset_, substrSize_, buf_, bufSize_, &res_),
               ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"string", "ani_string"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
@@ -86,7 +86,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "reference is nullptr"},
+        {"string", "ani_string", "reference is nullptr [ERROR]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -105,7 +105,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, null_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: null"},
+        {"string", "ani_string", "wrong reference type: null [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -124,7 +124,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, undef_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: undefined"},
+        {"string", "ani_string", "wrong reference type: undefined [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -143,7 +143,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, err_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_error"},
+        {"string", "ani_string", "wrong reference type: ani_error [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -162,7 +162,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, obj_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_object"},
+        {"string", "ani_string", "wrong reference type: ani_object [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -181,7 +181,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, cls_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_class"},
+        {"string", "ani_string", "wrong reference type: ani_class [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -203,7 +203,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_res)
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     // clang-format on
 
@@ -219,7 +219,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_buf)
         {"string", "ani_string"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
-        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} *"},
+        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} * [ERROR]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}SubString", testLines);
@@ -231,12 +231,12 @@ TEST_F(StringGet{{ Format }}SubstrTest, wrong_all_args)
         env_->c_api->String_Get{{ Format }}SubString(nullptr, nullptr, substrOffset_, substrSize_, nullptr, bufSize_, nullptr),
         ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"string", "ani_string", "reference is nullptr"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"string", "ani_string", "reference is nullptr [ERROR]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
-        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} *"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"{{ format }}Buffer", "{{ type }} *", "argument is nullptr, expected {{ type }} * [ERROR]"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}SubString", testLines);
 }
@@ -247,7 +247,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, throw_error)
     ASSERT_EQ(env_->c_api->String_Get{{ Format }}SubString(env_, string_, substrOffset_, substrSize_, buf_, bufSize_, &res_),
               ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"string", "ani_string"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},

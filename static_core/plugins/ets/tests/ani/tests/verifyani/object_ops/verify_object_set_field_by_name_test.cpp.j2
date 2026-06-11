@@ -109,7 +109,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(nullptr, object_, "{{ type }}Field", value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
@@ -127,8 +127,8 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"name", "const char *", "wrong object for field"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "wrong object for field [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -146,8 +146,8 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null"},
-        {"name", "const char *", "wrong object for field"},
+        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"name", "const char *", "wrong object for field [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -164,7 +164,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -188,13 +188,13 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_all_args)
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
 {% if type == "boolean" %}
-        {"value", "ani_boolean", "wrong value for ani_boolean"},
+        {"value", "ani_boolean", "wrong value for ani_boolean [FATAL]"},
 {% elif type == "ref" %}
-        {"value", "ani_ref", "reference is nullptr"},
+        {"value", "ani_ref", "reference is nullptr [ERROR]"},
 {% else %}
         {"value", "ani_{{ type }}"},
 {% endif %}
@@ -222,10 +222,10 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_type)
         env_->c_api->Object_SetFieldByName_{{ Type }}(env_, object_, "{{ wrong_ret }}Field", value),
         ANI_INVALID_TYPE);
     {% if type == "ref" %}
-    std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: object";
-    {% else %}
-    std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: {{ type }}";
-    {% endif %}
+    std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: object [ERROR]";
+{% else %}
+    std::string expectedErr = "wrong field type: {{ wrong_ret }}, expected: {{ type }} [ERROR]";
+{% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -259,8 +259,8 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"name", "const char *", "wrong object for field"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"name", "const char *", "wrong object for field [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -419,7 +419,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_boolean_value)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean"},
+        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_Boolean", testLines);
@@ -437,7 +437,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_ref)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"value", "ani_ref", "reference is nullptr"},
+        {"value", "ani_ref", "reference is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_Ref", testLines);

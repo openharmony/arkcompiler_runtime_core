@@ -56,7 +56,7 @@ TEST_F(ArrayPushTest, wrong_env)
     CreateInt(env_, magicNumber, &intObj);
     ASSERT_EQ(env_->c_api->Array_Push(nullptr, arr, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"array", "ani_array"},
         {"ref", "ani_ref"},
     };
@@ -70,7 +70,7 @@ TEST_F(ArrayPushTest, wrong_array)
     ASSERT_EQ(env_->Array_Push(nullptr, intObj), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "reference is nullptr"},
+        {"array", "ani_array", "reference is nullptr [ERROR]"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -86,7 +86,7 @@ TEST_F(ArrayPushTest, null_input_array)
     ASSERT_EQ(env_->Array_Push(arr, intObj), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: null"},
+        {"array", "ani_array", "wrong reference type: null [FATAL]"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -102,7 +102,7 @@ TEST_F(ArrayPushTest, undef_input_array)
     ASSERT_EQ(env_->Array_Push(arr, intObj), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: undefined"},
+        {"array", "ani_array", "wrong reference type: undefined [FATAL]"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -124,7 +124,7 @@ TEST_F(ArrayPushTest, err_input_array)
     ASSERT_EQ(env_->Array_Push(static_cast<ani_array>(errObj), intObj), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: ani_error"},
+        {"array", "ani_array", "wrong reference type: ani_error [FATAL]"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -144,7 +144,7 @@ TEST_F(ArrayPushTest, obj_input_array)
     ASSERT_EQ(env_->Array_Push(static_cast<ani_array>(obj), intObj), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: ani_object"},
+        {"array", "ani_array", "wrong reference type: ani_object [FATAL]"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -161,7 +161,7 @@ TEST_F(ArrayPushTest, str_input_array)
     ASSERT_EQ(env_->Array_Push(reinterpret_cast<ani_array>(stringObj), intObj), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: ani_string"},
+        {"array", "ani_array", "wrong reference type: ani_string [FATAL]"},
         {"ref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
@@ -177,7 +177,7 @@ TEST_F(ArrayPushTest, wrong_ref)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
 }
@@ -186,9 +186,9 @@ TEST_F(ArrayPushTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Array_Push(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"array", "ani_array", "reference is nullptr"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"array", "ani_array", "reference is nullptr [ERROR]"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_Push", testLines);
 }
@@ -205,7 +205,7 @@ TEST_F(ArrayPushTest, throw_error)
     ThrowError();
     ASSERT_EQ(env_->Array_Push(arr, intObj), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"array", "ani_array"},
         {"ref", "ani_ref"},
     };

@@ -24,7 +24,7 @@ TEST_F(GetVersionTest, wrong_env)
     uint32_t version {};
     ASSERT_EQ(env_->c_api->GetVersion(nullptr, &version), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"result", "uint32_t *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetVersion", testLines);
@@ -35,7 +35,7 @@ TEST_F(GetVersionTest, wrong_result_ptr)
     ASSERT_EQ(env_->c_api->GetVersion(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "uint32_t *", "nullptr for storing 'uint32_t'"},
+        {"result", "uint32_t *", "nullptr for storing 'uint32_t' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetVersion", testLines);
 }

@@ -810,6 +810,20 @@ struct ExtArgInfo {
 
 enum class ANIErrorSeverity { NONE, ERROR, FATAL };
 
+static const char *SeverityToString(ANIErrorSeverity severity)
+{
+    switch (severity) {
+        case ANIErrorSeverity::ERROR:
+            return "ERROR";
+        case ANIErrorSeverity::FATAL:
+            return "FATAL";
+        case ANIErrorSeverity::NONE:
+            return "NONE";
+        default:
+            UNREACHABLE();
+    }
+}
+
 class VerificationResult final {
 public:
     VerificationResult() = default;
@@ -3458,18 +3472,23 @@ static constexpr std::array<CheckerHandler, helpers::ToUnderlying(ANIArg::Action
 };
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-static void DoReportANI(PandaEtsVM *etsVm, std::string_view functionName, std::string_view message, bool isFatal = true)
+static void DoReportANI(PandaEtsVM *etsVm, std::string_view functionName, std::string_view message, bool isFatal = true,
+                        bool appendSeverity = false)
 {
     PandaStringStream ss;
     ss << "DETECT AN ERROR WHEN USING ANI:";
     ss << "\n  ANI method: " << functionName;
     ss << "\n" << message;
+    if (appendSeverity) {
+        ss << " [" << SeverityToString(isFatal ? ANIErrorSeverity::FATAL : ANIErrorSeverity::ERROR) << "]";
+    }
     etsVm->GetANIVerifier()->Report(ss.str(), isFatal);
 }
 
 struct ArgInfo {
     ANIArg arg;
     std::optional<PandaString> err;
+    ANIErrorSeverity severity = ANIErrorSeverity::NONE;
 };
 
 struct ArgsInfo {
@@ -3586,18 +3605,27 @@ private:
     size_t maxTypeSize_ = 0;
 };
 
+static PandaString FormatInvalidError(const PandaString &error, ANIErrorSeverity severity)
+{
+    ASSERT(severity == ANIErrorSeverity::ERROR || severity == ANIErrorSeverity::FATAL);
+
+    PandaStringStream ss;
+    ss << "INVALID: " << error << " [" << SeverityToString(severity) << "]";
+    return ss.str();
+}
+
 static void ProcessStandardArgs(const PandaVector<ArgInfo> &argInfoList, ReportData &data)
 {
     for (const auto &v : argInfoList) {
-        PandaString error = v.err ? PandaString("INVALID: ") + v.err.value() : "VALID";
+        PandaString error = v.err ? FormatInvalidError(v.err.value(), v.severity) : "VALID";
         data.AddItem(v.arg.GetName(), v.arg.GetStringValue(), v.arg.GetStringType(), std::move(error));
     }
 }
 
-static void ProcessExtArgs(const PandaVector<ExtArgInfo> &extArgInfoList, ReportData &data)
+static void ProcessExtArgs(const PandaVector<ExtArgInfo> &extArgInfoList, ReportData &data, ANIErrorSeverity severity)
 {
     for (const auto &v : extArgInfoList) {
-        PandaString error = v.isValid ? "VALID" : "INVALID: wrong value";
+        PandaString error = v.isValid ? "VALID" : FormatInvalidError("wrong value", severity);
         PandaStringStream ssValue;
         ssValue << "0x" << std::hex << v.value;
         data.AddItem(v.name, ssValue.str(), GetAniTypeByType(v.type), std::move(error));
@@ -3609,7 +3637,8 @@ static void DoANIArgsReport(PandaEtsVM *etsVm, std::string_view functionName, co
     ReportData data;
     ProcessStandardArgs(argsInfo.argInfoList, data);
     if (argsInfo.extArgInfoList.has_value()) {
-        ProcessExtArgs(argsInfo.extArgInfoList.value(), data);
+        ProcessExtArgs(argsInfo.extArgInfoList.value(), data,
+                       isFatal ? ANIErrorSeverity::FATAL : ANIErrorSeverity::ERROR);
     }
     if (!data.Empty()) {
         DoReportANI(etsVm, functionName, data.ToString(), isFatal);
@@ -3634,14 +3663,15 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
         CheckerHandler handler = HANDLERS[id];
         ASSERT(handler != nullptr);
         auto err = handler(verifier, arg);
+        ANIErrorSeverity severity = err.GetSeverity();
         if (err) {
             hasAnyError = true;
-            if (err.GetSeverity() == ANIErrorSeverity::FATAL) {
+            if (severity == ANIErrorSeverity::FATAL) {
                 hasFatalError = true;
             }
         }
 
-        argInfoList.emplace_back(ArgInfo {arg, err.TakeError()});
+        argInfoList.emplace_back(ArgInfo {arg, err.TakeError(), severity});
     }
 
     if (!hasAnyError) {
@@ -3670,6 +3700,6 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
 void VerifyReportANI(std::string_view functionName, std::string_view message)
 {
     PandaEtsVM *etsVm = PandaEtsVM::GetCurrent();
-    DoReportANI(etsVm, functionName, "    " + std::string(message));
+    DoReportANI(etsVm, functionName, "    " + std::string(message), true, true);
 }
 }  // namespace ark::ets::ani::verify

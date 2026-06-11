@@ -39,7 +39,7 @@ TEST_F(VerifyEnumItemGetEnumTest, wrong_env)
     ani_enum result {};
     ASSERT_EQ(env_->c_api->EnumItem_GetEnum(nullptr, itemColorRed_, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"enum_item", "ani_enum_item"},
         {"result", "ani_enum *"},
     };
@@ -52,7 +52,7 @@ TEST_F(VerifyEnumItemGetEnumTest, wrong_enum_item_null)
     ASSERT_EQ(env_->EnumItem_GetEnum(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_item", "ani_enum_item", "reference is nullptr"},
+        {"enum_item", "ani_enum_item", "reference is nullptr [ERROR]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnumItem_GetEnum", testLines);
@@ -64,7 +64,7 @@ TEST_F(VerifyEnumItemGetEnumTest, wrong_enum_item_type)
     ASSERT_EQ(env_->EnumItem_GetEnum(reinterpret_cast<ani_enum_item>(enumColor_), &result), ANI_INVALID_TYPE);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_item", "ani_enum_item", "wrong reference type: ani_enum"},
+        {"enum_item", "ani_enum_item", "wrong reference type: ani_enum [ERROR]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnumItem_GetEnum", testLines);
@@ -76,7 +76,7 @@ TEST_F(VerifyEnumItemGetEnumTest, wrong_result_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enum_item", "ani_enum_item"},
-        {"result", "ani_enum *", "nullptr for storing 'ani_enum'"},
+        {"result", "ani_enum *", "nullptr for storing 'ani_enum' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnumItem_GetEnum", testLines);
 }
@@ -85,9 +85,9 @@ TEST_F(VerifyEnumItemGetEnumTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->EnumItem_GetEnum(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"enum_item", "ani_enum_item", "reference is nullptr"},
-        {"result", "ani_enum *", "nullptr for storing 'ani_enum'"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"enum_item", "ani_enum_item", "reference is nullptr [ERROR]"},
+        {"result", "ani_enum *", "nullptr for storing 'ani_enum' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnumItem_GetEnum", testLines);
 }
@@ -98,7 +98,7 @@ TEST_F(VerifyEnumItemGetEnumTest, has_unhandled_error)
     ani_enum result {};
     ASSERT_EQ(env_->EnumItem_GetEnum(itemColorRed_, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"enum_item", "ani_enum_item"},
         {"result", "ani_enum *"},
     };
@@ -120,7 +120,7 @@ TEST_F(VerifyEnumItemGetEnumTest, wrong_enum_item_from_local_scope)
     ASSERT_EQ(env_->EnumItem_GetEnum(localItem, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_item", "ani_enum_item", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"enum_item", "ani_enum_item", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnumItem_GetEnum", testLines);
@@ -142,7 +142,7 @@ TEST_F(VerifyEnumItemGetEnumTest, cross_thread_enum_item_ref)
     ASSERT_EQ(env_->EnumItem_GetEnum(crossThreadItem, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_item", "ani_enum_item", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"enum_item", "ani_enum_item", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnumItem_GetEnum", testLines);

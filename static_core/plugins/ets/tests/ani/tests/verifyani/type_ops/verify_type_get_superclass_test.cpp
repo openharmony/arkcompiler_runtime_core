@@ -27,7 +27,7 @@ TEST_F(TypeGetSuperClassTest, wrong_env)
     ani_class result {};
     ASSERT_EQ(env_->c_api->Type_GetSuperClass(nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"type", "ani_ref"},
         {"result", "ani_class *"},
     };
@@ -42,7 +42,7 @@ TEST_F(TypeGetSuperClassTest, wrong_type_null)
     ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"type", "ani_ref", "reference is nullptr"},
+        {"type", "ani_ref", "reference is nullptr [ERROR]"},
         {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
@@ -57,7 +57,7 @@ TEST_F(TypeGetSuperClassTest, wrong_type_type)
     ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, reinterpret_cast<ani_type>(undef), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"type", "ani_ref", "wrong reference type: undefined"},
+        {"type", "ani_ref", "wrong reference type: undefined [FATAL]"},
         {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
@@ -74,7 +74,7 @@ TEST_F(TypeGetSuperClassTest, wrong_result_ptr)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"type", "ani_ref"},
-        {"result", "ani_class *", "nullptr for storing 'ani_class'"},
+        {"result", "ani_class *", "nullptr for storing 'ani_class' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);
 
@@ -105,7 +105,7 @@ TEST_F(TypeGetSuperClassTest, throw_error)
     ani_class superClass {};
     ASSERT_EQ(env_->Type_GetSuperClass(cls, &superClass), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"type", "ani_ref"},
         {"result", "ani_class *"},
     };

@@ -33,7 +33,7 @@ TEST_F(VerifyFindEnumTest, wrong_env)
     ani_enum result {};
     ASSERT_EQ(env_->c_api->FindEnum(nullptr, "verify_find_enum_test.Color", &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"enum_descriptor", "const char *"},
         {"result", "ani_enum *"},
     };
@@ -46,7 +46,7 @@ TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_null)
     ASSERT_EQ(env_->FindEnum(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_descriptor", "const char *", "argument is nullptr, expected const char *"},
+        {"enum_descriptor", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
@@ -58,7 +58,7 @@ TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_invalid)
     ASSERT_EQ(env_->FindEnum("Lverify_find_enum_test/Color;", &result), ANI_INVALID_DESCRIPTOR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_descriptor", "const char *", "enum descriptor is invalid"},
+        {"enum_descriptor", "const char *", "enum descriptor is invalid [ERROR]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
@@ -77,7 +77,7 @@ TEST_F(VerifyFindEnumTest, wrong_enum_descriptor_not_enum_0)
     ASSERT_EQ(env_->FindEnum("std.core.Int", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enum_descriptor", "const char *", "descriptor is not enum"},
+        {"enum_descriptor", "const char *", "descriptor is not enum [FATAL]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
@@ -89,7 +89,7 @@ TEST_F(VerifyFindEnumTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enum_descriptor", "const char *"},
-        {"result", "ani_enum *", "nullptr for storing 'ani_enum'"},
+        {"result", "ani_enum *", "nullptr for storing 'ani_enum' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
 }
@@ -98,9 +98,9 @@ TEST_F(VerifyFindEnumTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->FindEnum(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"enum_descriptor", "const char *", "argument is nullptr, expected const char *"},
-        {"result", "ani_enum *", "nullptr for storing 'ani_enum'"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"enum_descriptor", "const char *", "argument is nullptr, expected const char * [ERROR]"},
+        {"result", "ani_enum *", "nullptr for storing 'ani_enum' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
 }
@@ -111,7 +111,7 @@ TEST_F(VerifyFindEnumTest, has_unhandled_error)
     ani_enum result {};
     ASSERT_EQ(env_->FindEnum("verify_find_enum_test.Color", &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"enum_descriptor", "const char *"},
         {"result", "ani_enum *"},
     };
@@ -125,8 +125,8 @@ TEST_F(VerifyFindEnumTest, has_unhandled_error_with_non_enum_descriptor)
     ani_enum result {};
     ASSERT_EQ(env_->FindEnum("std.core.Int", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"enum_descriptor", "const char *", "descriptor is not enum"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"enum_descriptor", "const char *", "descriptor is not enum [FATAL]"},
         {"result", "ani_enum *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindEnum", testLines);
@@ -146,7 +146,7 @@ TEST_F(VerifyFindEnumTest, cross_thread_call_with_other_thread_env)
 
     ASSERT_EQ(status, ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [FATAL]"},
         {"enum_descriptor", "const char *"},
         {"result", "ani_enum *"},
     };

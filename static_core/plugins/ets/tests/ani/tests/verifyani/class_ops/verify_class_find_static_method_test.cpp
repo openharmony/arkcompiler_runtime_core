@@ -52,7 +52,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "static method not found"},
+        {"signature", "const char *", "static method not found [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", missingLines);
@@ -62,7 +62,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "method lookup is ambiguous"},
+        {"signature", "const char *", "method lookup is ambiguous [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", ambiguousLines);
@@ -72,7 +72,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "method signature descriptor is invalid"},
+        {"signature", "const char *", "method signature descriptor is invalid [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", invalidDescriptorLines);
@@ -82,7 +82,7 @@ TEST_F(ClassFindStaticMethodTest, lookup_status_is_forwarded_without_verify_abor
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "static method not found"},
+        {"signature", "const char *", "static method not found [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", instanceMethodLines);
@@ -96,7 +96,7 @@ TEST_F(ClassFindStaticMethodTest, old_static_getter_name_is_rejected)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"signature", "const char *", "static method not found"},
+        {"signature", "const char *", "static method not found [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", testLines);
@@ -107,7 +107,7 @@ TEST_F(ClassFindStaticMethodTest, wrong_env)
     ani_static_method method {};
     ASSERT_EQ(env_->c_api->Class_FindStaticMethod(nullptr, class_, "staticMethod", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
@@ -122,9 +122,9 @@ TEST_F(ClassFindStaticMethodTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, nullptr, "staticMethod", ":i", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference is nullptr"},
+        {"class", "ani_class", "reference is nullptr [ERROR]"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong class for static method"},
+        {"signature", "const char *", "wrong class for static method [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", testLines);
@@ -137,7 +137,7 @@ TEST_F(ClassFindStaticMethodTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"signature", "const char *"},
         {"result", "ani_static_method *"},
     };
@@ -152,7 +152,7 @@ TEST_F(ClassFindStaticMethodTest, wrong_result_storage)
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"result", "ani_static_method *", "nullptr for storing 'ani_static_method'"},
+        {"result", "ani_static_method *", "nullptr for storing 'ani_static_method' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", testLines);
 }
@@ -168,9 +168,9 @@ TEST_F(ClassFindStaticMethodTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, localClass, "staticMethod", ":i", &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"name", "const char *"},
-        {"signature", "const char *", "wrong class for static method"},
+        {"signature", "const char *", "wrong class for static method [ERROR]"},
         {"result", "ani_static_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticMethod", testLines);
@@ -183,7 +183,7 @@ TEST_F(ClassFindStaticMethodTest, pending_error_is_rejected)
     ani_static_method method {};
     ASSERT_EQ(env_->c_api->Class_FindStaticMethod(env_, class_, "staticMethod", ":i", &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},

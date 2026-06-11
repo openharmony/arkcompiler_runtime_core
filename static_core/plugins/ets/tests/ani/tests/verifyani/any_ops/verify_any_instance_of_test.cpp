@@ -27,9 +27,9 @@ TEST_F(AnyInstanceOfTest, wrong_env)
     ani_boolean result {};
     ASSERT_EQ(env_->c_api->Any_InstanceOf(nullptr, cls, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"ref", "ani_ref", "Static types are not supported"},
-        {"type", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
+        {"type", "ani_ref", "Static types are not supported [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
@@ -46,8 +46,8 @@ TEST_F(AnyInstanceOfTest, wrong_ref_null)
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, nullptr, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "reference is nullptr"},
-        {"type", "ani_ref", "Static types are not supported"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
+        {"type", "ani_ref", "Static types are not supported [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
@@ -64,8 +64,8 @@ TEST_F(AnyInstanceOfTest, wrong_type_null)
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, cls, nullptr, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
-        {"type", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
+        {"type", "ani_ref", "reference is nullptr [ERROR]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
@@ -81,9 +81,9 @@ TEST_F(AnyInstanceOfTest, wrong_result_ptr)
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, cls, cls, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
-        {"type", "ani_ref", "Static types are not supported"},
-        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
+        {"type", "ani_ref", "Static types are not supported [FATAL]"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
 
@@ -99,8 +99,8 @@ TEST_F(AnyInstanceOfTest, rejects_non_xref_objects)
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, cls, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
-        {"type", "ani_ref", "Static types are not supported"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
+        {"type", "ani_ref", "Static types are not supported [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);
@@ -118,9 +118,9 @@ TEST_F(AnyInstanceOfTest, throw_error)
     ani_boolean result {};
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, cls, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"ref", "ani_ref", "Static types are not supported"},
-        {"type", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
+        {"type", "ani_ref", "Static types are not supported [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_InstanceOf", testLines);

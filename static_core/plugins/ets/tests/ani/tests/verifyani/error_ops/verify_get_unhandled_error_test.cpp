@@ -24,7 +24,7 @@ TEST_F(GetUnhandledErrorTest, wrong_env)
     ani_error err {};
     ASSERT_EQ(env_->c_api->GetUnhandledError(nullptr, &err), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"result", "ani_error *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetUnhandledError", testLines);
@@ -35,7 +35,7 @@ TEST_F(GetUnhandledErrorTest, wrong_err)
     ASSERT_EQ(env_->c_api->GetUnhandledError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "ani_error *", "nullptr for storing 'ani_error'"},
+        {"result", "ani_error *", "nullptr for storing 'ani_error' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GetUnhandledError", testLines);
 }

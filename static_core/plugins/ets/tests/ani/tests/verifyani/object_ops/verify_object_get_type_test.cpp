@@ -27,7 +27,7 @@ TEST_F(ObjectGetTypeTest, wrong_env)
     ani_type resultType {};
     ASSERT_EQ(env_->c_api->Object_GetType(nullptr, cls, &resultType), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"object", "ani_object"},
         {"result", "ani_ref *"},
     };
@@ -42,7 +42,7 @@ TEST_F(ObjectGetTypeTest, wrong_object_null)
     ASSERT_EQ(env_->c_api->Object_GetType(env_, nullptr, &resultType), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference is nullptr"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetType", testLines);
@@ -57,7 +57,7 @@ TEST_F(ObjectGetTypeTest, wrong_result_ptr)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"result", "ani_ref *", "nullptr for storing 'ani_type'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_type' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetType", testLines);
 
@@ -73,7 +73,7 @@ TEST_F(ObjectGetTypeTest, wrong_object_type)
     ASSERT_EQ(env_->c_api->Object_GetType(env_, reinterpret_cast<ani_object>(undef), &resultType), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: undefined"},
+        {"object", "ani_object", "wrong reference type: undefined [FATAL]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetType", testLines);
@@ -104,7 +104,7 @@ TEST_F(ObjectGetTypeTest, throw_error)
     ani_type resultType {};
     ASSERT_EQ(env_->Object_GetType(cls, &resultType), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"object", "ani_object"},
         {"result", "ani_ref *"},
     };

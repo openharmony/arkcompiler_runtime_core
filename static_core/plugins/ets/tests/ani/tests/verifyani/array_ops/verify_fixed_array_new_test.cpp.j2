@@ -27,7 +27,7 @@ TEST_F(FixedArrayNew{{ Type }}Test, wrong_env)
     ani_fixedarray_{{ type }} res {};
     ASSERT_EQ(env_->c_api->FixedArray_New_{{ Type }}(nullptr, length_, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"length", "ani_size"},
         {"result", "ani_fixedarray_{{ type }} *"},
     };
@@ -40,7 +40,7 @@ TEST_F(FixedArrayNew{{ Type }}Test, wrong_res)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
-        {"result", "ani_fixedarray_{{ type }} *", "nullptr for storing 'ani_fixedarray_{{ type }}'"},
+        {"result", "ani_fixedarray_{{ type }} *", "nullptr for storing 'ani_fixedarray_{{ type }}' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_{{ Type }}", testLines);
 }
@@ -49,9 +49,9 @@ TEST_F(FixedArrayNew{{ Type }}Test, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->FixedArray_New_{{ Type }}(nullptr, length_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"length", "ani_size"},
-        {"result", "ani_fixedarray_{{ type }} *", "nullptr for storing 'ani_fixedarray_{{ type }}'"},
+        {"result", "ani_fixedarray_{{ type }} *", "nullptr for storing 'ani_fixedarray_{{ type }}' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_New_{{ Type }}", testLines);
 }
@@ -65,7 +65,7 @@ TEST_F(FixedArrayNew{{ Type }}Test, throw_error)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"length", "ani_size"},
         {"result", "ani_fixedarray_{{ type }} *"},
     };

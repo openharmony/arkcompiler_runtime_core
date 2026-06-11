@@ -27,8 +27,8 @@ TEST_F(AnyNewTest, wrong_env)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_New(nullptr, cls, 0U, nullptr, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"ctor", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"ctor", "ani_ref", "Static types are not supported [FATAL]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -46,7 +46,7 @@ TEST_F(AnyNewTest, wrong_ctor_null)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_New(env_, nullptr, 0U, nullptr, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},    {"ctor", "ani_ref", "reference is nullptr"},
+        {"env", "ani_env *"},    {"ctor", "ani_ref", "reference is nullptr [ERROR]"},
         {"argc", "ani_size"},    {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
     };
@@ -62,8 +62,8 @@ TEST_F(AnyNewTest, wrong_result_null)
 
     ASSERT_EQ(env_->c_api->Any_New(env_, cls, 0U, nullptr, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},  {"ctor", "ani_ref", "Static types are not supported"},    {"argc", "ani_size"},
-        {"argv", "ani_ref *"}, {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
+        {"env", "ani_env *"},  {"ctor", "ani_ref", "Static types are not supported [FATAL]"},    {"argc", "ani_size"},
+        {"argv", "ani_ref *"}, {"result", "ani_ref *", "nullptr for storing 'ani_ref' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_New", testLines);
 
@@ -78,8 +78,8 @@ TEST_F(AnyNewTest, argv_null_with_argc_positive)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_New(env_, cls, 1U, nullptr, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *"},    {"ctor", "ani_ref", "Static types are not supported"},
-        {"argc", "ani_size"},    {"argv", "ani_ref *", "wrong pointer to use as argument in 'ani_ref *argv'"},
+        {"env", "ani_env *"},    {"ctor", "ani_ref", "Static types are not supported [FATAL]"},
+        {"argc", "ani_size"},    {"argv", "ani_ref *", "wrong pointer to use as argument in 'ani_ref *argv' [FATAL]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_New", testLines);
@@ -97,8 +97,8 @@ TEST_F(AnyNewTest, throw_error)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_New(env_, cls, 0U, nullptr, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"ctor", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"ctor", "ani_ref", "Static types are not supported [FATAL]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},

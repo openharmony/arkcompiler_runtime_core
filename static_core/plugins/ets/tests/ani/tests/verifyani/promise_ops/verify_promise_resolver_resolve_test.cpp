@@ -42,7 +42,7 @@ TEST_F(PromiseResolverResolveTest, wrong_env)
 {
     ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, resolver, resolution), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"resolver", "ani_resolver"},
         {"resolution", "ani_ref"},
     };
@@ -55,7 +55,7 @@ TEST_F(PromiseResolverResolveTest, wrong_resolution)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"resolver", "ani_resolver"},
-        {"resolution", "ani_ref", "reference is nullptr"},
+        {"resolution", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);
 }
@@ -65,7 +65,7 @@ TEST_F(PromiseResolverResolveTest, wrong_resolver)
     ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, nullptr, resolution), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"resolver", "ani_resolver", "wrong resolver"},
+        {"resolver", "ani_resolver", "wrong resolver [ERROR]"},
         {"resolution", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);
@@ -75,9 +75,9 @@ TEST_F(PromiseResolverResolveTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"resolver", "ani_resolver", "wrong resolver"},
-        {"resolution", "ani_ref", "reference is nullptr"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"resolver", "ani_resolver", "wrong resolver [ERROR]"},
+        {"resolution", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);
 }
@@ -88,7 +88,7 @@ TEST_F(PromiseResolverResolveTest, throw_error)
 
     ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, resolver, resolution), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"resolver", "ani_resolver"},
         {"resolution", "ani_ref"},
     };
@@ -103,7 +103,7 @@ TEST_F(PromiseResolverResolveTest, bad_resolver)
     ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, fakeRef, resolution), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"resolver", "ani_resolver", "wrong resolver"},
+        {"resolver", "ani_resolver", "wrong resolver [FATAL]"},
         {"resolution", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);
@@ -121,7 +121,7 @@ TEST_F(PromiseResolverResolveTest, double_rejection)
     ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(env_, resolver, resolution), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"resolver", "ani_resolver", "wrong resolver"},
+        {"resolver", "ani_resolver", "wrong resolver [FATAL]"},
         {"resolution", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Resolve", testLines);

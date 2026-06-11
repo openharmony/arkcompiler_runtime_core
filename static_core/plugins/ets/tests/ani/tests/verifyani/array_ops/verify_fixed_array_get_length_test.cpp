@@ -33,7 +33,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_env)
     ani_size result {};
     ASSERT_EQ(env_->c_api->FixedArray_GetLength(nullptr, array, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"array", "ani_fixedarray"},
         {"result", "ani_size *"},
     };
@@ -46,7 +46,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_array)
     ASSERT_EQ(env_->FixedArray_GetLength(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray", "reference is nullptr"},
+        {"array", "ani_fixedarray", "reference is nullptr [ERROR]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
@@ -61,7 +61,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_fixedarray"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
 }
@@ -76,7 +76,7 @@ TEST_F(FixedArrayGetLengthTest, wrong_reference_type)
     ASSERT_EQ(env_->FixedArray_GetLength(reinterpret_cast<ani_fixedarray>(string), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray", "wrong reference type: ani_string, expected: ani_fixedarray"},
+        {"array", "ani_fixedarray", "wrong reference type: ani_string, expected: ani_fixedarray [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
@@ -92,7 +92,7 @@ TEST_F(FixedArrayGetLengthTest, throw_error)
     ani_size result {};
     ASSERT_EQ(env_->FixedArray_GetLength(array, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"array", "ani_fixedarray"},
         {"result", "ani_size *"},
     };

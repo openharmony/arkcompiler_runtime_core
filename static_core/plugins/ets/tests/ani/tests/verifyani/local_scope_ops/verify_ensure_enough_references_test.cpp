@@ -24,7 +24,7 @@ TEST_F(EnsureEnoughRef, wrong_env)
     ani_size cnt = 5U;
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, cnt), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"nrRefs", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
@@ -41,7 +41,7 @@ TEST_F(EnsureEnoughRef, wrong_nr_refs_0)
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, 0), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"nrRefs", "ani_size", "nr_refs must be greater than 0"},
+        {"nrRefs", "ani_size", "nr_refs must be greater than 0 [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
 }
@@ -53,7 +53,7 @@ TEST_F(EnsureEnoughRef, wrong_nr_refs_too_big)
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(env_, nrRefs), ANI_OUT_OF_MEMORY);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"nrRefs", "ani_size", "nr_refs is too large"},
+        {"nrRefs", "ani_size", "nr_refs is too large [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
 #endif

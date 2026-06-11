@@ -30,7 +30,7 @@ TEST_F(ArrayNewTest, wrong_env)
     ani_array res {};
     ASSERT_EQ(env_->c_api->Array_New(nullptr, length_, undefinedRef, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"length", "ani_size"},
         {"initial_element", "ani_ref"},
         {"result", "ani_array *"},
@@ -45,7 +45,7 @@ TEST_F(ArrayNewTest, wrong_ref)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
-        {"initial_element", "ani_ref", "reference is nullptr"},
+        {"initial_element", "ani_ref", "reference is nullptr [ERROR]"},
         {"result", "ani_array *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_New", testLines);
@@ -60,7 +60,7 @@ TEST_F(ArrayNewTest, wrong_result)
         {"env", "ani_env *"},
         {"length", "ani_size"},
         {"initial_element", "ani_ref"},
-        {"result", "ani_array *", "nullptr for storing 'ani_array'"},
+        {"result", "ani_array *", "nullptr for storing 'ani_array' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_New", testLines);
 }
@@ -69,10 +69,10 @@ TEST_F(ArrayNewTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Array_New(nullptr, length_, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"length", "ani_size"},
-        {"initial_element", "ani_ref", "reference is nullptr"},
-        {"result", "ani_array *", "nullptr for storing 'ani_array'"},
+        {"initial_element", "ani_ref", "reference is nullptr [ERROR]"},
+        {"result", "ani_array *", "nullptr for storing 'ani_array' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_New", testLines);
 }
@@ -87,7 +87,7 @@ TEST_F(ArrayNewTest, throw_error)
     ani_array res {};
     ASSERT_EQ(env_->Array_New(length_, undefinedRef, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"length", "ani_size"},
         {"initial_element", "ani_ref"},
         {"result", "ani_array *"},

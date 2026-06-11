@@ -147,7 +147,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_env)
         ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
@@ -178,8 +178,8 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"method", "ani_method", "object is nullptr or invalid while verifying method"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"method", "ani_method", "object is nullptr or invalid while verifying method [ERROR]"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -210,8 +210,8 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null"},
-        {"method", "ani_method", "object is nullptr or invalid while verifying method"},
+        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"method", "ani_method", "object is nullptr or invalid while verifying method [ERROR]"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -244,7 +244,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
+        {"method", "ani_method", "wrong type: ani_static_method, expected: ani_method [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -274,9 +274,9 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "ani_method handle not found (may be deleted, out of scope, or corrupted)"},
+        {"method", "ani_method", "ani_method handle not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method"},
+        {"...", "       ", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
@@ -294,9 +294,9 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "method is nullptr"},
+        {"method", "ani_method", "method is nullptr [ERROR]"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method"},
+        {"...", "       ", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
@@ -315,7 +315,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_result)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -346,8 +346,8 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_boolean_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
-        {"[0]", "ani_boolean", "wrong value"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
@@ -376,9 +376,9 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_char_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
-        {"[1]", "ani_char", "wrong value"},
+        {"[1]", "ani_char", "wrong value [FATAL]"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
         {"[4]", "ani_int"},
@@ -406,10 +406,10 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_byte_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
-        {"[2]", "ani_byte", "wrong value"},
+        {"[2]", "ani_byte", "wrong value [FATAL]"},
         {"[3]", "ani_short"},
         {"[4]", "ani_int"},
         {"[5]", "ani_long"},
@@ -436,11 +436,11 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_short_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
-        {"[3]", "ani_short", "wrong value"},
+        {"[3]", "ani_short", "wrong value [FATAL]"},
         {"[4]", "ani_int"},
         {"[5]", "ani_long"},
         {"[6]", "ani_float"},
@@ -466,7 +466,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_ref_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -475,7 +475,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_ref_arg)
         {"[5]", "ani_long"},
         {"[6]", "ani_float"},
         {"[7]", "ani_double"},
-        {"[8]", "ani_ref", "wrong value"},
+        {"[8]", "ani_ref", "wrong value [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
@@ -486,11 +486,11 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"method", "ani_method", "method is nullptr"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
-        {"...", "       ", "wrong method"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"method", "ani_method", "method is nullptr [ERROR]"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
+        {"...", "       ", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
@@ -510,9 +510,9 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_return_type)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {% if type == "ref" %}
-        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
@@ -544,7 +544,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "method does not belong to the object"},
+        {"method", "ani_method", "method does not belong to the object [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -576,8 +576,8 @@ TEST_F(ObjectCallMethod{{ Type }}Test, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"method", "ani_method", "object is nullptr or invalid while verifying method"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"method", "ani_method", "object is nullptr or invalid while verifying method [ERROR]"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -754,7 +754,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_env)
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, object_, method_, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
@@ -783,8 +783,8 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"method", "ani_method", "object is nullptr or invalid while verifying method"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"method", "ani_method", "object is nullptr or invalid while verifying method [ERROR]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -813,8 +813,8 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null"},
-        {"method", "ani_method", "object is nullptr or invalid while verifying method"},
+        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"method", "ani_method", "object is nullptr or invalid while verifying method [ERROR]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -846,7 +846,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
+        {"method", "ani_method", "wrong type: ani_static_method, expected: ani_method [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -874,9 +874,9 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "ani_method handle not found (may be deleted, out of scope, or corrupted)"},
+        {"method", "ani_method", "ani_method handle not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method"},
+        {"args", "ani_value *", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
@@ -892,9 +892,9 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "method is nullptr"},
+        {"method", "ani_method", "method is nullptr [ERROR]"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method"},
+        {"args", "ani_value *", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
@@ -911,7 +911,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_result)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -940,7 +940,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_args)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong arguments value"},
+        {"args", "ani_value *", "wrong arguments value [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
@@ -951,11 +951,11 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"method", "ani_method", "method is nullptr"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
-        {"args", "ani_value *", "wrong arguments value"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"method", "ani_method", "method is nullptr [ERROR]"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
+        {"args", "ani_value *", "wrong arguments value [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
@@ -976,8 +976,8 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_{{ type }}_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method arguments"},
-        {"[0]", "ani_boolean", "wrong value"},
+        {"args", "ani_value *", "wrong method arguments [FATAL]"},
+        {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
@@ -1003,9 +1003,9 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_return_type)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {% if type == "ref" %}
-        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {"method", "ani_method", "wrong return type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
@@ -1035,7 +1035,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_object_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"method", "ani_method", "method does not belong to the object"},
+        {"method", "ani_method", "method does not belong to the object [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -1065,8 +1065,8 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"method", "ani_method", "object is nullptr or invalid while verifying method"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"method", "ani_method", "object is nullptr or invalid while verifying method [ERROR]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
