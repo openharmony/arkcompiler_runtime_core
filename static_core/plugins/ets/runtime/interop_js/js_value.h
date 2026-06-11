@@ -306,7 +306,7 @@ private:
 
         // Interop ctx check:
         // check if the ctx is the same as the one that created the reference
-        if (sharedRef->GetCtx()->GetJSEnv() != env) {
+        if (sharedRef == nullptr || sharedRef->GetCtx()->GetJSEnv() != env) {
             // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
             InteropFatal("InteropFatal, interop object must be used in the same interopCtx as it was created.");
         }
