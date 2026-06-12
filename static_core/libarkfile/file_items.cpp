@@ -485,6 +485,18 @@ bool ParamAnnotationsItem::Write(Writer *writer)
     return true;
 }
 
+void ParamAnnotationsItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    for (const auto &paramAnnotations : annotations_) {
+        for (auto *item : paramAnnotations) {
+            if (item != nullptr) {
+                item->SetDependencyMark();
+            }
+        }
+    }
+}
+
 ProtoItem::ProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params)
 {
     size_t n = 0;
@@ -764,6 +776,12 @@ void MethodItem::SetDependencyMark()
     }
     for (auto &item : runtimeTypeAnnotations_) {
         item->SetDependencyMark();
+    }
+    if (paramAnnotations_ != nullptr) {
+        paramAnnotations_->SetDependencyMark();
+    }
+    if (runtimeParamAnnotations_ != nullptr) {
+        runtimeParamAnnotations_->SetDependencyMark();
     }
 }
 

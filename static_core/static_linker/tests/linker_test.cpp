@@ -439,6 +439,96 @@ TEST(linkertests, StripUnusedKeepsLiveBytecodePatchRanges)
     EXPECT_EQ(patcher.GetBytecodePatchRangeCount(), 1U);
 }
 
+std::string JoinLinkErrors(const Result &res)
+{
+    std::string errs;
+    for (const auto &err : res.errors) {
+        errs += err;
+        errs += '\n';
+    }
+    return errs;
+}
+
+bool WriteAbcWithParamAnnotations(const std::string &path)
+{
+    ark::panda_file::ItemContainer container;
+
+    auto *annotClass = container.GetOrCreateClassItem("LMetaAnno;");
+    annotClass->SetAccessFlags(ark::ACC_PUBLIC | ark::ACC_ANNOTATION);
+
+    std::vector<ark::panda_file::AnnotationItem::Elem> elems;
+    std::vector<ark::panda_file::AnnotationItem::Tag> tags;
+    auto *paramAnnot = container.CreateItem<ark::panda_file::AnnotationItem>(annotClass, elems, tags);
+
+    auto *voidType = container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::VOID);
+    auto *i32Type = container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::I32);
+
+    std::vector<ark::panda_file::MethodParamItem> params;
+    ark::panda_file::MethodParamItem param(i32Type);
+    param.AddAnnotation(paramAnnot);
+    params.push_back(param);
+
+    auto *proto = container.GetOrCreateProtoItem(voidType, params);
+    auto *entryClass = container.GetOrCreateClassItem("LEntry;");
+    entryClass->SetAccessFlags(ark::ACC_PUBLIC);
+    auto *method = entryClass->AddMethod(container.GetOrCreateStringItem("main"), proto,
+                                         ark::ACC_PUBLIC | ark::ACC_STATIC, params);
+
+    std::vector<uint8_t> ins = {static_cast<uint8_t>(ark::BytecodeInstruction::Opcode::RETURN_VOID)};
+    method->SetCode(container.CreateItem<ark::panda_file::CodeItem>(0, 0, ins));
+
+    container.CreateItem<ark::panda_file::ParamAnnotationsItem>(method, false);
+
+    ark::panda_file::FileWriter writer(path);
+    return container.Write(&writer);
+}
+
+TEST(linkertests, StripUnusedParamAnnotationRelinkable)
+{
+    const std::string inputAbc = "strip_param_anno_input.abc";
+    const std::string strippedAbc = "strip_param_anno_stripped.abc";
+    const std::string relinkedAbc = "strip_param_anno_relinked.abc";
+
+    ASSERT_TRUE(WriteAbcWithParamAnnotations(inputAbc));
+
+    auto stripConf = DefaultConfig();
+    stripConf.entryNames.insert("Entry");
+
+    auto firstLink = Link(stripConf, strippedAbc, {inputAbc});
+    ASSERT_TRUE(firstLink.errors.empty()) << JoinLinkErrors(firstLink);
+
+    auto secondLink = Link(DefaultConfig(), relinkedAbc, {strippedAbc});
+    ASSERT_TRUE(secondLink.errors.empty()) << JoinLinkErrors(secondLink);
+}
+
+TEST(linkertests, ParamTypeAnnotationIsNotSerializedParamAnnotation)
+{
+    ark::panda_file::ItemContainer container;
+
+    auto *annotClass = container.GetOrCreateClassItem("LTypeUseAnno;");
+    annotClass->SetAccessFlags(ark::ACC_PUBLIC | ark::ACC_ANNOTATION);
+
+    std::vector<ark::panda_file::AnnotationItem::Elem> elems;
+    std::vector<ark::panda_file::AnnotationItem::Tag> tags;
+    auto *typeUseAnnotation = container.CreateItem<ark::panda_file::AnnotationItem>(annotClass, elems, tags);
+
+    auto *voidType = container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::VOID);
+    auto *i32Type = container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::I32);
+
+    ark::panda_file::MethodParamItem param(i32Type);
+    param.AddTypeAnnotation(typeUseAnnotation);
+
+    std::vector<ark::panda_file::MethodParamItem> params {param};
+    auto *proto = container.GetOrCreateProtoItem(voidType, params);
+    auto *entryClass = container.GetOrCreateClassItem("LEntry;");
+    auto *method =
+        entryClass->AddMethod(container.GetOrCreateStringItem("use"), proto, ark::ACC_PUBLIC | ark::ACC_STATIC, params);
+
+    method->SetDependencyMark();
+
+    EXPECT_FALSE(typeUseAnnotation->GetDependencyMark());
+}
+
 constexpr uint32_t I = 32;
 constexpr uint64_t L = 64;
 constexpr float F = 11.1;
