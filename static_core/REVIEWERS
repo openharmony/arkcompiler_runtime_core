@@ -27,7 +27,7 @@ common_runtime/ @ipetrov @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yi
 static_core/ @dmitriitr @Prof @igelhaus @Nojpg
 static_core/*.gn{i,}                  @sukhikhalexander @ipetrov
 static_core/abc2program/              @nazarovkonstantin @oatuwwutao ^igelhaus ^seeuiceland
-static_core/assembler/                @nazarovkonstantin ^igelhaus @tension16
+static_core/assembler/                ^nazarovkonstantin ^igelhaus @Sprouted_Potato @zhaoshuting @dddzzzhhh
 static_core/bytecode_optimizer/       @mbolshov @chernykhsergey ^igelhaus  @oatuwwutao ^seeuiceland
 static_core/cmake/                    @igelhaus
 static_core/compiler/                 @Prof @wanzixuan330 @LeechyLiang @zhangrunze13 @chernykhsergey ^oatuwwutao ^seeuiceland ^asidorov
@@ -127,7 +127,7 @@ static_core/libarkbase/tests/taskmanager/                @artemu @molotkovmikhai
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov @oatuwwutao	^seeuiceland @chernykhsergey
 static_core/plugins/ets/compiler/                        @Prof @wanzixuan330 @chernykhsergey ^asidorov @LeechyLiang @zhangrunze13
 static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr @fanglou @dumbledore
+static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin ^mbolshov ^akmaevaleksey ^anedoria ^klooer ^wanzixuan330 ^mengbierr ^davidwulanxi ^egavrin ^igelhaus ^vpukhov ^dmitriitr ^zsw_zhushiwei @fanglou @dumbledore @vigavi
 static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^wanzixuan330 ^gitee-dakeQI ^chernykhsergey ^LeechyLiang @lizheng89
 static_core/plugins/ets/isa/                             @mbolshov @gitee-dakeQI @lizheng89
 static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon ^asidorov ^gitee-dakeQI @lizheng89
@@ -241,19 +241,19 @@ static_core/plugins/ets/tests/ets-common-tests/gc/*finalization*                
 static_core/plugins/ets/tests/ets-common-tests/gc/*finreg*                      @artemu ^shemetovphilip
 static_core/plugins/ets/tests/ets-common-tests/taskpool/                        ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets-templates/03.types/                         ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @tengtengh
-static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/ ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xuxjeeee
+static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/ ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @fanglou
 static_core/plugins/ets/tests/ets-templates/06.contexts_and_conversions/      ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @tengtengh
 static_core/plugins/ets/tests/ets-templates/07.expressions/                   @Prof @igelhaus @fotograf ^amate @sergeyandreev ^lindvladimir_f9b8 @xingshunxiang
-static_core/plugins/ets/tests/ets-templates/08.statements/                    ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @ziziziiziziz
-static_core/plugins/ets/tests/ets-templates/09.classes/                       ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xuxjeeee
+static_core/plugins/ets/tests/ets-templates/08.statements/                    ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @dddzzzhhh
+static_core/plugins/ets/tests/ets-templates/09.classes/                       ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @fanglou
 static_core/plugins/ets/tests/ets-templates/10.interfaces/                    ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xingshunxiang
-static_core/plugins/ets/tests/ets-templates/11.enumerations/                  ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @ziziziiziziz
-static_core/plugins/ets/tests/ets-templates/13.modules_and_namespaces/        ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @ziziziiziziz
-static_core/plugins/ets/tests/ets-templates/14.ambient_declarations/          ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xuxjeeee
+static_core/plugins/ets/tests/ets-templates/11.enumerations/                  ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @dddzzzhhh
+static_core/plugins/ets/tests/ets-templates/13.modules_and_namespaces/        ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @dddzzzhhh
+static_core/plugins/ets/tests/ets-templates/14.ambient_declarations/          ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @fanglou
 static_core/plugins/ets/tests/ets-templates/15.semantic_rules/                ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @tengtengh
-static_core/plugins/ets/tests/ets-templates/16.concurrency/                   ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @ziziziiziziz @dmitriitr
+static_core/plugins/ets/tests/ets-templates/16.concurrency/                   ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @dddzzzhhh @dmitriitr
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @Prof @igelhaus @fotograf ^amate @sergeyandreev ^lindvladimir_f9b8 @xingshunxiang
-static_core/plugins/ets/tests/ets-templates/18.annotations/                   ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @xuxjeeee
+static_core/plugins/ets/tests/ets-templates/18.annotations/                   ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate @sergeyandreev ^lindvladimir_f9b8 @fanglou
 static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @fly971205 @lijin1039 ^liyiming13
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/interop_js/eacoro/                              @igelhaus ^nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav @slynkodenis @benzunfu @konstanting
