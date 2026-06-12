@@ -17,10 +17,9 @@
 /*---
 test_suffix: "{{c.test_suffix}}"
 desc: >-
-    Runtime checking in cast expression must reject a function value whose
-    actual type is not a subtype of the target function type. The cast itself
-    must throw ClassCastError before the result can be observed.The nested
-    number-argument call below must never be reached.
+    Runtime checking in cast expression must accept a function value whose
+    actual type with optional parameters can be cast to the target function type.
+    The cast itself must succeed without throwing ClassCastError.
 ---*/
 
 function cast(a: Any) {
@@ -29,18 +28,13 @@ function cast(a: Any) {
 
 function main(): void {
     let reachedInnerCall: boolean = false
-    arktest.expectThrow(() => {
-        let res = ((p: Any) => {
-            ((p: {{c.target_incompat}}) => {
-                ((p: {{c.target_upcast}}) => {
-                    reachedInnerCall = true
-                })(p)
-            })(cast(p))
-        })({{c.expr}})
-        // below prevents optimising unused return value
-        arktest.assertTrue(res instanceof object, "this assert uses return value")
-        arktest.assertTrue(false, "this code is not expected to run")
-    }, (e: Error): boolean => e instanceof ClassCastError)
-    arktest.assertFalse(reachedInnerCall, "not expected to reach inner call")
+    let res = ((p: Any) => {
+        ((p: {{c.target_incompat}}) => {
+            ((p: {{c.target_upcast}}) => {
+                reachedInnerCall = true
+            })(p)
+        })(cast(p))
+    })({{c.expr}})
+    arktest.assertTrue(reachedInnerCall)
 }
 {% endfor %}
