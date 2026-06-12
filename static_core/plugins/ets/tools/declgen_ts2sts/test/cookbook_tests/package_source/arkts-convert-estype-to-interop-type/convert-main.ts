@@ -27,6 +27,7 @@ export declare function func4(p: Array<string>): st.Array<string>;
 export declare function func5(p: Set<number>): st.Set<number>;
 export declare function func6(p: Map<string, any>): st.Map<string, any>;
 export declare function noConvertForRestParams(...p: Array<string>): void;
+export declare function noConvertForRestParamsMix(...p: [number, string][]): void;
 export declare let composedVar1: Array<st.Map<string, st.Set<number>>>;
 export declare let composedVar2: st.Map<string, Array<st.Set<number>>>;
 export declare let composedVar3: st.Array<st.Map<string, st.Set<number>>>;

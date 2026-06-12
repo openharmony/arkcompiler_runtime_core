@@ -46,7 +46,7 @@ rm -rf "$NODE_MODULES_PATH/typescript" && mv "$NODE_MODULES_PATH/package" "$NODE
 
 # build panda declgen
 pushd "$TMP_DECLGEN_PATH" > /dev/null
-    npm run build
+    npm run build:release
 popd > /dev/null
 
 # pack panda declgen

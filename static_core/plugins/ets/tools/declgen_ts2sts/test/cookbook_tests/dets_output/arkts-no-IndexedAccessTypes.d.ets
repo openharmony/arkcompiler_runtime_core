@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type NonNull<T, K extends Any = Any> = NonNullable<Any>;
-export declare function Get<Type extends Any, Key extends Any = Any, Value extends Any = Any>(key: Key, value: Type): NonNullable<Value>;
+export type NonNull<T, K extends Any = Any> = Any;
+export declare function Get<Type extends Any, Key extends Any = Any, Value extends Any = Any>(key: Key, value: Type): Any;
 export type Person = Any;
 export type Age = number;
