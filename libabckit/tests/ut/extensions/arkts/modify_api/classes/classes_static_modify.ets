@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@interface Anno1{}
+export @interface Anno1{}
 
 export class Class1 {
     @Anno1

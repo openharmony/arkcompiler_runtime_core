@@ -17,9 +17,9 @@ export @interface Anno1 {}
 
 export @interface Anno2 {}
 
-@interface Anno3 {}
+export @interface Anno3 {}
 
-@interface Anno4 {
+export @interface Anno4 {
     a: string
 }
 
