@@ -36,6 +36,12 @@ public:
     ~ANIVerifier() = default;
 
     struct GlobalData {
+        struct MemRange {
+            uintptr_t start;
+            uintptr_t end;
+        };
+        using MethodRange = MemRange;
+        using FieldRange = MemRange;
         PandaMap<VRef *, PandaUniquePtr<InternalRef>> grefsMap GUARDED_BY(grefsMapMutex);
         os::memory::Mutex grefsMapMutex;
 
@@ -44,10 +50,12 @@ public:
 
         PandaMap<EtsMethod *, impl::VMethod *> etsMethodsMap GUARDED_BY(methodsMapLock);
         PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsMap GUARDED_BY(methodsMapLock);
+        PandaVector<MethodRange> methodRanges GUARDED_BY(methodsMapLock);
         os::memory::RWLock methodsMapLock;
 
         PandaMap<EtsField *, impl::VField *> etsFieldsMap GUARDED_BY(fieldsMapLock);
         PandaMap<impl::VField *, PandaUniquePtr<impl::VField>> fieldsMap GUARDED_BY(fieldsMapLock);
+        PandaVector<FieldRange> fieldRanges GUARDED_BY(fieldsMapLock);
         os::memory::RWLock fieldsMapLock;
 
         PandaMap<VResolver *, PandaUniquePtr<VResolver>> resolversMap GUARDED_BY(resolverMapMutex);
@@ -76,24 +84,36 @@ public:
     VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
+    bool IsValidRawAniGlobalRef(void *ptr);
+    bool IsValidRawAniWeakRef(void *ptr);
 
     VWRef *AddVerifiedWeakRef(ani_wref wref);
     void DeleteVerifiedWeakRef(VWRef *vwref);
     bool IsValidWeakRef(VWRef *vwref);
 
     impl::VMethod *AddMethod(EtsMethod *method);
+    void AddMethodRanges(PandaVector<GlobalData::MethodRange> &&ranges);
     void DeleteMethod(impl::VMethod *vmethod);
     bool IsValidMethod(impl::VMethod *vmethod);
+    bool IsValidRawEtsMethod(void *ptr);
 
     impl::VField *AddField(EtsField *field);
+    void AddFieldRanges(PandaVector<GlobalData::FieldRange> &&ranges);
     void DeleteField(impl::VField *vfield);
     bool IsValidField(impl::VField *vfield);
+    bool IsValidRawEtsField(void *ptr);
 
     bool IsValidStackRef(VRef *vref);
 
     VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
     void DeleteGlobalResolver(VResolver *vresolver);
     bool IsValidGlobalResolver(VResolver *vresolver);
+
+    // NOTE: This method must be removed after resolution of #34764
+    bool IsWorkaroundNoCrashIfInvalidUsage() const
+    {
+        return isWorkaroundNoCrashIfInvalidUsage_;
+    }
 
 private:
     void Abort(const std::string_view message);
@@ -102,12 +122,6 @@ private:
     GlobalData &GetGlobalData()
     {
         return verifyObj_;
-    }
-
-    // NOTE: This method must always be private.
-    bool IsWorkaroundNoCrashIfInvalidUsage() const
-    {
-        return isWorkaroundNoCrashIfInvalidUsage_;
     }
 
     void (*abortHook_)(void *data, const std::string_view message) {};

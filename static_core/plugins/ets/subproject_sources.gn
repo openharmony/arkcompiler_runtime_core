@@ -284,7 +284,10 @@ if (ark_use_common_runtime) {
 }
 
 if (is_ohos && is_standard_system && !ark_standalone_build) {
-  srcs_runtime += [ "runtime/platform/ohos/logger.cpp" ]
+  srcs_runtime += [
+    "runtime/platform/ohos/logger.cpp",
+    "runtime/platform/ohos/verify_ani_enable.cpp",
+  ]
 }
 
 configs_runtime = []

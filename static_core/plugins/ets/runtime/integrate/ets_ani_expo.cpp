@@ -20,6 +20,9 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/file_manager.h"
 #include "runtime/include/thread_scopes.h"
+#ifdef PANDA_TARGET_OHOS
+#include "plugins/ets/runtime/platform/ohos/verify_ani_enable.h"
+#endif
 
 namespace ark::ets {
 PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napienv)
@@ -67,11 +70,22 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
             LoadAotFileForApp(path);
         }
     }
-
+    InitializeVerifyANI(env);
     if (postZygoteFork) {
         vm->PostZygoteFork();
         ProcessTaskpoolWorker(false);
     }
+}
+
+void ETSAni::InitializeVerifyANI([[maybe_unused]] ani_env *env)
+{
+#ifdef PANDA_TARGET_OHOS
+    if (ark::ets::ohos::GetVerifyANIEnable()) {
+        PandaEtsVM *vm = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
+        vm->CreateANIVerifier(true);
+        PandaAniEnv::FromAniEnv(env)->CreateEnvANIVerifier();
+    }
+#endif
 }
 
 void ETSAni::LoadAotFileForApp(std::string const &aotFileName)

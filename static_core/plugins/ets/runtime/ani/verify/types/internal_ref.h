@@ -23,8 +23,8 @@ namespace ark::ets::ani::verify {
 class VWRef;
 
 inline constexpr uintptr_t VERIFY_HANDLE_TAG_MASK = 3U;
-inline constexpr uintptr_t VERIFY_HANDLE_TAG_VREF = 1U;
-inline constexpr uintptr_t VERIFY_HANDLE_TAG_VWREF = 1U;
+inline constexpr uintptr_t VERIFY_HANDLE_TAG_VREF = 2U;
+inline constexpr uintptr_t VERIFY_HANDLE_TAG_VWREF = 3U;
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class InternalRef final {

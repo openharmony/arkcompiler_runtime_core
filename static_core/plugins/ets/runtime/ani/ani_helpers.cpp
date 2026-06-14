@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ani/ani_helpers.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_resolve.h"
 #include "runtime/execution/job_launch.h"
 #include "libarkfile/shorty_iterator.h"
 #include "libarkbase/macros.h"
@@ -431,12 +432,12 @@ extern "C" EtsObject *AniObjEnd(Method *method, EtsReference *etsRef, ManagedThr
 extern "C" EtsObject *AniObjEndVerify(Method *method, verify::VRef *vref, ManagedThread *thread, bool isFastNative)
 {
     auto *executionCtx = EtsExecutionContext::FromMT(thread);
-    ani_ref ref = vref->GetRef();
+    auto envANIVerifier = executionCtx->GetPandaAniEnv()->GetEnvANIVerifier();
+    ani_ref ref = verify::ResolveToAniRef(vref, envANIVerifier);
     auto etsRef = reinterpret_cast<EtsReference *>(ref);
 
     EtsObject *obj = AniObjEnd(method, etsRef, thread, isFastNative);
     // Pop native frame verification before ending the native method
-    auto envANIVerifier = executionCtx->GetPandaAniEnv()->GetEnvANIVerifier();
     auto err = envANIVerifier->PopNativeFrame();
     if (err) {
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();

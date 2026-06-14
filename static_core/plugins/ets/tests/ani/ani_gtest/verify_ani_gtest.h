@@ -21,6 +21,7 @@
 #include "ani_gtest.h"
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vm_options.h"
 
@@ -151,6 +152,69 @@ private:
     static void AbortHook(void *data, const std::string_view message)
     {
         auto self = reinterpret_cast<VerifyAniTest *>(data);
+        self->ss_ << message;
+    }
+
+    std::stringstream ss_;
+};
+
+// Simulates post-fork VerifyANI initialization: VM starts without --verify:ani, then
+// CreateANIVerifier(true) and CreateEnvANIVerifier() run as in ETSAni::InitializeVerifyANI.
+class PostforkVerifyAniTest : public ani::testing::AniTest {
+public:
+    void SetUp() override
+    {
+        AniTest::SetUp();
+
+        auto *pandaEnv = PandaAniEnv::FromAniEnv(env_);
+        auto *vm = pandaEnv->GetEtsVM();
+        ASSERT_FALSE(vm->IsVerifyANI());
+
+        // Preload classes as in zygote before post-fork VerifyANI initialization.
+        ani_class preloadedClass {};
+        ASSERT_EQ(env_->FindClass("std.core.Object", &preloadedClass), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.String", &preloadedClass), ANI_OK);
+
+        vm->CreateANIVerifier(true);
+        pandaEnv->CreateEnvANIVerifier();
+        ASSERT_TRUE(vm->IsVerifyANI());
+        ASSERT_TRUE(pandaEnv->IsVerifyANI());
+
+        ani_env *verifyEnv = nullptr;
+        ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &verifyEnv), ANI_OK);
+        env_ = verifyEnv;
+
+        auto *verifier = vm->GetANIVerifier();
+        ASSERT_NE(verifier, nullptr);
+        verifier->SetAbortHook(AbortHook, this);
+        verifier->SetErrorHook(AbortHook, this);
+    }
+
+    void TearDown() override
+    {
+        PandaEtsVM::GetCurrent()->GetANIVerifier()->SetAbortHook(nullptr, nullptr);
+        PandaEtsVM::GetCurrent()->GetANIVerifier()->SetErrorHook(nullptr, nullptr);
+        AniTest::TearDown();
+        ASSERT_NO_ABORT_MESSAGE();
+        ss_.str("");
+    }
+
+    std::vector<ani_option> GetExtraAniOptions() override
+    {
+        return {};
+    }
+
+    std::string GetAndClearAbortMessage()
+    {
+        std::string msg = ss_.str();
+        ss_.str("");
+        return msg;
+    }
+
+private:
+    static void AbortHook(void *data, const std::string_view message)
+    {
+        auto self = reinterpret_cast<PostforkVerifyAniTest *>(data);
         self->ss_ << message;
     }
 

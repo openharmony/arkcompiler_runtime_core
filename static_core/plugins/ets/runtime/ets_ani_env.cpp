@@ -82,6 +82,14 @@ void PandaAniEnv::ReInitialize()
     referenceStorage_->ReInitialize();
 }
 
+void PandaAniEnv::CreateEnvANIVerifier()
+{
+    auto *vm = executionCtx_->GetPandaVM();
+    ASSERT(vm->IsVerifyANI());
+    ani::verify::ANIVerifier *verifier = vm->GetANIVerifier();
+    envANIVerifier_ = MakePandaUnique<ani::verify::EnvANIVerifier>(this, verifier, c_api);
+}
+
 void PandaAniEnv::SetException(EtsThrowable *thr)
 {
     ASSERT_MANAGED_CODE();

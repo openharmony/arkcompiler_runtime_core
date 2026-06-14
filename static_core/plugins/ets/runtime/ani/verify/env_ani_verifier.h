@@ -79,6 +79,12 @@ public:
     bool IsValidStackRef(VRef *vref) const;
     bool IsValidMethod(impl::VMethod *vmethod) const;
     bool IsValidField(impl::VField *vfield) const;
+    bool IsValidRawEtsMethod(void *ptr) const;
+    bool IsValidRawEtsField(void *ptr) const;
+    bool IsValidRawAniGlobalRef(void *ptr) const;
+    bool IsValidRawAniWeakRef(void *ptr) const;
+    bool IsValidRawAniLocalRef(void *ptr) const;
+    void RemoveGrandfatheredRawLocalRef(void *ptr);
 
     bool IsInNativeFrame() const;
     bool IsInLocalScope() const;
@@ -115,10 +121,14 @@ private:
 
     void DoPushNativeFrame(PandaAniEnv *ownerEnv, ani_size capacity);
     static bool IsValidRefInFrame(const Frame &frame, VRef *vref);
+    void SnapshotPreforkRawLocalRefs();
+    bool IsVerifyManagedRef(VRef *vref) const;
 
     ANIVerifier *verifier_ {};
     const __ani_interaction_api *interactionAPI_ {};
+    PandaAniEnv *ownerEnv_ {};
     PandaVector<Frame> frames_;
+    PandaUnorderedSet<void *> grandfatheredRawLocals_;
 
     NO_COPY_SEMANTIC(EnvANIVerifier);
     NO_MOVE_SEMANTIC(EnvANIVerifier);

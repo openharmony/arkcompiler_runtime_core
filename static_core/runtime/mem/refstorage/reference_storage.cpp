@@ -388,6 +388,19 @@ PandaVector<ObjectHeader *> ReferenceStorage::GetAllObjects()
     return objects;
 }
 
+void ReferenceStorage::CollectLocalReferenceHandles(PandaUnorderedSet<uintptr_t> *out) const
+{
+    ASSERT(out != nullptr);
+    for (const auto &currentFrame : *localStorage_) {
+        const PandaVector<mem::Reference *> &refs = currentFrame->GetAllReferencesInFrame();
+        for (const auto *ref : refs) {
+            // GetAllReferencesInFrame returns untagged slot pointers; ANI handles use typed pointers.
+            auto *typedRef = Reference::SetType(const_cast<Reference *>(ref), Reference::ObjectType::LOCAL);
+            out->insert(ToUintPtr(typedRef));
+        }
+    }
+}
+
 void ReferenceStorage::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType)
 {
     for (const auto &frame : *localStorage_) {

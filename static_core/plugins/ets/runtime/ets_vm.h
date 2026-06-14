@@ -111,6 +111,13 @@ public:
     void UpdateAndSweepVmRefs(const ReferenceUpdater &updater) override;
     void UninitializeThreads() override;
     void StopListeners() override;
+    /**
+     * @brief Internally creates and initializes the ANI Verifier.
+     * @param useWorkaround Whether to enable compatibility mode for legacy SDKs.
+     * @note This workaround logic should be removed once all invalid ANI usages in the
+     * SDKs are fixed; removal is tracked in #34764.
+     */
+    void CreateANIVerifier(bool useWorkaround);
 
     void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
     void HandleGCRoutineInMutator() override;

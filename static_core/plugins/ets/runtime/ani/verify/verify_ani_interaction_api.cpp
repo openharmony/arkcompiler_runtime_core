@@ -33,7 +33,9 @@
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_resolve.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
+#include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/include/mem/panda_containers.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -41,10 +43,13 @@
 // CC-OFFNXT(G.PRE.02) should be with define
 #define CHECK_PTR_ARG(arg) ANI_CHECK_RETURN_IF_EQ(arg, nullptr, ANI_INVALID_ARGS)
 
-#define VERIFY_ANI_ARGS(...)                                   \
-    do {                                                       \
-        bool success = VerifyANIArgs(__func__, {__VA_ARGS__}); \
-        ANI_CHECK_RETURN_IF_EQ(success, false, ANI_ERROR);     \
+#define VERIFY_ANI_ARGS(...)                                                                                  \
+    do {                                                                                                      \
+        bool success = VerifyANIArgs(__func__, {__VA_ARGS__});                                                \
+        auto *aniVerifier = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM())->GetANIVerifier(); \
+        if (aniVerifier == nullptr || !aniVerifier->IsWorkaroundNoCrashIfInvalidUsage()) {                    \
+            ANI_CHECK_RETURN_IF_EQ(success, false, ANI_ERROR);                                                \
+        }                                                                                                     \
     } while (false)
 
 // CC-OFFNXT(G.PRE.02) should be with define
@@ -115,16 +120,6 @@ static std::optional<PandaString> VerifyBooleanRegionBufferValues(const ani_bool
     return {};
 }
 
-static EtsMethod *GetEtsMethodIfPointerValid(impl::VMethod *vmethod)
-{
-    ani_env *env = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
-    EnvANIVerifier *envANIVerifier = PandaAniEnv::FromAniEnv(env)->GetEnvANIVerifier();
-    if (!envANIVerifier->IsValidMethod(vmethod)) {
-        return nullptr;
-    }
-    return vmethod->GetEtsMethod();
-}
-
 static PandaSmallVector<ani_value> GetVValueArgs(VEnv *venv, const ANIArg::AniMethodArgs &methodArgs)
 {
     (void)venv;
@@ -147,7 +142,8 @@ static PandaSmallVector<ani_value> GetVValueArgs(VEnv *venv, const ANIArg::AniMe
         panda_file::Type type = *it;
         if (type.GetId() == panda_file::Type::TypeId::REFERENCE) {
             // NOTE: Add reference validation
-            value.r = reinterpret_cast<VRef *>(vArg.r)->GetRef();
+            auto ref = ResolveToAniRef(reinterpret_cast<VRef *>(vArg.r));
+            value.r = ref;
         } else {
             value = vArg;
         }
@@ -190,13 +186,14 @@ static ani_status ResolveVerifiedMethodByName(VEnv *venv, VObject *vobject, cons
     ASSERT(vmethod != nullptr);
     ani_method methodHandle {};
     ani_type result {};
-    ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), vobject->GetRef(), &result);
+    auto objectRef = ResolveToAniRef(vobject);
+    ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), objectRef, &result);
     if (status != ANI_OK) {
         return status;
     }
     auto vtype = static_cast<VType *>(venv->AddLocalVerifiedRef(result));
-    status = GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), static_cast<ani_class>(vtype->GetRef()), name,
-                                                       signature, &methodHandle);
+    status = GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), static_cast<ani_class>(ResolveToAniType(vtype)),
+                                                       name, signature, &methodHandle);
     if (status != ANI_OK) {
         return status;
     }
@@ -212,8 +209,9 @@ static ani_status ResolveVerifiedStaticMethodByName(VEnv *venv, VClass *vclass, 
     ASSERT(vstaticmethod != nullptr);
 
     ani_static_method staticMethodHandle {};
-    ani_status status = GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name,
-                                                                        signature, &staticMethodHandle);
+    auto classRef = ResolveToAniClass(vclass);
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), classRef, name, signature, &staticMethodHandle);
     if (status != ANI_OK) {
         return status;
     }
@@ -280,8 +278,10 @@ NO_UB_SANITIZE static ani_status Object_New(VEnv *venv, VClass *vclass, VMethod 
     CHECK_PTR_ARG(vresult);
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_object result {};
-    ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
-                                                              &result, args.data());
+    auto classRef = ResolveToAniClass(vclass);
+    auto ctorMethod = ResolveToAniMethod(vctor);
+    ani_status status =
+        GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), classRef, ctorMethod, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -309,8 +309,10 @@ NO_UB_SANITIZE static ani_status Object_New_A(VEnv *venv, VClass *vclass, VMetho
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_object result {};
-    ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
-                                                              &result, args.data());
+    auto classRef = ResolveToAniClass(vclass);
+    auto ctorMethod = ResolveToAniMethod(vctor);
+    ani_status status =
+        GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), classRef, ctorMethod, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -337,8 +339,10 @@ NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, VMetho
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_object result {};
-    ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
-                                                              &result, args.data());
+    auto classRef = ResolveToAniClass(vclass);
+    auto ctorMethod = ResolveToAniMethod(vctor);
+    ani_status status =
+        GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), classRef, ctorMethod, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -357,7 +361,8 @@ NO_UB_SANITIZE static ani_status Object_GetType(VEnv *venv, VObject *vobject, VT
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vresult);
     ani_type typeResult {};
-    ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), vobject->GetRef(), &typeResult);
+    auto objectRef = ResolveToAniRef(vobject);
+    ani_status status = GetInteractionAPI(venv)->Object_GetType(venv->GetEnv(), objectRef, &typeResult);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, typeResult, vresult);
     return status;
 }
@@ -377,7 +382,9 @@ NO_UB_SANITIZE static ani_status Object_InstanceOf(VEnv *venv, VObject *vobject,
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vtype);
 
-    return GetInteractionAPI(venv)->Object_InstanceOf(venv->GetEnv(), vobject->GetRef(), vtype->GetRef(), result);
+    auto objectRef = ResolveToAniRef(vobject);
+    auto typeRef = ResolveToAniType(vtype);
+    return GetInteractionAPI(venv)->Object_InstanceOf(venv->GetEnv(), objectRef, typeRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -394,7 +401,8 @@ NO_UB_SANITIZE static ani_status Type_GetSuperClass(VEnv *venv, VType *vtype, VC
     CHECK_PTR_ARG(vtype);
     CHECK_PTR_ARG(vresult);
     ani_class superClass {};
-    ani_status status = GetInteractionAPI(venv)->Type_GetSuperClass(venv->GetEnv(), vtype->GetRef(), &superClass);
+    auto typeRef = ResolveToAniType(vtype);
+    ani_status status = GetInteractionAPI(venv)->Type_GetSuperClass(venv->GetEnv(), typeRef, &superClass);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, superClass, vresult);
     return status;
 }
@@ -415,8 +423,9 @@ NO_UB_SANITIZE static ani_status Type_IsAssignableFrom(VEnv *venv, VType *vfromT
     CHECK_PTR_ARG(vfromType);
     CHECK_PTR_ARG(vtoType);
 
-    return GetInteractionAPI(venv)->Type_IsAssignableFrom(venv->GetEnv(), vfromType->GetRef(), vtoType->GetRef(),
-                                                          result);
+    auto fromTypeRef = ResolveToAniType(vfromType);
+    auto toTypeRef = ResolveToAniType(vtoType);
+    return GetInteractionAPI(venv)->Type_IsAssignableFrom(venv->GetEnv(), fromTypeRef, toTypeRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -513,8 +522,8 @@ NO_UB_SANITIZE static ani_status Module_FindFunction(VEnv *venv, VModule *vmodul
     CHECK_PTR_ARG(vresult);
 
     ani_function result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Module_FindFunction(venv->GetEnv(), vmodule->GetRef(), name, signature, &result);
+    ani_status status = GetInteractionAPI(venv)->Module_FindFunction(
+        venv->GetEnv(), ResolveToAniModule(static_cast<VModule *>(vmodule)), name, signature, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedFunction(result);
     }
@@ -538,7 +547,8 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(VEnv *venv, VModule *vmodul
     CHECK_PTR_ARG(vresult);
 
     ani_variable result {};
-    ani_status status = GetInteractionAPI(venv)->Module_FindVariable(venv->GetEnv(), vmodule->GetRef(), name, &result);
+    ani_status status = GetInteractionAPI(venv)->Module_FindVariable(
+        venv->GetEnv(), ResolveToAniModule(static_cast<VModule *>(vmodule)), name, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedVariable(result);
     }
@@ -562,8 +572,8 @@ NO_UB_SANITIZE static ani_status Namespace_FindFunction(VEnv *venv, VNamespace *
     CHECK_PTR_ARG(vnamespace);
     CHECK_PTR_ARG(vresult);
     ani_function result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Namespace_FindFunction(venv->GetEnv(), vnamespace->GetRef(), name, signature, &result);
+    ani_status status = GetInteractionAPI(venv)->Namespace_FindFunction(
+        venv->GetEnv(), ResolveToAniNamespace(static_cast<VNamespace *>(vnamespace)), name, signature, &result);
     if (LIKELY(status == ANI_OK)) {
         *vresult = venv->GetVerifiedFunction(result);
     }
@@ -587,8 +597,8 @@ NO_UB_SANITIZE static ani_status Namespace_FindVariable(VEnv *venv, VNamespace *
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(vresult);
     ani_variable result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Namespace_FindVariable(venv->GetEnv(), vnamespace->GetRef(), name, &result);
+    ani_status status = GetInteractionAPI(venv)->Namespace_FindVariable(
+        venv->GetEnv(), ResolveToAniNamespace(static_cast<VNamespace *>(vnamespace)), name, &result);
     if (LIKELY(status == ANI_OK)) {
         *vresult = venv->GetVerifiedVariable(result);
     }
@@ -609,8 +619,8 @@ NO_UB_SANITIZE static ani_status Module_BindNativeFunctions(VEnv *venv, VModule 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vmodule);
-    return GetInteractionAPI(venv)->Module_BindNativeFunctions(venv->GetEnv(), vmodule->GetRef(), functions,
-                                                               nrFunctions);
+    return GetInteractionAPI(venv)->Module_BindNativeFunctions(
+        venv->GetEnv(), ResolveToAniModule(static_cast<VModule *>(vmodule)), functions, nrFunctions);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -628,8 +638,8 @@ NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(VEnv *venv, VName
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vnamespace);
-    return GetInteractionAPI(venv)->Namespace_BindNativeFunctions(venv->GetEnv(), vnamespace->GetRef(), functions,
-                                                                  nrFunctions);
+    return GetInteractionAPI(venv)->Namespace_BindNativeFunctions(
+        venv->GetEnv(), ResolveToAniNamespace(static_cast<VNamespace *>(vnamespace)), functions, nrFunctions);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -646,7 +656,8 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(VEnv *venv, VClass *vcl
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vclass);
-    return GetInteractionAPI(venv)->Class_BindNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
+    auto classRef = ResolveToAniClass(vclass);
+    return GetInteractionAPI(venv)->Class_BindNativeMethods(venv->GetEnv(), classRef, methods, nrMethods);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -661,13 +672,22 @@ NO_UB_SANITIZE static ani_status Reference_Delete(VEnv *venv, VRef *lvref)
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(lvref);
 
+    auto *envVerifier = PandaAniEnv::FromAniEnv(venv->GetEnv())->GetEnvANIVerifier();
+    bool isRawLocalRef = envVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(lvref));
+
     if (!venv->IsValidLocalVerifiedRef(lvref) && !venv->IsValidStackVerifiedRef(lvref) &&
-        !ManagedCodeAccessor::IsUndefined(lvref->GetRef())) {
+        !ManagedCodeAccessor::IsUndefined(ResolveToAniRef(lvref)) && !isRawLocalRef) {
         return ANI_INCORRECT_REF;
     }
-    ani_ref lref = lvref->GetRef();
-    venv->DeleteLocalVerifiedRef(lvref);
-    return GetInteractionAPI(venv)->Reference_Delete(venv->GetEnv(), lref);
+    auto lref = ResolveToAniRef(lvref);
+    if (!isRawLocalRef) {
+        venv->DeleteLocalVerifiedRef(lvref);
+    }
+    ani_status status = GetInteractionAPI(venv)->Reference_Delete(venv->GetEnv(), lref);
+    if (status == ANI_OK && isRawLocalRef) {
+        envVerifier->RemoveGrandfatheredRawLocalRef(reinterpret_cast<void *>(lvref));
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -751,7 +771,7 @@ NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(VEnv *venv, VRef *vref,
     if (!venv->IsValidLocalVerifiedRef(vref)) {
         return ANI_INCORRECT_REF;
     }
-    ani_ref ref = vref->GetRef();
+    auto ref = ResolveToAniRef(vref);
     VERIFY_ANI_ABORT_IF_ERROR(venv->DestroyEscapeLocalScope(vref));
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->DestroyEscapeLocalScope(venv->GetEnv(), ref, &result);
@@ -774,7 +794,8 @@ NO_UB_SANITIZE static ani_status ThrowError(VEnv *venv, VError *verr)
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(verr);
-    return GetInteractionAPI(venv)->ThrowError(venv->GetEnv(), verr->GetRef());
+    auto errorRef = ResolveToAniRef(verr);
+    return GetInteractionAPI(venv)->ThrowError(venv->GetEnv(), errorRef);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -899,9 +920,8 @@ NO_UB_SANITIZE static ani_status Reference_IsNull(VEnv *venv, VRef *vref, ani_bo
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vref);
-    CHECK_PTR_ARG(result);
-
-    return GetInteractionAPI(venv)->Reference_IsNull(venv->GetEnv(), vref->GetRef(), result);
+    auto ref = ResolveToAniRef(vref);
+    return GetInteractionAPI(venv)->Reference_IsNull(venv->GetEnv(), ref, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -916,9 +936,8 @@ NO_UB_SANITIZE static ani_status Reference_IsUndefined(VEnv *venv, VRef *vref, a
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vref);
-    CHECK_PTR_ARG(result);
-
-    return GetInteractionAPI(venv)->Reference_IsUndefined(venv->GetEnv(), vref->GetRef(), result);
+    auto ref = ResolveToAniRef(vref);
+    return GetInteractionAPI(venv)->Reference_IsUndefined(venv->GetEnv(), ref, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -933,9 +952,8 @@ NO_UB_SANITIZE static ani_status Reference_IsNullishValue(VEnv *venv, VRef *vref
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vref);
-    CHECK_PTR_ARG(result);
-
-    return GetInteractionAPI(venv)->Reference_IsNullishValue(venv->GetEnv(), vref->GetRef(), result);
+    auto ref = ResolveToAniRef(vref);
+    return GetInteractionAPI(venv)->Reference_IsNullishValue(venv->GetEnv(), ref, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -952,9 +970,9 @@ NO_UB_SANITIZE static ani_status Reference_Equals(VEnv *venv, VRef *vref0, VRef 
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vref0);
     CHECK_PTR_ARG(vref1);
-    CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Reference_Equals(venv->GetEnv(), vref0->GetRef(), vref1->GetRef(), result);
+    return GetInteractionAPI(venv)->Reference_Equals(venv->GetEnv(), ResolveToAniRef(vref0), ResolveToAniRef(vref1),
+                                                     result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -973,7 +991,8 @@ NO_UB_SANITIZE static ani_status Reference_StrictEquals(VEnv *venv, VRef *vref0,
     CHECK_PTR_ARG(vref1);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Reference_StrictEquals(venv->GetEnv(), vref0->GetRef(), vref1->GetRef(), result);
+    return GetInteractionAPI(venv)->Reference_StrictEquals(venv->GetEnv(), ResolveToAniRef(vref0),
+                                                           ResolveToAniRef(vref1), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1012,7 +1031,8 @@ NO_UB_SANITIZE static ani_status String_GetUTF16Size(VEnv *venv, VString *vstrin
     CHECK_PTR_ARG(vstring);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->String_GetUTF16Size(venv->GetEnv(), vstring->GetRef(), result);
+    auto stringRef = ResolveToAniRef(vstring);
+    return GetInteractionAPI(venv)->String_GetUTF16Size(venv->GetEnv(), stringRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1033,8 +1053,8 @@ NO_UB_SANITIZE static ani_status String_GetUTF16(VEnv *venv, VString *vstring, u
     CHECK_PTR_ARG(utf16Buffer);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->String_GetUTF16(venv->GetEnv(), vstring->GetRef(), utf16Buffer, utf16BufferSize,
-                                                    result);
+    auto stringRef = ResolveToAniRef(vstring);
+    return GetInteractionAPI(venv)->String_GetUTF16(venv->GetEnv(), stringRef, utf16Buffer, utf16BufferSize, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1054,9 +1074,9 @@ NO_UB_SANITIZE static ani_status String_GetUTF16SubString(VEnv *venv, VString *v
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vstring);
-
-    return GetInteractionAPI(venv)->String_GetUTF16SubString(venv->GetEnv(), vstring->GetRef(), substrOffset,
-                                                             substrSize, utf16Buffer, utf16BufferSize, result);
+    auto stringRef = ResolveToAniRef(vstring);
+    return GetInteractionAPI(venv)->String_GetUTF16SubString(venv->GetEnv(), stringRef, substrOffset, substrSize,
+                                                             utf16Buffer, utf16BufferSize, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1095,7 +1115,8 @@ NO_UB_SANITIZE static ani_status String_GetUTF8Size(VEnv *venv, VString *vstring
     CHECK_PTR_ARG(vstring);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->String_GetUTF8Size(venv->GetEnv(), vstring->GetRef(), result);
+    auto stringRef = ResolveToAniRef(vstring);
+    return GetInteractionAPI(venv)->String_GetUTF8Size(venv->GetEnv(), stringRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1116,8 +1137,8 @@ NO_UB_SANITIZE static ani_status String_GetUTF8(VEnv *venv, VString *vstring, ch
     CHECK_PTR_ARG(utf8Buffer);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->String_GetUTF8(venv->GetEnv(), vstring->GetRef(), utf8Buffer, utf8BufferSize,
-                                                   result);
+    auto stringRef = ResolveToAniRef(vstring);
+    return GetInteractionAPI(venv)->String_GetUTF8(venv->GetEnv(), stringRef, utf8Buffer, utf8BufferSize, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1140,7 +1161,8 @@ NO_UB_SANITIZE static ani_status String_GetUTF8SubString(VEnv *venv, VString *vs
     CHECK_PTR_ARG(utf8Buffer);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->String_GetUTF8SubString(venv->GetEnv(), vstring->GetRef(), substrOffset, substrSize,
+    auto stringRef = ResolveToAniRef(vstring);
+    return GetInteractionAPI(venv)->String_GetUTF8SubString(venv->GetEnv(), stringRef, substrOffset, substrSize,
                                                             utf8Buffer, utf8BufferSize, result);
 }
 
@@ -1158,7 +1180,8 @@ NO_UB_SANITIZE static ani_status Array_GetLength(VEnv *venv, VArray *varray, ani
     CHECK_PTR_ARG(varray);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Array_GetLength(venv->GetEnv(), varray->GetRef(), result);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->Array_GetLength(venv->GetEnv(), arrayRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1179,8 +1202,8 @@ NO_UB_SANITIZE static ani_status Array_New(VEnv *venv, ani_size length, VRef *vi
     CHECK_PTR_ARG(vresult);
 
     ani_array result {};
-    ani_ref initialElement = vinitialElement == nullptr ? nullptr : vinitialElement->GetRef();
-    ani_status status = GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, initialElement, &result);
+    ani_status status =
+        GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, ResolveToAniRef(vinitialElement), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1200,7 +1223,8 @@ NO_UB_SANITIZE static ani_status Array_Set(VEnv *venv, VArray *varray, ani_size 
     CHECK_PTR_ARG(varray);
     CHECK_PTR_ARG(vref);
 
-    return GetInteractionAPI(venv)->Array_Set(venv->GetEnv(), varray->GetRef(), index, vref->GetRef());
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->Array_Set(venv->GetEnv(), arrayRef, index, ResolveToAniRef(vref));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1219,7 +1243,8 @@ NO_UB_SANITIZE static ani_status Array_Get(VEnv *venv, VArray *varray, ani_size 
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Array_Get(venv->GetEnv(), varray->GetRef(), index, &result);
+    auto arrayRef = ResolveToAniRef(varray);
+    ani_status status = GetInteractionAPI(venv)->Array_Get(venv->GetEnv(), arrayRef, index, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1238,7 +1263,8 @@ NO_UB_SANITIZE static ani_status Array_Push(VEnv *venv, VArray *varray, VRef *vr
     CHECK_PTR_ARG(varray);
     CHECK_PTR_ARG(vref);
 
-    return GetInteractionAPI(venv)->Array_Push(venv->GetEnv(), varray->GetRef(), vref->GetRef());
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->Array_Push(venv->GetEnv(), arrayRef, ResolveToAniRef(vref));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1256,7 +1282,8 @@ NO_UB_SANITIZE static ani_status Array_Pop(VEnv *venv, VArray *varray, VRef **vr
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Array_Pop(venv->GetEnv(), varray->GetRef(), &result);
+    auto arrayRef = ResolveToAniRef(varray);
+    ani_status status = GetInteractionAPI(venv)->Array_Pop(venv->GetEnv(), arrayRef, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1273,7 +1300,9 @@ NO_UB_SANITIZE static ani_status FixedArray_GetLength(VEnv *venv, VFixedArray *v
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetLength(venv->GetEnv(), varray->GetRef(), result);
+
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetLength(venv->GetEnv(), arrayRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1455,7 +1484,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(VEnv *venv, VFixed
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Boolean(venv->GetEnv(), varray->GetRef(), offset, length,
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Boolean(venv->GetEnv(), arrayRef, offset, length,
                                                                  nativeBuffer);
 }
 
@@ -1478,8 +1508,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Char(VEnv *venv, VFixedArr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Char(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                              nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Char(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1501,8 +1531,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(VEnv *venv, VFixedArr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Byte(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                              nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Byte(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1524,8 +1554,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(VEnv *venv, VFixedAr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Short(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                               nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Short(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1547,8 +1577,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(VEnv *venv, VFixedArra
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Int(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                             nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Int(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1570,8 +1600,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(VEnv *venv, VFixedArr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Long(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                              nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Long(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1593,8 +1623,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(VEnv *venv, VFixedAr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Float(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                               nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Float(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1616,8 +1646,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(VEnv *venv, VFixedA
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Double(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                                nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_GetRegion_Double(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1640,7 +1670,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(VEnv *venv, VFixed
         VERIFY_ANI_ABORT_IF_ERROR(VerifyBooleanRegionBufferValues(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Boolean(venv->GetEnv(), varray->GetRef(), offset, length,
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Boolean(venv->GetEnv(), arrayRef, offset, length,
                                                                  nativeBuffer);
 }
 
@@ -1663,8 +1694,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Char(VEnv *venv, VFixedArr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Char(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                              nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Char(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1686,8 +1717,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(VEnv *venv, VFixedArr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Byte(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                              nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Byte(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1709,8 +1740,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(VEnv *venv, VFixedAr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Short(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                               nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Short(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1732,8 +1763,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(VEnv *venv, VFixedArra
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Int(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                             nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Int(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1755,8 +1786,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(VEnv *venv, VFixedArr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Long(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                              nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Long(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1778,8 +1809,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(VEnv *venv, VFixedAr
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Float(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                               nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Float(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1801,8 +1832,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(VEnv *venv, VFixedA
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Double(venv->GetEnv(), varray->GetRef(), offset, length,
-                                                                nativeBuffer);
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_SetRegion_Double(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1823,13 +1854,13 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, an
     ani_ref initialElement = nullptr;
     if (LIKELY(length != 0)) {
         CHECK_PTR_ARG(vinitialElement);
-        initialElement = vinitialElement->GetRef();
+        initialElement = ResolveToAniRef(vinitialElement);
     }
     CHECK_PTR_ARG(vresult);
     ani_fixedarray_ref result {};
+    auto typeRef = ResolveToAniType(vtype);
     ani_status status =
-        GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), vtype->GetRef(), length, initialElement, &result);
-
+        GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), typeRef, length, initialElement, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1849,7 +1880,8 @@ NO_UB_SANITIZE static ani_status FixedArray_Set_Ref(VEnv *venv, VFixedArrayRef *
     CHECK_PTR_ARG(varray);
     CHECK_PTR_ARG(vref);
 
-    return GetInteractionAPI(venv)->FixedArray_Set_Ref(venv->GetEnv(), varray->GetRef(), index, vref->GetRef());
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->FixedArray_Set_Ref(venv->GetEnv(), arrayRef, index, ResolveToAniRef(vref));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1867,8 +1899,8 @@ NO_UB_SANITIZE static ani_status FixedArray_Get_Ref(VEnv *venv, VFixedArrayRef *
     CHECK_PTR_ARG(varray);
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_Get_Ref(venv->GetEnv(), varray->GetRef(), index, &result);
-
+    auto arrayRef = ResolveToAniRef(varray);
+    ani_status status = GetInteractionAPI(venv)->FixedArray_Get_Ref(venv->GetEnv(), arrayRef, index, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1888,7 +1920,8 @@ NO_UB_SANITIZE static ani_status Enum_GetEnumItemByName(VEnv *venv, VEnum *venum
     CHECK_PTR_ARG(venum);
     CHECK_PTR_ARG(vresult);
     ani_enum_item result {};
-    ani_status status = GetInteractionAPI(venv)->Enum_GetEnumItemByName(venv->GetEnv(), venum->GetRef(), name, &result);
+    auto enumRef = ResolveToAniEnum(venum);
+    ani_status status = GetInteractionAPI(venv)->Enum_GetEnumItemByName(venv->GetEnv(), enumRef, name, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -1910,7 +1943,7 @@ NO_UB_SANITIZE static ani_status Enum_GetEnumItemByIndex(VEnv *venv, VEnum *venu
     CHECK_PTR_ARG(vresult);
     ani_enum_item result {};
     ani_status status =
-        GetInteractionAPI(venv)->Enum_GetEnumItemByIndex(venv->GetEnv(), venum->GetRef(), index, &result);
+        GetInteractionAPI(venv)->Enum_GetEnumItemByIndex(venv->GetEnv(), ResolveToAniEnum(venum), index, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -1930,7 +1963,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetEnum(VEnv *venv, VEnumItem *venumIt
     CHECK_PTR_ARG(venumItem);
     CHECK_PTR_ARG(vresult);
     ani_enum result {};
-    ani_status status = GetInteractionAPI(venv)->EnumItem_GetEnum(venv->GetEnv(), venumItem->GetRef(), &result);
+    auto enumItemRef = ResolveToAniEnumItem(venumItem);
+    ani_status status = GetInteractionAPI(venv)->EnumItem_GetEnum(venv->GetEnv(), enumItemRef, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -1949,7 +1983,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(VEnv *venv, VEnumItem *ve
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(venumItem);
 
-    return GetInteractionAPI(venv)->EnumItem_GetValue_Int(venv->GetEnv(), venumItem->GetRef(), result);
+    auto enumItemRef = ResolveToAniEnumItem(venumItem);
+    return GetInteractionAPI(venv)->EnumItem_GetValue_Int(venv->GetEnv(), enumItemRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1966,7 +2001,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_String(VEnv *venv, VEnumItem 
     CHECK_PTR_ARG(venumItem);
     CHECK_PTR_ARG(vresult);
     ani_string result {};
-    ani_status status = GetInteractionAPI(venv)->EnumItem_GetValue_String(venv->GetEnv(), venumItem->GetRef(), &result);
+    auto enumItemRef = ResolveToAniEnumItem(venumItem);
+    ani_status status = GetInteractionAPI(venv)->EnumItem_GetValue_String(venv->GetEnv(), enumItemRef, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -1986,7 +2022,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetName(VEnv *venv, VEnumItem *venumIt
     CHECK_PTR_ARG(venumItem);
     CHECK_PTR_ARG(vresult);
     ani_string result {};
-    ani_status status = GetInteractionAPI(venv)->EnumItem_GetName(venv->GetEnv(), venumItem->GetRef(), &result);
+    auto enumItemRef = ResolveToAniEnumItem(venumItem);
+    ani_status status = GetInteractionAPI(venv)->EnumItem_GetName(venv->GetEnv(), enumItemRef, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -2005,7 +2042,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(VEnv *venv, VEnumItem *venumI
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(venumItem);
 
-    return GetInteractionAPI(venv)->EnumItem_GetIndex(venv->GetEnv(), venumItem->GetRef(), result);
+    auto enumItemRef = ResolveToAniEnumItem(venumItem);
+    return GetInteractionAPI(venv)->EnumItem_GetIndex(venv->GetEnv(), enumItemRef, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2026,7 +2064,7 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(VEnv *venv, VFnObject *vf
     CHECK_PTR_ARG(vfnObject);
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->FunctionalObject_Call(venv->GetEnv(), vfnObject->GetRef(), argc,
+    ani_status status = GetInteractionAPI(venv)->FunctionalObject_Call(venv->GetEnv(), ResolveToAniRef(vfnObject), argc,
                                                                        argvArgs.releaseArgv, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -2045,7 +2083,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Boolean(VEnv *venv, VVariable
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Boolean(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Boolean(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2061,7 +2099,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Char(VEnv *venv, VVariable *v
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Char(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Char(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2077,7 +2115,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Byte(VEnv *venv, VVariable *v
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Byte(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Byte(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2093,7 +2131,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Short(VEnv *venv, VVariable *
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Short(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Short(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2109,7 +2147,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Int(VEnv *venv, VVariable *vv
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Int(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Int(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2125,7 +2163,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Long(VEnv *venv, VVariable *v
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Long(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Long(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2141,7 +2179,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Float(VEnv *venv, VVariable *
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Float(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Float(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2157,7 +2195,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Double(VEnv *venv, VVariable 
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vvariable);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Double(venv->GetEnv(), vvariable->GetVariable(), value);
+    return GetInteractionAPI(venv)->Variable_SetValue_Double(venv->GetEnv(), ResolveToAniVariable(vvariable), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2174,7 +2212,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(VEnv *venv, VVariable *vv
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Variable_SetValue_Ref(venv->GetEnv(), vvariable->GetVariable(), vvalue->GetRef());
+    return GetInteractionAPI(venv)->Variable_SetValue_Ref(venv->GetEnv(), ResolveToAniVariable(vvariable),
+                                                          ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2191,7 +2230,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(VEnv *venv, VVariable
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Boolean(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Boolean(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2208,7 +2247,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Char(VEnv *venv, VVariable *v
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Char(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Char(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2225,7 +2264,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(VEnv *venv, VVariable *v
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Byte(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Byte(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2242,7 +2281,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Short(VEnv *venv, VVariable *
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Short(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Short(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2259,7 +2298,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Int(VEnv *venv, VVariable *vv
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Int(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Int(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2276,7 +2315,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Long(VEnv *venv, VVariable *v
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Long(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Long(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2293,7 +2332,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Float(VEnv *venv, VVariable *
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Float(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Float(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2310,7 +2349,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Double(VEnv *venv, VVariable 
     CHECK_PTR_ARG(vvariable);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Variable_GetValue_Double(venv->GetEnv(), vvariable->GetVariable(), result);
+    return GetInteractionAPI(venv)->Variable_GetValue_Double(venv->GetEnv(), ResolveToAniVariable(vvariable), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2329,7 +2368,7 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Ref(VEnv *venv, VVariable *vv
 
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Variable_GetValue_Ref(venv->GetEnv(), vvariable->GetVariable(), &result);
+        GetInteractionAPI(venv)->Variable_GetValue_Ref(venv->GetEnv(), ResolveToAniVariable(vvariable), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -2355,8 +2394,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean(VEnv *venv, VFunction *vf
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Boolean_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Function_Call_Boolean_A(venv->GetEnv(), ResolveToAniFunction(vfn),
+                                                                         result, args.data());
     return status;
 }
 
@@ -2379,8 +2418,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean_A(VEnv *venv, VFunction *
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Boolean_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Function_Call_Boolean_A(venv->GetEnv(), ResolveToAniFunction(vfn),
+                                                                         result, args.data());
     return status;
 }
 
@@ -2402,8 +2441,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean_V(VEnv *venv, VFunction *
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Boolean_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Function_Call_Boolean_A(venv->GetEnv(), ResolveToAniFunction(vfn),
+                                                                         result, args.data());
     return status;
 }
 
@@ -2429,7 +2468,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Char(VEnv *venv, VFunction *vfn, 
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Char_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Char_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2453,7 +2492,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Char_A(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Char_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Char_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2475,7 +2514,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Char_V(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Char_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Char_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2501,7 +2540,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte(VEnv *venv, VFunction *vfn, 
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Byte_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Byte_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2525,7 +2564,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte_A(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Byte_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Byte_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2547,7 +2586,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte_V(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Byte_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Byte_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2573,7 +2612,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Short(VEnv *venv, VFunction *vfn,
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Short_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Short_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2597,7 +2636,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Short_A(VEnv *venv, VFunction *vf
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Short_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Short_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2619,7 +2658,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Short_V(VEnv *venv, VFunction *vf
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Short_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Short_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2645,7 +2684,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Int(VEnv *venv, VFunction *vfn, a
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Int_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Int_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2669,7 +2708,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Int_A(VEnv *venv, VFunction *vfn,
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Int_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Int_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2691,7 +2730,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Int_V(VEnv *venv, VFunction *vfn,
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Int_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Int_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2717,7 +2756,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Long(VEnv *venv, VFunction *vfn, 
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Long_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Long_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2741,7 +2780,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Long_A(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Long_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Long_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2763,7 +2802,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Long_V(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Long_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Long_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2789,7 +2828,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Float(VEnv *venv, VFunction *vfn,
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Float_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Float_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2813,7 +2852,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Float_A(VEnv *venv, VFunction *vf
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Float_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Float_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2835,7 +2874,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Float_V(VEnv *venv, VFunction *vf
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Float_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Float_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2861,7 +2900,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Double(VEnv *venv, VFunction *vfn
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Double_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Double_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2885,7 +2924,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Double_A(VEnv *venv, VFunction *v
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Double_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Double_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2907,7 +2946,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Double_V(VEnv *venv, VFunction *v
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Double_A(venv->GetEnv(), vfn->GetMethod(), result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Double_A(venv->GetEnv(), ResolveToAniFunction(vfn), result, args.data());
     return status;
 }
 
@@ -2934,7 +2973,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref(VEnv *venv, VFunction *vfn, V
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Ref_A(venv->GetEnv(), vfn->GetMethod(), &result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Ref_A(venv->GetEnv(), ResolveToAniFunction(vfn), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -2959,7 +2998,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref_A(VEnv *venv, VFunction *vfn,
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Ref_A(venv->GetEnv(), vfn->GetMethod(), &result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Ref_A(venv->GetEnv(), ResolveToAniFunction(vfn), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -2983,7 +3022,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref_V(VEnv *venv, VFunction *vfn,
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Function_Call_Ref_A(venv->GetEnv(), vfn->GetMethod(), &result, args.data());
+        GetInteractionAPI(venv)->Function_Call_Ref_A(venv->GetEnv(), ResolveToAniFunction(vfn), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -3007,7 +3046,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Void(VEnv *venv, VFunction *vfn, 
     CHECK_PTR_ARG(vfn);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), vfn->GetMethod(), args.data());
+    ani_status status =
+        GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), ResolveToAniFunction(vfn), args.data());
     return status;
 }
 
@@ -3027,7 +3067,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_A(VEnv *venv, VFunction *vfn
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), vfn->GetMethod(), args.data());
+    ani_status status =
+        GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), ResolveToAniFunction(vfn), args.data());
     return status;
 }
 
@@ -3046,7 +3087,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_V(VEnv *venv, VFunction *vfn
     CHECK_PTR_ARG(vfn);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), vfn->GetMethod(), args.data());
+    ani_status status =
+        GetInteractionAPI(venv)->Function_Call_Void_A(venv->GetEnv(), ResolveToAniFunction(vfn), args.data());
     return status;
 }
 
@@ -3068,7 +3110,8 @@ NO_UB_SANITIZE static ani_status Class_FindField(VEnv *venv, VClass *vclass, con
 
     ani_field result {};
 
-    ani_status status = GetInteractionAPI(venv)->Class_FindField(venv->GetEnv(), vclass->GetRef(), name, &result);
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindField(venv->GetEnv(), ResolveToAniClass(vclass), name, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedField(result);
     }
@@ -3093,7 +3136,8 @@ NO_UB_SANITIZE static ani_status Class_FindStaticField(VEnv *venv, VClass *vclas
     CHECK_PTR_ARG(vresult);
 
     ani_static_field result {};
-    ani_status status = GetInteractionAPI(venv)->Class_FindStaticField(venv->GetEnv(), vclass->GetRef(), name, &result);
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindStaticField(venv->GetEnv(), ResolveToAniClass(vclass), name, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedStaticField(result);
     }
@@ -3120,7 +3164,7 @@ NO_UB_SANITIZE static ani_status Class_FindMethod(VEnv *venv, VClass *vclass, co
 
     ani_method result {};
     ani_status status =
-        GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
+        GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), ResolveToAniClass(vclass), name, signature, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedMethod(result);
     }
@@ -3147,8 +3191,8 @@ NO_UB_SANITIZE static ani_status Class_FindStaticMethod(VEnv *venv, VClass *vcla
     CHECK_PTR_ARG(vresult);
 
     ani_static_method result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
+    ani_status status = GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), ResolveToAniClass(vclass), name,
+                                                                        signature, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedStaticMethod(result);
     }
@@ -3172,7 +3216,8 @@ NO_UB_SANITIZE static ani_status Class_FindSetter(VEnv *venv, VClass *vclass, co
     CHECK_PTR_ARG(vresult);
 
     ani_method result {};
-    ani_status status = GetInteractionAPI(venv)->Class_FindSetter(venv->GetEnv(), vclass->GetRef(), name, &result);
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindSetter(venv->GetEnv(), ResolveToAniClass(vclass), name, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedMethod(result);
     }
@@ -3196,7 +3241,8 @@ NO_UB_SANITIZE static ani_status Class_FindGetter(VEnv *venv, VClass *vclass, co
     CHECK_PTR_ARG(vresult);
 
     ani_method result {};
-    ani_status status = GetInteractionAPI(venv)->Class_FindGetter(venv->GetEnv(), vclass->GetRef(), name, &result);
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindGetter(venv->GetEnv(), ResolveToAniClass(vclass), name, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedMethod(result);
     }
@@ -3221,8 +3267,8 @@ NO_UB_SANITIZE static ani_status Class_FindIndexableGetter(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vresult);
 
     ani_method result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Class_FindIndexableGetter(venv->GetEnv(), vclass->GetRef(), signature, &result);
+    ani_status status = GetInteractionAPI(venv)->Class_FindIndexableGetter(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                           signature, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedMethod(result);
     }
@@ -3247,8 +3293,8 @@ NO_UB_SANITIZE static ani_status Class_FindIndexableSetter(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vresult);
 
     ani_method result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Class_FindIndexableSetter(venv->GetEnv(), vclass->GetRef(), signature, &result);
+    ani_status status = GetInteractionAPI(venv)->Class_FindIndexableSetter(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                           signature, &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedMethod(result);
     }
@@ -3270,7 +3316,7 @@ NO_UB_SANITIZE static ani_status Class_FindIterator(VEnv *venv, VClass *vclass, 
     CHECK_PTR_ARG(vresult);
 
     ani_method result {};
-    ani_status status = GetInteractionAPI(venv)->Class_FindIterator(venv->GetEnv(), vclass->GetRef(), &result);
+    ani_status status = GetInteractionAPI(venv)->Class_FindIterator(venv->GetEnv(), ResolveToAniClass(vclass), &result);
     if (LIKELY((status) == ANI_OK)) {
         *vresult = venv->GetVerifiedMethod(result);
     }
@@ -3294,8 +3340,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Boolean(VEnv *venv, VClass
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Boolean(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                                 result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Boolean(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                                 ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3315,8 +3361,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Char(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Char(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                              result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Char(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                              ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3336,8 +3382,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Byte(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Byte(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                              result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Byte(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                              ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3357,8 +3403,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Short(VEnv *venv, VClass *
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Short(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                               result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Short(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                               ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3378,8 +3424,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Int(VEnv *venv, VClass *vc
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Int(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                             result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Int(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                             ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3399,8 +3445,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Long(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Long(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                              result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Long(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                              ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3420,8 +3466,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Float(VEnv *venv, VClass *
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Float(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                               result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Float(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                               ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3441,8 +3487,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Double(VEnv *venv, VClass 
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticField_Double(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                                result);
+    return GetInteractionAPI(venv)->Class_GetStaticField_Double(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                                ResolveToAniStaticField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3463,8 +3509,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Ref(VEnv *venv, VClass *vc
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    auto status =
-        GetInteractionAPI(venv)->Class_GetStaticField_Ref(venv->GetEnv(), vcls->GetRef(), vfield->GetField(), &result);
+    auto status = GetInteractionAPI(venv)->Class_GetStaticField_Ref(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                                    ResolveToAniStaticField(vfield), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -3485,8 +3531,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Boolean(VEnv *venv, VClass
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Boolean(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                                 value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Boolean(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                                 ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3505,8 +3551,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Char(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Char(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                              value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Char(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                              ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3525,8 +3571,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Byte(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Byte(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                              value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Byte(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                              ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3545,8 +3591,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Short(VEnv *venv, VClass *
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Short(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                               value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Short(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                               ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3564,7 +3610,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Int(VEnv *venv, VClass *vc
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Int(venv->GetEnv(), vcls->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Int(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                             ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3583,8 +3630,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Long(VEnv *venv, VClass *v
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Long(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                              value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Long(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                              ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3603,8 +3650,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Float(VEnv *venv, VClass *
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Float(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                               value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Float(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                               ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3623,8 +3670,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Double(VEnv *venv, VClass 
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Double(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                                value);
+    return GetInteractionAPI(venv)->Class_SetStaticField_Double(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                                ResolveToAniStaticField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3643,8 +3690,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(VEnv *venv, VClass *vc
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Class_SetStaticField_Ref(venv->GetEnv(), vcls->GetRef(), vfield->GetField(),
-                                                             vvalue->GetRef());
+    return GetInteractionAPI(venv)->Class_SetStaticField_Ref(venv->GetEnv(), ResolveToAniClass(vcls),
+                                                             ResolveToAniStaticField(vfield), ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3664,7 +3711,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Boolean(VEnv *venv, 
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Boolean(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                       result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3684,7 +3732,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Char(VEnv *venv, VCl
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Char(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                    result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3704,7 +3753,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Byte(VEnv *venv, VCl
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Byte(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                    result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3724,7 +3774,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Short(VEnv *venv, VC
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Short(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                     result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3744,7 +3795,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Int(VEnv *venv, VCla
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Int(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                   result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3764,7 +3816,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Long(VEnv *venv, VCl
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Long(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                    result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3784,7 +3837,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Float(VEnv *venv, VC
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Float(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                     result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3804,7 +3858,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Double(VEnv *venv, V
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Class_GetStaticFieldByName_Double(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                      result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3826,7 +3881,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(VEnv *venv, VCla
 
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Class_GetStaticFieldByName_Ref(venv->GetEnv(), vcls->GetRef(), name, &result);
+        GetInteractionAPI(venv)->Class_GetStaticFieldByName_Ref(venv->GetEnv(), ResolveToAniClass(vcls), name, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -3847,7 +3902,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Boolean(VEnv *venv, 
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Boolean(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Boolean(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                       value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3866,7 +3922,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Char(VEnv *venv, VCl
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Char(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Char(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                    value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3885,7 +3942,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Byte(VEnv *venv, VCl
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Byte(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Byte(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                    value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3904,7 +3962,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Short(VEnv *venv, VC
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Short(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Short(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                     value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3923,7 +3982,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Int(VEnv *venv, VCla
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Int(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Int(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                   value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3942,7 +4002,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Long(VEnv *venv, VCl
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Long(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Long(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                    value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3961,7 +4022,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Float(VEnv *venv, VC
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Float(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Float(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                     value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3980,7 +4042,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Double(VEnv *venv, V
     CHECK_PTR_ARG(vcls);
     CHECK_PTR_ARG(name);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Double(venv->GetEnv(), vcls->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Double(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                      value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4000,8 +4063,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(VEnv *venv, VCla
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Ref(venv->GetEnv(), vcls->GetRef(), name,
-                                                                   vvalue->GetRef());
+    return GetInteractionAPI(venv)->Class_SetStaticFieldByName_Ref(venv->GetEnv(), ResolveToAniClass(vcls), name,
+                                                                   ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4029,7 +4092,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean(VEnv *venv, VCla
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Boolean_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4056,7 +4119,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_A(VEnv *venv, VC
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Boolean_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4082,7 +4145,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_V(VEnv *venv, VC
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Boolean_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4111,7 +4174,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char(VEnv *venv, VClass 
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Char_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4137,7 +4200,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char_A(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Char_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4162,7 +4225,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char_V(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Char_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4191,7 +4254,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte(VEnv *venv, VClass 
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Byte_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4217,7 +4280,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte_A(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Byte_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4242,7 +4305,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte_V(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Byte_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4271,7 +4334,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short(VEnv *venv, VClass
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Short_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4298,7 +4361,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short_A(VEnv *venv, VCla
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Short_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4324,7 +4387,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short_V(VEnv *venv, VCla
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Short_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4353,7 +4416,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int(VEnv *venv, VClass *
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Int_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4379,7 +4442,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_A(VEnv *venv, VClass
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Int_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4404,7 +4467,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_V(VEnv *venv, VClass
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Int_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4433,7 +4496,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long(VEnv *venv, VClass 
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Long_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4459,7 +4522,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long_A(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Long_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4484,7 +4547,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long_V(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Long_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4513,7 +4576,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float(VEnv *venv, VClass
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Float_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4540,7 +4603,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float_A(VEnv *venv, VCla
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Float_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4566,7 +4629,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float_V(VEnv *venv, VCla
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Float_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4595,7 +4658,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double(VEnv *venv, VClas
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Double_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4622,7 +4685,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_A(VEnv *venv, VCl
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Double_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4648,7 +4711,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_V(VEnv *venv, VCl
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Double_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), result, args.data());
     return status;
 }
 
@@ -4678,7 +4741,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref(VEnv *venv, VClass *
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Ref_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), &result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -4706,7 +4769,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_A(VEnv *venv, VClass
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Ref_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), &result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -4733,7 +4796,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_V(VEnv *venv, VClass
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
     ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Ref_A(
-        venv->GetEnv(), vclass->GetRef(), vstaticmethod->GetMethod(), &result, args.data());
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -4760,8 +4823,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void(VEnv *venv, VClass 
     CHECK_PTR_ARG(vstaticmethod);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(venv->GetEnv(), vclass->GetRef(),
-                                                                               vstaticmethod->GetMethod(), args.data());
+    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), args.data());
     return status;
 }
 
@@ -4784,8 +4847,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_A(VEnv *venv, VClas
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(venv->GetEnv(), vclass->GetRef(),
-                                                                               vstaticmethod->GetMethod(), args.data());
+    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), args.data());
     return status;
 }
 
@@ -4807,8 +4870,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_V(VEnv *venv, VClas
     CHECK_PTR_ARG(vstaticmethod);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(venv->GetEnv(), vclass->GetRef(),
-                                                                               vstaticmethod->GetMethod(), args.data());
+    ani_status status = GetInteractionAPI(venv)->Class_CallStaticMethod_Void_A(
+        venv->GetEnv(), ResolveToAniClass(vclass), ResolveToAniStaticMethod(vstaticmethod), args.data());
     return status;
 }
 
@@ -4848,8 +4911,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean(VEnv *venv
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                           signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                           name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4886,8 +4949,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(VEnv *ve
     // clang-format on
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                           signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                           name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4923,8 +4986,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(VEnv *ve
     );
     // clang-format on
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                           signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Boolean_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                           name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4964,7 +5027,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char(VEnv *venv, V
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5002,7 +5065,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_A(VEnv *venv,
     // clang-format on
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5040,7 +5103,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Char_V(VEnv *venv,
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Char_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5081,7 +5144,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte(VEnv *venv, V
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5119,7 +5182,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(VEnv *venv,
     // clang-format on
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5157,7 +5220,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_V(VEnv *venv,
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Byte_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5198,8 +5261,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short(VEnv *venv, 
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5237,8 +5300,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(VEnv *venv
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5275,8 +5338,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_V(VEnv *venv
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Short_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5316,7 +5379,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int(VEnv *venv, VC
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                        signature, result, args.data());
 }
 
@@ -5355,7 +5418,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(VEnv *venv, 
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                        signature, result, args.data());
 }
 
@@ -5393,7 +5456,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_V(VEnv *venv, 
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Int_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                        signature, result, args.data());
 }
 
@@ -5434,7 +5497,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long(VEnv *venv, V
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5473,7 +5536,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(VEnv *venv,
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5511,7 +5574,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_V(VEnv *venv,
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Long_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, result, args.data());
 }
 
@@ -5552,8 +5615,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float(VEnv *venv, 
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5591,8 +5654,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(VEnv *venv
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5629,8 +5692,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_V(VEnv *venv
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Float_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5670,8 +5733,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double(VEnv *venv,
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                          signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                          name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5709,8 +5772,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(VEnv *ven
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                          signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                          name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5747,8 +5810,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_V(VEnv *ven
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                          signature, result, args.data());
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Double_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                          name, signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5790,8 +5853,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(VEnv *venv, VC
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
-    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, &result, args.data());
+    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -5833,8 +5896,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(VEnv *venv, 
     CHECK_PTR_ARG(vresult);
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
-    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, &result, args.data());
+    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, &result, args.data());
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -5875,8 +5938,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(VEnv *venv, 
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
-    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), vclass->GetRef(), name,
-                                                                         signature, &result, args.data());
+    status = GetInteractionAPI(venv)->Class_CallStaticMethodByName_Ref_A(venv->GetEnv(), ResolveToAniClass(vclass),
+                                                                         name, signature, &result, args.data());
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -5918,7 +5981,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(VEnv *venv, V
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, args.data());
 }
 
@@ -5955,7 +6018,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(VEnv *venv,
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, args.data());
 }
 
@@ -5991,7 +6054,7 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_V(VEnv *venv,
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), vclass->GetRef(), name,
+    return GetInteractionAPI(venv)->Class_CallStaticMethodByName_Void_A(venv->GetEnv(), ResolveToAniClass(vclass), name,
                                                                         signature, args.data());
 }
 
@@ -6012,8 +6075,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Boolean(VEnv *venv, VObject *vo
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Boolean(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                            result);
+    return GetInteractionAPI(venv)->Object_GetField_Boolean(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                            ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6032,7 +6095,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Char(VEnv *venv, VObject *vobje
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Char(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
+    return GetInteractionAPI(venv)->Object_GetField_Char(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                         ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6051,7 +6115,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Byte(VEnv *venv, VObject *vobje
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Byte(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
+    return GetInteractionAPI(venv)->Object_GetField_Byte(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                         ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6070,8 +6135,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Short(VEnv *venv, VObject *vobj
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Short(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                          result);
+    return GetInteractionAPI(venv)->Object_GetField_Short(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                          ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6090,7 +6155,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Int(VEnv *venv, VObject *vobjec
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Int(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
+    return GetInteractionAPI(venv)->Object_GetField_Int(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                        ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6109,7 +6175,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Long(VEnv *venv, VObject *vobje
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Long(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), result);
+    return GetInteractionAPI(venv)->Object_GetField_Long(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                         ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6128,8 +6195,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Float(VEnv *venv, VObject *vobj
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
 
-    return GetInteractionAPI(venv)->Object_GetField_Float(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                          result);
+    return GetInteractionAPI(venv)->Object_GetField_Float(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                          ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6148,8 +6215,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Double(VEnv *venv, VObject *vob
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(result);
-    return GetInteractionAPI(venv)->Object_GetField_Double(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                           result);
+    return GetInteractionAPI(venv)->Object_GetField_Double(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                           ResolveToAniField(vfield), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6169,8 +6236,8 @@ NO_UB_SANITIZE static ani_status Object_GetField_Ref(VEnv *venv, VObject *vobjec
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Object_GetField_Ref(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), &result);
+    ani_status status = GetInteractionAPI(venv)->Object_GetField_Ref(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                                     ResolveToAniField(vfield), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -6191,8 +6258,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Boolean(VEnv *venv, VObject *vo
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Boolean(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                            value);
+    return GetInteractionAPI(venv)->Object_SetField_Boolean(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                            ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6210,7 +6277,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Char(VEnv *venv, VObject *vobje
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Char(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Object_SetField_Char(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                         ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6228,7 +6296,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Byte(VEnv *venv, VObject *vobje
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Byte(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Object_SetField_Byte(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                         ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6246,7 +6315,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Short(VEnv *venv, VObject *vobj
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Short(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Object_SetField_Short(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                          ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6264,7 +6334,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Int(VEnv *venv, VObject *vobjec
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Int(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Object_SetField_Int(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                        ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6282,7 +6353,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Long(VEnv *venv, VObject *vobje
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Long(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Object_SetField_Long(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                         ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6300,7 +6372,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Float(VEnv *venv, VObject *vobj
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Float(venv->GetEnv(), vobject->GetRef(), vfield->GetField(), value);
+    return GetInteractionAPI(venv)->Object_SetField_Float(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                          ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6318,8 +6391,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Double(VEnv *venv, VObject *vob
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vfield);
 
-    return GetInteractionAPI(venv)->Object_SetField_Double(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                           value);
+    return GetInteractionAPI(venv)->Object_SetField_Double(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                           ResolveToAniField(vfield), value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6338,8 +6411,8 @@ NO_UB_SANITIZE static ani_status Object_SetField_Ref(VEnv *venv, VObject *vobjec
     CHECK_PTR_ARG(vfield);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Object_SetField_Ref(venv->GetEnv(), vobject->GetRef(), vfield->GetField(),
-                                                        vvalue->GetRef());
+    return GetInteractionAPI(venv)->Object_SetField_Ref(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                        ResolveToAniField(vfield), ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6356,7 +6429,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Boolean(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Boolean(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6373,7 +6447,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Char(VEnv *venv, VObject 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Char(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Char(venv->GetEnv(), ResolveToAniRef(vobject), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6390,7 +6464,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Byte(VEnv *venv, VObject 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Byte(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Byte(venv->GetEnv(), ResolveToAniRef(vobject), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6407,7 +6481,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Short(VEnv *venv, VObject
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Short(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Short(venv->GetEnv(), ResolveToAniRef(vobject), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6424,7 +6498,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Int(VEnv *venv, VObject *
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Int(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Int(venv->GetEnv(), ResolveToAniRef(vobject), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6441,7 +6515,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Long(VEnv *venv, VObject 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Long(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Long(venv->GetEnv(), ResolveToAniRef(vobject), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6458,7 +6532,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Float(VEnv *venv, VObject
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Float(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Float(venv->GetEnv(), ResolveToAniRef(vobject), name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6475,7 +6549,8 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Double(VEnv *venv, VObjec
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetFieldByName_Double(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetFieldByName_Double(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                 result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6495,7 +6570,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(VEnv *venv, VObject *
     CHECK_PTR_ARG(vresult);
     ani_ref tmp {};
     ani_status status =
-        GetInteractionAPI(venv)->Object_GetFieldByName_Ref(venv->GetEnv(), vobject->GetRef(), name, &tmp);
+        GetInteractionAPI(venv)->Object_GetFieldByName_Ref(venv->GetEnv(), ResolveToAniRef(vobject), name, &tmp);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, tmp, vresult);
     return status;
@@ -6515,7 +6590,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Boolean(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Boolean(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6532,7 +6608,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Char(VEnv *venv, VObject 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Char(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Char(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6549,7 +6625,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Byte(VEnv *venv, VObject 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Byte(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Byte(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6566,7 +6642,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Short(VEnv *venv, VObject
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Short(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Short(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6583,7 +6659,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Int(VEnv *venv, VObject *
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Int(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Int(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6600,7 +6676,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Long(VEnv *venv, VObject 
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Long(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Long(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6617,7 +6693,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Float(VEnv *venv, VObject
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Float(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Float(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6634,7 +6710,7 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Double(VEnv *venv, VObjec
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Double(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Double(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6651,8 +6727,8 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Ref(VEnv *venv, VObject *
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
     CHECK_PTR_ARG(vvalue);
-    return GetInteractionAPI(venv)->Object_SetFieldByName_Ref(venv->GetEnv(), vobject->GetRef(), name,
-                                                              vvalue->GetRef());
+    return GetInteractionAPI(venv)->Object_SetFieldByName_Ref(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                              ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6669,7 +6745,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Boolean(VEnv *venv, VO
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Boolean(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                     result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6686,7 +6763,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Char(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Char(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Char(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6703,7 +6781,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Byte(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Byte(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Byte(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6720,7 +6799,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Short(VEnv *venv, VObj
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Short(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Short(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6737,7 +6817,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Int(VEnv *venv, VObjec
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Int(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Int(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                 result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6754,7 +6835,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Long(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Long(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Long(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6771,7 +6853,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Float(VEnv *venv, VObj
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Float(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Float(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6788,7 +6871,8 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Double(VEnv *venv, VOb
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_GetPropertyByName_Double(venv->GetEnv(), vobject->GetRef(), name, result);
+    return GetInteractionAPI(venv)->Object_GetPropertyByName_Double(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6808,7 +6892,7 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Ref(VEnv *venv, VObjec
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Object_GetPropertyByName_Ref(venv->GetEnv(), vobject->GetRef(), name, &result);
+        GetInteractionAPI(venv)->Object_GetPropertyByName_Ref(venv->GetEnv(), ResolveToAniRef(vobject), name, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -6827,7 +6911,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Boolean(VEnv *venv, VO
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Boolean(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Boolean(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                     value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6844,7 +6929,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Char(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Char(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Char(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6861,7 +6947,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Byte(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Byte(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Byte(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6878,7 +6965,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Short(VEnv *venv, VObj
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Short(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Short(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6895,7 +6983,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Int(VEnv *venv, VObjec
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Int(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Int(venv->GetEnv(), ResolveToAniRef(vobject), name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6912,7 +7000,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Long(VEnv *venv, VObje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Long(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Long(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6929,7 +7018,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Float(VEnv *venv, VObj
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Float(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Float(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6946,7 +7036,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Double(VEnv *venv, VOb
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Double(venv->GetEnv(), vobject->GetRef(), name, value);
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Double(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6963,8 +7054,8 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(VEnv *venv, VObjec
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Object_SetPropertyByName_Ref(venv->GetEnv(), vobject->GetRef(), name,
-                                                                 vvalue->GetRef());
+    return GetInteractionAPI(venv)->Object_SetPropertyByName_Ref(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                 ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6991,8 +7082,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean(VEnv *venv, VObject *
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
-                                                                             vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7017,8 +7108,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(VEnv *venv, VObject
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
-                                                                             vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7042,8 +7133,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_V(VEnv *venv, VObject
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
-                                                                             vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7071,8 +7162,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char(VEnv *venv, VObject *vob
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7097,8 +7188,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char_A(VEnv *venv, VObject *v
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7122,8 +7213,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char_V(VEnv *venv, VObject *v
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7151,8 +7242,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte(VEnv *venv, VObject *vob
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7177,8 +7268,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_A(VEnv *venv, VObject *v
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7202,8 +7293,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_V(VEnv *venv, VObject *v
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7231,8 +7322,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short(VEnv *venv, VObject *vo
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
-                                                                           vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7257,8 +7348,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short_A(VEnv *venv, VObject *
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
-                                                                           vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7282,8 +7373,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short_V(VEnv *venv, VObject *
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
-                                                                           vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7311,8 +7402,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int(VEnv *venv, VObject *vobj
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
-                                                                         vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7337,8 +7428,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(VEnv *venv, VObject *vo
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
-                                                                         vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7362,8 +7453,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(VEnv *venv, VObject *vo
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
-                                                                         vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7391,8 +7482,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long(VEnv *venv, VObject *vob
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7417,8 +7508,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_A(VEnv *venv, VObject *v
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7442,8 +7533,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(VEnv *venv, VObject *v
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7471,8 +7562,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float(VEnv *venv, VObject *vo
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
-                                                                           vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7497,8 +7588,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float_A(VEnv *venv, VObject *
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
-                                                                           vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7522,8 +7613,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float_V(VEnv *venv, VObject *
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
-                                                                           vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7551,8 +7642,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double(VEnv *venv, VObject *v
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
-                                                                            vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7577,8 +7668,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double_A(VEnv *venv, VObject 
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
-                                                                            vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7602,8 +7693,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double_V(VEnv *venv, VObject 
     CHECK_PTR_ARG(result);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
-                                                                            vmethod->GetMethod(), result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), result, args.data());
     return status;
 }
 
@@ -7632,8 +7723,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref(VEnv *venv, VObject *vobj
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
-                                                                         vmethod->GetMethod(), &result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -7660,8 +7751,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_A(VEnv *venv, VObject *vo
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
-                                                                         vmethod->GetMethod(), &result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -7687,8 +7778,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_V(VEnv *venv, VObject *vo
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
-                                                                         vmethod->GetMethod(), &result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(
+        venv->GetEnv(), ResolveToAniRef(vobject), ResolveToAniMethod(vmethod), &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -7714,8 +7805,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(VEnv *venv, VObject *vob
     CHECK_PTR_ARG(vmethod);
 
     auto args = GetVValueArgs(venv, methodVArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                                          ResolveToAniMethod(vmethod), args.data());
     return status;
 }
 
@@ -7738,8 +7829,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_A(VEnv *venv, VObject *v
     CHECK_PTR_ARG(vargs);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                                          ResolveToAniMethod(vmethod), args.data());
     return status;
 }
 
@@ -7761,8 +7852,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(VEnv *venv, VObject *v
     CHECK_PTR_ARG(vmethod);
 
     auto args = GetVValueArgs(venv, methodArgs);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
-                                                                          vmethod->GetMethod(), args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), ResolveToAniRef(vobject),
+                                                                          ResolveToAniMethod(vmethod), args.data());
     return status;
 }
 
@@ -7802,7 +7893,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean(VEnv *venv, VOb
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), vobject->GetRef(), name,
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
                                                                       signature, result, args.data());
 }
 
@@ -7841,7 +7932,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_A(VEnv *venv, V
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), vobject->GetRef(), name,
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
                                                                       signature, result, args.data());
 }
 
@@ -7878,7 +7969,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_V(VEnv *venv, V
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), vobject->GetRef(), name,
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Boolean_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
                                                                       signature, result, args.data());
 }
 
@@ -7918,8 +8009,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Char(VEnv *venv, VObjec
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7957,8 +8048,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Char_A(VEnv *venv, VObj
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -7994,8 +8085,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Char_V(VEnv *venv, VObj
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Char_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8034,8 +8125,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte(VEnv *venv, VObjec
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8073,8 +8164,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte_A(VEnv *venv, VObj
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8110,8 +8201,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte_V(VEnv *venv, VObj
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Byte_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8150,8 +8241,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short(VEnv *venv, VObje
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8189,8 +8280,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short_A(VEnv *venv, VOb
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8227,8 +8318,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short_V(VEnv *venv, VOb
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Short_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8267,8 +8358,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int(VEnv *venv, VObject
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                  result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8306,8 +8397,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int_A(VEnv *venv, VObje
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                  result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8342,8 +8433,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int_V(VEnv *venv, VObje
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                  result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Int_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                  signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8382,8 +8473,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long(VEnv *venv, VObjec
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8421,8 +8512,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long_A(VEnv *venv, VObj
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8458,8 +8549,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long_V(VEnv *venv, VObj
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Long_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8498,8 +8589,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float(VEnv *venv, VObje
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8535,8 +8626,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float_A(VEnv *venv, VOb
     // clang-format on
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8572,8 +8663,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float_V(VEnv *venv, VOb
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Float_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8612,8 +8703,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double(VEnv *venv, VObj
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                     result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                     signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8651,8 +8742,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double_A(VEnv *venv, VO
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                     result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                     signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8688,8 +8779,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double_V(VEnv *venv, VO
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                     result, args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Double_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                     signature, result, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8730,8 +8821,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref(VEnv *venv, VObject
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
-    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    &result, args.data());
+    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -8773,8 +8864,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_A(VEnv *venv, VObje
     CHECK_PTR_ARG(vargs);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
-    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    &result, args.data());
+    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -8813,8 +8904,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_V(VEnv *venv, VObje
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto args = GetVValueArgs(venv, methodArgs);
-    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                    &result, args.data());
+    status = GetInteractionAPI(venv)->Object_CallMethodByName_Ref_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                    signature, &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -8854,8 +8945,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void(VEnv *venv, VObjec
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8891,8 +8982,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_A(VEnv *venv, VObj
 
     CHECK_PTR_ARG(vargs);
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8926,8 +9017,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_V(VEnv *venv, VObj
     // clang-format on
 
     auto args = GetVValueArgs(venv, methodArgs);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), vobject->GetRef(), name, signature,
-                                                                   args.data());
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_A(venv->GetEnv(), ResolveToAniRef(vobject), name,
+                                                                   signature, args.data());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8942,7 +9033,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(VEnv *venv, VTupleV
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
-    return GetInteractionAPI(venv)->TupleValue_GetNumberOfItems(venv->GetEnv(), vtupleValue->GetRef(), result);
+    return GetInteractionAPI(venv)->TupleValue_GetNumberOfItems(venv->GetEnv(), ResolveToAniRef(vtupleValue), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8960,7 +9051,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Boolean(VEnv *venv, VTupleVa
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Boolean(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Boolean(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                               result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8978,7 +9070,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Char(VEnv *venv, VTupleValue
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Char(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Char(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                            result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -8996,7 +9089,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Byte(VEnv *venv, VTupleValue
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Byte(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Byte(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                            result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9014,7 +9108,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Short(VEnv *venv, VTupleValu
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Short(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Short(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                             result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9032,7 +9127,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Int(VEnv *venv, VTupleValue 
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Int(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Int(venv->GetEnv(), ResolveToAniRef(vtupleValue), index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9050,7 +9145,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Long(VEnv *venv, VTupleValue
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Long(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Long(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                            result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9068,7 +9164,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Float(VEnv *venv, VTupleValu
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Float(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Float(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                             result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9086,7 +9183,8 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Double(VEnv *venv, VTupleVal
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_GetItem_Double(venv->GetEnv(), vtupleValue->GetRef(), index, result);
+    return GetInteractionAPI(venv)->TupleValue_GetItem_Double(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                              result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9107,7 +9205,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Ref(VEnv *venv, VTupleValue 
 
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->TupleValue_GetItem_Ref(venv->GetEnv(), vtupleValue->GetRef(), index, &result);
+        GetInteractionAPI(venv)->TupleValue_GetItem_Ref(venv->GetEnv(), ResolveToAniRef(vtupleValue), index, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9127,7 +9225,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Boolean(VEnv *venv, VTupleVa
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Boolean(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Boolean(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                               value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9145,7 +9244,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Char(VEnv *venv, VTupleValue
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Char(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Char(venv->GetEnv(), ResolveToAniRef(vtupleValue), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9163,7 +9262,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Byte(VEnv *venv, VTupleValue
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Byte(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Byte(venv->GetEnv(), ResolveToAniRef(vtupleValue), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9181,7 +9280,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Short(VEnv *venv, VTupleValu
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Short(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Short(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                             value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9199,7 +9299,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Int(VEnv *venv, VTupleValue 
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Int(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Int(venv->GetEnv(), ResolveToAniRef(vtupleValue), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9217,7 +9317,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Long(VEnv *venv, VTupleValue
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Long(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Long(venv->GetEnv(), ResolveToAniRef(vtupleValue), index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9235,7 +9335,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Float(VEnv *venv, VTupleValu
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Float(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Float(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                             value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9253,7 +9354,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Double(VEnv *venv, VTupleVal
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vtupleValue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Double(venv->GetEnv(), vtupleValue->GetRef(), index, value);
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Double(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                              value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9272,8 +9374,8 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(VEnv *venv, VTupleValue 
     CHECK_PTR_ARG(vtupleValue);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->TupleValue_SetItem_Ref(venv->GetEnv(), vtupleValue->GetRef(), index,
-                                                           vvalue->GetRef());
+    return GetInteractionAPI(venv)->TupleValue_SetItem_Ref(venv->GetEnv(), ResolveToAniRef(vtupleValue), index,
+                                                           ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9291,7 +9393,7 @@ NO_UB_SANITIZE static ani_status GlobalReference_Create(VEnv *venv, VRef *vref, 
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    auto status = GetInteractionAPI(venv)->GlobalReference_Create(venv->GetEnv(), vref->GetRef(), &result);
+    auto status = GetInteractionAPI(venv)->GlobalReference_Create(venv->GetEnv(), ResolveToAniRef(vref), &result);
     if (LIKELY(status == ANI_OK)) {
         *vresult = venv->AddGlobalVerifiedRef(result);
     }
@@ -9309,10 +9411,10 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(VEnv *venv, VRef *vgref)
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vgref);
-    if (!venv->IsValidGlobalVerifiedRef(vgref) && !ManagedCodeAccessor::IsUndefined(vgref->GetRef())) {
+    if (!venv->IsValidGlobalVerifiedRef(vgref) && !ManagedCodeAccessor::IsUndefined(ResolveToAniRef(vgref))) {
         return ANI_INCORRECT_REF;
     }
-    ani_ref gref = vgref->GetRef();
+    ani_ref gref = ResolveToAniRef(vgref);
     ani_status status = GetInteractionAPI(venv)->GlobalReference_Delete(venv->GetEnv(), gref);
     if (LIKELY(status == ANI_OK) && venv->IsValidGlobalVerifiedRef(vgref)) {
         venv->DeleteGlobalVerifiedRef(vgref);
@@ -9335,7 +9437,8 @@ NO_UB_SANITIZE static ani_status WeakReference_Create(VEnv *venv, VRef *vref, VW
     CHECK_PTR_ARG(vresult);
 
     ani_wref runtimeWref {};
-    ani_status status = GetInteractionAPI(venv)->WeakReference_Create(venv->GetEnv(), vref->GetRef(), &runtimeWref);
+    ani_status status =
+        GetInteractionAPI(venv)->WeakReference_Create(venv->GetEnv(), ResolveToAniRef(vref), &runtimeWref);
     if (LIKELY(status == ANI_OK)) {
         *vresult = venv->AddVerifiedWeakRef(runtimeWref);
     }
@@ -9354,10 +9457,10 @@ NO_UB_SANITIZE static ani_status WeakReference_Delete(VEnv *venv, VWRef *vwref)
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vwref);
     if (!venv->IsValidWeakRef(vwref) &&
-        !ManagedCodeAccessor::IsUndefined(reinterpret_cast<ani_ref>(vwref->GetWRef()))) {
+        !ManagedCodeAccessor::IsUndefined(reinterpret_cast<ani_ref>(ResolveToAniRef(vwref)))) {
         return ANI_INCORRECT_REF;
     }
-    ani_status status = GetInteractionAPI(venv)->WeakReference_Delete(venv->GetEnv(), vwref->GetWRef());
+    ani_status status = GetInteractionAPI(venv)->WeakReference_Delete(venv->GetEnv(), ResolveToAniRef(vwref));
     if (LIKELY(status == ANI_OK)) {
         venv->DeleteVerifiedWeakRef(vwref);
     }
@@ -9384,12 +9487,12 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(VEnv *venv, VWRef *v
         if (venv->IsValidGlobalVerifiedRef(reinterpret_cast<VRef *>(vwref))) {
             return ANI_INCORRECT_REF;
         }
-        if (!ManagedCodeAccessor::IsUndefined(reinterpret_cast<VRef *>(vwref)->GetRef())) {
+        if (!ManagedCodeAccessor::IsUndefined(reinterpret_cast<ani_ref>(ResolveToAniRef(vwref)))) {
             return ANI_INCORRECT_REF;
         }
     }
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->WeakReference_GetReference(venv->GetEnv(), vwref->GetWRef(),
+    ani_status status = GetInteractionAPI(venv)->WeakReference_GetReference(venv->GetEnv(), ResolveToAniRef(vwref),
                                                                             wasReleasedResult, &result);
     if (LIKELY(status == ANI_OK)) {
         *vrefResult = result == nullptr ? nullptr : venv->AddLocalVerifiedRef(result);
@@ -9431,7 +9534,7 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(VEnv *venv, VArrayBuffer *v
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varraybuffer);
-    return GetInteractionAPI(venv)->ArrayBuffer_GetInfo(venv->GetEnv(), varraybuffer->GetRef(), dataResult,
+    return GetInteractionAPI(venv)->ArrayBuffer_GetInfo(venv->GetEnv(), ResolveToAniRef(varraybuffer), dataResult,
                                                         lengthResult);
 }
 
@@ -9473,8 +9576,8 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(VEnv *venv, VResolver *
     CHECK_PTR_ARG(vresolver);
     CHECK_PTR_ARG(vresolution);
 
-    ani_status status = GetInteractionAPI(venv)->PromiseResolver_Resolve(venv->GetEnv(), vresolver->GetResolver(),
-                                                                         vresolution->GetRef());
+    ani_status status = GetInteractionAPI(venv)->PromiseResolver_Resolve(
+        venv->GetEnv(), ResolveToAniResolver(vresolver), ResolveToAniRef(vresolution));
     if (LIKELY(status == ANI_OK)) {
         venv->DeleteGlobalResolver(vresolver);
     }
@@ -9495,8 +9598,8 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(VEnv *venv, VResolver *v
     CHECK_PTR_ARG(vresolver);
     CHECK_PTR_ARG(vrejection);
 
-    ani_status status =
-        GetInteractionAPI(venv)->PromiseResolver_Reject(venv->GetEnv(), vresolver->GetResolver(), vrejection->GetRef());
+    ani_status status = GetInteractionAPI(venv)->PromiseResolver_Reject(venv->GetEnv(), ResolveToAniResolver(vresolver),
+                                                                        ResolveToAniRef(vrejection));
     if (LIKELY(status == ANI_OK)) {
         venv->DeleteGlobalResolver(vresolver);
     }
@@ -9517,7 +9620,9 @@ NO_UB_SANITIZE static ani_status Any_InstanceOf(VEnv *venv, VRef *vref, VRef *vt
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vref);
     CHECK_PTR_ARG(vtype);
-    return GetInteractionAPI(venv)->Any_InstanceOf(venv->GetEnv(), vref->GetRef(), vtype->GetRef(), result);
+
+    return GetInteractionAPI(venv)->Any_InstanceOf(venv->GetEnv(), ResolveToAniRef(vref), ResolveToAniRef(vtype),
+                                                   result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9537,7 +9642,7 @@ NO_UB_SANITIZE static ani_status Any_GetProperty(VEnv *venv, VRef *vref, const c
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Any_GetProperty(venv->GetEnv(), vref->GetRef(), name, &result);
+    ani_status status = GetInteractionAPI(venv)->Any_GetProperty(venv->GetEnv(), ResolveToAniRef(vref), name, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9558,7 +9663,8 @@ NO_UB_SANITIZE static ani_status Any_SetProperty(VEnv *venv, VRef *vref, const c
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Any_SetProperty(venv->GetEnv(), vref->GetRef(), name, vvalue->GetRef());
+    return GetInteractionAPI(venv)->Any_SetProperty(venv->GetEnv(), ResolveToAniRef(vref), name,
+                                                    ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9577,7 +9683,7 @@ NO_UB_SANITIZE static ani_status Any_GetByIndex(VEnv *venv, VRef *vref, ani_size
     CHECK_PTR_ARG(vresult);
 
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Any_GetByIndex(venv->GetEnv(), vref->GetRef(), index, &result);
+    ani_status status = GetInteractionAPI(venv)->Any_GetByIndex(venv->GetEnv(), ResolveToAniRef(vref), index, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9597,7 +9703,8 @@ NO_UB_SANITIZE static ani_status Any_SetByIndex(VEnv *venv, VRef *vref, ani_size
     CHECK_PTR_ARG(vref);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Any_SetByIndex(venv->GetEnv(), vref->GetRef(), index, vvalue->GetRef());
+    return GetInteractionAPI(venv)->Any_SetByIndex(venv->GetEnv(), ResolveToAniRef(vref), index,
+                                                   ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9618,7 +9725,7 @@ NO_UB_SANITIZE static ani_status Any_GetByValue(VEnv *venv, VRef *vref, VRef *vk
 
     ani_ref result {};
     ani_status status =
-        GetInteractionAPI(venv)->Any_GetByValue(venv->GetEnv(), vref->GetRef(), vkey->GetRef(), &result);
+        GetInteractionAPI(venv)->Any_GetByValue(venv->GetEnv(), ResolveToAniRef(vref), ResolveToAniRef(vkey), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9639,7 +9746,8 @@ NO_UB_SANITIZE static ani_status Any_SetByValue(VEnv *venv, VRef *vref, VRef *vk
     CHECK_PTR_ARG(vkey);
     CHECK_PTR_ARG(vvalue);
 
-    return GetInteractionAPI(venv)->Any_SetByValue(venv->GetEnv(), vref->GetRef(), vkey->GetRef(), vvalue->GetRef());
+    return GetInteractionAPI(venv)->Any_SetByValue(venv->GetEnv(), ResolveToAniRef(vref), ResolveToAniRef(vkey),
+                                                   ResolveToAniRef(vvalue));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9662,8 +9770,8 @@ NO_UB_SANITIZE static ani_status Any_Call(VEnv *venv, VRef *vfunc, ani_size argc
     }
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Any_Call(venv->GetEnv(), vfunc->GetRef(), argc, refArgs.GetReleaseArgv(), &result);
+    ani_status status = GetInteractionAPI(venv)->Any_Call(venv->GetEnv(), ResolveToAniRef(vfunc), argc,
+                                                          refArgs.GetReleaseArgv(), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9691,7 +9799,7 @@ NO_UB_SANITIZE static ani_status Any_CallMethod(VEnv *venv, VRef *vself, const c
     }
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
-    ani_status status = GetInteractionAPI(venv)->Any_CallMethod(venv->GetEnv(), vself->GetRef(), name, argc,
+    ani_status status = GetInteractionAPI(venv)->Any_CallMethod(venv->GetEnv(), ResolveToAniRef(vself), name, argc,
                                                                 refArgs.GetReleaseArgv(), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
@@ -9717,8 +9825,8 @@ NO_UB_SANITIZE static ani_status Any_New(VEnv *venv, VRef *vctor, ani_size argc,
     }
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Any_New(venv->GetEnv(), vctor->GetRef(), argc, refArgs.GetReleaseArgv(), &result);
+    ani_status status = GetInteractionAPI(venv)->Any_New(venv->GetEnv(), ResolveToAniRef(vctor), argc,
+                                                         refArgs.GetReleaseArgv(), &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9737,7 +9845,8 @@ NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(VEnv *venv, VClas
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vclass);
-    return GetInteractionAPI(venv)->Class_BindStaticNativeMethods(venv->GetEnv(), vclass->GetRef(), methods, nrMethods);
+    return GetInteractionAPI(venv)->Class_BindStaticNativeMethods(venv->GetEnv(), ResolveToAniClass(vclass), methods,
+                                                                  nrMethods);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9770,7 +9879,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Boolean(VEnv *venv, VObject *vo
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Boolean(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Boolean(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9803,7 +9912,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Byte(VEnv *venv, VObject *vobje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Byte(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Byte(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9836,7 +9945,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Char(VEnv *venv, VObject *vobje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Char(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Char(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9869,7 +9978,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Short(VEnv *venv, VObject *vobj
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Short(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Short(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9902,7 +10011,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Int(VEnv *venv, VObject *vobjec
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Int(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Int(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9935,7 +10044,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Long(VEnv *venv, VObject *vobje
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Long(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Long(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -9968,7 +10077,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Float(VEnv *venv, VObject *vobj
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Float(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Float(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -10001,7 +10110,7 @@ NO_UB_SANITIZE static ani_status Primitive_Unbox_Double(VEnv *venv, VObject *vob
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vobject);
-    return GetInteractionAPI(venv)->Primitive_Unbox_Double(venv->GetEnv(), vobject->GetRef(), result);
+    return GetInteractionAPI(venv)->Primitive_Unbox_Double(venv->GetEnv(), ResolveToAniRef(vobject), result);
 }
 
 // clang-format off
