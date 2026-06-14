@@ -29,9 +29,10 @@ IntlCollatorCache::IntlCollatorCache()
 }
 
 icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::string &lang,
-                                                      const std::string &collation, const std::string &caseFirst)
+                                                      const std::string &collation, const std::string &caseFirst,
+                                                      bool numeric)
 {
-    std::string cacheKey = lang + ";" + collation + ";" + caseFirst;
+    std::string cacheKey = lang + ";" + collation + ";" + caseFirst + ";" + (numeric ? "numeric" : "standard");
 
     os::memory::LockHolder lh(mtx_);
     auto it = cache_.find(cacheKey);
@@ -75,6 +76,14 @@ icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::s
     } else {
         newCollator->setAttribute(UCOL_CASE_FIRST, UCOL_OFF, status);
     }
+
+    if (UNLIKELY(U_FAILURE(status))) {
+        delete newCollator;
+        return nullptr;
+    }
+
+    status = U_ZERO_ERROR;
+    newCollator->setAttribute(UCOL_NUMERIC_COLLATION, numeric ? UCOL_ON : UCOL_OFF, status);
 
     if (UNLIKELY(U_FAILURE(status))) {
         delete newCollator;

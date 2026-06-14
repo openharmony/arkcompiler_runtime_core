@@ -151,6 +151,7 @@ function testPunctuation() : int {
 
 function testNumeric() : int {
     const collator = new Intl.Collator(RU_RU, {sensitivity: 'base', numeric: true}  as Intl.CollatorOptions)
+    const standardCollator = new Intl.Collator(RU_RU, {sensitivity: 'base', numeric: false} as Intl.CollatorOptions)
     arktest.assertEQ(collator.compare('3', '14'), -1)
     arktest.assertEQ(collator.compare('2', '15'), -1)
     arktest.assertEQ(collator.compare('9', '61'), -1)
@@ -176,6 +177,14 @@ function testNumeric() : int {
 
     arktest.assertEQ(collator.compare('4', '3'), 1)
     arktest.assertEQ(collator.compare('24', '31'), -1)
+    arktest.assertEQ(collator.compare('file10', 'file2'), 1)
+    arktest.assertEQ(collator.compare('file2', 'file10'), -1)
+    arktest.assertEQ(collator.compare('file02', 'file2'), 0)
+    arktest.assertEQ(collator.compare('a1b2', 'a1b10'), -1)
+    arktest.assertEQ(collator.compare('a1b10', 'a1b2'), 1)
+    arktest.assertEQ(collator.compare('v1.2.10', 'v1.2.3'), 1)
+    arktest.assertEQ(standardCollator.compare('file10', 'file2'), -1)
+    arktest.assertEQ(standardCollator.compare('file02', 'file2'), -1)
 
     arktest.assertEQ(collator.compare('-1', '6557899'), -1) //((-1 > 6557899) ? 1 : -1));
     arktest.assertEQ(collator.compare( '-6557899', '1'), -1) //((-6557899 > 1) ? 1 : -1));
@@ -409,16 +418,19 @@ function testNumericFromLocale() : int {
         let c = new Intl.Collator('fr-Latn-FR-u-kn-true', {} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.numeric, true)
+        arktest.assertEQ(c.compare('file10', 'file2'), 1)
     }
     {
         let c = new Intl.Collator('fr-Latn-FR-u-kn-false', {numeric: true} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.numeric, true)
+        arktest.assertEQ(c.compare('file10', 'file2'), 1)
     }
     {
         let c = new Intl.Collator('fr-Latn-FR-u-kn-true', {numeric: false} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.numeric, false)
+        arktest.assertEQ(c.compare('file10', 'file2'), -1)
     }
 
     return success
@@ -448,4 +460,3 @@ function testDe() : int {
     arktest.assertEQ(collator.compare('ä', 'z'), -1)
     return success
 }
-

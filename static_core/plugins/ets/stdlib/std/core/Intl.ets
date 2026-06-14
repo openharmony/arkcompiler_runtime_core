@@ -195,7 +195,7 @@ export namespace Intl {
 
             const IgnoreSensitivityValues : ReadonlyArray<string> = Array.of<string>('base',  'accent')
             return this.compareByCollation(this.options.collation, this.options.locale, xToCompare, yToCompare,
-                                           this.options.caseFirst)
+                                           this.options.caseFirst, this.options.numeric)
         }
 
         /**
@@ -304,7 +304,8 @@ export namespace Intl {
         * @param data string array contains collation, lang, x, y
         * @return icu-collator 2 strings compare result: 1 (x 'more' than y), -1 (y 'more' than x) or 0 (equals)
         */
-        private native compareByCollation(collation : string, lang: string, str1: string, str2: string, caseFirst: string) : int
+        private native compareByCollation(collation : string, lang: string, str1: string, str2: string, caseFirst: string,
+                                          numeric: boolean) : int
 
         private static readonly SensitivityValues : ReadonlyArray<string> = Array.of<string>('base',  'accent', 'case', 'variant')
         private static readonly UsageValues : ReadonlyArray<string> = Array.of<string>('sort', 'search')

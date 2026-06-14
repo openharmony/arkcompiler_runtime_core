@@ -92,7 +92,7 @@ ani_string StdCoreIntlCollatorRemovePunctuation(ani_env *env, [[maybe_unused]] a
 
 ani_int StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class klass, ani_string collationIn,
                                      ani_string langIn, ani_string firstStr, ani_string secondStr,
-                                     ani_string caseFirstIn)
+                                     ani_string caseFirstIn, ani_boolean numeric)
 {
     auto collation = ConvertFromAniString(env, collationIn);
     auto lang = ConvertFromAniString(env, langIn);
@@ -100,7 +100,8 @@ ani_int StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class kl
     auto str2 = ConvertFromAniString(env, secondStr);
     auto caseFirst = ConvertFromAniString(env, caseFirstIn);
 
-    icu::Collator *collator = g_intlState->collatorCache.GetOrCreateCollator(env, lang, collation, caseFirst);
+    icu::Collator *collator =
+        g_intlState->collatorCache.GetOrCreateCollator(env, lang, collation, caseFirst, numeric == ANI_TRUE);
     if (collator == nullptr) {
         ThrowNewError(env, "std.core.RuntimeError", "Failed to create Collator instance for comparison",
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
@@ -126,7 +127,7 @@ ani_status RegisterIntlCollator(ani_env *env)
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemoveAccents)},
                     ani_native_function {
                         "compareByCollation",
-                        "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}:i",
+                        "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}z:i",
                         reinterpret_cast<void *>(StdCoreIntlCollatorLocaleCmp)}};
 
     ani_class collatorClass;
