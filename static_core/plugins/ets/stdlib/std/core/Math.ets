@@ -995,7 +995,7 @@ export class Math {
      *
      */
     public static sign(x: double): double {
-        if (isNaN(x)) {
+        if (isNaN(x) || x == 0.0) {
             return x;
         }
         return sign(x).toDouble();
