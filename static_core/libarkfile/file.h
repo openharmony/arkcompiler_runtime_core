@@ -292,7 +292,7 @@ public:
         return reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
     }
 
-    Span<const uint32_t> GetMetadata() const
+    Span<const uint8_t> GetMetadata() const
     {
         const Header *header = GetHeader();
         Span file(GetBase(), header->fileSize);
@@ -321,7 +321,7 @@ public:
         }
 
         const auto metadataSpan = exportedIdxData.SubSpan(metadataStartPos);
-        return {reinterpret_cast<const uint32_t *>(metadataSpan.data()), metadataSpan.size() / sizeof(uint32_t)};
+        return {metadataSpan.data(), metadataSpan.size()};
     }
 
     Span<const uint32_t> GetLiteralArrays() const

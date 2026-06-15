@@ -47,6 +47,11 @@ struct MetadataModuleId {
         return moduleName_;
     }
 
+    [[nodiscard]] std::string ToString() const
+    {
+        return pkgName_ + ":" + moduleName_;
+    }
+
     bool operator==(const MetadataModuleId &other) const
     {
         return pkgName_ == other.pkgName_ && moduleName_ == other.moduleName_;
@@ -88,7 +93,8 @@ public:
 
     PANDA_PUBLIC_API void SetFile(const File &pandaFile);
     PANDA_PUBLIC_API MetadataByModules GetMetadata();
-    EncodedMetadata GetMetadataFor(const MetadataModuleId &moduleId);
+    EncodedMetadata GetMetadataForModule(const MetadataModuleId &moduleId);
+    MetadataByModules GetMetadataForPackage(const MetadataModuleId &moduleId);
 
     static MetadataModuleId BuildModuleId(const std::string_view pkgName, const std::string_view moduleName)
     {
@@ -108,13 +114,13 @@ public:
 
 private:
     const File *pandaFile_ = nullptr;
-    Span<const uint32_t> metadataSpan_;
+    Span<const uint8_t> metadataSpan_;
     MetadataIndex metadataIndex_;  // modules to offsets and sizes
     uint64_t uncompressedMetadataSize_ = 0;
 
     void BuildIndex();
     [[nodiscard]] EncodedMetadata UncompressMetadata(const EncodedMetadata &compressedMetadata) const;
-    EncodedMetadata GetMetadataFor(const MetadataModuleId &moduleId, const EncodedMetadata &uncompressedMetadata);
+    EncodedMetadata GetMetadataForModule(const MetadataModuleId &moduleId, const EncodedMetadata &uncompressedMetadata);
 };
 
 }  // namespace ark::panda_file
