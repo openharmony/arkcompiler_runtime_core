@@ -90,7 +90,12 @@ export namespace Intl {
             const langTags = new string[locales.length]('')
             for (let i = 0; i < locales.length; i++) {
                 const locale = locales[i] as string | Intl.Locale
-                langTags[i] = locale instanceof string ? locale : locale.toString()
+                if (locale instanceof string) {
+                    LocaleHelper.verifyBCP47LanguageTag(locale)
+                    langTags[i] = locale
+                } else {
+                    langTags[i] = locale.toString()
+                }
             }
             return langTags
         } else {
@@ -320,7 +325,7 @@ export namespace Intl {
         day?: string;
         dayPeriod?: 'narrow' | 'short' | 'long';
         era?: string;
-        formatMatcher?: 'basic' | 'best fit' | 'best fit';
+        formatMatcher?: 'basic' | 'best fit';
         fractionalSecondDigits?: int;
         hour12?: boolean;
         hour?: string;
