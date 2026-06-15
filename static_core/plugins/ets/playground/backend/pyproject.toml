@@ -15,7 +15,7 @@
 name = "arkts-playground"
 dynamic = ["version"]
 dependencies = [
-    "fastapi[standard]",
+    "fastapi[standard]<=0.136.3",
     "PyYaml",
     "pydantic_settings",
     "aiofiles",
