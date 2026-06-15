@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-* @jokerxd-liu
 .* @dmitriitr @Prof @igelhaus
 
 .gitattributes       @dmitriitr @Prof @igelhaus @ipetrov
@@ -20,7 +19,7 @@ CODEOWNERS           @dmitriitr @Prof @igelhaus
 bundle.json          @dmitriitr @Prof @igelhaus @ipetrov @jokerxd-liu @huyunhui1
 static_vm_config.gni @dmitriitr @Prof @igelhaus @ipetrov
 
-arkplatform/ @dmitriitr @artemu @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+arkplatform/ @dmitriitr @artemu @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 
 common_runtime/ @ipetrov @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yingguofeng @lizheng89
 
@@ -285,30 +284,30 @@ static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/g
 /ark_guard	@oatuwwutao	^seeuiceland
 /ark_root.gni	@jokerxd-liu @huyunhui1
 /abc2program/	@oatuwwutao
-/assembler/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/assembler/	@jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /bytecode_optimizer/ @oatuwwutao ^seeuiceland
-/cmake/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/cmake/	@jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /common_interfaces/	@wuzhefengh	@weng-changcheng @igelhaus @dmitriitr ^yingguofeng ^Prof
 /compiler/	@oatuwwutao ^seeuiceland
 /disassembler/	@oatuwwutao
-/docs/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/gn/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/docs/ @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/gn/ @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /isa/ @oatuwwutao
-/ldscripts/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/ldscripts/	@gitee-dakeQI @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /libabckit/	@nazarovkonstantin	@oatuwwutao	@oatuwwutao	^seeuiceland
 /libark_defect_scan_aux/ @gitee-dakeQI @oatuwwutao ^seeuiceland
-/libpandabase/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/libpandafile/	@jokerxd-liu @gitee-dakeQI @oatuwwutao ^seeuiceland @huyunhui1 ^zmw1 ^ElevenDuan
-/libziparchive/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/panda/	@gitee-dakeQI	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/libpandabase/	@gitee-dakeQI @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/libpandafile/	@jokerxd-liu @gitee-dakeQI @oatuwwutao ^seeuiceland @huyunhui1 @zmw1 ^ElevenDuan
+/libziparchive/	@gitee-dakeQI @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/panda/	@gitee-dakeQI	@jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /panda_guard/	@oatuwwutao	^seeuiceland
-/pandastdlib/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/platforms/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/plugins/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/scripts/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/pandastdlib/	@jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/platforms/	@gitee-dakeQI @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/plugins/ @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/scripts/ @jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /taihe/ @wanzixuan330
-/templates/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
-/tests/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/templates/	@jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
+/tests/	@jokerxd-liu @huyunhui1 @zmw1 ^ElevenDuan
 /verifier/	@oatuwwutao	^seeuiceland
 
 /common_interfaces/heap/    @wuzhefengh @weng-changcheng @dmitriitr @artemu @ipetrov ^yingguofeng
