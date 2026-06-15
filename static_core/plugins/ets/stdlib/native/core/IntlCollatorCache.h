@@ -36,7 +36,7 @@ public:
     ~IntlCollatorCache() = default;
 
     icu::Collator *GetOrCreateCollator(ani_env *env, const std::string &lang, const std::string &collation,
-                                       const std::string &caseFirst);
+                                       const std::string &caseFirst, bool numeric);
 
 private:
     using CacheUMap = std::unordered_map<std::string, std::unique_ptr<icu::Collator>>;
