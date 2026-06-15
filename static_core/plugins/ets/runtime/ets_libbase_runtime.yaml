@@ -10025,7 +10025,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ i64, i64, u1 ]
+      args: [ i64, i64 ]
     impl: ark::ets::intrinsics::AsyncWorkNativeInvoke
 
   - name: stdConcurrencyNativeAsyncWorkHelperEventNativeInvoke
@@ -10035,7 +10035,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ i64, i64, u1 ]
+      args: [ i64, i64 ]
     impl: ark::ets::intrinsics::EventNativeInvoke
 
 ######################################
