@@ -964,12 +964,26 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
         If(str2_orig, 0).EQ.Unlikely.b {
           Goto(:NotEqual)
         }
-        length1 := LoadI(str1_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        length2 := LoadI(str2_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        If(length1, length2).NE.Unlikely.b {
+        class1 := load_class(str1_orig)
+        class2 := load_class(str2_orig)
+        # str2_orig can be any object, so if it's not String, then return 'false'
+        If(load_base_class(class1), load_base_class(class2)).NE.Unlikely.b {
           Goto(:NotEqual)
         }
-        length := Cast(length1.u32).u64
+        str1_len_packed := LoadI(str1_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        str2_len_packed := LoadI(str2_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        str1_length := ShrI(str1_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+        str2_length := ShrI(str2_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+        If(str1_length, str2_length).NE.Unlikely.b {
+          Goto(:NotEqual)
+        }
+        str1_uncompressed := is_string_uncompressed_u32(str1_len_packed)
+        str2_uncompressed := is_string_uncompressed_u32(str2_len_packed)
+        # Compare strings with different storage layouts through the slow path
+        If(str1_uncompressed, str2_uncompressed).NE.Unlikely.b {
+          Goto(:SlowPathEntrypoint)
+        }
+        length := Cast(str1_len_packed.u32).u64
       end
 
       if cgmode == :NativePlus
@@ -987,14 +1001,8 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
           # if cgmode is :FastPath.
           check_not_tree_string_type(str1_orig) if defines.DEBUG
           # Still have to check if it is 'SlicedString'.
-          class1 := load_class(str1_orig)
           If(LoadI(class1).Imm(Constants::STRING_TYPE_OFFSET).u64, Constants::STRING_TYPE_SLICE).EQ {
             Goto(:SlowPathEntrypoint)
-          }
-          # str2_orig can be any object, so if it's not String, then return 'false'
-          class2 := load_class(str2_orig)
-          If(load_base_class(class1), load_base_class(class2)).NE.Unlikely.b {
-            Goto(:NotEqual)
           }
           # now check string kind of str2_orig
           type2 := LoadI(class2).Imm(Constants::STRING_TYPE_OFFSET).u64

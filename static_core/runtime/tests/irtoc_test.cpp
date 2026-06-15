@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "libarkbase/utils/arch.h"
+#include "common_interfaces/objects/string/base_string.h"
 #include "gtest/gtest.h"
 #include "libarkbase/utils/utils.h"
 #include <array>
@@ -26,6 +27,8 @@ extern "C" uint64_t IrtocTestCfg(void *, uint64_t);
 extern "C" uint64_t IrtocTestCfgLabels(void *, uint64_t);
 extern "C" size_t IrtocTestLabels(size_t);
 extern "C" size_t IrtocTestReturnBeforeLabel(size_t);
+extern "C" uint32_t IrtocTestUtf16SubstringCompressible(void *, uint32_t, uint64_t);
+extern "C" uint32_t IrtocTestStringEqualsPackedDecision(uint32_t, uint32_t);
 
 using TestCfgFunc = uint64_t (*)(void *, uint64_t);
 
@@ -161,6 +164,53 @@ TEST(Irtoc, ReturnBeforeLabel)
 {
     EXPECT_EQ(IrtocTestReturnBeforeLabel(42U), 2U);
     EXPECT_EQ(IrtocTestReturnBeforeLabel(146U), 1U);
+}
+
+TEST(Irtoc, Utf16SubstringCompressible)
+{
+    if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP();
+    }
+
+    std::array<uint8_t, 8U> chars {0x57U, 0x5BU, 'A', 0U, 'S', 0U, 'C', 0U};
+    EXPECT_EQ(IrtocTestUtf16SubstringCompressible(static_cast<void *>(chars.data()), 0U, 1U), 0U);
+    EXPECT_EQ(IrtocTestUtf16SubstringCompressible(static_cast<void *>(chars.data()), 1U, 3U), 1U);
+}
+
+TEST(Irtoc, StringEqualsPackedDecision)
+{
+    if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
+        GTEST_SKIP();
+    }
+
+    constexpr uint32_t COMPRESSED_STATUS_BIT = 1U << ark::mem::BaseString::CompressedStatusBit::START_BIT;
+    constexpr uint32_t INTERN_BIT = 1U << ark::mem::BaseString::IsInternBit::START_BIT;
+    auto packedLength = [](uint32_t length, bool utf16, bool interned = false) {
+        uint32_t packed = length << ark::mem::BaseString::LengthBits::START_BIT;
+        if (utf16) {
+            packed |= COMPRESSED_STATUS_BIT;
+        }
+        if (interned) {
+            packed |= INTERN_BIT;
+        }
+        return packed;
+    };
+    auto utf8Length = [&packedLength](uint32_t length, bool interned = false) {
+        return packedLength(length, false, interned);
+    };
+    auto utf16Length = [&packedLength](uint32_t length, bool interned = false) {
+        return packedLength(length, true, interned);
+    };
+
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf16Length(3U), utf16Length(4U)), 0U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf16Length(3U), utf8Length(3U)), 2U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf8Length(3U), utf16Length(3U)), 2U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf16Length(3U), utf16Length(3U)), 1U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf8Length(3U), utf8Length(3U)), 1U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf8Length(3U), utf8Length(3U, true)), 1U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf16Length(3U), utf16Length(3U, true)), 1U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf8Length(3U, true), utf8Length(4U)), 0U);
+    EXPECT_EQ(IrtocTestStringEqualsPackedDecision(utf16Length(3U, true), utf8Length(3U, true)), 2U);
 }
 
 }  // namespace ark::test
