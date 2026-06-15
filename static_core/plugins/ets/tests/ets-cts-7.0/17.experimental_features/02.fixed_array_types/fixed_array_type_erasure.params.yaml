@@ -76,6 +76,9 @@ cases:
     new_val_0: "17.23"
     new_val_1: "7"
     new_val_2: "125.4"
+    new_wrong_val_0: "null"
+    new_wrong_val_1: "null"
+    new_wrong_val_2: "null"
     test_suffix: "number_null_und"
 
   - element_type: "number"
@@ -109,6 +112,9 @@ cases:
     new_val_0: "17.23"
     new_val_1: "7.3"
     new_val_2: "125.4"
+    new_wrong_val_0: "null"
+    new_wrong_val_1: "null"
+    new_wrong_val_2: "null"
     test_suffix: "number_any"
 
   - element_type: "double"
@@ -304,6 +310,9 @@ cases:
     new_val_0: "\"abc\""
     new_val_1: "123"
     new_val_2: "c'z'"
+    new_wrong_val_0: "null"
+    new_wrong_val_1: "null"
+    new_wrong_val_2: "null"
     test_suffix: "object"
 
   - element_type: "Any"
