@@ -83,10 +83,8 @@
 #include "syspara/parameters.h"
 #endif
 
-#include "runtime/common_runtime.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_components/heap/heap.h"
-#include "common_interfaces/base_runtime.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
@@ -423,7 +421,6 @@ bool Runtime::Create(const RuntimeOptions &options)
         LOG(ERROR, RUNTIME) << "Failed to create runtime instance";
         return false;
     }
-    common_runtime::InitCommonRuntime();
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -433,7 +430,6 @@ bool Runtime::Create(const RuntimeOptions &options)
         instance_ = nullptr;
         return false;
     }
-    common_runtime::SetMutatorLock(instance_->GetPandaVM()->GetMutatorLock());
 
     instance_->GetPandaVM()->StartGC();
 
@@ -653,7 +649,6 @@ bool Runtime::Destroy()
 
     DestroyUnderLockHolder();
     RuntimeInternalAllocator::Destroy();
-    common_runtime::FinishCommonRuntime();
     os::CpuAffinityManager::Finalize();
 
     return true;

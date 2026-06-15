@@ -16,8 +16,9 @@
 // CMC GC (common_runtime) implementations of ETS GC intrinsics
 // For shared intrinsics see std_core_gc.cpp
 // For default GC (static_core) implementations see std_core_default_gc.cpp
-#include "common_interfaces/base_runtime.h"
+#include "common_components/heap/heap_manager.h"
 #include "common_interfaces/thread/mutator-inl.h"
+#include "common_components/heap/heap.h"
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -77,11 +78,11 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, [[maybe_unuse
         return -1;
     }
     // target guarantees waitForFinishGC waits for at least +1 GC cycle
-    uint64_t target = ark::common_vm::BaseRuntime::GetGcCompletedCount() + 1U;
+    uint64_t target = common_vm::Heap::GetHeap().GetGcCompletedCount() + 1U;
     // false allows to call RequestGCAndWait.
     // Sync or async current gcTask will be detected
     // inside RequestGCAndWait by reason
-    ark::common_vm::BaseRuntime::RequestGC(reason, false, gcType, true);
+    ark::common_vm::HeapManager::RequestGC(reason, false, gcType, true);
     return static_cast<EtsLong>(target);
 }
 
@@ -104,22 +105,22 @@ extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
     common_vm::ScopedEnterSaferegion enterSaferegion(true);
     // Block on condition variable until gcCompletedCount >= target, or return early on
     // GC shutdown (TASK_INDEX_GC_EXIT sentinel) — no more cycles will fire
-    ark::common_vm::BaseRuntime::WaitForGCCompletionCount(target);
+    ark::common_vm::Heap::GetHeap().WaitForGCCompletionCount(target);
 }
 
 extern "C" EtsLong StdGetFreeHeapSize()
 {
-    return static_cast<EtsLong>(ark::common_vm::BaseRuntime::GetFreeHeapSize());
+    return static_cast<EtsLong>(ark::common_vm::Heap::GetHeap().GetFreeHeapSize());
 }
 
 extern "C" EtsLong StdGetUsedHeapSize()
 {
-    return static_cast<EtsLong>(ark::common_vm::BaseRuntime::GetUsedHeapSize());
+    return static_cast<EtsLong>(ark::common_vm::Heap::GetHeap().GetUsedHeapSize());
 }
 
 extern "C" EtsLong StdGetReservedHeapSize()
 {
-    return static_cast<EtsLong>(ark::common_vm::BaseRuntime::GetReservedHeapSize());
+    return static_cast<EtsLong>(ark::common_vm::Heap::GetHeap().GetReservedHeapSize());
 }
 
 extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
@@ -131,7 +132,7 @@ extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
                           "The value must be non negative");
         return;
     }
-    ark::common_vm::BaseRuntime::NotifyNativeAllocation(ClampToSizeT(size));
+    ark::common_vm::Heap::GetHeap().NotifyNativeAllocation(ClampToSizeT(size));
 }
 
 extern "C" void StdGCRegisterNativeFree(EtsLong size)
@@ -143,7 +144,7 @@ extern "C" void StdGCRegisterNativeFree(EtsLong size)
                           "The value must be non negative");
         return;
     }
-    ark::common_vm::BaseRuntime::NotifyNativeFree(ClampToSizeT(size));
+    ark::common_vm::Heap::GetHeap().NotifyNativeFree(ClampToSizeT(size));
 }
 
 }  // namespace ark::ets::intrinsics

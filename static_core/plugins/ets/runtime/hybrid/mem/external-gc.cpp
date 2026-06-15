@@ -23,6 +23,7 @@
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/base_runtime.h"
+#include "common_components/heap/heap.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 
 namespace ark::mem::ets {
@@ -121,15 +122,12 @@ static void ProcessReferencesAfterCopy()
 
 class StaticVMInterface : public ark::mem::VMInterface {
 public:
-    StaticVMInterface()
+    void Init() override
     {
-        ark::common_vm::BaseRuntime::GetInstance()->RegisterVM(this);
+        ark::common_vm::Heap::GetHeap().GetCollector().RegisterVM(this);
     }
 
-    ~StaticVMInterface() override
-    {
-        ark::common_vm::BaseRuntime::GetInstance()->UnregisterVM(this);
-    }
+    ~StaticVMInterface() override {}
 
     void VisitAllRoots(const ark::mem::RefFieldVisitor &visitor) override
     {

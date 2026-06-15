@@ -367,12 +367,14 @@ bool GCCMCBarrierSet::IsReadBarrierEnabled()
 void *GCCMCBarrierSet::AtomicReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                          [[maybe_unused]] std::memory_order order)
 {
+#if defined(ARK_USE_COMMON_RUNTIME)
     if constexpr (USE_READ_BARRIERS) {
         auto *fieldPtr = reinterpret_cast<ObjectPointerType *>(ToUintPtr(objAddr) + offset);
         auto &atomicField = reinterpret_cast<ark::mem::RefField<true> &>(*fieldPtr);
         ark::mem::RefField<false> tmpField(atomicField.GetFieldValue(order));
         return ReadBarrier(reinterpret_cast<void **>(&tmpField));
     }
+#endif
     return nullptr;
 }
 

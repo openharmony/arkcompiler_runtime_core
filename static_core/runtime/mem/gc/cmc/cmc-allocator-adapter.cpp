@@ -18,19 +18,80 @@
 #include "runtime/mem/gc/cmc/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/base_runtime.h"
 #include "common_interfaces/heap/heap_allocator.h"
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_state_word.h"
+#include "common_components/heap/heap.h"
+#include "common_components/common/page_pool.h"
+#include "common_components/common_runtime/base_runtime_param.h"
+#include "common_components/heap/heap_manager.h"
 #endif
 
 namespace ark::mem {
+
+namespace cvm = common_vm;
 
 template <MTModeT MT_MODE>
 CMCObjectAllocatorAdapter<MT_MODE>::CMCObjectAllocatorAdapter(MemStatsType *memStats, bool createPygoteSpaceAllocator)
     : ObjectAllocatorNoGen<MT_MODE>(memStats, createPygoteSpaceAllocator)
 {
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto param = cvm::BaseRuntimeParam::DefaultRuntimeParam();
+    // Single pass compaction should be enabled explicitly
+    auto &runtimeOptions = Runtime::GetCurrent()->GetOptions();
+    param.gcParam.singlePassCompactionEnabled =
+        runtimeOptions.WasSetG1SinglePassCompactionEnabled() && runtimeOptions.IsG1SinglePassCompactionEnabled();
+
+    size_t pagePoolSize = param.heapParam.heapSize;
+#if defined(PANDA_TARGET_32)
+    pagePoolSize = pagePoolSize / 128;  // 128 means divided.
+#endif
+    cvm::PagePool::Instance().Init(pagePoolSize * cvm::KB / cvm::COMMON_PAGE_SIZE);
+
+    heapManager_ = new (std::nothrow) cvm::HeapManager();
+    LOG_IF(UNLIKELY(heapManager_ == nullptr), FATAL, RUNTIME) << "HeapManager instance creation failed.";
+    heapManager_->Init(param);
+
+    constexpr int logFloatingPointPrecision = 2;
+    LOG(DEBUG, GC) << "Arkcommon runtime started.";
+    // Record runtime parameter to report. heap growth value needs to plus 1.
+    LOG(DEBUG, GC) << "Runtime parameter:\n\tHeap size: " << pagePoolSize
+                   << "(KB)\n\tRegion size: " << param.heapParam.regionSize
+                   << "(KB)\n\tExemption threshold: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param.heapParam.exemptionThreshold << "\n\t"
+                   << "Heap utilization: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param.heapParam.heapUtilization << "\n\tHeap growth: " << std::fixed
+                   << std::setprecision(logFloatingPointPrecision) << 1 + param.heapParam.heapGrowth
+                   << "\n\tAllocation rate: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param.heapParam.allocationRate << "(MB/s)\n\t"
+                   << "Alloction wait time: " << param.heapParam.allocationWaitTime << "ns\n\t"
+                   << "GC Threshold: " << param.gcParam.gcThreshold / cvm::KB
+                   << "(KB)\n\tGarbage threshold: " << std::fixed << std::setprecision(logFloatingPointPrecision)
+                   << param.gcParam.garbageThreshold
+                   << "\n\tGC interval: " << param.gcParam.gcInterval / cvm::MILLI_SECOND_TO_NANO_SECOND
+                   << "ms\n\tBackup GC interval: " << param.gcParam.backupGCInterval / cvm::SECOND_TO_NANO_SECOND
+                   << "s\n\t"
+                   << "Log level: " << 0 << "\n\tThread stack size: " << 0 << "(KB)\n\tArkcommon stack size: " << 0
+                   << "(KB)\n\t"
+                   << "Processor number: " << 0;
+#endif
 }
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+template <MTModeT MT_MODE>
+CMCObjectAllocatorAdapter<MT_MODE>::~CMCObjectAllocatorAdapter()
+{
+    // since there might be failure during initialization,
+    // here we need to check and call fini.
+    if (heapManager_ != nullptr) {
+        heapManager_->Fini();
+    }
+    delete heapManager_;
+    heapManager_ = nullptr;
+
+    cvm::PagePool::Instance().Fini();
+}
+#endif
 
 template <MTModeT MT_MODE>
 void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
@@ -69,7 +130,7 @@ void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]]
             objectVisitor(reinterpret_cast<ObjectHeader *>(obj));
         }
     };
-    ark::common_vm::BaseRuntime::ForEachObj(visitor, true);
+    ark::common_vm::Heap::GetHeap().ForEachObject(visitor, true);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

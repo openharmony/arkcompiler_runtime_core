@@ -35,6 +35,7 @@
 
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/cmc/cmc-allocator-adapter.h"
+#include "runtime/mem/gc/cmc/common_components/mutator/mutator_manager.h"
 #include "runtime/include/managed_thread.h"
 
 namespace ark::common_vm {
@@ -159,7 +160,7 @@ public:
     virtual void PreGarbageCollection(bool isConcurrent);
     virtual void PostGarbageCollection(uint64_t gcIndex);
 
-    void Init(const RuntimeParam &param) override
+    void Init() override
     {
         HeapBitmapManager::GetHeapBitmapManager().InitializeHeapBitmap();
         DCHECK(GetGCPhase() == ark::common_vm::GC_PHASE_IDLE);
@@ -167,7 +168,7 @@ public:
         // cmc is not adapted for 32-bit systems
         gcMode_ = GCMode::STW;
 #else
-        if (param.gcParam.enableStwGC) {
+        if (common_vm::Heap::GetHeap().GetGCParam().enableStwGC) {
             gcMode_ = GCMode::STW;
         } else {
             gcMode_ = GCMode::CMC;
@@ -178,10 +179,12 @@ public:
 #ifdef ENABLE_CMC_RB_DFX
         gcMode_ = GCMode::STW;
 #endif
+        common_vm::MutatorManager::Create();
     }
 
     void Fini() override
     {
+        common_vm::MutatorManager::Destroy();
         HeapBitmapManager::GetHeapBitmapManager().DestroyHeapBitmap();
     }
 
@@ -191,7 +194,7 @@ public:
     void DumpBeforeGC()
     {
         if (ENABLE_LOG(FRAGMENT)) {
-            if (MutatorManager::Instance().WorldStopped()) {
+            if (common_vm::MutatorManager::Instance().WorldStopped()) {
                 DumpHeap("before_gc");
             } else {
                 STWParam stwParam {"dump-heap-before-gc"};
@@ -204,7 +207,7 @@ public:
     void DumpAfterGC()
     {
         if (ENABLE_LOG(FRAGMENT)) {
-            if (MutatorManager::Instance().WorldStopped()) {
+            if (common_vm::MutatorManager::Instance().WorldStopped()) {
                 DumpHeap("after_gc");
             } else {
                 STWParam stwParam {"dump-heap-after-gc"};

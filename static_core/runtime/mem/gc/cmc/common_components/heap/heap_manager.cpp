@@ -23,6 +23,11 @@ namespace ark::common_vm {
 HeapManager::HeapManager() {}
 void HeapManager::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
 {
+    if (reason < GC_REASON_BEGIN || reason > GC_REASON_END || gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {
+        LOG(ERROR, GC) << "Invalid gc reason or gc type, gc reason: " << GCReasonToString(reason)
+                       << ", gc type: " << GCTypeToString(gcType);
+        return;
+    }
     if (!Heap::GetHeap().IsGCEnabled()) {
         return;
     }

@@ -187,7 +187,7 @@ public:
 
     inline size_t GetTargetSize() const
     {
-        double heapUtilization = BaseRuntime::GetInstance()->GetHeapParam().heapUtilization;
+        double heapUtilization = Heap::GetHeap().GetHeapParam().heapUtilization;
         return static_cast<size_t>(GetUsedPageSize() / heapUtilization);
     }
 
@@ -269,7 +269,7 @@ public:
             return regionManager_.ReleaseGarbageRegions(0);
         } else {
             size_t size = GetAllocatedBytes();
-            double cachedRatio = 1 - BaseRuntime::GetInstance()->GetHeapParam().heapUtilization;
+            double cachedRatio = 1 - Heap::GetHeap().GetHeapParam().heapUtilization;
             size_t targetCachedSize = static_cast<size_t>(size * cachedRatio);
             return regionManager_.ReleaseGarbageRegions(targetCachedSize);
         }

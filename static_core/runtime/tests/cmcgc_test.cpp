@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/thread_scopes.h"
+#include "common_components/heap/heap_manager.h"
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/mutator/thread_local.h"
 #include "common_components/mutator/satb_buffer.h"
@@ -112,7 +113,7 @@ public:
     }
     ~CMCGCPreBarrierChecker()
     {
-        cvm::BaseRuntime::GetInstance()->RemoveGCListener(this);
+        cvm::Heap::GetHeap().GetCollector().RemoveGCListener(this);
     }
 
 private:
@@ -196,7 +197,7 @@ public:
     }
     ~CMCGCReadBarrierChecker()
     {
-        cvm::BaseRuntime::GetInstance()->RemoveGCListener(this);
+        cvm::Heap::GetHeap().GetCollector().RemoveGCListener(this);
     }
 
 private:
@@ -230,8 +231,8 @@ public:
 
     void TriggerGC()
     {
-        cvm::BaseRuntime::GetInstance()->RequestGC(cvm::GCReason::GC_REASON_FORCE, false, cvm::GCType::GC_TYPE_YOUNG);
-        cvm::BaseRuntime::WaitForGCFinish();
+        cvm::HeapManager::RequestGC(cvm::GCReason::GC_REASON_FORCE, false, cvm::GCType::GC_TYPE_YOUNG);
+        cvm::Heap::GetHeap().WaitForGCFinish();
     }
 
     static RuntimeOptions CreateRuntimeOptions()
@@ -503,9 +504,9 @@ TEST_F(CMCGCTest, PreBarrierCheck)
     ASSERT_TRUE(obj2Region->IsInOldSpace());
 
     CMCGCPreBarrierChecker checker;
-    cvm::BaseRuntime::GetInstance()->AddGCListener(&checker);
+    cvm::Heap::GetHeap().GetCollector().AddGCListener(&checker);
 
-    cvm::BaseRuntime::GetInstance()->RequestGC(cvm::GCReason::GC_REASON_USER, true, cvm::GCType::GC_TYPE_FULL);
+    cvm::HeapManager::RequestGC(cvm::GCReason::GC_REASON_USER, true, cvm::GCType::GC_TYPE_FULL);
 
     {
         cvm::ScopedEnterSaferegion safeRegion(true);
@@ -544,9 +545,9 @@ TEST_F(CMCGCTest, ReadBarrierCheck)
     FillCurrentMemRegion(execCtx);
 
     CMCGCReadBarrierChecker checker;
-    cvm::BaseRuntime::GetInstance()->AddGCListener(&checker);
+    cvm::Heap::GetHeap().GetCollector().AddGCListener(&checker);
 
-    cvm::BaseRuntime::GetInstance()->RequestGC(cvm::GCReason::GC_REASON_USER, true, cvm::GCType::GC_TYPE_FULL);
+    cvm::HeapManager::RequestGC(cvm::GCReason::GC_REASON_USER, true, cvm::GCType::GC_TYPE_FULL);
 
     uintptr_t objPtr = 0;
     {

@@ -73,7 +73,7 @@ void Mutator::HandleSuspensionRequest()
 
 void Mutator::HandleGCCallback()
 {
-    BaseRuntime::GetInstance()->ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
+    Heap::GetHeap().GetCollector().ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
 }
 
 void Mutator::SuspendForStw()

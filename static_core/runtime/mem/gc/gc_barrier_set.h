@@ -23,7 +23,7 @@
 #include "runtime/include/object_header.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/base_runtime.h"
+#include "common_components/heap/heap.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {

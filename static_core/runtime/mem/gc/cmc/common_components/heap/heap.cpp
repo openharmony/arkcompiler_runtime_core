@@ -126,10 +126,20 @@ public:
         collectorResources_.SetCollector(collector);
         collector_ = collector;
 
-        collector_->Init(runtimeParam_);
+        collector_->Init();
         collectorResources_.Init();
 
         Heap::GetHeap().EnableGC(runtimeParam_.gcParam.enableGC);
+    }
+
+    const HeapParam &GetHeapParam() const override
+    {
+        return runtimeParam_.heapParam;
+    }
+
+    GCParam &GetGCParam() override
+    {
+        return runtimeParam_.gcParam;
     }
 
     HeapAddress Allocate(size_t size, AllocType allocType, bool allowGC = true) override;
