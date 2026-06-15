@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+    Test for binary compatibility. The case when adding a final modifier to exported class
+    doesn't break the binary compatibility.
+files: ['./add_final_modifier.libr.ets']
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+import { C1 } from './add_final_modifier.libr.ets'
 
 function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+    arktest.assertEQ(new C1().m(42), "C1.m.42");
 }
-{% endfor %}

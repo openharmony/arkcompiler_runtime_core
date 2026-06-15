@@ -64,6 +64,6 @@ fi
 for new_lib in ${BASE}.libr*.new${suffix}; do
     [ -f "$new_lib" ] || continue
     old_lib="${new_lib%.new${suffix}}${suffix}"
-    cp "$old_lib" "${old_lib}.orig"
-    cp "$new_lib" "$old_lib"
+    cp -v "$old_lib" "${old_lib}.orig"
+    cp -v "$new_lib" "$old_lib"
 done

@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+    Test for binary compatibility. Adding an overriding method to subclass
+    doesn't break the binary compatibility. Added method is getting resolved
+    by dynamic method resolution.
+files: ['./add_method_to_subclass.libr.ets']
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+import { C1, C2 } from './add_method_to_subclass.libr.ets'
 
 function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+    let c = ((): C1 => new C2())()
+    arktest.assertEQ(c.m(23), c.version() == 1 ? "C1.m.23" : "C2.m.C1.m.23");
 }
-{% endfor %}

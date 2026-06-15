@@ -13,17 +13,27 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+desc: Test for binary compatibility. Adding default method to interface.
+tags:
+    - compile-only
+    - not-a-test
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+export class A {}
+export class B extends A {}
 
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+export interface I1 {
+    /*
+     * Adding the following default method causes
+     * an ambiguity in method resolution:
+     * the both methods in C2 now override
+     * this added method. This is prohibited by
+     * 15.9.1 Overriding in Classes
+     */
+    m(p: B): string {
+        return "I1.B"
+    }
+
+    m(p: A): string
 }
-{% endfor %}

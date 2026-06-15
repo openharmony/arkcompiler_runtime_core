@@ -13,17 +13,24 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+    Test for binary compatibility. The case when adding final modifier to exported
+    class makes the class not loadable, i.e. breaks the binary compatibility.
+files: ['./final_modifier_n.libr.ets']
+tags: [negative]
+negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
+expected_error:
+  verify-new-libs:
+    - "E/verifier: Cannot inherit from final class: final_modifier_n.C2->final_modifier_n.libr.C1"
+  runtime-with-new-libs.ark:
+    - "E/verifier: Cannot inherit from final class: final_modifier_n.C2->final_modifier_n.libr.C1"
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+import * as LIB from './final_modifier_n.libr.ets'
+
+class C2 extends LIB.C1 {}
 
 function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+    let c2 = new C2();
 }
-{% endfor %}

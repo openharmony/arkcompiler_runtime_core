@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+desc: Test for binary compatibility. Adding required property to interface.
+tags:
+    - compile-only
+    - not-a-test
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+export interface I1 {
+    prop: number
 
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+    /*
+     * Adding the following required property breaks
+     * the binary compatibility.
+     * See 9.3.1 Implementing Required Interface Properties
+     */
+    new_required_property: string
 }
-{% endfor %}

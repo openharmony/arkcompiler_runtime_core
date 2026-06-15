@@ -12,46 +12,60 @@
 # limitations under the License.
 
 libs:
-  - desc: |-
-        function added to namespace
-    body: |-
-        export function f(): string {
-            return 'f'
-        }
-        export function m(): string {
-            return 'm'
-        }
-  - desc: |-
-        new members added to namespace
-    body: |-
-        export namespace NN {
-            let a: string = 'a'
-        }
-        export function m(): string {
-            return 'm'
-        }
-        export let a: string = 'a'
-        export let b: string = 'b'
-  - desc: |-
-        non-exported member removed from namespace
-    body: |-
-        export function m(): string {
-            return 'm'
-        }
-  - desc: |-
-        non-exported member renamed in namespace
-    body: |-
-        let b: string = 'a'
-        export function m(): string {
-            return 'm'
-        }
-  - desc: |-
-        type definitions added to namespace
-    body: |-
-        export function m(): string {
-            return 'm'
-        }
-        export class A {}
-        export interface I {}
-        export enum E { A, B, C }
-        export type T = E
+    - desc: |-
+          Adding a function to a namespace is a binary-compatible change
+      body: |-
+          export function f(): string {
+              return 'f'
+          }
+
+    - desc: |-
+          Adding a variable to a namespace is a binary-compatible change
+      body: |-
+          export let b: string = 'b'
+
+    - desc: |-
+          Adding a new member namespace is a binary-compatible change
+      body: |-
+          export namespace NN {
+              export let a: string = 'aa'
+          }
+
+    - desc: |-
+          Removing a non-exported member from a namespace is a binary-compatible change
+
+    - desc: |-
+          Renaming a non-exported member of a namespace is a binary-compatible change
+      body: |-
+          let b: number = 42
+          function foo(): Any {
+              return null
+          }
+
+    - desc: |-
+          Adding a class is a binary-compatible change
+      body: |-
+          class A {}
+          export class B {}
+          final class C {}
+          export final class D {}
+          abstract class E {}
+          export abstract class F {}
+
+    - desc: |-
+          Adding an interface is a binary-compatible change
+      body: |-
+          interface I {}
+          export interface J {}
+
+    - desc: |-
+          Adding a enum is a binary-compatible change
+      body: |-
+          enum Enum1 { A, B, C }
+          export enum Enum2 { A, B, C }
+
+    - desc: |-
+          Adding a type alias is a binary-compatible change
+      body: |-
+          type T1 = Array<number>
+          export type T2 = Array<string>

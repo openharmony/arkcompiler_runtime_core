@@ -12,36 +12,39 @@
 # limitations under the License.
 
 libs:
-  - desc: |-
-        original namespace exposing m()
-    body: |-
-        export function m(): string {
-            return 'm'
-        }
-  - desc: |-
-        original namespace exposing m() and a
-    body: |-
-        export function m(): string {
-            return 'm'
-        }
-        export let a: string = 'a'
-  - desc: |-
-        original namespace with non-exported a and exposed m()
-    body: |-
-        let a: string = 'a'
-        export function m(): string {
-            return 'm'
-        }
-  - desc: |-
-        original namespace with non-exported a and exposed m()
-    body: |-
-        let a: string = 'a'
-        export function m(): string {
-            return 'm'
-        }
-  - desc: |-
-        original namespace exposing only m()
-    body: |-
-        export function m(): string {
-            return 'm'
-        }
+    - desc: |-
+          Adding a function to a namespace is a binary-compatible change
+
+    - desc: |-
+          Adding a variable to a namespace is a binary-compatible change
+
+    - desc: |-
+          Adding a new member namespace is a binary-compatible change
+
+    - desc: |-
+          Removing a non-exported member from a namespace is a binary-compatible change
+      body: |-
+          let b: string = 'b'
+          function foo(): boolean {
+              return true
+          }
+
+    - desc: |-
+          Renaming a non-exported member of a namespace is a binary-compatible change
+      body: |-
+          let b: string = 'b'
+          function foo(): boolean {
+              return true
+          }
+
+    - desc: |-
+          Adding a class is a binary-compatible change
+
+    - desc: |-
+          Adding an interface is a binary-compatible change
+
+    - desc: |-
+          Adding a enum is a binary-compatible change
+
+    - desc: |-
+          Adding a type alias is a binary-compatible change

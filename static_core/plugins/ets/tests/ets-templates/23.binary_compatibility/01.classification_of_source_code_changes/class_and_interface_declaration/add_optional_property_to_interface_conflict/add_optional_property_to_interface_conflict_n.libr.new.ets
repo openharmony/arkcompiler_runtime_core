@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+desc: Test for binary compatibility. Adding optional property to interface.
+tags:
+    - compile-only
+    - not-a-test
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
-
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+export interface I1 {
+    /*
+     * Adding the following optional property causes
+     * a conflict with C2 class field.
+     * This is prohibited by
+     * 9.3.2 Implementing Optional Interface Properties
+     */
+    prop?: number
 }
-{% endfor %}

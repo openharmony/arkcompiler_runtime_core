@@ -15,13 +15,17 @@
 
 {% for lib in libs %}
 /*---
-desc: |-
+desc: >-
     New library - {{lib.desc}}
 tags: [compile-only, not-a-test]
 ---*/
 
 export namespace N {
-    {{lib.body|indent}}
-}
+    export function m(): string {
+        return 'm'
+    }
+    export let a: string = 'a'
 
+    {{(lib.body or '')|indent}}
+}
 {% endfor %}

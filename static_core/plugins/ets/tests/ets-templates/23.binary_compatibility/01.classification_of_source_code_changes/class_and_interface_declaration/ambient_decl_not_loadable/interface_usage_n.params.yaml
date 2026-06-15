@@ -12,108 +12,115 @@
 # limitations under the License.
 
 cases:
-  # interfaces
-  - import: |-
-      A
-    decl: |-
-      class B implements A {
-        a: string = 'b'
-      }
-    use: |-
-      const b: B  = new B
-      arktest.assertEQ(b.a, 'b')
-    err: |-
-      E/verifier: Error: method void interface_usage_n_0.ETSGLOBAL::usage() failed to verify
-    err2: |-
-      E/verifier: Cannot link class: Cannot find class Linterface_declarations/A;
-  - import: |-
-      B
-    decl: |-
-      class C implements B {
-        a: int = 1
-        b: float = 1.0f
-        c: String[] = ["c"]
-      }
-    use: |-
-      const c: C  = new C
-      arktest.assertEQ(c.a, 1)
-      arktest.assertEQ(c.b, 1.0)
-      arktest.assertEQ(c.c[0], "c")
-    err: |-
-      E/verifier: Error: method void interface_usage_n_1.ETSGLOBAL::usage() failed to verify
-    err2: |-
-      E/verifier: Cannot link class: Cannot find class Linterface_declarations/B;
-  - import: |-
-      C
-    decl: |-
-      class D implements C {
-        foo(x: number, y: string, z: double[]): string {
-          return x.toString() + y + z.toString();
-        }
-      }
-    use: |-
-      const d: D  = new D
-      arktest.assertEQ(d.foo(1, '1', [1]), '111')
-    err: |-
-      TODO: not known yet
-  - import: |-
-      D
-    decl: |-
-      class E implements D<string, number> {
-        a: string = 'a'
-        b: number = 1
-      }
-    use: |-
-      const e: E = new E
-      arktest.assertEQ(e.a, 'a')
-      arktest.assertEQ(e.b, 12)
-    err: |-
-      TODO: not known yet
-  - import: |-
-      E
-    decl: |-
-      class F implements E<number,number,string> {
-        foo(x: number, y: number): string {
-          return (x + y).toString()
-        }
-      }
-    use: |-
-      const f: F = new F
-      arktest.assertEQ(f.foo(1,1), '2')
-    err: |-
-      TODO: not known yet
-  - import: |-
-      M,F
-    decl: |-
-      class C implements M {
-        f: string = 'a'
-      }
-    use: |-
-      const c: C = new C
-      arktest.assertEQ(c.f, 'a')
-    err: |-
-      TODO: not known yet
-  - import: |-
-      K
-    decl: |-
-      class B implements K {
-        a: int = 1
-        get foo(): int {return this.a}
-        set foo(v: int) { this.a = v}
-      }
-    use: |-
-      const b: B = new B
-      arktest.assertEQ(b.a, 1)
-      b.a = 2
-      arktest.assertEQ(b.a, 2)
-    err: |-
-      TODO: not known yet
-  - import: |-
-      J
-    decl: |-
-      class I implements J {}
-    use: |-
-      const i: I = new I
-      arktest.assertEQ(i.foo(1), '1')
-    err: |-
-      E/verifier: Cannot link class: Cannot find method 'foo (D)Lstd/core/String;' in class 'interface_declarations.J'
+    # interfaces
+    - import: |-
+          A
+      decl: |-
+          class B implements A {
+            a: string = 'b'
+          }
+      use: |-
+          const b: B  = new B
+          arktest.assertEQ(b.a, 'b')
+      err: |-
+          E/verifier: Error: method void interface_usage_n_0.ETSGLOBAL::usage() failed to verify
+      err2: |-
+          E/verifier: Cannot link class: Cannot find class Linterface_declarations/A;
+    - import: |-
+          B
+      decl: |-
+          class C implements B {
+            a: int = 1
+            b: float = 1.0f
+            c: String[] = ["c"]
+          }
+      use: |-
+          const c: C  = new C
+          arktest.assertEQ(c.a, 1)
+          arktest.assertEQ(c.b, 1.0)
+          arktest.assertEQ(c.c[0], "c")
+      err: |-
+          E/verifier: Error: method void interface_usage_n_1.ETSGLOBAL::usage() failed to verify
+      err2: |-
+          E/verifier: Cannot link class: Cannot find class Linterface_declarations/B;
+    - import: |-
+          C
+      decl: |-
+          class D implements C {
+            foo(x: number, y: string, z: double[]): string {
+              return x.toString() + y + z.toString();
+            }
+          }
+      use: |-
+          const d: D  = new D
+          arktest.assertEQ(d.foo(1, '1', [1]), '111')
+      err: |-
+          TODO: not known yet
+    - import: |-
+          D
+      decl: |-
+          class E implements D<string, number> {
+            a: string = 'a'
+            b: number = 1
+          }
+      use: |-
+          const e: E = new E
+          arktest.assertEQ(e.a, 'a')
+          arktest.assertEQ(e.b, 12)
+      err: |-
+          TODO: not known yet
+    - import: |-
+          E
+      decl: |-
+          class F implements E<number,number,string> {
+            foo(x: number, y: number): string {
+              return (x + y).toString()
+            }
+          }
+      use: |-
+          const f: F = new F
+          arktest.assertEQ(f.foo(1,1), '2')
+      err: |-
+          TODO: not known yet
+    - import: |-
+          M,F
+      decl: |-
+          class C implements M {
+            f: string = 'a'
+          }
+      use: |-
+          const c: C = new C
+          arktest.assertEQ(c.f, 'a')
+      err: |-
+          TODO: not known yet
+    - import: |-
+          K
+      decl: |-
+          class B implements K {
+            a: int = 1
+            get foo(): int {return this.a}
+            set foo(v: int) { this.a = v}
+          }
+      use: |-
+          const b: B = new B
+          arktest.assertEQ(b.a, 1)
+          b.a = 2
+          arktest.assertEQ(b.a, 2)
+      err: |-
+          TODO: not known yet
+    - import: |-
+          J
+      decl: |-
+          class I implements J {}
+      use: |-
+          const i: I = new I
+          arktest.assertEQ(i.foo(1), '1')
+      err: |-
+          E/verifier: Cannot link class: Cannot find method 'foo (D)Lstd/core/String;' in class 'interface_declarations.J'
+    - import: |-
+          F
+      use: |-
+          let f: F = { f: 'abc' }
+          arktest.assertEQ(f.f.length, 3)
+      err: |-
+          E/verifier: Cannot link class: Cannot find method '%%get-f ()Lstd/core/String;' in class 'interface_declarations.F'
