@@ -81,6 +81,7 @@ test_ets_files = [
   "ut/obfuscator/code_sample/module_link_method_test",
   "ut/obfuscator/code_sample/obfuscator_test",
   "ut/obfuscator/code_sample/remove_log_test",
+  "ut/obfuscator/code_sample/remove_log_istrue_test",
   "ut/obfuscator/code_sample/toplevel_field_demo",
   "ut/obfuscator/code_sample/stack_recovery",
   "ut/obfuscator/code_sample/lambda_demo",
@@ -154,6 +155,7 @@ arkguard_host_unittest_action("ArkGuardUnitTest") {
     "ut/name_mapping_manager_test.cpp",
     "ut/name_mark/name_marker_test.cpp",
     "ut/obfuscator/obfuscator_test.cpp",
+    "ut/obfuscator/remove_log_istrue_test.cpp",
     "ut/obfuscator/seeds_dumper_test.cpp",
     "ut/obfuscator_preprocess/obfuscator_preprocess_test.cpp",
     "ut/object_util_test.cpp",
@@ -168,13 +170,16 @@ arkguard_host_unittest_action("ArkGuardUnitTest") {
     "$ark_root/ark_guard/library",
     "$ark_root/ark_guard/tests/util/include",
     "$ark_root/static_core",
+    "$ark_root/static_core/assembler",
     "$target_gen_dir/../../static_core",
+    "$target_gen_dir/../../static_core/assembler",
     "$ark_root",
   ]
 
   configs = [
     "$ark_root/libabckit:abckit_config",
     "$ark_root/static_core/libarkbase:arkbase_public_config",
+    "$ark_root/static_core/assembler:arkassembler_public_config",
     "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_public_config",
     "$ark_root/ark_guard:ark_guard_public_config",
   ]
@@ -184,6 +189,7 @@ arkguard_host_unittest_action("ArkGuardUnitTest") {
     "$ark_root/ark_guard:ark_guard_shared",
     "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_shared",
     "$ark_root/libabckit/src:libabckit",
+    "$ark_root/static_core/assembler:libarktsassembler",
     "$ark_root/static_core/libarkbase:libarktsbase",
     "$ark_root/static_core/plugins/ets:etsstdlib",
     "$ark_root/static_core/runtime:libarkruntime",

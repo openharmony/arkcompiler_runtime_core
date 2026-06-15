@@ -699,6 +699,10 @@ public:
         ASSERT(HasNullPtrInst());
         nullptrInst_ = nullptr;
     }
+    void SetNullPtrInst(Inst *inst)
+    {
+        nullptrInst_ = inst;
+    }
     Inst *GetOrCreateNullPtr();
 
     Inst *GetUniqueObjectInst() const
@@ -713,6 +717,10 @@ public:
     {
         ASSERT(HasUniqueObjectInst());
         uniqueObjectInst_ = nullptr;
+    }
+    void SetUniqueObjectInst(Inst *inst)
+    {
+        uniqueObjectInst_ = inst;
     }
     Inst *GetOrCreateUniqueObjectInst();
 

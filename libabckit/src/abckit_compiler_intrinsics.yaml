@@ -704,14 +704,14 @@ intrinsics:
   signature:
     ret: i32
     args: [ ref ]
-  clear_flags: [ "require_state", "call", "heap_inv", "compiler_barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
+  clear_flags: [ "acc_read", "require_state", "call", "heap_inv", "compiler_barrier", "can_throw", "no_dce", "no_hoist", "no_cse"]
   set_flags: []
   is_stub: false
   additional_temps: 0
   codegen_arch: []
   need_nullcheck: []
   is_fastpath: false
-  need_param_locations: false
+  need_param_locations: true
 
 - name: AbckitEtsTypeof
   space: abckit
