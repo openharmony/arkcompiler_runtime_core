@@ -46,10 +46,10 @@ async function main() {
     writeLock.unlock()
     fns.mul(2, 3)
 
-    await job1
-    await job2
-    await worker1.join()
-    await worker2.join()
+    job1.Await()
+    job2.Await()
+    worker1.join().Await()
+    worker2.join().Await()
 
     arktest.assertLT(0, attach.countEventsForMethod('sum'))
     arktest.assertLT(0, attach.countEventsForMethod('sub'))

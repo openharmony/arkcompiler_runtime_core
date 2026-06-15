@@ -14,14 +14,14 @@
  */
 
 import { launch } from "std/concurrency"
-
+import { Job } from "std/core"
 
 let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
     let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentDeletePressureTest");
 
-    ConcurrentSetTestsuite.addAsyncTest("deletePressureTest002", async () =>
+    ConcurrentSetTestsuite.addTest("deletePressureTest002", () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
@@ -29,14 +29,14 @@ function main(): int {
             addMore(i);
         }
         arktest.assertEQ(ConcurrentSetTestOne.size, 100);
-        let jobs = Array.create<Promise<void> | undefined>(100, undefined);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         for (let i: int = 0; i < 100; i++) {
             jobs[i] = launch() {
                 deleteMore(i)
             };
         }
         for (let i: int = 0; i < 100; i++) {
-            await jobs[i]!;
+            jobs[i]!.Await();
         }
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });

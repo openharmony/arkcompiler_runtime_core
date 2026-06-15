@@ -45,34 +45,34 @@ function main(): int {
         arktest.assertEQ(ind, arr.length);
         arktest.assertEQ(queueInt.size, 0);
     });
-    ArrayBlockingQueueTestsuite.addAsyncTest("ConcurrentPushPopTestInt", async () =>
+    ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestInt", () =>
     {
         let p1 = launch(pusherInt);
         let arrayToCheck = popperInt();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(testArrayInt[i], arrayToCheck[i]);
         }
-        await p1;
+        p1.Await();
         arktest.assertEQ(queueInt.size, 0);
     });
-    ArrayBlockingQueueTestsuite.addAsyncTest("ConcurrentPushPopTestObj", async () =>
+    ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestObj", () =>
     {
         let p1 = launch(pusherObj);
         let arrayToCheck = popperObj();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(testArrayObj[i], arrayToCheck[i]);
         }
-        await p1;
+        p1.Await();
         arktest.assertEQ(queueObj.size, 0);
     });
-    ArrayBlockingQueueTestsuite.addAsyncTest("ConcurrentPushPopTestStr", async () =>
+    ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
         let p1 = launch(pusherStr);
         let arrayToCheck = popperStr();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);
         }
-        await p1;
+        p1.Await();
         arktest.assertEQ(queueStr.size, 0);
     });
 

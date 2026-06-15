@@ -35,7 +35,7 @@ function messageBasicInterfaceTest() {
     let msg3 = new concurrency.Message(MessageType.BOOLEAN, true, handler);
     let array = [1, 2, 3, 4, 5];
     let msg4 = new concurrency.Message(MessageType.ARRAY, array, handler);
-    
+
     let callback = ()=>{
         let a = 0;
     }
@@ -61,7 +61,7 @@ function messageBasicInterfaceTest() {
     arktest.assertEQ(msg4.getObject(), array);
 
     arktest.assertEQ(msg5.getCallback(), callback);
-    eaw.quit();
+    eaw.join();
 }
 
 function main() {

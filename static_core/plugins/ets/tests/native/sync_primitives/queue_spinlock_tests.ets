@@ -17,9 +17,9 @@ native function spinlockCreate(): Object;
 native function spinlockGuard(spinlock: Object, callback: Object): void;
 native function spinlockIsHeld(spinlock: Object): boolean;
 
-async function runConcurrently(coroutinesCount: number, callback: () => void) {
+function runConcurrently(coroutinesCount: number, callback: () => void) {
     let spinlock = spinlockCreate();
-    let jobs = new Array<Promise<boolean>>;
+    let jobs = new Array<Job<boolean>>;
     let guard = () => {
         spinlockGuard(spinlock, callback);
         return true;
@@ -29,7 +29,7 @@ async function runConcurrently(coroutinesCount: number, callback: () => void) {
         jobs.push(j);
     }
     for (let job of jobs) {
-        await job;
+        job.Await();
     }
 }
 
@@ -37,12 +37,10 @@ function exclusiveAccess(): void {
     const coroutinesCount = 10;
     const workload = 100500;
     let count = 0;
-    waitForCompletion<void>(async (): Promise<void> => {
-        await runConcurrently(coroutinesCount, () => {
-            for (let i = 0; i < workload; ++i) {
-                count++;
-            }
-        });
+    runConcurrently(coroutinesCount, () => {
+        for (let i = 0; i < workload; ++i) {
+            count++;
+        }
     });
     arktest.assertTrue(count == workload * coroutinesCount);
 }
@@ -52,12 +50,10 @@ function objectAllocationsUnderLock() {
     const workload = 1000;
     let objects = Array.create<Object>(workload, new Object());
     // Checks that the deadlock did not occur due to GC
-    waitForCompletion<void>(async (): Promise<void> => {
-        await runConcurrently(coroutinesCount, () => {
-            for (let i = 0; i < workload; ++i) {
-                objects[i] = new Object();
-            }
-        });
+    runConcurrently(coroutinesCount, () => {
+        for (let i = 0; i < workload; ++i) {
+            objects[i] = new Object();
+        }
     });
 }
 

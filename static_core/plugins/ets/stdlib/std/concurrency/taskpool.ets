@@ -398,7 +398,7 @@ export namespace taskpool {
             });
             return res;
         }
-        
+
         public setWorkerActive(active: boolean): void {
             ConcurrencyHelpers.lockGuard(this.isAliveMutex, () => {
                 this.isActive = active;
@@ -1362,7 +1362,7 @@ export namespace taskpool {
                 ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
                     ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
                 });
-            } 
+            }
             this.callUserCallback(this.onEnqueueCallback);
         }
 
@@ -3226,7 +3226,7 @@ export namespace taskpool {
             return;
         }
         managerWorker?.stopManagerWorker();
-        
+
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             workers.forEach((worker: GlobalQueueWorker) => {
                 worker.closeWorker();
@@ -3498,7 +3498,7 @@ export namespace taskpool {
             waitingTasksNum.fetchSub(1);
             return queuedExecution;
         }
-        
+
         // No tasks available, wait on condition variable to avoid CPU busy waiting
         // Only wait if worker is active
         if (!worker.isWorkerActive()) {
@@ -3547,14 +3547,14 @@ export namespace taskpool {
             attempts--;
         }
         return undefined;
-    } 
+    }
     /**
     * @brief Non-blocking priority-based task selection using LinkedBlockingQueue.poll()
      * Uses poll() instead of pop() to avoid blocking
      */
     function selectTaskByPriorityNonBlocking(): QueuedExecution | undefined {
         let queuedExecution: QueuedExecution | undefined = undefined;
-        
+
         // HIGH priority tasks (with continuous execution limit)
         if (getGlobalTaskQueueSize(Priority.HIGH) > 0) {
             if (globalHighTaskExecuteCount.load() < continuousExecutionCount) {
@@ -3564,7 +3564,7 @@ export namespace taskpool {
                 globalHighTaskExecuteCount.store(0);
             }
         }
-        
+
         // MEDIUM priority tasks (with continuous execution limit)
         if (getGlobalTaskQueueSize(Priority.MEDIUM) > 0 && queuedExecution === undefined) {
             if (globalMediumTaskExecuteCount.load() < continuousExecutionCount) {
@@ -3574,17 +3574,17 @@ export namespace taskpool {
                 globalMediumTaskExecuteCount.store(0);
             }
         }
-        
+
         // LOW priority tasks
         if (getGlobalTaskQueueSize(Priority.LOW) > 0 && queuedExecution === undefined) {
             queuedExecution = getGlobalTaskImplNonBlocking(Priority.LOW);
         }
-        
+
         // IDLE priority tasks (non-blocking check)
         if (getGlobalTaskQueueSize(Priority.IDLE) > 0 && queuedExecution === undefined) {
             queuedExecution = getGlobalTaskImplNonBlocking(Priority.IDLE);
         }
-        
+
         return queuedExecution;
     }
 
@@ -3649,7 +3649,7 @@ export namespace taskpool {
         if (queue == undefined || queue.size == 0) {
             return undefined;
         }
-        
+
         let queuedExecution = queue.poll(); // Non-blocking poll instead of blocking pop
         if (queuedExecution == undefined) {
             return undefined;
@@ -3746,7 +3746,20 @@ export namespace taskpool {
     }
 
     function launchImpl(task: Task, priority?: Priority): Promise<Any> {
-        return launchTaskExecution(task).promise;
+        const internalTask = InternalTask.of(task);
+        const job: Job<Any> = launch(() => {
+            return internalTask.execute();
+        });
+        let promise = new Promise<Any>((resolve, reject) => {
+            try {
+                let res = job.Await();
+                resolve(res);
+            } catch(e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                reject(e as Error);
+            }
+        });
+        return promise;
     }
 
     native function isUsingLaunch(): boolean;
@@ -3826,4 +3839,3 @@ export namespace taskpool {
     const TRIGGER_EXPAND_RETRY_MS: int = 10; // Same order as native TRIGGER_EXPAND_INTERVAL.
     const WORKERS_MINIMUM: int = 1; // 1: minimum thread num when idle.
 }
-

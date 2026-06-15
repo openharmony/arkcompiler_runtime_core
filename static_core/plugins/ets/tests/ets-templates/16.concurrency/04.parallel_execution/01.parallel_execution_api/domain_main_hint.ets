@@ -23,6 +23,7 @@ tags: [no-warmup]
 
 import { CoroutineExtras } from "std/debug/concurrency"
 import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
+import { Job } from "std/core"
 
 const MAIN_WORKER_ID: int = 0;
 
@@ -30,9 +31,9 @@ function getWorkerId(): int {
     return CoroutineExtras.getWorkerId();
 }
 
-async function main(): Promise<void> {
+function main(): void {
     const mainWorkerId: int = getWorkerId();
-    arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+    arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
         "Test precondition: main() should run on main worker (ID=0)");
 
     // Create hint array
@@ -44,9 +45,10 @@ async function main(): Promise<void> {
     };
 
     // Launch coroutine and verify it runs on main worker
-    const launchedWorkerId: int = await (() => launch<int>(params, getWorkerId))();
+    let job: Job<int> = launch<int>(params, getWorkerId);
+    const launchedWorkerId: int = job.Await();
 
-    arktest.assertEQ(launchedWorkerId, mainWorkerId, 
+    arktest.assertEQ(launchedWorkerId, mainWorkerId,
         "MAIN domain with hint {{c.desc}} should still execute on main worker");
 }
 {% endfor %}

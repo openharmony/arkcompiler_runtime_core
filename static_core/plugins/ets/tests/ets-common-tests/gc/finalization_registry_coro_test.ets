@@ -52,9 +52,9 @@ function removeFromRegistry(finreg: FinalizationRegistry<String> | null, token: 
 
 // ==============================  GetSize tests ==================
 
-let promise_array: Array<Promise<void>> = new Array<Promise<void>>;
+let promise_array: Array<Job<void>> = new Array<Job<void>>;
 
-async function getSizeTests(finreg: FinalizationRegistry<String> | null) {
+function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 
 	for (let i = 0; i < promise_count; i++) {
 		promise_array.push(launch() {
@@ -63,7 +63,7 @@ async function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 	}
 
 	for (let i = 0; i < promise_array.length; i++) {
-		await promise_array[i];
+		promise_array[i]!.Await();
 	}
 
  arktest.assertEQ(3 * promise_count, finreg!.getSize(), 'Size of the finreg is invalid');
@@ -71,9 +71,9 @@ async function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 
 // ========================= Unregister tests ===========================================
 
-let unreg_array: Array<Promise<void>> = new Array<Promise<void>>;
+let unreg_array: Array<Job<void>> = new Array<Job<void>>;
 
-async function unregisterTests(finreg: FinalizationRegistry<String> | null) {
+function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 
 	finreg!.unregister(token);
  arktest.assertEQ(0, finreg!.getSize(), 'Start size of unregister is invalid');
@@ -94,18 +94,18 @@ async function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 		return finreg.unregister(s);
 	};
 
-	await launch() {
+	launch() {
 		unregister(finreg!, token1)
-	};
-	await launch() {
+	}.Await();
+	launch() {
 		unregister(finreg!, token2)
-	};
-	await launch() {
+	}.Await();
+	launch() {
 		unregister(finreg!, token3)
-	};
-	await launch() {
+	}.Await();
+	launch() {
 		unregister(finreg!, token4)
-	};
+	}.Await();
 
  arktest.assertEQ(0, finreg!.getSize(), 'Size of unregister is invalid');
 
@@ -122,7 +122,7 @@ async function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 	}
 
 	for (let i = 0; i < unreg_array.length; ++i) {
-		await unreg_array[i];
+		unreg_array[i].Await();
 	}
  arktest.assertEQ(0, finreg!.getSize(), 'unregister  test failed');
 }
@@ -187,15 +187,12 @@ async function ctorTests() {
 
 }
 
-async function runAllTests() {
+function main(): void {
     registry = new FinalizationRegistry<String>((string: String): void => { });
-	await getSizeTests(registry!);
-	await unregisterTests(registry!);
+	getSizeTests(registry!);
+	unregisterTests(registry!);
 
-	await ctorTests();
-	arktest.assertEQ(cntr, ctor_cleanup_count, "Counter of ctors is not valid");
-}
+	waitForCompletion(ctorTests);
+ arktest.assertEQ(cntr, ctor_cleanup_count, "Counter of ctors is not valid");
 
-async function main(): Promise<void> {
-	await runAllTests();
 }

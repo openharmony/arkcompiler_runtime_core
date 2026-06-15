@@ -103,9 +103,9 @@ function popperStr(): Array<String> {
     return arr;
 }
 
-async function concurrentPushPopTestInt(): Promise<void> {
+function concurrentPushPopTestInt() {
     let p1 = launch(pusherInt);
-    await p1;
+    p1.Await();
     let arrayToCheck = popperInt();
     for (let i = 0; i < elementsNum; i++) {
         arktest.assertEQ(testArrayInt[i], arrayToCheck[i]);
@@ -113,9 +113,9 @@ async function concurrentPushPopTestInt(): Promise<void> {
     arktest.assertEQ(queueInt.size, 0);
 }
 
-async function concurrentPushPopTestObj(): Promise<void> {
+function concurrentPushPopTestObj() {
     let p1 = launch(pusherObj);
-    await p1;
+    p1.Await();
     let arrayToCheck = popperObj();
     for (let i = 0; i < elementsNum; i++) {
         arktest.assertEQ(testArrayObj[i], arrayToCheck[i]);
@@ -123,9 +123,9 @@ async function concurrentPushPopTestObj(): Promise<void> {
     arktest.assertEQ(queueObj.size, 0);
 }
 
-async function concurrentPushPopTestStr(): Promise<void> {
+function concurrentPushPopTestStr() {
     let p1 = launch(pusherStr);
-    await p1;
+    p1.Await();
     let arrayToCheck = popperStr();
     for (let i = 0; i < elementsNum; i++) {
         arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);
@@ -151,11 +151,9 @@ function simpleQueuePushPopFrontBackSizeEmptyTest() {
     arktest.assertEQ(queueInt.size, 0);
 }
 
-function main(): int {
-    let suite = new arktest.ArkTestsuite("BlockingQueueTest");
-    suite.addTest("simpleQueuePushPopFrontBackSizeEmptyTest", simpleQueuePushPopFrontBackSizeEmptyTest);
-    suite.addAsyncTest("concurrentPushPopTestInt", async () => { await concurrentPushPopTestInt(); });
-    suite.addAsyncTest("concurrentPushPopTestObj", async () => { await concurrentPushPopTestObj(); });
-    suite.addAsyncTest("concurrentPushPopTestStr", async () => { await concurrentPushPopTestStr(); });
-    return suite.run();
+function main() {
+    simpleQueuePushPopFrontBackSizeEmptyTest();
+    concurrentPushPopTestInt(); // Concurrent test for Int type
+    concurrentPushPopTestObj(); // Concurrent test for Object type
+    concurrentPushPopTestStr(); // Concurrent test for String type
 }

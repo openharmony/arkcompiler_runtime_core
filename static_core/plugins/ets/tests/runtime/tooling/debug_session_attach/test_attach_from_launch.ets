@@ -52,8 +52,8 @@ async function main() {
     fns.sum(2, 1)
     readLock.unlock()
 
-    await jobAttach
-    await job
+    await jobAttach.Await()
+    await job.Await()
 
     if (!attach.isAotEnabled()) {
         arktest.assertLT(0, attach.countEventsForMethod('launchAttachImpl'))

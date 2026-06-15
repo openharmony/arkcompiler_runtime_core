@@ -53,7 +53,7 @@ function main(): int {
         concurrentHashMap.clear();
         arktest.assertTrue(concurrentHashMap.isEmpty());
     });
-    concurrentHashMapClearTestsuite.addAsyncTest("clearAndTest_001", async () =>
+    concurrentHashMapClearTestsuite.addTest("clearAndTest_001", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -61,8 +61,8 @@ function main(): int {
         setAll();
         let p1 = launch(removeAll);
         let p2 = launch(clearAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
 

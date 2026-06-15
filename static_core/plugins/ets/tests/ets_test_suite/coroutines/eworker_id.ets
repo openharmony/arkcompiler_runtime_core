@@ -15,7 +15,7 @@
 
 let mainId = CoroutineExtras.getWorkerId();
 
-async function testEworkerId(): Promise<void> {
+function testEworkerId() {
     let w = new EAWorker();
     w.start();
     let p1 = w.run<int>(():int => {
@@ -28,13 +28,13 @@ async function testEworkerId(): Promise<void> {
         arktest.assertNE(runId, mainId);
         return runId;
     });
-    let runId1 = await p1;
-    let runId2 = await p2;
-    w.quit();
+    w.join();
+    let runId1 = p1.Await();
+    let runId2 = p2.Await();
     arktest.assertEQ(runId1, runId2);
 }
 
-async function testGetEAWorkerId(): Promise<void> {
+function testGetEAWorkerId() {
     let ew1 = new EAWorker('testWorker');
     let ew2 = new EAWorker('testWorker');
     let ew3 = new EAWorker('testWorker');
@@ -45,22 +45,22 @@ async function testGetEAWorkerId(): Promise<void> {
     let worker1Id1 = ew1.getWorkerId();
     let worker2Id1 = ew2.getWorkerId();
     let worker3Id1 = ew3.getWorkerId();
-    let worker1Id2 = await ew1.run<int>(() => {
+    let worker1Id2 = ew1.run<int>(() => {
         return CoroutineExtras.getWorkerId();
-    });
+    }).Await();
     arktest.assertEQ(worker1Id1, worker1Id2);
     ew1.quit();
     arktest.assertEQ(worker1Id1, ew1.getWorkerId());
     ew2.quit();
     arktest.assertEQ(worker2Id1, ew2.getWorkerId());
-    ew3.quit();
+    ew3.join();
     arktest.assertEQ(worker3Id1, ew3.getWorkerId());
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_id');
-    testSuite.addAsyncTest('testEworkerId', testEworkerId);
-    testSuite.addAsyncTest('testGetEAWorkerId', testGetEAWorkerId);
-    let res = testSuite.run();
+    testSuite.addTest('testEworkerId', testEworkerId);
+    testSuite.addTest('testGetEAWorkerId', testGetEAWorkerId);
+    let res = await testSuite.runAsync();
     return res;
 }

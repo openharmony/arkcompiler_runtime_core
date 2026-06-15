@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push((await arr[i]) as T);
+		res.push(arr[i].Await());
 	return res;
 }
 
@@ -38,7 +38,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-async function testConcurrentSizeAndSR1(): Promise<void> {
+function testConcurrentSizeAndSR1() {
 	let map = new CHMap();
 
 	const JOB_COUNT = 10;
@@ -58,15 +58,15 @@ async function testConcurrentSizeAndSR1(): Promise<void> {
 		}
 	}
 	let sizeJob = launch(sizeF);
-	let srJobs: Promise<void>[] = [];
+	let srJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);
-	await awaitAll(srJobs);
+	awaitAll(srJobs);
 	running = false;
-	await sizeJob;
+	sizeJob.Await();
 }
 
-async function testConcurrentSizeAndSRI(): Promise<void> {
+function testConcurrentSizeAndSRI() {
 	let map = new CHMap();
 
 	const JOB_COUNT = 10;
@@ -86,19 +86,19 @@ async function testConcurrentSizeAndSRI(): Promise<void> {
 		}
 	}
 	let sizeJob = launch(sizeF);
-	let srJobs: Promise<void>[] = [];
+	let srJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);
-	await awaitAll(srJobs);
+	awaitAll(srJobs);
 	running = false;
-	await sizeJob;
+	sizeJob.Await();
 }
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	
-	CHMTestSuitecase.addAsyncTest("testConcurrentSizeAndSR1", async () => { await testConcurrentSizeAndSR1(); });
-	CHMTestSuitecase.addAsyncTest("testConcurrentSizeAndSRI", async () => { await testConcurrentSizeAndSRI(); });
+
+	CHMTestSuitecase.addTest("testConcurrentSizeAndSR1", testConcurrentSizeAndSR1);
+	CHMTestSuitecase.addTest("testConcurrentSizeAndSRI", testConcurrentSizeAndSRI);
 
     return CHMTestSuitecase.run();
 }

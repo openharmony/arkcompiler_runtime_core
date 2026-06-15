@@ -23,13 +23,13 @@ async function main(): Promise<int> {
 
     const waitForStart = (): void => {
         while (!startFlag.load()) {
-            Coroutine.Schedule();
+            continue;
         }
     };
 
     const waitForStage = (expected: int): void => {
         while (stage.load() != expected) {
-            Coroutine.Schedule();
+            continue;
         }
     };
 
@@ -79,7 +79,7 @@ async function main(): Promise<int> {
     second.start();
     startFlag.store(true);
 
-    await first.join();
-    await second.join();
+    first.join().Await();
+    second.join().Await();
     return 0;
 }

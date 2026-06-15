@@ -57,7 +57,7 @@ function testMain() {
         cur_64 = Atomics.load(bytearr_i64, 0).getLong()
     }
     L.log('all tasks have finished')
-    w.quit();
+    w.join();
 }
 
 function task1(): Int {

@@ -43,14 +43,65 @@ function testUnhandledRejectionObserverRegistration(): void {
     p2.catch(error => {
 
     });
-    Coroutine.Schedule();
-    StdProcess.off('unhandledPromiseRejection');
+}
+
+function Failing(): string {
+    throw Error('get unhandled job rejection');
+}
+
+function catchFailing(): string {
+    throw Error('catch launch rejection');
+}
+
+function testAllUnhandledJobRejection(): void {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        arktest.assertEQ(reason.message, 'get unhandled job rejection');
+    });
+
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        arktest.assertEQ(reason.message, 'get unhandled job rejection');
+    });
+
+    let observer1 = (reason: Error, obj: Object): void => {
+        arktest.assertTrue(false, 'Job handler that have been removed using off will no longer be triggered');
+    };
+
+    let observer2 = (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        arktest.assertEQ(reason.message, 'get unhandled job rejection');
+    };
+
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer2);
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
+
+    let g = launch(Failing);
+
+    try {
+        launch(catchFailing).Await();
+    } catch(e) {
+
+    }
+
+    let job1 = new CompletableJob<int>();
+    job1.fail(new Error('get unhandled job rejection'));
+
+    let job2 = new CompletableJob<int>();
+    job2.fail(new Error('catch job rejection'));
+    try {
+        job2.Await();
+    } catch (e) {
+
+    }
 }
 
 async function main(): Promise<int> {
-    StdProcess.off('unhandledPromiseRejection');
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_event');
     testSuite.addTest('testUnhandledRejectionObserverRegistration', testUnhandledRejectionObserverRegistration);
+    testSuite.addTest('testAllUnhandledJobRejection', testAllUnhandledJobRejection);
     let res = await testSuite.runAsync();
     return res;
 }

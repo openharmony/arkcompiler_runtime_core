@@ -22,14 +22,14 @@ async function resolved(): Promise<int> {
   return 0
 }
 
-async function startTest(): Promise<void> {
+function startTest(): void {
   let order: int[] = []
 
   const ea = new EAWorker()
   ea.start()
 
-  await ea.run<undefined>(async () => {
-    let low: Promise<undefined> = launch<undefined>() {
+  ea.run<undefined>(() => {
+    let low = launch<undefined>() {
       order.push(2)
     }
 
@@ -38,9 +38,9 @@ async function startTest(): Promise<void> {
       return v
     })
 
-    await high
-    await low
-  })
+    high.awaitSync()
+    low.Await()
+  }).Await()
 
   arktest.assertEQ(order[0], 1)
   arktest.assertEQ(order[1], 2)
@@ -48,7 +48,6 @@ async function startTest(): Promise<void> {
   ea.quit()
 }
 
-async function main(): Promise<void> {
-  await startTest()
+function main(): void {
+  startTest()
 }
-

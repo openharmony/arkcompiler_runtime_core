@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cases:  
+cases:
   - desc: >-
       Verify that a coroutine can be launched from Main domain into General domain
       and it executes on a general worker (not on main).
@@ -20,7 +20,7 @@ cases:
     logic: |-
       // Verify we are starting from Main domain (main worker)
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0) - Main domain");
 
       // Cross-domain launch: Main -> General
@@ -30,20 +30,21 @@ cases:
 
       // Launch multiple coroutines from Main domain to General domain
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          const generalWorkerId: int = waitForCompletion<int>(() => launch<int>(generalParams, getWorkerId));
+          let job: Job<int> = launch<int>(generalParams, getWorkerId);
+          const generalWorkerId: int = job.Await();
 
           // Verify: coroutine in General domain should NOT run on main worker
-          arktest.assertNE(generalWorkerId, mainWorkerId, 
+          arktest.assertNE(generalWorkerId, mainWorkerId,
               `Iteration ${i}: Cross-domain (Main->General): coroutine should NOT execute on main worker`);
       }
 
   - desc: >-
-      Verify that a coroutine can be launched from Main domain 
+      Verify that a coroutine can be launched from Main domain
       into EA domain and it executes on the specified EA worker.
     logic: |-
       // Verify we are starting from Main domain (main worker)
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0) - Main domain");
 
       // Create and start an EA worker
@@ -51,7 +52,7 @@ cases:
       ea.start();
 
       // Get the EA worker's ID
-      const eaWorkerId: int = waitForCompletion<int>(() => ea.run<int>(getWorkerId));
+      const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
 
       // Verify EA worker has different ID than main
       arktest.assertNE(eaWorkerId, mainWorkerId,
@@ -62,19 +63,20 @@ cases:
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
 
-      const launchedWorkerId: int = waitForCompletion<int>(() => launch<int>(eaParams, getWorkerId));
+      let job: Job<int> = launch<int>(eaParams, getWorkerId);
+      const launchedWorkerId: int = job.Await();
 
       // Verify: coroutine launched from Main to EA domain should run on the EA worker
-      arktest.assertEQ(launchedWorkerId, eaWorkerId, 
+      arktest.assertEQ(launchedWorkerId, eaWorkerId,
           "Cross-domain (Main->EA): coroutine should execute on specified EA worker");
-      arktest.assertNE(launchedWorkerId, mainWorkerId, 
+      arktest.assertNE(launchedWorkerId, mainWorkerId,
           "Cross-domain (Main->EA): coroutine should NOT execute on main worker");
 
       // Cleanup
       ea.quit();
 
   - desc: >-
-      Verify that a coroutine can be launched from General domain 
+      Verify that a coroutine can be launched from General domain
       into Main domain and it executes on the main worker.
     decl: |-
       function launchToMainFromGeneral(): int {
@@ -83,11 +85,12 @@ cases:
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          return waitForCompletion<int>(() => launch<int>(mainParams, getWorkerId));
+          let job: Job<int> = launch<int>(mainParams, getWorkerId);
+          return job.Await();
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0)");
 
       // First, launch to General domain
@@ -96,14 +99,15 @@ cases:
       };
 
       // From General domain, launch to Main domain and get the worker ID
-      const resultWorkerId: int = waitForCompletion<int>(() => launch<int>(generalParams, launchToMainFromGeneral));
+      let job: Job<int> = launch<int>(generalParams, launchToMainFromGeneral);
+      const resultWorkerId: int = job.Await();
 
       // Verify: coroutine launched from General to Main should run on main worker
-      arktest.assertEQ(resultWorkerId, mainWorkerId, 
+      arktest.assertEQ(resultWorkerId, mainWorkerId,
           "Cross-domain (General->Main): coroutine should execute on main worker")
 
   - desc: >-
-      Verify that a coroutine can be launched from General domain 
+      Verify that a coroutine can be launched from General domain
       into EA domain and it executes on the specified EA worker.
     decl: |-
       let targetEaWorkerId: int = -1;
@@ -114,7 +118,8 @@ cases:
           const eaParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [targetEaWorkerId])
           };
-          return waitForCompletion<int>(() => launch<int>(eaParams, getWorkerId));
+          let job: Job<int> = launch<int>(eaParams, getWorkerId);
+          return job.Await();
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
@@ -124,10 +129,10 @@ cases:
       ea.start();
 
       // Get the EA worker's ID and store it for use in launchToEaFromGeneral
-      targetEaWorkerId = waitForCompletion<int>(() => ea.run<int>(getWorkerId));
+      targetEaWorkerId = ea.run<int>(getWorkerId).Await();
 
       // Verify EA worker has different ID than main
-      arktest.assertNE(targetEaWorkerId, mainWorkerId, 
+      arktest.assertNE(targetEaWorkerId, mainWorkerId,
           "Test precondition: EA worker should have different ID than main worker");
 
       // First, launch to General domain
@@ -136,19 +141,20 @@ cases:
       };
 
       // From General domain, launch to EA domain and get the worker ID
-      const resultWorkerId: int = waitForCompletion<int>(() => launch<int>(generalParams, launchToEaFromGeneral));
+      let job: Job<int> = launch<int>(generalParams, launchToEaFromGeneral);
+      const resultWorkerId: int = job.Await();
 
       // Verify: coroutine launched from General to EA should run on EA worker
-      arktest.assertEQ(resultWorkerId, targetEaWorkerId, 
+      arktest.assertEQ(resultWorkerId, targetEaWorkerId,
           "Cross-domain (General->EA): coroutine should execute on specified EA worker");
-      arktest.assertNE(resultWorkerId, mainWorkerId, 
+      arktest.assertNE(resultWorkerId, mainWorkerId,
           "Cross-domain (General->EA): coroutine should NOT execute on main worker");
 
       // Cleanup
       ea.quit();
 
   - desc: >-
-      Verify that a coroutine can be launched from EA domain 
+      Verify that a coroutine can be launched from EA domain
       into Main domain and it executes on the main worker.
     decl: |-
       function launchToMainFromEa(): int {
@@ -157,11 +163,12 @@ cases:
           const mainParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
           };
-          return waitForCompletion<int>(() => launch<int>(mainParams, getWorkerId));
+          let job: Job<int> = launch<int>(mainParams, getWorkerId);
+          return job.Await();
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0)");
 
       // Create and start an EA worker
@@ -169,22 +176,22 @@ cases:
       ea.start();
 
       // Verify EA worker has different ID than main
-      const eaWorkerId: int = waitForCompletion<int>(() => ea.run<int>(getWorkerId));
+      const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
       arktest.assertNE(eaWorkerId, mainWorkerId,
           "Test precondition: EA worker should have different ID than main worker");
 
       // From EA domain, launch to Main domain and get the worker ID
-      const resultWorkerId: int = waitForCompletion<int>(() => ea.run<int>(launchToMainFromEa));
+      const resultWorkerId: int = ea.run<int>(launchToMainFromEa).Await();
 
       // Verify: coroutine launched from EA to Main should run on main worker
-      arktest.assertEQ(resultWorkerId, mainWorkerId, 
+      arktest.assertEQ(resultWorkerId, mainWorkerId,
           "Cross-domain (EA->Main): coroutine should execute on main worker");
 
       // Cleanup
       ea.quit();
 
   - desc: >-
-      Verify that a coroutine can be launched from EA domain 
+      Verify that a coroutine can be launched from EA domain
       into General domain and it executes on a general worker.
     decl: |-
       const TEST_ITERATIONS: int = 10;
@@ -196,11 +203,12 @@ cases:
           const generalParams: LaunchParams = {
               workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
           };
-          return waitForCompletion<int>(() => launch<int>(generalParams, getWorkerId));
+          let job: Job<int> = launch<int>(generalParams, getWorkerId);
+          return job.Await();
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0)");
 
       // Create and start an EA worker
@@ -208,19 +216,19 @@ cases:
       ea.start();
 
       // Get EA worker ID and store globally
-      eaWorkerIdGlobal = waitForCompletion<int>(() => ea.run<int>(getWorkerId));
-      arktest.assertNE(eaWorkerIdGlobal, mainWorkerId, 
+      eaWorkerIdGlobal = ea.run<int>(getWorkerId).Await();
+      arktest.assertNE(eaWorkerIdGlobal, mainWorkerId,
           "Test precondition: EA worker should have different ID than main worker");
 
       // From EA domain, launch multiple coroutines to General domain
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          const resultWorkerId: int = waitForCompletion<int>(() => ea.run<int>(launchToGeneralFromEa));
+          const resultWorkerId: int = ea.run<int>(launchToGeneralFromEa).Await();
 
           // Verify: coroutine launched from EA to General should NOT run on main worker
-          arktest.assertNE(resultWorkerId, mainWorkerId, 
+          arktest.assertNE(resultWorkerId, mainWorkerId,
               `Iteration ${i}: Cross-domain (EA->General): coroutine should NOT execute on main worker`);
           // Verify: coroutine launched from EA to General should NOT run on EA worker
-          arktest.assertNE(resultWorkerId, eaWorkerIdGlobal, 
+          arktest.assertNE(resultWorkerId, eaWorkerIdGlobal,
               `Iteration ${i}: Cross-domain (EA->General): coroutine should NOT execute on EA worker`);
       }
 

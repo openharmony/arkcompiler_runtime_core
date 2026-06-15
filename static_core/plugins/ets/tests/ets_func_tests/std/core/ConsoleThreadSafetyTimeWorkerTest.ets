@@ -64,7 +64,7 @@ async function main(): Promise<int> {
     waitForStage(2);
     stage.store(3);
 
-    await owner.join();
-    await observer.join();
+    owner.join().Await();
+    observer.join().Await();
     return 0;
 }

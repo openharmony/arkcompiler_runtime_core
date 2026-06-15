@@ -15,50 +15,58 @@
 
 type callbackT = (id: int) => void;
 
-let event = new PromiseWithResolvers<void>();
+class Event {
+    public Wait() {
+        while (this.flag.get() != true) {
+            Coroutine.Schedule();
+        }
+    }
+
+    public Fire() {
+        this.flag.set(true);
+    }
+
+    private flag = new AtomicFlag(false);
+};
+
+let event = new Event();
 
 class SharedJob<T> {
     constructor(jobs: Array<T>) {
-        this.sharedJob = new PromiseWithResolvers<void>();
+        this.sharedJob = new CompletableJob<void>();
         SharedJob.completeJob(jobs, this.sharedJob);
     }
 
-    public Await(): void {
-        this.sharedJob.promise.awaitSync();
+    public Await() {
+        this.sharedJob.Await();
     }
 
-    private static async completeJob<T>(jobs: Array<T>, sharedJob: PromiseWithResolvers<void>) {
+    private static async completeJob<T>(jobs: Array<T>, sharedJob: CompletableJob<void>) {
         Coroutine.Schedule();
         for (let job of jobs) {
-            if (job instanceof Promise) {
-                await job;
-            } else if (job instanceof PromiseWithResolvers) {
-                await job.promise;
-            } else {
-                throw new Error('invalid type')
-            }
+            (job as Job<void>).Await();
         }
-        sharedJob.resolve(undefined);
+        sharedJob.finish();
     }
 
-    private sharedJob: PromiseWithResolvers<void>;
+    private sharedJob: CompletableJob<void>;
 }
 
-function runConcurrently(callback: callbackT, coroutines: number) {
-    let jobs = new Array<Promise<void>>();
+function runConcurrently(callback: callbackT, coroutines: int) {
+    let jobs = new Array<Job<void>>();
     for (let i = 0; i < coroutines; ++i) {
-        const id = i.toInt();
+        const id = i;
         jobs.push(launch() {
             return callback(id)
         });
     }
-    return new SharedJob<Promise<void>>(jobs);
+    return new SharedJob<Job<void>>(jobs);
 }
 
 // The test checks exclusive access to the critical section
 function exclusiveLockTest(locker: Lock) {
-    const coroutines = 10;
-    const workload = 1000;
+    const coroutines: int = 10;
+    const workload: int = 1000;
 
     let count = 0;
     runConcurrently((id: int) => {
@@ -73,14 +81,17 @@ function exclusiveLockTest(locker: Lock) {
 
 // The test checks that there is no deadlock with the ReadLock
 function sharedLockTest() {
-    const coroutines = 10;
+    const coroutines: int = 10;
 
     let rLock = new RWLock().readLock();
-    let jobs = new Array<PromiseWithResolvers<void>>(coroutines, (index: int) => new PromiseWithResolvers<void>());
-    let sharedJob = new SharedJob<PromiseWithResolvers<void>>(jobs);
+    let jobs = new Array<CompletableJob<void>>();
+    for (let i = 0; i < coroutines; ++i) {
+        jobs.push(new CompletableJob<void>());
+    }
+    let sharedJob = new SharedJob<CompletableJob<void>>(jobs);
     runConcurrently((id: int) => {
         rLock.lock();
-        jobs[id].resolve(undefined);
+        jobs[id].finish();
         sharedJob.Await();
         rLock.unlock();
     }, coroutines).Await();
@@ -131,7 +142,7 @@ function illegalLockStateTest() {
 }
 
 // The test checks whether read-write locks are mutually exclusive
-async function readWriteMutualExclusionTest(): Promise<void> {
+function readWriteMutualExclusionTest() {
     let rwLock = new RWLock();
     let readLock = rwLock.readLock();
     let writeLock = rwLock.writeLock();
@@ -143,18 +154,18 @@ async function readWriteMutualExclusionTest(): Promise<void> {
 
     let job = launch() {
         writeLockAttempted = true;
-        event.resolve(undefined);
+        event.Fire();
         writeLock.lock();
         writeAcquired = true;
         writeLock.unlock();
     };
-    await event.promise;
+    event.Wait();
 
     arktest.assertTrue(writeLockAttempted);
     arktest.assertFalse(writeAcquired);
 
     readLock.unlock();
-    await job;
+    job.Await();
     arktest.assertTrue(writeAcquired);
 }
 
@@ -172,7 +183,7 @@ async function main(): Promise<int> {
     testSuite.addTest('exclusiveRWLockTest', exclusiveRWLockTest);
     testSuite.addTest('sharedLockTest', sharedLockTest);
     testSuite.addTest('illegalLockStateTest', illegalLockStateTest);
-    testSuite.addAsyncTest('readWriteMutualExclusionTest', async () => { await readWriteMutualExclusionTest(); });
+    testSuite.addTest('readWriteMutualExclusionTest', readWriteMutualExclusionTest);
 
     let res = await testSuite.runAsync();
     return res;

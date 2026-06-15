@@ -32,7 +32,7 @@ async function main() {
     const attachLock = new RWLock()
     const startEvent = new Event()
 
-    const jobAttach = workerAttach.run<undefined>(async () => {
+    const jobAttach = workerAttach.run<Promise<undefined>>(async () => {
         const writeLock = attachLock.writeLock()
         writeLock.lock()
         await startEvent.setAll()
@@ -41,7 +41,7 @@ async function main() {
 
         writeLock.unlock()
     })
-    const job = worker.run<undefined>(async () => {
+    const job = worker.run<Promise<undefined>>(async () => {
         await startEvent.wait()
 
         const readLock = attachLock.readLock()
@@ -56,10 +56,10 @@ async function main() {
     fns.sum(2, 1)
     readLock.unlock()
 
-    await jobAttach
-    await job
-    await workerAttach.join()
-    await worker.join()
+    await jobAttach.Await()
+    await job.Await()
+    workerAttach.join().Await()
+    worker.join().Await()
 
     if (!attach.isAotEnabled()) {
         arktest.assertLT(0, attach.countEventsForMethod('workerAttachImpl'))

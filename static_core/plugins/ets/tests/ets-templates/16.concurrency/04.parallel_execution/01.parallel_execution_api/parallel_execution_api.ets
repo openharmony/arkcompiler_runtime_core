@@ -22,7 +22,7 @@ tags: [no-warmup]
 
 {{c.decl}}
 
-async function main() {
+function main(): void {
   {{c.logic}}
 }
 

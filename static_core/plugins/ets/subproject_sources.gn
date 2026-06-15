@@ -216,6 +216,7 @@ srcs_runtime = [
   "runtime/types/ets_field.cpp",
   "runtime/types/ets_method.cpp",
   "runtime/types/ets_async_context.cpp",
+  "runtime/types/ets_job.cpp",
   "runtime/types/ets_promise.cpp",
   "runtime/types/ets_promise_ref.cpp",
   "runtime/types/ets_object.cpp",

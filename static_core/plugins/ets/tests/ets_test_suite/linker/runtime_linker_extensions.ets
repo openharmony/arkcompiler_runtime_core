@@ -328,13 +328,13 @@ class Test {
         linker.addAbcFiles([path]);
     }
 
-    static async testConcurrentAddAbcFiles() {
+    static testConcurrentAddAbcFiles() {
         const linker = new AbcRuntimeLinker(undefined, []);
         const allAbcFiles = Test.getAdditionalFilesList();
-        const promises = new Array<Promise<void>>();
+        const jobs = new Array<Job<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
-            promises.push(launch() {
+            jobs.push(launch() {
                 Test.addSingleAbcFile(linker, allAbcFiles[i])
             });
         }
@@ -342,9 +342,7 @@ class Test {
         arktest.expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },
             (e) => e instanceof LinkerClassNotFoundError
         );
-        for (const p of promises) {
-            await p;
-        }
+        jobs.forEach((p: Job<void>): void => { p.Await(); });
         Test.addSingleAbcFile(linker, allAbcFiles[0]);
         // Now class must be found
         arktest.expectNoThrow(() => { linker.loadClass(Test.additionalClass1Name, true); });
@@ -381,10 +379,6 @@ class Test {
         );
     }
 
-    static async testConcurrent() {
-        await Test.testConcurrentAddAbcFiles();
-    }
-
     static test() {
         Test.testDummyLinker();
         Test.testEmptyAbcRuntimeLinker();
@@ -401,31 +395,13 @@ class Test {
         Test.testRuntimeLinkerAddHspFile();
         Test.testAbcRuntimeLinkerWithHspFile();
         Test.testMemoryRuntimeLinkerAddAbcFiles();
+        Test.testConcurrentAddAbcFiles();
         Test.testWrongClassName();
         Test.testLinkerUnresolvedClassError();
     }
 }
 
-function main(): int {
+function main() {
     loadLibrary("runtime_linker_extensions-shared-lib");
-    let testsuite = new arktest.ArkTestsuite("RuntimeLinkerExtensions");
-    testsuite.addTest('testDummyLinker', Test.testDummyLinker);
-    testsuite.addTest('testEmptyAbcRuntimeLinker', Test.testEmptyAbcRuntimeLinker);
-    testsuite.addTest('testEmptyMemoryRuntimeLinker', Test.testEmptyMemoryRuntimeLinker);
-    testsuite.addTest('testAbcRuntimeLinker', Test.testAbcRuntimeLinker);
-    testsuite.addTest('testMemoryRuntimeLinker', Test.testMemoryRuntimeLinker);
-    testsuite.addTest('testClassInitializationFail', Test.testClassInitializationFail);
-    testsuite.addTest('testAbcRuntimeLinkerUnload', Test.testAbcRuntimeLinkerUnload);
-    testsuite.addTest('testAbcRuntimeLinkerLoadErrorPath', Test.testAbcRuntimeLinkerLoadErrorPath);
-    testsuite.addTest('testRuntimeLinkerAddAbcFiles', Test.testRuntimeLinkerAddAbcFiles);
-    testsuite.addTest('testRuntimeLinkerAddHapFile', Test.testRuntimeLinkerAddHapFile);
-    testsuite.addTest('testAbcRuntimeLinkerWithHapFile', Test.testAbcRuntimeLinkerWithHapFile);
-    testsuite.addTest('testAbcRuntimeLinkerWithInvalidHapFileEntry', Test.testAbcRuntimeLinkerWithInvalidHapFileEntry);
-    testsuite.addTest('testRuntimeLinkerAddHspFile', Test.testRuntimeLinkerAddHspFile);
-    testsuite.addTest('testAbcRuntimeLinkerWithHspFile', Test.testAbcRuntimeLinkerWithHspFile);
-    testsuite.addTest('testMemoryRuntimeLinkerAddAbcFiles', Test.testMemoryRuntimeLinkerAddAbcFiles);
-    testsuite.addAsyncTest('testConcurrentAddAbcFiles', Test.testConcurrent);
-    testsuite.addTest('testWrongClassName', Test.testWrongClassName);
-    testsuite.addTest('testLinkerUnresolvedClassError', Test.testLinkerUnresolvedClassError);
-    return testsuite.run();
+    Test.test();
 }

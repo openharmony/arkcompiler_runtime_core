@@ -23,7 +23,7 @@ tags: [no-warmup]
 
 import { CoroutineExtras } from "std/debug/concurrency"
 import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
-import { EAWorker } from "std/core"
+import { Job, EAWorker } from "std/core"
 
 const MAIN_WORKER_ID: int = 0;
 
@@ -31,16 +31,16 @@ function getWorkerId(): int {
     return CoroutineExtras.getWorkerId();
 }
 
-async function main() {
+function main(): void {
     const mainWorkerId: int = getWorkerId();
 
     // Create and start an EA worker
     const ea = new EAWorker();
     ea.start();
-    const eaWorkerId: int = await (() => ea.run<int>(getWorkerId))();
+    const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
 
     // Verify EA worker ID is different from main
-    arktest.assertNE(eaWorkerId, mainWorkerId, 
+    arktest.assertNE(eaWorkerId, mainWorkerId,
         "EA worker should have different ID than main worker");
 
     // Build hint array with non-EA IDs that should be ignored
@@ -53,10 +53,11 @@ async function main() {
         workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, hint)
     };
 
-    const launchedWorkerId: int = await (() => launch<int>(params, getWorkerId))();
+    let job: Job<int> = launch<int>(params, getWorkerId);
+    const launchedWorkerId: int = job.Await();
 
     // Verify coroutine executed on EA worker
-    arktest.assertEQ(launchedWorkerId, eaWorkerId, 
+    arktest.assertEQ(launchedWorkerId, eaWorkerId,
         "Hint {{c.desc}}: non-EA IDs should be ignored, should execute on EA worker");
 
     // Cleanup

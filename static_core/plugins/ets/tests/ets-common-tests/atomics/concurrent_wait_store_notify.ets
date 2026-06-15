@@ -34,7 +34,7 @@ function testMain() {
 
     let res = Atomics.wait(arr, 0, 0) as string
     arktest.assertTrue(res == 'ok' || res == 'not-equal')
-    w.quit();
+    w.join();
 }
 
 function writer(): Int {

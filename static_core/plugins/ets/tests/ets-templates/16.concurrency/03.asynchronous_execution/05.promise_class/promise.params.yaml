@@ -30,7 +30,7 @@ cases:
                     return undefined
                 }
           ).finally(
-            //check finally execution  
+            //check finally execution
             () => arktest.assertTrue(true)
           );
 
@@ -52,15 +52,15 @@ cases:
           ).finally(
                 () => arktest.assertTrue(true)
           );
-        
+
           try {
                 await checkPromise
           } catch (e) {
-              if (e instanceof Error) 
+              if (e instanceof Error)
                   arktest.assertEQ((e as Error).message,'testfinally')
-              else 
+              else
                   arktest.assertTrue(false)
-          }	      
+          }
 
     - decl: |-
           //classic external resolve-reject function declarations
@@ -77,7 +77,7 @@ cases:
            ).then(
                 resolveFunc
            );
-        
+
            arktest.assertEQ((await checkPromise), 'test')
 
     - decl: |-
@@ -94,13 +94,14 @@ cases:
               }
           )
 
-          const resultFromOtherCoroutine: string = await launch<Promise<string>>() {
+          const resultPromiseFromOtherCoroutine: Promise<string> = launch<Promise<string>>() {
               return sharedPromise.then<string>((value: string): string => {
                   return value + '_PROCESSED'
               })
-          }
+          }.Await()
+          const resultFromOtherCoroutine: string = await resultPromiseFromOtherCoroutine
 
-          arktest.assertTrue(resultFromOtherCoroutine == 'COROUTINE_SAFE_PROCESSED')          
+          arktest.assertTrue(resultFromOtherCoroutine == 'COROUTINE_SAFE_PROCESSED')
 
     - decl: |-
           const testValue: string = 'BOTH_COROUTINES_SAFE'
@@ -119,13 +120,14 @@ cases:
           const originalResult: string = await sharedPromise
           arktest.assertTrue(originalResult == 'BOTH_COROUTINES_SAFE')
 
-          const resultFromOtherCoroutine: string = await launch<Promise<string>>() {
-              return sharedPromise.then<string>((value: string): string => {
-                  return value + '_WITH_THEN'
-              })
-          }
+          const resultPromiseFromOtherCoroutine: Promise<string> = launch<Promise<string>>() {
+            return sharedPromise.then<string>((value: string): string => {
+                return value + '_WITH_THEN'
+            })
+          }.Await()
+          const resultFromOtherCoroutine: string = await resultPromiseFromOtherCoroutine
 
-          arktest.assertTrue(resultFromOtherCoroutine == 'BOTH_COROUTINES_SAFE_WITH_THEN')          
+          arktest.assertTrue(resultFromOtherCoroutine == 'BOTH_COROUTINES_SAFE_WITH_THEN')
 
     - decl: |-
           const testValue: string = 'SYNC_COROUTINES_SAFE'
@@ -147,16 +149,17 @@ cases:
 
           const waitForOriginal: Promise<void> = originalPromise.then(() => {})
 
-          const resultFromOtherCoroutine: string = await launch<Promise<string>>() {
-              return waitForOriginal.then<Promise<string>>((): Promise<string> => {
-                  return sharedPromise.then<string>((value: string): string => {
-                      return value + '_OTHER_THEN'
-                  })
-              })
-          }
+          const resultPromiseFromOtherCoroutine: Promise<string> = launch<Promise<string>>() {
+            return waitForOriginal.then<Promise<string>>((): Promise<string> => {
+                return sharedPromise.then<string>((value: string): string => {
+                    return value + '_OTHER_THEN'
+                })
+            })
+          }.Await()
+          const resultFromOtherCoroutine: string = await resultPromiseFromOtherCoroutine
 
           const originalResult: string = await originalPromise
-          
+
           arktest.assertTrue(originalResult == 'SYNC_COROUTINES_SAFE_ORIGINAL_THEN')
           arktest.assertTrue(resultFromOtherCoroutine == 'SYNC_COROUTINES_SAFE_OTHER_THEN')
 

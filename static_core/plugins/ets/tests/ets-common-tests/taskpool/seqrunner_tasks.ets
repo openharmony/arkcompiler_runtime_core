@@ -26,7 +26,15 @@ function max(a: int, b: int): int {
 }
 
 function launchImpl(func: () => Any): Promise<Any> {
-    return launch(func);
+    const job: Job<Any> = launch(func);
+    return new Promise<Any>((resolve, reject) => {
+        try {
+            let res = job.Await();
+            resolve(res);
+        } catch (e) {
+            reject(e as Error);
+        }
+    });
 }
 
 async function delay(ms: int) {

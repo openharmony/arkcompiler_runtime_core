@@ -14,6 +14,7 @@
  */
 
 import { launch } from "std/concurrency"
+import { Job } from "std/core"
 
 let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
@@ -21,15 +22,16 @@ let arr = new Int32Array(s, 0, 1);
 let N = 5
 
 async function testMain(): Promise<void> {
-    let corArrayTmp = new Array<Promise<Promise<Int>>>();
+    let corArrayTmp = new Array<Job<Promise<int>>>();
     setUpBarrier(N)
     for (let i = 0; i < N; i++) {
         let job = launch(task)
         corArrayTmp.push(job);
     }
     for (let i = 0; i < N; i++) {
-        await corArrayTmp[i];
+        await corArrayTmp[i].Await();
     }
+    console.log('asdasdasd')
 }
 
 async function task(): Promise<Int> {

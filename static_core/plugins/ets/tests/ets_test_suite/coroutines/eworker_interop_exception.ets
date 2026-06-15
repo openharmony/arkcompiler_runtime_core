@@ -18,7 +18,7 @@ function testEworkerInteropError() {
     try {
         let eaw : EAWorker = new EAWorker(true);
         eaw.start();
-        eaw.quit();
+        eaw.join();
     } catch (e) {
         if (e instanceof RuntimeError) {
             errorWasCaught = true;

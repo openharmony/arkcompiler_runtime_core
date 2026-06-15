@@ -40,7 +40,8 @@ async function startTest() {
   const ea2 = new EAWorker()
   ea2.start()
 
-  let job1 = ea1.run<undefined>( async () => {
+  let job1 = ea1.run<undefined>(() => {
+    (async () => {
       console.log("S1=" + readRun) // To ensure the async function has started.
       readLock.lock()
       readRun = true
@@ -49,9 +50,11 @@ async function startTest() {
       i--
       readLock.unlock()
       console.log("F1=" + readRun) // To ensure the async function has completed.
-    })
+    })().awaitSync()
+  })
 
-  let job2 = ea2.run<undefined>(async () => {
+  let job2 = ea2.run<undefined>(() => {
+    (async () => {
       console.log("S2=" + writeRun) // To ensure the async function has started.
       writeLock.lock()
       writeRun = true
@@ -61,10 +64,11 @@ async function startTest() {
       Coroutine.Schedule()
       writeLock.unlock()
       console.log("F2=" + writeRun) // To ensure the async function has completed.
-    })
+    })().awaitSync()
+  })
 
-  await job1
-  await job2
+  job1.Await()
+  job2.Await()
 
   console.log("M=" + readRun + "-" + writeRun)
 
@@ -75,6 +79,6 @@ async function startTest() {
   ea2.quit()
 }
 
-async function main(): Promise<void> {
-  await startTest()
+function main(): void {
+  startTest()
 }

@@ -19,7 +19,7 @@ expected_out:
     runtime:
         - Test for asynchronous function-1 is passed.
         - Test for asynchronous lambda is passed.
-        - Test for asynchronous function-2 is passed.    
+        - Test for asynchronous function-2 is passed.
 ---*/
 
 async function g(): Promise<int> {

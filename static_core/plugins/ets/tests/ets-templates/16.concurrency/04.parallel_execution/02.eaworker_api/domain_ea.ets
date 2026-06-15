@@ -21,11 +21,11 @@ tags: [no-warmup]
 
 import { CoroutineExtras } from "std/debug/concurrency"
 import { launch, WorkerDomain, WorkerGroup, WorkerGroupId, LaunchParams } from "std/concurrency"
-import { EAWorker } from "std/core"
+import { Job, EAWorker } from "std/core"
 
 {{c.decl}}
 
-async function main() {
+function main(): void {
     {{c.logic|indent}}
 }
 {% endfor %}

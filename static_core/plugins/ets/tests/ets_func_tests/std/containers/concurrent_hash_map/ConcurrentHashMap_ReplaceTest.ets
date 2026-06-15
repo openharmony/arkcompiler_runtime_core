@@ -72,7 +72,7 @@ function main(): int {
             reItorVal = reItor.next().value;
         }
     });
-    concurrentHashMapTestsuite.addAsyncTest("twiceTest_005", async () =>
+    concurrentHashMapTestsuite.addTest("twiceTest_005", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -80,14 +80,14 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         let p1 = launch(replaceAll);
         let p2 = launch(replaceAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re"
             arktest.assertEQ(concurrentHashMapOne.get(i), newVal);
         }
     });
-    concurrentHashMapTestsuite.addAsyncTest("replaceAndTest_001", async () =>
+    concurrentHashMapTestsuite.addTest("replaceAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -95,15 +95,15 @@ function main(): int {
         setAll();
         let p1 = launch(replaceAll);
         let p2 = launch(isEmptyFun);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertEQ(Atomics.load(flag, 0), 10);
         for (let i = 0; i < 10; i++) {
             let reVal = arrValues[i] + "-re";
             arktest.assertEQ(concurrentHashMapOne.get(i), reVal);
         }
     });
-    concurrentHashMapTestsuite.addAsyncTest("replaceAndTest_002", async () =>
+    concurrentHashMapTestsuite.addTest("replaceAndTest_002", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -111,12 +111,12 @@ function main(): int {
         setAll();
         let p1 = launch(replaceAllBack);
         let p2 = launch(clearAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         arktest.assertTrue(Atomics.load(flag, 0) >= 0);
     });
-    concurrentHashMapTestsuite.addAsyncTest("replaceAndTest_003", async () =>
+    concurrentHashMapTestsuite.addTest("replaceAndTest_003", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -124,8 +124,8 @@ function main(): int {
         setAll();
         let p1 = launch(replaceAll);
         let p2 = launch(removeAllBack);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";

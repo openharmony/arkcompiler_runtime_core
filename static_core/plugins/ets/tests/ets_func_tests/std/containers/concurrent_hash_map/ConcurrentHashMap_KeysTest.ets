@@ -86,36 +86,36 @@ function main(): int {
         arktest.assertEQ(flag, 10);
         arktest.assertEQ(iterKeys.next().value, undefined);
     });
-    concurrentHashMapKeysTestsuite.addAsyncTest("keysAndTest_001", async () =>
+    concurrentHashMapKeysTestsuite.addTest("keysAndTest_001", () =>
     {
         concurrentHashMapKeys.clear();
         arktest.assertTrue(concurrentHashMapKeys.isEmpty());
         let p1 = launch(setAll);
         let p2 = launch(keysAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapKeys.size >= 0);
     });
-    concurrentHashMapKeysTestsuite.addAsyncTest("keysAndTest_002", async () =>
+    concurrentHashMapKeysTestsuite.addTest("keysAndTest_002", () =>
     {
         concurrentHashMapKeys.clear();
         arktest.assertTrue(concurrentHashMapKeys.isEmpty());
         setAll();
         let p1 = launch(deleteAll);
         let p2 = launch(keysAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapKeys.isEmpty());
     });
-    concurrentHashMapKeysTestsuite.addAsyncTest("keysAndTest_003", async () =>
+    concurrentHashMapKeysTestsuite.addTest("keysAndTest_003", () =>
     {
         concurrentHashMapKeys.clear();
         arktest.assertTrue(concurrentHashMapKeys.isEmpty());
         setAll();
         let p1 = launch(clearAll);
         let p2 = launch(keysAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapKeys.isEmpty());
     });
 

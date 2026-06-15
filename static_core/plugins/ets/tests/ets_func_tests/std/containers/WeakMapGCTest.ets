@@ -65,7 +65,7 @@ function createTestWeakMap(keyId: int): WeakMap<Key, Val> {
     return map
 }
 
-async function weakMapKeyGarbageCollection(): Promise<void> {
+function weakMapKeyGarbageCollection(): void {
     if (STW_GC) {
         // non-production scenario
         return
@@ -78,16 +78,17 @@ async function weakMapKeyGarbageCollection(): Promise<void> {
     const weakMapCreator = launch<WeakMap<Key,Val>>() {
         return createTestWeakMap(KEY_ID)
     }
-    const weakMap = await weakMapCreator
+    const weakMap = weakMapCreator.Await()
 
     while (reclaimedKeyId != KEY_ID) {
         try {
             const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE)
+            // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
+            // if main coro is executed first, the test will return false
+            Coroutine.Schedule()
             if (gcId > 0) {
                 GC.waitForFinishGC(gcId)
             }
-            // Async tests need a real suspension point here so the finalizer coroutine can run.
-            await launch<void>(() => {})
         } catch (gcEx) {
             arktest.assertTrue(false)
         }
@@ -97,7 +98,7 @@ async function weakMapKeyGarbageCollection(): Promise<void> {
 function main(): int {
     const suite = new arktest.ArkTestsuite('WeakMap GC tests')
 
-    suite.addAsyncTest('WeakMap keys garbage collection', weakMapKeyGarbageCollection)
+    suite.addTest('WeakMap keys garbage collection', weakMapKeyGarbageCollection)
 
     return suite.run()
 }

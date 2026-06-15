@@ -15,28 +15,28 @@
 
  let mainId = CoroutineExtras.getWorkerId();
 
-async function testEworkerPost2Main(): Promise<void> {
-    let p1 = EAWorker.postToMain<int>(():int => {
+function testEworkerPost2Main() {
+    let job1 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         arktest.assertEQ(runId, mainId);
         return runId;
     });
 
-    let p2 = EAWorker.postToMain<int>(():int => {
+    let job2 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         arktest.assertEQ(runId, mainId);
         return runId;
     });
 
-    let p3 = launch<int>() {
+    let job3 = launch<int>() {
         let runId = CoroutineExtras.getWorkerId();
         arktest.assertNE(runId, mainId);
         return runId;
     };
 
-    let runId1 = await p1;
-    let runId2 = await p2;
-    let runId3 = await p3;
+    let runId1 = job1.Await();
+    let runId2 = job2.Await();
+    let runId3 = job3.Await();
 
     arktest.assertEQ(runId1, runId2);
     arktest.assertNE(runId1, runId3);
@@ -44,7 +44,7 @@ async function testEworkerPost2Main(): Promise<void> {
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_post_to_main');
-    testSuite.addAsyncTest('testEworkerPost2Main', testEworkerPost2Main);
-    let res = testSuite.run();
+    testSuite.addTest('testEworkerPost2Main', testEworkerPost2Main);
+    let res = await testSuite.runAsync();
     return res;
 }

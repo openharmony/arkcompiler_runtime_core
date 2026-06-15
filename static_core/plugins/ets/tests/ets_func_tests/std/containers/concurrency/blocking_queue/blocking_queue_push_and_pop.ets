@@ -15,17 +15,17 @@
 
 type BlockingQueueI = containers.BlockingQueue<int>;
 type BQConstructorI = (capacity: int) => BlockingQueueI;
-type TestFunction = (constr: BQConstructorI) => Promise<void>;
+type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: () => T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: () => T): void {
     arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
     let res: T[] = [];
     for (let i = 0; i < arr.length; ++ i)
-        res.push((await arr[i]) as T);
+        res.push(arr[i].Await());
     return res;
 }
 
@@ -48,11 +48,11 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
         arktest.assertEQ(array[i], value)
 }
 
-async function testOrderPopAndPushMany(constr: BQConstructorI): Promise<void> {
+function testOrderPopAndPushMany(constr: BQConstructorI) {
     let queue = constr(200);
     const EXTRA = -1;
-    let pushers: Promise<void>[] = [];
-    let poppers: Promise<void>[] = [];
+    let pushers: Job<void>[] = [];
+    let poppers: Job<void>[] = [];
 
     const PUSH_COUNT = 70;
     const JOB_COUNT = 7;
@@ -83,15 +83,15 @@ async function testOrderPopAndPushMany(constr: BQConstructorI): Promise<void> {
         addLaunch(poppers, popF);
     }
 
-    await awaitAll(pushers);
-    await awaitAll(poppers);
+    awaitAll(pushers);
+    awaitAll(poppers);
 }
 
-async function testPopAndPushCount(constr: BQConstructorI): Promise<void> {
+function testPopAndPushCount(constr: BQConstructorI): void {
     let queue = constr(200);
     const EXTRA = -1;
-    let pushers: Promise<void>[] = [];
-    let poppers: Promise<FixedArray<int>>[] = [];
+    let pushers: Job<void>[] = [];
+    let poppers: Job<FixedArray<int>>[] = [];
 
     const PUSH_COUNT = 100;
     const JOB_COUNT = 10;
@@ -118,9 +118,9 @@ async function testPopAndPushCount(constr: BQConstructorI): Promise<void> {
         addLaunch(poppers, popFunction);
     }
 
-    await awaitAll<void>(pushers);
+    awaitAll<void>(pushers);
     let finalCounter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT)
-    let resCounters = await awaitAll<FixedArray<int>>(poppers);
+    let resCounters = awaitAll<FixedArray<int>>(poppers);
 
     for (let i = 0; i < JOB_COUNT; ++ i)
         sumArrInto(finalCounter, resCounters[i]);
@@ -152,7 +152,7 @@ function main(): int {
         for (let i = 0; i < tests.length; ++ i) {
             let name = tests[i][0];
             let testF = tests[i][1];
-            arktestsuite.addAsyncTest(name, async () => { await testF(constr); });
+            arktestsuite.addTest(name, () => testF(constr));
         }
     }
 

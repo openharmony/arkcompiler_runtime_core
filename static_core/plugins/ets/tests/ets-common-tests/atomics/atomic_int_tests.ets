@@ -38,7 +38,7 @@ function nonconcurrentCompareAndSwapTest() {
     arktest.assertEQ(atomicInt.compareAndSwap(1, 2), 1);
     arktest.assertEQ(atomicInt.load(), 2);
     arktest.assertEQ(atomicInt.compareAndSwap(1, 3), 2);
-    arktest.assertEQ(atomicInt.load(), 2);       
+    arktest.assertEQ(atomicInt.load(), 2);
 }
 
 function nonconcurrentFetchAdd() {
@@ -85,7 +85,7 @@ function concurrentLoadStoreTest() {
     let atomicInt = new AtomicInt(1);
     let count : int = 0;
 
-    let worker = new EAWorker;     
+    let worker = new EAWorker;
     worker.start();
     worker.run<void>(() => {
         count = 1;
@@ -96,7 +96,7 @@ function concurrentLoadStoreTest() {
         // wait here
     }
     arktest.assertEQ(count, 1);
-    worker.quit();
+    worker.join();
 }
 
 // Checks correctness of visibility
@@ -126,18 +126,18 @@ function concurrentExchangeTest() {
         // wait here
     }
     arktest.assertEQ(count, 2);
-    worker1.quit();
-    worker2.quit();
+    worker1.join();
+    worker2.join();
 }
 
 function concurrentCompareAndSwapTest() {
     let atomicInt = new AtomicInt(1);
 
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let w1 = false;
     let worker2 = new EAWorker;
     let w2 = false;
-    
+
     worker1.start();
     worker2.start();
     worker1.run<void>(() => {
@@ -155,15 +155,15 @@ function concurrentCompareAndSwapTest() {
         }
     });
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertTrue((w1 && !w2) || (!w1 && w2));
 }
 
 function concurrentFetchAdd() {
     let atomicInt = new AtomicInt(0);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = () => {
         for (let i: int = 0; i < 10000; i++) {
@@ -176,15 +176,15 @@ function concurrentFetchAdd() {
     worker1.run<void>(workerBody);
     worker2.run<void>(workerBody);
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertEQ(atomicInt.load(), 20000);
 }
 
 function concurrentFetchSub() {
     let atomicInt = new AtomicInt(20000);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = () => {
         for (let i: int = 0; i < 10000; i++) {
@@ -197,15 +197,15 @@ function concurrentFetchSub() {
     worker1.run<void>(workerBody);
     worker2.run<void>(workerBody);
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertEQ(atomicInt.load(), 0);
 }
 
 function concurrentFetchAnd() {
     let atomicInt = new AtomicInt(3);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = (val: int) => {
         atomicInt.fetchAnd(val);
@@ -216,15 +216,15 @@ function concurrentFetchAnd() {
     worker1.run<void>(workerBody, 1);
     worker2.run<void>(workerBody, 2);
 
-    worker1.quit();
-    worker2.quit();
+    worker1.join().Await();
+    worker2.join().Await();
 
     arktest.assertEQ(atomicInt.load(), 3 & 2 & 1);
 }
 
 function concurrentFetchOr() {
     let atomicInt = new AtomicInt(0);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = (val: int) => {
         atomicInt.fetchXor(val);
@@ -235,15 +235,15 @@ function concurrentFetchOr() {
     worker1.run<void>(workerBody, 1);
     worker2.run<void>(workerBody, 2);
 
-    worker1.quit();
-    worker2.quit();
+    worker1.join().Await();
+    worker2.join().Await();
 
     arktest.assertEQ(atomicInt.load(), 0 | 1 | 2);
 }
 
 function concurrentFetchXor() {
     let atomicInt = new AtomicInt(1);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = (val: int) => {
         atomicInt.fetchXor(val);
@@ -254,8 +254,8 @@ function concurrentFetchXor() {
     worker1.run<void>(workerBody, 1);
     worker2.run<void>(workerBody, 2);
 
-    worker1.quit();
-    worker2.quit();
+    worker1.join().Await();
+    worker2.join().Await();
 
     arktest.assertEQ(atomicInt.load(), 1 ^ 1 ^ 2);
 }
