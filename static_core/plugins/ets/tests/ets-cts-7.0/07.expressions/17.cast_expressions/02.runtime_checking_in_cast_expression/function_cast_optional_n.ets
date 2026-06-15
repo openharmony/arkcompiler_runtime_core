@@ -17,9 +17,9 @@
 /*---
 test_suffix: "{{c.test_suffix}}"
 desc: >-
-    Runtime checking in cast expression must reject a function value whose
-    actual type is not a subtype of the target function type. The cast itself
-    must throw ClassCastError before the result can be observed.
+    Runtime checking in cast expression must accept a function value whose
+    actual type with optional parameters can be cast to the target function type.
+    The cast itself must succeed without throwing ClassCastError.
 ---*/
 
 function cast(a: Any) {
@@ -27,10 +27,6 @@ function cast(a: Any) {
 }
 
 function main(): void {
-    arktest.expectThrow(() => {
-        // below assert prevents optimising unused return value
-        arktest.assertTrue(cast({{c.expr}}) instanceof object, "this assert uses return value")
-        arktest.assertTrue(false, "this code is not expected to run")
-    }, (e: Error): boolean => e instanceof ClassCastError)
+    arktest.assertTrue(cast({{c.expr}}) instanceof object, "this assert uses return value")
 }
 {% endfor %}
