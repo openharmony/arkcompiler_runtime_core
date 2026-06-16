@@ -23,6 +23,59 @@
 
 namespace ark::tooling {
 
+static std::string GetClassName(const uint8_t *descriptor)
+{
+    switch (*descriptor) {
+        case 'V':
+            return "void";
+        case 'Z':
+            return "u1";
+        case 'B':
+            return "i8";
+        case 'H':
+            return "u8";
+        case 'S':
+            return "i16";
+        case 'C':
+            return "u16";
+        case 'I':
+            return "i32";
+        case 'U':
+            return "u32";
+        case 'J':
+            return "i64";
+        case 'Q':
+            return "u64";
+        case 'F':
+            return "f32";
+        case 'D':
+            return "f64";
+        case 'A':
+            return "any";
+        case 'Y':
+            return "Y";
+        case 'N':
+            return "N";
+        default: {
+            break;
+        }
+    }
+
+    std::string name = utf::Mutf8AsCString(descriptor);
+    if (name[0] == '[') {
+        return name;
+    }
+
+    std::replace(name.begin(), name.end(), '/', '.');
+
+    ASSERT(name.size() > 2);  // 2 - L and ;
+
+    name.erase(0, 1);
+    name.pop_back();
+
+    return name;
+}
+
 std::optional<MethodInfo> ReadMethodInfo(panda_file::MethodDataAccessor &mda)
 {
     uintptr_t methodId = mda.GetMethodId().GetOffset();
@@ -83,7 +136,7 @@ bool SymbolizeByNativeFrameImpl(uintptr_t pc, uintptr_t mapBase, uintptr_t loadO
             panda_file::ClassDataAccessor cda(*file, mda.GetClassId());
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             int size = snprintf_s(function->functionName, FUNCTIONNAME_MAX, FUNCTIONNAME_MAX - 1, "%s.%s",
-                                  ClassHelper::GetName(cda.GetDescriptor()).c_str(), mda.GetName().data);
+                                  GetClassName(cda.GetDescriptor()).c_str(), mda.GetName().data);
             if (size < 0) {
                 LOG(ERROR, RUNTIME) << "copy funtionname failed!";
             }
