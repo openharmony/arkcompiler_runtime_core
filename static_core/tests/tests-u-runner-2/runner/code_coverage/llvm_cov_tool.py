@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,7 @@ from pathlib import Path
 
 from runner.code_coverage.cmd_executor import CmdExecutor
 from runner.code_coverage.coverage_dir import CoverageDir
+from runner.code_coverage.lcov_tool import LCOV_IGNORE_ERROR
 from runner.utils import get_opener, write_2_file
 
 LLVM_COV_TOOLS_VERSION_NUMBER = '14'
@@ -55,16 +56,16 @@ class LlvmCovTool:
             list[Path]: Paths to the generated `.profraw` and `.profdata` files.
         """
         file_name = f"{current_process().pid}-{uuid.uuid4()}"
-        file_path = self.coverage_dir.profdata_dir / file_name
+        file_stem: Path = self.coverage_dir.profdata_dir / file_name
 
         if component_name is not None:
             self.components[component_name] = Path.cwd()
             component_profdata_dir = self.coverage_dir.profdata_dir / component_name
             component_profdata_dir.mkdir(parents=True, exist_ok=True)
-            file_path = component_profdata_dir / f"{component_name}-{file_name}"
+            file_stem = component_profdata_dir / f"{component_name}-{file_name}"
 
-        profraw_file = file_path.with_suffix(".profraw")
-        profdata_file = file_path.with_suffix(".profdata")
+        profraw_file = Path(f"{file_stem}.profraw")
+        profdata_file = Path(f"{file_stem}.profdata")
         return [profraw_file, profdata_file]
 
     def merge_and_delete_profraw_files(self, profraw_file: Path, profdata_file: Path) -> None:
@@ -80,7 +81,7 @@ class LlvmCovTool:
         """
         if profraw_file.is_file():
             self._execute_profdata_merge(["--sparse", str(profraw_file), "-o", str(profdata_file)])
-            os.remove(profraw_file)
+            profraw_file.unlink(missing_ok=True)
 
     def make_profdata_list_file(
         self,
@@ -196,7 +197,12 @@ class LlvmCovTool:
                 if binary_target_for_coverage.is_file() and binary_target_for_coverage.suffix == '':
                     llvm_cov_export_command_args.extend(["--object", str(binary_target_for_coverage)])
         else:
-            binary_target_for_coverage = self.build_bin_dir / component_name
+            # `component_name` is a workflow step name and follows the convention
+            # "<step-kind>.<binary>" — e.g. "compile.es2panda", "runtime.ark".
+            # Take the trailing dot-segment as the actual binary file name; a
+            # step name without a dot is used as-is.
+            binary_name = component_name.rsplit(".", 1)[-1]
+            binary_target_for_coverage = self.build_bin_dir / binary_name
             llvm_cov_export_command_args.extend(["--object", str(binary_target_for_coverage)])
 
         for so_path in self.build_dir.rglob('*.so'):
@@ -246,7 +252,12 @@ class LlvmCovTool:
             self._execute_genhtml([output_directory_option, str(self.coverage_dir.info_file)])
 
     def _execute_genhtml(self, args: list[str]) -> None:
-        self.cmd_executor.run_command([str(self.genhtml_binary), *args])
+        common_opts = [
+            "--branch-coverage",
+            "--filter", "missing",
+            "--ignore-errors", ",".join(LCOV_IGNORE_ERROR),
+        ]
+        self.cmd_executor.run_command([str(self.genhtml_binary), *common_opts, *args])
 
     def _execute_profdata_merge(self, args: list[str]) -> None:
         self.cmd_executor.run_command([str(self.llvm_profdata_binary), "merge", *args])

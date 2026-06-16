@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -153,7 +153,9 @@ class LcovTool:
             f"--output-directory={_output_directory}",
             str(_dot_info_file),
             "--ignore-errors", self.ignore_errors,
-            "--filter", "missing"
+            "--filter", "missing",
+            "--branch-coverage",
+            "--demangle-cpp",
         ]
         self.cmd_executor.run_command(genhtml_command)
 
