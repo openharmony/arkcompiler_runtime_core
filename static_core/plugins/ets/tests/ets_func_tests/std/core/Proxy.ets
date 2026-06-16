@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -753,7 +753,6 @@ function isProxyTestPrimitives() {
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_DOUBLE))
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_NUMBER))
     arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_VOID))
-    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_NEVER))
 }
 
 class ProxyChild extends reflect.Proxy {

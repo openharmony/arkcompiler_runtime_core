@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,16 +133,6 @@ export final class Class {
      */
     public static readonly PRIMITIVE_VOID: Class = Class.of(null)
 
-    /**
-     * Store Class of primitive never type
-     * @type { Class }
-     * @readonly
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    public static readonly PRIMITIVE_NEVER: Class = Class.of(null)
-
     static {
         Class.initializeStatics()
     }
@@ -201,50 +191,50 @@ export final class Class {
         return this.linker!
     }
 
-    /**
+    /** 
      * Check if this class represents a namespace.
-     *
+     * 
      * @returns { boolean } true if this class is a namespace, false otherwise.
-     * @syscap SystemCapability.Utils.Lang
+     * @syscap SystemCapability.Utils.Lang 
      */
     public native isNamespace(): boolean;
 
     public getNamespace(): Class | undefined {
         throw new Error("not implemented")
     }
-    /**
+    /** 
      * Get the component type of this class if it is a fixed array.
-     *
+     * 
      * @returns { Class | undefined } the component type of the fixed array, or undefined if this class is not a fixed array.
-     * @syscap SystemCapability.Utils.Lang
-     */
+     * @syscap SystemCapability.Utils.Lang 
+     */ 
     public native getFixedArrayComponentType(): Class | undefined
 
-    /**
+    /** 
      * Get the interfaces implemented by this class.
-     *
+     * 
      * @returns { FixedArray<Class> } a fixed array of interfaces implemented by the class.
-     * @syscap SystemCapability.Utils.Lang
-     */
+     * @syscap SystemCapability.Utils.Lang 
+     */ 
     public native getInterfaces(): FixedArray<Class>
 
-    /**
+    /** 
      * Invoke class initializer once if class is not initialized.
-     *
-     * @syscap SystemCapability.Utils.Lang
+     * 
+     * @syscap SystemCapability.Utils.Lang 
      */
     public native initialize(): void
 
     private static native ofObject(obj: Object): Class
 
-    /**
+    /** 
      * Get the class of an object of any type.
-     *
+     * 
      * @param { Any } obj The object to get the class from.
      * @returns { Class | undefined } the class of the object, or undefined if the object is not a class instance.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     */
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     */ 
     public static ofAny(obj: Any): Class | undefined {
         if (obj instanceof Object) {
             return Class.of(obj as Object)
@@ -255,14 +245,14 @@ export final class Class {
         return undefined
     }
 
-    /**
+    /** 
      * Get the class of an object.
-     *
+     * 
      * @param { Object | null } obj The object to get the class from.
      * @returns { Class } the class of the object.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     */
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     */ 
     public static of(obj: Object | null): Class {
         if (obj instanceof Object) {
             return Class.ofObject(obj)
@@ -274,21 +264,21 @@ export final class Class {
         //should never be executed
         throw new InternalError("Class.from call will be casted by frontend")
     }
-    /**
+    /** 
      * Get current class.
-     *
+     * 
      * @returns { Class } the current class.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     */
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     */ 
     public static native current(): Class
 
-    /**
+    /** 
      * Get class of caller.
-     *
+     * 
      * @returns { Class | undefined } the class of the caller, or undefined if there is no caller managed frame.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
      */
     public static native ofCaller(): Class | undefined
     /**
@@ -339,35 +329,35 @@ export final class Class {
      */
     public native isUnion(): boolean
 
-    /**
+    /** 
      * Get instance methods (including default methods from implemented interfaces) declared in the class.
-     *
+     * 
      * @returns { FixedArray<reflect.InstanceMethod> } a fixed array of instance methods.
-     * @syscap SystemCapability.Utils.Lang
+     * @syscap SystemCapability.Utils.Lang 
      */
     public getInstanceMethods(): FixedArray<reflect.InstanceMethod> {
         return this.getInstanceMethodsInternal(true)
     }
 
-    /**
-     * Look up a instance method (including default methods from implemented interfaces) among the methods
+    /** 
+     * Look up a instance method (including default methods from implemented interfaces) among the methods 
      * declared in the class.
-     *
+     * 
      * @param { string } name The method name to search for.
-     * @param { FixedArray<Class> | undefined } [ signature ] Array of parameter classes defining the method signature.
+     * @param { FixedArray<Class> | undefined } [ signature ] Array of parameter classes defining the method signature. 
      * @returns { reflect.InstanceMethod | undefined } the found instance method, or undefined if not found.
      * @throws { Error } When signature is omitted and multiple overloads exist
-     * @syscap SystemCapability.Utils.Lang
+     * @syscap SystemCapability.Utils.Lang 
      */
     public getInstanceMethod(name: string, signature?: FixedArray<Class>): reflect.InstanceMethod | undefined {
         return this.getInstanceMethodInternal(name, signature, true)
     }
 
-    /**
+    /** 
      * Get static methods declared in the class.
-     *
+     * 
      * @returns { FixedArray<reflect.StaticMethod> } a fixed array of static methods.
-     * @syscap SystemCapability.Utils.Lang
+     * @syscap SystemCapability.Utils.Lang 
      */
     public getStaticMethods(): FixedArray<reflect.StaticMethod> {
         if (this.isInterface()) {
@@ -376,14 +366,14 @@ export final class Class {
         return this.getStaticMethodsInternal(true)
     }
 
-    /**
+    /** 
      * Look up a static method among the methods declared in the class.
-     *
+     * 
      * @param { string } name The method name to search for.
-     * @param { FixedArray<Class> | undefined } [ signature ] Array of parameter classes defining the method signature.
+     * @param { FixedArray<Class> | undefined } [ signature ] Array of parameter classes defining the method signature. 
      * @returns { reflect.StaticMethod | undefined } the found static method, or undefined if not found.
      * @throws {Error} When signature is omitted and multiple overloads exist
-     * @syscap SystemCapability.Utils.Lang
+     * @syscap SystemCapability.Utils.Lang 
      */
     public getStaticMethod(name: string, signature?: FixedArray<Class>): reflect.StaticMethod | undefined {
         let methods = this.getStaticMethods()
@@ -462,7 +452,7 @@ export final class Class {
     /**
      * Get all constituent types of a union class.
      *
-     * @returns { FixedArray<Class> | undefined } a fixed array of constituent types,
+     * @returns { FixedArray<Class> | undefined } a fixed array of constituent types, 
      * or undefined if this is not a union class.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel

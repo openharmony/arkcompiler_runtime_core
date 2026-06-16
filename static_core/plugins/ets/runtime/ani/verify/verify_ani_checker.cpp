@@ -750,7 +750,6 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
                 return envANIVerifier->IsValidRef(reinterpret_cast<VRef *>(v.r));
-            case panda_file::Type::TypeId::NOVALUE: return false;
             // clang-format on
             default:
                 break;
@@ -768,7 +767,6 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
                 return envANIVerifier->IsValidRef(reinterpret_cast<VRef *>(v.r));
-            case panda_file::Type::TypeId::NOVALUE: return false;
             // clang-format on
             default:
                 break;
@@ -2192,10 +2190,10 @@ public:
                << ", expected: " << EtsTypeToString(propertyType);
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
-        if (method->GetReturnValueType() != EtsType::VOID && method->GetReturnValueType() != EtsType::NOVALUE) {
+        if (method->GetReturnValueType() != EtsType::VOID) {
             PandaStringStream ss;
             ss << "wrong property: setter return type is " << EtsTypeToString(method->GetReturnValueType())
-               << ", expected: " << EtsTypeToString(EtsType::VOID) << " or " << EtsTypeToString(EtsType::NOVALUE);
+               << ", expected: " << EtsTypeToString(EtsType::VOID);
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
@@ -3569,7 +3567,6 @@ static PandaString GetAniTypeByType(panda_file::Type type)
         case panda_file::Type::TypeId::F32:       return "ani_float";
         case panda_file::Type::TypeId::F64:       return "ani_double";
         case panda_file::Type::TypeId::REFERENCE: return "ani_ref";
-        case panda_file::Type::TypeId::NOVALUE: return "novalue";
         default: UNREACHABLE();
     }
     // clang-format on

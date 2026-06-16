@@ -127,7 +127,6 @@ void EtsClassLinkerExtension::InitializeClassRoots()
     InitializePrimitiveClassRoot(ClassRoot::U64, panda_file::Type::TypeId::U64, "Q");
     InitializePrimitiveClassRoot(ClassRoot::F32, panda_file::Type::TypeId::F32, "F");
     InitializePrimitiveClassRoot(ClassRoot::F64, panda_file::Type::TypeId::F64, "D");
-    InitializePrimitiveClassRoot(ClassRoot::NOVALUE, panda_file::Type::TypeId::NOVALUE, "X");
     InitializePrimitiveClassRoot(ClassRoot::TAGGED, panda_file::Type::TypeId::TAGGED, "A");
 
     InitializeArrayClassRoot(ClassRoot::ARRAY_U1, ClassRoot::U1, "[Z");
@@ -398,7 +397,6 @@ size_t EtsClassLinkerExtension::GetClassVTableSize(ClassRoot root)
         case ClassRoot::U64:
         case ClassRoot::F32:
         case ClassRoot::F64:
-        case ClassRoot::NOVALUE:
         case ClassRoot::TAGGED:
         case ClassRoot::ANY:
         case ClassRoot::NEVER:
@@ -455,7 +453,6 @@ size_t EtsClassLinkerExtension::GetClassIMTSize(ClassRoot root)
         case ClassRoot::TAGGED:
         case ClassRoot::ANY:
         case ClassRoot::NEVER:
-        case ClassRoot::NOVALUE:
             return 0;
         case ClassRoot::ARRAY_U1:
         case ClassRoot::ARRAY_I8:
@@ -507,7 +504,6 @@ size_t EtsClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::F64:
         case ClassRoot::ANY:
         case ClassRoot::NEVER:
-        case ClassRoot::NOVALUE:
         case ClassRoot::TAGGED:
             return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         case ClassRoot::ARRAY_U1:

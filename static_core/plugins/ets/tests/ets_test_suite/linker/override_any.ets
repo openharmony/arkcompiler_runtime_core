@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
 
 class StubError extends Error { }
 
-class CustomNeverError extends Error { }
+class NeverError extends Error { }
 
 function stub() {
     throw new StubError();
 }
 
 function neverErr(): never {
-    throw new CustomNeverError();
+    throw new NeverError();
 }
 
 class OverrideParamAny {
@@ -88,7 +88,7 @@ function overrideMethods() {
     retObj.returnAny();
     retArr.returnAny();
     retUn.returnAny();
-    arktest.expectThrow(() => { retNever.returnAny() }, (e) => e instanceof CustomNeverError)
+    arktest.expectThrow(() => { retNever.returnAny() }, (e) => e instanceof NeverError)
 }
 
 function main() {

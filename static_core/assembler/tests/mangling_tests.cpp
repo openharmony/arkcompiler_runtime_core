@@ -61,18 +61,4 @@ TEST(ManglingTests, GetFunctionNameFromSignature)
     ASSERT_EQ(GetFunctionNameFromSignature(name), "Asm.main");
 }
 
-TEST(ManglingTests, MangleFunctionNameNovalueReturn)
-{
-    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
-
-    auto returnType = Type("novalue", 0);
-    std::string name = "foo";
-    std::vector<Function::Parameter> empty;
-    ASSERT_EQ(MangleFunctionName(name, empty, returnType), "foo:novalue;");
-
-    std::vector<Function::Parameter> params;
-    params.emplace_back(Type {"N", 0}, language);
-    ASSERT_EQ(MangleFunctionName("bar", params, returnType), "bar:N;novalue;");
-}
-
 }  // namespace ark::test

@@ -29,7 +29,7 @@
 namespace ark::verifier {
 class Job;
 
-enum class InstructionType { NORMAL, JUMP, COND_JUMP, RETURN, THROW, CALL };
+enum class InstructionType { NORMAL, JUMP, COND_JUMP, RETURN, THROW };
 
 class CflowMethodInfo {
 public:

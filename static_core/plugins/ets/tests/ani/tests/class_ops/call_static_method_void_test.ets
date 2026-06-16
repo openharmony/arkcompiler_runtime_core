@@ -26,10 +26,6 @@ class Operations {
         return Operations.count;
     }
 
-    static fooNever(): never {
-        throw new Error()
-    }
-
     static count: int = 0;
 }
 

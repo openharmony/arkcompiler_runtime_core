@@ -159,7 +159,7 @@ static int64_t UnboxResult(EtsExecutionContext *executionCtx, EtsMethod *ifaceMe
 
     auto *boxedResult = value.GetAs<ObjectHeader *>();
     auto effectiveReturnType = ifaceMethod->GetEffectiveReturnValueType();
-    if (effectiveReturnType == EtsType::VOID || effectiveReturnType == EtsType::NOVALUE) {
+    if (effectiveReturnType == EtsType::VOID) {
         return 0;
     }
 

@@ -335,7 +335,6 @@ static size_t GetClassSize(ClassDataAccessorT dataAccessor, size_t vtableSize, s
             case Type::TypeId::TAGGED:
                 ++numTaggedSfields;
                 break;
-            case Type::TypeId::NOVALUE:
             default:
                 UNREACHABLE();
                 break;

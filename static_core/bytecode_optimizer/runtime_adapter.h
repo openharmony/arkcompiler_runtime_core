@@ -448,8 +448,6 @@ protected:
                 return compiler::DataType::FLOAT64;
             case panda_file::Type::TypeId::REFERENCE:
                 return compiler::DataType::REFERENCE;
-            case panda_file::Type::TypeId::NOVALUE:
-                return compiler::DataType::VOID;
             case panda_file::Type::TypeId::TAGGED:
             case panda_file::Type::TypeId::INVALID:
                 return compiler::DataType::ANY;

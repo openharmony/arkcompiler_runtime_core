@@ -13,5 +13,4 @@
 
 set(INSTRUCTIONS_TESTS_SOURCES
     ${VERIFICATION_SOURCES_DIR}/tests/instructions/any_opcodes_test.cpp
-    ${VERIFICATION_SOURCES_DIR}/tests/instructions/novalue_opcode_test.cpp
 )

@@ -157,11 +157,11 @@ VerificationInitAPI CoreLanguageContext::GetVerificationInitAPI() const
 {
     VerificationInitAPI vApi;
     vApi.primitiveRootsForVerification = {
-        panda_file::Type::TypeId::TAGGED, panda_file::Type::TypeId::VOID,   panda_file::Type::TypeId::U1,
-        panda_file::Type::TypeId::U8,     panda_file::Type::TypeId::U16,    panda_file::Type::TypeId::U32,
-        panda_file::Type::TypeId::U64,    panda_file::Type::TypeId::I8,     panda_file::Type::TypeId::I16,
-        panda_file::Type::TypeId::I32,    panda_file::Type::TypeId::I64,    panda_file::Type::TypeId::F32,
-        panda_file::Type::TypeId::F64,    panda_file::Type::TypeId::NOVALUE};
+        panda_file::Type::TypeId::TAGGED, panda_file::Type::TypeId::VOID, panda_file::Type::TypeId::U1,
+        panda_file::Type::TypeId::U8,     panda_file::Type::TypeId::U16,  panda_file::Type::TypeId::U32,
+        panda_file::Type::TypeId::U64,    panda_file::Type::TypeId::I8,   panda_file::Type::TypeId::I16,
+        panda_file::Type::TypeId::I32,    panda_file::Type::TypeId::I64,  panda_file::Type::TypeId::F32,
+        panda_file::Type::TypeId::F64};
 
     vApi.arrayElementsForVerification = {reinterpret_cast<const uint8_t *>("[Z"),
                                          reinterpret_cast<const uint8_t *>("[B"),

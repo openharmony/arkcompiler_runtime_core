@@ -756,7 +756,6 @@ void FileReader::SetFieldValue(FieldItem *fieldItem, Type fieldType, FieldDataAc
         case Type::TypeId::REFERENCE:
             SetStringFieldValue(&fieldAcc, fieldItem);
             break;
-        case Type::TypeId::NOVALUE:
         case Type::TypeId::TAGGED:
         default:
             UNREACHABLE();

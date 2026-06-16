@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,13 +118,13 @@ interface InvokeTester {
     funcRestParamsObj(v?: Object, ...v1: Object[]): Class
 }
 
-class CustomNeverError extends Error {}
+class NeverError extends Error {}
 
 class NeverClass {
     funcGetNever1(n: never): void {}
     funcGetNever2(a: Object, n: never): void {}
     funcReturnNever(): never {
-        throw new CustomNeverError()
+        throw new NeverError()
     }
 }
 
@@ -659,7 +659,7 @@ function invokeMethodWithNever(neverTester: NeverClass): void {
     let neverTesterMethod2 = neverTesterType.getInstanceMethod("funcGetNever2")!
     arktest.expectThrow(() => { neverTesterMethod2.invoke(neverTester, [new Object(), neverType]) }, (e) => e instanceof TypeError)
     let neverTesterMethod3 = neverTesterType.getInstanceMethod("funcReturnNever")!
-    arktest.expectThrow(() => { neverTesterMethod3.invoke(neverTester) }, (e) => e instanceof CustomNeverError)
+    arktest.expectThrow(() => { neverTesterMethod3.invoke(neverTester) }, (e) => e instanceof NeverError)
 }
 
 function testReflectMethodInvoke(): void {
@@ -700,13 +700,12 @@ class NeverTypeClass {
 }
 
 function testNeverMethods(): void{
-    let typePrimitiveNever = Class.PRIMITIVE_NEVER
     let typeNever = Class.from<never>()
     let testNeverType = Class.from<NeverTypeClass>()
 
     let returnNever = testNeverType.getInstanceMethod("returnNever")!
     let paramNever = testNeverType.getInstanceMethod("paramNever")!
-    arktest.assertEQ(returnNever.getReturnType(), typePrimitiveNever)
+    arktest.assertEQ(returnNever.getReturnType(), typeNever)
     arktest.assertEQ(paramNever.getParameterType(0)!, typeNever)
 }
 

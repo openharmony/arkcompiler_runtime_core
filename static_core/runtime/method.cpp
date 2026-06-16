@@ -136,8 +136,6 @@ std::string_view Method::Proto::GetReturnTypeDescriptor() const
             return "D";
         case panda_file::Type::TypeId::TAGGED:
             return "A";
-        case panda_file::Type::TypeId::NOVALUE:
-            return "X";
         default:
             UNREACHABLE();
     }
