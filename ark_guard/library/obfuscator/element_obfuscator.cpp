@@ -26,6 +26,7 @@
 namespace {
 constexpr std::string_view LAMBDA_CLASS_PREFIX = "%%lambda-";
 constexpr std::string_view LAMBDA_FIELD_PREFIX = "lambda_invoke-";
+constexpr std::string_view UNION_PROP_CLASS_PREFIX = "%%union_prop-";
 
 bool IsMainFunction(const std::string &name)
 {
@@ -40,6 +41,11 @@ bool IsLambdaClass(const std::string &name)
 bool IsLambdaField(const std::string &name)
 {
     return ark::guard::StringUtil::IsSubStrMatched(name, LAMBDA_FIELD_PREFIX.data());
+}
+
+bool IsUnionPropClass(const std::string &name)
+{
+    return ark::guard::StringUtil::IsSubStrMatched(name, UNION_PROP_CLASS_PREFIX.data());
 }
 }  // namespace
 
@@ -134,6 +140,22 @@ bool ark::guard::ElementObfuscator::VisitObject(abckit_wrapper::Object *object, 
         return visitChild ? object->ChildrenAccept(*this) : true;
     }
 
+    if (type == ObjectType::MODULE && visitChild) {
+        const auto moduleFqn = object->GetFullyQualifiedName();
+        if (obfName.empty()) {
+            const auto key = object->GetPackageName();
+            const auto moduleMapping = nameMappingManager_.GetNameMapping(key);
+            ARK_GUARD_ASSERT(!moduleMapping, ErrorCode::GENERIC_ERROR,
+                             "get nameMapping of module '" + object->GetName() + "' failed, key: " + key);
+            obfName = moduleMapping->GetName(object->GetName());
+            obfuscateData->SetObfName(obfName);
+        }
+        const auto classMapping = nameMappingManager_.GetNameMapping(moduleFqn);
+        ARK_GUARD_ASSERT(!classMapping, ErrorCode::GENERIC_ERROR,
+                         "get nameMapping of module classes failed, key: " + moduleFqn);
+        classMapping->AddUsedNameList(obfName);
+    }
+
     if (visitChild && !object->ChildrenAccept(*this)) {
         return false;
     }
@@ -143,7 +165,7 @@ bool ark::guard::ElementObfuscator::VisitObject(abckit_wrapper::Object *object, 
     }
 
     const auto rawName = object->GetName();
-    if (type == ObjectType::CLASS && IsLambdaClass(rawName)) {
+    if (type == ObjectType::CLASS && (IsLambdaClass(rawName) || IsUnionPropClass(rawName))) {
         return true;
     }
 

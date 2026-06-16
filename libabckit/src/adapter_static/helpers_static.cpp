@@ -45,9 +45,17 @@ namespace libabckit {
 std::tuple<std::string, std::string> ClassGetNames(const std::string &fullName)
 {
     static const std::string GLOBAL_CLASS_NAME = "ETSGLOBAL";
+    static const std::string OBJECT_LITERAL_SUFFIX = "$ObjectLiteral";
     {
         const std::string kSep = ".@ohos.";
         auto sepPos = fullName.rfind(kSep);
+        if (sepPos != std::string::npos) {
+            return {fullName.substr(0, sepPos), fullName.substr(sepPos + 1)};
+        }
+    }
+    // ObjectLiteral record names are built as moduleName + '.' + classPart + "$ObjectLiteral"
+    if (const auto objLitPos = fullName.find(OBJECT_LITERAL_SUFFIX); objLitPos != std::string::npos) {
+        auto sepPos = fullName.rfind(".@", objLitPos - 1);
         if (sepPos != std::string::npos) {
             return {fullName.substr(0, sepPos), fullName.substr(sepPos + 1)};
         }

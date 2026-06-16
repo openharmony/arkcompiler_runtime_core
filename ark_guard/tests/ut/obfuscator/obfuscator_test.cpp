@@ -16,8 +16,10 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <string>
 
 #include "obfuscator/obfuscator.h"
+#include "obfuscator/obfuscator_data_manager.h"
 #include "test_util/execute_util.h"
 #include "configuration/configuration_parser.h"
 #include "configuration/keep_option_parser.h"
@@ -1718,4 +1720,68 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_040, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("class_field_name_collision.ClassA.getStatic:i64;", "getStatic");
 
     this->VerifyObfuscated();
+}
+
+/**
+ * @tc.name: obfuscator_test_041
+ * @tc.desc: ClassA has fields unique to one side and shares `i` with ClassB; accessing `c.i` via ClassA|ClassB
+ * is lowered through %%union_prop-*. After obfuscation, linked `i` fields and the synthetic record field must match.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_041, TestSize.Level1)
+{
+    std::string abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/union_prop_same_field_demo.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/union_prop_same_field_demo.updated.abc";
+    std::string nameCacheFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/union_prop_same_field_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("union_prop_same_field_demo", "main");
+
+    const std::string moduleName = "union_prop_same_field_demo";
+    const auto fieldClassA = fileView_.Get<abckit_wrapper::Field>(moduleName + ".ClassA.i");
+    const auto fieldClassB = fileView_.Get<abckit_wrapper::Field>(moduleName + ".ClassB.i");
+    const auto fieldUnionProp =
+        fileView_.Get<abckit_wrapper::Field>(moduleName + ".%%union_prop-ClassA|ClassB.i");
+
+    ASSERT_TRUE(fieldClassA.has_value()) << "missing ClassA.i";
+    ASSERT_TRUE(fieldClassB.has_value()) << "missing ClassB.i";
+    ASSERT_TRUE(fieldUnionProp.has_value()) << "missing %%union_prop-ClassA|ClassB.i";
+
+#ifndef PANDA_TARGET_WINDOWS
+    const std::string oriModuleName = module_->GetName();
+    const std::string oriMethodName = method_->GetRawName();
+#endif
+
+    this->ExecuteObfuscator();
+
+    ASSERT_EQ(fieldClassA.value()->GetRawName(), fieldClassB.value()->GetRawName())
+        << "linked instance fields must receive the same obfuscated name";
+
+    ASSERT_EQ(fieldUnionProp.value()->GetRawName(), fieldClassA.value()->GetRawName())
+        << "%%union_prop synthetic field must track the linked obfuscated name";
+
+#ifndef PANDA_TARGET_WINDOWS
+    ark::guard::ObfuscatorDataManager moduleDataManager(module_);
+    const auto moduleObfData = moduleDataManager.GetData();
+    ASSERT_NE(moduleObfData, nullptr);
+    std::string obfModuleName =
+        !moduleObfData->GetObfName().empty() ? moduleObfData->GetObfName() : module_->GetName();
+    ASSERT_FALSE(obfModuleName.empty());
+
+    std::string obfMethodName = method_->GetRawName();
+    if (obfMethodName.empty()) {
+        obfMethodName = oriMethodName;
+    }
+    ASSERT_FALSE(obfMethodName.empty());
+#endif
+
+    this->VerifyObfuscatedFilesExist();
+
+#ifndef PANDA_TARGET_WINDOWS
+    VerifyAbcRunResult(oriModuleName, oriMethodName, obfModuleName, obfMethodName);
+#endif
 }
