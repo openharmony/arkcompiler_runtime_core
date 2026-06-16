@@ -81,7 +81,7 @@ module Constants
     TLAB_CUR_FREE_POSITION_OFFSET = "cross_values::GetTlabCurFreePositionOffset(GetArch())"
     TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
-    OBJECT_CLASS_MASK = "cross_values::GetObjectHeaderClassPointerMask(GetArch())"
+    OBJECT_MARKWORD_OFFSET = "cross_values::GetObjectHeaderMarkWordOffset(GetArch())"
     WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
     ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
     ANNOTATE_SANITIZERS_POISON_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_POISON_NO_BRIDGE)"
@@ -153,6 +153,11 @@ module Constants
     MARK_WORD_LWL_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
     MARK_WORD_LWL_THREAD_ID_AND_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE | MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
     MARK_WORD_STATUS_MASK_AND_LWL_THREAD_ID_MASK = "static_cast<uint64_t>(MarkWord::STATUS_MASK | MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE)"
+    MARK_WORD_STATUS_SHIFT = "ark::MarkWord::STATUS_SHIFT"
+    MARK_WORD_STATUS_SIZE = "ark::MarkWord::STATUS_SIZE"
+    MARK_WORD_STATE_FORWARDED = "static_cast<uint64_t>(ark::MarkWord::STATUS_GC)"
+    MARK_WORD_FORWARDING_ADDRESS_SHIFT = "ark::MarkWord::FORWARDING_ADDRESS_SHIFT"
+    MARK_WORD_FORWARDING_ADDRESS_MASK = "ark::MarkWord::FORWARDING_ADDRESS_MASK"
     CLASS_BASE_OFFSET = "cross_values::GetClassBaseOffset(GetArch())"
     CLASS_COMPONENT_OFFSET = "cross_values::GetClassComponentTypeOffset(GetArch())"
     CLASS_TYPE_OFFSET = "cross_values::GetClassTypeOffset(GetArch())"
@@ -264,8 +269,6 @@ module CommonRuntimeConstants
     INV_DEFAULT_REGION_UNIT_MASK = "~common_vm::RegionDesc::DEFAULT_REGION_UNIT_MASK"
     INLINED_REGION_METADATA_REGION_TYPE_OFFSET = "cross_values::GetInlinedRegionMetadataRegionTypeOffset(GetArch())"
     REGION_TYPE_FROM_REGION = "static_cast<uint64_t>(common_vm::RegionDesc::RegionType::FROM_REGION)"
-    FORWARD_STATE_SHIFT = "cross_values::GetForwardStateShift(GetArch())"
-    FORWARD_STATE_FORWARDED = "static_cast<uint64_t>(common_vm::BaseStateWord::ForwardState::FORWARDED)"
     REGION_SIZE_BIT = "ark::helpers::math::GetIntLog2(ark::mem::RegionDesc::UNIT_SIZE)"
     REGION_IS_COLLECTION_SET_OFFSET = "cross_values::GetRegionIsCollectionSetOffset(GetArch())"
     REGION_TYPE_THREAD_LOCAL = "static_cast<uint64_t>(ark::mem::RegionDesc::RegionType::THREAD_LOCAL_REGION)"
@@ -398,22 +401,11 @@ macro(:load_class) do |obj|
   # Memory order is not required since memory barrier after class initialization
   # in class linker guarantees initialized class visibility
   # See class_linker.cpp:AvoidLoadedClassPointerLeak
-  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
-    klass_with_flags := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).u64
-    # Mask for class pointer
-    Bitcast(And(klass_with_flags, 0x0000ffffffffffff).u64).ref
-  else
-    LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref
-  end
+  Bitcast(LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref_uint).ref
 end
 
 macro(:load_base_class) do |klass|
-  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
-    base_klass = LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.u64
-    Bitcast(And(base_klass, 0x0000ffffffffffff).u64).ref
-  else
-    LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.ref
-  end
+  Bitcast(LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.ref_uint).ref
 end
 
 macro(:store_class) do |obj, klass|
@@ -428,11 +420,7 @@ macro(:store_class) do |obj, klass|
   # Memory order is not required since memory barrier after class initialization
   # in class linker guarantees initialized class visibility
   # See class_linker.cpp:AvoidLoadedClassPointerLeak
-  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
-    StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).u64
-  else
-    StoreI(obj, klass).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref
-  end
+  StoreI(obj, klass).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref
 end
 
 macro(:get_class) do |arg|

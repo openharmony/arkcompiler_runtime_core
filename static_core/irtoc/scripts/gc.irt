@@ -515,10 +515,11 @@ def GenerateCmcReadViaBarrierIrtoc(atomic)
                 Return(old_ref).ref_uint
             }
 
-            state_class := LoadI(Bitcast(old_ref).ref).u64
-            state := ShrI(state_class).Imm(CommonRuntimeConstants::FORWARD_STATE_SHIFT).u64
-            If(state, CommonRuntimeConstants::FORWARD_STATE_FORWARDED).EQ {
-                fwd := AndI(state_class).Imm(Constants::OBJECT_CLASS_MASK).u64
+            mark_word := LoadI(Bitcast(old_ref).ref).Imm(Constants::OBJECT_MARKWORD_OFFSET).u64
+            state := AndI(ShrI(mark_word).Imm(Constants::MARK_WORD_STATUS_SHIFT).u64).Imm(Constants::MARK_WORD_STATUS_MASK).u64
+            If(state, Constants::MARK_WORD_STATE_FORWARDED).EQ {
+                fwd_field := AndI(ShrI(mark_word).Imm(Constants::MARK_WORD_FORWARDING_ADDRESS_SHIFT).u64).Imm(Constants::MARK_WORD_FORWARDING_ADDRESS_MASK).u64
+                fwd := ShlI(ShlI(fwd_field).Imm(Constants::MARK_WORD_FORWARDING_ADDRESS_SHIFT).u64).Imm(Constants::MARK_WORD_STATUS_SIZE).u64
                 Return(fwd).ref_uint
             }
         end

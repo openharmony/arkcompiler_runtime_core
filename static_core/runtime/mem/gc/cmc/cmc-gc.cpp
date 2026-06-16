@@ -84,20 +84,6 @@ bool CmcGC<LanguageConfig>::IsUnmovableFromObject(BaseObject *obj) const
     return regionInfo->IsUnmovableFromRegion();
 }
 
-template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::MarkObject(BaseObject *obj) const
-{
-    bool marked = RegionalHeap::MarkObject(obj);
-    if (!marked) {
-        [[maybe_unused]] RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
-        DCHECK(!region->IsGarbageRegion());
-        LOG(DEBUG, GC) << "mark obj " << obj << "<" << obj->GetTypeInfo() << "> in region " << region << "("
-                       << static_cast<size_t>(region->GetRegionType()) << ")@0x" << std::hex << region->GetRegionStart()
-                       << ", live " << std::dec << region->GetLiveByteCount();
-    }
-    return marked;
-}
-
 // this api updates current pointer as well as old pointer, caller should take care of this.
 template <class LanguageConfig>
 template <bool copy>
@@ -384,7 +370,7 @@ public:
 private:
     void MarkObject(BaseObject *object)
     {
-        if (!RegionalHeap::IsNewObjectSinceMarking(object) && !collector_->MarkObject(object)) {
+        if (!RegionalHeap::IsNewObjectSinceMarking(object) && collector_->MarkObjectIfNotMarked(object)) {
             collectStack_.Push(object);
         }
     }
@@ -393,7 +379,7 @@ private:
     {
         // We've checked oldVersion is in fromSpace, no need to check markingLine
         collector_->MarkObject(oldVersion);
-        if (!collector_->MarkObject(toVersion)) {
+        if (collector_->MarkObjectIfNotMarked(toVersion)) {
             // oldVersion don't have valid type info, cannot push it
             collectStack_.Push(toVersion);
         }
@@ -438,7 +424,7 @@ public:
 private:
     void MarkToObject(BaseObject *toVersion)
     {
-        if (!collector_->MarkObject(toVersion)) {
+        if (collector_->MarkObjectIfNotMarked(toVersion)) {
             auto *region = RegionDesc::GetAliveRegionDescAt(toVersion);
             region->AddLiveByteCount(toVersion->GetSize());
         }
@@ -1160,7 +1146,7 @@ void CmcGC<LanguageConfig>::PreforwardNonHeapRoots(GlobalEvacuationStack &global
     }
     LocalEvacuationStack stack(&globalStack);
     for (auto *obj : roots) {
-        if (!MarkObject(obj)) {
+        if (MarkObjectIfNotMarked(obj)) {
             EnqueueRefsToYoungCollectionSpace(obj, stack);
         }
     }
@@ -1291,7 +1277,7 @@ void CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
             obj = ForwardObject(obj);
         }
         auto *region = RegionDesc::GetAliveRegionDescAt(obj);
-        if (!MarkObject(obj)) {
+        if (MarkObjectIfNotMarked(obj)) {
             auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, localStack);
             region->AddLiveByteCount(size);
         }
@@ -1347,7 +1333,7 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack 
             if (IsFromObject(obj)) {
                 obj = ForwardObject(obj);
             }
-            if (!MarkObject(obj)) {
+            if (this->MarkObjectIfNotMarked(obj)) {
                 EnqueueRefsToYoungCollectionSpace(obj, stack);
                 needProcess = true;
             }
@@ -1434,7 +1420,7 @@ void CmcGC<LanguageConfig>::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
         return;
     }
 
-    if (!MarkObject(obj)) {
+    if (MarkObjectIfNotMarked(obj)) {
         EnqueueRefsToYoungCollectionSpace(obj, stack);
     }
 }
@@ -1455,7 +1441,7 @@ void CmcGC<LanguageConfig>::ProcessRef(RefField<> &ref, Stack &stack)
         auto *fwd = ForwardObject(obj);
 
         // Object can be evacuated by mutator so mark it
-        if (!MarkObject(fwd)) {
+        if (MarkObjectIfNotMarked(fwd)) {
             EnqueueRefsToYoungCollectionSpace(fwd, stack);
         }
         RefField<> newRef(fwd, oldRef.IsWeak());
@@ -1471,7 +1457,7 @@ void CmcGC<LanguageConfig>::ProcessRef(RefField<> &ref, Stack &stack)
         return;
     }
 
-    if (!MarkObject(obj)) {
+    if (MarkObjectIfNotMarked(obj)) {
         EnqueueRefsToYoungCollectionSpace(obj, stack);
     }
 }
@@ -1497,7 +1483,7 @@ void CmcGC<LanguageConfig>::MarkRef(RefField<> &ref, Stack &stack)
         obj = GetForwardingPointer(obj);
     }
 
-    if (!MarkObject(obj)) {
+    if (MarkObjectIfNotMarked(obj)) {
         auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, stack);
         region->AddLiveByteCount(size);
     }
@@ -1589,12 +1575,12 @@ BaseObject *CmcGC<LanguageConfig>::ForwardObject(BaseObject *obj)
 template <class LanguageConfig>
 BaseObject *CmcGC<LanguageConfig>::TryForwardObject(BaseObject *obj)
 {
-    return CopyObjectImpl(obj);
+    return static_cast<BaseObject *>(CopyObjectImpl(obj));
 }
 
 // ConcurrentGC
 template <class LanguageConfig>
-BaseObject *CmcGC<LanguageConfig>::CopyObjectImpl(BaseObject *obj)
+ObjectHeader *CmcGC<LanguageConfig>::CopyObjectImpl(ObjectHeader *object)
 {
     // reconsider phase difference between mutator and GC thread during transition.
     if (ark::common_vm::IsGcThread()) {
@@ -1610,26 +1596,21 @@ BaseObject *CmcGC<LanguageConfig>::CopyObjectImpl(BaseObject *obj)
     }
 
     do {
-        BaseStateWord oldWord = obj->GetBaseStateWord();
-
+        MarkWord oldWord = object->GetMark();
         // 1. object has already been forwarded
-        if (obj->IsForwarded()) {
-            auto toObj = GetForwardingPointer(obj);
-            LOG(DEBUG, GC) << "skip forwarded obj " << obj << " -> " << toObj << "<" << toObj->GetTypeInfo() << ">("
-                           << toObj->GetSize() << ")";
-            return toObj;
+        if (oldWord.IsForwarded()) {
+            return reinterpret_cast<ObjectHeader *>(oldWord.GetForwardingAddress());
         }
-
         // ConcurrentGC
         // 2. object is being forwarded, spin until it is forwarded (or gets its own forwarded address)
-        if (oldWord.IsForwarding()) {
+        if (oldWord.IsReadBarrierSet()) {
             sched_yield();
             continue;
         }
-
         // 3. hope we can copy this object
-        if (obj->TryLockExclusive(oldWord)) {
-            return CopyObjectAfterExclusive(obj);
+        MarkWord newWord = oldWord.SetReadBarrier();
+        if (object->AtomicSetMark(oldWord, newWord)) {
+            return CopyObjectAfterExclusive(object, newWord);
         }
     } while (true);
     LOG(FATAL, COMMON) << "forwardObject exit in wrong path";
@@ -1638,36 +1619,38 @@ BaseObject *CmcGC<LanguageConfig>::CopyObjectImpl(BaseObject *obj)
 }
 
 template <class LanguageConfig>
-BaseObject *CmcGC<LanguageConfig>::CopyObjectAfterExclusive(BaseObject *obj)
+ObjectHeader *CmcGC<LanguageConfig>::CopyObjectAfterExclusive(ObjectHeader *object, MarkWord markWord)
 {
-    size_t size = RegionalHeap::GetAllocSize(*obj);
-    // 8: size of free object, but free object can not be copied.
-    if (size == 8) {
-        LOG(FATAL, COMMON) << "forward free obj: " << obj
-                           << "is survived: " << (RegionalHeap::IsSurvivedObject(obj) ? "true" : "false");
-    }
-    BaseObject *toObj = reinterpret_cast<RegionalHeap &>(theAllocator_).RouteObject(obj, size);
-    if (toObj == nullptr) {
+    size_t size = RegionalHeap::ToAllocatedSize(object->ObjectSize());
+    AllocationBuffer *buffer = AllocationBuffer::GetOrCreateAllocBuffer();
+    uintptr_t toAddr = buffer->ToSpaceAllocate(size);
+    if (toAddr == 0) {
         // ConcurrentGC
-        obj->UnlockExclusive(BaseStateWord::ForwardState::NORMAL);
-        return toObj;
+        UnlockObject(object);
+        return nullptr;
     }
-    LOG(DEBUG, GC) << "copy obj " << obj << "<" << obj->GetTypeInfo() << ">(" << size << ") to " << toObj;
-    LOG(DEBUG, MM_OBJECT_EVENTS) << "[CMC] "
-                                 << "MOVE object " << obj << " -> " << toObj;
-    CopyObject(*obj, *toObj, size);
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "MOVE object " << object << " -> " << ToVoidPtr(toAddr);
+    CopyObject(*reinterpret_cast<BaseObject *>(object), *reinterpret_cast<BaseObject *>(toAddr), size);
 
-    ASSERT_PRINT(IsToObject(toObj), "Copy object to invalid region");
-    toObj->SetForwardState(BaseStateWord::ForwardState::NORMAL);
+    auto *toObj = reinterpret_cast<ObjectHeader *>(toAddr);
+    toObj->SetMark(toObj->GetMark().ClearReadBarrier());
 
     // Atomic with release order reason: ensure copied object content is visible before setting forwarding state
     std::atomic_thread_fence(std::memory_order_release);
-    obj->SetSizeForwarded(size);
-    // Atomic with release order reason: avoid seeing the fwd pointer before observing the size modification
-    // when calling GetSize during the CopyPhase
-    std::atomic_thread_fence(std::memory_order_release);
-    obj->SetForwardingPointerAfterExclusive(toObj);
-    return toObj;
+    object->SetMark(markWord.DecodeFromForwardingAddress(reinterpret_cast<MarkWord::MarkWordSize>(toAddr)));
+    return reinterpret_cast<ObjectHeader *>(toObj);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::UnlockObject(ObjectHeader *object)
+{
+    do {
+        MarkWord current = object->AtomicGetMark(std::memory_order_acquire);
+        MarkWord newMarkWord = current.ClearReadBarrier();
+        if (object->AtomicSetMark<false>(current, newMarkWord)) {
+            return;
+        }
+    } while (true);
 }
 
 template <class LanguageConfig>
@@ -1887,7 +1870,7 @@ static void ClearWeakRef(WeakStack::value_type *begin, WeakStack::value_type *en
 
             // Make sure even the object that contains the weak reference is trimed before forwarding, the weak ref
             // field is still within the object
-            if (toObj != nullptr && offset < obj->GetSizeForwarded()) {
+            if (toObj != nullptr && offset < obj->GetSize()) {
                 RefField<> &toField = *reinterpret_cast<RefField<> *>(reinterpret_cast<uintptr_t>(toObj) + offset);
                 toObj->ClearRef(toField);
             }
@@ -1918,7 +1901,7 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
         while (!remarkStack.empty()) {
             BaseObject *obj = remarkStack.back();
             remarkStack.pop_back();
-            if (Heap::IsHeapAddress(obj) && (!MarkObject(obj))) {
+            if (Heap::IsHeapAddress(obj) && (MarkObjectIfNotMarked(obj))) {
                 markStack.Push(obj);
                 needProcess = true;
                 LOG(DEBUG, GC) << "tracing take from satb buffer: obj " << obj;
@@ -2211,7 +2194,7 @@ bool CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
         while (!remarkStack.empty()) {  // LCOV_EXCL_BR_LINE
             BaseObject *obj = remarkStack.back();
             remarkStack.pop_back();
-            if (Heap::IsHeapAddress(obj) && !this->MarkObject(obj)) {
+            if (Heap::IsHeapAddress(obj) && this->MarkObjectIfNotMarked(obj)) {
                 collectStack.Push(obj);
                 LOG(DEBUG, GC) << "satb buffer add obj " << obj;
             }
@@ -2232,7 +2215,7 @@ void CmcGC<LanguageConfig>::MarkRememberSetImpl(BaseObject *object, LocalCollect
         if (Heap::IsHeapAddress(targetObj)) {
             RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(targetObj));
             if (region->IsInYoungSpace() && !region->IsNewObjectSinceMarking(targetObj) &&
-                !this->MarkObject(targetObj)) {
+                this->MarkObjectIfNotMarked(targetObj)) {
                 collectStack.Push(targetObj);
                 LOG(DEBUG, GC) << "remember set marking obj: " << object << "@" << &field << ", ref: " << targetObj;
             }
@@ -2699,12 +2682,6 @@ bool CmcGC<LanguageConfig>::WaitForGC([[maybe_unused]] ark::GCTask task)
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::InitGCBits([[maybe_unused]] ark::ObjectHeader *objHeader)
 {
-    constexpr ark::ClassHelper::ClassWordSize STATIC_OBJECT_MASK = static_cast<ark::ClassHelper::ClassWordSize>(
-        static_cast<uint64_t>(ark::mem::LanguageType::STATIC)
-        << (ark::mem::BaseStateWord::BASECLASS_WIDTH + ark::mem::BaseStateWord::PADDING_WIDTH));
-    auto *classWord = reinterpret_cast<ark::ClassHelper::ClassWordSize *>(ark::ToUintPtr(objHeader) +
-                                                                          ark::ObjectHeader::GetClassOffset());
-    *classWord |= STATIC_OBJECT_MASK;
 }
 
 template <class LanguageConfig>
@@ -2738,8 +2715,21 @@ void CmcGC<LanguageConfig>::StopGC()
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkObject([[maybe_unused]] ark::ObjectHeader *object)
+void CmcGC<LanguageConfig>::MarkObject(ObjectHeader *object)
 {
+    MarkObjectIfNotMarked(object);
+}
+
+template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
+{
+    bool marked = RegionalHeap::MarkObject(reinterpret_cast<BaseObject *>(object));
+    if (!marked) {
+        [[maybe_unused]] RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(object));
+        DCHECK(!region->IsGarbageRegion());
+        LOG(DEBUG, GC) << "mark obj " << GetDebugInfoAboutObject(object);
+    }
+    return !marked;
 }
 
 template <class LanguageConfig>

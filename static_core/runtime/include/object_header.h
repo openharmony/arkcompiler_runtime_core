@@ -79,19 +79,9 @@ public:
     {
         static_assert(sizeof(ClassHelper::ClassWordSize) == sizeof(ObjectPointerType));
         auto *classWordPtr = reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(&classWord_);
-        // NOTE(ipetrov): Set class with flags allocated by external CMC GC, will be removed when allocation in 32-bit
-        // space will be supported
-#if defined(ARK_USE_COMMON_RUNTIME) && defined(PANDA_TARGET_64)
-        // Atomic with acquire order reason: data race with classWord_ with dependecies on reads after the load which
-        // should become visible
-        auto flags = classWordPtr->load(std::memory_order_acquire) & ~GetClassMask();
-#else
-        constexpr ClassHelper::ClassWordSize flags = 0U;  // NOLINT(readability-identifier-naming)
-#endif
         // Atomic with release order reason: data race with classWord_ with dependecies on writes before the store which
         // should become visible acquire
-        classWordPtr->store(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass)) | flags,
-                            std::memory_order_release);
+        classWordPtr->store(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass)), std::memory_order_release);
         ASSERT_PRINT(ClassAddr<BaseClass>() == klass,
                      "Stored class = " << ClassAddr<BaseClass>() << ", but passed is " << klass);
     }
@@ -103,14 +93,13 @@ public:
         // Atomic with acquire order reason: data race with classWord_ with dependecies on reads after the load which
         // should become visible
         return reinterpret_cast<T *>(
-            reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(ptr)->load(std::memory_order_acquire) &
-            GetClassMask());
+            reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(ptr)->load(std::memory_order_acquire));
     }
 
     template <typename T>
     inline T *NotAtomicClassAddr() const
     {
-        return reinterpret_cast<T *>(GetClassWord());
+        return reinterpret_cast<T *>(classWord_);
     }
 
     // Generate hash value for an object.
@@ -142,21 +131,6 @@ public:
     static constexpr size_t GetClassOffset()
     {
         return MEMBER_OFFSET(ObjectHeader, classWord_);
-    }
-
-    // Mask to get class word from register:
-    // * 64-bit system, 64-bit class word: 0xFFFFFFFFFFFFFFFF
-    // * 64-bit system, 48-bit class word: 0x0000FFFFFFFFFFFF (external CMC GC)
-    // * 64-bit system, 32-bit class word: 0x00000000FFFFFFFF
-    // * 32-bit system, 32-bit class word: 0xFFFFFFFF
-    // * 32-bit system, 16-bit class word: 0x0000FFFF
-    static constexpr size_t GetClassMask()
-    {
-#if defined(ARK_USE_COMMON_RUNTIME) && defined(PANDA_TARGET_64)
-        return static_cast<size_t>((1ULL << 48ULL) - 1ULL);
-#else
-        return std::numeric_limits<size_t>::max() >> (ClassHelper::POINTER_SIZE - OBJECT_POINTER_SIZE) * BITS_PER_BYTE;
-#endif
     }
 
     static constexpr size_t GetMarkWordOffset()
@@ -343,20 +317,8 @@ private:
     size_t ObjectSizeDyn(BaseClass *baseKlass) const;
     size_t ObjectSizeStatic(BaseClass *baseKlass) const;
 
-    // NOTE(ipetrov): ClassWord mask usage is temporary solution, in the future all classes will be allocated in 32-bit
-    // address space
-    ALWAYS_INLINE ClassHelper::ClassWordSize GetClassWord() const
-    {
-        return classWord_ & GetClassMask();
-    }
-
-#if defined(ARK_USE_COMMON_RUNTIME) && defined(PANDA_TARGET_32)
-    MarkWord::MarkWordSize markWord_;
-    ClassHelper::ClassWordSize classWord_;
-#else
     ClassHelper::ClassWordSize classWord_;
     MarkWord::MarkWordSize markWord_;
-#endif
     /**
      * Allocates memory for the Object. No ctor is called.
      * @param klass - class of Object
@@ -366,14 +328,6 @@ private:
     static ObjectHeader *CreateObject(BaseClass *klass, bool nonMovable);
     static ObjectHeader *CreateObject(ManagedThread *thread, BaseClass *klass, bool nonMovable);
 };
-
-#if defined(ARK_USE_COMMON_RUNTIME) && defined(PANDA_TARGET_32)
-constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
-static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetMarkWordOffset());
-#else
-constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
-static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
-#endif
 
 // NOLINTBEGIN(readability-identifier-naming)
 template <class T>

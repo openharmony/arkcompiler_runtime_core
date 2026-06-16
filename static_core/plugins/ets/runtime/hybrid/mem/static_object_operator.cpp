@@ -116,19 +116,4 @@ void StaticObjectOperator::ClearRef(ark::common_vm::BaseObject *object, ark::mem
     referenceProcessor->EnqueueReference(reinterpret_cast<ObjectHeader *>(object));
 }
 
-ark::common_vm::BaseObject *StaticObjectOperator::GetForwardingPointer(const ark::common_vm::BaseObject *object) const
-{
-    // Overwrite class by forwarding address. Read barrier must be called before reading class.
-    uint64_t fwdAddr = *reinterpret_cast<const uint64_t *>(object);
-    return reinterpret_cast<ark::common_vm::BaseObject *>(fwdAddr & ObjectHeader::GetClassMask());
-}
-
-void StaticObjectOperator::SetForwardingPointerAfterExclusive(ark::common_vm::BaseObject *object,
-                                                              ark::common_vm::BaseObject *fwdPtr)
-{
-    auto &word = *reinterpret_cast<uint64_t *>(object);
-    uint64_t flags = word & (~ObjectHeader::GetClassMask());
-    word = flags | (reinterpret_cast<uint64_t>(fwdPtr) & ObjectHeader::GetClassMask());
-}
-
 }  // namespace ark::mem

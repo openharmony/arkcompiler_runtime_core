@@ -53,11 +53,6 @@ public:
         return hdr->ObjectSize();
     }
 
-    ark::common_vm::BaseObject *GetForwardingPointer(const ark::common_vm::BaseObject *object) const override;
-
-    void SetForwardingPointerAfterExclusive(ark::common_vm::BaseObject *object,
-                                            ark::common_vm::BaseObject *fwdPtr) override;
-
 private:
     static StaticObjectOperator instance_;
 };

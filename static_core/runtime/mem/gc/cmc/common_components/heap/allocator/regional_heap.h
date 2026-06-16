@@ -291,13 +291,6 @@ public:
         fromSpace_.ExemptFromRegions();
     }
 
-    BaseObject *RouteObject(BaseObject *fromObj, size_t size)
-    {
-        AllocationBuffer *buffer = AllocationBuffer::GetOrCreateAllocBuffer();
-        uintptr_t toAddr = buffer->ToSpaceAllocate(size);
-        return reinterpret_cast<BaseObject *>(toAddr);
-    }
-
     void CopyFromSpace(Taskpool *threadPool)
     {
         COMMON_PHASE_TIMER("CopyFromRegions");

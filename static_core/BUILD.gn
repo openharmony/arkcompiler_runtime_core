@@ -528,8 +528,8 @@ action("ark_clang_format") {
 action("ark_clang_force_format") {
   script = "${ark_root}/scripts/code_style/code_style_check.py"
   args = [
-    rebase_path("${ark_root}"),
     "--reformat",
+    rebase_path("${ark_root}"),
   ]
   outputs = [ "${target_gen_dir}/ark_static_core_force_clang_format.txt" ]
 }

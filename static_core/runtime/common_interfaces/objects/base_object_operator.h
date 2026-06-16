@@ -43,10 +43,6 @@ public:
                                              const RefFieldVisitor &weakFieldHandler) const = 0;
     // Clear the field
     virtual void ClearRef(BaseObject *object, ::ark::mem::RefField<> &field) const = 0;
-    // Get forwarding pointer.
-    virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
-    // Set forwarding pointer.
-    virtual void SetForwardingPointerAfterExclusive(BaseObject *object, BaseObject *fwdPtr) = 0;
 
     virtual ~BaseObjectOperatorInterfaces() = default;
 };
