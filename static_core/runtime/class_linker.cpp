@@ -48,6 +48,17 @@ namespace ark {
 using Type = panda_file::Type;
 using SourceLang = panda_file::SourceLang;
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+struct ClassInfo {
+    PandaUniquePtr<VTableBuilder> vtableBuilder;
+    PandaUniquePtr<ITableBuilder> itableBuilder;
+    PandaUniquePtr<IMTableBuilder> imtableBuilder;
+
+    Span<Field> fields;
+    size_t size;
+    size_t numSfields;
+};
+
 void ClassLinker::AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, ClassLinkerContext *context)
 {
     ASSERT(pf != nullptr);
@@ -294,8 +305,7 @@ Class *ClassLinker::FindLoadedClass(const uint8_t *descriptor, ClassLinkerContex
     return context->FindClass(descriptor);
 }
 
-template <class ClassDataAccessorT>
-static size_t GetClassSize(ClassDataAccessorT dataAccessor, size_t vtableSize, size_t imtSize, size_t *outNumSfields)
+static void UpdateClassSize(ClassInfo &info)
 {
     size_t num8bitSfields = 0;
     size_t num16bitSfields = 0;
@@ -304,11 +314,15 @@ static size_t GetClassSize(ClassDataAccessorT dataAccessor, size_t vtableSize, s
     size_t numRefSfields = 0;
     size_t numTaggedSfields = 0;
 
-    size_t numSfields = 0;
-
-    dataAccessor.EnumerateStaticFieldTypes([&num8bitSfields, &num16bitSfields, &num32bitSfields, &num64bitSfields,
-                                            &numRefSfields, &numTaggedSfields, &numSfields](Type fieldType) {
-        ++numSfields;
+    // Static fields are placed at front of the list.
+    // Traverse over all the fields until an instance field is found.
+    info.numSfields = info.fields.size();
+    for (const Field &field : info.fields) {
+        if (!field.IsStatic()) {
+            info.numSfields = &field - info.fields.data();
+            break;
+        }
+        Type fieldType = field.GetType();
 
         switch (fieldType.GetId()) {
             case Type::TypeId::U1:
@@ -340,41 +354,14 @@ static size_t GetClassSize(ClassDataAccessorT dataAccessor, size_t vtableSize, s
                 UNREACHABLE();
                 break;
         }
-    });
+    }
 
-    *outNumSfields = numSfields;
+    size_t vtableSize = info.vtableBuilder->GetVTableSize();
+    size_t imtSize = info.imtableBuilder->GetIMTSize();
 
-    return Class::ComputeClassSize(vtableSize, imtSize, num8bitSfields, num16bitSfields, num32bitSfields,
-                                   num64bitSfields, numRefSfields, numTaggedSfields);
+    info.size = Class::ComputeClassSize(vtableSize, imtSize, num8bitSfields, num16bitSfields, num32bitSfields,
+                                        num64bitSfields, numRefSfields, numTaggedSfields);
 }
-
-class ClassDataAccessorWrapper {
-public:
-    explicit ClassDataAccessorWrapper(panda_file::ClassDataAccessor *dataAccessor = nullptr)
-        : dataAccessor_(dataAccessor)
-    {
-    }
-
-    template <class Callback>
-    void EnumerateStaticFieldTypes(const Callback &cb) const
-    {
-        dataAccessor_->EnumerateFields([cb](panda_file::FieldDataAccessor &fda) {
-            if (!fda.IsStatic()) {
-                return;
-            }
-
-            cb(Type::GetTypeFromFieldEncoding(fda.GetType()));
-        });
-    }
-
-    ~ClassDataAccessorWrapper() = default;
-
-    DEFAULT_COPY_SEMANTIC(ClassDataAccessorWrapper);
-    DEFAULT_MOVE_SEMANTIC(ClassDataAccessorWrapper);
-
-private:
-    panda_file::ClassDataAccessor *dataAccessor_;
-};
 
 void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> interfaces)
 {
@@ -384,7 +371,7 @@ void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> interface
     }
 }
 
-ClassLinker::ClassInfo ClassLinker::CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler)
+ClassInfo ClassLinker::CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler)
 {
     ClassInfo classInfo;
     classInfo.itableBuilder = ctx.CreateITableBuilder(errorHandler);
@@ -393,81 +380,105 @@ ClassLinker::ClassInfo ClassLinker::CreateClassInfo(LanguageContext ctx, ClassLi
     return classInfo;
 }
 
-bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
+static void OnError(ClassLinkerErrorHandler *errorHandler, ClassLinker::Error error, const PandaString &msg)
+{
+    if (errorHandler != nullptr) {
+        errorHandler->OnError(error, msg);
+    }
+}
+
+/**
+ * Allocate array for fields with internal allocator.
+ * Static fields are placed in front of the array
+ */
+static bool SetupFields(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor,
+                        mem::InternalAllocatorPtr allocator, ClassLinkerErrorHandler *errorHandler)
+{
+    const uint32_t numFields = dataAccessor->GetFieldsNumber();
+    if (numFields == 0) {
+        return true;
+    }
+
+    Span fields = {allocator->AllocArray<Field>(numFields), numFields};
+    Field *staticFields = fields.data();
+
+    // Allocate external array for instance fields with arena allocator.
+    Field *instanceFieldsStart = info.vtableBuilder->GetAllocator()->AllocArray<Field>(numFields);
+    Field *instanceFields = instanceFieldsStart;
+
+    uint32_t fieldCount = 0;
+    dataAccessor->EnumerateFields(
+        [&staticFields, &instanceFields, &fieldCount, numFields](panda_file::FieldDataAccessor &fda) {
+            fieldCount++;
+            if (fieldCount > numFields) {  // actual field count is more than numFields
+                return;
+            }
+            Field *field = fda.IsStatic() ? staticFields++ : instanceFields++;
+            InitializeMemory(field, fda.GetFieldId(), fda.GetAccessFlags(),
+                             panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
+        });
+    if (numFields != fieldCount) {
+        // field count mismatch, possibly bytecode file curruption or attack payload.
+        allocator->Free(fields.data());
+        OnError(errorHandler, ClassLinker::Error::FIELD_NOT_FOUND, "invalid field len");
+        return false;
+    }
+    // Copy instanceFields to end of staticFields
+    MemcpyUnsafe(staticFields, instanceFieldsStart, (instanceFields - instanceFieldsStart) * sizeof(Field));
+    info.fields = fields;
+
+    return true;
+}
+
+bool ClassLinker::SetupClassInfo(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
                                  Span<Class *> interfaces, ClassLinkerContext *context,
                                  ClassLinkerErrorHandler *errorHandler)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(dataAccessor);
 
-    info.vtableBuilder = ctx.CreateVTableBuilder(errorHandler);
-    info.itableBuilder = ctx.CreateITableBuilder(errorHandler);
-    info.imtableBuilder = ctx.CreateIMTableBuilder();
+    info = CreateClassInfo(ctx, errorHandler);
+    // Call SetupFields before ITableBuilder::Build, because method index is calculated after CDA::EnumerateFields
+    if (!SetupFields(info, dataAccessor, allocator_, errorHandler)) {
+        return false;
+    }
 
     ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface())) {
         return false;
     }
     ASSERT(info.vtableBuilder != nullptr);
+    ASSERT(info.vtableBuilder->GetAllocator() != nullptr);
     if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
         FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
 
-    ClassDataAccessorWrapper dataAccessorWrapper(dataAccessor);
-    info.size = GetClassSize(dataAccessorWrapper, info.vtableBuilder->GetVTableSize(),
-                             info.imtableBuilder->GetIMTSize(), &info.numSfields);
+    UpdateClassSize(info);
     return true;
 }
 
-class ClassDataAccessor {
-public:
-    explicit ClassDataAccessor(Span<Field> fields) : fields_(fields) {}
-
-    template <class Callback>
-    void EnumerateStaticFieldTypes(const Callback &cb) const
-    {
-        for (const auto &field : fields_) {
-            if (!field.IsStatic()) {
-                continue;
-            }
-
-            cb(field.GetType());
-        }
-    }
-
-    ~ClassDataAccessor() = default;
-
-    DEFAULT_COPY_SEMANTIC(ClassDataAccessor);
-    DEFAULT_MOVE_SEMANTIC(ClassDataAccessor);
-
-private:
-    Span<Field> fields_;
-};
-
-bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> methods, Span<Field> fields, Class *base,
+bool ClassLinker::SetupClassInfo(ClassInfo &info, Span<Method> methods, Span<Field> fields, Class *base,
                                  Span<Class *> interfaces, bool isInterface, ClassLinkerErrorHandler *errorHandler)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*base);
 
-    info.vtableBuilder = ctx.CreateVTableBuilder(errorHandler);
-    info.itableBuilder = ctx.CreateITableBuilder(errorHandler);
-    info.imtableBuilder = ctx.CreateIMTableBuilder();
+    info = CreateClassInfo(ctx, errorHandler);
 
     ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, isInterface)) {
         return false;
     }
     ASSERT(info.vtableBuilder != nullptr);
+    ASSERT(info.vtableBuilder->GetAllocator() != nullptr);
     if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
         FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
 
-    ClassDataAccessor dataAccessor(fields);
-    info.size = GetClassSize(dataAccessor, info.vtableBuilder->GetVTableSize(), info.imtableBuilder->GetIMTSize(),
-                             &info.numSfields);
+    info.fields = fields;
+    UpdateClassSize(info);
     return true;
 }
 
@@ -595,32 +606,6 @@ bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::Cl
 
     SetupCopiedMethods(methods, copiedMethods);
     klass->SetMethods(methods, numVmethods, numSmethods);
-    return true;
-}
-
-bool ClassLinker::LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,
-                             [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
-{
-    uint32_t numFields = dataAccessor->GetFieldsNumber();
-    if (numFields == 0) {
-        return true;
-    }
-
-    uint32_t numSfields = klass->GetNumStaticFields();
-
-    Span<Field> fields {allocator_->AllocArray<Field>(numFields), numFields};
-
-    size_t sfieldsIdx = 0;
-    size_t ifieldsIdx = numSfields;
-    dataAccessor->EnumerateFields(
-        [klass, &sfieldsIdx, &ifieldsIdx, &fields](panda_file::FieldDataAccessor &fieldDataAccessor) {
-            Field *field = fieldDataAccessor.IsStatic() ? &fields[sfieldsIdx++] : &fields[ifieldsIdx++];
-            InitializeMemory(field, klass, fieldDataAccessor.GetFieldId(), fieldDataAccessor.GetAccessFlags(),
-                             panda_file::Type::GetTypeFromFieldEncoding(fieldDataAccessor.GetType()));
-        });
-
-    klass->SetFields(fields, numSfields);
-
     return true;
 }
 
@@ -988,7 +973,11 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
 
     klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
     klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
-    klass->SetNumStaticFields(classInfo.numSfields);
+
+    for (Field &field : classInfo.fields) {
+        field.SetClass(klass);
+    }
+    klass->SetFields(classInfo.fields, classInfo.numSfields);
 
     auto const onFail = [this, descriptor, klass](std::string_view msg) {
         FreeClass(klass);
@@ -997,9 +986,6 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
     };
     if (!LoadMethods(klass, &classInfo, classDataAccessor, errorHandler)) {
         return onFail("Cannot load methods of class");
-    }
-    if (!LoadFields(klass, classDataAccessor, errorHandler)) {
-        return onFail("Cannot load fields of class");
     }
     if (!LinkMethods(klass, &classInfo, errorHandler)) {
         return onFail("Cannot link methods of class");
@@ -1019,13 +1005,6 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, const uint8_t *descrip
     }
     ClassLinkerContext *context = GetExtension(lang)->GetBootContext();
     return LoadClass(pf, classId, descriptor, context, nullptr);
-}
-
-static void OnError(ClassLinkerErrorHandler *errorHandler, ClassLinker::Error error, const PandaString &msg)
-{
-    if (errorHandler != nullptr) {
-        errorHandler->OnError(error, msg);
-    }
 }
 
 static void OnClassNotFound(ClassLinkerErrorHandler *errorHandler, const uint8_t *descriptor)
@@ -1143,10 +1122,12 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     if (klass == nullptr) {
         return nullptr;
     }
-
-    auto *cha = Runtime::GetCurrent()->GetCha();
-    ASSERT(cha != nullptr);
-    cha->Update(klass);
+    if (Runtime::GetOptions().IsCompilerEnableJit()) {
+        auto runtime = Runtime::GetCurrent();
+        auto *cha = runtime->GetCha();
+        ASSERT(cha != nullptr);
+        cha->Update(klass);
+    }
 
     ASSERT(ext != nullptr);
     if (LIKELY(ext->CanInitializeClasses())) {
@@ -1225,11 +1206,10 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
 
     klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
     klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
-    klass->SetNumStaticFields(classInfo.numSfields);
 
     size_t numSmethods = methods.size() - klass->GetNumVirtualMethods();
     klass->SetMethods(methods, klass->GetNumVirtualMethods(), numSmethods);
-    klass->SetFields(fields, klass->GetNumStaticFields());
+    klass->SetFields(fields, classInfo.numSfields);
 
     for (auto &method : methods) {
         method.SetClass(klass);
@@ -1247,7 +1227,9 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
     klass->SetState(Class::State::LOADED);
 
     auto runtime = Runtime::GetCurrent();
-    runtime->GetCha()->Update(klass);
+    if (Runtime::GetOptions().IsCompilerEnableJit()) {
+        runtime->GetCha()->Update(klass);
+    }
     AnnounceClassInContext(klass);
 
     auto *otherKlass = context->InsertClass(klass);
@@ -1342,9 +1324,8 @@ public:
         }
         classInfo.imtableBuilder->Build(itable_, false);
 
-        ClassDataAccessor dataAccessor(fields);
-        classInfo.size = GetClassSize(dataAccessor, classInfo.vtableBuilder->GetVTableSize(),
-                                      classInfo.imtableBuilder->GetIMTSize(), &classInfo.numSfields);
+        classInfo.fields = fields;
+        UpdateClassSize(classInfo);
 
         auto *klass = linker->BuildClassImpl(descriptor, accessFlags, proxyMethods_, fields, baseClass, interfaces,
                                              context, ext_, std::move(classInfo));

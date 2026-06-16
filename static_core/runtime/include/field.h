@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,11 @@ class ClassLinkerErrorHandler;
 class Field {
 public:
     using UniqId = uint64_t;
+
+    Field(panda_file::File::EntityId fileId, uint32_t accessFlags, panda_file::Type type) : fileId_(fileId)
+    {
+        accessFlags_ = accessFlags | (static_cast<uint32_t>(type.GetEncoding()) << ACC_TYPE_SHIFT);
+    }
 
     Field(Class *klass, panda_file::File::EntityId fileId, uint32_t accessFlags, panda_file::Type type)
         : classWord_(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass))), fileId_(fileId)
@@ -159,7 +164,7 @@ public:
     NO_MOVE_SEMANTIC(Field);
 
 private:
-    ClassHelper::ClassWordSize classWord_;
+    ClassHelper::ClassWordSize classWord_ {0};
     panda_file::File::EntityId fileId_;
     uint32_t accessFlags_;
     uint32_t offset_ {0};
