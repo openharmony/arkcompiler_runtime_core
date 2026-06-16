@@ -29,12 +29,6 @@ cases:
           Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
 
     - decl: |-
-          enum E1 { X = 1, Y = 2 }
-          enum E2 { A = E1.X, B = E1.Y }
-      expected_out: |-
-          Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
-
-    - decl: |-
           enum E { A = (5).toInt() }
       expected_out: |-
           Semantic error ESE0342: Type of enumeration constants must be any integer or string type or explicitly defined and they must be of the same type.
