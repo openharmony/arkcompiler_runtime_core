@@ -26,7 +26,7 @@
 
 .record std.core.Array <external>
 
-.record std.core.Error <external>
+.record escompat.Error <external>
 
 .record std.core.NullPointerError <external>
 
@@ -59,7 +59,7 @@ jump_label_5:
 	lda v1
 	return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, handler_begin_label_0_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, handler_begin_label_0_0
 }
 
 .function std.core.String std.core.String.fromCharCode(std.core.Array a0) <external, varargs, static, access.function=public>

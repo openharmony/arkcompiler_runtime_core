@@ -163,7 +163,7 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
 
     auto pf = panda_file::OpenPandaFileFromMemory(array->GetData<void>(), array->GetLength());
     if (pf == nullptr) {
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
                                PandaString("Failed to load abc file from memory"));
         return nullptr;
     }

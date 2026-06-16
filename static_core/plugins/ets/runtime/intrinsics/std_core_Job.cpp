@@ -93,7 +93,7 @@ void EtsFailJob(EtsJob *job, EtsObject *error)
     EtsHandle<EtsObject> herror(executionCtx, error);
     EtsMutex::LockHolder lh(hjob);
 
-    auto *errorClass = PlatformTypes(executionCtx)->coreError;
+    auto *errorClass = PlatformTypes(executionCtx)->escompatError;
     if (!herror->IsInstanceOf(errorClass)) {
         ThrowRuntimeException("fail() argument is not an Error object");
         return;

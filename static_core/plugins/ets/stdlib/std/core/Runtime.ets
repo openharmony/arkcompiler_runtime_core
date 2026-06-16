@@ -173,23 +173,6 @@ export final class Runtime {
     }
 }
 
-class ErrorOptionsImpl implements ErrorOptions {
-
-    private cause_?: Object
-
-    override get cause(): Object | undefined {
-        return this.cause_
-    }
-
-    set cause(cause: Object | undefined) {
-        this.cause_ = cause
-    }
-
-    constructor(cause?: Object) {
-        this.cause_ = cause
-    }
-}
-
 // Deprecated. Narrow the value to type T or to default (object | null | undefined).
 /**
  * Narrow the type of the value to generic type T. This function is deprecated.

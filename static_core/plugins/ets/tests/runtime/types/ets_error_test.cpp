@@ -67,11 +67,11 @@ protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-// Check both EtsErrorTest and ark::Class<std.core.Error> has the same number of fields
+// Check both EtsErrorTest and ark::Class<escompat.Error> has the same number of fields
 // and at the same offsets
-TEST_F(EtsErrorTest, StdCoreErrorMemoryLayout)
+TEST_F(EtsErrorTest, EscompatErrorMemoryLayout)
 {
-    EtsClass *errorClass = PlatformTypes(vm_)->coreError;
+    EtsClass *errorClass = PlatformTypes(vm_)->escompatError;
     MirrorFieldInfo::CompareMemberOffsets(errorClass, GetErrorMembers());
 }
 

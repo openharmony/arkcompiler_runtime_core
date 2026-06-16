@@ -24,7 +24,7 @@ export namespace annotation {
     /**
      * InternalAPI layer APIs should only be used within the platform code
      */
-    @AccessRestriction(["arkruntime", "std"])
+    @AccessRestriction(["arkruntime", "std", "escompat"])
     @Retention("SOURCE")
     export @interface InternalAPI {}
 

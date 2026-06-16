@@ -2,7 +2,7 @@
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -23,7 +23,7 @@ expected_out:
         - "Task B start"
 expected_error:
     runtime:
-        - "Unhandled exception: std.core.Error"
+        - "Unhandled exception: escompat.Error"
         - "Error: concurrent_nested_n.ets: task A failed"
         - "at concurrent_nested_n.ETSGLOBAL.%async-taskA (concurrent_nested_n.ets:40:0)"
 ---*/

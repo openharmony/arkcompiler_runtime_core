@@ -577,7 +577,7 @@ void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, napi_value val
     bool isInstanceof = false;
     NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
     auto objRefconv =
-        JSRefConvertResolve(ctx, isInstanceof ? PlatformTypes(executionCtx)->coreError->GetRuntimeClass()
+        JSRefConvertResolve(ctx, isInstanceof ? PlatformTypes(executionCtx)->escompatError->GetRuntimeClass()
                                               : PlatformTypes(executionCtx)->interopESError->GetRuntimeClass());
     ASSERT(objRefconv != nullptr);
     LocalObjectHandle<EtsObject> etsObj(executionCtx->GetMT(), objRefconv->Unwrap(ctx, val));
@@ -588,7 +588,7 @@ void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, napi_value val
     }
 
     auto klass = etsObj->GetClass()->GetRuntimeClass();
-    if (LIKELY(PlatformTypes(executionCtx)->coreError->GetRuntimeClass()->IsAssignableFrom(klass))) {
+    if (LIKELY(PlatformTypes(executionCtx)->escompatError->GetRuntimeClass()->IsAssignableFrom(klass))) {
         executionCtx->GetMT()->SetException(etsObj->GetCoreType());
         return;
     }
@@ -605,7 +605,7 @@ void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, const char *ms
 {
     ASSERT_MANAGED_CODE();
     ASSERT(!executionCtx->GetMT()->HasPendingException());
-    ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, msg);
+    ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, msg);
 }
 
 void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)
@@ -692,7 +692,7 @@ void InteropCtx::ForwardEtsException(EtsExecutionContext *executionCtx)
     executionCtx->GetMT()->ClearException();
 
     auto klass = exc->ClassAddr<Class>();
-    ASSERT(PlatformTypes()->coreError->GetRuntimeClass()->IsAssignableFrom(klass));
+    ASSERT(PlatformTypes()->escompatError->GetRuntimeClass()->IsAssignableFrom(klass));
     JSRefConvert *refconv = JSRefConvertResolve<true>(this, klass);
     if (UNLIKELY(refconv == nullptr)) {
         INTEROP_LOG(INFO) << "Exception thrown while forwarding ets exception: " << klass->GetDescriptor();

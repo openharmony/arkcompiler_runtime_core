@@ -923,6 +923,10 @@ class CoverageInfo:
         # Update counts for executed line numbers
         line_coverage.update(self.line_stats)
 
+        for line_num, func_name in self.function_definition_line.items():
+            func_count = self.func_stats.get(f"{func_name}_{line_num}", 0)
+            line_coverage.setdefault(line_num, func_count)
+
         return [
             f"DA:{line_num},{count}"
             for line_num, count in sorted(line_coverage.items())
@@ -1447,7 +1451,9 @@ class ArktsconfigGenerator:
                     paths[key] = value
 
         if args.std_path:
-            paths["std"] = [os.path.abspath(args.std_path)]
+            std_path = Path(args.std_path).resolve()
+            paths["std"] = [str(std_path)]
+            paths["escompat"] = [str(std_path.parent / "escompat")]
 
         paths_keys = args.paths_keys
         paths_values = args.paths_values

@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"baseUrl": "${CMAKE_CURRENT_BINARY_DIR}",
 		"paths": {
-			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
+			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"],
+			"escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"]
 		},
 		"dependencies": {
 			"dynamic_import": { "language": "js",

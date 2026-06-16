@@ -81,7 +81,7 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
     }
     .record std.core.Object {
     }
-    .record std.core.Error {
+    .record escompat.Error {
     }
 
     .function std.core.Promise async_foo(std.core.Promise a0) {
@@ -94,7 +94,7 @@ TEST_F(EtsAsyncIrBuilderTest, StacklessAsyncFlow)
         lda.null
         return.obj
 
-    .catch std.core.Error, try_begin, try_end, try_end
+    .catch escompat.Error, try_begin, try_end, try_end
     }
     )";
 

@@ -128,7 +128,8 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
             auto etsVal = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, value).value();
             ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), etsVal, ark::ets::ToEtsBoolean(false));
         } else {
-            auto refconv = JSRefConvertResolve<true>(ctx, PlatformTypes(executionCtx)->coreError->GetRuntimeClass());
+            auto refconv =
+                JSRefConvertResolve<true>(ctx, PlatformTypes(executionCtx)->escompatError->GetRuntimeClass());
             ASSERT(refconv != nullptr);
             bool isInstanceof = false;
             EtsObject *error = nullptr;

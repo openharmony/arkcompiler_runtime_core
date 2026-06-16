@@ -122,26 +122,26 @@ static void ThrowErrorViaAni(ani_env *env)
     }
 
     ani_class cls {};
-    if (ANI_OK != env->FindClass("std.core.Error", &cls)) {
-        std::cerr << "Not found 'std.core.Error'" << std::endl;
+    if (ANI_OK != env->FindClass("escompat.Error", &cls)) {
+        std::cerr << "Not found 'escompat.Error'" << std::endl;
         return;
     }
 
     ani_method ctor {};
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor)) {
-        std::cerr << "Not found std.core.Error constructor" << std::endl;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor)) {
+        std::cerr << "Not found escompat.Error constructor" << std::endl;
         return;
     }
 
     ani_object errObj {};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     if (ANI_OK != env->Object_New(cls, ctor, &errObj, undef, undef)) {
-        std::cerr << "Failed to create std.core.Error" << std::endl;
+        std::cerr << "Failed to create escompat.Error" << std::endl;
         return;
     }
 
     if (ANI_OK != env->ThrowError(static_cast<ani_error>(errObj))) {
-        std::cerr << "Failed to throw std.core.Error" << std::endl;
+        std::cerr << "Failed to throw escompat.Error" << std::endl;
     }
 }
 

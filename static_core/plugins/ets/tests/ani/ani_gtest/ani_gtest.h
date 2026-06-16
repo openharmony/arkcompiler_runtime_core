@@ -171,12 +171,12 @@ public:
         }
 
         ani_class cls {};
-        if ((s = env->FindClass("std.core.Error", &cls)) != ANI_OK) {
+        if ((s = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
             return s;
         }
 
         ani_method ctor {};
-        if ((s = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor)) !=
+        if ((s = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor)) !=
             ANI_OK) {
             return s;
         }

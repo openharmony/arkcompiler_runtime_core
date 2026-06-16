@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,6 @@
 #
 Unhandled exception: error_call.TestError
 Error
-	at std.core.Error.<ctor> (Error.ets:56:0)
+	at escompat.Error.<ctor> (Error.ets:56:0)
 	at error_call.TestError.<ctor> (error_call.ets:26:0)
 	at error_call.ETSGLOBAL.main (error_call.ets:29:0)

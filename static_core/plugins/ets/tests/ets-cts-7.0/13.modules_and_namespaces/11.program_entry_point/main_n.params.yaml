@@ -155,4 +155,4 @@ cases:
           function main(): void {
               throw new Error();
           }
-      expected_runtime: "Unhandled exception: std.core.Error"
+      expected_runtime: "Unhandled exception: escompat.Error"

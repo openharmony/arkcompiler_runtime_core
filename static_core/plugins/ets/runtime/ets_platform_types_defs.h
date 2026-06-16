@@ -42,7 +42,7 @@
     TP("Lstd/core/Double;", coreDouble)                                                                                \
     /* Builtin language support */                                                                                     \
     TP("Lstd/core/BigInt;", coreBigInt)                                                                                \
-    TP("Lstd/core/Error;", coreError)                                                                                  \
+    TP("Lescompat/Error;", escompatError)                                                                              \
     TP("Lstd/core/Function;", coreFunction)                                                                            \
     IM("Lstd/core/Function;", "unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;", coreFunctionUnsafeCall)            \
     TP("Lstd/core/Tuple;", coreTuple)                                                                                  \
@@ -79,8 +79,8 @@
     TP("Lstd/core/LinkerMethodConflictError;", coreLinkerMethodConflictError)                                          \
     /* Core error handling */                                                                                          \
     TP("Larkruntime/StackTraceElement;", arkruntimeStackTraceElement)                                                  \
-    TP("Lstd/core/ErrorOptions;", coreErrorOptions)                                                                    \
-    TP("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                            \
+    TP("Lescompat/ErrorOptions;", escompatErrorOptions)                                                                \
+    TP("Lescompat/ErrorOptionsImpl;", escompatErrorOptionsImpl)                                                        \
     TP("Lstd/core/OutOfMemoryError;", coreOutOfMemoryError)                                                            \
     TP("Lstd/core/StackOverflowError;", coreStackOverflowError)                                                        \
     TP("Lstd/core/IllegalArgumentError;", coreIllegalArgumentError)                                                    \

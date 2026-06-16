@@ -3,6 +3,7 @@
         "baseUrl": "../../../../../..",
         "paths": {
             "std": ["plugins/ets/stdlib/std"],
+            "escompat": ["plugins/ets/stdlib/escompat"],
             "api": ["plugins/ets/sdk/api"],
             "arkts": ["plugins/ets/sdk/arkts"]
         },
