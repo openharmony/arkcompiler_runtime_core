@@ -28,16 +28,19 @@ function main(): int {
 function testEmptyStringInvalid() {
     const loc = '';
     arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags([loc]) });
 }
 
 function testNumericInvalid() {
     const loc = '123';
     arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags([loc]) });
 }
 
 function testDoubleHyphenInvalid() {
     const loc = 'en--US';
     arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags([loc]) });
 }
 
 function testValidSimpleTag() {
@@ -55,9 +58,11 @@ function testValidWithRegion() {
 function testGrandfatheredInvalidTag1() {
     const loc = 'i-enochian';
     arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags([loc]) });
 }
 
 function testGrandfatheredInvalidTag2() {
     const loc = 'sgn-BE-FR';
     arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags([loc]) });
 }
