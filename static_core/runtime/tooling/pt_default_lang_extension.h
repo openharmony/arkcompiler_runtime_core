@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,11 @@ public:
     std::optional<size_t> GetLengthIfArray(const ObjectHeader *object) override;
     void EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler) override;
     void EnumerateGlobals(const PropertyHandler &handler) override;
+    std::optional<std::string> GetAsBigIntString([[maybe_unused]] const ObjectHeader *object) override;
 
 private:
     panda_file::SourceLang lang_;
+    static constexpr std::string_view ETS_BIGINT_CLASSNAME = "std.core.BigInt";
 };
 
 class PtDynamicDefaultExtension : public PtLangExt {

@@ -39,6 +39,7 @@ set(SOURCES
     tooling/inspector/debugger_arkapi.cpp
     tooling/inspector/types/profile_result.cpp
     tooling/pt_default_lang_extension.cpp
+    tooling/bigint_helper.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
     tooling/tools.cpp
