@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include "libarkbase/os/mutex.h"
+#include "libarkbase/mem/space.h"
 #include "runtime/include/console_call_type.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/locks.h"
@@ -90,7 +91,7 @@ public:
     {
     }
 
-    virtual void OutOfMemory([[maybe_unused]] size_t size) {}
+    virtual void OutOfMemory([[maybe_unused]] size_t size, [[maybe_unused]] SpaceType spaceType) {}
 
     // Deprecated events
     virtual void ThreadStart([[maybe_unused]] ManagedThread::ThreadId threadId) {}
@@ -479,12 +480,12 @@ public:
         return hasAllocationFailedListeners_;
     }
 
-    void OutOfMemoryEvent(size_t size)
+    void OutOfMemoryEvent(size_t size, SpaceType spaceType)
     {
         if (UNLIKELY(hasAllocationFailedListeners_)) {
             for (auto *listener : allocationFailedListeners_) {
                 if (listener != nullptr) {
-                    listener->OutOfMemory(size);
+                    listener->OutOfMemory(size, spaceType);
                 }
             }
         }

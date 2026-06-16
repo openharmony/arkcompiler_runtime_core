@@ -17,6 +17,9 @@
 #define PANDA_RUNTIME_INCLUDE_OOM_STATS_H_
 
 #include "libarkbase/macros.h"
+#include "libarkbase/mem/space.h"
+
+#include <string>
 
 namespace ark::oom_stats {
 
@@ -29,7 +32,9 @@ public:
     OomNotifier() = delete;
     ~OomNotifier() = delete;
 
-    static void NotifyBeforeManagedOom(size_t heapLimitBytes, size_t activeMemoryBytes, size_t failedAllocBytes);
+    static void NotifyBeforeManagedOom(size_t heapLimitBytes, size_t activeMemoryBytes, size_t failedAllocBytes,
+                                       [[maybe_unused]] const std::string &processName,
+                                       [[maybe_unused]] SpaceType spaceType);
 
 private:
     NO_COPY_SEMANTIC(OomNotifier);

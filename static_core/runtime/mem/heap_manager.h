@@ -22,6 +22,7 @@
 #include "libarkbase/macros.h"
 #include "libarkbase/mem/code_allocator.h"
 #include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/space.h"
 #include "libarkbase/trace/trace.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/allocator.h"
@@ -279,7 +280,7 @@ private:
     void TriggerGCIfNeeded();
 
     /// Notifies allocation-failed listeners if applicable.
-    void NotifyAllocationFailedListeners(size_t size);
+    void NotifyAllocationFailedListeners(size_t size, SpaceType spaceType);
 
     void *TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
                         ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned = false);

@@ -19,7 +19,9 @@
 
 namespace ark::oom_stats {
 
-void OomNotifier::NotifyBeforeManagedOom(size_t heapLimitBytes, size_t activeMemoryBytes, size_t failedAllocBytes)
+void OomNotifier::NotifyBeforeManagedOom(size_t heapLimitBytes, size_t activeMemoryBytes, size_t failedAllocBytes,
+                                         [[maybe_unused]] const std::string &processName,
+                                         [[maybe_unused]] SpaceType spaceType)
 {
     LOG(INFO, RUNTIME) << "OOM notify (stub): heapLimit=" << heapLimitBytes << ", activeMemory=" << activeMemoryBytes
                        << ", failedAlloc=" << failedAllocBytes;

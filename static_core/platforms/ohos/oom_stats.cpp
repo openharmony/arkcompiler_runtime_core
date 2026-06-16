@@ -15,6 +15,7 @@
 
 #include "runtime/include/oom_stats.h"
 
+#include "libarkbase/mem/space.h"
 #include "libarkbase/os/thread.h"
 #include "libarkbase/utils/logger.h"
 
@@ -40,19 +41,23 @@ const std::string CHILD_THREAD_STR = "child thread";
 const std::string STATIC_STR = "static";
 }  // namespace
 
-void OomNotifier::NotifyBeforeManagedOom(size_t heapLimitBytes, size_t activeMemoryBytes, size_t failedAllocBytes)
+void OomNotifier::NotifyBeforeManagedOom(size_t heapLimitBytes, size_t activeMemoryBytes, size_t failedAllocBytes,
+                                         [[maybe_unused]] const std::string &processName,
+                                         [[maybe_unused]] SpaceType spaceType)
 {
 #ifdef PANDA_ENABLE_HISYSEVENT
     pid_t pid = getprocpid();
     ark::os::thread::ThreadId tid = ark::os::thread::GetCurrentThreadId();
     const std::string threadType = (pid == static_cast<pid_t>(tid)) ? MAIN_THREAD_STR : CHILD_THREAD_STR;
+    const char *spaceTypeStr = SpaceTypeToString(spaceType);
 
-    int32_t ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "ARK_STATS_DUMP", OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        "PID", pid, "TID", tid, "PROCESS_NAME", "", "LIMITSIZE", heapLimitBytes, "ACTIVE_MEMORY", activeMemoryBytes,
-        "TYPE", "OOMDump", "EVENT_CONFIG", "", "APP_RUNNING_UNIQUE_ID",
-        &DFX_GetAppRunningUniqueId == nullptr ? "" : DFX_GetAppRunningUniqueId(), "ARKTS_TYPE", STATIC_STR,
-        "THREAD_TYPE", threadType, "SPACE_TYPE", "", "LAST_ALLOCATE_OBJECT_SIZE", failedAllocBytes, "HEAP_TYPE", "");
+    int32_t ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "ARK_STATS_DUMP",
+                                  OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "TID", tid, "PROCESS_NAME",
+                                  processName.c_str(), "LIMITSIZE", heapLimitBytes, "ACTIVE_MEMORY", activeMemoryBytes,
+                                  "TYPE", "OOMDump", "EVENT_CONFIG", "", "APP_RUNNING_UNIQUE_ID",
+                                  &DFX_GetAppRunningUniqueId == nullptr ? "" : DFX_GetAppRunningUniqueId(),
+                                  "ARKTS_TYPE", STATIC_STR, "THREAD_TYPE", threadType, "SPACE_TYPE", spaceTypeStr,
+                                  "LAST_ALLOCATE_OBJECT_SIZE", failedAllocBytes, "HEAP_TYPE", "");
     if (ret != 0) {
         LOG(ERROR, RUNTIME) << "OomNotifier::NotifyBeforeManagedOom HiSysEventWrite failed, ret=" << ret;
     }

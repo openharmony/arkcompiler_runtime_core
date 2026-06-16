@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ static constexpr std::array AVAILABLE_RUNTIME_OPTIONS_IN_PRODUCT = {
     "gc-type",
     "native-library-path",
     "panda-files",
+    "process-package-name",
     "run-gc-in-place",
     "sampling-profiler-enable",
     "sampling-profiler-output-file",

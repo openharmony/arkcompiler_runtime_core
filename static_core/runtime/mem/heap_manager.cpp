@@ -19,6 +19,7 @@
 
 #include "libarkbase/mem/mmap_mem_pool-inl.h"
 #include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/mem/space.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime_notification.h"
@@ -103,11 +104,11 @@ bool HeapManager::Finalize()
     return true;
 }
 
-void HeapManager::NotifyAllocationFailedListeners(size_t size)
+void HeapManager::NotifyAllocationFailedListeners(size_t size, SpaceType spaceType)
 {
     auto *nm = GetNotificationManager();
     if (nm->HasAllocationFailedListeners()) {
-        nm->OutOfMemoryEvent(size);
+        nm->OutOfMemoryEvent(size, spaceType);
     }
 }
 
@@ -127,7 +128,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
     if (UNLIKELY(mem == nullptr)) {
         mem = TryGCAndAlloc(size, align, thread, objInitType, pinned);
         if (UNLIKELY(mem == nullptr)) {
-            NotifyAllocationFailedListeners(size);
+            NotifyAllocationFailedListeners(size, SpaceType::SPACE_TYPE_OBJECT);
             ThrowOutOfMemoryError("AllocateObject failed");
             return nullptr;
         }
@@ -236,7 +237,7 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
     }
     if (UNLIKELY(mem == nullptr)) {
         if (ManagedThread::GetCurrent() != nullptr) {
-            NotifyAllocationFailedListeners(size);
+            NotifyAllocationFailedListeners(size, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
             ThrowOutOfMemoryError("AllocateNonMovableObject failed");
         }
         return nullptr;
