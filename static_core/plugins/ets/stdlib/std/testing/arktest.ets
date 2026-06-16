@@ -124,6 +124,32 @@ export namespace arktest {
     }
 
     /**
+    * Asserts that the provided double value is positive zero (+0.0).
+    * @param {double} value The value to check.
+    * @param {string} [comment] Optional comment printed when the assertion fails.
+    * @throws {AssertionError} Thrown when the value is not positive zero.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    */
+    export function assertPositiveZero(value: double, comment?: string): void {
+        assertCommon(value === 0.0 && 1.0 / value === Infinity,
+            "expected +0.0 but got '" + value + "'", comment);
+    }
+
+    /**
+    * Asserts that the provided double value is negative zero (-0.0).
+    * @param {double} value The value to check.
+    * @param {string} [comment] Optional comment printed when the assertion fails.
+    * @throws {AssertionError} Thrown when the value is not negative zero.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    */
+    export function assertNegativeZero(value: double, comment?: string): void {
+        assertCommon(value === 0.0 && 1.0 / value === -Infinity,
+            "expected -0.0 but got '" + value + "'", comment);
+    }
+
+    /**
     * Checks whether the first value is less than the second value. Throws an error if the check fails.
     * @param {byte} value1 The first value to compare.
     * @param {byte} value2 The second value to compare.
