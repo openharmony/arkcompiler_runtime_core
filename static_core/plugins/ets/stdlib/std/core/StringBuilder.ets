@@ -81,7 +81,7 @@ export final class StringBuilder {
      * @FaAndStageModel
      */
     constructor(fromChars: char[]) {
-        let s: String = new String(fromChars);
+        let s: String = fromChars.join('');
         this.buf[this.index++] = s;
         this.length = s.getLength();
         if (!s.isCompressed()) {
