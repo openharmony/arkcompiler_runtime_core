@@ -422,12 +422,12 @@ TEST(linkertests, StripUnusedKeepsLiveBytecodePatchRanges)
 
     auto firstRange = patcher.GetSize();
     addPatch(deadMethod);
-    patcher.Add(std::string("dead debug string"));
+    patcher.AddNonBc(std::string("dead debug string"));
     patcher.AddBytecodePatchRange({firstRange, patcher.GetSize()});
 
     auto secondRange = patcher.GetSize();
     addPatch(liveMethod);
-    patcher.Add(std::string("live debug string"));
+    patcher.AddNonBc(std::string("live debug string"));
     patcher.AddBytecodePatchRange({secondRange, patcher.GetSize()});
 
     auto thirdRange = patcher.GetSize();

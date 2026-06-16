@@ -284,7 +284,7 @@ void Context::Write(const std::string &out)
         Error("Can't write", {ErrorDetail("file", out)});
         return;
     }
-    if (!cont_.Write(&writer, true, false,
+    if (!cont_.Write(&writer, false, false,
                      panda_file::ItemContainer::RegionSectionMode::REUSE_REQUIRED_UNCHANGED_DEPENDENCIES)) {
         Error("Can't write", {ErrorDetail("file", out)});
         return;

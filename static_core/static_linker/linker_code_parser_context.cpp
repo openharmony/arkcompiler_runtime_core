@@ -61,7 +61,7 @@ public:
 
     panda_file::StringItem *GetOrCreateStringItem(const std::string &s)
     {
-        patcher_->Add(s);
+        patcher_->AddNonBc(s);
         return nullptr;
     }
 
@@ -100,14 +100,24 @@ void CodePatcher::Add(Change c)
     changes_.emplace_back(std::move(c));
 }
 
+void CodePatcher::AddNonBc(NonBytecodeChange c)
+{
+    nonBcChanges_.emplace_back(std::move(c));
+}
+
 void CodePatcher::Devour(CodePatcher &&p)
 {
     const auto oldSize = changes_.size();
+    changes_.reserve(oldSize + p.changes_.size());
     changes_.insert(changes_.end(), std::move_iterator(p.changes_.begin()), std::move_iterator(p.changes_.end()));
+    nonBcChanges_.reserve(nonBcChanges_.size() + p.nonBcChanges_.size());
+    nonBcChanges_.insert(nonBcChanges_.end(), std::move_iterator(p.nonBcChanges_.begin()),
+                         std::move_iterator(p.nonBcChanges_.end()));
     for (auto range : p.bytecodePatchRanges_) {
         bytecodePatchRanges_.emplace_back(range.first + oldSize, range.second + oldSize);
     }
     ClearAndReleaseStorage(p.changes_);
+    ClearAndReleaseStorage(p.nonBcChanges_);
     ClearAndReleaseStorage(p.bytecodePatchRanges_);
 }
 
@@ -186,16 +196,13 @@ void CodePatcher::ApplyDeps(Context *ctx)
             ApplyStringChange(stringChange, ctx);
         } else if (auto literalArrayChange = std::get_if<LiteralArrayChange>(&v); literalArrayChange != nullptr) {
             ApplyLiteralArrayChange(literalArrayChange, ctx);
-        } else if (auto stringDependency = std::get_if<std::string>(&v); stringDependency != nullptr) {
+        }
+    }
+    for (auto &v : nonBcChanges_) {
+        if (auto stringDependency = std::get_if<std::string>(&v); stringDependency != nullptr) {
             ApplyStringDependency(stringDependency, ctx);
         }
     }
-}
-
-bool CodePatcher::IsBytecodePatchChange(const Change &change)
-{
-    return std::holds_alternative<IndexedChange>(change) || std::holds_alternative<StringChange>(change) ||
-           std::holds_alternative<LiteralArrayChange>(change);
 }
 
 void CodePatcher::RebuildBytecodePatchRanges(const std::vector<size_t> &newIndexes, size_t skippedIndex)
@@ -213,7 +220,7 @@ void CodePatcher::RebuildBytecodePatchRanges(const std::vector<size_t> &newIndex
             }
             newStart = newStart == skippedIndex ? mapped : newStart;
             newEnd = mapped + 1U;
-            hasBytecodePatch = hasBytecodePatch || IsBytecodePatchChange(changes_[mapped]);
+            hasBytecodePatch = true;
         }
         if (hasBytecodePatch) {
             newRanges.emplace_back(newStart, newEnd);
@@ -224,49 +231,61 @@ void CodePatcher::RebuildBytecodePatchRanges(const std::vector<size_t> &newIndex
 
 void CodePatcher::TryDeletePatch()
 {
-    auto shouldDelete = [](auto &a) {
+    auto shouldDeleteBc = [](auto &a) {
         using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
-        if constexpr (std::is_same_v<T, IndexedChange>) {
+        if constexpr (std::is_same_v<T, IndexedChange> || std::is_same_v<T, StringChange> ||
+                       std::is_same_v<T, LiteralArrayChange>) {
             return !a.mi->GetDependencyMark();
-        } else if constexpr (std::is_same_v<T, StringChange>) {
-            return !a.mi->GetDependencyMark();
-        } else if constexpr (std::is_same_v<T, LiteralArrayChange>) {
-            return !a.mi->GetDependencyMark();
-        } else if constexpr (std::is_same_v<T, DebugInfoPatch>) {
-            return !a.method->GetDependencyMark();
-        } else if constexpr (std::is_same_v<T, std::string>) {
-            return false;
         } else {
             UNREACHABLE();
         }
     };
 
-    auto skippedIndex = changes_.size();
-    auto newIndexes = std::vector<size_t>(changes_.size(), skippedIndex);
-    auto out = changes_.begin();
-    size_t newIndex = 0;
-    size_t oldIndex = 0;
-    for (auto it = changes_.begin(); it != changes_.end(); ++it) {
-        if (std::visit(shouldDelete, *it)) {
-            oldIndex++;
-            continue;
+    {
+        auto skippedIndex = changes_.size();
+        auto newIndexes = std::vector<size_t>(changes_.size(), skippedIndex);
+        auto out = changes_.begin();
+        size_t newIndex = 0;
+        size_t oldIndex = 0;
+        for (auto it = changes_.begin(); it != changes_.end(); ++it) {
+            if (std::visit(shouldDeleteBc, *it)) {
+                oldIndex++;
+                continue;
+            }
+            newIndexes[oldIndex++] = newIndex++;
+            if (out != it) {
+                *out = std::move(*it);
+            }
+            ++out;
         }
-        newIndexes[oldIndex++] = newIndex++;
-        if (out != it) {
-            *out = std::move(*it);
-        }
-        ++out;
+        changes_.erase(out, changes_.end());
+        RebuildBytecodePatchRanges(newIndexes, skippedIndex);
     }
-    changes_.erase(out, changes_.end());
-    // Keep strip-unused on the parallel patch path: compaction changes indexes, but method-local bytecode ranges
-    // remain independent after their surviving entries are remapped.
-    RebuildBytecodePatchRanges(newIndexes, skippedIndex);
-}
 
-void CodePatcher::Patch(const std::pair<size_t, size_t> range)
-{
-    PatchBytecode(range);
-    PatchDebug(range);
+    {
+        auto out = nonBcChanges_.begin();
+        for (auto it = nonBcChanges_.begin(); it != nonBcChanges_.end(); ++it) {
+            auto isDead = std::visit(
+                [](auto &a) {
+                    using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
+                    if constexpr (std::is_same_v<T, DebugInfoPatch>) {
+                        return !a.method->GetDependencyMark();
+                    } else if constexpr (std::is_same_v<T, std::string>) {
+                        return false;
+                    } else {
+                        UNREACHABLE();
+                    }
+                },
+                *it);
+            if (!isDead) {
+                if (out != it) {
+                    *out = std::move(*it);
+                }
+                ++out;
+            }
+        }
+        nonBcChanges_.erase(out, nonBcChanges_.end());
+    }
 }
 
 void CodePatcher::PatchBytecode(const std::pair<size_t, size_t> range)
@@ -286,10 +305,6 @@ void CodePatcher::PatchBytecode(const std::pair<size_t, size_t> range)
                 } else if constexpr (std::is_same_v<T, LiteralArrayChange>) {
                     auto off = a.it->GetIndex();
                     a.inst.UpdateId(BytecodeId(off));
-                } else if constexpr (std::is_same_v<T, std::string>) {
-                    // nothing
-                } else if constexpr (std::is_same_v<T, DebugInfoPatch>) {
-                    // Debug info patching mutates debug structures and is handled by PatchDebug().
                 } else {
                     UNREACHABLE();
                 }
@@ -305,18 +320,16 @@ void CodePatcher::PatchBytecodeRanges(const std::pair<size_t, size_t> range)
     }
 }
 
-void CodePatcher::PatchDebug(const std::pair<size_t, size_t> range)
+void CodePatcher::PatchDebug()
 {
-    for (size_t i = range.first; i < range.second; i++) {
-        auto &v = changes_[i];
+    for (auto &v : nonBcChanges_) {
         std::visit(
             [](auto &a) {
                 using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
                 if constexpr (std::is_same_v<T, DebugInfoPatch>) {
                     PatchDebugInfo(a);
-                } else if constexpr (std::is_same_v<T, IndexedChange> || std::is_same_v<T, StringChange> ||
-                                     std::is_same_v<T, LiteralArrayChange> || std::is_same_v<T, std::string>) {
-                    // Bytecode patching is handled by PatchBytecode().
+                } else if constexpr (std::is_same_v<T, std::string>) {
+                    // String dependency entries are resolved in ApplyDeps, nothing to patch here.
                 } else {
                     UNREACHABLE();
                 }
@@ -337,10 +350,8 @@ void CodePatcher::AddStringDependency()
         }
     };
 
-    for (auto it = changes_.begin(); it != changes_.end();) {
-        auto &v = *it;
+    for (auto &v : changes_) {
         std::visit(markStringDependency, v);
-        ++it;
     }
 }
 
@@ -387,39 +398,10 @@ void Context::HandleIndexedId(const InstructionIdContext &ctx, const BytecodeIns
     ctx.patcher.Add(CodePatcher::IndexedChange {inst, ctx.data.nmi, newItem});
 }
 
-Context::IndexResolver Context::GetIndexResolver(const BytecodeInstruction &inst)
-{
-    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
-    if (inst.HasFlag(Flags::TYPE_ID)) {
-        return &panda_file::File::ResolveClassIndex;
-    }
-    if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
-        return &panda_file::File::ResolveMethodIndex;
-    }
-    if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
-        return &panda_file::File::ResolveFieldIndex;
-    }
-    return nullptr;
-}
-
-void Context::HandleInstructionId(const InstructionIdContext &ctx, const BytecodeInstruction &inst)
-{
-    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
-
-    if (auto resolve = GetIndexResolver(inst); resolve != nullptr) {
-        HandleIndexedId(ctx, inst, resolve);
-        return;
-    }
-    if (inst.HasFlag(Flags::STRING_ID)) {
-        HandleStringId(ctx, inst);
-    } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
-        HandleLiteralArrayId(ctx, inst);
-    }
-}
-
 void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
 {
     using EntityId = panda_file::File::EntityId;
+    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
 
     const auto myId = EntityId(data->omi->GetOffset());
     auto *items = data->fileReader->GetItems();
@@ -443,7 +425,17 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
             continue;
         }
 
-        HandleInstructionId(idContext, inst);
+        if (inst.HasFlag(Flags::TYPE_ID)) {
+            HandleIndexedId(idContext, inst, &panda_file::File::ResolveClassIndex);
+        } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
+            HandleIndexedId(idContext, inst, &panda_file::File::ResolveMethodIndex);
+        } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
+            HandleIndexedId(idContext, inst, &panda_file::File::ResolveFieldIndex);
+        } else if (inst.HasFlag(Flags::STRING_ID)) {
+            HandleStringId(idContext, inst);
+        } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
+            HandleLiteralArrayId(idContext, inst);
+        }
 
         offset += instSize;
         inst = inst.JumpTo(instSize);
@@ -464,7 +456,6 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
         return;
     }
 
-    // Collect string items for each method with debug information.
     auto file = data->fileReader->GetFilePtr();
     auto scrapper = LinkerDebugInfoScrapper(file, &p, cont_.GetClassMap());
     auto off = dbg->GetOffset();
@@ -473,7 +464,7 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
     scrapper.Scrap(eId);
 
     auto newDbg = data->nmi->GetDebugInfo();
-    p.Add(CodePatcher::DebugInfoPatch {file, &cont_, newDbg, eId, data->nmi, data->patchLnp});
+    p.AddNonBc(CodePatcher::DebugInfoPatch {file, &cont_, newDbg, eId, data->nmi, data->patchLnp});
 }
 
 }  // namespace ark::static_linker

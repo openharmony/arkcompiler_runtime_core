@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <thread>
 #include <type_traits>
 #include <variant>
 
@@ -24,7 +25,6 @@
 #include "libarkbase/utils/utf.h"
 
 #include "linker_context.h"
-#include "linker_parallel.h"
 
 namespace {
 template <typename T>
@@ -93,6 +93,8 @@ void Context::Merge()
 
     FillRegularClasses();
 
+    ClearAndReleaseStorage(classMergeRecords_);
+
     for (const auto &[item, reader] : buckets.foreignMembers) {
         MergeItem(item, *reader);
     }
@@ -106,10 +108,17 @@ void Context::Merge()
 Context::MergeItemBuckets Context::CollectMergeItemBuckets()
 {
     auto buckets = MergeItemBuckets {};
+
+    size_t totalItems = 0;
+    for (auto &reader : readers_) {
+        totalItems += reader.GetItems()->size();
+    }
+    constexpr size_t kForeignReserveFraction = 3U;
+    buckets.foreignClasses.reserve(totalItems / kForeignReserveFraction);
+    buckets.foreignMembers.reserve(totalItems / kForeignReserveFraction);
+
     for (auto &reader : readers_) {
         for (const auto &[o, i] : *reader.GetItems()) {
-            // Keep old entity offsets available for bytecode/debug id resolution, and collect the work lists used by
-            // the ordered merge below.
             i->SetOffset(o.GetOffset());
             buckets.totalItems++;
             switch (i->GetItemType()) {
@@ -168,34 +177,15 @@ void Context::AddRegularClasses()
             auto *clz = GetOrCreateRegularClass(name, &reader);
             knownItems_[i] = clz;
             cameFrom_.emplace_back(clz, &reader);
+            classMergeRecords_.push_back({static_cast<panda_file::ClassItem *>(i), clz, &reader});
         }
     }
 }
 
 void Context::FillRegularClasses()
 {
-    for (auto &reader : readers_) {
-        auto *ic = reader.GetContainerPtr();
-        auto &classes = *ic->GetClassMap();
-
-        for (const auto &[name, i] : classes) {
-            if (i->IsForeign()) {
-                continue;
-            }
-            auto found = knownItems_.find(i);
-            ASSERT(found != knownItems_.end());
-            auto ni = static_cast<panda_file::ClassItem *>(found->second);
-            auto oi = static_cast<panda_file::ClassItem *>(i);
-            MergeClass(&reader, ni, oi);
-        }
-    }
-
-    auto &cm = *cont_.GetClassMap();
-    for (auto &kv : cm) {
-        auto *clz = kv.second;
-        if (clz != nullptr && !clz->IsForeign()) {
-            static_cast<panda_file::ClassItem *>(clz)->FinalizeMethodsOrder();
-        }
+    for (auto &rec : classMergeRecords_) {
+        MergeClass(rec.reader, rec.newItem, rec.oldItem);
     }
 }
 
@@ -607,17 +597,12 @@ void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, pand
 
 std::vector<panda_file::Type> Helpers::BreakProto(panda_file::ProtoItem *p)
 {
-    auto ret = std::vector<panda_file::Type>();
-    FillProtoTypes(p, ret);
-    return ret;
-}
-
-void Helpers::FillProtoTypes(panda_file::ProtoItem *p, std::vector<panda_file::Type> &out)
-{
     auto &shorty = p->GetShorty();
 
-    out.reserve(panda_file::SHORTY_ELEM_PER16 * shorty.size());
+    auto ret = std::vector<panda_file::Type>();
+    ret.reserve(panda_file::SHORTY_ELEM_PER16 * shorty.size());
 
+    // SHORTY
     size_t numElem = 0;
     [[maybe_unused]] size_t numRefs = 0;
     auto fetch = [idx = size_t(0), &shorty]() mutable {
@@ -643,7 +628,7 @@ void Helpers::FillProtoTypes(panda_file::ProtoItem *p, std::vector<panda_file::T
             numRefs++;
         }
         static_assert(std::is_trivially_copyable_v<decltype(t)>);
-        out.emplace_back(t);
+        ret.emplace_back(t);
 
         numElem++;
 
@@ -653,7 +638,9 @@ void Helpers::FillProtoTypes(panda_file::ProtoItem *p, std::vector<panda_file::T
     }
 
     ASSERT(numRefs == p->GetRefTypes().size());
-    ASSERT(!out.empty());
+    ASSERT(!ret.empty());
+
+    return ret;
 }
 
 const Context::ProtoData &Context::GetProto(panda_file::ProtoItem *p)
@@ -664,9 +651,7 @@ const Context::ProtoData &Context::GetProto(panda_file::ProtoItem *p)
 
     auto &refs = p->GetRefTypes();
 
-    auto &typs = protoTypsScratch_;
-    typs.clear();
-    Helpers::FillProtoTypes(p, typs);
+    auto typs = Helpers::BreakProto(p);
 
     panda_file::TypeItem *ret = nullptr;
     auto params = std::vector<panda_file::MethodParamItem>();
@@ -681,7 +666,7 @@ const Context::ProtoData &Context::GetProto(panda_file::ProtoItem *p)
             ASSERT(numRefs < refs.size());
             ti = TypeFromOld(refs[numRefs++]);
         } else {
-            ti = PrimitiveTypeFromCache(t.GetId());
+            ti = cont_.GetOrCreatePrimitiveTypeItem(t);
         }
 
         if (ret == nullptr) {
@@ -699,19 +684,6 @@ const Context::ProtoData &Context::GetProto(panda_file::ProtoItem *p)
     auto [it, inserted] = protoCache_.emplace(p, ProtoData {proto, std::move(params)});
     ASSERT(inserted);
     return it->second;
-}
-
-panda_file::PrimitiveTypeItem *Context::PrimitiveTypeFromCache(panda_file::Type::TypeId id)
-{
-    const auto idx = static_cast<size_t>(id);
-    ASSERT(idx < primitiveTypeCache_.size());
-    auto *cached = primitiveTypeCache_[idx];
-    if (cached != nullptr) {
-        return cached;
-    }
-    auto *fresh = cont_.GetOrCreatePrimitiveTypeItem(id);
-    primitiveTypeCache_[idx] = fresh;
-    return fresh;
 }
 
 template <typename T, typename Getter, typename Adder>
@@ -856,6 +828,20 @@ std::variant<panda_file::BaseItem *, Context::ErrorDetail> Context::ScalarValueI
     return ErrorDetail("id", oi);
 }
 
+void Context::Parse()
+{
+    const auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    const auto threadCount = std::min(codeDatas_.size(), static_cast<size_t>(hardwareThreads));
+    if (threadCount <= 1) {
+        patcher_.ReserveChanges(EstimatePatchChanges(0, codeDatas_.size()));
+        ProcessCodeDataRange(&patcher_, 0, codeDatas_.size());
+        ApplyPatchDependencies();
+        return;
+    }
+
+    ParseConcurrently();
+}
+
 void Context::ApplyPatchDependencies()
 {
     patcher_.ApplyDeps(this);
@@ -879,44 +865,49 @@ size_t Context::EstimatePatchChanges(size_t start, size_t end) const
 
 void Context::ProcessCodeDataRange(CodePatcher *patcher, size_t start, size_t end)
 {
+    patcher->ReserveRanges(end - start);
     for (auto idx = start; idx < end; idx++) {
         auto changeStart = patcher->GetSize();
         ProcessCodeData(*patcher, &codeDatas_[idx]);
+        // Keep one patch range per method.  Bytecode id updates inside different methods are independent and can be
+        // patched in parallel; debug info changes collected in the same range are skipped here and handled serially.
         patcher->AddBytecodePatchRange({changeStart, patcher->GetSize()});
     }
 }
 
-void Context::Parse()
+void Context::ParseConcurrently()
 {
-    const size_t n = codeDatas_.size();
-    if (n == 0) {
-        return;
-    }
+    const auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    const auto threadCount = std::min(codeDatas_.size(), static_cast<size_t>(hardwareThreads));
+    ASSERT(threadCount > 1);
 
-    constexpr size_t K_MIN_PER_THREAD = 256U;
-    const unsigned par = GetParallelism();
-    if (!IsParallelEnabled() || par <= 1U || n < K_MIN_PER_THREAD * 2U) {
-        patcher_.ReserveChanges(EstimatePatchChanges(0, n));
-        ProcessCodeDataRange(&patcher_, 0, n);
-        ApplyPatchDependencies();
-        return;
+    std::vector<CodePatcher> patchers(threadCount);
+    std::vector<std::thread> threads;
+    threads.reserve(threadCount);
+    const auto chunkSize = (codeDatas_.size() + threadCount - 1U) / threadCount;
+    for (size_t i = 0; i < threadCount; i++) {
+        auto start = i * chunkSize;
+        auto end = std::min(codeDatas_.size(), start + chunkSize);
+        if (start >= end) {
+            break;
+        }
+        patchers[i].ReserveChanges(EstimatePatchChanges(start, end));
+        // Keep chunk order deterministic: local patchers are merged by increasing start index.
+        threads.emplace_back(
+            [this, start, end, &patcher = patchers[i]]() { ProcessCodeDataRange(&patcher, start, end); });
     }
-
-    const size_t chunkCount = GetParallelChunkCount(n, K_MIN_PER_THREAD);
-    std::vector<CodePatcher> patchers(chunkCount);
-    ParallelForChunks(
-        0U, n,
-        [this, &patchers](size_t tid, size_t begin, size_t end) {
-            patchers[tid].ReserveChanges(EstimatePatchChanges(begin, end));
-            ProcessCodeDataRange(&patchers[tid], begin, end);
-        },
-        K_MIN_PER_THREAD);
+    for (auto &thread : threads) {
+        thread.join();
+    }
 
     size_t totalChanges = 0;
+    size_t totalRanges = 0;
     for (const auto &patcher : patchers) {
         totalChanges += patcher.GetSize();
+        totalRanges += patcher.GetBytecodePatchRangeCount();
     }
     patcher_.ReserveChanges(totalChanges);
+    patcher_.ReserveRanges(totalRanges);
     for (auto &patcher : patchers) {
         patcher_.Devour(std::move(patcher));
     }
@@ -982,23 +973,25 @@ bool Context::HandleEntryDependencies()
         auto firstSlash = name.find('/');
         auto lastSlash = name.rfind('/');
         if (dotPos != std::string::npos && dotPos != 0 && dotPos < name.size() - 1) {
-            // if entry is filename
             if (FileFind(name, cm)) {
                 continue;
             }
         } else if (firstSlash != std::string::npos && lastSlash != std::string::npos && lastSlash > firstSlash) {
-            // if entry is method
-            auto classNameFromEntry = name.substr(0, lastSlash);
-            classNameFromEntry.insert(classNameFromEntry.begin(), 'L');
-            classNameFromEntry += ";";
-            auto methodNameFromEntry = name.substr(lastSlash + 1);
-            if (MethodFind(classNameFromEntry, methodNameFromEntry, cm)) {
+            std::string className;
+            className.reserve(lastSlash + 2);
+            className.push_back('L');
+            className.append(name, 0, lastSlash);
+            className.push_back(';');
+            auto methodName = name.substr(lastSlash + 1);
+            if (MethodFind(className, methodName, cm)) {
                 continue;
             }
         }
-        // try look up as classname for last try
-        auto className = name + ";";
-        className.insert(className.begin(), 'L');
+        std::string className;
+        className.reserve(name.size() + 2);
+        className.push_back('L');
+        className.append(name);
+        className.push_back(';');
         auto it = cm.find(className);
         if (it != cm.end()) {
             it->second->SetDependencyMark();
@@ -1051,26 +1044,40 @@ void Context::TryDelete()
 
 void Context::Patch()
 {
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr size_t BYTECODE_PATCH_CHUNK_SIZE = 256;
 
     auto patchSize = patcher_.GetSize();
     auto rangeCount = patcher_.GetBytecodePatchRangeCount();
-    if (patchSize == 0) {
+    auto chunkCount = (rangeCount + BYTECODE_PATCH_CHUNK_SIZE - 1U) / BYTECODE_PATCH_CHUNK_SIZE;
+    auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
+    auto threadCount = std::min(chunkCount, static_cast<size_t>(hardwareThreads));
+    if (threadCount <= 1) {
+	patcher_.PatchBytecode({0, patchSize});
+ 	patcher_.PatchDebug();
         return;
     }
 
-    if (!IsParallelEnabled() || rangeCount < BYTECODE_PATCH_CHUNK_SIZE * 2U) {
-        patcher_.Patch({0, patchSize});
-        return;
+    std::vector<std::thread> threads;
+    threads.reserve(threadCount);
+    std::atomic_size_t nextRange {0};
+    for (size_t i = 0; i < threadCount; i++) {
+        threads.emplace_back([this, rangeCount, &nextRange]() {
+            // Atomic with relaxed order reason: counter only gives each thread a separate bytecode range
+            for (auto start = nextRange.fetch_add(BYTECODE_PATCH_CHUNK_SIZE, std::memory_order_relaxed);
+                 start < rangeCount;
+                 // Atomic with relaxed order reason: counter only gives each thread a separate bytecode range
+                 start = nextRange.fetch_add(BYTECODE_PATCH_CHUNK_SIZE, std::memory_order_relaxed)) {
+                auto end = std::min(rangeCount, start + BYTECODE_PATCH_CHUNK_SIZE);
+                patcher_.PatchBytecodeRanges({start, end});
+            }
+        });
     }
-
-    ParallelForChunks(
-        0U, rangeCount,
-        [this](size_t, size_t b, size_t e) {
-            patcher_.PatchBytecodeRanges({b, e});
-        },
-        BYTECODE_PATCH_CHUNK_SIZE);
-    patcher_.PatchDebug({0, patchSize});
+    for (auto &thread : threads) {
+        thread.join();
+    }
+    // Debug info patching mutates shared debug structures, so it stays serial after parallel bytecode patching.
+    patcher_.PatchDebug();
 }
 
 panda_file::BaseClassItem *Context::ClassFromOld(panda_file::BaseClassItem *old)
@@ -1094,7 +1101,7 @@ panda_file::TypeItem *Context::TypeFromOld(panda_file::TypeItem *old)
 {
     const auto ty = old->GetType();
     if (ty.IsPrimitive()) {
-        return PrimitiveTypeFromCache(ty.GetId());
+        return cont_.GetOrCreatePrimitiveTypeItem(ty.GetId());
     }
     ASSERT(old->GetItemType() == panda_file::ItemTypes::CLASS_ITEM ||
            old->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM);
