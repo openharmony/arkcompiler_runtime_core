@@ -304,14 +304,12 @@ export namespace util {
          */
         private static decodeBase64(base64: string, urlSafe: boolean): Uint8Array {
             let table = urlSafe ? Base64Helper.BASE64_URL_SAFE_CHARS : Base64Helper.BASE64_CHARS;
-            let allowedPattern = urlSafe ? "[^A-Za-z0-9\\-_=]" : "[^A-Za-z0-9+/=]";
-            let cleaned: string = base64.replace(new RegExp(allowedPattern, "g"), "");
             let buffer: int = 0;
             let bufferLength: int = 0;
-            let bytes: Array<number> = new Array<number>();
+            let bytes: Array<int> = new Array<int>();
 
-            for (let i = 0; i < cleaned.length; i++) {
-                let ch = cleaned.charAt(i);
+            for (let i = 0; i < base64.length; i++) {
+                let ch = base64.charAt(i);
                 if (ch == c'=') {
                     break;
                 }
@@ -381,6 +379,24 @@ export namespace util {
             }
         }
 
+        private static removeNewlines(src: string): string {
+            let sb = new StringBuilder();
+            let lastPos: int = 0;
+            for (let i: int = 0; i < src.length; i++) {
+                let ch: char = src.charAt(i);
+                if (ch == c'\r' || ch == c'\n') {
+                    if (i > lastPos) {
+                        sb.append(src.substring(lastPos, i));
+                    }
+                    lastPos = i + 1;
+                }
+            }
+            if (lastPos < src.length) {
+                sb.append(src.substring(lastPos));
+            }
+            return sb.toString();
+        }
+
         private decodeSyncUint8Array(src: Uint8Array, options: Type): Uint8Array {
             let base64String: string;
             let charArray: Array<string> = new Array<string>();
@@ -389,7 +405,7 @@ export namespace util {
             }
             base64String = charArray.join("");
             if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
-                base64String = base64String.replace(new RegExp("[\\r\\n]", "g"), "");
+                base64String = Base64Helper.removeNewlines(base64String);
             }
             return Base64Helper.decodeBase64(base64String, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
         }
@@ -397,7 +413,7 @@ export namespace util {
         private decodeSyncString(src: string, options: Type): Uint8Array {
             let newString: string = src;
             if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
-                newString = src.replace(new RegExp("[\\r\\n]", "g"), "");
+                newString = Base64Helper.removeNewlines(src);
             }
             return Base64Helper.decodeBase64(newString, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
         }

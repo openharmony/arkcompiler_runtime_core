@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 async function main(): Promise<int> {
-    const suite = new arktest.ArkTestsuite("Base64Helper Test");
+    const suite = new arktest.ArkTestsuite('Base64Helper Test');
 
     testEncodeDecodeBasic();
     testEncodeDecodeBasicSync();
@@ -28,16 +28,20 @@ async function main(): Promise<int> {
     testEmptyEncode();
     testEmptyDecode();
     testBase64WithoutPadding();
-    suite.addTest("Test encodeSync with MIME and MINE_URL_SAFE", testEncodeSyncMineAndMineUrlSafe);
-    suite.addTest("Test encode and decode with no options", testNoOptionsEncodeDecode);
-    suite.addTest("Test encodeSync and decodeSync with no options", testNoOptionsEncodeDecodeSync);
+    suite.addTest('Test encodeSync with MIME and MINE_URL_SAFE', testEncodeSyncMineAndMineUrlSafe);
+    suite.addTest('Test encode and decode with no options', testNoOptionsEncodeDecode);
+    suite.addTest('Test encodeSync and decodeSync with no options', testNoOptionsEncodeDecodeSync);
+    suite.addTest('Test all Type round-trip sync', testAllTypesRoundTripSync);
+    suite.addTest('Test all Type decode with Uint8Array input', testAllTypesDecodeUint8Array);
+    suite.addTest('Test MIME removeNewlines', testMimeRemoveNewlines);
 
     await testEncodeDecodeBasicAsync();
     await testEncodeDecodeAsyncBytes();
     await testUrlSafeAsync();
     await testDecodeWithNoiseAsync();
-    suite.addAsyncTest("Test async encode and decode with no options", testNoOptionsEncodeDecodeAsync);
-    suite.addAsyncTest("Test async encode and decode Bytes with no options", testNoOptionsEncodeDecodeAsyncBytes);
+    suite.addAsyncTest('Test async encode and decode with no options', testNoOptionsEncodeDecodeAsync);
+    suite.addAsyncTest('Test async encode and decode Bytes with no options', testNoOptionsEncodeDecodeAsyncBytes);
+    suite.addAsyncTest('Test all Type round-trip async', testAllTypesRoundTripAsync);
 
     return await suite.runAsync();
 }
@@ -258,4 +262,134 @@ async function testNoOptionsEncodeDecodeAsyncBytes(): Promise<void> {
     let decoded: Uint8Array = await helper.decode(encodedStr);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
+}
+
+function testAllTypesRoundTripSync(): void {
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array([0, 1, 2, 250, 251, 252, 127, 128, 255, 100, 200]);
+
+    // BASIC
+    let basicStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
+    let basicDec: Uint8Array = helper.decodeSync(basicStr, util.Type.BASIC);
+    assertUint8ArraysEqual(basicDec, input);
+
+    // BASIC_URL_SAFE
+    let urlSafeStr: string = helper.encodeToStringSync(input, util.Type.BASIC_URL_SAFE);
+    arktest.assertEQ(urlSafeStr.indexOf('+'), -1);
+    arktest.assertEQ(urlSafeStr.indexOf('/'), -1);
+    let urlSafeDec: Uint8Array = helper.decodeSync(urlSafeStr, util.Type.BASIC_URL_SAFE);
+    assertUint8ArraysEqual(urlSafeDec, input);
+
+    // MIME
+    let mimeStr: string = helper.encodeToStringSync(input, util.Type.MIME);
+    let mimeDec: Uint8Array = helper.decodeSync(mimeStr, util.Type.MIME);
+    assertUint8ArraysEqual(mimeDec, input);
+
+    // MIME_URL_SAFE
+    let mimeUrlStr: string = helper.encodeToStringSync(input, util.Type.MIME_URL_SAFE);
+    let mimeUrlDec: Uint8Array = helper.decodeSync(mimeUrlStr, util.Type.MIME_URL_SAFE);
+    assertUint8ArraysEqual(mimeUrlDec, input);
+}
+
+function testAllTypesDecodeUint8Array(): void {
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array([72, 101, 108, 108, 111]); // 'Hello'
+
+    let basicStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
+    let basicBytes: Uint8Array = new Uint8Array(basicStr.length);
+    for (let i: int = 0; i < basicStr.length; i++) {
+        basicBytes[i] = basicStr.charCodeAt(i);
+    }
+    let dec1: Uint8Array = helper.decodeSync(basicBytes, util.Type.BASIC);
+    assertUint8ArraysEqual(dec1, input);
+
+    let urlStr: string = helper.encodeToStringSync(input, util.Type.BASIC_URL_SAFE);
+    let urlBytes: Uint8Array = new Uint8Array(urlStr.length);
+    for (let i: int = 0; i < urlStr.length; i++) {
+        urlBytes[i] = urlStr.charCodeAt(i);
+    }
+    let dec2: Uint8Array = helper.decodeSync(urlBytes, util.Type.BASIC_URL_SAFE);
+    assertUint8ArraysEqual(dec2, input);
+
+    let mimeStr: string = helper.encodeToStringSync(input, util.Type.MIME);
+    let mimeBytes: Uint8Array = new Uint8Array(mimeStr.length);
+    for (let i: int = 0; i < mimeStr.length; i++) {
+        mimeBytes[i] = mimeStr.charCodeAt(i);
+    }
+    let dec3: Uint8Array = helper.decodeSync(mimeBytes, util.Type.MIME);
+    assertUint8ArraysEqual(dec3, input);
+
+    let mimeUrlStr: string = helper.encodeToStringSync(input, util.Type.MIME_URL_SAFE);
+    let mimeUrlBytes: Uint8Array = new Uint8Array(mimeUrlStr.length);
+    for (let i: int = 0; i < mimeUrlStr.length; i++) {
+        mimeUrlBytes[i] = mimeUrlStr.charCodeAt(i);
+    }
+    let dec4: Uint8Array = helper.decodeSync(mimeUrlBytes, util.Type.MIME_URL_SAFE);
+    assertUint8ArraysEqual(dec4, input);
+}
+
+async function testAllTypesRoundTripAsync(): Promise<void> {
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array([0, 1, 2, 250, 251, 252, 127, 128, 255, 100, 200]);
+
+    // BASIC
+    let basicStr: string = await helper.encodeToString(input, util.Type.BASIC);
+    let basicDec: Uint8Array = await helper.decode(basicStr, util.Type.BASIC);
+    assertUint8ArraysEqual(basicDec, input);
+
+    // BASIC_URL_SAFE
+    let urlSafeStr: string = await helper.encodeToString(input, util.Type.BASIC_URL_SAFE);
+    arktest.assertEQ(urlSafeStr.indexOf('+'), -1);
+    arktest.assertEQ(urlSafeStr.indexOf('/'), -1);
+    let urlSafeDec: Uint8Array = await helper.decode(urlSafeStr, util.Type.BASIC_URL_SAFE);
+    assertUint8ArraysEqual(urlSafeDec, input);
+
+    // MIME
+    let mimeStr: string = await helper.encodeToString(input, util.Type.MIME);
+    let mimeDec: Uint8Array = await helper.decode(mimeStr, util.Type.MIME);
+    assertUint8ArraysEqual(mimeDec, input);
+
+    // MIME_URL_SAFE
+    let mimeUrlStr: string = await helper.encodeToString(input, util.Type.MIME_URL_SAFE);
+    let mimeUrlDec: Uint8Array = await helper.decode(mimeUrlStr, util.Type.MIME_URL_SAFE);
+    assertUint8ArraysEqual(mimeUrlDec, input);
+}
+
+function testMimeRemoveNewlines(): void {
+    let helper = new util.Base64Helper();
+
+    // Large input to produce multiple \r\n line breaks in MIME encoding
+    let input = new Uint8Array(200);
+    for (let i: int = 0; i < 200; i++) {
+        input[i] = i % 256;
+    }
+
+    // MIME: encode produces \r\n, decode must strip them
+    let mimeStr: string = helper.encodeToStringSync(input, util.Type.MIME);
+    arktest.assertNE(mimeStr.indexOf('\r\n'), -1);
+    let mimeDec: Uint8Array = helper.decodeSync(mimeStr, util.Type.MIME);
+    assertUint8ArraysEqual(mimeDec, input);
+
+    // MIME_URL_SAFE: same newline behavior + URL-safe chars
+    let mimeUrlStr: string = helper.encodeToStringSync(input, util.Type.MIME_URL_SAFE);
+    arktest.assertNE(mimeUrlStr.indexOf('\r\n'), -1);
+    let mimeUrlDec: Uint8Array = helper.decodeSync(mimeUrlStr, util.Type.MIME_URL_SAFE);
+    assertUint8ArraysEqual(mimeUrlDec, input);
+
+    // Verify MIME string with manual \r\n insertion decodes correctly
+    let basicStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
+    let mimeManual: string = '';
+    for (let i: int = 0; i < basicStr.length; i += 76) {
+        let end: int = i + 76;
+        if (end > basicStr.length) {
+            end = basicStr.length;
+        }
+        mimeManual += basicStr.substring(i, end) + '\r\n';
+    }
+    let mimeManualDec: Uint8Array = helper.decodeSync(mimeManual, util.Type.MIME);
+    assertUint8ArraysEqual(mimeManualDec, input);
+
+    // Verify decoding MIME string as string input (not Uint8Array)
+    let mimeDecStr: Uint8Array = helper.decodeSync(mimeStr, util.Type.MIME);
+    assertUint8ArraysEqual(mimeDecStr, input);
 }
