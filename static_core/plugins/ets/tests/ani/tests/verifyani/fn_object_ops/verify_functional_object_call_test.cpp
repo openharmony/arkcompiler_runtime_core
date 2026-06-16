@@ -76,7 +76,7 @@ TEST_F(FunctionalObjectCallTest, wrong_env)
     ani_ref result {};
     ASSERT_EQ(env_->c_api->FunctionalObject_Call(nullptr, fnObj, 0, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"fn", "ani_fn_object"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
@@ -92,7 +92,7 @@ TEST_F(FunctionalObjectCallTest, wrong_functional_object)
     // clang-format off
     std::vector<TestLineInfo> nullLines {
         {"env", "ani_env *"},
-        {"fn", "ani_fn_object", "reference is nullptr"},
+        {"fn", "ani_fn_object", "reference is nullptr [ERROR]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -107,7 +107,7 @@ TEST_F(FunctionalObjectCallTest, wrong_functional_object)
     // clang-format off
     std::vector<TestLineInfo> wrongTypeLines {
         {"env", "ani_env *"},
-        {"fn", "ani_fn_object", "wrong functional object"},
+        {"fn", "ani_fn_object", "wrong functional object [ERROR]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -125,7 +125,7 @@ TEST_F(FunctionalObjectCallTest, wrong_argv)
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, oneArgument, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},    {"fn", "ani_fn_object"},
-        {"argc", "ani_size"},    {"argv", "ani_ref *", "wrong pointer to use as argument in 'ani_ref *'"},
+        {"argc", "ani_size"},    {"argv", "ani_ref *", "wrong pointer to use as argument in 'ani_ref *' [ERROR]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FunctionalObject_Call", testLines);
@@ -143,7 +143,7 @@ TEST_F(FunctionalObjectCallTest, non_functional_object_with_wrong_argv)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"fn", "ani_fn_object", "wrong functional object"},
+        {"fn", "ani_fn_object", "wrong functional object [ERROR]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -163,7 +163,7 @@ TEST_F(FunctionalObjectCallTest, wrong_result_storage)
         {"fn", "ani_fn_object"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
-        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FunctionalObject_Call", testLines);
 }
@@ -178,7 +178,7 @@ TEST_F(FunctionalObjectCallTest, pending_error_is_rejected)
     ani_ref result {};
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"fn", "ani_fn_object"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},

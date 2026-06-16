@@ -96,7 +96,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_env)
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
@@ -117,7 +117,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference is nullptr"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
     };
@@ -140,7 +140,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null"},
+        {"object", "ani_object", "wrong reference type: null [FATAL]"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
     };
@@ -163,7 +163,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_name_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -185,7 +185,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_name_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *", "wrong property: expected an instance setter with receiver object argument and value argument"},
+        {"name", "const char *", "wrong property: expected an instance setter with receiver object argument and value argument [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -203,7 +203,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_value)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean"},
+        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
@@ -221,7 +221,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_ref)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"value", "ani_{{ type }}", "reference is nullptr"},
+        {"value", "ani_{{ type }}", "reference is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
@@ -234,29 +234,29 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
-        {"value", "ani_{{ type }}", "reference is nullptr"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
+        {"value", "ani_{{ type }}", "reference is nullptr [ERROR]"},
     };
     // clang-format on
     {% elif type == "boolean" %}
     ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, 2), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
+        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
     };
     // clang-format on
     {% else %}
     ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, {{ value }}), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"object", "ani_object", "reference is nullptr"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -283,9 +283,9 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_type)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {% if type == "ref" %}
-        {"name", "const char *", "wrong property type: {{ wrong_ret }}, expected: object"},
+        {"name", "const char *", "wrong property type: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"name", "const char *", "wrong property type: {{ wrong_ret }}, expected: {{ type }}"},
+        {"name", "const char *", "wrong property type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"value", "ani_{{ type }}"},
     };
@@ -309,7 +309,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *", "wrong property: expected an instance setter with receiver object argument and value argument"},
+        {"name", "const char *", "wrong property: expected an instance setter with receiver object argument and value argument [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -333,7 +333,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, readonly_property)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"name", "const char *", "property is read-only"},
+        {"name", "const char *", "property is read-only [FATAL]"},
         {"value", "ani_{{ type }}"},
     };
     // clang-format on
@@ -357,7 +357,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, object_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"object", "ani_object", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
     };

@@ -91,7 +91,7 @@ TEST_F(ModuleNamespaceFindMemberTest, function_lookup_status_is_forwarded_withou
     ASSERT_EQ(env_->Module_FindFunction(module_, "missingFunction", ":i", &function), ANI_NOT_FOUND);
     std::vector<TestLineInfo> moduleMissingLines {
         {"env", "ani_env *"},         {"module", "ani_module"},
-        {"name", "const char *"},     {"signature", "const char *", "function not found"},
+        {"name", "const char *"},     {"signature", "const char *", "function not found [ERROR]"},
         {"result", "ani_function *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", moduleMissingLines);
@@ -99,7 +99,7 @@ TEST_F(ModuleNamespaceFindMemberTest, function_lookup_status_is_forwarded_withou
     ASSERT_EQ(env_->Namespace_FindFunction(ns_, "overloaded", nullptr, &function), ANI_AMBIGUOUS);
     std::vector<TestLineInfo> namespaceAmbiguousLines {
         {"env", "ani_env *"},         {"ns", "ani_namespace"},
-        {"name", "const char *"},     {"signature", "const char *", "method lookup is ambiguous"},
+        {"name", "const char *"},     {"signature", "const char *", "method lookup is ambiguous [ERROR]"},
         {"result", "ani_function *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindFunction", namespaceAmbiguousLines);
@@ -107,7 +107,7 @@ TEST_F(ModuleNamespaceFindMemberTest, function_lookup_status_is_forwarded_withou
     ASSERT_EQ(env_->Module_FindFunction(module_, "moduleFunction", "X", &function), ANI_INVALID_DESCRIPTOR);
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},         {"module", "ani_module"},
-        {"name", "const char *"},     {"signature", "const char *", "method signature descriptor is invalid"},
+        {"name", "const char *"},     {"signature", "const char *", "method signature descriptor is invalid [ERROR]"},
         {"result", "ani_function *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", invalidDescriptorLines);
@@ -120,7 +120,7 @@ TEST_F(ModuleNamespaceFindMemberTest, variable_lookup_status_is_forwarded_withou
     std::vector<TestLineInfo> moduleMissingLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
-        {"name", "const char *", "variable not found"},
+        {"name", "const char *", "variable not found [ERROR]"},
         {"result", "ani_variable *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindVariable", moduleMissingLines);
@@ -129,7 +129,7 @@ TEST_F(ModuleNamespaceFindMemberTest, variable_lookup_status_is_forwarded_withou
     std::vector<TestLineInfo> namespaceMissingLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
-        {"name", "const char *", "variable not found"},
+        {"name", "const char *", "variable not found [ERROR]"},
         {"result", "ani_variable *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindVariable", namespaceMissingLines);
@@ -144,8 +144,8 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_module_handle_kind_is_rejected)
     ani_function function {};
     ASSERT_EQ(env_->Module_FindFunction(wrongModule, "staticFunction", ":i", &function), ANI_ERROR);
     std::vector<TestLineInfo> functionLines {
-        {"env", "ani_env *"},         {"module", "ani_module", "wrong reference"},
-        {"name", "const char *"},     {"signature", "const char *", "wrong class for function"},
+        {"env", "ani_env *"},         {"module", "ani_module", "wrong reference [FATAL]"},
+        {"name", "const char *"},     {"signature", "const char *", "wrong class for function [ERROR]"},
         {"result", "ani_function *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", functionLines);
@@ -154,8 +154,8 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_module_handle_kind_is_rejected)
     ASSERT_EQ(env_->Module_FindVariable(wrongModule, "value", &variable), ANI_ERROR);
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
-        {"module", "ani_module", "wrong reference"},
-        {"name", "const char *", "wrong class for variable"},
+        {"module", "ani_module", "wrong reference [FATAL]"},
+        {"name", "const char *", "wrong class for variable [ERROR]"},
         {"result", "ani_variable *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindVariable", variableLines);
@@ -170,8 +170,8 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_namespace_handle_kind_is_rejected)
     ani_function function {};
     ASSERT_EQ(env_->Namespace_FindFunction(wrongNamespace, "staticFunction", ":i", &function), ANI_ERROR);
     std::vector<TestLineInfo> functionLines {
-        {"env", "ani_env *"},         {"ns", "ani_namespace", "wrong reference"},
-        {"name", "const char *"},     {"signature", "const char *", "wrong class for function"},
+        {"env", "ani_env *"},         {"ns", "ani_namespace", "wrong reference [FATAL]"},
+        {"name", "const char *"},     {"signature", "const char *", "wrong class for function [ERROR]"},
         {"result", "ani_function *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindFunction", functionLines);
@@ -180,8 +180,8 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_namespace_handle_kind_is_rejected)
     ASSERT_EQ(env_->Namespace_FindVariable(wrongNamespace, "value", &variable), ANI_ERROR);
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
-        {"ns", "ani_namespace", "wrong reference"},
-        {"name", "const char *", "wrong class for variable"},
+        {"ns", "ani_namespace", "wrong reference [FATAL]"},
+        {"name", "const char *", "wrong class for variable [ERROR]"},
         {"result", "ani_variable *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindVariable", variableLines);
@@ -194,7 +194,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
     std::vector<TestLineInfo> functionLines {
         {"env", "ani_env *"},
         {"module", "ani_module"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"signature", "const char *"},
         {"result", "ani_function *"},
     };
@@ -205,7 +205,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_name_is_rejected)
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_variable *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindVariable", variableLines);
@@ -219,7 +219,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_result_storage_is_rejected)
         {"module", "ani_module"},
         {"name", "const char *"},
         {"signature", "const char *"},
-        {"result", "ani_function *", "nullptr for storing 'ani_function'"},
+        {"result", "ani_function *", "nullptr for storing 'ani_function' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Module_FindFunction", functionLines);
 
@@ -228,7 +228,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_result_storage_is_rejected)
         {"env", "ani_env *"},
         {"ns", "ani_namespace"},
         {"name", "const char *"},
-        {"result", "ani_variable *", "nullptr for storing 'ani_variable'"},
+        {"result", "ani_variable *", "nullptr for storing 'ani_variable' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Namespace_FindVariable", variableLines);
 }
@@ -240,7 +240,7 @@ TEST_F(ModuleNamespaceFindMemberTest, pending_error_is_rejected)
     ani_function function {};
     ASSERT_EQ(env_->c_api->Namespace_FindFunction(env_, ns_, "namespaceFunction", ":i", &function), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"ns", "ani_namespace"},
         {"name", "const char *"},
         {"signature", "const char *"},

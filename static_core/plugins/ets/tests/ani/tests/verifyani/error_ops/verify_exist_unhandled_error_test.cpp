@@ -24,7 +24,7 @@ TEST_F(ExistUnhandledErrorTest, wrong_env)
     ani_boolean res {};
     ASSERT_EQ(env_->c_api->ExistUnhandledError(nullptr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ExistUnhandledError", testLines);
@@ -35,7 +35,7 @@ TEST_F(ExistUnhandledErrorTest, wrong_res)
     ASSERT_EQ(env_->c_api->ExistUnhandledError(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ExistUnhandledError", testLines);
 }

@@ -27,8 +27,8 @@ TEST_F(AnyGetByIndexTest, wrong_env)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_GetByIndex(nullptr, cls, 0U, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"index", "ani_size"},
         {"result", "ani_ref *"},
     };
@@ -46,7 +46,7 @@ TEST_F(AnyGetByIndexTest, wrong_ref_null)
     ASSERT_EQ(env_->c_api->Any_GetByIndex(env_, nullptr, 0U, &out), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"result", "ani_ref *"},
     };
@@ -63,9 +63,9 @@ TEST_F(AnyGetByIndexTest, wrong_result_null)
     ASSERT_EQ(env_->c_api->Any_GetByIndex(env_, cls, 0U, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"index", "ani_size"},
-        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_GetByIndex", testLines);
 
@@ -82,8 +82,8 @@ TEST_F(AnyGetByIndexTest, throw_error)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_GetByIndex(env_, cls, 0U, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"index", "ani_size"},
         {"result", "ani_ref *"},
     };

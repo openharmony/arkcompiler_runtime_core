@@ -126,7 +126,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_env)
               ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
@@ -158,7 +158,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong type: ani_method, expected: ani_function"},
+        {"function", "ani_function", "wrong type: ani_method, expected: ani_function [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -186,9 +186,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function"},
+        {"function", "ani_function", "wrong function [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method"},
+        {"...", "       ", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -202,9 +202,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_2)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function"},
+        {"function", "ani_function", "wrong function [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method"},
+        {"...", "       ", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -221,7 +221,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"function", "ani_function"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -250,8 +250,8 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_boolean_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
-        {"[0]", "ani_boolean", "wrong value"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
@@ -278,9 +278,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_char_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
-        {"[1]", "ani_char", "wrong value"},
+        {"[1]", "ani_char", "wrong value [FATAL]"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
         {"[4]", "ani_int"},
@@ -306,10 +306,10 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_byte_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
-        {"[2]", "ani_byte", "wrong value"},
+        {"[2]", "ani_byte", "wrong value [FATAL]"},
         {"[3]", "ani_short"},
         {"[4]", "ani_int"},
         {"[5]", "ani_long"},
@@ -334,11 +334,11 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_short_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
-        {"[3]", "ani_short", "wrong value"},
+        {"[3]", "ani_short", "wrong value [FATAL]"},
         {"[4]", "ani_int"},
         {"[5]", "ani_long"},
         {"[6]", "ani_float"},
@@ -362,7 +362,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_ref_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments"},
+        {"...", "       ", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -371,7 +371,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_ref_arg)
         {"[5]", "ani_long"},
         {"[6]", "ani_float"},
         {"[7]", "ani_double"},
-        {"[8]", "ani_ref", "wrong value"},
+        {"[8]", "ani_ref", "wrong value [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -382,10 +382,10 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"function", "ani_function", "wrong function"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
-        {"...", "       ", "wrong method"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"function", "ani_function", "wrong function [FATAL]"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
+        {"...", "       ", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -403,9 +403,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_return_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {% if type == "ref" %}
-        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
@@ -536,7 +536,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_env)
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, function, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
@@ -567,7 +567,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong type: ani_method, expected: ani_function"},
+        {"function", "ani_function", "wrong type: ani_method, expected: ani_function [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -594,9 +594,9 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function"},
+        {"function", "ani_function", "wrong function [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method"},
+        {"args", "ani_value *", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -609,9 +609,9 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_2)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function"},
+        {"function", "ani_function", "wrong function [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method"},
+        {"args", "ani_value *", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -627,7 +627,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"function", "ani_function"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -655,7 +655,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_args)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong arguments value"},
+        {"args", "ani_value *", "wrong arguments value [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -666,10 +666,10 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"function", "ani_function", "wrong function"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
-        {"args", "ani_value *", "wrong arguments value"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"function", "ani_function", "wrong function [FATAL]"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
+        {"args", "ani_value *", "wrong arguments value [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -689,8 +689,8 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_boolean_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method arguments"},
-        {"[0]", "ani_boolean", "wrong value"},
+        {"args", "ani_value *", "wrong method arguments [FATAL]"},
+        {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
@@ -715,9 +715,9 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_return_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {% if type == "ref" %}
-        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: object"},
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: {{ type }}"},
+        {"function", "ani_function", "wrong return type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
@@ -752,8 +752,8 @@ TEST_F(FunctionCall{{ Type }}ATest, class_from_local_scope)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"function", "ani_function", "wrong class"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"function", "ani_function", "wrong class [FATAL]"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},

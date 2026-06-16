@@ -36,7 +36,7 @@ TEST_F(ArrayGetLengthTest, wrong_env)
     ani_size res = -1;
     ASSERT_EQ(env_->c_api->Array_GetLength(nullptr, arr, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"array", "ani_array"},
         {"result", "ani_size *"},
     };
@@ -53,7 +53,7 @@ TEST_F(ArrayGetLengthTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"array", "ani_array"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
 }
@@ -66,9 +66,9 @@ TEST_F(ArrayGetLengthTest, wrong_all_args)
 
     ASSERT_EQ(env_->c_api->Array_GetLength(nullptr, arr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"array", "ani_array"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
 }
@@ -84,7 +84,7 @@ TEST_F(ArrayGetLengthTest, throw_error)
     ani_size res = -1;
     ASSERT_EQ(env_->Array_GetLength(arr, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"array", "ani_array"},
         {"result", "ani_size *"},
     };
@@ -100,7 +100,7 @@ TEST_F(ArrayGetLengthTest, null_input_array)
     ASSERT_EQ(env_->Array_GetLength(arr, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: null"},
+        {"array", "ani_array", "wrong reference type: null [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
@@ -115,7 +115,7 @@ TEST_F(ArrayGetLengthTest, undef_input_array)
     ASSERT_EQ(env_->Array_GetLength(arr, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: undefined"},
+        {"array", "ani_array", "wrong reference type: undefined [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
@@ -136,7 +136,7 @@ TEST_F(ArrayGetLengthTest, err_input_array)
     ASSERT_EQ(env_->Array_GetLength(static_cast<ani_array>(errObj), &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: ani_error"},
+        {"array", "ani_array", "wrong reference type: ani_error [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
@@ -155,7 +155,7 @@ TEST_F(ArrayGetLengthTest, obj_input_array)
     ASSERT_EQ(env_->Array_GetLength(static_cast<ani_array>(obj), &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: ani_object"},
+        {"array", "ani_array", "wrong reference type: ani_object [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);
@@ -171,7 +171,7 @@ TEST_F(ArrayGetLengthTest, str_input_array)
     ASSERT_EQ(env_->Array_GetLength(reinterpret_cast<ani_array>(stringObj), &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_array", "wrong reference type: ani_string"},
+        {"array", "ani_array", "wrong reference type: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Array_GetLength", testLines);

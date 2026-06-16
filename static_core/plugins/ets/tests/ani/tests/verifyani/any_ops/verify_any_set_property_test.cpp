@@ -26,8 +26,8 @@ TEST_F(AnySetPropertyTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->Any_SetProperty(nullptr, cls, "x", cls), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
         {"value", "ani_ref"},
     };
@@ -44,7 +44,7 @@ TEST_F(AnySetPropertyTest, wrong_ref_null)
     ASSERT_EQ(env_->c_api->Any_SetProperty(env_, nullptr, "x", cls), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
         {"name", "const char *"},
         {"value", "ani_ref"},
     };
@@ -61,8 +61,8 @@ TEST_F(AnySetPropertyTest, wrong_name_null)
     ASSERT_EQ(env_->c_api->Any_SetProperty(env_, cls, nullptr, cls), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_SetProperty", testLines);
@@ -78,9 +78,9 @@ TEST_F(AnySetPropertyTest, wrong_value_null)
     ASSERT_EQ(env_->c_api->Any_SetProperty(env_, cls, "x", nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
-        {"value", "ani_ref", "reference is nullptr"},
+        {"value", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_SetProperty", testLines);
 
@@ -95,7 +95,7 @@ TEST_F(AnySetPropertyTest, rejects_non_xref_receiver)
     ASSERT_EQ(env_->c_api->Any_SetProperty(env_, cls, "x", cls), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
         {"value", "ani_ref"},
     };
@@ -113,8 +113,8 @@ TEST_F(AnySetPropertyTest, throw_error)
 
     ASSERT_EQ(env_->c_api->Any_SetProperty(env_, cls, "x", cls), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
         {"value", "ani_ref"},
     };

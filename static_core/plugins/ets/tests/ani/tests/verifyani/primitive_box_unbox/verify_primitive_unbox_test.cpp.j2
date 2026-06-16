@@ -99,7 +99,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_env)
 
     ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, object, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"obj", "ani_object"},
         {"result", "ani_{{ type }} *"},
     };
@@ -113,7 +113,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_object)
     ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"obj", "ani_object", "reference is nullptr"},
+        {"obj", "ani_object", "reference is nullptr [ERROR]"},
         {"result", "ani_{{ type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
@@ -128,7 +128,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, null_object)
     ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"obj", "ani_object", "wrong reference type: null"},
+        {"obj", "ani_object", "wrong reference type: null [FATAL]"},
         {"result", "ani_{{ type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
@@ -140,7 +140,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, non_boxed_object)
     ASSERT_EQ(env_->String_NewUTF8("test", 4U, &string), ANI_OK);
     ani_{{ type }} result {};
     const std::string expectedError = "wrong boxed primitive type, actual: std.core.String, "
-                                      "expected: std.core.{{ Type }}";
+                                      "expected: std.core.{{ Type }} [ERROR]";
 
     ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(reinterpret_cast<ani_object>(string), &result), ANI_INVALID_TYPE);
     std::vector<TestLineInfo> testLines {
@@ -156,9 +156,9 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_boxed_type)
     ani_object object = BoxWrongTypeValue();
     ani_{{ type }} result {};
 {% if type == "byte" %}
-    const std::string expectedError = "wrong boxed primitive type, actual: std.core.Char, expected: std.core.Byte";
+    const std::string expectedError = "wrong boxed primitive type, actual: std.core.Char, expected: std.core.Byte [FATAL]";
 {% else %}
-    const std::string expectedError = "wrong boxed primitive type, actual: std.core.Byte, expected: std.core.{{ Type }}";
+    const std::string expectedError = "wrong boxed primitive type, actual: std.core.Byte, expected: std.core.{{ Type }} [FATAL]";
 {% endif %}
 
     ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, &result), ANI_ERROR);
@@ -178,7 +178,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"obj", "ani_object"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
 }
@@ -187,9 +187,9 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"obj", "ani_object", "reference is nullptr"},
-        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}'"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"obj", "ani_object", "reference is nullptr [ERROR]"},
+        {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);
 }
@@ -204,7 +204,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, throw_error)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"obj", "ani_object"},
         {"result", "ani_{{ type }} *"},
     };

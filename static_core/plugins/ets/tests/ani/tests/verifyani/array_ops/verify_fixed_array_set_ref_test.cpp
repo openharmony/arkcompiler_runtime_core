@@ -54,7 +54,7 @@ TEST_F(FixedArraySetRefTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->FixedArray_Set_Ref(nullptr, array, 0U, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
@@ -70,7 +70,7 @@ TEST_F(FixedArraySetRefTest, wrong_array)
     ASSERT_EQ(env_->FixedArray_Set_Ref(nullptr, 0U, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref", "reference is nullptr"},
+        {"array", "ani_fixedarray_ref", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
@@ -87,7 +87,8 @@ TEST_F(FixedArraySetRefTest, wrong_array_type)
     ASSERT_EQ(env_->FixedArray_Set_Ref(reinterpret_cast<ani_fixedarray_ref>(array), 0U, ref), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref", "wrong reference type: ani_fixedarray_int, expected: ani_fixedarray_ref"},
+        {"array", "ani_fixedarray_ref",
+         "wrong reference type: ani_fixedarray_int, expected: ani_fixedarray_ref [FATAL]"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
@@ -104,7 +105,7 @@ TEST_F(FixedArraySetRefTest, wrong_ref)
         {"env", "ani_env *"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
 }
@@ -121,7 +122,7 @@ TEST_F(FixedArraySetRefTest, wrong_ref_type)
         {"env", "ani_env *"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
-        {"ref", "ani_ref", "wrong reference type: ani_object, expected: fixed array component type"},
+        {"ref", "ani_ref", "wrong reference type: ani_object, expected: fixed array component type [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
 }
@@ -148,7 +149,7 @@ TEST_F(FixedArraySetRefTest, throw_error)
 
     ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0U, ref), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},

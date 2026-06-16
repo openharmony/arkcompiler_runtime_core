@@ -53,7 +53,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_wrong_arraybuffer)
     ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, &length), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"arraybuffer", "ani_arraybuffer", "wrong reference type: undefined, expected: ani_arraybuffer"},
+        {"arraybuffer", "ani_arraybuffer", "wrong reference type: undefined, expected: ani_arraybuffer [FATAL]"},
         {"data_result", "void **"},
         {"length_result", "ani_size *"},
     };
@@ -68,7 +68,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_wrong_data_storage)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"arraybuffer", "ani_arraybuffer"},
-        {"data_result", "void **", "nullptr for storing 'void *'"},
+        {"data_result", "void **", "nullptr for storing 'void *' [ERROR]"},
         {"length_result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ArrayBuffer_GetInfo", testLines);
@@ -83,7 +83,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_wrong_length_storage)
         {"env", "ani_env *"},
         {"arraybuffer", "ani_arraybuffer"},
         {"data_result", "void **"},
-        {"length_result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"length_result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ArrayBuffer_GetInfo", testLines);
 }
@@ -97,7 +97,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_pending_error)
     ani_size length {};
     ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, &length), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"arraybuffer", "ani_arraybuffer"},
         {"data_result", "void **"},
         {"length_result", "ani_size *"},

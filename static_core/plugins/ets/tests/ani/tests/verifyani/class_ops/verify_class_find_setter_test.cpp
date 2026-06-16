@@ -60,7 +60,7 @@ TEST_F(ClassFindSetterTest, lookup_status_is_forwarded_without_verify_abort)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "setter not found"},
+        {"name", "const char *", "setter not found [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindSetter", testLines);
@@ -71,7 +71,7 @@ TEST_F(ClassFindSetterTest, wrong_env)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindSetter(nullptr, class_, "prop", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_method *"},
@@ -85,8 +85,8 @@ TEST_F(ClassFindSetterTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindSetter(env_, nullptr, "prop", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference is nullptr"},
-        {"name", "const char *", "wrong class for setter"},
+        {"class", "ani_class", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "wrong class for setter [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindSetter", testLines);
@@ -99,7 +99,7 @@ TEST_F(ClassFindSetterTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindSetter", testLines);
@@ -112,7 +112,7 @@ TEST_F(ClassFindSetterTest, wrong_result_storage)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"result", "ani_method *", "nullptr for storing 'ani_method'"},
+        {"result", "ani_method *", "nullptr for storing 'ani_method' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindSetter", testLines);
 }
@@ -128,8 +128,8 @@ TEST_F(ClassFindSetterTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindSetter(env_, localClass, "prop", &method), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"name", "const char *", "wrong class for setter"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"name", "const char *", "wrong class for setter [ERROR]"},
         {"result", "ani_method *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindSetter", testLines);
@@ -142,7 +142,7 @@ TEST_F(ClassFindSetterTest, pending_error_is_rejected)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, "prop", &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_method *"},

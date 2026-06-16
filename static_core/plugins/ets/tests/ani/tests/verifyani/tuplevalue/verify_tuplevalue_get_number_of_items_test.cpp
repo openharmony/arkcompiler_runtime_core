@@ -41,7 +41,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, tupleValue, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"tuple_value", "ani_tuple_value"},
         {"result", "ani_size *"},
     };
@@ -54,7 +54,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "reference is nullptr"},
+        {"tuple_value", "ani_tuple_value", "reference is nullptr [ERROR]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -67,7 +67,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, expired_local_scope_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"tuple_value", "ani_tuple_value", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -81,7 +81,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, null_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: null"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: null [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -95,7 +95,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, undefined_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -109,7 +109,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, object_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(object), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -123,7 +123,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, string_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(string), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -137,7 +137,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, error_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(aniError), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -151,7 +151,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, array_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(array), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -165,7 +165,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
 }
@@ -174,9 +174,9 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"tuple_value", "ani_tuple_value", "reference is nullptr"},
-        {"result", "ani_size *", "nullptr for storing 'ani_size'"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"tuple_value", "ani_tuple_value", "reference is nullptr [ERROR]"},
+        {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
 }
@@ -189,7 +189,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, throw_error)
     ani_size result = 0U;
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"tuple_value", "ani_tuple_value"},
         {"result", "ani_size *"},
     };

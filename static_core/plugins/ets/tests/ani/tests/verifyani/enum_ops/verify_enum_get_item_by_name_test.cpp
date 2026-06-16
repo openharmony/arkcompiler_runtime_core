@@ -48,7 +48,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_env)
     ani_enum_item result {};
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByName(nullptr, enumColor_, "RED", &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"enm", "ani_enum"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
@@ -63,7 +63,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_enm_type_object)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(static_cast<ani_enum>(obj), "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "wrong reference type: ani_object"},
+        {"enm", "ani_enum", "wrong reference type: ani_object [FATAL]"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
     };
@@ -77,7 +77,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_name_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"enm", "ani_enum"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_enum_item *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
@@ -97,7 +97,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_result_null)
         {"env", "ani_env *"},
         {"enm", "ani_enum"},
         {"name", "const char *"},
-        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item'"},
+        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
 }
@@ -106,10 +106,10 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByName(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"enm", "ani_enum", "reference is nullptr"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
-        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item'"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"enm", "ani_enum", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
+        {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
 }
@@ -120,7 +120,7 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error)
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(enumColor_, "RED", &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"enm", "ani_enum"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
@@ -135,9 +135,9 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error_with_wrong_name_null)
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(enumColor_, nullptr, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"enm", "ani_enum"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_enum_item *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Enum_GetEnumItemByName", testLines);
@@ -151,8 +151,8 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error_with_wrong_enm_type_obje
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(static_cast<ani_enum>(obj), "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"enm", "ani_enum", "wrong reference type: ani_object"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"enm", "ani_enum", "wrong reference type: ani_object [FATAL]"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
     };
@@ -171,7 +171,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_enm_from_local_scope)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(localEnum, "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
     };
@@ -192,7 +192,7 @@ TEST_F(VerifyEnumGetItemByNameTest, cross_thread_enum_ref)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(crossThreadEnum, "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted)"},
+        {"enm", "ani_enum", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
     };

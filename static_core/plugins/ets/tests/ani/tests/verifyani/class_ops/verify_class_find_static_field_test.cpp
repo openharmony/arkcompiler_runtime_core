@@ -50,7 +50,7 @@ TEST_F(ClassFindStaticFieldTest, lookup_status_is_forwarded_without_verify_abort
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "static field not found"},
+        {"name", "const char *", "static field not found [ERROR]"},
         {"result", "ani_static_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticField", testLines);
@@ -61,7 +61,7 @@ TEST_F(ClassFindStaticFieldTest, wrong_env)
     ani_static_field field {};
     ASSERT_EQ(env_->c_api->Class_FindStaticField(nullptr, class_, "staticField", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_static_field *"},
@@ -75,8 +75,8 @@ TEST_F(ClassFindStaticFieldTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, nullptr, "staticField", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference is nullptr"},
-        {"name", "const char *", "wrong class for static field"},
+        {"class", "ani_class", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "wrong class for static field [ERROR]"},
         {"result", "ani_static_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticField", testLines);
@@ -89,7 +89,7 @@ TEST_F(ClassFindStaticFieldTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_static_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticField", testLines);
@@ -102,7 +102,7 @@ TEST_F(ClassFindStaticFieldTest, wrong_result_storage)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"result", "ani_static_field *", "nullptr for storing 'ani_static_field'"},
+        {"result", "ani_static_field *", "nullptr for storing 'ani_static_field' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticField", testLines);
 }
@@ -118,8 +118,8 @@ TEST_F(ClassFindStaticFieldTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, localClass, "staticField", &field), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"name", "const char *", "wrong class for static field"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"name", "const char *", "wrong class for static field [ERROR]"},
         {"result", "ani_static_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindStaticField", testLines);
@@ -132,7 +132,7 @@ TEST_F(ClassFindStaticFieldTest, pending_error_is_rejected)
     ani_static_field field {};
     ASSERT_EQ(env_->c_api->Class_FindStaticField(env_, class_, "staticField", &field), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_static_field *"},

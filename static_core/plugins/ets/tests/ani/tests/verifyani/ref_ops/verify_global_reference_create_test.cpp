@@ -25,7 +25,7 @@ TEST_F(GlobalReferenceCreateTest, wrong_ref)
     ASSERT_EQ(env_->c_api->GlobalReference_Create(env_, nullptr, &gref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GlobalReference_Create", testLines);
@@ -40,7 +40,7 @@ TEST_F(GlobalReferenceCreateTest, wrong_result)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
-        {"result", "ani_ref *", "nullptr for storing 'ani_ref'"},
+        {"result", "ani_ref *", "nullptr for storing 'ani_ref' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("GlobalReference_Create", testLines);
 

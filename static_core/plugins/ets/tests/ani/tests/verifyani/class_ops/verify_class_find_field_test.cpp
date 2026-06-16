@@ -61,7 +61,7 @@ TEST_F(ClassFindFieldTest, lookup_status_is_forwarded_without_verify_abort)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "field not found"},
+        {"name", "const char *", "field not found [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -74,7 +74,7 @@ TEST_F(ClassFindFieldTest, interface_property_name_is_rejected)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "field not found"},
+        {"name", "const char *", "field not found [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -85,7 +85,7 @@ TEST_F(ClassFindFieldTest, wrong_env)
     ani_field field {};
     ASSERT_EQ(env_->c_api->Class_FindField(nullptr, class_, "field", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_field *"},
@@ -99,8 +99,8 @@ TEST_F(ClassFindFieldTest, wrong_class)
     ASSERT_EQ(env_->c_api->Class_FindField(env_, nullptr, "field", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference is nullptr"},
-        {"name", "const char *", "wrong class for field"},
+        {"class", "ani_class", "reference is nullptr [ERROR]"},
+        {"name", "const char *", "wrong class for field [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -113,7 +113,7 @@ TEST_F(ClassFindFieldTest, wrong_name)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "argument is nullptr, expected const char *"},
+        {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -126,7 +126,7 @@ TEST_F(ClassFindFieldTest, wrong_result_storage)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {"name", "const char *"},
-        {"result", "ani_field *", "nullptr for storing 'ani_field'"},
+        {"result", "ani_field *", "nullptr for storing 'ani_field' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
 }
@@ -142,8 +142,8 @@ TEST_F(ClassFindFieldTest, local_class_reference_is_rejected)
     ASSERT_EQ(env_->c_api->Class_FindField(env_, localClass, "field", &field), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted)"},
-        {"name", "const char *", "wrong class for field"},
+        {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
+        {"name", "const char *", "wrong class for field [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -156,7 +156,7 @@ TEST_F(ClassFindFieldTest, pending_error_is_rejected)
     ani_field field {};
     ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, "field", &field), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_field *"},

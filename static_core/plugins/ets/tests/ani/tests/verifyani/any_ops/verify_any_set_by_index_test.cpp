@@ -26,8 +26,8 @@ TEST_F(AnySetByIndexTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->Any_SetByIndex(nullptr, cls, 0U, cls), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_ref"},
     };
@@ -44,7 +44,7 @@ TEST_F(AnySetByIndexTest, wrong_ref_null)
     ASSERT_EQ(env_->c_api->Any_SetByIndex(env_, nullptr, 0U, cls), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "reference is nullptr"},
+        {"ref", "ani_ref", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"value", "ani_ref"},
     };
@@ -61,9 +61,9 @@ TEST_F(AnySetByIndexTest, wrong_value_null)
     ASSERT_EQ(env_->c_api->Any_SetByIndex(env_, cls, 0U, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"index", "ani_size"},
-        {"value", "ani_ref", "reference is nullptr"},
+        {"value", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_SetByIndex", testLines);
 
@@ -79,8 +79,8 @@ TEST_F(AnySetByIndexTest, throw_error)
 
     ASSERT_EQ(env_->c_api->Any_SetByIndex(env_, cls, 0U, cls), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
-        {"ref", "ani_ref", "Static types are not supported"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_ref"},
     };

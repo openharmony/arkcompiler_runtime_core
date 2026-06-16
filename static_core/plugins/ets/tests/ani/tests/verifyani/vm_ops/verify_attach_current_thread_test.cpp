@@ -25,7 +25,7 @@ TEST_F(AttachCurrentThreadTest, wrong_vm)
     ani_env *env {};
     ASSERT_EQ(vm_->c_api->AttachCurrentThread(nullptr, nullptr, ANI_VERSION_1, &env), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"vm", "ani_vm *", "wrong VM pointer"},
+        {"vm", "ani_vm *", "wrong VM pointer [ERROR]"},
         {"options", "ani_options *"},
         {"version", "uint32_t"},
         {"result", "ani_env **"},
@@ -40,7 +40,7 @@ TEST_F(AttachCurrentThreadTest, wrong_options_0)
     ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, &opts, ANI_VERSION_1, &env), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
-        {"options", "ani_options *", "wrong 'options' pointer, options->options == NULL"},
+        {"options", "ani_options *", "wrong 'options' pointer, options->options == NULL [FATAL]"},
         {"version", "uint32_t"},
         {"result", "ani_env **"},
     };
@@ -58,7 +58,7 @@ TEST_F(AttachCurrentThreadTest, wrong_options_1)
     ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, &opts, ANI_VERSION_1, &env), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
-        {"options", "ani_options *", "wrong 'option' pointer, options->options[1].option == NULL"},
+        {"options", "ani_options *", "wrong 'option' pointer, options->options[1].option == NULL [ERROR]"},
         {"version", "uint32_t"},
         {"result", "ani_env **"},
     };
@@ -76,7 +76,7 @@ TEST_F(AttachCurrentThreadTest, wrong_options_2)
     ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, &opts, ANI_VERSION_1, &env), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
-        {"options", "ani_options *", "'nr_options' value is too large. options->nr_options == 8345"},
+        {"options", "ani_options *", "'nr_options' value is too large. options->nr_options == 8345 [FATAL]"},
         {"version", "uint32_t"},
         {"result", "ani_env **"},
     };
@@ -94,7 +94,8 @@ TEST_F(AttachCurrentThreadTest, wrong_options_3)
     ASSERT_EQ(vm_->c_api->AttachCurrentThread(vm_, &opts, ANI_VERSION_1, &env), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
-        {"options", "ani_options *", "wrong 'option' value, options->options[1].option == --ext:--log-level=info"},
+        {"options", "ani_options *",
+         "wrong 'option' value, options->options[1].option == --ext:--log-level=info [ERROR]"},
         {"version", "uint32_t"},
         {"result", "ani_env **"},
     };
@@ -109,7 +110,7 @@ TEST_F(AttachCurrentThreadTest, wrong_version)
     std::vector<TestLineInfo> testLines {
         {"vm", "ani_vm *"},
         {"options", "ani_options *"},
-        {"version", "uint32_t", "unsupported ANI version"},
+        {"version", "uint32_t", "unsupported ANI version [ERROR]"},
         {"result", "ani_env **"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("AttachCurrentThread", testLines);
@@ -122,7 +123,7 @@ TEST_F(AttachCurrentThreadTest, wrong_result_ptr)
         {"vm", "ani_vm *"},
         {"options", "ani_options *"},
         {"version", "uint32_t"},
-        {"result", "ani_env **", "nullptr for storing 'ani_env *'"},
+        {"result", "ani_env **", "nullptr for storing 'ani_env *' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("AttachCurrentThread", testLines);
 }
@@ -133,10 +134,10 @@ TEST_F(AttachCurrentThreadTest, invalid_all_args)
     ani_options opts = {1, nullptr};
     ASSERT_EQ(vm_->c_api->AttachCurrentThread(nullptr, &opts, fakeANIVersion, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"vm", "ani_vm *", "wrong VM pointer"},
-        {"options", "ani_options *", "wrong 'options' pointer, options->options == NULL"},
-        {"version", "uint32_t", "unsupported ANI version"},
-        {"result", "ani_env **", "nullptr for storing 'ani_env *'"},
+        {"vm", "ani_vm *", "wrong VM pointer [ERROR]"},
+        {"options", "ani_options *", "wrong 'options' pointer, options->options == NULL [FATAL]"},
+        {"version", "uint32_t", "unsupported ANI version [ERROR]"},
+        {"result", "ani_env **", "nullptr for storing 'ani_env *' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("AttachCurrentThread", testLines);
 }

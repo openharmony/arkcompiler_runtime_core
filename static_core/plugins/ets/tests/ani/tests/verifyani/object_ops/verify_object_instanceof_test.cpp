@@ -27,7 +27,7 @@ TEST_F(ObjectInstanceOfTest, wrong_env)
     ani_boolean result {};
     ASSERT_EQ(env_->c_api->Object_InstanceOf(nullptr, cls, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"object", "ani_object"},
         {"type", "ani_ref"},
         {"result", "ani_boolean *"},
@@ -46,7 +46,7 @@ TEST_F(ObjectInstanceOfTest, wrong_object_null)
     ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "reference is nullptr"},
+        {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"type", "ani_ref"},
         {"result", "ani_boolean *"},
     };
@@ -66,7 +66,7 @@ TEST_F(ObjectInstanceOfTest, wrong_object_type)
     ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, reinterpret_cast<ani_object>(undef), cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: undefined"},
+        {"object", "ani_object", "wrong reference type: undefined [FATAL]"},
         {"type", "ani_ref"},
         {"result", "ani_boolean *"},
     };
@@ -86,7 +86,7 @@ TEST_F(ObjectInstanceOfTest, wrong_type_null)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"type", "ani_ref", "reference is nullptr"},
+        {"type", "ani_ref", "reference is nullptr [ERROR]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_InstanceOf", testLines);
@@ -106,7 +106,7 @@ TEST_F(ObjectInstanceOfTest, wrong_type_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"type", "ani_ref", "wrong reference type: undefined"},
+        {"type", "ani_ref", "wrong reference type: undefined [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_InstanceOf", testLines);
@@ -125,7 +125,7 @@ TEST_F(ObjectInstanceOfTest, wrong_result_ptr)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"type", "ani_ref"},
-        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean'"},
+        {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_InstanceOf", testLines);
 
@@ -154,7 +154,7 @@ TEST_F(ObjectInstanceOfTest, throw_error)
     ani_boolean result {};
     ASSERT_EQ(env_->Object_InstanceOf(cls, cls, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error"},
+        {"env", "ani_env *", "has unhandled an error [ERROR]"},
         {"object", "ani_object"},
         {"type", "ani_ref"},
         {"result", "ani_boolean *"},

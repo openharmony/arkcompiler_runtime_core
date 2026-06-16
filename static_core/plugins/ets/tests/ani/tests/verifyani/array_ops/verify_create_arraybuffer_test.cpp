@@ -39,7 +39,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_env)
     ani_arraybuffer arraybuffer {};
     ASSERT_EQ(env_->c_api->CreateArrayBuffer(nullptr, LENGTH, &data, &arraybuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"length", "ani_size"},
         {"data_result", "void **"},
         {"arraybuffer_result", "ani_arraybuffer *"},
@@ -54,7 +54,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_data_storage)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"length", "ani_size"},
-        {"data_result", "void **", "nullptr for storing 'void *'"},
+        {"data_result", "void **", "nullptr for storing 'void *' [ERROR]"},
         {"arraybuffer_result", "ani_arraybuffer *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateArrayBuffer", testLines);
@@ -68,7 +68,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_arraybuffer_storage
         {"env", "ani_env *"},
         {"length", "ani_size"},
         {"data_result", "void **"},
-        {"arraybuffer_result", "ani_arraybuffer *", "nullptr for storing 'ani_arraybuffer'"},
+        {"arraybuffer_result", "ani_arraybuffer *", "nullptr for storing 'ani_arraybuffer' [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("CreateArrayBuffer", testLines);
 }
@@ -81,7 +81,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_too_large_length_forwards
     ASSERT_EQ(env_->CreateArrayBuffer(TOO_LARGE_LENGTH, &data, &arraybuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"length", "ani_size", "arraybuffer length is too large"},
+        {"length", "ani_size", "arraybuffer length is too large [ERROR]"},
         {"data_result", "void **"},
         {"arraybuffer_result", "ani_arraybuffer *"},
     };

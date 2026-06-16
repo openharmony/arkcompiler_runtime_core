@@ -70,7 +70,7 @@ TEST_F(ObjectNewATest, wrong_env)
     ASSERT_EQ(env_->c_api->Object_New_A(nullptr, cls_, ctor_, &obj, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
         {"result", "ani_object *"},
@@ -96,8 +96,8 @@ TEST_F(ObjectNewATest, wrong_cls_0)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "reference is nullptr"},
-        {"ctor", "ani_method", "wrong class for ctor"},
+        {"cls", "ani_class", "reference is nullptr [ERROR]"},
+        {"ctor", "ani_method", "wrong class for ctor [ERROR]"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -124,8 +124,8 @@ TEST_F(ObjectNewATest, wrong_cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "wrong reference type: null, expected: ani_class"},
-        {"ctor", "ani_method", "wrong class for ctor"},
+        {"cls", "ani_class", "wrong reference type: null, expected: ani_class [FATAL]"},
+        {"ctor", "ani_method", "wrong class for ctor [ERROR]"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -150,9 +150,9 @@ TEST_F(ObjectNewATest, wrong_ctor_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class"},
-        {"ctor", "ani_method", "wrong ctor"},
+        {"ctor", "ani_method", "wrong ctor [ERROR]"},
         {"result", "ani_object *"},
-        {"args", "ani_value *", "wrong method"},
+        {"args", "ani_value *", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
@@ -167,9 +167,9 @@ TEST_F(ObjectNewATest, wrong_ctor_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class"},
-        {"ctor", "ani_method", "wrong ctor"},
+        {"ctor", "ani_method", "wrong ctor [FATAL]"},
         {"result", "ani_object *"},
-        {"args", "ani_value *", "wrong method"},
+        {"args", "ani_value *", "wrong method [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
@@ -186,7 +186,7 @@ TEST_F(ObjectNewATest, wrong_ctor_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class"},
-        {"ctor", "ani_method", "method is not ctor"},
+        {"ctor", "ani_method", "method is not ctor [FATAL]"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
     };
@@ -206,7 +206,7 @@ TEST_F(ObjectNewATest, wrong_ctor_3)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class"},
-        {"ctor", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
+        {"ctor", "ani_method", "wrong type: ani_static_method, expected: ani_method [FATAL]"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
     };
@@ -222,7 +222,7 @@ TEST_F(ObjectNewATest, wrong_result)
         {"env", "ani_env *"},
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
-        {"result", "ani_object *", "nullptr for storing 'ani_object'"},
+        {"result", "ani_object *", "nullptr for storing 'ani_object' [ERROR]"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -248,7 +248,7 @@ TEST_F(ObjectNewATest, wrong_args)
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
         {"result", "ani_object *"},
-        {"args", "ani_value *", "wrong arguments value"},
+        {"args", "ani_value *", "wrong arguments value [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
@@ -265,8 +265,8 @@ TEST_F(ObjectNewATest, wrong_arg_boolean)
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
         {"result", "ani_object *"},
-        {"args", "ani_value *", "wrong method arguments"},
-        {"[0]", "ani_boolean", "wrong value"},
+        {"args", "ani_value *", "wrong method arguments [FATAL]"},
+        {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
         {"[3]", "ani_short"},
@@ -301,7 +301,7 @@ TEST_F(ObjectNewATest, wrong_arg_ref_0)
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
         {"result", "ani_object *"},
-        {"args", "ani_value *", "wrong method arguments"},
+        {"args", "ani_value *", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -310,7 +310,7 @@ TEST_F(ObjectNewATest, wrong_arg_ref_0)
         {"[5]", "ani_long"},
         {"[6]", "ani_float"},
         {"[7]", "ani_double"},
-        {"[8]", "ani_ref", "wrong value"},
+        {"[8]", "ani_ref", "wrong value [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
@@ -329,7 +329,7 @@ TEST_F(ObjectNewATest, wrong_arg_ref_1)
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
         {"result", "ani_object *"},
-        {"args", "ani_value *", "wrong method arguments"},
+        {"args", "ani_value *", "wrong method arguments [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -338,7 +338,7 @@ TEST_F(ObjectNewATest, wrong_arg_ref_1)
         {"[5]", "ani_long"},
         {"[6]", "ani_float"},
         {"[7]", "ani_double"},
-        {"[8]", "ani_ref", "wrong value"},
+        {"[8]", "ani_ref", "wrong value [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
@@ -354,8 +354,8 @@ TEST_F(ObjectNewATest, cls_undefined)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"cls", "ani_class", "wrong reference type: undefined, expected: ani_class"},
-        {"ctor", "ani_method", "wrong class for ctor"},
+        {"cls", "ani_class", "wrong reference type: undefined, expected: ani_class [FATAL]"},
+        {"ctor", "ani_method", "wrong class for ctor [ERROR]"},
         {"result", "ani_object *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -377,11 +377,11 @@ TEST_F(ObjectNewATest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_New_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope"},
-        {"cls", "ani_class", "reference is nullptr"},
-        {"ctor", "ani_method", "wrong ctor"},
-        {"result", "ani_object *", "nullptr for storing 'ani_object'"},
-        {"args", "ani_value *", "wrong arguments value"},
+        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"cls", "ani_class", "reference is nullptr [ERROR]"},
+        {"ctor", "ani_method", "wrong ctor [ERROR]"},
+        {"result", "ani_object *", "nullptr for storing 'ani_object' [ERROR]"},
+        {"args", "ani_value *", "wrong arguments value [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
