@@ -96,6 +96,26 @@ class Test {
         return hapFile;
     }
 
+    private static getAdditionalInvalidHapFile(): string {
+        let procManager = new StdProcess.ProcessManager();
+        const hapFile = procManager.getEnvironmentVar("ADDITIONAL_INVALID_HAP_FILE");
+        arktest.assertLT(0, hapFile.length, "this test must have additional invalid hap file")
+        return hapFile;
+    }
+
+    private static getAdditionalHspFile(): string {
+        let procManager = new StdProcess.ProcessManager();
+        const hspFile = procManager.getEnvironmentVar("ADDITIONAL_HSP_FILE");
+        arktest.assertLT(0, hspFile.length, "this test must have additional hsp file")
+        return hspFile;
+    }
+
+    private static testAdditionalClass1Loaded(linker: RuntimeLinker) {
+        const cls1 = linker.loadClass(Test.additionalClass1Name, true);
+        arktest.assertNE(cls1, undefined, "AdditionalClass1 must be found");
+        arktest.assertEQ(cls1.getLinker(), linker, "AdditionalClass1 must be loaded by custom linker");
+    }
+
     private static loadRawFiles(paths: string[]): Array<ValueArray<byte>> {
         const rawFiles = Array.create<ValueArray<byte>>(paths.length, new ValueArray<byte>(0));
         for (let i = 0; i < rawFiles.length; i++) {
@@ -267,9 +287,30 @@ class Test {
         const linker = new AbcRuntimeLinker(undefined, []);
         linker.addAbcFiles([Test.getAdditionalHapFile()]);
 
-        const cls1 = linker.loadClass(Test.additionalClass1Name, true);
-        arktest.assertNE(cls1, undefined, "AdditionalClass1 must be found");
-        arktest.assertEQ(cls1.getLinker(), linker, "AdditionalClass1 must be loaded by custom linker");
+        Test.testAdditionalClass1Loaded(linker);
+    }
+
+    static testAbcRuntimeLinkerWithHapFile() {
+        const linker = new AbcRuntimeLinker(undefined, [Test.getAdditionalHapFile()]);
+        Test.testAdditionalClass1Loaded(linker);
+    }
+
+    static testAbcRuntimeLinkerWithInvalidHapFileEntry() {
+        arktest.expectThrow(() => { new AbcRuntimeLinker(undefined, [Test.getAdditionalInvalidHapFile()]) },
+            (e) => e instanceof AbcFileNotFoundError
+        );
+    }
+
+    static testRuntimeLinkerAddHspFile() {
+        const linker = new AbcRuntimeLinker(undefined, []);
+        linker.addAbcFiles([Test.getAdditionalHspFile()]);
+
+        Test.testAdditionalClass1Loaded(linker);
+    }
+
+    static testAbcRuntimeLinkerWithHspFile() {
+        const linker = new AbcRuntimeLinker(undefined, [Test.getAdditionalHspFile()]);
+        Test.testAdditionalClass1Loaded(linker);
     }
 
     static testMemoryRuntimeLinkerAddAbcFiles() {
@@ -355,6 +396,10 @@ class Test {
         Test.testAbcRuntimeLinkerLoadErrorPath();
         Test.testRuntimeLinkerAddAbcFiles();
         Test.testRuntimeLinkerAddHapFile();
+        Test.testAbcRuntimeLinkerWithHapFile();
+        Test.testAbcRuntimeLinkerWithInvalidHapFileEntry();
+        Test.testRuntimeLinkerAddHspFile();
+        Test.testAbcRuntimeLinkerWithHspFile();
         Test.testMemoryRuntimeLinkerAddAbcFiles();
         Test.testWrongClassName();
         Test.testLinkerUnresolvedClassError();
@@ -374,6 +419,10 @@ function main(): int {
     testsuite.addTest('testAbcRuntimeLinkerLoadErrorPath', Test.testAbcRuntimeLinkerLoadErrorPath);
     testsuite.addTest('testRuntimeLinkerAddAbcFiles', Test.testRuntimeLinkerAddAbcFiles);
     testsuite.addTest('testRuntimeLinkerAddHapFile', Test.testRuntimeLinkerAddHapFile);
+    testsuite.addTest('testAbcRuntimeLinkerWithHapFile', Test.testAbcRuntimeLinkerWithHapFile);
+    testsuite.addTest('testAbcRuntimeLinkerWithInvalidHapFileEntry', Test.testAbcRuntimeLinkerWithInvalidHapFileEntry);
+    testsuite.addTest('testRuntimeLinkerAddHspFile', Test.testRuntimeLinkerAddHspFile);
+    testsuite.addTest('testAbcRuntimeLinkerWithHspFile', Test.testAbcRuntimeLinkerWithHspFile);
     testsuite.addTest('testMemoryRuntimeLinkerAddAbcFiles', Test.testMemoryRuntimeLinkerAddAbcFiles);
     testsuite.addAsyncTest('testConcurrentAddAbcFiles', Test.testConcurrent);
     testsuite.addTest('testWrongClassName', Test.testWrongClassName);
