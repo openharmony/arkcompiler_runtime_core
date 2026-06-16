@@ -209,6 +209,7 @@ srcs_runtime = [
   "runtime/mem/ets_reference_processor.cpp",
   "runtime/ani/ani_helpers.cpp",
   "runtime/tooling/internal_api.cpp",
+  "runtime/tooling/pt_ets_extension.cpp",
   "runtime/types/ets_class.cpp",
   "runtime/types/ets_arraybuffer.cpp",
   "runtime/types/ets_std_core_array.cpp",

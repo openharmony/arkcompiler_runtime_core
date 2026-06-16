@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,12 @@
 #define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_RECORD_H
 
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "libarkbase/os/mutex.h"
+#include "libarkfile/file.h"
 #include "sample_info.h"
 
 namespace ark::tooling::sampler {
@@ -33,6 +35,7 @@ struct FrameInfo {
     std::string functionName;
     std::string moduleName;
     std::string url;
+    bool isStaticFrame = true;  // true for ETS (static), false for JS (dynamic)
 };
 
 struct CpuProfileNode {
@@ -85,6 +88,33 @@ struct NodeKey {
     }
 };
 
+// Owned wrapper around SampleInfo that deep-copies ext frame data into heap memory.
+// This ensures dynamic frame data survives beyond the shared plugin slot's lifetime.
+struct OwnedSampleInfo {
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    SampleInfo sample;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    std::vector<std::unique_ptr<uint8_t[]>> ownedBuffers;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+
+    explicit OwnedSampleInfo(const SampleInfo &src) : sample(src)
+    {
+        for (size_t i = 0; i < src.stackInfo.managedStackSize; i++) {
+            auto &frame = sample.stackInfo.managedStack[i];
+            if (frame.pandaFilePtr == helpers::ToUnderlying(FrameKind::EXTERNAL_FRAME) &&
+                frame.extFrameData != nullptr && frame.extFrameDataSize > 0) {
+                // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+                auto buf = std::make_unique<uint8_t[]>(frame.extFrameDataSize);
+                [[maybe_unused]] int r =
+                    memcpy_s(buf.get(), frame.extFrameDataSize, frame.extFrameData, frame.extFrameDataSize);
+                ASSERT(r == 0);
+                frame.extFrameData = buf.get();
+                ownedBuffers.push_back(std::move(buf));
+            }
+        }
+    }
+};
+
 class SamplesRecord {
 public:
     SamplesRecord() = default;
@@ -93,7 +123,7 @@ public:
     {
         threadStartTime_ = threadStartTime;
     };
-    void AddSampleInfo(uint32_t threadId, std::unique_ptr<SampleInfo> sampleInfo)
+    void AddSampleInfo(uint32_t threadId, std::unique_ptr<OwnedSampleInfo> sampleInfo)
     {
         os::memory::LockHolder holder(addSamplInfoLock_);
         tidToSampleInfosMap_[threadId].emplace_back(std::move(sampleInfo));
@@ -101,11 +131,16 @@ public:
 
 private:
     void NodeInit(ProfileInfo &profileInfo);
-    using SampleInfoVector = std::vector<std::unique_ptr<SampleInfo>>;
+    using SampleInfoVector = std::vector<std::unique_ptr<OwnedSampleInfo>>;
     std::unique_ptr<ProfileInfo> GetSingleThreadProfileInfo(const SampleInfoVector &sampleInfos);
     void BuildStackInfoMap(const SampleInfo &sampleInfo);
     FrameInfo *GetFrameInfoByFrameId(const SampleInfo::ManagedStackFrameId &frameId);
     void ProcessSingleCallStackData(const SampleInfo &sampleInfo, ProfileInfo &profileInfo, uint64_t &prevTimeStamp);
+
+    FrameInfo BuildDynamicFrameInfo(const uint8_t *buffer, size_t size);
+    FrameInfo BuildStaticFrameInfo(const SampleInfo::ManagedStackFrameId &frameId);
+    int GetOrAssignScriptId(const std::string &url);
+    std::string GetUrlFromClassData(const panda_file::File *pfId, panda_file::File::EntityId classId);
 
     uint64_t threadStartTime_ = 0;
     os::memory::Mutex addSamplInfoLock_;

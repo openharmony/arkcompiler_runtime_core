@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include "samples_record.h"
 #include "libarkfile/debug_helpers.h"
 #include "libarkfile/class_data_accessor.h"
+#include "runtime/tooling/sampler/stack_walker_base.h"
+#include "runtime/include/tooling/buffer_serializer.h"
 
 namespace ark::tooling::sampler {
 static constexpr size_t ROOT_NODE_ID = 1;
@@ -25,6 +27,62 @@ static const uintptr_t ROOT_NODE_PTR = (reinterpret_cast<uintptr_t>(reinterpret_
 static const uintptr_t PROGRAM_NODE_PTR =
     (reinterpret_cast<uintptr_t>(reinterpret_cast<void *>(INT_MAX - PROGRAM_NODE_ID)));
 static const uintptr_t IDLE_NODE_PTR = (reinterpret_cast<uintptr_t>(reinterpret_cast<void *>(INT_MAX - IDLE_NODE_ID)));
+
+FrameInfo SamplesRecord::BuildDynamicFrameInfo(const uint8_t *buffer, size_t size)
+{
+    FrameInfo frameInfo = {};
+    frameInfo.isStaticFrame = false;
+
+    auto data = BufferSerializer::ReadPluginFrameData(buffer, size);
+    frameInfo.functionName = std::string(data.functionName);
+    frameInfo.moduleName = std::string(data.moduleName);
+    frameInfo.url = std::string(data.url);
+    frameInfo.lineNumber = data.lineNumber;
+    frameInfo.columnNumber = data.columnNumber;
+    frameInfo.scriptId = GetOrAssignScriptId(std::string(frameInfo.url));
+    return frameInfo;
+}
+
+int SamplesRecord::GetOrAssignScriptId(const std::string &url)
+{
+    // Check if the URL already exists in scriptIdMap_. If not, assign a new scriptId.
+    auto iter = scriptIdMap_.find(url);
+    if (iter == scriptIdMap_.end()) {
+        auto scriptId = scriptIdMap_.size() + 1;
+        scriptIdMap_.emplace(url, scriptId);
+        return static_cast<int>(scriptId);
+    }
+    return static_cast<int>(iter->second);
+}
+
+std::string SamplesRecord::GetUrlFromClassData(const panda_file::File *pfId, panda_file::File::EntityId classId)
+{
+    // Use ClassDataAccessor to get url.
+    panda_file::ClassDataAccessor cda(*pfId, classId);
+    auto sourceFileId = cda.GetSourceFileId();
+    if (!sourceFileId) {
+        return "<unknown>";
+    }
+    return reinterpret_cast<const char *>(pfId->GetStringData(sourceFileId.value()).data);
+}
+
+FrameInfo SamplesRecord::BuildStaticFrameInfo(const SampleInfo::ManagedStackFrameId &frameId)
+{
+    auto pfId = reinterpret_cast<panda_file::File *>(frameId.pandaFilePtr);
+    panda_file::File::EntityId fileId(frameId.fileId);
+    // Use MethodDataAccessor to access method data and retrieve the module name and function name.
+    panda_file::MethodDataAccessor mda(*pfId, fileId);
+
+    FrameInfo frameInfo;
+    frameInfo.url = GetUrlFromClassData(pfId, mda.GetClassId());
+    frameInfo.scriptId = GetOrAssignScriptId(frameInfo.url);
+    frameInfo.moduleName = mda.GetClassName();
+    frameInfo.functionName = mda.GetFullName();
+    frameInfo.lineNumber = static_cast<int>(panda_file::debug_helpers::GetLineNumber(mda, frameId.bcOffset, pfId)) - 1;
+    frameInfo.isStaticFrame = true;
+    return frameInfo;
+}
+
 void SamplesRecord::NodeInit(ProfileInfo &profileInfo)
 {
     NodeKey nodeKey;
@@ -60,7 +118,6 @@ void SamplesRecord::NodeInit(ProfileInfo &profileInfo)
  */
 void SamplesRecord::BuildStackInfoMap(const SampleInfo &sampleInfo)
 {
-    FrameInfo frameInfo;
     // Iterate over the managedStack array in sampleInfo.
     for (size_t index = 0; index < sampleInfo.stackInfo.managedStackSize; ++index) {
         const auto &frameId = sampleInfo.stackInfo.managedStack[index];
@@ -75,33 +132,20 @@ void SamplesRecord::BuildStackInfoMap(const SampleInfo &sampleInfo)
             continue;
         }
 
-        auto pfId = reinterpret_cast<panda_file::File *>(frameId.pandaFilePtr);
-        panda_file::File::EntityId fileId(frameId.fileId);
-        // Use MethodDataAccessor to access method data and retrieve the module name and function name.
-        panda_file::MethodDataAccessor mda(*pfId, fileId);
-
-        // Use ClassDataAccessor to get url.
-        panda_file::ClassDataAccessor cda(*pfId, mda.GetClassId());
-        auto sourceFileId = cda.GetSourceFileId();
-        if (!sourceFileId) {
-            frameInfo.url = "<unknown>";
+        FrameInfo frameInfo;
+        if (frameId.pandaFilePtr == helpers::ToUnderlying(FrameKind::EXTERNAL_FRAME)) {
+            if (frameId.extFrameData == nullptr) {
+                LOG(DEBUG, PROFILER) << "Profiler cannot read dynamic frame: extFrameData is null";
+                continue;
+            }
+            frameInfo =
+                BuildDynamicFrameInfo(static_cast<const uint8_t *>(frameId.extFrameData), frameId.extFrameDataSize);
+        } else if (frameId.pandaFilePtr == helpers::ToUnderlying(FrameKind::BRIDGE)) {
+            LOG(DEBUG, PROFILER) << "Skipping Ark internal bridge frame";
+            continue;
         } else {
-            frameInfo.url = reinterpret_cast<const char *>(pfId->GetStringData(sourceFileId.value()).data);
+            frameInfo = BuildStaticFrameInfo(frameId);
         }
-
-        // Check if the URL already exists in scriptIdMap_. If not, assign a new scriptId.
-        auto iter = scriptIdMap_.find(frameInfo.url);
-        if (iter == scriptIdMap_.end()) {
-            auto scriptId = scriptIdMap_.size() + 1;
-            scriptIdMap_.emplace(frameInfo.url, scriptId);
-            frameInfo.scriptId = static_cast<int>(scriptId);
-        } else {
-            frameInfo.scriptId = static_cast<int>(iter->second);
-        }
-        frameInfo.moduleName = mda.GetClassName();
-        frameInfo.functionName = mda.GetFullName();
-        frameInfo.lineNumber =
-            static_cast<int>(panda_file::debug_helpers::GetLineNumber(mda, frameId.bcOffset, pfId)) - 1;
         stackInfoMap_.emplace(frameId, frameInfo);
     }
 }
@@ -208,9 +252,9 @@ std::unique_ptr<ProfileInfo> SamplesRecord::GetSingleThreadProfileInfo(const Sam
     auto singleThreadProfileInfo = std::make_unique<ProfileInfo>();
     NodeInit(*singleThreadProfileInfo);
     uint64_t prevTimeStamp = 0;
-    for (const auto &sampleInfo : sampleInfos) {
-        BuildStackInfoMap(*sampleInfo);
-        ProcessSingleCallStackData(*sampleInfo, *singleThreadProfileInfo, prevTimeStamp);
+    for (const auto &owned : sampleInfos) {
+        BuildStackInfoMap(owned->sample);
+        ProcessSingleCallStackData(owned->sample, *singleThreadProfileInfo, prevTimeStamp);
     }
     return singleThreadProfileInfo;
 }

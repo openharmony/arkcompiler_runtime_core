@@ -100,6 +100,8 @@ void Profile::SerializeCallFrame(JsonObjectBuilder &builder, const struct sample
         objBuilder.AddProperty("url", codeEntry.url);
         objBuilder.AddProperty("lineNumber", codeEntry.lineNumber);
         objBuilder.AddProperty("columnNumber", codeEntry.columnNumber);
+        // CDP extension: stack frame type marker to distinguish static frames (ETS) from external frames.
+        objBuilder.AddProperty("frameType", codeEntry.isStaticFrame ? "static" : "external");
     });
 }
 }  // namespace ark::tooling::inspector

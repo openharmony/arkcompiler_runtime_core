@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,6 +122,15 @@ inline bool SampleReader::GetNextSample(SampleInfo *sampleOut)
     [[maybe_unused]] int r =
         memcpy_s(sampleOut->stackInfo.managedStack.data(), copySize, currentSamplePtr + SAMPLE_STACK_OFFSET, copySize);
     ASSERT(r == 0);
+    // extFrameData from file is a stale pointer from a previous process execution.
+    // Null it out so consumers don't dereference invalid memory.
+    for (size_t i = 0; i < sampleOut->stackInfo.managedStackSize; ++i) {
+        auto &frame = sampleOut->stackInfo.managedStack[i];
+        if (frame.pandaFilePtr == helpers::ToUnderlying(FrameKind::EXTERNAL_FRAME)) {
+            frame.extFrameData = nullptr;
+            frame.extFrameDataSize = 0;
+        }
+    }
     ++sampleRowCounter_;
     return true;
 }

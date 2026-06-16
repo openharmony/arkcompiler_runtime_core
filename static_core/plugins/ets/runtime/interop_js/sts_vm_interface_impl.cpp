@@ -140,6 +140,11 @@ bool STSVMInterfaceImpl::ForEachFrameInUnionStack(
     return ark::ets::interop::js::ForEachFrameInUnionStack(callback);
 }
 
+bool STSVMInterfaceImpl::GetStaticFrameInfo(const void *frame, arkplatform::HybridFrameInfo &frameInfo)
+{
+    return ark::ets::interop::js::GetStaticFrameInfo(frame, frameInfo);
+}
+
 STSVMInterfaceImpl::VMBarrier::VMBarrier(size_t vmsCount)
 {
     os::memory::LockHolder lh(barrierMutex_);

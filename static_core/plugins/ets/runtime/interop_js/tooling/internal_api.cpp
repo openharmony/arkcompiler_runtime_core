@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/tooling/internal_api.h"
+#include "runtime/tooling/debugger.h"
 
 namespace ark::ets::interop::js {
 
@@ -51,6 +52,58 @@ bool UnionStackIsEmpty(bool *isEmpty)
     }
     *isEmpty = (!ctx->GetInteropHybridStackEnabled()) || (ctx->GetOrCreateCallStack().GetRecords().Size() == 0);
     return true;
+}
+
+bool IsHybridStackEnabled()
+{
+    auto *mutator = Mutator::GetCurrent();
+    if (UNLIKELY(mutator == nullptr)) {
+        return false;
+    }
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(execCtx == nullptr)) {
+        return false;
+    }
+    auto *ctx = interop::js::InteropCtx::Current(execCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        return false;
+    }
+    bool isEnabled = ctx->GetInteropHybridStackEnabled();
+    if (isEnabled) {
+        ctx->GetOrCreateCallStack();
+    }
+    return isEnabled;
+}
+
+bool GetStaticFrameInfo(const void *frame, arkplatform::HybridFrameInfo &frameInfo)
+{
+    auto *debugFrame = static_cast<const tooling::PtDebugFrame *>(frame);
+    if (debugFrame == nullptr || debugFrame->GetMethod() == nullptr) {
+        return false;
+    }
+
+    frameInfo = {};
+    Method *method = debugFrame->GetMethod();
+    frameInfo.SetFunctionName(utf::Mutf8AsCString(method->GetName().data));
+    frameInfo.isStaticFrame = true;
+    frameInfo.nativePtr = method;
+    frameInfo.lineNumber = method->GetLineNumFromBytecodeOffset(debugFrame->GetBytecodeOffset());
+    frameInfo.SetUrl(utf::Mutf8AsCString(method->GetClassSourceFile().data));
+
+    return true;
+}
+
+bool GetDynamicFrameInfo(const void *frame, arkplatform::HybridFrameInfo &frameInfo)
+{
+    auto *ctx = InteropCtx::Current();
+    if (ctx == nullptr) {
+        return false;
+    }
+    auto *ecmaInterface = ctx->GetECMAInterface();
+    if (ecmaInterface == nullptr) {
+        return false;
+    }
+    return ecmaInterface->GetDynamicFrameInfo(frame, frameInfo);
 }
 
 const void *GetEcmaVM()

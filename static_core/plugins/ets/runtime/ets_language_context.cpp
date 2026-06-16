@@ -28,10 +28,16 @@
 #include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/tooling/pt_ets_extension.h"
 #include "include/mem/panda_string.h"
 #include "intrinsics.h"
 
 namespace ark::ets {
+
+std::unique_ptr<tooling::PtLangExt> EtsLanguageContext::CreatePtLangExt() const
+{
+    return std::make_unique<PtEtsExtension>();
+}
 
 void EtsLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
 {
