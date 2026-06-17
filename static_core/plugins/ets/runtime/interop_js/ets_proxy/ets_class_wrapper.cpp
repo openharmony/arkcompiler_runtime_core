@@ -20,7 +20,9 @@
 #include <ostream>
 #include <vector>
 
+#include "ets_execution_context.h"
 #include "include/mem/panda_containers.h"
+#include "include/thread_scopes.h"
 #include "interop_js/interop_common.h"
 #include "interop_js/js_proxy/js_proxy.h"
 #include "interop_js/js_refconvert.h"
@@ -961,7 +963,7 @@ napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClas
 
     napi_value proxyObj;
     std::vector<napi_value> args = {jsCtor, jsProxyHandlerRef};
-
+    ScopedNativeCodeThread nativeScope(EtsExecutionContext::GetCurrent()->GetMT());
     NAPI_CHECK_FATAL(napi_new_instance(env, jsProxyCtorRef, args.size(), args.data(), &proxyObj));
     return proxyObj;
 }
@@ -1094,6 +1096,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
             ASSERT(InteropCtx::SanityJSExceptionPending());
             return nullptr;
         }
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
         return nullptr;
     }
