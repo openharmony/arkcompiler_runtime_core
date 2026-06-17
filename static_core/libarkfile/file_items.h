@@ -1442,6 +1442,8 @@ public:
 
     bool Write(Writer *writer) override;
 
+    void SetDependencyMark() override;
+
     DEFAULT_MOVE_SEMANTIC(ParamAnnotationsItem);
     DEFAULT_COPY_SEMANTIC(ParamAnnotationsItem);
 
