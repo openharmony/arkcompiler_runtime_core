@@ -1,5 +1,6 @@
 #34838 failed on mutator != nullptr (need patch with mutators)
 ets_func_tests/std/concurrency/workerlocal_test.ets
+#34838 + 34866
 ets_func_tests/std/containers/WeakMapGCTest.ets
 ets_func_tests/std/containers/WeakSetGCTest.ets
 

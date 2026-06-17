@@ -23,6 +23,7 @@
 
 #include "common_components/base/time_utils.h"
 
+#include "runtime/include/mem/panda_string.h"
 #include "libarkbase/utils/logger.h"
 
 #ifdef ENABLE_HILOG
@@ -51,7 +52,7 @@ namespace ark::mem {
 
 #define COMMON_PHASE_TIMER(...) ::ark::mem::Timer ARK_pt_##__LINE__(__VA_ARGS__)
 
-std::string Pretty(uint64_t number) noexcept;
+PandaString Pretty(uint64_t number) noexcept;
 
 class Timer {
 public:

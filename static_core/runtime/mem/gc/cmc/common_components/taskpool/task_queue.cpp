@@ -14,9 +14,10 @@
  */
 
 #include "common_components/taskpool/task_queue.h"
+#include "runtime/include/mem/panda_smart_pointers.h"
 
 namespace ark::common_vm {
-void TaskQueue::PostTask(std::unique_ptr<Task> task)
+void TaskQueue::PostTask(PandaUniquePtr<Task> task)
 {
     ark::os::memory::LockHolder guard(mtx_);
     DCHECK(!terminate_);
@@ -24,7 +25,7 @@ void TaskQueue::PostTask(std::unique_ptr<Task> task)
     cv_.SignalAll();
 }
 
-void TaskQueue::PostDelayedTask(std::unique_ptr<Task> task, uint64_t delayMilliseconds)
+void TaskQueue::PostDelayedTask(PandaUniquePtr<Task> task, uint64_t delayMilliseconds)
 {
     ark::os::memory::LockHolder guard(mtx_);
     DCHECK(!terminate_);
@@ -33,13 +34,13 @@ void TaskQueue::PostDelayedTask(std::unique_ptr<Task> task, uint64_t delayMillis
     cv_.SignalAll();
 }
 
-std::unique_ptr<Task> TaskQueue::PopTask()
+PandaUniquePtr<Task> TaskQueue::PopTask()
 {
     ark::os::memory::LockHolder lock(mtx_);
     while (true) {
         MoveExpiredTask();
         if (!tasks_.empty()) {
-            std::unique_ptr<Task> task = std::move(tasks_.front());
+            PandaUniquePtr<Task> task = std::move(tasks_.front());
             tasks_.pop_front();
             return task;
         }

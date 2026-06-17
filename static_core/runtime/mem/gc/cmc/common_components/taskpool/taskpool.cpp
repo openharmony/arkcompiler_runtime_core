@@ -18,9 +18,16 @@
 #include "common_components/platform/cpu.h"
 
 namespace ark::common_vm {
-Taskpool *Taskpool::GetCurrentTaskpool()
+
+void Taskpool::CreateInstance()
 {
-    static Taskpool *taskpool = new Taskpool();
+    ASSERT(GetCurrentTaskpool() == nullptr);
+    GetCurrentTaskpool() = MakePandaUnique<Taskpool>();
+}
+
+PandaUniquePtr<Taskpool> &Taskpool::GetCurrentTaskpool()
+{
+    static PandaUniquePtr<Taskpool> taskpool;
     return taskpool;
 }
 
@@ -29,7 +36,7 @@ void Taskpool::Initialize(int threadNum, std::function<void(ark::os::thread::Nat
 {
     ark::os::memory::LockHolder guard(mutex_);
     if (isInitialized_++ <= 0) {
-        runner_ = std::make_unique<Runner>(TheMostSuitableThreadNum(threadNum), prologueHook, epilogueHook);
+        runner_ = MakePandaUnique<Runner>(TheMostSuitableThreadNum(threadNum), prologueHook, epilogueHook);
     }
 }
 
@@ -42,6 +49,7 @@ void Taskpool::Destroy(int32_t id)
     isInitialized_--;
     if (isInitialized_ == 0) {
         runner_->TerminateThread();
+        runner_.reset();
     } else {
         runner_->TerminateTask(id, TaskType::ALL);
     }

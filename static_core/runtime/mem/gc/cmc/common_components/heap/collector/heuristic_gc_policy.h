@@ -75,7 +75,7 @@ private:
         {
             StartupStatusManager::SetStartupStatus(StartupStatus::COLD_STARTUP_PARTIALLY_FINISH);
             size_t startupFinishDelay = STARTUP_FINISH_DURATION_MS - delay_;
-            threadPool_->PostDelayedTask(std::make_unique<StartupFinishTask>(0), startupFinishDelay);
+            threadPool_->PostDelayedTask(MakePandaUnique<StartupFinishTask>(0), startupFinishDelay);
             return true;
         }
 

@@ -19,6 +19,7 @@
 #include "common_components/common/mem_common.h"
 
 #include "libarkbase/os/mutex.h"
+#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::common_vm {
 class PageCache {
@@ -43,7 +44,7 @@ public:
 private:
     ark::os::memory::Mutex pageMtx_;
     SpanList pageCacheSpans_[MAX_NPAGES];
-    std::unordered_map<pageID, Span *> idSpanMap_;  // The mapping between page numbers and span objects.
+    ark::PandaUnorderedMap<pageID, Span *> idSpanMap_;  // The mapping between page numbers and span objects.
 
 private:
     PageCache() noexcept {}

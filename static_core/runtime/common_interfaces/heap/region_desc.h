@@ -34,7 +34,6 @@
 #include "common_components/base/mem_utils.h"
 #include "common_components/base/rw_lock.h"
 #include "common_components/heap/collector/copy_data_manager.h"
-#include "common_components/heap/collector/gc_infos.h"
 #include "common_components/heap/collector/region_bitmap.h"
 #include "common_components/heap/collector/region_rset.h"
 #include "common_interfaces/mem/tlab.h"

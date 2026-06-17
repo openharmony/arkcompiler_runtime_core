@@ -21,7 +21,7 @@ void ArrayTaskDispatcher::Dispatch(Taskpool *pool, int nThread)
 {
     aliveTask_ = nThread;
     for (int i = 0; i < nThread; ++i) {
-        pool->PostTask(std::make_unique<Runner>(this));
+        pool->PostTask(MakePandaUnique<Runner>(this));
     }
 }
 

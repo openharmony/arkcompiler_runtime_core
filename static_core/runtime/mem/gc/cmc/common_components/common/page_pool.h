@@ -16,6 +16,7 @@
 #define ARK_COMM_RUNTIME_ALLOCATOR_PAGE_POOL_H
 
 #include <atomic>
+#include "runtime/include/mem/panda_string.h"
 #ifdef _WIN64
 #include <errhandlingapi.h>
 #include <handleapi.h>
@@ -159,7 +160,7 @@ protected:
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS)
         COMMON_PRCTL(result, size, memName);
 #endif
-        os::mem::TagAnonymousMemory(result, size, (std::string("ArkTS Heap CMCGC PagePool ") + memName).c_str());
+        os::mem::TagAnonymousMemory(result, size, (PandaString("ArkTS Heap CMCGC PagePool ") + memName).c_str());
         return reinterpret_cast<uint8_t *>(result);
     }
 

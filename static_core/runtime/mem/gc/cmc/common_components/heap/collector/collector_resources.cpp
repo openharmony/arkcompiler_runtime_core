@@ -136,6 +136,7 @@ void CollectorResources::StopGCThreads()
     if (gcThreadPool_ != nullptr) {
         gcThreadPool_->Destroy(0);
         gcThreadPool_ = nullptr;
+        Taskpool::GetCurrentTaskpool().reset();
     }
     // Atomic with release order reason: data race with gcThreadRunning_ with dependecies on writes before the store
     gcThreadRunning_.store(false, std::memory_order_release);
@@ -309,7 +310,8 @@ void CollectorResources::StartGCThreads()
         UNREACHABLE();
     }
     DCHECK(gcThreadPool_ == nullptr);
-    gcThreadPool_ = Taskpool::GetCurrentTaskpool();
+    Taskpool::CreateInstance();
+    gcThreadPool_ = Taskpool::GetCurrentTaskpool().get();
     gcThreadPool_->Initialize();
     LOG_IF(UNLIKELY(gcThreadPool_ == nullptr), FATAL, GC) << "new GCThreadPool failed";
     uint32_t helperThreads = gcThreadPool_->GetTotalThreadNum();

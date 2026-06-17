@@ -18,9 +18,9 @@
 
 #include <array>
 #include <cstdint>
-#include <vector>
 
 #include "common_interfaces/base/common.h"
+#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::mem::utf_helper {
 constexpr size_t HI_SURROGATE_MIN = 0xd800;
@@ -143,7 +143,7 @@ size_t EncodeUTF8(uint32_t codepoint, uint8_t *utf8, size_t index, size_t size);
 
 uint32_t UTF16Decode(uint16_t lead, uint16_t trail);
 
-bool IsValidUTF8(const std::vector<uint8_t> &data);
+bool IsValidUTF8(const PandaVector<uint8_t> &data);
 
 Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modify, bool isWriteBuffer = false);
 

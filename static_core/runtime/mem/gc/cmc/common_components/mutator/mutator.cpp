@@ -201,7 +201,8 @@ Mutator *Mutator::GetMutator() noexcept
     return ThreadLocal::GetMutator();
 }
 
-inline void CheckAndPush(BaseObject *obj, std::set<BaseObject *> &rootSet, std::stack<BaseObject *> &rootStack)
+inline void CheckAndPush(BaseObject *obj, ark::PandaSet<BaseObject *> &rootSet,
+                         ark::PandaStack<BaseObject *> &rootStack)
 {
     auto search = rootSet.find(obj);
     if (search == rootSet.end()) {

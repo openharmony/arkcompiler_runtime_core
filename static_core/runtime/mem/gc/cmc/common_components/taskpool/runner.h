@@ -19,13 +19,13 @@
 #include <array>
 #include <memory>
 #include <thread>
-#include <vector>
 #include <functional>
 
 #include "common_components/taskpool/task_queue.h"
-#include "common_interfaces/base/common.h"
 
+#include "runtime/include/mem/panda_smart_pointers.h"
 #include "libarkbase/os/mutex.h"
+#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::common_vm {
 static constexpr uint32_t MIN_TASKPOOL_THREAD_NUM = 3;
@@ -43,12 +43,12 @@ public:
     NO_COPY_SEMANTIC(Runner);
     NO_MOVE_SEMANTIC(Runner);
 
-    void PostTask(std::unique_ptr<Task> task)
+    void PostTask(PandaUniquePtr<Task> task)
     {
         taskQueue_.PostTask(std::move(task));
     }
 
-    void PostDelayedTask(std::unique_ptr<Task> task, uint64_t delayMilliseconds)
+    void PostDelayedTask(PandaUniquePtr<Task> task, uint64_t delayMilliseconds)
     {
         taskQueue_.PostDelayedTask(std::move(task), delayMilliseconds);
     }
@@ -92,11 +92,11 @@ private:
     void Run(uint32_t threadId);
     void SetRunTask(uint32_t threadId, Task *task);
 
-    std::vector<std::unique_ptr<std::thread>> threadPool_ {};
+    PandaVector<PandaUniquePtr<std::thread>> threadPool_ {};
     TaskQueue taskQueue_ {};
     std::array<Task *, MAX_TASKPOOL_THREAD_NUM + 1> runningTask_;
     uint32_t totalThreadNum_ {0};
-    std::vector<uint32_t> gcThreadId_ {};
+    ark::PandaVector<uint32_t> gcThreadId_ {};
     ark::os::memory::Mutex mtx_;
     ark::os::memory::Mutex mtxPool_;
 

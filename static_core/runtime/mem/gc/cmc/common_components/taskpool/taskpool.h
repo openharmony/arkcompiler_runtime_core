@@ -26,14 +26,13 @@
 namespace ark::common_vm {
 class PANDA_PUBLIC_API Taskpool {
 public:
-    PANDA_PUBLIC_API static Taskpool *GetCurrentTaskpool();
+    PANDA_PUBLIC_API static void CreateInstance();
+    PANDA_PUBLIC_API static PandaUniquePtr<Taskpool> &GetCurrentTaskpool();
 
     Taskpool() = default;
     virtual PANDA_PUBLIC_API ~Taskpool()
     {
-        ark::os::memory::LockHolder guard(mutex_);
-        runner_->TerminateThread();
-        isInitialized_ = 0;
+        ASSERT(isInitialized_ == 0);
     }
 
     NO_COPY_SEMANTIC(Taskpool);
@@ -44,7 +43,7 @@ public:
                     const std::function<void(ark::os::thread::NativeHandleType)> epilogueHook = nullptr);
     void Destroy(int32_t id);
 
-    void PostTask(std::unique_ptr<Task> task) const
+    void PostTask(PandaUniquePtr<Task> task) const
     {
         DCHECK(isInitialized_ > 0);
         if (isInitialized_ > 0) {
@@ -52,7 +51,7 @@ public:
         }
     }
 
-    void PostDelayedTask(std::unique_ptr<Task> task, uint64_t delayMilliseconds) const
+    void PostDelayedTask(PandaUniquePtr<Task> task, uint64_t delayMilliseconds) const
     {
         DCHECK(isInitialized_ > 0);
         if (isInitialized_ > 0) {
@@ -83,7 +82,7 @@ public:
 private:
     virtual uint32_t TheMostSuitableThreadNum(uint32_t threadNum) const;
 
-    std::unique_ptr<Runner> runner_;
+    PandaUniquePtr<Runner> runner_;
     volatile int isInitialized_ = 0;
     ark::os::memory::Mutex mutex_;
 };

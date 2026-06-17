@@ -17,14 +17,8 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
 
 #include <algorithm>
-#include <atomic>
-#include <list>
-#include <memory>
-
-#include "common_components/base/immortal_wrapper.h"
-#include "common_components/heap/collector/gc_request.h"
-#include "common_components/log/log.h"
 #include "common_interfaces/base_runtime.h"
+#include "runtime/include/mem/panda_string.h"
 
 namespace ark::common_vm {
 // statistics for previous gc.
@@ -88,7 +82,7 @@ public:
         accumulatedFreeSize += size;
     }
 
-    std::string GetFinalStatistics() const;
+    PandaString GetFinalStatistics() const;
 
     static uint64_t prevGcStartTime;
     static uint64_t prevGcFinishTime;

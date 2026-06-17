@@ -24,10 +24,9 @@ Runner::Runner(uint32_t threadNum, const std::function<void(ark::os::thread::Nat
                const std::function<void(ark::os::thread::NativeHandleType)> epilogueHook)
     : totalThreadNum_(threadNum), prologueHook_(prologueHook), epilogueHook_(epilogueHook)
 {
-    for (uint32_t i = 0; i < threadNum; i++) {
-        // main thread is 0;
-        std::unique_ptr<std::thread> thread = std::make_unique<std::thread>([this, i] { this->Run(i + 1); });
-        threadPool_.emplace_back(std::move(thread));
+    // main thread is 0;
+    for (uint32_t i = 1; i <= threadNum; i++) {
+        threadPool_.emplace_back(MakePandaUnique<std::thread>([this, i] { this->Run(i); }));
     }
 
     for (uint32_t i = 0; i < runningTask_.size(); i++) {
@@ -62,7 +61,6 @@ void Runner::TerminateThread()
     for (uint32_t i = 0; i < threadNum; i++) {
         threadPool_.at(i)->join();
     }
-    threadPool_.clear();
 }
 
 void Runner::ForEachTask(const std::function<void(Task *)> &f)
@@ -124,7 +122,7 @@ void Runner::Run(uint32_t threadId)
     ark::os::thread::SetThreadName(thread, "OS_GC_Thread");
     PrologueHook(thread);
     RecordThreadId();
-    while (std::unique_ptr<Task> task = taskQueue_.PopTask()) {
+    while (PandaUniquePtr<Task> task = taskQueue_.PopTask()) {
         SetRunTask(threadId, task.get());
         task->Run(threadId);
         SetRunTask(threadId, nullptr);

@@ -22,6 +22,7 @@
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/common/mark_work_stack.h"
 #include "common_interfaces/mem/tlab.h"
+#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::common_vm {
 
@@ -171,9 +172,9 @@ private:
 
     std::atomic<RegionDesc *> preparedRegion_ = {nullptr};
     // Record stack roots in concurrent enum phase, waiting for GC to merge these roots
-    std::list<BaseObject *> stackRoots_;
+    ark::PandaList<BaseObject *> stackRoots_;
 
-    std::list<uint64_t *> taggedObjStackRoots_;
+    ark::PandaList<uint64_t *> taggedObjStackRoots_;
 };
 
 static_assert(AllocationBuffer::GetTLRegionOffset() == 0);

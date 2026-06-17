@@ -160,7 +160,7 @@ void FixHeapWorker::DispatchRegionFixTask(FixHeapTask *task)
     }
 }
 
-std::stack<std::pair<RegionList *, RegionDesc *>> PostFixHeapWorker::emptyRegionsToCollect {};
+std::stack<std::pair<RegionList *, RegionDesc *>> PostFixHeapWorker::emptyRegionsToCollect;
 
 void PostFixHeapWorker::PostClearTask()
 {
@@ -183,7 +183,7 @@ bool PostFixHeapWorker::Run([[maybe_unused]] uint32_t threadIndex)
 
 void PostFixHeapWorker::AddEmptyRegionToCollectDuringPostFix(RegionList *list, RegionDesc *region)
 {
-    PostFixHeapWorker::emptyRegionsToCollect.emplace(list, region);
+    emptyRegionsToCollect.emplace(list, region);
 }
 
 void PostFixHeapWorker::CollectEmptyRegions()
@@ -193,9 +193,9 @@ void PostFixHeapWorker::CollectEmptyRegions()
     GCStats &stats = Heap::GetHeap().GetCollector().GetGCStats();
     size_t garbageSize = 0;
 
-    while (!PostFixHeapWorker::emptyRegionsToCollect.empty()) {
-        auto [list, del] = PostFixHeapWorker::emptyRegionsToCollect.top();
-        PostFixHeapWorker::emptyRegionsToCollect.pop();
+    while (!emptyRegionsToCollect.empty()) {
+        auto [list, del] = emptyRegionsToCollect.top();
+        emptyRegionsToCollect.pop();
 
         list->DeleteRegion(del);
         garbageSize += regionManager.CollectRegion(del);

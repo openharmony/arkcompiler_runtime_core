@@ -156,7 +156,7 @@ void FromSpace::CopyFromRegions(Taskpool *threadPool)
             for (size_t count = 0; count < regionCntEachTask; ++count) {
                 region = region->GetNextRegion();
             }
-            threadPool->PostTask(std::make_unique<CopyTask>(0, *this, startRegion, regionCntEachTask, monitor));
+            threadPool->PostTask(MakePandaUnique<CopyTask>(0, *this, startRegion, regionCntEachTask, monitor));
         }
         ParallelCopyFromRegions(region, leftRegionCnt);
         monitor.WaitAllFinished();

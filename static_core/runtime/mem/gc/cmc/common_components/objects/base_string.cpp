@@ -93,18 +93,4 @@ template bool IsSubStringAtSpan<const uint16_t, const uint8_t>(ark::common_vm::S
                                                                ark::common_vm::Span<const uint8_t> &rhsSp,
                                                                uint32_t offset);
 
-std::u16string Utf16ToU16String(const uint16_t *utf16Data, uint32_t dataLen)
-{
-    auto *char16tData = reinterpret_cast<const char16_t *>(utf16Data);
-    std::u16string u16str(char16tData, dataLen);
-    return u16str;
-}
-
-std::u16string Utf8ToU16String(const uint8_t *utf8Data, uint32_t dataLen)
-{
-    auto *charData = reinterpret_cast<const char *>(utf8Data);
-    std::string str(charData, dataLen);
-    std::u16string u16str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.from_bytes(str);
-    return u16str;
-}
 }  // namespace ark::common_vm

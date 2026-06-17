@@ -47,7 +47,7 @@ void RegionalHeap::DumpAllRegionSummary(const char *msg) const
     auto old = oldSpace_.GetAllocatedSize();
     auto other = nonMovableSpace_.GetAllocatedSize() + largeSpace_.GetAllocatedSize();
 
-    std::ostringstream oss;
+    PandaOStringStream oss;
     oss << msg << "Current allocated: " << ::ark::mem::Pretty(from + to + young + old + other)
         << ". (from: " << ::ark::mem::Pretty(from) << "(exempt: " << ::ark::mem::Pretty(exempt)
         << "), to: " << ::ark::mem::Pretty(to) << ", young: " << ::ark::mem::Pretty(young)

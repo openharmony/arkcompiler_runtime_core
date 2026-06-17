@@ -99,7 +99,23 @@ size_t EncodeUTF8(uint32_t codepoint, uint8_t *utf8, size_t index, size_t size)
     return size;
 }
 
-bool IsValidUTF8(const std::vector<uint8_t> &data)
+static bool IsValidUTF8ThreeLength(const PandaVector<uint8_t> &data)
+{
+    if ((data.at(0) & BIT_MASK_4) != BIT_MASK_3) {
+        return false;
+    }
+    if (data.at(0) == UTF8_3B_FIRST && data.at(1) < UTF8_3B_SECOND_MIN) {
+        return false;
+    }
+    // Reject UTF-8 byte sequences that decode to UTF-16 surrogate code points (0xED 0xA0 0x80..0xED 0xBF 0xBF)
+    if (data.at(0) == UTF8_3B_RESERVED_FIRST && data.at(1) >= UTF8_3B_RESERVED_SECOND_MIN &&
+        data.at(1) <= UTF8_3B_RESERVED_SECOND_MAX) {
+        return false;
+    }
+    return true;
+}
+
+bool IsValidUTF8(const PandaVector<uint8_t> &data)
 {
     uint32_t length = data.size();
     switch (length) {
@@ -117,15 +133,7 @@ bool IsValidUTF8(const std::vector<uint8_t> &data)
             }
             break;
         case UtfLength::THREE:
-            if ((data.at(0) & BIT_MASK_4) != BIT_MASK_3) {
-                return false;
-            }
-            if (data.at(0) == UTF8_3B_FIRST && data.at(1) < UTF8_3B_SECOND_MIN) {
-                return false;
-            }
-            // U+D800~U+DFFF is reserved for UTF-16 surrogate pairs, corresponds to %ED%A0%80~%ED%BF%BF
-            if (data.at(0) == UTF8_3B_RESERVED_FIRST && data.at(1) >= UTF8_3B_RESERVED_SECOND_MIN &&
-                data.at(1) <= UTF8_3B_RESERVED_SECOND_MAX) {
+            if (!IsValidUTF8ThreeLength(data)) {
                 return false;
             }
             break;

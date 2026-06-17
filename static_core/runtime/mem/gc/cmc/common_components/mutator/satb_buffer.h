@@ -67,7 +67,7 @@ public:
             ark::os::memory::LockHolder lg(syncLock_);
             BaseObject **head = container_;
             while (head != top_) {
-                stack.push_back(*head);
+                stack.push(*head);
                 head++;
             }
             Clear();
