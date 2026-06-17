@@ -198,6 +198,16 @@ public:
                                                                       co->GetJob()->HasManagedEntrypoint());
     }
 
+    /*
+     * @brief Checks if a coroutine can be pooled for reuse
+     * A coroutine is poolable if it has a managed entrypoint or is not a system coroutine.
+     * System coroutines without managed entrypoint (e.g., SCHEDULER, FINALIZER) should not be pooled.
+     */
+    static bool IsCoroutinePoolable(Coroutine *co)
+    {
+        return co->GetJob()->HasManagedEntrypoint() || !CoroutineManager::IsSystemCoroutine(co);
+    }
+
     /* events */
     /// Should be called when a coro makes the non_active->active transition (see the state diagram in coroutine.h)
     virtual void OnCoroBecameActive([[maybe_unused]] Coroutine *co) {};
