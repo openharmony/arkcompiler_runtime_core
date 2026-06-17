@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     ani_class cls;
-    if (ANI_OK != env->FindClass("$bench_name.BasicCall", &cls)) {
+    if (ANI_OK != env->FindClass("bench_$bench_name.BasicCall", &cls)) {
         std::cout << "Class BasicCall not found!\n";
         return ANI_ERROR;
     }
