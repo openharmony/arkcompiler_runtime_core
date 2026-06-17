@@ -575,8 +575,8 @@ void EncodeVisitor::VisitStoreArray(GraphVisitor *visitor, Inst *inst)
         if (store->GetNeedWriteBarrier()) {
             auto tmpOffset =
                 enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(enc->GetArch()));
-            auto indexUpcasted = index.As(array.GetType());
-            enc->GetEncoder()->EncodeShl(tmpOffset, indexUpcasted, Imm(scale));
+            enc->GetEncoder()->EncodeShl(tmpOffset, enc->GetCodegen()->Upcast(index, array.GetType(), true),
+                                         Imm(scale));
             enc->GetEncoder()->EncodeAdd(tmpOffset, tmpOffset, Imm(offset));
             return MemRef(array, tmpOffset, 0);
         }
@@ -671,7 +671,6 @@ void EncodeVisitor::VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *i
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
     auto shift = DataType::ShiftByType(type, arch);
-    auto indexUpcasted = index.As(array.GetType());
     ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
     auto tmp = scopedTmp.GetReg();
     ASSERT(encoder->CanEncodeCompressedStringCharAt());
@@ -679,7 +678,8 @@ void EncodeVisitor::VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *i
     if (mask != 1) {
         UNREACHABLE();  // mask is hardcoded in JCL, but verify it just in case it's changed
     }
-    enc->GetEncoder()->EncodeCompressedStringCharAt({dst, array, indexUpcasted, length, tmp, offset, shift});
+    enc->GetEncoder()->EncodeCompressedStringCharAt(
+        {dst, array, enc->GetCodegen()->Upcast(index, array.GetType(), true), length, tmp, offset, shift});
 }
 
 void EncodeVisitor::VisitLenArray(GraphVisitor *visitor, Inst *inst)
@@ -2481,7 +2481,7 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
                   (indexImmValue << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
-    auto indexUpcasted = index.As(array.GetType());
+    auto indexUpcasted = enc->GetCodegen()->Upcast(index, array.GetType(), true);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
 
     if (loadArr->GetNeedReadBarrier()) {
@@ -2564,7 +2564,7 @@ void EncodeVisitor::VisitStoreArrayPair(GraphVisitor *visitor, Inst *inst)
                   (indexImmValue << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     auto scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
     auto tmp = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::REFERENCE);
-    auto indexUpcasted = index.As(array.GetType());
+    auto indexUpcasted = enc->GetCodegen()->Upcast(index, array.GetType(), true);
     enc->GetEncoder()->EncodeAdd(tmp, array, Shift(indexUpcasted, scale));
     auto mem = MemRef(tmp, offset);
     if (inst->CastToStoreArrayPair()->GetNeedPreWriteBarrier()) {

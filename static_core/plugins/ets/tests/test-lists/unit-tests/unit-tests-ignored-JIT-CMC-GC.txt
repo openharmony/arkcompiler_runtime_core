@@ -9,5 +9,3 @@ ets-common-tests/atomics/base_operation_sub.ets
 ets-common-tests/atomics/base_operation_xor.ets
 ets-common-tests/intrinsics/string_indexof.ets
 ets-common-tests/intrinsics/to_string_cache.ets
-#34838 failed on intrinsics (string_concat)
-ets-common-tests/intrinsics/map_new.ets
