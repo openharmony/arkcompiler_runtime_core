@@ -34,6 +34,8 @@ namespace interop::js {
  * @param napiEnv The napi_env for the main JSVM instance
  */
 PANDA_PUBLIC_API bool CreateMainInteropContext(ark::ets::EtsExecutionContext *mainCoro, void *napiEnv);
+PANDA_PUBLIC_API bool SetInteropContextHybridVMFlag(ark::ets::EtsExecutionContext *executionCtx, void *napiEnv,
+                                                    bool isHybrid);
 
 }  // namespace interop::js
 

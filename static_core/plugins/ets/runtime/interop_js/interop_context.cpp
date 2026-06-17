@@ -54,6 +54,7 @@ napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *re
 napi_status __attribute__((weak)) napi_destroy_runtime(napi_env env);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
 napi_status __attribute__((weak)) napi_setup_hybrid_environment(napi_env env);
+napi_status __attribute__((weak)) napi_set_is_hybrid_vm(napi_env env, bool isHybrid);
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 #endif
 
@@ -972,6 +973,24 @@ bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void 
 #else
     return true;
 #endif
+}
+
+bool SetInteropContextHybridVMFlag([[maybe_unused]] ark::ets::EtsExecutionContext *executionCtx,
+                                   [[maybe_unused]] void *napiEnv, [[maybe_unused]] bool isHybrid)
+{
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    if (executionCtx == nullptr) {
+        return false;
+    }
+    [[maybe_unused]] auto *mThread = executionCtx->GetMT();
+    ASSERT(JobExecutionContext::CastFromMutator(mThread)->GetManager()->GetMainThread() == mThread);
+    if (!CheckRuntimeOptions(executionCtx)) {
+        return false;
+    }
+    auto env = static_cast<napi_env>(napiEnv);
+    NAPI_CHECK_RETURN(napi_set_is_hybrid_vm(env, isHybrid));
+#endif
+    return true;
 }
 
 /* static */
