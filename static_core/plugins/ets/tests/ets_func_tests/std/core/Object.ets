@@ -337,6 +337,13 @@ function objectHasOwnProperty(): int {
         return a + 1
     }
 
+    const rec: Record<string, Any> = {
+        "x": 10,
+        "y": 20,
+    }
+
+    const arr2: Array<int> = [10, 20, 30]
+
     result += ((arr as Object).hasOwnProperty(0) == true) ? 0 : 1
     result += ((arr as Object).hasOwnProperty(3) == false) ? 0 : 1
     result += ((arr as Object).hasOwnProperty("length") == true) ? 0 : 1
@@ -360,6 +367,12 @@ function objectHasOwnProperty(): int {
     result += ((lambda as Object).hasOwnProperty("name") == true) ? 0 : 1
     result += ((lambda as Object).hasOwnProperty(0) == false) ? 0 : 1
 
+    result += (rec.hasOwnProperty("x") == true) ? 0 : 1
+    result += (rec.hasOwnProperty("y") == true) ? 0 : 1
+    result += (rec.hasOwnProperty("z") == false) ? 0 : 1
+    result += (arr2.hasOwnProperty(2.0) == true) ? 0 : 1
+    result += (arr2.hasOwnProperty(1.5) == false) ? 0 : 1
+
     return result
 }
 
@@ -368,11 +381,20 @@ function objectHasOwn(): int {
 
     let arr: FixedArray<number> = [10, 20, 30]
 
+    const rec: Record<string, Any> = {
+        "x": 10,
+        "y": 20,
+    }
+
     result += (Object.hasOwn(arr as Object, '0') == true) ? 0 : 1
     result += (Object.hasOwn(arr as Object, '3') == false) ? 0 : 1
     result += (Object.hasOwn(arr as Object, "length") == true) ? 0 : 1
     result += (Object.hasOwn(arr as Object, "qwerty") == false) ? 0 : 1
     result += (Object.hasOwn(arr as Object, "toString") == false) ? 0 : 1
+
+    result += (Object.hasOwn(rec, "x") == true) ? 0 : 1
+    result += (Object.hasOwn(rec, "y") == true) ? 0 : 1
+    result += (Object.hasOwn(rec, "z") == false) ? 0 : 1
 
     return result
 }

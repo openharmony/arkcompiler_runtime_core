@@ -480,7 +480,12 @@ export class Object {
     * @returns true if the object has the specified element; false otherwise
     */
     public hasOwnProperty(index: number): boolean {
-        const idx = index.toLong()
+        let idx: long = 0
+        if (!Double.isInteger(index)) {
+            return false
+        } else {
+            idx = index.toLong()
+        }
         if ((this) instanceof String) {
             const sv = this as String
             const len = sv.getLength()
@@ -518,7 +523,12 @@ export class Object {
     * @returns true if the object has the specified field; false otherwise
     */
     public hasOwnProperty(key: string): boolean {
-        const keys = Object.getOwnPropertyNames(this)
+        let keys: string[]
+        try {
+            keys = Object.getOwnPropertyNames(this as Record<PropertyKey, Any>)
+        } catch (e) {
+            keys = Object.getOwnPropertyNames(this)
+        }
         const len = keys.length
         for(let i = 0; i < len; i++) {
             if (keys[i] == key) {
@@ -592,7 +602,12 @@ export class Object {
     */
     public static assign(target: Record<PropertyKey, Any>,  ...source: FixedArray<Object>): Record<PropertyKey, Any> {
         for (const s of source) {
-            const entries = Object.entries(s)
+            let entries : NullishEntryType[] = []
+            try {
+                entries = Object.entries(s as Record<PropertyKey, Any>)
+            } catch (e) {
+                entries = Object.entries(s)
+            }
             for (const e of entries) {
                 target.set(e![0] as PropertyKey, e![1] as Any)
             }
