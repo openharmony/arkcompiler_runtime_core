@@ -7,5 +7,4 @@ ets-common-tests/atomics/base_operation_or.ets
 ets-common-tests/atomics/base_operation_store.ets
 ets-common-tests/atomics/base_operation_sub.ets
 ets-common-tests/atomics/base_operation_xor.ets
-ets-common-tests/intrinsics/string_indexof.ets
 ets-common-tests/intrinsics/to_string_cache.ets

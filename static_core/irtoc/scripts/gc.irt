@@ -491,9 +491,9 @@ PostInterRegionBarrierTwoCardsSlow()
 PostInterRegionBarrierMarkSingleFast()
 PostInterRegionBarrierMarkPairFast()
 
-def GenerateCmcReadViaBarrierIrtoc(atomic)
-    function("Cmc#{(atomic ? 'Atomic' : '')}ReadViaBarrierIrtoc".to_sym,
-             params: { obj: 'ref_uint', offset: 'u32'},
+def GenerateCmcReadViaBarrierIrtoc(volatile)
+    function("Cmc#{(volatile ? 'Volatile' : '')}ReadViaBarrierIrtoc".to_sym,
+             params: { ref: 'ptr'},
              regmap: $full_regmap,
              regalloc_set: $panda_mask,
              mode: [:FastPath]) {
@@ -503,8 +503,7 @@ def GenerateCmcReadViaBarrierIrtoc(atomic)
         end
 
         if defines.ARK_USE_COMMON_RUNTIME
-            mem := Bitcast(Add(obj, Cast(offset).u64).ref_uint).ref
-            old_ref := LoadI(mem).Volatile(atomic).ref_uint
+            old_ref := LoadI(ref).Volatile(volatile).ref_uint
             If(old_ref, 0).EQ {
                 Return(old_ref).ref_uint
             }
@@ -524,7 +523,7 @@ def GenerateCmcReadViaBarrierIrtoc(atomic)
             }
         end
 
-        Return(Call(obj, offset).Method("Cmc#{(atomic ? 'Atomic' : '')}ReadViaBarrier").ref_uint).ref_uint
+        Return(Call(ref).Method("Cmc#{(volatile ? 'Volatile' : '')}ReadViaBarrier").ref_uint).ref_uint
     }
 end
 
