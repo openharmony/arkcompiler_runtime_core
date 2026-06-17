@@ -1236,6 +1236,25 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace(GlobalEvacuationStack &gl
     MarkSatbBuffer(globalStack);
     MarkEvacuationStack(globalStack);
 
+    // we should update forwarded weak references located in global storage
+    auto weakVisitor = [this](RefField<> &refField) -> bool {
+        RefField<> oldField(refField);
+        auto *oldObj = oldField.GetTargetObject();
+        auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(oldObj);
+        if (!region->IsFromRegion()) {
+            return true;
+        }
+        if (!oldObj->IsForwarded()) {
+            // it is unreachable so it is not forwarded
+            return false;
+        }
+        auto *toVersion = GetForwardingPointer(oldObj);
+        RefField<> newField(toVersion, oldField.IsWeak());
+        refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue());
+        return true;
+    };
+    VisitWeakGlobalRoots(weakVisitor, true);
+
     SatbBuffer::Instance().ClearBuffer();
     GetGCStats().recordSTWTime(param.GetElapsedNs());
 }

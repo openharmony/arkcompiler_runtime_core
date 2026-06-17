@@ -1,6 +1,3 @@
-#34838 Need to add mutator for gc thread in CMC
-ets_func_tests/std/containers/WeakSetGCTest.ets
-
 #33648
 ets_func_tests/std/debug/CountInstancesOfClass.ets
 
