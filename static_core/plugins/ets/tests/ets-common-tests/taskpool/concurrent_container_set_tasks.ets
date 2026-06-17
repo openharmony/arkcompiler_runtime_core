@@ -65,9 +65,7 @@ async function concurrentSetSameValueIdempotentAdd(): Promise<void> {
 
 async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite('taskpool.concurrent.container.set');
-    const suiteDisabled = new arktest.ArkTestsuite('taskpool.concurrent.container.set.DISABLED');
-    // #33350: Test is incorrect and flaky fails
-    suiteDisabled.addAsyncTest('ConcurrentSetSameValueIdempotentAdd', concurrentSetSameValueIdempotentAdd);
+    suite.addAsyncTest('ConcurrentSetSameValueIdempotentAdd', concurrentSetSameValueIdempotentAdd);
     const res = await suite.runAsync();
     CoroutineExtras.stopTaskpool();
     return res;

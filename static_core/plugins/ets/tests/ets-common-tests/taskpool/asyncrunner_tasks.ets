@@ -173,23 +173,24 @@ function addDependencyExecutedTaskTest() {
 }
 
 async function cancelExecutingTaskTest() {
-    let task = new taskpool.Task(returnAbc);
+    let task = new taskpool.Task(async () => {
+        while (true) {
+            // This will throw if the task has been canceled
+            taskpool.Task.checkCancellation();
+        }
+    });
+
     let runner = new taskpool.AsyncRunner('testRunner', 3, 5);
+    let promise = runner.execute(task);
 
-    let p = runner.execute(task);
+    taskpool.cancel(task);
+
+    // The promise should now be rejected with the cancellation error
     try {
-        taskpool.cancel(task);
+        await promise;
+        arktest.assertTrue(false, 'Expected cancellation error, but promise resolved');
     } catch (e) {
-        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been executed');
-        return undefined;
-    }
-
-    try {
-        await p
-        arktest.assertTrue(false, 'taskpool:: asyncRunner task has been canceled error expected')
-    } catch(e) {
-        if (e instanceof AssertionError) throw e
-        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been canceled')
+        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been canceled');
     }
 }
 
