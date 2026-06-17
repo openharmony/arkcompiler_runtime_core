@@ -268,7 +268,16 @@ export class CacheSession {
         contentHash: meta.contentHash,
         stageArtifacts: inherited ? { ...inherited.stageArtifacts } : {},
         stageOutputHashes: inherited ? { ...inherited.stageOutputHashes } : {},
-        mtime: Date.now()
+        mtime: Date.now(),
+        // Carry forward the inherited emittedArtifact so that a stage-artifact
+        // write does not silently wipe the previous run's emit record on commit.
+        // The prior emit fingerprint must be preserved because a file may be
+        // reprocessed by the pipeline (via ensureUpdate) yet produce byte-identical
+        // output, in which case it is NOT re-emitted and recordEmittedArtifact is
+        // never called. Without preserving it here, the inherited emittedArtifact
+        // would be dropped on commit and the next run would lose its baseline,
+        // forcing a redundant re-emit.
+        emittedArtifact: inherited?.emittedArtifact ? { ...inherited.emittedArtifact } : undefined
       };
       this.updates.set(absSrc, cur);
     } else {
