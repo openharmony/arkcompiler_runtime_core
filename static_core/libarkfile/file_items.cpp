@@ -1161,7 +1161,6 @@ size_t ArrayValueItem::GetComponentSize() const
             return ID_SIZE;
         case panda_file::Type::TypeId::VOID:
             return 0;
-        case panda_file::Type::TypeId::NOVALUE:
         default: {
             UNREACHABLE();
             // Avoid cpp warning

@@ -27,11 +27,11 @@ namespace ark::test {
 
 TEST(ClassHelpers, IsPrimitive)
 {
-    const std::array<std::pair<const char *, std::string_view>, 16U> PRIMITIVE_RUNTIME_NAMES = {
+    const std::array<std::pair<const char *, std::string_view>, 15> PRIMITIVE_RUNTIME_NAMES = {
         std::pair {"V", "void"}, std::pair {"Z", "u1"},  std::pair {"B", "i8"},  std::pair {"H", "u8"},
         std::pair {"S", "i16"},  std::pair {"C", "u16"}, std::pair {"I", "i32"}, std::pair {"U", "u32"},
         std::pair {"J", "i64"},  std::pair {"Q", "u64"}, std::pair {"F", "f32"}, std::pair {"D", "f64"},
-        std::pair {"A", "any"},  std::pair {"Y", "Y"},   std::pair {"N", "N"},   std::pair {"X", "novalue"}};
+        std::pair {"A", "any"},  std::pair {"Y", "Y"},   std::pair {"N", "N"}};
 
     for (const auto &p : PRIMITIVE_RUNTIME_NAMES) {
         ASSERT_TRUE(ClassHelper::IsPrimitive(utf::CStringAsMutf8(p.first)));

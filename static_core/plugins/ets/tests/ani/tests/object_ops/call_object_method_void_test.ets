@@ -39,11 +39,6 @@ class A {
         this.count_ = 10;
     }
 
-    public fooNever(): never
-    {
-        throw new Error()
-    }
-
     public voidMethodMultipleParam(a0: int, a1: boolean, a2:float, a3:int, a4:float): void
     {
         if (a1) {

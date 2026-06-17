@@ -380,7 +380,6 @@ TEST_F(Abc2ProgramTypeTest, Type)
     EXPECT_EQ(existingType, expectedType);
 }
 
-// CC-OFFNXT(G.FUN.01-CPP, G.FUD.05) solid test logic
 TEST_F(Abc2ProgramAnyTest, Any)
 {
     const std::set<std::string> expectedType = {
@@ -389,13 +388,13 @@ TEST_F(Abc2ProgramAnyTest, Any)
         "Any.AnyTypeTest2.foo1 Any.AnyTypeTest2 Y void",
         "Any.AnyTypeTest2.foo2 Any.AnyTypeTest2 Y Y",
         "Any.AnyTypeTest2.foo3 Any.AnyTypeTest2 N void",
-        "Any.AnyTypeTest2.foo4 Any.AnyTypeTest2 N novalue",
+        "Any.AnyTypeTest2.foo4 Any.AnyTypeTest2 N N",
         "Any.AnyTypeTest2.foo5 Any.AnyTypeTest2 std.core.Array void",
         "Any.AnyTypeTest2.foo6 Any.AnyTypeTest2 std.core.Array std.core.Array",
         "Any.AnyTypeTest2.foo7 Any.AnyTypeTest2 i32 std.core.Array void",
         "Any.AnyTypeTest2.foo8 Any.AnyTypeTest2 i32 N void",
         "Any.ETSGLOBAL._cctor_ void",
-        "Any.ETSGLOBAL.foo novalue",
+        "Any.ETSGLOBAL.foo N",
         "Any.ETSGLOBAL.foo1 Y void",
         "Any.ETSGLOBAL.foo10 std.core.Array std.core.Array",
         "Any.ETSGLOBAL.foo12 N Y",
@@ -405,13 +404,12 @@ TEST_F(Abc2ProgramAnyTest, Any)
         "Any.ETSGLOBAL.foo5 Y std.core.Array void",
         "Any.ETSGLOBAL.foo6 N std.core.Array void",
         "Any.ETSGLOBAL.foo7 Y Y",
-        "Any.ETSGLOBAL.foo8 N novalue",
+        "Any.ETSGLOBAL.foo8 N N",
         "Any.ETSGLOBAL.foo9 Y N void",
         "Any.ETSGLOBAL.main void",
         "Any.NeverTypeTest._ctor_ Any.NeverTypeTest void",
         "std.core.Error._ctor_ std.core.Error std.core.String std.core.ErrorOptions void",
-        "std.core.Object._ctor_ std.core.Object void",
-        "std.core.Runtime.createNeverError std.core.Error"};
+        "std.core.Object._ctor_ std.core.Object void"};
     std::set<std::string> existingType {};
     for (auto &it : prog->functionInstanceTable) {
         std::stringstream str;

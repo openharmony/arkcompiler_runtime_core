@@ -1847,7 +1847,7 @@ bool Inlining::ResolveTarget(CallInst *callInst, InlineContext *ctx)
     if (CanUseTypeInfo(typeInfo, method)) {
         auto receiver = typeInfo.GetClass();
         MethodPtr resolvedMethod;
-        if (runtime->IsUnionClass(receiver) || runtime->IsNeverClass(receiver)) {
+        if (runtime->IsUnionClass(receiver)) {
             return false;
         } else if (runtime->IsInterfaceMethod(method)) {
             resolvedMethod = runtime->ResolveInterfaceMethod(receiver, method);

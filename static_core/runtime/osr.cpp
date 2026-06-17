@@ -198,7 +198,6 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const 
     return bit_cast<void *>(bit_cast<uintptr_t>(osrCode) + stackmap.GetNativePcUnpacked());
 }
 
-// CC-OFFNXT(G.FUN.01-CPP) solid logic
 extern "C" void SetOsrResult(Frame *frame, uint64_t uval, double fval)
 {
     ASSERT(frame != nullptr);
@@ -228,7 +227,6 @@ extern "C" void SetOsrResult(Frame *frame, uint64_t uval, double fval)
             acc.SetValue(bit_cast<int64_t>(fval));
             acc.SetTag(interpreter::StaticVRegisterRef::PRIMITIVE_TYPE);
             break;
-        case Type::TypeId::NOVALUE:
         case Type::TypeId::VOID:
             // Interpreter always restores accumulator from the callee method, even if callee method is void. Thus, we
             // need to reset it here, otherwise it can hold old object, that probably isn't live already.

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,8 +154,6 @@ public:
             return "L";
         case panda_file::Type::TypeId::TAGGED:
             return "A";
-        case panda_file::Type::TypeId::NOVALUE:
-            return "X";
         default:
             UNREACHABLE();
         }
@@ -189,8 +187,6 @@ public:
             return Type(panda_file::Type::TypeId::U64);
         case 'A':
             return Type(panda_file::Type::TypeId::TAGGED);
-        case 'X':
-            return Type(panda_file::Type::TypeId::NOVALUE);
         case 'L':
         case '[':
         case '{':

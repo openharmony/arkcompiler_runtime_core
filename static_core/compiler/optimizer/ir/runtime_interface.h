@@ -1722,11 +1722,6 @@ public:
         return false;
     }
 
-    virtual bool IsNeverClass([[maybe_unused]] ClassPtr unused) const
-    {
-        return false;
-    }
-
     virtual uintptr_t GetManagedType([[maybe_unused]] uintptr_t unused) const
     {
         return 0;

@@ -1116,7 +1116,7 @@ HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
     AssertKept(fileView, "module_test_008.foo12:{Ustd.core.Null,std.core.String};void;");
     AssertKept(fileView, "module_test_008.foo13:std.core.String;void;");
     AssertKept(fileView, "module_test_008.foo14:{Ustd.core.Array,std.core.String};void;");
-    AssertKept(fileView, "module_test_008.foo15:N;void;");
+    AssertKept(fileView, "module_test_008.foo15:Y;void;");
     AssertKept(fileView, "module_test_008.foo16:std.core.Int;void;");
 
     AssertKept(fileView, "module_test_008.fooEx1:{Ustd.core.Int,std.core.String};");

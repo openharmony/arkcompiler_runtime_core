@@ -652,9 +652,6 @@ static auto g_testSource = R"(
         ldai 0
         return
     }
-    .function novalue R.X_fun() {
-        return.void
-    }
     .function R R.tagged() {
         ldai 0
         return
@@ -696,7 +693,5 @@ TEST_F(MethodTest, GetReturnTypeDescriptor)
     TestMethodType(klass, "i64", "J");
     TestMethodType(klass, "u64", "Q");
     TestMethodType(klass, "f64", "D");
-    TestMethodType(klass, "X_fun", "X");
 }
-
 }  // namespace ark::test

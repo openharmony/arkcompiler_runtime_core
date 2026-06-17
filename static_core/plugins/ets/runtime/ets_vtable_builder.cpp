@@ -284,21 +284,17 @@ bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const
     }
     uint32_t numElems = basePDA.GetNumElements();
 
-    bool dervRetIsNever = dervPDA.GetType(0).GetId() == panda_file::Type::TypeId::NOVALUE;
-    uint32_t start = dervRetIsNever ? 1U : 0U;
-    uint32_t baseRefIdx = (dervRetIsNever && basePDA.GetType(0).IsReference()) ? 1U : 0U;
-    uint32_t dervRefIdx = 0;
-
-    for (uint32_t i = start; i < numElems; ++i) {
+    for (uint32_t i = 0, refIdx = 0; i < numElems; ++i) {
         if (dervPDA.GetType(i) != basePDA.GetType(i)) {
             return false;
         }
         if (dervPDA.GetType(i).IsReference()) {
-            auto dervRef = RefTypeLink::InPDA(ctx, dervPDA, dervRefIdx++);
-            auto baseRef = RefTypeLink::InPDA(ctx, basePDA, baseRefIdx++);
+            auto dervRef = RefTypeLink::InPDA(ctx, dervPDA, refIdx);
+            auto baseRef = RefTypeLink::InPDA(ctx, basePDA, refIdx);
             if (!IsAssignableRefs(ctx, dervRef, baseRef, i)) {
                 return false;
             }
+            refIdx++;
         }
     }
     return true;

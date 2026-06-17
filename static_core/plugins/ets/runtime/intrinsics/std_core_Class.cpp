@@ -633,7 +633,6 @@ extern "C" void StdCoreClassInitializeStatics()
     initStaticPrimitiveRoot("PRIMITIVE_DOUBLE", ClassRoot::F64);
     initStaticPrimitiveRoot("PRIMITIVE_NUMBER", ClassRoot::F64);
     initStaticPrimitiveRoot("PRIMITIVE_VOID", ClassRoot::V);
-    initStaticPrimitiveRoot("PRIMITIVE_NEVER", ClassRoot::NOVALUE);
 }
 
 }  // namespace ark::ets::intrinsics

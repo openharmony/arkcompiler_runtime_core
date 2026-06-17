@@ -3230,7 +3230,6 @@ public:
         return true;
     }
 
-    // NOLINTNEXTLINE(readability-function-size) // CC-OFFNXT(G.FUN.01-CPP) solid logic
     template <typename NameGetter>
     bool CheckMethodArgs(NameGetter nameGetter, const PandaVector<Type> &formalArgs, Span<int> regs,
                          Type constructedType = Type {})
@@ -3335,13 +3334,7 @@ public:
             }
         }
 
-        auto resultType = GetTypeSystem()->GetMethodSignature(method)->result;
-        SetAcc(resultType);
-
-        // Callee never returns; stop tracing — successors are unreachable.
-        if (resultType == Type::Bot()) {
-            return false;
-        }
+        SetAcc(GetTypeSystem()->GetMethodSignature(method)->result);
 
         MoveToNextInst<FORMAT>();
         return true;

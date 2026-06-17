@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-class CustomNeverError extends Error { }
+class NeverError extends Error { }
 
 function neverErr(): never {
-    throw new CustomNeverError();
+    throw new NeverError();
 }
 
 interface ReturnObj {
@@ -47,7 +47,7 @@ function overrideMethods() {
     let baseClass: Base = Base.create();
 
     // success overriding of returnNever() method
-    arktest.expectThrow(() => { baseClass.returnNever() }, (e) => e instanceof CustomNeverError)
+    arktest.expectThrow(() => { baseClass.returnNever() }, (e) => e instanceof NeverError)
 }
 
 function main() {

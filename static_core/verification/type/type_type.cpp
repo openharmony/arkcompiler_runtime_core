@@ -422,8 +422,6 @@ Type Type::FromTypeId(panda_file::Type::TypeId tid)
             return Type {Builtin::U64};
         case TypeId::REFERENCE:
             return Type {Builtin::REFERENCE};
-        case TypeId::NOVALUE:
-            return Type {Builtin::BOT};
         default:
             UNREACHABLE();
     }

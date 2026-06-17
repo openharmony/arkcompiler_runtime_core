@@ -410,29 +410,4 @@ TEST(FunctionsTest, AnyInInstructionsTest)
 }
 #undef DISASM_BIN_DIR
 
-TEST(FunctionsTest, NovalueReturnType)
-{
-    auto program = ark::pandasm::Parser().Parse(R"(
-        .record N <external>
-        .function novalue foo(N a0) <static, access.function=public> {
-            return.void
-        }
-        .function novalue bar() <static, access.function=public> {
-            return.void
-        }
-    )");
-    ASSERT(program);
-    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
-    ASSERT(pf);
-
-    ark::disasm::Disassembler d {};
-    std::stringstream ss {};
-
-    d.Disassemble(pf);
-    d.Serialize(ss);
-
-    EXPECT_TRUE(ss.str().find(".function novalue foo(N a0) <static, access.function=public> {") != std::string::npos);
-    EXPECT_TRUE(ss.str().find(".function novalue bar() <static, access.function=public> {") != std::string::npos);
-}
-
 }  // namespace ark::disasm::test

@@ -30,7 +30,6 @@ enum class ClassRoot {
     U64,
     F32,
     F64,
-    NOVALUE,
     ANY,
     NEVER,
     TAGGED,

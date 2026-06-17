@@ -41,7 +41,7 @@ static constexpr const char *ITERATOR_METHOD = "$_iterator";
 static constexpr const char *GET_INDEX_METHOD = "$_get";
 static constexpr const char *SET_INDEX_METHOD = "$_set";
 
-enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID, NOVALUE };
+enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 
 // CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline EtsType ConvertPandaTypeToEtsType(panda_file::Type type)
@@ -71,8 +71,6 @@ inline EtsType ConvertPandaTypeToEtsType(panda_file::Type type)
             return EtsType::OBJECT;
         case panda_file::Type::TypeId::TAGGED:
             return EtsType::UNKNOWN;
-        case panda_file::Type::TypeId::NOVALUE:
-            return EtsType::NOVALUE;
         default:
             return EtsType::UNKNOWN;
     }
@@ -103,8 +101,6 @@ inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
             return panda_file::Type(panda_file::Type::TypeId::F64);
         case EtsType::OBJECT:
             return panda_file::Type(panda_file::Type::TypeId::REFERENCE);
-        case EtsType::NOVALUE:
-            return panda_file::Type(panda_file::Type::TypeId::NOVALUE);
         default:
             return panda_file::Type(panda_file::Type::TypeId::INVALID);
     }
@@ -134,8 +130,6 @@ inline PandaString EtsTypeToString(const EtsType type)
             return "double";
         case EtsType::OBJECT:
             return "object";
-        case EtsType::NOVALUE:
-            return "novalue";
         default:
             return "invalid";
     }

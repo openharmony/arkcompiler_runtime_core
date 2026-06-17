@@ -71,20 +71,10 @@ static inline bool IsUndefined(ani_ref ref)
     return ManagedCodeAccessor::IsUndefined(ref);
 }
 
-static bool ReturnTypeMatches(EtsType actual, EtsType expected)
-{
-    if (actual == expected) {
-        return true;
-    }
-    // A never-returning method is compatible with a void caller contract:
-    // the call throws or diverges, so there is no result to read either way.
-    return expected == EtsType::VOID && actual == EtsType::NOVALUE;
-}
-
 static ani_status CheckStaticMethodReturnType(ani_static_method method, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(method);
-    if (UNLIKELY(!ReturnTypeMatches(m->GetReturnValueType(), type))) {
+    if (UNLIKELY(m->GetReturnValueType() != type)) {
         return ANI_INVALID_TYPE;
     }
     return ANI_OK;
@@ -93,7 +83,7 @@ static ani_status CheckStaticMethodReturnType(ani_static_method method, EtsType 
 static ani_status CheckMethodReturnType(ani_method method, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(method);
-    if (UNLIKELY(!ReturnTypeMatches(m->GetReturnValueType(), type))) {
+    if (UNLIKELY(m->GetReturnValueType() != type)) {
         return ANI_INVALID_TYPE;
     }
     return ANI_OK;
@@ -102,7 +92,7 @@ static ani_status CheckMethodReturnType(ani_method method, EtsType type)
 static ani_status CheckFunctionReturnType(ani_function fn, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(fn);
-    if (UNLIKELY(!ReturnTypeMatches(m->GetReturnValueType(), type))) {
+    if (UNLIKELY(m->GetReturnValueType() != type)) {
         return ANI_INVALID_TYPE;
     }
     return ANI_OK;
@@ -205,9 +195,6 @@ static Value ConvertArgValue(ScopedManagedCodeFix &s, const ani_value *arg, pand
             auto *param = s.ToInternalType(arg->r);
             return Value(param != nullptr ? param->GetCoreType() : nullptr);
         }
-        case TypeId::NOVALUE:
-            LOG(FATAL, ANI) << "Primitive never cannot be used as an argument type";
-            break;
         default:
             LOG(FATAL, ANI) << "Unexpected argument type";
     }

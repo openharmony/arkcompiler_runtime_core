@@ -26,9 +26,7 @@ TEST(typetests, test1)
     ASSERT_FALSE(type1.IsValid());
 
     std::string_view descriptor2 = "X";
-    ark::pandasm::Type type2 = ark::pandasm::Type::FromDescriptor(descriptor2);
-    ASSERT_EQ(type2.GetComponentName(), "novalue");
-    ASSERT_EQ(type2.GetId("novalue"), panda_file::Type::TypeId::NOVALUE);
+    EXPECT_DEATH({ ark::pandasm::Type::FromDescriptor(descriptor2); }, ".*");
 
     std::string_view descriptor3 = "Z";
     std::string descriptor3Expect = "u1";
@@ -89,20 +87,6 @@ TEST(typetests, malformed_type_name_returns_invalid_type)
     ark::pandasm::Type malformedSuffix = ark::pandasm::Type::FromName("i32]]");
     ASSERT_FALSE(malformedSuffix.IsValid());
     ASSERT_TRUE(malformedSuffix.GetDescriptor().empty());
-}
-
-TEST(typetests, novalue_assembler_type)
-{
-    ark::pandasm::Type type("novalue", 0);
-    ASSERT_EQ(type.GetDescriptor(), "X");
-    ASSERT_EQ(type.GetComponentName(), "novalue");
-    ASSERT_EQ(type.GetRank(), 0);
-    ASSERT_EQ(type.GetId(), panda_file::Type::TypeId::NOVALUE);
-    ASSERT_TRUE(ark::pandasm::Type::IsPandaPrimitiveType("novalue"));
-
-    auto fromPrim = ark::pandasm::Type::FromPrimitiveId(panda_file::Type::TypeId::NOVALUE);
-    ASSERT_EQ(fromPrim.GetComponentName(), "novalue");
-    ASSERT_EQ(fromPrim.GetRank(), 0);
 }
 
 }  // namespace ark::test

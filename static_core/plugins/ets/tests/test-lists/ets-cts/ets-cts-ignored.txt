@@ -325,9 +325,6 @@
 #33255 No CTE on double override with generic interface and default implementation
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_with_default_impl_double_overrides_n.ets
 
-#34453
-15.semantic_rules/09.overriding/03.override-compatible_signatures/derived_foo_never_alongside_undefined_n.ets
-
 #34493 CTE on object literal of interface with generic method
 15.semantic_rules/09.overriding/03.override-compatible_signatures/object_literal_5.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/object_literal_7.ets

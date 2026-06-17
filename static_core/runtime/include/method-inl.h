@@ -157,8 +157,7 @@ ValueT Method::GetReturnValueFromAcc(interpreter::AccVRegister &aacVreg)
         return TaggedValue(aacVreg.GetAs<uint64_t>());
     } else {  // NOLINT(readability-misleading-indentation)
         ASSERT(GetReturnType().GetId() != panda_file::Type::TypeId::TAGGED);
-        if (GetReturnType().GetId() != panda_file::Type::TypeId::VOID &&
-            GetReturnType().GetId() != panda_file::Type::TypeId::NOVALUE) {
+        if (GetReturnType().GetId() != panda_file::Type::TypeId::VOID) {
             interpreter::StaticVRegisterRef acc = aacVreg.AsVRegRef<false>();
             if (acc.HasObject()) {
                 return Value(aacVreg.GetReference());

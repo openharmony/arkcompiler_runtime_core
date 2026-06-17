@@ -70,8 +70,6 @@ public:
                 return TypedValue::Reference(reinterpret_cast<ObjectHeader *>(GetValue()));
             case panda_file::Type::TypeId::TAGGED:
                 return TypedValue::Tagged(coretypes::TaggedValue(GetValue()));
-            default:
-                break;
         }
         UNREACHABLE();
     }

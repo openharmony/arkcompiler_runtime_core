@@ -88,8 +88,6 @@ RemoteObject ObjectRepository::CreateObject(TypedValue value)
             return CreateObject(value.GetAsReference());
         case panda_file::Type::TypeId::TAGGED:
             return CreateObject(value.GetAsTagged());
-        case panda_file::Type::TypeId::NOVALUE:
-            break;
     }
     UNREACHABLE();
 }

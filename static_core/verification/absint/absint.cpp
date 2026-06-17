@@ -254,29 +254,12 @@ VerificationStatus VerifyExcHandler([[maybe_unused]] TryBlock const *tryBlock, C
     return VerifyEntryPoints(*verifCtx, execCtx);
 }
 
-VerificationStatus VerifyMethodSignature(VerificationContext &verifCtx)
-{
-    auto *verifMethod = verifCtx.GetMethod();
-    auto const *sig = verifCtx.GetTypeSystem()->GetMethodSignature(verifMethod);
-    for (auto arg : sig->args) {
-        if (arg == Type::Bot()) {
-            LOG_VERIFIER_NOVALUE_AS_PARAMETER();
-            return VerificationStatus::ERROR;
-        }
-    }
-    return VerificationStatus::OK;
-}
-
 }  // namespace
 
 VerificationStatus VerifyMethod(VerificationContext &verifCtx)
 {
     VerificationStatus worstSoFar = VerificationStatus::OK;
     auto &execCtx = verifCtx.ExecCtx();
-
-    if (VerifyMethodSignature(verifCtx) == VerificationStatus::ERROR) {
-        return VerificationStatus::ERROR;
-    }
 
     worstSoFar = std::max(worstSoFar, VerifyEntryPoints(verifCtx, execCtx));
     if (worstSoFar == VerificationStatus::ERROR) {

@@ -37,8 +37,7 @@ constexpr char PARSE_AREA_MARKER = '.';
     _("i64", I64)                \
     _("f32", F32)                \
     _("f64", F64)                \
-    _("any", TAGGED)             \
-    _("novalue", NOVALUE)
+    _("any", TAGGED)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define KEYWORDS_LIST(_)     \

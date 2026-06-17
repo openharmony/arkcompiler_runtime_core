@@ -25,9 +25,6 @@ function sum(a0: int, a1: int): void {
 function getCount(): int {
     return count as int;
 }
-function fooNever(): never {
-    throw new Error()
-}
 }
 
 export let intExport: int = 3;

@@ -179,7 +179,6 @@ pandasm::Type AbcMethodProcessor::PFTypeToPandasmType(const panda_file::Type &ty
         {panda_file::Type::TypeId::U32, "u32"},         {panda_file::Type::TypeId::F32, "f32"},
         {panda_file::Type::TypeId::F64, "f64"},         {panda_file::Type::TypeId::I64, "i64"},
         {panda_file::Type::TypeId::U64, "u64"},         {panda_file::Type::TypeId::TAGGED, "any"},
-        {panda_file::Type::TypeId::NOVALUE, "novalue"},
     };
 
     if (type.GetId() != panda_file::Type::TypeId::REFERENCE) {

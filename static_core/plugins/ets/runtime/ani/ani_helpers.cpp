@@ -398,10 +398,6 @@ extern "C" void AniEndVerify(Method *method, ManagedThread *thread, bool isFastN
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
     }
 
-    if (method->GetReturnType().GetId() == panda_file::Type::TypeId::NOVALUE && !thread->HasPendingException()) {
-        executionCtx->GetPandaVM()->GetANIVerifier()->Report("Function with return type never must throw");
-    }
-
     AniEnd(method, thread, isFastNative);
 }
 

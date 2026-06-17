@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -708,18 +708,6 @@ messages:
     level: debug
     args: section, option
     message: Option '${section}:${option}' is active.
-
-  BadReturnInstructionInNeverFunction:
-    number: 2008
-    args: suffix
-    message: >
-      Incorrect 'return${suffix}' instruction in function with 'never' return type.
-      Functions that never return cannot have any return instructions.
-
-  NovalueAsParameter:
-    number: 2009
-    message: >
-      Type 'novalue' cannot be used as a method parameter type.
 
   CannotResolveMethodReturnType:
     number: 2010

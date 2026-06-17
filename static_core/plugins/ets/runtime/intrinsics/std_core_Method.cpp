@@ -76,7 +76,7 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsExecutionContext *executionCtx, 
         return EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     }
 
-    if (meth->GetReturnValueType() == EtsType::VOID || meth->GetReturnValueType() == EtsType::NOVALUE) {
+    if (meth->GetReturnValueType() == EtsType::VOID) {
         return nullptr;
     }
 

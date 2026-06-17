@@ -425,21 +425,6 @@ TEST_F(FunctionCallVoidTest, check_initialization_void_a)
     ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_void_test.ops"));
 }
 
-TEST_F(FunctionCallVoidTest, function_call_void_never)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.ops", &ns), ANI_OK);
-    ani_function fn {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "fooNever", ":w", &fn), ANI_OK);
-
-    ASSERT_EQ(env_->Function_Call_Void(fn), ANI_PENDING_ERROR);
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
-
-    ani_value args[1] = {};
-    ASSERT_EQ(env_->Function_Call_Void_A(fn, args), ANI_PENDING_ERROR);
-    ASSERT_EQ(env_->ResetError(), ANI_OK);
-}
-
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
