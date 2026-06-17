@@ -87,11 +87,7 @@ TEST_F(DetachThreadTest, detach_thread_under_pending_error)
         EXPECT_NE(vm_, nullptr) << "vm_ is nullptr";
         EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv), ANI_OK);
 
-        std::string longString(10000U, 'a');
-        ani_string strRef {};
-        ASSERT_EQ(etsEnv->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
-        ani_ref anyStringRef {};
-        ASSERT_EQ(etsEnv->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+        ASSERT_EQ(AniTest::ThrowError(etsEnv), ANI_OK);
 
         EXPECT_EQ(vm_->DetachCurrentThread(), ANI_OK);
     };

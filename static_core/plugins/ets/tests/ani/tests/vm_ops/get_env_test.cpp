@@ -70,11 +70,7 @@ TEST_F(GetEnvTest, get_env_under_pending_error)
     ani_env *env = nullptr;
     ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env), ANI_OK);
 
-    std::string longString(10000U, 'a');
-    ani_string strRef {};
-    ASSERT_EQ(env->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ASSERT_EQ(AniTest::ThrowError(env), ANI_OK);
 
     uint32_t version;
     ASSERT_EQ(env->GetVersion(&version), ANI_OK);

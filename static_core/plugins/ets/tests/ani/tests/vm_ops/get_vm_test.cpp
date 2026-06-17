@@ -36,11 +36,7 @@ TEST_F(GetVMTest, invalid_argument)
 
 TEST_F(GetVMTest, get_vm_under_pending_error)
 {
-    std::string longString(10000U, 'a');
-    ani_string strRef {};
-    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ThrowError();
 
     ani_vm *vm = nullptr;
     ASSERT_EQ(env_->GetVM(&vm), ANI_OK);

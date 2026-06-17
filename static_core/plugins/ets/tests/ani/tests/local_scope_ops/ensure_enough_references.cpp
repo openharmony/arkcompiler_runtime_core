@@ -105,11 +105,7 @@ TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_pending_error)
 
 TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_under_pending_error)
 {
-    std::string longString(10000U, 'a');
-    ani_string strRef {};
-    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ThrowError();
 
     ASSERT_EQ(env_->EnsureEnoughReferences(SPECIFIED_CAPACITY), ANI_OK);
 }

@@ -87,12 +87,7 @@ TEST_F(CreateVMTest, destroy_vm_under_pending_error)
     ani_env *env = nullptr;
     ASSERT_EQ(vm->GetEnv(ANI_VERSION_1, &env), ANI_OK);
 
-    const int32_t longStringSize = 10000U;
-    std::string longString(longStringSize, 'a');
-    ani_string strRef {};
-    ASSERT_EQ(env->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ASSERT_EQ(AniTest::ThrowError(env), ANI_OK);
 
     ASSERT_EQ(vm->DestroyVM(), ANI_OK);
 }

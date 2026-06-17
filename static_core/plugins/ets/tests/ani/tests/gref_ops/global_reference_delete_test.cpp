@@ -88,8 +88,7 @@ TEST_F(GlobalReferenceDeleteTest, global_reference_delete_under_pending_error)
     ani_ref gref {};
     ASSERT_EQ(env_->GlobalReference_Create(strRef, &gref), ANI_OK);
 
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ThrowError();
 
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
 }

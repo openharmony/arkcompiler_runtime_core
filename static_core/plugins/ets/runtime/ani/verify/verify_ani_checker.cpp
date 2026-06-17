@@ -710,7 +710,6 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_FIXED_ARRAY_REF_STORAGE:      return "ani_fixedarray_ref *";
         case ValueType::ANI_RESOLVER:                     return "ani_resolver";
         case ValueType::ANI_RESOLVER_STORAGE:             return "ani_resolver *";
-        case ValueType::ANI_REF_CALL_ARGS:                return "ani_ref *";
         case ValueType::CONST_VOID_PTR:                   return "const void *";
         default:                                          UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
@@ -1036,54 +1035,6 @@ public:
             return {};
         }
         return {"escape reference is invalid", ANIErrorSeverity::FATAL};
-    }
-
-    VerificationResult VerifyAnyApiRefIsXRefClass(ani_ref ref)
-    {
-        ScopedManagedCodeFix s(venv_->GetEnv());
-        EtsObject *obj = s.ToInternalType(ref);
-        if (obj != nullptr && !obj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
-            return {"Static types are not supported", ANIErrorSeverity::FATAL};
-        }
-        return {};
-    }
-
-    VerificationResult VerifyAnyRef(VRef *vref)
-    {
-        auto err = VerifyRef(vref);
-        if (err) {
-            return err;
-        }
-        return VerifyAnyApiRefIsXRefClass(vref->GetRef());
-    }
-
-    VerificationResult VerifyRefCallArgs(VRefCallArgs *desc)
-    {
-        if (desc == nullptr) {
-            return {"argv parameter is nullptr", ANIErrorSeverity::FATAL};
-        }
-        desc->ClearReleaseArgvState();
-        if (desc->GetArgc() == 0) {
-            return {};
-        }
-        if (desc->GetVargv() == nullptr) {
-            return {"argv array is nullptr", ANIErrorSeverity::FATAL};
-        }
-        Span<VRef *> argvSpan(desc->GetVargv(), desc->GetArgc());
-        for (VRef *argRef : argvSpan) {
-            auto err = VerifyRef(argRef);
-            if (err) {
-                return err;
-            }
-        }
-        auto &releaseStorage = desc->MutableReleaseArgvStorage();
-        releaseStorage.reserve(desc->GetArgc());
-        for (ani_size i = 0; i < desc->GetArgc(); ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            releaseStorage.push_back(desc->GetVargv()[i]->GetRef());
-        }
-        desc->SetReleaseArgv(releaseStorage.data());
-        return {};
     }
 
     VerificationResult VerifyType(VType *vtype)
@@ -2715,12 +2666,6 @@ static VerificationResult VerifyRef(Verifier &v, const ANIArg &arg)
     return v.VerifyRef(arg.GetValueRef());
 }
 
-static VerificationResult VerifyAnyRef(Verifier &v, const ANIArg &arg)
-{
-    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ANY_REF);
-    return v.VerifyAnyRef(arg.GetValueRef());
-}
-
 static VerificationResult VerifyModule(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_MODULE);
@@ -3490,12 +3435,6 @@ static VerificationResult VerifyResolverStorage(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_RESOLVER_STORAGE);
     return v.VerifyTypeStorage<VResolver **>(arg.GetValueResolverStorage(), "ani_resolver");
-}
-
-static VerificationResult VerifyRefCallArgs(Verifier &v, const ANIArg &arg)
-{
-    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_REF_CALL_ARGS);
-    return v.VerifyRefCallArgs(arg.GetValueRefCallArgs());
 }
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

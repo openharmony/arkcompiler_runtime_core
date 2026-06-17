@@ -49,7 +49,7 @@ This file only covers adding, composing, and testing VerifyANI checkers. For the
 | VM/env | `../../../../../tests/ani/tests/verifyani/vm_ops/`, `../../../../../tests/ani/tests/verifyani/env_ops/` |
 | refs/scopes | `../../../../../tests/ani/tests/verifyani/ref_ops/`, `../../../../../tests/ani/tests/verifyani/scope_ops/`, `../../../../../tests/ani/tests/verifyani/local_scope_ops/` |
 | object/class/function | `../../../../../tests/ani/tests/verifyani/object_ops/`, `../../../../../tests/ani/tests/verifyani/class_ops/`, `../../../../../tests/ani/tests/verifyani/function_ops/` |
-| arrays/strings/tuple/any | `../../../../../tests/ani/tests/verifyani/array_ops/`, `../../../../../tests/ani/tests/verifyani/string_ops/`, `../../../../../tests/ani/tests/verifyani/tuplevalue/`, `../../../../../tests/ani/tests/verifyani/any_ops/` |
+| arrays/strings/tuple | `../../../../../tests/ani/tests/verifyani/array_ops/`, `../../../../../tests/ani/tests/verifyani/string_ops/`, `../../../../../tests/ani/tests/verifyani/tuplevalue/` |
 | generated primitive/variable tests | `../../../../../tests/ani/tests/verifyani/primitive_box_unbox/`, `../../../../../tests/ani/tests/verifyani/variable_ops/` |
 
 ## Modification Checklist
