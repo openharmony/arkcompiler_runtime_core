@@ -364,14 +364,13 @@ bool GCCMCBarrierSet::IsReadBarrierEnabled()
     return Mutator::GetCurrent()->GetReadBarrierEntrypoint() != nullptr;
 }
 
-void *GCCMCBarrierSet::AtomicReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
-                                         [[maybe_unused]] std::memory_order order)
+void *GCCMCBarrierSet::VolatileReadBarrier([[maybe_unused]] void **refAddr)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     if constexpr (USE_READ_BARRIERS) {
-        auto *fieldPtr = reinterpret_cast<ObjectPointerType *>(ToUintPtr(objAddr) + offset);
+        auto *fieldPtr = reinterpret_cast<ObjectPointerType *>(refAddr);
         auto &atomicField = reinterpret_cast<ark::mem::RefField<true> &>(*fieldPtr);
-        ark::mem::RefField<false> tmpField(atomicField.GetFieldValue(order));
+        ark::mem::RefField<false> tmpField(atomicField.GetFieldValue(std::memory_order_acquire));
         return ReadBarrier(reinterpret_cast<void **>(&tmpField));
     }
 #endif

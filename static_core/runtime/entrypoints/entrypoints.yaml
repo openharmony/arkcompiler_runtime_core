@@ -325,17 +325,15 @@ entrypoints:
   properties: []
   signature:
     - void*
-    - ark::ObjectHeader*
-    - uint32_t
+    - void**
 
-- name: CmcAtomicReadViaBarrier
-  entrypoint: CmcAtomicReadViaBarrier
+- name: CmcVolatileReadViaBarrier
+  entrypoint: CmcVolatileReadViaBarrier
   bridge: none
   properties: []
   signature:
     - void*
-    - ark::ObjectHeader*
-    - uint32_t
+    - void**
 
 - name: PostBarrierWrite
   entrypoint: PostBarrierWriteEntrypoint
@@ -353,16 +351,14 @@ entrypoints:
   signature:
     - ark::ObjectHeader*
     - ark::ObjectHeader**
-    - int32_t
 
-- name: CmcAtomicReadViaBarrierIrtoc
-  entrypoint: CmcAtomicReadViaBarrierIrtoc
+- name: CmcVolatileReadViaBarrierIrtoc
+  entrypoint: CmcVolatileReadViaBarrierIrtoc
   bridge: none
   properties: [irtoc]
   signature:
     - ark::ObjectHeader*
     - ark::ObjectHeader**
-    - int32_t
 
 - name: Safepoint
   entrypoint: SafepointEntrypoint

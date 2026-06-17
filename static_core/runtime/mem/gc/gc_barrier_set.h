@@ -104,16 +104,10 @@ public:
 
     BarrierOperand GetPostBarrierOperand(std::string_view name);
 
-    virtual void *ReadBarrier(const void *objAddr, size_t offset)
+    virtual void *VolatileReadBarrier(void **refAddr)
     {
-        return *reinterpret_cast<void **>((ToUintPtr(objAddr) + offset));
-    }
-
-    virtual void *AtomicReadBarrier(const void *objAddr, size_t offset, std::memory_order order)
-    {
-        void *p = reinterpret_cast<void **>((ToUintPtr(objAddr) + offset));
-        // Atomic with parameterized order reason: memory order passed as argument
-        return reinterpret_cast<std::atomic<void *> *>(p)->load(order);
+        // Atomic with acquire order reason: volatile field access has acquire semantic
+        return reinterpret_cast<std::atomic<void *> *>(refAddr)->load(std::memory_order_acquire);
     }
 
     virtual void *ReadBarrier(void **refAddr)
@@ -253,7 +247,7 @@ public:
 
     bool IsReadBarrierEnabled() override;
 
-    void *AtomicReadBarrier(const void *objAddr, size_t offset, std::memory_order order) override;
+    void *VolatileReadBarrier(void **refAddr) override;
 
     void *ReadBarrier(void **refAddr) override;
 

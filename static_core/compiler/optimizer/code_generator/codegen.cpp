@@ -2386,30 +2386,32 @@ void Codegen::CreatePostWRBForDynamicImpl(Inst *inst, MemRef mem, Reg reg1, Reg 
 
 void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
 {
-    if (!mem.HasIndex()) {
-        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase(), TypedImm(mem.GetDisp()));
+    if (!mem.HasIndex() && !mem.HasDisp()) {
+        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase());
     } else if (dstReg.GetId() != mem.GetBase().GetId()) {
         MemRefToOffset(dstReg /* as offset */, mem);
-        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase(), dstReg /* as offset */);
+        GetEncoder()->EncodeAdd(dstReg, mem.GetBase(), dstReg);
+        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, dstReg /* as refAddr */);
     } else {
-        ScopedTmpReg offset(GetEncoder());
-        MemRefToOffset(offset, mem);
-        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, mem.GetBase(), offset);
+        ScopedTmpReg refAddr(GetEncoder());
+        MemRefToOffset(refAddr, mem);
+        GetEncoder()->EncodeAdd(refAddr, mem.GetBase(), refAddr);
+        CreateCmcReadViaBarrierCall(inst, dstReg, isVolatile, preserved, refAddr);
     }
 }
 
-template <typename... Args>
-void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, Reg dstReg, bool isVolatile, RegMask preserved, Args &&...params)
+void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, Reg dstReg, bool isVolatile, RegMask preserved, Reg refAddr)
 {
     if (GetGraph()->SupportsIrtocBarriers()) {
         auto entrypointId =
-            isVolatile ? EntrypointId::CMC_ATOMIC_READ_VIA_BARRIER_IRTOC : EntrypointId::CMC_READ_VIA_BARRIER_IRTOC;
-        CallFastPath(inst, entrypointId, dstReg, preserved, std::forward<Args>(params)...);
+            isVolatile ? EntrypointId::CMC_VOLATILE_READ_VIA_BARRIER_IRTOC : EntrypointId::CMC_READ_VIA_BARRIER_IRTOC;
+        CallFastPath(inst, entrypointId, dstReg, preserved, refAddr);
     } else {
         auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
         live_regs |= preserved;
-        auto entrypointId = isVolatile ? EntrypointId::CMC_ATOMIC_READ_VIA_BARRIER : EntrypointId::CMC_READ_VIA_BARRIER;
-        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, std::forward<Args>(params)...);
+        auto entrypointId =
+            isVolatile ? EntrypointId::CMC_VOLATILE_READ_VIA_BARRIER : EntrypointId::CMC_READ_VIA_BARRIER;
+        CallBarrier(live_regs, live_vregs, entrypointId, dstReg, refAddr);
     }
 }
 
