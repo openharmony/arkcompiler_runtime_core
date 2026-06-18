@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "runtime/tooling/sampler/samples_record.h"
 #include "runtime/tooling/sampler/thread_communicator.h"
 #include "runtime/tooling/sampler/lock_free_queue.h"
+#include "include/tooling/pt_lang_extension.h"
 
 namespace ark::tooling::sampler {
 
@@ -95,6 +96,50 @@ public:
     static PANDA_PUBLIC_API uint64_t GetMicrosecondsTimeStamp();
 
     static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
+    // Maximum serialized size for a single plugin (dynamic) frame: 1280 bytes.
+    // Sized to accommodate function name, source URL, module name, line/column
+    // numbers and other metadata produced by the language extension (PtLangExt).
+    static constexpr size_t PLUGIN_FRAME_DATA_MAX_SIZE = 1280;
+    static constexpr size_t PLUGIN_POOL_SLOT_SIZE = SampleInfo::StackInfo::MAX_STACK_DEPTH * PLUGIN_FRAME_DATA_MAX_SIZE;
+
+    // Per-thread plugin slot. state protocol (signal handler -> listener):
+    //   FREE  -> signal handler CAS(FREE->READY) on acquire
+    //   READY -> listener deep-copies data, then store(FREE)
+    struct PluginSlot {
+        static constexpr uint32_t FREE = 0;
+        static constexpr uint32_t READY = 1;
+        std::array<uint8_t, PLUGIN_POOL_SLOT_SIZE> data {};
+        std::atomic<uint32_t> state {FREE};
+    };
+
+    static constexpr size_t MAX_SLOTS = 128;
+
+    // Look up the PluginSlot for the given managed thread.
+    // Called from SIGPROF handler -- must not allocate or lock.
+    static PluginSlot &GetSlotForThread(ManagedThread *mthread);
+
+    // Return a writable buffer for frameIndex within the thread's slot.
+    static void *GetSlotBuffer(ManagedThread *mthread, size_t frameIndex);
+
+    static tooling::PtLangExt *GetSamplePtLangExt()
+    {
+        return instance_->GetPtLangExt();
+    }
+
+    tooling::PtLangExt *GetPtLangExt()
+    {
+        return ptLangExt_.get();
+    }
+
+    static bool IsHybridStackEnable()
+    {
+        return instance_->GetHybridStackEnableStatus();
+    }
+
+    bool GetHybridStackEnableStatus()
+    {
+        return isHybridStackEnable_;
+    }
 
 private:
     explicit Sampler();
@@ -122,6 +167,13 @@ private:
         loadedPfs_.clear();
     }
 
+    void CreatePtLangExt();
+    void CheckHybridStackIsSupported();
+
+    void AllocateSlotForThread(ManagedThread *thread);
+    void ReleaseSlot(const void *extFrameData);
+    void ReleaseSampleSlots(const SampleInfo &sample);
+
     static Sampler *instance_;
 
     Runtime *runtime_ {nullptr};
@@ -130,10 +182,12 @@ private:
     os::thread::NativeHandleType samplerTid_ {0};
     std::unique_ptr<std::thread> samplerThread_ {nullptr};
     std::unique_ptr<std::thread> listenerThread_ {nullptr};
+    std::unique_ptr<tooling::PtLangExt> ptLangExt_ {nullptr};
     ThreadCommunicator communicator_;
 
     std::atomic<bool> isActive_ {false};
     bool isSegvHandlerEnable_ {true};
+    bool isHybridStackEnable_ {false};
 
     PandaSet<os::thread::ThreadId> managedThreads_ GUARDED_BY(managedThreadsLock_);
     os::memory::Mutex managedThreadsLock_;
@@ -144,6 +198,13 @@ private:
     os::memory::Mutex loadedPfsLock_;
 
     std::chrono::microseconds sampleInterval_;
+    // Fixed-size array of per-thread plugin slots.
+    // Allocated once in Start(); signal handler reads by slot index (lock-free).
+    // Each slot has a FREE/READY state machine to prevent overwrite while
+    // the listener thread still holds a reference.
+    os::memory::Mutex slotAllocLock_;
+    PandaVector<std::unique_ptr<PluginSlot>> pluginSlots_ GUARDED_BY(slotAllocLock_);
+    PandaVector<size_t> freeSlotIndices_ GUARDED_BY(slotAllocLock_);
 
     friend class test::SamplerTest;
 

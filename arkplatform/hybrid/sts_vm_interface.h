@@ -18,6 +18,7 @@
 
 #include "hybrid/vm_interface.h"
 #include "hybrid/hybrid_heap_snapshot_info.h"
+#include "hybrid/hybrid_frame_info.h"
 #include <cstdint>
 #include <cstddef>
 #include <functional>
@@ -97,6 +98,8 @@ public:
      * Used to interrupt the barrier when XGC cannot proceed (e.g. ETS GC task rejected).
      */
     virtual void NotifyWaiters() = 0;
+
+    virtual bool GetStaticFrameInfo(const void *frame, arkplatform::HybridFrameInfo &frameInfo) = 0;
 
     // --- Hybrid Heapdump Methods ---
     /// @brief Trigger XGC and wait for completion

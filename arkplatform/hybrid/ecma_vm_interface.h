@@ -17,6 +17,7 @@
 #define PANDA_ECMA_VM_INTERFACE_H
 
 #include "hybrid/vm_interface.h"
+#include "hybrid/hybrid_frame_info.h"
 #include <cstdint>
 #include <functional>
 
@@ -38,6 +39,12 @@ public:
     VMInterfaceType GetVMType() const override
     {
         return VMInterface::VMInterfaceType::ECMA_VM_IFACE;
+    }
+
+    virtual bool GetDynamicFrameInfo([[maybe_unused]] const void *dynamicFramePtr,
+                                     [[maybe_unused]] HybridFrameInfo &frameInfo)
+    {
+        return false;
     }
 
     virtual void NotifyXGCInterruption() {}

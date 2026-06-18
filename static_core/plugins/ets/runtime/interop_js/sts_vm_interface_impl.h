@@ -20,6 +20,7 @@
 #include <functional>
 // arkplatform
 #include "hybrid/sts_vm_interface.h"
+#include "hybrid/hybrid_frame_info.h"
 
 #include "libarkbase/macros.h"
 #include "libarkbase/os/mutex.h"
@@ -62,6 +63,7 @@ public:
     PANDA_PUBLIC_API bool UnionStackIsEmpty(bool *isEmpty) override;
     PANDA_PUBLIC_API bool ForEachFrameInUnionStack(
         const std::function<void(const void *frame, bool isStaticFrame)> &callback) override;
+    PANDA_PUBLIC_API bool GetStaticFrameInfo(const void *frame, arkplatform::HybridFrameInfo &frameInfo) override;
 
     PandaEtsVM *GetVM() const
     {

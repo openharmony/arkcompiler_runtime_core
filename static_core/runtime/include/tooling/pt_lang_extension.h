@@ -46,6 +46,21 @@ public:
     {
         return "this";
     }
+    virtual bool CollectHybridStackFrames(
+        [[maybe_unused]] const std::function<void(const void *frame, bool isStaticFrame)> &callback)
+    {
+        return false;
+    }
+    virtual size_t GetDynamicFrameInfo([[maybe_unused]] const void *frame, [[maybe_unused]] void *buffer,
+                                       [[maybe_unused]] size_t bufferSize, [[maybe_unused]] uintptr_t *fileId,
+                                       [[maybe_unused]] uint32_t *bcOffset)
+    {
+        return 0;
+    }
+    virtual bool IsSupportHybridStack()
+    {
+        return false;
+    }
     virtual std::optional<std::string> GetAsBigIntString([[maybe_unused]] const ObjectHeader *object)
     {
         return {};

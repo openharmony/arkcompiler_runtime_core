@@ -475,6 +475,7 @@ void Runtime::SetDebuggerOptions(RuntimeOptions &options)
             LOG(ERROR, RUNTIME) << "Debug mode enabled but debugger library path is not set for this platform";
         }
         options.SetDebuggerBreakOnStart(true);
+        options.SetSamplingProfilerCreate(true);
     }
 }
 

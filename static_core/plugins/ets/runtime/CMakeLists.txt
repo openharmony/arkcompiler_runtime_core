@@ -134,6 +134,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_execution_context_wrapper.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/tooling/internal_api.cpp
+    ${ETS_EXT_SOURCES}/tooling/pt_ets_extension.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
     ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
     ${ETS_EXT_SOURCES}/types/ets_std_core_array.cpp
