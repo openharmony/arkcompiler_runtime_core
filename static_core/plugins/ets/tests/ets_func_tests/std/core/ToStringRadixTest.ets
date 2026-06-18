@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function main(): int {
     let suite = new arktest.ArkTestsuite('toString(radix) tests')
     
     suite.addTest('Char.toString(radix) tests', Char_toString_tests)
@@ -22,7 +22,7 @@ function main() {
     suite.addTest('Int.toString(radix) tests', Int_toString_tests)
     suite.addTest('Long.toString(radix) tests', Long_toString_tests)
     
-    suite.run()
+    return suite.run()
 }
 
 interface CharTestCase {
@@ -148,6 +148,16 @@ function Long_toString_tests() {
         { value: -46655, radix: 36, expected: '-zzz' },
         { value: -1295, radix: 36, expected: '-zz' },
         { value: -1, radix: 10, expected: '-1' },
+        { value: Long.MIN_VALUE, radix: 2,
+          expected: '-1000000000000000000000000000000000000000000000000000000000000000' },
+        { value: Long.MIN_VALUE, radix: 10, expected: '-9223372036854775808' },
+        { value: Long.MIN_VALUE, radix: 16, expected: '-8000000000000000' },
+        { value: Long.MIN_VALUE, radix: 36, expected: '-1y2p0ij32e8e8' },
+        { value: Long.MAX_VALUE, radix: 2,
+          expected: '111111111111111111111111111111111111111111111111111111111111111' },
+        { value: Long.MAX_VALUE, radix: 10, expected: '9223372036854775807' },
+        { value: Long.MAX_VALUE, radix: 16, expected: '7fffffffffffffff' },
+        { value: Long.MAX_VALUE, radix: 36, expected: '1y2p0ij32e8e7' },
     ]
     
     for (let tc of testCases) {

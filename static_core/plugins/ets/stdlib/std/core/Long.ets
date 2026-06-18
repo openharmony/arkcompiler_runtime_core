@@ -249,15 +249,28 @@ export final class Long extends Integral implements Comparable<Long> {
         const negative: boolean = this.value < 0
 
         let digitsNum: int = negative ? 1 : zero
-        for (let val: long = abs(this.value); val > 0; val /= radix) {
+        let value: long = this.value
+        if (negative) {
+            value /= radix
+            digitsNum++
+            value = -value
+        }
+        for (let val: long = value; val > 0; val /= radix) {
             digitsNum++
         }
 
         const data: FixedArray<char> = new FixedArray<char>(digitsNum)
         let i: int = digitsNum - 1
-        for (let val: long = abs(this.value); val > 0; val /= radix) {
+        let val: long = this.value
+        if (negative) {
+            let remainder: long = -(val % radix)
+            data[i--] = digitChars[remainder.toInt()]
+            val = -(val / radix)
+        }
+        while (val > 0) {
             let remainder: long = val % radix
             data[i--] = digitChars[remainder.toInt()]
+            val /= radix
         }
         if (negative) {
             data[0] = c'-'
