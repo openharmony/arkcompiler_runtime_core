@@ -25,3 +25,11 @@ cases:
   - {check_type: "bigint", base_value: "12345678901234567890n", override_value: "5556423623465n"}
   - {check_type: "char", base_value: "c'\\u2028'", override_value: "c'z'"}
   - {check_type: "boolean", base_value: "false", override_value: "true"}
+
+  - {check_type: "UT", base_value: "\"abc\"", override_value: "true"}
+  - {check_type: "Color", base_value: "Color.Red", override_value: "Color.Yellow"}
+  - {check_type: "FT", base_value: "f1", override_value: "f2"}
+  - {check_type: "IPerson", base_value: "bob", override_value: "liz"}
+  - {check_type: "RT", base_value: "r1", override_value: "r2"}
+
+

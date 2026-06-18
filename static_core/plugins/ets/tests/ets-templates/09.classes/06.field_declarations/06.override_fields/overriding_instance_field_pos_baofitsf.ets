@@ -13,7 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
+{% yaml "overriding_instance_field_pos.params.yaml" as data %}
+
+{% for c in data.cases %}
 
 /*---
 desc: >-
@@ -23,6 +25,29 @@ desc: >-
     changing field initialization.
 params: simple overriding, base and overridden field initialized through static function
 ---*/
+
+type UT = String | Boolean
+type FT = () => number
+enum Color { White, Black, Red, Blue, Yellow }
+type RT = Record<string, number>
+
+const f1: FT = () => 12
+const f2: FT = () => 24
+const f3: FT = () => 36
+
+interface IPerson {
+    name: String;
+    surname: String;
+    age: int
+}
+
+const bob: IPerson = {name: "Bob", surname: "Doe", age: 25}
+const liz: IPerson = {name: "Liz", surname: "Doe", age: 16}
+const ann: IPerson = {name: "Ann", surname: "Doe", age: 33}
+
+const r1: RT = { "John": 25, "Mary": 21 }
+const r2: RT = { "Bob": 15, "Jane": 31 }
+const r3: RT = { "Jiji": 15, "Jane": 42 }
 
 class Base {
   field: {{c.check_type}} = Base.init()

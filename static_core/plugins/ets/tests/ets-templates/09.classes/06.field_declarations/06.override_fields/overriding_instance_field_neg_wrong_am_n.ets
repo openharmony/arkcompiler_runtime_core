@@ -1,4 +1,4 @@
-/*---
+/*
 Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,30 +11,24 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
----*/
+*/
+
+{% for c in cases %}
 
 /*---
 desc: >-
     A compile-time error occurs if: Access Modifiers of the overriding field
     and of the overridden field are different.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE1600001: Access modifier of field 'f' in class 'D' and in the base class 'Base' must be the same."
+expected_out: "Semantic error ESE1600001: Access modifier of field 'num' in class 'D' and in the base class 'C' must be the same."
 ---*/
 
-class Base<T> {
-  f: T
-  constructor(v: T) {
-    this.f = v
-  }
+class C {
+  {{c.from}} num: number = 1
 }
 
-class D<T> extends Base<T> {
-  protected f: T
-  constructor(v: T) {
-    super(v)
-    this.f = v
-  }
+class D extends C {
+  {{c.to}} num: number = 2
 }
 
-function main(): void {
-}
+{% endfor %}
