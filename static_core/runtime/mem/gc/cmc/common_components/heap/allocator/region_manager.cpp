@@ -29,10 +29,8 @@
 #include "common_components/base/time_utils.h"
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/heap.h"
-#include "common_components/mutator/mutator_manager.h"
 #include "common_components/heap/allocator/fix_heap.h"
 
-#include "common_interfaces/thread/mutator-inl.h"
 #include "common_interfaces/objects/base_object.h"
 
 #if defined(COMMON_TSAN_SUPPORT)
@@ -45,6 +43,8 @@
 #if defined(_WIN64)
 #include <sysinfoapi.h>
 #endif
+
+#include "runtime/mem/gc/cmc/cmc-gc.h"
 
 namespace ark::mem {
 uintptr_t RegionDesc::UnitInfo::totalUnitCount = 0;
@@ -83,36 +83,6 @@ constexpr size_t HUGE_PAGE_UNIT_NUM = (2048 * KB) / RegionDesc::UNIT_SIZE;
 
 namespace ark::mem {
 using ::ark::common_vm::RegionalHeap;
-
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-void RegionDesc::DumpRegionDesc(LogType type) const
-{
-    LOG(DEBUG, GC) << "Region index: " << GetUnitIdx() << ", type: " << GetTypeName() << ", address: 0x" << std::hex
-                   << GetRegionBase() << "(start=0x" << std::hex << GetRegionStart() << ")-0x" << std::hex
-                   << GetRegionEnd() << ", allocated(B) " << std::dec << GetRegionAllocatedSize() << ", live(B) "
-                   << GetLiveByteCount();
-}
-
-const char *RegionDesc::GetTypeName() const
-{
-    static constexpr const char *regionNames[] = {
-        "undefined region",
-        "thread local region",
-        "recent fullregion",
-        "from region",
-        "unmovable from region",
-        "to region",
-        "full non-movable region",
-        "recent non-movable region",
-        "raw pointer non-movable region",
-        "tl raw pointer region",
-        "large region",
-        "recent large region",
-        "garbage region",
-    };
-    return regionNames[static_cast<uint8_t>(GetRegionType())];
-}
-#endif
 
 void RegionDesc::VisitAllObjects(const std::function<void(BaseObject *)> &&func)
 {
@@ -606,22 +576,6 @@ RegionDesc *RegionManager::TakeRegion(size_t num, RegionDesc::UnitRole type, boo
 
     return nullptr;
 }
-
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-void RegionManager::DumpRegionDesc() const
-{
-    if (!ENABLE_LOG(ALLOC)) {
-        return;
-    }
-    for (uintptr_t regionAddr = regionHeapStart; regionAddr < inactiveZone;) {
-        RegionDesc *region = RegionDesc::GetRegionDescAt(regionAddr);
-        regionAddr = region->GetRegionEnd();
-        if (!region->IsFreeRegion()) {
-            region->DumpRegionDesc(ALLOC);
-        }
-    }
-}
-#endif
 
 void RegionManager::DumpRegionStats() const
 {

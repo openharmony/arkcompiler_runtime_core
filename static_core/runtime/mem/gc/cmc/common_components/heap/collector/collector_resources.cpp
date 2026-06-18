@@ -19,8 +19,8 @@
 #include "common_components/base/sys_call.h"
 #include "common_components/common/run_type.h"
 #include "common_components/common/scoped_object_access.h"
-#include "common_components/mutator/mutator_manager.h"
 
+#include "include/mutator_status.h"
 #include "libarkbase/utils/logger.h"
 
 #ifdef ENABLE_QOS
@@ -128,7 +128,10 @@ void CollectorResources::StopGCThreads()
     }
     {
         // Enter saferegion to avoid blocking gc stw
-        ScopedEnterSaferegion enterSaferegion(true);
+        ark::Mutator *mutator = ark::Mutator::GetCurrent();
+        if (mutator != nullptr) {
+            mutator->UpdateStatus(MutatorStatus::NATIVE);
+        }
         int ret = ::pthread_join(gcMainThread_, nullptr);
         LOG_IF(UNLIKELY(ret != 0), ERROR, GC) << "::pthread_join() in StopGCThreads() return " << ret;
     }

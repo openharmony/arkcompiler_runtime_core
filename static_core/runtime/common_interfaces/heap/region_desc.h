@@ -590,11 +590,6 @@ public:
         return GetRegionAllocPtr() - GetRegionStart();
     }
 
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-    void DumpRegionDesc(LogType type) const;
-    const char *GetTypeName() const;
-#endif
-
     void VisitAllObjects(const std::function<void(BaseObject *)> &&func);
     void VisitAllObjectsBeforeCopy(const std::function<void(BaseObject *)> &&func);
     bool VisitLiveObjectsUntilFalse(const std::function<bool(BaseObject *)> &&func);

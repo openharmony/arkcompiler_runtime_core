@@ -1070,7 +1070,6 @@
   "plugins/ets/runtime/ets_vtable_builder.h": "*",
   "plugins/ets/runtime/external_iface_table.h": "*",
   "plugins/ets/runtime/finalreg/finalization_registry_manager.h": "*",
-  "plugins/ets/runtime/hybrid/mem/external-gc.h": "*",
   "plugins/ets/runtime/hybrid/mem/static_object_operator.h": "*",
   "plugins/ets/runtime/integrate/ark_vm_api.h": "*",
   "plugins/ets/runtime/integrate/ets_ani_expo.h": "*",

@@ -49,18 +49,6 @@ public:
     {
         return false;
     }
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::Mutator *GetMutator()
-    {
-        return mutator_;
-    }
-#endif  // ARK_USE_COMMON_RUNTIME
-
-private:
-#if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::Mutator *mutator_ = nullptr;
-#endif  // ARK_USE_COMMON_RUNTIME
 };
 
 }  // namespace ark

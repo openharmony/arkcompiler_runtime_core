@@ -62,7 +62,6 @@ cmc_sources = [
   "${_cmc_dir}/heap/verification.cpp",
   "${_cmc_dir}/log/log.cpp",
   "${_cmc_dir}/mutator/mutator.cpp",
-  "${_cmc_dir}/mutator/mutator_manager.cpp",
   "${_cmc_dir}/mutator/satb_buffer.cpp",
   "${_cmc_dir}/mutator/thread_local.cpp",
   "${_cmc_dir}/objects/base_object.cpp",

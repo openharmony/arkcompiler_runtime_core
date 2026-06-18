@@ -28,7 +28,6 @@
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/heap/region_desc.h"
-#include "common_components/mutator/mutator_manager.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
 #endif
@@ -60,7 +59,7 @@ protected:
         if (region == nullptr) {
             return;
         }
-        GCPhase phase = Mutator::GetMutator()->GetMutatorPhase();
+        GCPhase phase = ark::Mutator::GetCurrent()->GetMutatorPhase();
         if (phase == GC_PHASE_ENUM || phase == GC_PHASE_MARK || phase == GC_PHASE_REMARK_SATB ||
             phase == GC_PHASE_POST_MARK) {
             region->SetMarkingLine();

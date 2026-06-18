@@ -13,23 +13,13 @@
  * limitations under the License.
  */
 
-#include <algorithm>
 #include <cstdint>
-#include <stack>
 #include <unistd.h>
 
 #include "common_components/common/type_def.h"
-#include "libarkbase/os/mutex.h"
 #include "mutator/satb_buffer.h"
-#if defined(_WIN64)
-#define NOGDI
-#include <windows.h>
-#endif
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/common/scoped_object_access.h"
-#include "common_components/mutator/mutator_manager.h"
-
-#include "common_interfaces/thread/mutator-inl.h"
 
 namespace ark::common_vm {
 
@@ -47,60 +37,9 @@ ThreadLocalData *GetThreadLocalData()
     return reinterpret_cast<ThreadLocalData *>(tlDataAddr);
 }
 
-void Mutator::HandleSuspensionRequest()
-{
-    // CC-OFFNXT(G.CTL.03): false positive
-    for (;;) {
-        SetInSaferegion(ark::MutatorStatus::NATIVE);
-        if (HasSuspensionRequest(ark::SUSPEND_REQUEST)) {
-            SuspendForStw();
-        } else if (HasSuspensionRequest(ark::PENDING_CALLBACK_REQUEST)) {
-            TryRunFlipFunction();
-        } else if (HasSuspensionRequest(ark::RUNNING_CALLBACK_REQUEST)) {
-            WaitFlipFunctionFinish();
-        }
-        SetInSaferegion(ark::MutatorStatus::RUNNING);
-        // Leave saferegion if current mutator has no suspend request, otherwise try again
-        if (LIKELY(!HasAnySuspensionRequestExceptCallbacks())) {
-            if (HasSuspensionRequest(ark::SUSPEND_FOR_FINALIZE)) {
-                ClearFinalizeRequest();
-                HandleGCCallback();
-            }
-            return;
-        }
-    }
-}
-
 void Mutator::HandleGCCallback()
 {
     Heap::GetHeap().GetCollector().ForEachVM([](VMInterface *vm) { vm->ProcessFinalizationRegistryCleanup(); });
-}
-
-void Mutator::SuspendForStw()
-{
-    ClearSuspensionFlag(ark::SUSPEND_REQUEST);
-    // wait until StartTheWorld
-    int curCount = static_cast<int>(MutatorManager::Instance().GetStwFutexWordValue());
-    // Avoid losing wake-ups
-    if (curCount > 0) {
-#if defined(_WIN64) || defined(__APPLE__)
-        MutatorManager::Instance().MutatorWait();
-#else
-        int *countAddr = MutatorManager::Instance().GetStwFutexWord();
-        // FUTEX_WAIT may fail when gc thread wakes up all threads before the current thread reaches this position.
-        // But it is not important because there won't be data race between the current thread and the gc thread,
-        // and it also won't be frozen since gc thread also modifies the value at countAddr before its waking option.
-        (void)Futex(countAddr, FUTEX_WAIT, curCount);
-#endif
-    }
-    SetInSaferegion(ark::MutatorStatus::NATIVE);
-    if (MutatorManager::Instance().StwTriggered()) {
-        // entering this branch means a second request has been broadcasted, we need to reset this flag to avoid
-        // missing the request. And this must be after the behaviour that set saferegion state to false, because
-        // we need to make sure that the mutator can always perceive the gc request when the mutator is not in
-        // safe region.
-        SetSuspensionFlag(ark::SUSPEND_REQUEST);
-    }
 }
 
 static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)
@@ -110,18 +49,10 @@ static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)
 
 Mutator::~Mutator()
 {
-    tid_ = 0;
     if (satbNode_ != nullptr) {
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
         satbNode_ = nullptr;
     }
-}
-
-Mutator *Mutator::NewMutator()
-{
-    Mutator *mutator = new (std::nothrow) Mutator();
-    LOG_IF(UNLIKELY(mutator == nullptr), FATAL, GC) << "new Mutator failed";
-    return mutator;
 }
 
 void Mutator::RememberObjectImpl(const BaseObject *obj)
@@ -136,27 +67,11 @@ void Mutator::RememberObjectImpl(const BaseObject *obj)
 
 void Mutator::ResetMutator()
 {
-    rawObject_.object = nullptr;
     if (satbNode_ != nullptr) {
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
         satbNode_ = nullptr;
     }
-    flipFunction_ = nullptr;
-    // Atomic with relaxed order reason: data race with transitionState_ with no synchronization or ordering
-    // constraints imposed on other reads or writes
-    transitionState_.store(NO_TRANSITION, std::memory_order_relaxed);
-    static_cast<ark::Mutator *>(this)->ClearFlag(ark::PENDING_CALLBACK_REQUEST);
-    static_cast<ark::Mutator *>(this)->ClearFlag(ark::RUNNING_CALLBACK_REQUEST);
     static_cast<ark::Mutator *>(this)->ClearFlag(ark::SUSPEND_FOR_FINALIZE);
-}
-
-void Mutator::InitTid()
-{
-    tid_ = ThreadLocal::GetThreadLocalData()->tid;
-    if (tid_ == 0) {
-        tid_ = static_cast<uint32_t>(GetTid());
-        ThreadLocal::GetThreadLocalData()->tid = tid_;
-    }
 }
 
 const void *Mutator::GetSatbBufferNode() const
@@ -177,40 +92,10 @@ void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
 void Mutator::DumpMutator() const
 {
     // Atomic with relaxed order reason: logging only, no synchronization or ordering constraints
-    LOG(ERROR, COMMON) << "mutator " << this << ": inSaferegion " << InSaferegion() << ", tid " << tid_
+    LOG(ERROR, COMMON) << "mutator " << this << ": inSaferegion "
+                       << (static_cast<const ark::Mutator *>(this)->GetStatus() != ark::MutatorStatus::RUNNING)
                        << ", gc phase: " << mutatorPhase_.load(std::memory_order_relaxed) << ", suspension request "
-                       << GetSuspensionFlag();
-}
-
-#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
-void Mutator::CreateCurrentGCInfo()
-{
-    gcInfos_.CreateCurrentGCInfo();
-}
-#endif
-
-void Mutator::VisitRawObjects(const RootVisitor &func)
-{
-    if (rawObject_.object != nullptr) {
-        func(rawObject_);
-    }
-}
-
-Mutator *Mutator::GetMutator() noexcept
-{
-    return ThreadLocal::GetMutator();
-}
-
-inline void CheckAndPush(BaseObject *obj, ark::PandaSet<BaseObject *> &rootSet,
-                         ark::PandaStack<BaseObject *> &rootStack)
-{
-    auto search = rootSet.find(obj);
-    if (search == rootSet.end()) {
-        rootSet.insert(obj);
-        if (obj->IsValidObject() && obj->HasRefField()) {
-            rootStack.push(obj);
-        }
-    }
+                       << static_cast<const ark::Mutator *>(this)->ReadFlagsUnsafe();
 }
 
 void Mutator::GcPhaseEnum(GCPhase newPhase) {}
@@ -238,95 +123,25 @@ void Mutator::HandleGCPhase(GCPhase newPhase)
     }
 }
 
-bool Mutator::TryBindMutator()
-{
-    if (ThreadLocal::IsArkProcessor()) {
-        return false;
-    }
-
-    auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.BindMutator(*this);
-
-    allocBuffer_ = ThreadLocal::GetAllocBuffer();
-    DCHECK(allocBuffer_ != nullptr);
-    return true;
-}
-
-void Mutator::BindMutator()
-{
-    DCHECK(!IsInRunningState());
-    [[maybe_unused]] Mutator *curr = ThreadLocal::GetMutator();
-    DCHECK(curr == nullptr || !curr->IsInRunningState());
-
-    if (!TryBindMutator()) {
-        LOG(FATAL, COMMON) << "BindMutator fail";
-        return;
-    }
-}
-
-void Mutator::UnbindMutator()
-{
-    DCHECK(!IsInRunningState());
-    allocBuffer_ = nullptr;
-    auto &mutatorManager = MutatorManager::Instance();
-    mutatorManager.UnbindMutator(*this);
-}
-
 void Mutator::ReleaseAllocBuffer()
 {
     allocBuffer_ = nullptr;
 }
 
-Mutator::TryBindMutatorScope::TryBindMutatorScope(Mutator *mutator) : mutator_(nullptr)
+bool IsRuntimeThread()
 {
-    if (mutator != nullptr && mutator->TryBindMutator()) {
-        mutator_ = mutator;
+    if (static_cast<int>(ThreadLocal::GetThreadType()) >= static_cast<int>(ThreadType::GC_THREAD)) {
+        return true;
     }
+    return false;
 }
 
-Mutator::TryBindMutatorScope::~TryBindMutatorScope()
+bool IsGcThread()
 {
-    if (mutator_ != nullptr) {
-        mutator_->ReleaseAllocBuffer();
-        mutator_->UnbindMutator();
-        mutator_ = nullptr;
+    if (static_cast<int>(ThreadLocal::GetThreadType()) == static_cast<int>(ThreadType::GC_THREAD)) {
+        return true;
     }
-}
-
-bool Mutator::TryRunFlipFunction()
-{
-    // CC-OFFNXT(G.CTL.03): false positive
-    while (true) {
-        uint32_t oldFlag = GetSuspensionFlag();
-        if ((oldFlag & ark::PENDING_CALLBACK_REQUEST) != 0) {
-            uint32_t newFlag =
-                Mutator::ConstructSuspensionFlag(oldFlag, ark::PENDING_CALLBACK_REQUEST, ark::RUNNING_CALLBACK_REQUEST);
-            if (CASSetSuspensionFlag(oldFlag, newFlag)) {
-                DCHECK(flipFunction_);
-                (*flipFunction_)(*this);
-                flipFunction_ = nullptr;
-                ark::os::memory::LockHolder lock(flipFunctionMtx_);
-                ClearSuspensionFlag(ark::RUNNING_CALLBACK_REQUEST);
-                flipFunctionCV_.SignalAll();
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-}
-
-void Mutator::WaitFlipFunctionFinish()
-{
-    // CC-OFFNXT(G.CTL.03): false positive
-    while (true) {
-        ark::os::memory::LockHolder lock(flipFunctionMtx_);
-        if (HasSuspensionRequest(ark::RUNNING_CALLBACK_REQUEST)) {
-            flipFunctionCV_.Wait(&flipFunctionMtx_);
-        } else {
-            return;
-        }
-    }
+    return false;
 }
 
 }  // namespace ark::common_vm

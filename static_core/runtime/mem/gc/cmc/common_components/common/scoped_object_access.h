@@ -17,9 +17,9 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
 
 #include "common_components/mutator/thread_local.h"
-#include "common_components/mutator/mutator_manager.h"
 
-#include "common_interfaces/thread/mutator-inl.h"
+#include "include/mutator_status.h"
+#include "include/mutator.h"
 
 namespace ark::common_vm {
 // Scoped guard for saferegion.
@@ -28,19 +28,23 @@ public:
     ScopedEnterSaferegion() = delete;
     explicit ScopedEnterSaferegion(bool onlyForMutator = false)
     {
-        Mutator *mutator = Mutator::GetMutator();
+        ark::Mutator *mutator = ark::Mutator::GetCurrent();
         ThreadType threadType = ThreadLocal::GetThreadType();
         if (onlyForMutator && (threadType == ThreadType::FP_THREAD || threadType == ThreadType::GC_THREAD)) {
             stateChanged = false;
         } else {
-            stateChanged = (mutator != nullptr) ? mutator->EnterSaferegion(true) : false;
+            stateChanged = false;
+            if (static_cast<const ark::Mutator *>(mutator)->GetStatus() == ark::MutatorStatus::RUNNING) {
+                stateChanged = true;
+                mutator->UpdateStatus(ark::MutatorStatus::NATIVE);
+            }
         }
     }
 
     ~ScopedEnterSaferegion()
     {
         if (LIKELY(stateChanged)) {
-            static_cast<ark::Mutator *>(Mutator::GetMutator())->TransitCMCMutatorToRunning();
+            ark::Mutator::GetCurrent()->UpdateStatus(ark::MutatorStatus::RUNNING);
         }
     }
 

@@ -190,15 +190,7 @@ void Mutator::UpdateStatus(enum MutatorStatus status)
     if (oldStatus == MutatorStatus::RUNNING && status != MutatorStatus::RUNNING) {
         TransitionFromRunningToSuspended(status);
     } else if (oldStatus != MutatorStatus::RUNNING && status == MutatorStatus::RUNNING) {
-        // NB! This thread is treated as suspended so when we transition from suspended state to
-        // running we need to check suspension flag and counter so SafepointPoll has to be done before
-        // acquiring mutator_lock.
-        // StoreStatus acquires lock here
-#if !defined(ARK_USE_COMMON_RUNTIME)
-        StoreStatus<CHECK_SAFEPOINT, READLOCK>(MutatorStatus::RUNNING);
-#else
-        TransitCMCMutatorToRunning();
-#endif
+        TransitionFromSuspendedToRunning();
     } else if (oldStatus == MutatorStatus::NATIVE && status != MutatorStatus::IS_TERMINATED_LOOP &&
                IsRuntimeTerminated()) {
         // If a daemon thread with NATIVE status was deregistered, it should not access any managed object,
@@ -218,6 +210,22 @@ void Mutator::TransitionFromRunningToSuspended(enum MutatorStatus status)
     // Do Unlock after StoreStatus, because the thread requesting a suspension should see an updated status
     StoreStatus(status);
     GetMutatorLock()->Unlock();
+}
+
+void Mutator::TransitionFromSuspendedToRunning()
+{
+    // NB! This thread is treated as suspended so when we transition from suspended state to
+    // running we need to check suspension flag and counter so SafepointPoll has to be done before
+    // acquiring mutator_lock.
+    // StoreStatus acquires lock here
+    StoreStatus<CHECK_SAFEPOINT, READLOCK>(MutatorStatus::RUNNING);
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+    if (HasFinalizationRequest()) {
+        ClearFlag(ark::SUSPEND_FOR_FINALIZE);
+        HandleGCCallback();
+    }
+#endif
 }
 
 void Mutator::SuspendCheck()
@@ -290,18 +298,12 @@ void Mutator::Safepoint()
     }
 #endif  // !NDEBUG
 
-#if !defined(ARK_USE_COMMON_RUNTIME)
     if (UNLIKELY(IsRuntimeTerminated())) {
         OnRuntimeTerminated();
     }
     if (IsSuspended()) {
         WaitSuspension();
     }
-#else
-    if (UNLIKELY(TestAllFlags())) {
-        WaitSuspension();
-    }
-#endif  // ARK_USE_COMMON_RUNTIME
 
 #if defined(SAFEPOINT_TIME_CHECKER_ENABLED)
     this->ResetSafepointTimer(false);
@@ -315,7 +317,6 @@ bool Mutator::IsUserSuspended() const
 
 void Mutator::WaitSuspension()
 {
-#if !defined(ARK_USE_COMMON_RUNTIME)
     constexpr int TIMEOUT = 100;
     auto oldStatus = GetStatus();
     PrintSuspensionStackIfNeeded();
@@ -338,42 +339,7 @@ void Mutator::WaitSuspension()
         ASSERT(!IsSuspended());
     }
     UpdateStatus(oldStatus);
-#else
-    ASSERT(GetStatus() == MutatorStatus::RUNNING);
-    ASSERT(mutatorLock_->HasLock());
-
-    StoreStatus(ark::MutatorStatus::NATIVE);
-    GetMutatorLock()->Unlock();
-    common_vm::Mutator::HandleSuspensionRequest();
-    StoreStatus(ark::MutatorStatus::NATIVE);
-    TransitCMCMutatorToRunning();
-#endif
 }
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-void Mutator::TransitCMCMutatorToRunning()
-{
-    ASSERT(GetStatus() != MutatorStatus::RUNNING);
-    ASSERT(!mutatorLock_->HasLock());
-
-    while (true) {
-        if (UNLIKELY(TestAllFlags())) {
-            common_vm::Mutator::HandleSuspensionRequest();
-            StoreStatus(ark::MutatorStatus::NATIVE);
-            continue;
-        }
-        GetMutatorLock()->ReadLock();
-
-        if (UNLIKELY(TestAllFlags())) {
-            GetMutatorLock()->Unlock();
-            continue;
-        }
-        break;
-    }
-
-    StoreStatus(ark::MutatorStatus::RUNNING);
-}
-#endif
 
 void Mutator::InitCardTableData(mem::GCBarrierSet *barrier)
 {
@@ -441,22 +407,5 @@ void Mutator::MakeTSANHappyForThreadState()
 {
     TSAN_ANNOTATE_HAPPENS_AFTER(&fms_);
 }
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-
-void Mutator::BindMutator()
-{
-    ark::common_vm::Mutator::BindMutator();
-}
-
-void Mutator::UnbindMutator()
-{
-    if (this != GetCurrent()) {
-        return;
-    }
-    ark::common_vm::Mutator::UnbindMutator();
-}
-
-#endif  // ARK_USE_COMMON_RUNTIME
 
 }  // namespace ark

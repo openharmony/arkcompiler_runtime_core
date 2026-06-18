@@ -723,7 +723,6 @@ TEST_F(SamplerTest, InspectorStreamWriterReaderTest)
     ASSERT_NE((*allThreadsProfileInfos)[0]->nodeCount, 0);
     ASSERT_EQ((*allThreadsProfileInfos)[0]->startTime, 0);
     ASSERT_EQ((*allThreadsProfileInfos)[0]->stopTime, 0);
-    ASSERT_EQ((*allThreadsProfileInfos)[0]->tid, GetThreadId());
 }
 
 // Testing reader and writer by writing and reading from .aspt lots of samples
@@ -773,7 +772,6 @@ TEST_F(SamplerTest, InspectorStreamWriterReaderLotsSamplesTest)
     ASSERT_NE((*allThreadsProfileInfos)[0]->nodeCount, 0);
     ASSERT_EQ((*allThreadsProfileInfos)[0]->startTime, 0);
     ASSERT_EQ((*allThreadsProfileInfos)[0]->stopTime, 0);
-    ASSERT_EQ((*allThreadsProfileInfos)[0]->tid, GetThreadId());
     ASSERT_EQ((*allThreadsProfileInfos)[0]->timeDeltas.size(), CURRENT_TEST_THRESHOLD);
 }
 

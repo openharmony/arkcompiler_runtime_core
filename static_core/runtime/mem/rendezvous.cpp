@@ -36,6 +36,7 @@ void Rendezvous::SafepointEnd()
 {
     ASSERT(mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd";
+
     // Release write MutatorLock
     mutatorLock_->Unlock();
     // Resume all mutators
@@ -47,12 +48,6 @@ ScopedSuspendAllThreadsRunning::ScopedSuspendAllThreadsRunning(Rendezvous *rende
 {
     ASSERT(rendezvous_ != nullptr);
     ASSERT(rendezvous_->GetMutatorLock()->HasLock());
-#if defined(ARK_USE_COMMON_RUNTIME)
-    // CMC GC's EnsurePhaseTransition sees this thread as InSaferegion and can process its phase transition while it
-    // waits for WriteLock. Without this, the GC holds WriteLock waiting for this thread to transition, while this
-    // thread blocks on WriteLock — a deadlock.
-    Mutator::GetCurrent()->StoreStatus(MutatorStatus::NATIVE);
-#endif
     rendezvous_->GetMutatorLock()->Unlock();
     rendezvous_->SafepointBegin();
 }
@@ -61,9 +56,6 @@ ScopedSuspendAllThreadsRunning::~ScopedSuspendAllThreadsRunning()
 {
     rendezvous_->SafepointEnd();
     rendezvous_->GetMutatorLock()->ReadLock();
-#if defined(ARK_USE_COMMON_RUNTIME)
-    Mutator::GetCurrent()->StoreStatus(MutatorStatus::RUNNING);
-#endif
 }
 
 }  // namespace ark
