@@ -221,7 +221,9 @@ export const UTILITY_TYPES = new Map<string, string>([
   ['Parameters', ARRAY_TYPE],
   ['Pick', JSVALUE],
   ['ThisParameterType', JSVALUE],
-  ['ThisType', JSVALUE]
+  ['ThisType', JSVALUE],
+  ['ReturnType', JSVALUE],
+  ['NonNullable', JSVALUE],
 ]);
 
 export enum INTEROP_NAMESPACE {
@@ -293,7 +295,9 @@ export function getBaseNameFromFilePath(filePath: string): string {
 
 export function isNodeParentRestParameter(node: ts.Node): boolean {
   if (ts.isTypeReferenceNode(node) || ts.isArrayTypeNode(node) || ts.isTupleTypeNode(node)) {
-    const parent = node.parent;
+    // Stages rebuild ancestors via visitEachChild, leaving `node.parent` unset on synthetic nodes.
+    // Walk back to the original parsed node, whose `.parent` is populated by the binder.
+    const parent = ts.getOriginalNode(node).parent;
     if (parent && ts.isParameter(parent)) {
       return !!parent.dotDotDotToken;
     }

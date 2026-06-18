@@ -21,10 +21,10 @@ export type UncomfortableGreeting = string;
 export declare function createInstance<T extends Any>(Class: T, ...args: Any[]): Any;
 export type T0 = Any;
 export type T1 = Any;
-export type T3 = NonNullable<string | number | undefined>;
+export type T3 = Any;
 export type T4 = Any;
 export type T5 = Any[];
-export type T6 = ReturnType<() => string>;
+export type T6 = Any;
 export type NoInfer<T> = Any;
 export declare function createStreetLight<C extends string>(colors: C[], defaultColor?: Any): void;
 export type UserPreview = Any;
@@ -38,4 +38,3 @@ export declare class UserIns {
     age: number;
     constructor(name: string, age: number);
 }
-
