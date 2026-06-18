@@ -337,26 +337,39 @@ public:
 
     size_t GetVTableSize() const override
     {
-        return vtable_.GetVTableSize();
+        return vtable_->GetVTableSize();
     }
 
     Span<const CopiedMethod> GetCopiedMethods() const override
     {
-        return {orderedCopiedMethods_.data(), orderedCopiedMethods_.size()};
+        ASSERT(orderedCopiedMethods_ != nullptr);
+        return {orderedCopiedMethods_->data(), orderedCopiedMethods_->size()};
     }
 
     Span<const IfaceMethodDispatch> GetIfaceMethodDispatches() const override
     {
-        return {dispatches_.data(), dispatches_.size()};
+        ASSERT(dispatches_ != nullptr);
+        return {dispatches_->data(), dispatches_->size()};
     }
 
     mem::InternalArenaAllocator *GetAllocator() override
     {
-        return &allocator_;
+        return allocator_;
     }
 
 protected:
     explicit VTableBuilderBase(ClassLinkerErrorHandler *errHandler) : errorHandler_(errHandler) {}
+
+    void SetAllocator(mem::InternalArenaAllocator *allocator)
+    {
+        ASSERT(allocator != nullptr);
+
+        allocator_ = allocator;
+        vtable_ = allocator->New<VTableInfo>(*allocator);
+        allocator->MakeContainer(orderedCopiedMethods_);
+        allocator->MakeContainer(dispatches_);
+        allocator->MakeContainer(baseMethodInfoByIndex_);
+    }
 
     [[nodiscard]] virtual bool ProcessClassMethod(const MethodInfo *info) = 0;
     [[nodiscard]] virtual bool ProcessDefaultMethod(ITable itable, size_t itableIdx, MethodInfo *methodInfo) = 0;
@@ -372,15 +385,15 @@ protected:
 
     [[nodiscard]] bool CollectProxyMethods(PandaVector<Method *> *output);
 
-    mem::InternalArenaAllocator allocator_ {Runtime::GetCurrent()->GetInternalAllocator()};
-    VTableInfo vtable_ {allocator_};
+    mem::InternalArenaAllocator *allocator_ {nullptr};
+    VTableInfo *vtable_ {nullptr};
     size_t numVmethods_ {0};
     size_t baseVTableSize_ {0};
-    InternalArenaVector<CopiedMethod> orderedCopiedMethods_ {allocator_};
-    InternalArenaVector<IfaceMethodDispatch> dispatches_ {allocator_};
-    InternalArenaVector<MethodInfo const *> baseMethodInfoByIndex_ {allocator_};
+    InternalArenaVector<CopiedMethod> *orderedCopiedMethods_ {nullptr};
+    InternalArenaVector<IfaceMethodDispatch> *dispatches_ {nullptr};
+    InternalArenaVector<MethodInfo const *> *baseMethodInfoByIndex_ {nullptr};
     bool vtableAppendedOnly_ {true};
-    ClassLinkerErrorHandler *errorHandler_;
+    ClassLinkerErrorHandler *errorHandler_ {nullptr};
 
 private:
     void BuildForInterface(panda_file::ClassDataAccessor *cda);

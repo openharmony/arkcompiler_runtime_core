@@ -50,7 +50,13 @@ struct EtsVTableOverridePred {
     static bool IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2);
 };
 
-using EtsVTableBuilder = VarianceVTableBuilder<EtsVTableCompatibleSignatures, EtsVTableOverridePred>;
+struct EtsSharedArenaAllocator {
+    static mem::InternalArenaAllocator *Get(bool &needRelease);
+    static void Release(mem::InternalArenaAllocator *allocator);
+};
+
+using EtsVTableBuilder =
+    VarianceVTableBuilder<EtsVTableCompatibleSignatures, EtsVTableOverridePred, EtsSharedArenaAllocator>;
 
 }  // namespace ark::ets
 

@@ -16,11 +16,33 @@
 #include "plugins/ets/runtime/ets_vtable_builder.h"
 
 #include "ets_class_linker_extension.h"
+#include "include/runtime.h"
+#include "mem/internal_arena_allocator.h"
 #include "runtime/include/class_linker.h"
 
 namespace ark::ets {
 
 static constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
+
+static thread_local mem::InternalArenaAllocator *g_tlPooledArenaAllocator = nullptr;
+
+mem::InternalArenaAllocator *EtsSharedArenaAllocator::Get(bool &needRelease)
+{
+    mem::InternalArenaAllocator *allocator = g_tlPooledArenaAllocator;
+    if (allocator == nullptr) {
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        allocator = classLinker->GetAllocatorPool().Get(classLinker->GetAllocator());
+        g_tlPooledArenaAllocator = allocator;
+        needRelease = true;
+    }
+    return allocator;
+}
+
+void EtsSharedArenaAllocator::Release(mem::InternalArenaAllocator *allocator)
+{
+    g_tlPooledArenaAllocator = nullptr;
+    Runtime::GetCurrent()->GetClassLinker()->GetAllocatorPool().Release(allocator);
+}
 
 bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2)
 {

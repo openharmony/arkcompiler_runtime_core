@@ -20,6 +20,8 @@
 #include "runtime/include/mem/allocator.h"
 
 namespace ark::mem {
+
+class InternalArenaPool;
 class InternalArenaAllocator {
     static constexpr size_t INTERNAL_ALLOCATOR_ARENA_SIZE = 128_KB;
 
@@ -63,6 +65,17 @@ public:
 
     void Free([[maybe_unused]] void *ptr, [[maybe_unused]] size_t size) {}
 
+    template <typename T>
+    [[nodiscard]] T *AllocArray(size_t size)
+    {
+        return reinterpret_cast<T *>(Alloc(sizeof(T) * size));
+    }
+
+    InternalAllocatorPtr GetInternalAllocator() const
+    {
+        return allocator_;
+    }
+
     template <typename T, typename... Args>
     [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&...args)
     {
@@ -71,6 +84,18 @@ public:
             return nullptr;
         }
         return new (p) T(std::forward<Args>(args)...);
+    }
+
+    template <typename T>
+    void MakeContainer(T *&target)
+    {
+        target = NewContainer<T>();
+    }
+
+    template <typename T>
+    T *NewContainer()
+    {
+        return New<T>(Adapter<typename T::value_type>(*this));
     }
 
     template <typename T>
@@ -127,6 +152,10 @@ public:
         friend class Adapter;
     };
 
+    size_t GetAllocatedSize();
+
+    void Resize(size_t newSize);
+
 private:
     InternalAllocatorPtr allocator_;
     Arena *arenas_ {nullptr};
@@ -146,6 +175,29 @@ private:
         ASSERT(sizeForBuff >= size);
         return new (ptr) Arena(sizeForBuff, ToVoidPtr(buffAddr));
     }
+};
+
+class InternalArenaPool {
+public:
+    InternalArenaPool() = default;
+    ~InternalArenaPool()
+    {
+        Clear();
+    }
+
+    NO_COPY_SEMANTIC(InternalArenaPool);
+    NO_MOVE_SEMANTIC(InternalArenaPool);
+
+    InternalArenaAllocator *Get(InternalAllocatorPtr allocator);
+
+    void Release(InternalArenaAllocator *allocator);
+
+    void Clear();
+
+private:
+    void SetArenaPool(InternalArenaAllocator *allocator);
+
+    std::atomic<InternalArenaAllocator *> pool_ {nullptr};
 };
 
 }  // namespace ark::mem

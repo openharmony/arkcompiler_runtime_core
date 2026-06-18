@@ -15,15 +15,34 @@
 #ifndef PANDA_RUNTIME_VTABLE_BUILDER_VARIANCE_H
 #define PANDA_RUNTIME_VTABLE_BUILDER_VARIANCE_H
 
+#include "mem/internal_arena_allocator.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/vtable_builder_base.h"
 
 namespace ark {
 
-template <class ProtoCompatibility, class OverridePred>
+template <class ProtoCompatibility, class OverridePred, class SharedArenaAllocator>
 class VarianceVTableBuilder final : public VTableBuilderBase<false> {
 public:
-    explicit VarianceVTableBuilder(ClassLinkerErrorHandler *errHandler) : VTableBuilderBase(errHandler) {}
+    explicit VarianceVTableBuilder(ClassLinkerErrorHandler *errHandler) : VTableBuilderBase(errHandler)
+    {
+        mem::InternalArenaAllocator *allocator = SharedArenaAllocator::Get(needReleaseAllocator_);
+        currentPosition_ = allocator->GetAllocatedSize();
+        SetAllocator(allocator);
+        allocator->MakeContainer(ownMethodNameHashes_);
+        allocator->MakeContainer(interfaceMethodCandidatesByName_);
+    }
+
+    ~VarianceVTableBuilder() override
+    {
+        allocator_->Resize(currentPosition_);
+        if (needReleaseAllocator_) {
+            SharedArenaAllocator::Release(allocator_);
+        }
+    }
+
+    NO_COPY_SEMANTIC(VarianceVTableBuilder);
+    NO_MOVE_SEMANTIC(VarianceVTableBuilder);
 
 private:
     [[nodiscard]] bool ProcessClassMethod(const MethodInfo *info) override;
@@ -67,10 +86,12 @@ private:
     static bool IsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
     ClassOverrideResult GetInheritedClassOverride(Method *inherited) const;
 
-    InternalArenaUnorderedSet<uint32_t> ownMethodNameHashes_ {allocator_};
-    InternalArenaUnorderedMap<uint32_t, InternalArenaVector<IfaceMethodCandidate> *> interfaceMethodCandidatesByName_ {
-        allocator_};
+    InternalArenaUnorderedSet<uint32_t> *ownMethodNameHashes_ {nullptr};
+    InternalArenaUnorderedMap<uint32_t, InternalArenaVector<IfaceMethodCandidate> *> *interfaceMethodCandidatesByName_ {
+        nullptr};
     bool useInterfaceMethodCandidateIndex_ {false};
+    bool needReleaseAllocator_ {false};
+    size_t currentPosition_ {0};
 };
 
 }  // namespace ark

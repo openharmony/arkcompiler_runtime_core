@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ bool StandardVTableBuilder<OverridePred>::ProcessClassMethod(const MethodInfo *i
 {
     bool compatibleFound = false;
 
-    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), info); !it.IsEmpty(); it.Next()) {
         auto &[itInfo, itEntry] = it.Value();
 
         if (!itInfo->IsBase()) {
@@ -52,7 +52,7 @@ bool StandardVTableBuilder<OverridePred>::ProcessClassMethod(const MethodInfo *i
     }
 
     if (!compatibleFound) {
-        vtable_.AddEntry(info);
+        vtable_->AddEntry(info);
     }
     return true;
 }
@@ -62,7 +62,7 @@ std::optional<MethodInfo const *> StandardVTableBuilder<OverridePred>::ScanConfl
     const MethodInfo *info)
 {
     // NOTE(vpukhov): test public flag
-    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->Methods(), info); !it.IsEmpty(); it.Next()) {
         MethodInfo const *itinfo = it.Value().second.CandidateOr(it.Value().first);
         VTableInfo::MethodEntry *itentry = &it.Value().second;
 
@@ -80,7 +80,7 @@ std::optional<MethodInfo const *> StandardVTableBuilder<OverridePred>::ScanConfl
         itentry->SetCandidate(info);
     }
 
-    for (auto it = SameNameMethodInfoIterator(vtable_.CopiedMethods(), info); !it.IsEmpty(); it.Next()) {
+    for (auto it = SameNameMethodInfoIterator(vtable_->CopiedMethods(), info); !it.IsEmpty(); it.Next()) {
         MethodInfo const *itinfo = it.Value().first;
         if (!IsOverriddenBy(info->GetProtoId(), itinfo->GetProtoId())) {
             continue;
@@ -131,14 +131,14 @@ bool StandardVTableBuilder<OverridePred>::ProcessDefaultMethod(ITable itable, si
 
     // if the default method is added for the first time, just add it.
     if (LIKELY(conflict == nullptr)) {
-        VTableInfo::CopiedMethodEntry *entry = &vtable_.AddCopiedEntry(methodInfo);
+        VTableInfo::CopiedMethodEntry *entry = &vtable_->AddCopiedEntry(methodInfo);
         if (!IsMaxSpecificInterfaceMethod(iface, *method, itableIdx + 1, itable)) {
             entry->SetStatus(CopiedMethod::Status::ABSTRACT);
         }
         return true;
     }
 
-    VTableInfo::CopiedMethodEntry *entry = &vtable_.CopiedMethods().find(conflict)->second;
+    VTableInfo::CopiedMethodEntry *entry = &vtable_->CopiedMethods().find(conflict)->second;
 
     // Use the following algorithm to judge whether we have to replace existing DEFAULT METHOD.
     // 1. if existing default method is ICCE, just skip.
@@ -158,7 +158,7 @@ bool StandardVTableBuilder<OverridePred>::ProcessDefaultMethod(ITable itable, si
         return true;
     }
     entry->SetStatus(CopiedMethod::Status::ORDINARY);
-    vtable_.UpdateCopiedEntry(conflict, methodInfo);
+    vtable_->UpdateCopiedEntry(conflict, methodInfo);
     return true;
 }
 

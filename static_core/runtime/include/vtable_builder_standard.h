@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_VTABLE_BUILDER_STANDARD_H
 #define PANDA_RUNTIME_VTABLE_BUILDER_STANDARD_H
 
+#include "mem/internal_arena_allocator.h"
 #include "runtime/include/vtable_builder_base.h"
 
 namespace ark {
@@ -29,9 +30,15 @@ struct VTableProtoIdentical {
 template <class OverridePred>
 class StandardVTableBuilder final : public VTableBuilderBase<true> {
 public:
-    explicit StandardVTableBuilder(ClassLinkerErrorHandler *errHandler) : VTableBuilderBase(errHandler) {}
+    explicit StandardVTableBuilder(ClassLinkerErrorHandler *errHandler)
+        : VTableBuilderBase(errHandler), ownedAllocator_(Runtime::GetCurrent()->GetInternalAllocator())
+    {
+        SetAllocator(&ownedAllocator_);
+    }
 
 private:
+    mem::InternalArenaAllocator ownedAllocator_;
+
     [[nodiscard]] bool ProcessClassMethod(const MethodInfo *info) override;
     [[nodiscard]] bool ProcessDefaultMethod(ITable itable, size_t itableIdx, MethodInfo *methodInfo) override;
 

@@ -106,6 +106,7 @@ set(SOURCES
     mem/mem_stats_default.cpp
     mem/mem_stats.cpp
     mem/internal_allocator.cpp
+    mem/internal_arena_allocator.cpp
     mem/panda_string.cpp
     mem/memory_manager.cpp
     mem/heap_space.cpp
@@ -961,6 +962,16 @@ add_gtests(
 add_gtests(
     arkruntime_memory_management_internal_allocator_test
     tests/internal_allocator_test.cpp
+)
+
+add_gtests(
+    arkruntime_memory_management_internal_arena_allocator_test
+    tests/internal_arena_allocator_test.cpp
+)
+
+add_gtests(
+    arkruntime_memory_management_internal_arena_pool_test
+    tests/internal_arena_pool_test.cpp
 )
 
 add_gtests(

@@ -98,17 +98,14 @@ void VTableBuilderBase<VISIT_SUPERITABLE>::BuildForInterface(Span<Method> method
 template <bool VISIT_SUPERITABLE>
 void VTableBuilderBase<VISIT_SUPERITABLE>::AddBaseMethods(Class *baseClass)
 {
-    auto baseMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
-    ASSERT(baseMethods != nullptr);
-
     if (baseClass != nullptr) {
         baseVTableSize_ = baseClass->GetVTable().size();
-        baseMethodInfoByIndex_.clear();
-        baseMethodInfoByIndex_.reserve(baseVTableSize_);
+        baseMethodInfoByIndex_->clear();
+        baseMethodInfoByIndex_->reserve(baseVTableSize_);
         for (auto const &method : baseClass->GetVTable()) {
-            auto &mi = baseMethods->emplace_front(method, 0, true);
-            baseMethodInfoByIndex_.push_back(&mi);
-            vtable_.AddEntry(&mi);
+            auto *mi = allocator_->New<MethodInfo>(method, 0, true);
+            baseMethodInfoByIndex_->push_back(mi);
+            vtable_->AddEntry(mi);
         }
     }
 }
@@ -117,7 +114,7 @@ template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(panda_file::ClassDataAccessor *cda, ClassLinkerContext *ctx)
 {
     ASSERT(cda != nullptr);
-    auto classMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
+    auto classMethods = allocator_->NewContainer<InternalArenaForwardList<MethodInfo>>();
     ASSERT(classMethods != nullptr);
 
     cda->EnumerateMethods([this, ctx, &classMethods](panda_file::MethodDataAccessor &mda) {
@@ -137,7 +134,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(panda_file::ClassData
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(Span<Method> methods)
 {
-    auto classMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
+    auto classMethods = allocator_->NewContainer<InternalArenaForwardList<MethodInfo>>();
     ASSERT(classMethods != nullptr);
 
     for (auto &method : methods) {
@@ -157,7 +154,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(Span<Method> methods)
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddProxyClassMethods(Span<Method *> methods)
 {
-    auto *classMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
+    auto *classMethods = allocator_->NewContainer<InternalArenaForwardList<MethodInfo>>();
     ASSERT(classMethods != nullptr);
 
     for (auto *method : methods) {
@@ -175,9 +172,6 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddProxyClassMethods(Span<Method *> m
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable itable, size_t superItableSize)
 {
-    auto defaultMethods = allocator_.New<InternalArenaForwardList<MethodInfo>>(allocator_);
-    ASSERT(defaultMethods != nullptr);
-
     // NOTE(vpukhov): avoid traversing the whole itable and handle conflicting super vtable methods in a separate pass
     size_t const traverseUpTo = VISIT_SUPERITABLE ? 0 : superItableSize;
 
@@ -193,7 +187,7 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable ita
             if (method.IsAbstract()) {
                 continue;  // abstracts never become CopiedMethods
             }
-            MethodInfo *info = &defaultMethods->emplace_front(&method);
+            MethodInfo *info = allocator_->New<MethodInfo>(&method);
             if (!ProcessDefaultMethod(itable, i, info)) {
                 return false;
             }
@@ -206,13 +200,14 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable ita
 template <bool VISIT_SUPERITABLE>
 void VTableBuilderBase<VISIT_SUPERITABLE>::BuildOrderedCopiedMethods()
 {
-    orderedCopiedMethods_.clear();
-    orderedCopiedMethods_.resize(vtable_.CopiedMethods().size());
+    ASSERT(orderedCopiedMethods_ != nullptr);
+    orderedCopiedMethods_->clear();
+    orderedCopiedMethods_->resize(vtable_->CopiedMethods().size());
 
-    for (auto const &[info, entry] : vtable_.CopiedMethods()) {
+    for (auto const &[info, entry] : vtable_->CopiedMethods()) {
         CopiedMethod copied(info->GetMethod());
         copied.SetStatus(entry.GetStatus());
-        orderedCopiedMethods_[entry.GetIndex()] = copied;
+        (*orderedCopiedMethods_)[entry.GetIndex()] = copied;
     }
 }
 
@@ -288,19 +283,19 @@ void VTableBuilderBase<VISIT_SUPERITABLE>::UpdateClass(Class *klass) const
         }
     }
 
-    vtable_.UpdateClass(klass);
+    vtable_->UpdateClass(klass);
 }
 
 template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::CollectProxyMethods(PandaVector<Method *> *output)
 {
-    auto &methodsUmap = vtable_.Methods();
+    auto &methodsUmap = vtable_->Methods();
     for (auto it : methodsUmap) {
         if (!it.first->IsBase()) {
             output->push_back(it.first->GetMethod());
         }
     }
-    for (auto it : orderedCopiedMethods_) {
+    for (auto it : *orderedCopiedMethods_) {
         output->push_back(it.GetMethod());
     }
     return true;
