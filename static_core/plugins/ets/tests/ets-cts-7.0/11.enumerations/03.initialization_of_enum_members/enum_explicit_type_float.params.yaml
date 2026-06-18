@@ -152,3 +152,42 @@ cases:
         arktest.assertEQ(Enum.L, l, "failed check: Enum.L == l")
         arktest.assertEQ(Enum.M, m, "failed check: Enum.M == m")
     test_suffix: "uemviie"
+
+  - desc: |-
+      >-
+       An enumeration member value can be set explicitly by initializer expression.
+       An initializer can be omitted if an enumeration base type is an integer type.
+       Otherwise, a compile-time error occurs.
+    params: |-
+      using other enum members values as enum members initializers
+    decl_variants:
+      - |-
+        enum Enum1: float { first = 1.23f, second = 17.682f, third = 53.4f }
+        enum Enum2: float { first = Enum1.second, second = Enum1.third, third = Enum1.first }
+    sub_cases_logic:
+      - |-
+        arktest.assertTrue(Enum1.first instanceof Enum1)
+        arktest.assertTrue(Enum1.second instanceof Enum1)
+        arktest.assertTrue(Enum1.third instanceof Enum1)
+        arktest.assertFalse(Enum1.first instanceof Enum2)
+        arktest.assertFalse(Enum1.second instanceof Enum2)
+        arktest.assertFalse(Enum1.third instanceof Enum2)
+        arktest.assertTrue(Enum1.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum1.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum1.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum1.first.valueOf(), 1.23f)
+        arktest.assertEQ(Enum1.second.valueOf(), 17.682f)
+        arktest.assertEQ(Enum1.third.valueOf(), 53.4f)
+        arktest.assertTrue(Enum2.first instanceof Enum2)
+        arktest.assertTrue(Enum2.second instanceof Enum2)
+        arktest.assertTrue(Enum2.third instanceof Enum2)
+        arktest.assertFalse(Enum2.first instanceof Enum1)
+        arktest.assertFalse(Enum2.second instanceof Enum1)
+        arktest.assertFalse(Enum2.third instanceof Enum1)
+        arktest.assertTrue(Enum2.first.valueOf() instanceof float)
+        arktest.assertTrue(Enum2.second.valueOf() instanceof float)
+        arktest.assertTrue(Enum2.third.valueOf() instanceof float)
+        arktest.assertEQ(Enum2.first.valueOf(), 17.682f)
+        arktest.assertEQ(Enum2.second.valueOf(), 53.4f)
+        arktest.assertEQ(Enum2.third.valueOf(), 1.23f)
+    test_suffix: "uoemvaemi"
