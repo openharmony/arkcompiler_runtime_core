@@ -31,7 +31,7 @@ bool SatbBuffer::ShouldEnqueue(const BaseObject *obj)
     if (UNLIKELY(obj == nullptr)) {
         return false;
     }
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+    if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
         auto *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
         if (!region->IsToRegion() && !region->IsInYoungSpace()) {
             return false;

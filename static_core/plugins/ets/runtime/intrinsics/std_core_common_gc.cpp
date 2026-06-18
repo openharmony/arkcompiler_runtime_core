@@ -21,8 +21,11 @@
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
 #include "common_components/common/scoped_object_access.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets::intrinsics {
 
@@ -36,18 +39,18 @@ static inline size_t ClampToSizeT(EtsLong n)
     return n;
 }
 
-// Convert ETS cause int to (GCReason, GCType) pair
+// Convert ETS cause int to (GCTaskCause, GCCollectionType) pair
 // ETS Cause enum: YOUNG=0, THRESHOLD=1, FULL=2
-static std::pair<ark::common_vm::GCReason, ark::common_vm::GCType> GCParamsFromCause(EtsInt cause)
+static std::pair<GCTaskCause, GCCollectionType> GCParamsFromCause(EtsInt cause)
 {
     if (cause == 0_I) {
-        return {ark::common_vm::GC_REASON_YOUNG, ark::common_vm::GC_TYPE_YOUNG};
+        return {GCTaskCause::YOUNG_GC_CAUSE, GCCollectionType::YOUNG};
     } else if (cause == 1_I) {
-        return {ark::common_vm::GC_REASON_USER, ark::common_vm::GC_TYPE_FULL};
+        return {GCTaskCause::EXPLICIT_CAUSE, GCCollectionType::FULL};
     } else if (cause == 2_I) {
-        return {ark::common_vm::GC_REASON_OOM, ark::common_vm::GC_TYPE_FULL};
+        return {GCTaskCause::OOM_CAUSE, GCCollectionType::FULL};
     }
-    return {ark::common_vm::GC_REASON_INVALID, ark::common_vm::GC_TYPE_END};
+    return {GCTaskCause::INVALID_CAUSE, GCCollectionType::NONE};
 }
 
 /**
@@ -62,27 +65,22 @@ static std::pair<ark::common_vm::GCReason, ark::common_vm::GCType> GCParamsFromC
  */
 extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, [[maybe_unused]] EtsBoolean isRunGcInPlace)
 {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     if (callback != nullptr) {
-        auto *executionCtx = EtsExecutionContext::GetCurrent();
-        ASSERT(executionCtx != nullptr);
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreUnsupportedOperationError,
                           "callback is not supported with current GC");
         return -1;
     }
     auto [reason, gcType] = GCParamsFromCause(cause);
-    if (reason == ark::common_vm::GC_REASON_INVALID) {
-        auto *executionCtx = EtsExecutionContext::GetCurrent();
-        ASSERT(executionCtx != nullptr);
+    if (reason == GCTaskCause::INVALID_CAUSE) {
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError, "Invalid GC cause");
         return -1;
     }
-    // target guarantees waitForFinishGC waits for at least +1 GC cycle
-    uint64_t target = common_vm::Heap::GetHeap().GetGcCompletedCount() + 1U;
-    // false allows to call RequestGCAndWait.
-    // Sync or async current gcTask will be detected
-    // inside RequestGCAndWait by reason
-    ark::common_vm::HeapManager::RequestGC(reason, false, gcType, true);
-    return static_cast<EtsLong>(target);
+    auto *gc = executionCtx->GetPandaVM()->GetGC();
+    auto task = MakePandaUnique<GCTask>(reason);
+    task->UpdateGCCollectionType(gcType);
+    return gc->WaitForGCInManaged(*task) ? 0 : -1;
 }
 
 /**
@@ -97,14 +95,18 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, [[maybe_unuse
  */
 extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
 {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     if (gcId <= 0) {
-        return;  // Nothing to wait
+        return;
     }
-    uint64_t target = static_cast<uint64_t>(gcId);
-    common_vm::ScopedEnterSaferegion enterSaferegion(true);
-    // Block on condition variable until gcCompletedCount >= target, or return early on
-    // GC shutdown (TASK_INDEX_GC_EXIT sentinel) — no more cycles will fire
-    ark::common_vm::Heap::GetHeap().WaitForGCCompletionCount(target);
+    auto id = static_cast<uint64_t>(gcId);
+    ASSERT(GCTaskTracker::IsInitialized());
+    ScopedNativeCodeThread s(executionCtx->GetMT());
+    while (GCTaskTracker::InitIfNeededAndGet(executionCtx->GetPandaVM()->GetGC()).HasId(id)) {
+        constexpr uint64_t WAIT_TIME_MS = 2U;
+        os::thread::NativeSleep(WAIT_TIME_MS);
+    }
 }
 
 extern "C" EtsLong StdGetFreeHeapSize()

@@ -38,7 +38,6 @@
 #endif
 #include "common_components/log/log.h"
 #include "common_components/taskpool/taskpool.h"
-#include "common_interfaces/base_runtime.h"
 
 #if defined(_WIN64)
 #include <sysinfoapi.h>

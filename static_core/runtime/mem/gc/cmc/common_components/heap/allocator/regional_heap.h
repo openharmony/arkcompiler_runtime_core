@@ -37,7 +37,6 @@
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
-#include "common_interfaces/base_runtime.h"
 
 namespace ark::common_vm {
 class Taskpool;
@@ -316,13 +315,6 @@ public:
         ForEachAwaitingJitFortUnsafe(MarkObject);
     }
 
-    void ClearJitFortAwaitingMark()
-    {
-        HandlePostGCJitFortInstallTask();
-    }
-
-    void MarkJitFortMemInstalled(void *thread, BaseObject *obj);
-
     size_t CollectLargeGarbage()
     {
         return largeSpace_.CollectLargeGarbage();
@@ -343,7 +335,7 @@ public:
     {
         youngSpace_.AssembleGarbageCandidates(fromSpace_);
         oldSpace_.AssembleRecentFull();
-        if (Heap::GetHeap().GetGCReason() != GC_REASON_YOUNG) {
+        if (Heap::GetHeap().GetGCReason() != GCTaskCause::YOUNG_GC_CAUSE) {
             oldSpace_.ClearRSet();
             oldSpace_.AssembleGarbageCandidates(fromSpace_);
             nonMovableSpace_.ClearRSet();
@@ -482,7 +474,6 @@ private:
 
     void ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObject *)> &visitor) const;
     void MarkJitFortMemAwaitingInstall(BaseObject *obj);
-    void HandlePostGCJitFortInstallTask();
 
     std::atomic<size_t> footprintBytes_ {0};
     HeapAddress reservedStart_ = 0;

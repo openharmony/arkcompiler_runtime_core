@@ -21,11 +21,11 @@
 
 namespace ark::common_vm {
 HeapManager::HeapManager() {}
-void HeapManager::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
+void HeapManager::RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest)
 {
-    if (reason < GC_REASON_BEGIN || reason > GC_REASON_END || gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {
-        LOG(ERROR, GC) << "Invalid gc reason or gc type, gc reason: " << GCReasonToString(reason)
-                       << ", gc type: " << GCTypeToString(gcType);
+    if (reason <= GCTaskCause::INVALID_CAUSE || reason > GCTaskCause::CROSSREF_CAUSE ||
+        gcType < GCCollectionType::NONE || gcType > GCCollectionType::FULL) {
+        LOG(ERROR, GC) << "Invalid gc reason or gc type, gc reason: " << reason << ", gc type: " << gcType;
         return;
     }
     if (!Heap::GetHeap().IsGCEnabled()) {
@@ -60,9 +60,4 @@ void HeapManager::StopRuntimeThreads()
     Heap::GetHeap().StopRuntimeThreads();
 }
 
-void HeapManager::MarkJitFortMemInstalled(void *vm, void *obj)
-{
-    RegionalHeap &regionalHeap = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
-    regionalHeap.MarkJitFortMemInstalled(vm, reinterpret_cast<BaseObject *>(obj));
-}
 }  // namespace ark::common_vm

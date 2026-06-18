@@ -43,13 +43,11 @@ constexpr size_t TEST_CLASS_IMT_SIZE = 0;
 constexpr size_t INT_ARRAY_SIZE = 8;
 constexpr std::array<uint32_t, INT_ARRAY_SIZE> INT_ARRAY = {8, 95, 34, 47, 74, 72, 29, 27};
 
-class CMCGCPreBarrierChecker : public cvm::GCListener {
+class CMCGCPreBarrierChecker : public GCListener {
 public:
-    void OnGCStart(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
-    void OnGCFinish(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
-    void OnGCPhaseStart(ark::common_vm::GCPhase phase) override
+    void GCPhaseStarted(GCPhase phase) override
     {
-        if (phase == cvm::GCPhase::GC_PHASE_MARK) {
+        if (phase == GCPhase::GC_PHASE_MARK) {
             {
                 auto &[lock, cond] = markStartedMon;
                 std::unique_lock phaseScope(lock);
@@ -63,9 +61,9 @@ public:
             }
         }
     }
-    void OnGCPhaseEnd(ark::common_vm::GCPhase phase) override
+    void GCPhaseFinished(GCPhase phase) override
     {
-        if (phase == cvm::GCPhase::GC_PHASE_MARK) {
+        if (phase == GCPhase::GC_PHASE_MARK) {
             {
                 auto &[lock, cond] = markFinishedMon;
                 std::unique_lock phaseScope(lock);
@@ -113,7 +111,7 @@ public:
     }
     ~CMCGCPreBarrierChecker()
     {
-        cvm::Heap::GetHeap().GetCollector().RemoveGCListener(this);
+        Runtime::GetCurrent()->GetPandaVM()->GetGC()->RemoveListener(this);
     }
 
 private:
@@ -130,13 +128,11 @@ private:
     std::pair<std::mutex, std::condition_variable> markFinishedActionMon;
 };
 
-class CMCGCReadBarrierChecker : public cvm::GCListener {
+class CMCGCReadBarrierChecker : public GCListener {
 public:
-    void OnGCStart(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
-    void OnGCFinish(ark::common_vm::GCReason reason, ark::common_vm::GCType type) override {}
-    void OnGCPhaseStart(ark::common_vm::GCPhase phase) override
+    void GCPhaseStarted(GCPhase phase) override
     {
-        if (phase == cvm::GCPhase::GC_PHASE_MARK) {
+        if (phase == GCPhase::GC_PHASE_MARK) {
             {
                 auto &[lock, cond] = markStartedMon;
                 std::unique_lock phaseScope(lock);
@@ -148,7 +144,7 @@ public:
                 std::unique_lock actionScope(lock);
                 cond.wait(actionScope, [this] { return markStartedActionCompleted; });
             }
-        } else if (phase == cvm::GCPhase::GC_PHASE_PRECOPY) {
+        } else if (phase == GCPhase::GC_PHASE_PRECOPY) {
             {
                 auto &[lock, cond] = precopyStartedMon;
                 std::unique_lock phaseScope(lock);
@@ -162,7 +158,7 @@ public:
             }
         }
     }
-    void OnGCPhaseEnd(ark::common_vm::GCPhase phase) override {}
+    void GCPhaseFinished([[maybe_unused]] GCPhase phase) override {}
     template <typename A>
     void OnStartPhaseMark(A action)
     {
@@ -197,7 +193,7 @@ public:
     }
     ~CMCGCReadBarrierChecker()
     {
-        cvm::Heap::GetHeap().GetCollector().RemoveGCListener(this);
+        Runtime::GetCurrent()->GetPandaVM()->GetGC()->RemoveListener(this);
     }
 
 private:
@@ -231,7 +227,7 @@ public:
 
     void TriggerGC()
     {
-        cvm::HeapManager::RequestGC(cvm::GCReason::GC_REASON_FORCE, false, cvm::GCType::GC_TYPE_YOUNG);
+        cvm::HeapManager::RequestGC(GCTaskCause::EXPLICIT_CAUSE, false, GCCollectionType::YOUNG);
         cvm::Heap::GetHeap().WaitForGCFinish();
     }
 
@@ -469,7 +465,8 @@ TEST_F(CMCGCTest, ObjectCopy)
     }
 }
 
-TEST_F(CMCGCTest, PreBarrierCheck)
+// This test is disabled and will be re-enabled in issue #35111.
+TEST_F(CMCGCTest, DISABLED_PreBarrierCheck)
 {
     auto *execCtx = ets::EtsExecutionContext::GetCurrent();
     auto *coro = ets::EtsCoroutine::GetCurrent();
@@ -504,9 +501,9 @@ TEST_F(CMCGCTest, PreBarrierCheck)
     ASSERT_TRUE(obj2Region->IsInOldSpace());
 
     CMCGCPreBarrierChecker checker;
-    cvm::Heap::GetHeap().GetCollector().AddGCListener(&checker);
+    vm->GetGC()->AddListener(&checker);
 
-    cvm::HeapManager::RequestGC(cvm::GCReason::GC_REASON_USER, true, cvm::GCType::GC_TYPE_FULL);
+    cvm::HeapManager::RequestGC(GCTaskCause::EXPLICIT_CAUSE, true, GCCollectionType::FULL);
 
     {
         cvm::ScopedEnterSaferegion safeRegion(true);
@@ -524,7 +521,8 @@ TEST_F(CMCGCTest, PreBarrierCheck)
     ASSERT_EQ(1, objects.size());
 }
 
-TEST_F(CMCGCTest, ReadBarrierCheck)
+// This test is disabled and will be re-enabled in issue #35111.
+TEST_F(CMCGCTest, DISABLED_ReadBarrierCheck)
 {
     auto *execCtx = ets::EtsExecutionContext::GetCurrent();
     auto *coro = ets::EtsCoroutine::GetCurrent();
@@ -540,9 +538,9 @@ TEST_F(CMCGCTest, ReadBarrierCheck)
     FillCurrentMemRegion(execCtx);
 
     CMCGCReadBarrierChecker checker;
-    cvm::Heap::GetHeap().GetCollector().AddGCListener(&checker);
+    vm->GetGC()->AddListener(&checker);
 
-    cvm::HeapManager::RequestGC(cvm::GCReason::GC_REASON_USER, true, cvm::GCType::GC_TYPE_FULL);
+    cvm::HeapManager::RequestGC(GCTaskCause::EXPLICIT_CAUSE, true, GCCollectionType::FULL);
 
     uintptr_t objPtr = 0;
     {

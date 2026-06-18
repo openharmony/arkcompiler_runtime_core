@@ -36,6 +36,7 @@
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/cmc/cmc-allocator-adapter.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/gc_task.h"
 #include "runtime/mem/rendezvous.h"
 #include "include/panda_vm.h"
 
@@ -60,7 +61,8 @@ struct STWParam {
 // Scoped stop the world.
 class ScopedStopTheWorld {
 public:
-    __attribute__((always_inline)) explicit ScopedStopTheWorld(STWParam &param, GCPhase phase = GC_PHASE_IDLE)
+    __attribute__((always_inline)) explicit ScopedStopTheWorld(STWParam &param,
+                                                               mem::GCPhase phase = mem::GCPhase::GC_PHASE_IDLE)
         : stwParam_(param), suspensionScope_(ScopedSuspendAllThreads(ark::PandaVM::GetCurrent()->GetRendezvous()))
     {
         reason_ = param.stwReason;
@@ -203,13 +205,13 @@ public:
         UpdatePreWriteBarrierEntrypointInMutator<false>(thread);
     }
 
-    virtual void PreGarbageCollection(bool isConcurrent);
+    virtual void PreGarbageCollection(GCTaskCause reason, bool isConcurrent);
     virtual void PostGarbageCollection(uint64_t gcIndex);
 
     void Init() override
     {
         HeapBitmapManager::GetHeapBitmapManager().InitializeHeapBitmap();
-        DCHECK(GetGCPhase() == ark::common_vm::GC_PHASE_IDLE);
+        DCHECK(this->GetGCPhase() == mem::GCPhase::GC_PHASE_IDLE);
 #ifdef PANDA_TARGET_32
         // cmc is not adapted for 32-bit systems
         gcMode_ = GCMode::STW;
@@ -235,7 +237,7 @@ public:
     bool ShouldIgnoreRequest(ark::common_vm::GCRequest &request) override;
 
     template <bool ProcessXRef>
-    void ProcessMarkStack(uint32_t threadIndex, ParallelLocalMarkStack &workStack);
+    void ProcessMarkStack(uint32_t threadIndex, ParallelLocalMarkStack &workStack, GCTaskCause reason);
     void ProcessWeakStack(WeakStack &weakStack);
 
     // live but not resurrected object.
@@ -283,7 +285,8 @@ public:
         ark::mem::RefFieldVisitor weakVisitor_;
         PandaUniquePtr<BaseObject *> closure_;
     };
-    MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack, WeakStack &weakStack);
+    MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack, WeakStack &weakStack,
+                                                               GCTaskCause reason);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     void MarkingXRef(RefField<> &ref, ParallelLocalMarkStack &workStack) const;
     void MarkingObjectXRef(BaseObject *obj, ParallelLocalMarkStack &workStack);
@@ -319,24 +322,24 @@ public:
     void MarkGCStart();
     void MarkGCFinish(uint64_t gcIndex);
 
-    void RunGarbageCollection(uint64_t, ark::common_vm::GCReason, ark::common_vm::GCType) override;
+    void RunGarbageCollection(uint64_t, ark::GCTask &) override;
 
-    void ReclaimGarbageMemory(ark::common_vm::GCReason reason);
+    void ReclaimGarbageMemory(GCTaskCause reason);
 
-    void TransitionToGCPhase(const ark::common_vm::GCPhase phase)
+    void TransitionToGCPhase(const GCPhase phase)
     {
-        using ark::common_vm::GCListener;
-        const auto currentPhase = Heap::GetHeap().GetGCPhase();
-        NotifyGCListeners([currentPhase](GCListener *l) { l->OnGCPhaseEnd(currentPhase); });
-        SetGCPhase(phase);
-        LOG(DEBUG, GC) << "transition gc phase: " << Collector::GetGCPhaseName(currentPhase) << "(" << currentPhase
-                       << ") -> " << Collector::GetGCPhaseName(phase) << "(" << phase << ")";
+        const auto currentPhase = this->GetGCPhase();
+        this->FireGCPhaseFinished(currentPhase);
+        this->SetGCPhase(phase);
+        LOG(DEBUG, GC) << "transition gc phase: " << GCScopedPhase::GetPhaseName(currentPhase) << "("
+                       << static_cast<uint8_t>(currentPhase) << ") -> " << GCScopedPhase::GetPhaseName(phase) << "("
+                       << static_cast<uint8_t>(phase) << ")";
         ForEachManagedMutator([this, phase](Mutator *mutator) {
             mutator->HandleGCPhase(phase);
             mutator->SetMutatorPhase(phase);
             UpdateBarrierEntrypoint(mutator, phase);
         });
-        NotifyGCListeners([phase](GCListener *l) { l->OnGCPhaseStart(phase); });
+        this->FireGCPhaseStarted(phase);
     }
 
     ark::common_vm::GCStats &GetGCStats() override;
@@ -377,37 +380,7 @@ public:
 
     void CopyObject(const BaseObject &fromObj, BaseObject &toObj, size_t size) const;
 
-    void AddGCListener(ark::common_vm::GCListener *listener) override
-    {
-        ark::os::memory::LockHolder gcListenersLock(gcListenersLock_);
-        gcListeners_.push_back(listener);
-    }
-
-    void RemoveGCListener(ark::common_vm::GCListener *listener) override
-    {
-        ark::os::memory::LockHolder gcListenersLock(gcListenersLock_);
-        gcListeners_.erase(std::remove(gcListeners_.begin(), gcListeners_.end(), listener), gcListeners_.end());
-    }
-
-    void NotifyGCListeners(std::function<void(ark::common_vm::GCListener *)> notifier) override
-    {
-        ark::os::memory::LockHolder gcListenersLock(gcListenersLock_);
-        std::for_each(gcListeners_.begin(), gcListeners_.end(), notifier);
-    }
-
-    ark::common_vm::GCPhase GetGCPhase() const override
-    {
-        // Atomic with acquire order reason: data race with gcPhase_ with dependecies on reads after the load
-        return gcPhase_.load(std::memory_order_acquire);
-    }
-
-    void SetGCPhase(const ark::common_vm::GCPhase phase) override
-    {
-        // Atomic with release order reason: data race with gcPhase_ with dependecies on writes before the store
-        gcPhase_.store(phase, std::memory_order_release);
-    }
-
-    void UpdateBarrierEntrypoint(ark::common_vm::Mutator *mutator, ark::common_vm::GCPhase phase);
+    void UpdateBarrierEntrypoint(ark::common_vm::Mutator *mutator, mem::GCPhase phase);
     void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
                             mem::BuffersKeepingFlag keepBuffers) override;
     void OnMutatorCreate(Mutator *mutator) override;
@@ -434,14 +407,14 @@ protected:
     void CollectSmallSpace();
     void ClearAllGCInfo();
 
-    void DoGarbageCollection();
+    void DoGarbageCollection(ark::GCTask &task);
 
     void ProcessFinalizers();
 
     void CopyFromSpace();
     void ExemptFromSpace();
 
-    void RequestGCInternal(ark::common_vm::GCReason reason, bool async, ark::common_vm::GCType gcType,
+    void RequestGCInternal(GCTaskCause reason, bool async, GCCollectionType gcType,
                            bool explicitRequest = false) override;
     void MergeWeakStack(WeakStack &weakStack);
     void UpdateNativeThreshold(ark::mem::GCParam &gcParam);
@@ -465,10 +438,7 @@ protected:
 
     uint32_t snapshotFinalizerNum_ = 0;
 
-    // reason for current GC.
-    ark::common_vm::GCReason gcReason_ = ark::common_vm::GC_REASON_USER;
-
-    ark::common_vm::GCType gcType_ = ark::common_vm::GC_TYPE_FULL;
+    GCCollectionType gcType_ = GCCollectionType::FULL;
 
     // indicate whether to fix references (including global roots and reference fields).
     // this member field is useful for optimizing concurrent copying gc.
@@ -483,29 +453,24 @@ protected:
 
     uint32_t GetGCThreadCount(const bool isConcurrent) const;
 
-    inline void SetGCReason(const ark::common_vm::GCReason reason)
-    {
-        gcReason_ = reason;
-    }
-
     ark::common_vm::Taskpool *GetThreadPool() const;
 
     // let finalizerProcessor process finalizers, and mark resurrected if in stw gc
-    void ClearWeakStack(bool parallel);
+    void ClearWeakStack(bool parallel, GCTaskCause reason);
 
-    void RemarkAndPreforwardStaticRoots(GlobalMarkStack &globalMarkStack);
     void PreforwardStaticRoots();
 
-    bool PushRootToWorkStack(LocalCollectStack &markStack, BaseObject *obj);
-    void PushRootsToWorkStack(LocalCollectStack &markStack, const CArrayList<BaseObject *> &collectedRoots);
-    void MarkingRoots(const CArrayList<BaseObject *> &collectedRoots);
-    void Remark();
+    bool PushRootToWorkStack(LocalCollectStack &markStack, BaseObject *obj, GCTaskCause reason);
+    void PushRootsToWorkStack(LocalCollectStack &markStack, const CArrayList<BaseObject *> &collectedRoots,
+                              GCTaskCause reason);
+    void MarkingRoots(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason);
+    void Remark(GCTaskCause reason);
 
     bool MarkSatbBuffer(GlobalMarkStack &globalMarkStack);
 
     // concurrent marking.
-    void TracingImpl(GlobalMarkStack &globalMarkStack, bool parallel, bool Remark);
-    void TracingSerial(GlobalMarkStack &globalMarkStack);
+    void TracingImpl(GlobalMarkStack &globalMarkStack, bool parallel, bool Remark, GCTaskCause reason);
+    void TracingSerial(GlobalMarkStack &globalMarkStack, GCTaskCause reason);
 
 private:
     template <bool ENABLE_BARRIER>
@@ -564,30 +529,28 @@ private:
         reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_).PrepareMarking();
 
         COMMON_PHASE_TIMER("enum roots & update old pointers within");
-        TransitionToGCPhase(ark::common_vm::GCPhase::GC_PHASE_ENUM);
+        TransitionToGCPhase(mem::GCPhase::GC_PHASE_INITIAL_MARK);
 
         rootsVisitFunc(visitor);
     }
     CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(ark::common_vm::STWParam &param,
                                                        const ark::mem::RefFieldVisitor &visitor);
 
-    void MarkingHeap(const CArrayList<BaseObject *> &collectedRoots);
-    void PostMarking();
-    void ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack);
-    void Preforward();
+    void MarkingHeap(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason);
+    void Preforward(GCTaskCause reason);
     void ConcurrentPreforward();
 
     void PreforwardConcurrentRoots();
-    void PreforwardStaticWeakRoots();
+    void PreforwardStaticWeakRoots(GCTaskCause reason);
     void PreforwardConcurrencyModelRoots();
 
     void ParallelFixHeap();
     void FixHeap(bool isWorldStopped);  // roots and ref-fields
-    WeakRefFieldVisitor GetWeakRefFieldVisitor();
+    WeakRefFieldVisitor GetWeakRefFieldVisitor(GCTaskCause reason);
     RefFieldVisitor GetPrefowardRefFieldVisitor();
-    void PreforwardFlip();
+    void PreforwardFlip(GCTaskCause reason);
 
-    void CollectGarbageWithXRef();
+    void CollectGarbageWithXRef(GCTaskCause reason);
 
     template <EnumRootsPolicy policy>
     void PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack);
@@ -623,9 +586,6 @@ private:
     void ForEachManagedMutator(const ManagedMutatorCallback &callback);
 
     GCMode gcMode_ = GCMode::CMC;
-    std::atomic<ark::common_vm::GCPhase> gcPhase_ = {ark::common_vm::GCPhase::GC_PHASE_IDLE};
-    PandaVector<ark::common_vm::GCListener *> gcListeners_;
-    ark::os::memory::Mutex gcListenersLock_;
 };
 
 template <typename StackType>

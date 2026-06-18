@@ -22,7 +22,6 @@
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/heap/heap_visitor.h"
-#include "common_interfaces/base_runtime.h"
 #include "common_components/heap/heap.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 

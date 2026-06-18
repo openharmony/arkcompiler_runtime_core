@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +42,6 @@ public:
                 return "Idle";
             case GCPhase::GC_PHASE_RUNNING:
                 return "RunPhases()";
-            case GCPhase::GC_PHASE_COLLECT_ROOTS:
-                return "CollectRoots()";
             case GCPhase::GC_PHASE_INITIAL_MARK:
                 return "InitialMark";
             case GCPhase::GC_PHASE_MARK:
@@ -52,6 +50,12 @@ public:
                 return "Mark()";
             case GCPhase::GC_PHASE_REMARK:
                 return "YoungRemark()";
+            case GCPhase::GC_PHASE_PRECOPY:
+                return "PreCopy";
+            case GCPhase::GC_PHASE_COPY:
+                return "Copy";
+            case GCPhase::GC_PHASE_FIX:
+                return "Fix";
             case GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE:
                 return "CollectAndMove()";
             case GCPhase::GC_PHASE_SWEEP:
@@ -70,8 +74,6 @@ public:
                 return "Idle";
             case GCPhase::GC_PHASE_RUNNING:
                 return "RunPhases";
-            case GCPhase::GC_PHASE_COLLECT_ROOTS:
-                return "ColRoots";
             case GCPhase::GC_PHASE_INITIAL_MARK:
                 return "InitMark";
             case GCPhase::GC_PHASE_MARK:
@@ -80,6 +82,12 @@ public:
                 return "MarkY";
             case GCPhase::GC_PHASE_REMARK:
                 return "YRemark";
+            case GCPhase::GC_PHASE_PRECOPY:
+                return "PreCopy";
+            case GCPhase::GC_PHASE_COPY:
+                return "Copy";
+            case GCPhase::GC_PHASE_FIX:
+                return "Fix";
             case GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE:
                 return "ColYAndMove";
             case GCPhase::GC_PHASE_SWEEP:

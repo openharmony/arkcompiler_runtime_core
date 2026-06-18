@@ -59,12 +59,12 @@ protected:
         if (region == nullptr) {
             return;
         }
-        GCPhase phase = ark::Mutator::GetCurrent()->GetMutatorPhase();
-        if (phase == GC_PHASE_ENUM || phase == GC_PHASE_MARK || phase == GC_PHASE_REMARK_SATB ||
-            phase == GC_PHASE_POST_MARK) {
+        mem::GCPhase phase = ::ark::Mutator::GetCurrent()->GetMutatorPhase();
+        if (phase == mem::GCPhase::GC_PHASE_INITIAL_MARK || phase == mem::GCPhase::GC_PHASE_MARK) {
             region->SetMarkingLine();
-        } else if (phase == GC_PHASE_PRECOPY || phase == GC_PHASE_COPY || phase == GC_PHASE_FIX ||
-                   phase == GC_PHASE_YOUNG_COPY) {
+        } else if (phase == mem::GCPhase::GC_PHASE_PRECOPY || phase == mem::GCPhase::GC_PHASE_COPY ||
+                   phase == mem::GCPhase::GC_PHASE_FIX || phase == mem::GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE) {
+            ASSERT_PRINT(phase != mem::GCPhase::GC_PHASE_REMARK, "remark phase should not set copy line");
             region->SetMarkingLine();
             region->SetCopyLine();
         }

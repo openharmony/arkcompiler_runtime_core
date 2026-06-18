@@ -23,6 +23,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mutator_status.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
+#include "runtime/mem/gc/gc_phase.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/thread/mutator.h"
@@ -146,6 +147,18 @@ public:
     ALWAYS_INLINE void SetPreWrbEntrypoint(void *entry)
     {
         preWrbEntrypoint_ = entry;
+    }
+
+    ALWAYS_INLINE void SetMutatorPhase(const mem::GCPhase newPhase)
+    {
+        // Atomic with release order reason: data race with gcPhase_ with dependecies on writes before the store
+        gcPhase_.store(newPhase, std::memory_order_release);
+    }
+
+    ALWAYS_INLINE mem::GCPhase GetMutatorPhase() const
+    {
+        // Atomic with acquire order reason: data race with gcPhase_ with dependecies on reads after the load
+        return gcPhase_.load(std::memory_order_acquire);
     }
 
     PandaVector<ObjectHeader *> *GetPreBuff() const
@@ -396,6 +409,8 @@ private:
     PandaVM *vm_ {nullptr};
     MutatorLock *mutatorLock_ {nullptr};
     MutatorType type_ {MutatorType::NONE};
+    // GC phase the mutator sees. Used for barriers and new region allocation.
+    std::atomic<mem::GCPhase> gcPhase_ = {mem::GCPhase::GC_PHASE_IDLE};
 #if !defined(NDEBUG)
     MutatorLock::MutatorLockState lockState_ = MutatorLock::UNLOCKED;
 #endif  // !NDEBUG

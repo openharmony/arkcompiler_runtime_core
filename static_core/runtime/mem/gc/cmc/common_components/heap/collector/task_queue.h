@@ -97,21 +97,24 @@ public:
     static constexpr uint32_t PRIO_TIMEOUT = 1;
     static constexpr uint32_t PRIO_INVOKE_GC = 2;
 
-    static_assert(PRIO_INVOKE_GC + static_cast<uint32_t>(GC_REASON_END) < std::numeric_limits<uint32_t>::digits,
+    static constexpr uint32_t GC_CAUSE_END = static_cast<uint32_t>(GCTaskCause::CROSSREF_CAUSE);
+
+    static_assert(PRIO_INVOKE_GC + GC_CAUSE_END < std::numeric_limits<uint32_t>::digits,
                   "task queue reached max capacity");
 
-    GCRunner() : GCTask(GCTaskType::GC_TASK_INVALID), gcReason_(GC_REASON_INVALID) {}
+    GCRunner() : GCTask(GCTaskType::GC_TASK_INVALID), gcReason_(GCTaskCause::INVALID_CAUSE) {}
 
-    explicit GCRunner(GCTaskType type) : GCTask(type), gcReason_(GC_REASON_INVALID)
+    explicit GCRunner(GCTaskType type) : GCTask(type), gcReason_(GCTaskCause::INVALID_CAUSE)
     {
         ASSERT_PRINT(type != GCTaskType::GC_TASK_INVOKE_GC, "invalid gc task!");
     }
 
-    GCRunner(GCTaskType type, GCReason reason, GCType gcType = GC_TYPE_FULL)
+    GCRunner(GCTaskType type, GCTaskCause reason, GCCollectionType gcType = GCCollectionType::FULL)
         : GCTask(type), gcReason_(reason), gcType_(gcType)
     {
-        ASSERT_PRINT(gcReason_ >= GC_REASON_BEGIN && gcReason_ <= GC_REASON_END, "invalid reason");
-        ASSERT_PRINT(gcType_ >= GC_TYPE_BEGIN && gcType_ <= GC_TYPE_END, "invalid gc type");
+        ASSERT_PRINT(gcReason_ > GCTaskCause::INVALID_CAUSE && gcReason_ <= GCTaskCause::CROSSREF_CAUSE,
+                     "invalid reason");
+        ASSERT_PRINT(gcType_ >= GCCollectionType::NONE && gcType_ <= GCCollectionType::FULL, "invalid gc type");
     }
 
     GCRunner(const GCRunner &task) = default;
@@ -122,9 +125,9 @@ public:
     {
         if (prio == PRIO_TERMINATE) {
             return GCRunner(GCTaskType::GC_TASK_TERMINATE_GC);
-        } else if (prio - PRIO_INVOKE_GC <= GC_REASON_END) {
-            auto reason = static_cast<GCReason>(prio - PRIO_INVOKE_GC);
-            auto gcType = reason == GC_REASON_YOUNG ? GC_TYPE_YOUNG : GC_TYPE_FULL;
+        } else if (prio - PRIO_INVOKE_GC <= GC_CAUSE_END) {
+            auto reason = static_cast<GCTaskCause>(prio - PRIO_INVOKE_GC);
+            auto gcType = reason == GCTaskCause::YOUNG_GC_CAUSE ? GCCollectionType::YOUNG : GCCollectionType::FULL;
             return GCRunner(GCTaskType::GC_TASK_INVOKE_GC, reason, gcType);
         } else {  // LCOV_EXCL_BR_LINE
             LOG(FATAL, COMMON) << "Invalid priority in GetGCRequestByPrio function";
@@ -138,7 +141,7 @@ public:
         if (taskType_ == GCTaskType::GC_TASK_TERMINATE_GC) {
             return PRIO_TERMINATE;
         } else if (taskType_ == GCTaskType::GC_TASK_INVOKE_GC) {
-            return PRIO_INVOKE_GC + gcReason_;
+            return PRIO_INVOKE_GC + static_cast<uint32_t>(gcReason_);
         }
         LOG(FATAL, COMMON) << "Invalid task in GetPriority function";
         UNREACHABLE();
@@ -152,7 +155,7 @@ public:
 
     inline bool IsInvalid() const
     {
-        return (taskType_ == GCTaskType::GC_TASK_INVALID) && (gcReason_ == GC_REASON_INVALID);
+        return (taskType_ == GCTaskType::GC_TASK_INVALID) && (gcReason_ == GCTaskCause::INVALID_CAUSE);
     }
 
     // Only for asyn gc task queues,
@@ -162,24 +165,31 @@ public:
         return (taskType_ != GCTaskType::GC_TASK_INVOKE_GC);
     }
 
-    inline GCReason GetGCReason() const
+    inline GCTaskCause GetGCReason() const
     {
         return gcReason_;
     }
 
-    inline void SetGCReason(GCReason reason)
+    inline void SetGCReason(GCTaskCause reason)
     {
         gcReason_ = reason;
     }
 
-    inline GCType GetGCType() const
+    inline GCCollectionType GetGCType() const
     {
         return gcType_;
     }
 
-    inline void SetGCType(GCType type)
+    inline void SetGCType(GCCollectionType type)
     {
         gcType_ = type;
+    }
+
+    ark::GCTask ToGCTask() const
+    {
+        ark::GCTask task(gcReason_);
+        task.collectionType = gcType_;
+        return task;
     }
 
     bool NeedFilter() const override
@@ -190,8 +200,8 @@ public:
     bool Execute(void *owner) override;
 
 private:
-    GCReason gcReason_ {GC_REASON_INVALID};
-    GCType gcType_ {GC_TYPE_FULL};
+    GCTaskCause gcReason_ {GCTaskCause::INVALID_CAUSE};
+    GCCollectionType gcType_ {GCCollectionType::FULL};
 };
 
 // Lockless async task queue implementation.

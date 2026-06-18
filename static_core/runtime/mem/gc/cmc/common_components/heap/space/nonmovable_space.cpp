@@ -28,7 +28,6 @@
 #endif
 #include "common_components/log/log.h"
 #include "common_components/taskpool/taskpool.h"
-#include "common_interfaces/base_runtime.h"
 
 #if defined(_WIN64)
 #include <sysinfoapi.h>
@@ -64,7 +63,7 @@ void CollectFixHeapTaskForFullRegion(RegionList &list, FixHeapTaskList &taskList
 void NonMovableSpace::CollectFixTasks(FixHeapTaskList &taskList)
 {
     // fix all objects.
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+    if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
         FixHeapWorker::CollectFixHeapTasks(taskList, recentPolySizeRegionList_, FIX_RECENT_OLD_REGION);
         FixHeapWorker::CollectFixHeapTasks(taskList, polySizeRegionList_, FIX_OLD_REGION);
 
@@ -90,9 +89,9 @@ void NonMovableSpace::DumpRegionStats() const
 
 uintptr_t NonMovableSpace::AllocInMonoSizeList(size_t cellCount)
 {
-    GCPhase mutatorPhase = ark::Mutator::GetCurrent()->GetMutatorPhase();
+    mem::GCPhase mutatorPhase = ark::Mutator::GetCurrent()->GetMutatorPhase();
     // workaround: make sure collector doesn't fix newly allocated incomplete objects
-    if (mutatorPhase == GC_PHASE_MARK || mutatorPhase == GC_PHASE_FIX) {
+    if (mutatorPhase == mem::GCPhase::GC_PHASE_MARK || mutatorPhase == mem::GCPhase::GC_PHASE_FIX) {
         return 0;
     }
 
@@ -100,7 +99,7 @@ uintptr_t NonMovableSpace::AllocInMonoSizeList(size_t cellCount)
     ark::os::memory::LockHolder lock(list->GetListMutex());
     uintptr_t allocPtr = list->AllocFromFreeListInLock();
     // For making bitmap comform with live object count, do not mark object repeated.
-    if (allocPtr == 0 || mutatorPhase == GCPhase::GC_PHASE_IDLE) {
+    if (allocPtr == 0 || mutatorPhase == mem::GCPhase::GC_PHASE_IDLE) {
         return allocPtr;
     }
 

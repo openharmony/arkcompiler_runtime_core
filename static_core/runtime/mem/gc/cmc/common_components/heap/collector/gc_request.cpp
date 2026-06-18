@@ -48,15 +48,15 @@ inline bool GCRequest::IsFrequentHeuristicGC() const
 bool GCRequest::ShouldBeIgnored() const
 {
     switch (reason) {
-        case GC_REASON_HEU:
-        case GC_REASON_YOUNG:
-        case GC_REASON_BACKGROUND:
-        case GC_REASON_HINT:
+        case GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE:
+        case GCTaskCause::MIXED:
+        case GCTaskCause::YOUNG_GC_CAUSE:
+        case GCTaskCause::STARTUP_COMPLETE_CAUSE:
             return IsFrequentHeuristicGC();
-        case GC_REASON_NATIVE:
+        case GCTaskCause::NATIVE_ALLOC_CAUSE:
             return IsFrequentAsyncGC();
-        case GC_REASON_OOM:
-        case GC_REASON_FORCE:
+        case GCTaskCause::OOM_CAUSE:
+        case GCTaskCause::EXPLICIT_CAUSE:
             return IsFrequentGC();
         default:
             return false;
@@ -64,17 +64,17 @@ bool GCRequest::ShouldBeIgnored() const
 }
 
 ark::common_vm::GCRequest g_gcRequests[] = {
-    {GC_REASON_USER, "user", false, true, 0, 0},
-    {GC_REASON_OOM, "oom", true, false, 0, 0},
-    {GC_REASON_BACKUP, "backup", true, false, 0, 0},
-    {GC_REASON_HEU, "heuristic", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
-    {GC_REASON_YOUNG, "young", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
-    {GC_REASON_NATIVE, "native_alloc", false, true, MIN_ASYNC_GC_INTERVAL_NS, g_initNativeTriggerTimestamp},
-    {GC_REASON_HEU_SYNC, "heuristic_sync", true, true, 0, 0},
-    {GC_REASON_NATIVE_SYNC, "native_alloc_sync", true, true, 0, 0},
-    {GC_REASON_FORCE, "force", true, false, 0, 0},
-    {GC_REASON_XREF, "force_xref", true, false, 0, 0},
-    {GC_REASON_BACKGROUND, "backgound", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
-    {GC_REASON_HINT, "hint", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
-    {GC_REASON_IDLE, "idle", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp}};
+    {GCTaskCause::INVALID_CAUSE, "invalid", true, false, 0, 0},
+    {GCTaskCause::YOUNG_GC_CAUSE, "young", false, true, LONG_MIN_HEU_GC_INTERVAL_NS, g_initHeuTriggerTimestamp},
+    {GCTaskCause::PYGOTE_FORK_CAUSE, "pygote_fork", true, false, 0, 0},
+    {GCTaskCause::STARTUP_COMPLETE_CAUSE, "startup_complete", false, true, 0, 0},
+    {GCTaskCause::NATIVE_ALLOC_CAUSE, "native_alloc", false, true, MIN_ASYNC_GC_INTERVAL_NS,
+     g_initNativeTriggerTimestamp},
+    {GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, "heuristic", false, true, LONG_MIN_HEU_GC_INTERVAL_NS,
+     g_initHeuTriggerTimestamp},
+    {GCTaskCause::MIXED, "mixed", true, false, 0, 0},
+    {GCTaskCause::EXPLICIT_CAUSE, "explicit", true, false, 0, 0},
+    {GCTaskCause::OOM_CAUSE, "oom", true, false, 0, 0},
+    {GCTaskCause::CROSSREF_CAUSE, "xref", true, false, 0, 0},
+};
 }  // namespace ark::common_vm

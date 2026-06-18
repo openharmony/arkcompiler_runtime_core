@@ -19,35 +19,11 @@
 
 namespace ark::common_vm {
 
-const char *Collector::GetGCPhaseName(GCPhase phase)
-{
-    static const char *phaseNames[] = {
-        "undefined phase",     // GC_PHASE_UNDEF
-        "idle phase",          // GC_PHASE_IDLE
-        "stub phase",          // reserved
-        "stub phase",          // reserved
-        "stub phase",          // reserved
-        "stub phase",          // reserved
-        "stub phase",          // reserved
-        "stub phase",          // reserved
-        "start phase",         // GC_PHASE_START
-        "enum phase",          // GC_PHASE_ENUM
-        "marking phase",       // GC_PHASE_MARK
-        "remark-satb phase",   // GC_PHASE_REMARK_SATB
-        "final-mark phase",    // GC_PHASE_FINAL_MARK
-        "post-marking phase",  // GC_PHASE_POST_MARK
-        "pre-copy phase",      // GC_PHASE_PRECOPY
-        "copy phase",          // GC_PHASE_COPY
-        "fix phase",           // GC_PHASE_FIX
-    };
-    return phaseNames[phase];
-}
-
 Collector::Collector() {}
 
 Collector::~Collector() {}
 
-void Collector::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
+void Collector::RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest)
 {
     RequestGCInternal(reason, async, gcType, explicitRequest);
     return;

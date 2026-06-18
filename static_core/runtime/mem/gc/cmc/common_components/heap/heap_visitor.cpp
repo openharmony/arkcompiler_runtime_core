@@ -16,7 +16,7 @@
 #include "common_components/heap/heap.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/thread/mutator.h"
-#include "common_interfaces/base_runtime.h"
+#include "common_interfaces/vm_interface.h"
 
 namespace ark::common_vm {
 

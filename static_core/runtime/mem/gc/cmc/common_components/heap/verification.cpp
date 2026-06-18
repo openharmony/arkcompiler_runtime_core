@@ -16,6 +16,7 @@
 #include "verification.h"
 
 #include "common_interfaces/heap/region_desc.h"
+#include "common_components/heap/collector/collector.h"
 #include "allocator/regional_heap.h"
 #include "common/mark_work_stack.h"
 #include "common/type_def.h"
@@ -24,8 +25,8 @@
 #include "common_interfaces/objects/ref_field.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/gc/cmc/cmc-gc.h"
+#include "runtime/mem/gc/gc_phase.h"
 #include "securec.h"
-#include "common_interfaces/thread/mutator.h"
 #include <iomanip>
 #include <sstream>
 
@@ -231,7 +232,7 @@ public:
             }
         }
 
-        if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+        if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
             LOG_IF(!(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
                      RegionalHeap::IsNewObjectSinceMarking(refObj) || !RegionalHeap::IsYoungSpaceObject(refObj)),
                    FATAL, COMMON)
@@ -417,11 +418,11 @@ private:
     RegionalHeap &space_;
 };
 
-void WVerify::VerifyAfterMarkInternal(RegionalHeap &space)
+void WVerify::VerifyAfterMarkInternal(RegionalHeap &space, mem::GCPhase phase)
 {
-    LOG_IF(!(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_POST_MARK), FATAL, COMMON)
-        << "Check failed: Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_POST_MARK" << CONTEXT
-        << "Mark verification should be called after PostMarking()";
+    LOG_IF(!(phase == mem::GCPhase::GC_PHASE_REMARK), FATAL, COMMON)
+        << "Check failed: phase == mem::GCPhase::GC_PHASE_REMARK" << CONTEXT
+        << "Mark verification should be called after Remark";
 
     auto iter = VerifyIterator(space);
     auto verifySTWRoots = AfterMarkVisitor();
@@ -436,7 +437,7 @@ void WVerify::VerifyAfterMarkInternal(RegionalHeap &space)
                        << verifyConcurrentRoots.VerifyRefCount();
 }
 
-void WVerify::VerifyAfterMark(bool isWorldStopped)
+void WVerify::VerifyAfterMark(mem::GCPhase phase, bool isWorldStopped)
 {
 #if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
     return;
@@ -445,16 +446,16 @@ void WVerify::VerifyAfterMark(bool isWorldStopped)
     if (!isWorldStopped) {
         STWParam stwParam {"WGC-verify-aftermark"};
         ScopedStopTheWorld stw(stwParam);
-        VerifyAfterMarkInternal(space);
+        VerifyAfterMarkInternal(space, phase);
     } else {
-        VerifyAfterMarkInternal(space);
+        VerifyAfterMarkInternal(space, phase);
     }
 }
 
-void WVerify::VerifyAfterForwardInternal(RegionalHeap &space)
+void WVerify::VerifyAfterForwardInternal(RegionalHeap &space, mem::GCPhase phase)
 {
-    LOG_IF(!(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_COPY), FATAL, COMMON)
-        << "Check failed: Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_COPY" << CONTEXT
+    LOG_IF(!(phase == mem::GCPhase::GC_PHASE_COPY), FATAL, COMMON)
+        << "Check failed: phase == mem::GCPhase::GC_PHASE_COPY" << CONTEXT
         << "Forward verification should be called after ForwardFromSpace()";
 
     auto iter = VerifyIterator(space);
@@ -464,7 +465,7 @@ void WVerify::VerifyAfterForwardInternal(RegionalHeap &space)
     LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterForward verified ref count: " << visitor.VerifyRefCount();
 }
 
-void WVerify::VerifyAfterForward(bool isWorldStopped)
+void WVerify::VerifyAfterForward(mem::GCPhase phase, bool isWorldStopped)
 {
 #if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
     return;
@@ -473,16 +474,16 @@ void WVerify::VerifyAfterForward(bool isWorldStopped)
     if (!isWorldStopped) {
         STWParam stwParam {"WGC-verify-afterforward"};
         ScopedStopTheWorld stw(stwParam);
-        VerifyAfterForwardInternal(space);
+        VerifyAfterForwardInternal(space, phase);
     } else {
-        VerifyAfterForwardInternal(space);
+        VerifyAfterForwardInternal(space, phase);
     }
 }
 
-void WVerify::VerifyAfterFixInternal(RegionalHeap &space)
+void WVerify::VerifyAfterFixInternal(RegionalHeap &space, mem::GCPhase phase)
 {
-    LOG_IF(!(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_FIX), FATAL, COMMON)
-        << "Check failed: Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_FIX" << CONTEXT
+    LOG_IF(!(phase == mem::GCPhase::GC_PHASE_FIX), FATAL, COMMON)
+        << "Check failed: phase == mem::GCPhase::GC_PHASE_FIX" << CONTEXT
         << "Fix verification should be called after Fix()";
 
     auto iter = VerifyIterator(space);
@@ -494,7 +495,7 @@ void WVerify::VerifyAfterFixInternal(RegionalHeap &space)
     LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterFix verified ref count: " << visitor.VerifyRefCount();
 }
 
-void WVerify::VerifyAfterFix(bool isWorldStopped)
+void WVerify::VerifyAfterFix(mem::GCPhase phase, bool isWorldStopped)
 {
 #if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
     return;
@@ -503,9 +504,9 @@ void WVerify::VerifyAfterFix(bool isWorldStopped)
     if (!isWorldStopped) {
         STWParam stwParam {"WGC-verify-afterfix"};
         ScopedStopTheWorld stw(stwParam);
-        VerifyAfterFixInternal(space);
+        VerifyAfterFixInternal(space, phase);
     } else {
-        VerifyAfterFixInternal(space);
+        VerifyAfterFixInternal(space, phase);
     }
 }
 

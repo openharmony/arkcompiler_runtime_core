@@ -14,7 +14,6 @@
  */
 #include "common_components/heap/collector/gc_stats.h"
 
-#include "common_interfaces/base_runtime.h"
 #include "common_components/base/time_utils.h"
 #include "common_components/heap/heap.h"
 
@@ -126,7 +125,7 @@ void GCStats::Dump() const
 
     PandaOStringStream oss;
     oss << "[" << g_gcCount << "] "
-        << "[" << GCTypeToString(gcType) << " (" << g_gcRequests[reason].name << ")] " << FormatTimestamp()
+        << "[" << gcType << " (" << g_gcRequests[GCRequestIndex(reason)].name << ")] " << FormatTimestamp()
         << " CMC GC freed " << FormatMemory(collectedBytes) << ", " << FormatMemory(largeGarbageSize)
         << " LOS objects, " << freePercent << "% free, " << FormatMemory(allocatedNow) << "/" << FormatMemory(totalHeap)
         << ", "

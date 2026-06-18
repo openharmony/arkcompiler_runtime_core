@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,21 @@
 #ifndef PANDA_RUNTIME_MEM_GC_GC_PHASE_H
 #define PANDA_RUNTIME_MEM_GC_GC_PHASE_H
 
+#include <cstddef>
+#include <cstdint>
+
 namespace ark::mem {
 
 enum class GCPhase {
     GC_PHASE_IDLE,  // GC waits for trigger event
     GC_PHASE_RUNNING,
-    GC_PHASE_COLLECT_ROOTS,
     GC_PHASE_INITIAL_MARK,
     GC_PHASE_MARK,
     GC_PHASE_MARK_YOUNG,
     GC_PHASE_REMARK,
+    GC_PHASE_PRECOPY,
+    GC_PHASE_COPY,
+    GC_PHASE_FIX,
     GC_PHASE_COLLECT_YOUNG_AND_MOVE,
     GC_PHASE_SWEEP,
     GC_PHASE_CLEANUP,
