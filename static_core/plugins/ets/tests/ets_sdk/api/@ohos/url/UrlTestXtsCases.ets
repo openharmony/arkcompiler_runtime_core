@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -409,6 +409,30 @@ function testUrlToStringEscape0003() {
 	arktest.assertEQ(result, 'https://username:password@host:8080/directory/');
 }
 
+function testUrlParseShortBasePath() {
+	// Regression: base path segment length 1 caused charAt(1) out of range
+	let result = url.URL.parseURL('c/d', 'https://example.com/a/b');
+	arktest.assertEQ(result.toString(), 'https://example.com/a/c/d');
+}
+
+function testUrlParseSingleCharBasePath() {
+	// base path with single-char segments
+	let result = url.URL.parseURL('x/y', 'https://example.com/a/b/c');
+	arktest.assertEQ(result.toString(), 'https://example.com/a/b/x/y');
+}
+
+function testUrlParseShortInputNoCrash() {
+	// Short input that previously triggered charAt out of range
+	let result = url.URL.parseURL('d', 'https://example.com/a/b');
+	arktest.assertEQ(result.toString(), 'https://example.com/a/d');
+}
+
+function testUrlParseSingleSlashInput() {
+	// input "/" — length 1, previously charAt(1) could crash
+	let result = url.URL.parseURL('/', 'https://example.com/a/b');
+	arktest.assertEQ(result.toString(), 'https://example.com/');
+}
+
 function main(): int {
 	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testGetAllValuesForKey0005", testGetAllValuesForKey0005);
@@ -449,6 +473,10 @@ function main(): int {
 	suite.addTest("testUrlParseUrl9Escape0003", testUrlParseUrl9Escape0003);
 	suite.addTest("testUrlParseUrl9Escape0005", testUrlParseUrl9Escape0005);
 	suite.addTest("testUrlToStringEscape0003", testUrlToStringEscape0003);
+	suite.addTest('testUrlParseShortBasePath', testUrlParseShortBasePath);
+	suite.addTest('testUrlParseSingleCharBasePath', testUrlParseSingleCharBasePath);
+	suite.addTest('testUrlParseShortInputNoCrash', testUrlParseShortInputNoCrash);
+	suite.addTest('testUrlParseSingleSlashInput', testUrlParseSingleSlashInput);
 
 	return suite.run();
 }
