@@ -43,6 +43,7 @@ ohos_source_set("hybridgref_static") {
     external_deps = [
       "bounds_checking_function:libsec_static",
       "napi:ace_napi",
+      "hilog:libhilog",
     ]
   } else if (ark_standalone_build && ark_ets_hybrid) {
     deps += [ "$arkui_root/napi:ace_napi" ]
