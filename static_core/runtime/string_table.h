@@ -78,7 +78,7 @@ protected:
         Table() = default;
         virtual ~Table() = default;
 
-        void PreBarrierOnGet(coretypes::String *str);
+        void PreBarrierOnGet(coretypes::String *&str);
 
         virtual coretypes::String *GetOrInternString(const uint8_t *mutf8Data, uint32_t utf16Length,
                                                      bool canBeCompressed, const LanguageContext &ctx);

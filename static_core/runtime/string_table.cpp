@@ -148,8 +148,14 @@ coretypes::String *StringTable::Table::InternString(coretypes::String *string,
     return string;
 }
 
-void StringTable::Table::PreBarrierOnGet(coretypes::String *str)
+void StringTable::Table::PreBarrierOnGet(coretypes::String *&str)
 {
+    auto *thread = ManagedThread::GetCurrent();
+    if (auto *readBarrier = thread->GetReadBarrierEntrypoint()) {
+        // It does not update reference in the table since but puts forwarded object to
+        // local str variable. Reference is updated in GC.
+        reinterpret_cast<mem::ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(&str));
+    }
     // Need pre barrier if string exists in string table, because this string can be got from the
     // string table (like phoenix) and write to a field during concurrent phase and GC does not see it on Remark
     ASSERT_MANAGED_CODE();

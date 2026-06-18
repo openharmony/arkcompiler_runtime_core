@@ -164,6 +164,11 @@ ObjectHeader *GlobalObjectStorage::GetWeakRef(const Reference *refWitNoType) con
     if (object != nullptr) {
         auto *mutator = Mutator::GetCurrent();
         ASSERT(mutator != nullptr);
+        if (auto *readBarrier = mutator->GetReadBarrierEntrypoint()) {
+            // It does not update reference in global storage since it is const method but puts forwarded object to
+            // local object variable. Reference is updated in GC.
+            reinterpret_cast<mem::ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(&object));
+        }
         auto *preWrb = mutator->GetPreWrbEntrypoint();
         if (preWrb != nullptr) {
             reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(ToObjPtr(object));
