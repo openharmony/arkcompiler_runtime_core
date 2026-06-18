@@ -20,10 +20,50 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/js_convert.h"
 
 #include "runtime/mem/vm_handle-inl.h"
 
 namespace ark::ets::interop::js::ets_proxy {
+
+namespace {
+
+EtsMethod *FindMatchingMethod(napi_env env, const PandaVector<EtsMethod *> &bucket, uint32_t argc,
+                              Span<napi_value> jsArgs)
+{
+    for (auto *method : bucket) {
+        if (EtsMethodWrapper::MatchesSignature(env, method, argc, jsArgs)) {
+            return method;
+        }
+        bool isExceptionPending = false;
+        NAPI_CHECK_FATAL(napi_is_exception_pending(env, &isExceptionPending));
+        if (UNLIKELY(isExceptionPending)) {
+            return nullptr;
+        }
+    }
+    return nullptr;
+}
+
+napi_value InvokeETSInstance(napi_env env, EtsMethod *etsMethod, Span<napi_value> jsArgs, EtsObject *etsThis)
+{
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
+
+    Method *method = etsMethod->GetPandaMethod();
+    uint32_t argc = jsArgs.size();
+    uint32_t actualArgNum = etsMethod->GetParametersNum();
+    if (actualArgNum > argc && !method->HasVarArgs()) {
+        auto newJsArgs = ctx->GetTempArgs<napi_value>(actualArgNum);
+        std::copy(jsArgs.begin(), jsArgs.end(), newJsArgs->begin());
+        napi_value result;
+        napi_get_undefined(env, &result);
+        std::fill(newJsArgs->begin() + argc, newJsArgs->end(), result);
+        return CallETSInstance(executionCtx, ctx, method, *newJsArgs, etsThis);
+    }
+    return CallETSInstance(executionCtx, ctx, method, jsArgs, etsThis);
+}
+
+}  // namespace
 
 /*static*/
 std::unique_ptr<EtsMethodWrapper> EtsMethodWrapper::CreateMethod(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner)
@@ -33,6 +73,54 @@ std::unique_ptr<EtsMethodWrapper> EtsMethodWrapper::CreateMethod(EtsMethodSet *e
         return nullptr;
     }
     return std::unique_ptr<EtsMethodWrapper>(wrapper);
+}
+
+/*static*/
+bool EtsMethodWrapper::MatchesSignature(napi_env env, EtsMethod *method, uint32_t argc, Span<napi_value> jsArgs)
+{
+    uint32_t minArgs = method->TryGetMinArgCount().value_or(method->GetParametersNum());
+    uint32_t maxArgs = method->GetParametersNum();
+    bool hasVarargs = method->GetPandaMethod()->HasVarArgs();
+    if (argc < minArgs || (argc > maxArgs && !hasVarargs)) {
+        return false;
+    }
+    uint32_t argsToMatch = std::min(argc, maxArgs);
+    uint32_t methodArgOffset = method->IsStatic() ? 0 : 1;
+    for (uint32_t i = 0; i < argsToMatch; ++i) {
+        if (!CheckArgMatch(env, method, i + methodArgOffset, jsArgs[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*static*/
+std::tuple<EtsMethod *, const char *> EtsMethodWrapper::FindSuitableMethod(napi_env env, const EtsMethodSet *methodSet,
+                                                                           uint32_t argc, Span<napi_value> jsArgs)
+{
+    if (nullptr == methodSet) {
+        return {nullptr, "no method found"};
+    }
+
+    auto currentSet = methodSet;
+    while (nullptr != currentSet) {
+        auto &bucket = currentSet->GetMethods(argc);
+        if (bucket.size() == 1) {
+            return {bucket[0], nullptr};
+        }
+        auto *matched = FindMatchingMethod(env, bucket, argc, jsArgs);
+        if (matched != nullptr) {
+            return {matched, nullptr};
+        }
+        bool isExceptionPending = false;
+        NAPI_CHECK_FATAL(napi_is_exception_pending(env, &isExceptionPending));
+        if (UNLIKELY(isExceptionPending)) {
+            return {nullptr, nullptr};
+        }
+        currentSet = currentSet->GetBaseMethodSet();
+    }
+
+    return {nullptr, "no suitable method found for these arguments"};
 }
 
 /*static*/
@@ -102,13 +190,17 @@ template <bool IS_STATIC>
 /*static*/
 napi_value EtsMethodWrapper::GetterSetterCallHandler(napi_env env, napi_callback_info cinfo)
 {
-    FindMethodFunc findMethodFunc = [](void *data, size_t argc) {
+    FindMethodFunc findMethodFunc = [](napi_env jsEnv, void *data, size_t argc, Span<napi_value> jsArgs) {
         auto fieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
         if (fieldWrapper == nullptr) {
             return EtsMethodAndClassWrapper(nullptr, "method didn't bind a EtsFieldWrapper", nullptr);
         }
         auto etsMethodSet = fieldWrapper->GetGetterSetterMethod(argc);
-        return EtsMethodAndClassWrapper(etsMethodSet->GetMethod(argc), nullptr, fieldWrapper->GetOwner());
+        if (etsMethodSet == nullptr) {
+            return EtsMethodAndClassWrapper(nullptr, "no getter/setter found", nullptr);
+        }
+        auto result = FindSuitableMethod(jsEnv, etsMethodSet, argc, jsArgs);
+        return EtsMethodAndClassWrapper(std::get<0>(result), std::get<1>(result), fieldWrapper->GetOwner());
     };
 
     return EtsMethodWrapper::DoEtsMethodCall<IS_STATIC>(env, cinfo, findMethodFunc);
@@ -128,18 +220,21 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, nullptr, nullptr));
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
-
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
-    auto [etsMethod, errorMessage, etsClassWrapper] = findMethodFunc(data, argc);
+    auto [etsMethod, errorMessage, etsClassWrapper] =
+        findMethodFunc(env, data, argc, Span<napi_value>(jsArgs->data(), argc));
 
-    ASSERT(nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);
+    bool isExceptionPending = false;
+    NAPI_CHECK_FATAL(napi_is_exception_pending(env, &isExceptionPending));
+    ASSERT(isExceptionPending || nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);
     if (UNLIKELY(nullptr == etsMethod || nullptr == etsClassWrapper)) {
-        ctx->ThrowJSTypeError(env, errorMessage);
+        if (!isExceptionPending && errorMessage != nullptr) {
+            ctx->ThrowJSTypeError(env, errorMessage);
+        }
         return nullptr;
     }
 
     Method *method = etsMethod->GetPandaMethod();
-
     if constexpr (IS_STATIC) {
         EtsClass *etsClass = etsMethod->GetClass();
         ASSERT(method->GetClass() == etsClass->GetRuntimeClass());
@@ -158,43 +253,7 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
-    uint32_t actualArgNum = etsMethod->GetParametersNum();
-    if (actualArgNum > argc && !method->HasVarArgs()) {
-        auto newJsArgs = ctx->GetTempArgs<napi_value>(actualArgNum);
-        std::copy(jsArgs->begin(), jsArgs->end(), newJsArgs->begin());
-        napi_value result;
-        napi_get_undefined(env, &result);
-        std::fill(newJsArgs->begin() + argc, newJsArgs->end(), result);
-        return CallETSInstance(executionCtx, ctx, method, *newJsArgs, etsThis);
-    }
-    return CallETSInstance(executionCtx, ctx, method, *jsArgs, etsThis);
-}
-
-static std::tuple<EtsMethod *, const char *> FindSuitableMethod(const EtsMethodSet *methodSet, uint32_t parametersNum)
-{
-    if (nullptr == methodSet) {
-        return {nullptr, "no method found"};
-    }
-
-    EtsMethod *etsMethod = methodSet->GetMethod(parametersNum);
-
-    // Methods with matched number of arguments might present in base classes
-    while (nullptr == etsMethod && nullptr != methodSet) {
-        methodSet = methodSet->GetBaseMethodSet();
-        if (nullptr != methodSet) {
-            etsMethod = methodSet->GetMethod(parametersNum);
-        }
-    }
-
-    if (UNLIKELY(nullptr != methodSet && !methodSet->IsValid())) {
-        return {nullptr, "method has unsupported overloads"};
-    }
-
-    if (UNLIKELY(nullptr == etsMethod)) {
-        return {nullptr, "no suitable method found for this number of arguments"};
-    }
-
-    return {etsMethod, nullptr};
+    return InvokeETSInstance(env, etsMethod, *jsArgs, etsThis);
 }
 
 template <bool IS_STATIC>
@@ -204,13 +263,13 @@ napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_in
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
-    FindMethodFunc findMethodFunc = [&](void *data, size_t argc) {
+    FindMethodFunc findMethodFunc = [&](napi_env jsEnv, void *data, size_t argc, Span<napi_value> jsArgs) {
         auto lazyLink = reinterpret_cast<LazyEtsMethodWrapperLink *>(data);
         auto methodWrapper = EtsMethodWrapper::ResolveLazyLink(ctx, *lazyLink);
         if (methodWrapper == nullptr) {
             return EtsMethodAndClassWrapper(nullptr, "method didn't bind a LazyEtsMethodWrapperLink", nullptr);
         }
-        auto result = FindSuitableMethod(methodWrapper->etsMethodSet_, argc);
+        auto result = FindSuitableMethod(jsEnv, methodWrapper->etsMethodSet_, argc, jsArgs);
         auto etsMethod = std::get<0>(result);
         auto errorMessage = std::get<1>(result);
         auto classWrapper = methodWrapper->owner_;

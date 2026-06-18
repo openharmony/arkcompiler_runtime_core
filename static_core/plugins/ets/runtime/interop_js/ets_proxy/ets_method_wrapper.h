@@ -37,7 +37,8 @@ class EtsClassWrapper;
 using LazyEtsMethodWrapperLink = TypedPointer<EtsMethodSet, EtsMethodWrapper>;
 using EtsMethodWrappersCache = WrappersCache<EtsMethodSet *, EtsMethodWrapper>;
 using EtsMethodAndClassWrapper = std::tuple<EtsMethod *, const char *, EtsClassWrapper *>;
-using FindMethodFunc = std::function<std::tuple<EtsMethod *, const char *, EtsClassWrapper *>(void *, size_t)>;
+using FindMethodFunc =
+    std::function<std::tuple<EtsMethod *, const char *, EtsClassWrapper *>(napi_env, void *, size_t, Span<napi_value>)>;
 
 class EtsMethodWrapper {
 public:
@@ -58,12 +59,14 @@ public:
 
     EtsMethod *GetEtsMethod(uint32_t parametersNum) const
     {
-        return etsMethodSet_->GetMethod(parametersNum);
+        auto &methods = etsMethodSet_->GetMethods(parametersNum);
+        return methods.empty() ? nullptr : methods[0];
     }
 
     Method *GetMethod(uint32_t parametersNum) const
     {
-        EtsMethod *const etsMethod = etsMethodSet_->GetMethod(parametersNum);
+        auto &methods = etsMethodSet_->GetMethods(parametersNum);
+        EtsMethod *const etsMethod = methods.empty() ? nullptr : methods[0];
         return etsMethod != nullptr ? etsMethod->GetPandaMethod() : nullptr;
     }
 
@@ -97,6 +100,16 @@ public:
 
     template <bool IS_STATIC>
     static napi_value GetterSetterCallHandler(napi_env env, napi_callback_info cinfo);
+
+    static std::tuple<EtsMethod *, const char *> FindSuitableMethod(napi_env env, const EtsMethodSet *methodSet,
+                                                                    uint32_t argc, Span<napi_value> jsArgs);
+
+    static bool MatchesSignature(napi_env env, EtsMethod *method, uint32_t argc, Span<napi_value> jsArgs);
+
+    std::tuple<EtsMethod *, const char *> GetSuitableMethod(napi_env env, uint32_t argc, Span<napi_value> jsArgs) const
+    {
+        return FindSuitableMethod(env, etsMethodSet_, argc, jsArgs);
+    }
 
 private:
     static std::unique_ptr<EtsMethodWrapper> CreateMethod(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner);

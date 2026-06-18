@@ -177,20 +177,20 @@ class ClassWithDefaultParameterMethods {
     //     return arg;
     // }
 
-    public overloadedMethod(arg: int) {
-        // do nothing
+    public overloadedMethod(arg: int): string {
+        return "int";
     }
 
-    public overloadedMethod(arg: string) {
-        // do nothing
+    public overloadedMethod(arg: string): string {
+        return "string";
     }
 
-    public overloadedStaticMethod(arg: int) {
-        // do nothing
+    public static overloadedStaticMethod(arg: int): string {
+        return "int";
     }
 
-    public overloadedStaticMethod(arg: string) {
-        // do nothing
+    public static overloadedStaticMethod(arg: string): string {
+        return "string";
     }
 }
 
@@ -200,12 +200,12 @@ class DerivedClassWithDefaultParameterMethods extends ClassWithDefaultParameterM
     }
 }
 
-function overloadedFunction(arg: int) {
-    // do nothing
+function overloadedFunction(arg: int): string {
+    return "int";
 }
 
-function overloadedFunction(arg: string) {
-    // do nothing
+function overloadedFunction(arg: string): string {
+    return "string";
 }
 
 function defaultIntParameterFunction(arg: int = 1): int {

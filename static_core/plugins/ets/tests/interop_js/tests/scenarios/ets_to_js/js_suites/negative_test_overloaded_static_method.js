@@ -22,8 +22,8 @@ const ClassWithDefaultParameterMethods = etsMod.getClass('ClassWithDefaultParame
 	const INT_VALUE = 1;
 	const STRING_VALUE = 'Hello';
 
-	ASSERT_THROWS(TypeError, () => ClassWithDefaultParameterMethods.overloaded_static_method(INT_VALUE));
-	ASSERT_THROWS(TypeError, () => ClassWithDefaultParameterMethods.overloaded_static_method(STRING_VALUE));
+	ASSERT_EQ(ClassWithDefaultParameterMethods.overloadedStaticMethod(INT_VALUE), 'int');
+	ASSERT_EQ(ClassWithDefaultParameterMethods.overloadedStaticMethod(STRING_VALUE), 'string');
 }
 
 GCJSRuntimeCleanup();
