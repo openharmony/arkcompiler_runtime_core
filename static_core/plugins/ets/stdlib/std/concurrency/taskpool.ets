@@ -1229,11 +1229,11 @@ export namespace taskpool {
                     });
                 }
                 if (this.isTimeout.load()) {
-                    this.state.store(InternalState.FINISHED.valueOf());
+                    this.transitionToFinished();
                     this.tryTriggerAsyncRunnerAndGroup();
                     return;
                 }
-                this.state.store(InternalState.FINISHED.valueOf());
+                this.transitionToFinished();
                 try {
                     if (executionSucceeded) {
                         if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
@@ -1275,6 +1275,18 @@ export namespace taskpool {
                 executionRecord.markTaskError(e as Error);
                 return executionRecord.promise;
             });
+        }
+
+        private transitionToFinished(): void {
+            while (true) {
+                let curState = this.state.load();
+                if (curState == InternalState.CANCELED.valueOf() && this.isPeriodicTask) {
+                    return;
+                }
+                if (this.state.compareAndSwap(curState, InternalState.FINISHED) == curState) {
+                    return;
+                }
+            }
         }
 
         checkCancellation(): void {
@@ -2095,6 +2107,7 @@ export namespace taskpool {
                 return executionRecord.promise;
             }
 
+            let shouldEnqueue = false;
             ConcurrencyHelpers.lockGuard(this.impl.seqMutex, () => {
                 if (this.impl.isRunning) {
                     while(true) {
@@ -2109,9 +2122,12 @@ export namespace taskpool {
                     this.impl.tasks.push(task);
                 } else {
                     this.impl.isRunning = true;
-                    internalTask.enqueue(this.impl.priority, executionRecord);
+                    shouldEnqueue = true;
                 }
             });
+            if (shouldEnqueue) {
+                internalTask.enqueue(this.impl.priority, executionRecord);
+            }
             return executionRecord.promise;
         }
 
@@ -2778,6 +2794,7 @@ export namespace taskpool {
                 InternalTask.of(task).enqueue(priority, executionRecord);
             }
         }, period);
+        periodicTasks.set(task.taskId, task);
     }
 
     /**
@@ -2796,6 +2813,9 @@ export namespace taskpool {
             }
         }
         ConcurrencyHelpers.mutexUnlock(mutex);
+        if (task === undefined) {
+            task = periodicTasks.get(taskId);
+        }
         if (task === undefined) {
             let err = new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
             throw err;
@@ -2819,6 +2839,7 @@ export namespace taskpool {
             timerId = InternalTask.of(task).timerId;
             if (InternalTask.of(task).isPeriodicTask) {
                 clearInterval(InternalTask.of(task).timerId);
+                periodicTasks.delete(task.taskId);
             }
             InternalTask.of(task).timerId = -1;
         }
@@ -3699,6 +3720,7 @@ export namespace taskpool {
     // all tasks in the taskpool
     let allTasks: Map<Task, int> = new Map<Task, int>();
     let taskSet: containers.ConcurrentSet<Task> = new containers.ConcurrentSet<Task>();
+    let periodicTasks: containers.ConcurrentHashMap<int, Task> = new containers.ConcurrentHashMap<int, Task>();
     // manage the taskGroup
     let allGroups: containers.ConcurrentHashMap<int, TaskGroup> = new containers.ConcurrentHashMap<int, TaskGroup>();
 
