@@ -10,6 +10,12 @@ regression/12581_custom_class_Engine_array.ets
 #25425
 regression/15278_1.ets
 
+#25911
+regression/25911_0.ets
+regression/25911_1.ets
+regression/25911_2.ets
+regression/25911_3.ets
+
 #26443
 regression/23659_0.ets
 regression/23659_1.ets
@@ -19,6 +25,10 @@ regression/32441.ets
 
 #32353
 regression/32353.ets
+
+#35144
+regression/35144_0.ets
+regression/35144_1.ets
 
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
