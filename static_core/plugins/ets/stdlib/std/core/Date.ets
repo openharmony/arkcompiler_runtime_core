@@ -77,9 +77,9 @@ const dayNames: String[];
 const monthNames: String[];
 
 /** First day of a month in a year */
-const firstDayInMonthNormal: int[];
+const firstDayInMonthNormal: ValueArray<int>;
 /** First day of a month in a leap year */
-const firstDayInMonthLeap: int[];
+const firstDayInMonthLeap: ValueArray<int>;
 
 /**
  * Returns first day with respect to year and month
@@ -148,7 +148,7 @@ function ecmaYearFromTime(time: long): int {
  *
  * @returns Month number (within year).
  */
-function ecmaMonthFromTime(time: long): byte {
+function ecmaMonthFromTime(time: long): int {
     let year = ecmaYearFromTime(time);
     let dayWithinYear = ecmaDayFromTime(time) - ecmaDayFromYear(year);
 
@@ -156,7 +156,7 @@ function ecmaMonthFromTime(time: long): byte {
 
     for (let i = 1; i < 12; i++) {
         if (dayWithinYear < getFirstDayInMonth(inLeapYear, i)) {
-            return (i - 1).toByte();
+            return i - 1;
         }
     }
 
@@ -168,21 +168,21 @@ function ecmaMonthFromTime(time: long): byte {
  *
  * @returns Date number (within month).
  */
-function ecmaDateFromTime(time: long): byte {
+function ecmaDateFromTime(time: long): int {
     let year = ecmaYearFromTime(time);
     let dayWithinYear = ecmaDayFromTime(time) - ecmaDayFromYear(year);
     let inLeapYear = ecmaInLeapYear(year);
 
-    let month: byte = 11;
+    let month: int = 11;
 
     for (let i = 1; i < 12; i++) {
         if (dayWithinYear < getFirstDayInMonth(inLeapYear, i)) {
-            month = (i - 1).toByte();
+            month = i - 1;
             break;
         }
     }
 
-    return (dayWithinYear + 1 - getFirstDayInMonth(inLeapYear, month)).toByte();
+    return dayWithinYear + 1 - getFirstDayInMonth(inLeapYear, month);
 }
 
 /**
@@ -192,11 +192,11 @@ function ecmaDateFromTime(time: long): byte {
  *
  * @returns Week day.
  */
-function ecmaWeekDay(time: long): byte {
+function ecmaWeekDay(time: long): int {
     let day = ecmaDayFromTime(time);
-    let weekDay = ((day + 4) % 7).toByte();
+    let weekDay = (day + 4) % 7;
 
-    return weekDay >= 0 ? weekDay : (weekDay + 7).toByte();
+    return weekDay >= 0 ? weekDay : weekDay + 7;
 }
 
 /**
@@ -216,9 +216,9 @@ function ecmaTimeInDayFromTime(time: long): long {
  *
  * @returns Hour component of a given time.
  */
-function ecmaHourFromTime(time: long): byte {
+function ecmaHourFromTime(time: long): int {
     let timeInDay = ecmaTimeInDayFromTime(time);
-    return (timeInDay / msPerHour).toByte();
+    return (timeInDay / msPerHour).toInt();
 }
 
 /**
@@ -226,9 +226,9 @@ function ecmaHourFromTime(time: long): byte {
  *
  * @returns Minute component of a given time.
  */
-function ecmaMinFromTime(time: long): byte {
+function ecmaMinFromTime(time: long): int {
     let timeInDay = ecmaTimeInDayFromTime(time);
-    return ((timeInDay / msPerMinute) % minutesPerHour).toByte();
+    return ((timeInDay / msPerMinute) % minutesPerHour).toInt();
 }
 
 /**
@@ -236,9 +236,9 @@ function ecmaMinFromTime(time: long): byte {
  *
  * @returns Seconds component of a given time.
  */
-function ecmaSecFromTime(time: long): byte {
+function ecmaSecFromTime(time: long): int {
     let timeInDay = ecmaTimeInDayFromTime(time);
-    return ((timeInDay / msPerSecond) % secondsPerMinute).toByte();
+    return ((timeInDay / msPerSecond) % secondsPerMinute).toInt();
 }
 
 /**
@@ -246,9 +246,9 @@ function ecmaSecFromTime(time: long): byte {
  *
  * @returns Milliseconds component of a given time.
  */
-function ecmaMsFromTime(time: long): short {
+function ecmaMsFromTime(time: long): int {
     let timeInDay = ecmaTimeInDayFromTime(time);
-    return (timeInDay % msPerSecond).toShort();
+    return (timeInDay % msPerSecond).toInt();
 }
 
 /**
@@ -419,8 +419,8 @@ function ecmaTimeFromYear(year: int): long {
  * @returns 1 - if the year is leap
  *          0 - otherwise
  */
-function ecmaInLeapYear(year: int): byte {
-    return (ecmaDaysInYear(year) - dayCountInYear).toByte();
+function ecmaInLeapYear(year: int): int {
+    return ecmaDaysInYear(year) - dayCountInYear;
 }
 
 /**
@@ -474,7 +474,7 @@ export class Date {
     /** Stored value of Date, milliseconds */
     private ms: long;
     private get TZOffset(): long {
-        return Date.getLocalTimezoneOffset(this.ms as long);
+        return Date.getLocalTimezoneOffset(this.ms);
     }
 
     /**
@@ -860,8 +860,9 @@ export class Date {
      */
     public getDate(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
+        let year = ecmaYearFromTime(localTime);
+        let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(year);
+        let inLeapYear = ecmaInLeapYear(year);
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
         return day - firstDay + 1;
     }
@@ -1598,17 +1599,22 @@ export class Date {
      * @FaAndStageModel
      */
     public setMonth(month: int): long {
-        let yearsNow: int = this.getFullYear();
+        let tzOffset = this.TZOffset;
+        let localTime = this.ms - tzOffset * 60 * msPerSecond;
+        let yearsNow: int = ecmaYearFromTime(localTime);
         let yearsOffSet: int = Math.floor(month / 12.0).toInt();
         let yearsNew = yearsNow + yearsOffSet;
         let adjustMonth = ((month % 12) + 12) % 12;
         if (yearsNew !== yearsNow) {
             this.setFullYear(yearsNew);
+            tzOffset = this.TZOffset;
+            localTime = this.ms - tzOffset * 60 * msPerSecond;
         }
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
-        let daysNow: int = getFirstDayInMonth(inLeapYear, this.getMonth());
-        let daysNew: int = getFirstDayInMonth(ecmaInLeapYear(this.getFullYear()), adjustMonth);
-        let dayOfMonth = this.getDate();
+        let year = ecmaYearFromTime(localTime);
+        let inLeapYear = ecmaInLeapYear(year);
+        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
+        let daysNew: int = getFirstDayInMonth(inLeapYear, adjustMonth);
+        let dayOfMonth = ecmaDateFromTime(localTime);
         this.ms -= (daysNow + dayOfMonth - 1) * msPerDay;
         this.ms += (daysNew + dayOfMonth - 1) * msPerDay;
         return this.ms;
@@ -1647,7 +1653,7 @@ export class Date {
         }
         let inLeapYear = ecmaInLeapYear(this.getUTCFullYear());
         let daysNow: int = getFirstDayInMonth(inLeapYear, this.getUTCMonth());
-        let daysNew: int = getFirstDayInMonth(ecmaInLeapYear(this.getUTCFullYear()), adjustedMonth);
+        let daysNew: int = getFirstDayInMonth(inLeapYear, adjustedMonth);
 
         let dayOfMonth = this.getUTCDate();
         this.ms -= (daysNow + dayOfMonth - 1) * msPerDay;
@@ -1845,31 +1851,32 @@ export class Date {
      * @FaAndStageModel
      */
     public toTimeString(): string {
-        return this.timeString() + " " + this.timeZoneString();
+        if (!this.isDateValid()) {
+            throw new Error('Invalid Date');
+        }
+        let tzOffset = this.TZOffset;
+        let localTime = this.ms - tzOffset * 60 * msPerSecond;
+        return this.timeString(localTime) + ' ' + this.timeZoneString(tzOffset);
     }
 
     /**
      * Returns string representation
      */
-    private timeString(): String {
-        if (!this.isDateValid()) {
-            throw new Error("Invalid Date");
-        }
-
+    private timeString(localTime: long): String {
         let sb = new StringBuilder();
-        let h = this.getHours();
+        let h = ecmaHourFromTime(localTime);
         if (h < 10) {
             sb.append("0");
         }
         sb.append(h);
         sb.append(":");
-        let m = this.getMinutes();
+        let m = ecmaMinFromTime(localTime);
         if (m < 10) {
             sb.append("0");
         }
         sb.append(m);
         sb.append(":");
-        let s = this.getSeconds();
+        let s = ecmaSecFromTime(localTime);
         if (s < 10) {
             sb.append("0");
         }
@@ -1886,29 +1893,29 @@ export class Date {
      * @FaAndStageModel
      */
     public toDateString(): string {
-        return this.dateString();
+        if (!this.isDateValid()) {
+            throw new Error('Invalid Date');
+        }
+        let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
+        return this.dateString(localTime);
     }
 
     /**
      * Returns a string representation
      */
-    private dateString(): String {
-        if (!this.isDateValid()) {
-            throw new Error("Invalid Date");
-        }
-
+    private dateString(localTime: long): String {
         let sb = new StringBuilder();
-        sb.append(dayNames[this.getDay()]);
+        sb.append(dayNames[ecmaWeekDay(localTime)]);
         sb.append(" ");
-        sb.append(monthNames[this.getMonth()]);
+        sb.append(monthNames[ecmaMonthFromTime(localTime)]);
         sb.append(" ");
-        let d = this.getDate();
+        let d = ecmaDateFromTime(localTime);
         if (d < 10) {
             sb.append("0");
         }
         sb.append(d);
         sb.append(" ");
-        let y = this.getFullYear();
+        let y = ecmaYearFromTime(localTime);
         if (y < 0) {
             sb.append("-");
         }
@@ -1928,10 +1935,10 @@ export class Date {
     /**
      * TODO Until TZ support implemented, the time is calculated in UTC+0 and TZ string is hardcoded
      */
-    private timeZoneString(): String {
+    private timeZoneString(tzOffset: long): String {
         let sb = new StringBuilder();
         sb.append("GMT");
-        let offset = -this.TZOffset;
+        let offset = -tzOffset;
         let hours = offset / 60;
         if (hours < 0) {
             sb.append("-");
@@ -1954,20 +1961,16 @@ export class Date {
      * Returns a string representing the specified `Date` object interpreted in the local timezone.
      *
      * @returns { string } get new date value
-     * @throws { Error } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
     public override toString(): string {
-        let res: String = "Invalid Date";
         if (!this.isDateValid()) {
-            return res;
+            return 'Invalid Date';
         }
-        try {
-            res = this.toDateString() + " " + this.toTimeString();
-        }
-        catch (e) { }
-        return res;
+        let tzOffset = this.TZOffset;
+        let localTime = this.ms - tzOffset * 60 * msPerSecond;
+        return this.dateString(localTime) + ' ' + this.timeString(localTime) + ' ' + this.timeZoneString(tzOffset);
     }
 
     /**

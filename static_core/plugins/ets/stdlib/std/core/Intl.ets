@@ -1723,26 +1723,43 @@ export class DateTimeFormat {
         private tag: BCP47LanguageTag = ''
 
         private uFlags() : BCP47LanguageTag {
-            let sb = new StringBuilder()
-            if ((this.numeric != undefined && this.numeric as boolean == true)) {
-                sb.append('-u-kn')
+            // BCP47/UTS#35: a unicode locale extension is a single `-u-` singleton followed by
+            // keyword pairs (`key` or `key-type`), with keys sorted in ascending order.
+            // The leading `-u` is the first element so one join('-') yields the whole extension.
+            let keywords = new Array<string>()
+            keywords.push('-u')
+            let calendar = this.calendar
+            if (calendar != undefined && calendar != '') {
+                keywords.push('ca')
+                keywords.push(calendar)
             }
-            if (this.caseFirst != undefined && this.caseFirst != '') {
-                sb.append('-u-kf-' + this.caseFirst as string)
+            let collation = this.collation
+            if (collation != undefined && collation != '') {
+                keywords.push('co')
+                keywords.push(collation)
             }
-            if (this.calendar != undefined && this.calendar != '') {
-                sb.append('-u-ca-' + this.calendar as string)
+            let hourCycle = this.hourCycle
+            if (hourCycle != undefined && hourCycle != '' && (hourCycle instanceof LocaleHourCycleKey)) {
+                keywords.push('hc')
+                keywords.push(hourCycle)
             }
-            if (this.collation != undefined && this.collation != '') {
-                sb.append('-u-co-' + this.collation as string)
+            let caseFirst = this.caseFirst
+            if (caseFirst != undefined && caseFirst != '') {
+                keywords.push('kf')
+                keywords.push(caseFirst)
             }
-            if (this.hourCycle != undefined && this.hourCycle != '' && (this.hourCycle instanceof LocaleHourCycleKey)) {
-                sb.append('-u-hc-' + this.hourCycle as string)
+            if (this.numeric == true) {
+                keywords.push('kn')
             }
-            if (this.numberingSystem != undefined && this.numberingSystem != '') {
-                sb.append('-u-nu-' + this.numberingSystem as string)
+            let numberingSystem = this.numberingSystem
+            if (numberingSystem != undefined && numberingSystem != '') {
+                keywords.push('nu')
+                keywords.push(numberingSystem)
             }
-            return sb.toString()
+            if (keywords.length == 1) {
+                return ''
+            }
+            return keywords.join('-')
         }
 
         private createTag() : BCP47LanguageTag {
