@@ -41,7 +41,7 @@ endif()
 # =============================================================================
 
 set(COVERAGE_FLAGS "-fprofile-arcs -ftest-coverage")
-set(LCOV_COMMON_FLAGS --quiet --branch-coverage --ignore-errors empty,utility,range,inconsistent,source,format,mismatch)
+set(LCOV_COMMON_FLAGS --quiet --branch-coverage --ignore-errors empty,utility,range,inconsistent,source,format,mismatch,negative)
 set(LCOV_ZEROCOUNTERS_FLAGS --zerocounters --directory ${PANDA_BINARY_ROOT})
 
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)
