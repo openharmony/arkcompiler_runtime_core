@@ -21,19 +21,6 @@
 
 namespace ark::common_vm {
 HeapManager::HeapManager() {}
-void HeapManager::RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest)
-{
-    if (reason <= GCTaskCause::INVALID_CAUSE || reason > GCTaskCause::CROSSREF_CAUSE ||
-        gcType < GCCollectionType::NONE || gcType > GCCollectionType::FULL) {
-        LOG(ERROR, GC) << "Invalid gc reason or gc type, gc reason: " << reason << ", gc type: " << gcType;
-        return;
-    }
-    if (!Heap::GetHeap().IsGCEnabled()) {
-        return;
-    }
-    Collector &collector = Heap::GetHeap().GetCollector();
-    collector.RequestGC(reason, async, gcType, explicitRequest);
-}
 
 HeapAddress HeapManager::Allocate(size_t allocSize, AllocType allocType, bool allowGC)
 {

@@ -25,9 +25,6 @@ class CollectorProxy;
 // such as gc thread/threadPool, gc task queue...
 class CollectorResources {
 public:
-    // the collector thread entry routine.
-    PANDA_PUBLIC_API static void *GCMainThreadEntry(void *arg);
-
     void SetCollector(Collector *collector)
     {
         collector_ = collector;
@@ -35,11 +32,7 @@ public:
     void Init();
     void Fini();
     void StopGCWork();
-    void RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest = false);
     void WaitForGCFinish();
-
-    // Blocks until gcCompletedCount >= targetCount or GC exits
-    void WaitForGCCompletionCount(uint64_t targetCount);
 
     // Returns the number of completed GC cycles (both sync and async)
     uint64_t GetGcCompletedCount() const
@@ -50,8 +43,6 @@ public:
         return gcCompletedCount_.load(std::memory_order_acquire);
     }
 
-    // gc main loop
-    void RunTaskLoop();
     uint32_t GetGCThreadCount(const bool isConcurrent) const;
 
     Taskpool *GetThreadPool() const
@@ -111,7 +102,6 @@ public:
     {
         return gcStats_;
     }
-    void RequestHeapDump(GCTask::GCTaskType gcTask);
 
     void StartRuntimeThreads();
     void StopRuntimeThreads();
@@ -126,21 +116,12 @@ private:
     void StartGCThreads();
     void TerminateGCTask();
     void StopGCThreads();
-    // Notify the GC thread to start GC, and wait.
-    // Called by mutator.
-    // reason: The reason for this GC.
-    void RequestAsyncGC(GCTaskCause reason, GCCollectionType gcType);
-    void RequestGCAndWait(GCTaskCause reason, GCCollectionType gcType);
-    void PostIgnoredGcRequest(GCTaskCause reason);
 
     // the thread pool for parallel tracing.
     Taskpool *gcThreadPool_ = nullptr;
     uint32_t gcThreadCount_ = 1;
     GCTaskQueue<GCRunner> *taskQueue_ = nullptr;
 
-    // the collector thread handle.
-    pthread_t gcMainThread_ = 0;
-    std::atomic<pid_t> gcTid_ {0};
     std::atomic<bool> gcThreadRunning_ = {false};
     // finishedGcIndex records the currently finished gcIndex
     // may be read by mutator but only be written by gc thread sequentially

@@ -2195,7 +2195,6 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
     Heap::GetHeap().SetGCReason(task.reason);
     auto &gcStats = GetGCStats();
 
-    this->FireGCStarted(task, currentAllocatedSize);
     DoGarbageCollection(task);
 
     HeapBitmapManager::GetHeapBitmapManager().ClearHeapBitmap();
@@ -2206,8 +2205,6 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
     // (garbage regions have been already reclaimed here).
     // Now safe to call RecalculateFootprint, because no mutator can allocate concurrently
     Heap::GetHeap().GetAllocator().RecalculateFootprint();
-    auto allocatedSizeAfterGc = Heap::GetHeap().GetAllocatedSize();
-    this->FireGCFinished(task, currentAllocatedSize, allocatedSizeAfterGc);
 
     PostGarbageCollection(gcIndex);
     gcStats.gcEndTime = ark::common_vm::TimeUtil::NanoSeconds();
@@ -2331,12 +2328,7 @@ ark::common_vm::GCStats &CmcGC<LanguageConfig>::GetGCStats()
 {
     return collectorResources_.GetGCStats();
 }
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::RequestGCInternal(GCTaskCause reason, bool async, GCCollectionType gcType,
-                                              bool explicitRequest)
-{
-    collectorResources_.RequestGC(reason, async, gcType, explicitRequest);
-}
+
 template <class LanguageConfig>
 uint32_t CmcGC<LanguageConfig>::GetGCThreadCount(const bool isConcurrent) const
 {
@@ -2375,11 +2367,11 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
 {
     LOG(DEBUG, GC) << "CMC GC adapter RunPhases...";
-    ark::mem::GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
     if (task.collectionType == GCCollectionType::NONE) {
         task.UpdateGCCollectionType(task.reason == GCTaskCause::YOUNG_GC_CAUSE ? GCCollectionType::YOUNG
                                                                                : GCCollectionType::FULL);
     }
+    ConcurrentScope concurrentScope(this);
     RunGarbageCollection(ark::common_vm::GCTask::TASK_INDEX_SYNC_GC_MIN, task);
 }
 
@@ -2389,7 +2381,7 @@ bool CmcGC<LanguageConfig>::WaitForGC(ark::GCTask task)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     ark::common_vm::ScopedGcThreadType scopedGcThreadType;
-    RunPhasesImpl(task);
+    return GC::WaitForGC(task);
 #endif  // ARK_USE_COMMON_RUNTIME
     return false;
 }
@@ -2409,7 +2401,7 @@ template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::Trigger(ark::PandaUniquePtr<ark::GCTask> task)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::HeapManager::RequestGC(task->reason, false, task->collectionType);
+    return this->AddGCTask(true, std::move(task));
 #endif  // ARK_USE_COMMON_RUNTIME
     return false;
 }
@@ -2418,14 +2410,6 @@ template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::IsPostponeGCSupported() const
 {
     return false;
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::StopGC()
-{
-#if defined(ARK_USE_COMMON_RUNTIME)
-    ark::common_vm::Heap::GetHeap().StopGCWork();
-#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 template <class LanguageConfig>

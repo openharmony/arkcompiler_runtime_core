@@ -17,6 +17,9 @@
 
 #include "common_components/heap/allocator/allocator.h"
 #include "common_components/heap/heap.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
+#include "runtime/mem/gc/gc.h"
 
 namespace ark::common_vm {
 
@@ -74,12 +77,15 @@ void HeuristicGCPolicy::TryHeuristicGC()
     size_t threshold = collector.GetGCStats().GetThreshold();
     size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
     if (allocated >= threshold) {
+        auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
         if (collector.GetGCStats().shouldRequestYoung) {
             LOG(DEBUG, GC) << "request heu gc: young " << allocated << ", threshold " << threshold;
-            collector.RequestGC(GCTaskCause::YOUNG_GC_CAUSE, true, GCCollectionType::YOUNG);
+            auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::YOUNG_GC_CAUSE);
+            gc->AddGCTask(false, std::move(task));
         } else {
             LOG(DEBUG, GC) << "request heu gc: allocated " << allocated << ", threshold " << threshold;
-            collector.RequestGC(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, true, GCCollectionType::FULL);
+            auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+            gc->AddGCTask(false, std::move(task));
         }
     }
 }
@@ -135,12 +141,15 @@ void HeuristicGCPolicy::CheckGCForNative()
     // constraints imposed on other reads or writes
     size_t currentThreshold = nativeHeapThreshold_.load(std::memory_order_relaxed);
     if (currentNativeSize > currentThreshold) {
+        auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
         if (currentNativeSize > URGENCY_NATIVE_LIMIT) {
             // Native binding size is too large, should wait a sync finished.
-            Heap::GetHeap().GetCollector().RequestGC(GCTaskCause::NATIVE_ALLOC_CAUSE, false, GCCollectionType::FULL);
+            ark::GCTask task(GCTaskCause::NATIVE_ALLOC_CAUSE);
+            gc->WaitForGCInManaged(task);
             return;
         }
-        Heap::GetHeap().GetCollector().RequestGC(GCTaskCause::NATIVE_ALLOC_CAUSE, true, GCCollectionType::FULL);
+        auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::NATIVE_ALLOC_CAUSE);
+        gc->AddGCTask(false, std::move(task));
     }
 }
 void HeuristicGCPolicy::NotifyNativeFree(size_t bytes)
@@ -199,7 +208,9 @@ void HeuristicGCPolicy::ChangeGCParams(bool isBackground)
         size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
         if (allocated > aliveSizeAfterGC_ && (allocated - aliveSizeAfterGC_) > BACKGROUND_LIMIT &&
             allocated > MIN_BACKGROUND_GC_SIZE) {
-            Heap::GetHeap().GetCollector().RequestGC(GCTaskCause::STARTUP_COMPLETE_CAUSE, true, GCCollectionType::FULL);
+            auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
+            auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE);
+            gc->AddGCTask(false, std::move(task));
         }
         common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::BACKGROUND);
         Heap::GetHeap().GetGCParam().multiplier = 1;

@@ -182,9 +182,6 @@ public:
 
     bool IsPostponeGCSupported() const override;
 
-    void StartGC() override {}
-    void StopGC() override;
-
     void EnableReadBarrier(ark::Mutator *thread)
     {
         UpdateReadBarrierEntrypointInMutator<true>(thread);
@@ -414,8 +411,6 @@ protected:
     void CopyFromSpace();
     void ExemptFromSpace();
 
-    void RequestGCInternal(GCTaskCause reason, bool async, GCCollectionType gcType,
-                           bool explicitRequest = false) override;
     void MergeWeakStack(WeakStack &weakStack);
     void UpdateNativeThreshold(ark::mem::GCParam &gcParam);
 

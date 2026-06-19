@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/intrinsics/gc_cause_helper.h"
 #include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
 #include "common_components/common/scoped_object_access.h"
 #include "runtime/include/thread_scopes.h"
@@ -37,20 +38,6 @@ static inline size_t ClampToSizeT(EtsLong n)
         }
     }
     return n;
-}
-
-// Convert ETS cause int to (GCTaskCause, GCCollectionType) pair
-// ETS Cause enum: YOUNG=0, THRESHOLD=1, FULL=2
-static std::pair<GCTaskCause, GCCollectionType> GCParamsFromCause(EtsInt cause)
-{
-    if (cause == 0_I) {
-        return {GCTaskCause::YOUNG_GC_CAUSE, GCCollectionType::YOUNG};
-    } else if (cause == 1_I) {
-        return {GCTaskCause::EXPLICIT_CAUSE, GCCollectionType::FULL};
-    } else if (cause == 2_I) {
-        return {GCTaskCause::OOM_CAUSE, GCCollectionType::FULL};
-    }
-    return {GCTaskCause::INVALID_CAUSE, GCCollectionType::NONE};
 }
 
 /**
@@ -72,14 +59,13 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, [[maybe_unuse
                           "callback is not supported with current GC");
         return -1;
     }
-    auto [reason, gcType] = GCParamsFromCause(cause);
+    GCTaskCause reason = GCCauseFromInt(cause);
     if (reason == GCTaskCause::INVALID_CAUSE) {
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError, "Invalid GC cause");
         return -1;
     }
     auto *gc = executionCtx->GetPandaVM()->GetGC();
     auto task = MakePandaUnique<GCTask>(reason);
-    task->UpdateGCCollectionType(gcType);
     return gc->WaitForGCInManaged(*task) ? 0 : -1;
 }
 

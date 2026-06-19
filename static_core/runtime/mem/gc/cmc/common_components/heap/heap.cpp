@@ -63,11 +63,6 @@ public:
         return collectorResources_.WaitForGCFinish();
     }
 
-    void WaitForGCCompletionCount(uint64_t targetCount) override
-    {
-        collectorResources_.WaitForGCCompletionCount(targetCount);
-    }
-
     uint64_t GetGcCompletedCount() const override
     {
         return collectorResources_.GetGcCompletedCount();

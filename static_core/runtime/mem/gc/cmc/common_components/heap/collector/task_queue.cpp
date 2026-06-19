@@ -22,17 +22,14 @@ namespace ark::common_vm {
 bool GCRunner::Execute(void *owner)
 {
     ASSERT_PRINT(owner != nullptr, "task queue owner ptr should not be null!");
-    auto *collectorProxy = reinterpret_cast<Collector *>(owner);
 
     switch (taskType_) {
         case GCTask::GCTaskType::GC_TASK_TERMINATE_GC: {
             return false;
         }
         case GCTask::GCTaskType::GC_TASK_INVOKE_GC: {
-            GCStats::SetPrevGCStartTime(TimeUtil::NanoSeconds());
-            auto task = ToGCTask();
-            collectorProxy->RunGarbageCollection(taskIndex_, task);
-            GCStats::SetPrevGCFinishTime(TimeUtil::NanoSeconds());
+            LOG(FATAL, COMMON) << "GC must be called through a different interface";
+            UNREACHABLE();
             break;
         }
         case GCTask::GCTaskType::GC_TASK_DUMP_HEAP: {  // LCOV_EXCL_BR_LINE
