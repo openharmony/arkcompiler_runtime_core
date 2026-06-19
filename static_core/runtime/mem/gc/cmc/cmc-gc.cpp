@@ -557,7 +557,7 @@ void CmcGC<LanguageConfig>::PreforwardStaticWeakRoots()
 
     WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
     VisitWeakRoots(weakVisitor);
-    ForEachManagedMutator([](Mutator *mutator) { mutator->SetFlag(ark::SUSPEND_FOR_FINALIZE); });
+    ForEachManagedMutator([](Mutator *mutator) { mutator->RequestReferencesCleanup(); });
 
     auto *allocBuffer = ark::common_vm::AllocationBuffer::GetAllocBuffer();
     if (LIKELY(allocBuffer != nullptr)) {
@@ -751,7 +751,7 @@ void CmcGC<LanguageConfig>::PreforwardFlip()
             RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
             VisitMutatorPreforwardRoot(visitor, *mutator);
             // Request finalize callback in each vm-thread when gc finished.
-            mutator->SetFlag(ark::SUSPEND_FOR_FINALIZE);
+            mutator->RequestReferencesCleanup();
         });
         GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
     }

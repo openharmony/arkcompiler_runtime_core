@@ -213,9 +213,19 @@ public:
         return ReadFlag(RUNTIME_TERMINATION_REQUEST);
     }
 
-    ALWAYS_INLINE bool HasFinalizationRequest() const
+    ALWAYS_INLINE bool HaveRefCleanupRequest() const
     {
-        return ReadFlag(SUSPEND_FOR_FINALIZE);
+        return ReadFlag(REF_CLEANUP_REQUEST);
+    }
+
+    ALWAYS_INLINE void RequestReferencesCleanup()
+    {
+        SetFlag(REF_CLEANUP_REQUEST);
+    }
+
+    ALWAYS_INLINE void ClearReferencesCleanupRequest()
+    {
+        ClearFlag(REF_CLEANUP_REQUEST);
     }
 
     ALWAYS_INLINE void SetRuntimeTerminated()
@@ -290,9 +300,6 @@ private:
     // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
     NO_THREAD_SANITIZE uint32_t ReadFlagsAndMutatorStatusUnsafe();
 
-    // NOTE(ivagin): make these methods private once common_vm::Mutator is fully merged into ark::Mutator.
-    // They are public now because common_vm::Mutator accesses them via static_cast<ark::Mutator*>(this).
-public:
     // NO_THREAD_SANITIZE for invalid TSAN data race report
     NO_THREAD_SANITIZE bool ReadFlag(MutatorFlag flag) const
     {
@@ -308,12 +315,14 @@ public:
 
     void ClearFlag(MutatorFlag flag);
 
+    void HandleReferencesCleanupRequest();
+
     enum SafepointFlag : bool { DONT_CHECK_SAFEPOINT = false, CHECK_SAFEPOINT = true };
     enum ReadlockFlag : bool { NO_READLOCK = false, READLOCK = true };
 
     bool CheckSafepoint(uint16_t flags)
     {
-        return (flags & static_cast<uint16_t>(~SUSPEND_FOR_FINALIZE)) != initialMutatorFlag_;
+        return (flags & static_cast<uint16_t>(~REF_CLEANUP_REQUEST)) != initialMutatorFlag_;
     }
 
     // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status

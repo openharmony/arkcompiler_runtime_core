@@ -219,13 +219,9 @@ void Mutator::TransitionFromSuspendedToRunning()
     // acquiring mutator_lock.
     // StoreStatus acquires lock here
     StoreStatus<CHECK_SAFEPOINT, READLOCK>(MutatorStatus::RUNNING);
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-    if (HasFinalizationRequest()) {
-        ClearFlag(ark::SUSPEND_FOR_FINALIZE);
-        HandleGCCallback();
+    if (HaveRefCleanupRequest()) {
+        HandleReferencesCleanupRequest();
     }
-#endif
 }
 
 void Mutator::SuspendCheck()
@@ -386,6 +382,17 @@ void Mutator::InitBuffers()
             g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
         }
     }
+}
+
+void Mutator::HandleReferencesCleanupRequest()
+{
+    ClearReferencesCleanupRequest();
+    if (IsRuntimeTerminated() || type_ != MutatorType::MANAGED) {
+        return;
+    }
+#if defined(ARK_USE_COMMON_RUNTIME)
+    HandleGCCallback();
+#endif
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)

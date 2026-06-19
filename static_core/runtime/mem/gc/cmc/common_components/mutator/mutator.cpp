@@ -71,7 +71,7 @@ void Mutator::ResetMutator()
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
         satbNode_ = nullptr;
     }
-    static_cast<ark::Mutator *>(this)->ClearFlag(ark::SUSPEND_FOR_FINALIZE);
+    static_cast<ark::Mutator *>(this)->ClearReferencesCleanupRequest();
 }
 
 const void *Mutator::GetSatbBufferNode() const
@@ -88,15 +88,6 @@ void Mutator::ClearSatbBufferNode()
 }
 
 void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
-
-void Mutator::DumpMutator() const
-{
-    // Atomic with relaxed order reason: logging only, no synchronization or ordering constraints
-    LOG(ERROR, COMMON) << "mutator " << this << ": inSaferegion "
-                       << (static_cast<const ark::Mutator *>(this)->GetStatus() != ark::MutatorStatus::RUNNING)
-                       << ", gc phase: " << mutatorPhase_.load(std::memory_order_relaxed) << ", suspension request "
-                       << static_cast<const ark::Mutator *>(this)->ReadFlagsUnsafe();
-}
 
 void Mutator::GcPhaseEnum(GCPhase newPhase) {}
 
