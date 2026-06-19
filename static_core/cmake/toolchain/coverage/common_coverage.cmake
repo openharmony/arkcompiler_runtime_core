@@ -35,3 +35,6 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_FLAGS}")
+
+# NOTE: -Werror removal is handled in static_core/CMakeLists.txt after all flags are set.
+
