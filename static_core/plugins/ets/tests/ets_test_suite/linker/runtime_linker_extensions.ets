@@ -76,7 +76,7 @@ class Test {
     }
 
     static testEmptyMemoryRuntimeLinker() {
-        const linker = new MemoryRuntimeLinker(undefined, []);
+        const linker = new MemoryRuntimeLinker(undefined, [] as Array<ValueArray<byte>>);
         Test.testEmptyLinker(linker);
     }
 
@@ -366,7 +366,7 @@ class Test {
         arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName3) }, errorCheck);
         arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName4) }, errorCheck);
 
-        const memoryLinker = new MemoryRuntimeLinker(undefined, []);
+        const memoryLinker = new MemoryRuntimeLinker(undefined, [] as Array<ValueArray<byte>>);
         arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName1) }, errorCheck);
         arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName2) }, errorCheck);
         arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName3) }, errorCheck);
