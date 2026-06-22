@@ -47,8 +47,9 @@ public:
      * @brief Unregister mutator from MutatorManager
      * @note For managed mutators should be called under related managed mutator list lock
      * @param mutator - a registered mutator in the MutatorManager
+     * @param callback - a callback will be called after mutator unregistration under the MutatorManager lock
      */
-    void UnregisterMutator(Mutator *mutator);
+    void UnregisterMutator(Mutator *mutator, const MutatorCallback &callback);
 
     /**
      * @param callback applies for each registered mutator

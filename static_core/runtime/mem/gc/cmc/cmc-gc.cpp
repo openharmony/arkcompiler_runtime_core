@@ -1341,17 +1341,17 @@ void CmcGC<LanguageConfig>::UpdateBarrierEntrypoint(ark::common_vm::Mutator *mut
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]] MutatorUnregistrationMode mode,
-                                               [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
+void CmcGC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
 {
-    GC::OnMutatorTerminate(mutator, mode, keepBuffers);
+    this->GetPandaVm()->GetMutatorManager()->UnregisterMutator(mutator, [this](Mutator *mutator) {
+        DCHECK(static_cast<const ark::Mutator *>(mutator)->GetStatus() != ark::MutatorStatus::RUNNING);
+        mutator->ReleaseAllocBuffer();
 
-    DCHECK(static_cast<const ark::Mutator *>(mutator)->GetStatus() != ark::MutatorStatus::RUNNING);
-    mutator->ReleaseAllocBuffer();
-
-    UpdateBarrierEntrypoint(mutator, GCPhase::GC_PHASE_IDLE);
-    mutator->SetMutatorPhase(GCPhase::GC_PHASE_IDLE);
-    mutator->ResetMutator();
+        UpdateBarrierEntrypoint(mutator, GCPhase::GC_PHASE_IDLE);
+        mutator->SetMutatorPhase(GCPhase::GC_PHASE_IDLE);
+        mutator->ResetMutator();
+        return true;
+    });
 }
 
 template <class LanguageConfig>

@@ -199,6 +199,9 @@ public:
         return &threadLock_;
     }
 
+    ManagedThread *GetMainThread() const = delete;
+    void SetMainThread([[maybe_unused]] ManagedThread *thread) = delete;
+
 protected:
     bool EnumerateThreadsImpl(const Callback &cb, unsigned int incMask, unsigned int xorMask) const override
     {
@@ -221,10 +224,10 @@ private:
     {
         ASSERT(threadsCount_ >= daemonThreadsCount_);
         auto thread = static_cast<uint32_t>(threadsCount_ - daemonThreadsCount_);
-        return thread < 2 && pendingThreads_ == 0;
+        return thread == 0 && pendingThreads_ == 0;
     }
 
-    bool StopThreadsOnTerminationLoops(MTManagedThread *current) REQUIRES(threadLock_);
+    bool StopThreadsOnTerminationLoops() REQUIRES(threadLock_);
 
     /**
      * Tries to stop all daemon threads in case there are no active basic threads

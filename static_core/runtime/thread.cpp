@@ -779,20 +779,17 @@ void ManagedThread::CollectTLABMetrics()
     }
 }
 
-void ManagedThread::DestroyInternalResources(mem::MutatorUnregistrationMode mode)
+void ManagedThread::DestroyInternalResources()
 {
-    if (mode == mem::MutatorUnregistrationMode::UNREGISTER) {
-        GetVM()->GetGC()->OnMutatorTerminate(this, mode, mem::BuffersKeepingFlag::DELETE);
-        ASSERT(GetSatbBuff() == nullptr);
-        ASSERT(GetG1PostBarrierBuffer() == nullptr);
-    }
-    ptThreadInfo_->Destroy();
+    GetVM()->GetGC()->OnMutatorTerminate(this, mem::BuffersKeepingFlag::DELETE);
+    ASSERT(GetSatbBuff() == nullptr);
+    ASSERT(GetG1PostBarrierBuffer() == nullptr);
+    ptThreadInfo_->Destroy(GetVM());
 }
 
 void ManagedThread::CleanupInternalResources()
 {
-    GetVM()->GetGC()->OnMutatorTerminate(this, mem::MutatorUnregistrationMode::UNREGISTER,
-                                         mem::BuffersKeepingFlag::KEEP);
+    GetVM()->GetGC()->OnMutatorTerminate(this, mem::BuffersKeepingFlag::KEEP);
 }
 
 void ManagedThread::FreeInternalMemory()
@@ -800,7 +797,7 @@ void ManagedThread::FreeInternalMemory()
 #if defined(VERBOSE_THREAD_STATE_LOG)
     threadFrameStates_.~PandaStack<ThreadState>();
 #endif
-    DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
+    DestroyInternalResources();
 
     localObjects_.~PandaVector<ObjectHeader **>();
     {

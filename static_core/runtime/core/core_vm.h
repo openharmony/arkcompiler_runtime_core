@@ -182,7 +182,6 @@ private:
     PandaVector<ObjectHeader *> gcRoots_;
     Rendezvous *rendezvous_ {nullptr};
     CompilerInterface *compiler_ {nullptr};
-    MTManagedThread *mainThread_ {nullptr};
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};
     MTThreadManager *threadManager_ {nullptr};

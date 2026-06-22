@@ -2408,45 +2408,49 @@ bool G1GC<LanguageConfig>::HaveEnoughRegionsToMove(size_t num)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
-                                              mem::BuffersKeepingFlag keepBuffers)
+void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, mem::BuffersKeepingFlag keepBuffers)
 {
-    // Deletion of buffers must be synchronized with remset worker - if mutator get terminated (and its buffers deleted)
-    // at the same time as remset worker tries to read buffers data: data race occures. Update remset worker iterates
-    // over mutator using ForEach method, that accuires mutators lock in manager. Deregisration of mutator happens with
-    // same lock accuired. So if deregistration is done before deleting of buffers synchronization is done by mutators
-    // lock - update remset worker sees either mutator with buffers (as deletion of buffers happens only after
-    // deregistration) or sees no mutator at all. But if mutator is not being deregistated, then its buffers must be
-    // kept (because they can not be deleted synchronized with update remset worker).
-    ASSERT(mode == mem::MutatorUnregistrationMode::UNREGISTER || keepBuffers == mem::BuffersKeepingFlag::KEEP);
-
-    InternalAllocatorPtr allocator = this->GetInternalAllocator();
     // The method must be called while the lock which guards thread/coroutine list is hold
     LOG(DEBUG, GC) << "Call OnMutatorTerminate";
-    GC::OnMutatorTerminate(mutator, mode, keepBuffers);
-    ObjectPointerType *preBuff = mutator->MoveSatbBuff();
-    ASSERT(preBuff != nullptr);
-    size_t preBuffSize = mutator->GetSatbBuffSize();
-    if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
-        mutator->AllocateSatbBuff(allocator);
-    }
-    mutator->PushSatbBuff({preBuff, preBuffSize});
-    {
-        auto *localBuffer = mutator->GetG1PostBarrierBuffer();
-        ASSERT(localBuffer != nullptr);
-        if (!localBuffer->IsEmpty()) {
-            auto *tempBuffer = allocator->New<PandaVector<mem::CardTable::CardPtr>>();
-            while (!localBuffer->IsEmpty()) {
-                tempBuffer->push_back(localBuffer->Pop());
+
+    // We have to handle buffers under the mutators manager lock taken because of next situation
+    // 1) Mutator starting to get deregistered
+    // 2) GC started
+    // 3) Mutator was already removed from manager, but its barriers were not handled yet
+    // 4) GC dont see mutator through manager (it was deregistered). GC dont see mutator's barriers - they were
+    // not handled yet => GC loses barriers.
+    // 5) Even though next GC will see lost barriers current GC could already delete alive objects
+    //
+    // So we need to synchronize barrier handling with GC and mutator deregistration: for GC barriers must be seen
+    // always either through the mutator or through the remsetworker/
+    this->GetPandaVm()->GetMutatorManager()->UnregisterMutator(mutator, [this, keepBuffers](Mutator *mutator) {
+        InternalAllocatorPtr allocator = this->GetInternalAllocator();
+        ObjectPointerType *preBuff = mutator->MoveSatbBuff();
+        ASSERT(preBuff != nullptr);
+        size_t preBuffSize = mutator->GetSatbBuffSize();
+        if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
+            mutator->AllocateSatbBuff(allocator);
+        }
+        mutator->PushSatbBuff({preBuff, preBuffSize});
+        {
+            auto *localBuffer = mutator->GetG1PostBarrierBuffer();
+            ASSERT(localBuffer != nullptr);
+            if (!localBuffer->IsEmpty()) {
+                auto *tempBuffer = allocator->New<PandaVector<mem::CardTable::CardPtr>>();
+                while (!localBuffer->IsEmpty()) {
+                    tempBuffer->push_back(localBuffer->Pop());
+                }
+                updateRemsetWorker_->AddPostBarrierBuffer(tempBuffer);
             }
-            updateRemsetWorker_->AddPostBarrierBuffer(tempBuffer);
+
+            if (keepBuffers == mem::BuffersKeepingFlag::DELETE) {
+                allocator->Delete(localBuffer);
+                mutator->ResetG1PostBarrierBuffer();
+            }
         }
 
-        if (keepBuffers == mem::BuffersKeepingFlag::DELETE) {
-            allocator->Delete(localBuffer);
-            mutator->ResetG1PostBarrierBuffer();
-        }
-    }
+        return true;
+    });
 }
 
 template <class LanguageConfig>

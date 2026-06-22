@@ -596,7 +596,7 @@ public:
     ThreadId GetInternalId();
 
     virtual void FreeInternalMemory();
-    void DestroyInternalResources(mem::MutatorUnregistrationMode mode);
+    void DestroyInternalResources();
 
     /// Clears the pre/post barrier buffers (and other resources) without deallocation.
     void CleanupInternalResources();

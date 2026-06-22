@@ -311,8 +311,7 @@ public:
     void CopyObject(const BaseObject &fromObj, BaseObject &toObj, size_t size) const;
 
     void UpdateBarrierEntrypoint(ark::common_vm::Mutator *mutator, mem::GCPhase phase);
-    void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
-                            mem::BuffersKeepingFlag keepBuffers) override;
+    void OnMutatorTerminate(Mutator *mutator, mem::BuffersKeepingFlag keepBuffers) override;
     void OnMutatorCreate(Mutator *mutator) override;
 
 protected:

@@ -24,23 +24,26 @@ Rendezvous::Rendezvous(PandaVM *pandaVm) : mutatorLock_(pandaVm->GetMutatorLock(
 
 void Rendezvous::SafepointBegin()
 {
+    auto mutator = Mutator::GetCurrent();
+    ASSERT(mutator != nullptr);
     ASSERT(!mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointBegin";
     // Suspend all mutators
-    Mutator::GetCurrent()->GetVM()->GetMutatorManager()->SuspendAllMutators();
+    mutator->GetVM()->GetMutatorManager()->SuspendAllMutators();
     // Acquire write MutatorLock
     mutatorLock_->WriteLock();
 }
 
 void Rendezvous::SafepointEnd()
 {
+    auto mutator = Mutator::GetCurrent();
+    ASSERT(mutator != nullptr);
     ASSERT(mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd";
-
     // Release write MutatorLock
     mutatorLock_->Unlock();
     // Resume all mutators
-    Mutator::GetCurrent()->GetVM()->GetMutatorManager()->ResumeAllMutators();
+    mutator->GetVM()->GetMutatorManager()->ResumeAllMutators();
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd exit";
 }
 

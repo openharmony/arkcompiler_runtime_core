@@ -272,7 +272,7 @@ void StackfulCoroutineManager::Finalize()
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     allocator->Delete(programCompletionEvent_);
     for (auto *co : coroutinePool_) {
-        co->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
+        co->DestroyInternalResources();
         CoroutineManager::DestroyEntrypointfulCoroutine(co);
     }
     coroutinePool_.clear();
@@ -345,7 +345,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         if (Runtime::GetOptions().IsUseCoroutinePool() && CoroutineManager::IsCoroutinePoolable(co)) {
             co->CleanupInternalResources();
         } else {
-            co->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
+            co->DestroyInternalResources();
         }
         co->UpdateStatus(MutatorStatus::FINISHED);
     }

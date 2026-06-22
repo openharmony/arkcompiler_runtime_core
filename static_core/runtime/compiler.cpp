@@ -920,8 +920,7 @@ void PandaRuntimeInterface::RegisterMutator(ThreadPtr mutator) const
 void PandaRuntimeInterface::UnregisterMutator(ThreadPtr mutator) const
 {
     auto *m = static_cast<Mutator *>(mutator);
-    m->GetVM()->GetGC()->OnMutatorTerminate(m, mem::MutatorUnregistrationMode::UNREGISTER,
-                                            mem::BuffersKeepingFlag::DELETE);
+    m->GetVM()->GetGC()->OnMutatorTerminate(m, mem::BuffersKeepingFlag::DELETE);
 }
 
 void PandaRuntimeInterface::DestroyCompilerThread(ThreadPtr thread)

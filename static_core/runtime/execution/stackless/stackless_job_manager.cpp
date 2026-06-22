@@ -129,7 +129,7 @@ bool StacklessJobManager::TerminateExecutionContext(JobExecutionContext *executi
         executionCtx->CollectTLABMetrics();
         executionCtx->ClearTLAB();
 
-        executionCtx->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
+        executionCtx->DestroyInternalResources();
         executionCtx->UpdateStatus(MutatorStatus::FINISHED);
     }
     Runtime::GetCurrent()->GetNotificationManager()->ThreadEndEvent(executionCtx);

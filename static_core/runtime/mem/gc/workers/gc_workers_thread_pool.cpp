@@ -47,8 +47,7 @@ GCWorkersCreationInterface::GCWorkersCreationInterface(PandaVM *vm) : gcThread_(
 
 GCWorkersCreationInterface::~GCWorkersCreationInterface()
 {
-    gcThread_.GetVM()->GetGC()->OnMutatorTerminate(&gcThread_, MutatorUnregistrationMode::UNREGISTER,
-                                                   BuffersKeepingFlag::DELETE);
+    gcThread_.GetVM()->GetGC()->OnMutatorTerminate(&gcThread_, BuffersKeepingFlag::DELETE);
 }
 
 GCWorkersThreadPool::GCWorkersThreadPool(GC *gc, size_t threadsCount)

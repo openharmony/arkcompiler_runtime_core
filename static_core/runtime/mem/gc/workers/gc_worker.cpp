@@ -84,7 +84,7 @@ void GCWorker::FinalizeAndDestroyWorker()
     if (gc_->GetSettings()->UseTaskManagerForGC()) {
         needToFinish_ = true;
         gc_->GetWorkersTaskQueue()->WaitBackgroundTasks();
-        gc_->OnMutatorTerminate(gcMutator_, MutatorUnregistrationMode::UNREGISTER, BuffersKeepingFlag::DELETE);
+        gc_->OnMutatorTerminate(gcMutator_, BuffersKeepingFlag::DELETE);
         return;
     }
     ASSERT(gc_->GetSettings()->UseThreadPoolForGC());
@@ -93,7 +93,7 @@ void GCWorker::FinalizeAndDestroyWorker()
         gc_->GetInternalAllocator()->Delete(gcInternalThread_);
         gcInternalThread_ = nullptr;
     }
-    gc_->OnMutatorTerminate(gcMutator_, MutatorUnregistrationMode::UNREGISTER, BuffersKeepingFlag::DELETE);
+    gc_->OnMutatorTerminate(gcMutator_, BuffersKeepingFlag::DELETE);
 }
 
 void GCWorker::CreateAndAddTaskToTaskManager()
