@@ -91,12 +91,31 @@ public:
         return reinterpret_cast<EtsField *>(etsField_);
     }
 
+    EtsClass *GetCachedFieldType()
+    {
+        return cachedType_;  // ObjectPointer implicitly converts to EtsClass*
+    }
+
+    void SetCachedFieldType(EtsClass *fieldType)
+    {
+        ASSERT(fieldType != nullptr);
+        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsReflectField, cachedType_),
+                                  fieldType->AsObject()->GetCoreType());
+    }
+
 private:
     ObjectPointer<EtsString> name_;
     ObjectPointer<EtsClass> ownerType_;
-    EtsLong etsField_;
+    ObjectPointer<EtsClass> cachedType_;
+#if defined(PANDA_32_BIT_MANAGED_POINTER)
     EtsInt attr_;
+    EtsLong etsField_;
     EtsByte accessMod_;
+#else
+    EtsLong etsField_;
+    EtsInt attr_;  // note alignment
+    EtsByte accessMod_;
+#endif
 
     friend class test::EtsReflectTest;
 };

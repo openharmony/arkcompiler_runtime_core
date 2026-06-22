@@ -53,17 +53,24 @@ extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsOb
 
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto *reflectField = EtsReflectField::FromEtsObject(EtsObject::FromCoreType(thisField));
-    ASSERT(reflectField != nullptr);
-    auto *field = reflectField->GetEtsField();
+    EtsHandle<EtsReflectField> reflectFieldH(executionCtx,
+                                             EtsReflectField::FromEtsObject(EtsObject::FromCoreType(thisField)));
+    ASSERT(reflectFieldH.GetPtr() != nullptr);
+    auto *field = reflectFieldH->GetEtsField();
     ASSERT(field != nullptr);
     EtsHandle thisObjH(executionCtx, thisObj);
     EtsHandle argH(executionCtx, arg);
-    EtsClass *fieldType = field->GetType();
+
+    auto fieldType = reflectFieldH->GetCachedFieldType();
     if (fieldType == nullptr) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
-        return;
+        fieldType = field->GetType();
+        if (fieldType == nullptr) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return;
+        }
+        reflectFieldH->SetCachedFieldType(fieldType);
     }
+    ASSERT(fieldType != nullptr);
     bool isFieldPrimitive = fieldType->IsPrimitive();
 
     if (argH.GetPtr() == nullptr) {
@@ -95,9 +102,10 @@ extern "C" EtsObject *ReflectFieldGetValueInternal(ark::ObjectHeader *thisField,
 
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto *reflectField = EtsReflectField::FromEtsObject(EtsObject::FromCoreType(thisField));
-    ASSERT(reflectField != nullptr);
-    auto *field = reflectField->GetEtsField();
+    EtsHandle<EtsReflectField> reflectFieldH(executionCtx,
+                                             EtsReflectField::FromEtsObject(EtsObject::FromCoreType(thisField)));
+    ASSERT(reflectFieldH.GetPtr() != nullptr);
+    auto *field = reflectFieldH->GetEtsField();
     ASSERT(field != nullptr);
 
     EtsHandle thisObjH(executionCtx, thisObj);
@@ -107,11 +115,16 @@ extern "C" EtsObject *ReflectFieldGetValueInternal(ark::ObjectHeader *thisField,
         return nullptr;
     }
 
-    EtsClass *fieldType = field->GetType();
+    auto fieldType = reflectFieldH->GetCachedFieldType();
     if (fieldType == nullptr) {
-        ASSERT(executionCtx->GetMT()->HasPendingException());
-        return nullptr;
+        fieldType = field->GetType();
+        if (fieldType == nullptr) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return nullptr;
+        }
+        reflectFieldH->SetCachedFieldType(fieldType);
     }
+    ASSERT(fieldType != nullptr);
     if (fieldType->IsPrimitive()) {
         EtsType fieldEtsType = fieldType->GetEtsType();
         Value val = helpers::GetPrimitiveValue(executionCtx, thisObjH.GetPtr(), fieldEtsType, field);
