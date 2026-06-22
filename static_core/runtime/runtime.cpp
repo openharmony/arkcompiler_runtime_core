@@ -944,7 +944,6 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
         CheckBootPandaFiles();
     }
 #endif  // PANDA_PRODUCT_BUILD
-    notificationManager_->SetRendezvous(pandaVm_->GetRendezvous());
 
     return true;
 }
