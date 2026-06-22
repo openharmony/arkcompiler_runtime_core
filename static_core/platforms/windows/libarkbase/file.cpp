@@ -118,35 +118,66 @@ bool File::HasStatMode(const std::string &path, uint16_t mode)
     return true;
 }
 
+namespace {
+bool PathEqualsCaseSensitive(const std::wstring &a, const std::wstring &b)
+{
+    if (a == b) {
+        return true;
+    }
+    if (a.size() != b.size()) {
+        return false;
+    }
+
+    bool drivePos = (a.size() > 1U && a[1U] == L':' && b[1U] == L':');
+    if (drivePos) {
+        return std::towlower(a[0U]) == std::towlower(b[0U]) &&
+               a.compare(1U, std::wstring::npos, b, 1U, std::wstring::npos) == 0;
+    }
+    return false;
+}
+}  // namespace
+
 bool File::HasStatModeCaseSensitive(const std::string &path, uint16_t mode)
 {
-    std::filesystem::path p(path);
-    std::wstring fileName = p.filename().wstring();
-    std::filesystem::path dir = p.parent_path();
+    std::filesystem::path p = std::filesystem::absolute(path);
+    std::wstring input = p.wstring();
+    std::replace(input.begin(), input.end(), L'/', L'\\');
 
-    WIN32_FIND_DATAW findFileData;
-    HANDLE hFind = FindFirstFileW((dir / L"*").c_str(), &findFileData);
-    if (hFind == INVALID_HANDLE_VALUE) {
+    // Prefix with `\\?\` to bypass MAX_PATH (up to 32767). FILE_FLAG_BACKUP_SEMANTICS
+    // is required so that directories can be opened as well as regular files.
+    std::wstring openPath = L"\\\\?\\" + input;
+    HANDLE h = CreateFileW(openPath.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                           OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+    if (h == INVALID_HANDLE_VALUE) {
         return false;
     }
 
     bool result = false;
+    constexpr DWORD BUF_LEN = 32767U;
+    std::wstring realBuf(BUF_LEN, L'\0');
+    // FILE_NAME_NORMALIZED returns the canonical path with the real on-disk casing.
+    DWORD len = GetFinalPathNameByHandleW(h, realBuf.data(), BUF_LEN, FILE_NAME_NORMALIZED);
+    CloseHandle(h);
+    if (len == 0U || len >= BUF_LEN) {
+        return false;
+    }
+    realBuf.resize(len);
 
-    do {
-        std::wstring currentFileName = findFileData.cFileName;
+    // realBuf is "\\?\C:\proj\...\file" (correct case). Strip the \\?\ prefix.
+    const std::wstring prefix = L"\\\\?\\";
+    if (realBuf.compare(0U, prefix.size(), prefix) == 0) {
+        realBuf.erase(0U, prefix.size());
+    }
 
-        if (currentFileName == fileName) {
-            bool isDir = (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-            if ((mode & _S_IFDIR) && isDir) {
-                result = true;
-            } else if ((mode & _S_IFREG) && !isDir) {
-                result = true;
-            }
-            break;
+    if (PathEqualsCaseSensitive(realBuf, input)) {
+        DWORD attr = GetFileAttributesW(openPath.c_str());
+        bool isDir = (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0);
+        if ((mode & _S_IFDIR) && isDir) {
+            result = true;
+        } else if ((mode & _S_IFREG) && !isDir) {
+            result = true;
         }
-    } while (FindNextFileW(hFind, &findFileData));
-
-    FindClose(hFind);
+    }
     return result;
 }
 
