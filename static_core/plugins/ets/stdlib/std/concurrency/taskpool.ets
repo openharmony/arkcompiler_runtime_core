@@ -1945,6 +1945,26 @@ export namespace taskpool {
         }
     }
 
+    class GroupCancelDeferred {
+        readonly promise: Promise<Array<Any>>;
+        private rejectHandler: ((error: Error) => void) | undefined = undefined;
+
+        constructor() {
+            this.promise = new Promise<Array<Any>>((resolve, reject) => {
+                this.rejectHandler = reject;
+            });
+        }
+
+        reject(error: Error): void {
+            const rejectFn = this.rejectHandler;
+            if (rejectFn === undefined) {
+                return;
+            }
+            this.rejectHandler = undefined;
+            rejectFn(error);
+        }
+    }
+
     class GroupState {
         constructor() {
             this.id = GroupState.generateGroupId();
@@ -1968,7 +1988,10 @@ export namespace taskpool {
         state_: AtomicInt = new AtomicInt(InternalState.NOT_FOUND);
         taskCount: AtomicInt = new AtomicInt(0);
         hasFailedTask: AtomicInt = new AtomicInt(0);
+        controlMutex: Object = ConcurrencyHelpers.mutexCreate();
         hasTimeout: boolean = false;
+        cancelDeferred: GroupCancelDeferred | undefined = undefined;
+        resultSettled: boolean = false;
         successCallbacks: containers.ConcurrentSet<CallbackFunction> = new containers.ConcurrentSet<CallbackFunction>();
     }
 
@@ -2607,39 +2630,55 @@ export namespace taskpool {
 
     function executeImplGroup(group: TaskGroup, priority?: Priority): Promise<Array<Any>> {
         initWorkerPoolSync();
-        const tasksCount = GroupState.of(group).tasks.length.toInt();
+        const groupState = GroupState.of(group);
+        const tasksCount = groupState.tasks.length.toInt();
         if (tasksCount == 0) {
             return Promise.resolve<Array<Any>>(new Array<Any>());
         }
-        // Check if taskGroup has already been configured with timeout
-        if (GroupState.of(group).hasTimeout) {
-            throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: the taskGroup cannot be executed again, taskGroup has already set timeout");
-        }
-        if (GroupState.of(group).isTaskAlreadySubmitted) {
-            GroupState.of(group).taskCount.store(tasksCount);
-            GroupState.of(group).hasFailedTask.store(0);
-            GroupState.of(group).successCallbacks.clear();
-        }
-        GroupState.of(group).isTaskAlreadySubmitted = true;
-        allGroups.set(GroupState.of(group).id, group);
-        GroupState.of(group).state_.store(InternalState.WAITING.valueOf());
+        let groupCancelPromise: Promise<Array<Any>> | undefined = undefined;
+        ConcurrencyHelpers.lockGuard(groupState.controlMutex, () => {
+            if (groupState.hasTimeout) {
+                throw new Error(
+                    TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED,
+                    "taskpool:: the taskGroup cannot be executed again, taskGroup has already set timeout"
+                );
+            }
+            if (groupState.isTaskAlreadySubmitted) {
+                groupState.taskCount.store(tasksCount);
+                groupState.hasFailedTask.store(0);
+                groupState.successCallbacks.clear();
+            }
+            groupState.isTaskAlreadySubmitted = true;
+            allGroups.set(groupState.id, group);
+            resetGroupExecutionResultLocked(groupState);
+            groupState.state_.store(InternalState.WAITING.valueOf());
+            groupCancelPromise = getGroupCancelPromiseLocked(groupState);
+        });
         const promises = submitGroupTasks(group, priority);
-        return Promise.all<Any>(promises);
+        return wrapGroupExecutionResult(groupState, Promise.all<Any>(promises), groupCancelPromise!);
     }
 
     function executeGroupWithTimeout(group: TaskGroup, configs: Configs): Promise<Array<Any>> {
         initWorkerPoolSync();
-        const tasksCount = GroupState.of(group).tasks.length.toInt();
+        const groupState = GroupState.of(group);
+        const tasksCount = groupState.tasks.length.toInt();
         if (tasksCount == 0) {
             return Promise.resolve<Array<Any>>(new Array<Any>());
         }
-        // Check if taskGroup has already been executed
-        if (GroupState.of(group).state_.compareAndSwap(InternalState.NOT_FOUND, InternalState.WAITING) != InternalState.NOT_FOUND) {
-            throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP, "taskpool:: the taskGroup cannot be executed again, taskGroup cannot be set timeout");
-        }
-        GroupState.of(group).isTaskAlreadySubmitted = true;
-        GroupState.of(group).hasTimeout = true;
-        allGroups.set(GroupState.of(group).id, group);
+        let groupCancelPromise: Promise<Array<Any>> | undefined = undefined;
+        ConcurrencyHelpers.lockGuard(groupState.controlMutex, () => {
+            if (groupState.state_.compareAndSwap(InternalState.NOT_FOUND, InternalState.WAITING) != InternalState.NOT_FOUND) {
+                throw new Error(
+                    TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP,
+                    "taskpool:: the taskGroup cannot be executed again, taskGroup cannot be set timeout"
+                );
+            }
+            groupState.isTaskAlreadySubmitted = true;
+            groupState.hasTimeout = true;
+            allGroups.set(groupState.id, group);
+            resetGroupExecutionResultLocked(groupState);
+            groupCancelPromise = getGroupCancelPromiseLocked(groupState);
+        });
         const promises = submitGroupTasks(group, configs.priority);
 
         let timeoutTimerId: int = -1;
@@ -2649,10 +2688,6 @@ export namespace taskpool {
                     return;
                 }
                 if (GroupState.of(group).state_.load() === InternalState.CANCELED.valueOf()) {
-                    let hasRunningTask = GroupState.of(group).tasks.some((task: Task) => InternalTask.of(task).isRunning);
-                    if (hasRunningTask) {
-                        reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task group has been timeout"));
-                    }
                     return;
                 }
                 GroupState.of(group).state_.store(InternalState.TIMEOUT.valueOf());
@@ -2663,20 +2698,51 @@ export namespace taskpool {
             }, configs.timeout!.toInt());
         });
         const allPromise = Promise.all<Any>(promises);
+        return wrapGroupExecutionResult(groupState, allPromise, groupCancelPromise!, timeoutPromise).finally(() => {
+            if (timeoutTimerId != -1) {
+                clearTimeout(timeoutTimerId);
+                timeoutTimerId = -1;
+            }
+        });
+    }
 
-        return new Promise<Array<Any>>((resolve, reject) => {
-            Promise.race<Array<Any>>([allPromise, timeoutPromise]).then((result: Array<Any>) => {
-                if (timeoutTimerId != -1) {
-                    clearTimeout(timeoutTimerId);
-                    timeoutTimerId = -1;
-                }
-                resolve(result);
-            }).catch((error: Error) => {
-                if (timeoutTimerId != -1) {
-                    clearTimeout(timeoutTimerId);
-                    timeoutTimerId = -1;
-                }
-                reject(error);
+    function resetGroupExecutionResultLocked(groupState: GroupState): void {
+        groupState.cancelDeferred = new GroupCancelDeferred();
+        groupState.resultSettled = false;
+    }
+
+    function getGroupCancelPromiseLocked(groupState: GroupState): Promise<Array<Any>> {
+        const cancelDeferred = groupState.cancelDeferred;
+        if (cancelDeferred === undefined) {
+            throw new Error("taskpool:: missing task group result");
+        }
+        return cancelDeferred.promise;
+    }
+
+    function tryRejectCanceledGroupResultLocked(groupState: GroupState): void {
+        const cancelDeferred = groupState.cancelDeferred;
+        if (groupState.resultSettled || cancelDeferred === undefined) {
+            return;
+        }
+        groupState.resultSettled = true;
+        cancelDeferred.reject(
+            new Error(TASKPOOL_ERROR_GROUP_CANCELED, "taskpool:: taskGroup has been canceled")
+        );
+    }
+
+    function wrapGroupExecutionResult(
+        groupState: GroupState,
+        allPromise: Promise<Array<Any>>,
+        groupCancelPromise: Promise<Array<Any>>,
+        timeoutPromise?: Promise<Array<Any>>
+    ): Promise<Array<Any>> {
+        const racePromises = timeoutPromise === undefined
+            ? [allPromise, groupCancelPromise]
+            : [allPromise, timeoutPromise, groupCancelPromise];
+        return Promise.race<Array<Any>>(racePromises).finally(() => {
+            ConcurrencyHelpers.lockGuard(groupState.controlMutex, () => {
+                groupState.resultSettled = true;
+                groupState.cancelDeferred = undefined;
             });
         });
     }
@@ -2879,13 +2945,21 @@ export namespace taskpool {
      * @throws Error if the task group does not exist when it is canceled
      */
     export function cancel(group: TaskGroup): void {
-        let groupState = GroupState.of(group).state_.load();
-        if (groupState != (InternalState.RUNNING.valueOf()) && groupState != (InternalState.WAITING.valueOf())) {
-            throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP, "taskpool:: taskGroup is not executed or has been executed");
-        }
-        GroupState.of(group).state_.store(State.CANCELED.valueOf());
-        GroupState.of(group).tasks.forEach((task: Task) => {
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
+        const groupState = GroupState.of(group);
+        ConcurrencyHelpers.lockGuard(groupState.controlMutex, () => {
+            let currentState = groupState.state_.load();
+            if (currentState != (InternalState.RUNNING.valueOf()) &&
+                currentState != (InternalState.WAITING.valueOf())) {
+                throw new Error(
+                    TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP,
+                    "taskpool:: taskGroup is not executed or has been executed"
+                );
+            }
+            groupState.state_.store(State.CANCELED.valueOf());
+            groupState.tasks.forEach((task: Task) => {
+                InternalTask.of(task).state.store(State.CANCELED.valueOf());
+            });
+            tryRejectCanceledGroupResultLocked(groupState);
         });
     }
 
