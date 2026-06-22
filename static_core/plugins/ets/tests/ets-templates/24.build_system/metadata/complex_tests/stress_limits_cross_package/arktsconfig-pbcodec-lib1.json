@@ -1,0 +1,79 @@
+{
+ "compilerOptions": {
+  "package": "@panda/schema1",
+  "baseUrl": "${WORK_DIR}/${SUITE_NAME}/gen/24.build_system/metadata/complex_tests/stress_limits_cross_package",
+  "cacheDir": "${WORK_DIR}/${SUITE_NAME}/gen/24.build_system/metadata/complex_tests/stress_limits_cross_package/decls",
+  "dependencies": {
+   "std/core": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/core"
+   },
+   "std/math": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/math"
+   },
+   "std/math/consts": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/math/consts"
+   },
+   "std/containers": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/containers"
+   },
+   "std/interop/js": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/interop/js"
+   },
+   "std/time": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/time"
+   },
+   "std/debug": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/debug"
+   },
+   "std/debug/concurrency": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/debug/concurrency"
+   },
+   "std/testing": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/testing"
+   },
+   "std/concurrency": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/concurrency"
+   },
+   "std/annotations": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/annotations"
+   },
+   "std/interop": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "std/interop"
+   },
+   "escompat": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "escompat"
+   },
+   "arkruntime": {
+    "language": "ets",
+    "path": "${PANDA_BUILD}/plugins/ets/etsstdlib.abc",
+    "ohmUrl": "arkruntime"
+   }
+  }
+ }
+}

@@ -2253,6 +2253,9 @@
 24.build_system/metadata/base_tests/export_all/test_import.ets
 24.build_system/metadata/base_tests/export_default/test_import.ets
 24.build_system/metadata/base_tests/namespace_import/test_import.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_enum.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_genparams.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_union.ets
 
 # This code is unsupported in TypeScript
 #TSC-PROJECT_FAIL
