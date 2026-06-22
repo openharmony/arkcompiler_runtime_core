@@ -225,7 +225,8 @@ export namespace url {
     }
 
     function isFileNotHost(input: string): boolean {
-        return Char.isLetter(input.charAt(0)) && (input.charAt(1) == c':' || input.charAt(1) == c'|');
+        return input.length >= 2 && Char.isLetter(input.charAt(0)) &&
+            (input.charAt(1) == c':' || input.charAt(1) == c'|');
     }
 
     function DecodeSpecialChars(input: string): string {
@@ -530,7 +531,8 @@ export namespace url {
             }
 
             let it = this.cPath[0];
-            if (Char.isLetter(it.charAt(0)) && (it.charAt(1) == c':' || it.charAt(1) == c'|')) {
+            if (it.length >= 2 && Char.isLetter(it.charAt(0)) &&
+                (it.charAt(1) == c':' || it.charAt(1) == c'|')) {
                 if (it.length == 2) {
                     this.cPath[0] = it[0] + ':';
                     this.flags[INDEX_HOST] = false;
@@ -981,7 +983,8 @@ export namespace url {
                 this.analysizeFilescheme(input);
                 return;
             }
-            if (input.charAt(0) == c'/' && input.charAt(1) == c'/' && input.charAt(2) != c'/') {
+            if (input.length >= 3 && input.charAt(0) == c'/' && input.charAt(1) == c'/' &&
+                input.charAt(2) != c'/') {
                 let hostAndPath: string = input.substring(2);
                 if (hostAndPath.length == 0) {
                     return;
@@ -1019,7 +1022,7 @@ export namespace url {
                     strHost = this.analysizeHostPath(strHost);
                     this.analysizeHost(strHost, special);
                 }
-            } else if (input.charAt(0) == c'/' && input.charAt(1) == c'/') {
+            } else if (input.length >= 2 && input.charAt(0) == c'/' && input.charAt(1) == c'/') {
                 let strOfPath = input.substring(1);
                 this.analysizePath(strOfPath, false);
             } else {
@@ -1560,10 +1563,12 @@ export namespace url {
             return;
         }
 
-        let ch: char = baseUrl.cPath[0].charAt(0);
-        let ch1: char = baseUrl.cPath[0].charAt(1);
-        if ((baseUrl.cPath.length == 1) && isFile && Char.isLetter(ch) && ch1 == c':') {
-            return;
+        if (baseUrl.cPath[0].length >= 2) {
+            let ch: char = baseUrl.cPath[0].charAt(0);
+            let ch1: char = baseUrl.cPath[0].charAt(1);
+            if ((baseUrl.cPath.length == 1) && isFile && Char.isLetter(ch) && ch1 == c':') {
+                return;
+            }
         }
         baseUrl.cPath.pop();
     }
