@@ -210,7 +210,8 @@ export class Object {
             }
             let n: int = 0
             for (let i = 0; i < fnum; i++) {
-                if (!ct.getField(i).isStatic()) {
+                let f = ct.getField(i)
+                if (!f.isStatic() && f.getAccessModifier() == AccessModifier.PUBLIC) {
                     n++
                 }
             }
@@ -218,7 +219,7 @@ export class Object {
             let j: int = 0
             for (let i = 0; i < fnum; i++) {
                 let f = ct.getField(i)
-                if (!f.isStatic()) {
+                if (!f.isStatic() && f.getAccessModifier() == AccessModifier.PUBLIC) {
                     res[j] = f.getName()
                     j++
                 }
