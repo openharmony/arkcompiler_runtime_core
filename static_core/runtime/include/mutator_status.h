@@ -42,7 +42,7 @@ enum MutatorFlag {
     SUSPEND_REQUEST = 1U << 1U,
     RUNTIME_TERMINATION_REQUEST = 1U << 2U,
     GC_ON_SAFEPOINT_REQUEST = 1U << 3U,
-    SUSPEND_FOR_FINALIZE = 1U << 4U,
+    REF_CLEANUP_REQUEST = 1U << 4U,
 };
 
 std::ostream &operator<<(std::ostream &stream, MutatorStatus status);

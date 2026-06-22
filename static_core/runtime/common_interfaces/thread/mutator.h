@@ -85,8 +85,6 @@ public:
 
     virtual void VisitMutatorRoots(const RefFieldVisitor &visitor);
 
-    void DumpMutator() const;
-
     NO_INLINE void RememberObjectInSatbBuffer(const BaseObject *obj)
     {
         RememberObjectImpl(obj);
