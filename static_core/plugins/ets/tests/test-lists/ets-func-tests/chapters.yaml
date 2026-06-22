@@ -15,6 +15,7 @@ chapters:
   - all:
     - algorithms
     - arkui
+    - escompat
     - koala-related-benchmarks
     - regression
     - spec
@@ -25,6 +26,8 @@ chapters:
     - algorithms
   - arkui-dir:
     - arkui
+  - escompat-dir:
+    - escompat
   - koala-related-benchmarks-dir:
     - koala-related-benchmarks
   - regression-dir:
@@ -92,13 +95,15 @@ chapters:
     - 'std/core/std_core_short*.ets'
     - 'std/core/std_core_string*.ets'
     - 'std/core/std_core_stringbuilder*.ets'
-    - 'std/core/std_core_typedarrays*.ets'
   - std-core4:
     - std/core
     - exclude:
       - "std-core1"
       - "std-core2"
       - "std-core3"
+  - escompat1:
+    - 'escompat/escompat_typedarrays*.ets'
+    - 'escompat/escompat_typeduarrays*.ets'
 
   - jit-preheat-low:
     - "std-core-reflect1"

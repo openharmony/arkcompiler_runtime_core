@@ -142,8 +142,8 @@ def validate_templates(template_dir: Path, stdlib_dir: Path):
         "Function.ets.j2": stdlib_dir / "std" / "core" / "Function.ets",
         "DataView.ets.j2": stdlib_dir / "std" / "core" / "DataView.ets",
         "Tuple.ets.j2": stdlib_dir / "std" / "core" / "Tuple.ets",
-        "typedArray.ets.j2": stdlib_dir / "std" / "core" / "TypedArrays.ets",
-        "typedUArray.ets.j2": stdlib_dir / "std" / "core" / "TypedUArrays.ets"
+        "typedArray.ets.j2": stdlib_dir / "escompat" / "TypedArrays.ets",
+        "typedUArray.ets.j2": stdlib_dir / "escompat" / "TypedUArrays.ets"
     }
     jinja_loader = jinja2.FileSystemLoader(template_dir)
     jinja_env = jinja2.Environment(
@@ -155,6 +155,11 @@ def validate_templates(template_dir: Path, stdlib_dir: Path):
         with open(source, 'r', encoding='utf8') as fsource:
             if actual.strip() != fsource.read().strip():
                 raise RuntimeError(f"Template validation failed on {temp}, {source}")
+
+
+def clean_owned_output(target_dir: Path):
+    for package_dir in ("std", "escompat", "arkruntime"):
+        shutil.rmtree(target_dir / package_dir, ignore_errors=True)
 
 
 def main():
@@ -190,6 +195,7 @@ def main():
     template_dir = escompat_lib_dir.parent.parent / "templates" / "stdlib"
     validate_templates(template_dir, escompat_lib_dir.parent)
     target_dir.mkdir(parents=True, exist_ok=True)
+    clean_owned_output(target_dir)
     hiddable_apis = read_hiddable_apis(std_lib_dir, json_file)
     copy_files_with_filter(std_lib_dir, target_dir, hiddable_apis)
 

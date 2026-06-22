@@ -342,7 +342,7 @@
   "plugins/ets/runtime/intrinsics/helpers/json_helper.h": "*",
   "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h": "*",
   "plugins/ets/runtime/intrinsics/helpers/regexp_preparser.h": "*",
-  "plugins/ets/runtime/intrinsics/std_core_TypedArrays.cpp": "*",
+  "plugins/ets/runtime/intrinsics/escompat_TypedArrays.cpp": "*",
   "plugins/ets/runtime/intrinsics_declaration.h": "*",
   "plugins/ets/runtime/job_queue.h": "*",
   "plugins/ets/runtime/libani_helpers/ani_signature_builder.h": "*",

@@ -3632,7 +3632,7 @@ class UnifiedJsonParser {
                 throw new JsonParseError(`Invalid hexadecimal digit '${c}' at ${index + i}`,
                     index + i, index + i + 1)
             }
-            codePoint = codePoint * 16 + unhex(c)
+            codePoint = codePoint * 16 + jsonUnhex(c)
         }
 
         return codePoint
@@ -3986,6 +3986,21 @@ class UnifiedJsonParser {
         let parser = new UnifiedJsonParser(source, reviver, options)
         return parser.parse()
     }
+}
+
+type Types = reflect.internals.Types
+
+function jsonUnhex(c: char): int {
+    if (c >= c'0' && c <= c'9') {
+        return c.toInt() - c'0'.toInt()
+    }
+    if (c >= c'A' && c <= c'F') {
+        return c.toInt() - c'A'.toInt() + 10
+    }
+    if (c >= c'a' && c <= c'f') {
+        return c.toInt() - c'a'.toInt() + 10
+    }
+    throw new Error("invalid codepoint")
 }
 
 class JSONValueParser {

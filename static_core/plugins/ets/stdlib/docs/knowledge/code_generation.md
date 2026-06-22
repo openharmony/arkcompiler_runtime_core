@@ -23,9 +23,9 @@ Template file (.j2) → genlib.sh → Generated .ets file
 
 | Template | Generated File |
 | --- | --- |
-| `TypedArray.ets.j2` | `std/core/TypedArrays.ets` |
-| `TypedUArray.ets.j2` | `std/core/TypedUArrays.ets` |
-| `Function.ets.j2` | `std/core/Functions.ets` |
+| `TypedArray.ets.j2` | `escompat/TypedArrays.ets` |
+| `TypedUArray.ets.j2` | `escompat/TypedUArrays.ets` |
+| `Function.ets.j2` | `escompat/Functions.ets` |
 | `Tuple.ets.j2` | `std/core/Tuple.ets` |
 | `DataView.ets.j2` | `std/core/DataView.ets` |
 | `InteropTransferHelper.ets.j2` | `std/interop/js/InteropTransferHelper.ets` |
