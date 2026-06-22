@@ -2513,7 +2513,7 @@ export namespace taskpool {
         readonly state: Any;
     }
 
-    class SeqRunnerImpl {
+    export class SeqRunnerImpl {
         constructor(id: int) {
             this.id = id;
             this.seqPromise = Promise.resolve<Any>(new Object());
