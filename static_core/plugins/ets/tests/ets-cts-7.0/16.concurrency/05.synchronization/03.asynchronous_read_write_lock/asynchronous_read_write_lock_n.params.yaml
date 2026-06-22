@@ -16,7 +16,7 @@ cases:
   - desc: Asynchronous read lock illegal unlock.
     logic: |-
       async function startTest() {
-        let rwLock = new concurrency.stackless.AsyncReadWriteLock();
+        let rwLock = new RWLock();
         let readLock = rwLock.readLock();
         readLock.unlock();
       }
@@ -25,7 +25,7 @@ cases:
   - desc: Asynchronous write lock illegal unlock.
     logic: |-
       async function startTest() {
-        let rwLock = new concurrency.stackless.AsyncReadWriteLock();
+        let rwLock = new RWLock();
         let writeLock = rwLock.writeLock();
         writeLock.unlock();
       }

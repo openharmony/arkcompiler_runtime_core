@@ -260,7 +260,6 @@ static_core/plugins/ets/tests/interop_js/tests/                               @i
 static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^artemu
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis ^kurnevichstanislav
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/tests/test-lists/ets-cts-stackless/*ignored*          @nkholiavin ^chernykhsergey
 static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/stdlib/native/core/regexp/                            ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg

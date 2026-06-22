@@ -29,7 +29,7 @@ export namespace concurrency.stackless {
  * @class AsyncMutex
  * @syscap SystemCapability.Utils.Lang
  */
-export class AsyncMutex {
+class AsyncMutex {
     constructor() {
         this.waitersList_ = new WaitersList();
         this.waiters_ = new AtomicInt(0);

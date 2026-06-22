@@ -3394,11 +3394,11 @@ export namespace taskpool {
         if (isGlobalTaskQueuesInitialized.get()) {
             return;
         }
-        globalTaskQueue = new Map<Priority, containers.stackless.LinkedConcurrentQueue<QueuedExecution>>();
-        globalTaskQueue.set(Priority.HIGH, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
-        globalTaskQueue.set(Priority.MEDIUM, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
-        globalTaskQueue.set(Priority.LOW, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
-        globalTaskQueue.set(Priority.IDLE, new containers.stackless.LinkedConcurrentQueue<QueuedExecution>());
+        globalTaskQueue = new Map<Priority, containers.LinkedBlockingQueue<QueuedExecution>>();
+        globalTaskQueue.set(Priority.HIGH, new containers.LinkedBlockingQueue<QueuedExecution>());
+        globalTaskQueue.set(Priority.MEDIUM, new containers.LinkedBlockingQueue<QueuedExecution>());
+        globalTaskQueue.set(Priority.LOW, new containers.LinkedBlockingQueue<QueuedExecution>());
+        globalTaskQueue.set(Priority.IDLE, new containers.LinkedBlockingQueue<QueuedExecution>());
 
         isGlobalTaskQueuesInitialized.set(true);
     }
@@ -3475,7 +3475,7 @@ export namespace taskpool {
         return undefined;
     } 
     /**
-    * @brief Non-blocking priority-based task selection using LinkedConcurrentQueue.poll()
+    * @brief Non-blocking priority-based task selection using LinkedBlockingQueue.poll()
      * Uses poll() instead of pop() to avoid blocking
      */
     function selectTaskByPriorityNonBlocking(): QueuedExecution | undefined {
@@ -3706,7 +3706,7 @@ export namespace taskpool {
     const taskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
     let isGlobalTaskQueuesInitialized: AtomicFlag = new AtomicFlag(false);
     let taskQueues: Map<Priority, Array<Task>>;
-    let globalTaskQueue: Map<Priority, containers.stackless.LinkedConcurrentQueue<QueuedExecution>>;
+    let globalTaskQueue: Map<Priority, containers.LinkedBlockingQueue<QueuedExecution>>;
     let pendingDependencyTasks: Map<Task, QueuedExecution> = new Map<Task, QueuedExecution>();
 
     // New task queue management variables

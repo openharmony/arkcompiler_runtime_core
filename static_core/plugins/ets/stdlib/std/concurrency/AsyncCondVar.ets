@@ -30,7 +30,7 @@ export namespace concurrency.stackless {
  * @class AsyncCondVar
  * @syscap SystemCapability.Utils.Lang
  */
-export class AsyncCondVar {
+class AsyncCondVar {
     constructor() {
         this.waitersList_ = new WaitersList();
         this.waiters_ = 0;

@@ -5,7 +5,6 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 ets_func_tests/std/core/get_hash.ets
 
 #33832
-ets_func_tests/std/concurrency/AsyncRWLockTest.ets
 
 #30642 
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets

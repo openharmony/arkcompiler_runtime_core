@@ -64,27 +64,16 @@ export function mul(lhs: int, rhs: int): int {
 
 export class Event {
     constructor() {
-        this.mutex_ = new concurrency.stackless.AsyncMutex();
-        this.flagCV_ = new concurrency.stackless.AsyncCondVar();
-        this.flag_ = false;
+        this.signal_ = new PromiseWithResolvers<undefined>();
     }
 
     public async wait(): Promise<undefined> {
-        await this.mutex_.lock();
-        if (!this.flag_) {
-            await this.flagCV_.wait(this.mutex_);
-        }
-        this.mutex_.unlock();
+        await this.signal_.promise;
     }
 
     public async setAll(): Promise<undefined> {
-        await this.mutex_.lock();
-        this.flagCV_.notifyAll(this.mutex_);
-        this.flag_ = true;
-        this.mutex_.unlock();
+        this.signal_.resolve(undefined);
     }
 
-    private mutex_: concurrency.stackless.AsyncMutex;
-    private flagCV_: concurrency.stackless.AsyncCondVar;
-    private flag_: boolean;
+    private signal_: PromiseWithResolvers<undefined>;
 }

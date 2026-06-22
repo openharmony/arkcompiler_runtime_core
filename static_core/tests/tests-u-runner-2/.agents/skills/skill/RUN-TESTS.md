@@ -42,7 +42,6 @@ WORK_DIR=<path to temporary folder for intermediate files and reports>
 | `ets-cts-7.0` | ETS conformance tests for spec version 7.0 |
 | `ets-cts-ch23` | ETS conformance tests chapters 2–3 |
 | `ets-cts-ch23-7.0` | ETS conformance tests chapters 2–3, spec 7.0 |
-| `ets-cts-stackless` | ETS conformance tests with stackless coroutines |
 | `ets-func` | ETS functional tests and stdlib templates |
 | `ets-runtime` | ETS runtime-focused tests |
 | `ets-sdk` | ETS SDK tests |

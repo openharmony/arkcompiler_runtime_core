@@ -7,9 +7,7 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 #34658
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-operands-negative-number-2.ets
 #33832
-ets_func_tests/std/concurrency/AsyncRWLockTest.ets
 #33585
-ets_func_tests/std/concurrency/AsyncCondVarTest.ets
 #34645
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 #32636
@@ -103,11 +101,6 @@ ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_GetEndTest
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PollTest.ets
 ets_func_tests/std/containers/ArrayBufferIsViewTest.ets
 ets_func_tests/std/containers/ArrayReduceRightTest.ets
-ets_func_tests/std/containers/async_array_concurrent_queue/ArrayConcurrentQueue_GetEndTest.ets
-ets_func_tests/std/containers/async_array_concurrent_queue/ArrayConcurrentQueue_PopTest.ets
-ets_func_tests/std/containers/async_linked_concurrent_queue/AsyncLinkedConcurrentQueue_IsEmptyTest.ets
-ets_func_tests/std/containers/async_linked_concurrent_queue/AsyncLinkedConcurrentQueue_PopTest_Stress.ets
-ets_func_tests/std/containers/async_linked_concurrent_queue/AsyncLinkedConcurrentQueue_PushTest_Stress.ets
 ets_func_tests/std/containers/blocking_queue.ets
 ets_func_tests/std/containers/BlockingQueue/AddAndPollStress.ets
 ets_func_tests/std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets

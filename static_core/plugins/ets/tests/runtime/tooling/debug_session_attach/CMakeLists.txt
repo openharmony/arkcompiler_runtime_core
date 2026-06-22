@@ -53,9 +53,6 @@ function(add_target_with_dependencies test_suite target additional_dependencies)
 endfunction()
 
 function(add_debug_session_attach_test_impl test_target_name test_name test_work_dir test_ets_source runtime_extra_options fe_options)
-    set(noValues IS_STACKLESS)
-    cmake_parse_arguments(ARG "${noValues}" "" "" ${ARGN})
-
     run_int_ets_code(${test_target_name}-ets-int ${test_work_dir}
         SOURCES "${test_ets_source}"
         RUNTIME_EXTRA_OPTIONS ${runtime_extra_options}
@@ -69,8 +66,7 @@ function(add_debug_session_attach_test_impl test_target_name test_name test_work
         COMPILER_EXTRA_OPTIONS ${fe_options}
     )
 
-    # NOTE(dslynko): stackless is not supported yet in LLVM AOT
-    if (NOT ARG_IS_STACKLESS AND PANDA_LLVM_AOT)
+    if (PANDA_LLVM_AOT)
         run_aot_ets_code(llvm ${test_target_name}-ets-llvmaot ${test_work_dir}
             SOURCES ${test_ets_source}
             ENTRYPOINT ${test_name}
@@ -86,7 +82,7 @@ function(add_debug_session_attach_test_impl test_target_name test_name test_work
 
     if (NOT PANDA_TARGET_ARM32 AND NOT CMAKE_CROSSCOMPILING)
         add_target_with_dependencies(${test_target_name} ${test_target_name}-ets-aot ${additional_dependencies_target_name})
-        if (NOT ARG_IS_STACKLESS AND PANDA_LLVM_AOT)
+        if (PANDA_LLVM_AOT)
             add_target_with_dependencies(${test_target_name} ${test_target_name}-ets-llvmaot
                 ${additional_dependencies_target_name}
             )
@@ -96,7 +92,7 @@ endfunction()
 
 # Adds test with target name `ets_debug_session_attach_${file_name}`
 function(add_debug_session_attach_test ets_file)
-    set(noValues USES_CONCURRENCY SUPPORTS_STACKLESS)
+    set(noValues USES_CONCURRENCY)
     cmake_parse_arguments(ARG "${noValues}" "" "" ${ARGN})
 
     get_filename_component(test_name ${ets_file} NAME_WE)
@@ -107,10 +103,6 @@ function(add_debug_session_attach_test ets_file)
     )
 
     set(impls "STACKFUL")
-    get_target_property(STACKLESS_STDLIB etsstdlib.stackless FILE)
-    if (ARG_SUPPORTS_STACKLESS)
-        set(impls "STACKFUL" "STACKLESS")
-    endif()
 
     foreach(impl ${impls})
         string(TOLOWER "${impl}" impl_name)
@@ -123,16 +115,10 @@ function(add_debug_session_attach_test ets_file)
             "--coroutine-impl=${impl_name}"
         )
         set(fe_options "")
-        set(is_stackless "")
 
-        if (impl STREQUAL "STACKLESS")
-            list(APPEND fe_options "--stackless-coros=true")
-            set(is_stackless "IS_STACKLESS")
-            set(BOOT_PANDA_FILES_OLD ${BOOT_PANDA_FILES})
-            set(BOOT_PANDA_FILES ${STACKLESS_STDLIB})
-        elseif(CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-               PANDA_ENABLE_ADDRESS_SANITIZER OR
-               PANDA_ENABLE_THREAD_SANITIZER)
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+           PANDA_ENABLE_ADDRESS_SANITIZER OR
+           PANDA_ENABLE_THREAD_SANITIZER)
             list(APPEND runtime_extra_options "--coroutine-stack-size-pages=128")
         endif()
 
@@ -145,12 +131,7 @@ function(add_debug_session_attach_test ets_file)
             "${test_ets_source}"
             "${runtime_extra_options}"
             "${fe_options}"
-            "${is_stackless}"
         )
-
-        if (impl STREQUAL "STACKLESS")
-            set(BOOT_PANDA_FILES ${BOOT_PANDA_FILES_OLD})
-        endif()
 
         add_dependencies(${suite_target_name} ${test_target_name})
     endforeach()
@@ -165,8 +146,7 @@ add_debug_session_attach_test(test_attach_main_proxy.ets)
 add_debug_session_attach_test(test_attach_main_return.ets)
 add_debug_session_attach_test(test_attach_main_via_ani.ets)
 add_debug_session_attach_test(test_attach_main_via_reflection.ets)
-# NOTE(dslynko): enable stackless tests for the rest of tests after runtime fully supports stackless
 add_debug_session_attach_test(test_attach_from_worker.ets USES_CONCURRENCY)
 add_debug_session_attach_test(test_attach_main_with_workers.ets USES_CONCURRENCY)
 add_debug_session_attach_test(test_attach_from_launch.ets USES_CONCURRENCY)
-add_debug_session_attach_test(test_attach_main_with_launch.ets USES_CONCURRENCY SUPPORTS_STACKLESS)
+add_debug_session_attach_test(test_attach_main_with_launch.ets USES_CONCURRENCY)

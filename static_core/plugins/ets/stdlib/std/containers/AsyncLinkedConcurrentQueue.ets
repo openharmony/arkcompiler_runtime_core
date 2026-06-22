@@ -616,8 +616,8 @@ export namespace containers.stackless {
 
         private pushMutex: Object = ConcurrencyHelpers.mutexCreate();
         private popMutex: Object = ConcurrencyHelpers.mutexCreate();
-        private pushCondVar: concurrency.stackless.AsyncCondVarBasedMutex = new concurrency.stackless.AsyncCondVarBasedMutex();
-        private popCondVar: concurrency.stackless.AsyncCondVarBasedMutex = new concurrency.stackless.AsyncCondVarBasedMutex();
+        private pushCondVar: CondVarBasedMutex = new CondVarBasedMutex();
+        private popCondVar: CondVarBasedMutex = new CondVarBasedMutex();
         private actualCapacity: int = Int.MAX_VALUE;
         private actualSize: AtomicInt = new AtomicInt(0);
         private head: ListNode<T>;

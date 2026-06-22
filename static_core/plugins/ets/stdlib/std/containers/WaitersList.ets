@@ -90,4 +90,35 @@ class WaitersList {
     private head_ : OptionalNode = undefined;
 }
 
+final class CondVarBasedMutex {
+    constructor() {
+        this.waitersList_ = new WaitersList();
+        this.waiters_ = 0;
+    }
+
+    public async wait(mutex: Object): Promise<void> {
+        ++this.waiters_;
+        ConcurrencyHelpers.mutexUnlock(mutex);
+        await this.waitersList_.suspend();
+        ConcurrencyHelpers.mutexLock(mutex);
+    }
+
+    public notifyOne(): void {
+        if (this.waiters_ != 0) {
+            this.waitersList_.resume();
+            this.waiters_--;
+        }
+    }
+
+    public notifyAll(): void {
+        while (this.waiters_ != 0) {
+            this.waitersList_.resume();
+            this.waiters_--;
+        }
+    }
+
+    private waitersList_: WaitersList;
+    private waiters_: int;
+}
+
 }

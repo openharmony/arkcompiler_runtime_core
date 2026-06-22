@@ -2,7 +2,6 @@
 ets_func_tests/std/concurrency/workerlocal_test.ets
 
 #34009
-ets_func_tests/std/containers/async_array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 
 #33931
 ets_func_tests/std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
