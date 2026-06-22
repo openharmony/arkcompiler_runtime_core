@@ -295,7 +295,7 @@ export function isInteger(v: number): boolean {
  * @FaAndStageModel
  */
 export function isSafeInteger(v: int): boolean {
-    return v <= Float.MAX_SAFE_INTEGER.toInt();
+    return v >= -Float.MAX_SAFE_INTEGER.toInt() && v <= Float.MAX_SAFE_INTEGER.toInt();
 }
 
 /**
@@ -307,7 +307,7 @@ export function isSafeInteger(v: int): boolean {
  * @FaAndStageModel
  */
 export function isSafeInteger(v: long): boolean {
-    return v <= Double.MAX_SAFE_INTEGER.toLong();
+    return v >= Double.MIN_SAFE_INTEGER.toLong() && v <= Double.MAX_SAFE_INTEGER.toLong();
 }
 
 /**
