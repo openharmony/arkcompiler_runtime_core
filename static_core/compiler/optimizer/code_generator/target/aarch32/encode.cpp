@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1337,24 +1337,29 @@ void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     ScopedTmpRegF64 ceil(this);
     vixl::aarch32::DRegister tmp(ceil.GetReg().GetId() + 1);
 
-    auto skipZero = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto defaultRounding = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     auto negZeroCase = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     auto done = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     GetMasm()->Vmov(tmp, NEG_HALF);
     GetMasm()->Vcmp(VixlVReg(src), tmp);
     GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
-    GetMasm()->B(vixl::aarch32::lt, skipZero);
+    GetMasm()->B(vixl::aarch32::lt, defaultRounding);
 
     GetMasm()->Vmov(tmp, HALF);
     GetMasm()->Vcmp(VixlVReg(src), tmp);
     GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
-    GetMasm()->B(vixl::aarch32::ge, skipZero);
+    GetMasm()->B(vixl::aarch32::ge, defaultRounding);
 
-    GetMasm()->Vmov(tmp, NEG_HALF);
+    GetMasm()->Vmov(tmp, ZERO);
     GetMasm()->Vcmp(VixlVReg(src), tmp);
     GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
     GetMasm()->B(vixl::aarch32::lt, negZeroCase);
+
+    GetMasm()->Vmov(tmp, NEG_ZERO);  // +0.0 == -0.0, one compare is enough to do default rounding for both, saving sign
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::eq, defaultRounding);
 
     GetMasm()->Vmov(tmp, ZERO);
     GetMasm()->Vmov(VixlVReg(dst), tmp);
@@ -1365,7 +1370,7 @@ void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     GetMasm()->Vmov(VixlVReg(dst), tmp);
     GetMasm()->B(done);
 
-    GetMasm()->Bind(skipZero);
+    GetMasm()->Bind(defaultRounding);
 
     // calculate ceil(val)
     GetMasm()->Vrintp(VixlVReg(ceil), VixlVReg(src));

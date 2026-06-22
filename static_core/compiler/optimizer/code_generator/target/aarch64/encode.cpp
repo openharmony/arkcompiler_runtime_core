@@ -963,21 +963,26 @@ void Aarch64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
 
     ScopedTmpRegF64 ceil(this);
 
-    auto skipZero = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto defaultRounding = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     auto negZeroCase = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     auto done = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     GetMasm()->Fmov(VixlVReg(ceil), NEG_HALF);
     GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
-    GetMasm()->B(vixl::aarch64::lt, skipZero);
+    GetMasm()->B(vixl::aarch64::lt, defaultRounding);
 
     GetMasm()->Fmov(VixlVReg(ceil), HALF);
     GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
-    GetMasm()->B(vixl::aarch64::ge, skipZero);
+    GetMasm()->B(vixl::aarch64::ge, defaultRounding);
 
     GetMasm()->Fmov(VixlVReg(ceil), ZERO);
     GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
     GetMasm()->B(vixl::aarch64::lt, negZeroCase);
+
+    GetMasm()->Fmov(VixlVReg(ceil),
+                    NEG_ZERO);  // +0.0 == -0.0, one compare is enough to do default rounding for both, saving sign
+    GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
+    GetMasm()->B(vixl::aarch64::eq, defaultRounding);
 
     GetMasm()->Fmov(VixlVReg(dst), ZERO);
     GetMasm()->B(done);
@@ -986,7 +991,7 @@ void Aarch64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     GetMasm()->Fmov(VixlVReg(dst), NEG_ZERO);
     GetMasm()->B(done);
 
-    GetMasm()->Bind(skipZero);
+    GetMasm()->Bind(defaultRounding);
 
     // calculate ceil(val)
     GetMasm()->Frintp(VixlVReg(ceil), VixlVReg(src));

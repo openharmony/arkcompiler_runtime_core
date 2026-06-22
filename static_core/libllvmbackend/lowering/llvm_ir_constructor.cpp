@@ -1379,12 +1379,14 @@ bool LLVMIrConstructor::EmitRoundToPInf(Inst *inst)
 
     auto cmpLow = builder_.CreateFCmpOGE(input, negHalfConst);
     auto cmpHigh = builder_.CreateFCmpOLT(input, roundBias);
+    auto isNotZero = builder_.CreateFCmpONE(input, zeroConst);  // +0.0 == -0.0, no need 2 checks
     auto inRange = builder_.CreateAnd(cmpLow, cmpHigh);
+    auto inRangeNonZero = builder_.CreateAnd(isNotZero, inRange);
 
     auto cmpNeg = builder_.CreateFCmpOLT(input, zeroConst);
     auto zeroSel = builder_.CreateSelect(cmpNeg, negZeroConst, zeroConst);
 
-    auto result = builder_.CreateSelect(inRange, zeroSel, roundRes);
+    auto result = builder_.CreateSelect(inRangeNonZero, zeroSel, roundRes);
 
     ValueMapAdd(inst, result);
     return true;

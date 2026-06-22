@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@ function main(): int {
     let roundTestsuite = new arktest.ArkTestsuite("roundTest")
     roundTestsuite.addTest("round_normal", roundNormals)
     roundTestsuite.addTest("round_boundary", roundBoundaries)
+    roundTestsuite.addTest("round_zero_with_sign", Math_round_zero_with_sign)
     return roundTestsuite.run()
 }
 
@@ -57,7 +58,11 @@ function roundBoundaries() {
 
 function Math_round_zero_with_sign () {
     const negativeZero = Math.round(-0.1);
+    const exactNegativeZero = Math.round(-0.0);
     const positiveZero = Math.round(0.1);
+    const exactPositiveZero = Math.round(0.0);
     arktest.assertEQ(1 / negativeZero, Double.NEGATIVE_INFINITY, "1 / Math.round(-0.1) => -Infinity");
+    arktest.assertEQ(1 / exactNegativeZero, Double.NEGATIVE_INFINITY, "1 / Math.round(-0.0) => -Infinity");
     arktest.assertEQ(1 / positiveZero, Double.POSITIVE_INFINITY, "1 / Math.round(0.1) => Infinity");
+    arktest.assertEQ(1 / exactPositiveZero, Double.POSITIVE_INFINITY, "1 / Math.round(0.0) => Infinity");
 }

@@ -2668,7 +2668,7 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr int64_t NEG_ZERO = 0x8000000000000000;  // double precision representation of -0.0
 
-    auto skipZero = GetMasm()->newLabel();
+    auto defaultRounding = GetMasm()->newLabel();
     auto negZeroCase = GetMasm()->newLabel();
     auto end = GetMasm()->newLabel();
     {
@@ -2678,17 +2678,24 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
         GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(HALF));
         GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
         GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
-        GetMasm()->jae(skipZero);
+        GetMasm()->jae(defaultRounding);
 
         GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(NEG_HALF));
         GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
         GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
-        GetMasm()->jb(skipZero);
+        GetMasm()->jb(defaultRounding);
 
         GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(ZERO));
         GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
         GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
         GetMasm()->jb(negZeroCase);
+
+        GetMasm()->mov(
+            ArchReg(tmpReg),
+            asmjit::imm(NEG_ZERO));  // +0.0 == -0.0, one compare is enough to do default rounding for both, saving sign
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->je(defaultRounding);
 
         GetMasm()->xorpd(ArchVReg(dst), ArchVReg(dst));
         GetMasm()->jmp(end);
@@ -2700,7 +2707,7 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
         GetMasm()->movq(ArchVReg(dst), ArchReg(tmpReg));
         GetMasm()->jmp(end);
     }
-    GetMasm()->bind(skipZero);
+    GetMasm()->bind(defaultRounding);
 
     ScopedTmpRegF64 ceil(this);
     GetMasm()->roundsd(ArchVReg(ceil), ArchVReg(src), asmjit::imm(0b10));
