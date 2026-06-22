@@ -318,10 +318,13 @@ export class Declgen {
    * dependencies (compiler, cache session, affected set) instead of leaking
    * the whole `StageContext` to keep the public surface narrow.
    *
-   * The files actually written are `affectedFiles` ∪ `missingEmitArtifact`:
-   * a root file whose previous run never reached emit (no `emittedArtifact`
-   * recorded in the cache) must be (re-)emitted even though the pipeline
-   * itself was a cache hit — otherwise the user sees no `.d.ets` on disk.
+   * The files actually written are decided by {@link buildFilesToEmit}, which
+   * implements a content-diffing policy: a root file is emitted only when its
+   * freshly-printed `.d.ets` differs from the bytes recorded by the previous
+   * emit (or when it was never emitted). A file that the pipeline marked
+   * affected but whose final output is byte-identical to last run is skipped,
+   * so the on-disk timestamp is not churned and downstream consumers are not
+   * needlessly re-triggered.
    */
   private buildEmit(
     affectedFiles: ReadonlySet<string>,
@@ -333,8 +336,7 @@ export class Declgen {
 
     const emitWithWriteFile = (writeFile: DeclgenWriteFile) => {
       return (fileName: string, sourceFile: ts.SourceFile) => {
-        const printed = compiler.printer.printFile(sourceFile);
-        const finalCode = `'use static'\n${printed}`;
+        const finalCode = compiler.renderDeclaration(sourceFile);
         const hash = sha256(finalCode);
         const result = writeFile(fileName, finalCode, { hash });
         if (result && typeof result === 'object' && result.artifactPath) {
@@ -385,25 +387,67 @@ export class Declgen {
   }
 
   /**
-   * Computes the set of root files to emit: the pipeline-affected files union
-   * any root that has never had an emitted artifact recorded (covers the
-   * "run() without emit()" case where a prior process built the cache but
-   * never wrote outputs to disk).
+   * Computes the set of root files to actually write to disk (Scheme B:
+   * content diffing). A file is emitted when ANY of the following holds:
+   *
+   *   1. There is no cache session (no baseline to diff against) → fall back
+   *      to emitting every affected file.
+   *   2. The file was never emitted before (no `emittedArtifact` recorded).
+   *      Covers the first run, a deleted/tampered output (its record was
+   *      cleared by InitialAffectedAnalysisStage), and the "run() without
+   *      emit()" case where a prior process built the cache but never wrote
+   *      outputs.
+   *   3. The file is in the pipeline's `affectedFiles` set AND its
+   *      freshly-printed final content differs from the previously-emitted
+   *      `sha256`.
+   *
+   * A file that is affected but whose printed output is byte-identical to the
+   * last emit is intentionally skipped: rewriting it would only churn its
+   * mtime and needlessly re-trigger downstream consumers. Non-affected files
+   * are never emitted (their output is unchanged by construction).
    */
   private buildFilesToEmit(
     affectedFiles: ReadonlySet<string>,
     session: CacheSession | undefined
   ): Set<string> {
-    const filesToEmit = new Set<string>(affectedFiles);
+    // No cache → no baseline to diff against; emit everything affected.
     if (!session) {
-      return filesToEmit;
+      return new Set<string>(affectedFiles);
     }
-    for (const root of this.compiler.rootFileNames) {
-      if (!filesToEmit.has(root) && !session.getFile(root)?.emittedArtifact) {
+    const compiler = this.compiler;
+    const filesToEmit = new Set<string>();
+    for (const root of compiler.rootFileNames) {
+      const prior = session.getFile(root)?.emittedArtifact;
+      // Never emitted (first run / deleted / tampered / forced) → emit.
+      if (!prior) {
+        filesToEmit.add(root);
+        continue;
+      }
+      // Not touched by the pipeline this run → output is unchanged.
+      if (!affectedFiles.has(root)) {
+        continue;
+      }
+      // Affected: re-emit only when the printed bytes actually changed.
+      if (this.printedOutputHash(root) !== prior.sha256) {
         filesToEmit.add(root);
       }
     }
     return filesToEmit;
+  }
+
+  /**
+   * sha256 of the final `.d.ets` content (the `'use static'` prefix + printed
+   * AST) for a root file as it currently lives in the compiler, matching the
+   * exact bytes the emit writers produce. Returns `undefined` when the source
+   * file is unavailable, which callers treat as "changed" so the file emits.
+   */
+  private printedOutputHash(root: string): string | undefined {
+    const sf = this.compiler.getSourceFile(root);
+    if (!sf) {
+      return undefined;
+    }
+    const finalCode = this.compiler.renderDeclaration(sf);
+    return sha256(finalCode);
   }
 
   private openCacheSession(): CacheSession | undefined {

@@ -361,6 +361,54 @@ describe('CacheStore', function () {
         fs.rmSync(dir, { recursive: true, force: true });
       }
     });
+
+    it('preserves inherited emittedArtifact when a later run rewrites the stage artifact without re-recording the emit', async () => {
+      // Reproduces the incremental bug where:
+      //   Run 1: putStageArtifact + recordEmittedArtifact + commit
+      //   Run 2: putStageArtifact only (e.g. declaration stage re-ran but
+      //          downstream narrowing decided no emit was needed)
+      // After Run 2 commits, the manifest must still carry the emit record
+      // from Run 1; otherwise Run 3 would think the file was never emitted
+      // and re-emit it unnecessarily, while Run 2 itself skipped the emit.
+      const dir = tmp('cache-store-emit-preserve-');
+      try {
+        const s1 = cacheStore.open({ cacheDir: dir, globalKey: 'k1' });
+        s1.putStageArtifact('/abs/foo.ts', 'declaration', 'export let foo: number;', {
+          fileKey: 'fk1',
+          interopSigHash: null,
+          contentHash: 'c1'
+        });
+        s1.recordEmittedArtifact('/abs/foo.ts', {
+          path: '/out/foo.d.ets',
+          sha256: 'emit-sha-1',
+          mtime: 1000,
+          size: 24
+        });
+        await s1.commit();
+
+        const s2 = cacheStore.open({ cacheDir: dir, globalKey: 'k1' });
+        // Source content changed but declaration output happens to be identical,
+        // so the stage writes a (same-text) artifact and the emit phase is skipped.
+        s2.putStageArtifact('/abs/foo.ts', 'declaration', 'export let foo: number;', {
+          fileKey: 'fk2',
+          interopSigHash: null,
+          contentHash: 'c2'
+        });
+        await s2.commit();
+
+        const s3 = cacheStore.open({ cacheDir: dir, globalKey: 'k1' });
+        const entry = s3.getFile('/abs/foo.ts');
+        assert.ok(entry);
+        assert.strictEqual(entry!.fileKey, 'fk2', 'meta from latest run should win');
+        assert.deepStrictEqual(
+          entry!.emittedArtifact,
+          { path: '/out/foo.d.ets', sha256: 'emit-sha-1', mtime: 1000, size: 24 },
+          'emittedArtifact from Run 1 must survive a stage-artifact-only Run 2'
+        );
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
   });
 });
 

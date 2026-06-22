@@ -62,6 +62,7 @@ export class Compiler {
   private fileHost: VirtualFileHost;
   private defaultPrinter: ts.Printer;
   private sourceFilesCache: Map<string, ts.SourceFile>;
+  private renderCache: WeakMap<ts.SourceFile, string>;
   public rootDir: string;
 
   constructor(
@@ -79,6 +80,7 @@ export class Compiler {
     this.compilerHost = this.fileHost.getCompilerHost();
     this.defaultPrinter = ts.createPrinter();
     this.sourceFilesCache = new Map<string, ts.SourceFile>();
+    this.renderCache = new WeakMap<ts.SourceFile, string>();
     if (customResolveModuleNames) {
       this.compilerHost.resolveModuleNames = customResolveModuleNames;
     }
@@ -295,7 +297,39 @@ export class Compiler {
     return this.defaultPrinter;
   }
 
+  /**
+   * Render a source file to the exact `.d.ets` text that gets written to disk:
+   * the printed AST prefixed with the `'use static'` directive. This is the
+   * single source of truth for the final emitted content — all writers and
+   * content-hash computations must go through here so they stay byte-identical.
+   *
+   * The result is memoized per `SourceFile` instance: during the emit phase the
+   * same file is rendered both to decide whether its output changed and to
+   * actually write it, and `printFile` is the costly part. A `WeakMap` is used
+   * (keyed on the AST instance) so cache entries are garbage-collected once an
+   * old AST is no longer referenced, and `updateFile` evicts the entry when a
+   * file is replaced.
+   *
+   * IMPORTANT: because the cache is keyed on the AST instance (not its
+   * contents), it does NOT detect in-place mutations of the same `SourceFile`.
+   * Only call this AFTER all stages have run and the AST is final/frozen
+   * (i.e. during emit). Calling it while stages may still mutate a node in
+   * place would cache stale text. Stages that need fresh output must replace
+   * the file via {@link updateFile} (which evicts the entry) rather than
+   * mutating the existing node.
+   */
+  renderDeclaration(sourceFile: ts.SourceFile): string {
+    const cached = this.renderCache.get(sourceFile);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const rendered = `'use static'\n${this.defaultPrinter.printFile(sourceFile)}`;
+    this.renderCache.set(sourceFile, rendered);
+    return rendered;
+  }
+
   updateFile(fileName: string, content: ts.SourceFile): void {
+    this.renderCache.delete(content);
     this.sourceFilesCache.set(normalizePath(fileName), content);
   }
 
@@ -311,15 +345,13 @@ export class Compiler {
       fileName: string,
       sourceFile: ts.SourceFile
     ): { artifactPath: string; finalContent: string } => {
-      const printer = this.printer;
-      const printed = printer.printFile(sourceFile);
       const rootDir = this.rootDir;
       const outDir = this.compilerOptions.outDir ?? this.rootDir;
       const relativePath = path.relative(rootDir, fileName);
       const detsFileName = convertToDetsFileName(relativePath);
       const dEtsFilePath = path.join(outDir, detsFileName);
       const outPath = path.dirname(dEtsFilePath);
-      const finalCode = `'use static'\n${printed}`;
+      const finalCode = this.renderDeclaration(sourceFile);
       if (!fs.existsSync(outPath)) {
         fs.mkdirSync(outPath, { recursive: true });
       }
