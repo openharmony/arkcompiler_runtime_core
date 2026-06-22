@@ -1,10 +1,6 @@
-#34838 failed on mutator != nullptr (need patch with mutators)
-ets-common-tests/atomics/base_operation_add.ets
-ets-common-tests/atomics/base_operation_and.ets
-ets-common-tests/atomics/base_operation_exchange.ets
-ets-common-tests/atomics/base_operation_load.ets
-ets-common-tests/atomics/base_operation_or.ets
-ets-common-tests/atomics/base_operation_store.ets
-ets-common-tests/atomics/base_operation_sub.ets
-ets-common-tests/atomics/base_operation_xor.ets
+#35186
+ets-common-tests/taskpool/common_tasks.ets
+ets-common-tests/taskpool/concurrent_container_set_tasks.ets
+
+#34838
 ets-common-tests/intrinsics/to_string_cache.ets
