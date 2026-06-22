@@ -885,7 +885,14 @@ export class Math {
         if (val1 > val2) {
             return val1
         }
-        return val2;
+        if (val2 > val1) {
+            return val2
+        }
+        // val1 == val2 numerically; Math.max must prefer +0 over -0
+        if (val1.compareTo(0.0) == 0) {
+            return val1 + val2
+        }
+        return val1;
     }
 
     public static max(...values: double[]): double {
@@ -897,6 +904,9 @@ export class Math {
             if (isNaN(values[i])) return NaN;
             if (values[i] > max) {
                 max = values[i];
+            } else if (max.compareTo(0.0) == 0 && values[i].compareTo(0.0) == 0) {
+                // both are zero; Math.max must prefer +0 over -0
+                max = max + values[i];
             }
         }
         return max;
@@ -925,7 +935,17 @@ export class Math {
         if (val1 < val2) {
             return val1
         }
-        return val2;
+        if (val2 < val1) {
+            return val2
+        }
+        // val1 == val2 numerically; Math.min must prefer -0 over +0
+        if (val1.compareTo(0.0) == 0) {
+            if (1.0 / val1 < 0.0) {
+                return val1
+            }
+            return val2
+        }
+        return val1;
     }
 
     public static min(...values: double[]): double {
@@ -937,6 +957,11 @@ export class Math {
             if (isNaN(values[i])) return NaN;
             if (values[i] < min) {
                 min = values[i];
+            } else if (min.compareTo(0.0) == 0 && values[i].compareTo(0.0) == 0) {
+                // both are zero; Math.min must prefer -0 over +0
+                if (1.0 / values[i] < 0.0) {
+                    min = values[i];
+                }
             }
         }
         return min;
@@ -991,7 +1016,7 @@ export class Math {
     /**
      * @param x arbitrary number
      *
-     * @returns -1 if `x` is negative, 1 if `x` is positive, 0 if `x` is close to zero (epsilon is 1e-13)
+     * @returns -1 if `x` is negative, 1 if `x` is positive, +0 if `x` is +0, -0 if `x` is -0, NaN if `x` is NaN
      *
      */
     public static sign(x: double): double {

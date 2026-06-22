@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { max as maxChar } from "std/math"
+import { max as maxChar } from 'std/math'
 
 function testNoArguments() {
     arktest.assertEQ(Math.max(), -Infinity)
@@ -66,6 +66,49 @@ function testWithZero() {
     arktest.assertEQ(Math.max(0, -0), 0)
     arktest.assertEQ(Math.max(-0, 0), 0)
     arktest.assertEQ(Math.max(-0, -0), -0)
+}
+
+function testZeroSign() {
+    // Math.max must return +0 (not -0) when args include both signs.
+    arktest.assertPositiveZero(Math.max(0.0, -0.0))
+    arktest.assertPositiveZero(Math.max(-0.0, 0.0))
+    arktest.assertPositiveZero(Math.max(0.0, 0.0, -0.0))
+    arktest.assertPositiveZero(Math.max(-0.0, 0.0, -0.0))
+}
+
+function testEqualNonZero() {
+    arktest.assertEQ(Math.max(5.0, 5.0), 5.0)
+    arktest.assertEQ(Math.max(5.0, 5.0, 5.0), 5.0)
+    arktest.assertEQ(Math.max(1e-300, 1e-300), 1e-300)
+    arktest.assertEQ(Math.max(-1e-300, -1e-300), -1e-300)
+    arktest.assertEQ(Math.max(Number.MIN_VALUE, Number.MIN_VALUE), Number.MIN_VALUE)
+    arktest.assertEQ(Math.max(-Number.MIN_VALUE, -Number.MIN_VALUE), -Number.MIN_VALUE)
+}
+
+function testSameSignZero() {
+    // Same-sign zero pairs must preserve that sign (the mixed-sign branch must not flip it).
+    arktest.assertNegativeZero(Math.max(-0.0, -0.0))
+    arktest.assertPositiveZero(Math.max(0.0, 0.0))
+    arktest.assertNegativeZero(Math.max(-0.0, -0.0, -0.0))
+    arktest.assertPositiveZero(Math.max(0.0, 0.0, 0.0))
+}
+
+function testSingleArgZeroSign() {
+    // Single-argument overload must return the argument's zero sign unchanged.
+    arktest.assertNegativeZero(Math.max(-0.0))
+    arktest.assertPositiveZero(Math.max(0.0))
+}
+
+function testTinyNonZeroMixedWithZero() {
+    // Tiny non-zero values must NOT be treated as zero: strict > decides the result,
+    // and the zero branch must not fire for them.
+    // Tiny positive beats -0 -> returns the tiny value itself
+    arktest.assertEQ(Math.max(-0.0, 1e-300), 1e-300)
+    arktest.assertEQ(Math.max(1e-300, -0.0), 1e-300)
+    arktest.assertEQ(Math.max(-0.0, Number.MIN_VALUE), Number.MIN_VALUE)
+    // +0 beats tiny negative -> returns +0 (sign matters)
+    arktest.assertPositiveZero(Math.max(0.0, -1e-300))
+    arktest.assertPositiveZero(Math.max(-1e-300, 0.0))
 }
 
 function testWithFloats() {
@@ -164,23 +207,28 @@ function testDoubleOverload() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite("Math.max tests")
-    suite.addTest("Test No Arguments", testNoArguments)
-    suite.addTest("Test Single Argument", testSingleArgument)
-    suite.addTest("Test Two Arguments", testTwoArguments)
-    suite.addTest("Test Multiple Arguments", testMultipleArguments)
-    suite.addTest("Test With NaN", testWithNaN)
-    suite.addTest("Test With Infinity", testWithInfinity)
-    suite.addTest("Test With Zero", testWithZero)
-    suite.addTest("Test With Floats", testWithFloats)
-    suite.addTest("Test Negative And Positive", testNegativeAndPositive)
-    suite.addTest("Test Large Numbers", testLargeNumbers)
-    suite.addTest("Test Small Numbers", testSmallNumbers)
-    suite.addTest("Test Mixed Values", testMixedValues)
-    suite.addTest("Test Char Overload", testCharOverload)
-    suite.addTest("Test Int Overload", testIntOverload)
-    suite.addTest("Test Long Overload", testLongOverload)
-    suite.addTest("Test Float Overload", testFloatOverload)
-    suite.addTest("Test Double Overload", testDoubleOverload)
+    const suite = new arktest.ArkTestsuite('Math.max tests')
+    suite.addTest('Test No Arguments', testNoArguments)
+    suite.addTest('Test Single Argument', testSingleArgument)
+    suite.addTest('Test Two Arguments', testTwoArguments)
+    suite.addTest('Test Multiple Arguments', testMultipleArguments)
+    suite.addTest('Test With NaN', testWithNaN)
+    suite.addTest('Test With Infinity', testWithInfinity)
+    suite.addTest('Test With Zero', testWithZero)
+    suite.addTest('Test Zero Sign', testZeroSign)
+    suite.addTest('Test Equal Non Zero', testEqualNonZero)
+    suite.addTest('Test Same Sign Zero', testSameSignZero)
+    suite.addTest('Test Single Arg Zero Sign', testSingleArgZeroSign)
+    suite.addTest('Test Tiny Non Zero Mixed With Zero', testTinyNonZeroMixedWithZero)
+    suite.addTest('Test With Floats', testWithFloats)
+    suite.addTest('Test Negative And Positive', testNegativeAndPositive)
+    suite.addTest('Test Large Numbers', testLargeNumbers)
+    suite.addTest('Test Small Numbers', testSmallNumbers)
+    suite.addTest('Test Mixed Values', testMixedValues)
+    suite.addTest('Test Char Overload', testCharOverload)
+    suite.addTest('Test Int Overload', testIntOverload)
+    suite.addTest('Test Long Overload', testLongOverload)
+    suite.addTest('Test Float Overload', testFloatOverload)
+    suite.addTest('Test Double Overload', testDoubleOverload)
     return suite.run()
 }
