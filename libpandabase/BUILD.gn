@@ -257,14 +257,14 @@ ohos_static_library("libarkbase_static") {
       sdk_libc_secshared_dep,
     ]
   } else {
-    public_external_deps = [
+    external_deps = [
       "json:nlohmann_json_static",
       sdk_libc_secshared_dep,
     ]
   }
 
   if (enable_hilog) {
-    public_external_deps += [ "hilog:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   }
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -274,6 +274,9 @@ ohos_shared_library("libarkbase") {
   stack_protector_ret = false
   deps = [ ":libarkbase_static" ]
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }

@@ -36,20 +36,15 @@ ohos_static_library("libarkziparchive_static") {
       "$ark_third_party_root/bounds_checking_function:libsec_static",
       "$ark_third_party_root/zlib:libz",
     ]
-  } else if (ark_standalone_build) {
-    external_deps = [
-      sdk_libc_secshared_dep,
-      zlib_deps,
-    ]
   } else {
-    public_external_deps = [
+    external_deps = [
       sdk_libc_secshared_dep,
       zlib_deps,
     ]
   }
 
   if (enable_hilog) {
-    public_external_deps += [ "hilog:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   }
 
   part_name = "runtime_core"

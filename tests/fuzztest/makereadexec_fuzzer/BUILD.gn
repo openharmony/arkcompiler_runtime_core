@@ -30,7 +30,12 @@ ohos_fuzztest("MakeReadExecFuzzTest") {
   ]
   sources = [ "makereadexec_fuzzer.cpp" ]
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]
+  external_deps = [ sdk_libc_secshared_dep ]
   configs = [ "$ark_root:ark_config" ]
+
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {
