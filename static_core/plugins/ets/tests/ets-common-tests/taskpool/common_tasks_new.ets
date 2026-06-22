@@ -967,8 +967,9 @@ async function main(): Promise<int> {
         'sendDataExecuteSettlesOnlyAfterReceiveCallbacks', sendDataExecuteSettlesOnlyAfterReceiveCallbacks);
     commonTaskSuite.addAsyncTest('sequenceRunnerSendDataDeliveredOnHost', sequenceRunnerSendDataDeliveredOnHost);
     commonTaskSuite.addAsyncTest('taskpoolScalingShouldNotOverExpand', taskpoolScalingShouldNotOverExpand);
-    commonTaskSuite.addAsyncTest(
-        'asyncStackSubmissionKeepsTaskpoolSemantics', asyncStackSubmissionKeepsTaskpoolSemantics);
+    // #34893
+    //commonTaskSuite.addAsyncTest(
+    //    'asyncStackSubmissionKeepsTaskpoolSemantics', asyncStackSubmissionKeepsTaskpoolSemantics);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskStopsExecution', cancelPeriodicTaskStopsExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByTaskAfterExecution', cancelPeriodicTaskByTaskAfterExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByIdAfterExecution', cancelPeriodicTaskByIdAfterExecution);

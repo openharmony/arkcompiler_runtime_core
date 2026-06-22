@@ -19,9 +19,6 @@ ets-common-tests/atomics/base_operation_compare_exchange.ets
 #32837
 ets-common-tests/taskpool/asyncrunner_tasks.ets
 
-#34893
-ets-common-tests/taskpool/common_tasks_new.ets
-
 # 24986
 ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets
