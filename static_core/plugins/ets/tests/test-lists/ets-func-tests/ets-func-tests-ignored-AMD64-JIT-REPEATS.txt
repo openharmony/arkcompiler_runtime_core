@@ -1,2 +1,4 @@
 #33581
 ets_func_tests/std/concurrency/AsyncLockTimeoutTest.ets
+#34832
+ets_func_tests/std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_remove.ets
