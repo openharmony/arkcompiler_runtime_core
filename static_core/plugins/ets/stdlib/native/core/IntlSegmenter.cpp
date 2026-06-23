@@ -69,24 +69,21 @@ std::optional<icu::Locale> EtsToLocale(ani_env *env, const ani_string &bcp47Loca
  * @return Pointer to newly created IntlCluster object, nullptr if creation fails
  * @throws RuntimeError if class/constructor/field lookups fail
  */
-ani_object StdCoreIntlCreateClusterObject(ani_env *env, [[maybe_unused]] ani_class klass, ani_string cluster,
-                                          ani_int index, ani_boolean isWordLike)
-{
-    // Find the cluster class
-    ani_class clusterClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Cluster", &clusterClass));
 
-    // Find the constructor method
+static ani_status CreateClusterInstance(ani_env *env, ani_class clusterClass, ani_object *out)
+{
     ani_method constructorMethod;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(clusterClass, "<ctor>", ":", &constructorMethod));
 
-    // Create a new instance
-    ani_object clusterObj;
-
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(clusterClass, constructorMethod, &clusterObj));
+    ANI_RETURN_ON_PENDING_ERROR(env->Object_New(clusterClass, constructorMethod, out));
+    return ANI_OK;
+}
 
-    // Get field IDs
+// CC-OFFNXT(G.FUN.01) solid logic
+static void PopulateClusterFields(ani_env *env, ani_class clusterClass, ani_object obj, ani_string cluster,
+                                  ani_int index, ani_boolean isWordLike)
+{
     ani_field clusterField;
     ANI_FATAL_IF_ERROR(env->Class_FindField(clusterClass, "cluster", &clusterField));
 
@@ -96,12 +93,21 @@ ani_object StdCoreIntlCreateClusterObject(ani_env *env, [[maybe_unused]] ani_cla
     ani_field isWordLikeField;
     ANI_FATAL_IF_ERROR(env->Class_FindField(clusterClass, "isWordLike", &isWordLikeField));
 
-    // Set field values
-    ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(clusterObj, clusterField, cluster));
-    ANI_FATAL_IF_ERROR(env->Object_SetField_Int(clusterObj, indexField, index));
-    ANI_FATAL_IF_ERROR(env->Object_SetField_Boolean(clusterObj, isWordLikeField, isWordLike));
+    ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(obj, clusterField, cluster));
+    ANI_FATAL_IF_ERROR(env->Object_SetField_Int(obj, indexField, index));
+    ANI_FATAL_IF_ERROR(env->Object_SetField_Boolean(obj, isWordLikeField, isWordLike));
+}
 
-    return clusterObj;
+// CC-OFFNXT(G.FUN.01) solid logic
+ani_status StdCoreIntlCreateClusterObject(ani_env *env, [[maybe_unused]] ani_class klass, ani_string cluster,
+                                          ani_int index, ani_boolean isWordLike, ani_object *out)
+{
+    ani_class clusterClass;
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Cluster", &clusterClass));
+
+    ANI_RETURN_ON_PENDING_ERROR(CreateClusterInstance(env, clusterClass, out));
+    PopulateClusterFields(env, clusterClass, *out, cluster, index, isWordLike);
+    return ANI_OK;
 }
 
 /**
@@ -133,15 +139,14 @@ ani_boolean IntlCurrentClusterIsWordLike(std::unique_ptr<icu::BreakIterator> &br
  * @return Array of IntlCluster objects representing the segments, nullptr if operation fails
  * @throws RuntimeError if locale creation or break iterator initialization fails
  */
-ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
-                       ani_string localeStr)
+ani_status IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
+                        ani_string localeStr, ani_array *out)
 {
     std::optional<icu::Locale> locale = EtsToLocale(env, localeStr);
     if (!locale) {
         std::string message = "Unable to create ICU locale for specified tag (bcp47): ";
         message += ConvertFromAniString(env, localeStr);
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
-        return nullptr;
+        return ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
     icu::Locale breakLocale = locale.value();
 
@@ -149,8 +154,7 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     std::unique_ptr<icu::BreakIterator> breaker(factory(breakLocale, status));
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Unable to create break iterator";
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
-        return nullptr;
+        return ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 
     icu::UnicodeString uniStr = AniToUnicode(env, str);
@@ -168,7 +172,9 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
 
         ani_string clusterStr = StdStrToAni(env, utf8Cluster);
         ani_boolean isWordLike = IntlCurrentClusterIsWordLike(breaker);
-        ani_object clusterObject = StdCoreIntlCreateClusterObject(env, klass, clusterStr, current, isWordLike);
+        ani_object clusterObject = nullptr;
+        ANI_RETURN_ON_PENDING_ERROR(
+            StdCoreIntlCreateClusterObject(env, klass, clusterStr, current, isWordLike, &clusterObject));
 
         clusters.push_back(clusterObject);
         current = next;
@@ -182,15 +188,14 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     // Create array of the correct size
     ani_ref undefined {};
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
-    ani_array resultArray;
-    ANI_FATAL_IF_ERROR(env->Array_New(clusters.size(), undefined, &resultArray));
+    ANI_RETURN_ON_PENDING_ERROR(env->Array_New(clusters.size(), undefined, out));
 
     // Fill the array with cluster objects
     for (size_t i = 0; i < clusters.size(); ++i) {
-        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, clusters[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, clusters[i]));
     }
 
-    return resultArray;
+    return ANI_OK;
 }
 
 /**
@@ -203,7 +208,9 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
  */
 ani_array StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
-    return IntlClusters(env, klass, icu::BreakIterator::createCharacterInstance, str, localeStr);
+    ani_array arr = nullptr;
+    ani_status status = IntlClusters(env, klass, icu::BreakIterator::createCharacterInstance, str, localeStr, &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 /**
@@ -216,7 +223,9 @@ ani_array StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_string 
  */
 ani_array StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
-    return IntlClusters(env, klass, icu::BreakIterator::createWordInstance, str, localeStr);
+    ani_array arr = nullptr;
+    ani_status status = IntlClusters(env, klass, icu::BreakIterator::createWordInstance, str, localeStr, &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 /**
@@ -229,7 +238,9 @@ ani_array StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string str,
  */
 ani_array StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
-    return IntlClusters(env, klass, icu::BreakIterator::createSentenceInstance, str, localeStr);
+    ani_array arr = nullptr;
+    ani_status status = IntlClusters(env, klass, icu::BreakIterator::createSentenceInstance, str, localeStr, &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 /**

@@ -30,10 +30,10 @@ void StdlibLogFatal(const char *msg, ani_status status);
 
 ANI_EXPORT std::string StatusToString(ani_status status);
 
-ANI_EXPORT void ThrowNewError(ani_env *env, ani_class errorClass, std::string_view msg,
-                              const char *ctorSignature = nullptr);
-ANI_EXPORT void ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
-                              const char *ctorSignature = nullptr);
+ANI_EXPORT ani_status ThrowNewError(ani_env *env, ani_class errorClass, std::string_view msg,
+                                    const char *ctorSignature = nullptr);
+ANI_EXPORT ani_status ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
+                                    const char *ctorSignature = nullptr);
 
 ANI_EXPORT std::string ConvertFromAniString(ani_env *env, ani_string aniStr);
 

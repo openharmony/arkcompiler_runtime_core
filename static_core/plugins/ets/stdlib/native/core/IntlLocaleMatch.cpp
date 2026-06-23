@@ -40,7 +40,8 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+    [[maybe_unused]] ani_status status =
+        ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 std::vector<std::string> GetAvailableLocales()
@@ -125,24 +126,23 @@ static std::vector<std::string> ToStringList(ani_env *env, ani_array aniList)
     return result;
 }
 
-static ani_array ToAniStrArray(ani_env *env, std::vector<std::string> strings)
+static ani_status ToAniStrArray(ani_env *env, std::vector<std::string> strings, ani_array *out)
 {
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
 
-    ani_array array;
     if (strings.empty()) {
-        ANI_FATAL_IF_ERROR(env->Array_New(0, nullptr, &array));
-        return array;
+        ANI_RETURN_ON_PENDING_ERROR(env->Array_New(0, nullptr, out));
+        return ANI_OK;
     }
     auto first = intl::StdStrToAni(env, strings[0]);
 
-    ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), first, &array));
+    ANI_RETURN_ON_PENDING_ERROR(env->Array_New(strings.size(), first, out));
     for (size_t i = 1; i < strings.size(); ++i) {
         auto item = intl::StdStrToAni(env, strings[i]);
-        ANI_FATAL_IF_ERROR(env->Array_Set(array, i, item));
+        ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, item));
     }
-    return array;
+    return ANI_OK;
 }
 
 ani_status CanonicalizeLocaleList(ani_env *env, std::vector<std::string> &seen,
@@ -323,7 +323,9 @@ ani_array StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class kla
         }
         result.push_back(bestfit);
     }
-    return ToAniStrArray(env, result);
+    ani_array arr = nullptr;
+    ani_status status = ToAniStrArray(env, result, &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 static std::string LookupLocale(const std::string &locTag, const icu::Locale *availableLocales, const int32_t count)
@@ -383,7 +385,9 @@ ani_array StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class klas
         return nullptr;
     }
     auto result = LookupLocales(availableLocales, requestedLocales);
-    return ToAniStrArray(env, result);
+    ani_array arr = nullptr;
+    ani_status toArrStatus = ToAniStrArray(env, result, &arr);
+    return toArrStatus == ANI_OK ? arr : nullptr;
 }
 
 ani_status RegisterIntlLocaleMatch(ani_env *env)

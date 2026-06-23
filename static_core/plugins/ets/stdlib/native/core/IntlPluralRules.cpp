@@ -63,7 +63,8 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+    [[maybe_unused]] ani_status status =
+        ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 static icu::Locale GetLocale(const std::string &tag)
@@ -208,7 +209,9 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
     ani_fixedarray_ref array;
-    ANI_FATAL_IF_ERROR(env->FixedArray_New_Ref(stringClass, categories.size(), first, &array));
+    if (env->FixedArray_New_Ref(stringClass, categories.size(), first, &array) != ANI_OK) {
+        return nullptr;
+    }
     for (size_t i = 1; i < categories.size(); ++i) {
         auto item = StdStrToAni(env, categories[i]);
         ANI_FATAL_IF_ERROR(env->FixedArray_Set_Ref(array, i, item));

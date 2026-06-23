@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,10 +135,16 @@ function dateFormatToPartsWithOptions(): void {
     })
 }
 
+function formatRangeToPartsTest() {
+    let dtf = new Intl.DateTimeFormat('en', {dateStyle: 'medium'})
+    arktest.expectNoThrow(() => {dtf.formatRangeToParts(1,2)})
+}
+
 function main(): int {
     initFormatResults()
 
     const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
     suite.addTest("with formatting options", dateFormatToPartsWithOptions)
+    suite.addTest('test formatrangetoparts', formatRangeToPartsTest)
     return suite.run()
 }

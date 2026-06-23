@@ -31,7 +31,7 @@ void StdlibLogFatal(const char *msg, ani_status status)
     UNREACHABLE();
 }
 
-ANI_EXPORT void ThrowNewError(ani_env *env, ani_class errorClass, std::string_view msg, const char *ctorSignature)
+ANI_EXPORT ani_status ThrowNewError(ani_env *env, ani_class errorClass, std::string_view msg, const char *ctorSignature)
 {
     ASSERT(env != nullptr);
 
@@ -41,7 +41,7 @@ ANI_EXPORT void ThrowNewError(ani_env *env, ani_class errorClass, std::string_vi
     ani_string message = CreateUtf8String(env, msg.data(), msg.size());
     if (message == nullptr) {
         // Exception occured in CreateUtf8String.
-        return;
+        return ANI_PENDING_ERROR;
     }
 
     ani_ref undefined;
@@ -49,19 +49,20 @@ ANI_EXPORT void ThrowNewError(ani_env *env, ani_class errorClass, std::string_vi
 
     ani_object errorObject;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(errorClass, ctor, &errorObject, message, undefined));
+    ANI_RETURN_ON_PENDING_ERROR(env->Object_New(errorClass, ctor, &errorObject, message, undefined));
 
-    ANI_FATAL_IF_ERROR(env->ThrowError(reinterpret_cast<ani_error>(errorObject)));
+    ANI_RETURN_ON_PENDING_ERROR(env->ThrowError(reinterpret_cast<ani_error>(errorObject)));
+    return ANI_OK;
 }
 
-ANI_EXPORT void ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
-                              const char *ctorSignature)
+ANI_EXPORT ani_status ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
+                                    const char *ctorSignature)
 {
     ASSERT(env != nullptr);
 
     ani_class errCls;
     ANI_FATAL_IF_ERROR(env->FindClass(classDescriptor.data(), &errCls));
-    ThrowNewError(env, errCls, msg, ctorSignature);
+    return ThrowNewError(env, errCls, msg, ctorSignature);
 }
 
 ANI_EXPORT std::string ConvertFromAniString(ani_env *env, ani_string aniStr)

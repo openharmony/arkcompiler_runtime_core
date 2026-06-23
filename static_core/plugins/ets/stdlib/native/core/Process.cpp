@@ -482,11 +482,13 @@ static ani_array GetGroupIDs(ani_env *env)
     ani_ref undefined {};
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_array result;
-    ANI_FATAL_IF_ERROR(env->Array_New(groups.size(), undefined, &result));
+    if (env->Array_New(groups.size(), undefined, &result) != ANI_OK) {
+        return nullptr;
+    }
 
     if (groups.empty()) {
-        ThrowNewError(env, "std.core.RuntimeError", "Failed to get process groups",
-                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        [[maybe_unused]] ani_status status = ThrowNewError(env, "std.core.RuntimeError", "Failed to get process groups",
+                                                           ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return result;
     }
 
@@ -499,7 +501,9 @@ static ani_array GetGroupIDs(ani_env *env)
     for (size_t i = 0; i < groups.size(); ++i) {
         ani_object boxedInt {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ANI_FATAL_IF_ERROR(env->Object_New(intClass, intCtor, &boxedInt, groupIds[i]));
+        if (env->Object_New(intClass, intCtor, &boxedInt, groupIds[i]) != ANI_OK) {
+            return nullptr;
+        }
         ANI_FATAL_IF_ERROR(env->Array_Set(result, i, boxedInt));
     }
 

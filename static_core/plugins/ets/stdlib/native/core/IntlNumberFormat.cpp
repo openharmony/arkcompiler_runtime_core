@@ -510,7 +510,7 @@ std::vector<NumberFormatPart> ExtractParts(ani_env *env, const icu::FormattedVal
                                      endRangeSource, calculateSources);
 }
 
-ani_object GetNumberFormatPart(ani_env *env, ani_string ty, ani_string value)
+ani_status GetNumberFormatPart(ani_env *env, ani_string ty, ani_string value, ani_object *out)
 {
     ani_class numberFormatPartClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.NumberFormatPart", &numberFormatPartClass));
@@ -521,7 +521,7 @@ ani_object GetNumberFormatPart(ani_env *env, ani_string ty, ani_string value)
     ani_object numberFormatPartObj;
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(numberFormatPartClass, constructorMethod, &numberFormatPartObj));
+    ANI_RETURN_ON_PENDING_ERROR(env->Object_New(numberFormatPartClass, constructorMethod, &numberFormatPartObj));
 
     ani_field typeField;
     ANI_FATAL_IF_ERROR(env->Class_FindField(numberFormatPartClass, "type", &typeField));
@@ -532,10 +532,11 @@ ani_object GetNumberFormatPart(ani_env *env, ani_string ty, ani_string value)
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(numberFormatPartObj, typeField, ty));
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(numberFormatPartObj, valueField, value));
 
-    return numberFormatPartObj;
+    *out = numberFormatPartObj;
+    return ANI_OK;
 }
 
-ani_object GetNumberFormatRangePart(ani_env *env, ani_string ty, ani_string value, ani_string source)
+ani_status GetNumberFormatRangePart(ani_env *env, ani_string ty, ani_string value, ani_string source, ani_object *out)
 {
     ani_class numberRangeFormatPartClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.NumberRangeFormatPart", &numberRangeFormatPartClass));
@@ -545,8 +546,9 @@ ani_object GetNumberFormatRangePart(ani_env *env, ani_string ty, ani_string valu
 
     ani_object numberRangeFormatPartObj;
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(numberRangeFormatPartClass, constructorMethod, &numberRangeFormatPartObj));
+    ANI_RETURN_ON_PENDING_ERROR(
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        env->Object_New(numberRangeFormatPartClass, constructorMethod, &numberRangeFormatPartObj));
 
     ani_field typeField;
     ANI_FATAL_IF_ERROR(env->Class_FindField(numberRangeFormatPartClass, "type", &typeField));
@@ -560,25 +562,25 @@ ani_object GetNumberFormatRangePart(ani_env *env, ani_string ty, ani_string valu
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(numberRangeFormatPartObj, typeField, ty));
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(numberRangeFormatPartObj, valueField, value));
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(numberRangeFormatPartObj, sourceField, source));
-    return numberRangeFormatPartObj;
+    *out = numberRangeFormatPartObj;
+    return ANI_OK;
 }
 
 template <typename T>
-ani_array IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] T value)
+ani_status IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] T value, ani_array *out)
 {
-    ani_array resultArray;
     ParsedOptions options;
     ParseOptions(env, self, options);
 
     ani_status err;
     LocNumFmt &formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
     if (err != ANI_OK) {
-        return nullptr;
+        return err;
     }
 
     auto fmtNumber = GetICUFormattedNumber<T>::GetFormattedNumber(formatter, value);
     if (!fmtNumber) {
-        return nullptr;
+        return ANI_PENDING_ERROR;
     }
 
     std::vector<ani_object> resultParts;
@@ -589,57 +591,57 @@ ani_array IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[may
     for (const auto &part : parts) {
         auto utype = CreateUtf8String(env, part.type.c_str(), part.type.size());
         auto uvalue = CreateUtf8String(env, part.value.c_str(), part.value.size());
-        auto partObj = GetNumberFormatPart(env, utype, uvalue);
+        ani_object partObj = nullptr;
+        ANI_RETURN_ON_PENDING_ERROR(GetNumberFormatPart(env, utype, uvalue, &partObj));
         resultParts.push_back(partObj);
     }
 
     ani_ref undefined;
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
-    ANI_FATAL_IF_ERROR(env->Array_New(resultParts.size(), undefined, &resultArray));
+    ANI_RETURN_ON_PENDING_ERROR(env->Array_New(resultParts.size(), undefined, out));
     for (size_t i = 0; i < resultParts.size(); ++i) {
-        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, resultParts[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, resultParts[i]));
     }
 
-    return resultArray;
+    return ANI_OK;
 }
 
-ani_array IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object self,
-                                [[maybe_unused]] const icu::Formattable &startFrmtbl,
-                                [[maybe_unused]] const icu::Formattable &endFrmtbl)
+ani_status IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object self,
+                                 [[maybe_unused]] const icu::Formattable &startFrmtbl,
+                                 [[maybe_unused]] const icu::Formattable &endFrmtbl, ani_array *out)
 {
-    ani_array resultArray;
-
     ParsedOptions options;
     ParseOptions(env, self, options);
 
     ani_status err;
     LocNumRangeFmt &formatter = g_intlState->fmtsCache.NumRangeFmtsCacheInvalidation(env, options, err);
     if (err != ANI_OK) {
-        return nullptr;
+        return err;
     }
 
     UErrorCode status = U_ZERO_ERROR;
     icu::number::FormattedNumberRange formatted = formatter.formatFormattableRange(startFrmtbl, endFrmtbl, status);
 
     if (U_FAILURE(status) != 0) {
-        return nullptr;
+        return ANI_PENDING_ERROR;
     }
 
     std::vector<NumberFormatPart> parts = ExtractParts(env, formatted, true);
 
     ani_ref undefined;
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
-    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), undefined, &resultArray));
+    ANI_RETURN_ON_PENDING_ERROR(env->Array_New(parts.size(), undefined, out));
 
     for (size_t i = 0; i < parts.size(); ++i) {
         auto typeString = CreateUtf8String(env, parts[i].type.c_str(), parts[i].type.size());
         auto valueString = CreateUtf8String(env, parts[i].value.c_str(), parts[i].value.size());
         auto sourceString = CreateUtf8String(env, parts[i].source.c_str(), parts[i].source.size());
-        auto part = GetNumberFormatRangePart(env, typeString, valueString, sourceString);
-        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, part));
+        ani_object part = nullptr;
+        ANI_RETURN_ON_PENDING_ERROR(GetNumberFormatRangePart(env, typeString, valueString, sourceString, &part));
+        ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, part));
     }
 
-    return resultArray;
+    return ANI_OK;
 }
 
 ani_string IcuFormatRangeDoubleDouble(ani_env *env, ani_object self, ani_double startValue, ani_double endValue)
@@ -664,40 +666,56 @@ ani_string IcuFormatRangeDecStrDecStr(ani_env *env, ani_object self, ani_string 
 
 ani_array IcuFormatToPartsDouble(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_double value)
 {
-    return IcuFormatToParts<ani_double>(env, self, value);
+    ani_array arr = nullptr;
+    ani_status status = IcuFormatToParts<ani_double>(env, self, value, &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 ani_array IcuFormatToPartsDecStr(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_string value)
 {
-    return IcuFormatToParts<std::string>(env, self, ConvertFromAniString(env, value));
+    ani_array arr = nullptr;
+    ani_status status = IcuFormatToParts<std::string>(env, self, ConvertFromAniString(env, value), &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 ani_array IcuFormatToRangePartsDoubleDouble(ani_env *env, [[maybe_unused]] ani_object self,
                                             [[maybe_unused]] ani_double startValue,
                                             [[maybe_unused]] ani_double endValue)
 {
-    return IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), DoubleToFormattable(env, endValue));
+    ani_array arr = nullptr;
+    ani_status status = IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue),
+                                              DoubleToFormattable(env, endValue), &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 ani_array IcuFormatToRangePartsDoubleDecStr(ani_env *env, [[maybe_unused]] ani_object self,
                                             [[maybe_unused]] ani_double startValue,
                                             [[maybe_unused]] ani_string endValue)
 {
-    return IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), StrToFormattable(env, endValue));
+    ani_array arr = nullptr;
+    ani_status status =
+        IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), StrToFormattable(env, endValue), &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 ani_array IcuFormatToRangePartsDecStrDouble(ani_env *env, [[maybe_unused]] ani_object self,
                                             [[maybe_unused]] ani_string startValue,
                                             [[maybe_unused]] ani_double endValue)
 {
-    return IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), DoubleToFormattable(env, endValue));
+    ani_array arr = nullptr;
+    ani_status status =
+        IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), DoubleToFormattable(env, endValue), &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 ani_array IcuFormatToRangePartsDecStrDecStr(ani_env *env, [[maybe_unused]] ani_object self,
                                             [[maybe_unused]] ani_string startValue,
                                             [[maybe_unused]] ani_string endValue)
 {
-    return IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), StrToFormattable(env, endValue));
+    ani_array arr = nullptr;
+    ani_status status =
+        IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), StrToFormattable(env, endValue), &arr);
+    return status == ANI_OK ? arr : nullptr;
 }
 
 ani_boolean IsIcuUnitCorrect(ani_env *env, [[maybe_unused]] ani_object self, ani_string unit)
