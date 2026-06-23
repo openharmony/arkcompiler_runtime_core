@@ -1279,9 +1279,9 @@ void BasicBlock::RemoveInst(Inst *inst)
     inst->RemoveUsers();
     ASSERT(!inst->HasUsers());
     inst->RemoveInputs();
-    if (inst->GetOpcode() == Opcode::NullPtr) {
+    if (inst->GetOpcode() == Opcode::NullPtr && graph_->GetNullPtrInst() == inst) {
         graph_->UnsetNullPtrInst();
-    } else if (inst->GetOpcode() == Opcode::LoadUniqueObject) {
+    } else if (inst->GetOpcode() == Opcode::LoadUniqueObject && graph_->GetUniqueObjectInst() == inst) {
         graph_->UnsetUniqueObjectInst();
     } else if (inst->GetOpcode() == Opcode::Constant) {
         graph_->RemoveConstFromList(static_cast<ConstantInst *>(inst));

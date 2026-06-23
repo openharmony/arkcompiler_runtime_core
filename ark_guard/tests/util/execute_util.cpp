@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "libarkbase/mem/mem_config.h"
-#include "libarkbase/mem/pool_manager.h"
+#include "libabckit/src/mem_manager/mem_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
 
 #include "logger.h"
@@ -32,18 +31,16 @@
 #endif
 
 namespace ark::guard {
-bool ExecuteUtil::isInitialized_ = false;
-
 ani_options GenerateVmOptions(const std::string &abcPath)
 {
-    static std::string bootFileString; // CC-OFF(G.EXP.09) for test purposes
+    static std::string bootFileString;  // CC-OFF(G.EXP.09) for test purposes
     bootFileString = "--ext:boot-panda-files=" + std::string(ARK_GUARD_ETS_STD_LIB);
     if (!abcPath.empty()) {
         bootFileString += ":";
         bootFileString += abcPath;
     }
 
-    static std::vector<ani_option> optionsVector; // CC-OFF(G.EXP.09) for test purposes
+    static std::vector<ani_option> optionsVector;  // CC-OFF(G.EXP.09) for test purposes
     optionsVector = {{bootFileString.data(), nullptr},
                      {"--ext:gc-trigger-type=heap-trigger", nullptr},
                      {"--ext:compiler-enable-jit=false", nullptr},
@@ -99,12 +96,10 @@ bool ExecuteTargetFunction(ani_env *env, const std::string &moduleName, const st
 
 void ark::guard::ExecuteUtil::InitEnvironment()
 {
-    if (isInitialized_) {
-        return;
-    }
-    PoolManager::Finalize();
-    mem::MemConfig::Finalize();
-    isInitialized_ = true;
+    // Finalize libabckit memory state before creating ANI VM.
+    // ANI_CreateVM initializes its own PoolManager/MemConfig, so they must be finalized first.
+    // MemManager::Finalize() is safe to call even when not initialized (it guards internally).
+    libabckit::MemManager::Finalize();
 }
 
 std::string ark::guard::ExecuteUtil::ExecuteStaticAbc(const std::string &abcPath, const std::string &moduleName,
