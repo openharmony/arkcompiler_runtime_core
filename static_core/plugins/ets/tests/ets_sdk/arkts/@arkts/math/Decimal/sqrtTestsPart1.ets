@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0(the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,14 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Decimal sqrt API tests");
-    suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM001);
-    suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM002);
-    suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM003);
-    suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM004);
+    const suite = new arktest.ArkTestsuite('Decimal sqrt API tests');
+    suite.addTest('Decimal clamp with specific config', testSqrtWithDiffPRandRM001);
+    suite.addTest('Decimal clamp with specific config', testSqrtWithDiffPRandRM002);
+    suite.addTest('Decimal clamp with specific config', testSqrtWithDiffPRandRM003);
+    suite.addTest('Decimal clamp with specific config', testSqrtWithDiffPRandRM004);
+    suite.addTest('Decimal sqrt extreme exponent', testSqrtWithDiffPRandRM005);
+    suite.addTest('Decimal sqrt extreme exponent', testSqrtWithDiffPRandRM006);
+    suite.addTest('Decimal sqrt extreme exponent', testSqrtWithDiffPRandRM007);
     return suite.run();
 }
 
@@ -106,4 +109,28 @@ function testSqrtWithDiffPRandRM004() {
     checkSqrtResult('0.0000000000000000000000000000000000000000000000000000140471526414353053458592377645343274655348630930173397', '1.97322497331782876158645511100784258994087355048761111111111111E-106', 54, 5);
     checkSqrtResult('0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002598902022257132166703490111187879281161770014282895', '6.7542917212922111E-232', 52, 5);
     checkSqrtResult('0.00999999999999999999999999999949', '0.00009999999999999999999999999999', 30, 1);
+}
+
+function testSqrtWithDiffPRandRM005() {
+    Decimal.set({ toExpNeg: -7, toExpPos: 21, minE: -9e15, maxE: 9e15, rounding: 3, precision: 9 });
+    let r : Decimal = new Decimal('9e-757456408356952');
+    let p : Decimal = r.pow(0.5);
+    let s : Decimal = r.sqrt();
+    arktest.assertEQ(p.valueOf(), s.valueOf());
+}
+
+function testSqrtWithDiffPRandRM006() {
+    Decimal.set({ toExpNeg: -7, toExpPos: 21, minE: -9e15, maxE: 9e15, rounding: 1, precision: 9 });
+    let r : Decimal = new Decimal('1e-136962340');
+    let p : Decimal = r.pow(0.5);
+    let s : Decimal = r.sqrt();
+    arktest.assertEQ(p.valueOf(), s.valueOf());
+}
+
+function testSqrtWithDiffPRandRM007() {
+    Decimal.set({ toExpNeg: -7, toExpPos: 21, minE: -9e15, maxE: 9e15, rounding: 1, precision: 1 });
+    let r : Decimal = new Decimal('9e-4408427903084132');
+    let p : Decimal = r.pow(0.5);
+    let s : Decimal = r.sqrt();
+    arktest.assertEQ(p.valueOf(), s.valueOf());
 }

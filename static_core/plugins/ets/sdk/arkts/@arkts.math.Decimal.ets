@@ -1358,7 +1358,7 @@ export class Decimal {
         while (true) {
             let t = r;
             r = t.add(Utils.divide(x, t, sd + 2, 1)).mul(0.5);
-            if (this.isDigitsEqual(t.d!, r.d!, 0, sd)) {
+            if (Utils.digitsToString(t.d!).slice(0, sd) === (n = Utils.digitsToString(r.d!)).slice(0, sd)) {
                 n = n.slice(sd - 3, sd + 1);
                 if (n == '9999' || !rep && n == '4999') {
                     if (!rep) {
