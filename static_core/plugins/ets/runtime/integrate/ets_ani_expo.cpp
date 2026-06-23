@@ -70,6 +70,9 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
             appAnFiles.push_back(aotFilesRawInput.substr(start));
         } else if (option == ENABLE_AN_OPTION) {
             TryLoadAotFileForBoot();
+        } else if (option.rfind(PROCESS_PACKAGE_PREFIX, 0) == 0) {
+            std::string packageName = option.substr(PROCESS_PACKAGE_PREFIX.size());
+            Runtime::GetCurrent()->SetProcessPackageName(packageName.c_str());
         } else {
             LOG(ERROR, RUNTIME) << "Unprocessed or invalid option parameter." << option;
         }

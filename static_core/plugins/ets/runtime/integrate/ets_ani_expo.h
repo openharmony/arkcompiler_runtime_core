@@ -44,6 +44,7 @@ public:
     static constexpr std::string_view AOT_FILES_OPTION_PREFIX = "--ext:--aot-files=";
     static constexpr std::string_view INTEROP_OPTION_PREFIX = "--ext:interop";
     static constexpr std::string_view ENABLE_AN_OPTION = "--ext:--enable-an";
+    static constexpr std::string_view PROCESS_PACKAGE_PREFIX = "--ext:--process-package-name=";
     static constexpr std::string_view ETSSTDLIB_ABC = "/system/framework/etsstdlib_bootabc.abc";
     static void Prefork(ani_env *env, void *napienv);
     static void Postfork(ani_env *env, const std::vector<ani_option> &options, bool postZygoteFork = true);
