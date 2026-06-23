@@ -30,14 +30,6 @@ ohos_fuzztest("GetGlobalFileInfoFuzzTest") {
   ]
   sources = [ "getglobalfileinfo_fuzzer.cpp" ]
   deps = [ "$ark_root/libpandafile:libarkfile_static" ]
-  external_deps = [
-    sdk_libc_secshared_dep,
-    zlib_deps,
-  ]
-
-  if (enable_hilog) {
-    external_deps += [ "hilog:libhilog" ]
-  }
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {

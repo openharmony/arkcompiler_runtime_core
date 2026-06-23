@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//arkcompiler/runtime_core/ark_config.gni")
 
 #####################hydra-fuzz###################
 import("//build/test.gni")
@@ -33,14 +32,6 @@ ohos_fuzztest("MethodDataAccessorFuzzTest") {
   ]
   sources = [ "methoddataaccessor_fuzzer.cpp" ]
   deps = [ "//arkcompiler/runtime_core/libpandafile:libarkfile_static_fuzz" ]
-  external_deps = [
-    sdk_libc_secshared_dep,
-    zlib_deps,
-  ]
-
-  if (enable_hilog) {
-    external_deps += [ "hilog:libhilog" ]
-  }
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {

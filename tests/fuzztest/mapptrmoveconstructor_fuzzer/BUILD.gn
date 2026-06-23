@@ -30,11 +30,6 @@ ohos_fuzztest("MapPtrMoveConstructorFuzzTest") {
   ]
   sources = [ "mapptrmoveconstructor_fuzzer.cpp" ]
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]
-  external_deps = [ sdk_libc_secshared_dep ]
-
-  if (enable_hilog) {
-    external_deps += [ "hilog:libhilog" ]
-  }
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {

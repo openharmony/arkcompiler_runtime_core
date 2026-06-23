@@ -176,15 +176,20 @@ ohos_static_library("libarkfile_static") {
       "$ark_third_party_root/bounds_checking_function:libsec_static",
       "$ark_third_party_root/zlib:libz",
     ]
-  } else {
+  } else if (ark_standalone_build) {
     external_deps = [
+      sdk_libc_secshared_dep,
+      zlib_deps,
+    ]
+  } else {
+    public_external_deps = [
       sdk_libc_secshared_dep,
       zlib_deps,
     ]
   }
 
   if (enable_hilog) {
-    external_deps += [ "hilog:libhilog" ]
+    public_external_deps += [ "hilog:libhilog" ]
   }
 
   part_name = "runtime_core"
@@ -213,15 +218,20 @@ ohos_static_library("libarkfile_runtime_static") {
       "$ark_third_party_root/bounds_checking_function:libsec_static",
       "$ark_third_party_root/zlib:libz",
     ]
-  } else {
+  } else if (ark_standalone_build) {
     external_deps = [
+      sdk_libc_secshared_dep,
+      zlib_deps,
+    ]
+  } else {
+    public_external_deps = [
       sdk_libc_secshared_dep,
       zlib_deps,
     ]
   }
 
   if (enable_hilog) {
-    external_deps += [ "hilog:libhilog" ]
+    public_external_deps += [ "hilog:libhilog" ]
   }
 
   part_name = "runtime_core"
@@ -241,13 +251,20 @@ ohos_source_set("libarkfile_static_fuzz") {
     "$ark_root/libziparchive:libarkziparchive_static",
   ]
 
-  external_deps = [
-    "zlib:libz",
-    sdk_libc_secshared_dep,
-  ]
+  if (!ark_standalone_build) {
+    public_external_deps = [
+      "zlib:libz",
+      sdk_libc_secshared_dep,
+    ]
+  } else {
+    external_deps = [
+      "zlib:libz",
+      sdk_libc_secshared_dep,
+    ]
+  }
 
   if (enable_hilog) {
-    external_deps += [ "hilog:libhilog" ]
+    public_external_deps += [ "hilog:libhilog" ]
   }
 
   part_name = "runtime_core"
@@ -270,13 +287,13 @@ ohos_source_set("libarkfile_static_verifier") {
   ]
 
   if (!ark_standalone_build) {
-    external_deps = [
+    public_external_deps = [
       sdk_libc_secshared_dep,
       zlib_deps,
     ]
     if (enable_hilog && defined(ohos_indep_compiler_enable) &&
         ohos_indep_compiler_enable) {
-      external_deps += [ "hilog:libhilog" ]
+      external_deps = [ "hilog:libhilog" ]
     }
   } else {
     external_deps = [
@@ -328,12 +345,12 @@ ohos_source_set("libarkfile_frontend_set_static") {
       sdk_libc_secshared_dep,
     ]
   } else {
-    external_deps = [
+    public_external_deps = [
       "zlib:libz",
       sdk_libc_secshared_dep,
     ]
     if (enable_hilog) {
-      external_deps += [ "hilog:libhilog" ]
+      external_deps = [ "hilog:libhilog" ]
     }
   }
 
