@@ -128,8 +128,8 @@ public:
                             [[maybe_unused]] size_t heapSize)
     {
     }
-    virtual void GCPhaseStarted([[maybe_unused]] GCPhase phase) {}
-    virtual void GCPhaseFinished([[maybe_unused]] GCPhase phase) {}
+    virtual void GCPhaseStarted([[maybe_unused]] ark::mem::GCPhase phase) {}
+    virtual void GCPhaseFinished([[maybe_unused]] ark::mem::GCPhase phase) {}
 };
 
 class GCExtensionData;

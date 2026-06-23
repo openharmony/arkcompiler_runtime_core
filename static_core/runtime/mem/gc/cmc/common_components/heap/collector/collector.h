@@ -20,14 +20,15 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
+#include <unordered_set>
+#include <vector>
 
+#include "common_components/base/globals.h"
 #include "common_interfaces/objects/base_object.h"
 #include "common_components/heap/collector/gc_request.h"
 #include "common_components/heap/collector/gc_stats.h"
 #include "common_interfaces/thread/mutator.h"
-#include "runtime/include/mem/panda_containers.h"
-#include "common_interfaces/base_runtime.h"
-#include "runtime/include/mem/panda_containers.h"
+#include "libarkbase/os/mutex.h"
 
 namespace ark::common_vm {
 enum CollectorType {
@@ -38,28 +39,11 @@ enum CollectorType {
     COLLECTOR_TYPE_COUNT,
 };
 
-class GCListener {
-public:
-    GCListener() = default;
-
-    virtual void OnGCStart(GCReason reason, GCType type) = 0;
-    virtual void OnGCFinish(GCReason reason, GCType type) = 0;
-    virtual void OnGCPhaseStart(GCPhase phase) = 0;
-    virtual void OnGCPhaseEnd(GCPhase phase) = 0;
-
-    virtual ~GCListener() = default;
-
-    NO_COPY_SEMANTIC(GCListener);
-    NO_MOVE_SEMANTIC(GCListener);
-};
-
 // Central garbage identification algorithm.
 class Collector {
 public:
     Collector();
     virtual ~Collector();
-
-    static const char *GetGCPhaseName(GCPhase phase);
 
     // Initializer and finalizer.
     virtual void Init() = 0;
@@ -70,15 +54,11 @@ public:
     // reason: Reason for GC.
     // async:  Trigger from unsafe context, e.g., holding a lock, in the middle of an allocation.
     //         In order to prevent deadlocks, async trigger only add one async gc task and will not block.
-    void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
-
-    virtual GCPhase GetGCPhase() const = 0;
-
-    virtual void SetGCPhase(const GCPhase phase) = 0;
+    void RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest = false);
 
     virtual void FixObjectRefFields(BaseObject *) const {}
 
-    virtual void RunGarbageCollection(uint64_t, GCReason, GCType) = 0;
+    virtual void RunGarbageCollection(uint64_t, ark::GCTask &) = 0;
 
     virtual GCStats &GetGCStats()
     {
@@ -109,28 +89,20 @@ public:
         return obj;
     };
 
-    virtual void AddGCListener(GCListener *listener) = 0;
-    virtual void RemoveGCListener(GCListener *listener) = 0;
-    virtual void NotifyGCListeners(std::function<void(GCListener *)> notifier) = 0;
-
     bool RegisterVM(VMInterface *vm);
     bool UnregisterVM(VMInterface *vm);
     void ForEachVM(std::function<void(VMInterface *)> action);
 
 protected:
-    virtual void RequestGCInternal(GCReason, bool, GCType, bool)
+    virtual void RequestGCInternal(GCTaskCause, bool, GCCollectionType, bool)
     {
         LOG(FATAL, COMMON) << "Unresolved fatal";
         UNREACHABLE();
     }
 
     CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
-    std::atomic<GCPhase> gcPhase_ = {GCPhase::GC_PHASE_IDLE};
 
 private:
-    PandaVector<GCListener *> gcListeners_;
-    ark::os::memory::Mutex gcListenersLock_;
-
     std::unordered_set<VMInterface *> vmIfaces_;
     ark::os::memory::RWLock vmIfacesLock_;
 };

@@ -24,7 +24,6 @@
 #include "common_components/heap/collector/collector.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_interfaces/base/runtime_param.h"
-#include "common_interfaces/base_runtime.h"
 #include "common_interfaces/objects/base_object.h"
 
 namespace ark::common_vm {
@@ -94,7 +93,6 @@ public:
     virtual Allocator &GetAllocator() = 0;
     virtual HeuristicGCPolicy &GetHeuristicGCPolicy() = 0;
     virtual void TryHeuristicGC() = 0;
-    virtual void TryIdleGC() = 0;
     virtual void NotifyNativeAllocation(size_t bytes) = 0;
     virtual void NotifyNativeFree(size_t bytes) = 0;
     virtual void NotifyNativeReset(size_t oldBytes, size_t newBytes) = 0;
@@ -103,7 +101,6 @@ public:
     virtual size_t GetNativeHeapThreshold() const = 0;
     virtual void ChangeGCParams(bool isBackground) = 0;
     virtual void RecordAliveSizeAfterLastGC(size_t aliveBytes) = 0;
-    virtual bool CheckAndTriggerHintGC(MemoryReduceDegree degree) = 0;
     virtual void NotifyHighSensitive(bool isStart) = 0;
     virtual void SetRecordHeapObjectSizeBeforeSensitive(size_t objSize) = 0;
     virtual AppSensitiveStatus GetSensitiveStatus() = 0;
@@ -185,16 +182,10 @@ public:
         return false;
     }
 
-    static void MarkJitFortMemInstalled(void *thread, void *obj);
-
     static bool IsHeapAddress(const void *addr)
     {
         return IsHeapAddress(reinterpret_cast<HeapAddress>(addr));
     }
-
-    virtual GCPhase GetGCPhase() const = 0;
-
-    virtual void SetGCPhase(const GCPhase phase) = 0;
 
     virtual bool ForEachObject(const std::function<void(BaseObject *)> &, bool safe) = 0;
 
@@ -206,9 +197,9 @@ public:
 
     virtual void StopGCWork() = 0;
 
-    virtual GCReason GetGCReason() = 0;
+    virtual GCTaskCause GetGCReason() = 0;
 
-    virtual void SetGCReason(GCReason reason) = 0;
+    virtual void SetGCReason(GCTaskCause reason) = 0;
 
     virtual bool InRecentSpace(const void *addr) = 0;
     virtual bool GetForceThrowOOM() const = 0;

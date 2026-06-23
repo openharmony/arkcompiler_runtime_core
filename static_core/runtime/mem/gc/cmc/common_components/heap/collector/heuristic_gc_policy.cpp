@@ -17,7 +17,6 @@
 
 #include "common_components/heap/allocator/allocator.h"
 #include "common_components/heap/heap.h"
-#include "common_interfaces/base_runtime.h"
 
 namespace ark::common_vm {
 std::atomic<StartupStatus> StartupStatusManager::startupStatus_ = StartupStatus::BEFORE_STARTUP;
@@ -76,30 +75,11 @@ void HeuristicGCPolicy::TryHeuristicGC()
     if (allocated >= threshold) {
         if (collector.GetGCStats().shouldRequestYoung) {
             LOG(DEBUG, GC) << "request heu gc: young " << allocated << ", threshold " << threshold;
-            collector.RequestGC(GC_REASON_YOUNG, true, GC_TYPE_YOUNG);
+            collector.RequestGC(GCTaskCause::YOUNG_GC_CAUSE, true, GCCollectionType::YOUNG);
         } else {
             LOG(DEBUG, GC) << "request heu gc: allocated " << allocated << ", threshold " << threshold;
-            collector.RequestGC(GC_REASON_HEU, true, GC_TYPE_FULL);
+            collector.RequestGC(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, true, GCCollectionType::FULL);
         }
-    }
-}
-
-void HeuristicGCPolicy::TryIdleGC()
-{
-    if (UNLIKELY(ShouldRestrainGCOnStartupOrSensitive())) {
-        return;
-    }
-
-    if (aliveSizeAfterGC_ == 0) {
-        return;
-    }
-    size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
-    size_t expectHeapSize = std::max(static_cast<size_t>(aliveSizeAfterGC_ * IDLE_SPACE_SIZE_MIN_INC_RATIO),
-                                     aliveSizeAfterGC_ + IDLE_SPACE_SIZE_MIN_INC_STEP_FULL);
-    if (allocated >= expectHeapSize) {
-        LOG(DEBUG, GC) << "request idle gc: allocated " << allocated << ", expectHeapSize " << expectHeapSize
-                       << ", aliveSizeAfterGC " << aliveSizeAfterGC_;
-        Heap::GetHeap().GetCollector().RequestGC(GC_REASON_IDLE, true, GC_TYPE_FULL);
     }
 }
 
@@ -156,10 +136,10 @@ void HeuristicGCPolicy::CheckGCForNative()
     if (currentNativeSize > currentThreshold) {
         if (currentNativeSize > URGENCY_NATIVE_LIMIT) {
             // Native binding size is too large, should wait a sync finished.
-            Heap::GetHeap().GetCollector().RequestGC(GC_REASON_NATIVE_SYNC, false, GC_TYPE_FULL);
+            Heap::GetHeap().GetCollector().RequestGC(GCTaskCause::NATIVE_ALLOC_CAUSE, false, GCCollectionType::FULL);
             return;
         }
-        Heap::GetHeap().GetCollector().RequestGC(GC_REASON_NATIVE, true, GC_TYPE_FULL);
+        Heap::GetHeap().GetCollector().RequestGC(GCTaskCause::NATIVE_ALLOC_CAUSE, true, GCCollectionType::FULL);
     }
 }
 void HeuristicGCPolicy::NotifyNativeFree(size_t bytes)
@@ -218,7 +198,7 @@ void HeuristicGCPolicy::ChangeGCParams(bool isBackground)
         size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
         if (allocated > aliveSizeAfterGC_ && (allocated - aliveSizeAfterGC_) > BACKGROUND_LIMIT &&
             allocated > MIN_BACKGROUND_GC_SIZE) {
-            Heap::GetHeap().GetCollector().RequestGC(GC_REASON_BACKGROUND, true, GC_TYPE_FULL);
+            Heap::GetHeap().GetCollector().RequestGC(GCTaskCause::STARTUP_COMPLETE_CAUSE, true, GCCollectionType::FULL);
         }
         common_vm::Taskpool::GetCurrentTaskpool()->SetThreadPriority(common_vm::PriorityMode::BACKGROUND);
         Heap::GetHeap().GetGCParam().multiplier = 1;
@@ -227,32 +207,5 @@ void HeuristicGCPolicy::ChangeGCParams(bool isBackground)
         // 3: The front-end application waterline is 3 times
         Heap::GetHeap().GetGCParam().multiplier = 3;
     }
-}
-
-bool HeuristicGCPolicy::CheckAndTriggerHintGC(MemoryReduceDegree degree)
-{
-    if (UNLIKELY(ShouldRestrainGCOnStartupOrSensitive())) {
-        return false;
-    }
-    size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
-
-    size_t stepAfterLastGC = 0;
-    if (degree == MemoryReduceDegree::LOW) {
-        stepAfterLastGC = LOW_DEGREE_STEP_IN_IDLE;
-    } else {
-        stepAfterLastGC = HIGH_DEGREE_STEP_IN_IDLE;
-    }
-    if (aliveSizeAfterGC_ == 0) {
-        return false;
-    }
-    size_t expectHeapSize =
-        std::max(static_cast<size_t>(aliveSizeAfterGC_ * IDLE_MIN_INC_RATIO), aliveSizeAfterGC_ + stepAfterLastGC);
-    if (expectHeapSize < allocated) {
-        LOG(DEBUG, GC) << "request heu gc by hint: allocated " << allocated << ", expectHeapSize " << expectHeapSize
-                       << ", aliveSizeAfterGC " << aliveSizeAfterGC_;
-        Heap::GetHeap().GetCollector().RequestGC(GC_REASON_HINT, true, GC_TYPE_FULL);
-        return true;
-    }
-    return false;
 }
 }  // namespace ark::common_vm

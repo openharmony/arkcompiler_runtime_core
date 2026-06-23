@@ -35,7 +35,7 @@ public:
     void Init();
     void Fini();
     void StopGCWork();
-    void RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest = false);
+    void RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest = false);
     void WaitForGCFinish();
 
     // Blocks until gcCompletedCount >= targetCount or GC exits
@@ -129,9 +129,9 @@ private:
     // Notify the GC thread to start GC, and wait.
     // Called by mutator.
     // reason: The reason for this GC.
-    void RequestAsyncGC(GCReason reason, GCType gcType);
-    void RequestGCAndWait(GCReason reason, GCType gcType);
-    void PostIgnoredGcRequest(GCReason reason);
+    void RequestAsyncGC(GCTaskCause reason, GCCollectionType gcType);
+    void RequestGCAndWait(GCTaskCause reason, GCCollectionType gcType);
+    void PostIgnoredGcRequest(GCTaskCause reason);
 
     // the thread pool for parallel tracing.
     Taskpool *gcThreadPool_ = nullptr;

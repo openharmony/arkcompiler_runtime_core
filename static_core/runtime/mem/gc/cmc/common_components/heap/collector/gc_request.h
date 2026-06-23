@@ -19,7 +19,7 @@
 #include <limits>
 
 #include "common_components/base/globals.h"
-#include "common_interfaces/base_runtime.h"
+#include "runtime/include/gc_task.h"
 
 namespace ark::common_vm {
 // Minimum time between async GC (heuristic, native).
@@ -27,7 +27,7 @@ constexpr uint64_t MIN_ASYNC_GC_INTERVAL_NS = SECOND_TO_NANO_SECOND;
 constexpr uint64_t LONG_MIN_HEU_GC_INTERVAL_NS = 200 * MILLI_SECOND_TO_NANO_SECOND;
 
 struct GCRequest {
-    const GCReason reason;
+    const GCTaskCause reason;
     const char *name;  // Human-readable names of GC reasons.
 
     const bool isSync;
@@ -55,6 +55,11 @@ struct GCRequest {
         prevRequestTime = timestamp;
     }
 };
+
+constexpr size_t GCRequestIndex(GCTaskCause reason)
+{
+    return static_cast<size_t>(reason);
+}
 
 // Defined in gcRequest.cpp
 extern GCRequest g_gcRequests[];

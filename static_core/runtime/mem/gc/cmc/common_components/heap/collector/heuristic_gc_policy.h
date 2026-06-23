@@ -17,7 +17,6 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H
 
 #include "common_components/base/globals.h"
-#include "common_interfaces/base_runtime.h"
 #include "common_components/taskpool/taskpool.h"
 #include "common_components/log/log.h"
 
@@ -113,8 +112,6 @@ public:
 
     void TryHeuristicGC();
 
-    void TryIdleGC();
-
     bool ShouldRestrainGCInSensitive(size_t currentSize);
 
     void NotifyHighSensitive(bool isStart)
@@ -188,7 +185,6 @@ public:
 
     void ChangeGCParams(bool isBackground);
 
-    bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
 #if defined(PANDA_TARGET_32)
     static constexpr size_t INC_OBJ_SIZE_IN_SENSITIVE = 40 * MB;
 #else

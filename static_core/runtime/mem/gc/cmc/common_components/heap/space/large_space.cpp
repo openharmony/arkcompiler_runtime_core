@@ -29,7 +29,7 @@ void LargeSpace::AssembleGarbageCandidates()
 
 void LargeSpace::CollectFixTasks(FixHeapTaskList &taskList)
 {
-    if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+    if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
         FixHeapWorker::CollectFixHeapTasks(taskList, largeRegionList_, FIX_OLD_REGION);
         FixHeapWorker::CollectFixHeapTasks(taskList, recentLargeRegionList_, FIX_RECENT_OLD_REGION);
     } else {

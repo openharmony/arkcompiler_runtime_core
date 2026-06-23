@@ -154,9 +154,9 @@ void CollectorResources::RunTaskLoop()
 }
 
 // For the ignored gc request, check whether need to wait for current gc finish
-void CollectorResources::PostIgnoredGcRequest(GCReason reason)
+void CollectorResources::PostIgnoredGcRequest(GCTaskCause reason)
 {
-    GCRequest &request = g_gcRequests[reason];
+    GCRequest &request = g_gcRequests[GCRequestIndex(reason)];
     // Atomic with seq_cst order reason: data race with isGcStarted_ with requirement for sequentially consistent
     // order where threads observe all modifications in the same order
     if (request.IsSyncGC() && isGcStarted_.load(std::memory_order_seq_cst)) {
@@ -165,17 +165,17 @@ void CollectorResources::PostIgnoredGcRequest(GCReason reason)
     }
 }
 
-void CollectorResources::RequestAsyncGC(GCReason reason, GCType gcType)
+void CollectorResources::RequestAsyncGC(GCTaskCause reason, GCCollectionType gcType)
 {
     // The gc request must be none blocked
-    ASSERT_PRINT(!g_gcRequests[reason].IsSyncGC(), "trigger from unsafe context must be none blocked");
+    ASSERT_PRINT(!g_gcRequests[GCRequestIndex(reason)].IsSyncGC(), "trigger from unsafe context must be none blocked");
     GCRunner gcTask(GCTask::GCTaskType::GC_TASK_INVOKE_GC, reason, gcType);
     // we use async enqueue because this doesn't have locks, lowering the risk
     // of timeouts when entering safe region due to thread scheduling
     taskQueue_->EnqueueAsync(gcTask);
 }
 
-void CollectorResources::RequestGCAndWait(GCReason reason, GCType gcType)
+void CollectorResources::RequestGCAndWait(GCTaskCause reason, GCCollectionType gcType)
 {
     // Enter saferegion since current thread may blocked by locks.
     ScopedEnterSaferegion enterSaferegion(false);
@@ -185,7 +185,7 @@ void CollectorResources::RequestGCAndWait(GCReason reason, GCType gcType)
         return oldTask.GetGCReason() == newTask.GetGCReason();
     };
 
-    GCRequest &request = g_gcRequests[reason];
+    GCRequest &request = g_gcRequests[GCRequestIndex(reason)];
     // If this gcTask need not to block, just add to async queue
     if (!request.IsSyncGC()) {
         taskQueue_->EnqueueAsync(gcTask);
@@ -209,21 +209,21 @@ void CollectorResources::RequestGCAndWait(GCReason reason, GCType gcType)
     }
 }
 
-void CollectorResources::RequestGC(GCReason reason, bool async, GCType gcType, bool explicitRequest)
+void CollectorResources::RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest)
 {
     if (!IsGCActive()) {
         return;
     }
 
-    GCRequest &request = g_gcRequests[reason];
+    GCRequest &request = g_gcRequests[GCRequestIndex(reason)];
     uint64_t curTime = TimeUtil::NanoSeconds();
     request.SetPrevRequestTime(curTime);
     if ((!explicitRequest && collector_->ShouldIgnoreRequest(request)) ||
-        (reason == GCReason::GC_REASON_NATIVE && IsNativeGCInvoked())) {
+        (reason == GCTaskCause::NATIVE_ALLOC_CAUSE && IsNativeGCInvoked())) {
         LOG(DEBUG, GC) << "ignore gc request";
         PostIgnoredGcRequest(reason);
     } else if (async) {
-        if (reason == GCReason::GC_REASON_NATIVE) {
+        if (reason == GCTaskCause::NATIVE_ALLOC_CAUSE) {
             SetIsNativeGCInvoked(true);
         }
         RequestAsyncGC(reason, gcType);

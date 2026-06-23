@@ -23,6 +23,9 @@
 #endif
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/heap.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
+#include "runtime/mem/gc/gc.h"
 
 namespace ark::common_vm {
 template <AllocBufferType type>
@@ -98,13 +101,17 @@ bool RegionalHeap::ShouldRetryAllocation(size_t &tryTimes) const
             ScopedEnterSaferegion enterSaferegion(false);
             Heap::GetHeap().GetCollectorResources().WaitForGCFinish();
         } else {
-            Heap::GetHeap().GetCollector().RequestGC(GC_REASON_HEU, false, GC_TYPE_FULL);
+            ark::GCTask task(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+            task.UpdateGCCollectionType(GCCollectionType::FULL);
+            Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(task);
         }
         return true;
     } else if (tryTimes == static_cast<size_t>(TryAllocationThreshold::TRIGGER_OOM)) {
         if (!Heap::GetHeap().IsGcStarted()) {
             LOG(INFO, GC) << "gc is triggered for OOM";
-            Heap::GetHeap().GetCollector().RequestGC(GC_REASON_OOM, false, GC_TYPE_FULL);
+            ark::GCTask task(GCTaskCause::OOM_CAUSE);
+            task.UpdateGCCollectionType(GCCollectionType::FULL);
+            Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(task);
         } else {
             ScopedEnterSaferegion enterSaferegion(false);
             Heap::GetHeap().GetCollectorResources().WaitForGCFinish();
@@ -466,36 +473,11 @@ void RegionalHeap::ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObj
     }
 }
 
-void RegionalHeap::MarkJitFortMemInstalled(void *thread, BaseObject *obj)
-{
-    ark::os::memory::LockHolder guard(awaitingJitFortMutex_);
-    // GC is running, we should mark JitFort installled after GC finish
-    if (Heap::GetHeap().GetGCPhase() != GCPhase::GC_PHASE_IDLE) {
-        jitFortPostGCInstallTask_.emplace(nullptr, obj);
-    } else {
-        // a threadlocal JitFort mem
-        if (!thread) {
-            RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(obj))->SetJitFortAwaitInstallFlag(false);
-        }
-        awaitingJitFort_.erase(obj);
-    }
-}
-
 void RegionalHeap::MarkJitFortMemAwaitingInstall(BaseObject *obj)
 {
     ark::os::memory::LockHolder guard(awaitingJitFortMutex_);
     RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(obj))->SetJitFortAwaitInstallFlag(true);
     awaitingJitFort_.insert(obj);
-}
-
-void RegionalHeap::HandlePostGCJitFortInstallTask()
-{
-    DCHECK(Heap::GetHeap().GetGCPhase() == GCPhase::GC_PHASE_IDLE);
-    while (!jitFortPostGCInstallTask_.empty()) {
-        auto [thread, machineCode] = jitFortPostGCInstallTask_.top();
-        MarkJitFortMemInstalled(thread, machineCode);
-        jitFortPostGCInstallTask_.pop();
-    }
 }
 
 }  // namespace ark::common_vm

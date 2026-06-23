@@ -20,6 +20,8 @@
 #include "mutator/satb_buffer.h"
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/common/scoped_object_access.h"
+#include "common_interfaces/vm_interface.h"
+#include "runtime/include/mutator.h"
 
 namespace ark::common_vm {
 
@@ -31,10 +33,20 @@ ThreadLocalData *GetThreadLocalData()
         // Since the TBI(top bit ignore) feature in Aarch64,
         // set gc phase to high 8-bit of ThreadLocalData Address for gc barrier fast path.
         // 56: make gcphase value shift left 56 bit to set the high 8-bit
-        tlDataAddr = tlDataAddr | (static_cast<uint64_t>(Heap::GetHeap().GetGCPhase()) << 56);
+        tlDataAddr = tlDataAddr | (static_cast<uint64_t>(ark::Mutator::GetCurrent()->GetMutatorPhase()) << 56);
     }
 #endif
     return reinterpret_cast<ThreadLocalData *>(tlDataAddr);
+}
+
+ScopedGcThreadType::ScopedGcThreadType() : oldType_(ThreadLocal::GetThreadType())
+{
+    ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
+}
+
+ScopedGcThreadType::~ScopedGcThreadType()
+{
+    ThreadLocal::SetThreadType(oldType_);
 }
 
 void Mutator::HandleGCCallback()
@@ -89,24 +101,9 @@ void Mutator::ClearSatbBufferNode()
 
 void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
 
-void Mutator::GcPhaseEnum(GCPhase newPhase) {}
-
-// comment all
-void Mutator::GCPhasePreForward(GCPhase newPhase) {}
-
-void Mutator::HandleGCPhase(GCPhase newPhase)
+void Mutator::HandleGCPhase(mem::GCPhase newPhase)
 {
-    if (newPhase == GCPhase::GC_PHASE_POST_MARK) {
-        if (satbNode_ != nullptr) {
-            DCHECK(CastSatbNode(satbNode_)->IsEmpty());
-            SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
-            satbNode_ = nullptr;
-        }
-    } else if (newPhase == GCPhase::GC_PHASE_ENUM) {
-        GcPhaseEnum(newPhase);
-    } else if (newPhase == GCPhase::GC_PHASE_PRECOPY) {
-        GCPhasePreForward(newPhase);
-    } else if (newPhase == GCPhase::GC_PHASE_REMARK_SATB || newPhase == GCPhase::GC_PHASE_FINAL_MARK) {
+    if (newPhase == mem::GCPhase::GC_PHASE_REMARK) {
         if (satbNode_ != nullptr) {
             SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
             satbNode_ = nullptr;

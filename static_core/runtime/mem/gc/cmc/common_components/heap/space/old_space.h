@@ -41,7 +41,7 @@ public:
 
     void CollectFixTasks(FixHeapTaskList &taskList)
     {
-        if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
+        if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
             FixHeapWorker::CollectFixHeapTasks(taskList, oldRegionList_, FIX_OLD_REGION);
             ark::os::memory::LockHolder lock(lock_);
             FixHeapWorker::CollectFixHeapTasks(taskList, tlOldRegionList_, FIX_RECENT_OLD_REGION);

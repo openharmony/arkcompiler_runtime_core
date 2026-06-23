@@ -17,8 +17,8 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
 
 #include <algorithm>
-#include "common_interfaces/base_runtime.h"
 #include "runtime/include/mem/panda_string.h"
+#include "runtime/include/gc_task.h"
 
 namespace ark::common_vm {
 // statistics for previous gc.
@@ -87,8 +87,8 @@ public:
     static uint64_t prevGcStartTime;
     static uint64_t prevGcFinishTime;
 
-    GCReason reason;
-    GCType gcType;
+    GCTaskCause reason;
+    GCCollectionType gcType;
     bool isConcurrentMark;
     bool async;
 
@@ -126,7 +126,7 @@ public:
 
     bool isYoungGC()
     {
-        return reason == GCReason::GC_REASON_YOUNG;
+        return reason == GCTaskCause::YOUNG_GC_CAUSE;
     }
 };
 extern size_t g_gcCount;

@@ -97,12 +97,12 @@ public:
         return isGCEnabled_.store(val, std::memory_order_seq_cst);
     }
 
-    GCReason GetGCReason() override
+    GCTaskCause GetGCReason() override
     {
         return gcReason_;
     }
 
-    void SetGCReason(GCReason reason) override
+    void SetGCReason(GCTaskCause reason) override
     {
         gcReason_ = reason;
     }
@@ -142,9 +142,6 @@ public:
     }
 
     HeapAddress Allocate(size_t size, AllocType allocType, bool allowGC = true) override;
-
-    GCPhase GetGCPhase() const override;
-    void SetGCPhase(const GCPhase phase) override;
     Collector &GetCollector() override;
     Allocator &GetAllocator() override;
     HeuristicGCPolicy &GetHeuristicGCPolicy() override;
@@ -165,7 +162,6 @@ public:
     void UnregisterAllocBuffer(AllocationBuffer &buffer) override;
     void StopGCWork() override;
     void TryHeuristicGC() override;
-    void TryIdleGC() override;
     void NotifyNativeAllocation(size_t bytes) override;
     void NotifyNativeFree(size_t bytes) override;
     void NotifyNativeReset(size_t oldBytes, size_t newBytes) override;
@@ -174,7 +170,6 @@ public:
     size_t GetNativeHeapThreshold() const override;
     void ChangeGCParams(bool isBackground) override;
     void RecordAliveSizeAfterLastGC(size_t aliveBytes) override;
-    bool CheckAndTriggerHintGC(MemoryReduceDegree degree) override;
     void NotifyHighSensitive(bool isStart) override;
     void SetRecordHeapObjectSizeBeforeSensitive(size_t objSize) override;
     AppSensitiveStatus GetSensitiveStatus() override;
@@ -195,7 +190,7 @@ private:
 
     std::atomic<bool> isGCEnabled_ = {true};
 
-    GCReason gcReason_ = GCReason::GC_REASON_INVALID;
+    GCTaskCause gcReason_ = GCTaskCause::INVALID_CAUSE;
     bool isForceThrowOOM_ = {false};
     RuntimeParam runtimeParam_;
 };  // end class HeapImpl
@@ -261,11 +256,6 @@ void HeapImpl::TryHeuristicGC()
     heuristicGCPolicy_.TryHeuristicGC();
 }
 
-void HeapImpl::TryIdleGC()
-{
-    heuristicGCPolicy_.TryIdleGC();
-}
-
 void HeapImpl::NotifyNativeAllocation(size_t bytes)
 {
     heuristicGCPolicy_.NotifyNativeAllocation(bytes);
@@ -307,11 +297,6 @@ void HeapImpl::RecordAliveSizeAfterLastGC(size_t aliveBytes)
     heuristicGCPolicy_.RecordAliveSizeAfterLastGC(aliveBytes);
 }
 
-bool HeapImpl::CheckAndTriggerHintGC(MemoryReduceDegree degree)
-{
-    return heuristicGCPolicy_.CheckAndTriggerHintGC(degree);
-}
-
 void HeapImpl::NotifyHighSensitive(bool isStart)
 {
     heuristicGCPolicy_.NotifyHighSensitive(isStart);
@@ -347,16 +332,6 @@ Collector &HeapImpl::GetCollector()
 Allocator &HeapImpl::GetAllocator()
 {
     return *theSpace_;
-}
-
-GCPhase HeapImpl::GetGCPhase() const
-{
-    return collector_->GetGCPhase();
-}
-
-void HeapImpl::SetGCPhase(const GCPhase phase)
-{
-    collector_->SetGCPhase(phase);
 }
 
 size_t HeapImpl::GetMaxCapacity() const

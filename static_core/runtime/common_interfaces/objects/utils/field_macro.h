@@ -17,7 +17,6 @@
 #define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 
 #include "common_interfaces/objects/utils/objects_traits.h"
-#include "common_interfaces/base_runtime.h"
 #include "common_interfaces/base/mem.h"
 #include <type_traits>
 #include <utility>

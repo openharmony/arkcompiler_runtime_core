@@ -20,6 +20,7 @@
 
 #include "common_components/base/ark_sanitizer.h"
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/base/runtime_param.h"
 
 namespace ark::mem {
 class RegionDesc;
@@ -27,7 +28,10 @@ class VMInterface;
 }  // namespace ark::mem
 
 namespace ark::common_vm {
+using ::ark::mem::GCParam;
+using ::ark::mem::HeapParam;
 using ::ark::mem::RegionDesc;
+using ::ark::mem::RuntimeParam;
 using ::ark::mem::VMInterface;
 
 // Time Factors

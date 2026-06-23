@@ -29,7 +29,8 @@ bool GCRunner::Execute(void *owner)
         }
         case GCTask::GCTaskType::GC_TASK_INVOKE_GC: {
             GCStats::SetPrevGCStartTime(TimeUtil::NanoSeconds());
-            collectorProxy->RunGarbageCollection(taskIndex_, gcReason_, gcType_);
+            auto task = ToGCTask();
+            collectorProxy->RunGarbageCollection(taskIndex_, task);
             GCStats::SetPrevGCFinishTime(TimeUtil::NanoSeconds());
             break;
         }

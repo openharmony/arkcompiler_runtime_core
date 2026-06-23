@@ -30,31 +30,27 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/base_object.h"
+#include "runtime/mem/gc/gc_phase.h"
 
 namespace ark::common_vm {
 class Mutator;
 struct ThreadLocalData;
-
-// GCPhase describes phases for stw/concurrent gc.
-enum GCPhase : uint8_t {
-    GC_PHASE_UNDEF = 0,
-    GC_PHASE_IDLE = 1,
-    GC_PHASE_START = 8,
-
-    // only gc phase after GC_PHASE_START ( enum value > GC_PHASE_START) needs barrier.
-    GC_PHASE_ENUM = 9,
-    GC_PHASE_MARK = 10,
-    GC_PHASE_REMARK_SATB = 11,
-    GC_PHASE_FINAL_MARK = 12,
-    GC_PHASE_POST_MARK = 13,
-    GC_PHASE_PRECOPY = 14,
-    GC_PHASE_COPY = 15,
-    GC_PHASE_FIX = 16,
-    GC_PHASE_YOUNG_COPY = 17,
-};
+enum class ThreadType;
 
 bool IsRuntimeThread();
 bool IsGcThread();
+
+class ScopedGcThreadType {
+public:
+    ScopedGcThreadType();
+    ~ScopedGcThreadType();
+
+    NO_COPY_SEMANTIC(ScopedGcThreadType);
+    NO_MOVE_SEMANTIC(ScopedGcThreadType);
+
+private:
+    ThreadType oldType_;
+};
 
 class Mutator;
 using FlipFunction = std::function<void(Mutator &)>;
@@ -64,24 +60,10 @@ public:
 
     void ResetMutator();
 
-    __attribute__((always_inline)) inline void SetMutatorPhase(const GCPhase newPhase)
-    {
-        // Atomic with release order reason: data race with mutatorPhase_ with dependecies on writes before the store
-        mutatorPhase_.store(newPhase, std::memory_order_release);
-    }
-
-    __attribute__((always_inline)) inline GCPhase GetMutatorPhase() const
-    {
-        // Atomic with acquire order reason: data race with mutatorPhase_ with dependecies on reads after the load
-        return mutatorPhase_.load(std::memory_order_acquire);
-    }
-
     // temporary impl to clean GC callback, and need to refact to flip function
     __attribute__((visibility("default"))) void HandleGCCallback();
 
-    void GcPhaseEnum(GCPhase newPhase);
-    void GCPhasePreForward(GCPhase newPhase);
-    void HandleGCPhase(GCPhase newPhase);
+    void HandleGCPhase(mem::GCPhase newPhase);
 
     virtual void VisitMutatorRoots(const RefFieldVisitor &visitor);
 
@@ -105,9 +87,6 @@ public:
 private:
     void RememberObjectImpl(const BaseObject *obj);
 
-    // Indicate the current mutator phase and use which barrier in concurrent gc
-    std::atomic<GCPhase> mutatorPhase_ = {GCPhase::GC_PHASE_UNDEF};
-
     void *satbNode_ = nullptr;
 
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
@@ -118,10 +97,10 @@ ThreadLocalData *GetThreadLocalData();
 
 }  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_H
-// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
-//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
-//           readability-else-after-return, readability-duplicate-include,
-//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
-//           cppcoreguidelines-pro-type-union-access, modernize-use-auto, llvm-namespace-comment,
-//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
-//           readability-implicit-bool-conversion)
+        // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
+        //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
+        //           readability-else-after-return, readability-duplicate-include,
+        //           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
+        //           cppcoreguidelines-pro-type-union-access, modernize-use-auto, llvm-namespace-comment,
+        //           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
+        //           readability-implicit-bool-conversion)
