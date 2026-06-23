@@ -331,6 +331,9 @@
 
 15.semantic_rules/11.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_negative_1.ets
 
+#35311
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/abstract_class_resolution_8.ets
+
 #34495 Incorrect behavior of instanceof with type erasure
 15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_0.ets
 15.semantic_rules/12.type_erasure/instanceof_func_not_preserved_1.ets

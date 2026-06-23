@@ -989,6 +989,7 @@
 09.classes/01.class_declaration/01.abstract_classes/abstract_method_in_simple_class_n.ets
 09.classes/01.class_declaration/enclosing_instances/blank_readonly_field_in_inner_class_n.ets
 09.classes/02.class_extension_clause/circularly_class_declaration_n.ets
+09.classes/02.class_extension_clause/class_overrides_single_signature.ets
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri31.ets
 09.classes/02.class_extension_clause/extends_itself_n.ets
 09.classes/02.class_extension_clause/extension_clause_negative_0.ets
@@ -1041,6 +1042,7 @@
 09.classes/02.class_extension_clause/invalid_type_reference_n_11.ets
 09.classes/02.class_extension_clause/method_return_value/method_return_value_n_8.ets
 09.classes/02.class_extension_clause/method_return_value/method_return_value_n_9.ets
+09.classes/02.class_extension_clause/subinterface_overload_resolution.ets
 09.classes/02.class_extension_clause/valid_type_reference_2.ets
 09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/interface_getter_and_setter_neg_3.ets
 09.classes/03.class_implementation_clause/01.implementing_required_interface_properties/interface_getter_and_setter_neg_4.ets
@@ -1708,7 +1710,12 @@
 15.semantic_rules/10.overloading/interfaces/overloading_3.ets
 15.semantic_rules/10.overloading/interfaces/overloading_4.ets
 15.semantic_rules/11.overload_resolution/05.overload_set_for_class_instance_methods/combination_overloaded_methods_2.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/abstract_class_resolution_4.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/abstract_class_resolution_5.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/abstract_class_resolution_6.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/abstract_class_resolution_7.ets
 15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/dynamic_resolution_2_5.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/interface_resolution_2_5.ets
 15.semantic_rules/13.static_initialization/bad-static-location.ets
 15.semantic_rules/semantic_rules_case_06.ets
 15.semantic_rules/semantic_rules_case_10.ets

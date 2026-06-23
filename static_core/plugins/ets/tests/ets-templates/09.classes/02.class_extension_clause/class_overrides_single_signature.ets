@@ -15,32 +15,33 @@
 
 /*---
 desc: >-
-    The most specific available default method is chosen when the final
-    subinterface does not provide its own override.
+   Class overrides one signature, leaving the default for the other.
 ---*/
 
-interface I1 {
-    m(): string {
-        return "I1";
+interface I1 { 
+    m(s: string): string { 
+        return "I1" 
     }
-}
+} 
 
-interface I2 extends I1 {
-    m(): string {
-        return "I2";
+interface I2 { 
+    m(n: int): string { 
+        return "I2" 
     }
-}
+} 
 
-interface I3 extends I2 {
-}
+class C implements I1, I2 { 
+    m(s: string): string {
+        return "C.str" 
+    }
+} 
 
-class C implements I3 {
-}
-
-function main(): void {
-    let i1: I1 = new C();
-    let i3: I3 = new C();
-
-    arktest.assertEQ(i1.m(), "I2");
-    arktest.assertEQ(i3.m(), "I2");
+function main(){
+    let i1: I1 = new C() 
+    let i2: I2 = new C() 
+    arktest.assertEQ(i1.m("x"), "C.str", "via I1")
+    arktest.assertEQ(i2.m(42), "I2", "via I2")
+    let c: C = new C()
+    arktest.assertEQ(c.m("x"), "C.str", "via C - string")
+    arktest.assertEQ(c.m(42), "I2", "via C - int")
 }
