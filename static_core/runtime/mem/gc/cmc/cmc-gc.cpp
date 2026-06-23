@@ -38,6 +38,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/trace.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
+#include "runtime/mem/object-references-iterator-inl.h"
 
 #include "common_interfaces/heap/region_desc.h"
 
@@ -147,96 +148,65 @@ bool CmcGC<LanguageConfig>::TryForwardRefField(BaseObject *obj, RefField<> &fiel
     return TryUpdateRefFieldImpl<true>(obj, field, oldRef, newRef);
 }
 
-static void MarkingRefField(BaseObject *obj, BaseObject *targetObj, RefField<> &field,
-                            ParallelLocalMarkStack &markStack, RegionDesc *targetRegion);
-// note each ref-field will not be marked twice, so each old pointer the markingr meets must come from previous gc.
-static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMarkStack &markStack,
-                            const GCTaskCause gcReason)
-{
-    RefField<> oldField(field);
-    BaseObject *targetObj = oldField.GetTargetObject();
+template <bool PARALLEL>
+class ObjectMarker {
+public:
+    using MarkingStack = std::conditional_t<PARALLEL, ParallelLocalMarkStack, LocalCollectStack>;
 
-    if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
-        return;
-    }
-    // field is tagged object, should be in heap
-    DCHECK(Heap::IsHeapAddress(targetObj));
-
-    auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>((void *)targetObj));
-    // cannot skip objects in EXEMPTED_FROM_REGION, because its rset is incomplete
-    if (gcReason == GCTaskCause::YOUNG_GC_CAUSE && !targetRegion->IsInYoungSpace()) {
-        LOG(DEBUG, GC) << "marking: skip non-young object " << obj << "@" << &field << ", target object: " << targetObj
-                       << "<" << targetObj->GetTypeInfo() << ">(" << targetObj->GetSize() << ")";
-        return;
-    }
-    MarkingRefField(obj, targetObj, field, markStack, targetRegion);
-}
-
-// note each ref-field will not be marked twice, so each old pointer the markingr meets must come from previous gc.
-static void MarkingRefField(BaseObject *obj, BaseObject *targetObj, RefField<> &field,
-                            ParallelLocalMarkStack &markStack, RegionDesc *targetRegion)
-{
-    if (targetRegion->IsNewObjectSinceMarking(targetObj)) {
-        LOG(DEBUG, GC) << "marking: skip new obj " << targetObj << "<" << targetObj->GetTypeInfo() << ">("
-                       << targetObj->GetSize() << ")";
-        return;
+    ObjectMarker(MarkingStack *stack, GCTaskCause reason) : stack_(stack), gcReason_(reason)
+    {
+        ASSERT(stack_ != nullptr);
     }
 
-    if (targetRegion->MarkObject(targetObj)) {
-        LOG(DEBUG, GC) << "marking: obj has been marked " << targetObj;
-        return;
-    }
-    LOG(DEBUG, GC) << "marking obj " << obj << " ref@" << &field << ": " << targetObj << "<" << targetObj->GetTypeInfo()
-                   << ">(" << targetObj->GetSize() << ")";
-    markStack.Push(targetObj);
-}
-
-// GC passes this function to ObjectOperator::ForEachRefField.
-// ObjectOperator must call it for reference fields of WeakRef objects.
-// Its responcibility of ObjectOperator to determine whether 'obj' is kind of WeakRef or not.
-static void MarkWeakRefField(BaseObject *obj, RefField<> &field, WeakStack &weakStack, const GCTaskCause gcReason)
-{
-    RefField<> oldField(field);
-    [[maybe_unused]] BaseObject *targetObj = oldField.GetTargetObject();
-
-    if (gcReason == GCTaskCause::YOUNG_GC_CAUSE) {
-        return;
+    bool ProcessObjectPointer(ObjectHeader *obj, ObjectPointerType *field)
+    {
+        if (ObjectAccessor::Load(field) == 0) {
+            return true;
+        }
+        ProcessImpl(obj, reinterpret_cast<RefField<> &>(*field));
+        return true;
     }
 
-    if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
-        return;
-    }
-    // field is tagged object, should be in heap
-    DCHECK(Heap::IsHeapAddress(targetObj));
-    LOG(DEBUG, GC) << "marking: skip weak obj when full gc, object: " << obj << "@" << &field
-                   << ", targetObj: " << targetObj;
-    // weak ref is cleared after roots pre-forward, so there might be a to-version weak ref which also need to be
-    // cleared, offset recorded here will help us find it
-    weakStack.emplace_back(&field, reinterpret_cast<uintptr_t>(&field) - reinterpret_cast<uintptr_t>(obj));
-}
+private:
+    void ProcessImpl(ObjectHeader *obj, RefField<> &field)
+    {
+        RefField<> oldField(field);
+        BaseObject *targetObj = oldField.GetTargetObject();
 
-template <class LanguageConfig>
-typename CmcGC<LanguageConfig>::MarkingRefFieldVisitor CmcGC<LanguageConfig>::CreateMarkingObjectRefFieldsVisitor(
-    ParallelLocalMarkStack &markStack, WeakStack &weakStack, GCTaskCause reason)
-{
-    MarkingRefFieldVisitor visitor;
+        if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
+            return;
+        }
+        // field is tagged object, should be in heap
+        DCHECK(Heap::IsHeapAddress(targetObj));
 
-    if (reason == GCTaskCause::YOUNG_GC_CAUSE) {
-        auto func = [obj = visitor.GetClosure().get(), &markStack](RefField<> &field) {
-            MarkingRefField(*obj, field, markStack, GCTaskCause::YOUNG_GC_CAUSE);
-        };
-        visitor.SetVisitor(func);
-        visitor.SetWeakVisitor(func);
-    } else {
-        visitor.SetVisitor([obj = visitor.GetClosure().get(), &markStack, reason](RefField<> &field) {
-            MarkingRefField(*obj, field, markStack, reason);
-        });
-        visitor.SetWeakVisitor([obj = visitor.GetClosure().get(), &weakStack, reason](RefField<> &field) {
-            MarkWeakRefField(*obj, field, weakStack, reason);
-        });
+        auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>((void *)targetObj));
+        // cannot skip objects in EXEMPTED_FROM_REGION, because its rset is incomplete
+        if (gcReason_ == GCTaskCause::YOUNG_GC_CAUSE && !targetRegion->IsInYoungSpace()) {
+            LOG(DEBUG, GC) << "marking: skip non-young object " << obj << "@" << &field
+                           << ", target object: " << targetObj << "<" << targetObj->GetTypeInfo() << ">("
+                           << targetObj->GetSize() << ")";
+            return;
+        }
+
+        if (targetRegion->IsNewObjectSinceMarking(targetObj)) {
+            LOG(DEBUG, GC) << "marking: skip new obj " << targetObj << "<" << targetObj->GetTypeInfo() << ">("
+                           << targetObj->GetSize() << ")";
+            return;
+        }
+
+        if (targetRegion->MarkObject(targetObj)) {
+            LOG(DEBUG, GC) << "marking: obj has been marked " << targetObj;
+            return;
+        }
+        LOG(DEBUG, GC) << "marking obj " << obj << " ref@" << &field << ": " << targetObj << "<"
+                       << targetObj->GetTypeInfo() << ">(" << targetObj->GetSize() << ")";
+
+        stack_->Push(targetObj);
     }
-    return visitor;
-}
+
+    MarkingStack *stack_;
+    GCTaskCause gcReason_;
+};
 
 #ifdef PANDA_JS_ETS_HYBRID_MODE
 // note each ref-field will not be traced twice, so each old pointer the tracer meets must come from previous gc.
@@ -805,12 +775,6 @@ private:
 };
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::ProcessReferencesAfterCopy()
-{
-    PandaVM::GetCurrent()->GetReferenceProcessor()->ProcessReferencesAfterCopy();
-}
-
-template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ForEachManagedMutator(const ManagedMutatorCallback &callback)
 {
     Mutator::GetCurrent()->GetVM()->GetMutatorManager()->ForEachMutator([&callback](Mutator *mutator) {
@@ -887,7 +851,6 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
         }
 
         CopyFromSpace();
-        ProcessReferencesAfterCopy();
         WVerify::VerifyAfterForward(this->GetGCPhase(), false);
 
         FixHeap(false);
@@ -1637,48 +1600,22 @@ private:
     GCTaskCause reason_;
 };
 
-static void ClearWeakRef(WeakStack::value_type *begin, WeakStack::value_type *end)
+template <class LanguageConfig>
+template <bool HANDLE_WEAK_REFS, typename ObjectMarkerT>
+void CmcGC<LanguageConfig>::HandleMarkedObject(ObjectMarkerT *handler, BaseObject *object)
 {
-    for (auto iter = begin; iter != end; ++iter) {
-        RefField<> *fieldPointer = iter->first;
-        size_t offset = iter->second;
-        ASSERT_PRINT(offset % sizeof(RefField<>) == 0, "offset is not aligned");
-
-        RefField<> &field = reinterpret_cast<RefField<> &>(*fieldPointer);
-        RefField<> oldField(field);
-
-        if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
-            continue;
+    if constexpr (HANDLE_WEAK_REFS) {
+        if (this->IsWeakReference(object)) {
+            this->HandleWeakReference(handler, object);
+            return;
         }
-        BaseObject *targetObj = oldField.GetTargetObject();
-        DCHECK(Heap::IsHeapAddress(targetObj));
-
-        auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>(targetObj));
-        if (targetRegion->IsMarkedObject(targetObj) || targetRegion->IsNewObjectSinceMarking(targetObj)) {
-            continue;
-        }
-
-        BaseObject *obj = reinterpret_cast<BaseObject *>(reinterpret_cast<uintptr_t>(&field) - offset);
-        if (RegionDesc::GetAliveRegionType(reinterpret_cast<MAddress>(obj)) == RegionDesc::RegionType::FROM_REGION) {
-            BaseObject *toObj = obj->GetForwardingPointer();
-
-            // Make sure even the object that contains the weak reference is trimed before forwarding, the weak ref
-            // field is still within the object
-            if (toObj != nullptr && offset < obj->GetSize()) {
-                RefField<> &toField = *reinterpret_cast<RefField<> *>(reinterpret_cast<uintptr_t>(toObj) + offset);
-                toObj->ClearRef(toField);
-            }
-        }
-        obj->ClearRef(field);
     }
+    ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(object->ClassAddr<Class>(), object, handler);
 }
 
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::ProcessWeakStack(WeakStack &weakStack)
+static bool IsFullCollection(GCTaskCause reason)
 {
-    WeakStack::value_type *begin = &(*weakStack.begin());
-    WeakStack::value_type *end = begin + weakStack.size();
-    ClearWeakRef(begin, end);
+    return reason == GCTaskCause::EXPLICIT_CAUSE || reason == GCTaskCause::OOM_CAUSE;
 }
 
 template <class LanguageConfig>
@@ -1687,8 +1624,6 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
                                              GCTaskCause reason)
 {
     size_t nNewlyMarked = 0;
-    WeakStack weakStack;
-    auto visitor = CreateMarkingObjectRefFieldsVisitor(markStack, weakStack, reason);
     PandaStack<BaseObject *> remarkStack;
     auto fetchFromSatbBuffer = [this, &markStack, &remarkStack]() {
         SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
@@ -1706,15 +1641,21 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
     };
     size_t iterationCnt = 0;
     constexpr size_t maxIterationLoopNum = 1000;
+
+    ObjectMarker<true> marker(&markStack, reason);
+
     // loop until work stack empty.
     while (true) {
         BaseObject *object;
         while (markStack.Pop(&object)) {
             ++nNewlyMarked;
             auto region = RegionDesc::GetAliveRegionDescAt(static_cast<MAddress>(reinterpret_cast<uintptr_t>(object)));
-            visitor.SetMarkingRefFieldArgs(object);
             auto objSize = object->GetSize();
-            object->ForEachRefField(visitor.GetRefFieldVisitor(), visitor.GetWeakRefFieldVisitor());
+            if (IsFullCollection(reason)) {
+                HandleMarkedObject<true>(&marker, object);
+            } else {
+                HandleMarkedObject<false>(&marker, object);
+            }
             region->AddLiveByteCount(objSize);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
             if constexpr (ProcessXRef) {
@@ -1735,31 +1676,6 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     markedObjectCount_.fetch_add(nNewlyMarked, std::memory_order_relaxed);
-    MergeWeakStack(weakStack);
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MergeWeakStack(WeakStack &weakStack)
-{
-    ark::os::memory::LockHolder lock(weakStackLock_);
-
-    // Preprocess the weak stack to minimize work during STW remark.
-    for (const auto &pair : weakStack) {
-        RefField<> oldField(*pair.first);
-
-        if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
-            continue;
-        }
-        auto obj = oldField.GetTargetObject();
-        DCHECK(Heap::IsHeapAddress(obj));
-
-        auto region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>(obj));
-        if (region->IsNewObjectSinceMarking(obj) || region->IsMarkedObject(obj)) {
-            continue;
-        }
-
-        globalWeakStack_.push_back(pair);
-    }
 }
 
 template <class LanguageConfig>
@@ -1838,6 +1754,24 @@ void CmcGC<LanguageConfig>::TracingImpl(GlobalMarkStack &globalMarkStack, bool p
 }
 
 template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::IsWeakReference(BaseObject *obj)
+{
+    return this->GetReferenceProcessor()->IsReference(obj->ClassAddr<BaseClass>(), obj,
+                                                      GC::EmptyReferenceProcessPredicate);
+}
+
+template <class LanguageConfig>
+template <typename ObjectMarkerT>
+void CmcGC<LanguageConfig>::HandleWeakReference(ObjectMarkerT *handler, BaseObject *weakRef)
+{
+    this->GetReferenceProcessor()->HandleReference(
+        this, weakRef->ClassAddr<BaseClass>(), weakRef, [weakRef, handler](void *ref) {
+            handler->ProcessObjectPointer(weakRef, reinterpret_cast<ObjectPointerType *>(ref));
+        });
+}
+
+template <class LanguageConfig>
+template <bool HANDLE_WEAK_REFS>
 bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack, BaseObject *obj, GCTaskCause reason)
 {
     RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
@@ -1853,6 +1787,13 @@ bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack,
         LOG(DEBUG, GC) << "mark obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ") in region "
                        << regionInfo << "(" << static_cast<size_t>(regionInfo->GetRegionType()) << ")@0x" << std::hex
                        << regionInfo->GetRegionStart() << std::dec << ", live " << regionInfo->GetLiveByteCount();
+        if constexpr (HANDLE_WEAK_REFS) {
+            ObjectMarker<false> marker(&collectStack, reason);
+            if (IsWeakReference(obj)) {
+                HandleWeakReference(&marker, obj);
+                return true;
+            }
+        }
         collectStack.Push(obj);
         return true;
     } else {
@@ -1861,6 +1802,7 @@ bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack,
 }
 
 template <class LanguageConfig>
+template <bool HANDLE_WEAK_REFS>
 void CmcGC<LanguageConfig>::PushRootsToWorkStack(LocalCollectStack &collectStack,
                                                  const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
 {
@@ -1868,7 +1810,7 @@ void CmcGC<LanguageConfig>::PushRootsToWorkStack(LocalCollectStack &collectStack
                        ark::common_vm::ENABLE_GC_TRACING);
 
     for (BaseObject *obj : collectedRoots) {
-        PushRootToWorkStack(collectStack, obj, reason);
+        PushRootToWorkStack<HANDLE_WEAK_REFS>(collectStack, obj, reason);
     }
 }
 
@@ -1882,7 +1824,11 @@ void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collect
     {
         LocalCollectStack collectStack(&globalMarkStack);
 
-        PushRootsToWorkStack(collectStack, collectedRoots, reason);
+        if (IsFullCollection(reason)) {
+            PushRootsToWorkStack<true>(collectStack, collectedRoots, reason);
+        } else {
+            PushRootsToWorkStack<false>(collectStack, collectedRoots, reason);
+        }
 
         if (reason == GCTaskCause::YOUNG_GC_CAUSE) {
             ScopedTrace tracer("PushRootInRSet", ark::common_vm::ENABLE_GC_TRACING);
@@ -1918,8 +1864,7 @@ void CmcGC<LanguageConfig>::Remark(GCTaskCause reason)
     TracingImpl(globalMarkStack, maxWorkers > 0, true, reason);
     PreforwardStaticRoots();
     MarkAwaitingJitFort();  // Mark awaiting
-    ClearWeakStack(maxWorkers > 0, reason);
-
+    ProcessWeakReferences(GCPhase::GC_PHASE_REMARK, reason);
     // clear satb buffer when gc finish tracing.
     SatbBuffer::Instance().ClearBuffer();
 
@@ -1930,46 +1875,14 @@ void CmcGC<LanguageConfig>::Remark(GCTaskCause reason)
     WVerify::VerifyAfterMark(this->GetGCPhase(), true);
 }
 
-class ClearWeakRefTask : public ark::common_vm::ArrayTaskDispatcher::ArrayTask {
-public:
-    using T = WeakStack::value_type;
-    explicit ClearWeakRefTask(CArrayList<T> *inputs) : data_(inputs) {}
-    void Run(void *begin, void *end) override
-    {
-        T *first = reinterpret_cast<T *>(begin);
-        T *last = reinterpret_cast<T *>(end);
-        DCHECK(((uintptr_t)last - (uintptr_t)first) % sizeof(T) == 0 &&
-               ((uintptr_t)first - (uintptr_t)data_->data()) % sizeof(T) == 0);
-        DCHECK(first == last || (first >= data_->data() && last > data_->data()));
-        DCHECK(first == last || (first < (data_->data() + data_->size()) && last <= (data_->data() + data_->size())));
-        ClearWeakRef(first, last);
-    }
-    CArrayList<T> *data_;
-};
-
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::ClearWeakStack(bool parallel, GCTaskCause reason)
+void CmcGC<LanguageConfig>::ProcessWeakReferences(GCPhase phase, GCTaskCause reason)
 {
-    ScopedTrace tracer("ProcessGlobalWeakStack", ark::common_vm::ENABLE_GC_TRACING);
-    if (reason == GCTaskCause::YOUNG_GC_CAUSE || globalWeakStack_.empty()) {
+    ScopedTrace tracer("ProcessWeakReferences", ark::common_vm::ENABLE_GC_TRACING);
+    if (reason == GCTaskCause::YOUNG_GC_CAUSE) {
         return;
     }
-    // the globalWeakStack_ cannot be modified during task execution
-    auto *threadPool = GetThreadPool();
-    ASSERT_PRINT(threadPool != nullptr, "thread pool is null");
-    constexpr size_t BATCH_N = 200;
-    if (parallel && globalWeakStack_.size() > BATCH_N) {
-        auto inputs = &globalWeakStack_;
-        ClearWeakRefTask callback(inputs);
-        DCHECK(inputs->size() < (SIZE_MAX / sizeof(WeakStack::value_type)));
-        ark::common_vm::ArrayTaskDispatcher dispatcher(inputs->data(), inputs->size() * sizeof(WeakStack::value_type),
-                                                       BATCH_N * sizeof(WeakStack::value_type), &callback);
-        dispatcher.Dispatch(threadPool, threadPool->GetTotalThreadNum());
-        dispatcher.JoinAndWait();
-    } else {
-        ProcessWeakStack(globalWeakStack_);
-    }
-    globalWeakStack_.clear();
+    this->GetReferenceProcessor()->ProcessReferences(false, false, phase, GC::EmptyReferenceProcessPredicate);
 }
 
 template <class LanguageConfig>
@@ -2447,9 +2360,9 @@ bool CmcGC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
 }
 
 template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::IsMarked([[maybe_unused]] const ark::ObjectHeader *object) const
+bool CmcGC<LanguageConfig>::IsMarked(const ark::ObjectHeader *object) const
 {
-    return false;
+    return RegionalHeap::IsMarkedObject(static_cast<const BaseObject *>(object));
 }
 
 template <class LanguageConfig>

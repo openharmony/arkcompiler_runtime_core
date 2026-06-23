@@ -98,11 +98,6 @@ public:
 
     /// Process finalizers of references.
     virtual void ProcessFinalizers() {}
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-    /// Process references after copy in cmc.
-    virtual void ProcessReferencesAfterCopy() {}
-#endif
 };
 
 }  // namespace ark::mem

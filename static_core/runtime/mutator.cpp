@@ -390,9 +390,7 @@ void Mutator::HandleReferencesCleanupRequest()
     if (IsRuntimeTerminated() || type_ != MutatorType::MANAGED) {
         return;
     }
-#if defined(ARK_USE_COMMON_RUNTIME)
-    HandleGCCallback();
-#endif
+    GetVM()->HandleGCRoutineInMutator();
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)

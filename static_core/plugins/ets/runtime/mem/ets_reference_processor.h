@@ -76,10 +76,6 @@ public:
 
     void ProcessClearedReferences();
 
-#if defined(ARK_USE_COMMON_RUNTIME)
-    void ProcessReferencesAfterCopy() override;
-#endif
-
 private:
     template <typename Handler>
     void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler);

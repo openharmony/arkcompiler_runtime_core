@@ -36,7 +36,7 @@ public:
         return MEMBER_OFFSET(EtsWeakReference, referent_);
     }
 
-    template <bool NEED_PREWRITE_BARRIER = true>
+    template <bool NEED_PREWRITE_BARRIER = true, bool NEED_READ_BARRIER = true>
     ALWAYS_INLINE EtsObject *GetReferent() const
     {
         // G1GC uses SATB approach. It requires to put WeakRef's target to SATB buffer on `deref` during concurrent mark
@@ -49,7 +49,8 @@ public:
         //     5. GC thread removes dead objects, including target and set up WeakRef to nullptr
         //     6. We have the garbage accessible from roots
         //  To resolve it we make `deref` native and add the target object to SATB on each `deref`
-        EtsObject *obj = EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetReferentOffset()));
+        EtsObject *obj =
+            EtsObject::FromCoreType(ObjectAccessor::GetObject<false, NEED_READ_BARRIER>(this, GetReferentOffset()));
         if constexpr (NEED_PREWRITE_BARRIER) {
             ASSERT(Mutator::GetCurrent() != nullptr);
             auto *preWrb = Mutator::GetCurrent()->GetPreWrbEntrypoint();

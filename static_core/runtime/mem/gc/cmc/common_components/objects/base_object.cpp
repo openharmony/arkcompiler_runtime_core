@@ -87,12 +87,4 @@ void BaseObject::ForEachRefField(const RefFieldVisitor &fieldHandler, const RefF
     }
 }
 
-void BaseObject::ClearRef(RefField<> &field)
-{
-    field.SetTargetObject(nullptr);
-    auto *vm = ark::PandaVM::GetCurrent();
-    auto *referenceProcessor = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor());
-    referenceProcessor->EnqueueReference(static_cast<ObjectHeader *>(this));
-}
-
 }  // namespace ark::common_vm

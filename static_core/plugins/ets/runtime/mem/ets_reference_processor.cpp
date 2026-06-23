@@ -58,7 +58,7 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
 
     const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
 
-    auto *referent = etsRef->GetReferent<false>();
+    auto *referent = etsRef->GetReferent<false, false>();
     if (referent == nullptr || referent == nullValue_) {
         LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
                              << " as normal object, because referent is nullish";
@@ -224,21 +224,5 @@ void EtsReferenceProcessor::ProcessClearedReferences()
         EnqueueFinalizer(weakRef);
     }
 }
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-void EtsReferenceProcessor::ProcessReferencesAfterCopy()
-{
-    weakReferences_.FlushSets();
-    while (!weakReferences_.IsEmpty()) {
-        auto *weakRefObj = weakReferences_.Extract();
-        auto weakRef = reinterpret_cast<ark::common_vm::BaseObject *>(weakRefObj);
-        if (weakRef->IsForwarded()) {
-            weakReferences_.Insert(reinterpret_cast<ObjectHeader *>(weakRef->GetForwardingPointer()));
-        } else {
-            weakReferences_.Insert(weakRefObj);
-        }
-    }
-}
-#endif  // ARK_USE_COMMON_RUNTIME
 
 }  // namespace ark::mem::ets

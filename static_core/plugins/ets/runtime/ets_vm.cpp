@@ -571,7 +571,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     ASSERT(GetMutatorLock()->HasLock());
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     GetFinalizationRegistryManager()->LaunchCleanupJobIfNeeded(executionCtx);
-    executionCtx->GetPandaVM()->CleanFinalizableReferenceList();
+    CleanFinalizableReferenceList();
 }
 
 void PandaEtsVM::HandleGCFinished() {}
