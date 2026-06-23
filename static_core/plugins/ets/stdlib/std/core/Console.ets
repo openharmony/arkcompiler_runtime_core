@@ -563,7 +563,7 @@ export final class Console {
 
         // Note(ivan-tyulyandin): unwrap from Array, workaround for 25264
         // unwrap from Array
-        let dat = data[0]!
+        let dat = data[0]
 
         if (!Console.isTabularData(dat)) {
             this.log(dat)
@@ -573,6 +573,11 @@ export final class Console {
         let df: DataFrame | undefined = undefined
         if (dat instanceof ArrayLike) {
             dat = dat as ArrayLike<Any>
+            if (dat.length == 0) {
+                let tableResult = Console.graphTable(["(index)"], [""], 1)
+                Console.printTable(tableResult)
+                return
+            }
             let d = Array.create<Any>(dat.length, undefined)
             for (let i = 0; i < d.length; ++i) {
                 d[i] = dat[i]
@@ -685,7 +690,9 @@ export final class Console {
 
                 let value = fieldVal[1]
                 const fieldType = fieldVal[2]
-                if (value === undefined || DataFrame.isElementaryType(fieldType)) {
+
+                if (value === undefined || value === null || value instanceof String ||
+                    DataFrame.isElementaryValue(value) || DataFrame.isElementaryType(fieldType)) {
                     valuesKeyArray[i] = DataFrame.primitiveToString(value)
                     hasPrimitive = true;
                 } else {
@@ -969,7 +976,7 @@ class DataFrame {
      */
     public insertRow(row: Map<ColumnName, ColumnValue>) {
         for (let key of this.tableModel.keys()) {
-            const value = row.get(key) ?? "-";
+            const value = row.get(key) ?? "";
             this.tableModel.get(key)!.push(value);
             const currentWidth = this.columnWidths.get(key)!;
             const valueLength = value.length
@@ -1119,7 +1126,7 @@ class DataFrame {
         } else if (obj === undefined) {
             mapping.set("Values", "undefined");
         } else if (obj instanceof String) {
-            mapping.set("Values", `'${obj}'`);
+            mapping.set("Values", `${obj}`);
         }
         // Handle complex types
         else if (obj instanceof Map) {
@@ -1141,20 +1148,31 @@ class DataFrame {
             if (DataFrame.isElementaryValue(obj)) {
                 mapping.set("Values", `${obj}`);
             } else if (obj instanceof object) {
-                const objType = Class.of(obj as object)
-                if (objType.isFixedArray()) {
-                    DataFrame.addArrayInfoToTableMapping(obj, mapping)
+                if (Array.isArray(obj)) {
+                    const arr = obj as Array<Any>
+                    for (let i = 0; i < arr.length; i++) {
+                        mapping.set(`${i}`, DataFrame.toPrint(arr[i], MAX_CONSOLE_PRINT_DEPTH));
+                    }
                 } else {
-                    const fieldVals = DataFrame.getAllInstanceFieldValues(obj)
-                    for (let i = 0; i < fieldVals.length; i++) {
-                        const fieldVal: [string, Any, Class] = fieldVals[i]
-                        const fieldName = (obj instanceof Tuple) ? `${i}` : fieldVal[0]
-                        mapping.set(fieldName, DataFrame.toPrint(fieldVal[1], MAX_CONSOLE_PRINT_DEPTH));
+                    const objType = Class.of(obj as object)
+                    if (objType.isFixedArray()) {
+                        DataFrame.addArrayInfoToTableMapping(obj, mapping)
+                    } else {
+                        const fieldVals = DataFrame.getAllInstanceFieldValues(obj)
+                        for (let i = 0; i < fieldVals.length; i++) {
+                            const fieldVal: [string, Any, Class] = fieldVals[i]
+                            const fieldName = (obj instanceof Tuple) ? `${i}` : fieldVal[0]
+                            mapping.set(fieldName, DataFrame.toPrint(fieldVal[1], MAX_CONSOLE_PRINT_DEPTH));
+                        }
                     }
                 }
             } else {
                 mapping.set("Values", JSON.stringify(obj))
             }
+        }
+
+        if (mapping.size == 0) {
+            mapping.set("Values", `${obj}`);
         }
 
         return mapping;
@@ -1415,14 +1433,14 @@ class DataFrame {
     }
 
     public static primitiveToString(val: Any): string {
-        if (!DataFrame.isElementaryValue(val)) {
-            throw new IllegalArgumentError("illegal argument")
-        }
-
         if (val === undefined) {
             return "undefined"
         } else if (val === null) {
             return "null"
+        } else if (val instanceof String) {
+            return val.toString()
+        } else if (!DataFrame.isElementaryValue(val)) {
+            throw new IllegalArgumentError("illegal argument")
         } else if (val instanceof object) {
             return val.toString()
         } else {
