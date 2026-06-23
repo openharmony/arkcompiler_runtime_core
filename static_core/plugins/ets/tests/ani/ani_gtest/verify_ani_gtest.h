@@ -107,6 +107,7 @@ public:
         auto *pandaEnv = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
         pandaEnv->GetEnvANIVerifier()->PushNativeFrame(pandaEnv);
         env_ = pandaEnv->GetEnvANIVerifier()->GetEnv();
+        PandaEtsVM::GetCurrent()->GetANIVerifier()->SetNativeCallStackUnwinding(false);
     }
 
     void TearDown() override
