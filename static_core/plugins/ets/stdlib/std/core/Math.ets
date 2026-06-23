@@ -889,7 +889,7 @@ export class Math {
             return val2
         }
         // val1 == val2 numerically; Math.max must prefer +0 over -0
-        if (val1.compareTo(0.0) == 0) {
+        if (val1 === 0.0) {
             return val1 + val2
         }
         return val1;
@@ -904,7 +904,7 @@ export class Math {
             if (isNaN(values[i])) return NaN;
             if (values[i] > max) {
                 max = values[i];
-            } else if (max.compareTo(0.0) == 0 && values[i].compareTo(0.0) == 0) {
+            } else if (max === 0.0 && values[i] === 0.0) {
                 // both are zero; Math.max must prefer +0 over -0
                 max = max + values[i];
             }
@@ -939,7 +939,7 @@ export class Math {
             return val2
         }
         // val1 == val2 numerically; Math.min must prefer -0 over +0
-        if (val1.compareTo(0.0) == 0) {
+        if (val1 === 0.0) {
             if (1.0 / val1 < 0.0) {
                 return val1
             }
@@ -957,7 +957,7 @@ export class Math {
             if (isNaN(values[i])) return NaN;
             if (values[i] < min) {
                 min = values[i];
-            } else if (min.compareTo(0.0) == 0 && values[i].compareTo(0.0) == 0) {
+            } else if (min === 0.0 && values[i] === 0.0) {
                 // both are zero; Math.min must prefer -0 over +0
                 if (1.0 / values[i] < 0.0) {
                     min = values[i];
