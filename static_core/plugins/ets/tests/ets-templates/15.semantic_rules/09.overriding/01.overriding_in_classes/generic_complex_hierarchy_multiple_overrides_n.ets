@@ -21,7 +21,7 @@ desc: >-
     superclass, a compile-time error occurs.
     {{ c.desc }}
 tags: [compile-only, negative]
-expected_out: "TODO: expected out is unknown"
+expected_out: "{{ c.expected_out }}"
 ---*/
 
 {{ c.decl }}

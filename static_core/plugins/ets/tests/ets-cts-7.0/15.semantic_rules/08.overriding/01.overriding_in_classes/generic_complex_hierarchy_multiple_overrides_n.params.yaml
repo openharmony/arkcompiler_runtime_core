@@ -14,6 +14,11 @@
 ---
 cases:
   - desc: Generic class chain with an inherited contravariant override and a declared exact override.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T): undefined from class or interface Leaf<T>,
+      inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: A): undefined from class or interface Mid<T> because both declarations override method
+      foo(p: T): undefined from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -31,6 +36,11 @@ cases:
       }
 
   - desc: Generic class chain with two type parameters and an inherited wider-parameter override.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: U): undefined from class or interface Leaf<T,U>,
+      inherited into class or interface Leaf<T,U>, conflicts with the previous declaration of method
+      foo(p: T): undefined from class or interface Mid<T,U> because both declarations override method
+      foo(p: U): undefined from class or interface Root<T,U>
     decl: |-
       class A {}
       class B extends A {}
@@ -48,6 +58,11 @@ cases:
       }
 
   - desc: Generic class chain where both conflicting overrides remain return-type compatible.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T): C from class or interface Leaf<T>, inherited
+      into class or interface Leaf<T>, conflicts with the previous declaration of method foo(p: B): B
+      from class or interface Mid<T> because both declarations override method foo(p: T): A from class
+      or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -66,6 +81,11 @@ cases:
       }
 
   - desc: Generic class chain with rest parameters on both conflicting overriding methods.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T, ...rest: Array<Tag>): undefined from class or interface
+      Leaf<T>, inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: A, ...rest: Array<Tag>): undefined from class or interface Mid<T> because both declarations
+      override method foo(p: T, ...rest: Array<Tag>): undefined from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -84,6 +104,11 @@ cases:
       }
 
   - desc: Mixed class-interface hierarchy with one conflicting method inherited from a class and one from a generic interface.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T): undefined from class or interface Mid<T>,
+      inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: A): undefined from class or interface Wide<T> because both declarations override method
+      foo(p: T): undefined from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -103,6 +128,11 @@ cases:
       class Leaf<T extends B> extends Mid<T> implements Wide<T> {}
 
   - desc: Mixed hierarchy where the conflicting interface method is inherited through a superinterface.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T): undefined from class or interface Mid<T>,
+      inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: A): undefined from class or interface WideBase<T> because both declarations override method
+      foo(p: T): undefined from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -124,6 +154,11 @@ cases:
       class Leaf<T extends B> extends Mid<T> implements Wide<T> {}
 
   - desc: Mixed hierarchy with an inherited interface default method and a declared class method in the leaf.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T): undefined from class or interface Leaf<T>,
+      inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: A): undefined from class or interface Wide<T> because both declarations override method
+      foo(p: T): undefined from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -143,6 +178,11 @@ cases:
       }
 
   - desc: Mixed hierarchy with three separate methods in the subclass all overriding the same superclass method.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: T): undefined from class or interface Leaf<T>,
+      inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: B): undefined from class or interface Mid<T> because both declarations override method
+      foo(p: T): undefined from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -164,6 +204,11 @@ cases:
       }
 
   - desc: Mixed class-interface hierarchy with covariant returns on both conflicting overriding methods.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: B): B from class or interface Mid<T>, inherited into
+      class or interface Leaf<T>, conflicts with the previous declaration of method foo(p: A): C
+      from class or interface Wide<T> because both declarations override method foo(p: T): A from class
+      or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
@@ -184,6 +229,11 @@ cases:
       class Leaf<T extends B> extends Mid<T> implements Wide<T> {}
 
   - desc: Mixed class-interface hierarchy with rest parameters and covariant returns on both conflicting overriding methods.
+    expected_out: >-
+      Semantic error ESE602430: Method foo(p: B, ...rest: Array<Tag>): B from class or interface Mid<T>,
+      inherited into class or interface Leaf<T>, conflicts with the previous declaration of method
+      foo(p: A, ...rest: Array<Tag>): C from class or interface Wide<T> because both declarations override
+      method foo(p: T, ...rest: Array<Tag>): A from class or interface Root<T>
     decl: |-
       class A {}
       class B extends A {}
