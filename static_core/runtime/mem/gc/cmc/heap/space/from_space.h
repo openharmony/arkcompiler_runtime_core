@@ -28,6 +28,7 @@
 #include "common_interfaces/thread/mutator.h"
 #include "runtime/mem/gc/cmc/heap/allocator/fix_heap.h"
 #include "runtime/mem/gc/cmc/heap/space/regional_space.h"
+#include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
 #endif
@@ -111,8 +112,7 @@ public:
     }
 
     void ParallelCopyFromRegions(RegionDesc *startRegion, size_t regionCnt);
-    void CopyFromRegions(Taskpool *threadPool);
-    void CopyFromRegions();
+    void CopyFromRegions(mem::GCWorkersTaskPool *pool);
 
     void GetPromotedTo(OldSpace &mspace);
 
@@ -137,6 +137,9 @@ public:
     }
 
 private:
+    void CopyFromRegionsOnSingleThread();
+    void CopyFromRegionsOnGCWorkerTaskPool(mem::GCWorkersTaskPool *pool);
+
     void ClearGCInfo(RegionList &list)
     {
         RegionList tmp("temp region list");

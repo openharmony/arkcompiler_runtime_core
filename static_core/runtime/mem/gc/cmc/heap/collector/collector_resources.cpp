@@ -19,6 +19,8 @@
 
 #include "libarkbase/utils/logger.h"
 
+#include "libarkbase/taskmanager/task_manager.h"
+
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
@@ -177,10 +179,10 @@ void CollectorResources::StartGCThreads()
 
 uint32_t CollectorResources::GetGCThreadCount(const bool isConcurrent) const
 {
-    if (GetThreadPool() == nullptr) {
+    if (!taskmanager::TaskManager::IsUsed()) {
         return 1;
     } else if (isConcurrent) {
-        return gcThreadCount_;
+        return taskmanager::TaskManager::GetWorkersCount();
     }
     // default to 2
     return 2;

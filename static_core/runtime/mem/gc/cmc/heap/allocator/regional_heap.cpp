@@ -64,11 +64,11 @@ void RegionalHeap::ExemptFromSpace()
     fromSpace_.ExemptFromRegions();
 }
 
-void RegionalHeap::CopyFromSpace(Taskpool *threadPool)
+void RegionalHeap::CopyFromSpace(mem::GCWorkersTaskPool *pool)
 {
     auto gc = PandaVM::GetCurrent()->GetGC();
     mem::GCScope<mem::TRACE_TIMING> gcScope("CopyFromRegions", gc);
-    fromSpace_.CopyFromRegions(threadPool);
+    fromSpace_.CopyFromRegions(pool);
 }
 
 // used to dump a brief summary of all regions.

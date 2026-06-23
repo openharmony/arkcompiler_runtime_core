@@ -38,6 +38,8 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
+#include "runtime/mem/gc/workers/gc_workers_task_pool.h"
+
 namespace ark::common_vm {
 class Taskpool;
 
@@ -219,7 +221,7 @@ public:
 
     void ExemptFromSpace();
 
-    void CopyFromSpace(Taskpool *threadPool);
+    void CopyFromSpace(mem::GCWorkersTaskPool *pool);
 
     FixHeapTaskList CollectFixTasks()
     {
