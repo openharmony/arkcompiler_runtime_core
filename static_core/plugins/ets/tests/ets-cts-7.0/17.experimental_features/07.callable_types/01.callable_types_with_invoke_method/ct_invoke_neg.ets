@@ -16,19 +16,18 @@
 
 /*---
 desc: >-
-    The method instantiate can have an arbitrary signature by itself.
-    If it is to be used in a type call expression, then its first parameter
-    must be a factory. The method can have or not have other parameters,
-    and those parameters can be arbitrary.
+    The method invoke can have an arbitrary signature. The method can be used
+    in a type call expression in either case above. If the signature has
+    parameters, then the call must contain corresponding arguments.
 tags: [compile-only, negative]
-{% if c.expected_out is defined %}
-expected_out: "{{c.expected_out}}"
-{% endif %}
+expected_out: "{{c.expected}}"
 ---*/
 
 {{c.decl}}
 
 function main(): void {
+    {% if c.use %}
     {{c.use|indent}}
+    {%- endif %}
 }
 {%- endfor %}

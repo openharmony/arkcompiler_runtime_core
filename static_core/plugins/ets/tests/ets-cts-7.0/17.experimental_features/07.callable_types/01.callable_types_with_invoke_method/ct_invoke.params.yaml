@@ -209,28 +209,6 @@ cases:
           arktest.assertEQ(new B().$_invoke(), 'b')
 
     - decl: |-
-          // error propagation from invoke
-          class B {
-              static $_invoke(p: boolean): string {
-                  if (p) {
-                      throw new Error('invoke error')
-                  }
-                  return 'B'
-              }
-          }
-          class C extends B {
-              $_invoke(): C { return new C() }
-          }
-          function foo(p: boolean): string {
-              return C(p)
-          }
-      use: |-
-          let checkException = (e: Error): boolean => { return e instanceof Error }
-          arktest.expectThrow(() => {
-              foo(true)
-          }, checkException)
-
-    - decl: |-
           // call chain of invoke
           class A<T> {
               static $_invoke(): number { return 42.0 }

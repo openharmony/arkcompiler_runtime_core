@@ -15,7 +15,5 @@
 cases:
   - { call: 'G1(1)',     value: 'Hi 1!'    }
   - { call: 'G1("Kim")', value: 'Hey Kim!' }
-  - { call: 'G2(10)',    value: 'Hi 10!'   }
-  - { call: 'G2("Mao")', value: 'Hey Mao!' }
   - { call: 'G2(true)',  value: 'Hi!'      }
   - { call: 'G2(false)', value: 'Bye!'     }

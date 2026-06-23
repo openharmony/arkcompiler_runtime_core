@@ -79,3 +79,39 @@ cases:
           }
       use: |-
           arktest.assertEQ(new C().meth(42.0).fld, '42')
+
+    - decl: |-
+          // protected instantiate from subclass instantiate via subclass name
+          class B {
+              fld: string = ''
+              protected static $_instantiate(f: ()=>B, p: string): B {
+                  let x = f()
+                  x.fld = p
+                  return x
+              }
+          }
+          class C extends B {
+              public static $_instantiate(f: ()=>C, p: number): B { return C('' + p) }
+          }
+      use: |-
+          arktest.assertEQ(C(42.0).fld, '42')
+      expected_out: "Semantic error ESE854298: Class static member $_instantiate must be accessed with the class name B qualification only."
+
+    - decl: |-
+          // protected instantiate from subclass method via subclass name
+          class B {
+              fld: string = ''
+              protected static $_instantiate(f: ()=>B, p: string): B {
+                  let x = f()
+                  x.fld = p
+                  return x
+              }
+          }
+          class C extends B {
+              meth(p: number): B {
+                  return C('' + p)
+              }
+          }
+      use: |-
+          arktest.assertEQ(new C().meth(42.0).fld, '42')
+      expected_out: "Semantic error ESE854298: Class static member $_instantiate must be accessed with the class name B qualification only."
