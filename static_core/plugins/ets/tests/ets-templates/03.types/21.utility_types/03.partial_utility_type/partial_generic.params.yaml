@@ -37,3 +37,92 @@ cases:
       g = {b: {i: 1}}
       g = {b: {j: "str"}}
       g = {b: {i: 2, j: "str"}}
+
+  - decl: |-
+      class A<T> {
+        value?: T
+      }
+    use: |-
+      let a: A<string> = new A<string>
+      a.value = "string"
+      arktest.assertEQ(a.value, "string", "expect string in non-partial example")
+      let partial: Partial<A<string>> = {}
+      partial.value = "string"
+      arktest.assertEQ(partial.value, "string", "expect string in partial example")
+
+  - decl: |-
+      class A<T> {
+        value: T | undefined
+      }
+    use: |-
+      let a: A<string> = new A<string>
+      a.value = "string"
+      arktest.assertEQ(a.value, "string", "expect string in non-partial example")
+      let partial: Partial<A<string>> = {}
+      partial.value = "string1"
+      arktest.assertEQ(partial.value, "string1", "expect string1 in partial example")
+
+  - decl: |-
+      class A<T> {
+        value: T | undefined
+      }
+    use: |-
+      let partial: Partial<A<int>> = {}
+      partial.value = 0
+      arktest.assertEQ(partial.value, 0, "expect 0")
+
+  - decl: |-
+      class A<T> {
+        value: T | undefined
+        value1: T | undefined
+      }
+    use: |-
+      let partial: Partial<A<string>> = {value: "string"}
+      arktest.assertEQ(partial.value, "string", "expect string")
+      arktest.assertEQ(partial.value1, undefined, "expect undefined")
+
+  - decl: |-
+      interface I<T> {
+        value: T | undefined
+      }
+    use: |-
+      let partial: Partial<I<string>> = {}
+      partial.value = "string"
+      arktest.assertEQ(partial.value, "string", "expect string")
+
+  # test with inheritance
+  - decl: |-
+      class Base<T> {
+        value: T | undefined
+      }
+      class Derived<T> extends Base<T> {
+        value1: T | undefined
+      }
+    use: |-
+      let partial: Partial<Derived<string>> = {value: "string", value1: "string1"}
+      arktest.assertEQ(partial.value, "string", "expect string")
+      arktest.assertEQ(partial.value1, "string1", "expect string1")
+
+  - decl: |-
+      class Base<T> {
+        value: T | undefined
+      }
+      class Derived<T> extends Base<T> {
+        value1: T | undefined
+      }
+    use: |-
+      let partial: Partial<Derived<string>> = {}
+      arktest.assertEQ(partial.value, undefined, "expect undefined")
+      arktest.assertEQ(partial.value1, undefined, "expect undefined")
+
+  - decl: |-
+      class Base<T> {
+        value: T | undefined
+      }
+      class Derived<T, U> extends Base<T> {
+        value1: U | undefined
+      }
+    use: |-
+      let partial: Partial<Derived<string, int>> = {value: "string", value1: 1}
+      arktest.assertEQ(partial.value, "string", "expect undefined")
+      arktest.assertEQ(partial.value1, 1, "expect 1")
