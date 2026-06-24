@@ -12,33 +12,29 @@
 # limitations under the License.
 
 cases:
-  - desc: |-
-        Adding a function to a namespace is a binary-compatible change
-    call: |-
-        N.m()
-    value: |-
-        'm'
-  - desc: |-
-        Adding members to a namespace is a binary-compatible change
-    call: |-
-        N.m()
-    value: |-
-        'm'
-  - desc: |-
-        Removing a private member from a namespace is a binary-compatible change
-    call: |-
-        N.m()
-    value: |-
-        'm'
-  - desc: |-
-        Renaming a private member of a namespace is a binary-compatible change
-    call: |-
-        N.m()
-    value: |-
-        'm'
-  - desc: |-
-        Adding a type definition to a namespace is a binary-compatible change
-    call: |-
-        N.m()
-    value: |-
-        'm'
+    - desc: |-
+          Adding a function to a namespace is a binary-compatible change
+
+    - desc: |-
+          Adding a variable to a namespace is a binary-compatible change
+
+    - desc: |-
+          Adding a new member namespace is a binary-compatible change
+
+    - desc: |-
+          Removing a non-exported member from a namespace is a binary-compatible change
+
+    - desc: |-
+          Renaming a non-exported member of a namespace is a binary-compatible change
+
+    - desc: |-
+          Adding a class is a binary-compatible change
+
+    - desc: |-
+          Adding an interface is a binary-compatible change
+
+    - desc: |-
+          Adding a enum is a binary-compatible change
+
+    - desc: |-
+          Adding a type alias is a binary-compatible change

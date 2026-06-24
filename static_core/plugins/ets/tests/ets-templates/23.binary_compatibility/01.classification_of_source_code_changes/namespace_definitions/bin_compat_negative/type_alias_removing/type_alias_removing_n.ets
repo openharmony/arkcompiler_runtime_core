@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+    Test for binary compatibility. Removing an exported type alias from namespace
+    breaks the binary compatibility.
+files: ['./type_alias_removing_n.libr.ets']
+tags: [negative]
+negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
+expected_error:
+    verify-new-libs: |-
+        TODO: Error message that N.TypeA is not found
+    runtime-with-new-libs.ark: |-
+        TODO: Error message that N.TypeA is not found
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+import { N } from './type_alias_removing_n.libr.ets'
 
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+function main() {
+    arktest.assertEQ(new N.TypeA().m(), 'abc')
 }
-{% endfor %}

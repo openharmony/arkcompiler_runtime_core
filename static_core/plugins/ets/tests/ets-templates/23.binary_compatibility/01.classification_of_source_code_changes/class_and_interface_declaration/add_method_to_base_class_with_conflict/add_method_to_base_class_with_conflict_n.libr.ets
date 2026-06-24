@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: >-
-    {{c.desc}}
-files: ['./namespace_definitions.libr_{{loop.index0}}.ets']
+desc: Test for binary compatibility. Adding new method to a base class.
+tags:
+    - compile-only
+    - not-a-test
 ---*/
 
-import { N } from './namespace_definitions.libr_{{loop.index0}}.ets'
+export class A {}
+export class B extends A {}
 
-function main(): void {
-    arktest.assertEQ(N.m(), 'm')
-    arktest.assertEQ(N.a, 'a')
+export class C1 {
+    m(p: A): string {
+        return "C1.A"
+    }
 }
-{% endfor %}

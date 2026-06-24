@@ -81,9 +81,9 @@ steps:
             - "${parameters.arktsconfig}"
             - "${parameters.extension}"
             - "${parameters.opt-level}"
-            - "${parameters.es2panda-args}"
             - "${parameters.work-dir}/gen/${test-id:parent}/${test-id:stem}"
             - "${parameters.work-dir}/intermediate/${test-id:parent}/${test-id:stem}"
+            - "${parameters.es2panda-args}"
         timeout: 60
     verify-new-libs:
         executable-path: ${parameters.build}/bin/verifier

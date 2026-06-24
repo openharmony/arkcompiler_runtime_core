@@ -47,6 +47,7 @@ EXTENSION="$3"
 OPT_LEVEL="$4"
 BASE_GEN="$5"
 BASE_INTERMEDIATE="$6"
+ES2PANDA_ARGS="${7:-}"
 
 suffix=".ets"
 
@@ -72,17 +73,24 @@ for new_lib in ${BASE_GEN}.libr*.new${suffix}; do
     lib_file="${new_lib%.new${suffix}}${suffix}"
     output_abc="${BASE_INTERMEDIATE}${lib_file#${BASE_GEN}}.abc"
 
-    "$ES2PANDA" \
-        "--arktsconfig=${ARKTSCONFIG}" \
-        "--gen-stdlib=false" \
-        "--extension=${EXTENSION}" \
-        "--opt-level=${OPT_LEVEL}" \
-        "--output=${output_abc}" \
-        "$lib_file"
+    cmd="${ES2PANDA}"
+    cmd+=" --arktsconfig=${ARKTSCONFIG}"
+    cmd+=" --gen-stdlib=false"
+    cmd+=" --extension=${EXTENSION}"
+    cmd+=" --opt-level=${OPT_LEVEL}"
+    cmd+=" --output=${output_abc}"
+    if [ ! -z "${ES2PANDA_ARGS}" ]; then
+        cmd+=" ${ES2PANDA_ARGS}"
+    fi
+    cmd+=" ${lib_file}"
+
+    echo "${cmd}"
+    ${cmd}
+    echo "es2panda exit code = $?"
 done
 
 # Restore original library files from .orig backups.
 for orig_lib in ${BASE_GEN}.libr*${suffix}.orig; do
     [ -f "$orig_lib" ] || continue
-    mv "$orig_lib" "${orig_lib%.orig}"
+    mv -v "$orig_lib" "${orig_lib%.orig}"
 done
