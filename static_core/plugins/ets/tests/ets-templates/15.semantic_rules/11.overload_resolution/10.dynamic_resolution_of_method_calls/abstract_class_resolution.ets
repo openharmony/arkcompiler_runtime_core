@@ -13,32 +13,15 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
+
 /*---
-desc: >-
-    A default method from a deeper subinterface is chosen when an intermediate
-    interface does not override the inherited default method.
+desc: Abstract class methods resolution verification.
 ---*/
 
-interface I1 {
-    m(): string {
-        return "I1";
-    }
-}
-
-interface I2 extends I1 {
-}
-
-interface I3 extends I2 {
-    m(): string {
-        return "I3";
-    }
-}
-
-class C implements I3 {
-}
+{{c.decl}}
 
 function main(): void {
-    let i1: I1 = new C();
-
-    arktest.assertEQ(i1.m(), "I3");
+    {{c.use|indent}}
 }
+{%- endfor %}

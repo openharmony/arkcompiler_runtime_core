@@ -1,0 +1,429 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |-
+      abstract class A {
+          abstract m(): string
+      }
+      class B extends A {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+
+  - decl: |-
+      abstract class A {
+          abstract m(): string
+      }
+      abstract class A1 extends A {}
+      class B extends A1 {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+
+  - decl: |-
+      abstract class A {
+          abstract m(): string
+      }
+      class A1 extends A {
+          override m(): string {
+              return "A1"
+          }
+      }
+      class B extends A1 {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+
+  - decl: |-
+      abstract class A {
+          abstract m(): string
+      }
+      class A1 extends A {
+          override m(): string {
+              return "A"
+          }
+      }
+      class B extends A1 {}
+    use: |-
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+
+  - decl: |-
+      interface I {
+          m(): string
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class B extends A {
+          override m(): string {
+              return "A"
+          }
+      }
+      abstract class AA implements I {}
+      class BB extends AA {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      abstract class A1 extends A {}
+      class B extends A1 {
+          override m(): string {
+              return "A"
+          }
+      }
+      abstract class AA implements I {}
+      abstract class AA1 extends AA {}
+      class BB extends AA1 {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let aa1: AA1 = new BB()
+      arktest.assertEQ(aa1.m(), "A", "via AA1")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class A1 extends A {
+          override m(): string {
+              return "A1"
+          }
+      }
+      class B extends A1 {
+          override m(): string {
+              return "A"
+          }
+      }
+      abstract class AA implements I {}
+      class AA1 extends AA {
+          override m(): string {
+              return "A1"
+          }
+      }
+      class BB extends AA1 {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let aa1: AA1 = new BB()
+      arktest.assertEQ(aa1.m(), "A", "via AA1")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class A1 extends A {
+          override m(): string {
+              return "A"
+          }
+      }
+      class B extends A1 {}
+      abstract class AA implements I {}
+      class AA1 extends AA {
+          override m(): string {
+              return "A"
+          }
+      }
+      class BB extends AA1 {}
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let aa1: AA1 = new BB()
+      arktest.assertEQ(aa1.m(), "A", "via AA1")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string {
+              return "A"
+          }
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class B extends A {} // relies on default method instead of one defined in parent class
+      abstract class AA implements I {}
+      class BB extends AA {} // relies on default method having none in parent class
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class B extends A {
+          override m(): string {
+              return "A"
+          }
+      }
+      abstract class AA implements I {}
+      class BB extends AA {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      abstract class A1 extends A {}
+      class B extends A1 {
+          override m(): string {
+              return "A"
+          }
+      }
+      abstract class AA implements I {}
+      abstract class AA1 extends AA {}
+      class BB extends AA1 {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let aa1: AA1 = new BB()
+      arktest.assertEQ(aa1.m(), "A", "via AA1")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class A1 extends A {
+          override m(): string {
+              return "A1"
+          }
+      }
+      class B extends A1 {
+          override m(): string {
+              return "A"
+          }
+      }
+      abstract class AA implements I {}
+      class AA1 extends AA {
+          override m(): string {
+              return "A1"
+          }
+      }
+      class BB extends AA1 {
+          override m(): string {
+              return "A"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let aa1: AA1 = new BB()
+      arktest.assertEQ(aa1.m(), "A", "via AA1")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")
+
+  - decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      abstract class A implements I {
+          abstract m(): string
+      }
+      class A1 extends A {
+          override m(): string {
+              return "A"
+          }
+      }
+      class B extends A1 {}
+      abstract class AA implements I {}
+      class AA1 extends AA {
+          override m(): string {
+              return "A"
+          }
+      }
+      class BB extends AA1 {}
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let a1: A1 = new B()
+      arktest.assertEQ(a1.m(), "A", "via A1")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let ii: I = new BB()
+      arktest.assertEQ(ii.m(), "A", "via I - BB")
+      let aa: AA = new BB()
+      arktest.assertEQ(aa.m(), "A", "via AA")
+      let aa1: AA1 = new BB()
+      arktest.assertEQ(aa1.m(), "A", "via AA1")
+      let bb: BB = new BB()
+      arktest.assertEQ(bb.m(), "A", "via BB")

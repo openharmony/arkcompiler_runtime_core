@@ -1,0 +1,423 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: |-
+      Class method inherited from a superclass has priority over interface default method when invoked through an interface reference.
+    decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      class A implements I {
+          m(): string {
+              return "A"
+          }
+      }      
+      class B extends A {}      
+      class A1 implements I {} // baseline test - relies on default method
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A", "via I")
+      let a: A = new B()
+      arktest.assertEQ(a.m(), "A", "via A")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A", "via B")
+      let i1: I = new A1()
+      arktest.assertEQ(i1.m(), "I", "via I - default")
+      let a1: A1 = new A1()
+      arktest.assertEQ(a1.m(), "I", "via A1 - default")
+    test_suffix: |-
+      1_1
+
+  - desc: |-
+      Subclass override has priority over interface default method when invoked through an interface reference.
+    decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      class A implements I {}      
+      class B extends A {
+          override m(): string {
+              return "B"
+          }
+      }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "B")
+    test_suffix: |-
+      1_2
+
+  - desc: |-
+      Method inherited from superclass is chosen over interface default method when the subclass implements the interface without override.
+    decl: |-
+      interface I {
+          m(): string {
+              return "I"
+          }
+      }      
+      class A {
+          m(): string {
+              return "A"
+          }
+      }      
+      class B extends A implements I {}
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(), "A")
+      let b: B = new B()
+      arktest.assertEQ(b.m(), "A")
+    test_suffix: |-
+      1_3
+
+  - desc: |-
+      Class wins regardless of which interface ref is used.
+    decl: |-
+      interface I1 { m(): string { return "I1" } }
+      interface I2 extends I1 { m(): string { return "I2" } }
+      class C implements I2 { override m(): string { return "C" } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let c: C = new C() // baseline
+      arktest.assertEQ(i1.m(), "C")
+      arktest.assertEQ(i2.m(), "C")
+      arktest.assertEQ(c.m(), "C")
+    test_suffix: |-
+      1_4
+
+  - desc: |-
+      Superclass method (not implementing I) still wins via class resolution path.
+    decl: |-
+      interface I { m(): string { return "I" } }
+      class A { m(): string { return "A" } }
+      class B extends A implements I {}
+    use: |-
+      let i: I = new B()
+      let b: B = new B() // baseline
+      arktest.assertEQ(i.m(), "A")
+      arktest.assertEQ(b.m(), "A")
+    test_suffix: |-
+      1_5
+
+  - desc: |-
+      The default method from a subinterface is chosen when it overrides a default method from its superinterface.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      class C implements I2 {}
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let c: C = new C()
+      arktest.assertEQ(i1.m(), "I2")
+      arktest.assertEQ(i2.m(), "I2")
+      arktest.assertEQ(c.m(), "I2")
+    test_suffix: |-
+      2_1
+
+  - desc: |-
+      The deepest default method in an interface inheritance chain is chosen even when the call is made through the topmost interface type.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      interface I3 extends I2 {
+          m(): string {
+              return "I3"
+          }
+      }      
+      class C implements I3 {}
+    use: |-
+      let i1: I1 = new C()
+      arktest.assertEQ(i1.m(), "I3")
+      let c: C = new C()
+      arktest.assertEQ(c.m(), "I3")
+    test_suffix: |-
+      2_2
+
+  - desc: |-
+      A default method from a deeper subinterface is chosen when an intermediate interface does not override the inherited default method.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {}      
+      interface I3 extends I2 {
+          m(): string {
+              return "I3"
+          }
+      }      
+      class C implements I3 {}
+    use: |-
+      let i1: I1 = new C()
+      arktest.assertEQ(i1.m(), "I3")
+      let c: C = new C()
+      arktest.assertEQ(c.m(), "I3")
+    test_suffix: |-
+      2_3
+
+  - desc: |-
+      The most specific available default method is chosen when the final subinterface does not provide its own override.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      interface I3 extends I2 {}      
+      class C implements I3 {}
+    use: |-
+      let i1: I1 = new C()
+      let i3: I3 = new C()
+      let c: C = new C()
+      arktest.assertEQ(i1.m(), "I2")
+      arktest.assertEQ(i3.m(), "I2")
+      arktest.assertEQ(c.m(), "I2")
+    test_suffix: |-
+      2_4
+
+  - desc: |-
+      A default method from a subinterface is chosen when the superinterface only declares an abstract method.
+    decl: |-
+      interface I1 {
+          m(): string
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      class C implements I2 {}
+    use: |-
+      let i1: I1 = new C()
+      arktest.assertEQ(i1.m(), "I2")
+      let c: C = new C()
+      arktest.assertEQ(c.m(), "I2")
+    test_suffix: |-
+      2_5
+
+  - desc: |-
+      Class override resolves both. Same result through either ref.
+    decl: |-
+      interface I1 { m(): string { return "I1" } }
+      interface I2 { m(): string { return "I2" } }
+      class C implements I1, I2 { override m(): string { return "C" } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let c: C = new C() // baseline
+      arktest.assertEQ(i1.m(), "C")
+      arktest.assertEQ(i2.m(), "C")
+      arktest.assertEQ(c.m(), "C")
+    test_suffix: |-
+      3_1
+
+  - desc: |-
+      Different method names, each interface's default dispatched independently.
+    decl: |-
+      interface Readable { read(): string { return "Readable" } }
+      interface Writable { write(): string { return "Writable" } }
+      class RW implements Readable, Writable {}
+    use: |-
+      let r: Readable = new RW()
+      let w: Writable = new RW()
+      arktest.assertEQ(r.read(), "Readable")
+      arktest.assertEQ(w.write(), "Writable")
+    test_suffix: |-
+      3_2
+
+  - desc: |-
+      Combined interface inherits both defaults, accessible through any ref.
+    decl: |-
+      interface I1 { m(): string { return "I1" } }
+      interface I2 { n(): string { return "I2" } }
+      interface I3 extends I1, I2 {}
+      class C implements I3 {}
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let i3: I3 = new C()
+      let c: C = new C() // baseline
+      arktest.assertEQ(i1.m(), "I1")
+      arktest.assertEQ(i2.n(), "I2")
+      arktest.assertEQ(i3.m(), "I1")
+      arktest.assertEQ(i3.n(), "I2")
+      arktest.assertEQ(c.m(), "I1")
+      arktest.assertEQ(c.n(), "I2")
+    test_suffix: |-
+      3_3
+
+  - desc: |-
+      A class method resolves a diamond conflict between two default methods inherited from subinterfaces.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      interface I3 extends I1 {
+          m(): string {
+              return "I3"
+          }
+      }      
+      class C implements I2, I3 {
+          m(): string {
+              return "C"
+          }
+      }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let i3: I3 = new C()
+      let c: C = new C()      
+      arktest.assertEQ(i1.m(), "C")
+      arktest.assertEQ(i2.m(), "C")
+      arktest.assertEQ(i3.m(), "C")
+      arktest.assertEQ(c.m(), "C")
+    test_suffix: |-
+      4_1
+
+  - desc: |-
+      Separate classes implementing different subinterfaces use the default method from their own interface inheritance path.
+    decl: |-
+      interface DiamondBase {
+          m(): string {
+              return "Base"
+          }
+      }      
+      interface DiamondLeft extends DiamondBase {
+          m(): string {
+              return "Left"
+          }
+      }      
+      interface DiamondRight extends DiamondBase {
+          m(): string {
+              return "Right"
+          }
+      }      
+      class A implements DiamondLeft {}      
+      class B implements DiamondRight {}
+    use: |-
+      let bl: DiamondBase = new A()
+      let br: DiamondBase = new B()
+      arktest.assertEQ(bl.m(), "Left", "via DiamondBase - left")
+      arktest.assertEQ(br.m(), "Right", "via DiamondBase - right")
+      
+      let dl: DiamondLeft = new A()
+      let dr: DiamondRight = new B()
+      arktest.assertEQ(dl.m(), "Left", "via DiamondLeft")
+      arktest.assertEQ(dr.m(), "Right", "via DiamondRight")
+      
+      let a: A = new A()
+      let b: B = new B()
+      arktest.assertEQ(a.m(), "Left", "via A")
+      arktest.assertEQ(b.m(), "Right", "via B")
+    test_suffix: |-
+      4_2
+
+  - desc: |-
+      In an asymmetric diamond, the only overriding subinterface default method is chosen when the other subinterface does not override it.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      interface I3 extends I1 {}      
+      class C implements I2, I3 {}
+    use: |-
+      let i1: I1 = new C()
+      arktest.assertEQ(i1.m(), "I2", "via I1")
+      let i2: I2 = new C()
+      arktest.assertEQ(i2.m(), "I2", "via I2")
+      let i3: I3 = new C()
+      arktest.assertEQ(i3.m(), "I2", "via I3")
+      let c: C = new C()
+      arktest.assertEQ(c.m(), "I2", "via C")
+    test_suffix: |-
+      4_3
+
+  - desc: |-
+      A default method in the interface joining a diamond is chosen as the most specific implementation.
+    decl: |-
+      interface I1 {
+          m(): string {
+              return "I1"
+          }
+      }      
+      interface I2 extends I1 {
+          m(): string {
+              return "I2"
+          }
+      }      
+      interface I3 extends I1 {
+          m(): string {
+              return "I3"
+          }
+      }      
+      interface I4 extends I2, I3 {
+          m(): string {
+              return "I4"
+          }
+      }      
+      class C implements I4 {}
+    use: |-
+      let i1: I1 = new C()
+      arktest.assertEQ(i1.m(), "I4", "via I1")
+      let i2: I2 = new C()
+      arktest.assertEQ(i2.m(), "I4", "via I2")
+      let i3: I3 = new C()
+      arktest.assertEQ(i3.m(), "I4", "via I3")
+      let i4: I4 = new C()
+      arktest.assertEQ(i4.m(), "I4", "via I4")
+      let c: C = new C()
+      arktest.assertEQ(c.m(), "I4", "via C")
+    test_suffix: |-
+      4_4
