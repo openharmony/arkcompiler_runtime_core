@@ -16,10 +16,11 @@
 {% for c in cases %}
 
 /*---
-desc: Generic class fields initialization - negative cases.
+desc: >-
+    No type parameter has a default value, and initialization is mandatory for variables
+    and fields of a type parameter (see Field Initialization)
+expected_out: "Semantic error ESE0375: Variable 't' is used before being assigned."
 tags: [compile-only, negative]
-expected_out: {{c.exp_out}}
-test_suffix: "{{c.test_suffix}}"
 ---*/
 
 {{c.decl}}
