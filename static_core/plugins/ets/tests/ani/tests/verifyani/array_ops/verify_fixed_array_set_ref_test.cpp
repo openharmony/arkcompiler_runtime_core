@@ -54,7 +54,7 @@ TEST_F(FixedArraySetRefTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->FixedArray_Set_Ref(nullptr, array, 0U, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
@@ -149,7 +149,7 @@ TEST_F(FixedArraySetRefTest, throw_error)
 
     ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0U, ref), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"array", "ani_fixedarray_ref"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},

@@ -60,7 +60,7 @@ TEST_F(VariableSetValue{{ Type }}Test, null_env)
     ASSERT_EQ(env_->c_api->Variable_SetValue_{{ Type }}(nullptr, variable, {{ test_value }}), ANI_INVALID_ARGS);
 {% endif %}
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"variable", "ani_variable"},
         {"value", "ani_{{ type }}"},
     };

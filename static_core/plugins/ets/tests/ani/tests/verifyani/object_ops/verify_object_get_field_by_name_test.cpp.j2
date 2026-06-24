@@ -67,7 +67,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_env)
 
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"result", "ani_{{ type }} *"},
@@ -153,7 +153,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_all_args)
 
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},

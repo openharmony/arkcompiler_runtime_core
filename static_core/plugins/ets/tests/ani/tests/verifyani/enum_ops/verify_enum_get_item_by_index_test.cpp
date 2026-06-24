@@ -47,7 +47,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_env)
     ani_enum_item result {};
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, enumColor_, 0U, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"enm", "ani_enum"},
         {"index", "ani_size"},
         {"result", "ani_enum_item *"},
@@ -98,7 +98,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, nullptr, 0U, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"enm", "ani_enum", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item' [ERROR]"},
@@ -120,7 +120,7 @@ TEST_F(VerifyEnumGetItemByIndexTest, has_unhandled_error)
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(enumColor_, 0U, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"enm", "ani_enum"},
         {"index", "ani_size"},
         {"result", "ani_enum_item *"},

@@ -27,7 +27,7 @@ TEST_F(AnyGetByValueTest, wrong_env)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_GetByValue(nullptr, cls, cls, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"key", "ani_ref"},
         {"result", "ani_ref *"},
@@ -100,7 +100,7 @@ TEST_F(AnyGetByValueTest, throw_error)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_GetByValue(env_, cls, cls, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"key", "ani_ref"},
         {"result", "ani_ref *"},

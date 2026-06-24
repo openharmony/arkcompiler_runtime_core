@@ -147,7 +147,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_env)
         ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
@@ -486,7 +486,7 @@ TEST_F(ObjectCallMethod{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"method", "ani_method", "method is nullptr [ERROR]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
@@ -754,7 +754,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_env)
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, object_, method_, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
@@ -951,7 +951,7 @@ TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"method", "ani_method", "method is nullptr [ERROR]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},

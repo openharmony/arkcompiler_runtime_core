@@ -27,7 +27,7 @@ TEST_F(AnyInstanceOfTest, wrong_env)
     ani_boolean result {};
     ASSERT_EQ(env_->c_api->Any_InstanceOf(nullptr, cls, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"type", "ani_ref", "Static types are not supported [FATAL]"},
         {"result", "ani_boolean *"},
@@ -118,7 +118,7 @@ TEST_F(AnyInstanceOfTest, throw_error)
     ani_boolean result {};
     ASSERT_EQ(env_->c_api->Any_InstanceOf(env_, cls, cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"ref", "ani_ref", "Static types are not supported [FATAL]"},
         {"type", "ani_ref", "Static types are not supported [FATAL]"},
         {"result", "ani_boolean *"},

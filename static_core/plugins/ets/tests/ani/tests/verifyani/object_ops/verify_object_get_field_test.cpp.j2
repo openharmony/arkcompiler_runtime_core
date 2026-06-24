@@ -87,7 +87,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(nullptr, object_, field, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"field", "ani_field"},
         {"result", "ani_{{ type }} *"},
@@ -215,7 +215,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_GetField_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"field", "ani_field", "field is nullptr, expected ani_field [ERROR]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},

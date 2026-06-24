@@ -97,7 +97,7 @@ TEST_F(ArrayBufferGetInfoVerifyTest, arraybuffer_get_info_pending_error)
     ani_size length {};
     ASSERT_EQ(env_->ArrayBuffer_GetInfo(arraybuffer, &data, &length), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"arraybuffer", "ani_arraybuffer"},
         {"data_result", "void **"},
         {"length_result", "ani_size *"},

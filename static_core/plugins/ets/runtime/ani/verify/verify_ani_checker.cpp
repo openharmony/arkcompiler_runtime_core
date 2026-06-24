@@ -869,19 +869,19 @@ public:
     VerificationResult VerifyEnv(VEnv *venv, bool checkPendingError)
     {
         if (UNLIKELY(venv == nullptr)) {
-            return {"called from incorrect the native scope", ANIErrorSeverity::ERROR};
+            return {"env is nullptr", ANIErrorSeverity::ERROR};
         }
         if (UNLIKELY(venv_ == nullptr)) {
             return {"current native thread is not attached", ANIErrorSeverity::FATAL};
         }
 
         if (UNLIKELY(venv != venv_)) {
-            return {"called from incorrect the native scope", ANIErrorSeverity::FATAL};
+            return {"env does not belong to the current native scope", ANIErrorSeverity::FATAL};
         }
         auto *pandaEnv = PandaAniEnv::FromAniEnv(venv_->GetEnv());
         ASSERT(pandaEnv == EtsExecutionContext::GetCurrent()->GetPandaAniEnv());
         if (UNLIKELY(checkPendingError && pandaEnv->HasPendingException())) {
-            return {"has unhandled an error", ANIErrorSeverity::ERROR};
+            return {"has a pending exception", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1010,13 +1010,10 @@ public:
         if (envANIVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vref))) {
             return {};
         }
-        if (!envANIVerifier->IsValidRef(vref)) {
-            return {"reference not found (may be deleted, out of scope, or corrupted)", ANIErrorSeverity::FATAL};
-        }
         if (envANIVerifier->IsValidRef(vref)) {
             return {};
         }
-        return {"wrong reference", ANIErrorSeverity::FATAL};
+        return {"reference not found (may be deleted, out of scope, or corrupted)", ANIErrorSeverity::FATAL};
     }
 
     VerificationResult VerifyEscapeRef(VRef *vref)

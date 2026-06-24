@@ -240,7 +240,7 @@ TEST_F(ModuleNamespaceFindMemberTest, pending_error_is_rejected)
     ani_function function {};
     ASSERT_EQ(env_->c_api->Namespace_FindFunction(env_, ns_, "namespaceFunction", ":i", &function), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"ns", "ani_namespace"},
         {"name", "const char *"},
         {"signature", "const char *"},

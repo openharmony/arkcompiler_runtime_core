@@ -33,7 +33,7 @@ TEST_F(ThrowErrorTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->ThrowError(nullptr, static_cast<ani_error>(err)), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"error", "ani_error"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("ThrowError", testLines);

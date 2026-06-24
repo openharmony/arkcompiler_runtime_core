@@ -24,7 +24,7 @@ TEST_F(EnsureEnoughRef, wrong_env)
     ani_size cnt = 5U;
     ASSERT_EQ(env_->c_api->EnsureEnoughReferences(nullptr, cnt), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"nrRefs", "ani_size"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("EnsureEnoughReferences", testLines);
