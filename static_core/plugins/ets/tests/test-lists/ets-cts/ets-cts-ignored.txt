@@ -2,6 +2,15 @@
 02.lexical_elements/04.line_separators/case_without_semicolon_0.ets
 02.lexical_elements/08.operators_and_punctuators/parentheses_without_semicolon_0.ets
 
+#34632
+03.types/21.utility_types/03.partial_utility_type/partial_generic_1.ets
+03.types/21.utility_types/03.partial_utility_type/partial_generic_2.ets
+03.types/21.utility_types/03.partial_utility_type/partial_generic_3.ets
+03.types/21.utility_types/03.partial_utility_type/partial_generic_4.ets
+03.types/21.utility_types/03.partial_utility_type/partial_generic_5.ets
+03.types/21.utility_types/03.partial_utility_type/partial_generic_6.ets
+03.types/21.utility_types/03.partial_utility_type/partial_generic_8.ets
+
 #17300 No CTE on using predefined types as generic parameters
 05.generics/generic_declarations/generic_functions/generic_params_n_0.ets
 05.generics/generic_declarations/generic_functions/generic_params_n_1.ets
