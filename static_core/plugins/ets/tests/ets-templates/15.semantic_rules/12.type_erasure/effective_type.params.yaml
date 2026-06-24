@@ -1,0 +1,238 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - tested_type: Any
+    effective_type: Any | undefined
+    init: |-
+      = "any"
+    test_suffix: any
+
+  - tested_type: undefined
+    effective_type: undefined
+    init: |-
+      = undefined
+    test_suffix: undefined
+
+  - tested_type: |-
+      null
+    effective_type: |-
+      null | undefined
+    init: |-
+      = null
+    test_suffix: 'null'
+
+  - decl: |-
+      type foo_tested = () => never
+      type foo_effective = () => never | undefined
+      let foo: foo_tested = () => {
+        throw new Error('test')
+      }
+    tested_type: foo_tested
+    effective_type: foo_effective
+    init: |-
+      = foo
+    test_suffix: never
+
+  - decl: |-
+      class A<out T> { // covariant type parameter without constraint
+      }
+    tested_type: A<int>
+    effective_type: A | undefined
+    init: |-
+      = new A<int>
+    test_suffix: covariant_any
+
+  - decl: |-
+      class A<out T extends Object> { // covariant type parameter with constraint
+      }
+    tested_type: A<int>
+    effective_type: A | undefined
+    init: |-
+      = new A<int>
+    test_suffix: covariant_object
+
+  - decl: |-
+      let res: Any
+      class A<in T> { // contravariant type parameter
+          meth(p: T) {
+              res = p
+          }
+      }
+    tested_type: A<int>
+    effective_type: A | undefined
+    init: |-
+      = new A<int>
+    test_suffix: contravariant
+
+  - decl: |-
+      class A<T> { // invariant type parameter, erases to wildcard type
+      }
+    tested_type: A<int>
+    effective_type: A
+    init: |-
+      = new A<int>
+    test_suffix: invariant
+
+  - decl: |-
+      type foo_with_constraint<T extends Object> = (param: T) => void
+      let foo: foo_with_constraint<int> = (param: int) => {}
+      type foo_effective = foo_with_constraint<Object>
+    tested_type: foo_with_constraint<int>
+    effective_type: foo_effective
+    init: |-
+      = foo
+    test_suffix: type_parameter_constraint
+
+  - decl: |-
+      class A<T> {}
+      class B<T> {}
+    tested_type: A<int> | B<string>
+    effective_type: A | B | undefined
+    init: |-
+      = new A<int>
+    test_suffix: union
+
+  - decl: |-
+      class A {}
+    tested_type: A[]
+    effective_type: Array | undefined
+    init: |-
+      = [new A]
+    test_suffix: array_square
+
+  - decl: |-
+      class A {}
+    tested_type: FixedArray<A>
+    effective_type: FixedArray<Object> | undefined
+    init: |-
+      = new FixedArray<A>(0)
+    test_suffix: fixed_array
+
+  - decl: |-
+      type foo_tested<P1, P2, R> = (p1: P1, p2: P2) => R
+      let foo_inst: foo_tested<int, boolean, string> = (p1: int, p2: boolean) => { return "string" }
+      type foo_effective = foo_tested<Any, Any, never>
+    tested_type: foo_tested<int, boolean, string>
+    effective_type: foo_effective
+    init: |-
+      = foo_inst
+    test_suffix: type_function
+
+  - decl: |-
+      type foo_tested<P1, P2, R> = (p1: P1, ...p2: P2[]) => R
+      let foo_inst: foo_tested<int, boolean, string> = (p1: int, ...p2: boolean[]) => { return "string" }
+      type foo_effective = foo_tested<Any, Any, never>
+    tested_type: foo_tested<int, boolean, string>
+    effective_type: foo_effective
+    init: |-
+      = foo_inst
+    test_suffix: type_function_rest
+
+  - decl: |-
+      class A {}
+      class B {}
+      type my_tuple<T1 extends Object, T2> = [T1, T2]
+      type effective = [Object, Any]
+    tested_type: my_tuple<A, B>
+    effective_type: effective | undefined
+    init: |-
+      = [new A, new B]
+    test_suffix: tuple
+
+  - tested_type: '"aa"'
+    effective_type: string | undefined
+    init: |-
+      = "aa"
+    test_suffix: string_literal
+
+  - tested_type: Awaited<string>
+    effective_type: string | undefined
+    init: |-
+      = "string"
+    test_suffix: awaited_string
+
+  - tested_type: Awaited<Promise<string>>
+    effective_type: Awaited<string> | undefined
+    init: |-
+      = "string"
+    test_suffix: awaited_promise_string
+
+  - decl: |-
+      let res: Any
+      class A<in T> { // type parameter with in variance
+          meth(p: T) {
+              res = p
+          }
+      }
+      type effective_type = Awaited<A<never>>
+    tested_type: Awaited<A<int>>
+    effective_type: effective_type | undefined
+    init: |-
+      = new A<int>
+    test_suffix: awaited_in_variance
+
+  - decl: |-
+      class A<out T extends Object> { // type parameter with out variance with constraint
+      }
+    tested_type: Awaited<A<int>>
+    effective_type: Object | undefined
+    init: |-
+      = new A<int>
+    test_suffix: awaited_out_variance
+
+  - tested_type: NonNullable<string>
+    effective_type: string | undefined
+    init: |-
+      = "string"
+    test_suffix: non_nullable_string
+
+  - decl: |-
+      class A<T> {}
+    tested_type: Partial<A<string>>
+    effective_type: Partial<A> | undefined
+    init: |-
+      = {}
+    test_suffix: partial
+
+  - decl: |-
+      class A<T> {}
+    tested_type: Required<A<string>>
+    effective_type: Required<A> | undefined
+    init: |-
+      = {}
+    test_suffix: required
+
+  - decl: |-
+      class A<T> {}
+    tested_type: Readonly<A<string>>
+    effective_type: Readonly<A> | undefined
+    init: |-
+      = {}
+    test_suffix: readonly
+
+  - tested_type: Record<string, boolean>
+    effective_type: Map | undefined
+    init: |-
+      = { "string": true }
+    test_suffix: record
+
+  - decl: |-
+      type GetStringType = () => string
+      type StrRet = ReturnType<GetStringType>
+    tested_type: StrRet
+    effective_type: StrRet | undefined
+    init: |-
+      = "result"
+    test_suffix: return_type
