@@ -83,6 +83,19 @@ endif()
 # CC-OFFNXT(bc-40028) FP
 include(cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
+# Disable -Werror for coverage builds - done here to ensure it's removed after
+# all flags are set (including -Werror set on line 73 above).
+# Coverage can be enabled via:
+# - UNIT_TESTS_COVERAGE (with USE_GCOV_TOOLS or USE_LLVM_COV_TOOLS)
+# - ENABLE_*_COVERAGE options
+# - Direct use of common_coverage.cmake toolchain (which sets USE_GCOV_TOOLS or USE_LLVM_COV_TOOLS)
+if(UNIT_TESTS_COVERAGE OR USE_GCOV_TOOLS OR USE_LLVM_COV_TOOLS OR
+   ENABLE_UNIT_TESTS_FULL_COVERAGE OR ENABLE_BYTECODE_OPTIMIZER_COVERAGE OR
+   ENABLE_COMPILER_COVERAGE OR ENABLE_LIBPANDABASE_COVERAGE OR ENABLE_ES2PANDA_COVERAGE)
+    string(REGEX REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    message(STATUS "Coverage build detected - disabled -Werror")
+endif()
+
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)
     add_custom_target(coverage_full DEPENDS cts-assembly tests benchmarks)
     collect_coverage_for_target(
