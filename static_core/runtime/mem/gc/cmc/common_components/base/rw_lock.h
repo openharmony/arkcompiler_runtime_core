@@ -18,7 +18,7 @@
 
 #include <atomic>
 
-#include "common_components/log/log.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::common_vm {
 class RwLock {

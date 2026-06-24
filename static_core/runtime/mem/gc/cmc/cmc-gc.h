@@ -388,7 +388,7 @@ public:
 protected:
     void CollectLargeGarbage()
     {
-        COMMON_PHASE_TIMER("Collect large garbage");
+        mem::GCScope<mem::TRACE_TIMING> gcScope("Collect large garbage", this);
         auto &space = reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_);
         auto &stats = GetGCStats();
         stats.largeSpaceSize = space.LargeObjectSize();
@@ -528,7 +528,7 @@ private:
         reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_).AssembleGarbageCandidates();
         reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_).PrepareMarking();
 
-        COMMON_PHASE_TIMER("enum roots & update old pointers within");
+        mem::GCScope<mem::TRACE_TIMING> gcScope("enum roots & update old pointers within", this);
         TransitionToGCPhase(mem::GCPhase::GC_PHASE_INITIAL_MARK);
 
         rootsVisitFunc(visitor);

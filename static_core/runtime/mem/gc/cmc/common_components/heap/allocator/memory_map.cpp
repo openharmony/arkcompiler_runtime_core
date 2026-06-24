@@ -24,9 +24,10 @@
 
 #include "libarkbase/os/mem.h"
 #include "common_components/base/sys_call.h"
-#include "common_components/log/log.h"
 
 #include "libarkbase/utils/logger.h"
+
+#include "runtime/include/mem/panda_string.h"
 
 #include "securec.h"
 

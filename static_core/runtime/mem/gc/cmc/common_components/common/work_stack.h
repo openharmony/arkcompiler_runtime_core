@@ -19,7 +19,7 @@
 #include <type_traits>
 
 #include "common_interfaces/base/common.h"
-#include "common_components/log/log.h"
+
 #include "libarkbase/os/mutex.h"
 
 namespace ark::common_vm {

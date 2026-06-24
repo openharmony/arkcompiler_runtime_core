@@ -20,8 +20,7 @@
 #include "runtime/mem/gc/cmc/cmc-gc.h"
 #include "runtime/mem/gc/cmc/common_components/heap/heap_manager.h"
 
-#include "common_components/log/log.h"
-#include "common_components/base/time_utils.h"
+#include "common_components/base/globals.h"
 #include "common_components/heap/verification.h"
 #include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/ref_field.h"
@@ -39,6 +38,7 @@
 #include "libarkbase/utils/math_helpers.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/trace.h"
 
 #include "common_interfaces/heap/region_desc.h"
 
@@ -371,7 +371,7 @@ private:
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardStaticRoots()
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardStaticRoots", "");
+    ScopedTrace tracer("PreforwardStaticRoots", ark::common_vm::ENABLE_GC_TRACING);
     PreforwardVisitor<LanguageConfig> visitor(this);
     VisitRoots(visitor);
 }
@@ -402,7 +402,7 @@ void CmcGC<LanguageConfig>::PreforwardConcurrentRoots()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardStaticWeakRoots(GCTaskCause reason)
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardStaticRoots", "");
+    ScopedTrace tracer("PreforwardStaticRoots", ark::common_vm::ENABLE_GC_TRACING);
 
     WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor(reason);
     VisitWeakRoots(weakVisitor);
@@ -471,8 +471,8 @@ CArrayList<BaseObject *> CmcGC<LanguageConfig>::EnumRoots()
         EnumRootsImpl<VisitRoots>(visitor);
     } else if constexpr (policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR) {
         ScopedStopTheWorld stw(stwParam);
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL,
-                     ("CMCGC::EnumRoots-STW-bufferSize(" + std::to_string(results->capacity()) + ")").c_str(), "");
+        ScopedTrace tracer(("EnumRoots-STW-bufferSize(" + ToPandaString(results->capacity()) + ")").c_str(),
+                           ark::common_vm::ENABLE_GC_TRACING);
         EnumRootsImpl<VisitRoots>(visitor);
     } else if constexpr (policy == EnumRootsPolicy::STW_AND_FLIP_MUTATOR) {
         auto rootSet = EnumRootsFlip(stwParam, visitor);
@@ -489,7 +489,7 @@ CArrayList<BaseObject *> CmcGC<LanguageConfig>::EnumRoots()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
 {
-    COMMON_PHASE_TIMER("marking live objects");
+    mem::GCScope<mem::TRACE_TIMING> gcScope("Marking live objects", this);
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     markedObjectCount_.store(0, std::memory_order_relaxed);
@@ -567,7 +567,7 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
         STWParam stwParam {"final-mark"};
         ScopedStopTheWorld stw(stwParam);
 
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PreforwardFlip[STW]", "");
+        ScopedTrace tracer("PreforwardFlip[STW]", ark::common_vm::ENABLE_GC_TRACING);
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
         ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
         TransitionToGCPhase(GCPhase::GC_PHASE_REMARK);
@@ -600,8 +600,8 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::Preforward(GCTaskCause reason)
 {
-    COMMON_PHASE_TIMER("Preforward");
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Preforward[STW]", "");
+    mem::GCScope<mem::TRACE_TIMING> gcScope("Preforward", this);
+
     TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY);
 
     [[maybe_unused]] auto *threadPool = GetThreadPool();
@@ -617,7 +617,7 @@ void CmcGC<LanguageConfig>::Preforward(GCTaskCause reason)
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ConcurrentPreforward()
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::ConcurrentPreforward", "");
+    ScopedTrace tracer("ConcurrentPreforward", ark::common_vm::ENABLE_GC_TRACING);
     PreforwardConcurrentRoots();
 }
 
@@ -641,7 +641,8 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
     uint32_t parallelCount = runningWorkers + 1;  // 1 ：DaemonThread
     PandaVector<FixHeapWorker::Result> results(parallelCount);
     {
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap [Parallel]", "");
+        ScopedTrace tracer("FixHeap [Parallel]", ark::common_vm::ENABLE_GC_TRACING);
+
         // Fix heap
         TaskPackMonitor monitor(runningWorkers, runningWorkers);
         for (uint32_t i = 1; i < parallelCount; ++i) {
@@ -658,7 +659,8 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
     }
 
     {
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Post FixHeap Clear [Parallel]", "");
+        ScopedTrace tracer("Post FixHeap Clear [Parallel]", ark::common_vm::ENABLE_GC_TRACING);
+
         // Post clear task
         TaskPackMonitor monitor(runningWorkers, runningWorkers);
         for (uint32_t i = 1; i < parallelCount; ++i) {
@@ -682,8 +684,10 @@ void CmcGC<LanguageConfig>::FixHeap(bool isWorldStopped)
     } else {
         TransitionToGCPhase(GCPhase::GC_PHASE_FIX);
     }
-    COMMON_PHASE_TIMER("FixHeap");
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::FixHeap", "");
+    mem::GCScope<mem::TRACE_TIMING> gcScope("FixHeap", this);
+
+    ScopedTrace tracer("FixHeap", ark::common_vm::ENABLE_GC_TRACING);
+
     ParallelFixHeap();
 
     WVerify::VerifyAfterFix(this->GetGCPhase(), isWorldStopped);
@@ -825,7 +829,9 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
 {
     const bool isYoungGC = task.reason == GCTaskCause::YOUNG_GC_CAUSE;
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::DoGarbageCollection", "");
+
+    mem::GCScope<mem::TRACE_TIMING> gcScope(__FUNCTION__, this);
+
     if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
         CollectGarbageWithXRef(task.reason);
         return;
@@ -1475,7 +1481,7 @@ void CmcGC<LanguageConfig>::UnlockObject(ObjectHeader *object)
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ClearAllGCInfo()
 {
-    COMMON_PHASE_TIMER("ClearAllGCInfo");
+    mem::GCScope<mem::TRACE_TIMING> gcScope("ClearAllGCInfo", this);
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
     space.ClearAllGCInfo();
 }
@@ -1483,11 +1489,11 @@ void CmcGC<LanguageConfig>::ClearAllGCInfo()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::CollectSmallSpace()
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CollectSmallSpace", "");
+    ScopedTrace tracer("CollectSmallSpace", ark::common_vm::ENABLE_GC_TRACING);
     auto &stats = GetGCStats();
     auto &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
     {
-        COMMON_PHASE_TIMER("CollectFromSpaceGarbage");
+        mem::GCScope<mem::TRACE_TIMING> gcScope("CollectFromSpaceGarbage", this);
         stats.collectedBytes += stats.smallGarbageSize;
         space.CollectFromSpaceGarbage();
         space.HandlePromotion();
@@ -1506,13 +1512,6 @@ void CmcGC<LanguageConfig>::CollectSmallSpace()
                    << stats.largeGarbageSize << " B. garbage ratio " << std::fixed
                    << std::setprecision(logPercentagePrecision) << stats.garbageRatio * logBasePercentage
                    << "%";  // The base of the percentage is 100
-    OHOS_HITRACE(
-        HITRACE_LEVEL_COMMERCIAL, "CMCGC::CollectSmallSpace END",
-        ("collect:" + std::to_string(stats.collectedBytes) + "B;small:" + std::to_string(stats.fromSpaceSize) + "-" +
-         std::to_string(stats.smallGarbageSize) + "B;non-movable:" + std::to_string(stats.nonMovableSpaceSize) + "-" +
-         std::to_string(stats.nonMovableGarbageSize) + "B;large:" + std::to_string(stats.largeSpaceSize) + "-" +
-         std::to_string(stats.largeGarbageSize) + "B;garbage ratio:" + std::to_string(stats.garbageRatio))
-            .c_str());
 }
 
 template <class LanguageConfig>
@@ -1520,7 +1519,8 @@ void CmcGC<LanguageConfig>::SetGCThreadQosPriority(PriorityMode mode)
 {
 #ifdef ENABLE_QOS
     LOG(DEBUG, COMMON) << "SetGCThreadQosPriority gettid " << gettid();
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::SetGCThreadQosPriority", "");
+
+    ScopedTrace tracer("SetGCThreadQosPriority", ark::common_vm::ENABLE_GC_TRACING);
     switch (mode) {
         case PriorityMode::STW: {
             OHOS::QOS::SetQosForOtherThread(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE, gettid());
@@ -1787,8 +1787,8 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::TracingImpl(GlobalMarkStack &globalMarkStack, bool parallel, bool Remark,
                                         GCTaskCause reason)
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, ("CMCGC::TracingImpl_" + std::to_string(globalMarkStack.Count())).c_str(),
-                 "");
+    ScopedTrace tracer(("TracingImpl_" + ToPandaString(globalMarkStack.Count())).c_str(),
+                       ark::common_vm::ENABLE_GC_TRACING);
 
     // enable parallel marking if we have thread pool.
     auto *threadPool = GetThreadPool();
@@ -1865,8 +1865,9 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PushRootsToWorkStack(LocalCollectStack &collectStack,
                                                  const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL,
-                 ("CMCGC::PushRootsToWorkStack_" + std::to_string(collectedRoots.size())).c_str(), "");
+    ScopedTrace tracer(("PushRootsToWorkStack_" + ToPandaString(collectedRoots.size())).c_str(),
+                       ark::common_vm::ENABLE_GC_TRACING);
+
     for (BaseObject *obj : collectedRoots) {
         PushRootToWorkStack(collectStack, obj, reason);
     }
@@ -1875,7 +1876,7 @@ void CmcGC<LanguageConfig>::PushRootsToWorkStack(LocalCollectStack &collectStack
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkingRoots", "");
+    ScopedTrace tracer("MarkingRoots", ark::common_vm::ENABLE_GC_TRACING);
 
     GlobalMarkStack globalMarkStack;
 
@@ -1885,7 +1886,7 @@ void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collect
         PushRootsToWorkStack(collectStack, collectedRoots, reason);
 
         if (reason == GCTaskCause::YOUNG_GC_CAUSE) {
-            OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::PushRootInRSet", "");
+            ScopedTrace tracer("PushRootInRSet", ark::common_vm::ENABLE_GC_TRACING);
             auto func = [this, &collectStack](BaseObject *object) { MarkRememberSetImpl(object, collectStack); };
             RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
             space.MarkRememberSet(func);
@@ -1894,7 +1895,7 @@ void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collect
         collectStack.Publish();
     }
 
-    COMMON_PHASE_TIMER("MarkingRoots");
+    mem::GCScope<mem::TRACE_TIMING> gcScope("MarkingRoots", this);
 
     ASSERT_PRINT(GetThreadPool() != nullptr, "null thread pool");
 
@@ -1902,7 +1903,7 @@ void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collect
     const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
 
     {
-        COMMON_PHASE_TIMER("Concurrent marking");
+        mem::GCScope<mem::TRACE_TIMING> gcScope("Concurrent marking", this);
         TracingImpl(globalMarkStack, maxWorkers > 0, false, reason);
     }
 }
@@ -1912,8 +1913,8 @@ void CmcGC<LanguageConfig>::Remark(GCTaskCause reason)
 {
     GlobalMarkStack globalMarkStack;
     const uint32_t maxWorkers = GetGCThreadCount(true) - 1;
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::Remark[STW]", "");
-    COMMON_PHASE_TIMER("STW re-marking");
+
+    mem::GCScope<mem::TRACE_TIMING> gcScope("STW re-marking", this);
     ConcurrentRemark(globalMarkStack, maxWorkers > 0);  // Mark enqueue
     TracingImpl(globalMarkStack, maxWorkers > 0, true, reason);
     PreforwardStaticRoots();
@@ -1923,10 +1924,6 @@ void CmcGC<LanguageConfig>::Remark(GCTaskCause reason)
     // clear satb buffer when gc finish tracing.
     SatbBuffer::Instance().ClearBuffer();
 
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkingRoots END",
-                 // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or
-                 // ordering constraints imposed on other reads or writes
-                 ("mark obejects:" + std::to_string(markedObjectCount_.load(std::memory_order_relaxed))).c_str());
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     LOG(DEBUG, GC) << "mark " << markedObjectCount_.load(std::memory_order_relaxed) << " objects";
@@ -1954,7 +1951,7 @@ public:
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ClearWeakStack(bool parallel, GCTaskCause reason)
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::ProcessGlobalWeakStack", "");
+    ScopedTrace tracer("ProcessGlobalWeakStack", ark::common_vm::ENABLE_GC_TRACING);
     if (reason == GCTaskCause::YOUNG_GC_CAUSE || globalWeakStack_.empty()) {
         return;
     }
@@ -1979,8 +1976,7 @@ void CmcGC<LanguageConfig>::ClearWeakStack(bool parallel, GCTaskCause reason)
 template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::MarkSatbBuffer", "");
-    COMMON_PHASE_TIMER("MarkSatbBuffer");
+    mem::GCScope<mem::TRACE_TIMING> gcScope("MarkSatbBuffer", this);
     auto visitSatbObj = [this, &globalMarkStack]() {
         PandaStack<BaseObject *> remarkStack;
         auto func = [&remarkStack](Mutator *mutator) {
@@ -2133,17 +2129,10 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
     PandaOStringStream oss;
     oss << "allocated bytes " << bytesAllocated << " (survive bytes " << survivedBytes << ", recent-allocated "
         << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << gcStats.targetFootprint
-        << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold;
+        << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold << ", native size "
+        << Heap::GetHeap().GetNotifiedNativeSize() << ", new native threshold "
+        << Heap::GetHeap().GetNativeHeapThreshold();
     LOG(DEBUG, GC) << oss.str();
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::UpdateGCStats END",
-                 ("allocated bytes:" + std::to_string(bytesAllocated) + ";survive bytes:" +
-                  std::to_string(survivedBytes) + ";recent allocated:" + std::to_string(recentBytes) +
-                  ";update target footprint:" + std::to_string(oldTargetFootprint) + ";new target footprint:" +
-                  std::to_string(gcStats.targetFootprint) + ";old gc threshold:" + std::to_string(oldThreshold) +
-                  ";new gc threshold:" + std::to_string(gcStats.heapThreshold) +
-                  ";native size:" + std::to_string(Heap::GetHeap().GetNotifiedNativeSize()) +
-                  ";new native threshold:" + std::to_string(Heap::GetHeap().GetNativeHeapThreshold()))
-                     .c_str());
 }
 
 template <class LanguageConfig>
@@ -2194,17 +2183,15 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
     auto currentThreshold = GetGCStats().GetThreshold();
     LOG(DEBUG, GC) << "Begin GC log. GCReason: " << gcReasonName << ", GCType: " << task.collectionType
-                   << ", Current allocated " << ::ark::mem::Pretty(currentAllocatedSize) << ", Current threshold "
-                   << ::ark::mem::Pretty(currentThreshold) << ", gcIndex=" << gcIndex;
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::RunGarbageCollection",
-                 ("GCReason:" + gcReasonName + ";GCType:" + task.collectionType +
-                  ";Sensitive:" + std::to_string(static_cast<int>(Heap::GetHeap().GetSensitiveStatus())) +
-                  ";Startup:" + std::to_string(static_cast<int>(Heap::GetHeap().GetStartupStatus())) +
-                  ";Current Allocated:" + ::ark::mem::Pretty(currentAllocatedSize) +
-                  ";Current Threshold:" + ::ark::mem::Pretty(currentThreshold) +
-                  ";Current Native:" + ::ark::mem::Pretty(Heap::GetHeap().GetNotifiedNativeSize()) +
-                  ";NativeThreshold:" + ::ark::mem::Pretty(Heap::GetHeap().GetNativeHeapThreshold()))
-                     .c_str());
+                   << ", Current allocated " << common_vm::TimeUtil::PrettyDigitsFormat(currentAllocatedSize)
+                   << ", Current threshold " << common_vm::TimeUtil::PrettyDigitsFormat(currentThreshold)
+                   << ", gcIndex=" << gcIndex
+                   << ", Sensitive " + ToPandaString(static_cast<int>(Heap::GetHeap().GetSensitiveStatus()))
+                   << ", Startup " + ToPandaString(static_cast<int>(Heap::GetHeap().GetStartupStatus()))
+                   << ", Current Native " +
+                          common_vm::TimeUtil::PrettyDigitsFormat(Heap::GetHeap().GetNotifiedNativeSize())
+                   << ", NativeThreshold " +
+                          common_vm::TimeUtil::PrettyDigitsFormat(Heap::GetHeap().GetNativeHeapThreshold());
     PreGarbageCollection(task.reason, true);
     Heap::GetHeap().SetGCReason(task.reason);
     auto &gcStats = GetGCStats();
@@ -2238,7 +2225,8 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcS
     {
         PandaOStringStream oss;
         const int prec = 3;
-        oss << "total gc time: " << ::ark::mem::Pretty(gcTimeNs / ark::common_vm::NS_PER_US) << " us, collection rate ";
+        oss << "total gc time: " << common_vm::TimeUtil::PrettyDigitsFormat(gcTimeNs / ark::common_vm::NS_PER_US)
+            << " us, collection rate ";
         oss << std::setprecision(prec) << rate << " MB/s";
         LOG(DEBUG, GC) << oss.str();
     }
@@ -2277,7 +2265,7 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcS
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::CopyFromSpace()
 {
-    OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "CMCGC::CopyFromSpace", "");
+    ScopedTrace tracer("CopyFromSpace", ark::common_vm::ENABLE_GC_TRACING);
     STWParam stwParam {"GC_PHASE_COPY transition"};
     {
         ScopedStopTheWorld stw(stwParam);

@@ -15,6 +15,7 @@
 
 #include "common_components/heap/collector/task_queue.h"
 
+#include "common_components/base/time_utils.h"
 #include "common_components/heap/collector/collector.h"
 
 namespace ark::common_vm {

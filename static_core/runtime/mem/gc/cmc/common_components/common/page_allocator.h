@@ -25,7 +25,6 @@
 #include "common_components/base/globals.h"
 #include "common_components/common/run_type.h"
 #include "common_components/common/page_pool.h"
-#include "common_components/log/log.h"
 
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/logger.h"

@@ -46,6 +46,8 @@ constexpr size_t GB = KB * KB * KB;
 
 constexpr size_t ALIGN_OBJECT = 8;
 
+constexpr bool ENABLE_GC_TRACING = false;
+
 template <typename T>
 struct Identity {
     using type = T;

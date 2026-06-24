@@ -15,12 +15,6 @@
 
 #include "common_components/heap/allocator/region_manager.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-#include <unistd.h>
-
-#include "libarkbase/os/mem.h"
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"
@@ -36,14 +30,22 @@
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
-#include "common_components/log/log.h"
 #include "common_components/taskpool/taskpool.h"
+
+#include "libarkbase/os/mem.h"
+#include "libarkbase/utils/logger.h"
 
 #if defined(_WIN64)
 #include <sysinfoapi.h>
 #endif
 
 #include "runtime/mem/gc/cmc/cmc-gc.h"
+
+#include <algorithm>
+
+#include <cmath>
+#include <cstdint>
+#include <unistd.h>
 
 namespace ark::mem {
 uintptr_t RegionDesc::UnitInfo::totalUnitCount = 0;

@@ -18,9 +18,11 @@
 
 #include "common_components/base/globals.h"
 #include "common_components/taskpool/taskpool.h"
-#include "common_components/log/log.h"
+
+#include "libarkbase/utils/logger.h"
 
 namespace ark::common_vm {
+
 enum class StartupStatus : uint8_t {
     BEFORE_STARTUP,
     COLD_STARTUP,
@@ -116,7 +118,6 @@ public:
 
     void NotifyHighSensitive(bool isStart)
     {
-        OHOS_HITRACE(HITRACE_LEVEL_COMMERCIAL, "SmartGC: set high sensitive status: ", std::to_string(isStart).c_str());
         isStart ? SetSensitiveStatus(AppSensitiveStatus::ENTER_HIGH_SENSITIVE)
                 : SetSensitiveStatus(AppSensitiveStatus::EXIT_HIGH_SENSITIVE);
         LOG(INFO, COMMON) << "SmartGC: set high sensitive status: " << isStart;

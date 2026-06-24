@@ -257,23 +257,7 @@ public:
     bool IsHeapObject(HeapAddress addr) const override;
 #endif
 
-    size_t ReclaimGarbageMemory(bool releaseAll) override
-    {
-        {
-            COMMON_PHASE_TIMER("ReclaimGarbageRegions");
-            regionManager_.ReclaimGarbageRegions();
-        }
-
-        COMMON_PHASE_TIMER("ReleaseGarbageMemory");
-        if (releaseAll) {
-            return regionManager_.ReleaseGarbageRegions(0);
-        } else {
-            size_t size = GetAllocatedBytes();
-            double cachedRatio = 1 - Heap::GetHeap().GetHeapParam().heapUtilization;
-            size_t targetCachedSize = static_cast<size_t>(size * cachedRatio);
-            return regionManager_.ReleaseGarbageRegions(targetCachedSize);
-        }
-    }
+    size_t ReclaimGarbageMemory(bool releaseAll) override;
 
     bool ForEachObject(const std::function<void(BaseObject *)> &visitor, bool safe) const override
     {
@@ -285,17 +269,9 @@ public:
         return true;
     }
 
-    void ExemptFromSpace()
-    {
-        COMMON_PHASE_TIMER("ExemptFromRegions");
-        fromSpace_.ExemptFromRegions();
-    }
+    void ExemptFromSpace();
 
-    void CopyFromSpace(Taskpool *threadPool)
-    {
-        COMMON_PHASE_TIMER("CopyFromRegions");
-        fromSpace_.CopyFromRegions(threadPool);
-    }
+    void CopyFromSpace(Taskpool *threadPool);
 
     FixHeapTaskList CollectFixTasks()
     {

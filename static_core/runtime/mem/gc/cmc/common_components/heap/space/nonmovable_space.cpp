@@ -26,8 +26,9 @@
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
-#include "common_components/log/log.h"
 #include "common_components/taskpool/taskpool.h"
+
+#include "libarkbase/utils/logger.h"
 
 #if defined(_WIN64)
 #include <sysinfoapi.h>

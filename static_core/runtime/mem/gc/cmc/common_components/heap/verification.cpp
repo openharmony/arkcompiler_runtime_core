@@ -20,6 +20,7 @@
 #include "allocator/regional_heap.h"
 #include "common/mark_work_stack.h"
 #include "common/type_def.h"
+
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_state_word.h"
 #include "common_interfaces/objects/ref_field.h"

@@ -108,5 +108,19 @@ CString GetTimestamp()
                     tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, rem);
     return CString(buf);
 }
+
+PandaString PrettyDigitsFormat(uint64_t number) noexcept
+{
+    constexpr int numDigitsPerSegment = 3;
+    PandaString orig = ToPandaString(number);
+    int pos = static_cast<int>(orig.length()) - numDigitsPerSegment;
+    while (pos > 0) {
+        orig.insert(pos, ",");
+        pos -= numDigitsPerSegment;
+    }
+    return orig;
+}
+
 }  // namespace TimeUtil
+
 }  // namespace ark::common_vm
