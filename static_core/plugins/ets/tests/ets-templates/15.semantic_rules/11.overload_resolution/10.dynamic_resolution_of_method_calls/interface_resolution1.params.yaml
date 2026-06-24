@@ -1,0 +1,432 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: |-
+      Default n() calls this.m(), virtual dispatch resolves to C.m.
+    decl: |-
+      interface I {
+        m(): string { return "I.m" }
+        n(): string { return this.m() }
+      }
+      class C implements I { m(): string { return "C.m" } }
+    use: |-
+      let i: I = new C()
+      arktest.assertEQ(i.n(), "C.m", "via I")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.n(), "C.m", "via C")
+    test_suffix: |-
+      5_1
+
+  - desc: |-
+      No class override, hence this.m() resolves to I.m.
+    decl: |-
+      interface I {
+        m(): string { return "I.m" }
+        n(): string { return this.m() }
+      }
+      class C implements I {}
+    use: |-
+      let i: I = new C()
+      arktest.assertEQ(i.n(), "I.m", "via I")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.n(), "I.m", "via C")
+    test_suffix: |-
+      5_2
+
+  - desc: |-
+      Inherited class method: this.m() in I.n() dispatches to A.m via B
+    decl: |-
+      interface I {
+        m(): string { return "I.m" }
+        n(): string { return this.m() }
+      }
+      class A implements I { m(): string { return "A.m" } }
+      class B extends A {}
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.n(), "A.m", "via I")
+      let a: A = new B() // baseline
+      arktest.assertEQ(a.n(), "A.m", "via A")
+      let b: B = new B() // baseline
+      arktest.assertEQ(b.n(), "A.m", "via B")
+    test_suffix: |-
+      5_3
+
+  - desc: |-
+      this.m() in I2.n() dispatches to C.m, not I2.m.
+    decl: |-
+      interface I1 { m(): string { return "I1" } }
+      interface I2 extends I1 {
+        m(): string { return "I2" }
+        n(): string { return this.m() }
+      }
+      class C implements I2 { m(): string { return "C" } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      arktest.assertEQ(i1.m(), "C")
+      arktest.assertEQ(i2.n(), "C")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), "C", "via C")
+      arktest.assertEQ(c.n(), "C", "via C")
+    test_suffix: |-
+      5_4
+
+  - desc: |-
+      Overload resolution picks signature at compile time, dispatch picks C's impl at runtime.
+    decl: |-
+      interface I {
+        m(p: String): string { return "I.String" }
+        m(p: Object): string { return "I.Object" }
+      }
+      class C implements I {
+        m(p: String): string { return "C.String" }
+        m(p: Object): string { return "C.Object" }
+      }
+    use: |-
+      let i: I = new C()
+      arktest.assertEQ(i.m("x"), "C.String", "expect C.String via I")
+      arktest.assertEQ(i.m(new Object()), "C.Object", "expect C.Object via I")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m("x"), "C.String", "expect C.String via C")
+      arktest.assertEQ(c.m(new Object()), "C.Object", "expect C.Object via C")
+    test_suffix: |-
+      6_1
+
+  - desc: |-
+      Overriding both superclass and interface, hence B wins.
+    decl: |-
+      interface I { m(p: Object): string { return "I" } }
+      class A { m(p: Object): string { return "A" } }
+      class B extends A implements I { override m(p: Object): string { return "B" } }
+    use: |-
+      let i: I = new B()
+      arktest.assertEQ(i.m(new Object()), "B", "via I")
+      let a: A = new B() // baseline
+      arktest.assertEQ(a.m(new Object()), "B", "via A")
+      let b: B = new B() // baseline
+      arktest.assertEQ(b.m(new Object()), "B", "via B")
+    test_suffix: |-
+      6_2
+
+  - desc: |-
+      D.m(C1) overrides both A.m(C2) and A.m(C1) per 15.10.9. Through interface ref, same behavior.
+    decl: |-
+      class C1 {}
+      class C2 extends C1 {}
+      interface I {
+        m(c: C2): string
+        m(c: C1): string
+      }
+      class A implements I {
+        m(c: C2): string { return "A.C2" }
+        m(c: C1): string { return "A.C1" }
+      }
+      class D extends A { override m(c: C1): string { return "D.C1" } }
+    use: |-
+      let i: I = new D()
+      arktest.assertEQ(i.m(new C2()), "D.C1", "via I from C2")
+      arktest.assertEQ(i.m(new C1()), "D.C1", "via I from C1")
+      let a: A = new D() // baseline
+      arktest.assertEQ(a.m(new C2()), "D.C1", "via A from C2")
+      arktest.assertEQ(a.m(new C1()), "D.C1", "via A from C1")
+      let d: D = new D() // baseline
+      arktest.assertEQ(d.m(new C2()), "D.C1", "via D from C2")
+      arktest.assertEQ(d.m(new C1()), "D.C1", "via D from C1")
+    test_suffix: |-
+      6_3
+
+  - desc: |-
+      A provides class method, hence wins over I2 default. B inherits A.m.
+    decl: |-
+      // 3-level class + 2-level interface:
+      interface I1 { m(): string { return "I1" } }
+      interface I2 extends I1 { m(): string { return "I2" } }
+      class A implements I1 { m(): string { return "A" } }
+      class B extends A implements I2 {}
+    use: |-
+      let i1: I1 = new B()
+      let i2: I2 = new B()
+      arktest.assertEQ(i1.m(), "A", "via I1")
+      arktest.assertEQ(i2.m(), "A", "via I2")
+      let a: A = new B() // baseline
+      let b: B = new B() // baseline
+      arktest.assertEQ(a.m(), "A", "via A")
+      arktest.assertEQ(b.m(), "A", "via B")
+    test_suffix: |-
+      7_1
+
+  - desc: |-
+      C inherits B.m, B overrides I's default. Class path wins.
+    decl: |-
+      // Class chain overrides at different level:
+      interface I { m(): string { return "I" } }
+      class A implements I {}
+      // Note override modifier in B is legal because parent class "has" this method
+      class B extends A { override m(): string { return "B" } }
+      class C extends B {}
+    use: |-
+      let i: I = new C()
+      arktest.assertEQ(i.m(), "B", "via I")
+      let a: A = new C() // baseline
+      arktest.assertEQ(a.m(), "B", "via A")
+      let b: B = new C() // baseline
+      arktest.assertEQ(b.m(), "B", "via B")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), "B", "via C")
+    test_suffix: |-
+      7_2
+
+  - desc: |-
+      Class overrides m() but not n(). m() -> class wins, n() -> interface default.
+    decl: |-
+      // Multiple interfaces, partial class override:
+      interface I1 { m(): string { return "I1" } }
+      interface I2 { n(): string { return "I2" } }
+      class C implements I1, I2 { m(): string { return "C.m" } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      arktest.assertEQ(i1.m(), "C.m")
+      arktest.assertEQ(i2.n(), "I2")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), "C.m")
+      arktest.assertEQ(c.n(), "I2")
+    test_suffix: |-
+      7_3
+
+  - desc: |-
+      A.m() is class method, hence wins over I4 default despite I4 being deeper.
+    decl: |-
+      // 4-interface chain with class at middle:
+      interface I1 { m(): string { return "I1" } }
+      interface I2 extends I1 { m(): string { return "I2" } }
+      interface I3 extends I2 {}
+      interface I4 extends I3 { m(): string { return "I4" } }
+      class A implements I2 { m(): string { return "A" } }
+      class B extends A implements I4 {}
+    use: |-
+      let i1: I1 = new B()
+      let i4: I4 = new B()
+      arktest.assertEQ(i1.m(), "A", "via I1")
+      arktest.assertEQ(i4.m(), "A", "via I4")
+      let a: A = new B() // baseline
+      let b: B = new B() // baseline
+      arktest.assertEQ(a.m(), "A", "via A")
+      arktest.assertEQ(b.m(), "A", "via B")
+    test_suffix: |-
+      7_4
+
+  - desc: |-
+      Same interface variable, different actual types - verify correct dispatch each time.
+    decl: |-
+      // Sibling classes, same interface:
+      interface I { m(): string { return "I" } }
+      class A implements I { m(): string { return "A" } }
+      class B implements I { m(): string { return "B" } }
+    use: |-
+      let i: I
+      i = new A()
+      arktest.assertEQ(i.m(), "A")
+      i = new B()
+      arktest.assertEQ(i.m(), "B")
+    test_suffix: |-
+      7_5
+
+  - desc: |-
+      Class override resolves collision. Each interface ref dispatches to class method.
+    decl: |-
+      interface I1 { m(): string { return "I1" } }
+      interface I2 { m(): string { return "I2" } }
+      class C implements I1, I2 { m(): string { return "C" } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      arktest.assertEQ(i1.m(), "C", "via I1")
+      arktest.assertEQ(i2.m(), "C", "via I2")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), "C", "via C")
+    test_suffix: |-
+      8_1
+
+  - desc: |-
+      Sub-interface combines two unrelated same-sig defaults; class override resolves ambiguity. Dispatch through both I1 and I3 refs gives class method.
+    decl: |-
+      interface I1 { m(): int { return 1 } }
+      interface I2 { m(): int { return 2 } }
+      interface I3 extends I1, I2 {}
+      class C implements I3 { m(): int { return 0 } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let i3: I3 = new C()
+      arktest.assertEQ(i1.m(), 0, "via I1")
+      arktest.assertEQ(i2.m(), 0, "via I2")
+      arktest.assertEQ(i3.m(), 0, "via I3")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), 0, "via C")
+    test_suffix: |-
+      8_2
+
+  - desc: |-
+      I4 extends I1, I3. I2 overrides I1 (related via extends). I2.m() is the single most-specific default -- no ambiguity.
+    decl: |-
+      interface I1 { m(): int { return 1 } }
+      interface I2 extends I1 { m(): int { return 2 } }
+      interface I3 extends I2 {}
+      interface I4 extends I1, I3 {}
+      class C implements I4 {}
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let i3: I3 = new C()
+      let i4: I4 = new C()
+      arktest.assertEQ(i1.m(), 2, "via I1")
+      arktest.assertEQ(i2.m(), 2, "via I2")
+      arktest.assertEQ(i3.m(), 2, "via I3")
+      arktest.assertEQ(i4.m(), 2, "via I4")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), 2, "via C")
+    test_suffix: |-
+      8_3
+
+  - desc: |-
+      Three independent interfaces, class override resolves all.
+    decl: |-
+      interface I1 { m(): int { return 1 } }
+      interface I2 { m(): int { return 2 } }
+      interface I3 { m(): int { return 3 } }
+      class C implements I1, I2, I3 { m(): int { return 0 } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let i3: I3 = new C()
+      arktest.assertEQ(i1.m(), 0, "via I1")
+      arktest.assertEQ(i2.m(), 0, "via I2")
+      arktest.assertEQ(i3.m(), 0, "via I3")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), 0, "via C")
+    test_suffix: |-
+      8_4
+
+  - desc: |-
+      Diamond: class override resolves conflict for all three ref types.
+    decl: |-
+      interface IBase { m(): int { return 0 } }
+      interface ILeft extends IBase { m(): int { return 1 } }
+      interface IRight extends IBase { m(): int { return 2 } }
+      class C implements ILeft, IRight { m(): int { return 99 } }
+    use: |-
+      let b: IBase = new C()
+      let l: ILeft = new C()
+      let r: IRight = new C()
+      arktest.assertEQ(b.m(), 99, "via IBase")
+      arktest.assertEQ(l.m(), 99, "via ILeft")
+      arktest.assertEQ(r.m(), 99, "via IRight")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), 99, "via C")
+    test_suffix: |-
+      8_5
+
+  - desc: |-
+      Asymmetric diamond: only ILeft overrides, hence no conflict, ILeft.m() is the single most-specific default.
+    decl: |-
+      interface IBase { m(): int { return 0 } }
+      interface ILeft extends IBase { m(): int { return 1 } }
+      interface IRight extends IBase {}
+      class C implements ILeft, IRight {}
+    use: |-
+      let b: IBase = new C()
+      let l: ILeft = new C()
+      let r: IRight = new C()
+      arktest.assertEQ(b.m(), 1, "via IBase")
+      arktest.assertEQ(l.m(), 1, "via ILeft")
+      arktest.assertEQ(r.m(), 1, "via IRight")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(), 1, "via C")
+    test_suffix: |-
+      8_6
+
+  - desc: |-
+      Different signatures, hence no collision. Each interface ref calls its own default.
+    decl: |-
+      interface I1 { m(s: string): string { return "I1:" + s } }
+      interface I2 { m(n: int): string { return "I2:" + n.toString() } }
+      class C implements I1, I2 {}
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      arktest.assertEQ(i1.m("x"), "I1:x", "signature I1")
+      arktest.assertEQ(i2.m(42), "I2:42", "signature I2")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m("x"), "I1:x", "signature I1 via C")
+      arktest.assertEQ(c.m(42), "I2:42", "signature I2 via C")
+    test_suffix: |-
+      9_1
+
+  - desc: |-
+      Sub-interface inherits both overloads. Overload resolution selects by argument type.
+    decl: |-
+      interface I1 { m(s: string): string { return "I1" } }
+      interface I2 { m(n: int): string { return "I2" } }
+      interface I3 extends I1, I2 {}
+      class C implements I3 {}
+    use: |-
+      let i3: I3 = new C()
+      arktest.assertEQ(i3.m("x"), "I1", "signature I1")
+      arktest.assertEQ(i3.m(42), "I2", "signature I1")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m("x"), "I1", "signature I1 via C")
+      arktest.assertEQ(c.m(42), "I2", "signature I2 via C")
+    test_suffix: |-
+      9_2
+
+  - desc: |-
+      Class overrides one signature, keeps default for the other.
+    decl: |-
+      interface I1 { m(s: string): string { return "I1" } }
+      interface I2 { m(n: int): string { return "I2" } }
+      class C implements I1, I2 { m(s: string): string { return "C.str" } }
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      arktest.assertEQ(i1.m("x"), "C.str", "via I1")
+      arktest.assertEQ(i2.m(42), "I2", "via I2")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m("x"), "C.str", "signature I1 via C")
+      arktest.assertEQ(c.m(42), "I2", "signature I2 via C")
+    test_suffix: |-
+      9_3
+
+  - desc: |-
+      Three interfaces, three distinct signatures. Each dispatches to its own default.
+    decl: |-
+      interface I1 { m(a: int): string { return "int" } }
+      interface I2 { m(a: double): string { return "double" } }
+      interface I3 { m(a: string): string { return "string" } }
+      class C implements I1, I2, I3 {}
+    use: |-
+      let i1: I1 = new C()
+      let i2: I2 = new C()
+      let i3: I3 = new C()
+      arktest.assertEQ(i1.m(1), "int", "via I1")
+      arktest.assertEQ(i2.m(1.0), "double", "via I2")
+      arktest.assertEQ(i3.m("x"), "string", "via I3")
+      let c: C = new C() // baseline
+      arktest.assertEQ(c.m(1), "int", "via C - I1")
+      arktest.assertEQ(c.m(1.0), "double", "via C - I2")
+      arktest.assertEQ(c.m("x"), "string", "via C - I3")
+    test_suffix: |-
+      9_4

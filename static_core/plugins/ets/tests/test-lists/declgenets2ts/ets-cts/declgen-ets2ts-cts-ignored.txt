@@ -1717,6 +1717,9 @@
 15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/abstract_class_resolution_7.ets
 15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/dynamic_resolution_2_5.ets
 15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/interface_resolution_2_5.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/interface_resolution1_7_3.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/interface_resolution1_9_2.ets
+15.semantic_rules/11.overload_resolution/10.dynamic_resolution_of_method_calls/interface_resolution1_9_3.ets
 15.semantic_rules/13.static_initialization/bad-static-location.ets
 15.semantic_rules/semantic_rules_case_06.ets
 15.semantic_rules/semantic_rules_case_10.ets
