@@ -21,8 +21,47 @@ cases:
       arktest.assertEQ(a.value, "invalid init", "this avoids compiler optimization")
     exp_out: |-
       "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "basic"
 
-  # constrained by type having default
+  - decl: |-
+      class A<T> {
+        value: T // default unknown
+        value1: T // default unknown
+      }
+    use: |-
+      let a = new A<string>
+      arktest.assertEQ(a.value, "invalid init", "this avoids compiler optimization")
+    exp_out: |-
+      "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "basic_two_fields"
+
+  - decl: |-
+      class A<T, U> {
+        value: T // default unknown
+        value1: U // default unknown
+      }
+    use: |-
+      let a = new A<string, string>
+      arktest.assertEQ(a.value, "invalid init", "this avoids compiler optimization")
+    exp_out: |-
+      "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "basic_two_params"
+
+  - decl: |-
+      class Inner<U> {
+        value: U
+      }
+      class A<T> {
+        value: Inner<T> // default unknown
+      }
+    use: |-
+      let a = new A<string>
+      arktest.assertEQ(a.value, "invalid init", "this avoids compiler optimization")
+    exp_out: |-
+      "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "basic_nested"
+
+  # constrained by type
   - decl: |-
       class A<T extends number> {
         value: T // type parameters have no defaults per spec 1.2.1a-tp10 ch 3.22
@@ -32,6 +71,29 @@ cases:
       arktest.assertEQ(a.value, 0, "this avoids compiler optimization")
     exp_out: |-
       "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "constrained_with_default"
+
+  - decl: |-
+      class A<T extends Object> {
+        value: T // type parameters have no defaults per spec 1.2.1a-tp10 ch 3.22
+      }
+    use: |-
+      let a = new A<double>
+      arktest.assertEQ(a.value, 0, "this avoids compiler optimization")
+    exp_out: |-
+      "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "constrained_by_object"
+
+  - decl: |-
+      class A<T extends Any> {
+        value: T // type parameters have no defaults per spec 1.2.1a-tp10 ch 3.22
+      }
+    use: |-
+      let a = new A<double>
+      arktest.assertEQ(a.value, 0, "this avoids compiler optimization")
+    exp_out: |-
+      "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "constrained_by_any"
 
   # default type having default value - implicitly used
   - decl: |-
@@ -43,6 +105,7 @@ cases:
       arktest.assertEQ(a.value, 0, "this avoids compiler optimization")
     exp_out: |-
       "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "default_with_default_implicit"
 
   # default type having default value - explicitly used
   - decl: |-
@@ -54,6 +117,7 @@ cases:
       arktest.assertEQ(a.value, 0, "this avoids compiler optimization")
     exp_out: |-
       "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "default_with_default_explicit"
 
   # default type having default value - overridden
   - decl: |-
@@ -65,3 +129,4 @@ cases:
       arktest.assertEQ(a.value, "invalid init", "this avoids compiler optimization")
     exp_out: |-
       "Semantic error ESE0280: Property 'value' might not have been initialized."
+    test_suffix: "default_with_default_overridden"

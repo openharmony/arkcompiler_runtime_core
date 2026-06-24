@@ -16,16 +16,15 @@
 {% for c in cases %}
 
 /*---
-desc: Generic class fields initialization - negative cases.
+desc: Type parameter substitution is expected to happen before applying Required.
 tags: [compile-only, negative]
-expected_out: {{c.exp_out}}
-test_suffix: "{{c.test_suffix}}"
+expected_out: {{c.expected_out}}
 ---*/
 
 {{c.decl}}
 
-function main(): void {
-  {{c.use}}
+function main() {
+  {{c.use|indent}}
 }
 
 {% endfor %}

@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: Generic class fields initialization - negative cases.
-tags: [compile-only, negative]
-expected_out: {{c.exp_out}}
-test_suffix: "{{c.test_suffix}}"
+desc: >-
+    No type parameter has a default value, and initialization is mandatory for variables
+    and fields of a type parameter (see Field Initialization)
 ---*/
 
-{{c.decl}}
-
-function main(): void {
-  {{c.use}}
+function foo<T>(v: T) {
+  let t: T
+  t = v
+  return t
 }
 
-{% endfor %}
+function main(): void {
+  arktest.assertEQ(foo<string>("string"), "string", "expect string")
+}

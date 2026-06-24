@@ -24,6 +24,22 @@ cases:
       arktest.assertTrue(a.value instanceof string, "expect instance of string")
       arktest.assertEQ(a.value, "string", "expect string")
 
+  - decl: |-
+      class A<T, U> {
+        value: T // initialized in constructor
+        value1: U // initialized in constructor
+        constructor(param: T, param1: U) {
+            this.value = param
+            this.value1 = param1
+        }
+      }
+    use: |-
+      let a = new A<string, int>("string", 0)
+      arktest.assertTrue(a.value instanceof string, "expect instance of string")
+      arktest.assertEQ(a.value, "string", "expect string")
+      arktest.assertTrue(a.value1 instanceof int, "expect instance of int")
+      arktest.assertEQ(a.value1, 0, "expect 0")
+
   # constrained by some type
   - decl: |-
       class A<T extends number> {
@@ -75,3 +91,22 @@ cases:
       let a = new A<string>("string")
       arktest.assertTrue(a.value instanceof string, "expect instance of string")
       arktest.assertEQ(a.value, "string", "expect string")
+
+  # more specific cases
+  - decl: |-
+      class A<T> {
+        value: T | undefined // has default per 3.22
+      }
+    use: |-
+      let a = new A<string>()
+      arktest.assertTrue(a.value instanceof undefined, "expect instance of undefined")
+      arktest.assertEQ(a.value, undefined, "expect undefined")
+
+  - decl: |-
+      class A<T> {
+        value?: T // optional has default per 3.22
+      }
+    use: |-
+      let a = new A<string>()
+      arktest.assertTrue(a.value instanceof undefined, "expect instance of undefined")
+      arktest.assertEQ(a.value, undefined, "expect undefined")
