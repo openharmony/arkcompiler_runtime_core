@@ -113,9 +113,9 @@ Context::MergeItemBuckets Context::CollectMergeItemBuckets()
     for (auto &reader : readers_) {
         totalItems += reader.GetItems()->size();
     }
-    constexpr size_t kForeignReserveFraction = 3U;
-    buckets.foreignClasses.reserve(totalItems / kForeignReserveFraction);
-    buckets.foreignMembers.reserve(totalItems / kForeignReserveFraction);
+    constexpr size_t K_FOREIGN_RESERVE_FRACTION = 3U;  // CC-OFF(G.NAM.03-CPP) project code style
+    buckets.foreignClasses.reserve(totalItems / K_FOREIGN_RESERVE_FRACTION);
+    buckets.foreignMembers.reserve(totalItems / K_FOREIGN_RESERVE_FRACTION);
 
     for (auto &reader : readers_) {
         for (const auto &[o, i] : *reader.GetItems()) {
@@ -967,6 +967,9 @@ bool Context::FileFind(const std::string &fileName, std::map<std::string, panda_
 
 bool Context::HandleEntryDependencies()
 {
+    // CC-OFFNXT(G.CNS.02-CPP) class descriptor wraps type name with 'L' prefix and ';' suffix
+    constexpr size_t K_CLASS_DESCRIPTOR_AFFIX_COUNT = 2U;
+
     auto &cm = *cont_.GetClassMap();
     for (const auto &name : conf_.entryNames) {
         auto dotPos = name.rfind('.');
@@ -978,7 +981,7 @@ bool Context::HandleEntryDependencies()
             }
         } else if (firstSlash != std::string::npos && lastSlash != std::string::npos && lastSlash > firstSlash) {
             std::string className;
-            className.reserve(lastSlash + 2);
+            className.reserve(lastSlash + K_CLASS_DESCRIPTOR_AFFIX_COUNT);
             className.push_back('L');
             className.append(name, 0, lastSlash);
             className.push_back(';');
@@ -988,7 +991,7 @@ bool Context::HandleEntryDependencies()
             }
         }
         std::string className;
-        className.reserve(name.size() + 2);
+        className.reserve(name.size() + K_CLASS_DESCRIPTOR_AFFIX_COUNT);
         className.push_back('L');
         className.append(name);
         className.push_back(';');
@@ -1053,8 +1056,8 @@ void Context::Patch()
     auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
     auto threadCount = std::min(chunkCount, static_cast<size_t>(hardwareThreads));
     if (threadCount <= 1) {
-	patcher_.PatchBytecode({0, patchSize});
- 	patcher_.PatchDebug();
+        patcher_.PatchBytecode({0, patchSize});
+        patcher_.PatchDebug();
         return;
     }
 

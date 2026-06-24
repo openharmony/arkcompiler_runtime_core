@@ -488,6 +488,8 @@ private:
 
     void ProcessCodeDataRange(CodePatcher *patcher, size_t start, size_t end);
 
+    void ParseConcurrently();
+
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
 
     using ItemsMap = std::map<panda_file::File::EntityId, panda_file::BaseItem *>;

@@ -97,7 +97,7 @@ void PatchDebugInfo(const CodePatcher::DebugInfoPatch &patch)
 
 void CodePatcher::Add(Change c)
 {
-    changes_.emplace_back(std::move(c));
+    changes_.emplace_back(c);
 }
 
 void CodePatcher::AddNonBc(NonBytecodeChange c)
@@ -234,7 +234,7 @@ void CodePatcher::TryDeletePatch()
     auto shouldDeleteBc = [](auto &a) {
         using T = std::remove_cv_t<std::remove_reference_t<decltype(a)>>;
         if constexpr (std::is_same_v<T, IndexedChange> || std::is_same_v<T, StringChange> ||
-                       std::is_same_v<T, LiteralArrayChange>) {
+                      std::is_same_v<T, LiteralArrayChange>) {
             return !a.mi->GetDependencyMark();
         } else {
             UNREACHABLE();
@@ -254,7 +254,7 @@ void CodePatcher::TryDeletePatch()
             }
             newIndexes[oldIndex++] = newIndex++;
             if (out != it) {
-                *out = std::move(*it);
+                *out = *it;
             }
             ++out;
         }
