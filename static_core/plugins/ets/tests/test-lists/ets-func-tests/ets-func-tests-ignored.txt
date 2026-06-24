@@ -30,6 +30,13 @@ regression/32353.ets
 regression/35144_0.ets
 regression/35144_1.ets
 
+#35187 Usage of ETSGLOBAL is not prohibited
+regression/35187_0.ets
+regression/35187_1.ets
+regression/35187_2.ets
+regression/35187_3.ets
+regression/35187_4.ets
+
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
