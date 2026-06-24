@@ -38,28 +38,26 @@ class ClassLinkerContext;
 
 class MethodInfo {
 public:
-    MethodInfo(const panda_file::MethodDataAccessor &mda, size_t index, ClassLinkerContext *ctx)
-        : pf_(&mda.GetPandaFile()),
-          name_(pf_->GetStringData(mda.GetNameId())),
-          protoId_(mda.GetProtoId()),
-          accessFlags_(mda.GetAccessFlags()),
-          classId_(mda.GetClassId()),
+    MethodInfo(const Method *method, size_t index, ClassLinkerContext *ctx, panda_file::File::EntityId classId)
+        : name_(method->GetName()),
+          protoId_(method->GetProtoId()),
+          accessFlags_(method->GetAccessFlags()),
           ctx_(ctx),
-          vmethodIndex_(index)
+          vmethodIndex_(index),
+          classId_(classId),
+          nameHash_(GetHash32String(name_.data))
     {
     }
 
-    explicit MethodInfo(Method *method, size_t index = 0, bool isBase = false)
-        : pf_(method->GetPandaFile()),
-          name_(method->GetName()),
-          protoId_(method->GetProtoId().GetEntityId()),
+    explicit MethodInfo(Method *method, bool isBase = false)
+        : name_(method->GetName()),
+          protoId_(method->GetProtoId()),
           accessFlags_(method->GetAccessFlags()),
           isBase_(isBase),
           isInterfaceMethod_(method->GetClass()->IsInterface()),
-          classId_(method->GetClass()->GetFileId()),
-          method_(method),
           ctx_(method->GetClass()->GetLoadContext()),
-          vmethodIndex_(index)
+          method_(method),
+          nameHash_(GetHash32String(name_.data))
     {
     }
 
@@ -68,14 +66,20 @@ public:
         return name_;
     }
 
+    uint32_t GetNameHash() const
+    {
+        return nameHash_;
+    }
+
     const uint8_t *GetClassName() const
     {
-        return method_ != nullptr ? method_->GetClass()->GetDescriptor() : pf_->GetStringData(classId_).data;
+        return method_ != nullptr ? method_->GetClass()->GetDescriptor()
+                                  : protoId_.GetPandaFile().GetStringData(classId_).data;
     }
 
     Method::ProtoId GetProtoId() const
     {
-        return Method::ProtoId(*pf_, protoId_);
+        return protoId_;
     }
 
     Method *GetMethod() const
@@ -115,12 +119,7 @@ public:
 
     bool IsInterfaceMethod() const
     {
-        if (method_ != nullptr) {
-            return isInterfaceMethod_;
-        }
-
-        panda_file::ClassDataAccessor cda(*pf_, classId_);
-        return cda.IsInterface();
+        return isInterfaceMethod_;
     }
 
     bool IsBase() const
@@ -142,18 +141,19 @@ public:
     NO_MOVE_SEMANTIC(MethodInfo);
 
 private:
-    const panda_file::File *pf_;
     panda_file::File::StringData name_;
-    panda_file::File::EntityId protoId_;
+    Method::ProtoId protoId_;
     uint32_t accessFlags_;
     bool isBase_ {false};
     bool isInterfaceMethod_ {false};
 
-    panda_file::File::EntityId classId_;
-    Method *method_ {nullptr};
     ClassLinkerContext *ctx_ {nullptr};
 
-    size_t vmethodIndex_ {0};
+    // Either method_ or vmethodIndex_+classId_ is initialized
+    Method *method_ {nullptr};
+    uint32_t vmethodIndex_ {0};
+    panda_file::File::EntityId classId_;
+    uint32_t nameHash_;
 };
 
 class VTableInfo {
@@ -231,6 +231,8 @@ public:
         return copiedMethods_;
     }
 
+    void Reserve(size_t methodCount);
+
     void AddEntry(const MethodInfo *info);
 
     void ReplaceEntryWith(const MethodInfo *prev, const MethodInfo *current);
@@ -254,7 +256,7 @@ private:
     struct MethodNameHash {
         uint32_t operator()(const MethodInfo *methodInfo) const
         {
-            return GetHash32String(methodInfo->GetName().data);
+            return methodInfo->GetNameHash();
         }
     };
 
@@ -322,9 +324,10 @@ auto SameNameMethodInfoIterator(UMap &umap, MethodInfo const *info)
 template <bool VISIT_SUPERITABLE>
 class VTableBuilderBase : public VTableBuilder {
 public:
-    bool Build(panda_file::ClassDataAccessor *cda, Class *baseClass, ITable itable, ClassLinkerContext *ctx) override;
+    bool Build(panda_file::ClassDataAccessor *cda, Span<const Method> vmethods, Class *baseClass, ITable itable,
+               ClassLinkerContext *ctx) override;
 
-    bool Build(Span<Method> methods, Class *baseClass, ITable itable, bool isInterface) override;
+    bool Build(Span<Method> vmethods, Class *baseClass, ITable itable, bool isInterface) override;
 
     bool FilterProxyClassMethods(Span<Method *> input, PandaVector<Method *> *output, Class *baseClass) override;
 
@@ -342,8 +345,7 @@ public:
 
     Span<const CopiedMethod> GetCopiedMethods() const override
     {
-        ASSERT(orderedCopiedMethods_ != nullptr);
-        return {orderedCopiedMethods_->data(), orderedCopiedMethods_->size()};
+        return orderedCopiedMethods_.ToConst();
     }
 
     Span<const IfaceMethodDispatch> GetIfaceMethodDispatches() const override
@@ -366,9 +368,7 @@ protected:
 
         allocator_ = allocator;
         vtable_ = allocator->New<VTableInfo>(*allocator);
-        allocator->MakeContainer(orderedCopiedMethods_);
         allocator->MakeContainer(dispatches_);
-        allocator->MakeContainer(baseMethodInfoByIndex_);
     }
 
     [[nodiscard]] virtual bool ProcessClassMethod(const MethodInfo *info) = 0;
@@ -389,22 +389,21 @@ protected:
     VTableInfo *vtable_ {nullptr};
     size_t numVmethods_ {0};
     size_t baseVTableSize_ {0};
-    InternalArenaVector<CopiedMethod> *orderedCopiedMethods_ {nullptr};
+    Span<CopiedMethod> orderedCopiedMethods_ {};
     InternalArenaVector<IfaceMethodDispatch> *dispatches_ {nullptr};
-    InternalArenaVector<MethodInfo const *> *baseMethodInfoByIndex_ {nullptr};
+    Span<MethodInfo> baseMethodInfoByIndex_ {};
     bool vtableAppendedOnly_ {true};
     ClassLinkerErrorHandler *errorHandler_ {nullptr};
 
 private:
-    void BuildForInterface(panda_file::ClassDataAccessor *cda);
-
-    void BuildForInterface(Span<Method> methods);
+    void BuildForInterface(Span<const Method> vmethods);
 
     void AddBaseMethods(Class *baseClass);
 
-    [[nodiscard]] bool AddClassMethods(panda_file::ClassDataAccessor *cda, ClassLinkerContext *ctx);
+    [[nodiscard]] bool AddClassMethods(Span<const Method> vmethods, ClassLinkerContext *ctx,
+                                       panda_file::File::EntityId classId);
 
-    [[nodiscard]] bool AddClassMethods(Span<Method> methods);
+    [[nodiscard]] bool AddClassMethods(Span<Method> vmethods);
 
     [[nodiscard]] bool AddProxyClassMethods(Span<Method *> methods);
 

@@ -87,10 +87,10 @@ class VTableBuilder {
 public:
     VTableBuilder() = default;
 
-    [[nodiscard]] virtual bool Build(panda_file::ClassDataAccessor *cda, Class *baseClass, ITable itable,
-                                     ClassLinkerContext *ctx) = 0;
+    [[nodiscard]] virtual bool Build(panda_file::ClassDataAccessor *cda, Span<const Method> vmethods, Class *baseClass,
+                                     ITable itable, ClassLinkerContext *ctx) = 0;
 
-    [[nodiscard]] virtual bool Build(Span<Method> methods, Class *baseClass, ITable itable, bool isInterface) = 0;
+    [[nodiscard]] virtual bool Build(Span<Method> vmethods, Class *baseClass, ITable itable, bool isInterface) = 0;
 
     [[nodiscard]] virtual bool FilterProxyClassMethods([[maybe_unused]] Span<Method *> input,
                                                        [[maybe_unused]] PandaVector<Method *> *output,

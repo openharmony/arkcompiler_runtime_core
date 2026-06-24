@@ -308,7 +308,7 @@ public:
     void VisitLoadedClasses(size_t flag);
 
     PANDA_PUBLIC_API Class *BuildClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
-                                       Span<Method> methods, Span<Field> fields, Class *baseClass,
+                                       Span<Method> vmethods, Span<Field> fields, Class *baseClass,
                                        Span<Class *> interfaces, ClassLinkerContext *context, bool isInterface);
 
     PANDA_PUBLIC_API Class *BuildProxyClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
@@ -386,8 +386,6 @@ private:
                      Span<Class *> interfaces, ClassLinkerContext *context, ClassLinkerExtension *ext,
                      ClassLinkerErrorHandler *errorHandler);
 
-    void FreeITableAndInterfaces(ITable itable, Span<Class *> interfaces);
-
     Class *LoadBaseClass(panda_file::ClassDataAccessor *cda, const LanguageContext &ctx, ClassLinkerContext *context,
                          ClassLinkerErrorHandler *errorHandler);
 
@@ -399,14 +397,14 @@ private:
 
     [[nodiscard]] bool LinkMethods(Class *klass, ClassInfo *classInfo, ClassLinkerErrorHandler *errorHandler);
 
-    [[nodiscard]] bool LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
-                                   ClassLinkerErrorHandler *errorHandler);
+    [[nodiscard]] bool SetupMethods(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, LanguageContext ctx,
+                                    ClassLinkerErrorHandler *errorHandler);
 
     [[nodiscard]] bool SetupClassInfo(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
                                       Span<Class *> interfaces, ClassLinkerContext *context,
                                       ClassLinkerErrorHandler *errorHandler);
 
-    [[nodiscard]] bool SetupClassInfo(ClassInfo &info, Span<Method> methods, Span<Field> fields, Class *base,
+    [[nodiscard]] bool SetupClassInfo(ClassInfo &info, Span<Method> vmethods, Span<Field> fields, Class *base,
                                       Span<Class *> interfaces, bool isInterface,
                                       ClassLinkerErrorHandler *errorHandler);
 
@@ -415,9 +413,8 @@ private:
 
     void BuildBootClassIndexLocked() REQUIRES(bootPandaFilesLock_);
 
-    Class *BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Span<Method> methods, Span<Field> fields,
-                          Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
-                          ClassLinkerExtension *ext, ClassInfo classInfo);
+    Class *BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Class *baseClass, Span<Class *> interfaces,
+                          ClassLinkerContext *context, ClassLinkerExtension *ext, ClassInfo classInfo);
 
     bool CanLinkAotEntrypoints() const;
 
