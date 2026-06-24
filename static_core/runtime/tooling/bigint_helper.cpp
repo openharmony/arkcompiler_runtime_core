@@ -101,7 +101,7 @@ static void Uint32ToDigits(uint32_t word, std::vector<int> &wordDigits)
     }
 }
 
-std::string BigIntBytesToDecimalString(const PandaVector<uint32_t> &bytes, int sign)
+std::string BigIntBytesToDecimalString(const std::vector<uint32_t> &bytes, int sign)
 {
     if (bytes.empty()) {
         return "0n";

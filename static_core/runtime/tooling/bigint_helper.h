@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "runtime/include/mem/panda_containers.h"
 
 namespace ark::tooling {
 
@@ -29,7 +28,7 @@ std::vector<int> MultiplyDecimalArrayByBigInt(std::vector<int> lhs, const std::v
 
 std::string DecimalArrayToString(const std::vector<int> &digits);
 
-std::string BigIntBytesToDecimalString(const PandaVector<uint32_t> &bytes, int sign);
+std::string BigIntBytesToDecimalString(const std::vector<uint32_t> &bytes, int sign);
 
 }  // namespace ark::tooling
 #endif

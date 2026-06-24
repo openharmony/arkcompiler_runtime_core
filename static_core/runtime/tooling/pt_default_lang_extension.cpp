@@ -153,7 +153,7 @@ std::optional<std::string> PtStaticDefaultExtension::GetAsBigIntString([[maybe_u
         return "0n";
     }
     auto length = bytes->GetLength();
-    PandaVector<uint32_t> bytesVec;
+    std::vector<uint32_t> bytesVec;
     bytesVec.reserve(length);
     for (size_t i = 0; i < length; i++) {
         bytesVec.push_back(static_cast<uint32_t>(bytes->Get(i)));
