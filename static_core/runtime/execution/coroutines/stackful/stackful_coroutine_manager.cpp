@@ -342,7 +342,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         // RemoveFromRegistry (under core_list_lock_). This functions transfer cards from coro's post_barrier buffer to
         // UpdateRemsetThread internally. Situation when cards still remain and UpdateRemsetThread cannot visit the
         // coro (because it is already removed) must be impossible.
-        if (Runtime::GetOptions().IsUseCoroutinePool() && co->GetJob()->HasManagedEntrypoint()) {
+        if (Runtime::GetOptions().IsUseCoroutinePool() && CoroutineManager::IsCoroutinePoolable(co)) {
             co->CleanupInternalResources();
         } else {
             co->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
@@ -825,7 +825,7 @@ StackfulCoroutineWorker *StackfulCoroutineManager::GetCurrentWorker()
 
 void StackfulCoroutineManager::DestroyEntrypointfulCoroutine(Coroutine *co)
 {
-    if (Runtime::GetOptions().IsUseCoroutinePool() && co->GetJob()->HasManagedEntrypoint()) {
+    if (Runtime::GetOptions().IsUseCoroutinePool() && CoroutineManager::IsCoroutinePoolable(co)) {
         co->CleanUp();
         os::memory::LockHolder lock(coroPoolLock_);
         coroutinePool_.push_back(co);
