@@ -117,7 +117,7 @@ TEST_F(FixedArrayGetRegion{{ Type }}Test, wrong_native_buffer_range)
     auto addr = std::numeric_limits<uintptr_t>::max() - sizeof(ani_{{ type }}) + 1U;
     auto *nativeBuffer = reinterpret_cast<ani_{{ type }} *>(addr);
     ASSERT_EQ(env_->FixedArray_GetRegion_{{ Type }}(array, 0U, 1U, nativeBuffer), ANI_ERROR);
-    ASSERT_ERROR_ANI_MSG("FixedArray_GetRegion_{{ Type }}", "wrong native buffer");
+    ASSERT_ERROR_ANI_MSG("FixedArray_GetRegion_{{ Type }}", "wrong native buffer [FATAL]");
 }
 
 TEST_F(FixedArrayGetRegion{{ Type }}Test, out_of_range_with_wrong_native_buffer_range)

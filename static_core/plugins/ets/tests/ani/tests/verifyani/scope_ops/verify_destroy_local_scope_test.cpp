@@ -73,7 +73,7 @@ TEST_F(DestroyLocalScopeTest, call_without_scope)
 {
     ASSERT_EQ(env_->c_api->DestroyLocalScope(env_), ANI_ERROR);
     ASSERT_ERROR_ANI_MSG("DestroyLocalScope",
-                         "Illegal call DestroyLocalScope() without first calling CreateLocalScope()");
+                         "Illegal call DestroyLocalScope() without first calling CreateLocalScope() [FATAL]");
 }
 
 TEST_F(DestroyLocalScopeTest, call_after_call_CreateEscapeLocalScope)
@@ -82,7 +82,7 @@ TEST_F(DestroyLocalScopeTest, call_after_call_CreateEscapeLocalScope)
 
     ASSERT_EQ(env_->c_api->DestroyLocalScope(env_), ANI_ERROR);
     ASSERT_ERROR_ANI_MSG("DestroyLocalScope",
-                         "Illegal call DestroyLocalScope(), after calling CreateEscapeLocalScope()");
+                         "Illegal call DestroyLocalScope(), after calling CreateEscapeLocalScope() [FATAL]");
 
     ani_ref ref {};
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);

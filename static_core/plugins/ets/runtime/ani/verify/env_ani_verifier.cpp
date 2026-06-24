@@ -55,13 +55,14 @@ void EnvANIVerifier::DetachThread()
 {
     auto err = PopNativeFrame();
     if (err) {
-        verifier_->Report(*err);
+        verifier_->Report(*err, true, true);
     }
 }
 
 void EnvANIVerifier::ReportDetachOnUnattachedThread(ani_vm *vm)
 {
-    PandaEtsVM::FromAniVM(vm)->GetANIVerifier()->Report("Cannot detach current thread, thread is not attached");
+    PandaEtsVM::FromAniVM(vm)->GetANIVerifier()->Report("Cannot detach current thread, thread is not attached", true,
+                                                        true);
 }
 
 void EnvANIVerifier::DoPushNativeFrame(PandaAniEnv *ownerEnv, ani_size capacity)
@@ -159,7 +160,7 @@ VRef *EnvANIVerifier::AddLocalVerifiedRef(ani_ref ref)
     if (UNLIKELY(frames_.size() == 1)) {
         PandaStringStream ss;
         ss << "Local reference created outside of any native scope";
-        verifier_->Report(ss.str());
+        verifier_->Report(ss.str(), true, true);
     }
 
     Frame &frame = frames_.back();
@@ -168,7 +169,7 @@ VRef *EnvANIVerifier::AddLocalVerifiedRef(ani_ref ref)
     if (UNLIKELY(frame.capacity != VERIFICATION_BOTTOM_FRAME && frame.refs.size() >= frame.capacity)) {
         PandaStringStream ss;
         ss << "Creating " << (frame.refs.size() + 1) << "th local reference in scope with capacity " << frame.capacity;
-        verifier_->Report(ss.str());
+        verifier_->Report(ss.str(), true, true);
     }
 
     InternalRef *iref = frame.refsAllocator->New<InternalRef>(ref);
