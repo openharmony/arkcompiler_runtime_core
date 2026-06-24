@@ -113,6 +113,8 @@ function testTinyNonZeroMixedWithZero() {
     arktest.assertEQ(Math.min(0.0, -1e-300), -1e-300)
     arktest.assertEQ(Math.min(-1e-300, 0.0), -1e-300)
     arktest.assertEQ(Math.min(0.0, -Number.MIN_VALUE), -Number.MIN_VALUE)
+    // Tiny negative beats both +0 and -0 in a 3-arg call
+    arktest.assertEQ(Math.min(0.0, -Double.MIN_VALUE, -0.0), -Double.MIN_VALUE)
     // -0 beats tiny positive -> returns -0 (sign matters)
     arktest.assertNegativeZero(Math.min(-0.0, 1e-300))
     arktest.assertNegativeZero(Math.min(1e-300, -0.0))
@@ -213,6 +215,69 @@ function testDoubleOverload() {
     arktest.assertEQ(Math.min(a, c), c)
 }
 
+function testNaNWithSpecial() {
+    // NaN propagates regardless of the other operand
+    arktest.assertTrue(Double.isNaN(Math.min(NaN, -0)))
+    arktest.assertTrue(Double.isNaN(Math.min(-0, NaN)))
+    arktest.assertTrue(Double.isNaN(Math.min(NaN, 0)))
+    arktest.assertTrue(Double.isNaN(Math.min(NaN, NaN)))
+    arktest.assertTrue(Double.isNaN(Math.min(NaN, Infinity)))
+    arktest.assertTrue(Double.isNaN(Math.min(-Infinity, NaN)))
+    arktest.assertTrue(Double.isNaN(Math.min(Infinity, -Infinity, NaN, 0)))
+}
+
+function testAllIdentical() {
+    // All-same-value reduction must return that value unchanged
+    arktest.assertEQ(Math.min(42, 42), 42)
+    arktest.assertEQ(Math.min(42, 42, 42, 42), 42)
+    arktest.assertEQ(Math.min(-7, -7, -7), -7)
+    arktest.assertEQ(Math.min(3.14, 3.14, 3.14), 3.14)
+}
+
+function testSafeIntegerBounds() {
+    arktest.assertEQ(Math.min(Double.MAX_SAFE_INTEGER, Double.MIN_SAFE_INTEGER), Double.MIN_SAFE_INTEGER)
+    arktest.assertEQ(Math.min(Double.MIN_SAFE_INTEGER, Double.MAX_SAFE_INTEGER), Double.MIN_SAFE_INTEGER)
+    arktest.assertEQ(Math.min(Double.MAX_SAFE_INTEGER, Double.MAX_SAFE_INTEGER), Double.MAX_SAFE_INTEGER)
+    // Just beyond safe integer range
+    arktest.assertEQ(Math.min(Double.MAX_SAFE_INTEGER + 1, Double.MAX_SAFE_INTEGER), Double.MAX_SAFE_INTEGER)
+}
+
+function testMathConstants() {
+    arktest.assertEQ(Math.min(Math.PI, Math.E), Math.E)
+    arktest.assertEQ(Math.min(Math.E, Math.PI), Math.E)
+    arktest.assertEQ(Math.min(Math.LN2, Math.LN10), Math.LN2)
+    arktest.assertEQ(Math.min(Math.SQRT2, Math.SQRT1_2), Math.SQRT1_2)
+}
+
+function testManyArguments() {
+    // Stress the variadic reduction with 15 arguments
+    arktest.assertEQ(Math.min(5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9), -9)
+    arktest.assertEQ(Math.min(9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5), -5)
+    // Descending then ascending — min is in the middle
+    arktest.assertEQ(Math.min(10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10), 0)
+}
+
+function testNegativeZeroVariadicPosition() {
+    // -0 in different positions of a variadic call must still win over +0 and positives
+    arktest.assertNegativeZero(Math.min(1, -0, 2))
+    arktest.assertNegativeZero(Math.min(2, 1, -0))
+    arktest.assertNegativeZero(Math.min(-0, 1, 2))
+    // -0 in the middle among several zeros
+    arktest.assertNegativeZero(Math.min(0, 0, -0, 0))
+    arktest.assertNegativeZero(Math.min(5, -0, 3, -0, 1))
+}
+
+function testMixedSpecialValues() {
+    // Infinity beaten by any finite value
+    arktest.assertEQ(Math.min(Infinity, -1e300, 1e300), -1e300)
+    arktest.assertEQ(Math.min(1e300, -1e300, Infinity), -1e300)
+    // -Infinity always wins (is the smallest)
+    arktest.assertEQ(Math.min(-Infinity, Double.MAX_VALUE, Double.MIN_VALUE), -Infinity)
+    // NaN poisons the entire variadic call
+    arktest.assertTrue(Double.isNaN(Math.min(1, 2, Infinity, -Infinity, NaN)))
+    arktest.assertTrue(Double.isNaN(Math.min(NaN, 1, 2, Infinity, -Infinity)))
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Math.min tests')
     suite.addTest('Test No Arguments', testNoArguments)
@@ -237,5 +302,12 @@ function main() {
     suite.addTest('Test Long Overload', testLongOverload)
     suite.addTest('Test Float Overload', testFloatOverload)
     suite.addTest('Test Double Overload', testDoubleOverload)
+    suite.addTest('Test NaN With Special', testNaNWithSpecial)
+    suite.addTest('Test All Identical', testAllIdentical)
+    suite.addTest('Test Safe Integer Bounds', testSafeIntegerBounds)
+    suite.addTest('Test Math Constants', testMathConstants)
+    suite.addTest('Test Many Arguments', testManyArguments)
+    suite.addTest('Test Negative Zero Variadic Position', testNegativeZeroVariadicPosition)
+    suite.addTest('Test Mixed Special Values', testMixedSpecialValues)
     return suite.run()
 }
