@@ -16,7 +16,6 @@
 /*---
 desc: >-
     Library with default export.
-    Covers exportDefaultDeclaration.cpp and importDefaultSpecifier.cpp code paths.
 tags: [not-a-test, compile-only]
 name: lib_default
 arktsconfig: arktsconfig-lib.json

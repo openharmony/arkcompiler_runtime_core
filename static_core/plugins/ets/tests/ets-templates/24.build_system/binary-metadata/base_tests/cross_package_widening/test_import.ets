@@ -15,7 +15,6 @@
 /*---
 desc: >-
     Test widening reference conversion across packages.
-    Covers conversion.cpp WideningReference (Object, Object).
 files: [lib_hierarchy.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

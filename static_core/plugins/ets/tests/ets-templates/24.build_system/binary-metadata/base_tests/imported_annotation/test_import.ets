@@ -15,7 +15,6 @@
 /*---
 desc: >-
     Test importing annotation from another package and using it on local entities.
-    Covers ETSemitter GenCustomAnnotation import branch (lines 1135-1140).
 files: [lib_anno.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

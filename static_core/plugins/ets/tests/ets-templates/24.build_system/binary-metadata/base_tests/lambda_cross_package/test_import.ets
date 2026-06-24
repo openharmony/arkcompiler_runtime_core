@@ -15,7 +15,6 @@
 /*---
 desc: >-
     Test function references across packages.
-    Covers ETSemitter GenAnnotationFunctionalReference (FUNCTIONAL_REFERENCE).
 files: [lib_funcs.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json

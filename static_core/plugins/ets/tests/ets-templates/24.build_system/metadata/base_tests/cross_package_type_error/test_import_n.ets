@@ -15,8 +15,8 @@
 /*---
 desc: >-
     Negative test: assigning Cat to Dog variable across packages.
-    Triggers ETSChecker::TypeError() for incompatible type assignment
-    when type information comes from .etscache declaration.
+    Triggers check for incompatible type assignment
+    when type information comes from serialized declaration.
 files: [lib_types.ets]
 tags: [compile-only, negative]
 name: test_import_n
