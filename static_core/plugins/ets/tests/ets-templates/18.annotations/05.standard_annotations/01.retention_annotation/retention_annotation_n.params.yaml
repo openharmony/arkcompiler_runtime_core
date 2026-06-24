@@ -122,7 +122,7 @@ cases:
         f: string = "str"
       }
     error: |-
-      TBD: Duplicated '@Retention' annotation
+      Semantic error ESE0041: Duplicate annotations are not allowed. The annotation 'Retention' has already been applied to this element.
   - decl: |-
       @Retention("RUNTIME")
       @Retention("BYTECODE")
@@ -130,4 +130,4 @@ cases:
         f: string = "str"
       }
     error: |-
-      TBD: Semantic error ESE1122645: Annotation '@Retention' can only be applied to @interface annotation declaration.
+      Semantic error ESE0041: Duplicate annotations are not allowed. The annotation 'Retention' has already been applied to this element.
