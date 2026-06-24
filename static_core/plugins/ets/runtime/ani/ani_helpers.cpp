@@ -417,6 +417,9 @@ extern "C" EtsObject *AniObjEnd(Method *method, EtsReference *etsRef, ManagedThr
     auto storage = EtsExecutionContext::FromMT(thread)->GetPandaAniEnv()->GetEtsReferenceStorage();
     EtsObject *ret = nullptr;
     if (LIKELY(!thread->HasPendingException())) {
+        if (UNLIKELY(etsRef == nullptr)) {
+            LOG(ERROR, ANI) << "Native method '" << method->GetFullName(true) << "' returned nullptr reference";
+        }
         ret = storage->GetEtsObject(etsRef);
     }
 
@@ -432,11 +435,15 @@ extern "C" EtsObject *AniObjEndVerify(Method *method, verify::VRef *vref, Manage
     ani_ref ref = verify::ResolveToAniRef(vref, envANIVerifier);
     auto etsRef = reinterpret_cast<EtsReference *>(ref);
 
+    bool returnedNullRef = etsRef == nullptr && !thread->HasPendingException();
     EtsObject *obj = AniObjEnd(method, etsRef, thread, isFastNative);
     // Pop native frame verification before ending the native method
     auto err = envANIVerifier->PopNativeFrame();
     if (err) {
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
+    }
+    if (returnedNullRef) {
+        LOG(FATAL, ANI) << "Native method '" << method->GetFullName(true) << "' returned nullptr reference";
     }
     return obj;
 }
