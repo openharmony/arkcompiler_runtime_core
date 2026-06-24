@@ -51,8 +51,6 @@
  */
 
 namespace ark::common_vm {
-void VisitRoots(const RefFieldVisitor &visitorFunc);
-void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 #define CONTEXT " at " << __FILE__ << ":" << __LINE__ << std::endl
 
@@ -344,7 +342,7 @@ public:
         MarkStack<BaseObject *> roots;
 
         RefFieldVisitor refVisitor = [&](RefField<> &ref) { visitor.VerifyRef(nullptr, ref); };
-        VisitRoots(refVisitor);
+        Heap::GetHeap().GetCollector().VisitRootsI(refVisitor);
     }
 
     void IterateWeakRoot(VerifyVisitor &visitor)
@@ -355,11 +353,26 @@ public:
             visitor.VerifyRef(nullptr, ref);
             return true;
         };
-        VisitWeakRoots(refVisitor);
+        Heap::GetHeap().GetCollector().VisitWeakRootsI(refVisitor);
+    }
+
+    static void IterateRemarkedDefaultVisitor(const RefFieldVisitor &visitor)
+    {
+        Heap::GetHeap().GetCollector().VisitRootsI(visitor);
+    }
+
+    static void IterateRemarkedSTWVisitor(const RefFieldVisitor &visitor)
+    {
+        Heap::GetHeap().GetCollector().VisitSTWRootsI(visitor);
+    }
+
+    static void IterateRemarkedConcurrentVisitor(const RefFieldVisitor &visitor)
+    {
+        Heap::GetHeap().GetCollector().VisitConcurrentRootsI(visitor);
     }
 
     // By default, IterateRemarked uses the VisitRoots method to traverse GC roots
-    template <void (*VisitRoot)(const RefFieldVisitor &) = VisitRoots>
+    template <void (*VisitRoot)(const RefFieldVisitor &) = IterateRemarkedDefaultVisitor>
     void IterateRemarked(VerifyVisitor &visitor, PandaUnorderedSet<BaseObject *> &markSet, bool forRBDFX = false)
     {
         MarkStack<BaseObject *> markStack;
@@ -411,7 +424,7 @@ private:
 
     void EnumStrongRoots(const std::function<void(RefField<> &)> &markFunc)
     {
-        VisitRoots(markFunc);
+        Heap::GetHeap().GetCollector().VisitRootsI(markFunc);
     }
 
     void Marking(MarkStack<BaseObject *> &markStack) {}
@@ -428,9 +441,9 @@ void WVerify::VerifyAfterMarkInternal(RegionalHeap &space, mem::GCPhase phase)
     auto iter = VerifyIterator(space);
     auto verifySTWRoots = AfterMarkVisitor();
     PandaUnorderedSet<BaseObject *> markSet;
-    iter.IterateRemarked<VisitSTWRoots>(verifySTWRoots, markSet);
+    iter.IterateRemarked<VerifyIterator::IterateRemarkedSTWVisitor>(verifySTWRoots, markSet);
     auto verifyConcurrentRoots = AfterMarkVisitor<false>();
-    iter.IterateRemarked<VisitConcurrentRoots>(verifyConcurrentRoots, markSet);
+    iter.IterateRemarked<VerifyIterator::IterateRemarkedConcurrentVisitor>(verifyConcurrentRoots, markSet);
 
     LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterMark (STWRoots) verified ref count: "
                        << verifySTWRoots.VerifyRefCount();

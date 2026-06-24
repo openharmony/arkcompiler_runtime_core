@@ -275,8 +275,6 @@ srcs_runtime = [
 if (ark_use_common_runtime) {
   srcs_runtime += [
     "runtime/intrinsics/std_core_common_gc.cpp",
-    "runtime/hybrid/mem/external-gc.cpp",
-    "runtime/hybrid/mem/static_object_operator.cpp",
   ]
 } else {
   srcs_runtime += [

@@ -28,24 +28,4 @@ void Collector::RequestGC(GCTaskCause reason, bool async, GCCollectionType gcTyp
     RequestGCInternal(reason, async, gcType, explicitRequest);
     return;
 }
-
-bool Collector::RegisterVM(VMInterface *vm)
-{
-    ark::os::memory::WriteLockHolder vmIfacesWriteLock(vmIfacesLock_);
-    auto res = vmIfaces_.insert(vm);
-    return res.second;
-}
-
-bool Collector::UnregisterVM(VMInterface *vm)
-{
-    ark::os::memory::WriteLockHolder vmIfacesWriteLock(vmIfacesLock_);
-    auto erased = vmIfaces_.erase(vm);
-    return erased != 0;
-}
-
-void Collector::ForEachVM(std::function<void(VMInterface *)> action)
-{
-    ark::os::memory::ReadLockHolder vmIfacesReadLock(vmIfacesLock_);
-    std::for_each(vmIfaces_.begin(), vmIfaces_.end(), action);
-}
 }  // namespace ark::common_vm.

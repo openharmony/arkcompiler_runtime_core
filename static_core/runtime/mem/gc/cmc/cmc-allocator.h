@@ -28,15 +28,15 @@ class ObjectAllocConfig;
 class TLAB;
 
 template <MTModeT MT_MODE>
-class CMCObjectAllocatorAdapter final : public ObjectAllocatorNoGen<MT_MODE> {
+class CMCObjectAllocator final : public ObjectAllocatorNoGen<MT_MODE> {
 public:
-    NO_MOVE_SEMANTIC(CMCObjectAllocatorAdapter);
-    NO_COPY_SEMANTIC(CMCObjectAllocatorAdapter);
+    NO_MOVE_SEMANTIC(CMCObjectAllocator);
+    NO_COPY_SEMANTIC(CMCObjectAllocator);
 
-    explicit CMCObjectAllocatorAdapter(MemStatsType *memStats, bool createPygoteSpaceAllocator);
+    explicit CMCObjectAllocator(MemStatsType *memStats, bool createPygoteSpaceAllocator);
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    ~CMCObjectAllocatorAdapter();
+    ~CMCObjectAllocator();
 #endif
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,

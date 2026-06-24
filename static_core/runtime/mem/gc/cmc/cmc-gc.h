@@ -34,7 +34,7 @@
 #include "common_components/heap/allocator/regional_heap.h"
 
 #include "runtime/mem/gc/lang/gc_lang.h"
-#include "runtime/mem/gc/cmc/cmc-allocator-adapter.h"
+#include "runtime/mem/gc/cmc/cmc-allocator.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/mem/rendezvous.h"
@@ -96,7 +96,7 @@ namespace ark::mem {
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::CMC_GC, MT_MODE> {
 public:
-    using ObjectAllocatorType = CMCObjectAllocatorAdapter<MT_MODE>;
+    using ObjectAllocatorType = CMCObjectAllocator<MT_MODE>;
     using CodeAllocatorType = CodeAllocator;
 };
 
@@ -584,6 +584,33 @@ private:
 
     using ManagedMutatorCallback = std::function<void(Mutator *)>;
     void ForEachManagedMutator(const ManagedMutatorCallback &callback);
+
+    static void VisitRoots(const RefFieldVisitor &visitor);
+    static void VisitSTWRoots(const RefFieldVisitor &visitor);
+    static void VisitConcurrentRoots(const RefFieldVisitor &visitor);
+    static void VisitWeakRoots(const WeakRefFieldVisitor &visitor);
+    static void VisitGlobalRoots(const RefFieldVisitor &visitor);
+    static void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung);
+
+    void VisitRootsI(const RefFieldVisitor &visitor) override
+    {
+        CmcGC<LanguageConfig>::VisitRoots(visitor);
+    }
+
+    void VisitSTWRootsI(const RefFieldVisitor &visitor) override
+    {
+        CmcGC<LanguageConfig>::VisitSTWRoots(visitor);
+    }
+
+    void VisitConcurrentRootsI(const RefFieldVisitor &visitor) override
+    {
+        CmcGC<LanguageConfig>::VisitConcurrentRoots(visitor);
+    }
+
+    void VisitWeakRootsI(const WeakRefFieldVisitor &visitor) override
+    {
+        CmcGC<LanguageConfig>::VisitWeakRoots(visitor);
+    }
 
     GCMode gcMode_ = GCMode::CMC;
 };

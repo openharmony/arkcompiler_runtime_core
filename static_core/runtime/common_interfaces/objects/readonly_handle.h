@@ -16,6 +16,7 @@
 #ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 #define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 
+#include "common_interfaces/base/common.h"
 #include "common_interfaces/objects/base_object.h"
 namespace ark::mem {
 template <typename T>

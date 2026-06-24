@@ -76,7 +76,9 @@ public:
 
     void ProcessClearedReferences();
 
-    void ProcessReferencesAfterCopy();
+#if defined(ARK_USE_COMMON_RUNTIME)
+    void ProcessReferencesAfterCopy() override;
+#endif
 
 private:
     template <typename Handler>

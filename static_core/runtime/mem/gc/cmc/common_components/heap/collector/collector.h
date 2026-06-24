@@ -29,6 +29,8 @@
 #include "common_components/heap/collector/gc_stats.h"
 #include "common_interfaces/thread/mutator.h"
 #include "libarkbase/os/mutex.h"
+#include "runtime/include/mem/panda_containers.h"
+#include "common_interfaces/heap/visitor.h"
 
 #include "libarkbase/utils/logger.h"
 
@@ -91,10 +93,6 @@ public:
         return obj;
     };
 
-    bool RegisterVM(VMInterface *vm);
-    bool UnregisterVM(VMInterface *vm);
-    void ForEachVM(std::function<void(VMInterface *)> action);
-
 protected:
     virtual void RequestGCInternal(GCTaskCause, bool, GCCollectionType, bool)
     {
@@ -105,8 +103,13 @@ protected:
     CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
 
 private:
-    std::unordered_set<VMInterface *> vmIfaces_;
     ark::os::memory::RWLock vmIfacesLock_;
+
+    friend class VerifyIterator;
+    virtual void VisitRootsI(const RefFieldVisitor &visitor) = 0;
+    virtual void VisitSTWRootsI(const RefFieldVisitor &visitor) = 0;
+    virtual void VisitConcurrentRootsI(const RefFieldVisitor &visitor) = 0;
+    virtual void VisitWeakRootsI(const mem::WeakRefFieldVisitor &visitor) = 0;
 };
 }  // namespace ark::common_vm
 

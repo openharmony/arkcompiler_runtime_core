@@ -22,9 +22,7 @@
 
 #include "common_components/base/globals.h"
 #include "common_components/heap/verification.h"
-#include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/ref_field.h"
-#include "common_interfaces/vm_interface.h"
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/allocator/alloc_buffer.h"
@@ -39,12 +37,20 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/trace.h"
+#include "runtime/mem/gc/reference-processor/reference_processor.h"
 
 #include "common_interfaces/heap/region_desc.h"
 
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
+
+namespace ark::common_vm {
+void RemoveXRefFromRoots() {}
+void SweepUnmarkedXRefs() {}
+void AddXRefToRoots() {}
+void UnmarkAllXRefs() {}
+};  // namespace ark::common_vm
 
 namespace ark::mem {
 using ark::common_vm::AllocationBuffer;
@@ -62,12 +68,6 @@ using ark::common_vm::Task;
 using ark::common_vm::TaskPackMonitor;
 using ark::common_vm::ThreadLocal;
 using ark::common_vm::ThreadType;
-using ark::common_vm::VisitConcurrentRoots;
-using ark::common_vm::VisitGlobalRoots;
-using ark::common_vm::VisitPreforwardRoots;
-using ark::common_vm::VisitRoots;
-using ark::common_vm::VisitWeakGlobalRoots;
-using ark::common_vm::VisitWeakRoots;
 using ark::common_vm::WVerify;
 
 template <class LanguageConfig>
@@ -584,7 +584,6 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
             WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor(reason);
             mutator->VisitMutatorRoots(weakVisitor);
             RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
-            VisitMutatorPreforwardRoot(visitor, *mutator);
             // Request finalize callback in each vm-thread when gc finished.
             mutator->RequestReferencesCleanup();
         });
@@ -610,8 +609,6 @@ void CmcGC<LanguageConfig>::Preforward(GCTaskCause reason)
     // copy and fix finalizer roots.
     // Only one root task, no need to post task.
     PreforwardStaticWeakRoots(reason);
-    RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
-    VisitPreforwardRoots(visitor);
 }
 
 template <class LanguageConfig>
@@ -810,7 +807,7 @@ private:
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ProcessReferencesAfterCopy()
 {
-    ForEachVM([](VMInterface *vm) { vm->ProcessReferencesAfterCopy(); });
+    PandaVM::GetCurrent()->GetReferenceProcessor()->ProcessReferencesAfterCopy();
 }
 
 template <class LanguageConfig>
@@ -1337,7 +1334,9 @@ size_t CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseOb
         }
     };
 
-    return obj->ForEachRefFieldAndGetSize(fieldHandler, fieldHandler);
+    auto sz = obj->GetSize();
+    obj->ForEachRefField(fieldHandler, fieldHandler);
+    return sz;
 }
 
 template <class LanguageConfig>
@@ -1714,8 +1713,8 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
             ++nNewlyMarked;
             auto region = RegionDesc::GetAliveRegionDescAt(static_cast<MAddress>(reinterpret_cast<uintptr_t>(object)));
             visitor.SetMarkingRefFieldArgs(object);
-            auto objSize =
-                object->ForEachRefFieldAndGetSize(visitor.GetRefFieldVisitor(), visitor.GetWeakRefFieldVisitor());
+            auto objSize = object->GetSize();
+            object->ForEachRefField(visitor.GetRefFieldVisitor(), visitor.GetWeakRefFieldVisitor());
             region->AddLiveByteCount(objSize);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
             if constexpr (ProcessXRef) {
@@ -2457,6 +2456,101 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkReferences([[maybe_unused]] ark::mem::GCMarkingStackType *references,
                                            [[maybe_unused]] ark::mem::GCPhase gcPhase)
 {
+}
+
+// Helper for root visitors
+GCRootVisitor MakeCallback(const RefFieldVisitor &visitor)
+{
+    return [visitor](mem::GCRoot root) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        visitor(reinterpret_cast<ark::mem::RefField<> &>(*root.GetObjectPointer()));
+    };
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitRoots(const RefFieldVisitor &visitor)
+{
+    auto *vm = PandaVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    mem::RootManager<LanguageConfig> rootManager(vm);
+
+    const GCRootVisitor &callback = MakeCallback(visitor);
+    rootManager.VisitNonHeapRoots(callback);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitSTWRoots(const RefFieldVisitor &visitor)
+{
+    auto *vm = PandaVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    mem::RootManager<LanguageConfig> rootManager(vm);
+
+    const GCRootVisitor &callback = MakeCallback(visitor);
+    rootManager.VisitAotStringRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitVmRoots(callback);
+    rootManager.VisitClassRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitClassLinkerContextRoots(callback);
+    vm->VisitStringTable(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitConcurrentRoots(const RefFieldVisitor &visitor)
+{
+    auto *vm = PandaVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    mem::RootManager<LanguageConfig> rootManager(vm);
+
+    const GCRootVisitor &callback = MakeCallback(visitor);
+
+    rootManager.VisitClassRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitClassLinkerContextRoots(callback);
+    vm->VisitStringTable(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitWeakRoots(const WeakRefFieldVisitor &visitor)
+{
+    auto *vm = PandaVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    mem::RootManager<LanguageConfig> rootManager(vm);
+
+    const GCRootVisitor &callback = MakeCallback(visitor);
+
+    rootManager.VisitNonHeapRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.UpdateAndSweep([&visitor](ObjectHeader **ref) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        return (visitor(reinterpret_cast<ark::mem::RefField<> &>(*ref))) ? ObjectStatus::ALIVE_OBJECT
+                                                                         : ObjectStatus::ALIVE_OBJECT;
+    });
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitGlobalRoots(const RefFieldVisitor &visitor)
+{
+    auto *vm = PandaVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    mem::RootManager<LanguageConfig> rootManager(vm);
+
+    const GCRootVisitor &callback = MakeCallback(visitor);
+    rootManager.VisitAotStringRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitVmRoots(callback);
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung)
+{
+    auto *vm = PandaVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    mem::RootManager<LanguageConfig> rootManager(vm);
+
+    const GCRootVisitor &callback = MakeCallback(visitor);
+    rootManager.VisitAotStringRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitVmRoots(callback);
+    rootManager.UpdateAndSweep([&visitor](ObjectHeader **ref) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        return (visitor(reinterpret_cast<ark::mem::RefField<> &>(*ref))) ? ObjectStatus::ALIVE_OBJECT
+                                                                         : ObjectStatus::ALIVE_OBJECT;
+    });
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(CmcGC);

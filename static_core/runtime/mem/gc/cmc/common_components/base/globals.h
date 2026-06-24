@@ -24,7 +24,6 @@
 
 namespace ark::mem {
 class RegionDesc;
-class VMInterface;
 }  // namespace ark::mem
 
 namespace ark::common_vm {
@@ -32,7 +31,6 @@ using ::ark::mem::GCParam;
 using ::ark::mem::HeapParam;
 using ::ark::mem::RegionDesc;
 using ::ark::mem::RuntimeParam;
-using ::ark::mem::VMInterface;
 
 // Time Factors
 constexpr uint64_t TIME_FACTOR = 1000LL;

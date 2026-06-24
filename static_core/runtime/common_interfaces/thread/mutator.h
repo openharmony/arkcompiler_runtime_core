@@ -28,7 +28,6 @@
 #include <unordered_set>
 
 #include "common_interfaces/base/common.h"
-#include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/base_object.h"
 #include "runtime/mem/gc/gc_phase.h"
 
