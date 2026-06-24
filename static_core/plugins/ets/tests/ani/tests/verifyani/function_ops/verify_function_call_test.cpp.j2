@@ -186,9 +186,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function [FATAL]"},
+        {"function", "ani_function", "function not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method [ERROR]"},
+        {"...", "       ", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -202,9 +202,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_function_2)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function [FATAL]"},
+        {"function", "ani_function", "function not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method [ERROR]"},
+        {"...", "       ", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -250,7 +250,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_boolean_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -278,7 +278,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_char_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char", "wrong value [FATAL]"},
         {"[2]", "ani_byte"},
@@ -306,7 +306,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_byte_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte", "wrong value [FATAL]"},
@@ -334,7 +334,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_short_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -362,7 +362,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_ref_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -383,9 +383,9 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
-        {"function", "ani_function", "wrong function [FATAL]"},
+        {"function", "ani_function", "function not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
-        {"...", "       ", "wrong method [ERROR]"},
+        {"...", "       ", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}", testLines);
@@ -594,9 +594,9 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function [FATAL]"},
+        {"function", "ani_function", "function not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method [ERROR]"},
+        {"args", "ani_value *", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -609,9 +609,9 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_function_2)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"function", "ani_function", "wrong function [FATAL]"},
+        {"function", "ani_function", "function not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method [ERROR]"},
+        {"args", "ani_value *", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -655,7 +655,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_args)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -667,9 +667,9 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_all_args)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
-        {"function", "ani_function", "wrong function [FATAL]"},
+        {"function", "ani_function", "function not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Function_Call_{{ Type }}_A", testLines);
@@ -689,7 +689,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_boolean_arg)
         {"env", "ani_env *"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong method arguments [FATAL]"},
+        {"args", "ani_value *", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},

@@ -46,7 +46,7 @@ TEST_F(WeakReferenceGetReferenceTest, wrong_wref_kind)
               ANI_INCORRECT_REF);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"wref", "ani_wref", "wrong weak reference [ERROR]"},
+        {"wref", "ani_wref", "wrong reference type: not a weak reference [ERROR]"},
         {"was_released_result", "ani_boolean *"},
         {"result", "ani_ref *"},
     };

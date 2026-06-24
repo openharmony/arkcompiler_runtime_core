@@ -78,7 +78,7 @@ TEST_F(PromiseResolverRejectTest, wrong_resolver)
     ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, nullptr, err), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"resolver", "ani_resolver", "wrong resolver [ERROR]"},
+        {"resolver", "ani_resolver", "resolver is nullptr [ERROR]"},
         {"rejection", "ani_error"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Reject", testLines);
@@ -89,7 +89,7 @@ TEST_F(PromiseResolverRejectTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
-        {"resolver", "ani_resolver", "wrong resolver [ERROR]"},
+        {"resolver", "ani_resolver", "resolver is nullptr [ERROR]"},
         {"rejection", "ani_error", "error reference is null [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Reject", testLines);
@@ -116,7 +116,7 @@ TEST_F(PromiseResolverRejectTest, bad_resolver)
     ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, fakeRef, err), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"resolver", "ani_resolver", "wrong resolver [FATAL]"},
+        {"resolver", "ani_resolver", "resolver has already been resolved or is invalid [FATAL]"},
         {"rejection", "ani_error"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Reject", testLines);
@@ -196,7 +196,7 @@ TEST_F(PromiseResolverRejectTest, double_rejection)
     ASSERT_EQ(env_->c_api->PromiseResolver_Reject(env_, resolver, err), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"resolver", "ani_resolver", "wrong resolver [FATAL]"},
+        {"resolver", "ani_resolver", "resolver has already been resolved or is invalid [FATAL]"},
         {"rejection", "ani_error"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("PromiseResolver_Reject", testLines);

@@ -90,7 +90,7 @@ TEST_F(PrimitiveBox{{ Type }}Test, wrong_value)
     ASSERT_EQ(env_->Primitive_Box_Boolean(static_cast<ani_boolean>(2U), &object), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"value", "ani_boolean", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_boolean", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
         {"result", "ani_object *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Box_Boolean", testLines);

@@ -66,7 +66,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_from_type_type)
     ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(env_, reinterpret_cast<ani_type>(undef), cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"from_type", "ani_ref", "wrong reference type: undefined [FATAL]"},
+        {"from_type", "ani_ref", "wrong reference type: undefined, expected: ani_class [FATAL]"},
         {"to_type", "ani_ref"},
         {"result", "ani_boolean *"},
     };
@@ -106,7 +106,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_to_type_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"from_type", "ani_ref"},
-        {"to_type", "ani_ref", "wrong reference type: undefined [FATAL]"},
+        {"to_type", "ani_ref", "wrong reference type: undefined, expected: ani_class [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_IsAssignableFrom", testLines);

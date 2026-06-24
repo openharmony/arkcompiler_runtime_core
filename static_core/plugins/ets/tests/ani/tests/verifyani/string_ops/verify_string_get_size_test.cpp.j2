@@ -84,7 +84,7 @@ TEST_F(StringGetUtf8SizeTest, null_input_string)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(env_, static_cast<ani_string>(null_), &size_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: null [FATAL]"},
+        {"string", "ani_string", "wrong reference type: null, expected: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
@@ -95,7 +95,7 @@ TEST_F(StringGetUtf8SizeTest, undef_input_string)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(env_, static_cast<ani_string>(undef_), &size_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: undefined [FATAL]"},
+        {"string", "ani_string", "wrong reference type: undefined, expected: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
@@ -106,7 +106,7 @@ TEST_F(StringGetUtf8SizeTest, err_input_string)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(env_, static_cast<ani_string>(err_), &size_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_error [FATAL]"},
+        {"string", "ani_string", "wrong reference type: ani_error, expected: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
@@ -117,7 +117,7 @@ TEST_F(StringGetUtf8SizeTest, obj_input_string)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(env_, static_cast<ani_string>(obj_), &size_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_object [FATAL]"},
+        {"string", "ani_string", "wrong reference type: ani_object, expected: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);
@@ -128,7 +128,7 @@ TEST_F(StringGetUtf8SizeTest, cls_input_string)
     ASSERT_EQ(env_->c_api->String_Get{{ format }}Size(env_, reinterpret_cast<ani_string>(cls_), &size_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_class [FATAL]"},
+        {"string", "ani_string", "wrong reference type: ani_class, expected: ani_string [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ format }}Size", testLines);

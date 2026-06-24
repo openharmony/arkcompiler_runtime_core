@@ -40,7 +40,7 @@ TEST_F(ReferenceDeleteTest, wrong_lref_null)
     ASSERT_EQ(env_->c_api->Reference_Delete(env_, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference [ERROR]"},
+        {"lref", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 }
@@ -115,7 +115,7 @@ TEST_F(ReferenceDeleteTest, wrong_ref_stack)
     // Check the error that occurs when deleting a stack reference.
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference [FATAL]"},
+        {"lref", "ani_ref", "stack reference cannot be deleted [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 
@@ -129,7 +129,7 @@ TEST_F(ReferenceDeleteTest, wrong_lref_junk_like_stack_ref)
     ASSERT_EQ(env_->c_api->Reference_Delete(env_, junkStackRef), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference [FATAL]"},
+        {"lref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 }
@@ -141,7 +141,7 @@ TEST_F(ReferenceDeleteTest, wrong_lref_junk_like_local_ref)
     ASSERT_EQ(env_->c_api->Reference_Delete(env_, junkLocalRef), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference [FATAL]"},
+        {"lref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 }
@@ -153,7 +153,7 @@ TEST_F(ReferenceDeleteTest, wrong_lref_junk_like_global_ref)
     ASSERT_EQ(env_->c_api->Reference_Delete(env_, junkGlobalRef), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference [FATAL]"},
+        {"lref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 }
@@ -165,7 +165,7 @@ TEST_F(ReferenceDeleteTest, wrong_lref_junk_like_weak_ref)
     ASSERT_EQ(env_->c_api->Reference_Delete(env_, junkWeakRef), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "wrong reference [FATAL]"},
+        {"lref", "ani_ref", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 }
@@ -175,7 +175,7 @@ TEST_F(ReferenceDeleteTest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
-        {"lref", "ani_ref", "wrong reference [ERROR]"},
+        {"lref", "ani_ref", "reference is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 }

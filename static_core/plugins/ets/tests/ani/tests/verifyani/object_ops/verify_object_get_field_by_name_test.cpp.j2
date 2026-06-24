@@ -104,7 +104,7 @@ TEST_F(ObjectGetFieldByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"name", "const char *", "wrong object for field [ERROR]"},
         {"result", "ani_{{ type }} *"},
     };

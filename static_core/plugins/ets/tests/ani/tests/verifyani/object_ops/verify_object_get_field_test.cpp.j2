@@ -128,7 +128,7 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"field", "ani_field", "object is nullptr or invalid while verifying field [ERROR]"},
         {"result", "ani_{{ type }} *"},
     };
@@ -237,9 +237,9 @@ TEST_F(ObjectGetField{{ Type }}Test, wrong_type)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {% if type == "ref" %}
-        {"field", "ani_field", "wrong value type: {{ wrong_ret }}, expected: object [ERROR]"},
+        {"field", "ani_field", "field return type mismatch: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"field", "ani_field", "wrong value type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
+        {"field", "ani_field", "field return type mismatch: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ type }} *"},
     };

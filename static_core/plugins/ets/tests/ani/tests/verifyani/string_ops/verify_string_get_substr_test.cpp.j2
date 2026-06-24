@@ -105,7 +105,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, null_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: null [FATAL]"},
+        {"string", "ani_string", "wrong reference type: null, expected: ani_string [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -124,7 +124,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, undef_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: undefined [FATAL]"},
+        {"string", "ani_string", "wrong reference type: undefined, expected: ani_string [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -143,7 +143,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, err_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_error [FATAL]"},
+        {"string", "ani_string", "wrong reference type: ani_error, expected: ani_string [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -162,7 +162,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, obj_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_object [FATAL]"},
+        {"string", "ani_string", "wrong reference type: ani_object, expected: ani_string [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},
@@ -181,7 +181,7 @@ TEST_F(StringGet{{ Format }}SubstrTest, cls_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_class [FATAL]"},
+        {"string", "ani_string", "wrong reference type: ani_class, expected: ani_string [FATAL]"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"{{ format }}Buffer", "{{ type }} *"},

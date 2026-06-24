@@ -38,7 +38,7 @@ TEST_F(WeakReferenceDeleteTest, wrong_wref_kind)
     ASSERT_EQ(env_->c_api->WeakReference_Delete(env_, reinterpret_cast<ani_wref>(ref)), ANI_INCORRECT_REF);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"wref", "ani_wref", "wrong weak reference [ERROR]"},
+        {"wref", "ani_wref", "wrong reference type: not a weak reference [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("WeakReference_Delete", testLines);
 

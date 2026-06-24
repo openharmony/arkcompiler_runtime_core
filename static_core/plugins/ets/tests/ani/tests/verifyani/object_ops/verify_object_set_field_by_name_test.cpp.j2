@@ -146,7 +146,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"name", "const char *", "wrong object for field [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
@@ -192,7 +192,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_all_args)
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
 {% if type == "boolean" %}
-        {"value", "ani_boolean", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_boolean", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
 {% elif type == "ref" %}
         {"value", "ani_ref", "reference is nullptr [ERROR]"},
 {% else %}
@@ -419,7 +419,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_boolean_value)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_{{ type }}", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetFieldByName_Boolean", testLines);

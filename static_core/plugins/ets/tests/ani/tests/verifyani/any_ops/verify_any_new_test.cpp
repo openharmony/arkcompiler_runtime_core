@@ -79,7 +79,7 @@ TEST_F(AnyNewTest, argv_null_with_argc_positive)
     ASSERT_EQ(env_->c_api->Any_New(env_, cls, 1U, nullptr, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},    {"ctor", "ani_ref", "Static types are not supported [FATAL]"},
-        {"argc", "ani_size"},    {"argv", "ani_ref *", "wrong pointer to use as argument in 'ani_ref *argv' [FATAL]"},
+        {"argc", "ani_size"},    {"argv", "ani_ref *", "argv array is nullptr [FATAL]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Any_New", testLines);

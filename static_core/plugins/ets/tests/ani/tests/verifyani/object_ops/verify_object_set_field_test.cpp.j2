@@ -128,7 +128,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"field", "ani_field", "object is nullptr or invalid while verifying field [ERROR]"},
         {"value", "ani_{{ type }}"},
     };
@@ -206,7 +206,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_value)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"field", "ani_field"},
-        {"value", "ani_{{ type }}", "wrong value for ani_{{ type }} [FATAL]"},
+        {"value", "ani_{{ type }}", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetField_{{ Type }}", testLines);
@@ -227,7 +227,7 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_all_args)
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"field", "ani_field", "field is nullptr, expected ani_field [ERROR]"},
 {% if type == "boolean" %}
-        {"value", "ani_{{ type }}", "wrong value for ani_{{ type }} [FATAL]"},
+        {"value", "ani_{{ type }}", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
 {% else %}
         {"value", "ani_{{ type }}"},
 {% endif %}
@@ -249,9 +249,9 @@ TEST_F(ObjectSetField{{ Type }}Test, wrong_type)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {% if type == "ref" %}
-        {"field", "ani_field", "wrong value type: {{ wrong_ret }}, expected: object [ERROR]"},
+        {"field", "ani_field", "field return type mismatch: {{ wrong_ret }}, expected: object [ERROR]"},
         {% else %}
-        {"field", "ani_field", "wrong value type: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
+        {"field", "ani_field", "field return type mismatch: {{ wrong_ret }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"value", "ani_{{ type }}"},
     };

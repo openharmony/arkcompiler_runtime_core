@@ -119,11 +119,11 @@ TEST_F(VariableSetValue{{ Type }}Test, wrong_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {% if type == "int" %}
-        {"variable", "ani_variable", "wrong value type: byte, expected: int [ERROR]"},
+        {"variable", "ani_variable", "field return type mismatch: byte, expected: int [ERROR]"},
         {% elif type == "ref" %}
-        {"variable", "ani_variable", "wrong value type: int, expected: object [ERROR]"},
+        {"variable", "ani_variable", "field return type mismatch: int, expected: object [ERROR]"},
         {% else %}
-        {"variable", "ani_variable", "wrong value type: int, expected: {{ type }} [ERROR]"},
+        {"variable", "ani_variable", "field return type mismatch: int, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"value", "ani_{{ type }}"},
     };
@@ -163,7 +163,7 @@ TEST_F(VariableSetValue{{ Type }}Test, wrong_value)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"variable", "ani_variable"},
-        {"value", "ani_boolean", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_boolean", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Variable_SetValue_{{ Type }}", testLines);
 }

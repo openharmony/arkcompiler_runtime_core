@@ -81,7 +81,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, null_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: null [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: null, expected: ani_tuple_value [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -95,7 +95,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, undefined_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined, expected: ani_tuple_value [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -109,7 +109,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, object_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(object), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object, expected: ani_tuple_value [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -123,7 +123,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, string_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(string), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string, expected: ani_tuple_value [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -137,7 +137,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, error_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(aniError), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error, expected: ani_tuple_value [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);
@@ -151,7 +151,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, array_input_tuple)
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(reinterpret_cast<ani_tuple_value>(array), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array, expected: ani_tuple_value [FATAL]"},
         {"result", "ani_size *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_GetNumberOfItems", testLines);

@@ -128,7 +128,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, null_object)
     ASSERT_EQ(env_->Primitive_Unbox_{{ Type }}(object, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"obj", "ani_object", "wrong reference type: null [FATAL]"},
+        {"obj", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"result", "ani_{{ type }} *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Primitive_Unbox_{{ Type }}", testLines);

@@ -27,7 +27,7 @@ TEST_F(DetachCurrentThreadTest, wrong_vm)
 {
     ASSERT_EQ(vm_->c_api->DetachCurrentThread(nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"vm", "ani_vm *", "wrong VM pointer [ERROR]"},
+        {"vm", "ani_vm *", "vm is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DetachCurrentThread", testLines);
 }
@@ -38,7 +38,7 @@ TEST_F(DetachCurrentThreadTest, wrong_vm_pointer)
     auto *wrongVm = reinterpret_cast<ani_vm *>(wrongVmAddress);
     ASSERT_EQ(vm_->c_api->DetachCurrentThread(wrongVm), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"vm", "ani_vm *", "wrong VM pointer [FATAL]"},
+        {"vm", "ani_vm *", "vm pointer does not match current VM [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DetachCurrentThread", testLines);
 }

@@ -61,7 +61,7 @@ TEST_F(ClassFindFieldTest, lookup_status_is_forwarded_without_verify_abort)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "field not found [ERROR]"},
+        {"name", "const char *", "instance field not found with given name [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -74,7 +74,7 @@ TEST_F(ClassFindFieldTest, interface_property_name_is_rejected)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"name", "const char *", "field not found [ERROR]"},
+        {"name", "const char *", "instance field not found with given name [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -100,7 +100,7 @@ TEST_F(ClassFindFieldTest, wrong_class)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
-        {"name", "const char *", "wrong class for field [ERROR]"},
+        {"name", "const char *", "instance field requires a class [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
@@ -143,7 +143,7 @@ TEST_F(ClassFindFieldTest, local_class_reference_is_rejected)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
-        {"name", "const char *", "wrong class for field [ERROR]"},
+        {"name", "const char *", "instance field requires a class [ERROR]"},
         {"result", "ani_field *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Class_FindField", testLines);
