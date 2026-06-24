@@ -51,6 +51,8 @@ public:
         return true;
     }
 
+    void ForEachRefField(const ark::mem::CommonRefVisitor &fieldHandler,
+                         const ark::mem::CommonRefVisitor &weakFieldHandler);
     void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler);
 
     inline BaseObject *GetForwardingPointer() const

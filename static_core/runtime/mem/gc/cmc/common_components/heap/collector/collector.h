@@ -64,14 +64,13 @@ public:
         UNREACHABLE();
     }
 
-    virtual BaseObject *ForwardObject(BaseObject *) = 0;
+    virtual ObjectHeader *ForwardObject(ObjectHeader *) = 0;
 
     virtual bool ShouldIgnoreRequest(GCRequest &quest) = 0;
-    virtual bool IsFromObject(BaseObject *) const = 0;
+    virtual bool IsFromObject(ObjectHeader *) const = 0;
     virtual bool IsUnmovableFromObject(BaseObject *) const = 0;
     virtual BaseObject *FindToVersion(BaseObject *obj) const = 0;
 
-    virtual bool TryUpdateRefField(BaseObject *, RefField<> &, BaseObject *&) const = 0;
     virtual bool TryForwardRefField(BaseObject *, RefField<> &, BaseObject *&) const = 0;
 
     BaseObject *FindLatestVersion(BaseObject *obj) const

@@ -25,7 +25,7 @@ namespace ark::common_vm {
 
 class Handler {
 public:
-    explicit Handler(const ark::mem::RefFieldVisitor &visitor) : visitor_(visitor) {}
+    explicit Handler(const ark::mem::CommonRefVisitor &visitor) : visitor_(visitor) {}
 
     ~Handler() = default;
 
@@ -34,23 +34,22 @@ public:
         if (*p == 0) {
             return true;
         }
-        auto **ref = reinterpret_cast<ark::common_vm::BaseObject **>(p);
-        visitor_(reinterpret_cast<ark::mem::RefField<> &>(*ref));
+        visitor_(p);
         return true;
     }
 
 private:
-    const ark::mem::RefFieldVisitor &visitor_;
+    const ark::mem::CommonRefVisitor &visitor_;
 };
 
-class SkipReferentHandler : public Handler {
+class SkipReferentSlotHandler : public Handler {
 public:
-    explicit SkipReferentHandler(const ark::mem::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
+    explicit SkipReferentSlotHandler(const ark::mem::CommonRefVisitor &visitor, ObjectPointerType *weakReferentPointer)
         : Handler(visitor), weakReferentPointer_(weakReferentPointer)
     {
     }
 
-    ~SkipReferentHandler() = default;
+    ~SkipReferentSlotHandler() = default;
 
     bool ProcessObjectPointer(ObjectHeader *obj, ObjectPointerType *p)
     {
@@ -65,26 +64,33 @@ private:
     const ObjectPointerType *weakReferentPointer_ {nullptr};
 };
 
-void BaseObject::ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
+void BaseObject::ForEachRefField(const ark::mem::CommonRefVisitor &fieldHandler,
+                                 const ark::mem::CommonRefVisitor &weakFieldHandler)
 {
-    const auto *objHeader = reinterpret_cast<const ObjectHeader *>(this);
+    auto *objHeader = reinterpret_cast<ObjectHeader *>(this);
     auto *cls = objHeader->template ClassAddr<Class>();
     auto *etsClass = ark::ets::EtsClass::FromRuntimeClass(cls);
     if (UNLIKELY(etsClass->IsReference())) {
         ObjectPointerType *referentPointer = reinterpret_cast<ObjectPointerType *>(
             ToUintPtr(objHeader) + ark::ets::EtsWeakReference::GetReferentOffset());
         if (*referentPointer != 0) {
-            weakFieldHandler(reinterpret_cast<ark::mem::RefField<> &>(
-                *reinterpret_cast<ark::common_vm::BaseObject **>(referentPointer)));
+            weakFieldHandler(referentPointer);
         }
-        SkipReferentHandler handler(fieldHandler, referentPointer);
-        mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(
-            cls, const_cast<ObjectHeader *>(objHeader), &handler);
+        SkipReferentSlotHandler handler(fieldHandler, referentPointer);
+        mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, objHeader, &handler);
     } else {
         Handler handler(fieldHandler);
-        mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(
-            cls, const_cast<ObjectHeader *>(objHeader), &handler);
+        mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, objHeader, &handler);
     }
+}
+
+void BaseObject::ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
+{
+    ForEachRefField(
+        [&fieldHandler](ObjectPointerType *ref) { fieldHandler(reinterpret_cast<ark::mem::RefField<> &>(*ref)); },
+        [&weakFieldHandler](ObjectPointerType *ref) {
+            weakFieldHandler(reinterpret_cast<ark::mem::RefField<> &>(*ref));
+        });
 }
 
 }  // namespace ark::common_vm

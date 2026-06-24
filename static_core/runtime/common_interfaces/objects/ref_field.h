@@ -31,8 +31,6 @@ using ::ark::common_vm::BaseObject;
 template <bool IS_ATOMIC = false>
 class RefField {
 public:
-    static constexpr uint64_t TAG_WEAK = 0x01ULL;
-
     struct BitFieldLayout {
         MAddress address : 48;
         MAddress isTagged : 1;
@@ -51,9 +49,9 @@ public:
         if (IS_ATOMIC) {
             // Atomic with parameterized order reason: atomic load with memory order passed as parameter
             MAddress value = __atomic_load_n(&fieldVal, order);
-            return reinterpret_cast<BaseObject *>(RefField<>(value).GetAddress() & (~TAG_WEAK));
+            return reinterpret_cast<BaseObject *>(RefField<>(value).GetAddress());
         }
-        return reinterpret_cast<BaseObject *>(this->GetAddress() & (~TAG_WEAK));
+        return reinterpret_cast<BaseObject *>(this->GetAddress());
     }
 
     MAddress GetFieldValue(std::memory_order order = std::memory_order_relaxed) const
@@ -128,11 +126,6 @@ public:
         return layout.address;
     }
 
-    bool IsWeak() const
-    {
-        return (layout.address & TAG_WEAK);
-    }
-
     bool IsTagged() const
     {
         return false;
@@ -149,11 +142,6 @@ public:
     explicit RefField(const BaseObject *obj) : fieldVal(0)
     {
         layout.address = reinterpret_cast<MAddress>(obj);
-    }
-    RefField(const BaseObject *obj, bool forWeak) : fieldVal(0)
-    {
-        MAddress tag = forWeak ? TAG_WEAK : 0;
-        layout.address = reinterpret_cast<MAddress>(obj) | tag;
     }
     RefField(const BaseObject *obj, uint16_t tagged, uint16_t tagid) : fieldVal(0)
     {

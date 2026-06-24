@@ -103,9 +103,6 @@ public:
 template <typename T>
 using CArrayList = PandaVector<T>;
 
-template <typename StackType>
-class GlobalStackQueue;
-
 // prefetch distance for mark.
 #define MACRO_MARK_PREFETCH_DISTANCE 16     // this macro is used for check when pre-compiling.
 constexpr int MARK_PREFETCH_DISTANCE = 16;  // when it is changed, remember to change MACRO_MARK_PREFETCH_DISTANCE.
@@ -128,10 +125,6 @@ public:
     }
 };
 
-template <class LanguageConfig>
-class MarkingWork;
-template <class LanguageConfig, bool ProcessXRef>
-class ConcurrentMarkingWork;
 constexpr size_t LOCAL_MARK_STACK_CAPACITY = 128;
 using GlobalMarkStack = ark::common_vm::StackList<BaseObject, LOCAL_MARK_STACK_CAPACITY>;
 using ParallelLocalMarkStack =
@@ -139,21 +132,54 @@ using ParallelLocalMarkStack =
 using SequentialLocalMarkStack = ark::common_vm::LocalStack<BaseObject, LOCAL_MARK_STACK_CAPACITY>;
 using LocalCollectStack = ark::common_vm::LocalStack<BaseObject, LOCAL_MARK_STACK_CAPACITY>;
 
-using WeakStack = CArrayList<std::pair<RefField<> *, size_t>>;
-
-constexpr size_t LOCAL_EVACUATION_STACK_CAPACITY = 128;
-using GlobalEvacuationStack = ark::common_vm::StackList<RefField<>, LOCAL_EVACUATION_STACK_CAPACITY>;
-using LocalEvacuationStack = ark::common_vm::LocalStack<RefField<>, LOCAL_EVACUATION_STACK_CAPACITY>;
-using ParallelLocalEvacuationStack =
-    ark::common_vm::LocalStack<RefField<>, LOCAL_MARK_STACK_CAPACITY, ParallelMarkingMonitor>;
-
 enum class GCMode : uint8_t { CMC = 0, CONCURRENT_MARK = 1, STW = 2 };
 
 template <class LanguageConfig>
 class CmcGC : public GCLang<LanguageConfig>, public ark::common_vm::Collector {
-    friend class MarkingWork<LanguageConfig>;
-    template <class LC, bool ProcessXRef>
-    friend class ConcurrentMarkingWork;
+    class CMCGCAdaptiveStack;
+
+    class CMCGCWorkersTask : public GCWorkersTask {
+    public:
+        CMCGCWorkersTask(GCWorkersTaskTypes type, CMCGCAdaptiveStack *markingStack) : GCWorkersTask(type, markingStack)
+        {
+            ASSERT(type == GCWorkersTaskTypes::TASK_REMARK || type == GCWorkersTaskTypes::TASK_EVACUATE_REGIONS);
+        }
+        DEFAULT_COPY_SEMANTIC(CMCGCWorkersTask);
+        DEFAULT_MOVE_SEMANTIC(CMCGCWorkersTask);
+        ~CMCGCWorkersTask() = default;
+
+        CMCGCAdaptiveStack *GetStack() const
+        {
+            return static_cast<CMCGCAdaptiveStack *>(storage_);
+        }
+    };
+
+    class CMCGCAdaptiveStack : public GCAdaptiveStack<ObjectPointerType *> {
+        using Ref = ObjectPointerType *;
+        using GCAdaptiveStack<Ref>::GCAdaptiveStack;
+
+    public:
+        NO_COPY_SEMANTIC(CMCGCAdaptiveStack);
+        NO_MOVE_SEMANTIC(CMCGCAdaptiveStack);
+
+        ~CMCGCAdaptiveStack() = default;
+
+        CMCGCAdaptiveStack *CreateStack() override
+        {
+            auto *gc = GCAdaptiveStack<Ref>::GetGC();
+            auto allocator = gc->GetInternalAllocator();
+            // New tasks will be created with the same new_task_stack_size_limit_ and stack_size_limit_
+            return allocator->template New<CMCGCAdaptiveStack>(
+                gc, GCAdaptiveStack<Ref>::GetNewTaskStackSizeLimit(), GCAdaptiveStack<Ref>::GetNewTaskStackSizeLimit(),
+                GCAdaptiveStack<Ref>::GetTaskType(), GCAdaptiveStack<Ref>::GetTimeLimitForNewTaskCreation(),
+                GCAdaptiveStack<Ref>::GetStackDst());
+        }
+
+        GCWorkersTask CreateTask(GCAdaptiveStack<Ref> *stack) override
+        {
+            return CMCGCWorkersTask(GCAdaptiveStack<Ref>::GetTaskType(), static_cast<CMCGCAdaptiveStack *>(stack));
+        }
+    };
 
 public:
     explicit CmcGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
@@ -235,7 +261,6 @@ public:
 
     template <bool ProcessXRef>
     void ProcessMarkStack(uint32_t threadIndex, ParallelLocalMarkStack &workStack, GCTaskCause reason);
-    void ProcessWeakStack(WeakStack &weakStack);
 
     template <bool HANDLE_WEAK_REFS, typename ObjectMarkerT>
     void HandleMarkedObject(ObjectMarkerT *handler, BaseObject *object);
@@ -254,9 +279,9 @@ public:
     void FixObjectRefFields(BaseObject *obj) const override;
     void FixRefField(BaseObject *obj, RefField<> &field) const;
 
-    BaseObject *ForwardObject(BaseObject *fromVersion) override;
+    ObjectHeader *ForwardObject(ObjectHeader *fromVersion) override;
 
-    bool IsFromObject(BaseObject *obj) const override
+    bool IsFromObject(ObjectHeader *obj) const override
     {
         // filter const string object.
         if (Heap::IsHeapAddress(obj)) {
@@ -318,17 +343,14 @@ public:
 
     void SetGCThreadQosPriority(ark::common_vm::PriorityMode mode);
 
-    BaseObject *TryForwardObject(BaseObject *fromVersion);
+    BaseObject *TryForwardObject(ObjectHeader *fromVersion);
 
-    bool TryUpdateRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const override;
     bool TryForwardRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const override;
 
-    void ProcessEvacuationStack(GlobalEvacuationStack &globalStack);
-    void ProcessEvacuationStack(ParallelLocalEvacuationStack &markStack);
+    void ProcessEvacuationStack(CMCGCAdaptiveStack &markStack);
 
-    void RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack);
-    void MarkEvacuationStack(GlobalEvacuationStack &globalStack);
-    void MarkEvacuationStack(ParallelLocalEvacuationStack &markStack);
+    void RemarkYoungCollectionSpace();
+    void MarkEvacuationStack(CMCGCAdaptiveStack &objectsStack);
 
     void MarkObject(ObjectHeader *object) override;
     bool MarkObjectIfNotMarked(ObjectHeader *object) override;
@@ -373,7 +395,6 @@ protected:
     void CopyFromSpace();
     void ExemptFromSpace();
 
-    void MergeWeakStack(WeakStack &weakStack);
     void UpdateNativeThreshold(ark::mem::GCParam &gcParam);
 
     void UpdateGCCompletionStats(ark::common_vm::GCStats &gcStats);
@@ -420,13 +441,14 @@ protected:
     void HandleWeakReference(ObjectMarkerT *handler, BaseObject *weakRef);
 
     template <bool HANDLE_WEAK_REFS>
-    bool PushRootToWorkStack(LocalCollectStack &markStack, BaseObject *obj, GCTaskCause reason);
+    bool PushRootToWorkStack(LocalCollectStack &markStack, ObjectHeader *obj, GCTaskCause reason);
 
     template <bool HANDLE_WEAK_REFS>
-    void PushRootsToWorkStack(LocalCollectStack &markStack, const CArrayList<BaseObject *> &collectedRoots,
+    void PushRootsToWorkStack(LocalCollectStack &markStack, const CArrayList<ObjectHeader *> &collectedRoots,
                               GCTaskCause reason);
 
-    void MarkingRoots(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason);
+    void MarkingRoots(const CArrayList<ObjectHeader *> &collectedRoots, GCTaskCause reason);
+
     void Remark(GCTaskCause reason);
 
     bool MarkSatbBuffer(GlobalMarkStack &globalMarkStack);
@@ -482,10 +504,10 @@ private:
     };
 
     template <EnumRootsPolicy policy>
-    CArrayList<BaseObject *> EnumRoots();
+    CArrayList<ObjectHeader *> EnumRoots();
 
-    template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
-    void EnumRootsImpl(const ark::mem::RefFieldVisitor &visitor)
+    template <void (&rootsVisitFunc)(const GCRootVisitor &)>
+    void EnumRootsImpl(const GCRootVisitor &visitor)
     {
         // assemble garbage candidates.
         reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_).AssembleGarbageCandidates();
@@ -496,10 +518,9 @@ private:
 
         rootsVisitFunc(visitor);
     }
-    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(ark::common_vm::STWParam &param,
-                                                       const ark::mem::RefFieldVisitor &visitor);
+    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(ark::common_vm::STWParam &param, const GCRootVisitor &visitor);
 
-    void MarkingHeap(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason);
+    void MarkingHeap(const CArrayList<ObjectHeader *> &collectedRoots, GCTaskCause reason);
     void Preforward(GCTaskCause reason);
     void ConcurrentPreforward();
 
@@ -510,52 +531,44 @@ private:
     void ParallelFixHeap();
     void FixHeap(bool isWorldStopped);  // roots and ref-fields
     WeakRefFieldVisitor GetWeakRefFieldVisitor(GCTaskCause reason);
-    RefFieldVisitor GetPrefowardRefFieldVisitor();
     void PreforwardFlip(GCTaskCause reason);
 
     void CollectGarbageWithXRef(GCTaskCause reason);
 
-    template <EnumRootsPolicy policy>
-    void PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack);
-    template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
-    void PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots);
-    void PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots);
-    void PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots);
-    void RemarkNonHeapRoots(GlobalEvacuationStack &globalStack);
-    void EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack);
-    void MarkSatbBuffer(GlobalEvacuationStack &globalStack);
-    template <typename Stack>
-    void EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &stack);
-    template <typename Stack>
-    size_t EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj, Stack &stack);
-    bool InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region) const;
-    bool InYoungCollectionSpace(const RegionDesc *region) const;
-    bool InYoungCollectionSpace(const BaseObject *obj) const;
-    bool InYoungCollectionSpace(RegionDesc::RegionType type) const;
+    void PreforwardNonHeapRoots(CMCGCAdaptiveStack &stack);
+    void PreforwardNonHeapRoot(GCRoot root, PandaVector<ObjectHeader *> &forwardedRoots);
+    PandaVector<ObjectHeader *> PreforwardNonHeapRootsFlip();
+    void RemarkNonHeapRoots(CMCGCAdaptiveStack &stack);
+    void EnqueueRememberedSetRefs(CMCGCAdaptiveStack &stack);
+    void MarkSatbBuffer(CMCGCAdaptiveStack &stack);
+    void EnqueueRefsToYoungCollectionSpace(ObjectHeader *obj, CMCGCAdaptiveStack &stack);
+    static bool InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region);
+    static bool InYoungCollectionSpace(const RegionDesc *region);
+    static bool InYoungCollectionSpace(const BaseObject *obj);
+    static bool InYoungCollectionSpace(RegionDesc::RegionType type);
     void DoGarbageCollectionWithoutConcurrentMarking();
 
-    template <typename Stack>
-    void RemarkNonHeapRoot(RefField<> &ref, Stack &stack);
+    void RemarkNonHeapRoot(GCRoot root, CMCGCAdaptiveStack &stack);
 
-    template <typename Stack>
-    void ProcessRef(RefField<> &ref, Stack &stack);
-
-    template <typename Stack>
-    void MarkRef(RefField<> &ref, Stack &stack);
+    void ProcessRef(ObjectPointerType *obj, CMCGCAdaptiveStack &stack);
+    void MarkRef(BaseObject *obj, CMCGCAdaptiveStack &stack);
 
     using ManagedMutatorCallback = std::function<void(Mutator *)>;
     void ForEachManagedMutator(const ManagedMutatorCallback &callback);
 
-    static void VisitRoots(const RefFieldVisitor &visitor);
+    static void VisitRoots(const GCRootVisitor &visitor);
     static void VisitSTWRoots(const RefFieldVisitor &visitor);
-    static void VisitConcurrentRoots(const RefFieldVisitor &visitor);
+    static void VisitConcurrentRoots(const GCRootVisitor &visitor);
     static void VisitWeakRoots(const WeakRefFieldVisitor &visitor);
-    static void VisitGlobalRoots(const RefFieldVisitor &visitor);
+    static void VisitGlobalRoots(const GCRootVisitor &visitor);
     static void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung);
 
     void VisitRootsI(const RefFieldVisitor &visitor) override
     {
-        CmcGC<LanguageConfig>::VisitRoots(visitor);
+        auto rootVisitor = [&visitor](GCRoot root) {
+            visitor(reinterpret_cast<RefField<> &>(*root.GetObjectPointer()));
+        };
+        CmcGC<LanguageConfig>::VisitRoots(rootVisitor);
     }
 
     void VisitSTWRootsI(const RefFieldVisitor &visitor) override
@@ -565,7 +578,10 @@ private:
 
     void VisitConcurrentRootsI(const RefFieldVisitor &visitor) override
     {
-        CmcGC<LanguageConfig>::VisitConcurrentRoots(visitor);
+        auto rootVisitor = [&visitor](GCRoot root) {
+            visitor(reinterpret_cast<RefField<> &>(*root.GetObjectPointer()));
+        };
+        CmcGC<LanguageConfig>::VisitConcurrentRoots(rootVisitor);
     }
 
     void VisitWeakRootsI(const WeakRefFieldVisitor &visitor) override
@@ -573,65 +589,10 @@ private:
         CmcGC<LanguageConfig>::VisitWeakRoots(visitor);
     }
 
+    void WorkerTaskProcessing(GCWorkersTask *task, void *workerData) override;
+
     GCMode gcMode_ = GCMode::CMC;
 };
-
-template <typename StackType>
-class GlobalStackQueue {
-public:
-    GlobalStackQueue() = default;
-    ~GlobalStackQueue() = default;
-
-    void AddWorkStack(StackType &&stack)
-    {
-        DCHECK(!stack.empty());
-        ark::os::memory::LockHolder guard(mtx_);
-        stacks_.push_back(std::move(stack));
-        cv_.Signal();
-    }
-
-    StackType PopWorkStack()
-    {
-        ark::os::memory::LockHolder lock(mtx_);
-        while (true) {
-            if (!stacks_.empty()) {
-                StackType stack(std::move(stacks_.back()));
-                stacks_.pop_back();
-                return stack;
-            }
-            if (finished_) {
-                return StackType();
-            }
-            cv_.Wait(&mtx_);
-        }
-    }
-
-    StackType DrainAllWorkStack()
-    {
-        ark::os::memory::LockHolder lock(mtx_);
-        while (!stacks_.empty()) {
-            StackType stack(std::move(stacks_.back()));
-            stacks_.pop_back();
-            return stack;
-        }
-        return StackType();
-    }
-
-    void NotifyFinish()
-    {
-        ark::os::memory::LockHolder guard(mtx_);
-        DCHECK(!finished_);
-        finished_ = true;
-        cv_.SignalAll();
-    }
-
-private:
-    bool finished_ {false};
-    ark::os::memory::ConditionVariable cv_;
-    ark::os::memory::Mutex mtx_;
-    PandaVector<StackType> stacks_;
-};
-
 }  // namespace ark::mem
 
 #endif  // if defined(ARK_USE_COMMON_RUNTIME)

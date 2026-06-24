@@ -487,7 +487,7 @@ public:
         return reinterpret_cast<RegionDesc *>(unit);
     }
 
-    static RegionDesc *GetAliveRegionDescAt(const BaseObject *obj)
+    static RegionDesc *GetAliveRegionDescAt(const ObjectHeader *obj)
     {
         return GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
     }
@@ -772,7 +772,7 @@ public:
         metadata.freeSlot = nullptr;
     }
 
-    bool IsNewObjectSinceMarking(const BaseObject *obj)
+    bool IsNewObjectSinceMarking(const ObjectHeader *obj)
     {
         return GetMarkingLine() <= reinterpret_cast<uintptr_t>(obj);
     }
@@ -1306,7 +1306,7 @@ public:
             return reinterpret_cast<InlinedRegionMetaData *>(allocAddr & ~DEFAULT_REGION_UNIT_MASK);
         }
 
-        static InlinedRegionMetaData *GetInlinedRegionMetaData(const BaseObject *obj)
+        static InlinedRegionMetaData *GetInlinedRegionMetaData(const ObjectHeader *obj)
         {
             return GetInlinedRegionMetaData(reinterpret_cast<HeapAddress>(obj));
         }
