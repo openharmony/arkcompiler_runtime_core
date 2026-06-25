@@ -37,6 +37,12 @@ regression/35187_2.ets
 regression/35187_3.ets
 regression/35187_4.ets
 
+#35428 String spread bug. Surrogate pair should not to be splitted
+regression/35428.ets
+
+#35444 Crash on instantiating anonimous class literal
+regression/35444.ets
+
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
