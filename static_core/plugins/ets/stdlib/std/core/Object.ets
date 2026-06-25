@@ -203,7 +203,7 @@ export class Object {
         }
         const t = Type.of(o)
         if (t instanceof ClassType) {
-            const ct = t as ClassType
+            const ct = t
             const fnum = ct.getFieldsNum()
             if (fnum == 0) {
                 return new string[0]("")
@@ -272,7 +272,7 @@ export class Object {
             return new Any[0](undefined)
         }
         if (o instanceof String) {
-            const sv = o as string
+            const sv = o
             const len = sv.getLength()
             if (len == 0) {
                 return new Any[0](undefined)
@@ -368,14 +368,14 @@ export class Object {
             return new NullishEntryType[0](undefined)
         }
         if (o instanceof String) {
-            const sv = o as string
+            const sv = o
             const len = sv.getLength()
             if (len == 0) {
                 return new NullishEntryType[0](undefined)
             }
             let res: NullishEntryType[] = new NullishEntryType[len](undefined)
             for (let i = 0; i < len; i++) {
-                res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()] as EntryType
+                res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()]
             }
             return res
         }
@@ -386,7 +386,7 @@ export class Object {
                 let len = arr.length
                 let res: NullishEntryType[] = new NullishEntryType[len](undefined)
                 for (let i = 0;i < len; i++) {
-                    res[i] = [new Int(i).toString(), arr[i]] as EntryType
+                    res[i] = [new Int(i).toString(), arr[i]]
                 }
                 return res
             }
@@ -398,7 +398,7 @@ export class Object {
             const len = keys.length
             let res: NullishEntryType[] = new NullishEntryType[len](undefined)
             for (let i = 0; i < len; i++) {
-                res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()] as EntryType
+                res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()]
             }
             return res
         } else if (t instanceof ArrayType) {
@@ -409,7 +409,7 @@ export class Object {
             }
             let res: NullishEntryType[] = new NullishEntryType[len.toInt()](undefined)
             for (let i = 0; i < len; i++) {
-                res[i] = [new Int(i).toString(), av.getElement(i).getData()] as EntryType
+                res[i] = [new Int(i).toString(), av.getElement(i).getData()]
             }
             return res
         } else if (t instanceof LambdaType) {
@@ -583,7 +583,7 @@ export class Object {
         while (!entriesIterResult.done) {
             const entry: [PropertyKey, T] | undefined = entriesIterResult.value
             if (entry != undefined) {
-                result[entry[0] as PropertyKey] = entry[1] as T
+                result[entry[0]] = entry[1]
             }
 
             entriesIterResult = entriesIter.next()
@@ -610,7 +610,7 @@ export class Object {
                 entries = Object.entries(s)
             }
             for (const e of entries) {
-                target.set(e![0] as PropertyKey, e![1] as Any)
+                target.set(e![0], e![1])
             }
         }
         return target

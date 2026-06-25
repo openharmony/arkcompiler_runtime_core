@@ -222,7 +222,7 @@ final class MapIteratorImpl<K, V, R> implements MapIterator<R> {
     constructor(data: FixedArray<Any>, mapper: (k: K, v: V) => R) {
         this.data = data
         this.buckets = data.getBucketsFromData()
-        this.buckets!.chgItersCounter(+1)
+        this.buckets.chgItersCounter(+1)
         this.curAt = getAtZero()
         this.mapper = mapper
     }
@@ -241,27 +241,27 @@ final class MapIteratorImpl<K, V, R> implements MapIterator<R> {
             }
 
             if (this.curAt > getAtZero()) {
-                this.curAt -= pairs(buckets!.getNumOfDeletedAt(this.curAt - pairs(1)))
+                this.curAt -= pairs(buckets.getNumOfDeletedAt(this.curAt - pairs(1)))
             }
-            data = nestedData as DataArrType
+            data = nestedData
             buckets = data.getBucketsFromData()
         }
         this.data = data
         this.buckets = buckets
 
-        for (const length = (this.buckets!.getBucketsIdxLength()); isInsideAt(this.curAt, length); this.curAt += pairs(1)) {
-            if (this.buckets!.isEmptyAt(this.curAt)) {
+        for (const length = (this.buckets.getBucketsIdxLength()); isInsideAt(this.curAt, length); this.curAt += pairs(1)) {
+            if (this.buckets.isEmptyAt(this.curAt)) {
                 break
             }
-            if (!this.buckets!.isDeletedAt(this.curAt)) {
-                const res = new IteratorResult<R>(this.mapper(getKeyAt<K>(this.data!, this.curAt), getValueAt<V>(this.data!, this.curAt)))
+            if (!this.buckets.isDeletedAt(this.curAt)) {
+                const res = new IteratorResult<R>(this.mapper(getKeyAt<K>(this.data, this.curAt), getValueAt<V>(this.data, this.curAt)))
                 this.curAt += pairs(1)
                 return res
             }
         }
 
         this.curAt = Const.EMPTY_ENTRY
-        this.buckets!.chgItersCounter(-1)
+        this.buckets.chgItersCounter(-1)
         return new IteratorResult<R>()
     }
 
@@ -424,7 +424,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 continue
             }
             // TODO #33602: replace with const enum
-            this.set(pair[/*Map.ENTRY_KEY*/0] as K, pair[/*Map.ENTRY_VAL*/1] as V)
+            this.set(pair[/*Map.ENTRY_KEY*/0], pair[/*Map.ENTRY_VAL*/1])
         }
     }
 
@@ -442,7 +442,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
         entries.forEach((entry: [K, V]) => {
             // TODO #33602: replace with const enum
-            this.set(entry[/*Map.ENTRY_KEY*/0] as K, entry[/*Map.ENTRY_VAL*/1] as V)
+            this.set(entry[/*Map.ENTRY_KEY*/0], entry[/*Map.ENTRY_VAL*/1])
         })
     }
 
@@ -487,7 +487,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                     continue
                 }
                 // TODO #33602: replace with const enum
-                this.set(pair[/*Map.ENTRY_KEY*/0] as K, pair[/*Map.ENTRY_VAL*/1] as V)
+                this.set(pair[/*Map.ENTRY_KEY*/0], pair[/*Map.ENTRY_VAL*/1])
             }
         } else {
             const entriesIter = (entries as Iterable<[K, V]>).$_iterator()
@@ -506,7 +506,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
             entriesBuf.forEach((e: [K, V]) => {
                 // TODO #33602: replace with const enum
-                this.set(e[/*Map.ENTRY_KEY*/0] as K, e[/*Map.ENTRY_VAL*/1] as V)
+                this.set(e[/*Map.ENTRY_KEY*/0], e[/*Map.ENTRY_VAL*/1])
             })
         }
         this.initialCapacity = this.cap
@@ -819,7 +819,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             // NOTE (magikarp777, #30548): Replace isSameReference with !==
             while (!Map.isSameReference(curData, this.data)) {
                 let curBuckets = curData.getBucketsFromData()
-                curAt -= pairs(curBuckets!.getNumOfDeletedAt(curAt))
+                curAt -= pairs(curBuckets.getNumOfDeletedAt(curAt))
                 curData = getNestedData(curData) as DataArrType
             }
         }

@@ -303,7 +303,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      */
     public codePointAt(index: int): int | undefined {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
+        if (index < 0 || index >= this.getLength()) {
             return undefined
         }
         let highValue: char = this.charAt(index);
@@ -671,7 +671,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (fromIndex == undefined) {
             return this.startsWithImpl(prefix, 0)
         }
-        return this.startsWithImpl(prefix, fromIndex!)
+        return this.startsWithImpl(prefix, fromIndex)
     }
 
     /**
@@ -782,7 +782,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public lastIndexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined) {
-            return this.lastIndexOfImpl(str, Int.MAX_VALUE as int)
+            return this.lastIndexOfImpl(str, Int.MAX_VALUE)
         }
         return this.lastIndexOfImpl(str, fromIndex)
     }
@@ -1083,9 +1083,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public split(separator: StringOrRegExp, limit?: int): String[] {
         if (separator instanceof RegExp) {
-            return (separator as RegExp).split(this, limit);
+            return separator.split(this, limit);
         }
-        return this.split(separator as String, limit);
+        return this.split(separator, limit);
     }
 
     /**
@@ -1360,7 +1360,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (index < 0 || index >= n) {
             return undefined;
         }
-        return new String(this.charAt(index).toString())
+        return String.fromCharCode(this.charAt(index).toInt())
     }
 
     private CreateHTMLString(tag: String, param: String): String{
@@ -1955,9 +1955,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public replace(searchValue: StringOrRegExp, replaceValue: String) : String {
         if (searchValue instanceof RegExp) {
-            return (searchValue as RegExp).replace(this, replaceValue)
+            return searchValue.replace(this, replaceValue)
         }
-        return this.replace(searchValue as String, replaceValue)
+        return this.replace(searchValue, replaceValue)
     }
 
     /**
@@ -1990,7 +1990,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         let preceding = this.substring(0, position)
         let following = this.substring(position + searchLength)
-        let replacement = replacer(searchValue, [position.toDouble() as Object, this as Object] as Object[])
+        let replacement = replacer(searchValue, [position.toDouble(), this])
         return preceding + replacement + following
     }
 
@@ -2005,9 +2005,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public replace(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (searchValue instanceof RegExp) {
-            return (searchValue as RegExp).replace(this, replacer)
+            return searchValue.replace(this, replacer)
         }
-        return this.replace(searchValue as String, replacer)
+        return this.replace(searchValue, replacer)
     }
 
     /**
@@ -2078,13 +2078,12 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public replaceAll(searchValue: StringOrRegExp, replaceValue: String): String {
         if (searchValue instanceof RegExp) {
-            const re = searchValue as RegExp
-            if (!re.global) {
+            if (!searchValue.global) {
                 throw new Error('Global flag expected for regexp')
             }
-            return re.replace(this, replaceValue)
+            return searchValue.replace(this, replaceValue)
         }
-        return this.replaceAll(searchValue as String, replaceValue)
+        return this.replaceAll(searchValue, replaceValue)
     }
 
     /**
@@ -2131,7 +2130,7 @@ export final class String extends Object implements Comparable<String>, Iterable
             let args = new containers.UndefinableObjectArray(2)
             args.pushBack(new Double(p))
             args.pushBack(this)
-            let replacement = replacer(searchValue, args.toArray() as Object[])
+            let replacement = replacer(searchValue, args.toArray())
             result = result + preserved + replacement
             endOfLastMatch = p + searchLength
         }
@@ -2153,13 +2152,12 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public replaceAll(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (searchValue instanceof RegExp) {
-            const re = searchValue as RegExp
-            if (!re.global) {
+            if (!searchValue.global) {
                 throw new Error('Global flag expected for regexp')
             }
-            return re.replace(this, replacer)
+            return searchValue.replace(this, replacer)
         }
-        return this.replaceAll(searchValue as String, replacer)
+        return this.replaceAll(searchValue, replacer)
     }
 
     /**
@@ -2199,9 +2197,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public search(regexp: StringOrRegExp): int {
         if (regexp instanceof String) {
-            return new RegExp(regexp as String).search(this)
+            return new RegExp(regexp).search(this)
         }
-        return (regexp as RegExp).search(this)
+        return regexp.search(this)
     }
 
     /**
@@ -2315,9 +2313,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public match(regexp: StringOrRegExp): RegExpMatchArray | null {
         if (regexp instanceof String) {
-            return new RegExp(regexp as String).match(this)
+            return new RegExp(regexp).match(this)
         }
-        return (regexp as RegExp).match(this)
+        return regexp.match(this)
     }
 
 
@@ -2332,7 +2330,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      */
     public matchAll(reg: RegExp): IterableIterator<RegExpMatchArray> {
-        let flags = reg.flags;
         if (!reg.global) {
             throw new Error('matchAll must be called with a global RegExp')
         }
@@ -2424,10 +2421,8 @@ export final class String extends Object implements Comparable<String>, Iterable
             } else if (codeUnit >= LOW_SURROGATE_MIN && codeUnit <= LOW_SURROGATE_MAX) {
                 res.append(REPLACEMENT_CHARACTER);
             // Regular Characters
-            } else if (Char.isValidCodePoint(codeUnit)) {
-                res.append(this.charAt(i).toChar());
             } else {
-                res.append(REPLACEMENT_CHARACTER);
+                res.append(this.charAt(i).toChar());
             }
         }
         return res.toString();

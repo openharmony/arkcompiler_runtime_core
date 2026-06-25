@@ -243,12 +243,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (arrayLength >= this.actualLength) {
             return
         }
-        let newLen: int = arrayLength
-        if (newLen < 0) {
-            // Convert from signed to unsigned
-            newLen = newLen & Int.MAX_VALUE
-        }
-        const other = this.slice(0, newLen)
+        const other = this.slice(0, arrayLength)
         this.buffer = other.buffer
         this.actualLength = other.actualLength
     }
@@ -532,10 +527,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return (aDigs - bDigs)
     }
 
-    private static defaultComparatorStr(a: String, b: String) {
-        return a.compareTo(b)
-    }
-
     private copyArray(): FixedArray<Any> {
         let len: int = this.actualLength
         let res : FixedArray<Any> = new FixedArray<Any>(len)
@@ -573,7 +564,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             if (e instanceof OutOfMemoryError) {
                 this.slow_default_sort()
             } else {
-                throw e as Error
+                throw e
             }
         }
     }
@@ -960,7 +951,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             if (depth > 0 && element instanceof Array) {
                 let subArray = (element as Array<T>).flat<U>(depth - 1)
                 for (let j = 0; j < subArray.length; j++) {
-                    to.push(subArray[j] as U)
+                    to.push(subArray[j])
                 }
             } else {
                 to.push(element as U)
@@ -994,8 +985,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             let value: U | ReadonlyArray<U> = fn(this.$_get_unsafe(i), i, this);
             if (value instanceof ReadonlyArray) {
                 let vv: ReadonlyArray<U> = value;
-                for (let i = 0; i < vv.length; ++i) {
-                    result.push(vv[i]);  // Workaround to not use 'push(value[i] as U)'
+                for (let j = 0; j < vv.length; ++j) {
+                    result.push(vv[j]);  // Workaround to not use 'push(value[j] as U)'
                 }
             }
             else {
@@ -1323,9 +1314,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0 && i < this.actualLength; i++) {
-            if (i >= this.actualLength) {
-                break
-            }
             callbackfn(this.$_get_unsafe(i), i, this)
         }
     }
@@ -1438,7 +1426,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return
         }
         visited.add(arr)
-        const sepReal = sep === undefined ? "," : sep!
+        const sepReal = sep === undefined ? "," : sep
         const first_el = arr[0]
         if (first_el != null) {
             if (first_el instanceof Array) {
@@ -1494,7 +1482,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return result.toString()
         }
 
-        return Array.joinInternal(this.buffer, this.actualLength, sep === undefined ? "," : sep!);
+        return Array.joinInternal(this.buffer, this.actualLength, sep === undefined ? "," : sep);
     }
 
     /**
@@ -1530,9 +1518,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             }
             for (let i: int = 1; i < len; ++i) {
                 sb.append(",")
-                let x = this.$_get_unsafe(i);
-                if (x instanceof object) {
-                    sb.append(x.toLocaleString(locales, options))
+                let elem = this.$_get_unsafe(i);
+                if (elem instanceof object) {
+                    sb.append(elem.toLocaleString(locales, options))
                 }
             }
             return sb.toString()

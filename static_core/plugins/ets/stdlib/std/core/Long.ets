@@ -237,45 +237,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns result of the conversion
      */
     public toString(radix: int): string {
-        if (radix < 2 || radix > 36) {
-            throw new RangeError('Radix must be between 2 and 36')
-        }
-        if (this.value == 0) {
-            return '0'
-        }
-
-        // NOTE (igorlegalov): workaround for #26305, replace with 0 when the circular dependency bug is fixed
-        const zero: int = (0.0).toInt()
-        const negative: boolean = this.value < 0
-
-        let digitsNum: int = negative ? 1 : zero
-        let value: long = this.value
-        if (negative) {
-            value /= radix
-            digitsNum++
-            value = -value
-        }
-        for (let val: long = value; val > 0; val /= radix) {
-            digitsNum++
-        }
-
-        const data: FixedArray<char> = new FixedArray<char>(digitsNum)
-        let i: int = digitsNum - 1
-        let val: long = this.value
-        if (negative) {
-            let remainder: long = -(val % radix)
-            data[i--] = digitChars[remainder.toInt()]
-            val = -(val / radix)
-        }
-        while (val > 0) {
-            let remainder: long = val % radix
-            data[i--] = digitChars[remainder.toInt()]
-            val /= radix
-        }
-        if (negative) {
-            data[0] = c'-'
-        }
-        return new String(data)
+        return toStrHelper(this.value, radix)
     }
 
     /**
@@ -306,7 +268,7 @@ export final class Long extends Integral implements Comparable<Long> {
             return false
         }
 
-        return this.value == (other as Long).value
+        return this.value == other.value
     }
 
     /**
@@ -351,7 +313,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the addition
      */
     public add(other: Long): Long {
-        return new Long((this.value + other.toLong()) as long)
+        return this.value + other
     }
 
     /**
@@ -362,7 +324,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the subtraction
      */
     public sub(other: Long): Long {
-        return new Long((this.value - other.toLong()) as long)
+        return this.value - other
     }
 
     /**
@@ -373,7 +335,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the multiplication
      */
     public mul(other: Long): Long {
-        return new Long((this.value * other.toLong()) as long)
+        return this.value * other
     }
 
     /**
@@ -384,7 +346,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns Result of the division
      */
     public div(other: Long): Long {
-        return new Long((this.value / other.toLong()) as long)
+        return this.value / other
     }
 
     /**
@@ -395,7 +357,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Long): boolean {
-        return this.value < other.toLong();
+        return this.value < other
     }
 
     /**
@@ -406,7 +368,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Long): boolean {
-        return this.value <= other.toLong();
+        return this.value <= other
     }
 
     /**
@@ -417,7 +379,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Long): boolean {
-        return this.value > other.toLong();
+        return this.value > other
     }
 
     /**
@@ -428,7 +390,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Long): boolean {
-        return this.value >= other.toLong();
+        return this.value >= other
     }
 
     /**

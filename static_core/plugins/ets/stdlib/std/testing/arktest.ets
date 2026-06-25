@@ -317,12 +317,10 @@ export namespace arktest {
     */
     export function expectThrow(
         cb: () => void,
-        test?: (v: Error) => boolean | string): void{
+        test?: (v: Error) => boolean | string): void {
         try {
             cb()
         } catch (e) {
-            e = (e instanceof Error) ? e as Error
-                : failingAssertion("An arbitrary object instance was caught!")
             let res = test?.(e)
             if (res != undefined && res != true) {
                 failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
@@ -343,9 +341,6 @@ export namespace arktest {
     */
     export function expectError(fn: () => void, expect?: string | Error): void {
         expectThrow(fn, (e) => {
-            if (!(e instanceof Error)) {
-                return "Expected an instance of Error, got " + Class.of(e).getName()
-            }
             if (expect === undefined) {
                 return true
             } else if (typeof expect == "string") {
@@ -396,8 +391,6 @@ export namespace arktest {
         try {
             await cb()
         } catch (e) {
-            e = (e instanceof Error) ? e as Error
-                : failingAssertion("An arbitrary object instance was caught!")
             let res = test?.(e)
             if (res != undefined && res != true) {
                 failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
@@ -418,9 +411,6 @@ export namespace arktest {
     */
     export async function expectErrorAsync(fn: () => Promise<void>, expect?: string | Error): Promise<void> {
         await expectThrowAsync(fn, (e) => {
-            if (!(e instanceof Error)) {
-                return "Expected an instance of Error, got " + Class.of(e).getName()
-            }
             if (expect === undefined) {
                 return true
             } else if (typeof expect == "string") {
@@ -570,10 +560,8 @@ export namespace arktest {
                 // so set message to empty to avoid double printing
                 e.message = "";
             }
-            if (e instanceof Error) {
-                if (e.stack) {
-                    console.error(e.stack);
-                }
+            if (e.stack) {
+                console.error(e.stack);
             }
             console.log(msgFail);
         }
@@ -615,9 +603,7 @@ export namespace arktest {
             try {
                 this.callback();
             } catch (e) {
-                if (e instanceof Error) {
-                    this.handleTestError(testcaseName, startMs, e as Error);
-                }
+                this.handleTestError(testcaseName, startMs, e);
                 return false;
             }
             const passedMsg = this.addTermColor(TermColor.GREEN, "PASSED")
@@ -654,9 +640,7 @@ export namespace arktest {
                 let res = this.callback();
                 await res;
             } catch (e) {
-                if (e instanceof Error) {
-                    this.handleTestError(testcaseName, startMs, e as Error);
-                }
+                this.handleTestError(testcaseName, startMs, e);
                 return false;
             }
             const passedMsg = this.addTermColor(TermColor.GREEN, "PASSED")

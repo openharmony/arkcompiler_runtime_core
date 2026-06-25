@@ -98,11 +98,11 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     static $_invoke(value: String | Number | BigInt | undefined | null): Number {
         if (value instanceof String) {
-            return new Double(value as String);
+            return new Double(value);
         } else if (value instanceof Number) {
-            return new Double(value as Number);
+            return new Double(value);
         } else if (value instanceof BigInt) {
-            return new Double(value as BigInt);
+            return new Double(value);
         }
         if (value === null) {
             return new Double();
@@ -118,7 +118,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public valueOf(): number {
-        return this.value as number;
+        return this.value;
     }
 
     /**
@@ -539,7 +539,7 @@ export final class Double extends Floating implements Comparable<Double> {
             return false
         }
 
-        return this.value == (other as Double).value
+        return this.value == other.value
     }
 
     /**
@@ -650,7 +650,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public add(other: Double): Double {
-        return new Double((this.value + other.toDouble()) as double)
+        return new Double((this.value + other.toDouble()))
     }
 
     /**
@@ -662,7 +662,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public sub(other: Double): Double {
-        return new Double((this.value - other.toDouble()) as double)
+        return new Double((this.value - other.toDouble()))
     }
 
     /**
@@ -674,7 +674,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public mul(other: Double): Double {
-        return new Double((this.value * other.toDouble()) as double)
+        return new Double((this.value * other.toDouble()))
     }
 
     /**
@@ -686,7 +686,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * @FaAndStageModel
      */
     public div(other: Double): Double {
-        return new Double((this.value / other.toDouble()) as double)
+        return new Double((this.value / other.toDouble()))
     }
 
     /**

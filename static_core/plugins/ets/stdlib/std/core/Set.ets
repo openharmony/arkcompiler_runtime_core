@@ -256,7 +256,7 @@ export class Set<K> implements ReadonlySet<K> {
         } else {
             const entries = new ([K, K] | null | undefined)[(elements as FixedArray<K>).length](undefined)
             for (let i = 0; i < elements.length; ++i) {
-                entries[i] = [elements[i], elements[i]] as [K, K]
+                entries[i] = [elements[i], elements[i]]
             }
             this.elements = new FinalMap<K, K>(entries)
         }

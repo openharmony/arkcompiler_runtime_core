@@ -618,10 +618,10 @@ export namespace jsonx {
             if (longValue == undefined) {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
-            if (longValue! > Double.MAX_SAFE_INTEGER || longValue! < Double.MIN_SAFE_INTEGER) {
-                throw new RangeError(`'${longValue!}' is not a double`)
+            if (longValue > Double.MAX_SAFE_INTEGER || longValue < Double.MIN_SAFE_INTEGER) {
+                throw new RangeError(`'${longValue}' is not a double`)
             }
-            return longValue!.toDouble()
+            return longValue.toDouble()
         }
 
         /**
@@ -642,10 +642,10 @@ export namespace jsonx {
             if (longValue == undefined) {
                 return undefined
             }
-            if (longValue! > Double.MAX_SAFE_INTEGER || longValue! < Double.MIN_SAFE_INTEGER) {
+            if (longValue > Double.MAX_SAFE_INTEGER || longValue < Double.MIN_SAFE_INTEGER) {
                 return undefined
             }
-            return longValue!.toDouble()
+            return longValue.toDouble()
         }
 
 

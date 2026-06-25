@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,52 @@ function forEachTest5() {
     arktest.assertEQ(data.toString(), '10,15,11,16,12,17,13,18');
 }
 
+function forEachTest6() {
+    let data: int[] = [1, 2, 3, 4, 5, 6];
+    let res: int[] = [];
+    data.forEach((val, index, arr) => {
+        arr.length = 2;
+        res.push(val);
+    });
+    arktest.assertEQ(res.toString(), '1,2');
+    arktest.assertEQ(data.toString(), '1,2');
+}
+
+function forEachTest7() {
+    let data: int[] = [1, 2, 3, 4, 5, 6];
+    let res: int[] = [];
+    data.forEach((val, index, arr) => {
+        res.push(val);
+        arr.splice(index, 1);
+    });
+    arktest.assertEQ(res.toString(), '1,3,5');
+    arktest.assertEQ(data.toString(), '2,4,6');
+}
+
+function forEachTest8() {
+    let data: int[] = [1, 2, 3, 4, 5, 6];
+    let res: int[] = [];
+    data.forEach((val, index, arr) => {
+        res.push(val);
+        if (index == 0) {
+            arr.splice(1, 2);
+        }
+    });
+    arktest.assertEQ(res.toString(), '1,4,5,6');
+    arktest.assertEQ(data.toString(), '1,4,5,6');
+}
+
+function forEachTest9() {
+    let data: int[] = [1, 2, 3, 4, 5, 6];
+    let count = 0;
+    data.forEach((val, index, arr) => {
+        count++;
+        arr.splice(index, 1);
+    });
+    arktest.assertEQ(count, 3);
+    arktest.assertEQ(data.toString(), '2,4,6');
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('Array length change tests');
     suite.addTest('forEach empty test', forEachEmptyTest);
@@ -88,5 +134,9 @@ function main(): int {
     suite.addTest('forEach test 3', forEachTest3);
     suite.addTest('forEach test 4', forEachTest4);
     suite.addTest('forEach test 5', forEachTest5);
+    suite.addTest('forEach test 6', forEachTest6);
+    suite.addTest('forEach test 7', forEachTest7);
+    suite.addTest('forEach test 8', forEachTest8);
+    suite.addTest('forEach test 9', forEachTest9);
     return suite.run();
 }

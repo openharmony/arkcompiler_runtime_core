@@ -77,8 +77,7 @@ export namespace Intl {
         }
 
         if (locales instanceof string) {
-            const locale = locales as string
-            LocaleHelper.verifyBCP47LanguageTag(locale)
+            LocaleHelper.verifyBCP47LanguageTag(locales)
             return [locales]
         } else if (locales instanceof Intl.Locale) {
             return [locales.toString()]
@@ -89,7 +88,7 @@ export namespace Intl {
 
             const langTags = new string[locales.length]('')
             for (let i = 0; i < locales.length; i++) {
-                const locale = locales[i] as string | Intl.Locale
+                const locale = locales[i]
                 if (locale instanceof string) {
                     LocaleHelper.verifyBCP47LanguageTag(locale)
                     langTags[i] = locale
@@ -234,7 +233,7 @@ export namespace Intl {
             }
 
             if (options != undefined) {
-                Collator.checkOptions(options!)
+                Collator.checkOptions(options)
                 this.options.caseFirst = (options.caseFirst == undefined) ? this.options.caseFirst : options.caseFirst!
                 this.options.ignorePunctuation = (options.ignorePunctuation == undefined) ? false : options.ignorePunctuation!
                 this.options.numeric = (options.numeric == undefined) ? this.options.numeric : options.numeric!
@@ -263,17 +262,7 @@ export namespace Intl {
                 Collator.checkOptions(options!)
             }
             let lookup = (options != undefined) ? options.localeMatcher == 'lookup' : false
-            try {
-                return lookup ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
-            }
-            catch(e) {
-                if (e instanceof Error) {
-                    throw e
-                }
-                else {
-                    throw new RangeError('Incorrect locales ' + locales)
-                }
-            }
+            return lookup ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
         }
 
 
@@ -730,13 +719,13 @@ export class DateTimeFormat {
                 this.locale = Locale.defaultTag()
             } else {
                 const lookupLocale = options?.localeMatcher == 'lookup'
-                this.locale = lookupLocale ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
+                this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
             }
 
             if (options === undefined || DateTimeFormat.isEmpty(options)) {
                 this.options = { year: 'numeric', month: 'numeric', day: 'numeric' } as DateTimeFormatOptionsImpl
             } else {
-                this.options = this.getResolvedOptions(options!) as DateTimeFormatOptionsImpl
+                this.options = this.getResolvedOptions(options)
             }
 
             this.pattern = this.getPattern()
@@ -754,7 +743,7 @@ export class DateTimeFormat {
             if (date instanceof Date) {
                 return this.formatImpl(date.getTime(), this.cacheKey)
             }
-            return this.formatImpl(date!, this.cacheKey)
+            return this.formatImpl(date, this.cacheKey)
         }
 
         public formatToParts(date?: Date | number): DateTimeFormatPart[] {
@@ -764,7 +753,7 @@ export class DateTimeFormat {
             if (date instanceof Date) {
                 return this.formatToPartsImpl(date.getTime(), this.cacheKey)
             }
-            return this.formatToPartsImpl(date!, this.cacheKey)
+            return this.formatToPartsImpl(date, this.cacheKey)
         }
 
         public formatRange(startDate: Date | number, endDate: Date | number): string {
@@ -1199,10 +1188,6 @@ export class DateTimeFormat {
                 throw new TypeError('Options parameter is required');
             }
 
-            if (options.type === undefined) {
-                throw new TypeError('Option \'type\' is required');
-            }
-
             // Set default values and process options
             const localeMatcher = options.localeMatcher ?? 'best fit';
             this.style = options.style ?? 'long';
@@ -1215,7 +1200,7 @@ export class DateTimeFormat {
             }
 
             if (locales !== undefined) {
-                const lookupLocale = options != null && options!.localeMatcher == 'lookup'
+                const lookupLocale = options != null && options.localeMatcher == 'lookup'
                 this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
             } else {
                 this.locale = Locale.defaultTag();
@@ -1355,7 +1340,7 @@ export class DateTimeFormat {
             if (locales === undefined) {
                 return Locale.defaultTag()
             }
-            return localeMatcher === 'lookup' ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
+            return localeMatcher === 'lookup' ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
         }
 
         private static iterableToArray(list: Iterable<string>): string[] {
@@ -1782,7 +1767,7 @@ export class DateTimeFormat {
                 (options.hourCycle != undefined && !Locale.hourCycleValues.includes(options.hourCycle!)) ||
                 (options.numberingSystem != undefined && (options.numberingSystem! == '' ||
                                 !this.numberingSystemList().includes(options.numberingSystem!))) ||
-                (options.region != undefined && (options.region! == '' || !this.regionList().includes((options.region! as String).toUpperCase()))) ||
+                (options.region != undefined && (options.region! == '' || !this.regionList().includes(options.region!.toUpperCase()))) ||
                 (options.script != undefined && (options.script! == '' || !this.scriptList().includes(options.script!)))
             ) {
                 throw new RangeError(this.errMsg)
@@ -1811,7 +1796,7 @@ export class DateTimeFormat {
                 return true  // Cache hit
             }
 
-            if (this.isTagValid(this.tag as string) == 1) {
+            if (this.isTagValid(this.tag) == 1) {
                 throw new RangeError(this.errMsg)
             }
 
@@ -2206,10 +2191,10 @@ export class DateTimeFormat {
                 }
             } else {
                 let loc: Array<string>
-                if (locales! instanceof string) {
-                    loc = Array.of<string>(locales! as string)
+                if (locales instanceof string) {
+                    loc = Array.of<string>(locales)
                 } else {
-                    loc = Array.from<string>(locales! as string[])
+                    loc = Array.from<string>(locales as string[])
                 }
                 if (loc.includes('') && options != undefined) {
                     throw new Error('Incorrect locale information provided')
@@ -2219,7 +2204,7 @@ export class DateTimeFormat {
             let locMatcher = options?.localeMatcher ?? 'best fit'
             this.options.locale = locMatcher == 'lookup' ? intlLookUpLocale(locales ?? '') : intlBestFitLocale(locales ?? '')
             if (options != undefined) {
-                const localOptions: Intl.NumberFormatOptions = options!; // It's used to reduce amount of calls options!
+                const localOptions: Intl.NumberFormatOptions = options; // It's used to reduce amount of calls options!
                 NumberFormat.checkOptions(localOptions)
                 if (localOptions.style != undefined) {
                     this.options.style = localOptions.style!
@@ -2417,7 +2402,7 @@ export class DateTimeFormat {
             newOptions._style = options?.style ?? 'decimal'
             newOptions._unit = options?.unit ?? undefined
             newOptions._unitDisplay = options?.unitDisplay ?? undefined
-            newOptions._useGrouping = (options == undefined) ? true : (options!.useGrouping ?? true)
+            newOptions._useGrouping = (options == undefined) ? true : (options.useGrouping ?? true)
             return newOptions
         }
 
@@ -2487,13 +2472,13 @@ export class DateTimeFormat {
             let isStartBigInt: boolean = false;
             if (start instanceof BigInt) {
                 isStartBigInt = true;
-            } else if (isNaN(start as number)) {
+            } else if (isNaN(start)) {
                 throw new TypeError('Invalid start: NaN');
             }
             let isEndBigInt: boolean = false;
             if (end instanceof BigInt) {
                 isEndBigInt = true;
-            } else if (isNaN(end as number)) {
+            } else if (isNaN(end)) {
                 throw new TypeError('Invalid end: NaN');
             }
 
@@ -2521,13 +2506,13 @@ export class DateTimeFormat {
             let isStartBigInt: boolean = false;
             if (start instanceof BigInt) {
                 isStartBigInt = true;
-            } else if (isNaN(start as number)) {
+            } else if (isNaN(start)) {
                 throw new TypeError('Invalid start: NaN');
             }
             let isEndBigInt: boolean = false;
             if (end instanceof BigInt) {
                 isEndBigInt = true;
-            } else if (isNaN(end as number)) {
+            } else if (isNaN(end)) {
                 throw new TypeError('Invalid end: NaN');
             }
 
@@ -2576,14 +2561,14 @@ export class DateTimeFormat {
         */
         static supportedLocalesOf(locales: string | string[], options?: NumberFormatOptions): string[] {
             if (options != undefined) {
-                NumberFormat.checkOptions(options!)
+                NumberFormat.checkOptions(options)
             }
             let locMatcher = options?.localeMatcher ?? 'best fit'
             let loc: Array<string>
-            if (locales! instanceof string)
-                loc = Array.of<string>(locales! as string)
+            if (locales instanceof string)
+                loc = Array.of<string>(locales)
             else {
-                loc = Array.from<string>(locales! as string[])
+                loc = Array.from<string>(locales)
             }
             if (loc.includes('')) {
                 throw new Error('Incorrect locale information provided')
@@ -3092,15 +3077,9 @@ export class DateTimeFormat {
         ): BCP47LanguageTag[]
         {
             const matchingStrategy = options?.localeMatcher ?? 'best fit';
-            try {
-                return matchingStrategy == 'lookup'
-                    ? intlLookUpLocales(locales)
-                    : intlBestFitLocales(locales)
-            }
-            catch(e) {
-                if (e instanceof Error) throw e
-                throw new RangeError(`Incorrect locales ${locales}`)
-            }
+            return matchingStrategy == 'lookup'
+                ? intlLookUpLocales(locales)
+                : intlBestFitLocales(locales)
         }
 
         /**

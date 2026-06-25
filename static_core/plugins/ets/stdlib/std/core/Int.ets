@@ -233,7 +233,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns result of the conversion
      */
     public toString(radix: int): string {
-        return (new Long(this.value)).toString(radix);
+        return toStrHelper(this.value, radix)
     }
 
     /**
@@ -256,7 +256,7 @@ export final class Int extends Integral implements Comparable<Int> {
             return false
         }
 
-        return this.value == (other as Int).value
+        return this.value == other.value
     }
 
     /**
@@ -301,7 +301,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the addition
      */
     public add(other: Int): Int {
-        return new Int(this.value + other.toInt()) 
+        return this.value + other 
     }
 
     /**
@@ -312,7 +312,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the subtraction
      */
     public sub(other: Int): Int {
-        return new Int(this.value - other.toInt())
+        return this.value - other
     }
 
     /**
@@ -323,7 +323,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the multiplication
      */
     public mul(other: Int): Int {
-        return new Int(this.value * other.toInt())
+        return this.value * other
     }
 
     /**
@@ -334,7 +334,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns Result of the division
      */
     public div(other: Int): Int {
-        return new Int(this.value / other.toInt())
+        return this.value / other
     }
 
     /**
@@ -345,7 +345,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Int): boolean {
-        return this.value < other.toInt();
+        return this.value < other
     }
 
     /**
@@ -356,7 +356,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Int): boolean {
-        return this.value <= other.toInt();
+        return this.value <= other
     }
 
     /**
@@ -367,7 +367,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Int): boolean {
-        return this.value > other.toInt();
+        return this.value > other
     }
 
     /**
@@ -378,7 +378,7 @@ export final class Int extends Integral implements Comparable<Int> {
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Int): boolean {
-        return this.value >= other.toInt();
+        return this.value >= other
     }
 
     /**
