@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -103,11 +103,18 @@ async def test_debug(
             paused = await client.run_if_waiting_for_debugger()
             log.info("%s", paused)
             await client.resume()
-    check_exit_status(process, log)
+            with trio.fail_after(5):
+                await process.wait()
+    assert process.returncode == 0
 
 
 async def _pause_and_get_vars(client: DebuggerClient, log: RichLogger, script_file: ScriptFile, line_number: int):
-    paused = await client.continue_to_location(script_id=runtime.ScriptId("0"), line_number=line_number)
+    bp_id, _ = await client.set_breakpoint_by_url(
+        url=script_file.source_file.name,
+        line_number=line_number,
+    )
+    paused = await client.resume_and_wait_for_paused()
+    await client.remove_breakpoint(bp_id)
     script_file.log(log, highlight_lines=[paused.call_frames[0].location.line_number + 1])
     log.info("paused: %s", paused)
     # NOTE(dslynko, #22497): do not omit global objects when tests' applications are loaded into application context
@@ -137,30 +144,48 @@ async def test_code_compiler(
     debug_locator: DebugLocator,
     log: RichLogger,
 ):
-    code = """
+    code = """\
     function main(): int {
-        let a: int = 100;
-        let b: int = a + 10;
-        console.log(a + 1)
+        let a: int = 100;    // # BP
+        let b: int = a + 10; // # BP
+        console.log(a + 1)   // # BP
         return a;
-    }
-    """
+    }"""
 
     script_file = code_compiler.compile(code)
+    meta = parse_source_meta(code)
+    log.info("Parsed breakpoints %s", meta.breakpoints)
+    script_file.log(log, highlight_lines=[b.line_number for b in meta.breakpoints])
+
+    expected_vars = [{}, {"a": 100}, {"a": 100, "b": 110}]
+
+    async def _check_breakpoints():
+        await trio.lowlevel.checkpoint()
+        for i, br in enumerate(meta.breakpoints):
+            with trio.fail_after(10):
+                paused = await client.resume_and_wait_for_paused()
+                paused_ln = paused.call_frames[0].location.line_number
+                script_file.log(log, highlight_lines=[paused_ln])
+                assert paused_ln == br.line_number
+                object_id = paused.call_frames[0].scope_chain[0].object_.object_id
+                props = (await client.get_properties(object_id))[0]
+                variables = {p.name: p.value.value if p.value is not None else None for p in props}
+                log.info("Variables at line %d: %r", paused_ln, variables)
+                assert variables == expected_vars[i]
+
     async with ark_runtime.run(nursery, module=script_file) as process:
         async with debug_locator.connect(nursery) as client:
-
             await client.configure(nursery)
-            await client.run_if_waiting_for_debugger()
+            _ = await client.run_if_waiting_for_debugger()
+            for br in meta.breakpoints:
+                await client.set_breakpoint_by_url(
+                    url=script_file.source_file.name,
+                    line_number=br.line_number,
+                )
 
-            variables = await _pause_and_get_vars(client, log, script_file, 3)
-            assert variables == {"a": 100}
-
-            variables = await _pause_and_get_vars(client, log, script_file, 4)
-            assert variables == {"a": 100, "b": 110}
-
-            await client.resume()
-    check_exit_status(process, log)
+            await _check_breakpoints()
+            process.terminate()
+    assert process.returncode == -SIGTERM
 
 
 async def test_inline_breakpoints(
