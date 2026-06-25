@@ -237,53 +237,15 @@ public:
     void ProcessMarkStack(uint32_t threadIndex, ParallelLocalMarkStack &workStack, GCTaskCause reason);
     void ProcessWeakStack(WeakStack &weakStack);
 
+    template <bool HANDLE_WEAK_REFS, typename ObjectMarkerT>
+    void HandleMarkedObject(ObjectMarkerT *handler, BaseObject *object);
+
     // live but not resurrected object.
     bool IsMarkedObject(const BaseObject *obj) const;
 
     // live or resurrected object.
     bool IsToObject(const BaseObject *obj) const;
 
-    // avoid std::function allocation for each object marking
-    class MarkingRefFieldVisitor {
-    public:
-        MarkingRefFieldVisitor() : closure_(MakePandaUnique<BaseObject *>(nullptr)) {}
-
-        template <typename Functor>
-        void SetVisitor(Functor &&f)
-        {
-            visitor_ = std::forward<Functor>(f);
-        }
-
-        template <typename Functor>
-        void SetWeakVisitor(Functor &&f)
-        {
-            weakVisitor_ = std::forward<Functor>(f);
-        }
-
-        const auto &GetRefFieldVisitor() const
-        {
-            return visitor_;
-        }
-        const auto &GetWeakRefFieldVisitor() const
-        {
-            return weakVisitor_;
-        }
-        void SetMarkingRefFieldArgs(BaseObject *obj)
-        {
-            *closure_ = obj;
-        }
-        const PandaUniquePtr<BaseObject *> &GetClosure() const
-        {
-            return closure_;
-        }
-
-    private:
-        ark::mem::RefFieldVisitor visitor_;
-        ark::mem::RefFieldVisitor weakVisitor_;
-        PandaUniquePtr<BaseObject *> closure_;
-    };
-    MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack, WeakStack &weakStack,
-                                                               GCTaskCause reason);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     void MarkingXRef(RefField<> &ref, ParallelLocalMarkStack &workStack) const;
     void MarkingObjectXRef(BaseObject *obj, ParallelLocalMarkStack &workStack);
@@ -428,9 +390,6 @@ protected:
     // This resource should be singleton and shared for multi-collectors
     ark::common_vm::CollectorResources &collectorResources_;
 
-    WeakStack globalWeakStack_;
-    ark::os::memory::Mutex weakStackLock_;
-
     uint32_t snapshotFinalizerNum_ = 0;
 
     GCCollectionType gcType_ = GCCollectionType::FULL;
@@ -451,13 +410,22 @@ protected:
     ark::common_vm::Taskpool *GetThreadPool() const;
 
     // let finalizerProcessor process finalizers, and mark resurrected if in stw gc
-    void ClearWeakStack(bool parallel, GCTaskCause reason);
+    void ProcessWeakReferences(GCPhase phase, GCTaskCause reason);
 
     void PreforwardStaticRoots();
 
+    bool IsWeakReference(BaseObject *obj);
+
+    template <typename ObjectMarkerT>
+    void HandleWeakReference(ObjectMarkerT *handler, BaseObject *weakRef);
+
+    template <bool HANDLE_WEAK_REFS>
     bool PushRootToWorkStack(LocalCollectStack &markStack, BaseObject *obj, GCTaskCause reason);
+
+    template <bool HANDLE_WEAK_REFS>
     void PushRootsToWorkStack(LocalCollectStack &markStack, const CArrayList<BaseObject *> &collectedRoots,
                               GCTaskCause reason);
+
     void MarkingRoots(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason);
     void Remark(GCTaskCause reason);
 
@@ -574,8 +542,6 @@ private:
 
     template <typename Stack>
     void MarkRef(RefField<> &ref, Stack &stack);
-
-    void ProcessReferencesAfterCopy();
 
     using ManagedMutatorCallback = std::function<void(Mutator *)>;
     void ForEachManagedMutator(const ManagedMutatorCallback &callback);

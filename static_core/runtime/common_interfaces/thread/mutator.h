@@ -59,9 +59,6 @@ public:
 
     void ResetMutator();
 
-    // temporary impl to clean GC callback, and need to refact to flip function
-    __attribute__((visibility("default"))) void HandleGCCallback();
-
     void HandleGCPhase(mem::GCPhase newPhase);
 
     virtual void VisitMutatorRoots(const RefFieldVisitor &visitor);

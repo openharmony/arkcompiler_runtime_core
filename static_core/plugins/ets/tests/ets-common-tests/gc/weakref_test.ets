@@ -37,7 +37,8 @@ function weakRefTest() {
     for (let i = 0; i < 200; ++i) {
         {};
     }
-    GC.startGC(GC.Cause.FULL, true);
+    let gcId = GC.startGC(GC.Cause.FULL, true);
+    GC.waitForFinishGC(gcId);
     arktest.assertEQ(globalWr!.deref(), undefined);
 }
 

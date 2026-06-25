@@ -53,9 +53,6 @@ public:
 
     void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler);
 
-    // Clear the specified field
-    void ClearRef(RefField<> &field);
-
     inline BaseObject *GetForwardingPointer() const
     {
         if (IsForwarded()) {

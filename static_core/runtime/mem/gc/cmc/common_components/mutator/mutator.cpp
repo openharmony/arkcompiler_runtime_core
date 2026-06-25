@@ -52,14 +52,6 @@ ScopedGcThreadType::~ScopedGcThreadType()
     ThreadLocal::SetThreadType(oldType_);
 }
 
-void Mutator::HandleGCCallback()
-{
-    auto vm = static_cast<ark::Mutator *>(this)->GetVM();
-    ASSERT(static_cast<ark::Mutator *>(this)->GetMutatorLock()->HasLock());
-    static_cast<mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor())->ProcessClearedReferences();
-    vm->HandleGCRoutineInMutator();
-}
-
 static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)
 {
     return reinterpret_cast<SatbBuffer::TreapNode *&>(satbNode);

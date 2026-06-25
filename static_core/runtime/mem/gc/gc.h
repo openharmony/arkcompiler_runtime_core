@@ -637,6 +637,11 @@ protected:
         return referenceProcessor_;
     }
 
+    ReferenceProcessor *GetReferenceProcessor()
+    {
+        return referenceProcessor_;
+    }
+
     bool IsWorkerThreadsExist() const
     {
         return gcSettings_.GCWorkersCount() != 0;
