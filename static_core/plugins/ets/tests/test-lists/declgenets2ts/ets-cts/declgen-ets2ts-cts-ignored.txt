@@ -2315,3 +2315,8 @@
 20.implementation_details/07.bridge_methods_for_generic_overrides/class_bridge2.ets
 #TS2304: Cannot find name 'ValueArray'
 17.experimental_features/03.value_array_types/value_array_parameters.ets
+
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/triple_interface_distinct_dispatch.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/diff_signatures_no_collision.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/class_overrides_single_signature.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/subinterface_overload_resolution.ets
