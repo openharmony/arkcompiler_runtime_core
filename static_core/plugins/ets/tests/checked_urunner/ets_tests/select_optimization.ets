@@ -24,7 +24,7 @@
 //! PASS_AFTER      "SelectOptimization"
 //! INST_COUNT      "SelectImm EQ", 7
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_NOT        "Select"
+//! INST_COUNT      "SelectImm", 2
 //!
 //! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectSameOperands"
 //! PASS_AFTER      "MemoryCoalescing"
@@ -87,7 +87,7 @@
 //! PASS_AFTER      "SelectOptimization"
 //! INST_COUNT      "SelectImm EQ", 7
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_NOT        "Select"
+//! INST_COUNT      "SelectImm", 2
 //!
 //! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectSameOperands"
 //! PASS_AFTER      "MemoryCoalescing"

@@ -57,30 +57,6 @@ bool SelectOptimization::TryOptimizeSelectInst(Inst *selectInst)
     return result;
 }
 
-// Check if raw `value` can be store as `type`
-bool RawValueFits(Arch arch, uint64_t value, DataType::Type type)
-{
-    ASSERT(DataType::IsInt32Bit(type));
-
-    uint64_t typeSize = DataType::GetTypeSize(type, arch);
-    return value < (1ULL << typeSize);
-}
-
-// Check if `inst` value can be store as `type`
-bool InstTypeFits(Arch arch, Inst *inst, DataType::Type type)
-{
-    if (inst->IsConst()) {
-        return RawValueFits(arch, inst->CastToConstant()->GetRawValue(), type);
-    }
-
-    ASSERT(DataType::IsInt32Bit(type));
-    ASSERT(DataType::IsInt32Bit(inst->GetType()));
-
-    auto typeByteSize = DataType::GetTypeByteSize(type, arch);
-    auto instTypeByteSize = DataType::GetTypeByteSize(inst->GetType(), arch);
-    return instTypeByteSize <= typeByteSize;
-}
-
 // Case 1: Same inputs within one instruction
 //   3. Select[Imm] CC v0, v0, vX, vY|Imm
 //   ===>
@@ -131,37 +107,30 @@ bool SelectOptimization::TryOptimizeSelectInstWithSameOperands(Inst *selectInst,
         return false;
     }
 
-    return TryOptimizeSelectInstWithSameOperandsChecked(selectInst, v0, v1, const3, cc);
+    return TryOptimizeSelectInstWithSameOperandsChecked(selectInst, v0, v1, const3, cc, operandsType);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep select-equivalence fields explicit.
 bool SelectOptimization::TryOptimizeSelectInstWithSameOperandsChecked(Inst *selectInst, Inst *v0, Inst *v1,
-                                                                      uint64_t const3, ConditionCode cc)
+                                                                      uint64_t const3, ConditionCode cc,
+                                                                      DataType::Type operandsType)
 {
     // The optimization below works on SelectImm instruction or Select instruction with constant last input
     // 3. Constant 0x0
     // 4. Select CC v0, v1, v2, v3
     // 5. SelectImm CC v0, v1, v2, 0x0
-    // Instruction v4 and v5 are considered equivalent
+    // Instruction v4 and v5 are considered equivalent when the operands type and result type also match.
 
     auto v2 = selectInst->GetInput(2U).GetInst();
-    Key key = {{v0, v1, v2}, const3, cc};
+    Key key = {{v0, v1, v2}, const3, cc, operandsType, selectInst->GetType()};
 
     auto found = sameOperandsMap_.find(key);
     if (found != sameOperandsMap_.end()) {
         auto foundInst = found->second;
         ASSERT(foundInst->GetBasicBlock() == selectInst->GetBasicBlock());
         ASSERT(foundInst->IsDominate(selectInst));
-
-        // Check if operands type is not wider than instruction type
-        if (InstTypeFits(GetGraph()->GetArch(), v0, selectInst->GetType()) &&
-            InstTypeFits(GetGraph()->GetArch(), v1, selectInst->GetType())) {
-            // Move `selectInst` until it dominates all user of `foundInst`
-            selectInst->GetBasicBlock()->EraseInst(selectInst);
-            foundInst->InsertAfter(selectInst);
-
-            foundInst->ReplaceUsers(selectInst);
-            return true;
-        }
+        selectInst->ReplaceUsers(foundInst);
+        return true;
     } else {
         sameOperandsMap_[key] = selectInst;
     }
@@ -425,6 +394,18 @@ bool SelectOptimization::Key::operator<(const SelectOptimization::Key &other) co
         return true;
     }
     if (cc > other.cc) {
+        return false;
+    }
+    if (operandsType < other.operandsType) {
+        return true;
+    }
+    if (operandsType > other.operandsType) {
+        return false;
+    }
+    if (resultType < other.resultType) {
+        return true;
+    }
+    if (resultType > other.resultType) {
         return false;
     }
     if (args < other.args) {
