@@ -20,7 +20,7 @@
 #include <cstdint>
 #include "common_interfaces/objects/base_state_word.h"
 #include "common_interfaces/base/common.h"
-#include "common_interfaces/mem/tlab.h"
+#include "runtime/mem/tlab.h"
 
 namespace ark::common_vm {
 using Address32 = uint32_t;
@@ -41,7 +41,7 @@ public:
     static Address AllocateOldRegion();
     static Address AllocateNonMovableRegion();
     static Address AllocateLargeRegion(size_t size);
-    static TLAB *CreateTLAB();
+    static mem::TLAB *CreateTLAB();
     static size_t GetTLABMaxAllocSize();
 };
 }  // namespace ark::common_vm

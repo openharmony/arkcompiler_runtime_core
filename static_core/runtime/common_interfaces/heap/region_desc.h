@@ -36,7 +36,6 @@
 #include "common_components/heap/collector/copy_data_manager.h"
 #include "common_components/heap/collector/region_bitmap.h"
 #include "common_components/heap/collector/region_rset.h"
-#include "common_interfaces/mem/tlab.h"
 #include "securec.h"
 #ifdef COMMON_ASAN_SUPPORT
 #include "common_components/sanitizer/sanitizer_interface.h"
@@ -972,19 +971,15 @@ public:
     void DetachTLAB()
     {
         ASSERT_PRINT(metadata.tlab != nullptr, "TLAB in RegionDesc is already nullptr");
-        metadata.tlab->startAddr_ = 0;
-        metadata.tlab->allocPtr_ = 0;
-        metadata.tlab->endAddr_ = 0;
+        metadata.tlab->Reset();
         metadata.tlab = nullptr;
     }
 
-    void AttachTLAB(ark::common_vm::TLAB *tlab)
+    void AttachTLAB(mem::TLAB *tlab)
     {
         ASSERT_PRINT(metadata.tlab == nullptr, "TLAB in RegionDesc is not nullptr, cannot attach");
         metadata.tlab = tlab;
-        metadata.tlab->startAddr_ = metadata.regionStart;
-        metadata.tlab->allocPtr_ = metadata.allocPtr;
-        metadata.tlab->endAddr_ = metadata.regionEnd;
+        metadata.tlab->Fill(ToVoidPtr(metadata.regionStart), metadata.regionEnd - metadata.regionStart);
     }
 
     bool IsFromRegion() const
@@ -1153,7 +1148,7 @@ private:
             uint32_t prevRegionIdx;  // support fast deletion for region list.
 
             uint32_t liveByteCount;
-            ark::common_vm::TLAB *tlab;
+            mem::TLAB *tlab;
         };
 
         RegionLiveDesc liveInfo_ {};

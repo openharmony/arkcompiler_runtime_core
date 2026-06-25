@@ -100,7 +100,7 @@ Address HeapAllocator::AllocateOldRegion()
     return allocator.AllocOldRegion();
 }
 
-TLAB *HeapAllocator::CreateTLAB()
+mem::TLAB *HeapAllocator::CreateTLAB()
 {
     RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     return allocator.CreateTLAB();
