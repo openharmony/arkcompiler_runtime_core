@@ -21,7 +21,7 @@
  * @Seamless '../../shared/js/libValues.d.ets'
  * @Tags interop, s2d, seamless
  */
-class getValueSeamless {
+class setValueSeamless {
 
     holder = jsValueHolder;
     array = jsArray;
@@ -31,121 +31,120 @@ class getValueSeamless {
     /**
      * @Benchmark
      */
-    getNumber(): Object {
-        let numVal = this.holder.jsNumber;
-        return numVal;
+    setNumber(): void {
+        this.holder.jsNumber = 42;
     };
 
     /**
      * @Benchmark
      */
-    getByte(): Object {
-        let byteVal = this.holder.jsByte;
-        return byteVal;
+    setByte(): void {
+        this.holder.jsByte = 42;
     };
 
     /**
      * @Benchmark
      */
-    getShort(): Object {
-        let shortVal = this.holder.jsShort;
-        return shortVal;
+    setShort(): void {
+        this.holder.jsShort = 42;
     };
 
     /**
      * @Benchmark
      */
-    getInt(): Object {
-        let intVal = this.holder.jsInt;
-        return intVal;
+    setInt(): void {
+        this.holder.jsInt = 42;
     };
 
     /**
      * @Benchmark
      */
-    getLong(): Object {
-        let longVal = this.holder.jsLong;
-        return longVal;
+    setLong(): void {
+        this.holder.jsLong = 42;
     };
 
     /**
      * @Benchmark
      */
-    getFloat(): Object {
-        let floatVal = this.holder.jsFloat;
-        return floatVal;
+    setFloat(): void {
+        this.holder.jsFloat = 42.0;
     };
 
     /**
      * @Benchmark
      */
-    getDouble(): Object {
-        let doubleVal = this.holder.jsDouble;
-        return doubleVal;
+    setDouble(): void {
+        this.holder.jsDouble = 42.0;
     };
 
     /**
      * @Benchmark
      */
-    getBigInt(): Object {
-        let bigIntVal = this.holder.jsBigint;
-        return bigIntVal;
+    setBigInt(): void {
+        this.holder.jsBigint = 9876543210987654321098765432109876543210n;
     };
 
     /**
      * @Benchmark
      */
-    getBool(): Object {
-        let boolVal = this.holder.jsBoolean;
-        return boolVal;
+    setBool(): void {
+        this.holder.jsBoolean = false;
     };
 
     /**
      * @Benchmark
      */
-    getUndefined(): Any {
-        let undefinedVal = this.holder.jsUndefined;
-        return undefinedVal;
+    setUndefined(): void {
+        this.holder.jsUndefined = undefined;
     };
 
     /**
      * @Benchmark
      */
-    getNull(): Any {
-        let nullVal = this.holder.jsNull;
-        return nullVal;
+    setNull(): void {
+        this.holder.jsNull = null;
     };
 
     /**
      * @Benchmark
      */
-    getString(): Object {
-        let strVal = this.holder.jsString;
-        return strVal;
+    setString(): void {
+        this.holder.jsString = "Set Test";
     };
 
     /**
      * @Benchmark
      */
-    getArrayElement(): Any {
-        let elemVal = this.array[3];
-        return elemVal;
+    setArrayElement(): void {
+        this.array[1] = 42;
     };
 
     /**
      * @Benchmark
      */
-    getNumberMapElement(): Object {
-        let elemVal = this.numberMap[1];
-        return elemVal;
+    setNumberMapElementExisting(): void {
+        this.numberMap[0] = 24;
     };
 
     /**
      * @Benchmark
      */
-    getStringMapElement(): Object {
-        let elemVal = this.stringMap['one'];
-        return elemVal;
+    setNumberMapElementNew(): void {
+        this.numberMap[3] = 42;
+    };
+
+    /**
+     * @Benchmark
+     */
+    setStringMapElementExisting(): void {
+        this.stringMap['two'] = 24;
+    };
+
+    /**
+     * @Benchmark
+     */
+    setStringMapElementNew(): void {
+        this.stringMap['four'] = 42;
     };
 
 }
