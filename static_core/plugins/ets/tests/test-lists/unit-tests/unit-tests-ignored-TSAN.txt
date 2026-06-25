@@ -1,6 +1,9 @@
 #33176
 ets-common-tests/atomics/concurrent_compare_exchange.ets
 
+#34702
+ets-common-tests/gc/test_finreg_coros_g1.ets
+
 #30702
 ets-common-tests/intrinsics/copyTo.ets
 
