@@ -79,7 +79,6 @@ public:
 
     virtual bool IsGcStarted() const = 0;
     virtual void WaitForGCFinish() = 0;
-    virtual void WaitForGCCompletionCount(uint64_t targetCount) = 0;
     virtual uint64_t GetGcCompletedCount() const = 0;
     virtual void MarkGCStart() = 0;
     virtual void MarkGCFinish() = 0;

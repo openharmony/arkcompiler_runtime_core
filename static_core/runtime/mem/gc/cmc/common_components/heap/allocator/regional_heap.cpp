@@ -135,26 +135,13 @@ bool RegionalHeap::ShouldRetryAllocation(size_t &tryTimes) const
     if (!IsRuntimeThread() && tryTimes <= static_cast<size_t>(TryAllocationThreshold::RESCHEDULE)) {
         return true;
     } else if (tryTimes < static_cast<size_t>(TryAllocationThreshold::TRIGGER_OOM)) {
-        if (Heap::GetHeap().IsGcStarted()) {
-            ScopedEnterSaferegion enterSaferegion(false);
-            Heap::GetHeap().GetCollectorResources().WaitForGCFinish();
-        } else {
-            ark::GCTask task(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
-            task.UpdateGCCollectionType(GCCollectionType::FULL);
-            Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(task);
-        }
+        ark::GCTask task(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+        Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(task);
         return true;
     } else if (tryTimes == static_cast<size_t>(TryAllocationThreshold::TRIGGER_OOM)) {
-        if (!Heap::GetHeap().IsGcStarted()) {
-            LOG(INFO, GC) << "gc is triggered for OOM";
-            ark::GCTask task(GCTaskCause::OOM_CAUSE);
-            task.UpdateGCCollectionType(GCCollectionType::FULL);
-            Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(task);
-        } else {
-            ScopedEnterSaferegion enterSaferegion(false);
-            Heap::GetHeap().GetCollectorResources().WaitForGCFinish();
-            tryTimes--;
-        }
+        LOG(INFO, GC) << "gc is triggered for OOM";
+        ark::GCTask task(GCTaskCause::OOM_CAUSE);
+        Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(task);
         return true;
     } else {  // LCOV_EXCL_BR_LINE
         Heap::throwOOM();

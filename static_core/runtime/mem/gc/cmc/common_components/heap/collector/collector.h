@@ -46,19 +46,13 @@ enum CollectorType {
 // Central garbage identification algorithm.
 class Collector {
 public:
-    Collector();
-    virtual ~Collector();
+    Collector() = default;
+    virtual ~Collector() = default;
 
     // Initializer and finalizer.
     virtual void Init() = 0;
     virtual void Fini() {}
     const char *GetCollectorName() const;
-
-    // This pure virtual function implements the trigger of GC.
-    // reason: Reason for GC.
-    // async:  Trigger from unsafe context, e.g., holding a lock, in the middle of an allocation.
-    //         In order to prevent deadlocks, async trigger only add one async gc task and will not block.
-    void RequestGC(GCTaskCause reason, bool async, GCCollectionType gcType, bool explicitRequest = false);
 
     virtual void FixObjectRefFields(BaseObject *) const {}
 
@@ -94,12 +88,6 @@ public:
     };
 
 protected:
-    virtual void RequestGCInternal(GCTaskCause, bool, GCCollectionType, bool)
-    {
-        LOG(FATAL, COMMON) << "Unresolved fatal";
-        UNREACHABLE();
-    }
-
     CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
 
 private:

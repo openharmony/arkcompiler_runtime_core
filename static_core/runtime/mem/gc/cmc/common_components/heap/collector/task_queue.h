@@ -185,13 +185,6 @@ public:
         gcType_ = type;
     }
 
-    ark::GCTask ToGCTask() const
-    {
-        ark::GCTask task(gcReason_);
-        task.collectionType = gcType_;
-        return task;
-    }
-
     bool NeedFilter() const override
     {
         return true;

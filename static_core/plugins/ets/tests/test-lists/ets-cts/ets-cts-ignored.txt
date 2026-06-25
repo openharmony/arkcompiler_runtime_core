@@ -685,6 +685,10 @@
 
 #35430
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_methods.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_enum.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_genparams.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_multi_import.ets
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_union.ets
 
 #34886
 24.build_system/binary-metadata/base_tests/abstract_class/test_import.ets

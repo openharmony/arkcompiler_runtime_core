@@ -359,8 +359,10 @@ bool GC::GCPhasesPreparation(const GCTask &task)
 void GC::GCPhasesFinish(const GCTask &task)
 {
     ASSERT(task.collectionType != GCCollectionType::NONE);
-    LOG(INFO, GC) << "[" << gcCounter_ << "] [" << task.collectionType << " (" << task.reason << ")] "
-                  << GetPandaVm()->GetGCStats()->GetStatistics();
+    if (GetType() != GCType::CMC_GC) {
+        LOG(INFO, GC) << "[" << gcCounter_ << "] [" << task.collectionType << " (" << task.reason << ")] "
+                      << GetPandaVm()->GetGCStats()->GetStatistics();
+    }
 
     if (gcSettings_.IsDumpHeap()) {
         PandaOStringStream os;
