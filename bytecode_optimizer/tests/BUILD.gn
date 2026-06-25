@@ -93,6 +93,9 @@ host_unittest_action("BytecodeOptimizerTest") {
   configs = bcopt_test_config
   deps = bcopt_test_deps
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   test_abc_dir = rebase_path(target_out_dir)
 
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]

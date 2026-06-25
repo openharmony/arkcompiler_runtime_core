@@ -61,4 +61,8 @@ ohos_source_set("abckit_adapter_dynamic_source_set") {
     "$ark_root_dynamic/abc2program:abc2program_frontend_static",
     "$ark_root_dynamic/assembler:libarkassembler",
   ]
+
+  if (enable_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }

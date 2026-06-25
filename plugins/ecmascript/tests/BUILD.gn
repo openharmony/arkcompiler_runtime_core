@@ -32,6 +32,9 @@ host_unittest_action("PluginsTest") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 }
 
 group("unittest") {

@@ -56,6 +56,9 @@ host_unittest_action("PandaGuardUnitTest") {
   deps += [ ":update_unittest_config" ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 }
 
 group("host_unittest") {

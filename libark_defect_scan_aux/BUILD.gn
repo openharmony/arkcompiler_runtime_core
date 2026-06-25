@@ -71,6 +71,9 @@ ohos_shared_library("libark_defect_scan_aux") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   output_extension = "so"
   relative_install_dir = "ark"
@@ -92,6 +95,9 @@ ohos_static_library("libark_defect_scan_aux_static_test") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
