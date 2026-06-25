@@ -3621,7 +3621,7 @@ class UnifiedJsonParser {
     private static parseUnicodeEscape(src: string, index: int, length: int, decoded: ValueArray<char>,
         decodedOffset: int): int {
         const codePoint = UnifiedJsonParser.parseUnicodeEscapeCodePoint(src, index, length)
-        decoded[decodedOffset] = codePoint as Char
+        decoded[decodedOffset] = codePoint.toChar()
         return 4
     }
 
@@ -4227,7 +4227,7 @@ class JSONValueParser {
             if (jsonFieldVal instanceof JSONObject && this.isParseableObjectType(fieldType)) {
                 const existingFieldVal = classField.getValue(existingObj)
                 if (existingFieldVal !== null && existingFieldVal !== undefined) {
-                    this.parseObjectInto(jsonFieldVal, existingFieldVal as object)
+                    this.parseObjectInto(jsonFieldVal, existingFieldVal as Object)
                     continue
                 }
             }
@@ -4470,7 +4470,7 @@ function createBooleanFromJSONValue(json: JSONValue): Boolean {
     } else if (json instanceof JSONTrue) {
         return Boolean.TRUE
     }
-    throw new JSONTypeError('Cannot create Boolean from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Boolean from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4483,12 +4483,12 @@ function createBooleanFromJSONValue(json: JSONValue): Boolean {
  */
 function createByteFromJSONValue(json: JSONValue): Byte {
     if (json instanceof JSONNumber) {
-        let num = (json as JSONNumber).value
+        let num = json.value
         if (Double.isInteger(num) && Byte.MIN_VALUE <= num && num <= Byte.MAX_VALUE) {
             return num.toByte()
         }
     }
-    throw new JSONTypeError('Cannot create Byte from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Byte from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4501,12 +4501,12 @@ function createByteFromJSONValue(json: JSONValue): Byte {
  */
 function createCharFromJSONValue(json: JSONValue): Char {
     if (json instanceof JSONString) {
-        let str = (json as JSONString).value
+        let str = json.value
         if (str.getLength() == 1) {
             return new Char(str.charAt(0))
         }
     }
-    throw new JSONTypeError('Cannot create Char from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Char from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4519,12 +4519,12 @@ function createCharFromJSONValue(json: JSONValue): Char {
  */
 function createShortFromJSONValue(json: JSONValue): Short {
     if (json instanceof JSONNumber) {
-        let num = (json as JSONNumber).value
+        let num = json.value
         if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
             return num.toShort()
         }
     }
-    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Short from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4537,12 +4537,12 @@ function createShortFromJSONValue(json: JSONValue): Short {
  */
 function createIntFromJSONValue(json: JSONValue): Int {
     if (json instanceof JSONNumber) {
-        let num = (json as JSONNumber).value
+        let num = json.value
         if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
-            return new Int(Double.toInt(num))
+            return num.toInt()
         }
     }
-    throw new JSONTypeError('Cannot create Int from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Int from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4555,13 +4555,13 @@ function createIntFromJSONValue(json: JSONValue): Int {
  */
 function createLongFromJSONValue(json: JSONValue): Long {
     if (json instanceof JSONNumber) {
-        let num = (json as JSONNumber).value
-        let value = (json as JSONNumber).bigintValue
+        let num = json.value
+        let value = json.bigintValue
         if (Double.isInteger(num) && Long.MIN_VALUE <= value && value <= Long.MAX_VALUE) {
             return value.getLong()
         }
     }
-    throw new JSONTypeError('Cannot create Long from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Long from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4574,12 +4574,12 @@ function createLongFromJSONValue(json: JSONValue): Long {
  */
 function createFloatFromJSONValue(json: JSONValue): Float {
     if (json instanceof JSONNumber) {
-        let val = (json as JSONNumber).value
+        let val = json.value
         if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
             return val.toFloat()
         }
     }
-    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4593,9 +4593,9 @@ function createFloatFromJSONValue(json: JSONValue): Float {
  */
 function createDoubleFromJSONValue(json: JSONValue): Double {
     if (json instanceof JSONNumber) {
-        return new Double((json as JSONNumber).value)
+        return json.value
     }
-    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json} as ErrorOptions)
 }
 
 /**
@@ -4608,7 +4608,7 @@ function createDoubleFromJSONValue(json: JSONValue): Double {
  */
 function createStringFromJSONValue(json: JSONValue): String {
     if (json instanceof JSONString) {
-        return (json as JSONString).value
+        return json.value
     }
-    throw new JSONTypeError('Cannot create String from JSON', {cause: json as Object} as ErrorOptions)
+    throw new JSONTypeError('Cannot create String from JSON', {cause: json} as ErrorOptions)
 }

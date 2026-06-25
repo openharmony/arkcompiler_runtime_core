@@ -27,6 +27,7 @@ function main(): int {
     failures += check(testCreateWithOtherLocale(), 'Test create with other locale')
     failures += check(testManyExtensions(), 'Test create with many extensions in tag')
     failures += check(testUpperCaseExtensions(), 'Test ignore case-sensitivity in locale tag')
+    failures += check(testMultipleUKeywords(), 'Test single u- singleton with multiple keywords')
     return failures
 }
 
@@ -287,6 +288,32 @@ function testUpperCaseExtensions() : int {
     {
         let l = new Intl.Locale('ru-u-KN-true')
         arktest.assertEQ(l.numeric, true)
+    }
+    return success
+}
+
+// A valid tag carries a single `u-` singleton with one or more keyword pairs.
+// toString() must round-trip under ONE `-u-` prefix with keys sorted ascending (BCP47/UTS#35).
+function testMultipleUKeywords() : int {
+    {
+        // Reported case: two keywords must not produce a second `-u-`
+        const l = new Intl.Locale('en-Latn-GB-u-nu-arab-hc-h24')
+        arktest.assertEQ(l.toString(), 'en-Latn-GB-u-hc-h24-nu-arab')
+    }
+    {
+        // Unordered input must be normalized to sorted key order
+        const l = new Intl.Locale('en-u-nu-arab-hc-h24-ca-gregory')
+        arktest.assertEQ(l.toString(), 'en-u-ca-gregory-hc-h24-nu-arab')
+    }
+    {
+        // co sorts before kn
+        const l = new Intl.Locale('ru-u-kn-co-emoji')
+        arktest.assertEQ(l.toString(), 'ru-u-co-emoji-kn')
+    }
+    {
+        // Single keyword still uses a single `-u-`
+        const l = new Intl.Locale('en-u-ca-gregory')
+        arktest.assertEQ(l.toString(), 'en-u-ca-gregory')
     }
     return success
 }
