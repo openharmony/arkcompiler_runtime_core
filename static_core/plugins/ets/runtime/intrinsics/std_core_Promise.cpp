@@ -105,6 +105,7 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     EtsHandle<EtsPromise> hpromise(executionCtx, promise);
     EtsHandle<EtsObject> hcallback(executionCtx, callback);
     EtsMutex::LockHolder lh(hpromise);
+    hpromise->SetHandled();
     if (hpromise->IsPending() || hpromise->IsLinked()) {
         EnsureCapacity(executionCtx, hpromise);
         hpromise->SubmitCallback(executionCtx, hcallback.GetPtr(), workerDomain);

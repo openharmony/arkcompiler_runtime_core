@@ -79,9 +79,28 @@ function testAllhandledRejection(): void {
     launch(SingleRejectedJob);
 }
 
+async function taskAsyncErrorFunc(): Promise<void> {
+  throw new Error('taskAsyncFunc error')
+}
+
+async function testAwaitRejectCatchNotTriggered(): Promise<void> {
+    StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        if (reason.message === 'taskAsyncFunc error') {
+            arktest.assertTrue(false);
+        }
+    });
+    try {
+        await taskAsyncErrorFunc();
+        arktest.assertTrue(false);
+    } catch (e) {
+        arktest.assertTrue(true);
+    }
+}
+
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.allhandled_rejection');
     testSuite.addTest('testAllhandledRejection', testAllhandledRejection);
+    testSuite.addAsyncTest('testAwaitRejectCatchNotTriggered', testAwaitRejectCatchNotTriggered);
     let res = await testSuite.runAsync();
     return res;
 }
