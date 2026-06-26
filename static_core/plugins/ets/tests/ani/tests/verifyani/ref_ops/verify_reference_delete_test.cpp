@@ -27,7 +27,7 @@ TEST_F(ReferenceDeleteTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"lref", "ani_ref"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
@@ -174,7 +174,7 @@ TEST_F(ReferenceDeleteTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Reference_Delete(nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"lref", "ani_ref", "wrong reference [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);

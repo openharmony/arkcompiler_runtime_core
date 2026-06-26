@@ -132,7 +132,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_env)
         ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
@@ -533,7 +533,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_all_args)
               ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
         {"static_method", "ani_static_method", "wrong static method [ERROR]"},
         {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},
@@ -807,7 +807,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_env)
               ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
@@ -1055,7 +1055,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_all_args)
               ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
         {"static_method", "ani_static_method", "wrong static method [ERROR]"},
         {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},

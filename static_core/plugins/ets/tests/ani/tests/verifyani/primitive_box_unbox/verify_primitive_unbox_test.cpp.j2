@@ -99,7 +99,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_env)
 
     ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, object, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"obj", "ani_object"},
         {"result", "ani_{{ type }} *"},
     };
@@ -187,7 +187,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Primitive_Unbox_{{ Type }}(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"obj", "ani_object", "reference is nullptr [ERROR]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
     };
@@ -204,7 +204,7 @@ TEST_F(PrimitiveUnbox{{ Type }}Test, throw_error)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"obj", "ani_object"},
         {"result", "ani_{{ type }} *"},
     };

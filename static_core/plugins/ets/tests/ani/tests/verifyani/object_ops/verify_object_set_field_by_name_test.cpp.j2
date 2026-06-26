@@ -109,7 +109,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->c_api->Object_SetFieldByName_{{ Type }}(nullptr, object_, "{{ type }}Field", value), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
@@ -188,7 +188,7 @@ TEST_F(ObjectSetFieldByName{{ Type }}Test, wrong_all_args)
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
 {% if type == "boolean" %}

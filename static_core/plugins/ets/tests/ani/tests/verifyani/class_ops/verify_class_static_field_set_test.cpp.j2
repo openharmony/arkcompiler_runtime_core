@@ -70,7 +70,7 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_null_env)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field"},
         {"value", "ani_{{ type }}"},

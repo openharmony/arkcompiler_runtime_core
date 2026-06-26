@@ -27,7 +27,7 @@ TEST_F(ObjectGetTypeTest, wrong_env)
     ani_type resultType {};
     ASSERT_EQ(env_->c_api->Object_GetType(nullptr, cls, &resultType), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"result", "ani_ref *"},
     };
@@ -104,7 +104,7 @@ TEST_F(ObjectGetTypeTest, throw_error)
     ani_type resultType {};
     ASSERT_EQ(env_->Object_GetType(cls, &resultType), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"object", "ani_object"},
         {"result", "ani_ref *"},
     };

@@ -41,7 +41,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, tupleValue, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"tuple_value", "ani_tuple_value"},
         {"result", "ani_size *"},
     };
@@ -174,7 +174,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->TupleValue_GetNumberOfItems(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"tuple_value", "ani_tuple_value", "reference is nullptr [ERROR]"},
         {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
@@ -189,7 +189,7 @@ TEST_F(TupleValueGetNumberOfItemsTest, throw_error)
     ani_size result = 0U;
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tupleValue, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"tuple_value", "ani_tuple_value"},
         {"result", "ani_size *"},
     };

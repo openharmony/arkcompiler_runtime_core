@@ -48,7 +48,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_env)
     ani_enum_item result {};
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByName(nullptr, enumColor_, "RED", &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"enm", "ani_enum"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
@@ -106,7 +106,7 @@ TEST_F(VerifyEnumGetItemByNameTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Enum_GetEnumItemByName(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"enm", "ani_enum", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_enum_item *", "nullptr for storing 'ani_enum_item' [ERROR]"},
@@ -120,7 +120,7 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error)
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(enumColor_, "RED", &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"enm", "ani_enum"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},
@@ -135,7 +135,7 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error_with_wrong_name_null)
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(enumColor_, nullptr, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"enm", "ani_enum"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_enum_item *"},
@@ -151,7 +151,7 @@ TEST_F(VerifyEnumGetItemByNameTest, has_unhandled_error_with_wrong_enm_type_obje
     ani_enum_item result {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(static_cast<ani_enum>(obj), "RED", &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"enm", "ani_enum", "wrong reference type: ani_object [FATAL]"},
         {"name", "const char *"},
         {"result", "ani_enum_item *"},

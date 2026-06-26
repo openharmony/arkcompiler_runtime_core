@@ -27,7 +27,7 @@ TEST_F(AnyCallMethodTest, wrong_env)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_CallMethod(nullptr, cls, "hashCode", 0U, nullptr, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"self", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
         {"argc", "ani_size"},
@@ -122,7 +122,7 @@ TEST_F(AnyCallMethodTest, throw_error)
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_CallMethod(env_, cls, "hashCode", 0U, nullptr, &out), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"self", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
         {"argc", "ani_size"},

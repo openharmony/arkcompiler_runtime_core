@@ -27,7 +27,7 @@ TEST_F(TypeIsAssignableFromTest, wrong_env)
     ani_boolean result {};
     ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(nullptr, cls, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"from_type", "ani_ref"},
         {"to_type", "ani_ref"},
         {"result", "ani_boolean *"},
@@ -154,7 +154,7 @@ TEST_F(TypeIsAssignableFromTest, throw_error)
     ani_boolean result {};
     ASSERT_EQ(env_->Type_IsAssignableFrom(cls, cls, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"from_type", "ani_ref"},
         {"to_type", "ani_ref"},
         {"result", "ani_boolean *"},

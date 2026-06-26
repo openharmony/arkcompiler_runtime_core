@@ -71,7 +71,7 @@ TEST_F(ClassFindSetterTest, wrong_env)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindSetter(nullptr, class_, "prop", &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_method *"},
@@ -142,7 +142,7 @@ TEST_F(ClassFindSetterTest, pending_error_is_rejected)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindSetter(env_, class_, "prop", &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_method *"},

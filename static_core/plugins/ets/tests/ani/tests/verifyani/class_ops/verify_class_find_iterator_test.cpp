@@ -59,7 +59,7 @@ TEST_F(ClassFindIteratorTest, wrong_env)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindIterator(nullptr, class_, &method), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"result", "ani_method *"},
     };
@@ -113,7 +113,7 @@ TEST_F(ClassFindIteratorTest, pending_error_is_rejected)
     ani_method method {};
     ASSERT_EQ(env_->c_api->Class_FindIterator(env_, class_, &method), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"class", "ani_class"},
         {"result", "ani_method *"},
     };

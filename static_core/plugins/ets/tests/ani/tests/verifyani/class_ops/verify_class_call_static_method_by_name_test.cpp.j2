@@ -166,7 +166,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_env)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
@@ -528,7 +528,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_all_args)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"signature", "const char *"},
@@ -765,7 +765,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_env)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"signature", "const char *"},
@@ -894,7 +894,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_all_args)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"signature", "const char *"},

@@ -85,7 +85,7 @@ TEST_F(ClassFindFieldTest, wrong_env)
     ani_field field {};
     ASSERT_EQ(env_->c_api->Class_FindField(nullptr, class_, "field", &field), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_field *"},
@@ -156,7 +156,7 @@ TEST_F(ClassFindFieldTest, pending_error_is_rejected)
     ani_field field {};
     ASSERT_EQ(env_->c_api->Class_FindField(env_, class_, "field", &field), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"class", "ani_class"},
         {"name", "const char *"},
         {"result", "ani_field *"},

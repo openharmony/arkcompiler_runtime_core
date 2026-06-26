@@ -96,7 +96,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_env)
     {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
@@ -234,7 +234,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_{{ type }}", "reference is nullptr [ERROR]"},
@@ -244,7 +244,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, 2), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
@@ -254,7 +254,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_SetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, {{ value }}), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"value", "ani_{{ type }}"},

@@ -27,7 +27,7 @@ TEST_F(TypeGetSuperClassTest, wrong_env)
     ani_class result {};
     ASSERT_EQ(env_->c_api->Type_GetSuperClass(nullptr, cls, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"type", "ani_ref"},
         {"result", "ani_class *"},
     };
@@ -105,7 +105,7 @@ TEST_F(TypeGetSuperClassTest, throw_error)
     ani_class superClass {};
     ASSERT_EQ(env_->Type_GetSuperClass(cls, &superClass), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"type", "ani_ref"},
         {"result", "ani_class *"},
     };

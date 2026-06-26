@@ -77,7 +77,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_env)
     ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(nullptr, object_, "{{ type }}Prop", &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"result", "ani_{{ type }} *"},
@@ -174,7 +174,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_GetPropertyByName_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},

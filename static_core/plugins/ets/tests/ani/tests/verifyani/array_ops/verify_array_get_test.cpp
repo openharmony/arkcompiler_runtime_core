@@ -52,7 +52,7 @@ TEST_F(ArrayGetTest, wrong_env)
     ani_ref res;
     ASSERT_EQ(env_->c_api->Array_Get(nullptr, arr, index, &res), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"array", "ani_array"},
         {"index", "ani_size"},
         {"result", "ani_ref"},
@@ -192,7 +192,7 @@ TEST_F(ArrayGetTest, wrong_all_args)
     ani_size index = -1U;
     ASSERT_EQ(env_->c_api->Array_Get(nullptr, nullptr, index, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"array", "ani_array", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"result", "ani_ref", "nullptr for storing 'ani_ref' [ERROR]"},
@@ -212,7 +212,7 @@ TEST_F(ArrayGetTest, throw_error)
     ani_ref res;
     ASSERT_EQ(env_->Array_Get(arr, index, &res), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"array", "ani_array"},
         {"index", "ani_size"},
         {"result", "ani_ref"},

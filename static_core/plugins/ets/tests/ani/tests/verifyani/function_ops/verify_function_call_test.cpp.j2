@@ -126,7 +126,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_env)
               ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
         {"...", "       "},
@@ -382,7 +382,7 @@ TEST_F(FunctionCall{{ Type }}Test, wrong_all_args)
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"function", "ani_function", "wrong function [FATAL]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
         {"...", "       ", "wrong method [ERROR]"},
@@ -536,7 +536,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_env)
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, function, &result, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"function", "ani_function"},
         {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
@@ -666,7 +666,7 @@ TEST_F(FunctionCall{{ Type }}ATest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Function_Call_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"function", "ani_function", "wrong function [FATAL]"},
         {"result", "ani_{{ type }} *", "nullptr for storing 'ani_{{ type }}' [ERROR]"},
         {"args", "ani_value *", "wrong arguments value [ERROR]"},

@@ -76,7 +76,7 @@ TEST_F(FunctionalObjectCallTest, wrong_env)
     ani_ref result {};
     ASSERT_EQ(env_->c_api->FunctionalObject_Call(nullptr, fnObj, 0, nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"fn", "ani_fn_object"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
@@ -178,7 +178,7 @@ TEST_F(FunctionalObjectCallTest, pending_error_is_rejected)
     ani_ref result {};
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"fn", "ani_fn_object"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},

@@ -64,7 +64,7 @@ TEST_F(FindClassTest, pending_error_is_rejected)
     ani_class result {};
     ASSERT_EQ(env_->FindClass("verify_find_class_test.TestClass", &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "has unhandled an error [ERROR]"},
+        {"env", "ani_env *", "has a pending exception [ERROR]"},
         {"class_descriptor", "const char *"},
         {"result", "ani_class *"},
     };

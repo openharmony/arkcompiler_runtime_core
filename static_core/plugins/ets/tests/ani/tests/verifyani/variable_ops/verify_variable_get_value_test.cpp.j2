@@ -65,7 +65,7 @@ TEST_F(VariableGetValue{{ Type }}Test, null_env)
     ASSERT_EQ(env_->c_api->Variable_GetValue_{{ Type }}(nullptr, variable, &result), ANI_INVALID_ARGS);
 {% endif %}
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"variable", "ani_variable"},
         {"result", "ani_{{ "ref" if type == "ref" else type }} *"},
     };

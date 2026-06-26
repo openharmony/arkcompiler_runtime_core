@@ -180,7 +180,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_env)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"signature", "const char *"},
@@ -535,7 +535,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_all_args)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
         {"signature", "const char *"},
@@ -799,7 +799,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_env)
 {% endif %}
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object"},
         {"name", "const char *"},
         {"signature", "const char *"},

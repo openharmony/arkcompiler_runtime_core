@@ -57,7 +57,7 @@ TEST_F(DestroyEscapeLocalScopeTest, wrong_env)
 
     ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(nullptr, ref, &ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"ref", "ani_ref"},
         {"result", "ani_ref *"},
     };
@@ -175,7 +175,7 @@ TEST_F(DestroyEscapeLocalScopeTest, wrong_all_args)
     CreateEscapeLocalScope();
     ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"ref", "ani_ref", "escape reference is null [ERROR]"},
         {"result", "ani_ref *", "nullptr for storing 'ani_ref' [ERROR]"},
     };
@@ -227,7 +227,7 @@ TEST_F(DestroyEscapeLocalScopeTest, call_without_scope_and_wrong_env)
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
     ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(nullptr, ref, &ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"ref", "ani_ref"},
         {"result", "ani_ref *"},
     };
@@ -280,7 +280,7 @@ TEST_F(DestroyEscapeLocalScopeTest, call_with_wrong_scope_and_wrong_env)
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
     ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(nullptr, ref, &ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"ref", "ani_ref"},
         {"result", "ani_ref *"},
     };

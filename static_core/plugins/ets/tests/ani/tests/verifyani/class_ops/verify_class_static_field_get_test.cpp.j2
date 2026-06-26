@@ -49,7 +49,7 @@ TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_env)
     ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(nullptr, class_, field, &result), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class"},
         {"static_field", "ani_static_field"},
         {"result", "ani_{{ type }} *"},

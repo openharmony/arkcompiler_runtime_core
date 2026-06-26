@@ -70,7 +70,7 @@ TEST_F(ObjectNewATest, wrong_env)
     ASSERT_EQ(env_->c_api->Object_New_A(nullptr, cls_, ctor_, &obj, args_.data()), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"cls", "ani_class"},
         {"ctor", "ani_method"},
         {"result", "ani_object *"},
@@ -377,7 +377,7 @@ TEST_F(ObjectNewATest, wrong_all_args)
     ASSERT_EQ(env_->c_api->Object_New_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_INVALID_ARGS);
     // clang-format off
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"cls", "ani_class", "reference is nullptr [ERROR]"},
         {"ctor", "ani_method", "wrong ctor [ERROR]"},
         {"result", "ani_object *", "nullptr for storing 'ani_object' [ERROR]"},

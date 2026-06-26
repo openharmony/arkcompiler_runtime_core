@@ -24,7 +24,7 @@ TEST_F(DestroyLocalScopeTest, wrong_env)
     ASSERT_EQ(env_->CreateLocalScope(1), ANI_OK);
     ASSERT_EQ(env_->c_api->DestroyLocalScope(nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DestroyLocalScope", testLines);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
@@ -64,7 +64,7 @@ TEST_F(DestroyLocalScopeTest, call_without_scope_and_wrong_env)
 {
     ASSERT_EQ(env_->c_api->DestroyLocalScope(nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("DestroyLocalScope", testLines);
 }

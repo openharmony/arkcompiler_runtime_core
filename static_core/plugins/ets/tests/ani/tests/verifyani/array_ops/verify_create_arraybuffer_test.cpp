@@ -39,7 +39,7 @@ TEST_F(CreateArrayBufferVerifyTest, create_arraybuffer_wrong_env)
     ani_arraybuffer arraybuffer {};
     ASSERT_EQ(env_->c_api->CreateArrayBuffer(nullptr, LENGTH, &data, &arraybuffer), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
-        {"env", "ani_env *", "called from incorrect the native scope [ERROR]"},
+        {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"length", "ani_size"},
         {"data_result", "void **"},
         {"arraybuffer_result", "ani_arraybuffer *"},
