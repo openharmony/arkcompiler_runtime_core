@@ -213,32 +213,32 @@ std::string GetArrayTypeNewName(AbckitFile *file, const std::string &oldName)
 
 std::string GetUnionTypeNewName(AbckitFile *file, const std::string &oldName)
 {
-    std::string newName = oldName;
-    if (IsArray(oldName)) {
-        newName = newName.substr(0, newName.size() - 2);
+    const bool isArr = IsArray(oldName);
+    std::string body = oldName;
+    if (isArr) {
+        body = body.substr(0, body.size() - ARRAY_SUFFIX_LEN);
     }
-    std::vector<std::string> types = ParseUnionTypes(newName);
+    std::vector<std::string> types = ParseUnionTypes(body);
     if (types.empty()) {
         return oldName;
     }
     for (auto &type : types) {
-        if (file->nameToClass.find(type) != file->nameToClass.end()) {
-            type = GetClassRecordName(file->nameToClass[type]);
+        auto compIt = file->nameToClass.find(type);
+        if (compIt != file->nameToClass.end()) {
+            type = GetClassRecordName(compIt->second);
         }
     }
-    newName = JoinUnionTypes(types);
-    if (IsArray(oldName)) {
+    std::string newName = JoinUnionTypes(types);
+    if (isArr) {
         newName += ARRAY_SUFFIX;
     }
+
     auto it = file->nameToClass.find(oldName);
-    if (it == file->nameToClass.end()) {
-        return oldName;
+    if (it != file->nameToClass.end()) {
+        if (auto *record = GetClassRecord(it->second); record != nullptr) {
+            record->name = newName;
+        }
     }
-    const auto record = GetClassRecord(it->second);
-    if (record == nullptr) {
-        return oldName;
-    }
-    record->name = newName;
     return newName;
 }
 }  // namespace
@@ -423,10 +423,55 @@ void libabckit::InstModifier::ModifyInstClass(ark::pandasm::Ins &ins) const
     LIBABCKIT_LOG_FUNC;
 
     const std::string oldName = ins.GetID(0);
-    const auto it = this->file_->nameToClass.find(oldName);
+    const auto prog = this->file_->GetStaticProgram();
+    auto rewriteRecordTableKey = [prog](const std::string &oldKey, const std::string &newKey) {
+        if (oldKey == newKey) {
+            return;
+        }
+        auto oldIt = prog->recordTable.find(oldKey);
+        if (oldIt == prog->recordTable.end()) {
+            return;
+        }
+        if (prog->recordTable.find(newKey) != prog->recordTable.end()) {
+            return;
+        }
+        auto entry = prog->recordTable.extract(oldKey);
+        entry.key() = newKey;
+        entry.mapped().name = newKey;
+        prog->recordTable.insert(std::move(entry));
+    };
 
-    // Handle ETSGLOBAL module remapping when class not found
+    // Union types (including union arrays such as "{U...}[]"). The full union
+    // string is not always registered in file_->nameToClass, but its component
+    // classes are. Always recompute the new name from components.
+    if (IsUnion(oldName)) {
+        const std::string newName = GetUnionTypeNewName(this->file_, oldName);
+        if (newName.empty() || newName == oldName) {
+            return;
+        }
+        rewriteRecordTableKey(oldName, newName);
+        LIBABCKIT_LOG(DEBUG) << "ins old className: " << oldName << std::endl;
+        LIBABCKIT_LOG(DEBUG) << "ins new className: " << newName << std::endl;
+        ins.SetID(0, newName);
+        return;
+    }
+
+    if (IsArray(oldName)) {
+        const std::string newName = GetArrayTypeNewName(this->file_, oldName);
+        if (newName.empty() || newName == oldName) {
+            return;
+        }
+        rewriteRecordTableKey(oldName, newName);
+        LIBABCKIT_LOG(DEBUG) << "ins old className: " << oldName << std::endl;
+        LIBABCKIT_LOG(DEBUG) << "ins new className: " << newName << std::endl;
+        ins.SetID(0, newName);
+        return;
+    }
+
+    // Simple class / interface / enum names.
+    const auto it = this->file_->nameToClass.find(oldName);
     if (it == this->file_->nameToClass.end()) {
+        // ETSGLOBAL module remapping fallback (only valid for simple names).
         auto lastDotPos = oldName.rfind('.');
         if (lastDotPos == std::string::npos) {
             return;
@@ -460,44 +505,12 @@ void libabckit::InstModifier::ModifyInstClass(ark::pandasm::Ins &ins) const
         return;
     }
 
-    // Handle different type cases
-    std::string newName;
-    if (IsUnion(oldName)) {
-        newName = GetUnionTypeNewName(this->file_, oldName);
-        const auto record = GetClassRecord(it->second);
-        if (record == nullptr) {
-            return;
-        }
-        record->name = newName;
-        const auto prog = this->file_->GetStaticProgram();
-        auto oldIt = prog->recordTable.find(oldName);
-        if (oldIt != prog->recordTable.end() && prog->recordTable.find(newName) == prog->recordTable.end()) {
-            auto entry = prog->recordTable.extract(oldName);
-            entry.key() = newName;
-            entry.mapped().name = newName;
-            prog->recordTable.insert(std::move(entry));
-        }
-    } else if (IsArray(oldName)) {
-        newName = GetArrayTypeNewName(this->file_, oldName);
-        const auto prog = this->file_->GetStaticProgram();
-        auto oldIt = prog->recordTable.find(oldName);
-        if (oldIt != prog->recordTable.end() && prog->recordTable.find(newName) == prog->recordTable.end()) {
-            auto entry = prog->recordTable.extract(oldName);
-            entry.key() = newName;
-            entry.mapped().name = newName;
-            prog->recordTable.insert(std::move(entry));
-        }
-    } else {
-        newName = GetClassRecordName(it->second);
-    }
-
+    const std::string newName = GetClassRecordName(it->second);
     if (newName.empty() || newName == oldName) {
         return;
     }
-
     LIBABCKIT_LOG(DEBUG) << "ins old className: " << oldName << std::endl;
     LIBABCKIT_LOG(DEBUG) << "ins new className: " << newName << std::endl;
-
     ins.SetID(0, newName);
 }
 

@@ -1,0 +1,12 @@
+{
+  "interface_object_literal_demo": {
+    "#obfName": "l",
+    "i1": "c",
+    "i2": "d",
+    "I": {
+      "#obfName": "b",
+      "method:interface_object_literal_demo.I;f64;": "a"
+    }
+  },
+  "ArkGuardStaticVersion": "1.0.0.300"
+}

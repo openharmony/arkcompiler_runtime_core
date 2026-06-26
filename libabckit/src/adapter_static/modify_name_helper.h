@@ -55,6 +55,7 @@ private:
     static bool ModuleRefreshInterfaces(AbckitCoreModule *m);
     static bool ModuleRefreshEnums(AbckitCoreModule *m);
     static bool ModuleRefreshAnnotationInterfaces(AbckitCoreModule *m);
+    static bool ModuleRefreshOwnedObjectLiterals(AbckitCoreModule *m);
 
     static bool NamespaceRefreshNamespaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshFunctions(AbckitCoreNamespace *ns);
@@ -63,6 +64,7 @@ private:
     static bool NamespaceRefreshEnums(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshAnnotationInterfaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshAnnotationElements(AbckitCoreNamespace *ns);
+    static bool NamespaceRefreshOwnedObjectLiterals(AbckitCoreNamespace *ns, const std::string &oldFullNsName);
 
     static bool FunctionRefreshParams(AbckitCoreFunction *function);
     static bool FunctionRefreshReturnType(AbckitCoreFunction *function);
