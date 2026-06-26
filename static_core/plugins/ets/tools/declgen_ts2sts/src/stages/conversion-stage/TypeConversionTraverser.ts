@@ -1330,7 +1330,52 @@ function insertPendingDefaultImports(
     );
   }
 
-  return context.factory.updateSourceFile(node, [...newImports, ...node.statements]);
+  const oldStatements = node.statements.filter((stmt) => {
+    return !isReplacedNamespaceImport(stmt, localState, node);
+  });
+  return context.factory.updateSourceFile(node, [...newImports, ...oldStatements]);
+}
+
+function isReplacedNamespaceImport(
+  stmt: ts.Statement,
+  localState: ConversionLocalState,
+  sourceFile: ts.SourceFile
+): boolean {
+  if (!ts.isImportDeclaration(stmt)) {
+    return false;
+  }
+
+  const namespaceName = getNamespaceImportName(stmt);
+  return (
+    namespaceName !== undefined &&
+    localState.defaultAccessMap.has(namespaceName) &&
+    !hasRemainingIdentifierUse(sourceFile, stmt, namespaceName)
+  );
+}
+
+function getNamespaceImportName(stmt: ts.ImportDeclaration): string | undefined {
+  const bindings = stmt.importClause?.namedBindings;
+  return bindings !== undefined && ts.isNamespaceImport(bindings) ? bindings.name.text : undefined;
+}
+
+function hasRemainingIdentifierUse(
+  sourceFile: ts.SourceFile,
+  ignoredImport: ts.ImportDeclaration,
+  name: string
+): boolean {
+  let found = false;
+  const visit = (node: ts.Node): void => {
+    if (found || node === ignoredImport) {
+      return;
+    }
+    if (ts.isIdentifier(node) && node.text === name) {
+      found = true;
+      return;
+    }
+    node.forEachChild(visit);
+  };
+  sourceFile.forEachChild(visit);
+  return found;
 }
 
 /**

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {CoroutineExtras, AtomicFlag, launch} from "std/debug/concurrency"
+import {CoroutineExtras, AtomicFlag} from "std/debug/concurrency"
+import {launch} from "std/concurrency"
 
 class Test {
     checkIfPromiseInJs(): boolean {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,3 +22,4 @@ files: [./issue_15669_01.ets, ./issue_15669_02.ets]
 
 export * from './issue_15669_01'
 export * from './issue_15669_02'
+export { foo } from './issue_15669_01'
