@@ -20,7 +20,7 @@ params: >-
 ---*/
 
 class U<S> {
-    field0: S
+    field0?: S = undefined
     constructor(v?: S) {
         if (v !== undefined) {
             this.field0 = v
@@ -65,8 +65,8 @@ function testClassGeneric() {
     arktest.assertTrue(a instanceof A)
     arktest.assertTrue(a.fieldA instanceof B)
     arktest.assertEQ(a.fieldA, f)
-    arktest.assertTrue(a.fieldA.field0 instanceof B)
-    arktest.assertEQ(a.fieldA.field0, f)
+    arktest.assertTrue(a.fieldA.field0! instanceof B)
+    arktest.assertEQ(a.fieldA.field0!, f)
 }
 
 function testClassFinalGeneric() {
@@ -74,8 +74,8 @@ function testClassFinalGeneric() {
     a.fieldA = new B()
     arktest.assertTrue(a instanceof Af)
     arktest.assertTrue(a.fieldA instanceof B)
-    arktest.assertTrue((a.fieldA as B).field0 instanceof B)
-    arktest.assertEQ((a.fieldA as B).field0, a.fieldA)
+    arktest.assertTrue((a.fieldA as B).field0! instanceof B)
+    arktest.assertEQ((a.fieldA as B).field0!, a.fieldA)
 }
 
 function testClassAbstractGeneric() {
@@ -84,8 +84,8 @@ function testClassAbstractGeneric() {
     arktest.assertTrue(a instanceof C)
     arktest.assertTrue(a.fieldA instanceof B)
     arktest.assertEQ(a.fieldA, f)
-    arktest.assertTrue(a.fieldA.field0 instanceof B)
-    arktest.assertEQ(a.fieldA.field0, f)
+    arktest.assertTrue(a.fieldA.field0! instanceof B)
+    arktest.assertEQ(a.fieldA.field0!, f)
 }
 
 function main(): int {

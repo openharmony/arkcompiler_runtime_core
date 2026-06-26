@@ -89,7 +89,7 @@ cases:
     - decl: |-
           // parameterized class
           class C<T extends String|Number|undefined> {
-              fld: T
+              fld: T = undefined as T
               static $_instantiate(f: ()=>C<String>, p: String): C<String> {
                   let x: C<String> = f()
                   x.fld = p

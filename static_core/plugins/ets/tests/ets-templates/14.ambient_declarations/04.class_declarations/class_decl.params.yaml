@@ -39,7 +39,7 @@ implementations:
     }
   - >
     export class A<T> {
-      v: T
+      v: T = undefined as T
     }
   - >
     export class A<U,V> {

@@ -20,7 +20,7 @@ params: >-
 ---*/
 
 class U<S> {
-    field0: S
+    field0?: S = undefined
     constructor(v?: S) {
         if (v !== undefined) {
             this.field0 = v
@@ -29,7 +29,7 @@ class U<S> {
 }
 
 abstract class W<R> {
-    fieldW: R
+    fieldW?: R = undefined
     constructor(v?: R) {
         if (v !== undefined) {
             this.fieldW = v
@@ -82,9 +82,10 @@ function testClassGeneric() {
     arktest.assertTrue(a instanceof A)
     arktest.assertTrue(a.fieldA instanceof B)
     arktest.assertEQ(a.fieldA, f)
-    arktest.assertTrue(a.fieldA.field0 instanceof D)
-    arktest.assertTrue(a.fieldA.field0.fieldW instanceof B)
-    arktest.assertEQ(a.fieldA.field0.fieldW, f)
+    let fa = a.fieldA.field0!
+    arktest.assertTrue(fa instanceof D)
+    arktest.assertTrue(fa.fieldW! instanceof B)
+    arktest.assertEQ(fa.fieldW!, f)
 }
 
 function testClassFinalGeneric() {
@@ -92,9 +93,9 @@ function testClassFinalGeneric() {
     a.fieldA = new B()
     arktest.assertTrue(a instanceof Af)
     arktest.assertTrue(a.fieldA instanceof B)
-    let fa = (a.fieldA as B).field0
+    let fa = (a.fieldA as B).field0!
     arktest.assertTrue(fa instanceof D)
-    let fw = fa.fieldW
+    let fw = fa.fieldW!
     arktest.assertTrue(fw instanceof B)
     arktest.assertEQ(fw, a.fieldA)
 }
@@ -105,9 +106,10 @@ function testClassAbstractGeneric() {
     arktest.assertTrue(a instanceof C)
     arktest.assertTrue(a.fieldA instanceof B)
     arktest.assertEQ(a.fieldA, f)
-    arktest.assertTrue(a.fieldA.field0 instanceof D)
-    arktest.assertTrue(a.fieldA.field0.fieldW instanceof B)
-    arktest.assertEQ(a.fieldA.field0.fieldW, f)
+    let fa = a.fieldA.field0!
+    arktest.assertTrue(fa instanceof D)
+    arktest.assertTrue(fa.fieldW! instanceof B)
+    arktest.assertEQ(fa.fieldW!, f)
 }
 
 function main(): int {

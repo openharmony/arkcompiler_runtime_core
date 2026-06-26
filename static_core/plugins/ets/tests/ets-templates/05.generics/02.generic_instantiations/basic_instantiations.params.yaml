@@ -41,7 +41,7 @@ cases:
       twoArgs<A, B>()
 #4
   - decl: |-
-      class Base<T> { value: T }
+      class Base<T> { value: T = undefined as T }
     use: |-
       let b: Base<never>
 #5

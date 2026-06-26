@@ -63,7 +63,8 @@ export class PromiseStatus{
  * The class describes fulfillment result of Promise.allSettled's argument.
  */
 export class PromiseFulfilledResult<T> {
-    constructor(){}
+    constructor() {
+    }
 
     constructor(value: T) {
         this.status = PromiseStatus.fulfilled;
@@ -71,7 +72,7 @@ export class PromiseFulfilledResult<T> {
     }
 
     status: string = "";
-    value: T;
+    value: T = undefined as T;
 }
 
 /**

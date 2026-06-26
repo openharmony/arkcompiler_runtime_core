@@ -30,7 +30,7 @@ desc: >-
 let checked: boolean = false
 
 class C<T> extends Array<T> {
-  j: T
+  j: T = undefined as T
   constructor() { }
   private constructor(j: T) {
     this.j = j

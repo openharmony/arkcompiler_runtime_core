@@ -26,7 +26,7 @@
 //! INST_COUNT   "end", 0
 
 class MyIterable<T> implements IterableIterator<T> {
-    public item : T;
+    public item?: T;
 
     public next() : IteratorResult<T> {
         return new IteratorResult<T>(true, undefined)

@@ -54,7 +54,7 @@ cases:
       type t = keyof A<B,int[]>
       abstract class A<T,V> {
         foo(i: T) {}
-        bar: V
+        bar: V = undefined as V
         jay<U>() {}
       }
       class B {}

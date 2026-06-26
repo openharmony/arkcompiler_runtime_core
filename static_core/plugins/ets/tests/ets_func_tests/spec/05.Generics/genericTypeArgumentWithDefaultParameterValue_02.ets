@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,9 @@ class Helper {}
 
 class A<T> {
     data: T
+    constructor(data: T) {
+        this.data = data
+    }
 }
 
 class B<T> {
@@ -30,15 +33,14 @@ class B<T> {
     constructor(data: T) {
         this.data = data
     }
-    foo<T>(): A<T> {
-        return new A<T>() // T should be taken from declaration of foo
+    foo<T>(data: T): A<T> {
+        return new A<T>(data) // T should be taken from declaration of foo
     }
 }
 
 function main(): void {
     let b = new B<String>("hello")
-    let a = b.foo<Helper>();
+    let a = b.foo<Helper>(new Helper());
     arktest.assertTrue( a instanceof A)
-    a.data = new Helper()
     arktest.assertTrue( a.data instanceof Helper)
 }

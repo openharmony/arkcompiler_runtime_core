@@ -294,15 +294,6 @@
 #35000 Incorrect evaluation of ternary expression in for-of iterations over a union of arrays
 08.statements/09.for_of_statements/for_of_35.ets
 
-#34631
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_basic.ets
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_basic_two_fields.ets
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_basic_two_params.ets
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_constrained_by_any.ets
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_default_with_default_explicit.ets
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_default_with_default_implicit.ets
-09.classes/06.field_declarations/04.field_initialization/generic_fields_init_n_default_with_default_overridden.ets
-
 #33639
 11.enumerations/enum_decl_25.ets
 11.enumerations/enum_decl_26.ets

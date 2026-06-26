@@ -41,7 +41,10 @@ export interface IGeneric1<T> {
 export class BaseGeneric<T, U> {
     c: T;
     d: U;
-    constructor(c: T, d: U) {}
+    constructor(c: T, d: U) {
+        this.c = c;
+        this.d = d;
+    }
 }
 
 export class C1<T> {}

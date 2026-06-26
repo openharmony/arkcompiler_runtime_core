@@ -20,7 +20,7 @@ desc: >-
     (see Standard Library) class BigInt methods or constructors.
 ---*/
 class A<T> {
-    fld: T
+    fld: T = undefined as T
     meth(): T {
         return this.fld
     }

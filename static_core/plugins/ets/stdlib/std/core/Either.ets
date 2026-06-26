@@ -27,8 +27,8 @@ package std.core;
  * @FaAndStageModel
  */
 export abstract class Either<L, R> {
-    protected Ldata: L
-    protected Rdata: R
+    protected Ldata?: L
+    protected Rdata?: R
     protected isLeft_: boolean
 
     /**
@@ -66,7 +66,7 @@ export abstract class Either<L, R> {
      */
     public final get left(): L {
         if (this.isLeft()) {
-            return this.Ldata
+            return this.Ldata as L
         }
         throw new Error("Cannot read Left value from Right!")
     }
@@ -82,7 +82,7 @@ export abstract class Either<L, R> {
      */
     public final get right(): R {
         if (this.isRight()) {
-            return this.Rdata
+            return this.Rdata as R
         }
         throw new Error("Cannot read Right value from Left!")
     }

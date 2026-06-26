@@ -243,5 +243,5 @@ export class AbortSignal<T> {
     /**
      * Reason for the abort. This value will be used to reject the promise returned from lockAsync.
      */
-    public reason: T
+    public reason: T = undefined as T
 }

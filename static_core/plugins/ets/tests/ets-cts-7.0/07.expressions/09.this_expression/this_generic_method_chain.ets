@@ -19,7 +19,7 @@ assert: The keyword this enables fluent API pattern in generic classes.
 ---*/
 
 class Builder<T> {
-  private value: T;
+  private value: T = undefined as T;
 
   public setValue(val: T): Builder<T> {
     this.value = val;

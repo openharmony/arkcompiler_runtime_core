@@ -213,7 +213,7 @@ cases:
 
   - defs: |-
       class Node<T> {
-        value: T
+        value: T = undefined as T
         left: Alias<T> | undefined
         right?: Alias<T>
       }
@@ -229,7 +229,7 @@ cases:
 
   - defs: |-
       class Node<T> {
-        value: T
+        value: T = undefined as T
         left: Alias<T> | undefined
         right?: Alias<T>
       }

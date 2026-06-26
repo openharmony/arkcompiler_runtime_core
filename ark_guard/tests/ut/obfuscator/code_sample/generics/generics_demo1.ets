@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,7 @@ console.log('test1', varY.f2.tag('', ''));
 
 class InOutX<in T1, out T2, T3> {
     public readonly fldT2: T2
-    public fldT3: T3
+    public fldT3?: T3
 
     foo(p: T1) {
         // CC-OFFNXT(G.AOD.03) for test purposes

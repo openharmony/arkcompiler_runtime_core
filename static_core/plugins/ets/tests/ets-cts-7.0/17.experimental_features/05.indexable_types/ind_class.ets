@@ -25,8 +25,8 @@ tags: [{{c.tags}}]
 {{c.decl}}
 
 abstract class Base<T, U> {
-    ind: T
-    val: U
+    ind: T = undefined as T
+    val: U = undefined as U
     abstract $_get(i: T): U|undefined;
     $_set(i: T, v: U) {
         this.ind = i

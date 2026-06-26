@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,8 @@ tags: [{{c.tags}}]
 {{c.decl}}
 
 abstract class Base<T, U> {
-    ind: T
-    val: U
+    ind: T = undefined as T
+    val: U = undefined as U
     abstract $_get(i: T): U|undefined;
     $_set(i: T, v: U) {
         this.ind = i
