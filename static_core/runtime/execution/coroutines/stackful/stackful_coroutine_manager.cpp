@@ -595,7 +595,10 @@ LaunchResult StackfulCoroutineManager::LaunchImpl(Job *job, const JobWorkerThrea
         auto *w = ChooseWorkerForCoroutine(co);
         if UNLIKELY (w == nullptr) {
             // We use this workaround for correct coroutine destruction, should be fixed by #29944
-            co->ReplaceEntrypoint(Job::NativeEntrypointInfo {[]([[maybe_unused]] void *data) {}, co});
+            auto *fakeJob = CreateJob("Replacement Job for [" + job->GetName() + "]",
+                                      Job::NativeEntrypointInfo {[]([[maybe_unused]] void *data) {}, co});
+            fakeJob->SetStatus(Job::Status::RUNNABLE);
+            co->SetJob(fakeJob);
             GetCurrentWorker()->AddRunnableCoroutine(co);
             return LaunchResult::NO_SUITABLE_WORKER;
         }
@@ -665,6 +668,24 @@ static bool ValidateLaunchArgs([[maybe_unused]] Coroutine *co, JobWorkerThread *
     return true;
 }
 
+void StackfulCoroutineManager::HandleLaunchResultManaged(LaunchResult result)
+{
+    ASSERT_MANAGED_CODE();
+    switch (result) {
+        case LaunchResult::OK:
+            break;
+        case LaunchResult::RESOURCE_LIMIT_EXCEED:
+            ThrowCoroutinesLimitExceedError(
+                "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
+            break;
+        case LaunchResult::NO_SUITABLE_WORKER:
+            ThrowRuntimeException("Unable to launch coroutine: no suitable worker was found");
+            break;
+        default:
+            UNREACHABLE();
+    }
+}
+
 LaunchResult StackfulCoroutineManager::Launch(Job *job, const LaunchParams &params)
 {
     // profiling: scheduler and launch time
@@ -690,19 +711,6 @@ LaunchResult StackfulCoroutineManager::Launch(Job *job, const LaunchParams &para
             groupId = ark::JobWorkerThreadGroup::GenerateExactWorkerId(w->GetId());
         }
         result = LaunchImpl(job, groupId, params.startEvent);
-    }
-    switch (result) {
-        case LaunchResult::RESOURCE_LIMIT_EXCEED:
-            ThrowCoroutinesLimitExceedError(
-                "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
-            break;
-        case LaunchResult::NO_SUITABLE_WORKER:
-            ThrowRuntimeException("Unable to launch coroutine: no suitable worker was found");
-            break;
-        case LaunchResult::OK:
-            break;
-        default:
-            UNREACHABLE();
     }
 
     Tracer::Count(Tracer::LAUNCH, 1U);

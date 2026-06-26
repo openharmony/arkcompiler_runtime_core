@@ -45,6 +45,8 @@ public:
     bool TerminateExecutionContext(JobExecutionContext *executionCtx) override;
 
     LaunchResult Launch(Job *job, const LaunchParams &params) override;
+    void HandleLaunchResultManaged(LaunchResult result) override;
+
     void ExecuteJobs() override;
     void Await(JobEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(JobEvent *blocker) override;

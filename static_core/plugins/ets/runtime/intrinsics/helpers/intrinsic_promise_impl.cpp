@@ -27,8 +27,8 @@
 
 namespace ark::ets::intrinsics::helpers {
 
-static void LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job, EtsAsyncContext *asyncCtx,
-                                    EtsPromise *promise)
+static LaunchResult LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job, EtsAsyncContext *asyncCtx,
+                                            EtsPromise *promise)
 {
     auto *etsCtx = EtsExecutionContext::FromMT(executionCtx);
     asyncCtx->SetAwaitee(etsCtx, promise);
@@ -36,12 +36,15 @@ static void LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job,
     auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(jobMan);
     auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
     LaunchParams lParams {job->GetPriority(), groupId, dependency};
-    [[maybe_unused]] auto launchResult = jobMan->Launch(job, lParams);
-
-    ASSERT(launchResult == LaunchResult::OK);
+    auto launchResult = jobMan->Launch(job, lParams);
+    if UNLIKELY (launchResult != LaunchResult::OK) {
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(dependency);
+        return launchResult;
+    }
     ASSERT(!lParams.launchImmediately);  // so we can suppress csa
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
+    return launchResult;
 }
 
 static PandaVector<Value> FillEntrypointArgs(Method *method)
@@ -109,7 +112,8 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
         ThrowNullPointerException(ctx, executionCtx);
         return nullptr;
     }
-    if (executionCtx->GetManager()->IsJobSwitchDisabled()) {
+    auto *jobMan = executionCtx->GetManager();
+    if (jobMan->IsJobSwitchDisabled()) {
         ThrowEtsException(etsCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot await in the current context!");
         return nullptr;
@@ -121,7 +125,7 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
 
     auto *asyncCtx = EtsAsyncContext::GetCurrent(etsCtx);
     if (asyncCtx != nullptr) {
-        auto *stacklessJobMan = static_cast<StacklessJobManager *>(executionCtx->GetManager());
+        auto *stacklessJobMan = static_cast<StacklessJobManager *>(jobMan);
         auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
         asyncCtx->SetAwaitee(etsCtx, promise);
         stacklessJobMan->AwaitAsynchronous(dependency);
@@ -141,9 +145,13 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
     auto *asyncMethod = StackWalker::Create(etsCtx->GetMT()).GetMethod();
     auto args = FillEntrypointArgs(asyncMethod);
     auto epInfo = Job::ManagedEntrypointInfo {nullptr, asyncMethod, std::move(args)};
-    auto *job = executionCtx->GetManager()->CreateJob<SuspendableJob>(asyncMethod->GetFullName(), std::move(epInfo));
+    auto *job = jobMan->CreateJob<SuspendableJob>(asyncMethod->GetFullName(), std::move(epInfo));
     job->SetSuspensionContext(aCtxRef);
-    LaunchJobWithDependency(executionCtx, job, asyncCtxHandle.GetPtr(), promiseHandle.GetPtr());
+    auto launchResult = LaunchJobWithDependency(executionCtx, job, asyncCtxHandle.GetPtr(), promiseHandle.GetPtr());
+    if UNLIKELY (launchResult != LaunchResult::OK) {
+        jobMan->HandleLaunchResultManaged(launchResult);
+        jobMan->DestroyJob(job);
+    }
     return asyncCtxHandle.GetPtr();
 }
 

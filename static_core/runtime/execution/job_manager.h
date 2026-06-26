@@ -102,6 +102,8 @@ public:
     void DestroyJob(Job *job);
 
     virtual LaunchResult Launch(Job *job, const LaunchParams &params) = 0;
+    virtual void HandleLaunchResultManaged(LaunchResult result) = 0;
+
     virtual void ExecuteJobs() = 0;
     virtual void Await(JobEvent *awaitee) RELEASE(awaitee) = 0;
 

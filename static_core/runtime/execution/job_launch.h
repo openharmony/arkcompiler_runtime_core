@@ -25,7 +25,7 @@ namespace ark {
 class JobEvent;
 
 /// @brief defines result of launch
-enum class LaunchResult : uint8_t {
+enum class [[nodiscard]] LaunchResult : uint8_t {
     /// coroutine was created and scheduled successfully
     OK,
     /**
@@ -39,7 +39,7 @@ enum class LaunchResult : uint8_t {
      * coroutine was not created because it's launch method is not supported, for example take a look at
      * ThreadedCoroutineManager::LaunchImmediately
      */
-    NOT_SUPPORTED
+    NOT_SUPPORTED,
 };
 
 /// @brief set of launch parameters

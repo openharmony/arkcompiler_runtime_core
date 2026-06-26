@@ -51,6 +51,7 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     LaunchResult Launch(Job *job, const LaunchParams &params) override;
+    void HandleLaunchResultManaged(LaunchResult result) override;
     /**
      *  @brief Move the current coroutine to the waiting state until awaitee happens and schedule the
      * next ready coroutine for execution.

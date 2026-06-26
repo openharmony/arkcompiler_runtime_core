@@ -204,6 +204,7 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecution
     LaunchResult launchRes = jobMan->Launch(job, LaunchParams {true});
     if UNLIKELY (launchRes != LaunchResult::OK) {
         LOG(DEBUG, COROUTINES) << "Failed to list unhandled rejections";
+        jobMan->HandleLaunchResultManaged(launchRes);
         ASSERT(launchRes == LaunchResult::RESOURCE_LIMIT_EXCEED);
         jobMan->DestroyJob(job);
         return;

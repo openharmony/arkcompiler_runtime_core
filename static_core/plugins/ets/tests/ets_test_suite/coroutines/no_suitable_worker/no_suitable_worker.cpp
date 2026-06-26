@@ -37,7 +37,10 @@ TEST_F(EtsNoSuitableWorkerTest, NoSuitableWorkerForNativeCoro)
     auto *job = jobMan->CreateJob("NoSuitableWorkerForNativeCoro", Job::NativeEntrypointInfo {cb, nullptr});
     auto launchRes = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
     ASSERT_EQ(launchRes, LaunchResult::NO_SUITABLE_WORKER);
+    ASSERT_FALSE(executionCtx->GetMT()->HasPendingException());
+    jobMan->HandleLaunchResultManaged(launchRes);
     ASSERT_TRUE(executionCtx->GetMT()->HasPendingException());
+    jobMan->DestroyJob(job);
 }
 
 }  // namespace ark::ets::test

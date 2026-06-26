@@ -88,10 +88,8 @@ static inline bool Launch(EtsExecutionContext *executionCtx, Method *method, con
     auto *job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::LAUNCH);
     auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority()});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
-        // OOM
-        if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
-            jobMan->DestroyJob(job);
-        }
+        jobMan->HandleLaunchResultManaged(launchResult);
+        jobMan->DestroyJob(job);
         etsVm->GetGlobalObjectStorage()->Remove(promiseRef);
     }
     return launchResult == LaunchResult::OK;

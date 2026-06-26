@@ -189,7 +189,8 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
             jobMan->CreateJob(std::move(jobName), epInfo, ets::EtsCoroutine::TIMER_CALLBACK, Job::Type::MUTATOR, true);
         auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
         auto lResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
-        if (UNLIKELY(lResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+        if UNLIKELY (lResult != LaunchResult::OK) {
+            jobMan->HandleLaunchResultManaged(lResult);
             jobMan->DestroyJob(job);
         }
     }

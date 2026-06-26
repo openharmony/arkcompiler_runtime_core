@@ -203,7 +203,14 @@ void LaunchTimerCallback(EntrypointParams *epParams, TimerEvent *timerEvent)
 
     auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
     auto launchRes = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId, timerEvent});
-    if (launchRes != LaunchResult::OK) {
+    if UNLIKELY (launchRes != LaunchResult::OK) {
+        {
+            std::optional<ScopedManagedCodeThread> sc;
+            if (executionCtx->IsInNativeCode()) {
+                sc.emplace(executionCtx);
+            }
+            jobMan->HandleLaunchResultManaged(launchRes);
+        }
         deleteParams(epParams);
         jobMan->DestroyJob(job);
     }
