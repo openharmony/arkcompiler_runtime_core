@@ -16,18 +16,8 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_REGIONAL_SPACE_H
 
 #include <assert.h>
-#include <list>
-#include <map>
-#include <set>
-#include <thread>
-#include <vector>
-
-#include "common_interfaces/base/common.h"
-#include "common_components/heap/allocator/alloc_util.h"
-#include "common_components/heap/allocator/allocator.h"
 #include "common_components/heap/allocator/region_manager.h"
-#include "common_interfaces/thread/mutator.h"
-#include "common_interfaces/heap/region_desc.h"
+#include "runtime/include/mutator.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
 #endif

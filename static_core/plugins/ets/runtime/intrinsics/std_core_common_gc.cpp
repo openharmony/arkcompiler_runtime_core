@@ -25,7 +25,6 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/intrinsics/gc_cause_helper.h"
 #include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
-#include "common_components/common/scoped_object_access.h"
 #include "runtime/include/thread_scopes.h"
 
 namespace ark::ets::intrinsics {

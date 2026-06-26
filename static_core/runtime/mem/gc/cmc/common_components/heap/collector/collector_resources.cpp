@@ -16,17 +16,12 @@
 
 #include "common_components/base/time_utils.h"
 #include "common_components/base/sys_call.h"
-#include "common_components/common/run_type.h"
-#include "common_components/common/scoped_object_access.h"
 
-#include "include/mutator_status.h"
 #include "libarkbase/utils/logger.h"
 
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
-
-#include <thread>
 
 namespace ark::common_vm {
 

@@ -23,13 +23,11 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_class.h"
-#include "runtime/include/coretypes/class.h"
 #include "runtime/include/thread_scopes.h"
 #include "common_components/heap/heap_manager.h"
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/mutator/thread_local.h"
 #include "common_components/mutator/satb_buffer.h"
-#include "common_components/common/scoped_object_access.h"
 #include "common_interfaces/objects/base_object.h"
 #include "runtime/tests/interpreter_test_utils.h"
 #include "runtime/include/gc_task.h"
@@ -557,13 +555,13 @@ TEST_F(CMCGCTest, PreBarrierCheck)
     gc->AddGCTask(false, std::move(task));
 
     {
-        cvm::ScopedEnterSaferegion safeRegion(true);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         checker->OnStartPhaseMark([&arrHandle, &obj2Handle] { arrHandle.GetPtr()->Set(0, obj2Handle.GetPtr()); });
     }
 
     PandaStack<cvm::BaseObject *> objects;
     {
-        cvm::ScopedEnterSaferegion safeRegion(true);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         checker->OnFinishPhaseMark([&objects, &coro] {
             const auto *node = static_cast<const cvm::SatbBuffer::TreapNode *>(coro->GetSatbBufferNode());
             ASSERT_NE(node, nullptr);
@@ -573,7 +571,7 @@ TEST_F(CMCGCTest, PreBarrierCheck)
     ASSERT_EQ(1, objects.size());
 
     {
-        cvm::ScopedEnterSaferegion safeRegion(true);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         checker->WaitForGCFinished();
     }
 }
@@ -601,7 +599,7 @@ TEST_F(CMCGCTest, ReadBarrierCheck)
 
     uintptr_t objPtr = 0;
     {
-        cvm::ScopedEnterSaferegion safeRegion(true);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         checker->OnStartPhaseMark([&objHandle, &objPtr] { objPtr = reinterpret_cast<uintptr_t>(objHandle.GetPtr()); });
     }
 
@@ -609,7 +607,7 @@ TEST_F(CMCGCTest, ReadBarrierCheck)
     ASSERT_TRUE(objRegion->IsInFromSpace());
 
     {
-        cvm::ScopedEnterSaferegion safeRegion(true);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         checker->OnStartPhasePrecopy(
             [&objHandle, &objPtr] { objPtr = reinterpret_cast<uintptr_t>(objHandle.GetPtr()); });
     }
@@ -618,7 +616,7 @@ TEST_F(CMCGCTest, ReadBarrierCheck)
     ASSERT_TRUE(objRegion->IsInToSpace());
 
     {
-        cvm::ScopedEnterSaferegion safeRegion(true);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         checker->WaitForGCFinished();
     }
 }
