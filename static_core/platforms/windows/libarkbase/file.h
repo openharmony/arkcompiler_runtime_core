@@ -23,12 +23,17 @@
 #include <array>
 #include <cerrno>
 #include <cstddef>
+#include <cstdlib>
 #include <io.h>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 namespace ark::os::windows::file {
+
+// In windows API, the length of a path has a limitation of MAX_PATH, which is defined as 260 characters,
+// the "\\?\" prefix is used to specify an extended-length path for a maximum length of 32,767 characters.
+static const std::string PREFIX_FOR_LONG_PATH = "\\\\?\\";
 
 class File {
 public:
@@ -104,6 +109,10 @@ public:
     {
         return "\\";
     }
+
+    static const std::string GetExtendedFilePath(const std::string &path);
+
+    static const std::string NormalizeFullPath(const std::string &path);
 
     static Expected<std::string, Error> GetTmpPath();
 
