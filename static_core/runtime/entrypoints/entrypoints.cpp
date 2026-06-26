@@ -465,6 +465,7 @@ extern "C" ObjectHeader *PostBarrierWriteEntrypoint(ObjectHeader *obj, size_t si
 
 extern "C" void CheckCastEntrypoint(const ObjectHeader *obj, Class *klass)
 {
+    // In case of a successful check, must not trigger GC (`is_check` IR instruction)
     BEGIN_ENTRYPOINT();
 
     // Don't use obj after ClassLinker call because GC can move it.
@@ -480,6 +481,7 @@ extern "C" void CheckCastEntrypoint(const ObjectHeader *obj, Class *klass)
 
 extern "C" void CheckCastDeoptimizeEntrypoint(const ObjectHeader *obj, Class *klass)
 {
+    // In case of a successful check, must not trigger GC (`is_check` IR instruction)
     BEGIN_ENTRYPOINT();
 
     ASSERT(obj != nullptr);
@@ -976,6 +978,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(con
 
 extern "C" void CheckStoreArrayReferenceEntrypoint(coretypes::Array *array, ObjectHeader *storeObj)
 {
+    // In case of a successful check, must not trigger GC (`is_check` IR instruction)
     BEGIN_ENTRYPOINT();
     ASSERT(array != nullptr);
     ASSERT(storeObj != nullptr);
@@ -994,6 +997,7 @@ extern "C" void CheckStoreArrayReferenceEntrypoint(coretypes::Array *array, Obje
 
 extern "C" void CheckStoreArrayReferenceDeoptimizeEntrypoint(coretypes::Array *array, ObjectHeader *storeObj)
 {
+    // In case of a successful check, must not trigger GC (`is_check` IR instruction)
     BEGIN_ENTRYPOINT();
     ASSERT(array != nullptr);
     ASSERT(storeObj != nullptr);

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -268,6 +268,7 @@ void LicmTest::BuildGraphPreHeaderWithIf()
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
+            INST(30U, Opcode::SaveStateDeoptimize);
             INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_NE).Imm(0U).Inputs(0U);
         }
         BASIC_BLOCK(3U, 3U, 4U)
@@ -298,6 +299,76 @@ TEST_F(LicmTest, PreHeaderWithIf)
 
         BASIC_BLOCK(2U, 5U, 4U)
         {
+            INST(30U, Opcode::SaveStateDeoptimize);
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_NE).Imm(0U).Inputs(0U);
+        }
+        BASIC_BLOCK(5U, 3U)
+        {
+            INST(9U, Opcode::Mul).u64().Inputs(0U, 0U);
+            // copy SSD over
+            INST(31U, Opcode::SaveStateDeoptimize);
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(7U, Opcode::Phi).u64().Inputs(0U, 8U);
+            INST(8U, Opcode::Add).u64().Inputs(7U, 1U);
+            INST(10U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).CC(CC_LT).Inputs(8U, 9U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(12U, Opcode::Phi).u64().Inputs(0U, 8U);
+            INST(13U, Opcode::Return).u64().Inputs(12U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(PreHeaderInlinedSaveStateWithIf, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::CallStatic).v0id().Inlined().InputsAutoType(2U);
+            INST(30U, Opcode::SaveStateDeoptimize);
+            INST(4U, Opcode::ReturnInlined).Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_NE).Imm(0U).Inputs(0U);
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(7U, Opcode::Phi).u64().Inputs(0U, 8U);
+            INST(8U, Opcode::Add).u64().Inputs(7U, 1U);
+            INST(9U, Opcode::Mul).u64().Inputs(0U, 0U);
+            INST(10U, Opcode::Compare).b().SrcType(DataType::Type::UINT64).CC(CC_LT).Inputs(8U, 9U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(12U, Opcode::Phi).u64().Inputs(0U, 8U);
+            INST(13U, Opcode::Return).u64().Inputs(12U);
+        }
+    }
+}
+
+OUT_GRAPH(PreHeaderInlinedSaveStateWithIf, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 1U);
+
+        BASIC_BLOCK(2U, 5U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::CallStatic).v0id().Inlined().InputsAutoType(2U);
+            // do NOT copy inlined SSD outside to the new preheader
+            INST(30U, Opcode::SaveStateDeoptimize);
+            INST(4U, Opcode::ReturnInlined).Inputs(2U);
             INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).CC(CC_NE).Imm(0U).Inputs(0U);
         }
         BASIC_BLOCK(5U, 3U)
@@ -317,6 +388,14 @@ TEST_F(LicmTest, PreHeaderWithIf)
             INST(13U, Opcode::Return).u64().Inputs(12U);
         }
     }
+}
+
+TEST_F(LicmTest, PreHeaderInlinedSaveStateWithIf)
+{
+    src_graph::PreHeaderInlinedSaveStateWithIf::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
+    auto graph = CreateEmptyGraph();
+    out_graph::PreHeaderInlinedSaveStateWithIf::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

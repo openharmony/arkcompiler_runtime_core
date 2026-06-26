@@ -3512,13 +3512,41 @@ SRC_GRAPH(SplitDeoptimizationP8, Graph *graph)
         }
         BASIC_BLOCK(4U, 5U)
         {
-            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+            INST(56U, Opcode::SaveState).Inputs(0U, 1U, 2U, 4U).SrcVregs({0U, 1U, 2U, 4U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 56U);
             INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
             INST(59U, Opcode::SaveState);
             INST(7U, Opcode::DeoptimizeIf).Inputs(6U, 59U);
         }
         BASIC_BLOCK(5U, -1L)
         {
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP8, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(56U, Opcode::SaveState).Inputs(0U, 1U, 2U, 4U).SrcVregs({0U, 1U, 2U, 4U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 56U);
+            INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
+            INST(59U, Opcode::SaveState);
+            INST(7U, Opcode::DeoptimizeIf).Inputs(6U, 59U);
             INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
             INST(9U, Opcode::Return).s32().Inputs(8U);
         }
@@ -3865,7 +3893,7 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP8)
     ASSERT_TRUE(Run());
 
     auto graph = CreateEmptyGraph();
-    src_graph::SplitDeoptimizationP1::CREATE(graph);
+    out_graph::SplitDeoptimizationP8::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

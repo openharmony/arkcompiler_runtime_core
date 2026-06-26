@@ -18,12 +18,13 @@
 
 //! CHECKER      JIT escape analysis decompose
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex=.*next[0-9]* --compiler-inlining=true",
+//! RUN          force_jit: true, options: "--compiler-regex=.*next[0-9]* --compiler-inlining=true " +
+//!                                        "--compiler-inlining-blacklist=escape_analysis_decompose.ETSGLOBAL::next1",
 //!              entry: "escape_analysis_decompose.ETSGLOBAL::main"
 //!
-//! EVENT        /DeoptimizationReason,escape_analysis_decompose.ETSGLOBAL::__noinline__next2,IFIMM_TRY/
-//! EVENT        /Deoptimization,escape_analysis_decompose.ETSGLOBAL::__noinline__next2,4,IFRAME/
-//! METHOD       "escape_analysis_decompose.ETSGLOBAL::__noinline__next2"
+//! EVENT        /DeoptimizationReason,escape_analysis_decompose.ETSGLOBAL::next2,IFIMM_TRY/
+//! EVENT        /Deoptimization,escape_analysis_decompose.ETSGLOBAL::next2,4,IFRAME/
+//! METHOD       "escape_analysis_decompose.ETSGLOBAL::next2"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "SaveState", 4
 //! INST_COUNT   "DeoptimizeIf", 1
@@ -31,7 +32,7 @@
 //! INST_COUNT   "SaveState", 5
 //! INST_COUNT   "DeoptimizeIf", 1
 //!
-//! METHOD       "escape_analysis_decompose.ETSGLOBAL::__noinline__next3"
+//! METHOD       "escape_analysis_decompose.ETSGLOBAL::next3"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "SaveState", 4
 //! INST_COUNT   "NullCheck", 0
@@ -59,18 +60,28 @@
 //! INST_NOT     "Deoptimize NULL_CHECK"
 //! INST_COUNT   "BoundsCheck D", 1
 //! INST_COUNT   "NullCheck D", 1
+//!
+//! METHOD       "escape_analysis_decompose.ETSGLOBAL::next6"
+//! PASS_BEFORE  "EscapeAnalysis"
+//! INST         /DeoptimizeIf BOUNDS_CHECK.*v(?<ss_pre>\d+)\b/
+//! INST_NEXT    /DeoptimizeIf BOUNDS_CHECK.*v#{VAR(:ss_pre)}\b/
+//! INST         /#{VAR(:ss_pre)}\.\s+SaveState/
+//! PASS_AFTER   "EscapeAnalysis"
+//! INST         /DeoptimizeIf BOUNDS_CHECK.*v(?<ss_post>\d+)\b/
+//! INST_NEXT    /DeoptimizeIf BOUNDS_CHECK.*v#{VAR(:ss_post)}\b/
+//! INST         /#{VAR(:ss_post)}\.\s+SaveState/
 
-function __noinline__next1(str: string): string {
+function next1(str: string): string {
   return str;
 }
 
 // Positive test 1 - Decompose and compose normally
-function __noinline__next2(str: string, arg: int) {
+function next2(str: string, arg: int) {
   try {
     if (arg > 0) {
-      throw new Error(__noinline__next1(str) + 'ok');
+      throw new Error(next1(str) + 'ok');
     } else {
-      return __noinline__next1(str) + 'ok';
+      return next1(str) + 'ok';
     }
   } catch (e) {
     return e.message;
@@ -81,7 +92,7 @@ function doSmth() : void {
 }
 
 // Negative test 1 - NullCheck inst which has no flag CAN_DEOPTIMIZE
-function __noinline__next3(str: String): String {
+function next3(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();
     doSmth();
@@ -142,10 +153,23 @@ function next5(t : Int8ArrayIteratorEntries2) : IteratorResult<[Number, Number]>
   return t.next()
 }
 
+// Negative test 5 - Two deopts sharing same SaveState.
+// Need to merge the split-off block back so that SaveState's users are in the same block
+function next6(arr: ValueArray<int>, size: int, offset: int, take: boolean): int {
+    let sum: int = 0;
+    for (let i: int = 0; i < size; ++i) {
+        if (take) {
+            sum += arr[i + offset];
+            sum += arr[i + offset + 1];
+        }
+    }
+    return sum + size;
+}
+
 function main(): void {
     for (let i = 0; i < 200; i++) {
-        arktest.assertEQ(__noinline__next2('maybe', i < 100 ? 0 : 1), 'maybeok');
-        arktest.assertEQ(__noinline__next3('abcde'), 'abcde', 'Wrong at next3')
+        arktest.assertEQ(next2('maybe', i < 100 ? 0 : 1), 'maybeok');
+        arktest.assertEQ(next3('abcde'), 'abcde', 'Wrong at next3')
     }
 
     let arr = new Int8Array([1, 2, 3]);
@@ -157,4 +181,6 @@ function main(): void {
     arktest.assertEQ(iter2.next().done, false);
     arktest.assertEQ(next5(iter2).done, false);
 
+    const values: ValueArray<int> = [0, 1, 2, 3, 4];
+    arktest.assertEQ(next6(values, 3, 1, true), 18);
 }

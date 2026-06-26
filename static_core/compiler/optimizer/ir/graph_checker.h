@@ -116,11 +116,12 @@ private:
     void CheckLoadGCEntrypointBarrierTypes();
     void CheckLoadGCEntrypointToUserPaths();
     void ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, const Inst *otherInst);
-#endif  // COMPILER_DEBUG_CHECKS
+    void CheckSaveStateRuntimeCallUser(BasicBlock *block, SaveStateInst *ss, Inst *userInst);
     void CheckSaveStateInputs();
-    void CheckSaveStatesWithRuntimeCallUsers();
-    void CheckSaveStatesWithRuntimeCallUsers(BasicBlock *block, SaveStateInst *ss);
+    void CheckSaveStateUsers();
+    void CheckSaveStateUsers(BasicBlock *block, SaveStateInst *ss);
     void CheckSaveStateOsrRec(const Inst *inst, const Inst *user, BasicBlock *block, Marker visited);
+#endif  // COMPILER_DEBUG_CHECKS
 
     Graph *GetGraph() const
     {

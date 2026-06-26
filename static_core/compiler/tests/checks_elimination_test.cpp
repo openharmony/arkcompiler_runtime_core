@@ -5637,63 +5637,6 @@ TEST_F(ChecksEliminationTest, RootMergeBranchLocalBoundsChecks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-// CC-OFFNXT(huge_method, G.FUN.01) graph creation
-TEST_F(ChecksEliminationTest, LoopKeepBranchLocalBoundsChecksOuterSaveState)
-{
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0U);
-        CONSTANT(1U, 1U);
-        CONSTANT(2U, 2U);
-        PARAMETER(3U, 0U).ref();  // array
-        PARAMETER(4U, 1U).s32();  // limit
-        PARAMETER(5U, 2U).s32();  // branch selector
-
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(6U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U, 5U).SrcVregs({0U, 1U, 2U, 3U, 4U, 5U});
-            INST(7U, Opcode::NullCheck).ref().Inputs(3U, 6U);
-            INST(8U, Opcode::LenArray).s32().Inputs(7U);
-        }
-
-        BASIC_BLOCK(3U, 4U, 9U)
-        {
-            INST(9U, Opcode::Phi).s32().Inputs(0U, 29U);  // i
-            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(9U, 4U);
-            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
-        }
-
-        BASIC_BLOCK(4U, 5U, 8U)
-        {
-            INST(12U, Opcode::Compare).b().CC(CC_EQ).SrcType(DataType::INT32).Inputs(5U, 0U);
-            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
-        }
-
-        BASIC_BLOCK(5U, 8U)
-        {
-            INST(14U, Opcode::Add).s32().Inputs(9U, 1U);
-            INST(15U, Opcode::BoundsCheck).s32().Inputs(8U, 14U, 6U);  // SaveState in preheader block.
-            INST(16U, Opcode::StoreArray).s32().Inputs(7U, 15U, 0U);
-            INST(17U, Opcode::Add).s32().Inputs(9U, 2U);
-            INST(18U, Opcode::BoundsCheck).s32().Inputs(8U, 17U, 6U);  // SaveState in preheader block.
-            INST(19U, Opcode::StoreArray).s32().Inputs(7U, 18U, 0U);
-        }
-
-        BASIC_BLOCK(8U, 3U)
-        {
-            INST(29U, Opcode::Add).s32().Inputs(9U, 1U);
-        }
-
-        BASIC_BLOCK(9U, 1U)
-        {
-            INST(30U, Opcode::ReturnVoid).v0id();
-        }
-    }
-    auto clone = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
-    ASSERT_FALSE(GetGraph()->RunPass<ChecksElimination>());
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
-}
-
 TEST_F(ChecksEliminationTest, DeoptTest)
 {
     GRAPH(GetGraph())

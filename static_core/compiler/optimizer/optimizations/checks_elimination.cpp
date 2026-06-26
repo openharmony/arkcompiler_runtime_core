@@ -1570,9 +1570,10 @@ std::optional<ChecksElimination::DeoptGuardInfo> ChecksElimination::TryReplaceBo
     }
 
     auto *saveState = FindSaveStateBlockLocal(blockInfos, block);
-    if (saveState == nullptr || saveState->GetBasicBlock() != block) {
+    if (saveState == nullptr) {
         return std::nullopt;
     }
+    ASSERT(saveState->GetBasicBlock() == block);
     // Keep insertion local to this block.
     auto *insertAfter = SelectInsertAfterForBoundsDeopt(lenArray, saveState, parentIndex);
     if (insertAfter == nullptr || insertAfter->GetBasicBlock() != block) {

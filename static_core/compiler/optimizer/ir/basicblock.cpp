@@ -687,7 +687,7 @@ void BasicBlock::RemoveFixLoopInfo()
  * turns into this:
  *              [1']
  */
-void BasicBlock::JoinSuccessorBlock()
+void BasicBlock::JoinSuccessorBlock(bool fixDomTree)
 {
     ASSERT(!IsStartBlock());
 
@@ -739,7 +739,7 @@ void BasicBlock::JoinSuccessorBlock()
     if (succ->tryId_ != INVALID_ID) {
         this->tryId_ = succ->tryId_;
     }
-    GetGraph()->RemoveEmptyBlock(succ);
+    GetGraph()->RemoveEmptyBlock(succ, fixDomTree);
 }
 
 void BasicBlock::ReplaceSuccessorLoopBackEdges(Loop *loop, BasicBlock *succ)

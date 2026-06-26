@@ -334,6 +334,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/deoptimize_elimination_test.cpp
     tests/escape_analysis_test.cpp
     tests/dom_tree_test.cpp
+    tests/graph_checker_test.cpp
     tests/graph_cloner_test.cpp
     tests/graph_comparator_test.cpp
     tests/graph_creation_test.cpp

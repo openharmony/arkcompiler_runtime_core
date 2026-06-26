@@ -120,8 +120,40 @@ def match_str(match)
   match.is_a?(Regexp) ? "/#{match.source}/" : match
 end
 
+$checker_variables = {}
+
+def checker_variable(name)
+  key = name.to_s
+  raise_error "Undefined checker variable: #{key}" unless $checker_variables.key?(key)
+
+  $checker_variables[key]
+end
+
+def VAR(name)
+  Regexp.escape(checker_variable(name))
+end
+
+def VAR_RAW(name)
+  checker_variable(name)
+end
+
+def save_checker_variables(match_data)
+  match_data.names.each do |name|
+    value = match_data[name]
+    if $checker_variables.key?(name) && $checker_variables[name] != value
+      raise_error "Checker variable #{name} redefined: #{$checker_variables[name]} vs #{value}"
+    end
+
+    $checker_variables[name] = value
+  end
+end
+
 def contains?(str, match)
-  return str =~ match if match.is_a? Regexp
+  if match.is_a? Regexp
+    match_data = str.match(match)
+    save_checker_variables(match_data) if match_data
+    return match_data
+  end
 
   raise_error "Wrong type for search: #{match.class}" unless match.is_a? String
   str.include? match
@@ -964,6 +996,7 @@ class Checker
     log.info "Running \"#{@name}\""
     init_run
     $checker_name = @name
+    $checker_variables = {}
     begin
       $checker_counter += 1
       # This block processes checkers that have //! DEFINE_FRONTEND_OPTIONS blocks. If used block already compiled .abc we use its path. Otherwise we add compilation steps to checker and afterwards save path to .abc
