@@ -62,7 +62,7 @@ public:
         os::memory::Mutex resolverMapMutex;
     };
 
-    void Report(const std::string_view message, bool isFatal = true);
+    void Report(const std::string_view message, bool isFatal = true, bool appendSeverity = false);
 
     void SetVerifyOptions(bool isWorkaroundNoCrashIfInvalidUsage)
     {

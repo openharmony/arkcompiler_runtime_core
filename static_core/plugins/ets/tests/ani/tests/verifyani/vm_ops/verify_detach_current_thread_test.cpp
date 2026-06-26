@@ -48,7 +48,7 @@ TEST_F(DetachCurrentThreadTest, thread_is_not_attached)
     std::thread([this]() {
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_ERROR);
         std::string msg = GetAndClearAbortMessage();
-        ASSERT_THAT(msg, ::testing::HasSubstr("Cannot detach current thread, thread is not attached"));
+        ASSERT_THAT(msg, ::testing::HasSubstr("Cannot detach current thread, thread is not attached [FATAL]"));
     }).join();
 }
 

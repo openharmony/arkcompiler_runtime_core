@@ -347,12 +347,21 @@ bool ANIVerifier::IsValidGlobalResolver(VResolver *vresolver)
     return resolvers.find(vresolver) != resolvers.cend();
 }
 
-void ANIVerifier::Report(const std::string_view message, bool isFatal)
+void ANIVerifier::Report(const std::string_view message, bool isFatal, bool appendSeverity)
 {
+    PandaString formattedMessage;
+    std::string_view reportMessage = message;
+    if (appendSeverity) {
+        PandaStringStream ss;
+        ss << message << " [" << (isFatal ? "FATAL" : "ERROR") << "]";
+        formattedMessage = ss.str();
+        reportMessage = formattedMessage;
+    }
+
     if (IsWorkaroundNoCrashIfInvalidUsage() || !isFatal) {
-        ANIVerifier::Error(message);
+        ANIVerifier::Error(reportMessage);
     } else {
-        ANIVerifier::Abort(message);
+        ANIVerifier::Abort(reportMessage);
     }
 }
 

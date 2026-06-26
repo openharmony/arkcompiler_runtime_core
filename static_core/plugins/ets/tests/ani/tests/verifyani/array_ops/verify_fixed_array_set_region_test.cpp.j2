@@ -117,7 +117,7 @@ TEST_F(FixedArraySetRegion{{ Type }}Test, wrong_native_buffer_range)
     auto addr = std::numeric_limits<uintptr_t>::max() - sizeof(ani_{{ type }}) + 1U;
     auto *nativeBuffer = reinterpret_cast<const ani_{{ type }} *>(addr);
     ASSERT_EQ(env_->FixedArray_SetRegion_{{ Type }}(array, 0U, 1U, nativeBuffer), ANI_ERROR);
-    ASSERT_ERROR_ANI_MSG("FixedArray_SetRegion_{{ Type }}", "wrong native buffer");
+    ASSERT_ERROR_ANI_MSG("FixedArray_SetRegion_{{ Type }}", "wrong native buffer [FATAL]");
 }
 
 TEST_F(FixedArraySetRegion{{ Type }}Test, out_of_range_with_wrong_native_buffer_range)
@@ -139,7 +139,8 @@ TEST_F(FixedArraySetRegion{{ Type }}Test, wrong_native_buffer_value)
 
     const ani_{{ type }} nativeBuffer[LENGTH] {ANI_FALSE, static_cast<ani_boolean>(2U), ANI_TRUE};
     ASSERT_EQ(env_->FixedArray_SetRegion_{{ Type }}(array, 0U, LENGTH, nativeBuffer), ANI_ERROR);
-    ASSERT_ERROR_ANI_MSG("FixedArray_SetRegion_{{ Type }}", "wrong value for ani_boolean in native buffer at index 1");
+    ASSERT_ERROR_ANI_MSG("FixedArray_SetRegion_{{ Type }}",
+                         "wrong value for ani_boolean in native buffer at index 1 [FATAL]");
 }
 
 TEST_F(FixedArraySetRegion{{ Type }}Test, out_of_range_with_wrong_native_buffer_value)
