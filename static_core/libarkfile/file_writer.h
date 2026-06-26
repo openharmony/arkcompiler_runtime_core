@@ -25,6 +25,7 @@
 #include <array>
 #include <cerrno>
 #include <cstdint>
+#include <cstring>
 
 #include <limits>
 #include <type_traits>
@@ -52,11 +53,33 @@ public:
         return WriteBytes(bytes.data(), bytes.size());
     }
 
+    virtual bool WriteRawBytes(const uint8_t *data, size_t size)
+    {
+        if (size == 0) {
+            return true;
+        }
+        std::vector<uint8_t> tmp(size);
+        if (memcpy_s(tmp.data(), tmp.size(), data, size) != EOK) {
+            return false;
+        }
+        return WriteBytes(tmp);
+    }
+
+    virtual bool AppendRange(const uint8_t *data, size_t size)
+    {
+        return WriteRawBytes(data, size);
+    }
+
     virtual size_t GetOffset() const = 0;
 
     virtual void CountChecksum(bool /* counting */) {}
 
     virtual bool WriteChecksum(size_t /* offset */)
+    {
+        return false;
+    }
+
+    virtual bool FinalizeChecksum(size_t /* contentBeginOffset */, size_t /* checksumStoreOffset */)
     {
         return false;
     }
@@ -138,6 +161,64 @@ public:
     NO_MOVE_SEMANTIC(Writer);
 };
 
+class OffsetWriter : public Writer {
+public:
+    OffsetWriter(uint8_t *base, size_t absoluteOffset, size_t capacity)
+        : sp_(Span<uint8_t>(base, capacity)), absStart_(absoluteOffset)
+    {
+    }
+
+    ~OffsetWriter() override = default;
+
+    NO_COPY_SEMANTIC(OffsetWriter);
+    NO_MOVE_SEMANTIC(OffsetWriter);
+
+    bool WriteByte(uint8_t byte) override
+    {
+        if (pos_ >= sp_.Size()) {
+            return false;
+        }
+        sp_[pos_++] = byte;
+        return true;
+    }
+
+    bool WriteBytes(const std::vector<uint8_t> &bytes) override
+    {
+        return WriteRawBytes(bytes.data(), bytes.size());
+    }
+
+    bool WriteBytes(const uint8_t *bytes, size_t size) override
+    {
+        return WriteRawBytes(bytes, size);
+    }
+
+    bool WriteRawBytes(const uint8_t *data, size_t size) override
+    {
+        if (size == 0) {
+            return true;
+        }
+        if (pos_ + size > sp_.Size()) {
+            return false;
+        }
+        auto dest = sp_.SubSpan(pos_, size);
+        if (memcpy_s(dest.data(), dest.Size(), data, size) != 0) {
+            return false;
+        }
+        pos_ += size;
+        return true;
+    }
+
+    size_t GetOffset() const override
+    {
+        return absStart_ + pos_;
+    }
+
+private:
+    Span<uint8_t> sp_;
+    size_t absStart_ {0};
+    size_t pos_ {0};
+};
+
 class MemoryWriter : public Writer {
 public:
     PANDA_PUBLIC_API MemoryWriter();
@@ -156,11 +237,17 @@ public:
         return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
     }
 
+    PANDA_PUBLIC_API bool FinalizeChecksum(size_t contentBeginOffset, size_t checksumStoreOffset) override;
+
     bool WriteByte(uint8_t byte) override;
 
     bool WriteBytes(const std::vector<uint8_t> &bytes) override;
 
     bool WriteBytes(const uint8_t *bytes, size_t size) override;
+
+    PANDA_PUBLIC_API bool WriteRawBytes(const uint8_t *data, size_t size) override;
+
+    PANDA_PUBLIC_API bool AppendRange(const uint8_t *data, size_t size) override;
 
     const std::vector<uint8_t> &GetData()
     {
@@ -200,11 +287,17 @@ public:
         return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
     }
 
+    PANDA_PUBLIC_API bool FinalizeChecksum(size_t contentBeginOffset, size_t checksumStoreOffset) override;
+
     bool WriteByte(uint8_t byte) override;
 
     bool WriteBytes(const std::vector<uint8_t> &bytes) override;
 
     bool WriteBytes(const uint8_t *bytes, size_t size) override;
+
+    PANDA_PUBLIC_API bool WriteRawBytes(const uint8_t *data, size_t size) override;
+
+    PANDA_PUBLIC_API bool AppendRange(const uint8_t *data, size_t size) override;
 
     size_t GetOffset() const override
     {
@@ -233,11 +326,17 @@ public:
 
     bool WriteChecksum(size_t offset) override;
 
+    PANDA_PUBLIC_API bool FinalizeChecksum(size_t contentBeginOffset, size_t checksumStoreOffset) override;
+
     bool WriteByte(uint8_t data) override;
 
     bool WriteBytes(const std::vector<uint8_t> &bytes) override;
 
     bool WriteBytes(const uint8_t *bytes, size_t size) override;
+
+    PANDA_PUBLIC_API bool WriteRawBytes(const uint8_t *data, size_t size) override;
+
+    PANDA_PUBLIC_API bool AppendRange(const uint8_t *data, size_t size) override;
 
     size_t GetOffset() const override
     {
@@ -256,7 +355,12 @@ public:
 
     void ReserveBufferCapacity(size_t size) override
     {
-        buffer_.reserve(seekable_ ? std::min(size, BUFFER_CAPACITY) : size);
+        buffer_.reserve(size);
+    }
+
+    const std::vector<uint8_t> &GetBuffer() const
+    {
+        return buffer_;
     }
 
     bool FinishWrite() override;

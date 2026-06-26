@@ -648,6 +648,10 @@ private:
 
     bool WriteBody(Writer *writer);
 
+    bool WriteItemsParallel(Writer *writer, const std::vector<BaseItem *> &itemsArr);
+
+    void BuildEmitItems();
+
     bool PrepareRegionSectionForWrite(RegionSectionMode regionSectionMode, bool *rebuildRegionSection,
                                       bool *updateOrderIndexes);
 
@@ -711,6 +715,7 @@ private:
 
     bool isQuickened_ = false;
     bool regionSectionBuilt_ = false;
+    std::vector<BaseItem *> emitItems_;
     std::optional<BytecodeVersion> bytecodeVersion_;
 };
 

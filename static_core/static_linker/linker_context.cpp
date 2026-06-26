@@ -93,6 +93,8 @@ void Context::Merge()
 
     FillRegularClasses();
 
+    ClearAndReleaseStorage(classMergeRecords_);
+
     for (const auto &[item, reader] : buckets.foreignMembers) {
         MergeItem(item, *reader);
     }
@@ -106,10 +108,17 @@ void Context::Merge()
 Context::MergeItemBuckets Context::CollectMergeItemBuckets()
 {
     auto buckets = MergeItemBuckets {};
+
+    size_t totalItems = 0;
+    for (auto &reader : readers_) {
+        totalItems += reader.GetItems()->size();
+    }
+    constexpr size_t K_FOREIGN_RESERVE_FRACTION = 3U;  // CC-OFF(G.NAM.03-CPP) project code style
+    buckets.foreignClasses.reserve(totalItems / K_FOREIGN_RESERVE_FRACTION);
+    buckets.foreignMembers.reserve(totalItems / K_FOREIGN_RESERVE_FRACTION);
+
     for (auto &reader : readers_) {
         for (const auto &[o, i] : *reader.GetItems()) {
-            // Keep old entity offsets available for bytecode/debug id resolution, and collect the work lists used by
-            // the ordered merge below.
             i->SetOffset(o.GetOffset());
             buckets.totalItems++;
             switch (i->GetItemType()) {
@@ -168,26 +177,15 @@ void Context::AddRegularClasses()
             auto *clz = GetOrCreateRegularClass(name, &reader);
             knownItems_[i] = clz;
             cameFrom_.emplace_back(clz, &reader);
+            classMergeRecords_.push_back({static_cast<panda_file::ClassItem *>(i), clz, &reader});
         }
     }
 }
 
 void Context::FillRegularClasses()
 {
-    for (auto &reader : readers_) {
-        auto *ic = reader.GetContainerPtr();
-        auto &classes = *ic->GetClassMap();
-
-        for (const auto &[name, i] : classes) {
-            if (i->IsForeign()) {
-                continue;
-            }
-            auto found = knownItems_.find(i);
-            ASSERT(found != knownItems_.end());
-            auto ni = static_cast<panda_file::ClassItem *>(found->second);
-            auto oi = static_cast<panda_file::ClassItem *>(i);
-            MergeClass(&reader, ni, oi);
-        }
+    for (auto &rec : classMergeRecords_) {
+        MergeClass(rec.reader, rec.newItem, rec.oldItem);
     }
 }
 
@@ -867,6 +865,7 @@ size_t Context::EstimatePatchChanges(size_t start, size_t end) const
 
 void Context::ProcessCodeDataRange(CodePatcher *patcher, size_t start, size_t end)
 {
+    patcher->ReserveRanges(end - start);
     for (auto idx = start; idx < end; idx++) {
         auto changeStart = patcher->GetSize();
         ProcessCodeData(*patcher, &codeDatas_[idx]);
@@ -902,10 +901,13 @@ void Context::ParseConcurrently()
     }
 
     size_t totalChanges = 0;
+    size_t totalRanges = 0;
     for (const auto &patcher : patchers) {
         totalChanges += patcher.GetSize();
+        totalRanges += patcher.GetBytecodePatchRangeCount();
     }
     patcher_.ReserveChanges(totalChanges);
+    patcher_.ReserveRanges(totalRanges);
     for (auto &patcher : patchers) {
         patcher_.Devour(std::move(patcher));
     }
@@ -965,29 +967,34 @@ bool Context::FileFind(const std::string &fileName, std::map<std::string, panda_
 
 bool Context::HandleEntryDependencies()
 {
+    // CC-OFFNXT(G.CNS.02-CPP) class descriptor wraps type name with 'L' prefix and ';' suffix
+    constexpr size_t K_CLASS_DESCRIPTOR_AFFIX_COUNT = 2U;
+
     auto &cm = *cont_.GetClassMap();
     for (const auto &name : conf_.entryNames) {
         auto dotPos = name.rfind('.');
         auto firstSlash = name.find('/');
         auto lastSlash = name.rfind('/');
         if (dotPos != std::string::npos && dotPos != 0 && dotPos < name.size() - 1) {
-            // if entry is filename
             if (FileFind(name, cm)) {
                 continue;
             }
         } else if (firstSlash != std::string::npos && lastSlash != std::string::npos && lastSlash > firstSlash) {
-            // if entry is method
-            auto classNameFromEntry = name.substr(0, lastSlash);
-            classNameFromEntry.insert(classNameFromEntry.begin(), 'L');
-            classNameFromEntry += ";";
-            auto methodNameFromEntry = name.substr(lastSlash + 1);
-            if (MethodFind(classNameFromEntry, methodNameFromEntry, cm)) {
+            std::string className;
+            className.reserve(lastSlash + K_CLASS_DESCRIPTOR_AFFIX_COUNT);
+            className.push_back('L');
+            className.append(name, 0, lastSlash);
+            className.push_back(';');
+            auto methodName = name.substr(lastSlash + 1);
+            if (MethodFind(className, methodName, cm)) {
                 continue;
             }
         }
-        // try look up as classname for last try
-        auto className = name + ";";
-        className.insert(className.begin(), 'L');
+        std::string className;
+        className.reserve(name.size() + K_CLASS_DESCRIPTOR_AFFIX_COUNT);
+        className.push_back('L');
+        className.append(name);
+        className.push_back(';');
         auto it = cm.find(className);
         if (it != cm.end()) {
             it->second->SetDependencyMark();
@@ -1049,7 +1056,8 @@ void Context::Patch()
     auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
     auto threadCount = std::min(chunkCount, static_cast<size_t>(hardwareThreads));
     if (threadCount <= 1) {
-        patcher_.Patch({0, patchSize});
+        patcher_.PatchBytecode({0, patchSize});
+        patcher_.PatchDebug();
         return;
     }
 
@@ -1072,7 +1080,7 @@ void Context::Patch()
         thread.join();
     }
     // Debug info patching mutates shared debug structures, so it stays serial after parallel bytecode patching.
-    patcher_.PatchDebug({0, patchSize});
+    patcher_.PatchDebug();
 }
 
 panda_file::BaseClassItem *Context::ClassFromOld(panda_file::BaseClassItem *old)

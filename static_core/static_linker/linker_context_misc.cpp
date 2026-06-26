@@ -16,7 +16,6 @@
 #include <algorithm>
 #include <atomic>
 #include <sstream>
-#include <thread>
 
 #include "libarkfile/file_items.h"
 #include "libarkfile/file_reader.h"
@@ -24,27 +23,13 @@
 
 #include "linker.h"
 #include "linker_context.h"
+#include "linker_parallel.h"
 
 namespace ark::static_linker {
 
 namespace {
 
 using ReaderEntry = std::pair<const std::string *, ark::panda_file::FileReader *>;
-
-struct ReadWorkerData {
-    const std::vector<ReaderEntry> *readers;
-    std::vector<uint8_t> *readResults;
-    std::atomic<size_t> *nextReader;
-};
-
-void ReadContainers(ReadWorkerData *data)
-{
-    // Atomic with relaxed order reason: counter only gives each thread a separate reader index
-    for (auto idx = data->nextReader->fetch_add(1, std::memory_order_relaxed); idx < data->readers->size();
-         idx = data->nextReader->fetch_add(1, std::memory_order_relaxed)) {
-        (*data->readResults)[idx] = (*data->readers)[idx].second->ReadContainer(false) ? 1U : 0U;
-    }
-}
 
 void DemangleName(std::ostream &o, std::string_view s)
 {
@@ -299,7 +284,7 @@ void Context::Write(const std::string &out)
         Error("Can't write", {ErrorDetail("file", out)});
         return;
     }
-    if (!cont_.Write(&writer, true, false,
+    if (!cont_.Write(&writer, false, false,
                      panda_file::ItemContainer::RegionSectionMode::REUSE_REQUIRED_UNCHANGED_DEPENDENCIES)) {
         Error("Can't write", {ErrorDetail("file", out)});
         return;
@@ -330,23 +315,9 @@ void Context::Read(const std::vector<std::string> &input)
         return;
     }
 
-    auto hardwareThreads = std::max(1U, std::thread::hardware_concurrency());
-    auto threadCount = std::min(readers.size(), static_cast<size_t>(hardwareThreads));
-    std::atomic<size_t> nextReader {0};
     std::vector<uint8_t> readResults(readers.size(), 0);
-    ReadWorkerData workerData {&readers, &readResults, &nextReader};
-    if (threadCount <= 1) {
-        ReadContainers(&workerData);
-    } else {
-        std::vector<std::thread> threads;
-        threads.reserve(threadCount);
-        for (size_t i = 0; i < threadCount; i++) {
-            threads.emplace_back(ReadContainers, &workerData);
-        }
-        for (auto &thread : threads) {
-            thread.join();
-        }
-    }
+    ParallelForDynamic(0U, readers.size(),
+                       [&](size_t i) { readResults[i] = readers[i].second->ReadContainer(false) ? 1U : 0U; });
 
     for (size_t i = 0; i < readers.size(); i++) {
         if (readResults[i] != 0) {

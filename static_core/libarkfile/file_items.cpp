@@ -258,6 +258,7 @@ size_t ClassItem::CalculateSize() const
 
 void ClassItem::ComputeLayout()
 {
+    FinalizeMethodsOrder();
     BaseClassItem::ComputeLayout();
 
     uint32_t offset = GetOffset();

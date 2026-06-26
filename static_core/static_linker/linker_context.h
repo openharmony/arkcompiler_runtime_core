@@ -18,6 +18,7 @@
 
 #include <forward_list>
 #include <functional>
+#include <array>
 #include <unordered_map>
 #include <vector>
 
@@ -76,16 +77,17 @@ public:
         bool patchLineNumberProgram;
     };
 
-    using Change = std::variant<IndexedChange, StringChange, LiteralArrayChange, std::string, DebugInfoPatch>;
+    using Change = std::variant<IndexedChange, StringChange, LiteralArrayChange>;
+    using NonBytecodeChange = std::variant<std::string, DebugInfoPatch>;
 
     void Add(Change c);
+    void AddNonBc(NonBytecodeChange c);
 
     void ApplyDeps(Context *ctx);
 
     void TryDeletePatch();
-    void Patch(const std::pair<size_t, size_t> range);
     void PatchBytecode(const std::pair<size_t, size_t> range);
-    void PatchDebug(const std::pair<size_t, size_t> range);
+    void PatchDebug();
     void PatchBytecodeRanges(const std::pair<size_t, size_t> range);
     void AddStringDependency();
 
@@ -97,9 +99,15 @@ public:
         changes_.reserve(size);
     }
 
+    void ReserveRanges(size_t size)
+    {
+        bytecodePatchRanges_.reserve(size);
+    }
+
     void Clear()
     {
         ClearAndReleaseStorage(changes_);
+        ClearAndReleaseStorage(nonBcChanges_);
         ClearAndReleaseStorage(bytecodePatchRanges_);
     }
 
@@ -117,12 +125,10 @@ private:
     static void ApplyStringChange(StringChange *change, Context *ctx);
     static void ApplyLiteralArrayChange(LiteralArrayChange *change, Context *ctx);
     static void ApplyStringDependency(std::string *value, Context *ctx);
-    static bool IsBytecodePatchChange(const Change &change);
     void RebuildBytecodePatchRanges(const std::vector<size_t> &newIndexes, size_t skippedIndex);
 
     std::vector<Change> changes_;
-    // Per-method ranges inside changes_ used to patch bytecode ids in parallel.  DebugInfoPatch entries may be present
-    // inside these ranges, but PatchBytecode() ignores them; debug info is patched later by PatchDebug().
+    std::vector<NonBytecodeChange> nonBcChanges_;
     std::vector<std::pair<size_t, size_t>> bytecodePatchRanges_;
 };
 
@@ -138,6 +144,8 @@ struct CodeData {
 class Helpers {
 public:
     static std::vector<panda_file::Type> BreakProto(panda_file::ProtoItem *p);
+
+    static void FillProtoTypes(panda_file::ProtoItem *p, std::vector<panda_file::Type> &out);
 };
 
 class Context {
@@ -213,6 +221,13 @@ private:
     // Output item provenance used to add source file names to diagnostics.
     std::vector<std::pair<const panda_file::BaseItem *, const panda_file::FileReader *>> cameFrom_;
     size_t literalArrayId_ {};
+
+    struct ClassMergeRecord {
+        panda_file::ClassItem *oldItem;
+        panda_file::ClassItem *newItem;
+        const panda_file::FileReader *reader;
+    };
+    std::vector<ClassMergeRecord> classMergeRecords_;
 
     // Foreign member resolution is keyed by item identity.  Ordering is irrelevant, so typed hash keys avoid
     // std::map tuple comparisons in the merge hot path.
@@ -378,6 +393,13 @@ private:
     std::unordered_map<const panda_file::StringItem *, panda_file::StringItem *> stringCache_;
     std::unordered_map<panda_file::LiteralArrayItem *, std::vector<panda_file::LiteralItem>> literalArrayCache_;
 
+    std::vector<panda_file::Type> protoTypsScratch_;
+
+    static constexpr size_t K_PRIMITIVE_TYPE_CACHE_SIZE = 16U;
+    std::array<panda_file::PrimitiveTypeItem *, K_PRIMITIVE_TYPE_CACHE_SIZE> primitiveTypeCache_ {};
+
+    panda_file::PrimitiveTypeItem *PrimitiveTypeFromCache(panda_file::Type::TypeId id);
+
     // The initial merge scan gathers counts for reserve() and records foreign items for the required deterministic
     // merge order: regular class declarations, foreign classes, regular bodies, then foreign members.
     struct MergeItemBuckets {
@@ -486,10 +508,6 @@ private:
     void HandleStringId(const InstructionIdContext &ctx, const BytecodeInstruction &inst);
 
     void HandleIndexedId(const InstructionIdContext &ctx, const BytecodeInstruction &inst, IndexResolver resolve);
-
-    static IndexResolver GetIndexResolver(const BytecodeInstruction &inst);
-
-    void HandleInstructionId(const InstructionIdContext &ctx, const BytecodeInstruction &inst);
 
     void HandleLiteralArrayId(const InstructionIdContext &ctx, const BytecodeInstruction &inst);
 
