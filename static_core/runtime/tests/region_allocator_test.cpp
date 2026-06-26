@@ -18,6 +18,7 @@
 #include <thread>
 
 #include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/mem_config.h"
 #include "libarkbase/os/mem.h"
 #include "libarkbase/utils/asan_interface.h"
 #include "libarkbase/utils/logger.h"
@@ -720,6 +721,78 @@ TEST_F(RegionHumongousObjectAllocatorTest, TestCollectDeadObject)
                                           false>(freeRegions);
     allocator.GetSpace()->IterateRegions([region, &hasRegion](Region *r) { hasRegion |= region == r; });
     ASSERT_TRUE(!hasRegion);
+}
+
+class YoungRegionCacheBoundTest : public testing::Test {
+public:
+    YoungRegionCacheBoundTest()
+    {
+        options_.SetShouldLoadBootPandaFiles(false);
+        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetYoungSpaceSize(INIT_YOUNG_SIZE);
+        options_.SetHeapSizeLimit(HEAP_SIZE_LIMIT);
+        options_.SetGcType("epsilon");
+        Runtime::Create(options_);
+
+        spaces_.Initialize(INIT_YOUNG_SIZE, true, INIT_YOUNG_SIZE, true, MemConfig::GetInitialHeapSizeLimit(),
+                           MemConfig::GetHeapSizeLimit(), 0, PERCENT_100_D);
+
+        thread_ = ark::MTManagedThread::GetCurrent();
+        thread_->ManagedCodeBegin();
+    }
+    ~YoungRegionCacheBoundTest() override
+    {
+        thread_->ManagedCodeEnd();
+        Runtime::Destroy();
+    }
+
+    NO_COPY_SEMANTIC(YoungRegionCacheBoundTest);
+    NO_MOVE_SEMANTIC(YoungRegionCacheBoundTest);
+
+protected:
+    static constexpr size_t INIT_YOUNG_SIZE = 4_MB;
+    static constexpr size_t ENLARGED_YOUNG_SIZE = 8_MB;
+    static constexpr size_t HEAP_SIZE_LIMIT = 64_MB;
+
+    GenerationalSpaces spaces_;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+private:
+    ark::MTManagedThread *thread_;
+    RuntimeOptions options_;
+};
+
+TEST_F(YoungRegionCacheBoundTest, CacheBoundedByInitialMaxAfterYoungEnlargement)
+{
+    static constexpr size_t INIT_MAX_YOUNG_REGIONS = INIT_YOUNG_SIZE / DEFAULT_REGION_SIZE;
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    static constexpr size_t NUM_REGIONS_TO_FREE = INIT_MAX_YOUNG_REGIONS + 4U;
+
+    mem::MemStatsType memStats;
+    NonObjectRegionAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_OBJECT);
+    auto *regionSpace = allocator.GetSpace();
+
+    ASSERT_EQ(spaces_.GetMaxYoungSize(), INIT_YOUNG_SIZE);
+    ASSERT_EQ(spaces_.GetInitialMaxYoungSize(), INIT_YOUNG_SIZE);
+    ASSERT_EQ(regionSpace->GetEmptyYoungRegionsCount(), 0U);
+
+    spaces_.UpdateYoungSpaceMaxSize(ENLARGED_YOUNG_SIZE);
+    ASSERT_EQ(spaces_.GetMaxYoungSize(), ENLARGED_YOUNG_SIZE);
+    ASSERT_EQ(spaces_.GetInitialMaxYoungSize(), INIT_YOUNG_SIZE);
+
+    PandaVector<Region *> youngRegions;
+    for (size_t i = 0; i < NUM_REGIONS_TO_FREE; i++) {
+        auto *region = regionSpace->NewRegion(DEFAULT_REGION_SIZE, RegionFlag::IS_EDEN, RegionFlag::IS_UNUSED);
+        ASSERT_NE(region, nullptr);
+        youngRegions.push_back(region);
+    }
+
+    auto onRegionDestroy = [](uintptr_t, uintptr_t) {};
+    for (auto *region : youngRegions) {
+        regionSpace->template FreeRegion<decltype(onRegionDestroy), RegionSpace::ReleaseRegionsPolicy::NoRelease>(
+            region, onRegionDestroy);
+    }
+
+    ASSERT_EQ(regionSpace->GetEmptyYoungRegionsCount(), INIT_MAX_YOUNG_REGIONS);
 }
 
 }  // namespace ark::mem::test

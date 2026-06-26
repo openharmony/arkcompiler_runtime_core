@@ -39,6 +39,7 @@ void HeapSpace::ObjectMemorySpace::Initialize(size_t initialSize, size_t maxSize
 {
     minSize_ = initialSize;
     maxSize_ = maxSize;
+    initialMaxSize_ = maxSize;
     ASSERT(minSize_ <= maxSize_);
     // Set current space size as initial_size
     currentSize_ = minSize_;
@@ -377,6 +378,12 @@ size_t GenerationalSpaces::GetMaxYoungSize() const
 {
     ASSERT(isInitialized_);
     return youngSpace_.GetMaxSize();
+}
+
+size_t GenerationalSpaces::GetInitialMaxYoungSize() const
+{
+    ASSERT(isInitialized_);
+    return youngSpace_.GetInitialMaxSize();
 }
 
 void GenerationalSpaces::UseFullYoungSpace()
