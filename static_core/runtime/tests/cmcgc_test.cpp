@@ -16,253 +16,123 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include "runtime/mem/vm_handle.h"
+#include "runtime/handle_scope-inl.h"
 #include "runtime/include/runtime.h"
-
-#include "plugins/ets/runtime/ets_class_root.h"
-#include "plugins/ets/runtime/ets_handle_scope.h"
-#include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_class.h"
-#include "runtime/include/thread_scopes.h"
-#include "common_components/heap/heap_manager.h"
-#include "common_interfaces/heap/region_desc.h"
-#include "common_components/mutator/thread_local.h"
-#include "common_components/mutator/satb_buffer.h"
-#include "common_interfaces/objects/base_object.h"
-#include "runtime/tests/interpreter_test_utils.h"
 #include "runtime/include/gc_task.h"
-#include "runtime/mem/gc/gc.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
+#include "runtime/include/thread_scopes.h"
+#include "runtime/include/coretypes/class.h"
+#include "runtime/mem/refstorage/global_object_storage.h"
+#include "runtime/mem/gc/cmc/common_components/mutator/satb_buffer.h"
+
+#include "runtime/tests/test_utils.h"
+#include "runtime/tests/interpreter_test_utils.h"
 
 namespace ark::mem {
 
 namespace cvm = ark::common_vm;
 
-constexpr size_t TEST_ARRAY_SIZE = 1;
-constexpr size_t TEST_CLASS_VTABLE_SIZE = 0;
-constexpr size_t TEST_CLASS_IMT_SIZE = 0;
-constexpr size_t INT_ARRAY_SIZE = 8;
-constexpr std::array<uint32_t, INT_ARRAY_SIZE> INT_ARRAY = {8, 95, 34, 47, 74, 72, 29, 27};
-
-class CMCGCPreBarrierChecker : public GCListener {
-public:
-    void GCPhaseStarted(GCPhase phase) override
-    {
-        if (phase == GCPhase::GC_PHASE_MARK) {
-            {
-                auto &[lock, cond] = markStartedMon;
-                std::unique_lock phaseScope(lock);
-                markStarted = true;
-                cond.notify_all();
-            }
-            {
-                auto &[lock, cond] = markStartedActionMon;
-                std::unique_lock actionScope(lock);
-                cond.wait(actionScope, [this] { return markStartedActionCompleted; });
-            }
-        }
-    }
-    void GCPhaseFinished(GCPhase phase) override
-    {
-        if (phase == GCPhase::GC_PHASE_MARK) {
-            {
-                auto &[lock, cond] = markFinishedMon;
-                std::unique_lock phaseScope(lock);
-                markFinished = true;
-                cond.notify_all();
-            }
-            {
-                auto &[lock, cond] = markFinishedActionMon;
-                std::unique_lock actionScope(lock);
-                cond.wait(actionScope, [this] { return markFinishedActionCompleted; });
-            }
-        }
-    }
-    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
-                    [[maybe_unused]] size_t heapSize) override
-    {
-        {
-            std::unique_lock phaseScope(gcFinishedSync.first);
-            gcFinished = true;
-        }
-        gcFinishedSync.second.notify_all();
-    }
-    template <typename A>
-    void OnStartPhaseMark(A action)
-    {
-        {
-            auto &[lock, cond] = markStartedMon;
-            std::unique_lock phaseScope(lock);
-            cond.wait(phaseScope, [this] { return markStarted; });
-        }
-        {
-            auto &[lock, cond] = markStartedActionMon;
-            std::unique_lock actionScope(lock);
-            action();
-            markStartedActionCompleted = true;
-            cond.notify_all();
-        }
-    }
-    template <typename A>
-    void OnFinishPhaseMark(A action)
-    {
-        {
-            auto &[lock, cond] = markFinishedMon;
-            std::unique_lock phaseScope(lock);
-            cond.wait(phaseScope, [this] { return markFinished; });
-        }
-        {
-            auto &[lock, cond] = markFinishedActionMon;
-            std::unique_lock actionScope(lock);
-            action();
-            markFinishedActionCompleted = true;
-            cond.notify_all();
-        }
-    }
-    void WaitForGCFinished()
-    {
-        auto &[lock, cond] = gcFinishedSync;
-        std::unique_lock phaseScope(lock);
-        cond.wait(phaseScope, [this] { return gcFinished; });
-        gcFinished = false;
-    }
-    ~CMCGCPreBarrierChecker() {}
-
-private:
-    bool markStarted = false;
-    std::pair<std::mutex, std::condition_variable> markStartedMon;
-
-    bool markStartedActionCompleted = false;
-    std::pair<std::mutex, std::condition_variable> markStartedActionMon;
-
-    bool markFinished = false;
-    std::pair<std::mutex, std::condition_variable> markFinishedMon;
-
-    bool markFinishedActionCompleted = false;
-    std::pair<std::mutex, std::condition_variable> markFinishedActionMon;
-
-    bool gcFinished = false;
-    std::pair<std::mutex, std::condition_variable> gcFinishedSync;
-};
-
-class CMCGCReadBarrierChecker : public GCListener {
-public:
-    void GCPhaseStarted(GCPhase phase) override
-    {
-        if (phase == GCPhase::GC_PHASE_MARK) {
-            {
-                auto &[lock, cond] = markStartedMon;
-                std::unique_lock phaseScope(lock);
-                markStarted = true;
-                cond.notify_all();
-            }
-            {
-                auto &[lock, cond] = markStartedActionMon;
-                std::unique_lock actionScope(lock);
-                cond.wait(actionScope, [this] { return markStartedActionCompleted; });
-            }
-        } else if (phase == GCPhase::GC_PHASE_PRECOPY) {
-            {
-                auto &[lock, cond] = precopyStartedMon;
-                std::unique_lock phaseScope(lock);
-                precopyStarted = true;
-                cond.notify_all();
-            }
-            {
-                auto &[lock, cond] = precopyStartedActionMon;
-                std::unique_lock actionScope(lock);
-                cond.wait(actionScope, [this] { return precopyStartedActionCompleted; });
-            }
-        }
-    }
-    void GCPhaseFinished([[maybe_unused]] GCPhase phase) override {}
-    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
-                    [[maybe_unused]] size_t heapSize) override
-    {
-        {
-            std::unique_lock phaseScope(gcFinishedSync.first);
-            gcFinished = true;
-        }
-        gcFinishedSync.second.notify_all();
-    }
-    template <typename A>
-    void OnStartPhaseMark(A action)
-    {
-        {
-            auto &[lock, cond] = markStartedMon;
-            std::unique_lock phaseScope(lock);
-            cond.wait(phaseScope, [this] { return markStarted; });
-        }
-        {
-            auto &[lock, cond] = markStartedActionMon;
-            std::unique_lock actionScope(lock);
-            action();
-            markStartedActionCompleted = true;
-            cond.notify_all();
-        }
-    }
-    template <typename A>
-    void OnStartPhasePrecopy(A action)
-    {
-        {
-            auto &[lock, cond] = precopyStartedMon;
-            std::unique_lock phaseScope(lock);
-            cond.wait(phaseScope, [this] { return precopyStarted; });
-        }
-        {
-            auto &[lock, cond] = precopyStartedActionMon;
-            std::unique_lock actionScope(lock);
-            action();
-            precopyStartedActionCompleted = true;
-            cond.notify_all();
-        }
-    }
-    void WaitForGCFinished()
-    {
-        auto &[lock, cond] = gcFinishedSync;
-        std::unique_lock phaseScope(lock);
-        cond.wait(phaseScope, [this] { return gcFinished; });
-        gcFinished = false;
-    }
-    ~CMCGCReadBarrierChecker() {}
-
-private:
-    bool markStarted = false;
-    std::pair<std::mutex, std::condition_variable> markStartedMon;
-
-    bool markStartedActionCompleted = false;
-    std::pair<std::mutex, std::condition_variable> markStartedActionMon;
-
-    bool precopyStarted = false;
-    std::pair<std::mutex, std::condition_variable> precopyStartedMon;
-
-    bool precopyStartedActionCompleted = false;
-    std::pair<std::mutex, std::condition_variable> precopyStartedActionMon;
-
-    bool gcFinished = false;
-    std::pair<std::mutex, std::condition_variable> gcFinishedSync;
-};
-
 class CMCGCTest : public testing::Test {
 public:
-    void FillCurrentMemRegion(ets::EtsExecutionContext *execCtx)
+    void SetUp() override
     {
-        auto *vm = execCtx->GetPandaVM();
-        auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-        auto *obj = ets::EtsObjectArray::Create(objCls, TEST_ARRAY_SIZE)->AsObject();
-        auto *objRegion = cvm::RegionDesc::GetRegionDescAt(reinterpret_cast<uintptr_t>(obj));
-        cvm::RegionDesc *curRegion = nullptr;
+        Runtime::Create(CreateRuntimeOptions());
+        thread_ = MTManagedThread::GetCurrent();
+        gc_ = static_cast<CmcGC<PandaAssemblyLanguageConfig> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC());
+    }
+
+    void TearDown() override
+    {
+        Runtime::Destroy();
+        thread_ = nullptr;
+        gc_ = nullptr;
+        cvm::ThreadLocal::SetAllocBuffer(nullptr);
+    }
+
+    static constexpr size_t LargeStringLength()
+    {
+        return cvm::RegionDesc::LARGE_OBJECT_DEFAULT_THRESHOLD - sizeof(coretypes::LineString);
+    }
+
+    static constexpr size_t LargeObjectArrayLength()
+    {
+        return (cvm::RegionDesc::LARGE_OBJECT_DEFAULT_THRESHOLD - sizeof(coretypes::Array)) / OBJECT_POINTER_SIZE;
+    }
+
+    coretypes::String *AllocString(size_t length)
+    {
+        return ObjectAllocator::AllocString(length);
+    }
+
+    coretypes::String *AllocEmptyNonMovableString()
+    {
+        return ObjectAllocator::AllocString(0, false, false);
+    }
+
+    coretypes::String *AllocEmptyString()
+    {
+        return AllocString(0);
+    }
+
+    coretypes::Array *AllocArray(size_t length, ClassRoot classRoot)
+    {
+        return ObjectAllocator::AllocArray(length, classRoot, false, false);
+    }
+
+    coretypes::Array *AllocNonMovableArray(size_t length, ClassRoot classRoot)
+    {
+        return ObjectAllocator::AllocArray(length, classRoot, true, false);
+    }
+
+    void FillCurrentRegion(ObjectHeader *obj = nullptr)
+    {
+        // Object size must be less then LARGE_OBJECT_DEFAULT_THRESHOLD
+        // CC-OFFNXT(G.NAM.03-CPP) project code style
+        static constexpr size_t OBJECT_SIZE = cvm::RegionDesc::LARGE_OBJECT_DEFAULT_THRESHOLD - sizeof(ObjectHeader);
+        // CC-OFFNXT(G.NAM.03-CPP) project code style
+        static constexpr size_t STRING_LENGTH = OBJECT_SIZE - sizeof(coretypes::LineString);
+        if (obj == nullptr) {
+            obj = AllocString(STRING_LENGTH);
+        }
+        auto *region = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(obj));
+        cvm::RegionDesc *r = nullptr;
         do {
-            auto *curObj = ets::EtsObjectArray::Create(objCls, TEST_ARRAY_SIZE)->AsObject();
-            curRegion = cvm::RegionDesc::GetRegionDescAt(reinterpret_cast<uintptr_t>(curObj));
-        } while (objRegion == curRegion);
+            auto *o = AllocString(STRING_LENGTH);
+            r = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(o));
+        } while (r == region);
     }
 
-    void TriggerGC()
+    void TriggerGC(GCTaskCause cause)
     {
-        ark::GCTask task(GCTaskCause::EXPLICIT_CAUSE);
-        gc->WaitForGCInManaged(task);
+        GCTask task(cause);
+        gc_->WaitForGCInManaged(task);
     }
 
+    template <class T>
+    void PromoteToOld(VMHandle<T> obj)
+    {
+        PromoteToOld(obj.GetPtr());
+    }
+
+    void PromoteToOld(ObjectHeader *obj)
+    {
+        FillCurrentRegion(obj);
+        TriggerGC(GCTaskCause::YOUNG_GC_CAUSE);
+    }
+
+    template <class T>
+    cvm::RegionDesc::RegionType GetRegionType(VMHandle<T> obj)
+    {
+        return GetRegionType(obj.GetPtr());
+    }
+
+    cvm::RegionDesc::RegionType GetRegionType(ObjectHeader *obj)
+    {
+        return cvm::RegionDesc::GetRegionDescAt(ToUintPtr(obj))->GetRegionType();
+    }
+
+private:
     static RuntimeOptions CreateRuntimeOptions()
     {
         RuntimeOptions options;
@@ -271,12 +141,13 @@ public:
         options.SetShouldInitializeIntrinsics(true);
         options.SetCompilerEnableJit(false);
         options.SetGcType("cmc-gc");
-        options.SetLoadRuntimes({"ets"});
+        options.SetLoadRuntimes({"core"});
         options.SetGcTriggerType("debug-never");
+        options.SetRunGcInPlace(true);
 
         auto stdlib = std::getenv("PANDA_STD_LIB");
         if (stdlib == nullptr) {
-            std::cerr << "PANDA_STD_LIB env variable should be set and point to mock_stdlib.abc" << std::endl;
+            std::cerr << "Error: PANDA_STD_LIB env variable is empty\n";
             std::abort();
         }
         options.SetBootPandaFiles({stdlib});
@@ -284,340 +155,298 @@ public:
         return options;
     }
 
-    CMCGCTest() : CMCGCTest(CreateRuntimeOptions()) {}
-
-    explicit CMCGCTest(const RuntimeOptions &options)
-        : preBarrierChecker(std::make_unique<CMCGCPreBarrierChecker>()),
-          readBarrierChecker(std::make_unique<CMCGCReadBarrierChecker>()),
-          runtimeOptions(options)
-    {
-    }
-
-    ~CMCGCTest() override = default;
-
-    void SetUp() override
-    {
-        Runtime::Create(runtimeOptions);
-        gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
-    }
-
-    void TearDown() override
-    {
-        [[maybe_unused]] bool success = Runtime::Destroy();
-        ASSERT(success);
-        Logger::Destroy();
-        cvm::ThreadLocal::SetAllocBuffer(nullptr);
-    }
-
-    NO_COPY_SEMANTIC(CMCGCTest);
-    NO_MOVE_SEMANTIC(CMCGCTest);
-
-    GC *gc {};
-    std::unique_ptr<CMCGCPreBarrierChecker> preBarrierChecker;
-    std::unique_ptr<CMCGCReadBarrierChecker> readBarrierChecker;
-
-private:
-    RuntimeOptions runtimeOptions;
+protected:
+    MTManagedThread *thread_ = nullptr;
+    CmcGC<PandaAssemblyLanguageConfig> *gc_ = nullptr;
 };
 
-TEST_F(CMCGCTest, AllocEtsMovableObject)
+TEST_F(CMCGCTest, AllocMovableObject)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *vm = execCtx->GetPandaVM();
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    ets::EtsObject *arr = ets::EtsObjectArray::Create(objCls, TEST_ARRAY_SIZE)->AsObject();
-    ets::EtsHandleScope scope(execCtx);
-    ets::EtsHandle<ets::EtsObject> arrHandle(execCtx, arr);
-    auto *arrPtr = arrHandle.GetPtr();
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-    ASSERT_NE(arrPtr, arrHandle.GetPtr());
+    VMHandle<coretypes::String> obj(thread_, AllocEmptyString());
+    auto *addr = obj.GetPtr();
+    ASSERT_EQ(cvm::RegionDesc::RegionType::THREAD_LOCAL_REGION, GetRegionType(obj));
+    FillCurrentRegion(obj.GetPtr());
+    ASSERT_EQ(cvm::RegionDesc::RegionType::RECENT_FULL_REGION, GetRegionType(obj));
+    TriggerGC(GCTaskCause::YOUNG_GC_CAUSE);
+    ASSERT_NE(addr, obj.GetPtr());
+    RegionDesc *region = RegionDesc::GetRegionDescAt(ToUintPtr(addr));
+    ASSERT_EQ(cvm::RegionDesc::RegionType::FREE_REGION, region->GetRegionType());
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(obj));
 }
 
 TEST_F(CMCGCTest, AllocateNonMovableObject)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto langCtx = execCtx->GetPandaVM()->GetLanguageContext();
-    auto *runtime = Runtime::GetCurrent();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    auto *linkerExt = runtime->GetClassLinker()->GetExtension(langCtx);
-    std::string className("Foo");
-    Class *coreCls =
-        linkerExt->CreateClass(reinterpret_cast<const uint8_t *>(className.data()), TEST_CLASS_VTABLE_SIZE,
-                               TEST_CLASS_IMT_SIZE, AlignUp(sizeof(Class) + OBJECT_POINTER_SIZE, OBJECT_POINTER_SIZE));
-    ets::EtsClass *etsCls = ets::EtsClass::FromRuntimeClass(coreCls);
-    ets::EtsHandleScope scope(execCtx);
-    ets::EtsHandle<ets::EtsClass> etsClsHandle(execCtx, etsCls);
-    auto *etsClsPtr = etsClsHandle.GetPtr();
-    TriggerGC();
-    ASSERT_EQ(etsClsPtr, etsClsHandle.GetPtr());
+    VMHandle<coretypes::String> obj(thread_, AllocEmptyNonMovableString());
+    auto *objAddr = obj.GetPtr();
+    ASSERT_EQ(cvm::RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION, GetRegionType(obj));
+    FillCurrentRegion();
+    TriggerGC(GCTaskCause::YOUNG_GC_CAUSE);
+    ASSERT_EQ(objAddr, obj.GetPtr());
 }
 
-TEST_F(CMCGCTest, RemSetCheck)
+// The test is disabled because the current situation is strange.
+// We cannot allocate an object in the large space becuase TLAB can fits it.
+// Need to adjust sizes.
+TEST_F(CMCGCTest, DISABLED_AllocateLargeObject)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *vm = execCtx->GetPandaVM();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-    ets::EtsObjectArray *arr = ets::EtsObjectArray::Create(objCls, TEST_ARRAY_SIZE);
-    ets::EtsHandleScope scope(execCtx);
-    ets::EtsHandle<ets::EtsObjectArray> arrHandle(execCtx, arr);
-
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-
-    uintptr_t arrPtr = reinterpret_cast<uintptr_t>(arrHandle.GetPtr());
-    cvm::RegionDesc *arrRegion = cvm::RegionDesc::GetRegionDescAt(arrPtr);
-    ASSERT_TRUE(arrRegion->IsInOldSpace());
-
-    ets::EtsObject *obj = ets::EtsObject::Create(objCls);
-    uintptr_t objPtr = reinterpret_cast<uintptr_t>(obj);
-    cvm::RegionDesc *objRegion = cvm::RegionDesc::GetRegionDescAt(objPtr);
-    ASSERT_TRUE(objRegion->IsInYoungSpace());
-    arrHandle.GetPtr()->Set(0, obj);
-
-    auto *rset = arrRegion->GetRSet();
-    uintptr_t rsetPtr = reinterpret_cast<uintptr_t>(rset);
-    auto *cardTable =
-        reinterpret_cast<cvm::RegionRSet::CardElement *>(rsetPtr + cvm::RegionRSet::CARD_TABLE_DATA_OFFSET);
-    ASSERT_NE(0, cardTable[0]);
-
-    int visited = 0;
-    arrRegion->VisitRememberSetBeforeMarking([&](cvm::BaseObject *obj) { visited++; });
-    ASSERT_NE(0, visited);
+    VMHandle<coretypes::String> obj(thread_, AllocString(LargeStringLength()));
+    auto *objAddr = obj.GetPtr();
+    ASSERT_EQ(cvm::RegionDesc::RegionType::LARGE_REGION, GetRegionType(obj));
+    FillCurrentRegion();
+    TriggerGC(GCTaskCause::YOUNG_GC_CAUSE);
+    ASSERT_EQ(objAddr, obj.GetPtr());
 }
 
-TEST_F(CMCGCTest, VregRoot)
+TEST_F(CMCGCTest, CardTableTest)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *vm = execCtx->GetPandaVM();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread scope(coro);
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-    ets::EtsObject *obj = ets::EtsObject::Create(objCls);
-    ASSERT_NE(nullptr, obj);
+    VMHandle<coretypes::Array> nonmovable(thread_, AllocNonMovableArray(1, ClassRoot::ARRAY_STRING));
+    ASSERT_EQ(cvm::RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION, GetRegionType(nonmovable));
+    VMHandle<coretypes::Array> large(thread_, AllocArray(LargeObjectArrayLength(), ClassRoot::ARRAY_STRING));
+    // NOTE(artemu) Check the region is LARGE_REGION
+    VMHandle<coretypes::Array> old(thread_, AllocArray(1, ClassRoot::ARRAY_STRING));
+    PromoteToOld(old);
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(old));
+    VMHandle<coretypes::String> young(thread_, AllocEmptyString());
+    ASSERT_EQ(cvm::RegionDesc::RegionType::THREAD_LOCAL_REGION, GetRegionType(young));
 
+    nonmovable->Set(0, young.GetPtr());
+    old->Set(0, young.GetPtr());
+    large->Set(0, young.GetPtr());
+
+    cvm::RegionDesc *nonmovableRegion = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(nonmovable.GetPtr()));
+    bool found = false;
+    nonmovableRegion->GetRSet()->VisitAllMarkedCardBefore(
+        [nonmovable, &found](BaseObject *obj) {
+            if (ToUintPtr(obj) == ToUintPtr(nonmovable.GetPtr())) {
+                found = true;
+            }
+        },
+        nonmovableRegion->GetRegionBase(), ToUintPtr(nonmovable.GetPtr()) + OBJECT_POINTER_SIZE);
+    ASSERT_TRUE(found);
+
+    cvm::RegionDesc *largeRegion = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(large.GetPtr()));
+    found = false;
+    largeRegion->GetRSet()->VisitAllMarkedCardBefore(
+        [large, &found](BaseObject *obj) {
+            if (ToUintPtr(obj) == ToUintPtr(large.GetPtr())) {
+                found = true;
+            }
+        },
+        largeRegion->GetRegionBase(), ToUintPtr(large.GetPtr()) + OBJECT_POINTER_SIZE);
+    ASSERT_TRUE(found);
+
+    cvm::RegionDesc *oldRegion = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(old.GetPtr()));
+    found = false;
+    oldRegion->GetRSet()->VisitAllMarkedCardBefore(
+        [old, &found](BaseObject *obj) {
+            if (ToUintPtr(obj) == ToUintPtr(old.GetPtr())) {
+                found = true;
+            }
+        },
+        oldRegion->GetRegionBase(), ToUintPtr(old.GetPtr()) + OBJECT_POINTER_SIZE);
+    ASSERT_TRUE(found);
+}
+
+TEST_F(CMCGCTest, TestVregRoot)
+{
+    ScopedManagedCodeThread scope(thread_);
+
+    ObjectHeader *obj = AllocEmptyString();
+    ASSERT_EQ(cvm::RegionDesc::RegionType::THREAD_LOCAL_REGION, GetRegionType(obj));
     auto frame = interpreter::test::CreateFrame(1U, nullptr, nullptr);
-    coro->SetCurrentFrame(frame.get());
-
     StaticFrameHandler handler(frame.get());
-    handler.GetVReg(0).SetReference(reinterpret_cast<ObjectHeader *>(obj));
-    ObjectHeader *objRef = handler.GetVReg(0).GetReference();
-
-    auto langCtx = execCtx->GetPandaVM()->GetLanguageContext();
-    auto mainCls = interpreter::test::CreateClass(langCtx.GetLanguage());
+    handler.GetVReg(0).SetReference(obj);
+    auto *cls = interpreter::test::CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
     std::vector<uint8_t> bytecode;
     BytecodeEmitter emitter;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
-    auto mainMethodData = interpreter::test::CreateMethod(mainCls, ACC_STATIC, 1, 1, nullptr, bytecode);
-    frame->SetMethod(mainMethodData.first.get());
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-    ASSERT_NE(nullptr, handler.GetVReg(0).GetReference());
-    ASSERT_NE(objRef, handler.GetVReg(0).GetReference());
+    auto [method, _] = interpreter::test::CreateMethod(cls, ACC_STATIC, 1, 1, nullptr, bytecode);
+    frame->SetMethod(method.get());
+    thread_->SetCurrentFrame(frame.get());
+
+    PromoteToOld(obj);
+
+    ObjectHeader *oldObj = handler.GetVReg(0).GetReference();
+    ASSERT_NE(nullptr, oldObj);
+    ASSERT_NE(obj, oldObj);
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(oldObj));
 }
 
-TEST_F(CMCGCTest, ExceptionRoot)
+TEST_F(CMCGCTest, TestExceptionRoot)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *vm = execCtx->GetPandaVM();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread scope(coro);
+    ScopedManagedCodeThread scope(thread_);
 
-    auto *exCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-    ObjectHeader *ex = reinterpret_cast<ObjectHeader *>(ets::EtsObject::Create(exCls));
+    ObjectHeader *ex = AllocEmptyString();
     ASSERT_NE(nullptr, ex);
+    ASSERT_EQ(cvm::RegionDesc::RegionType::THREAD_LOCAL_REGION, GetRegionType(ex));
 
-    coro->SetException(ex);
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-    ASSERT_NE(ex, coro->GetException());
+    thread_->SetException(ex);
+    PromoteToOld(ex);
+    ASSERT_NE(ex, thread_->GetException());
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(thread_->GetException()));
 }
 
-TEST_F(CMCGCTest, ClassRoot)
+TEST_F(CMCGCTest, TestClassRoot)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto langCtx = execCtx->GetPandaVM()->GetLanguageContext();
-    auto *runtime = Runtime::GetCurrent();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread scope(coro);
+    ScopedManagedCodeThread scope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    auto *linkerExt = runtime->GetClassLinker()->GetExtension(langCtx);
+    auto langCtx = thread_->GetVM()->GetLanguageContext();
+    auto *linkerExt = Runtime::GetCurrent()->GetClassLinker()->GetExtension(langCtx);
     auto *clsName = reinterpret_cast<const uint8_t *>("Foo");
-    auto *cls = linkerExt->CreateClass(clsName, TEST_CLASS_VTABLE_SIZE, TEST_CLASS_IMT_SIZE,
-                                       AlignUp(sizeof(Class) + OBJECT_POINTER_SIZE, OBJECT_POINTER_SIZE));
+    auto *cls =
+        linkerExt->CreateClass(clsName, 0, 0, AlignUp(sizeof(Class) + OBJECT_POINTER_SIZE, OBJECT_POINTER_SIZE));
     cls->SetRefFieldsNum(1, true);
     cls->SetState(Class::State::INITIALIZED);
     Field field(cls, static_cast<panda_file::File::EntityId>(0), 0,
                 panda_file::Type(panda_file::Type::TypeId::REFERENCE));
     cls->SetFields(Span<Field>(&field, 1), 1);
-    field.SetOffset(cls->GetRefFieldsOffset<true>() + sizeof(ObjectHeader));
+    field.SetOffset(sizeof(ObjectHeader));
 
-    auto *vm = execCtx->GetPandaVM();
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-    ObjectHeader *obj = reinterpret_cast<ObjectHeader *>(ets::EtsObject::Create(objCls));
-    ObjectAccessor::SetFieldObject(cls->GetManagedObject(), field, obj);
+    ObjectHeader *value = AllocEmptyString();
+    ObjectAccessor::SetFieldObject(cls->GetManagedObject(), field, value);
 
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-    ASSERT_NE(obj, ObjectAccessor::GetFieldObject(cls->GetManagedObject(), field));
+    PromoteToOld(value);
+    ObjectHeader *newValue = ObjectAccessor::GetFieldObject(cls->GetManagedObject(), field);
+    ASSERT_NE(value, newValue);
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(newValue));
 }
 
-TEST_F(CMCGCTest, GlobalObjectStorageRoot)
+TEST_F(CMCGCTest, TestGlobalObjectStorageRoot)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *vm = execCtx->GetPandaVM();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread scope(coro);
+    ScopedManagedCodeThread scope(thread_);
 
-    auto *storage = vm->GetGlobalObjectStorage();
-    ASSERT_NE(nullptr, storage);
-
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-    auto *obj = reinterpret_cast<ObjectHeader *>(ets::EtsObject::Create(objCls));
+    auto *storage = thread_->GetVM()->GetGlobalObjectStorage();
+    ObjectHeader *obj = AllocEmptyString();
     auto *objRef = storage->Add(obj, Reference::ObjectType::GLOBAL);
 
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-    ASSERT_NE(obj, storage->Get(objRef));
+    PromoteToOld(obj);
+    ObjectHeader *newObj = storage->Get(objRef);
+    ASSERT_NE(obj, newObj);
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(newObj));
 }
 
-TEST_F(CMCGCTest, ObjectCopy)
+TEST_F(CMCGCTest, TestRefUpdateAfterCopy)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    ets::EtsHandleScope scope(execCtx);
-    ets::EtsHandle<ets::EtsIntArray> arrHandle(execCtx, ets::EtsIntArray::Create(INT_ARRAY_SIZE));
-    for (size_t i = 0; i < INT_ARRAY_SIZE; i++) {
-        arrHandle->Set(i, INT_ARRAY[i]);
-    }
+    VMHandle<coretypes::Array> array(thread_, AllocArray(1, ClassRoot::ARRAY_STRING));
+    PromoteToOld(array.GetPtr());
+    ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(array));
 
-    auto *arrPtr = arrHandle.GetPtr();
-
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-
-    ASSERT_NE(arrPtr, arrHandle.GetPtr());
-    ASSERT_EQ(INT_ARRAY_SIZE, arrHandle->GetLength());
-    for (size_t i = 0; i < INT_ARRAY_SIZE; i++) {
-        ASSERT_EQ(INT_ARRAY[i], arrHandle->Get(i));
-    }
+    VMHandle<ObjectHeader> value(thread_, AllocEmptyString());
+    ObjectHeader *oldAddr = value.GetPtr();
+    array->Set(0, value.GetPtr());
+    PromoteToOld(value.GetPtr());
+    ASSERT_NE(oldAddr, value.GetPtr());
+    ASSERT_EQ(value.GetPtr(), array->Get<ObjectHeader *>(0));
 }
 
-TEST_F(CMCGCTest, PreBarrierCheck)
-{
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
-    ets::EtsHandleScope scope(execCtx);
-
-    auto *vm = execCtx->GetPandaVM();
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
-
-    auto *arr = ets::EtsObjectArray::Create(objCls, TEST_ARRAY_SIZE);
-    ets::EtsHandle<ets::EtsObjectArray> arrHandle(execCtx, arr);
-
-    ets::EtsObject *obj1 = ets::EtsObject::Create(objCls);
-    ets::EtsHandle<ets::EtsObject> obj1Handle(execCtx, obj1);
-    arr->Set(0, obj1);
-
-    ets::EtsObject *obj2 = ets::EtsObject::Create(objCls);
-    ets::EtsHandle<ets::EtsObject> obj2Handle(execCtx, obj2);
-
-    FillCurrentMemRegion(execCtx);
-    TriggerGC();
-
-    uintptr_t arrPtr = reinterpret_cast<uintptr_t>(arrHandle.GetPtr());
-    auto *arrRegion = cvm::RegionDesc::GetRegionDescAt(arrPtr);
-    ASSERT_TRUE(arrRegion->IsInOldSpace());
-
-    uintptr_t obj1Ptr = reinterpret_cast<uintptr_t>(obj1Handle.GetPtr());
-    auto obj1Region = cvm::RegionDesc::GetRegionDescAt(obj1Ptr);
-    ASSERT_TRUE(obj1Region->IsInOldSpace());
-    uintptr_t obj2Ptr = reinterpret_cast<uintptr_t>(obj2Handle.GetPtr());
-    auto obj2Region = cvm::RegionDesc::GetRegionDescAt(obj2Ptr);
-    ASSERT_TRUE(obj2Region->IsInOldSpace());
-
-    auto *checker = preBarrierChecker.get();
-    gc->AddListener(checker);
-
-    auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::EXPLICIT_CAUSE);
-    gc->AddGCTask(false, std::move(task));
-
+class PreBarrierCMCGCTest : public CMCGCTest, public GCListener {
+public:
+    void GCPhaseStarted(GCPhase phase) override
     {
-        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-        checker->OnStartPhaseMark([&arrHandle, &obj2Handle] { arrHandle.GetPtr()->Set(0, obj2Handle.GetPtr()); });
-    }
-
-    PandaStack<cvm::BaseObject *> objects;
-    {
-        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-        checker->OnFinishPhaseMark([&objects, &coro] {
-            const auto *node = static_cast<const cvm::SatbBuffer::TreapNode *>(coro->GetSatbBufferNode());
-            ASSERT_NE(node, nullptr);
+        if (phase != GCPhase::GC_PHASE_MARK) {
+            return;
+        }
+        markingDone_ = true;
+        array_->Set(0, newObj_.GetPtr());
+        const auto *node = static_cast<const cvm::SatbBuffer::TreapNode *>(thread_->GetSatbBufferNode());
+        EXPECT_NE(nullptr, node);
+        if (node != nullptr) {
+            PandaStack<cvm::BaseObject *> objects;
             const_cast<cvm::SatbBuffer::TreapNode *>(node)->GetObjects(objects);
-        });
+            size_t size = 0;
+            while (!objects.empty()) {
+                if (objects.top() == obj_.GetPtr()) {
+                    return;
+                }
+                ++size;
+                objects.pop();
+            }
+            FAIL() << "Object " << obj_.GetPtr() << " not faound in SATB buffer of size " << size;
+        }
     }
-    ASSERT_EQ(1, objects.size());
 
-    {
-        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-        checker->WaitForGCFinished();
-    }
-}
+protected:
+    VMHandle<coretypes::Array> array_;
+    VMHandle<ObjectHeader> obj_;
+    VMHandle<ObjectHeader> newObj_;
+    bool markingDone_ = false;
+};
 
-TEST_F(CMCGCTest, ReadBarrierCheck)
+TEST_F(PreBarrierCMCGCTest, TestPreBarrier)
 {
-    auto *execCtx = ets::EtsExecutionContext::GetCurrent();
-    auto *coro = ets::EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
-    ets::EtsHandleScope scope(execCtx);
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
 
-    auto *vm = execCtx->GetPandaVM();
-    auto *objCls = vm->GetClassLinker()->GetClassRoot(ets::EtsClassRoot::OBJECT);
+    array_ = VMHandle<coretypes::Array>(thread_, AllocArray(1, ClassRoot::ARRAY_STRING));
+    obj_ = VMHandle<ObjectHeader>(thread_, AllocEmptyString());
+    array_->Set(0, obj_.GetPtr());
+    newObj_ = VMHandle<ObjectHeader>(thread_, AllocEmptyString());
 
-    ets::EtsObject *obj = ets::EtsObject::Create(objCls);
-    ets::EtsHandle<ets::EtsObject> objHandle(execCtx, obj);
+    gc_->AddListener(this);
 
-    FillCurrentMemRegion(execCtx);
-
-    auto *checker = readBarrierChecker.get();
-    gc->AddListener(checker);
-
-    auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::EXPLICIT_CAUSE);
-    gc->AddGCTask(false, std::move(task));
-
-    uintptr_t objPtr = 0;
-    {
-        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-        checker->OnStartPhaseMark([&objHandle, &objPtr] { objPtr = reinterpret_cast<uintptr_t>(objHandle.GetPtr()); });
-    }
-
-    auto objRegion = cvm::RegionDesc::GetRegionDescAt(objPtr);
-    ASSERT_TRUE(objRegion->IsInFromSpace());
-
-    {
-        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-        checker->OnStartPhasePrecopy(
-            [&objHandle, &objPtr] { objPtr = reinterpret_cast<uintptr_t>(objHandle.GetPtr()); });
-    }
-
-    objRegion = cvm::RegionDesc::GetRegionDescAt(objPtr);
-    ASSERT_TRUE(objRegion->IsInToSpace());
-
-    {
-        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-        checker->WaitForGCFinished();
-    }
+    TriggerGC(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+    ASSERT_TRUE(markingDone_);
 }
+
+class ReadBarrierCMCGCTest : public CMCGCTest, public GCListener, public testing::WithParamInterface<GCTaskCause> {
+public:
+    void GCStarted(const GCTask &task, size_t) override
+    {
+        reason_ = task.reason;
+    }
+
+    void GCPhaseStarted(GCPhase phase) override
+    {
+        if ((reason_ == GCTaskCause::YOUNG_GC_CAUSE && phase == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE) ||
+            (reason_ == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE && phase == GCPhase::GC_PHASE_COPY)) {
+            EXPECT_EQ(cvm::RegionDesc::RegionType::TO_REGION, GetRegionType(array_.GetPtr()));
+            EXPECT_EQ(cvm::RegionDesc::RegionType::FROM_REGION, GetRegionType(obj_));
+            EXPECT_FALSE(obj_->IsForwarded());
+            ObjectHeader *fwdObj = array_->Get<ObjectHeader *>(0);
+            EXPECT_EQ(cvm::RegionDesc::RegionType::TO_REGION, GetRegionType(fwdObj));
+            EXPECT_TRUE(obj_->IsForwarded());
+            copyDone_ = true;
+        }
+    }
+
+protected:
+    GCTaskCause reason_ = GCTaskCause::INVALID_CAUSE;
+    VMHandle<coretypes::Array> array_;
+    ObjectHeader *obj_;
+    bool copyDone_ = false;
+};
+
+TEST_P(ReadBarrierCMCGCTest, TestReadBarrier)
+{
+    ScopedManagedCodeThread managedScope(thread_);
+    HandleScope<ObjectHeader *> handleScope(thread_);
+
+    array_ = VMHandle<coretypes::Array>(thread_, AllocArray(1, ClassRoot::ARRAY_STRING));
+    obj_ = AllocEmptyString();
+    array_->Set(0, obj_);
+    FillCurrentRegion(obj_);
+    gc_->AddListener(this);
+
+    TriggerGC(GetParam());
+    ASSERT_TRUE(copyDone_);
+}
+INSTANTIATE_TEST_SUITE_P(ReadBarrierCMCGCTestSuite, ReadBarrierCMCGCTest,
+                         testing::Values(GCTaskCause::YOUNG_GC_CAUSE, GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE));
+
 }  // namespace ark::mem
