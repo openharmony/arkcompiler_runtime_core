@@ -336,10 +336,6 @@ std/core/std_core_char_instance_Char_toUpperCase.ets
 # temporary place for the tests related to primitive types refactoring
 ############
 
-# 5.
-# TypeError: Unresolved reference compareWrapperObjectValue
-# TypeError: This expression is not callable
-
 # 9.
 # other fails
 std/core/std_core_BigInt_instance_BigInt_toString_011.ets
