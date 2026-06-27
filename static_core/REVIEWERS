@@ -210,8 +210,8 @@ static_core/plugins/ets/tests/interop_js/                                     @i
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis @zengmanyi @LeechyLiang
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
-static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg @luchenxu @CptH
-static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg ^shimenkovmikhail ^v-cherkashin ^trubachevilya ^nazarovkonstantin @luchenxu @CptH
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg @luchenxu @haorl
+static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg ^shimenkovmikhail ^v-cherkashin ^trubachevilya ^nazarovkonstantin @luchenxu @haorl
 static_core/plugins/ets/tools/migration_visualizer/                           @oatuwwutao @Fouckttt1 @cy917474985 ^Nojpg
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
@@ -268,7 +268,7 @@ static_core/plugins/ets/tests/ets_test_suite/std/containers/blocking_queue.ets  
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus ^nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav ^wanzixuan330
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus ^nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^wanzixuan330
-static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                ^Nojpg ^igelhaus @shimenkovmikhail ^v-cherkashin @trubachevilya ^Prof ^luobohua @luchenxu @Wangyuzhong11
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                ^Nojpg ^igelhaus @shimenkovmikhail ^v-cherkashin @trubachevilya ^Prof ^luobohua @luchenxu @haorl
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @konstanting
 static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 
