@@ -29,8 +29,8 @@ async function testMain() {
     arktest.assertTrue(res == 'ok' || res == 'not-equal')
 }
 
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_waitasync_store_notify tests')
     suite.addAsyncTest('Function testMain', testMain)
-    return await suite.runAsync()
+    return suite.run()
 }

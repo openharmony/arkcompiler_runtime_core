@@ -14,19 +14,19 @@
  */
 
 
-let event_coro = new PromiseWithResolvers<int>()
-let event_main = new PromiseWithResolvers<int>()
+let event_coro = new CompletableJob<int>()
+let event_main = new CompletableJob<int>()
 const cnt = 100
 
 async function test() {
-    await event_coro.promise
+    event_coro.Await()
     return 1
 }
 
 async function testCoro() {
     const start_count = CoroutineExtras.getCoroutineCount()
 
-   let arr: Array<Promise<int>> = new Array<Promise<int>>()
+    let arr: Promise<int>[] = []
 
     for (let i = 0; i < cnt; ++i) {
         arr.push(test())
@@ -35,7 +35,7 @@ async function testCoro() {
 
     arktest.assertEQ(start_count + cnt, count)
 
-    event_coro.resolve(0)
+    event_coro.finish(0)
 
     for (let i = 0; i < cnt; ++i) {
         await arr[i]
@@ -45,20 +45,19 @@ async function testCoro() {
 
     arktest.assertEQ(start_count, count)
 
-    event_main.resolve(0)
+    event_main.finish(0)
  
 }
 
 async function  payload ()  {
         const start_count = CoroutineExtras.getCoroutineCount()
         testCoro()
-        await event_main.promise
+        event_main.Await()
         arktest.assertEQ(start_count , CoroutineExtras.getCoroutineCount())
 }   
 
-async function main(): Promise<int> {
+function main() {
     let testsuite = new arktest.ArkTestsuite("CoroCount");
     testsuite.addAsyncTest('testCoroCount', payload)
-    let res = await testsuite.runAsync();
-    return res;
+    return testsuite.run();
 }

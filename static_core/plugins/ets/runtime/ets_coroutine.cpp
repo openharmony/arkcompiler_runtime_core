@@ -276,7 +276,13 @@ void EtsCoroutine::HandleUncaughtException()
 
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
 {
+    ProcessUnhandledFailedJobs();
     executionCtx_.ProcessUnhandledRejectedPromises(true);
+}
+
+void EtsCoroutine::ProcessUnhandledFailedJobs()
+{
+    executionCtx_.ProcessUnhandledFailedJobs();
 }
 
 bool EtsCoroutine::IsContextSwitchRisky() const

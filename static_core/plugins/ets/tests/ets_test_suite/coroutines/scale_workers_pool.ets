@@ -27,9 +27,9 @@ function testScaleWorkersPool() {
     arktest.assertEQ(mainId, workerId);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.scale_workers_pool');
     testSuite.addTest('testScaleWorkersPool', testScaleWorkersPool);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

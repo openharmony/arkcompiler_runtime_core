@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Duplex finish event should not be triggered", testDuplexFinishEventNotTriggered);
@@ -27,7 +27,7 @@ async function main(): Promise<int> {
     suite.addAsyncTest("Duplex error handling during write", testDuplexErrorHandlingOnWrite);
     suite.addTest("Duplex read and write with synchronous data", testDuplexReadWriteWithSyncData);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 async function mustCallCheckAll() {
@@ -146,7 +146,7 @@ async function testDuplexWritableFinishedState() {
     duplex.end('testing finished state', 'utf8', mustCall((err: Error | undefined | null): void => {
         arktest.assertTrue(duplex.writableFinished, "writableFinished should be true");
     }));
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyDuplex3 extends stream.Duplex {
@@ -220,7 +220,7 @@ async function testDuplexReadWithValidSize() {
             arktest.assertEQ(chunk.toString(), 'duplex test');
         }
     }));
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyDuplex5 extends stream.Duplex {
@@ -241,7 +241,7 @@ async function testDuplexErrorHandlingOnWrite() {
     }
     duplex.on('error', mustCall(func));
     duplex.write('test');
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyDuplex6 extends stream.Duplex {

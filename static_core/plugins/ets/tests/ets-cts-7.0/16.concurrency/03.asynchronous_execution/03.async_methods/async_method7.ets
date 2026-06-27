@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Asynchronous method throws error.
-tags: [no-warmup]
 ---*/
 
 class MethodThrowError {
@@ -34,6 +33,6 @@ async function startTest() {
     }
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

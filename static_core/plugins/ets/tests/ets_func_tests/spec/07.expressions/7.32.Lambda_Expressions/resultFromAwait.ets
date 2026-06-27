@@ -25,14 +25,14 @@ function regularFunc(): boolean {
     return true;
 }
 
-async function main(): Promise<void> {
+function main(): void {
     let booleanPromise: asyncLambda = async (): Promise<boolean> => {
         return Promise.resolve<boolean>(regularFunc());
     }
 
     let is_true: Boolean = new Boolean(true);
 
-    let is_resolution2: Boolean = await booleanPromise();
+    let is_resolution2: Boolean = waitForCompletion(booleanPromise);
 
     arktest.assertTrue( is_resolution2 instanceof Boolean)
     arktest.assertEQ(is_resolution2, is_true)

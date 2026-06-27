@@ -174,15 +174,14 @@ async function testDoubleFunc(): Promise<void> {
     check('doubleFunc');
 }
 
-async function main(): Promise<int> {
-    let testSuite = new arktest.ArkTestsuite('coroutines.launch_return');
-    testSuite.addAsyncTest('testByteFunc', testByteFunc);
-    testSuite.addAsyncTest('testCharFunc', testCharFunc);
-    testSuite.addAsyncTest('testShortFunc', testShortFunc);
-    testSuite.addAsyncTest('testIntFunc', testIntFunc);
-    testSuite.addAsyncTest('testLongFunc', testLongFunc);
-    testSuite.addAsyncTest('testFloatFunc', testFloatFunc);
-    testSuite.addAsyncTest('testDoubleFunc', testDoubleFunc);
-    let res = await testSuite.runAsync();
-    return res;
+function main(): int {
+    // NOTE(panferovi): #34019 (fix arktest.addAsyncTest)
+    testByteFunc();
+    testCharFunc();
+    testShortFunc();
+    testIntFunc();
+    testLongFunc();
+    testFloatFunc();
+    testDoubleFunc();
+    return 0;
 }

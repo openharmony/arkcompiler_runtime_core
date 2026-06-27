@@ -34,6 +34,6 @@ async function startTest() {
     arktest.assertEQ(result === "Promise 1 resolved", true);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+  waitForCompletion(startTest);
 }

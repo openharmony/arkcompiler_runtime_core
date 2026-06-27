@@ -54,8 +54,8 @@ async function startTest(){
     arktest.assertEQ(awaited_result, {{c.test_value}})
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(){
+    waitForCompletion(startTest)
 }
 
  {% endfor %}

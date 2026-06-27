@@ -97,6 +97,9 @@ public:
     void UpdateCachedObjects() override;
     void ListUnhandledEventsOnProgramExit() override;
 
+    /// @brief traverse current unhandled failed jobs with custom handler
+    void ProcessUnhandledFailedJobs();
+
     // event handlers
     void OnContextSwitchedTo() override;
     void OnChildCoroutineCreated(Coroutine *child) override;

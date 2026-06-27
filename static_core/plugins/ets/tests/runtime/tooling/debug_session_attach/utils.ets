@@ -64,16 +64,26 @@ export function mul(lhs: int, rhs: int): int {
 
 export class Event {
     constructor() {
-        this.signal_ = new PromiseWithResolvers<undefined>();
+        let resolveLocal: (() => void) | undefined = undefined;
+        this.signal_ = new Promise<undefined>((resolve, reject) => {
+            resolveLocal = () => {
+                resolve(undefined);
+            };
+        });
+        if (resolveLocal === undefined) {
+            throw new Error("Couldn't assign resolver");
+        }
+        this.resolve_ = resolveLocal!;
     }
 
     public async wait(): Promise<undefined> {
-        await this.signal_.promise;
+        await this.signal_;
     }
 
     public async setAll(): Promise<undefined> {
-        this.signal_.resolve(undefined);
+        this.resolve_();
     }
 
-    private signal_: PromiseWithResolvers<undefined>;
+    private signal_: Promise<undefined>;
+    private resolve_: () => void;
 }

@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Test cases for various usage scenarios of asynchronous lambda.
+desc: launch runs a job and returns its result through Await
 ---*/
 
-{{c.decl}}
-
 async function startTest() {
-    {{c.use|indent}}
+  let result: int = launch<int>() { 
+    return 42
+  }.Await()
+
+  arktest.assertEQ(42, result)
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+  waitForCompletion(startTest)
 }
-{% endfor %}

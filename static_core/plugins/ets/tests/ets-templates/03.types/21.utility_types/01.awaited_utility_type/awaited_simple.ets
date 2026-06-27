@@ -25,8 +25,8 @@ async function foo() {
     {{c.use|indent}}
 }
 
-async function main(): Promise<void> {
-    await foo()
+function main() {
+  waitForCompletion(foo)
 }
 
-{%- endfor %}
+{% endfor %}

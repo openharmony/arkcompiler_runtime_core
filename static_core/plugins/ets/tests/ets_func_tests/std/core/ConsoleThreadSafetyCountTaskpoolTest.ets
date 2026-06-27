@@ -19,14 +19,14 @@
 
 // This scenario validates exact console output, so it uses a paired .expected file instead of arktest assertions.
 
-async function main(): Promise<int> {
+function main(): int {
     const sharedLabel = 'MAIN_TASKPOOL_SHARED'
 
     console.count(sharedLabel)
 
-    await taskpool.execute((): void => {
+    waitForCompletion(() => taskpool.execute((): void => {
         console.count(sharedLabel)
-    })
+    }))
 
     console.count(sharedLabel)
     console.countReset(sharedLabel)

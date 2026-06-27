@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Duplex writableObjectMode property validation", testDuplexWritableObjectModeProperty);
@@ -29,7 +29,7 @@ async function main(): Promise<int> {
     suite.addTest("Duplex write undefined", testDuplexWriteUndefined);
     suite.addTest("Duplex write empty string", testDuplexWriteEmptyString);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 async function mustCallCheckAll() {
@@ -134,7 +134,7 @@ async function testDuplexDoWritevConcatenatesChunks() {
     })
     duplex.write('Hello ');
     duplex.write('World', 'utf8', func);
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class CustomDuplex2 extends stream.Duplex {
@@ -153,7 +153,7 @@ async function testDuplexDoWritevErrorHandling() {
         arktest.assertEQ(err.message, 'dowritev error');
     }));
     duplex.write('Hello ');
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_CustomDuplex3 = 0;
@@ -183,7 +183,7 @@ async function testDuplexDoWritevCallbackMultipleCalls() {
         arktest.assertEQ(error.message, 'Callback called multiple times');
     }));
     duplex.write('test', 'utf8', mustCallNoArgs());
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 function testDuplexWriteUndefined() {

@@ -15,8 +15,28 @@
 
 package std.concurrency;
 
-import { PromiseWithResolvers, WorkerPriority } from "std/core";
 import { InteropSerializeHelper } from "std/interop";
+
+class PromiseWithResolvers<T> {
+    public constructor() {
+        let resolveLocal: ((value: T | PromiseLike<T>) => void) | undefined = undefined;
+        let rejectLocal: ((error: Error) => void) | undefined = undefined;
+        let p = new Promise<T>((res, rej) => {
+            resolveLocal = res;
+            rejectLocal = rej;
+        });
+        if (resolveLocal === undefined || rejectLocal === undefined) {
+            throw new Error("Couldn't assign resolvers");
+        }
+        this.promise = p;
+        this.resolve = resolveLocal!;
+        this.reject = rejectLocal!;
+    }
+ 
+    public readonly promise: Promise<T>;
+    public readonly resolve: (value: T | PromiseLike<T>) => void;
+    public readonly reject: (error: Error) => void;
+}
 
 export namespace taskpool {
     const TASKPOOL_ERROR_NOT_IN_TASKPOOL: int = 10200022;
@@ -162,17 +182,26 @@ export namespace taskpool {
     class ExecutionRecord {
         constructor(submissionId: int, onFinalized?: () => void) {
             this.submissionId = submissionId;
-            this.resultPromise = new PromiseWithResolvers<Any>();
-            this.promise = this.resultPromise.promise;
+            let resolveLocal: ((value: Any) => void) | undefined = undefined;
+            let rejectLocal: ((error: Error) => void) | undefined = undefined;
+            this.promise = new Promise<Any>((resolve, reject) => {
+                resolveLocal = resolve;
+                rejectLocal = reject;
+            });
+            if (resolveLocal === undefined || rejectLocal === undefined) {
+                throw new Error('Couldn\'t assign resolvers');
+            }
+            this.resolveResult = resolveLocal!;
+            this.rejectResult = rejectLocal!;
             this.onFinalized = onFinalized;
         }
 
         resolvePromise(value: Any): void {
-            this.resultPromise.resolve(value);
+            this.resolveResult(value);
         }
 
         rejectPromise(error: Error): void {
-            this.resultPromise.reject(error);
+            this.rejectResult(error);
         }
 
         markTaskResult(value: Any): void {
@@ -205,7 +234,7 @@ export namespace taskpool {
                 return;
             }
             this.stateFlags.store(EXECUTION_RECORD_RESULT_READY | EXECUTION_RECORD_FINALIZED);
-            this.resultPromise.resolve(value);
+            this.resolveResult(value);
             this.runOnFinalized();
         }
 
@@ -217,7 +246,7 @@ export namespace taskpool {
             this.stateFlags.store(
                 EXECUTION_RECORD_RESULT_READY | EXECUTION_RECORD_RESULT_IS_ERROR | EXECUTION_RECORD_FINALIZED
             );
-            this.resultPromise.reject(error);
+            this.rejectResult(error);
             this.runOnFinalized();
         }
 
@@ -271,9 +300,9 @@ export namespace taskpool {
                 }
                 const result = this.resultSlot.load();
                 if ((currentState & EXECUTION_RECORD_RESULT_IS_ERROR) != 0) {
-                    this.resultPromise.reject(result as Error);
+                    this.rejectResult(result as Error);
                 } else {
-                    this.resultPromise.resolve(result);
+                    this.resolveResult(result);
                 }
                 this.runOnFinalized();
                 return;
@@ -283,7 +312,8 @@ export namespace taskpool {
         readonly submissionId: int;
         readonly promise: Promise<Any>;
 
-        private readonly resultPromise: PromiseWithResolvers<Any>;
+        private readonly resolveResult: (value: Any) => void;
+        private readonly rejectResult: (error: Error) => void;
         private readonly stateFlags: AtomicInt = new AtomicInt(0);
         private readonly resultSlot: AtomicReference<Any> = new AtomicReference<Any>(undefined);
         private readonly onFinalized?: () => void;

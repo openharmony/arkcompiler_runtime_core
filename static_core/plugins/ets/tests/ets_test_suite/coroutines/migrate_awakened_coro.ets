@@ -53,7 +53,7 @@ function testLaunch(): void {
     arktest.assertTrue(wId == 1 || wId == 2);
 
     loadThisWorker(wId);
-    awaitee().awaitSync();
+    waitForCompletion(awaitee);
 
     // migrate to the worker with the least load after await
     if (wId != CoroutineExtras.getWorkerId()) {
@@ -74,9 +74,9 @@ function testAwaitMigration(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.migrate_awakened_coro');
     testSuite.addTest('testAwaitMigration', testAwaitMigration);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

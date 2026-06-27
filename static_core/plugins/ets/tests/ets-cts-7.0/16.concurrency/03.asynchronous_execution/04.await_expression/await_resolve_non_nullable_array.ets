@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Test to wait for NonNullable Promise<{{c.type}}> resolve.
-tags: [no-warmup]
 ---*/
 
 type X = {{c.type}} | null | undefined
@@ -40,7 +39,7 @@ async function startTest(){
     }
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest);
 }
 {% endfor %}

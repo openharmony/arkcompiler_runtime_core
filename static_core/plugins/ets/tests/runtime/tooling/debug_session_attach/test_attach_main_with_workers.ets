@@ -15,7 +15,8 @@
 
 import { attach, fns } from './utils'
 
-async function main() {
+function main(): void {
+  waitForCompletion(async (): Promise<void> => {
     loadLibrary('ets_debug_session_attach_lib')
 
     const attachLock = new RWLock()
@@ -54,4 +55,5 @@ async function main() {
     arktest.assertLT(0, attach.countEventsForMethod('sum'))
     arktest.assertLT(0, attach.countEventsForMethod('sub'))
     arktest.assertLT(0, attach.countEventsForMethod('mul'))
+  });
 }

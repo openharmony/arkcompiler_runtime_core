@@ -20,10 +20,16 @@ class Event {
         this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
             this.resolveFn = resolve;
         });
+        this.job = new CompletableJob<boolean>();
+        this.promise.then((result: boolean) => {
+            this.job.finish(result);
+        }).catch((e: Error) => {
+            this.job.fail(e);
+        });
     }
 
     public wait(): boolean {
-        return this.promise.awaitSync();
+        return this.job.Await();
     }
 
     public fire(val: boolean = true) {
@@ -32,6 +38,7 @@ class Event {
 
     private promise: Promise<boolean>;
     private resolveFn: ((val: boolean) => void) | null = null;
+    private job: CompletableJob<boolean>;
 }
 
 const LARGE_INTERVAL_MS = 600000;
@@ -69,9 +76,9 @@ function releaseEAWorkers(workers: EAWorker[], gate: Event): void {
 }
 
 function warmTaskpool(): void {
-    let result = taskpool.execute((): int => {
+    let result = waitForCompletion<Any>(() => taskpool.execute((): int => {
         return 0;
-    }).awaitSync() as int;
+    })) as int;
     arktest.assertEQ(result, 0);
 }
 

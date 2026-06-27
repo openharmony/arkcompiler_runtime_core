@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: The class Promise<T> represents the values returned by launch expressions.
-tags: [no-warmup]
 ---*/
 
 {{c.decl}}
@@ -25,7 +24,7 @@ async function runTest() {
     {{c.use|indent}}
 }
 
-async function main(): Promise<void> {
-    await runTest()
+function main(){
+    waitForCompletion(runTest);
 }
 {% endfor %}

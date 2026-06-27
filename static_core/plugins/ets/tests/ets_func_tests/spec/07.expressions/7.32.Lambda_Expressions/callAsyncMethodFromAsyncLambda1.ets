@@ -40,6 +40,6 @@ class LambdaTests {
     }
 }
 
-async function main(): Promise<void> {
-    await new LambdaTests().testCallAsyncLambda();
+function main(): void {
+    waitForCompletion(new LambdaTests().testCallAsyncLambda);
 }

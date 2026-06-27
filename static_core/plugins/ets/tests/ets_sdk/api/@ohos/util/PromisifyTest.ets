@@ -48,7 +48,7 @@ async function testUtilPromisifyRejectsWithError() {
     let exceptionCheck = (e: Error): boolean | string => {
         return e.message == 'Invalid argument type, expected string';
     }
-    await arktest.expectThrowAsync(async () => { await value([1, 2]); }, exceptionCheck);
+    arktest.expectThrow(() => { waitForCompletion(async () => { await value([1, 2]); }) }, exceptionCheck);
 }
 
 async function testUtilPromisifyResolvesWithNumber() {

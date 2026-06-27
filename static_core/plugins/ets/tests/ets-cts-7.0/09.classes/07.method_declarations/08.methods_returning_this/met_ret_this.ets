@@ -23,11 +23,7 @@ tags: []
 
 {{c.decl}}
 
-{%- if c.async %}
-async function main(): Promise<void> {
-{% else %}
-function main(): void {
-{%- endif %}
+function main() {
     {{c.use|indent}}
 }
 {% endfor %}

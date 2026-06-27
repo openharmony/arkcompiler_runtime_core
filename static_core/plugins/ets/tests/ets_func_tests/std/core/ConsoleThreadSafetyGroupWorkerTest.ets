@@ -15,7 +15,7 @@
 
 // This scenario validates exact console output, so it uses a paired .expected file instead of arktest assertions.
 
-async function main(): Promise<int> {
+function main(): int {
     const startFlag = new AtomicBoolean(false);
     const stage = new AtomicInt(0);
 

@@ -31,7 +31,7 @@ class Getter {
     }
 }
 
-async function main(): Promise<void> {
+function main(): void {
     let getter = new Getter();
     let arr: Int[] = [0, 1, 2];
     let foo: fooAsyncLambda = async (): Promise<void> => {
@@ -42,5 +42,5 @@ async function main(): Promise<void> {
         arktest.assertTrue( arr2 instanceof Object)
         arktest.assertTrue( arr2[0] instanceof Int)
     }
-    await foo();
+    waitForCompletion(foo);
 }

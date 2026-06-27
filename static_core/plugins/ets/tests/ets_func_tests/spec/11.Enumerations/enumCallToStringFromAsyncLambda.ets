@@ -46,7 +46,7 @@ function getString(arg: string): string {
     return arg;
 }
 
-async function main(): Promise<void> {
+function main(): void {
     let expected_big_string = "mqpfcmvzctncgcjdjhxcghwcgnrxvxtuxnifrlumwpoukpezhupzbavqxkdwqkfviobuhjcnlajrjiarvboeatxpwuvbqwnbsngvxaux \
         gtyustiddvloyzddxuhafybdxkhovuswyzwtlzdvwwywilbqerbcvgfhbzowtvrmzagszlptlooopxdyrrzlpvjpgcnoldubdnhytftejlk \
         xiolxnojsoxmqwmxnttwaseebvtaqdtlizrxenpgxaipgmkvxmzakqsekqsypyccmgnwtvmltvepyeqjarfwgyxovoblgowqmwxcqjfoedttg \
@@ -71,7 +71,7 @@ async function main(): Promise<void> {
         return Promise.resolve<string>(getString(arg));
     };
 
-    let big_string_from_enum: string = await stringPromise();
+    let big_string_from_enum: string = waitForCompletion(stringPromise);
 
     arktest.assertEQ(expected_big_string, big_string_from_enum)
 }

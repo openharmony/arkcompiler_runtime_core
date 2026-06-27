@@ -19,12 +19,12 @@ desc: >-
     Type Awaited<T> constructs a type which has no type Promise in it.
 ---*/
 
-async function foo<T>() {
+function foo<T>(): Awaited<T> {
     return {{c.return_value}}
 }
 
-async function main(): Promise<void> {
-    let actual = await foo<string>()
+function main() {
+    let actual = foo<string>()
     arktest.assertEQ(actual, {{c.expected_value}})
 }
 

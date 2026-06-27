@@ -27,9 +27,9 @@ function testEworkerInteropError() {
     arktest.assertTrue(errorWasCaught);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_interop_error');
     testSuite.addTest('testEworkerInteropError', testEworkerInteropError);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

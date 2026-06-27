@@ -377,7 +377,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          arktest.assertTrue((await a.meth()) == "abc")
+          arktest.assertTrue(a.meth() == "abc")
 
     - decl: |-
           function bar<T>(p: T): T {
@@ -401,7 +401,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          arktest.assertTrue((await a.meth()) == "abc")
+          arktest.assertTrue(a.meth() == "abc")
 
     - decl: |-
           class A {

@@ -63,10 +63,10 @@ async function concurrentSetSameValueIdempotentAdd(): Promise<void> {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite('taskpool.concurrent.container.set');
     suite.addAsyncTest('ConcurrentSetSameValueIdempotentAdd', concurrentSetSameValueIdempotentAdd);
-    const res = await suite.runAsync();
+    const res = suite.run();
     CoroutineExtras.stopTaskpool();
     return res;
 }

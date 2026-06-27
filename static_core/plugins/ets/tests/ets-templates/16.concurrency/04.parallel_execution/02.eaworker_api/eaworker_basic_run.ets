@@ -35,6 +35,6 @@ async function startTest() {
   console.log("Test for EAWorker is passed."); //To ensure the async function has completed
 }
 
-async function main(): Promise<void> {
-  await startTest()
+function main(): void {
+  waitForCompletion(startTest);
 }

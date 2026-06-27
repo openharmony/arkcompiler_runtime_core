@@ -21,7 +21,6 @@
 
 /*---
 desc: {{c.desc}}
-tags: [no-warmup]
 ---*/
 
 {%- set ns = namespace() %}
@@ -52,11 +51,7 @@ tags: [no-warmup]
 namespace testNS{{cv_id}} {
   {{ns.decl|indent(width=2)}}
 
-{%- if c.async %}
-  export async function runTest(): Promise<boolean> {
-{% else %}
   export function runTest(): boolean {
-{%- endif %}
     {{ns.logic_data|indent(width=4)}}
     return true
   }
@@ -66,23 +61,13 @@ namespace testNS{{cv_id}} {
 
 {{ns.first_decl}}
 
-{%- if c.async %}
-async function main(): Promise<void> {
-{%- else %}
 function main(): void {
-{%- endif %}
-
 {%- for cv in check_variants %}
 {%- set cv_id = loop.index %}
 {%- if cv_id == 1 %}
   {{ns.first_logic_data|indent(width=2)}}
 {% endif %}
-
-{%- if c.async %}
-  arktest.assertTrue(await testNS{{cv_id}}.runTest())
-{%- else %}
   arktest.assertTrue(testNS{{cv_id}}.runTest())
-{%- endif %}
 {%- endfor %}
 }
 

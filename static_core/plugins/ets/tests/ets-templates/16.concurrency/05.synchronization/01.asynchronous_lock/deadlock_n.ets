@@ -24,8 +24,10 @@ tags: [no-warmup, negative]
 
 {{c.decl}}
 
-async function main(): Promise<void> {
-  {{c.logic}}
+function main(): void {
+  waitForCompletion(async (): Promise<void> => {
+    {{c.logic|indent(width=4)}}
+  });
 }
 
 {% endfor %}

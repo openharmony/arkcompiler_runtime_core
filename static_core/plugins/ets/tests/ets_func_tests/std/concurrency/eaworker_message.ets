@@ -21,7 +21,9 @@ class Event {
     }
 
     public wait(): boolean {
-        return this.promise.awaitSync();
+        return waitForCompletion<boolean>(() => {
+            return this.promise;
+        });
     }
 
     public fire(val: boolean = true) {
@@ -65,7 +67,7 @@ const sleep = (ms: int): Promise<int> => {
     });
 }
 
-async function testIsAliveAndQuit(): Promise<void> {
+function testIsAliveAndQuit() {
     let eaw1 = new EAWorker();
     let eaw2 = new EAWorker('custom name');
     let eaw3 = new EAWorker(() => {});
@@ -87,7 +89,7 @@ async function testIsAliveAndQuit(): Promise<void> {
         if (!eaw1.isAlive() && !eaw2.isAlive() && !eaw3.isAlive()) {
             break;
         }
-        await sleep(sleepTime);
+        waitForCompletion(() => sleep(sleepTime));
     }
     arktest.assertFalse(eaw1.isAlive());
     arktest.assertFalse(eaw2.isAlive());
@@ -369,7 +371,7 @@ function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
     suite.addTest('testTaskEAWorker', testTaskEAWorker);
-    suite.addAsyncTest('testIsAliveAndQuit', testIsAliveAndQuit);
+    suite.addTest('testIsAliveAndQuit', testIsAliveAndQuit);
     suite.addTest('testMainQuit', testMainQuit);
     suite.addTest('testQuit', testQuit);
     suite.addTest('testCurrent', testCurrent);

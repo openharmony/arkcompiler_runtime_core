@@ -37,7 +37,7 @@ function(add_ets_coroutines_test)
     set(prefix ARG)
     set(noValues SKIP_ARM32_COMPILER LIST_UNHANDLED)
     set(singleValues FILE)
-    set(multiValues OPTIONS IMPL OPTION_SETS_STACKFUL WORKERS MODE)
+    set(multiValues OPTIONS IMPL OPTION_SETS_STACKFUL OPTION_SETS_STACKLESS WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # NOTE(26403) Profilesaver is turned off beause of integer overflow
@@ -50,16 +50,30 @@ function(add_ets_coroutines_test)
     get_filename_component(test_name "${ARG_FILE}" NAME_WE)
 
     if (ARG_LIST_UNHANDLED)
-        list(APPEND list_unhandled_option "--list-unhandled-on-exit:promises=throw")
+        list(APPEND list_unhandled_option "--list-unhandled-on-exit:jobs=throw" "--list-unhandled-on-exit:promises=throw")
+    endif()
+
+    if (TARGET etsstdlib.stackless)
+        get_target_property(STACKLESS_STDLIB etsstdlib.stackless FILE)
     endif()
 
     foreach(impl ${ARG_IMPL})
+        if (impl STREQUAL "STACKLESS" AND NOT TARGET etsstdlib.stackless)
+            continue()
+        endif()
         string(TOLOWER "${impl}" impl_name)
         set(impl_option "--coroutine-impl=${impl_name}")
         if(impl STREQUAL "STACKFUL" AND
            (CMAKE_BUILD_TYPE STREQUAL "Debug" OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
             list(APPEND impl_option "--coroutine-stack-size-pages=128")
         endif()
+        set(fe_options "")
+        if (impl STREQUAL "STACKLESS")
+            list(APPEND fe_options "--stackless-coros=true")
+            set(BOOT_PANDA_FILES_OLD ${BOOT_PANDA_FILES})
+            set(BOOT_PANDA_FILES ${STACKLESS_STDLIB})
+        endif()
+
         foreach(workers_count ${ARG_WORKERS})
             set(workers_option "--coroutine-workers-count=0")
             if (workers_count STREQUAL "ONE")
@@ -85,13 +99,17 @@ function(add_ets_coroutines_test)
                 add_ets_test(ets_test_suite_coroutines
                              FILE ${ARG_FILE}
                              ${SKIP_ARM32_COMPILER}
-                             ENABLE_AN_FORCE
                              TEST_NAME "${test_name}_${impl_name}_${options_name}_workers_${workers_count}"
                              OPTIONS ${ARG_OPTIONS} ${impl_option} ${additional_options} ${workers_option} ${list_unhandled_option}
                              MODE ${ARG_MODE}
+                             COMPILER_EXTRA_OPTIONS ${fe_options}
                 )
             endforeach()
         endforeach()
+
+        if (impl STREQUAL "STACKLESS")
+            set(BOOT_PANDA_FILES ${BOOT_PANDA_FILES_OLD})
+        endif()
     endforeach()
 endfunction()
 
@@ -133,6 +151,15 @@ add_ets_coroutines_test(FILE unhandled_rejection_promise.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+add_ets_coroutines_test(FILE dump_unhandled_jobs.ets
+                        SKIP_ARM32_COMPILER
+                        LIST_UNHANDLED
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
 add_ets_coroutines_test(FILE async_call.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -163,6 +190,14 @@ add_ets_coroutines_test(FILE launch_instruction.ets
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
                         MODE "INT" "JIT"
+)
+
+add_ets_coroutines_test(FILE launch_instruction.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKLESS"
+                        OPTION_SETS_STACKLESS "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE launch_launch.ets
@@ -211,6 +246,14 @@ if (NOT PANDA_TARGET_ARM32)
                             OPTION_SETS_STACKFUL "NO_POOL"
                             WORKERS "ONE"
                             MODE "AOT"
+    )
+
+    add_ets_coroutines_test(FILE launch_instr_array.ets
+                            SKIP_ARM32_COMPILER
+                            IMPL "STACKLESS"
+                            OPTION_SETS_STACKLESS "DEFAULT"
+                            WORKERS "AUTO"
+                            MODE "INT" "AOT"
     )
 
     add_ets_coroutines_test(FILE class_load_race.ets
@@ -315,7 +358,6 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE concurrent_await.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
@@ -347,6 +389,14 @@ add_ets_coroutines_test(FILE launch_return.ets
                         MODE "INT"
 )
 
+add_ets_coroutines_test(FILE launch_return.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKLESS"
+                        OPTION_SETS_STACKLESS "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "AOT"
+)
+
 add_ets_coroutines_test(FILE launch_yield.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -363,6 +413,14 @@ add_ets_coroutines_test(FILE launch_yield.ets
                         MODE "INT" "JIT"
 )
 
+add_ets_coroutines_test(FILE launch_yield.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKLESS"
+                        OPTION_SETS_STACKLESS "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "AOT"
+)
+
 add_ets_coroutines_test(FILE affinity.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -377,6 +435,14 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE wake_for_another_event.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKLESS"
+                        OPTION_SETS_STACKLESS "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "AOT"
 )
 
 add_ets_coroutines_test(FILE await_standalone_promise.ets
@@ -427,6 +493,14 @@ add_ets_coroutines_test(FILE launch.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+add_ets_coroutines_test(FILE launch_compat.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
+
 add_ets_coroutines_test(FILE setTimeout.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -460,7 +534,7 @@ add_ets_coroutines_test(FILE migration.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE promise_with_resolvers_test.ets
+add_ets_coroutines_test(FILE job_test.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
@@ -525,5 +599,4 @@ add_ets_coroutines_test(FILE legacy_atomics_wait_notify.ets
 )
 
 add_subdirectory(dfx)
-add_subdirectory(await_sync)
 add_subdirectory(no_suitable_worker)

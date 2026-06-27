@@ -24,13 +24,13 @@ desc: Test to wait for already executed Promise<{{type_name}}>.
 const value: {{type_name}} = {{c.value}}
 
 async function startTest() {
-    const resolvedPromise = Promise.resolve(value); 
+    const resolvedPromise = Promise.resolve(value);
     const result = await resolvedPromise;
     arktest.assertEQ(result, value, `Promise.resolve result should be ${value}`);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest);
 }
 {% endfor %}
 {% endfor %}

@@ -21,7 +21,8 @@ function workerAttachImpl() {
     fns.mul(2, 3)
 }
 
-async function main() {
+function main(): void {
+  waitForCompletion(async (): Promise<void> => {
     loadLibrary('ets_debug_session_attach_lib')
 
     const workerAttach = new EAWorker()
@@ -67,4 +68,5 @@ async function main() {
     arktest.assertLT(0, attach.countEventsForMethod('sum'))
     arktest.assertLT(0, attach.countEventsForMethod('sub'))
     arktest.assertLT(0, attach.countEventsForMethod('mul'))
+  });
 }

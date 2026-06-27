@@ -249,7 +249,7 @@ async function testArm64LargeFuncCall(): Promise<void> {
     await p;
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.async_call');
     testSuite.addAsyncTest('testNoArgsStaticFuncCall', testNoArgsStaticFuncCall);
     testSuite.addAsyncTest('testAmd64SmallFuncCall', testAmd64SmallFuncCall);
@@ -260,6 +260,6 @@ async function main(): Promise<int> {
     testSuite.addAsyncTest('testArm32hfLargeFuncCall', testArm32hfLargeFuncCall);
     testSuite.addAsyncTest('testArm64SmallFuncCall', testArm64SmallFuncCall);
     testSuite.addAsyncTest('testArm64LargeFuncCall', testArm64LargeFuncCall);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

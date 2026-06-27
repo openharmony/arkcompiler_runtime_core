@@ -63,8 +63,8 @@ async function startTest(){
     {% endif %}
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(){
+    waitForCompletion(startTest)
 }
 
 {% endif %}

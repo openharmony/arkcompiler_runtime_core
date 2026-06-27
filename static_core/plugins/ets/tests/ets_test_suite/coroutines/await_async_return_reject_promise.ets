@@ -47,10 +47,10 @@ async function testRejectingPromise(): Promise<void> {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.await_async_return_reject_promise');
     testSuite.addAsyncTest('testRejectedPromise', testRejectedPromise);
     testSuite.addAsyncTest('testRejectingPromise', testRejectingPromise);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;    
 }

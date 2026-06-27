@@ -101,11 +101,11 @@ function registerTest(registry: FinalizationRegistry<String> | null): void {
 }
 
 
-let jobsNoToken: (PromiseWithResolvers<void> | undefined)[] = [undefined, undefined, undefined];
+let jobsNoToken: (CompletableJob<void> | undefined)[] = [undefined, undefined, undefined];
 let resultsNoToken: int[] = [];
 let finRegNoToken = new FinalizationRegistry<int>((i: int) => {
     resultsNoToken.push(i);
-    jobsNoToken[i]!.resolve(undefined);
+    jobsNoToken[i]!.finish();
 });
 
 function registerNoTokenTest() {
@@ -120,14 +120,14 @@ function registerNoTokenTest() {
         finRegNoToken.register(objects[2], 2);
 
         for (let i of seq) {
-            jobsNoToken[i] = new PromiseWithResolvers<void>();
+            jobsNoToken[i] = new CompletableJob<void>();
         }
 
         // Cleanup finReg in the given order
         for (let i of seq) {
             objects[i] = {};
             doFullGC();
-            jobsNoToken[i]!.promise.awaitSync();
+            jobsNoToken[i]!.Await();
 
             arktest.assertEQ(resultsNoToken.length, 1);
             arktest.assertEQ(resultsNoToken[0], i);
@@ -321,34 +321,34 @@ function finRegReenqueueTest(): void {
         tokens.push({});
     }
 
-    let jobs: PromiseWithResolvers<void>[] = [];
+    let jobs: CompletableJob<void>[] = [];
     finReg1 = new FinalizationRegistry<int>((i: int) => {
-        jobs[i]!.resolve(undefined);
+        jobs[i]!.finish();
     });
     finReg2 = new FinalizationRegistry<int>((i: int) => {
-        jobs[i]!.resolve(undefined);
+        jobs[i]!.finish();
     });
 
     for (let i = 0; i < COUNT; ++i) {
-        jobs.push(new PromiseWithResolvers<void>());
+        jobs.push(new CompletableJob<void>());
     }
 
     // Register a lot of garbage in finReg1 and one garbage in finReg2
     registerGarbage(finReg1!, finReg2!, COUNT, tokens);
     doFullGC();
     for (let i = 0; i < COUNT; ++i) {
-        jobs[i]!.promise.awaitSync()
+        jobs[i]!.Await()
     }
 
     for (let i = 0; i < COUNT; ++i) {
-        jobs[i] = new PromiseWithResolvers<void>();
+        jobs[i] = new CompletableJob<void>();
     }
 
     // Register a lot of garbage in finReg2 and one garbage in finReg1
     registerGarbage(finReg2!, finReg1!, COUNT, tokens);
     doFullGC();
     for (let i = 0; i < COUNT; ++i) {
-        jobs[i]!.promise.awaitSync()
+        jobs[i]!.Await()
     }
 }
 

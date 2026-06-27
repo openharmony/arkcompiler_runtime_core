@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Test cases for various usage scenarios of asynchronous method.
+desc: launch is allowed in non-async functions
 ---*/
 
-class A {
-    {{c.decl|indent}}
+function runFromNonAsync(): int {
+  return launch<int>() {
+    return 5
+  }.Await()
 }
 
 async function startTest() {
-    let a = new A()
-    {{c.use|indent}}
+  let result = runFromNonAsync()
+  arktest.assertEQ(5, result)
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+  waitForCompletion(startTest)
 }
-{% endfor %}

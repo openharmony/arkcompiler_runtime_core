@@ -117,6 +117,25 @@ int32_t EtsExecutionContext::GetTaskpoolSubmissionId() const
     return taskpoolSubmissionId_;
 }
 
+void EtsExecutionContext::ProcessUnhandledFailedJobs()
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    auto *umanager = GetPandaVM()->GetUnhandledObjectManager();
+    ASSERT(umanager != nullptr);
+    ASSERT_NATIVE_CODE();
+    if (umanager->HasFailedJobObjects()) {
+        {
+            [[maybe_unused]] ScopedManagedCodeThread sc(GetMT());
+            umanager->ListFailedJobs(this);
+        }
+        if (GetMT()->HasPendingException()) {
+            GetPandaVM()->HandleUncaughtException();
+        }
+    }
+}
+
 void EtsExecutionContext::ProcessUnhandledRejectedPromises(bool listAllObjects)
 {
     if (Runtime::GetOptions().IsArkAot()) {

@@ -80,10 +80,10 @@ function testLaunchError() {
     arktest.assertEQ(res, true);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
     testSuite.addTest('testLaunchStackOverflow', testLaunchStackOverflow);
     testSuite.addTest('testLaunchError', testLaunchError);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

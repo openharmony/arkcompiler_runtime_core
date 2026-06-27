@@ -29,8 +29,8 @@ const arr = [false, true];
 async function startTest() {
     let iterationResult = false;
     for (let i of arr) {
-        const valueResult = await Promise.resolve(value); 
-        iterationResult = await Promise.resolve(i); 
+        const valueResult = await Promise.resolve(value);
+        iterationResult = await Promise.resolve(i);
         arktest.assertEQ(valueResult, value, `Value result must be ${value}`);
         arktest.assertEQ(iterationResult, i, `Iteration result must be "${i}"`);
 
@@ -40,8 +40,8 @@ async function startTest() {
     }
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest);
 }
 {% endfor %}
 {% endfor %}

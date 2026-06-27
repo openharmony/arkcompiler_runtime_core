@@ -24,7 +24,7 @@ desc: Error type must be correct when reject Promise<{{type_name}}>.
 {% if declaration_type == 'custom' %}
 class CustomError extends Error {
     customCode: number;
-    
+
     constructor(message: string, customCode: number) {
         super(message);
         this.customCode = customCode;
@@ -93,8 +93,8 @@ async function startTest() {
     }
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest);
 }
 {% endfor %}
 {% endfor %}

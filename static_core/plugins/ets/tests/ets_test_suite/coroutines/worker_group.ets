@@ -225,13 +225,12 @@ function testInvalidGroupId() {
     });
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.worker_group');
     testSuite.addTest('testEADomain', testEADomain);
     testSuite.addTest('testGeneralDomain', testGeneralDomain);
     testSuite.addTest('testExactIdDomain', testExactIdDomain);
     testSuite.addTest('testMainDomain', testMainDomain);
     testSuite.addTest('testInvalidGroupId', testInvalidGroupId);
-    let res = await testSuite.runAsync();
-    return res;
+    return testSuite.run();
 }

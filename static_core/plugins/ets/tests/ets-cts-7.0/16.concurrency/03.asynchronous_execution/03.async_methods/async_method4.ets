@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Implicit return in an asynchronous method.
-tags: [no-warmup]
 ---*/
 
 class MethodReturnVoidImplicit {
@@ -32,6 +31,6 @@ async function startTest() {
     await example.methodReturnVoidImplicit();
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

@@ -79,15 +79,41 @@ function launchImpl(func: () => Any): Promise<Any> {
     });
 }
 
+class Event {
+    constructor() {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+            this.resolveFn = resolve;
+        })
+        this.job = new CompletableJob<boolean>();
+        this.promise.then((result: boolean) => {
+            this.job.finish(result);
+        }).catch((e: Error) => {
+            this.job.fail(e);
+        });
+    }
+
+    public wait(): boolean {
+        return this.job.Await();
+    }
+
+    public fire(val: boolean = true) {
+        this.resolveFn!(val);
+    }
+
+    private promise: Promise<boolean>;
+    private resolveFn: ((val: boolean) => void) | null = null;
+    private job: CompletableJob<boolean>;
+}
+
 function testDelayFunc(): Any {
     let task1 = new taskpool.Task(returnFailAbc);
     let res: string = '';
-    let isTask1Finished = new PromiseWithResolvers<void>();
+    let isTask1Finished = new Event();
     taskpool.executeDelayed(100, task1).catch((e: Any) => {
         res = (e as Error).message;
-        isTask1Finished.resolve(undefined);
+        isTask1Finished.fire();
     })
-    isTask1Finished.promise.awaitSync();
+    isTask1Finished.wait();
     return res;
 }
 
@@ -268,16 +294,16 @@ async function taskWithDependencyExecutePeriodicallyTest(): Promise<void> {
 async function testTaskpoolInfo() {
     // Check non empty threadInfo without tasks
     let emptyThreadInfo = taskpool.getTaskPoolInfo();
-    let flagForTask = new PromiseWithResolvers<void>();
-    let isRunTask = new PromiseWithResolvers<void>();
+    let flagForTask = new Event();
+    let isRunTask = new Event();
     // When taskpool using launch we do not have default worker for it
     // So the behavior is little bit different with taskpool using EAWorker
     if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
         arktest.assertNE(emptyThreadInfo.threadInfos.length, 0);
     }
-    let funcForTask = async (): Promise<string> => {
-        isRunTask.resolve(undefined);
-        await flagForTask.promise;
+    let funcForTask = (): string => {
+        isRunTask.fire();
+        flagForTask.wait();
         return 'result'
     }
     let task = new taskpool.Task('task_name', funcForTask);
@@ -288,10 +314,10 @@ async function testTaskpoolInfo() {
     }
     let p = taskpool.execute(task, taskpool.Priority.HIGH);
     // wait for task started
-    await isRunTask.promise;
+    isRunTask.wait();
     let info2 = taskpool.getTaskPoolInfo();
     // Notify to continue task
-    flagForTask.resolve(undefined);
+    flagForTask.fire();
     // Check current priority of the worker
     //here we cannot guarantee the task has been dispatched to the first worker
     let compared: boolean = false;
@@ -317,17 +343,17 @@ async function testTaskpoolInfo() {
     arktest.assertEQ(await p, 'result');
 }
 
-async function namedTaskFunction(flagForTask:PromiseWithResolvers<void>, isRunTask:PromiseWithResolvers<void>): Promise<string> {
-    isRunTask.resolve(undefined);
-    await flagForTask.promise;
+function namedTaskFunction(flagForTask:Event, isRunTask:Event):string {
+    isRunTask.fire();
+    flagForTask.wait();
     return 'result'
 }
 
 async function testTaskpoolInfoOfNoneNameTask() {
     // Check non empty threadInfo without tasks
     let emptyThreadInfo = taskpool.getTaskPoolInfo();
-    let flagForTask = new PromiseWithResolvers<void>();
-    let isRunTask = new PromiseWithResolvers<void>();
+    let flagForTask = new Event();
+    let isRunTask = new Event();
     // When taskpool using launch we do not have default worker for it
     // So the behavior is little bit different with taskpool using EAWorker
     if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
@@ -341,10 +367,10 @@ async function testTaskpoolInfoOfNoneNameTask() {
     }
     let p = taskpool.execute(task, taskpool.Priority.HIGH);
     // wait for task started
-    await isRunTask.promise;
+    isRunTask.wait();
     let info2 = taskpool.getTaskPoolInfo();
     // Notify to continue task
-    flagForTask.resolve(undefined);
+    flagForTask.fire();
     // Check current priority of the worker
     let checked = false;
     info2.threadInfos.forEach(threadInfo => {
@@ -369,21 +395,21 @@ async function testTaskpoolInfoOfNoneNameTask() {
     arktest.assertEQ('result', await p)
 }
 
-async function testTaskPoolInfoasyncawaitTask(): Promise<void> {
-    const caseName : string = 'testasyncawaitTask';
-    let flagforTask = new PromiseWithResolvers<void>();
-    let isRunTask = new PromiseWithResolvers<void>();
+function testTaskPoolInfoasyncawaitTask() {
+    const caseName: string = 'testasyncawaitTask';
+    let flagforTask = new Event();
+    let isRunTask = new Event();
     let asyncfuncforTask = async (ms : int) : Promise<int> => {
         const promise = await new Promise<int>(resolve => {
-            isRunTask.resolve(undefined);
-            flagforTask.promise.awaitSync();
+            isRunTask.fire();
+            flagforTask.wait();
             resolve(ms);
         })
         return promise;
     }
     let task: taskpool.Task = new taskpool.Task(caseName, asyncfuncforTask, 3000);
     taskpool.execute(task, taskpool.Priority.HIGH);
-    await isRunTask.promise;
+    isRunTask.wait();
     let taskpoolInfo: taskpool.TaskPoolInfo =  taskpool.getTaskPoolInfo();
     let state = 0;
     for(const taskInfo of taskpoolInfo.taskInfos) {
@@ -392,7 +418,7 @@ async function testTaskPoolInfoasyncawaitTask(): Promise<void> {
         }
     }
     arktest.assertEQ(state, taskpool.State.RUNNING.valueOf());
-    flagforTask.resolve(undefined);
+    flagforTask.fire();
 }
 
 function returnNumber(): int {
@@ -529,24 +555,24 @@ async function isCancelTest() {
     let t = new taskpool.Task(returnAbc);
     let res = await taskpool.execute(t);
     arktest.assertEQ(res, 'abc');
-    let isCanceled = new PromiseWithResolvers<boolean>();
-    let isRunning = new PromiseWithResolvers<void>();
-    let waitForCancel = new PromiseWithResolvers<void>();
-    let funcForTask = async (): Promise<boolean> => {
+    let isCanceled = new Event();
+    let isRunning = new Event();
+    let waitForCancel = new Event();
+    let funcForTask = (): boolean => {
         arktest.assertEQ(taskpool.Task.isCanceled(), false);
-        isRunning.resolve(undefined);
-        await waitForCancel.promise;
+        isRunning.fire();
+        waitForCancel.wait();
         // Set isCanceled value from taskpool
-        isCanceled.resolve(taskpool.Task.isCanceled());
+        isCanceled.fire(taskpool.Task.isCanceled());
         return true;
     }
     let task = new taskpool.Task(funcForTask);
     let p = taskpool.execute(task);
-    await isRunning.promise;
+    isRunning.wait();
     arktest.assertEQ(task.isDone(), false);
     taskpool.cancel(task);
-    waitForCancel.resolve(undefined);
-    let wasCanceled = await isCanceled.promise;
+    waitForCancel.fire();
+    let wasCanceled = isCanceled.wait();
     // Check isCanceled from taskpool
     arktest.assertEQ(wasCanceled, true);
     await p;
@@ -558,24 +584,24 @@ async function isCancelPromiseTest() {
     let t = new taskpool.Task(returnAbc);
     let res = await taskpool.execute(t);
     arktest.assertEQ(res, 'abc');
-    let isCanceled = new PromiseWithResolvers<boolean>();
-    let isRunning = new PromiseWithResolvers<void>();
-    let waitForCancel = new PromiseWithResolvers<void>();
+    let isCanceled = new Event();
+    let isRunning = new Event();
+    let waitForCancel = new Event();
     let funcForPromiseTask = async (): Promise<boolean> => {
         arktest.assertEQ(taskpool.Task.isCanceled(), false);
-        isRunning.resolve(undefined);
-        await waitForCancel.promise;
+        isRunning.fire();
+        waitForCancel.wait();
         // Set isCanceled value from taskpool
-        isCanceled.resolve(taskpool.Task.isCanceled());
+        isCanceled.fire(taskpool.Task.isCanceled());
         return true;
     }
     let task = new taskpool.Task(funcForPromiseTask);
     let p = taskpool.execute(task);
-    await isRunning.promise;
+    isRunning.wait();
     arktest.assertEQ(task.isDone(), false);
     taskpool.cancel(task);
-    waitForCancel.resolve(undefined);
-    let wasCanceled = await isCanceled.promise;
+    waitForCancel.fire();
+    let wasCanceled = isCanceled.wait();
     // Check isCanceled from taskpool
     arktest.assertEQ(wasCanceled, true);
     await p;
@@ -618,15 +644,15 @@ async function cancelNonExecutingTaskTest() {
 }
 
 async function cancelExecutingTaskTest(): Promise<void> {
-    let isExecuting = new PromiseWithResolvers<void>();
-    let lambdaFunc = async (): Promise<string> => {
-        await isExecuting.promise;
+    let isExecuting = new Event();
+    let lambdaFunc = (): string => {
+        isExecuting.wait();
         return 'abc';
     }
     let task1 = new taskpool.Task(lambdaFunc);
     let p1 = taskpool.execute(task1);
     taskpool.cancel(task1);
-    isExecuting.resolve(undefined);
+    isExecuting.fire();
     try {
         let res = await p1;
         arktest.assertEQ(res, 'abc');
@@ -635,13 +661,13 @@ async function cancelExecutingTaskTest(): Promise<void> {
     }
     let task2 = new taskpool.Task(testCancelFunc, 300);
     let val: int = 0;
-    let isExecuted = new PromiseWithResolvers<void>();
+    let isExecuted = new Event();
     taskpool.execute(task2).then((value: Any): void => {
         val = 1;
-        isExecuted.resolve(undefined);
+        isExecuted.fire();
     }).catch((e: Any): void => {
         val = 2;
-        isExecuted.resolve(undefined);
+        isExecuted.fire();
     });
     await promiseCase(50);
     try {
@@ -650,7 +676,7 @@ async function cancelExecutingTaskTest(): Promise<void> {
         arktest.assertEQ(e.message, 'taskpool:: task has been executed');
         return undefined;
     }
-    await isExecuted.promise;
+    isExecuted.wait();
     if (val == 1) {
         arktest.assertEQ(task2.isDone(), true);
     } else {
@@ -869,13 +895,13 @@ async function dependencyExecutedTaskTest() {
         arktest.assertEQ(e.message, expectedAgainExecuteError.message)
     }
     // Try to remove dependency after execute
-    let isRuning1 = new PromiseWithResolvers<void>();
-    let isRuning2 = new PromiseWithResolvers<void>();
+    let isRuning1 = new Event();
+    let isRuning2 = new Event();
     let eventTask1 = () =>{
-        isRuning1.resolve(undefined);
+        isRuning1.fire();
     }
     let eventTask2 = () =>{
-        isRuning2.resolve(undefined);
+        isRuning2.fire();
     }
     let task5 = new taskpool.Task(eventTask1);
     let task6 = new taskpool.Task(eventTask2);
@@ -883,8 +909,8 @@ async function dependencyExecutedTaskTest() {
     taskpool.execute(task5);
     arktest.expectError(() => { task5.removeDependency(task6); }, new Error('taskpool:: executedTask cannot removeDependency'));
     taskpool.execute(task6);
-    await isRuning1.promise;
-    await isRuning2.promise;
+    isRuning1.wait();
+    isRuning2.wait();
 }
 
 async function sendReceiveDataTest() {
@@ -919,10 +945,10 @@ async function sendDataAndCancelTest() {
     let recvCallback = (): string => {
         value += 10;
         return '';
-    };
-    let isRunning = new PromiseWithResolvers<void>();
+    }
+    let isRunning = new Event();
     let sendDataFunc = (): string => {
-        isRunning.resolve(undefined);
+        isRunning.fire();
         taskpool.Task.sendData();
         let t = Date.now();
         while ((Date.now() - t) < 200) {
@@ -941,7 +967,7 @@ async function sendDataAndCancelTest() {
     let task = new taskpool.Task(sendDataFunc);
     task.onReceiveData(recvCallback);
     let p = taskpool.execute(task);
-    await isRunning.promise;
+    isRunning.wait();
     try {
         taskpool.cancel(task);
     } catch (err) {
@@ -1032,16 +1058,16 @@ async function tasksExecutionTest() {
         let task: taskpool.Task = new taskpool.Task(sum, 10, 20);
         taskArray.push(task);
     }
-    let allExecuted = new PromiseWithResolvers<void>();
+    let allExecuted = new Event();
     for (let i: int = 0; i < count; ++i) {
         taskpool.execute(taskArray[i]).then((value: Any): void => {
             num++;
             if (num == count) {
-                allExecuted.resolve(undefined);
+                allExecuted.fire();
             }
         })
     }
-    await allExecuted.promise;
+    allExecuted.wait();
     arktest.assertEQ(taskArray[0].isDone(), true);
     arktest.assertEQ(taskArray[5].isDone(), true);
     arktest.assertEQ(num, count);
@@ -1395,42 +1421,42 @@ function periodicTaskAddedAsDepedency() {
 
 async function executeOneTaskThreetimes(){
     let checkPoints = new containers.LinkedBlockingQueue<int>();
-    let isTaskFinished = new PromiseWithResolvers<void>();
+    let isTaskFinished = new Event();
     let task = new taskpool.Task('executeOneTaskThreetimes', ()=> {
         checkPoints.push(1);
         if (checkPoints.size == 3) {
-            isTaskFinished.resolve(undefined);
+            isTaskFinished.fire();
         }
     });
     taskpool.execute(task);
     taskpool.execute(task);
     taskpool.execute(task);
-    await isTaskFinished.promise;
+    isTaskFinished.wait();
     arktest.assertEQ(checkPoints.size, 3);
 }
 
 async function executeDelayedOneTaskThreetimes(){
     let checkPoints = new containers.LinkedBlockingQueue<int>();
-    let isTaskFinished = new PromiseWithResolvers<void>();
+    let isTaskFinished = new Event();
     let task = new taskpool.Task('executeDelayedOneTaskThreetimes', () => {
         checkPoints.push(1);
         if (checkPoints.size == 3) {
-            isTaskFinished.resolve(undefined);
+            isTaskFinished.fire();
         }
     });
     taskpool.executeDelayed(100, task);
     taskpool.executeDelayed(100, task);
     taskpool.executeDelayed(100, task);
-    await isTaskFinished.promise;
+    isTaskFinished.wait();
     arktest.assertEQ(checkPoints.size, 3);
 }
 
 async function cancelAsyncRunnerWaittingTask(){
     let catchCalled = false;
     let runner = new taskpool.AsyncRunner(1);
-    let event = new PromiseWithResolvers<void>();
+    let event = new Event();
     let blockTask = (): void => {
-        event.promise.awaitSync();
+        event.wait();
         return;
     }
 
@@ -1446,7 +1472,7 @@ async function cancelAsyncRunnerWaittingTask(){
         arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been canceled');
     });
     taskpool.cancel(task2);
-    event.resolve(undefined);
+    event.fire();
     await p1;
     await p2;
     arktest.assertEQ(catchCalled, true);
@@ -1455,7 +1481,7 @@ async function cancelAsyncRunnerWaittingTask(){
 async function cancelExecuteDelayedTaskBeforeExecute(){
     let isCancel = false
     let isExecute = false
-    let event = new PromiseWithResolvers<void>();
+    let event = new Event();
 
     let delayedTask = (): void => {
         isExecute = true;
@@ -1466,11 +1492,11 @@ async function cancelExecuteDelayedTaskBeforeExecute(){
     taskpool.executeDelayed(100, task).catch((e: Error) => {
         isCancel = true
         arktest.assertEQ(e.message, 'taskpool:: task has been canceled');
-        event.resolve(undefined);
+        event.fire();
     });
 
     taskpool.cancel(task);
-    await event.promise;
+    event.wait();
     arktest.assertTrue(isCancel);
     arktest.assertFalse(isExecute);
 }
@@ -1486,16 +1512,16 @@ function blockedExpandInnerTask(): int {
 function blockedExpandOuterTask(): int {
     // Block this taskpool worker thread synchronously while waiting for another taskpool task.
     // With only one worker this creates a deadlock until the blocked-worker monitor triggers special expansion.
-    let job = new PromiseWithResolvers<int>();
+    let job = new CompletableJob<int>();
 
     (taskpool.execute(blockedExpandInnerTask) as Promise<int>).then((val: Any): void => {
-        job.resolve(val as int);
+        job.finish(val as int);
     }).catch((e: Any): void => {
         const err = (e instanceof Error) ? (e as Error) : new Error('blockedExpandInnerTask failed');
-        job.reject(err);
+        job.fail(err);
     })
 
-    return job.promise.awaitSync();
+    return job.Await();
 }
 
 async function waitUntilWorkersNum(expected: int, timeoutMs: int): Promise<int> {
@@ -1671,7 +1697,7 @@ async function currentTaskTest(): Promise<void> {
     arktest.assertEQ(errSuccessCount.load(), 9);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
     commonTaskSuite.addAsyncTest('CurrentTaskTest', currentTaskTest);
@@ -1733,7 +1759,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('executeDelayedOneTaskThreetimes',executeDelayedOneTaskThreetimes);
     commonTaskSuite.addAsyncTest('cancelAsyncRunnerWaittingTask', cancelAsyncRunnerWaittingTask);
     commonTaskSuite.addAsyncTest('cancelExecuteDelayedTaskBeforeExecute', cancelExecuteDelayedTaskBeforeExecute);
-    let res = await commonTaskSuite.runAsync();
+    let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
 }

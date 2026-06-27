@@ -24,13 +24,13 @@ class Derived extends Base {}
 class E extends Derived {}
 
 async function foo <T extends Base> (p: Awaited<T>) {
-    arktest.assertTrue(p instanceof Object, "expect instance of Object")
+    arktest.assertTrue(p instanceof Object, 'expect instance of Object')
 }
 
 async function bar <T extends Derived> (p: Awaited<T>) {
-    foo(p)
+  foo(p)
 }
 
-async function main(): Promise<void> {
-    await () => bar<E>( new E() )
+function main() {
+  waitForCompletion(() => bar<E>(new E()))
 }

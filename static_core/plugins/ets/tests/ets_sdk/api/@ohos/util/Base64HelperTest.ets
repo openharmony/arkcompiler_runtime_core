@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {util} from "@ohos.util";
+import {util} from '@ohos.util';
 
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite('Base64Helper Test');
 
     testEncodeDecodeBasic();
@@ -35,15 +35,15 @@ async function main(): Promise<int> {
     suite.addTest('Test all Type decode with Uint8Array input', testAllTypesDecodeUint8Array);
     suite.addTest('Test MIME removeNewlines', testMimeRemoveNewlines);
 
-    await testEncodeDecodeBasicAsync();
-    await testEncodeDecodeAsyncBytes();
-    await testUrlSafeAsync();
-    await testDecodeWithNoiseAsync();
+    waitForCompletion(testEncodeDecodeBasicAsync);
+    waitForCompletion(testEncodeDecodeAsyncBytes);
+    waitForCompletion(testUrlSafeAsync);
+    waitForCompletion(testDecodeWithNoiseAsync);
     suite.addAsyncTest('Test async encode and decode with no options', testNoOptionsEncodeDecodeAsync);
     suite.addAsyncTest('Test async encode and decode Bytes with no options', testNoOptionsEncodeDecodeAsyncBytes);
     suite.addAsyncTest('Test all Type round-trip async', testAllTypesRoundTripAsync);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 function assertUint8ArraysEqual(actual: Uint8Array, expected: Uint8Array): void {
@@ -55,7 +55,7 @@ function assertUint8ArraysEqual(actual: Uint8Array, expected: Uint8Array): void 
 
 function testEncodeDecodeBasic() {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
+    let input = new Uint8Array([72, 101, 108, 108, 111]); // 'Hello'
     let encodedStr: String = helper.encodeToStringSync(input, util.Type.BASIC);
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
@@ -64,9 +64,9 @@ function testEncodeDecodeBasic() {
 
 function testEncodeDecodeBasicSync() {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([87, 111, 114, 108, 100]); // "World"
+    let input = new Uint8Array([87, 111, 114, 108, 100]); // 'World'
     let encodedBytes: Uint8Array = helper.encodeSync(input, util.Type.BASIC);
-    let encodedStr: String = "";
+    let encodedStr: String = '';
     for (let i: int = 0; i < encodedBytes.length; i++) {
         encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
@@ -93,7 +93,7 @@ function testMime() {
         input[i] = i;
     }
     let encodedStr: String = helper.encodeToStringSync(input, util.Type.MIME);
-    arktest.assertNE(encodedStr.indexOf("\r\n"), -1.0);
+    arktest.assertNE(encodedStr.indexOf('\r\n'), -1.0);
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.MIME);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
@@ -106,9 +106,9 @@ function testEncodeToStringSyncMime() {
         32, 78, 111, 100, 101, 46, 106, 115, 105, 111, 110, 102, 114, 111, 109, 111, 116, 104, 101, 114, 97,
         110, 105, 109, 97, 108, 115, 119, 104, 105, 99, 104, 105, 115, 97, 108]);
     let encodedStr: String = helper.encodeToStringSync(input, util.Type.MIME);
-    arktest.assertEQ(encodedStr.indexOf("\r\n"), 76);
-    arktest.assertEQ(encodedStr.lastIndexOf("\r\n"), 102);
-    arktest.assertEQ(encodedStr, "QmFzZTY0IE5vZGUuanM2NCBOb2RlLmpzczY0IE5vZGUuanNzczY0IE5vZGUuanNpb25mcm9tb3Ro\r\nZXJhbmltYWxzd2hpY2hpc2Fs\r\n");
+    arktest.assertEQ(encodedStr.indexOf('\r\n'), 76);
+    arktest.assertEQ(encodedStr.lastIndexOf('\r\n'), 102);
+    arktest.assertEQ(encodedStr, 'QmFzZTY0IE5vZGUuanM2NCBOb2RlLmpzczY0IE5vZGUuanNzczY0IE5vZGUuanNpb25mcm9tb3Ro\r\nZXJhbmltYWxzd2hpY2hpc2Fs\r\n');
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.MIME);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
@@ -121,9 +121,9 @@ function testMimeUrlSafe() {
         input[i] = i;
     }
     let encodedStr: string = helper.encodeToStringSync(input, util.Type.MIME_URL_SAFE);
-    arktest.assertNE(encodedStr.indexOf("\r\n"), -1.0); 
-    arktest.assertEQ(encodedStr.indexOf("+"), -1);
-    arktest.assertEQ(encodedStr.indexOf("/"), -1);
+    arktest.assertNE(encodedStr.indexOf('\r\n'), -1.0); 
+    arktest.assertEQ(encodedStr.indexOf('+'), -1);
+    arktest.assertEQ(encodedStr.indexOf('/'), -1);
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.MIME_URL_SAFE);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
@@ -131,9 +131,9 @@ function testMimeUrlSafe() {
 
 function testDecodeWithNoise() {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([72, 105]); // "Hi"
+    let input = new Uint8Array([72, 105]); // 'Hi'
     let encodedStr: String = helper.encodeToStringSync(input, util.Type.BASIC);
-    let noisy: String = "!!" + encodedStr + "##";
+    let noisy: String = '!!' + encodedStr + '##';
     let decoded: Uint8Array = helper.decodeSync(noisy, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
@@ -143,14 +143,14 @@ function testEmptyEncode() {
     let helper = new util.Base64Helper();
     let input = new Uint8Array(0);
     let encodedStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
-    arktest.assertEQ(encodedStr, "");
+    arktest.assertEQ(encodedStr, '');
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.BASIC);
     arktest.assertEQ(decoded.length, 0);
 }
 
 function testEmptyDecode() {
     let helper = new util.Base64Helper();
-    let encodedStr = "";
+    let encodedStr = '';
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.BASIC);
     arktest.assertEQ(decoded.length, 0);
 }
@@ -159,7 +159,7 @@ function testBase64WithoutPadding() {
     let helper = new util.Base64Helper();
     let input = new Uint8Array([1, 2, 3, 4, 5, 6]);
     let encodedStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
-    let encodedWithoutPadding = encodedStr.replace(new RegExp("=+$"), "");
+    let encodedWithoutPadding = encodedStr.replace(new RegExp('=+$'), '');
     
     let decoded: Uint8Array = helper.decodeSync(encodedWithoutPadding, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
@@ -168,7 +168,7 @@ function testBase64WithoutPadding() {
 
 function testNoOptionsEncodeDecode(): void {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
+    let input = new Uint8Array([72, 101, 108, 108, 111]); // 'Hello'
     let encodedStr: String = helper.encodeToStringSync(input);
     let decoded: Uint8Array = helper.decodeSync(encodedStr);
     arktest.assertEQ(decoded.length, input.length);
@@ -177,9 +177,9 @@ function testNoOptionsEncodeDecode(): void {
 
 function testNoOptionsEncodeDecodeSync(): void {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([87, 111, 114, 108, 100]); // "World"
+    let input = new Uint8Array([87, 111, 114, 108, 100]); // 'World'
     let encodedBytes: Uint8Array = helper.encodeSync(input);
-    let encodedStr: String = "";
+    let encodedStr: String = '';
     for (let i: int = 0; i < encodedBytes.length; i++) {
         encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
@@ -201,7 +201,7 @@ function testEncodeSyncMineAndMineUrlSafe():void{
 
 async function testEncodeDecodeBasicAsync(): Promise<void> {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
+    let input = new Uint8Array([72, 101, 108, 108, 111]); // 'Hello'
     let encodedStr: string = await helper.encodeToString(input, util.Type.BASIC);
     let decoded: Uint8Array = await helper.decode(encodedStr, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
@@ -210,9 +210,9 @@ async function testEncodeDecodeBasicAsync(): Promise<void> {
 
 async function testEncodeDecodeAsyncBytes(): Promise<void> {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([87, 111, 114, 108, 100]); // "World"
+    let input = new Uint8Array([87, 111, 114, 108, 100]); // 'World'
     let encodedBytes: Uint8Array = await helper.encode(input, util.Type.BASIC);
-    let encodedStr: string = "";
+    let encodedStr: string = '';
     for (let i: int = 0; i < encodedBytes.length; i++) {
         encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
@@ -234,9 +234,9 @@ async function testUrlSafeAsync(): Promise<void> {
 
 async function testDecodeWithNoiseAsync(): Promise<void> {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([72, 105]); // "Hi"
+    let input = new Uint8Array([72, 105]); // 'Hi'
     let encodedStr: string = await helper.encodeToString(input, util.Type.BASIC);
-    let noisy: string = "!!" + encodedStr + "##";
+    let noisy: string = '!!' + encodedStr + '##';
     let decoded: Uint8Array = await helper.decode(noisy, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
@@ -244,7 +244,7 @@ async function testDecodeWithNoiseAsync(): Promise<void> {
 
 async function testNoOptionsEncodeDecodeAsync(): Promise<void> {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
+    let input = new Uint8Array([72, 101, 108, 108, 111]); // 'Hello'
     let encodedStr: string = await helper.encodeToString(input);
     let decoded: Uint8Array = await helper.decode(encodedStr);
     arktest.assertEQ(decoded.length, input.length);
@@ -253,9 +253,9 @@ async function testNoOptionsEncodeDecodeAsync(): Promise<void> {
 
 async function testNoOptionsEncodeDecodeAsyncBytes(): Promise<void> {
     let helper = new util.Base64Helper();
-    let input = new Uint8Array([87, 111, 114, 108, 100]); // "World"
+    let input = new Uint8Array([87, 111, 114, 108, 100]); // 'World'
     let encodedBytes: Uint8Array = await helper.encode(input);
-    let encodedStr: string = "";
+    let encodedStr: string = '';
     for (let i: int = 0; i < encodedBytes.length; i++) {
         encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }

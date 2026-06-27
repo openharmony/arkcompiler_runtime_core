@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Using try-catch to catch errors in asynchronous methods.
-tags: [no-warmup]
 ---*/
 
 class MethodWithErrorHandling {
@@ -40,6 +39,6 @@ async function startTest() {
     arktest.assertEQ(result, "Caught error: Something went wrong!")
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

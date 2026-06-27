@@ -32,9 +32,9 @@ function testEworkersReachedLimit() {
     arktest.assertTrue(errorWasCatched);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworkers_reached_limit');
     testSuite.addTest('testEworkersReachedLimit', testEworkersReachedLimit);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

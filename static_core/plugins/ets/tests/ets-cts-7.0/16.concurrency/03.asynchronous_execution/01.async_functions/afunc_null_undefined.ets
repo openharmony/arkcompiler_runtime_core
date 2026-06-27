@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: Async functions are implicit coroutines that can be called as regular functions.
+tags: [no-warmup]
 ---*/
 
 {{c.decl}}
@@ -24,7 +25,7 @@ async function startTest() {
     {{c.use|indent}}
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest)
 }
 {% endfor %}

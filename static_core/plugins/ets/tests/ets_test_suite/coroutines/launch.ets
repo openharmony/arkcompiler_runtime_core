@@ -57,7 +57,6 @@ class C {
 function testLaunchLambdas(): void {
     // Launch l0 function with no arguments
     const l0Result = launch(l0).Await();
-
     // Launch l1 function with one string argument 'l1_arg_0'
     const l1Result = launch<string>() {
         return l1('l1_arg_0')
@@ -131,11 +130,11 @@ function testLaunchStatic(): void {
 }
 
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch');
     testSuite.addTest('testLaunchLambdas', testLaunchLambdas);
     testSuite.addTest('testLaunchFunctions', testLaunchFunctions);
     testSuite.addTest('testLaunchStatic', testLaunchStatic);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

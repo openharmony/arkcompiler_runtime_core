@@ -20,7 +20,6 @@ desc: >-
 files: [lib_ns.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json
-es2panda_options: ['read-metadata']
 expected_out:
     runtime:
         - "7"

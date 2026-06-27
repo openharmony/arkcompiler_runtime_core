@@ -92,9 +92,9 @@ function testEworkerUnlimited(): void {
     JoinWorkers(workers);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_unlimited');
     testSuite.addTest('testEworkerUnlimited', testEworkerUnlimited);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

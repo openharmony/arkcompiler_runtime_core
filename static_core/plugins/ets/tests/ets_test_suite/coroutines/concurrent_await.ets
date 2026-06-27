@@ -56,9 +56,9 @@ function testConcurrentAwait(): void {
     arktest.assertEQ(result, 42);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.concurrent_await');
     testSuite.addTest('testConcurrentAwait', testConcurrentAwait);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

@@ -70,7 +70,7 @@ function testMultipleLaunch(): void {
     if(launchCoroutines(5) != 0) {
         arktest.assertTrue(false, 'First launch of 5 coroutines failed!!');
         return;
-    }
+    }    
 
     // Reuse 5 coroutines
     if(launchCoroutines(5) != 0) {
@@ -103,9 +103,9 @@ function testMultipleLaunch(): void {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.multiple_launch');
     testSuite.addTest('testMultipleLaunch', testMultipleLaunch);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

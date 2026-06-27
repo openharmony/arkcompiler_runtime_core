@@ -14,6 +14,9 @@
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_12.ets
 03.types/21.utility_types/06.record_utility_type/union_in_rec.ets
 
+# JIT repeats timeout
+03.types/21.utility_types/01.awaited_utility_type/awaited_return_1.ets
+
 #30101 Tests shouldn't rely on default arktsconfig contents.:
 13.modules_and_namespaces/04.import_directives/05.import_path/file/import_baseURL_path_file.ets
 

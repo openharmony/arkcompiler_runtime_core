@@ -15,16 +15,17 @@
 
 /*---
 desc: >-
-  ArkTS supports the async entry point function. The main function itself
-  can be declared as async, allowing direct use of await without
-  waitForCompletion wrapper.
+  Asynchronous code can be awaited from a synchronous entry point
+  through waitForCompletion instead of declaring main as async.
 ---*/
 
 async function asyncCompute(x: int): Promise<int> {
     return x * 5;
 }
 
-async function main(): Promise<void> {
+function main(): void {
+  waitForCompletion(async (): Promise<void> => {
     let result = await asyncCompute(8);
-    arktest.assertEQ(result, 40, "async main should support direct await");
+    arktest.assertEQ(result, 40, "waitForCompletion should support awaited async work");
+  });
 }

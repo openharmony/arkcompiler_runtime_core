@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Transform stream encoding validation (gb2312).", testTransformStreamWriteEncodingGb2312);
@@ -37,7 +37,7 @@ async function main(): Promise<int> {
     suite.addAsyncTest("Set default encoding for writable stream with multiple encodings.",
         testWritableStreamSetDefaultEncodingMultipleEncodings);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 const newArr = ['ascii', 'utf-8', 'UTF-8', 'gbk', 'GBK', 'GB2312', 'gb2312',
@@ -145,7 +145,7 @@ async function testTransformStreamWriteEncodingGb2312() {
     let transform = new MyTransform1();
     transform.write('你好123', 'gb2312');
     transform.end();
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyReadable1 extends stream.Readable {
@@ -440,7 +440,7 @@ async function testWritableStreamWriteMultipleEncodings() {
         let result = writable.write('测试', newArr[i]);
         arktest.assertEQ(result, true);
     }
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite11 = 0;
@@ -472,7 +472,7 @@ async function testWritableStreamEndMultipleEncodings() {
         let writable = new MyWrite11(i);
         writable.end('测试', newArr[i], mustCall());
     }
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite12 = 0;
@@ -505,5 +505,5 @@ async function testWritableStreamSetDefaultEncodingMultipleEncodings() {
         writable.setDefaultEncoding(newArr[i]);
         writable.write('你好');
     }
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }

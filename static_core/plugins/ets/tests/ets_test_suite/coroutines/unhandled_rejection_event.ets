@@ -81,8 +81,7 @@ function testAllUnhandledJobRejection(): void {
 
     try {
         launch(catchFailing).Await();
-    } catch(e) {
-
+    } catch (e) {
     }
 
     let job1 = new CompletableJob<int>();
@@ -95,13 +94,14 @@ function testAllUnhandledJobRejection(): void {
     } catch (e) {
 
     }
+
 }
 
-async function main(): Promise<int> {
+function main(): int {
     StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_event');
     testSuite.addTest('testUnhandledRejectionObserverRegistration', testUnhandledRejectionObserverRegistration);
     testSuite.addTest('testAllUnhandledJobRejection', testAllUnhandledJobRejection);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

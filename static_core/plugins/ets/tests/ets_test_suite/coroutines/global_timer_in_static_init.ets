@@ -36,9 +36,8 @@ function testGlobalTimerInStaticInit(): void {
     arktest.assertTrue(intervalCheckPassed);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.global_timer_in_static_init');
     testSuite.addTest('testGlobalTimerInStaticInit', testGlobalTimerInStaticInit);
-    let res = await testSuite.runAsync();
-    return res;
+    return testSuite.run();
 }

@@ -25,9 +25,9 @@ async function testAwaitStandalonePromise(): Promise<void> {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.await_standalone_promise');
     testSuite.addAsyncTest('testAwaitStandalonePromise', testAwaitStandalonePromise);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }
