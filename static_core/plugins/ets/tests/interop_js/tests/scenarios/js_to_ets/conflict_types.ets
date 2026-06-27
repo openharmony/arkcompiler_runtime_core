@@ -76,8 +76,8 @@ function TestFunctionArgTypeConflictMap(): boolean {
 }
 
 function TestFunctionArgTypeConflictObject(): boolean {
-    const obj = functionArgTypeConflictObject.invoke().unwrap() as Any;
-    return typeof obj === 'object' && obj instanceof Any;
+    const obj = functionArgTypeConflictObject.invoke().unwrap() as Object;
+    return typeof obj === 'object' && obj instanceof Object;
 }
 
 function TestFunctionArgTypeConflictString(): boolean {

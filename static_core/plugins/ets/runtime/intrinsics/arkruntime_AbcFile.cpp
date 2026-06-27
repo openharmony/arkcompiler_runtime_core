@@ -158,37 +158,17 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
     ASSERT(rawFileArray != nullptr);
     ASSERT(runtimeLinker != nullptr);
 
-    auto *ctx = runtimeLinker->GetClassLinkerContext();
     auto *executionCtx = EtsExecutionContext::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hs(executionCtx);
-    EtsHandle<EtsByteArray> arrayHandle(executionCtx,
-                                        EtsByteArray::FromEtsObject(EtsObject::FromCoreType(rawFileArray)));
+    auto *array = EtsByteArray::FromCoreType(rawFileArray);
 
-    auto length = arrayHandle->GetLength();
-    size_t sizeToMmap = AlignUp(length, ark::os::mem::GetPageSize());
-    void *mmapedMem = nullptr;
-    {
-        // mmap might be time-consuming, which would affect GC unless being executed in native scope
-        [[maybe_unused]] ScopedNativeCodeThread ns(executionCtx->GetMT());
-        mmapedMem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
-    }
-    if (UNLIKELY(mmapedMem == nullptr)) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
-                          PandaString("Failed to allocate in-memory AbcFile"));
-        return nullptr;
-    }
-    if (UNLIKELY(memcpy_s(mmapedMem, sizeToMmap, arrayHandle->GetData<void>(), length) != 0)) {
-        PLOG(FATAL, RUNTIME) << "Failed to copy buffer into mem";
-    }
-    os::mem::ConstBytePtr ptr(static_cast<std::byte *>(mmapedMem), sizeToMmap, os::mem::MmapDeleter);
-
-    auto pf = panda_file::File::OpenFromMemory(std::move(ptr));
+    auto pf = panda_file::OpenPandaFileFromMemory(array->GetData<void>(), array->GetLength());
     if (pf == nullptr) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
-                          PandaString("Failed to load abc file from memory"));
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
+                               PandaString("Failed to load abc file from memory"));
         return nullptr;
     }
 
+    auto *ctx = runtimeLinker->GetClassLinkerContext();
     return CreateAbcFile(executionCtx, ctx, std::move(pf));
 }
 

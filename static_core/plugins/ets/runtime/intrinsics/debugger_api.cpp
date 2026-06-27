@@ -20,12 +20,8 @@
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
-#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/tooling/helpers.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "plugins/ets/runtime/types/ets_string.h"
-#include "runtime/include/tooling/debug_interface.h"
-#include "runtime/include/tooling/vreg_value.h"
 
 namespace ark::ets::intrinsics {
 
@@ -37,11 +33,10 @@ static void SetRuntimeException(EtsLong regNumber, EtsExecutionContext *executio
 }
 
 template <typename T>
-static T DebuggerAPIGetLocal(EtsLong regNumber)
+static T DebuggerAPIGetLocal(EtsExecutionContext *executionCtx, EtsLong regNumber)
 {
     static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
 
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *runtime = executionCtx->GetPandaVM()->GetRuntime();
     if (UNLIKELY(!runtime->IsDebugMode())) {
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, "Debugger is not enabled");
@@ -64,57 +59,70 @@ static T DebuggerAPIGetLocal(EtsLong regNumber)
     return ark::ets::tooling::VRegValueToEtsValue<T>(vregValue);
 }
 
-extern "C" EtsBoolean DebuggerAPIGetLocalBoolean(EtsLong regNumber)
+EtsBoolean DebuggerAPIGetLocalBoolean(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsBoolean>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsBoolean>(executionCtx, regNumber);
 }
 
-extern "C" EtsByte DebuggerAPIGetLocalByte(EtsLong regNumber)
+EtsByte DebuggerAPIGetLocalByte(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsByte>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsByte>(executionCtx, regNumber);
 }
 
-extern "C" EtsShort DebuggerAPIGetLocalShort(EtsLong regNumber)
+EtsShort DebuggerAPIGetLocalShort(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsShort>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsShort>(executionCtx, regNumber);
 }
 
-extern "C" EtsChar DebuggerAPIGetLocalChar(EtsLong regNumber)
+EtsChar DebuggerAPIGetLocalChar(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsChar>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsChar>(executionCtx, regNumber);
 }
 
-extern "C" EtsInt DebuggerAPIGetLocalInt(EtsLong regNumber)
+EtsInt DebuggerAPIGetLocalInt(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsInt>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsInt>(executionCtx, regNumber);
 }
 
-extern "C" EtsFloat DebuggerAPIGetLocalFloat(EtsLong regNumber)
+EtsFloat DebuggerAPIGetLocalFloat(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsFloat>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsFloat>(executionCtx, regNumber);
 }
 
-extern "C" EtsDouble DebuggerAPIGetLocalDouble(EtsLong regNumber)
+EtsDouble DebuggerAPIGetLocalDouble(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsDouble>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsDouble>(executionCtx, regNumber);
 }
 
-extern "C" EtsLong DebuggerAPIGetLocalLong(EtsLong regNumber)
+EtsLong DebuggerAPIGetLocalLong(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsLong>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return DebuggerAPIGetLocal<EtsLong>(executionCtx, regNumber);
 }
 
-extern "C" EtsObject *DebuggerAPIGetLocalObject(EtsLong regNumber)
+EtsObject *DebuggerAPIGetLocalObject(EtsLong regNumber)
 {
-    return DebuggerAPIGetLocal<EtsObject *>(regNumber);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(executionCtx->GetMT());
+
+    auto *obj = DebuggerAPIGetLocal<ObjectHeader *>(executionCtx, regNumber);
+    obj = (obj == nullptr) ? executionCtx->GetNullValue() : obj;
+    VMHandle<ObjectHeader> objHandle(executionCtx->GetMT(), obj);
+    return EtsObject::FromCoreType(objHandle.GetPtr());
 }
 
 template <typename T>
-static void DebuggerAPISetLocal(EtsLong regNumber, T value)
+static void DebuggerAPISetLocal(EtsExecutionContext *executionCtx, EtsLong regNumber, T value)
 {
     static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
 
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *runtime = executionCtx->GetPandaVM()->GetRuntime();
     if (UNLIKELY(!runtime->IsDebugMode())) {
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError, "Debugger is not enabled");
@@ -135,48 +143,60 @@ static void DebuggerAPISetLocal(EtsLong regNumber, T value)
     }
 }
 
-extern "C" void DebuggerAPISetLocalBoolean(EtsLong regNumber, EtsBoolean value)
+void DebuggerAPISetLocalBoolean(EtsLong regNumber, EtsBoolean value)
 {
-    DebuggerAPISetLocal<EtsBoolean>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsBoolean>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalByte(EtsLong regNumber, EtsByte value)
+void DebuggerAPISetLocalByte(EtsLong regNumber, EtsByte value)
 {
-    DebuggerAPISetLocal<EtsByte>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsByte>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalShort(EtsLong regNumber, EtsShort value)
+void DebuggerAPISetLocalShort(EtsLong regNumber, EtsShort value)
 {
-    DebuggerAPISetLocal<EtsShort>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsShort>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalChar(EtsLong regNumber, EtsChar value)
+void DebuggerAPISetLocalChar(EtsLong regNumber, EtsChar value)
 {
-    DebuggerAPISetLocal<EtsChar>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsChar>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalInt(EtsLong regNumber, EtsInt value)
+void DebuggerAPISetLocalInt(EtsLong regNumber, EtsInt value)
 {
-    DebuggerAPISetLocal<EtsInt>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsInt>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalFloat(EtsLong regNumber, EtsFloat value)
+void DebuggerAPISetLocalFloat(EtsLong regNumber, EtsFloat value)
 {
-    DebuggerAPISetLocal<EtsFloat>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsFloat>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalDouble(EtsLong regNumber, EtsDouble value)
+void DebuggerAPISetLocalDouble(EtsLong regNumber, EtsDouble value)
 {
-    DebuggerAPISetLocal<EtsDouble>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsDouble>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalLong(EtsLong regNumber, EtsLong value)
+void DebuggerAPISetLocalLong(EtsLong regNumber, EtsLong value)
 {
-    DebuggerAPISetLocal<EtsLong>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    DebuggerAPISetLocal<EtsLong>(executionCtx, regNumber, value);
 }
 
-extern "C" void DebuggerAPISetLocalObject(EtsLong regNumber, EtsObject *value)
+void DebuggerAPISetLocalObject(EtsLong regNumber, EtsObject *value)
 {
-    DebuggerAPISetLocal<EtsObject *>(regNumber, value);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(executionCtx->GetMT());
+    VMHandle<EtsObject> objHandle(executionCtx->GetMT(), value->GetCoreType());
+
+    DebuggerAPISetLocal<ObjectHeader *>(executionCtx, regNumber, objHandle.GetPtr()->GetCoreType());
 }
 }  // namespace ark::ets::intrinsics

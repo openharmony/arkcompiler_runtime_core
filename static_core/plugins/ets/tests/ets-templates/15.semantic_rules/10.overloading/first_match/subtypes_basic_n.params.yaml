@@ -13,11 +13,15 @@
 
 ---
 cases:
-  - type_1: Any|undefined
-    type_2: Any
-  - type_1: Object|undefined
-    type_2: Object
-  - type_1: never|undefined
+  - type_1: Object
     type_2: Any
   - type_1: undefined
+    type_2: Object
+  - type_1: undefined
+    type_2: never
+  - type_1: undefined
     type_2: Any
+  - type_1: never
+    type_2: Any
+  - type_1: never
+    type_2: Object

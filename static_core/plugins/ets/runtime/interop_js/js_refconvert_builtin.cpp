@@ -202,12 +202,12 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), {":V", 1, "<ctor>"}},
-            {utf::CStringAsMutf8("$_get"), {"I:LY;", 2, "$_get"}},
-            {utf::CStringAsMutf8("$_set"), {"ILY;:V", 3, "$_set"}},
-            {utf::CStringAsMutf8("at"), {"I:LY;", 2, "at"}},
-            {utf::CStringAsMutf8("indexOf"), {"LY;Lstd/core/Int;:I", 3, "indexOf"}},
-            {utf::CStringAsMutf8("lastIndexOf"), {"LY;Lstd/core/Int;:I", 3, "lastIndexOf"}},
-            {utf::CStringAsMutf8("toSpliced"), {"II[LY;:Lstd/core/Array;", 3, "toSpliced"}},
+            {utf::CStringAsMutf8("$_get"), {"I:Lstd/core/Object;", 2, "$_get"}},
+            {utf::CStringAsMutf8("$_set"), {"ILstd/core/Object;:V", 3, "$_set"}},
+            {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
+            {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
+            {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
+            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lstd/core/Array;", 3, "toSpliced"}},
             {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
         wArray_ = RegisterClass(PlatformTypes()->coreArray->GetDescriptor(), "Array", &W_ARRAY_OVERLOADS);
@@ -258,7 +258,8 @@ private:
     void RegisterSet()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), {"{U[LY;Lstd/core/Iterable;Lstd/core/Null;}:V", 2, "<ctor>"}}};
+            {utf::CStringAsMutf8("<ctor>"),
+             {"{ULstd/core/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2, "<ctor>"}}};
         wSet_ = RegisterClass(PlatformTypes()->coreSet->GetDescriptor(), "Set", &W_SET_OVERLOADS);
     }
 
@@ -335,12 +336,6 @@ private:
     void RegisterObject()
     {
         wObject_ = RegisterClass(PlatformTypes()->coreObject->GetDescriptor(), "Object");
-    }
-
-    void RegisterAny()
-    {
-        wAny_ =
-            RegisterClass(PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY)->GetDescriptor());
     }
 
     EtsObject *MError(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
@@ -430,10 +425,10 @@ private:
         }
     }
 
-    template <bool IS_OBJECT>
-    EtsObject *MObjectOrAny(InteropCtx *ctxx, napi_value jsValue)
+    EtsObject *MObject(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
     {
         napi_env env = ctxx->GetJSEnv();
+        (void)verified;  // ignored for Object
 
         napi_valuetype jsType = GetValueType<true>(env, jsValue);
         switch (jsType) {
@@ -444,14 +439,9 @@ private:
             case napi_string:
                 return BuiltinConvert<JSConvertString>(ctxx, env, jsValue);
             case napi_object:
-                return MObjectObject(ctxx, jsValue);
-            case napi_null: {
-                if constexpr (IS_OBJECT) {
-                    return NotAssignable("Object");
-                } else {
-                    return ctxx->GetNullValue();
-                }
-            }
+                return MObjectObject(ctx_, jsValue);
+            case napi_null:
+                return ctx_->GetNullValue();
             case napi_bigint:
                 return BuiltinConvert<JSConvertBigInt>(ctxx, env, jsValue);
             case napi_symbol:
@@ -467,18 +457,6 @@ private:
                 ASSERT(!IsNullOrUndefined(env, jsValue));
                 InteropCtx::Fatal("Bad jsType in Object value matcher");
         };
-    }
-
-    EtsObject *MAny(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
-    {
-        (void)verified;  // ignored for Any
-        return MObjectOrAny<false>(ctxx, jsValue);
-    }
-
-    EtsObject *MObject(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
-    {
-        (void)verified;  // ignored for Object
-        return MObjectOrAny<true>(ctxx, jsValue);
     }
 
 public:
@@ -498,7 +476,6 @@ public:
     void Run()
     {
         RegisterObject();
-        RegisterAny();
 
         RegisterExceptions();
 
@@ -532,11 +509,6 @@ public:
             [self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
                 return self.MObject(ctxx, jsValue, verified);
             });
-
-        ASSERT(wAny_ != nullptr);
-        wAny_->SetJSBuiltinMatcher([self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
-            return self.MAny(ctxx, jsValue, verified);
-        });
     }
 
 private:
@@ -544,7 +516,6 @@ private:
     napi_value jsGlobalEts_ {};
     ets_proxy::EtsClassWrapper *wError_ {};
     ets_proxy::EtsClassWrapper *wObject_ {};
-    ets_proxy::EtsClassWrapper *wAny_ {};
     ets_proxy::EtsClassWrapper *wArray_ {};
     ets_proxy::EtsClassWrapper *wDate_ {};
     ets_proxy::EtsClassWrapper *wMap_ {};
@@ -584,16 +555,16 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
     auto ptypes = PlatformTypes(executionCtx);
 
-    RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ptypes->interopJSValue);
-    RegisterBuiltinRefConvertor<JSConvertESError>(cache, ptypes->interopESError);
-    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreString);
+    RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, PlatformTypes()->interopJSValue);
+    RegisterBuiltinRefConvertor<JSConvertESError>(cache, PlatformTypes()->interopESError);
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, PlatformTypes()->coreString);
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreLineString);
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreSlicedString);
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreTreeString);
 
-    RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ptypes->coreBigInt);
-    RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ptypes->corePromise);
-    RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ptypes->coreNull);
+    RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, PlatformTypes()->coreBigInt);
+    RegisterBuiltinRefConvertor<JSConvertPromise>(cache, PlatformTypes()->corePromise);
+    RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, PlatformTypes()->coreNull);
 
     RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, ptypes->coreBoolean);
     RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, ptypes->coreByte);

@@ -59,7 +59,6 @@ class F {
     $_set(index: number, x: double) {}
     $_set(index: number, s: String) {}
     $_set(index: number, s: Any) {}
-    $_set(index: number, s: never) {}
 
     foo(a: int, b: int): int {return a + b }
 

@@ -38,7 +38,7 @@ types:
           let x: never = null
       stdout: |-
          "Semantic error ESE0318: Type 'null' cannot be assigned to type 'never'"
-    #5
+    #5       
     - use: |-
           let x: never = undefined
       stdout: |-
@@ -47,7 +47,7 @@ types:
     - use: |-
           let x: never = ((): never => { return never })()
       stdout: |-
-          "Syntax error ESY0318: Class cannot be used as object."
+          "Syntax error ESY0318: Class cannot be used as object."    
     #7
     - use: |-
           let x: never[] = new never[10](never)
@@ -55,12 +55,11 @@ types:
         - "Semantic error ESE132307: Class 'never' cannot be used as object"
         - "Semantic error ESE0122: Class name can't be the argument of function or method."
         - "Semantic error ESE0127: No matching call signature for create(Int, never)"
-
-    #6
+    #8
     - use: |-
           let x: never[] = [new never] as never[]
       stdout: |-
-          "Semantic error ESE0290: Type 'never' is not constructible."
+          "Semantic error ESE0290: Type 'never' is not constructible."    
     #9
     - use: |-
           let x: never[] = [null]
@@ -76,7 +75,7 @@ types:
     - use: |-
           let x: [number, never] = [1, null]
       stdout: |-
-          "Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 1"
+          "Semantic error ESE0057: Array initializer's type is not assignable to tuple type at index: 1"  
     #12
     - use: |-
           let x: Record<string, never> = { "abc": null }
@@ -121,10 +120,3 @@ types:
           let z: UT = x as never
       stdout: |-
           "Semantic error ESE0305: Cast to 'never' is prohibited"
-    #18
-    - decl: |-
-        function never() {}
-      use: |-
-        never()
-      stdout: |-
-        "Semantic error ESE0350: Class 'never' is already defined with different type."

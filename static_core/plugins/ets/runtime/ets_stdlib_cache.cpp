@@ -78,7 +78,8 @@ PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
     CacheMethod(env, stdlibCache->std_core_String_Builder, "append",
                 "C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.StringBuilder}",
                 &stdlibCache->std_core_String_Builder_append);
-    CacheMethod(env, stdlibCache->std_core_Array, "pushOne", "Y:i", &stdlibCache->std_core_Array_pushOne);
+    CacheMethod(env, stdlibCache->std_core_Array, "pushOne", "C{std.core.Object}:i",
+                &stdlibCache->std_core_Array_pushOne);
 
     // Cache variables
     CacheVariable(env, stdlibCache->std_core, "console", &stdlibCache->std_core_console);

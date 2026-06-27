@@ -1278,7 +1278,9 @@ class JSONWriter {
             this.buffer.append(JSON.stringify(obj))
         } else if (obj instanceof Object) {
             const objCls = Class.of(obj)
-            if (objCls.isFixedArray()) {
+            if (objCls === JSONWriter.STD_CORE_INTEROP_JSVALUE_CLASS) {
+                this.buffer.append(JSON.stringify(obj as JSValue))
+            } else if (objCls.isFixedArray()) {
                 this.writeFixedArrayObject(obj as FixedArray<Any>)
             } else if (objCls.isEnum()) {
                 this.writeEnumValue(obj, objCls)
