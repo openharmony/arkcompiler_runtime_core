@@ -403,6 +403,9 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSQNameBase(Method *method, ui
 
             napi_value jsVal = JSConvertJSValue::Wrap(
                 env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
+            if (UNLIKELY(jsVal == nullptr)) {
+                return false;
+            }
             auto qnameStr =
                 st->ReadFixedRefArg<coretypes::String>(PlatformTypes(st->ExecCtx())->coreString->GetRuntimeClass());
 
@@ -451,6 +454,9 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSBase(Method *method, uint8_t
 
             napi_value jsVal = JSConvertJSValue::Wrap(
                 env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
+            if (UNLIKELY(jsVal == nullptr)) {
+                return false;
+            }
 
             auto classQnameOffset = GetClassQnameOffset(ctx, st->GetMethod());
             auto qnameStart = st->ReadFixedArg<panda_file::Type::TypeId::I32, int32_t>() + classQnameOffset;
@@ -503,6 +509,9 @@ extern "C" uint64_t JSRuntimeCallJSByValue(Method *method, uint8_t *args, uint8_
                 env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
             napi_value jsThis = JSConvertJSValue::Wrap(
                 env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->ExecCtx())->interopJSValue->GetRuntimeClass()));
+            if (UNLIKELY(jsFn == nullptr || jsThis == nullptr)) {
+                return false;
+            }
 
             st->SetupJSCallee(jsThis, jsFn);
             return true;
@@ -523,6 +532,9 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
             ASSERT(refconv != nullptr);
             napi_value jsThis = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
+            if (UNLIKELY(jsThis == nullptr)) {
+                return false;
+            }
             ASSERT(GetValueType<true>(env, jsThis) == napi_object);
             auto *refconvProxy = static_cast<ets_proxy::JSRefConvertJSProxy *>(refconv);
             ASSERT(refconvProxy != nullptr);
@@ -551,6 +563,9 @@ extern "C" uint64_t CallJSFunction(Method *method, uint8_t *args, uint8_t *inSta
             auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
             ASSERT(refconv != nullptr);
             napi_value jsCallBackFn = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
+            if (UNLIKELY(jsCallBackFn == nullptr)) {
+                return false;
+            }
 
             st->SetupJSCallee(jsCallBackFn, jsCallBackFn);
             return true;

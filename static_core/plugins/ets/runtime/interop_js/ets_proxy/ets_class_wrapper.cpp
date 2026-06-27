@@ -89,18 +89,26 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
         return storage->GetJsObject(etsObject, env);
     }
 
-    napi_value jsValue;
     // etsObject will be wrapped in jsValue in responce to jsCtor call
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
+    if (UNLIKELY(NapiIsExceptionPending(env) || executionCtx->GetMT()->HasPendingException())) {
+        return nullptr;
+    }
     // See (CheckClassInitialized) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     EtsHandle<EtsObject> handle(executionCtx, etsObject);
     ctx->SetPendingNewInstance(handle);
+    napi_value jsValue;
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
+        jsStatus = napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue);
+    }
+    if (UNLIKELY(jsStatus != napi_ok)) {
+        ctx->ForwardJSException(executionCtx);
+        return nullptr;
     }
 
     // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily

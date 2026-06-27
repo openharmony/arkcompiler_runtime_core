@@ -103,6 +103,9 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
     NapiScope jsHandleScope(jsenv);
 
     auto jsObj = JSConvertJSValue::WrapWithNullCheck(jsenv, jsValueObject);
+    if (UNLIKELY(jsObj == nullptr)) {
+        return false;
+    }
     void *res = nullptr;
     if (tag != nullptr) {
         if (napi_unwrap_hybrid_s(jsenv, jsObj, tag, &res) != napi_ok) {

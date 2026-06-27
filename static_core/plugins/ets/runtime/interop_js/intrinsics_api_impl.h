@@ -164,6 +164,9 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
 
     napi_value result;
     napi_value jsVal = JSValue::GetNapiValue(executionCtx, ctx, etsJsValueHandle);
+    if (UNLIKELY(jsVal == nullptr)) {
+        return {};
+    }
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
@@ -195,9 +198,16 @@ void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptyp
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
+        auto jsVal = JSConvertJSValue::WrapWithNullCheck(env, etsJsValue);
+        if (UNLIKELY(jsVal == nullptr)) {
+            return;
+        }
+        auto jsValue = T::WrapWithNullCheck(env, value);
+        if (UNLIKELY(jsValue == nullptr)) {
+            return;
+        }
 
-        jsStatus = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
-                                    T::WrapWithNullCheck(env, value));
+        jsStatus = napi_set_element(env, jsVal, index, jsValue);
     }
     if (jsStatus != napi_ok) {
         ctx->ForwardJSException(executionCtx);
@@ -217,7 +227,10 @@ void *ConvertToLocal(typename T::cpptype etsValue)
     napi_env env = ctx->GetJSEnv();
     napi_value localJsValue = T::Wrap(env, etsValue);
     if (UNLIKELY(localJsValue == nullptr)) {
-        ctx->ForwardJSException(executionCtx);
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(executionCtx);
+        }
+        ASSERT(ctx->SanityETSExceptionPending());
         return nullptr;
     }
     return localJsValue;

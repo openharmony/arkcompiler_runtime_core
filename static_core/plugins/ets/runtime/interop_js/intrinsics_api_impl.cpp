@@ -181,6 +181,9 @@ JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
         return nullptr;
     }
     auto result = refconv->Wrap(ctx, v);
+    if (UNLIKELY(result == nullptr)) {
+        return nullptr;
+    }
 
     auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
     if (!res) {
@@ -218,6 +221,9 @@ JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v)
 
     auto refconv = JSRefConvertResolve(ctx, v->GetClass()->GetRuntimeClass());
     auto result = refconv->Wrap(ctx, v);
+    if (UNLIKELY(result == nullptr)) {
+        return nullptr;
+    }
 
     auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
     if (!res) {
@@ -253,6 +259,9 @@ EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
     NapiScope jsHandleScope(env);
 
     napi_value jsVal = JSConvertJSValue::Wrap(env, etsJsValue);
+    if (UNLIKELY(jsVal == nullptr)) {
+        return nullptr;
+    }
     auto res = JSConvertString::Unwrap(ctx, env, jsVal);
     if (UNLIKELY(!res)) {
         if (NapiIsExceptionPending(env)) {
@@ -289,6 +298,9 @@ EtsObject *JSRuntimeGetValueObject(EtsObject *etsValue, EtsClass *clsObj)
     NapiScope jsHandleScope(env);
 
     napi_value jsVal = JSConvertEtsObject::WrapWithNullCheck(env, etsValue);
+    if (UNLIKELY(jsVal == nullptr)) {
+        return nullptr;
+    }
 
     auto refconv = JSRefConvertResolve<true>(ctx, cls);
     if (UNLIKELY(refconv == nullptr)) {
@@ -407,7 +419,13 @@ uint8_t JSRuntimeInstanceOfDynamic(EtsObject *object, EtsObject *ctor)
     auto ctorConv = JSRefConvertResolve(ctx, ctor->GetClass()->GetRuntimeClass());
     bool res;
     auto targetObj = objConv->Wrap(ctx, object);
+    if (UNLIKELY(targetObj == nullptr)) {
+        return 0;
+    }
     auto ctorObj = ctorConv->Wrap(ctx, ctor);
+    if (UNLIKELY(ctorObj == nullptr)) {
+        return 0;
+    }
     napi_status rc;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
@@ -443,9 +461,12 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
     }
 
     // Check if object has SharedReference
-    ets_proxy::SharedReference *sharedRef = [=] {
+    ets_proxy::SharedReference *sharedRef = [ctx, env, etsJsValue] {
         NapiScope jsHandleScope(env);
         napi_value jsValue = JSConvertJSValue::Wrap(env, etsJsValue);
+        if (UNLIKELY(jsValue == nullptr)) {
+            return static_cast<ets_proxy::SharedReference *>(nullptr);
+        }
         return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     }();
 
@@ -757,8 +778,15 @@ uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSV
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_strict_equals(env, JSConvertJSValue::WrapWithNullCheck(env, lhs),
-                                        JSConvertJSValue::WrapWithNullCheck(env, rhs), &result));
+    auto jsLhs = JSConvertJSValue::WrapWithNullCheck(env, lhs);
+    if (UNLIKELY(jsLhs == nullptr)) {
+        return 0;
+    }
+    auto jsRhs = JSConvertJSValue::WrapWithNullCheck(env, rhs);
+    if (UNLIKELY(jsRhs == nullptr)) {
+        return 0;
+    }
+    NAPI_CHECK_FATAL(napi_strict_equals(env, jsLhs, jsRhs, &result));
     return static_cast<uint8_t>(result);
 }
 
@@ -772,10 +800,17 @@ uint8_t JSRuntimeHasProperty(EtsObject *etsObject, EtsString *name)
 
     bool result = false;
     napi_status jsStatus;
+    auto jsObject = JSConvertEtsObject::WrapWithNullCheck(env, etsObject);
+    if (UNLIKELY(jsObject == nullptr)) {
+        return 0;
+    }
+    auto jsName = JSConvertString::WrapWithNullCheck(env, name);
+    if (UNLIKELY(jsName == nullptr)) {
+        return 0;
+    }
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        jsStatus = napi_has_property(env, JSConvertEtsObject::WrapWithNullCheck(env, etsObject),
-                                     JSConvertString::WrapWithNullCheck(env, name), &result);
+        jsStatus = napi_has_property(env, jsObject, jsName, &result);
     }
     CHECK_NAPI_STATUS(jsStatus, ctx, executionCtx, result);
     return static_cast<uint8_t>(result);
@@ -785,7 +820,13 @@ static napi_value JSRuntimeGetPropertyImpl(EtsExecutionContext *executionCtx, na
                                            JSValue *property)
 {
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return nullptr;
+    }
     auto key = JSConvertJSValue::WrapWithNullCheck(env, property);
+    if (UNLIKELY(key == nullptr)) {
+        return nullptr;
+    }
 
     napi_value result;
     {
@@ -804,6 +845,9 @@ JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property)
     NapiScope jsHandleScope(env);
 
     auto result = JSRuntimeGetPropertyImpl(executionCtx, env, object, property);
+    if (UNLIKELY(result == nullptr)) {
+        return {};
+    }
     auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
     if (UNLIKELY(!res)) {
         if (NapiIsExceptionPending(env)) {
@@ -825,8 +869,17 @@ void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value)
     NapiScope jsHandleScope(env);
 
     auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return;
+    }
     auto key = JSConvertJSValue::WrapWithNullCheck(env, property);
+    if (UNLIKELY(key == nullptr)) {
+        return;
+    }
     auto jsValue = JSConvertEtsObject::WrapWithNullCheck(env, value);
+    if (UNLIKELY(jsValue == nullptr)) {
+        return;
+    }
 
     napi_status jsStatus {};
     {
@@ -848,6 +901,9 @@ EtsObject *GetPropertyObject(JSValue *object, JSValue *property)
     NapiScope jsHandleScope(env);
 
     auto result = JSRuntimeGetPropertyImpl(executionCtx, env, object, property);
+    if (UNLIKELY(result == nullptr)) {
+        return {};
+    }
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, result).value();
 }
 
@@ -864,14 +920,22 @@ EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHa
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto realArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         if (realArg == nullptr) {
-            ctx->ForwardJSException(executionCtx);
+            if (NapiIsExceptionPending(env)) {
+                ctx->ForwardJSException(executionCtx);
+            }
             return nullptr;
         }
         realArgs.push_back(realArg);
     }
 
     auto receiver = JSConvertEtsObject::WrapWithNullCheck(env, thisObj);
+    if (UNLIKELY(receiver == nullptr)) {
+        return nullptr;
+    }
     auto jsFunc = JSConvertEtsObject::WrapWithNullCheck(env, func);
+    if (UNLIKELY(jsFunc == nullptr)) {
+        return nullptr;
+    }
     napi_value jsRet;
     napi_status jsStatus;
     {
@@ -895,10 +959,17 @@ uint8_t JSRuntimeHasPropertyObject(EtsObject *object, EtsObject *property)
 
     bool result = false;
     napi_status jsStatus;
+    auto jsObject = JSConvertEtsObject::WrapWithNullCheck(env, object);
+    if (UNLIKELY(jsObject == nullptr)) {
+        return 0;
+    }
+    auto jsProperty = JSConvertEtsObject::WrapWithNullCheck(env, property);
+    if (UNLIKELY(jsProperty == nullptr)) {
+        return 0;
+    }
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        jsStatus = napi_has_property(env, JSConvertEtsObject::WrapWithNullCheck(env, object),
-                                     JSConvertEtsObject::WrapWithNullCheck(env, property), &result);
+        jsStatus = napi_has_property(env, jsObject, jsProperty, &result);
     }
     CHECK_NAPI_STATUS(jsStatus, ctx, executionCtx, result);
     return static_cast<uint8_t>(result);
@@ -919,9 +990,13 @@ uint8_t JSRuntimeHasElement(EtsObject *object, int index)
     bool result = false;
     napi_status jsStatus;
     {
-        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         auto objectConv = JSRefConvertResolve(ctx, object->GetClass()->GetRuntimeClass());
-        jsStatus = napi_has_element(env, objectConv->Wrap(ctx, object), index, &result);
+        auto jsObject = objectConv->Wrap(ctx, object);
+        if (UNLIKELY(jsObject == nullptr)) {
+            return 0;
+        }
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
+        jsStatus = napi_has_element(env, jsObject, index, &result);
     }
     CHECK_NAPI_STATUS(jsStatus, ctx, executionCtx, result);
     return static_cast<uint8_t>(result);
@@ -941,10 +1016,17 @@ uint8_t JSRuntimeHasOwnProperty(EtsObject *object, EtsString *name)
 
     bool result = false;
     napi_status jsStatus;
+    auto jsObject = JSConvertEtsObject::WrapWithNullCheck(env, object);
+    if (UNLIKELY(jsObject == nullptr)) {
+        return 0;
+    }
+    auto jsName = JSConvertString::WrapWithNullCheck(env, name);
+    if (UNLIKELY(jsName == nullptr)) {
+        return 0;
+    }
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        jsStatus = napi_has_own_property(env, JSConvertEtsObject::WrapWithNullCheck(env, object),
-                                         JSConvertString::WrapWithNullCheck(env, name), &result);
+        jsStatus = napi_has_own_property(env, jsObject, jsName, &result);
     }
     CHECK_NAPI_STATUS(jsStatus, ctx, executionCtx, result);
     return static_cast<uint8_t>(result);
@@ -960,10 +1042,17 @@ uint8_t JSRuntimeHasOwnPropertyObject(EtsObject *etsObject, EtsObject *etsProper
 
     bool result = false;
     napi_status jsStatus;
+    auto jsObject = JSConvertEtsObject::WrapWithNullCheck(env, etsObject);
+    if (UNLIKELY(jsObject == nullptr)) {
+        return 0;
+    }
+    auto jsProperty = JSConvertEtsObject::WrapWithNullCheck(env, etsProperty);
+    if (UNLIKELY(jsProperty == nullptr)) {
+        return 0;
+    }
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        jsStatus = napi_has_own_property(env, JSConvertEtsObject::WrapWithNullCheck(env, etsObject),
-                                         JSConvertEtsObject::WrapWithNullCheck(env, etsProperty), &result);
+        jsStatus = napi_has_own_property(env, jsObject, jsProperty, &result);
     }
     CHECK_NAPI_STATUS(jsStatus, ctx, executionCtx, result);
     return static_cast<uint8_t>(result);
@@ -994,6 +1083,9 @@ EtsString *JSRuntimeTypeOf(JSValue *object)
             auto env = ctx->GetJSEnv();
             NapiScope jsHandleScope(env);
             napi_value jsValue = JSConvertJSValue::Wrap(env, object);
+            if (UNLIKELY(jsValue == nullptr)) {
+                return nullptr;
+            }
             // (note: need to use JS_TYPE, #ICIFWJ)
             if (IsConstructor<true>(env, jsValue, "Number")) {
                 return EtsString::CreateFromMUtf8("number");
@@ -1222,10 +1314,16 @@ EtsObject *CreateObject(JSValue *ctor, Span<VMHandle<ObjectHeader>> args)
         }
         auto refconv = JSRefConvertResolve(ctx, arg->GetClass()->GetRuntimeClass());
         auto realArg = refconv->Wrap(ctx, arg);
+        if (UNLIKELY(realArg == nullptr)) {
+            return nullptr;
+        }
         realArgs.push_back(realArg);
     }
 
     auto initFunc = JSConvertJSValue::WrapWithNullCheck(env, ctor);
+    if (UNLIKELY(initFunc == nullptr)) {
+        return nullptr;
+    }
     napi_status jsStatus;
     napi_value retVal;
     {
@@ -1249,7 +1347,11 @@ uint8_t JSRuntimeIsPromise(JSValue *object)
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_is_promise(env, JSConvertJSValue::WrapWithNullCheck(env, object), &result));
+    auto jsObject = JSConvertJSValue::WrapWithNullCheck(env, object);
+    if (UNLIKELY(jsObject == nullptr)) {
+        return 0;
+    }
+    NAPI_CHECK_FATAL(napi_is_promise(env, jsObject, &result));
     return static_cast<uint8_t>(result);
 }
 
@@ -1306,6 +1408,9 @@ EtsString *JSValueToString(JSValue *object)
     [[maybe_unused]] napi_status status;
     {
         auto napiValue = JSConvertJSValue::Wrap(env, object);
+        if (UNLIKELY(napiValue == nullptr)) {
+            return nullptr;
+        }
 
         ScopedNativeCodeThread nativeScope(
             executionCtx->GetMT());  // NOTE: Scope(Native/Managed)CodeThread should be optional here
@@ -1538,7 +1643,9 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
         auto value = JSValue::FromEtsObject(EtsObject::FromCoreType(ref));
         napi_value res = JSConvertJSValue::Wrap(env, value);
         if (UNLIKELY(res == nullptr)) {
-            ctx->ForwardJSException(executionCtx);
+            if (NapiIsExceptionPending(env)) {
+                ctx->ForwardJSException(executionCtx);
+            }
         }
         return res;
     }
@@ -1556,7 +1663,9 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
     auto refconv = JSRefConvertResolve(ctx, klass);
     auto res = refconv->Wrap(ctx, EtsObject::FromCoreType(handle.GetPtr()));
     if (UNLIKELY(res == nullptr)) {
-        ctx->ForwardJSException(executionCtx);
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(executionCtx);
+        }
     }
     return res;
 }
@@ -1645,6 +1754,9 @@ EtsString *JSONStringify(JSValue *jsvalue)
     napi_value stringify;
     napi_value result;
     auto object = JSConvertJSValue::Wrap(env, jsvalue);
+    if (UNLIKELY(object == nullptr)) {
+        return nullptr;
+    }
     std::array<napi_value, 1> args = {object};
     napi_status jsStatus;
 
@@ -1685,6 +1797,9 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
     } else {
         auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
         completionValue = refconv->Wrap(ctx, value);
+        if (UNLIKELY(completionValue == nullptr)) {
+            return;
+        }
     }
     ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
     napi_status status = state == EtsPromise::STATE_RESOLVED ? napi_resolve_deferred(env, deferred, completionValue)
@@ -1716,7 +1831,13 @@ JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyVal
     NapiScope jsHandleScope(env);
 
     napi_value objectNapiValue = JSConvertJSValue::Wrap(env, objectValue);
+    if (UNLIKELY(objectNapiValue == nullptr)) {
+        return nullptr;
+    }
     napi_value keyNapiValue = JSConvertJSValue::Wrap(env, keyValue);
+    if (UNLIKELY(keyNapiValue == nullptr)) {
+        return nullptr;
+    }
 
     napi_value result;
     auto status = napi_get_property(env, objectNapiValue, keyNapiValue, &result);
@@ -1756,6 +1877,9 @@ EtsStdCoreArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     NapiScope jsHandleScope(env);
 
     napi_value dynamicArrayBuffer = JSValue::GetNapiValue(executionCtx, ctx, objHandle);
+    if (UNLIKELY(dynamicArrayBuffer == nullptr)) {
+        return nullptr;
+    }
 
     bool isArrayBuffer = false;
     NAPI_CHECK_FATAL(napi_is_arraybuffer(env, dynamicArrayBuffer, &isArrayBuffer));
@@ -1898,6 +2022,9 @@ EtsLong SerializeHandle(JSValue *value)
     [[maybe_unused]] EtsHandleScope s(executionCtx);
     EtsHandle<JSValue> valueHandle(executionCtx, value);
     napi_value nv = JSValue::GetRefValue(env, valueHandle);
+    if (UNLIKELY(nv == nullptr)) {
+        return 0;
+    }
 
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);

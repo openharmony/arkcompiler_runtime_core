@@ -62,9 +62,14 @@ void JSValue::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
             [[fallthrough]];
         case napi_object:
             [[fallthrough]];
-        case napi_function:
-            NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), jsValue->GetNapiRef(ctx->GetJSEnv())));
+        case napi_function: {
+            auto napiRef = jsValue->GetNapiRef(ctx->GetJSEnv());
+            if (UNLIKELY(!napiRef.has_value())) {
+                return;
+            }
+            NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), napiRef.value()));
             return;
+        }
         case napi_bigint:
             delete jsValue->GetBigInt();
             return;
@@ -204,7 +209,11 @@ napi_value JSValue::GetNapiValue(EtsExecutionContext *executionCtx, InteropCtx *
         case napi_function:
             [[fallthrough]];
         case napi_external: {
-            return GetRefValue(env, handle);
+            napi_value refValue = GetRefValue(env, handle);
+            if (UNLIKELY(refValue == nullptr)) {
+                return nullptr;
+            }
+            return refValue;
         }
         default: {
             InteropCtx::Fatal("Unsupported JSValue.Type: " + std::to_string(jsType));

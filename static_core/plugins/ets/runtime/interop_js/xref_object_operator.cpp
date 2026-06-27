@@ -45,6 +45,9 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, co
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return {};
+    }
 
     napi_value result;
     napi_status jsStatus;
@@ -68,7 +71,13 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, Et
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return {};
+    }
     napi_value jsKey = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, keyObject);
+    if (UNLIKELY(jsKey == nullptr)) {
+        return {};
+    }
     napi_value jsVal = nullptr;
     napi_status jsStatus;
     {
@@ -91,6 +100,9 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, co
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return {};
+    }
     napi_value jsVal = nullptr;
     napi_status jsStatus;
     {
@@ -114,8 +126,14 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, const st
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return false;
+    }
     ASSERT_MANAGED_CODE();
     napi_value jsValue = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, valueObject);
+    if (UNLIKELY(jsValue == nullptr)) {
+        return false;
+    }
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
@@ -139,9 +157,18 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, EtsHandl
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return false;
+    }
     napi_status jsStatus;
     napi_value jsKey = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, keyObject);
+    if (UNLIKELY(jsKey == nullptr)) {
+        return false;
+    }
     napi_value jsValue = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, valueObject);
+    if (UNLIKELY(jsValue == nullptr)) {
+        return false;
+    }
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         jsStatus = napi_set_property(env, jsThis, jsKey, jsValue);
@@ -164,7 +191,13 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, uint32_t
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return false;
+    }
     napi_value jsValue = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, valueObject);
+    if (UNLIKELY(jsValue == nullptr)) {
+        return false;
+    }
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
@@ -187,6 +220,9 @@ bool XRefObjectOperator::IsInstanceOf(EtsExecutionContext *executionCtx, const X
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
     napi_value jsRhs = rhsObject.GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr || jsRhs == nullptr)) {
+        return false;
+    }
     bool isInstanceOf = false;
     napi_status jsStatus;
     {
@@ -209,12 +245,19 @@ EtsObject *XRefObjectOperator::Invoke(EtsExecutionContext *executionCtx, Span<VM
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsFunc = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsFunc == nullptr)) {
+        return nullptr;
+    }
 
     // convert static args to dynamic args
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
+        if (UNLIKELY(dynamicArg == nullptr)) {
+            ctx->ForwardJSException(executionCtx);
+            return nullptr;
+        }
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -240,12 +283,19 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return nullptr;
+    }
 
     // convert static args to dynamic args
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
+        if (UNLIKELY(dynamicArg == nullptr)) {
+            ctx->ForwardJSException(executionCtx);
+            return nullptr;
+        }
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -282,13 +332,23 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, E
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return nullptr;
+    }
     napi_value jsMethod = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, methodObject);
+    if (UNLIKELY(jsMethod == nullptr)) {
+        return nullptr;
+    }
 
     // convert static args to dynamic args
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
+        if (UNLIKELY(dynamicArg == nullptr)) {
+            ctx->ForwardJSException(executionCtx);
+            return nullptr;
+        }
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -314,6 +374,9 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const st
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return false;
+    }
     bool res = false;
     napi_status jsStatus;
     {
@@ -343,7 +406,13 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, EtsHandl
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return false;
+    }
     napi_value jsKey = XRefObjectOperator::ConvertStaticObjectToDynamic(executionCtx, keyObject);
+    if (UNLIKELY(jsKey == nullptr)) {
+        return false;
+    }
     bool res = false;
     napi_status jsStatus;
     {
@@ -369,6 +438,9 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const ui
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsThis == nullptr)) {
+        return false;
+    }
     bool res = false;
     napi_status jsStatus;
     {
@@ -389,12 +461,19 @@ EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Sp
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsCtor = this->GetNapiValue(executionCtx);
+    if (UNLIKELY(jsCtor == nullptr)) {
+        return nullptr;
+    }
 
     // convert static args to dynamic args
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
+        if (UNLIKELY(dynamicArg == nullptr)) {
+            ctx->ForwardJSException(executionCtx);
+            return nullptr;
+        }
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -499,13 +578,7 @@ napi_value XRefObjectOperator::GetNapiValue(EtsExecutionContext *executionCtx) c
     // so we will treat it as a JSValue
     auto jsValueObject = JSValue::FromEtsObject(this->etsObject_.GetPtr());
     EtsHandle<JSValue> jsValueHandle(executionCtx, jsValueObject);
-    auto jsObject = JSValue::GetNapiValue(executionCtx, ctx, jsValueHandle);
-    // NOTE(MockMockBlack): will be removed after this is stable
-    if (UNLIKELY(jsObject == nullptr)) {
-        InteropCtx::Fatal("Failed to get NAPI value for XRefObject");
-    }
-
-    return jsObject;
+    return JSValue::GetNapiValue(executionCtx, ctx, jsValueHandle);
 }
 
 bool XRefObjectOperator::StrictEquals(EtsExecutionContext *executionCtx, EtsObject *obj1, EtsObject *obj2)
