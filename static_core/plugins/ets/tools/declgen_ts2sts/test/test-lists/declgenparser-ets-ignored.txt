@@ -5,3 +5,4 @@ cookbook_tests/dets_output/arkts-classes-annotations.d.ets
 cookbook_tests/dets_output/arkts-fix-interop-imports.d.ets
 cookbook_tests/dets_output/arkts-convert-estype-to-interop-type/convert-decl.d.ets
 cookbook_tests/dets_output/arkts-convert-estype-to-interop-type/convert-main.d.ets
+cookbook_tests/dets_output/arkts-error-type-alias.d.ets
