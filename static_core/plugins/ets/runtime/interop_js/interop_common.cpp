@@ -16,6 +16,9 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "libarkbase/os/mutex.h"
+
+#include <cctype>
+
 #ifdef OHOS_PANDA_TRACE_ENABLE
 #include "syspara/parameters.h"
 #endif
@@ -185,6 +188,172 @@ bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name,
 {
     napi_status rc = napi_get_named_property(env, object, utf8name, result);
     return GetPropertyStatusHandling(env, rc);
+}
+
+// ---- BigInt JSON preprocessing helpers ----
+
+// Number.MAX_SAFE_INTEGER = 2^53 - 1 = 9007199254740991 (16 decimal digits)
+constexpr size_t MAX_SAFE_INTEGER_DIGITS = 16U;
+constexpr const char *MAX_SAFE_INTEGER_STR = "9007199254740991";
+
+bool IsExceedingSafeInteger(const PandaString &numStr)
+{
+    // numStr contains only digits (no sign, no leading zeros after '0')
+    if (numStr.length() > MAX_SAFE_INTEGER_DIGITS) {
+        return true;
+    }
+    if (numStr.length() < MAX_SAFE_INTEGER_DIGITS) {
+        return false;
+    }
+    return numStr > MAX_SAFE_INTEGER_STR;
+}
+
+namespace {
+
+// MUTF-8 encodes U+0000 as overlong two-byte sequence
+constexpr unsigned char MUTF8_NULL_HIGH = 0xC0U;
+constexpr unsigned char MUTF8_NULL_LOW = 0x80U;
+constexpr size_t MUTF8_NULL_LEN = 2U;
+
+// JSON control characters U+0000..U+001F MUST be escaped (RFC 8259 §7)
+constexpr unsigned char JSON_CONTROL_MAX = 0x1FU;
+constexpr unsigned char HEX_SHIFT = 4U;
+constexpr unsigned char HEX_MASK = 0x0FU;
+
+constexpr std::string_view CONTROL_ESCAPE_PREFIX = "\\u00";
+constexpr std::string_view NULL_ESCAPE = "\\u0000";
+
+// Reserve headroom for quoting large integer literals in JSON string
+constexpr size_t RESERVE_HEADROOM = 32U;
+
+constexpr std::array<char, 16U> HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7',
+                                              '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+// Consume consecutive ASCII digits starting at |i|, advancing past them.
+void ConsumeDigits(const PandaString &jsonStr, size_t &i)
+{
+    while (i < jsonStr.size() && std::isdigit(static_cast<unsigned char>(jsonStr[i])) != 0) {
+        i++;
+    }
+}
+
+// Copy a JSON string literal (including quotes), handling \" escape sequences
+// and escaping control characters (U+0000..U+001F) that ETS char serialization
+// may emit as raw bytes — invalid in JSON but repairable here as \u00XX.
+// Advances |i| past the closing quote on return.
+void CopyJsonStringLiteral(const PandaString &jsonStr, size_t &i, PandaString &result)
+{
+    result += '"';
+    i++;  // skip opening quote
+    while (i < jsonStr.size()) {
+        auto ch = static_cast<unsigned char>(jsonStr[i]);
+        if (ch == MUTF8_NULL_HIGH && i + 1 < jsonStr.size() &&
+            static_cast<unsigned char>(jsonStr[i + 1]) == MUTF8_NULL_LOW) {
+            result += NULL_ESCAPE;
+            i += MUTF8_NULL_LEN;
+            continue;
+        }
+        if (ch <= JSON_CONTROL_MAX) {
+            result += CONTROL_ESCAPE_PREFIX;
+            result += HEX_DIGITS[ch >> HEX_SHIFT];
+            result += HEX_DIGITS[ch & HEX_MASK];
+            i++;
+            continue;
+        }
+        result += jsonStr[i];
+        if (ch == '\\' && i + 1 < jsonStr.size()) {
+            result += jsonStr[++i];  // escaped char
+        } else if (ch == '"') {
+            i++;
+            return;
+        }
+        i++;
+    }
+}
+
+// Consume fractional part and/or exponent of a JSON number.
+// |i| must point to '.' or 'e'/'E' on entry; advances past the suffix.
+void ConsumeFloatSuffix(const PandaString &jsonStr, size_t &i)
+{
+    if (jsonStr[i] == '.') {
+        ConsumeDigits(jsonStr, ++i);
+    }
+    if (i < jsonStr.size() && (jsonStr[i] == 'e' || jsonStr[i] == 'E')) {
+        i++;
+        if (i < jsonStr.size() && (jsonStr[i] == '+' || jsonStr[i] == '-')) {
+            i++;
+        }
+        ConsumeDigits(jsonStr, i);
+    }
+}
+
+// Append an integer number token scanned from [start, end) to |result|,
+// wrapping it in quotes if it exceeds Number.MAX_SAFE_INTEGER.
+void AppendNumberToken(const PandaString &jsonStr, size_t start, size_t end, bool isNegative, PandaString &result)
+{
+    PandaString numStr = jsonStr.substr(start, end - start);
+    PandaString absStr = isNegative ? numStr.substr(1) : numStr;
+    if (UNLIKELY(IsExceedingSafeInteger(absStr))) {
+        result += '"';
+        result += numStr;
+        result += '"';
+        return;
+    }
+    result += numStr;
+}
+
+// Return true if |i| points to the fractional or exponent part of a JSON number.
+bool IsFloatSuffix(const PandaString &jsonStr, size_t i)
+{
+    return i < jsonStr.size() && (jsonStr[i] == '.' || jsonStr[i] == 'e' || jsonStr[i] == 'E');
+}
+
+// If |i| points to the start of a JSON number token ('-' or digit), scan it,
+// optionally preprocess large integers, append to |result|, and return true.
+// Otherwise return false and leave |i| unchanged.
+bool TryHandleNumber(const PandaString &jsonStr, size_t &i, PandaString &result)
+{
+    auto ch = static_cast<unsigned char>(jsonStr[i]);
+    if (ch != '-' && std::isdigit(ch) == 0U) {
+        return false;
+    }
+    size_t start = i;
+    bool isNegative = (ch == '-');
+    if (isNegative) {
+        i++;
+    }
+    ConsumeDigits(jsonStr, i);
+    if (IsFloatSuffix(jsonStr, i)) {
+        ConsumeFloatSuffix(jsonStr, i);
+        result += jsonStr.substr(start, i - start);
+        return true;
+    }
+    AppendNumberToken(jsonStr, start, i, isNegative, result);
+    return true;
+}
+
+}  // anonymous namespace
+
+PandaString PreprocessBigIntInJson(const PandaString &jsonStr)
+{
+    PandaString result;
+    result.reserve(jsonStr.size() + RESERVE_HEADROOM);
+
+    for (size_t i = 0U; i < jsonStr.size();) {
+        char ch = jsonStr[i];
+
+        if (ch == '"') {
+            CopyJsonStringLiteral(jsonStr, i, result);
+            continue;
+        }
+        if (TryHandleNumber(jsonStr, i, result)) {
+            continue;
+        }
+        result += ch;
+        i++;
+    }
+
+    return result;
 }
 
 }  // namespace ark::ets::interop::js

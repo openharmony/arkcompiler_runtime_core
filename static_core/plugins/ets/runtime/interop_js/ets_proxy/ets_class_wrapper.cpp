@@ -1260,8 +1260,11 @@ std::optional<PandaString> EtsClassWrapper::SerializeETSObject(EtsExecutionConte
 /*static*/
 napi_value EtsClassWrapper::JSJsonParse(napi_env env, const PandaString &jsonStr)
 {
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
+
+    PandaString modifiedJson = PreprocessBigIntInJson(jsonStr);
     napi_value jsJsonStr;
-    NAPI_CHECK_FATAL(napi_create_string_utf8(env, jsonStr.c_str(), jsonStr.size(), &jsJsonStr));
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, modifiedJson.c_str(), modifiedJson.size(), &jsJsonStr));
 
     napi_value global;
     napi_value jsonObj;

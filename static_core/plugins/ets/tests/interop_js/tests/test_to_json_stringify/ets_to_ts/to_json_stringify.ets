@@ -120,3 +120,125 @@ export function createOuterObj(): OuterObj {
 export function createDeepNestedObj(): DeepNestedObj {
     return new DeepNestedObj();
 }
+
+// BigInt precision test classes — use default field serialization (path B),
+// not JsonSerializable (path A), so that BigInt fields appear as unquoted numeric
+// literals in the JSON and get processed by PreprocessBigIntInJson in JSJsonParse.
+// Large integer: 12345678901234567890 (> MAX_SAFE_INTEGER 9007199254740991)
+export class BigIntPositiveClass {
+    public bigValue: BigInt = 12345678901234567890n;
+}
+
+export class BigIntNegativeClass {
+    public bigNeg: BigInt = -12345678901234567890n;
+}
+
+// 9007199254740992 = MAX_SAFE_INTEGER + 1 (unsafe), 9007199254740991 = MAX_SAFE_INTEGER (safe)
+export class BigIntSafeBoundaryClass {
+    public unsafe: BigInt = 9007199254740992n;
+    public safe: BigInt = 9007199254740991n;
+}
+
+export class BigIntMixedClass {
+    public big: BigInt = 12345678901234567890n;
+    public small: int = 42;
+    public name: string = "hello";
+}
+
+export class BigIntInnerClass {
+    public innerBig: BigInt = 12345678901234567890n;
+}
+
+export class BigIntNestedClass {
+    public outer: BigIntInnerClass = new BigIntInnerClass();
+}
+
+export class BigIntMultipleClass {
+    public a: BigInt = 12345678901234567890n;
+    public b: BigInt = 98765432109876543210n;
+}
+
+export class BigIntZeroClass {
+    public zero: BigInt = 0n;
+}
+
+export class BigIntFloatClass {
+    public pi: double = 3.141592653589793;
+}
+
+export function createBigIntPositive(): BigIntPositiveClass {
+    return new BigIntPositiveClass();
+}
+
+export function createBigIntNegative(): BigIntNegativeClass {
+    return new BigIntNegativeClass();
+}
+
+export function createBigIntSafeBoundary(): BigIntSafeBoundaryClass {
+    return new BigIntSafeBoundaryClass();
+}
+
+export function createBigIntMixed(): BigIntMixedClass {
+    return new BigIntMixedClass();
+}
+
+export function createBigIntInner(): BigIntInnerClass {
+    return new BigIntInnerClass();
+}
+
+export function createBigIntNested(): BigIntNestedClass {
+    return new BigIntNestedClass();
+}
+
+export function createBigIntMultiple(): BigIntMultipleClass {
+    return new BigIntMultipleClass();
+}
+
+export function createBigIntZero(): BigIntZeroClass {
+    return new BigIntZeroClass();
+}
+
+export function createBigIntFloat(): BigIntFloatClass {
+    return new BigIntFloatClass();
+}
+
+
+// Unicode char/string fields — all use \uXXXX escapes for CI safety
+export class UnicodeNullClass {
+    public value: char = c'\u0000';
+    public value2: char = c'\u0001';
+    public value3: char = c'\u0002';
+    public value4: char = c'\u0111';
+}
+
+export class UnicodeControlClass {
+    public lastCtrl: char = c'\u001f';
+    public space: char = c'\u0020';
+}
+
+export class UnicodeMultibyteClass {
+    public cjk: char = c'\u4e2d';
+    public heart: char = c'\u2665';
+}
+
+// string type — tests SerializeJSONString path (MUTF-8 encoding)
+export class UnicodeStringClass {
+    public nullInStr: string = "a\u0000b";
+    public mix: string = "hello\u4e2dworld";
+}
+
+export function createUnicodeNull(): UnicodeNullClass {
+    return new UnicodeNullClass();
+}
+
+export function createUnicodeControl(): UnicodeControlClass {
+    return new UnicodeControlClass();
+}
+
+export function createUnicodeMultibyte(): UnicodeMultibyteClass {
+    return new UnicodeMultibyteClass();
+}
+
+export function createUnicodeString(): UnicodeStringClass {
+    return new UnicodeStringClass();
+}

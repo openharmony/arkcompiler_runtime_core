@@ -81,6 +81,14 @@ std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsV
 SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32_t> &etsArray);
 std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray);
 
+// Check whether a digit-only string (no sign) exceeds Number.MAX_SAFE_INTEGER.
+bool IsExceedingSafeInteger(const PandaString &numStr);
+
+// Scan |jsonStr| for integer literals exceeding Number.MAX_SAFE_INTEGER
+// (9007199254740991) and wrap them in double quotes so that JSON.parse
+// treats them as strings instead of losing precision via IEEE 754 double.
+PandaString PreprocessBigIntInJson(const PandaString &jsonStr);
+
 PANDA_PUBLIC_API void ThrowNoInteropContextException();
 
 void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass);
