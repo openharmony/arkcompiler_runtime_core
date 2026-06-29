@@ -41,7 +41,7 @@ TEST_F(FindModuleTest, find_module_wrong_descriptor)
     ASSERT_EQ(env_->FindModule("Lverify_find_module_test;", &result), ANI_INVALID_DESCRIPTOR);
     std::vector<TestLineInfo> invalidDescriptorLines {
         {"env", "ani_env *"},
-        {"module_descriptor", "const char *", "invalid module descriptor [ERROR]"},
+        {"module_descriptor", "const char *", "invalid module descriptor: cannot be parsed [ERROR]"},
         {"result", "ani_module *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("FindModule", invalidDescriptorLines);

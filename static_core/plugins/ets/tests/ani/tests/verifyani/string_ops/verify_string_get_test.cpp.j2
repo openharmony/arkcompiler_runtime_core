@@ -77,7 +77,7 @@ TEST_F(StringGet{{ Format }}Test, null_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: null [FATAL]"},
+        {"string", "ani_string", "wrong reference type: null, expected: ani_string [FATAL]"},
         {"{{ format }}Buffer", "{{ type }} *"},
         {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
@@ -96,7 +96,7 @@ TEST_F(StringGet{{ Format }}Test, undef_input_string)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: undefined [FATAL]"},
+        {"string", "ani_string", "wrong reference type: undefined, expected: ani_string [FATAL]"},
         {"{{ format }}Buffer", "{{ type }} *"},
         {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},

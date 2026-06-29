@@ -231,7 +231,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"name", "const char *"},
         {"signature", "const char *"},
     };
@@ -333,7 +333,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_boolean_arg)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -357,7 +357,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_boolean_arg)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -396,7 +396,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_char_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char", "wrong value [FATAL]"},
         {"[2]", "ani_byte"},
@@ -434,7 +434,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_byte_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte", "wrong value [FATAL]"},
@@ -472,7 +472,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_short_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -510,7 +510,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}Test, wrong_ref_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -848,7 +848,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"name", "const char *"},
         {"signature", "const char *"},
     };
@@ -914,7 +914,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_args)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
 {% else %}
@@ -929,7 +929,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_args)
         {"object", "ani_object"},
         {"method", "ani_method"},
         {"result", "ani_{{ type }} *"},
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
 {% endif %}
@@ -960,7 +960,7 @@ TEST_F(ObjectCallMethodByName{{ Type }}ATest, wrong_{{ type }}_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"args", "ani_value *", "wrong method arguments [FATAL]"},
+        {"args", "ani_value *", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},

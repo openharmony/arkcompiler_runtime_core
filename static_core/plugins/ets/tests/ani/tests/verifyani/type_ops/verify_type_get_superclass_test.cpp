@@ -57,7 +57,7 @@ TEST_F(TypeGetSuperClassTest, wrong_type_type)
     ASSERT_EQ(env_->c_api->Type_GetSuperClass(env_, reinterpret_cast<ani_type>(undef), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"type", "ani_ref", "wrong reference type: undefined [FATAL]"},
+        {"type", "ani_ref", "wrong reference type: undefined, expected: ani_class [FATAL]"},
         {"result", "ani_class *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Type_GetSuperClass", testLines);

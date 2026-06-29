@@ -144,7 +144,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_module_handle_kind_is_rejected)
     ani_function function {};
     ASSERT_EQ(env_->Module_FindFunction(wrongModule, "staticFunction", ":i", &function), ANI_ERROR);
     std::vector<TestLineInfo> functionLines {
-        {"env", "ani_env *"},         {"module", "ani_module", "wrong reference [FATAL]"},
+        {"env", "ani_env *"},         {"module", "ani_module", "class is not a module [FATAL]"},
         {"name", "const char *"},     {"signature", "const char *", "wrong class for function [ERROR]"},
         {"result", "ani_function *"},
     };
@@ -154,7 +154,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_module_handle_kind_is_rejected)
     ASSERT_EQ(env_->Module_FindVariable(wrongModule, "value", &variable), ANI_ERROR);
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
-        {"module", "ani_module", "wrong reference [FATAL]"},
+        {"module", "ani_module", "class is not a module [FATAL]"},
         {"name", "const char *", "wrong class for variable [ERROR]"},
         {"result", "ani_variable *"},
     };
@@ -170,7 +170,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_namespace_handle_kind_is_rejected)
     ani_function function {};
     ASSERT_EQ(env_->Namespace_FindFunction(wrongNamespace, "staticFunction", ":i", &function), ANI_ERROR);
     std::vector<TestLineInfo> functionLines {
-        {"env", "ani_env *"},         {"ns", "ani_namespace", "wrong reference [FATAL]"},
+        {"env", "ani_env *"},         {"ns", "ani_namespace", "class is not a namespace [FATAL]"},
         {"name", "const char *"},     {"signature", "const char *", "wrong class for function [ERROR]"},
         {"result", "ani_function *"},
     };
@@ -180,7 +180,7 @@ TEST_F(ModuleNamespaceFindMemberTest, wrong_namespace_handle_kind_is_rejected)
     ASSERT_EQ(env_->Namespace_FindVariable(wrongNamespace, "value", &variable), ANI_ERROR);
     std::vector<TestLineInfo> variableLines {
         {"env", "ani_env *"},
-        {"ns", "ani_namespace", "wrong reference [FATAL]"},
+        {"ns", "ani_namespace", "class is not a namespace [FATAL]"},
         {"name", "const char *", "wrong class for variable [ERROR]"},
         {"result", "ani_variable *"},
     };

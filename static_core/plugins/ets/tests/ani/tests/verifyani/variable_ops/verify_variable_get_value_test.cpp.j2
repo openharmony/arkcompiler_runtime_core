@@ -124,11 +124,11 @@ TEST_F(VariableGetValue{{ Type }}Test, wrong_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {% if type == "int" %}
-        {"variable", "ani_variable", "wrong value type: byte, expected: int [ERROR]"},
+        {"variable", "ani_variable", "field return type mismatch: byte, expected: int [ERROR]"},
         {% elif type == "ref" %}
-        {"variable", "ani_variable", "wrong value type: int, expected: object [ERROR]"},
+        {"variable", "ani_variable", "field return type mismatch: int, expected: object [ERROR]"},
         {% else %}
-        {"variable", "ani_variable", "wrong value type: int, expected: {{ type }} [ERROR]"},
+        {"variable", "ani_variable", "field return type mismatch: int, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"result", "ani_{{ "ref" if type == "ref" else type }} *"},
     };

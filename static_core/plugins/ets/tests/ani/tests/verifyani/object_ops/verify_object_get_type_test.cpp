@@ -73,7 +73,7 @@ TEST_F(ObjectGetTypeTest, wrong_object_type)
     ASSERT_EQ(env_->c_api->Object_GetType(env_, reinterpret_cast<ani_object>(undef), &resultType), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: undefined [FATAL]"},
+        {"object", "ani_object", "wrong reference type: undefined, expected: ani_object [FATAL]"},
         {"result", "ani_ref *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_GetType", testLines);

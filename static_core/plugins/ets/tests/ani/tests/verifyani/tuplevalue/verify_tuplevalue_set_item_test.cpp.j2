@@ -111,7 +111,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, null_input_tuple)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: null [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: null, expected: ani_tuple_value [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_{{ type }}"},
     };
@@ -132,7 +132,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, undefined_input_tuple)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: undefined, expected: ani_tuple_value [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_{{ type }}"},
     };
@@ -156,7 +156,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, object_input_tuple)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_object, expected: ani_tuple_value [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_{{ type }}"},
     };
@@ -180,7 +180,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, string_input_tuple)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_string, expected: ani_tuple_value [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_{{ type }}"},
     };
@@ -204,7 +204,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, error_input_tuple)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_error, expected: ani_tuple_value [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_{{ type }}"},
     };
@@ -228,7 +228,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, array_input_tuple)
 {% endif %}
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array [FATAL]"},
+        {"tuple_value", "ani_tuple_value", "wrong reference type: ani_array, expected: ani_tuple_value [FATAL]"},
         {"index", "ani_size"},
         {"value", "ani_{{ type }}"},
     };
@@ -251,7 +251,7 @@ TEST_F(TupleValueSetItem{{ Type }}Test, wrong_all_args)
         {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"tuple_value", "ani_tuple_value", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_{{ type }}", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
 {% else %}
     ASSERT_EQ(env_->c_api->TupleValue_SetItem_{{ Type }}(nullptr, nullptr, VALID_INDEX, VALID_VALUE),
@@ -341,7 +341,7 @@ TEST_F(TupleValueSetItemBooleanTest, wrong_value)
         {"env", "ani_env *"},
         {"tuple_value", "ani_tuple_value"},
         {"index", "ani_size"},
-        {"value", "ani_boolean", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_boolean", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("TupleValue_SetItem_Boolean", testLines);
 }

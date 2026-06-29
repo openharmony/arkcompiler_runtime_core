@@ -346,7 +346,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_boolean_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "                 ", "wrong method arguments [FATAL]"},
+        {"...", "                 ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -384,7 +384,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_char_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "                 ", "wrong method arguments [FATAL]"},
+        {"...", "                 ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char", "wrong value [FATAL]"},
         {"[2]", "ani_byte"},
@@ -422,7 +422,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_byte_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "                 ", "wrong method arguments [FATAL]"},
+        {"...", "                 ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte", "wrong value [FATAL]"},
@@ -460,7 +460,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_short_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "                 ", "wrong method arguments [FATAL]"},
+        {"...", "                 ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -498,7 +498,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}Test, wrong_ref_arg)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"...", "                 ", "wrong method arguments [FATAL]"},
+        {"...", "                 ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -849,7 +849,7 @@ TEST_F(ClassCallStaticMethodByName{{ Type }}ATest, wrong_args)
         {% if type != "void" %}
         {"result", "ani_{{ type }} *"},
         {% endif %}
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethodByName_{{ Type }}_A", testLines);

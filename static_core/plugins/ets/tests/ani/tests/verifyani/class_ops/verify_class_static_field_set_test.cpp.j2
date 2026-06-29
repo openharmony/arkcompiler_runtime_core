@@ -142,9 +142,9 @@ TEST_F(ClassStaticFieldSet{{ Type }}Test, SetStaticField_{{ Type }}_wrong_type)
         {"env", "ani_env *"},
         {"class", "ani_class"},
         {% if type == "ref" %}
-        {"static_field", "ani_static_field", "wrong value type: {{ wrong_ets_type }}, expected: object [ERROR]"},
+        {"static_field", "ani_static_field", "field return type mismatch: {{ wrong_ets_type }}, expected: object [ERROR]"},
         {% else %}
-        {"static_field", "ani_static_field", "wrong value type: {{ wrong_ets_type }}, expected: {{ type }} [ERROR]"},
+        {"static_field", "ani_static_field", "field return type mismatch: {{ wrong_ets_type }}, expected: {{ type }} [ERROR]"},
         {% endif %}
         {"value", "ani_{{ type }}"},
     };

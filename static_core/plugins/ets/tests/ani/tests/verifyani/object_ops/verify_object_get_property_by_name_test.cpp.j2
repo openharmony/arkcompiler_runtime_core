@@ -111,7 +111,7 @@ TEST_F(ObjectGetPropertyByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"name", "const char *"},
         {"result", "ani_{{ type }} *"},
     };

@@ -66,7 +66,7 @@ TEST_F(ObjectInstanceOfTest, wrong_object_type)
     ASSERT_EQ(env_->c_api->Object_InstanceOf(env_, reinterpret_cast<ani_object>(undef), cls, &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: undefined [FATAL]"},
+        {"object", "ani_object", "wrong reference type: undefined, expected: ani_object [FATAL]"},
         {"type", "ani_ref"},
         {"result", "ani_boolean *"},
     };
@@ -106,7 +106,7 @@ TEST_F(ObjectInstanceOfTest, wrong_type_type)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
-        {"type", "ani_ref", "wrong reference type: undefined [FATAL]"},
+        {"type", "ani_ref", "wrong reference type: undefined, expected: ani_class [FATAL]"},
         {"result", "ani_boolean *"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Object_InstanceOf", testLines);

@@ -99,14 +99,16 @@ TEST_F(AnyCallMethodTest, argv_null_with_argc_positive)
 
     ani_ref out {};
     ASSERT_EQ(env_->c_api->Any_CallMethod(env_, cls, "hashCode", 1U, nullptr, &out), ANI_ERROR);
+    // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"self", "ani_ref", "Static types are not supported [FATAL]"},
         {"name", "const char *"},
         {"argc", "ani_size"},
-        {"argv", "ani_ref *", "wrong pointer to use as argument in 'ani_ref *argv' [FATAL]"},
+        {"argv", "ani_ref *", "argv array is nullptr [FATAL]"},
         {"result", "ani_ref *"},
     };
+    // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Any_CallMethod", testLines);
 
     ASSERT_EQ(env_->Reference_Delete(cls), ANI_OK);

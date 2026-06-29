@@ -167,7 +167,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
-        {"static_method", "ani_static_method", "wrong class for method [ERROR]"},
+        {"static_method", "ani_static_method", "static method requires a class [ERROR]"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -202,7 +202,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference type: null, expected: ani_class [FATAL]"},
-        {"static_method", "ani_static_method", "wrong class for method [ERROR]"},
+        {"static_method", "ani_static_method", "static method requires a class [ERROR]"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -236,7 +236,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong class for method [FATAL]"},
+        {"static_method", "ani_static_method", "static method does not belong to this class [FATAL]"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -301,9 +301,9 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_method_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong static method [FATAL]"},
+        {"static_method", "ani_static_method", "static method not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method [ERROR]"},
+        {"...", "       ", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean", testLines);
@@ -322,9 +322,9 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_method_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong static method [ERROR]"},
+        {"static_method", "ani_static_method", "static method is nullptr [ERROR]"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method [ERROR]"},
+        {"...", "       ", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean", testLines);
@@ -380,7 +380,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_boolean_arg)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -413,7 +413,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_char_arg)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char", "wrong value [FATAL]"},
         {"[2]", "ani_byte"},
@@ -446,7 +446,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_byte_arg)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte", "wrong value [FATAL]"},
@@ -479,7 +479,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_short_arg)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -512,7 +512,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_ref_arg)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"...", "       ", "wrong method arguments [FATAL]"},
+        {"...", "       ", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -535,9 +535,9 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
-        {"static_method", "ani_static_method", "wrong static method [ERROR]"},
+        {"static_method", "ani_static_method", "static method is nullptr [ERROR]"},
         {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},
-        {"...", "       ", "wrong method [ERROR]"},
+        {"...", "       ", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean", testLines);
@@ -594,7 +594,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, class_from_local_scope)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
-        {"static_method", "ani_static_method", "wrong class for method [ERROR]"},
+        {"static_method", "ani_static_method", "static method requires a class [ERROR]"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -841,7 +841,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
-        {"static_method", "ani_static_method", "wrong class for method [ERROR]"},
+        {"static_method", "ani_static_method", "static method requires a class [ERROR]"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -874,7 +874,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference type: null, expected: ani_class [FATAL]"},
-        {"static_method", "ani_static_method", "wrong class for method [ERROR]"},
+        {"static_method", "ani_static_method", "static method requires a class [ERROR]"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -906,7 +906,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong class for method [FATAL]"},
+        {"static_method", "ani_static_method", "static method does not belong to this class [FATAL]"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -968,9 +968,9 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_method_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong static method [FATAL]"},
+        {"static_method", "ani_static_method", "static method not found (may be deleted or corrupted) [FATAL]"},
         {"result", "ani_boolean *"},
-        {"args", "ani_value *", "wrong method [ERROR]"},
+        {"args", "ani_value *", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean_A", testLines);
@@ -988,9 +988,9 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_method_2)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class"},
-        {"static_method", "ani_static_method", "wrong static method [ERROR]"},
+        {"static_method", "ani_static_method", "static method is nullptr [ERROR]"},
         {"result", "ani_boolean *"},
-        {"args", "ani_value *", "wrong method [ERROR]"},
+        {"args", "ani_value *", "method pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean_A", testLines);
@@ -1043,7 +1043,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_args)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean_A", testLines);
@@ -1057,9 +1057,9 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_all_args)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"class", "ani_class", "reference is nullptr [ERROR]"},
-        {"static_method", "ani_static_method", "wrong static method [ERROR]"},
+        {"static_method", "ani_static_method", "static method is nullptr [ERROR]"},
         {"result", "ani_boolean *", "nullptr for storing 'ani_boolean' [ERROR]"},
-        {"args", "ani_value *", "wrong arguments value [ERROR]"},
+        {"args", "ani_value *", "arguments pointer is nullptr [ERROR]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Class_CallStaticMethod_Boolean_A", testLines);
@@ -1083,7 +1083,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_boolean_arg)
         {"class", "ani_class"},
         {"static_method", "ani_static_method"},
         {"result", "ani_boolean *"},
-        {"args", "ani_value *", "wrong method arguments [FATAL]"},
+        {"args", "ani_value *", "invalid method argument value [FATAL]"},
         {"[0]", "ani_boolean", "wrong value [FATAL]"},
         {"[1]", "ani_char"},
         {"[2]", "ani_byte"},
@@ -1146,7 +1146,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, class_from_local_scope)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "reference not found (may be deleted, out of scope, or corrupted) [FATAL]"},
-        {"static_method", "ani_static_method", "wrong class for method [ERROR]"},
+        {"static_method", "ani_static_method", "static method requires a class [ERROR]"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},

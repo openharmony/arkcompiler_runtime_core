@@ -107,7 +107,7 @@ TEST_F(FunctionalObjectCallTest, wrong_functional_object)
     // clang-format off
     std::vector<TestLineInfo> wrongTypeLines {
         {"env", "ani_env *"},
-        {"fn", "ani_fn_object", "wrong functional object [ERROR]"},
+        {"fn", "ani_fn_object", "reference is not a functional object [ERROR]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},
@@ -143,7 +143,7 @@ TEST_F(FunctionalObjectCallTest, non_functional_object_with_wrong_argv)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"fn", "ani_fn_object", "wrong functional object [ERROR]"},
+        {"fn", "ani_fn_object", "reference is not a functional object [ERROR]"},
         {"argc", "ani_size"},
         {"argv", "ani_ref *"},
         {"result", "ani_ref *"},

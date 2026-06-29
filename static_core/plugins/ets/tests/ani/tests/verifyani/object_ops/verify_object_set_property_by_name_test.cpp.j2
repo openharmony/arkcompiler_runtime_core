@@ -140,7 +140,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_object_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference type: null [FATAL]"},
+        {"object", "ani_object", "wrong reference type: null, expected: ani_object [FATAL]"},
         {"name", "const char *"},
         {"value", "ani_{{ type }}"},
     };
@@ -203,7 +203,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_value)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"name", "const char *"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_{{ type }}", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_SetPropertyByName_{{ Type }}", testLines);
@@ -247,7 +247,7 @@ TEST_F(ObjectSetPropertyByName{{ Type }}Test, wrong_all_args)
         {"env", "ani_env *", "env is nullptr [ERROR]"},
         {"object", "ani_object", "reference is nullptr [ERROR]"},
         {"name", "const char *", "argument is nullptr, expected const char * [ERROR]"},
-        {"value", "ani_{{ type }}", "wrong value for ani_boolean [FATAL]"},
+        {"value", "ani_{{ type }}", "ani_boolean value is neither ANI_TRUE nor ANI_FALSE [FATAL]"},
     };
     // clang-format on
     {% else %}

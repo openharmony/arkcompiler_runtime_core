@@ -858,10 +858,10 @@ public:
     VerificationResult VerifyVm(VVm *vvm)
     {
         if (UNLIKELY(vvm == nullptr)) {
-            return {"wrong VM pointer", ANIErrorSeverity::ERROR};
+            return {"vm is nullptr", ANIErrorSeverity::ERROR};
         }
         if (UNLIKELY(vvm != vvm_)) {
-            return {"wrong VM pointer", ANIErrorSeverity::FATAL};
+            return {"vm pointer does not match current VM", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -890,7 +890,7 @@ public:
     {
         if (opt.option == nullptr) {
             PandaStringStream ss;
-            ss << "wrong 'option' pointer, options->options[" << index << "].option == NULL";
+            ss << "options->options[" << index << "].option is nullptr";
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
         std::string_view name = opt.option;
@@ -901,7 +901,7 @@ public:
                            (std::isalpha(static_cast<unsigned char>(subName[0])) != 0);
             if (!isValid) {
                 PandaStringStream ss;
-                ss << "wrong 'option' value, options->options[" << index << "].option == " << name;
+                ss << "options->options[" << index << "].option has invalid value: " << name;
                 return {ss.str(), ANIErrorSeverity::ERROR};
             }
         }
@@ -917,12 +917,12 @@ public:
             return {};
         }
         if (options->options == nullptr) {
-            return {"wrong 'options' pointer, options->options == NULL", ANIErrorSeverity::FATAL};
+            return {"options->options pointer is nullptr", ANIErrorSeverity::FATAL};
         }
         const size_t maxNrOptions = 4096;
         if (options->nr_options > maxNrOptions) {
             PandaStringStream ss;
-            ss << "'nr_options' value is too large. options->nr_options == " << options->nr_options;
+            ss << "options->nr_options value " << options->nr_options << " exceeds maximum " << maxNrOptions;
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -964,7 +964,7 @@ public:
     VerificationResult VerifyBoolean(ani_boolean value)
     {
         if (!IsValidAniBoolean(value)) {
-            return {"wrong value for ani_boolean", ANIErrorSeverity::FATAL};
+            return {"ani_boolean value is neither ANI_TRUE nor ANI_FALSE", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -983,7 +983,9 @@ public:
     VerificationResult VerifyEnvVersion(uint32_t version)
     {
         if (!IsVersionSupported(version)) {
-            return {"unsupported ANI version", ANIErrorSeverity::ERROR};
+            PandaStringStream ss;
+            ss << "unsupported ANI version: 0x" << std::hex << version;
+            return {ss.str(), ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1058,14 +1060,14 @@ public:
     VerificationResult VerifyRefCallArgs(VRefCallArgs *desc)
     {
         if (desc == nullptr) {
-            return {"wrong pointer to use as argument in 'ani_ref *argv'", ANIErrorSeverity::FATAL};
+            return {"argv parameter is nullptr", ANIErrorSeverity::FATAL};
         }
         desc->ClearReleaseArgvState();
         if (desc->GetArgc() == 0) {
             return {};
         }
         if (desc->GetVargv() == nullptr) {
-            return {"wrong pointer to use as argument in 'ani_ref *argv'", ANIErrorSeverity::FATAL};
+            return {"argv array is nullptr", ANIErrorSeverity::FATAL};
         }
         Span<VRef *> argvSpan(desc->GetVargv(), desc->GetArgc());
         for (VRef *argRef : argvSpan) {
@@ -1094,7 +1096,7 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsClass(s, vtype->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vtype->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vtype->GetRef()) << ", expected: ani_class";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -1119,9 +1121,9 @@ public:
             return {"wrong reference type: local reference, expected: global reference", ANIErrorSeverity::ERROR};
         }
         if (envVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vgref))) {
-            return {"wrong global reference", ANIErrorSeverity::ERROR};
+            return {"local reference, expected: global reference", ANIErrorSeverity::ERROR};
         }
-        return {"wrong global reference", ANIErrorSeverity::FATAL};
+        return {"global reference not found (may have been deleted or corrupted)", ANIErrorSeverity::FATAL};
     }
 
     VerificationResult VerifyWRef(VWRef *vwref)
@@ -1136,17 +1138,17 @@ public:
 
         if (envVerifier->IsValidRef(reinterpret_cast<VRef *>(vwref))) {
             if (!InternalRef::IsVWRef(vwref)) {
-                return {"wrong weak reference", ANIErrorSeverity::ERROR};
+                return {"wrong reference type: not a weak reference", ANIErrorSeverity::ERROR};
             }
             if (ManagedCodeAccessor::IsUndefined(vwref->GetWRef())) {
                 return {};
             }
-            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+            return {"weak reference has been invalidated (may have been manually deleted)", ANIErrorSeverity::ERROR};
         }
         if (envVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vwref))) {
-            return {"wrong weak reference", ANIErrorSeverity::ERROR};
+            return {"local reference, expected: weak reference", ANIErrorSeverity::ERROR};
         }
-        return {"wrong weak reference", ANIErrorSeverity::FATAL};
+        return {"weak reference not found (may have been deleted or corrupted)", ANIErrorSeverity::FATAL};
     }
 
     VerificationResult VerifyFunctionalObject(VFnObject *vfnObject)
@@ -1160,13 +1162,14 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsObject(s, vfnObject->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vfnObject->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vfnObject->GetRef())
+               << ", expected: object reference";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
         EtsClass *cls = s.ToInternalType(vfnObject->GetRef())->GetClass();
         if (!cls->IsFunction()) {
-            return {"wrong functional object", ANIErrorSeverity::ERROR};
+            return {"reference is not a functional object", ANIErrorSeverity::ERROR};
         }
         canReadFunctionalObjectArgv_ = true;
         return {};
@@ -1272,7 +1275,7 @@ public:
         }
         if (!class_->IsModule()) {
             class_ = nullptr;
-            return {"wrong reference", ANIErrorSeverity::FATAL};
+            return {"class is not a module", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -1319,7 +1322,7 @@ public:
 
         std::optional<PandaString> desc = Mangle::ConvertDescriptor(moduleDescriptor);
         if (!desc.has_value()) {
-            return {"invalid module descriptor", ANIErrorSeverity::ERROR};
+            return {"invalid module descriptor: cannot be parsed", ANIErrorSeverity::ERROR};
         }
         return {};
     }
@@ -1376,7 +1379,7 @@ public:
         }
         if (!class_->IsModule()) {
             class_ = nullptr;
-            return {"wrong reference", ANIErrorSeverity::FATAL};
+            return {"class is not a namespace", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -1391,7 +1394,7 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsString(s, str)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, str);
+            ss << "wrong reference type: " << ANIRefTypeToString(s, str) << ", expected: ani_string";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
         return {};
@@ -1446,7 +1449,8 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsTupleValue(s, vtupleValue->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, vtupleValue->GetRef());
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vtupleValue->GetRef())
+               << ", expected: ani_tuple_value";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -1621,14 +1625,14 @@ public:
     VerificationResult VerifyDelLocalRef(VRef *vref)
     {
         if (vref == nullptr) {
-            return {"wrong reference", ANIErrorSeverity::ERROR};
+            return {"reference is nullptr", ANIErrorSeverity::ERROR};
         }
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
         if (envANIVerifier->IsValidRawAniLocalRef(reinterpret_cast<void *>(vref))) {
             return {};
         }
         if (!envANIVerifier->IsValidRef(vref)) {
-            return {"wrong reference", ANIErrorSeverity::FATAL};
+            return {"reference not found (may be deleted, out of scope, or corrupted)", ANIErrorSeverity::FATAL};
         }
 
         if (!envANIVerifier->IsValidLocalRef(vref) && !envANIVerifier->IsValidStackRef(vref)) {
@@ -1636,7 +1640,7 @@ public:
         }
 
         if (envANIVerifier->IsValidStackRef(vref)) {
-            return {"wrong reference", ANIErrorSeverity::FATAL};
+            return {"stack reference cannot be deleted", ANIErrorSeverity::FATAL};
         }
 
         if (!envANIVerifier->CanBeDeletedFromCurrentScope(vref)) {
@@ -1656,7 +1660,7 @@ public:
         ScopedManagedCodeFix s(venv_->GetEnv());
         if (!ANIRefTypeChecker::IsObject(s, object)) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(s, object);
+            ss << "wrong reference type: " << ANIRefTypeToString(s, object) << ", expected: ani_object";
             return {ss.str(), ANIErrorSeverity::FATAL};
         }
 
@@ -1743,14 +1747,14 @@ public:
     VerificationResult VerifyCtor(VMethod *vctor, EtsType returnType)
     {
         if (vctor == nullptr) {
-            return {"wrong ctor", ANIErrorSeverity::ERROR};
+            return {"ctor is nullptr", ANIErrorSeverity::ERROR};
         }
         if (class_ == nullptr) {
-            return {"wrong class for ctor", ANIErrorSeverity::ERROR};
+            return {"ctor requires a class", ANIErrorSeverity::ERROR};
         }
 
         if (!GetEnvANIVerifier()->IsValidMethod(vctor)) {
-            return {"wrong ctor", ANIErrorSeverity::FATAL};
+            return {"ctor not found (may be deleted or corrupted)", ANIErrorSeverity::FATAL};
         }
 
         auto err = DoVerifyMethod(vctor, impl::VMethod::ANIMethodType::METHOD, returnType);
@@ -1763,7 +1767,7 @@ public:
         }
 
         if (ctor->GetClass() != class_) {
-            return {"wrong class for ctor", ANIErrorSeverity::FATAL};
+            return {"ctor does not belong to this class", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -1957,9 +1961,9 @@ public:
 
         if (class_ == nullptr) {
             if constexpr (IS_STATIC) {
-                return {"wrong class for static field", ANIErrorSeverity::ERROR};
+                return {"static field requires a class", ANIErrorSeverity::ERROR};
             } else {
-                return {"wrong class for field", ANIErrorSeverity::ERROR};
+                return {"instance field requires a class", ANIErrorSeverity::ERROR};
             }
         }
 
@@ -1975,9 +1979,9 @@ public:
         }
 
         if constexpr (IS_STATIC) {
-            return {"static field not found", ANIErrorSeverity::ERROR};
+            return {"static field not found with given name", ANIErrorSeverity::ERROR};
         } else {
-            return {"field not found", ANIErrorSeverity::ERROR};
+            return {"instance field not found with given name", ANIErrorSeverity::ERROR};
         }
     }
 
@@ -2279,13 +2283,13 @@ public:
     VerificationResult VerifyStaticMethod(VStaticMethod *vstaticmethod, EtsType returnType)
     {
         if (vstaticmethod == nullptr) {
-            return {"wrong static method", ANIErrorSeverity::ERROR};
+            return {"static method is nullptr", ANIErrorSeverity::ERROR};
         }
         if (class_ == nullptr) {
-            return {"wrong class for method", ANIErrorSeverity::ERROR};
+            return {"static method requires a class", ANIErrorSeverity::ERROR};
         }
         if (!GetEnvANIVerifier()->IsValidMethod(vstaticmethod)) {
-            return {"wrong static method", ANIErrorSeverity::FATAL};
+            return {"static method not found (may be deleted or corrupted)", ANIErrorSeverity::FATAL};
         }
         auto err = DoVerifyMethod(vstaticmethod, impl::VMethod::ANIMethodType::STATIC_METHOD, returnType);
         if (err) {
@@ -2293,7 +2297,7 @@ public:
         }
         auto staticmethod = ResolveToEtsMethod(vstaticmethod, GetEnvANIVerifier());
         if (!staticmethod->GetClass()->IsAssignableFrom(class_)) {
-            return {"wrong class for method", ANIErrorSeverity::FATAL};
+            return {"static method does not belong to this class", ANIErrorSeverity::FATAL};
         }
         return {};
     }
@@ -2301,11 +2305,11 @@ public:
     VerificationResult VerifyFunction(VFunction *vfunction, EtsType returnType)
     {
         if (vfunction == nullptr) {
-            return {"expected non-null function", ANIErrorSeverity::ERROR};
+            return {"function is nullptr", ANIErrorSeverity::ERROR};
         }
 
         if (!GetEnvANIVerifier()->IsValidMethod(vfunction)) {
-            return {"wrong function", ANIErrorSeverity::FATAL};
+            return {"function not found (may be deleted or corrupted)", ANIErrorSeverity::FATAL};
         }
         auto err = DoVerifyMethod(vfunction, impl::VMethod::ANIMethodType::FUNCTION, returnType);
         if (err) {
@@ -2330,7 +2334,7 @@ public:
         EtsType fieldReturnType = field->GetEtsType();
         if (fieldReturnType != returnType) {
             PandaStringStream ss;
-            ss << "wrong value type: " << EtsTypeToString(fieldReturnType)
+            ss << "field return type mismatch: " << EtsTypeToString(fieldReturnType)
                << ", expected: " << EtsTypeToString(returnType);
             return {ss.str(), ANIErrorSeverity::ERROR};
         }
@@ -2362,9 +2366,9 @@ public:
     {
         if (field->IsStatic() != isStaticField) {
             if (isStaticField) {
-                return {"wrong static field", ANIErrorSeverity::FATAL};
+                return {"expected static field but found instance field", ANIErrorSeverity::FATAL};
             }
-            return {"wrong field", ANIErrorSeverity::FATAL};
+            return {"expected instance field but found static field", ANIErrorSeverity::FATAL};
         }
 
         if (field->GetEtsType() != expectedType) {
@@ -2376,9 +2380,9 @@ public:
 
         if (!field->GetDeclaringClass()->IsAssignableFrom(class_)) {
             if (isStaticField) {
-                return {"wrong class for static field", ANIErrorSeverity::FATAL};
+                return {"static field does not belong to this class", ANIErrorSeverity::FATAL};
             }
-            return {"wrong object for field", ANIErrorSeverity::FATAL};
+            return {"instance field does not belong to this object", ANIErrorSeverity::FATAL};
         }
 
         return {};
@@ -2545,10 +2549,10 @@ public:
     {
         ASSERT(methodArgs != nullptr);
         if (methodArgs->vargs == nullptr) {
-            return {"wrong arguments value", ANIErrorSeverity::ERROR};
+            return {"arguments pointer is nullptr", ANIErrorSeverity::ERROR};
         }
         if (methodArgs->method == nullptr) {
-            return {"wrong method", ANIErrorSeverity::ERROR};
+            return {"method pointer is nullptr", ANIErrorSeverity::ERROR};
         }
         return DoVerifyMethodArgs(methodArgs);
     }
@@ -2557,7 +2561,7 @@ public:
     {
         ASSERT(methodArgs != nullptr);
         if (methodArgs->method == nullptr) {
-            return {"wrong method", ANIErrorSeverity::ERROR};
+            return {"method pointer is nullptr", ANIErrorSeverity::ERROR};
         }
         return DoVerifyMethodArgs(methodArgs);
     }
@@ -2572,7 +2576,7 @@ public:
             return {};
         }
         if (vargs == nullptr && etsMethod->GetNumArgs() != 0) {
-            return {"wrong arguments value", ANIErrorSeverity::ERROR};
+            return {"arguments pointer is nullptr, but method expects arguments", ANIErrorSeverity::ERROR};
         }
 
         methodArgsForExtInfo_ = ANIArg::AniMethodArgs {etsMethod, vargs, {}, false};
@@ -2602,13 +2606,13 @@ public:
 
         callArgs.ForEachArgs([&](ani_value value, panda_file::Type type, size_t refIndex) -> bool {
             if (UNLIKELY(!IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs))) {
-                err = {"wrong method arguments", ANIErrorSeverity::FATAL};
+                err = {"invalid method argument value", ANIErrorSeverity::FATAL};
                 return false;
             }
             if (type.IsReference()) {
                 auto ref = ResolveToAniRef(reinterpret_cast<VRef *>(value.r), GetEnvANIVerifier());
                 if (UNLIKELY(!IsValidMethodArgRefType(venv_->GetEnv(), methodArgs->method, ref, refIndex))) {
-                    err = {"wrong method arguments", ANIErrorSeverity::FATAL};
+                    err = {"reference type does not match method parameter type", ANIErrorSeverity::FATAL};
                     return false;
                 }
             }
@@ -2620,11 +2624,11 @@ public:
     VerificationResult VerifyResolver(VResolver *vresolver)
     {
         if (vresolver == nullptr) {
-            return {"wrong resolver", ANIErrorSeverity::ERROR};
+            return {"resolver is nullptr", ANIErrorSeverity::ERROR};
         }
 
         if (!GetEnvANIVerifier()->IsValidGlobalResolver(vresolver)) {
-            return {"wrong resolver", ANIErrorSeverity::FATAL};
+            return {"resolver has already been resolved or is invalid", ANIErrorSeverity::FATAL};
         }
 
         return {};
