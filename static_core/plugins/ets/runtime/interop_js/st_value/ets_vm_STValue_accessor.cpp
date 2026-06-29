@@ -1448,15 +1448,13 @@ ani_status GetClassFromInteropDefaultLinker([[maybe_unused]] napi_env napiEnv, a
                                           &loadMethod));
     }
 
-    static ani_ref linkerRef {};
-    if (linkerRef == nullptr) {
-        ani_class contextCls {};
-        AniExpectOK(env->FindClass("std.interop.InteropContext", &contextCls));
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        AniExpectOK(env->Class_CallStaticMethodByName_Ref(contextCls, "getInteropRuntimeLinker",
-                                                          ":C{std.core.RuntimeLinker}", &linkerRef));
-    }
-    static ani_object boolObj = CreateBoolean(env, ANI_FALSE);
+    ani_ref linkerRef {};
+    ani_class contextCls {};
+    AniExpectOK(env->FindClass("std.interop.InteropContext", &contextCls));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    AniExpectOK(env->Class_CallStaticMethodByName_Ref(contextCls, "getInteropRuntimeLinker",
+                                                      ":C{std.core.RuntimeLinker}", &linkerRef));
+    ani_object boolObj = CreateBoolean(env, ANI_FALSE);
     ani_ref clsRef = nullptr;
     ani_status status =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
