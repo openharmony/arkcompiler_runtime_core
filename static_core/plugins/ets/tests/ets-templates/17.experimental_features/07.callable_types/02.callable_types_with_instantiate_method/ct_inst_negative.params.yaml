@@ -88,3 +88,34 @@ cases:
       use: |-
           let y = C.$_instantiate(() => { return new C<int>()})
           arktest.assertTrue(y instanceof C)
+#7
+    - decl: |-
+          // overloaded instantiate: accessing inherited static member via subclass
+          class B {
+              static $_instantiate(f: ()=>B, p: number): number { return p + p }
+          }
+          class C extends B {
+              static $_instantiate(f: ()=>C, p: string): string { return p + p }
+          }
+      use: |-
+          arktest.assertEQ(C.$_instantiate(() => { return new C() }, 42.0), 84.0)
+#8
+    - decl: |-
+          // mix of static and instance instantiate: inherited static member via subclass
+          class B {
+              static $_instantiate(f: ()=>B, p: number): number {
+                  return f().$_instantiate(f, p)
+              }
+              $_instantiate(f: ()=>B, p: number): number { return p + p }
+          }
+          class C extends B {
+              static $_instantiate(f: ()=>C, p: string): string {
+                  return f().$_instantiate(f, p)
+              }
+              $_instantiate(f: ()=>C, p: string): string { return '1' + p }
+          }
+          function foo_C(): C {
+              return new C()
+          }
+      use: |-
+          arktest.assertEQ(C(42.0), 84.0)

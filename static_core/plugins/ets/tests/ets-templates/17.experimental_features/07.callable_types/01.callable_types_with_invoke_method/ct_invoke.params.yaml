@@ -152,7 +152,7 @@ cases:
               static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
-          arktest.assertEQ(C(33.0), 66.0)
+          arktest.assertEQ(B(33.0), 66.0)
           arktest.assertEQ(C('abc'), 'abcabc')
           arktest.assertEQ(C('abc', false), 'abcfalse')
 
@@ -170,7 +170,7 @@ cases:
               static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
-          arktest.assertEQ(C(33.0), 66.0)
+          arktest.assertEQ(B(33.0), 66.0)
           arktest.assertEQ(C('abc'), 'abcabc')
           arktest.assertEQ(C('abc', false), 'abcfalse')
 
@@ -189,8 +189,6 @@ cases:
               $_invoke(): string { return 'C' }
           }
       use: |-
-          arktest.assertEQ(C(), 'A')
-          arktest.assertEQ(B(), 'A')
           arktest.assertEQ(A(), 'A')
 
           arktest.assertEQ(new C().$_invoke(), 'C')
@@ -209,28 +207,6 @@ cases:
           arktest.assertEQ(C().$_invoke(), 'b')
           arktest.assertEQ(B.$_invoke(), 'B')
           arktest.assertEQ(new B().$_invoke(), 'b')
-
-    - decl: |-
-          // error propagation from invoke
-          class B {
-              static $_invoke(p: boolean): string {
-                  if (p) {
-                      throw new Error('invoke error')
-                  }
-                  return 'B'
-              }
-          }
-          class C extends B {
-              $_invoke(): C { return new C() }
-          }
-          function foo(p: boolean): string {
-              return C(p)
-          }
-      use: |-
-          let checkException = (e: Error): boolean => { return e instanceof Error }
-          arktest.expectThrow(() => {
-              foo(true)
-          }, checkException)
 
     - decl: |-
           // call chain of invoke

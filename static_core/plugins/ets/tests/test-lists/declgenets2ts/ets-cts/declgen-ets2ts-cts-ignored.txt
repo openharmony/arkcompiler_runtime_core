@@ -1628,7 +1628,7 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_3.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_7.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_9.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_26.ets
 15.semantic_rules/09.overriding/02.overriding_and_overload_signatures_in_interfaces/intf_intf_clss2_8.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/method_inheritance.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_overriding.ets

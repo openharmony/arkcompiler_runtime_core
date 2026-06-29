@@ -21,6 +21,9 @@ desc: >-
     must be a factory. The method can have or not have other parameters,
     and those parameters can be arbitrary.
 tags: [compile-only, negative]
+{% if c.expected_out is defined %}
+expected_out: "{{c.expected_out}}"
+{% endif %}
 ---*/
 
 {{c.decl}}

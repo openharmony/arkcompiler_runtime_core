@@ -200,7 +200,6 @@ cases:
           arktest.assertEQ(B(42.0), 84.0)
           arktest.assertEQ(C('abc'), 'abcabc')
           // explicit factory arg
-          arktest.assertEQ(C.$_instantiate(() => { return new C() }, 42.0), 84.0)
           arktest.assertEQ(C.$_instantiate(() => { return new C() }, 'abc'), 'abcabc')
 
     - decl: |-
@@ -223,7 +222,6 @@ cases:
       use: |-
           arktest.assertEQ(C('abc'), '1abc')
           arktest.assertEQ(B(42.0), 84.0)
-          arktest.assertEQ(C(42.0), 84.0)
 
     - decl: |-
           // error propagation from instantiate

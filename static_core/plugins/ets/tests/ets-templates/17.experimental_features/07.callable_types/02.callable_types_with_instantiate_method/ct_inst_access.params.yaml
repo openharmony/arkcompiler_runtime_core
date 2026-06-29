@@ -71,37 +71,3 @@ cases:
           }
       use: |-
           arktest.assertEQ(new C().meth(42.0).fld, '42')
-
-    - decl: |-
-          // protected instantiate from subclass instantiate
-          class B {
-              fld: string = ''
-              protected static $_instantiate(f: ()=>B, p: string): B {
-                  let x = f()
-                  x.fld = p
-                  return x
-              }
-          }
-          class C extends B {
-              public static $_instantiate(f: ()=>C, p: number): B { return C('' + p) }
-          }
-      use: |-
-          arktest.assertEQ(C(42.0).fld, '42')
-
-    - decl: |-
-          // protected instantiate from subclass method
-          class B {
-              fld: string = ''
-              protected static $_instantiate(f: ()=>B, p: string): B {
-                  let x = f()
-                  x.fld = p
-                  return x
-              }
-          }
-          class C extends B {
-              meth(p: number): B {
-                  return C('' + p)
-              }
-          }
-      use: |-
-          arktest.assertEQ(new C().meth(42.0).fld, '42')

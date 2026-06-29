@@ -12,23 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
+{%- for c in cases %}
 /*---
 desc: >-
-    The method instantiate can have an arbitrary signature by itself.
-    If it is to be used in a type call expression, then its first parameter
-    must be a factory. The method can have or not have other parameters,
-    and those parameters can be arbitrary.
+    Methods with special names (see Indexable Types, Iterable Types, and Callable Types) can be overloaded like ordinary methods.
+    Callable Types: $_invoke
 tags: [compile-only, negative]
-{% if c.expected_out is defined %}
-expected_out: "{{c.expected_out}}"
-{% endif %}
+expected_out: "{{c.expected}}"
 ---*/
 
-{{c.decl}}
+class G1 {
+    static greetI(i: int): string { return 'Hi ' + i + '!' }
+    static greetS(s: string): string { return 'Hey ' + s + '!' }
+    static overload $_invoke { greetI, greetS }
+}
 
-function main(): void {
-    {{c.use|indent}}
+class G2 extends G1 {
+    static greetB(b: boolean): string { return b ? 'Hi!' : 'Bye!' }
+    static overload $_invoke { greetI, greetS, greetB }
+}
+
+function main() {
+    let value = {{c.call}};
 }
 {%- endfor %}
