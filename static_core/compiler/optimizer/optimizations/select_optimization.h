@@ -52,14 +52,17 @@ private:
         std::array<Inst *, 3U> args;  // NOLINT(misc-non-private-member-variables-in-classes)
         uint64_t constant;            // NOLINT(misc-non-private-member-variables-in-classes)
         ConditionCode cc;             // NOLINT(misc-non-private-member-variables-in-classes)
+        DataType::Type operandsType;  // NOLINT(misc-non-private-member-variables-in-classes)
+        DataType::Type resultType;    // NOLINT(misc-non-private-member-variables-in-classes)
 
         bool operator<(const Key &other) const;
     };
     ArenaMap<Key, Inst *> sameOperandsMap_;
     bool TryOptimizeSelectInst(Inst *selectInst);
     bool TryOptimizeSelectInstWithSameOperands(Inst *selectInst, Inst *v0, Inst *v1);
+    // CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) keep select-equivalence fields explicit.
     bool TryOptimizeSelectInstWithSameOperandsChecked(Inst *selectInst, Inst *v0, Inst *v1, uint64_t const3,
-                                                      ConditionCode cc);
+                                                      ConditionCode cc, DataType::Type operandsType);
     Inst *FindOrCreateXorI(Inst *selectInst, Inst *arg, uint64_t imm);
     void ReplaceUsersWithInvert(Inst *selectInst, Inst *arg);
     bool TryOptimizeSelectInstWithConstantBoolOperands(Inst *selectInst, Inst *v0, Inst *v1);
