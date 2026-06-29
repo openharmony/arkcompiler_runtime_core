@@ -37,6 +37,53 @@ class ColumnMap {
     constructor() {}
 }
 
+final class ConsoleWorkerState {
+    public timers: Map<string, long> = new Map<string, long>()
+    public counters: Map<string, int> = new Map<string, int>()
+    public indentationLevel: int = 0
+}
+
+class ConsoleWorkerStateStore {
+    static mainWorkerState: ConsoleWorkerState = new ConsoleWorkerState()
+    static workerStatesById: Map<int, ConsoleWorkerState> = new Map<int, ConsoleWorkerState>()
+    static workerStateLock: QueueSpinlock = new QueueSpinlock()
+
+    static getWorkerState(): ConsoleWorkerState {
+        if (CoroutineExtras.isMainWorker()) {
+            return ConsoleWorkerStateStore.mainWorkerState
+        }
+
+        const workerId = CoroutineExtras.getWorkerId()
+        let state: ConsoleWorkerState | undefined = undefined
+        ConsoleWorkerStateStore.workerStateLock.guard(() => {
+            state = ConsoleWorkerStateStore.workerStatesById.get(workerId)
+            if (state == undefined) {
+                state = new ConsoleWorkerState()
+                ConsoleWorkerStateStore.workerStatesById.set(workerId, state!)
+            }
+        })
+        return state!
+    }
+
+    static cleanupWorkerState(workerId: int): void {
+        if (workerId <= 0) {
+            return
+        }
+
+        ConsoleWorkerStateStore.workerStateLock.guard(() => {
+            ConsoleWorkerStateStore.workerStatesById.delete(workerId)
+        })
+    }
+}
+
+function getConsoleWorkerState(): ConsoleWorkerState {
+    return ConsoleWorkerStateStore.getWorkerState()
+}
+
+function cleanupWorkerState(workerId: int): void {
+    ConsoleWorkerStateStore.cleanupWorkerState(workerId)
+}
+
 /**
  * A Console class that provides access to standard output and error streams.
  * Supports printing various data types, timing operations, and indentation management.
@@ -44,24 +91,6 @@ class ColumnMap {
  * @final
  */
 export final class Console {
-
-    /**
-     * @section Internal fields
-     */
-    private lvl2Buf: Map<LogLevel, StringBuilder>
-
-    /**
-     * Map to store named timers for performance measurements
-     * @private
-     */
-    private timers: Map<string, long>
-
-    /**
-     * Current indentation level for formatted output
-     * @private
-     */
-    private indentationLevel: int = 0;
-
     /**
      * Number of spaces used for each level of indentation
      * @private
@@ -77,12 +106,6 @@ export final class Console {
      * @readonly
      */
     private static readonly INDENT_MARGIN: string = " ".repeat(Console.INDENT_SIZE)
-
-    /**
-     * Map to store named counters for counting operations
-     * @private
-     */
-    private counters: Map<string, int>
 
     private static tableChars: Map<string, string> = new Map<string,string>([
         ["middleMiddle", "─"],
@@ -104,17 +127,7 @@ export final class Console {
      * Internal constructor for Console class
      * @internal
      */
-    private constructor() {
-        this.timers = new Map<string, long>
-        this.counters = new Map<string, int>
-        this.lvl2Buf = new Map<LogLevel, StringBuilder>
-        this.lvl2Buf.set(LogLevel.DEBUG, new StringBuilder)
-        this.lvl2Buf.set(LogLevel.INFO, new StringBuilder)
-        this.lvl2Buf.set(LogLevel.LOG, new StringBuilder)
-        this.lvl2Buf.set(LogLevel.WARN, new StringBuilder)
-        this.lvl2Buf.set(LogLevel.ERROR, new StringBuilder)
-        this.lvl2Buf.set(LogLevel.PRINTLN, new StringBuilder)
-    }
+    private constructor() {}
 
     private static instance?: Console
 
@@ -131,15 +144,15 @@ export final class Console {
         if (s.length == 0) {
             return
         }
-        let buf = this.lvl2Buf.get(level)!
-        buf.append(s)
-        // buffering strategies can be applied here based on buf size
-        this.printString(buf.toString(), level.valueOf())
-        this.lvl2Buf.set(level, new StringBuilder)
+        this.printString(s, level.valueOf())
     }
 
     private get indent(): String {
-        return Console.INDENT_MARGIN.repeat(this.indentationLevel)
+        return Console.INDENT_MARGIN.repeat(this.getWorkerState().indentationLevel)
+    }
+
+    private getWorkerState(): ConsoleWorkerState {
+        return getConsoleWorkerState()
     }
 
     private static AnyToPrint(o: Any): String {
@@ -154,28 +167,28 @@ export final class Console {
      * @deprecated Will be removed in future. Please use log instead
      */
     public print(i: boolean): void {
-        this.addToBuffer(new Boolean(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: byte): void {
-        this.addToBuffer(new Byte(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: short): void {
-        this.addToBuffer(new Short(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: char): void {
-        this.addToBuffer(new Char(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: int): void {
-        this.addToBuffer(new Int(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: long): void {
-        this.addToBuffer(new Long(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: float): void {
-        this.addToBuffer(new Float(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: double): void {
-        this.addToBuffer(new Double(i).toString(), LogLevel.PRINTLN)
+        this.addToBuffer(i.toString(), LogLevel.PRINTLN)
     };
     public print(i: String): void {
         this.addToBuffer(i, LogLevel.PRINTLN)
@@ -195,7 +208,7 @@ export final class Console {
      * @deprecated Will be removed in future. Please use log instead
      */
     public println(): void {
-        this.print(c'\n')
+        this.addToBuffer("\n", LogLevel.PRINTLN)
     }
 
     /**
@@ -206,44 +219,34 @@ export final class Console {
      * @deprecated Will be removed in future. Please use log instead
      */
     public println(i: boolean): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: byte): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: short): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: char): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: int): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: long): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: float): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: double): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i.toString() + c'\n', LogLevel.PRINTLN)
     }
     public println(i: String): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(i + c'\n', LogLevel.PRINTLN)
     }
     public println(i: Any): void {
-        this.print(i)
-        this.println()
+        this.addToBuffer(Console.AnyToPrint(i) + c'\n', LogLevel.PRINTLN)
     }
 
     /**
@@ -415,8 +418,9 @@ export final class Console {
     */
     public count(label?: string): void {
         const key = label ?? 'default'
-        const current = this.counters.get(key) ?? 0
-        this.counters.set(key, current + 1)
+        const state = this.getWorkerState()
+        const current = state.counters.get(key) ?? 0
+        state.counters.set(key, current + 1)
         this.log(`${key}: ${current + 1}`)
     }
 
@@ -427,7 +431,7 @@ export final class Console {
     */
     public countReset(label?: string): void {
         const key = label ?? 'default'
-        this.counters.delete(key)
+        this.getWorkerState().counters.delete(key)
     }
 
 
@@ -496,7 +500,7 @@ export final class Console {
         if (objs.length != 0) {
             this.log(objs)
         }
-        this.indentationLevel++
+        this.getWorkerState().indentationLevel++
     }
 
     /**
@@ -505,8 +509,9 @@ export final class Console {
     * @returns {void}
     */
     public groupEnd(): void {
-        if (this.indentationLevel > 0) {
-            this.indentationLevel--
+        const state = this.getWorkerState()
+        if (state.indentationLevel > 0) {
+            state.indentationLevel--
         }
     }
 
@@ -604,12 +609,13 @@ export final class Console {
     public time(label?: string): void {
         const key = label ?? 'default'
         Console.isNullCharacter(key);
-        if (this.timers.has(key)) {
-            this.warn("⚠️ Warning: Label 'default' already exists for console.time()")
+        const state = this.getWorkerState()
+        if (state.timers.has(key)) {
+            this.warn(`⚠️ Warning: Label '${key}' already exists for console.time()`)
             return
         }
         const start = Date.now()
-        this.timers.set(key, start)
+        state.timers.set(key, start)
     }
 
     /**
@@ -624,7 +630,7 @@ export final class Console {
         Console.isNullCharacter(key);
         const len = arguments.length;
         let result = "";
-        const startTime = this.timers.get(key)
+        const startTime = this.getWorkerState().timers.get(key)
         if (startTime === undefined) {
             this.warn(`Timer '${key}' does not exist`)
             return
@@ -650,7 +656,7 @@ export final class Console {
             Console.isNullCharacter(label);
         }
         this.timeLog(label)
-        this.timers.delete(label ?? 'default')
+        this.getWorkerState().timers.delete(label ?? 'default')
     }
 
     /**

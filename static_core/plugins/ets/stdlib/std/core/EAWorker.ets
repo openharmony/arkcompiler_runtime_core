@@ -322,6 +322,7 @@ export class EAWorker {
              throw new Error('EAWorker:: Cannot stop worker before start');
         }
         let finalTask = () => {
+            cleanupWorkerState(this.worker.getWorkerId());
             EAWorker.getWorkers().delete(this.worker.getWorkerId());
             this.releaseUserWorkerSlot();
         };
@@ -385,6 +386,7 @@ export class EAWorker {
     private handleInteropEnvErrorInternal() {
         this.loopStarted.set(false);
         this.loopJoined.set(true);
+        cleanupWorkerState(this.worker.getWorkerId());
         EAWorker.getWorkers().delete(this.worker.getWorkerId());
         this.releaseUserWorkerSlot();
         this.worker.handleCreateInteropEnvError();

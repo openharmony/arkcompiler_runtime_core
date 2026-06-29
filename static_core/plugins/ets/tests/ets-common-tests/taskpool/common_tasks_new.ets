@@ -852,6 +852,102 @@ async function asyncStackSubmissionKeepsTaskpoolSemantics(): Promise<void> {
     arktest.assertLE(1, periodicCount);
 }
 
+function cancelGroupQueuedMemberTask(duration: int): int {
+    let start = Date.now();
+    while ((Date.now() - start) < duration) {
+        if (taskpool.Task.isCanceled()) {
+            return -1;
+        }
+    }
+    return duration;
+}
+
+function cancelGroupCpuBlockTask(
+    releaseFlag: AtomicFlag,
+    blockersStarted: AtomicInt,
+    workerLimit: int,
+    workersFull: PromiseWithResolvers<void>
+): int {
+    if (blockersStarted.fetchAdd(1) + 1 >= workerLimit) {
+        workersFull.resolve(undefined);
+    }
+    while (!releaseFlag.get()) {
+        continue;
+    }
+    return 1;
+}
+
+function buildCancelGroupSettleGroup(): taskpool.TaskGroup {
+    let group = new taskpool.TaskGroup('cancelGroupSettle');
+    group.addTask(new taskpool.Task(cancelGroupQueuedMemberTask, 10));
+    group.addTask(new taskpool.Task(cancelGroupQueuedMemberTask, 20));
+    group.addTask(new taskpool.Task(cancelGroupQueuedMemberTask, 30));
+    group.addTask(new taskpool.Task(cancelGroupQueuedMemberTask, 40));
+    group.addTask(new taskpool.Task(cancelGroupQueuedMemberTask, 50));
+    return group;
+}
+
+async function yieldSchedulerRounds(rounds: int): Promise<void> {
+    for (let i: int = 0; i < rounds; i++) {
+        await new Promise<void>((resolve) => {
+            setTimeout(() => {
+                resolve(undefined);
+            }, 0);
+        });
+    }
+}
+
+async function cancelGroupSettlesWhileQueued(): Promise<void> {
+    if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        return;
+    }
+
+    const workerLimit: int = 4;
+    const floodCount: int = 300;
+    const yieldRounds: int = 16;
+
+    let releaseFlag = new AtomicFlag(false);
+    let blockersStarted = new AtomicInt(0);
+    let workersFull = new PromiseWithResolvers<void>();
+
+    try {
+        CoroutineExtras.setTaskPoolWorkersLimit(workerLimit);
+
+        for (let i: int = 0; i < workerLimit; i++) {
+            let blocker = new taskpool.Task(
+                cancelGroupCpuBlockTask, releaseFlag, blockersStarted, workerLimit, workersFull
+            );
+            taskpool.execute(blocker, { priority: taskpool.Priority.HIGH });
+        }
+        await workersFull.promise;
+
+        for (let i: int = 0; i < floodCount; i++) {
+            let floodTask = new taskpool.Task(
+                cancelGroupCpuBlockTask, releaseFlag, blockersStarted, workerLimit, workersFull
+            );
+            taskpool.execute(floodTask, { priority: taskpool.Priority.HIGH });
+        }
+
+        let settled = false;
+        let group = buildCancelGroupSettleGroup();
+        taskpool.execute(group, { priority: taskpool.Priority.HIGH, timeout: 0 })
+            .then(() => {
+                settled = true;
+            })
+            .catch(() => {
+                settled = true;
+            });
+        taskpool.cancel(group);
+        await yieldSchedulerRounds(yieldRounds);
+        arktest.assertTrue(
+            settled,
+            'execute(group) promise did not settle after cancel while members were queued'
+        );
+    } finally {
+        releaseFlag.set(true);
+    }
+}
+
 async function cancelPeriodicTaskStopsExecution(): Promise<void> {
     let cancelPeriodicCount = new AtomicInt(0);
     let firstExecution = new PromiseWithResolvers<void>();
@@ -970,6 +1066,7 @@ async function main(): Promise<int> {
     // #34893
     //commonTaskSuite.addAsyncTest(
     //    'asyncStackSubmissionKeepsTaskpoolSemantics', asyncStackSubmissionKeepsTaskpoolSemantics);
+    commonTaskSuite.addAsyncTest('cancelGroupSettlesWhileQueued', cancelGroupSettlesWhileQueued);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskStopsExecution', cancelPeriodicTaskStopsExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByTaskAfterExecution', cancelPeriodicTaskByTaskAfterExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByIdAfterExecution', cancelPeriodicTaskByIdAfterExecution);
