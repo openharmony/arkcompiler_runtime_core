@@ -39,7 +39,8 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+    [[maybe_unused]] ani_status status =
+        ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ERROR_CTOR_SIGNATURE);
 }
 
 static icu::Locale GetLocale(const std::string &tag)
@@ -92,19 +93,18 @@ static std::vector<icu::UnicodeString> ToIcuList(ani_env *env, ani_array aniList
     return result;
 }
 
-static ani_array ToAniArray(ani_env *env, std::vector<ani_string> strings)
+static ani_status ToAniArray(ani_env *env, std::vector<ani_string> strings, ani_array *out)
 {
     ani_ref undefined {};
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
-    ani_array array;
-    ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), undefined, &array));
+    ANI_RETURN_ON_PENDING_ERROR(env->Array_New(strings.size(), undefined, out));
     for (size_t i = 0; i < strings.size(); ++i) {
         auto item = strings[i];
-        ANI_FATAL_IF_ERROR(env->Array_Set(array, i, item));
+        ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, item));
     }
-    return array;
+    return ANI_OK;
 }
 
 ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_array aniList, ani_string aniLocale,
@@ -161,7 +161,9 @@ ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_arr
         auto value = UnicodeToAniStr(env, segment);
         squashed.push_back(value);
     }
-    return ToAniArray(env, squashed);
+    ani_array arr = nullptr;
+    ani_status toArrStatus = ToAniArray(env, squashed, &arr);
+    return toArrStatus == ANI_OK ? static_cast<ani_object>(arr) : nullptr;
 }
 
 ani_status RegisterIntlListFormat(ani_env *env)
