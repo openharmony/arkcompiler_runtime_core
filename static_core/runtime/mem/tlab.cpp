@@ -17,9 +17,6 @@
 
 #include "libarkbase/utils/logger.h"
 #include "runtime/mem/object_helpers.h"
-#if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/mem/tlab.h"
-#endif
 
 namespace ark::mem {
 
@@ -118,12 +115,6 @@ bool TLAB::IsLive(const ObjectHeader *obj)
     ASSERT(ContainObject(obj));
     return ContainObject(obj);
 }
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-static_assert(TLAB::TLABStartAddrOffset() == ark::common_vm::TLAB::TLABStartAddrOffset());
-static_assert(TLAB::TLABFreePointerOffset() == ark::common_vm::TLAB::TLABAllocPtrOffset());
-static_assert(TLAB::TLABEndAddrOffset() == ark::common_vm::TLAB::TLABEndAddrOffset());
-#endif
 
 // tlab cur addr and tlab end addr are neighbours in TLAB structure
 static_assert(TLAB::TLABFreePointerOffset() - TLAB::TLABEndAddrOffset() == sizeof(void *));

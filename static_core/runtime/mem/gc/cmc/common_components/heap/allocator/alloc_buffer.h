@@ -21,7 +21,6 @@
 #include "common_components/mutator/thread_local.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/common/mark_work_stack.h"
-#include "common_interfaces/mem/tlab.h"
 #include "runtime/include/mem/panda_containers.h"
 
 namespace ark::common_vm {
@@ -79,7 +78,7 @@ public:
     {
         if constexpr (type == AllocBufferType::YOUNG) {
             if (tlRegion_->IsTLABAttached()) {
-                tlRegion_->SetRegionAllocPtr(GetTLAB().allocPtr_);
+                tlRegion_->SetRegionAllocPtr(ToUintPtr(GetTLAB().GetCurPos()));
                 tlRegion_->DetachTLAB();
             }
             tlRegion_ = RegionDesc::NullRegion();
@@ -126,7 +125,7 @@ public:
     {
         if constexpr (allocType == AllocBufferType::YOUNG) {
             if (LIKELY(tlRegion_ != RegionDesc::NullRegion())) {
-                return tlab_.Alloc(size);
+                return ToUintPtr(tlab_.Alloc(size));
             }
         } else if constexpr (allocType == AllocBufferType::OLD) {
             if (LIKELY(tlOldRegion_ != RegionDesc::NullRegion())) {
@@ -136,7 +135,7 @@ public:
         return 0;
     }
 
-    TLAB &GetTLAB()
+    mem::TLAB &GetTLAB()
     {
         return tlab_;
     }
@@ -168,7 +167,7 @@ private:
     // only used in ToSpaceAllocate for GC copy
     RegionDesc *tlToRegion_ = RegionDesc::NullRegion();  // managed by to-space
 
-    TLAB tlab_ {};
+    mem::TLAB tlab_ {};
 
     std::atomic<RegionDesc *> preparedRegion_ = {nullptr};
     // Record stack roots in concurrent enum phase, waiting for GC to merge these roots

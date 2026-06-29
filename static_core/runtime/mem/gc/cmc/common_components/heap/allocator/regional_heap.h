@@ -111,7 +111,7 @@ public:
     uintptr_t AllocateNonMovableRegion();
     uintptr_t AllocLargeRegion(size_t size);
     uintptr_t AllocJitFortRegion(size_t size);
-    TLAB *CreateTLAB();
+    mem::TLAB *CreateTLAB();
 
     HeapAddress Allocate(size_t size, AllocType allocType) override;
 
@@ -349,7 +349,7 @@ public:
         AllocBufferVisitor visitor = [](AllocationBuffer &regionBuffer) {
             RegionDesc *region = regionBuffer.GetRegion<AllocBufferType::YOUNG>();
             if (region != RegionDesc::NullRegion()) {
-                region->SetRegionAllocPtr(regionBuffer.GetTLAB().allocPtr_);
+                region->SetRegionAllocPtr(ToUintPtr(regionBuffer.GetTLAB().GetCurPos()));
                 region->SetMarkingLine();
             }
             region = regionBuffer.GetRegion<AllocBufferType::OLD>();
@@ -367,7 +367,7 @@ public:
         AllocBufferVisitor visitor = [](AllocationBuffer &regionBuffer) {
             RegionDesc *region = regionBuffer.GetRegion<AllocBufferType::YOUNG>();
             if (region != RegionDesc::NullRegion()) {
-                region->SetRegionAllocPtr(regionBuffer.GetTLAB().allocPtr_);
+                region->SetRegionAllocPtr(ToUintPtr(regionBuffer.GetTLAB().GetCurPos()));
                 region->SetCopyLine();
             }
             region = regionBuffer.GetRegion<AllocBufferType::OLD>();
