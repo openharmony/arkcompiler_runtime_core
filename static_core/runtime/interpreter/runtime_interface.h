@@ -170,6 +170,11 @@ public:
             }
             auto *mem = currentTlab->Alloc(size);
             ASSERT(mem != nullptr);
+            if (ark::mem::PANDA_TRACK_TLAB_ALLOCATIONS) {
+                LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size;
+                heapManager->GetMemStats()->RecordAllocateObject(ark::GetAlignedObjectSize(size),
+                                                                 ark::SpaceType::SPACE_TYPE_OBJECT);
+            }
             ObjectHeader *object = heapManager->InitObjectHeaderAtMem(klass, mem);
             object = heapManager->RegisterFinalizableIfNeeded(object, klass, size, thread);
             return object;

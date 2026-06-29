@@ -17,7 +17,6 @@
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_MANAGER_H
 
 #include "common_components/common/type_def.h"
-#include "common_components/heap/collector/gc_request.h"
 #include "common_interfaces/base/runtime_param.h"
 
 namespace ark::common_vm {
@@ -29,7 +28,7 @@ public:
     ~HeapManager() = default;
 
     // runtime required lifecycle interfaces
-    void Init(const RuntimeParam &param);
+    void Init(const mem::RuntimeParam &param);
     void Fini();
 
     // alloc return memory address, not "object" pointers, since they're not

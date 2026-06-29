@@ -112,8 +112,6 @@ public:
 
     bool ShouldRestrainGCOnStartupOrSensitive();
 
-    void TryHeuristicGC();
-
     bool ShouldRestrainGCInSensitive(size_t currentSize);
 
     void NotifyHighSensitive(bool isStart)

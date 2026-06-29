@@ -44,51 +44,6 @@ namespace ark::common_vm {
 class Allocator;
 class CollectorResources;
 
-struct STWParam {
-    const char *stwReason;
-    uint64_t elapsedTimeNs = 0;
-
-    uint64_t GetElapsedNs() const
-    {
-        return elapsedTimeNs;
-    }
-    uint64_t GetElapsedUs() const
-    {
-        return elapsedTimeNs / 1000U;
-    }
-};
-
-// Scoped stop the world.
-class ScopedStopTheWorld {
-public:
-    __attribute__((always_inline)) explicit ScopedStopTheWorld(STWParam &param,
-                                                               mem::GCPhase phase = mem::GCPhase::GC_PHASE_IDLE)
-        : stwParam_(param), suspensionScope_(ScopedSuspendAllThreads(ark::PandaVM::GetCurrent()->GetRendezvous()))
-    {
-        reason_ = param.stwReason;
-        startTime_ = TimeUtil::NanoSeconds();
-    }
-
-    __attribute__((always_inline)) ~ScopedStopTheWorld()
-    {
-        uint64_t elapsedTimeNs = GetElapsedTime();
-        stwParam_.elapsedTimeNs = elapsedTimeNs;
-        const uint64_t elapsedTimeUs = elapsedTimeNs / 1000UL;
-        LOG(DEBUG, GC) << reason_ << " stw time " << elapsedTimeUs << " us";  // 1000:nsec per usec
-    }
-
-    uint64_t GetElapsedTime() const
-    {
-        return TimeUtil::NanoSeconds() - startTime_;
-    }
-
-private:
-    uint64_t startTime_ = 0;
-    const char *reason_ = nullptr;
-    STWParam &stwParam_;
-    ScopedSuspendAllThreads suspensionScope_;
-};
-
 }  // namespace ark::common_vm
 
 namespace ark::mem {
@@ -257,8 +212,6 @@ public:
         HeapBitmapManager::GetHeapBitmapManager().DestroyHeapBitmap();
     }
 
-    bool ShouldIgnoreRequest(ark::common_vm::GCRequest &request) override;
-
     template <bool ProcessXRef>
     void ProcessMarkStack(uint32_t threadIndex, ParallelLocalMarkStack &workStack, GCTaskCause reason);
 
@@ -326,7 +279,30 @@ public:
         this->FireGCPhaseStarted(phase);
     }
 
-    ark::common_vm::GCStats &GetGCStats() override;
+    double GetCollectionRate() const override
+    {
+        return collectionRate_;
+    }
+
+    size_t GetThreshold() const override
+    {
+        return heapThreshold_;
+    }
+
+    size_t GetLiveBytesAfterGC() const override
+    {
+        return liveBytesAfterGC_;
+    }
+
+    bool ShouldRequestYoung() const override
+    {
+        return shouldRequestYoung_;
+    }
+
+    bool NeedToTrackFreedObjects() const override
+    {
+        return cmcTrackFreedObjects_;
+    }
 
     virtual void UpdateGCStats();
 
@@ -371,18 +347,12 @@ protected:
     {
         mem::GCScope<mem::TRACE_TIMING> gcScope("Collect large garbage", this);
         auto &space = reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_);
-        auto &stats = GetGCStats();
-        stats.largeSpaceSize = space.LargeObjectSize();
-        stats.largeGarbageSize = space.CollectLargeGarbage();
-        stats.collectedBytes += stats.largeGarbageSize;
+        collectedBytes_ += space.CollectLargeGarbage();
     }
 
-    void CollectNonMovableGarbage()
+    void CollectNonMovableGarbage(size_t nonMovableGarbageSize)
     {
-        auto &space = reinterpret_cast<ark::common_vm::RegionalHeap &>(theAllocator_);
-        auto &stats = GetGCStats();
-        stats.nonMovableSpaceSize = space.NonMovableSpaceSize();
-        stats.collectedBytes += stats.nonMovableGarbageSize;
+        collectedBytes_ += nonMovableGarbageSize;
     }
 
     void CollectSmallSpace();
@@ -397,7 +367,7 @@ protected:
 
     void UpdateNativeThreshold(ark::mem::GCParam &gcParam);
 
-    void UpdateGCCompletionStats(ark::common_vm::GCStats &gcStats);
+    void UpdateGCCompletionStats();
 
     void InitializeImpl() override;
     void RunPhasesImpl(GCTask &task) override;
@@ -518,7 +488,7 @@ private:
 
         rootsVisitFunc(visitor);
     }
-    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(ark::common_vm::STWParam &param, const GCRootVisitor &visitor);
+    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(const GCRootVisitor &visitor);
 
     void MarkingHeap(const CArrayList<ObjectHeader *> &collectedRoots, GCTaskCause reason);
     void Preforward(GCTaskCause reason);
@@ -528,8 +498,8 @@ private:
     void PreforwardStaticWeakRoots(GCTaskCause reason);
     void PreforwardConcurrencyModelRoots();
 
-    void ParallelFixHeap();
-    void FixHeap(bool isWorldStopped);  // roots and ref-fields
+    size_t ParallelFixHeap();
+    size_t FixHeap(bool isWorldStopped);  // roots and ref-fields, returns reclaimed non-movable garbage
     WeakRefFieldVisitor GetWeakRefFieldVisitor(GCTaskCause reason);
     void PreforwardFlip(GCTaskCause reason);
 
@@ -591,7 +561,24 @@ private:
 
     void WorkerTaskProcessing(GCWorkersTask *task, void *workerData) override;
 
+    bool IsYoungGC() const
+    {
+        return gcReason_ == GCTaskCause::YOUNG_GC_CAUSE;
+    }
+
     GCMode gcMode_ = GCMode::CMC;
+
+    GCTaskCause gcReason_ {GCTaskCause::INVALID_CAUSE};
+    bool shouldRequestYoung_ {false};
+    uint64_t gcStartTime_ {0};
+    size_t liveBytesAfterGC_ {0};
+    size_t heapThreshold_ {0};
+    size_t targetFootprint_ {0};
+    size_t fullGCCount_ {0};
+    size_t collectedBytes_ {0};
+    double collectionRate_ {0.0};
+    double fullGCMeanRate_ {0.0};
+    bool cmcTrackFreedObjects_ {false};
 };
 }  // namespace ark::mem
 

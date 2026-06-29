@@ -67,29 +67,6 @@ StartupStatus HeuristicGCPolicy::GetStartupStatus() const
     return StartupStatusManager::GetStartupStatus();
 }
 
-void HeuristicGCPolicy::TryHeuristicGC()
-{
-    if (UNLIKELY(ShouldRestrainGCOnStartupOrSensitive())) {
-        return;
-    }
-
-    Collector &collector = Heap::GetHeap().GetCollector();
-    size_t threshold = collector.GetGCStats().GetThreshold();
-    size_t allocated = Heap::GetHeap().GetAllocator().GetAllocatedBytes();
-    if (allocated >= threshold) {
-        auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
-        if (collector.GetGCStats().shouldRequestYoung) {
-            LOG(DEBUG, GC) << "request heu gc: young " << allocated << ", threshold " << threshold;
-            auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::YOUNG_GC_CAUSE);
-            gc->AddGCTask(false, std::move(task));
-        } else {
-            LOG(DEBUG, GC) << "request heu gc: allocated " << allocated << ", threshold " << threshold;
-            auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
-            gc->AddGCTask(false, std::move(task));
-        }
-    }
-}
-
 bool HeuristicGCPolicy::ShouldRestrainGCInSensitive(size_t currentSize)
 {
     AppSensitiveStatus current = GetSensitiveStatus();
@@ -100,7 +77,8 @@ bool HeuristicGCPolicy::ShouldRestrainGCInSensitive(size_t currentSize)
             if (GetRecordHeapObjectSizeBeforeSensitive() == 0) {
                 SetRecordHeapObjectSizeBeforeSensitive(currentSize);
             }
-            if (Heap::GetHeap().GetCollector().GetGCStats().shouldRequestYoung) {
+            auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
+            if (gc->ShouldRequestYoung()) {
                 return false;
             }
             if (currentSize < (GetRecordHeapObjectSizeBeforeSensitive() + INC_OBJ_SIZE_IN_SENSITIVE)) {

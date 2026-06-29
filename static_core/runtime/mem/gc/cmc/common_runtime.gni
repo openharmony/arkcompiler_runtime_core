@@ -43,8 +43,6 @@ cmc_sources = [
   "${_cmc_dir}/heap/collector/ark_mutator_container.cpp",
   "${_cmc_dir}/heap/collector/collector_resources.cpp",
   "${_cmc_dir}/heap/collector/copy_data_manager.cpp",
-  "${_cmc_dir}/heap/collector/gc_request.cpp",
-  "${_cmc_dir}/heap/collector/gc_stats.cpp",
   "${_cmc_dir}/heap/collector/heuristic_gc_policy.cpp",
   "${_cmc_dir}/heap/collector/task_queue.cpp",
   "${_cmc_dir}/heap/collector/utils.cpp",

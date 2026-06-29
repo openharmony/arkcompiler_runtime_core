@@ -21,6 +21,7 @@
 
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/ring_buffer.h"
+#include "libarkbase/utils/time.h"
 #include "runtime/mem/gc/gc.h"
 
 namespace ark {
@@ -258,23 +259,6 @@ public:
     GCTriggerType GetType() const override
     {
         return GCTriggerType::DEBUG_NEVER;
-    }
-
-    void TriggerGcIfNeeded([[maybe_unused]] GC *gc) override {}
-
-    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override {}
-    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
-                    [[maybe_unused]] size_t heapSize) override
-    {
-    }
-};
-
-// No-op trigger for CMC-GC (triggering is handled by common_runtime)
-class GCCmcTrigger : public GCTrigger {
-public:
-    GCTriggerType GetType() const override
-    {
-        return GCTriggerType::CMC_GC;
     }
 
     void TriggerGcIfNeeded([[maybe_unused]] GC *gc) override {}

@@ -20,6 +20,7 @@
 #include "runtime/mem/gc/cmc/cmc-gc.h"
 #include "runtime/mem/gc/cmc/common_components/heap/heap_manager.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
+#include "runtime/mem/gc/gc_stats.h"
 
 #include "common_components/base/globals.h"
 #include "common_components/heap/verification.h"
@@ -64,8 +65,6 @@ using ark::common_vm::PostFixHeapWorker;
 using ark::common_vm::PriorityMode;
 using ark::common_vm::RegionalHeap;
 using ark::common_vm::SatbBuffer;
-using ark::common_vm::ScopedStopTheWorld;
-using ark::common_vm::STWParam;
 using ark::common_vm::Task;
 using ark::common_vm::TaskPackMonitor;
 using ark::common_vm::WVerify;
@@ -438,7 +437,6 @@ template <class LanguageConfig>
 template <typename CmcGC<LanguageConfig>::EnumRootsPolicy policy>
 CArrayList<ObjectHeader *> CmcGC<LanguageConfig>::EnumRoots()
 {
-    STWParam stwParam {"wgc-enumroot"};
     EnumRootsBuffer buffer;
     CArrayList<ObjectHeader *> *results = buffer.GetBuffer();
     GCRootVisitor visitor = [&results](GCRoot root) { results->push_back(root.GetObjectHeader()); };
@@ -446,19 +444,19 @@ CArrayList<ObjectHeader *> CmcGC<LanguageConfig>::EnumRoots()
     if constexpr (policy == EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR) {
         EnumRootsImpl<VisitRoots>(visitor);
     } else if constexpr (policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR) {
-        ScopedStopTheWorld stw(stwParam);
+        ScopedStopTheWorld stw;
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
         ScopedTrace tracer(("EnumRoots-STW-bufferSize(" + ToPandaString(results->capacity()) + ")").c_str(),
                            ark::common_vm::ENABLE_GC_TRACING);
         EnumRootsImpl<VisitRoots>(visitor);
     } else if constexpr (policy == EnumRootsPolicy::STW_AND_FLIP_MUTATOR) {
-        auto rootSet = EnumRootsFlip(stwParam, visitor);
+        auto rootSet = EnumRootsFlip(visitor);
         for (const auto &roots : rootSet) {
             std::copy(roots.begin(), roots.end(), std::back_inserter(*results));
         }
         VisitConcurrentRoots(visitor);
     }
     buffer.UpdateBufferSize();
-    GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
     return std::move(*results);
 }
 
@@ -469,9 +467,8 @@ void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<ObjectHeader *> &collec
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     markedObjectCount_.store(0, std::memory_order_relaxed);
-    STWParam stwParam {"GC_PHASE_MARK transition"};
     {
-        ScopedStopTheWorld stw(stwParam);
+        ScopedStopTheWorld stw;
         TransitionToGCPhase(GCPhase::GC_PHASE_MARK);
     }
 
@@ -518,8 +515,8 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
 {
     {
-        STWParam stwParam {"final-mark"};
-        ScopedStopTheWorld stw(stwParam);
+        ScopedStopTheWorld stw;
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
 
         ScopedTrace tracer("PreforwardFlip[STW]", ark::common_vm::ENABLE_GC_TRACING);
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
@@ -538,7 +535,6 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
             // Request finalize callback in each vm-thread when gc finished.
             mutator->RequestReferencesCleanup();
         });
-        GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
     }
 
     AllocationBuffer *allocBuffer = AllocationBuffer::GetAllocBuffer();
@@ -570,7 +566,7 @@ void CmcGC<LanguageConfig>::ConcurrentPreforward()
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::ParallelFixHeap()
+size_t CmcGC<LanguageConfig>::ParallelFixHeap()
 {
     auto &regionalHeap = reinterpret_cast<RegionalHeap &>(theAllocator_);
     auto taskList = regionalHeap.CollectFixTasks();
@@ -588,6 +584,7 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
     const uint32_t runningWorkers = GetGCThreadCount(true) - 1;
     uint32_t parallelCount = runningWorkers + 1;  // 1 ：DaemonThread
     PandaVector<FixHeapWorker::Result> results(parallelCount);
+    size_t nonMovableGarbageSize = 0;
     {
         ScopedTrace tracer("FixHeap [Parallel]", ark::common_vm::ENABLE_GC_TRACING);
 
@@ -617,17 +614,17 @@ void CmcGC<LanguageConfig>::ParallelFixHeap()
 
         PostFixHeapWorker gcWorker(results[0], monitor);
         gcWorker.PostClearTask();
-        PostFixHeapWorker::CollectEmptyRegions();
+        nonMovableGarbageSize = PostFixHeapWorker::CollectEmptyRegions();
         monitor.WaitAllFinished();
     }
+    return nonMovableGarbageSize;
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::FixHeap(bool isWorldStopped)
+size_t CmcGC<LanguageConfig>::FixHeap(bool isWorldStopped)
 {
     if (!isWorldStopped) {
-        STWParam stwParam {"GC_PHASE_FIX transition"};
-        ScopedStopTheWorld stw(stwParam);
+        ScopedStopTheWorld stw;
         TransitionToGCPhase(GCPhase::GC_PHASE_FIX);
     } else {
         TransitionToGCPhase(GCPhase::GC_PHASE_FIX);
@@ -636,9 +633,11 @@ void CmcGC<LanguageConfig>::FixHeap(bool isWorldStopped)
 
     ScopedTrace tracer("FixHeap", ark::common_vm::ENABLE_GC_TRACING);
 
-    ParallelFixHeap();
+    size_t nonMovableGarbageSize = ParallelFixHeap();
 
     WVerify::VerifyAfterFix(this->GetGCPhase(), isWorldStopped);
+
+    return nonMovableGarbageSize;
 }
 
 template <class LanguageConfig>
@@ -648,8 +647,8 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef(GCTaskCause reason)
 #ifdef ENABLE_CMC_RB_DFX
     WVerify::DisableReadBarrierDFX(false);
 #endif
-    STWParam stwParam {"stw-gc"};
-    ScopedStopTheWorld stw(stwParam);
+    ScopedStopTheWorld stw;
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
     ark::common_vm::RemoveXRefFromRoots();
 
     auto collectedRoots = EnumRoots<EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR>();
@@ -670,9 +669,9 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef(GCTaskCause reason)
     CopyFromSpace();
     WVerify::VerifyAfterForward(this->GetGCPhase(), true);
 
-    FixHeap(true);
+    size_t nonMovableGarbageSize = FixHeap(true);
     if (isNotYoungGC) {
-        CollectNonMovableGarbage();
+        CollectNonMovableGarbage(nonMovableGarbageSize);
     }
 
     TransitionToGCPhase(GCPhase::GC_PHASE_IDLE);
@@ -684,7 +683,6 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef(GCTaskCause reason)
 #if defined(ENABLE_CMC_RB_DFX)
     WVerify::EnableReadBarrierDFX(true);
 #endif
-    GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
 }
 
 template <class LanguageConfig>
@@ -714,9 +712,10 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
 #ifdef ENABLE_CMC_RB_DFX
         WVerify::DisableReadBarrierDFX(false);
 #endif
-        STWParam stwParam {"stw-gc"};
         {
-            ScopedStopTheWorld stw(stwParam);
+            ScopedStopTheWorld stw;
+            GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr,
+                                                PauseTypeStats::COMMON_PAUSE);
             auto collectedRoots = EnumRoots<EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR>();
             MarkingHeap(collectedRoots, task.reason);
             TransitionToGCPhase(GCPhase::GC_PHASE_REMARK);
@@ -733,9 +732,9 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
             CopyFromSpace();
             WVerify::VerifyAfterForward(this->GetGCPhase(), true);
 
-            FixHeap(true);
+            size_t nonMovableGarbageSize = FixHeap(true);
             if (!isYoungGC) {
-                CollectNonMovableGarbage();
+                CollectNonMovableGarbage(nonMovableGarbageSize);
             }
 
             TransitionToGCPhase(GCPhase::GC_PHASE_IDLE);
@@ -747,7 +746,6 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
             WVerify::EnableReadBarrierDFX(true);
 #endif
         }
-        GetGCStats().recordSTWTime(stwParam.GetElapsedNs());
         return;
     }
 
@@ -765,18 +763,17 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
         CopyFromSpace();
         WVerify::VerifyAfterForward(this->GetGCPhase(), false);
 
-        FixHeap(false);
+        size_t nonMovableGarbageSize = FixHeap(false);
 
         if (!isYoungGC) {
-            CollectNonMovableGarbage();
+            CollectNonMovableGarbage(nonMovableGarbageSize);
         }
     } else {
         DoGarbageCollectionWithoutConcurrentMarking();
     }
 
-    STWParam stwParam {"GC_PHASE_IDLE transition"};
     {
-        ScopedStopTheWorld stw(stwParam);
+        ScopedStopTheWorld stw;
         TransitionToGCPhase(GCPhase::GC_PHASE_IDLE);
     }
     ClearAllGCInfo();
@@ -848,8 +845,8 @@ PandaVector<ObjectHeader *> CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip()
 {
     PandaVector<ObjectHeader *> forwardedRoots;
     {
-        STWParam param {"preforward-non-heap-roots"};
-        ScopedStopTheWorld stw(param);
+        ScopedStopTheWorld stw;
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
 
         SetGCThreadQosPriority(PriorityMode::STW);
         auto &heap = static_cast<RegionalHeap &>(theAllocator_);
@@ -867,7 +864,6 @@ PandaVector<ObjectHeader *> CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip()
 
         TransitionToGCPhase(GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
         SetGCThreadQosPriority(PriorityMode::FOREGROUND);
-        GetGCStats().recordSTWTime(param.GetElapsedNs());
     }
 
     VisitConcurrentRoots([&forwardedRoots](GCRoot root) {
@@ -884,8 +880,8 @@ PandaVector<ObjectHeader *> CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace()
 {
-    STWParam param {"remark-young-collection-space"};
-    ScopedStopTheWorld stw(param);
+    ScopedStopTheWorld stw;
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
 
     TransitionToGCPhase(GCPhase::GC_PHASE_REMARK);
 
@@ -921,7 +917,6 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace()
     VisitWeakGlobalRoots(weakVisitor, true);
 
     SatbBuffer::Instance().ClearBuffer();
-    GetGCStats().recordSTWTime(param.GetElapsedNs());
 }
 
 template <class LanguageConfig>
@@ -1161,12 +1156,13 @@ bool CmcGC<LanguageConfig>::InYoungCollectionSpace(RegionDesc::RegionType type)
 }
 
 template <class LanguageConfig>
-CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(STWParam &param, const GCRootVisitor &visitor)
+CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(const GCRootVisitor &visitor)
 {
     ark::os::memory::Mutex stackMutex;
     CArrayList<CArrayList<BaseObject *>> rootSet;  // allcate for each mutator
     {
-        ScopedStopTheWorld stw(param);
+        ScopedStopTheWorld stw;
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
 
         SetGCThreadQosPriority(PriorityMode::STW);
         EnumRootsImpl<VisitGlobalRoots>(visitor);
@@ -1282,28 +1278,25 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::CollectSmallSpace()
 {
     ScopedTrace tracer("CollectSmallSpace", ark::common_vm::ENABLE_GC_TRACING);
-    auto &stats = GetGCStats();
     auto &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
-    {
-        mem::GCScope<mem::TRACE_TIMING> gcScope("CollectFromSpaceGarbage", this);
-        stats.collectedBytes += stats.smallGarbageSize;
-        space.CollectFromSpaceGarbage();
-        space.HandlePromotion();
+    mem::GCScope<mem::TRACE_TIMING> gcScope("CollectFromSpaceGarbage", this);
+    size_t youngGarbage = space.FromRegionSize() - space.ToSpaceSize();
+    size_t freedObjectCount = 0;
+    if (cmcTrackFreedObjects_) {
+        auto countFreedObjects = [&freedObjectCount](BaseObject *obj) {
+            if (!RegionalHeap::IsSurvivedObject(obj)) {
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE YOUNG object " << obj;
+                ++freedObjectCount;
+            }
+        };
+        space.GetFromSpace().GetFromRegionList().VisitAllRegions(
+            [&countFreedObjects](RegionDesc *region) { region->VisitAllObjects(countFreedObjects); });
     }
-
-    size_t candidateBytes = stats.fromSpaceSize + stats.nonMovableSpaceSize + stats.largeSpaceSize;
-    stats.garbageRatio = (candidateBytes > 0) ? static_cast<float>(stats.collectedBytes) / candidateBytes : 0;
-
-    stats.liveBytesAfterGC = space.GetAllocatedBytes();
-
-    [[maybe_unused]] constexpr int logPercentagePrecision = 2;
-    [[maybe_unused]] constexpr size_t logBasePercentage = 100UL;
-    LOG(DEBUG, GC) << "collect " << stats.collectedBytes << " B: small " << stats.fromSpaceSize << " - "
-                   << stats.smallGarbageSize << " B, non-movable " << stats.nonMovableSpaceSize << " - "
-                   << stats.nonMovableGarbageSize << " B, large " << stats.largeSpaceSize << " - "
-                   << stats.largeGarbageSize << " B. garbage ratio " << std::fixed
-                   << std::setprecision(logPercentagePrecision) << stats.garbageRatio * logBasePercentage
-                   << "%";  // The base of the percentage is 100
+    space.CollectFromSpaceGarbage();
+    space.HandlePromotion();
+    this->GetPandaVm()->GetMemStats()->RecordFreeObjects(freedObjectCount, youngGarbage,
+                                                         ark::SpaceType::SPACE_TYPE_OBJECT);
+    liveBytesAfterGC_ = space.GetAllocatedBytes();
 }
 
 template <class LanguageConfig>
@@ -1384,12 +1377,6 @@ void CmcGC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
         UpdateBarrierEntrypoint(mutator, phase);
     }
     GC::OnMutatorCreate(mutator);
-}
-
-template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::ShouldIgnoreRequest(ark::common_vm::GCRequest &request)
-{
-    return request.ShouldBeIgnored();
 }
 
 template <class LanguageConfig>
@@ -1781,24 +1768,15 @@ void CmcGC<LanguageConfig>::MarkAwaitingJitFort()
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::PreGarbageCollection(GCTaskCause reason, bool isConcurrent)
+void CmcGC<LanguageConfig>::PreGarbageCollection(GCTaskCause reason, [[maybe_unused]] bool isConcurrent)
 {
     // SatbBuffer should be initialized before concurrent enumeration.
     SatbBuffer::Instance().Init();
     // prepare thread pool.
 
-    auto &gcStats = GetGCStats();
-    gcStats.reason = reason;
-    gcStats.async = !ark::common_vm::g_gcRequests[ark::common_vm::GCRequestIndex(reason)].IsSyncGC();
-    gcStats.gcType = gcType_;
-    gcStats.isConcurrentMark = isConcurrent;
-    gcStats.collectedBytes = 0;
-    gcStats.smallGarbageSize = 0;
-    gcStats.nonMovableGarbageSize = 0;
-    gcStats.largeGarbageSize = 0;
-    gcStats.gcStartTime = ark::common_vm::TimeUtil::NanoSeconds();
-    gcStats.totalSTWTime = 0;
-    gcStats.maxSTWTime = 0;
+    gcReason_ = reason;
+    collectedBytes_ = 0;
+    gcStartTime_ = ark::common_vm::TimeUtil::NanoSeconds();
 }
 
 template <class LanguageConfig>
@@ -1815,11 +1793,9 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::UpdateGCStats()
 {
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
-    auto &gcStats = GetGCStats();
-    gcStats.Dump();
 
-    size_t oldThreshold = gcStats.heapThreshold;
-    size_t oldTargetFootprint = gcStats.targetFootprint;
+    size_t oldThreshold = heapThreshold_;
+    size_t oldTargetFootprint = targetFootprint_;
     size_t recentBytes = space.GetRecentAllocatedSize();
     size_t survivedBytes = space.GetSurvivedSize();
     size_t bytesAllocated = space.GetAllocatedBytes();
@@ -1828,16 +1804,15 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
     Heap *heap = &common_vm::Heap::GetHeap();
     const HeapParam &heapParam = heap->GetHeapParam();
     GCParam &gcParam = heap->GetGCParam();
-    if (!gcStats.isYoungGC()) {
-        gcStats.shouldRequestYoung = true;
+    if (!IsYoungGC()) {
+        shouldRequestYoung_ = true;
         size_t delta = bytesAllocated * (1.0 / heapParam.heapUtilization - 1.0);
         size_t growBytes = std::min(delta, gcParam.maxGrowBytes);
         growBytes = std::max(growBytes, gcParam.minGrowBytes);
         targetSize = bytesAllocated + growBytes * gcParam.multiplier;
     } else {
-        gcStats.shouldRequestYoung =
-            gcStats.collectionRate * gcParam.ygcRateAdjustment >= ark::common_vm::g_fullGCMeanRate &&
-            bytesAllocated <= oldThreshold;
+        shouldRequestYoung_ =
+            collectionRate_ * gcParam.ygcRateAdjustment >= fullGCMeanRate_ && bytesAllocated <= oldThreshold;
         size_t adjustMaxGrowBytes = gcParam.maxGrowBytes * gcParam.multiplier;
         if (bytesAllocated + adjustMaxGrowBytes < oldTargetFootprint) {
             targetSize = bytesAllocated + adjustMaxGrowBytes;
@@ -1846,35 +1821,27 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
         }
     }
 
-    gcStats.targetFootprint = targetSize;
+    targetFootprint_ = targetSize;
     size_t remainingBytes = recentBytes;
     remainingBytes = std::min(remainingBytes, gcParam.kMaxConcurrentRemainingBytes);
     remainingBytes = std::max(remainingBytes, gcParam.kMinConcurrentRemainingBytes);
-    if (UNLIKELY(remainingBytes > gcStats.targetFootprint)) {
-        remainingBytes = std::min(gcParam.kMinConcurrentRemainingBytes, gcStats.targetFootprint);
+    if (UNLIKELY(remainingBytes > targetFootprint_)) {
+        remainingBytes = std::min(gcParam.kMinConcurrentRemainingBytes, targetFootprint_);
     }
-    gcStats.heapThreshold = std::max(gcStats.targetFootprint - remainingBytes, bytesAllocated);
-    gcStats.heapThreshold = std::max(gcStats.heapThreshold, 20 * MB);  // 20 MB:set 20 MB as min heapThreshold
-    gcStats.heapThreshold = std::min(gcStats.heapThreshold, gcParam.gcThreshold);
+    heapThreshold_ = std::max(targetFootprint_ - remainingBytes, bytesAllocated);
+    heapThreshold_ = std::max(heapThreshold_, 20 * MB);  // 20 MB:set 20 MB as min heapThreshold
+    heapThreshold_ = std::min(heapThreshold_, gcParam.gcThreshold);
 
     UpdateNativeThreshold(gcParam);
     Heap::GetHeap().RecordAliveSizeAfterLastGC(bytesAllocated);
-    if (!gcStats.isYoungGC()) {
+    if (!IsYoungGC()) {
         Heap::GetHeap().SetRecordHeapObjectSizeBeforeSensitive(bytesAllocated);
     }
 
-    if (!gcStats.isYoungGC()) {
-        ark::common_vm::g_gcRequests[ark::common_vm::GCRequestIndex(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE)]
-            .SetMinInterval(gcParam.gcInterval);
-    } else {
-        ark::common_vm::g_gcRequests[ark::common_vm::GCRequestIndex(GCTaskCause::YOUNG_GC_CAUSE)].SetMinInterval(
-            gcParam.gcInterval);
-    }
-    gcStats.IncreaseAccumulatedFreeSize(bytesAllocated);
     PandaOStringStream oss;
     oss << "allocated bytes " << bytesAllocated << " (survive bytes " << survivedBytes << ", recent-allocated "
-        << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << gcStats.targetFootprint
-        << ", update gc threshold " << oldThreshold << " -> " << gcStats.heapThreshold << ", native size "
+        << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << targetFootprint_
+        << ", update gc threshold " << oldThreshold << " -> " << heapThreshold_ << ", native size "
         << Heap::GetHeap().GetNotifiedNativeSize() << ", new native threshold "
         << Heap::GetHeap().GetNativeHeapThreshold();
     LOG(DEBUG, GC) << oss.str();
@@ -1924,13 +1891,11 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
 {
     MarkGCStart();
     gcType_ = task.collectionType;
-    auto gcReasonName = PandaString(ark::common_vm::g_gcRequests[ark::common_vm::GCRequestIndex(task.reason)].name);
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
-    auto currentThreshold = GetGCStats().GetThreshold();
-    LOG(DEBUG, GC) << "Begin GC log. GCReason: " << gcReasonName << ", GCType: " << task.collectionType
-                   << ", Current allocated " << common_vm::TimeUtil::PrettyDigitsFormat(currentAllocatedSize)
-                   << ", Current threshold " << common_vm::TimeUtil::PrettyDigitsFormat(currentThreshold)
-                   << ", gcIndex=" << gcIndex
+    auto currentThreshold = GetThreshold();
+    LOG(DEBUG, GC) << "Begin GC log. GCType: " << task.collectionType << ", Current allocated "
+                   << common_vm::TimeUtil::PrettyDigitsFormat(currentAllocatedSize) << ", Current threshold "
+                   << common_vm::TimeUtil::PrettyDigitsFormat(currentThreshold) << ", gcIndex=" << gcIndex
                    << ", Sensitive " + ToPandaString(static_cast<int>(Heap::GetHeap().GetSensitiveStatus()))
                    << ", Startup " + ToPandaString(static_cast<int>(Heap::GetHeap().GetStartupStatus()))
                    << ", Current Native " +
@@ -1939,7 +1904,6 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
                           common_vm::TimeUtil::PrettyDigitsFormat(Heap::GetHeap().GetNativeHeapThreshold());
     PreGarbageCollection(task.reason, true);
     Heap::GetHeap().SetGCReason(task.reason);
-    auto &gcStats = GetGCStats();
 
     DoGarbageCollection(task);
 
@@ -1947,23 +1911,18 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
 
     ReclaimGarbageMemory(task.reason);
 
-    // Call Recalculate byte-level heap footprint after ReclaimGarbageMemory
-    // (garbage regions have been already reclaimed here).
-    // Now safe to call RecalculateFootprint, because no mutator can allocate concurrently
-    Heap::GetHeap().GetAllocator().RecalculateFootprint();
-
     PostGarbageCollection(gcIndex);
-    gcStats.gcEndTime = ark::common_vm::TimeUtil::NanoSeconds();
 
-    UpdateGCCompletionStats(gcStats);
+    UpdateGCCompletionStats();
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcStats)
+void CmcGC<LanguageConfig>::UpdateGCCompletionStats()
 {
-    uint64_t gcTimeNs = gcStats.gcEndTime - gcStats.gcStartTime;
+    uint64_t gcEndTime = ark::common_vm::TimeUtil::NanoSeconds();
+    uint64_t gcTimeNs = gcEndTime - gcStartTime_;
     double rate =
-        (static_cast<double>(gcStats.collectedBytes) / gcTimeNs) * (static_cast<double>(ark::common_vm::NS_PER_S) / MB);
+        (static_cast<double>(collectedBytes_) / gcTimeNs) * (static_cast<double>(ark::common_vm::NS_PER_S) / MB);
     {
         PandaOStringStream oss;
         const int prec = 3;
@@ -1973,20 +1932,15 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcS
         LOG(DEBUG, GC) << oss.str();
     }
 
-    ark::common_vm::g_gcCount++;
-    ark::common_vm::g_gcTotalTimeUs += (gcTimeNs / ark::common_vm::NS_PER_US);
-    ark::common_vm::g_gcCollectedTotalBytes += gcStats.collectedBytes;
-    gcStats.collectionRate = rate;
+    collectionRate_ = rate;
 
-    if (!gcStats.isYoungGC()) {
-        if (ark::common_vm::g_fullGCCount == 0) {
-            ark::common_vm::g_fullGCMeanRate = rate;
+    if (!IsYoungGC()) {
+        if (fullGCCount_ == 0) {
+            fullGCMeanRate_ = rate;
         } else {
-            ark::common_vm::g_fullGCMeanRate =
-                (ark::common_vm::g_fullGCMeanRate * ark::common_vm::g_fullGCCount + rate) /
-                (ark::common_vm::g_fullGCCount + 1);
+            fullGCMeanRate_ = (fullGCMeanRate_ * fullGCCount_ + rate) / (fullGCCount_ + 1);
         }
-        ark::common_vm::g_fullGCCount++;
+        fullGCCount_++;
     }
 
     UpdateGCStats();
@@ -1994,9 +1948,8 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats(ark::common_vm::GCStats &gcS
     if (Heap::GetHeap().GetForceThrowOOM()) {
         // NOTE (shemetov.philip, #34958) Workaround to fix OOM for GC with JIT enabled
         RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
-        auto gcStats = GetGCStats();
         size_t maxCapacity = space.GetMaxCapacity();
-        if (gcStats.liveBytesAfterGC * 2U > maxCapacity) {
+        if (liveBytesAfterGC_ * 2U > maxCapacity) {
             Heap::throwOOM();
         } else {
             Heap::GetHeap().SetForceThrowOOM(false);
@@ -2008,18 +1961,14 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::CopyFromSpace()
 {
     ScopedTrace tracer("CopyFromSpace", ark::common_vm::ENABLE_GC_TRACING);
-    STWParam stwParam {"GC_PHASE_COPY transition"};
     {
-        ScopedStopTheWorld stw(stwParam);
+        ScopedStopTheWorld stw;
         TransitionToGCPhase(GCPhase::GC_PHASE_COPY);
     }
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
-    auto &stats = GetGCStats();
-    stats.liveBytesBeforeGC = space.GetAllocatedBytes();
-    stats.fromSpaceSize = space.FromSpaceSize();
     space.CopyFromSpace(GetThreadPool());
 
-    stats.smallGarbageSize = space.FromRegionSize() - space.ToSpaceSize();
+    collectedBytes_ += space.FromRegionSize() - space.ToSpaceSize();
 }
 
 template <class LanguageConfig>
@@ -2070,12 +2019,6 @@ void CmcGC<LanguageConfig>::MarkGCFinish(uint64_t gcIndex)
     collectorResources_.MarkGCFinish(gcIndex);
 }
 template <class LanguageConfig>
-ark::common_vm::GCStats &CmcGC<LanguageConfig>::GetGCStats()
-{
-    return collectorResources_.GetGCStats();
-}
-
-template <class LanguageConfig>
 uint32_t CmcGC<LanguageConfig>::GetGCThreadCount(const bool isConcurrent) const
 {
     return collectorResources_.GetGCThreadCount(isConcurrent);
@@ -2093,9 +2036,16 @@ CmcGC<LanguageConfig>::CmcGC(ObjectAllocatorBase *objectAllocator, const GCSetti
       theAllocator_(Heap::GetHeap().GetAllocator()),
       collectorResources_(Heap::GetHeap().GetCollectorResources())
 {
+    auto &heap = Heap::GetHeap();
     this->SetType(GCType::CMC_GC);
     this->SetTLABsSupported();
-    Heap::GetHeap().SetCollector(this);
+    heap.SetCollector(this);
+
+    cmcTrackFreedObjects_ = settings.G1TrackFreedObjects();
+
+    heapThreshold_ = std::min(heap.GetGCParam().gcThreshold, 20 * MB);  // 20 MB initial threshold
+    heapThreshold_ = std::min(static_cast<size_t>(heap.GetMaxCapacity() * 0.2F), heapThreshold_);
+    targetFootprint_ = heapThreshold_;
 }
 
 template <class LanguageConfig>

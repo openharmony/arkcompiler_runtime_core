@@ -90,6 +90,7 @@ set(SOURCES
     mem/gc/stw-gc/stw-gc.cpp
     mem/gc/gc_barrier_set.cpp
     mem/gc/cmc/cmc-gc.cpp
+    mem/gc/cmc/cmc-gc-trigger.cpp
     mem/gc/cmc/cmc-allocator.cpp
     mem/refstorage/ref_block.cpp
     mem/refstorage/reference_storage.cpp

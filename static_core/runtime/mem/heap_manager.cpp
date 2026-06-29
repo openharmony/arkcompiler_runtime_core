@@ -32,6 +32,7 @@
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "runtime/mem/gc/cmc/cmc-gc.h"
+#include "common_components/heap/heap.h"
 #endif
 
 namespace ark::mem {
@@ -82,7 +83,7 @@ bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool use
         isAdaptiveTlabSize_ = true;
     }
     // Now, USE_TLAB_FOR_ALLOCATIONS option is supported only for Generational GCs
-    ASSERT(IsGenerationalGCType(gcType) || gcType == GCType::CMC_GC || (!useTlabForAllocations_));
+    ASSERT(IsGenerationalGCType(gcType) || (!useTlabForAllocations_));
     return ret;
 }
 
@@ -118,13 +119,12 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
     ASSERT(size >= ObjectHeader::ObjectHeaderSize());
     ASSERT(GetGC()->IsMutatorAllowed());
     ASSERT(cls != nullptr);
-    TriggerGCIfNeeded();
     if (thread == nullptr) {
         // NOTE(dtrubenkov): try to avoid this
         thread = ManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
     }
-    void *mem = AllocateMemoryForObject(size, align, thread, objInitType, pinned);
+    void *mem = AllocateMemoryForObject<true>(size, align, thread, objInitType, pinned);
     if (UNLIKELY(mem == nullptr)) {
         mem = TryGCAndAlloc(size, align, thread, objInitType, pinned);
         if (UNLIKELY(mem == nullptr)) {
@@ -174,7 +174,7 @@ void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *th
             cause = GCTaskCause::YOUNG_GC_CAUSE;
         }
         GetGC()->WaitForGCInManaged(GCTask(cause));
-        mem = AllocateMemoryForObject(size, align, thread, objInitType, pinned);
+        mem = AllocateMemoryForObject<false>(size, align, thread, objInitType, pinned);
         if (mem != nullptr) {
             // we could set OOM in gc, but we need to clear it if next gc was successfully and we allocated memory
             thread->ClearException();
@@ -191,10 +191,12 @@ void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *th
     return mem;
 }
 
+template <bool TRIGGER_GC>
 void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
                                            ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned)
 {
     void *mem = nullptr;
+    bool needToTriggerGC = true;
     if (UseTLABForAllocations() && size <= GetTLABMaxAllocSize() && !pinned) {
         ASSERT(thread != nullptr);
         ASSERT(GetGC()->IsTLABsSupported());
@@ -205,6 +207,10 @@ void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, Managed
         bool shouldAllocNewTlab =
             !isAdaptiveTlabSize_ || currentTlab->GetFillFraction() >= TLAB::MIN_DESIRED_FILL_FRACTION;
         if (mem == nullptr && shouldAllocNewTlab) {
+            if constexpr (TRIGGER_GC) {
+                TriggerGCIfNeeded();
+                needToTriggerGC = false;
+            }
             // We couldn't allocate an object via current TLAB,
             // Therefore, create a new one and allocate in it.
             if (CreateNewTLAB(thread)) {
@@ -217,6 +223,11 @@ void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, Managed
         }
     }
     if (mem == nullptr) {  // if mem == nullptr, try to use common allocate scenario
+        if constexpr (TRIGGER_GC) {
+            if (needToTriggerGC) {
+                TriggerGCIfNeeded();
+            }
+        }
         mem = objectAllocator_.AsObjectAllocator()->Allocate(size, align, thread, objInitType, pinned);
     }
     return mem;
@@ -301,6 +312,7 @@ bool HeapManager::CreateNewTLAB(ManagedThread *thread)
     size_t newTlabSize = 0;
     TLAB *oldTlab = thread->GetTLAB();
     ASSERT(oldTlab != nullptr);
+    [[maybe_unused]] size_t oldTlabAllocatedBytes = oldTlab->GetOccupiedSize();
     if (!isAdaptiveTlabSize_) {
         // Using initial tlab size
         newTlabSize = Runtime::GetOptions().GetInitTlabSize();
@@ -312,7 +324,9 @@ bool HeapManager::CreateNewTLAB(ManagedThread *thread)
     ASSERT(newTlabSize != 0);
     TLAB *newTlab = objectAllocator_.AsObjectAllocator()->CreateNewTLAB(newTlabSize);
     if (newTlab != nullptr) {
-        RegisterTLAB(thread->GetTLAB());
+        if (!PANDA_TRACK_TLAB_ALLOCATIONS && oldTlabAllocatedBytes != 0) {
+            memStats_->RecordAllocateObject(oldTlabAllocatedBytes, SpaceType::SPACE_TYPE_OBJECT);
+        }
         thread->UpdateTLAB(newTlab);
         return true;
     }
@@ -372,7 +386,11 @@ void HeapManager::SetTargetHeapUtilization(float target)
 
 size_t HeapManager::GetConsumedHeapMemory() const
 {
+#if defined(ARK_USE_COMMON_RUNTIME)
+    return ark::common_vm::Heap::GetHeap().GetCurrentCapacity();
+#else
     return GetObjectAllocator().AsObjectAllocator()->GetHeapSpace()->GetCurrentHeapSize();
+#endif
 }
 
 size_t HeapManager::GetFreeMemoryBeforeHeapGrow() const
@@ -456,6 +474,14 @@ void HeapManager::RegisterFinalizedObject(ObjectHeader *object, BaseClass *cls, 
         registerFinalizeReferenceFunc_(object, cls);
     }
 }
+
+template void *HeapManager::AllocateMemoryForObject<true>(size_t size, Alignment align, ManagedThread *thread,
+                                                          ObjectAllocatorBase::ObjMemInitPolicy objInitType,
+                                                          bool pinned);
+
+template void *HeapManager::AllocateMemoryForObject<false>(size_t size, Alignment align, ManagedThread *thread,
+                                                           ObjectAllocatorBase::ObjMemInitPolicy objInitType,
+                                                           bool pinned);
 
 template ObjectHeader *HeapManager::AllocateNonMovableObject<true>(BaseClass *cls, size_t size, Alignment align,
                                                                    ManagedThread *thread,

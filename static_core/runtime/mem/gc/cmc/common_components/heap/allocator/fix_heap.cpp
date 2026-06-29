@@ -19,6 +19,8 @@
 #include "common_interfaces/heap/region_desc.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/heap/allocator/regional_heap.h"
+#include "runtime/include/runtime.h"
+#include "runtime/include/panda_vm.h"
 
 namespace ark::common_vm {
 
@@ -186,21 +188,36 @@ void PostFixHeapWorker::AddEmptyRegionToCollectDuringPostFix(RegionList *list, R
     emptyRegionsToCollect.emplace(list, region);
 }
 
-void PostFixHeapWorker::CollectEmptyRegions()
+size_t PostFixHeapWorker::CollectEmptyRegions()
 {
     RegionalHeap &theAllocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     RegionManager &regionManager = theAllocator.GetRegionManager();
-    GCStats &stats = Heap::GetHeap().GetCollector().GetGCStats();
+    bool trackFreedObjects = Runtime::GetCurrent()->GetPandaVM()->GetGC()->NeedToTrackFreedObjects();
     size_t garbageSize = 0;
+    size_t freedObjectBytes = 0;
+    size_t freedObjectCount = 0;
 
     while (!emptyRegionsToCollect.empty()) {
         auto [list, del] = emptyRegionsToCollect.top();
         emptyRegionsToCollect.pop();
 
+        if (trackFreedObjects) {
+            del->VisitAllObjects([&freedObjectCount](BaseObject *obj) {
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE NONMOVABLE object " << obj;
+                ++freedObjectCount;
+            });
+        }
+
         list->DeleteRegion(del);
+        freedObjectBytes += del->GetRegionAllocatedSize();
         garbageSize += regionManager.CollectRegion(del);
     }
-    stats.nonMovableGarbageSize += garbageSize;
+
+    if (freedObjectBytes > 0) {
+        Runtime::GetCurrent()->GetPandaVM()->GetMemStats()->RecordFreeObjects(
+            freedObjectCount, freedObjectBytes, ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    }
+    return garbageSize;
 }
 
 };  // namespace ark::common_vm

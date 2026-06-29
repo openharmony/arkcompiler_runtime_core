@@ -22,6 +22,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/mem/gc/gc_trigger.h"
+#include "runtime/mem/gc/cmc/cmc-gc-trigger.h"
 #include "libarkbase/utils/logger.h"
 
 namespace ark::mem {

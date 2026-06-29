@@ -44,12 +44,12 @@ constexpr bool IsGenerationalGCType(const GCType gcType)
     switch (gcType) {
         case GCType::G1_GC:
         case GCType::EPSILON_G1_GC:
+        case GCType::CMC_GC:
             ret = true;
             break;
         case GCType::INVALID_GC:
         case GCType::EPSILON_GC:
         case GCType::STW_GC:
-        case GCType::CMC_GC:
             break;
         default:
             UNREACHABLE();

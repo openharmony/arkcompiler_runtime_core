@@ -287,6 +287,7 @@ private:
 
     void *AllocByTLAB(size_t size, ManagedThread *thread);
 
+    template <bool TRIGGER_GC>
     void *AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
                                   ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned = false);
 

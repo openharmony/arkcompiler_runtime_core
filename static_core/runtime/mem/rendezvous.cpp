@@ -44,6 +44,12 @@ void Rendezvous::SafepointEnd()
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd exit";
 }
 
+ScopedStopTheWorld::ScopedStopTheWorld() : rendezvous_(PandaVM::GetCurrent()->GetRendezvous())
+{
+    ASSERT(rendezvous_ != nullptr);
+    rendezvous_->SafepointBegin();
+}
+
 ScopedSuspendAllThreadsRunning::ScopedSuspendAllThreadsRunning(Rendezvous *rendezvous) : rendezvous_(rendezvous)
 {
     ASSERT(rendezvous_ != nullptr);
