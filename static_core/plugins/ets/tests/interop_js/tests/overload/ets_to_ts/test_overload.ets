@@ -208,3 +208,155 @@ export class GenericOverloadRule {
 export function createGenericOverloadRule(): GenericOverloadRule {
     return new GenericOverloadRule();
 }
+
+export class Animal {}
+export class Dog extends Animal {}
+export class Cat extends Animal {}
+
+export class ObjectOverloadHandler {
+    handlePet(obj: Dog): string {
+        return 'dog';
+    }
+    handlePet(obj: Cat): string {
+        return 'cat';
+    }
+
+    handleSpecific(obj: Dog): string {
+        return 'dog';
+    }
+    handleSpecific(obj: Any): string {
+        return 'object';
+    }
+
+    handleAnimal(obj: Dog): string {
+        return 'dog';
+    }
+    handleAnimal(obj: Animal): string {
+        return 'animal';
+    }
+}
+
+export function createObjectOverloadHandler(): ObjectOverloadHandler {
+    return new ObjectOverloadHandler();
+}
+
+export function createDog(): Dog {
+    return new Dog();
+}
+
+export function createCat(): Cat {
+    return new Cat();
+}
+
+export function createAnimal(): Animal {
+    return new Animal();
+}
+
+export class ObjectOverloadPrimitiveHandler {
+    handleIntOrAny(val: int): string {
+        return 'int';
+    }
+    handleIntOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleStringOrAny(val: string): string {
+        return 'string';
+    }
+    handleStringOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleAnyOrInt(val: Any): string {
+        return 'any';
+    }
+    handleAnyOrInt(val: int): string {
+        return 'int';
+    }
+
+    handleDogOrAny(val: Dog): string {
+        return 'dog';
+    }
+    handleDogOrAny(val: Any): string {
+        return 'object';
+    }
+}
+
+export function createObjectOverloadPrimitiveHandler(): ObjectOverloadPrimitiveHandler {
+    return new ObjectOverloadPrimitiveHandler();
+}
+
+export class CheckArgMatchObjectHandler {
+    handleStringOrAny(val: string): string {
+        return 'string';
+    }
+    handleStringOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleBigIntOrAny(val: bigint): string {
+        return 'bigint';
+    }
+    handleBigIntOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleFnOrAny(val: int): string {
+        return 'int';
+    }
+    handleFnOrAny(val: Any): string {
+        return 'function';
+    }
+
+    handleBoolOrAny(val: boolean): string {
+        return 'boolean';
+    }
+    handleBoolOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleDoubleOrAny(val: double): string {
+        return 'double';
+    }
+    handleDoubleOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleTwoArgs(val1: string, val2: int): string {
+        return 'string int';
+    }
+    handleTwoArgs(val1: Any, val2: Any): string {
+        return 'any any';
+    }
+
+    handleDogOrAnimalOrAny(val: Dog): string {
+        return 'dog';
+    }
+    handleDogOrAnimalOrAny(val: Animal): string {
+        return 'animal';
+    }
+    handleDogOrAnimalOrAny(val: Any): string {
+        return 'any';
+    }
+
+    handleThreeSpecific(val1: string, val2: int, val3: Dog): string {
+        return 'string int dog';
+    }
+    handleThreeSpecific(val1: Any, val2: Any, val3: Any): string {
+        return 'any any any';
+    }
+
+    handleThreeInherit(val1: Dog, val2: Dog, val3: Dog): string {
+        return 'dog dog dog';
+    }
+    handleThreeInherit(val1: Animal, val2: Animal, val3: Any): string {
+        return 'animal animal any';
+    }
+    handleThreeInherit(val1: Any, val2: Any, val3: Any): string {
+        return 'any any any';
+    }
+}
+
+export function createCheckArgMatchObjectHandler(): CheckArgMatchObjectHandler {
+    return new CheckArgMatchObjectHandler();
+}
