@@ -113,13 +113,11 @@ function main() {
     const suite = new arktest.ArkTestsuite('Math.round tests')
     suite.addTest('Test Normal Rounding', testNormalRounding)
     suite.addTest('Test Half Rounding', testHalfRounding)
-    // AOT Issue: #35165
     suite.addTest('Test Zero Sign Preservation', testZeroSign)
     suite.addTest('Test Precision Boundaries', testPrecisionBoundaries)
     suite.addTest('Test Special Values', testSpecialValues)
     suite.addTest('Test Extreme Values', testExtremeValues)
     suite.addTest('Test Integer Inputs', testIntegerInputs)
-    // AOT Issue: #35165
     suite.addTest('Test TC39 Compliance Probe', testRoundTc39ComplianceProbe)
     return suite.run()
 }
