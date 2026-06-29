@@ -236,6 +236,17 @@ export final class Int extends Integral implements Comparable<Int> {
         return (new Long(this.value)).toString(radix);
     }
 
+    /**
+     * Converts this object to a string
+     *
+     * @param radix the radix base for string representation
+     * 
+     * @returns result of the conversion
+     */
+    public toString(radix: double): string {
+        return this.toString(radix.toInt());
+    } 
+
     equals(other: Any): boolean {
         if (this === other) {
             return true

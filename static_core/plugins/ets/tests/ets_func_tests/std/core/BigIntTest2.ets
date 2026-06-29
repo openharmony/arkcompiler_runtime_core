@@ -52,6 +52,55 @@ function testBigIntToString6() {
     arktest.assertEQ(result, '4581999761941507497992146088338584893584933027760574876539')
 }
 
+function testBigIntToStringDouble1() {
+    let n = -106233993686329866388788451887415352037722042843148312087371682210961017881854n;
+    let result = n.toString(16.0);
+    arktest.assertEQ(result, '-eade4f43ef29faba54e2276cd2fb250b9cfe381912e4cb7b4d98ca527fa544fe')
+}
+
+function testBigIntToStringDouble2() {
+    let n = 10n;
+    let result = n.toString(10.0);
+    arktest.assertEQ(result, '10')
+}
+
+function testBigIntToStringDouble3() {
+    let n = 10n;
+    let result = n.toString(16.0);
+    arktest.assertEQ(result, 'a')
+}
+
+function testBigIntToStringDouble4() {
+    let n = 255n;
+    let result = n.toString(16.9);
+    arktest.assertEQ(result, 'ff')
+}
+
+function testBigIntToStringDouble5() {
+    let n = 255n;
+    let result = n.toString(15.6);
+    arktest.assertEQ(result, '120')
+}
+
+function testBigIntToStringDouble6() {
+    let n = 255n;
+    let result = n.toString(2.5);
+    arktest.assertEQ(result, '11111111')
+}
+
+function testBigIntToStringDouble7() {
+    let n = -25n;
+    let result = n.toString(10.9);
+    arktest.assertEQ(result, '-25')
+}
+
+function testBigIntToStringDouble8() {
+    const rangeError = (e: Error): boolean => e instanceof RangeError
+    arktest.expectThrow(() => { 10n.toString(NaN) }, rangeError)
+    arktest.expectThrow(() => { 10n.toString(Infinity) }, rangeError)
+    arktest.expectThrow(() => { 10n.toString(-Infinity) }, rangeError)
+}
+
 function testBigIntConstructor1() {
     let n = BigInt(0x0102030405060708)
     arktest.assertEQ(n, BigInt('72623859790382856'))
@@ -177,6 +226,14 @@ function main(): int {
         testBigIntToString5)
     suite.addTest('convert 4581999761941507497992146088338584893584933027760574876539 to toString(10)',
         testBigIntToString6)
+    suite.addTest('test bigint toString(16.0)', testBigIntToStringDouble1)
+    suite.addTest('test bigint toString(10.0)', testBigIntToStringDouble2)
+    suite.addTest('test bigint toString(16.0) from 10n', testBigIntToStringDouble3)
+    suite.addTest('test bigint toString(16.9) fractional', testBigIntToStringDouble4)
+    suite.addTest('test bigint toString(15.6) fractional', testBigIntToStringDouble5)
+    suite.addTest('test bigint toString(2.5) fractional', testBigIntToStringDouble6)
+    suite.addTest('test bigint toString(10.9) negative fractional', testBigIntToStringDouble7)
+    suite.addTest('test bigint toString invalid radix NaN/Infinity', testBigIntToStringDouble8)
     suite.addTest('test large numbers and decimals', testBigIntConstructor1)
     suite.addTest('test ordinary numbers', testBigIntConstructor2)
     suite.addTest('test strings', testBigIntConstructor3)

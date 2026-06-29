@@ -303,6 +303,19 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
+     * Converts this object to a string
+     *
+     * @param { double } radix None
+     * @returns { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public toString(radix: double): string {
+        return this.toString(radix.toInt());
+    } 
+
+    /**
      * Checks for equality this instance with provided object, treated as a Byte Returns false if type of provided
      * object is not the same as this type
      *

@@ -188,6 +188,28 @@ function testBigIntToStringFastRadixSign() {
     arktest.assertEQ(new BigInt(255).toString(36), "73");
 }
 
+function testBigIntToStringFastRadixSignDouble() {
+    arktest.assertEQ(new BigInt(-25).toString(2.0), "-11001");
+    arktest.assertEQ(new BigInt(-25).toString(4.0), "-121");
+    arktest.assertEQ(new BigInt(-25).toString(8.0), "-31");
+    arktest.assertEQ(new BigInt(-25).toString(10.0), "-25");
+    arktest.assertEQ(new BigInt(-25).toString(16.0), "-19");
+    arktest.assertEQ(new BigInt(-25).toString(32.0), "-p");
+    arktest.assertEQ(new BigInt("-18446744073709551616").toString(10.0), "-18446744073709551616");
+    arktest.assertEQ(new BigInt(25).toString(10.0), "25");
+    arktest.assertEQ(new BigInt(0).toString(2.0), "0");
+    arktest.assertEQ(new BigInt(0).toString(10.0), "0");
+    arktest.assertEQ(new BigInt(0).toString(16.0), "0");
+    arktest.assertEQ(new BigInt(255).toString(3.0), "100110");
+    arktest.assertEQ(new BigInt(255).toString(36.0), "73");
+    arktest.assertEQ(new BigInt(-25).toString(10.9), "-25");
+    arktest.assertEQ(new BigInt(255).toString(2.999), "11111111");
+    arktest.assertEQ(new BigInt(255).toString(15.6), "120");
+    arktest.expectThrow(() => { new BigInt(255).toString(NaN) }, (e: Error): boolean => e instanceof RangeError)
+    arktest.expectThrow(() => { new BigInt(255).toString(Infinity) }, (e: Error): boolean => e instanceof RangeError)
+    arktest.expectThrow(() => { new BigInt(255).toString(-Infinity) }, (e: Error): boolean => e instanceof RangeError)
+}
+
 function testBigIntStringHex() {
     arktest.assertEQ(new BigInt("0xa"), 10n);
     arktest.assertEQ(new BigInt("0xff"), 255n);
@@ -225,6 +247,7 @@ function main(): int {
     suite.addTest("Test BigInt String Oct", testBigIntStringOct);
     suite.addTest("Test BigInt String Dec", testBigIntStringDec);
     suite.addTest("Test BigInt fast radix string sign", testBigIntToStringFastRadixSign);
+    suite.addTest("Test BigInt fast radix string sign with double", testBigIntToStringFastRadixSignDouble);
     suite.addTest("Test BigInt String Hex", testBigIntStringHex);
     suite.addTest("Test BigInt String Error", testBigIntStringError);
 
