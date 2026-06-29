@@ -47,6 +47,8 @@ using compiler::AotManager;
 
 class ClassLinkerErrorHandler;
 
+struct ClassInfo;
+
 /**
  * @brief Thread-safe container with language-agnostic API for operations on classes.
  * `ClassLinker` instance is owned by `Runtime`, effectively making it singleton.
@@ -352,15 +354,6 @@ public:
     void BuildBootClassIndex();
 
 private:
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-    struct ClassInfo {
-        PandaUniquePtr<VTableBuilder> vtableBuilder;
-        PandaUniquePtr<ITableBuilder> itableBuilder;
-        PandaUniquePtr<IMTableBuilder> imtableBuilder;
-        size_t size;
-        size_t numSfields;
-    };
-
     class InterfaceProxyBuilder;
 
     ClassInfo CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler);
@@ -402,9 +395,6 @@ private:
                                                 ClassLinkerErrorHandler *errorHandler);
 
     [[nodiscard]] bool LinkFields(Class *klass, mem::InternalArenaAllocator &allocator,
-                                  ClassLinkerErrorHandler *errorHandler);
-
-    [[nodiscard]] bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,
                                   ClassLinkerErrorHandler *errorHandler);
 
     [[nodiscard]] bool LinkMethods(Class *klass, ClassInfo *classInfo, ClassLinkerErrorHandler *errorHandler);
