@@ -21,6 +21,9 @@ config("arkbacktrace_config") {
 }
 
 ohos_static_library("arkbacktrace") {
+    if (!ark_standalone_build) {
+        branch_protector_ret = "pac_ret"
+    }
     sources = [
         "backtrace.cpp",
         "symbol_extractor.cpp",
