@@ -75,6 +75,7 @@ if (!is_host_product &&
     is_boot_abc = "True"
     device_dst_file = "/system/framework/etsstdlib_bootabc.abc"
     is_stdlib = "True"
+    is_ohos_ets_stdlib_abc = "True"
   }
 
   ohos_prebuilt_etc("etsstdlib_bootabc_etc") {
@@ -122,6 +123,7 @@ if (!is_host_product &&
     ]
     is_boot_abc = "True"
     device_dst_file = "/system/framework/ets2abc_commonsdk_api.abc"
+    is_ohos_ets_stdlib_abc = "True"
   }
 
   ohos_prebuilt_etc("ets2abc_commonsdk_arkts_etc") {
@@ -140,6 +142,7 @@ if (!is_host_product &&
     ]
     is_boot_abc = "True"
     device_dst_file = "/system/framework/ets2abc_commonsdk_arkts.abc"
+    is_ohos_ets_stdlib_abc = "True"
   }
 
   ohos_shared_library("ets_sdk_native") {
