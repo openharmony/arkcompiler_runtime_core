@@ -26,6 +26,9 @@ regression/32441.ets
 #32353
 regression/32353.ets
 
+#34667 Bytecode Optimizer: Opcode Compare not yet implemented
+regression/34667.ets
+
 #35144
 regression/35144_0.ets
 regression/35144_1.ets
@@ -36,6 +39,11 @@ regression/35187_1.ets
 regression/35187_2.ets
 regression/35187_3.ets
 regression/35187_4.ets
+
+
+#35423 AstVerifier fail with INCORRECT_PARENT_REF
+regression/35423_0.ets
+regression/35423_1.ets
 
 #35428 String spread bug. Surrogate pair should not to be splitted
 regression/35428.ets
