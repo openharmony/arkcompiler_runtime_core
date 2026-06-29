@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,6 +244,8 @@ public:
     void MonitorContendedEnter(ObjectHeader *object) override;
     void MonitorContendedEntered(ObjectHeader *object) override;
 
+    void NativeMethodCall(ManagedThread *managedThread, Method *method) override;
+
     /*
      * Mock API for debug interphase starts:
      *
@@ -363,7 +365,8 @@ private:
         RuntimeNotificationManager::Event::VM_EVENTS | RuntimeNotificationManager::Event::GARBAGE_COLLECTOR_EVENTS |
         RuntimeNotificationManager::Event::METHOD_EVENTS | RuntimeNotificationManager::Event::CLASS_EVENTS |
         RuntimeNotificationManager::Event::MONITOR_EVENTS | RuntimeNotificationManager::Event::ALLOCATION_EVENTS |
-        RuntimeNotificationManager::Event::CONSOLE_EVENTS;
+        RuntimeNotificationManager::Event::CONSOLE_EVENTS |
+        RuntimeNotificationManager::Event::NATIVE_METHOD_CALL_EVENTS;
 
     const Runtime *runtime_;
     PtHooksWrapper hooks_;

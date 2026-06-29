@@ -205,6 +205,7 @@ enum class PtHookType {
     PT_HOOK_TYPE_MONITOR_CONTENDED_ENTER,
     PT_HOOK_TYPE_MONITOR_CONTENDED_ENTERED,
     PT_HOOK_TYPE_OBJECT_ALLOC,
+    PT_HOOK_TYPE_NATIVE_METHOD_CALL,
     // The count of hooks. Don't move
     PT_HOOK_TYPE_COUNT
 };
@@ -348,6 +349,13 @@ public:
     }
 
     virtual void SingleStep(PtThread /* thread */, Method * /* method */, const PtLocation & /* location */) {}
+
+    /**
+     * @brief Method is called by the runtime before native method execution
+     * @param thread Thread that is calling the native method
+     * @param nativeAddress Entry address of the native method
+     */
+    virtual void NativeMethodCall(PtThread /* thread */, const void * /* nativeAddress */) {}
 
     // * * * * *
     // Deprecated hooks
