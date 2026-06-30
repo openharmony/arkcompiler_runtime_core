@@ -897,11 +897,11 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
     if (program.metadata.empty()) {
         return;
     }
-    for (const auto &[moduleInfo, metadata] : program.metadata) {
-        auto pkgName = moduleInfo.GetPkgName();
-        auto moduleName = moduleInfo.GetModuleName();
+    for (const auto &[pkgName, modules] : program.metadata) {
         entities.stringItems.insert({pkgName, items->GetOrCreateStringItem(pkgName)});
-        entities.stringItems.insert({moduleName, items->GetOrCreateStringItem(moduleName)});
+        for (const auto &[moduleName, _] : modules) {
+            entities.stringItems.insert({moduleName, items->GetOrCreateStringItem(moduleName)});
+        }
     }
 }
 

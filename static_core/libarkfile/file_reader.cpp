@@ -1064,9 +1064,8 @@ bool FileReader::TryCreateFieldItem(File::EntityId fieldId)
 
 bool FileReader::ReadMetadata()
 {
-    MetadataAccessor ma;
-    ma.SetFile(*file_);
-    container_.SetMetadataItems(ma.GetMetadata());
+    MetadataAccessor ma(*file_);
+    container_.SetMetadataItems(ma.ExtractMetadata());
     return true;
 }
 

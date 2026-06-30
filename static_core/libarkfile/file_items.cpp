@@ -942,7 +942,7 @@ bool CodeItem::Write(Writer *writer)
     return true;
 }
 
-void MetadataItems::SetMetadata(MetadataByModules metadata)
+void MetadataItems::SetMetadata(MetadataByPackages metadata)
 {
     metadata_ = std::move(metadata);
     if (metadata_.empty()) {
@@ -951,10 +951,12 @@ void MetadataItems::SetMetadata(MetadataByModules metadata)
 
     compressedMetadata_ = MetadataAccessor::CompressMetadata(metadata_);
 
-    for (auto const &[_, moduleMetadata] : metadata_) {
-        if (!moduleMetadata.empty()) {
-            isEmpty_ = false;
-            return;
+    for (auto const &[pkgName, modules] : metadata_) {
+        for (auto const &[moduleName, moduleMetadata] : modules) {
+            if (!moduleMetadata.empty()) {
+                isEmpty_ = false;
+                return;
+            }
         }
     }
 }

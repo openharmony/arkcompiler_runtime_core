@@ -35,7 +35,7 @@ struct Program {
     using FunctionSynonymsT = std::unordered_map<std::string, std::vector<std::string>>;
     using LiteralArrayTableT = std::map<std::string, LiteralArray>;
     using ArrayTypesT = std::set<Type>;
-    using MetadataT = panda_file::MetadataByModules;
+    using MetadataT = panda_file::MetadataByPackages;
 
     panda_file::SourceLang lang {panda_file::SourceLang::PANDA_ASSEMBLY};
     RecordTableT recordTable;

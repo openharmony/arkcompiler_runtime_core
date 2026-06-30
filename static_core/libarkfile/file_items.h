@@ -1731,7 +1731,7 @@ public:
     explicit MetadataItems() = default;
     ~MetadataItems() = default;
 
-    void SetMetadata(MetadataByModules metadata);
+    void SetMetadata(MetadataByPackages metadata);
 
     bool IsEnabled() const
     {
@@ -1743,7 +1743,7 @@ public:
         return isEmpty_;
     }
 
-    MetadataByModules ByModules() const
+    MetadataByPackages ByModules() const
     {
         return metadata_;
     }
@@ -1762,14 +1762,18 @@ public:
 
     size_t NumItems() const
     {
-        return metadata_.size();
+        size_t numItems = 0;
+        for (const auto &[_, modules] : metadata_) {
+            numItems += modules.size();
+        }
+        return numItems;
     }
 
     DEFAULT_MOVE_SEMANTIC(MetadataItems);
     DEFAULT_COPY_SEMANTIC(MetadataItems);
 
 private:
-    MetadataByModules metadata_;
+    MetadataByPackages metadata_;
     EncodedMetadata compressedMetadata_;
     bool isEmpty_ = true;
 };

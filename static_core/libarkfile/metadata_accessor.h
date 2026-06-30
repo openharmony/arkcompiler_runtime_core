@@ -16,96 +16,31 @@
 #ifndef LIBPANDAFILE_METADATA_ACCESSOR_H_
 #define LIBPANDAFILE_METADATA_ACCESSOR_H_
 
+#include <map>
 #include <string>
-#include <string_view>
-#include <unordered_map>
+#include <vector>
 
-#include "libarkbase/utils/span.h"
 #include "libarkbase/macros.h"
 
 namespace ark::panda_file {
 class File;
-
-struct MetadataModuleId {
-    MetadataModuleId(std::string pkgName, std::string moduleName)
-        : pkgName_(std::move(pkgName)), moduleName_(std::move(moduleName))
-    {
-    }
-
-    ~MetadataModuleId() = default;
-
-    DEFAULT_MOVE_SEMANTIC(MetadataModuleId);
-    DEFAULT_COPY_SEMANTIC(MetadataModuleId);
-
-    std::string GetPkgName() const
-    {
-        return pkgName_;
-    }
-
-    std::string GetModuleName() const
-    {
-        return moduleName_;
-    }
-
-    [[nodiscard]] std::string ToString() const
-    {
-        return pkgName_ + ":" + moduleName_;
-    }
-
-    bool operator==(const MetadataModuleId &other) const
-    {
-        return pkgName_ == other.pkgName_ && moduleName_ == other.moduleName_;
-    }
-
-private:
-    std::string pkgName_;
-    std::string moduleName_;
-};
 }  // namespace ark::panda_file
-
-template <>
-struct std::hash<ark::panda_file::MetadataModuleId> {
-    size_t operator()(const ark::panda_file::MetadataModuleId &p) const noexcept
-    {
-        return hash<std::string>()(p.GetPkgName()) ^ (hash<std::string_view>()(p.GetModuleName()) << 1U);
-    }
-};
 
 namespace ark::panda_file {
 
 using EncodedMetadata = std::vector<uint8_t>;
-using MetadataIndex = std::unordered_map<MetadataModuleId, std::pair<uint32_t, uint32_t>>;
-using MetadataByModules = std::unordered_map<MetadataModuleId, EncodedMetadata>;
+using MetadataByModules = std::map<std::string, EncodedMetadata>;
+using MetadataByPackages = std::map<std::string, MetadataByModules>;
 
-/*
- * The simplified metadata accessor implementation below.
- * Further, metadata will be loaded in several steps:
- *  1) Loading metadata index (module_name -> (metadata_offset, metadata_size)) into the memory once per abc file;
- *  2) During the first request of metadata when resolving import,
- *     uncompress metadata of all modules and cache it onto the disk / memory;
- *  3) During further requests of metadata, take it from the disk / memory
- *     according to known offset for the specific module.
- */
 class MetadataAccessor {
 public:
-    MetadataAccessor() = default;
+    PANDA_PUBLIC_API explicit MetadataAccessor(const File &pandaFile);
     ~MetadataAccessor() = default;
 
-    PANDA_PUBLIC_API void SetFile(const File &pandaFile);
-    PANDA_PUBLIC_API MetadataByModules GetMetadata();
-    EncodedMetadata GetMetadataForModule(const MetadataModuleId &moduleId);
-    MetadataByModules GetMetadataForPackage(const MetadataModuleId &moduleId);
+    PANDA_PUBLIC_API MetadataByPackages ExtractMetadata();
+    MetadataByModules ExtractMetadataForPackage(const std::string &pkgName);
 
-    static MetadataModuleId BuildModuleId(const std::string_view pkgName, const std::string_view moduleName)
-    {
-        auto pkgNameStr = std::string(pkgName);
-        pkgNameStr.erase(pkgNameStr.find_last_not_of('.') + 1, std::string::npos);
-        auto moduleNameStr = std::string(moduleName);
-        moduleNameStr.erase(moduleNameStr.find_last_not_of('.') + 1, std::string::npos);
-        return {pkgNameStr, moduleNameStr};
-    }
-
-    [[nodiscard]] static EncodedMetadata CompressMetadata(const MetadataByModules &metadata);
+    [[nodiscard]] static EncodedMetadata CompressMetadata(const MetadataByPackages &metadata);
 
     NO_COPY_SEMANTIC(MetadataAccessor);
     NO_MOVE_SEMANTIC(MetadataAccessor);
@@ -113,14 +48,17 @@ public:
     static constexpr auto INDEX_ITEM_SIZE = 3;
 
 private:
-    const File *pandaFile_ = nullptr;
-    Span<const uint8_t> metadataSpan_;
-    MetadataIndex metadataIndex_;  // modules to offsets and sizes
-    uint64_t uncompressedMetadataSize_ = 0;
+    std::string abcFilename_;
 
-    void BuildIndex();
-    [[nodiscard]] EncodedMetadata UncompressMetadata(const EncodedMetadata &compressedMetadata) const;
-    EncodedMetadata GetMetadataForModule(const MetadataModuleId &moduleId, const EncodedMetadata &uncompressedMetadata);
+    /*
+     * NB: This is a movable "back" cache for metadata.
+     * During request of the specific part of metadata, it's being moved onto use-site,
+     * which means next requests of the same part will be failed.
+     * This mechanics allows to avoid extra copies.
+     */
+    MetadataByPackages metadata_;
+
+    void LoadMetadata(const File &pandaFile);
 };
 
 }  // namespace ark::panda_file

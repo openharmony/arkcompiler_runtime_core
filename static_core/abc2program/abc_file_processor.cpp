@@ -89,9 +89,8 @@ void AbcFileProcessor::FillMetadata()
     if (!file_->IsMetadataEnabled()) {
         return;
     }
-    panda_file::MetadataAccessor ma;
-    ma.SetFile(*file_);
-    program_->metadata = ma.GetMetadata();
+    panda_file::MetadataAccessor ma(*file_);
+    program_->metadata = ma.ExtractMetadata();
 }
 
 void AbcFileProcessor::FillExternalFieldsToRecords()

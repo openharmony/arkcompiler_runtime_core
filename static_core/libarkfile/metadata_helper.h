@@ -39,21 +39,6 @@ namespace ark::panda_file::helpers {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_METADATA_NESTING_DEC() curLogLevel_--
 
-#else
-
-// CC-OFFNXT(G.PRE.02-CPP) metadata logging
-#define LOG_METADATA_ENABLE()
-// CC-OFFNXT(G.PRE.02-CPP) metadata logging
-#define LOG_METADATA_DISABLE()
-// CC-OFFNXT(G.PRE.02-CPP) metadata logging
-#define LOG_METADATA(message)
-// CC-OFFNXT(G.PRE.02-CPP) metadata logging
-#define LOG_METADATA_NESTING_INC()
-// CC-OFFNXT(G.PRE.02-CPP) metadata logging
-#define LOG_METADATA_NESTING_DEC()
-
-#endif
-
 inline Logger::Level MetadataLoggerInit(const Logger::Component component)
 {
     ASSERT(component == Logger::Component::METADATA_SERIALIZATION ||
@@ -77,6 +62,21 @@ inline void MetadataLoggerDestroy(const Logger::Component component, const Logge
         Logger::SetLevel(prevLoggerLevel);
     }
 }
+
+#else
+
+// CC-OFFNXT(G.PRE.02-CPP) metadata logging
+#define LOG_METADATA_ENABLE()
+// CC-OFFNXT(G.PRE.02-CPP) metadata logging
+#define LOG_METADATA_DISABLE()
+// CC-OFFNXT(G.PRE.02-CPP) metadata logging
+#define LOG_METADATA(message)
+// CC-OFFNXT(G.PRE.02-CPP) metadata logging
+#define LOG_METADATA_NESTING_INC()
+// CC-OFFNXT(G.PRE.02-CPP) metadata logging
+#define LOG_METADATA_NESTING_DEC()
+
+#endif
 
 }  // namespace ark::panda_file::helpers
 

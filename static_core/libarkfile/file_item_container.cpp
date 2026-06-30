@@ -283,7 +283,7 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
     return item;
 }
 
-void ItemContainer::SetMetadataItems(MetadataByModules metadata)
+void ItemContainer::SetMetadataItems(MetadataByPackages metadata) const
 {
     metadata_->SetMetadata(std::move(metadata));
 }
@@ -1176,15 +1176,17 @@ bool ItemContainer::WriteExportData(Writer *writer)
         return false;
     }
 
-    for (const auto &[module, metadata] : metadata_->ByModules()) {
-        if (!writer->Write<uint32_t>(GetOrCreateStringItem(module.GetPkgName())->GetOffset())) {
-            return false;
-        }
-        if (!writer->Write<uint32_t>(GetOrCreateStringItem(module.GetModuleName())->GetOffset())) {
-            return false;
-        }
-        if (!writer->Write<uint32_t>(metadata.size())) {
-            return false;
+    for (const auto &[pkgName, modules] : metadata_->ByModules()) {
+        for (const auto &[moduleName, metadata] : modules) {
+            if (!writer->Write<uint32_t>(GetOrCreateStringItem(pkgName)->GetOffset())) {
+                return false;
+            }
+            if (!writer->Write<uint32_t>(GetOrCreateStringItem(moduleName)->GetOffset())) {
+                return false;
+            }
+            if (!writer->Write<uint32_t>(metadata.size())) {
+                return false;
+            }
         }
     }
 
