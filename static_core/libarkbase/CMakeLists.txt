@@ -382,6 +382,7 @@ set(ARKBASE_TESTS_SOURCES
     tests/ringbuf/lock_free_ring_buffer_test.cpp
     tests/base_thread_test.cpp
     tests/mem_hooks_test.cpp
+    tests/filesystem_test.cpp
 )
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)

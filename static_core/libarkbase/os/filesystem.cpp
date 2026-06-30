@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,57 @@ std::string RemoveExtension(const std::string &filepath)
     return filepath;
 }
 
+static void HandleDotDotSegment(std::vector<std::string_view> &parts)
+{
+    if (parts.empty()) {
+        parts.emplace_back("..");
+        return;
+    }
+    if (parts.back().empty()) {
+        return;
+    }
+    if (parts.back() == "..") {
+        parts.emplace_back("..");
+        return;
+    }
+    parts.pop_back();
+}
+
+static void AppendFinalPathSegment(std::vector<std::string_view> &parts, std::string_view sv)
+{
+    if (sv.empty() || sv == ".") {
+        return;
+    }
+    if (sv == "..") {
+        HandleDotDotSegment(parts);
+        return;
+    }
+    parts.push_back(sv);
+}
+
+static std::string JoinPathParts(std::vector<std::string_view> &parts, char delimChar)
+{
+    if (parts.empty()) {
+        return ".";
+    }
+    std::stringstream ss;
+    if (parts[0].empty()) {
+        ss << delimChar;
+        for (size_t i = 1; i < parts.size(); ++i) {
+            if (i > 1) {
+                ss << delimChar;
+            }
+            ss << parts[i];
+        }
+    } else {
+        ss << parts[0];
+        for (size_t i = 1; i < parts.size(); ++i) {
+            ss << delimChar << parts[i];
+        }
+    }
+    return ss.str();
+}
+
 std::string NormalizePath(const std::string &path)
 {
     if (path.empty()) {
@@ -119,35 +170,16 @@ std::string NormalizePath(const std::string &path)
         }
 
         if (sv == "..") {
-            if (parts.empty()) {
-                parts.emplace_back("");
-                continue;
-            }
-
-            if (!parts.back().empty()) {
-                parts.pop_back();
-            }
+            HandleDotDotSegment(parts);
             continue;
         }
 
         parts.push_back(sv);
     }
 
-    std::string_view sv(&path[begin], length);
-    parts.push_back(sv);
+    AppendFinalPathSegment(parts, std::string_view(&path[begin], length));
 
-    std::stringstream ss;
-
-    ASSERT(!parts.empty());
-    i = 0;
-    ss << parts[i++];
-
-    while (i < parts.size()) {
-        ss << delim;
-        ss << parts[i++];
-    }
-
-    return ss.str();
+    return JoinPathParts(parts, delimChar);
 }
 
 std::string GetCurrentWorkingDirectory()
