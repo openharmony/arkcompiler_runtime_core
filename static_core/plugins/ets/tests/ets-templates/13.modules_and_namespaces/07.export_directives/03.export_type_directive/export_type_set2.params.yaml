@@ -39,24 +39,24 @@ cases:
     export_ex:
       - 'type S = D'
       - 'type A = D'
-  - description: '4. Duplicated export type. Constants. Expect warning.'
+  - description: '4. Duplicated export type. Type alias. Expect warning.'
     data:
-      - 'const NUM: int = 11'
+      - 'type NUM = int'
     export_ex:
       - 'type {NUM}'
       - 'type {NUM}'
     expected_out: "Warning W0073: Duplicated export aliases for 'NUM'."
-  - description: '5. Duplicated export type. Constants. Expect warning.'
+  - description: '5. Duplicated export type. Type alias. Expect warning.'
     data:
-      - 'const NUM: int = 786'
+      - 'type NUM = int'
     export_ex:
       - 'type {NUM, NUM}'
     expected_out:
       - "Warning W0073: Duplicated export aliases for 'NUM'."
       - "Warning W125428: 'NUM' has already imported"
-  - description: '6. Duplicated export type. Constants. With AS. Expect warning.'
+  - description: '6. Duplicated export type. Type alias. With AS. Expect warning.'
     data:
-      - 'const NUM: int = 445'
+      - 'type NUM = int'
     export_ex:
       - 'type {NUM, NUM as V}'
     expected_out: "Warning W125428: 'NUM' has already imported"

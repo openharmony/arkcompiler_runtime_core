@@ -23,5 +23,4 @@ export { int_1,  int_2, int_3 };
 
 export  const int_4: int = 3;
 export  const int_5: double = -0.0, int_6: long = 9007199254740991;
-export type { int_4 , int_5, int_6 };
-
+export { int_4 , int_5, int_6 };

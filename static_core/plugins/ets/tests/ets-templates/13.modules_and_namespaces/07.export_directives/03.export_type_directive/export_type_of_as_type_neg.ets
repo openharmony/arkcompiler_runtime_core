@@ -14,7 +14,8 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Edit value of the exported const variable type
+desc: Assign incompatible value to exported type alias
+expected_out: "Semantic error ESE0318: Type '\"bad\"' cannot be assigned to type 'Int'"
 files:
 - ./const_as_type.ets
 tags: [compile-only, negative]
@@ -23,5 +24,5 @@ tags: [compile-only, negative]
 import { FOO } from './const_as_type'
 
 function main() {
-    FOO = 43
+    let i: FOO = "bad"
 }

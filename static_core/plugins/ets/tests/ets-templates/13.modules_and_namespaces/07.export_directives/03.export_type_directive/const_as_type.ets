@@ -17,5 +17,5 @@ limitations under the License.
 tags: [not-a-test, compile-only]
 ---*/
 
-const FOO: int = 42
+type FOO = int
 export type {FOO}

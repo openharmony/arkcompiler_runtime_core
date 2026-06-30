@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,9 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+expected_out: "Semantic error ESE0371: Cannot find type 'a'."
+tags: [compile-only, negative]
 ---*/
 
-let a: int = 123
-let b: int = 321
-
-export { a }
-export { b }
+let a: int = 123;
+export type { a };

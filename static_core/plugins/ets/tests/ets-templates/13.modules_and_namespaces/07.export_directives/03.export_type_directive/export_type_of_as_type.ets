@@ -14,7 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export const variable type directive
+desc: Export type alias with type directive
 files:
 - ./const_as_type.ets
 ---*/
@@ -22,6 +22,6 @@ files:
 import { FOO } from './const_as_type'
 
 function main() {
-    let i = FOO
+    let i: FOO = 42
     arktest.assertEQ(i, 42)
 }
