@@ -917,29 +917,13 @@ bool EtsClassWrapper::SetupJsProxyWrapper(InteropCtx *ctx, EtsClass *etsClass)
 void EtsClassWrapper::DefineJSClass(napi_env env, const std::vector<napi_property_descriptor> &jsProps,
                                     napi_value *jsCtor)
 {
-    std::vector<napi_property_descriptor> instanceProps;
-    std::vector<napi_property_descriptor> staticProps;
-
-    for (const auto &prop : jsProps) {
-        if ((prop.attributes & napi_static) != 0) {
-            staticProps.push_back(prop);
-        } else {
-            instanceProps.push_back(prop);
-        }
-    }
-
     NAPI_CHECK_FATAL(napi_define_class(env, etsClass_->GetDescriptor(), NAPI_AUTO_LENGTH,
-                                       EtsClassWrapper::JSCtorCallback, this, instanceProps.size(),
-                                       instanceProps.data(), jsCtor));
+                                       EtsClassWrapper::JSCtorCallback, this, jsProps.size(), jsProps.data(), jsCtor));
 
     napi_valuetype valueType;
     if (napi_typeof(env, *jsCtor, &valueType) != napi_ok || valueType == napi_undefined) {
         INTEROP_LOG(FATAL) << "Failed to define JS class for ETS proxy: " << etsClass_->GetDescriptor();
         return;
-    }
-
-    if (!staticProps.empty()) {
-        NAPI_CHECK_FATAL(napi_define_properties(env, *jsCtor, staticProps.size(), staticProps.data()));
     }
 }
 
