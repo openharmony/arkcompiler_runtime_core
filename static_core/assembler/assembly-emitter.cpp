@@ -817,15 +817,17 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                 return;
             }
 #ifdef PANDA_WITH_ECMASCRIPT
-            AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities);
-            return;
-#endif
-            if (insn.opcode == pandasm::Opcode::INITOBJ_SHORT || insn.opcode == pandasm::Opcode::INITOBJ_RANGE ||
-                insn.opcode == pandasm::Opcode::INITOBJ) {
-                AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities);
+            if (lookupInStatic) {
+                AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities, false);
                 return;
             }
-            UNREACHABLE();
+#endif
+            if (lookupInStatic &&
+                (insn.opcode == pandasm::Opcode::INITOBJ_SHORT || insn.opcode == pandasm::Opcode::INITOBJ_RANGE ||
+                 insn.opcode == pandasm::Opcode::INITOBJ)) {
+                AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities, false);
+                return;
+            }
         }
         ASSERT_PRINT(it != items.cend(), "Symbol '" << id << "' not found");
 
