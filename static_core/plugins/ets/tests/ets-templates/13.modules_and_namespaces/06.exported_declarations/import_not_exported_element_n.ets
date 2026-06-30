@@ -18,6 +18,8 @@ desc: >-
     A declared name is considered private if not exported; a private declared name can be used only inside the
     package it is declared in.
 tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE0087: Property 'getFirstDayInMonth' does not exist on type 'std.time'"
 ---*/
 
 import * as Time from "std/time"

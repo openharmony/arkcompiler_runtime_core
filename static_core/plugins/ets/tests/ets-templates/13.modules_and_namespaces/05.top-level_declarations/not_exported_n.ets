@@ -18,8 +18,8 @@ desc: >-
       The declarations not marked as exported can be used only inside the compilation unit they are declared in.
       Import all, call not exported item.
 tags: [compile-only, negative]
-files:
-- ./modules/partial_export.ets
+expected_out:
+    - "Semantic error ESE0087: Property 'foo' does not exist on type 'partial_export'"
 ---*/
 
 import * as A from "./modules/partial_export"

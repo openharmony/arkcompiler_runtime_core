@@ -16,8 +16,6 @@
 /*---
 desc: ES2PANDA_FAIL - SyntaxError Namespace 'A' is already defined.
 tags: [compile-only, negative]
-files:
-    - ./namespace_storage2.ets
 expected_out: |-
     Semantic error ESE0349: Namespace 'A' is already defined.
     Syntax error ESY0316: Hard keyword 'class' cannot be used as identifier

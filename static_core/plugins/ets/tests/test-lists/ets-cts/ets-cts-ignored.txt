@@ -363,6 +363,20 @@
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_byte_0_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_short_0_0.ets
 
+#32585 No CTE on mixing context
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_01_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_02_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_03_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_04_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_05_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_06_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_07_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_08_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_09_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_10_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_11_n.ets
+13.modules_and_namespaces/01.module_declarations/mixed_decl_module_12_n.ets
+
 #33476
 13.modules_and_namespaces/02.module_header/module_header.ets
 13.modules_and_namespaces/02.module_header/module_header_export.ets

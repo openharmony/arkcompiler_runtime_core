@@ -18,8 +18,8 @@ desc: >-
       The declarations not marked as exported can be used only inside the compilation unit they are declared in.
       Import not exported item using selective binding.
 tags: [compile-only, negative]
-files:
-- ./modules/partial_export.ets
+expected_out:
+    - "Semantic error ESE0355: Imported element not exported 'foo'"
 ---*/
 
 import {foo} from "./modules/partial_export"

@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Ambient Interface declarations
+desc: Ambient interface declarations
 tags: [compile-only, not-a-test]
 ---*/
 

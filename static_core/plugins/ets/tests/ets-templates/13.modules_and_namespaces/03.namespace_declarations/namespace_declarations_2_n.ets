@@ -16,8 +16,6 @@
 /*---
 desc: ES2PANDA_FAIL -  TypeError Type 'int' cannot be assigned to type 'String'
 tags: [compile-only, negative]
-files:
-    - ./namespace_storage.ets
 expected_out: |-
     Semantic error ESE0318: Type 'Int' cannot be assigned to type 'String'
 ---*/

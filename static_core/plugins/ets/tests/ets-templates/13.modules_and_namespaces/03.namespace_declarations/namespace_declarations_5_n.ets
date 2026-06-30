@@ -16,8 +16,6 @@
 /*---
 desc: ES2PANDA_FAIL - Namespace 'NS2' is already defined.
 tags: [compile-only, negative]
-files:
-    - ./namespace_storage.ets
 expected_out: |-
     Semantic error ESE0349: Namespace 'NS2' is already defined.
 ---*/

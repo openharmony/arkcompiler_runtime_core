@@ -16,6 +16,8 @@
 /*---
 desc: Only one default export is allowed in a module
 tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE0374: Only one default export is allowed in a module"
 ---*/
 
 export default const b: int = 1;

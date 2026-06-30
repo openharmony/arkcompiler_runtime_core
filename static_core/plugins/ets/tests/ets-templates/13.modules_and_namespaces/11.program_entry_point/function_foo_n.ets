@@ -18,6 +18,7 @@
 desc: Any exported top-level function can be used as an entry point
 tags: [no-warmup, {{c.tags}}]
 entry_point: {{c.entry_point}}
+{{c.expected_data or ''}}
 ---*/
 
 {{c.use}}

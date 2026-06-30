@@ -17,6 +17,7 @@
 /*---
 desc: Program execution starts from the execution of a program entry point
 tags: [no-warmup, negative]
+{{c.expected_data or ''}}
 ---*/
 
 {{c.use}}
