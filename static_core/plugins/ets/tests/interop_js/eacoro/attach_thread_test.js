@@ -37,6 +37,7 @@ function runTest() {
     test.callJsFunctionTest();
     test.callJsAsyncFunctionTest();
     test.existEnvDetachTest();
+    test.createJSRuntimeWorkerThreadTest();
 }
 
 runTest();
