@@ -22,10 +22,9 @@
 # --emit-metadata + --read-metadata).
 #
 # Invoked per-test by cfg/workflows/panda-metadata-parity.yaml. The workflow
-# passes the LHS source file path (absolute, under .../metadata/...); this
-# script derives the RHS path by swapping the "metadata" path segment with
-# "binary-metadata". Exit 0 → parity OK; exit 1 → drift detected (with a
-# diagnostic printed to stderr).
+# passes the templates root and the relative test-id as separate arguments so
+# the script derives paths from the unambiguous relative test-id. Exit 0 →
+# parity OK; exit 1 → drift detected (with a diagnostic printed to stderr).
 
 import sys
 from pathlib import Path
@@ -53,21 +52,26 @@ EXPECTED_OPTIONS_MAP: dict[frozenset[str], set[frozenset[str]]] = {
 LHS_SEGMENT = "metadata"
 RHS_SEGMENT = "binary-metadata"
 SIBLING_SUFFIXES = (".json", ".yaml")
-# Delimiters of the per-test metadata block 
+TEMPLATES_ROOT: Path = Path()
+
+# Delimiters of the per-test metadata block
 METADATA_BLOCK_START = "/*---"
 METADATA_BLOCK_END = "---*/"
 
 
 def derive_rhs(lhs_path: Path) -> Path:
-    """Swap the FIRST 'metadata' path segment to 'binary-metadata'."""
-    parts = lhs_path.parts
+    """Swap the 'metadata' segment in the relative test-id to 'binary-metadata'."""
+    rel = lhs_path.relative_to(TEMPLATES_ROOT)
+    parts = list(rel.parts)
     try:
         idx = parts.index(LHS_SEGMENT)
     except ValueError as exc:
         raise SystemExit(
-            f"cannot derive RHS: '{lhs_path}' does not contain a '{LHS_SEGMENT}' path segment"
+            f"cannot derive RHS: '{lhs_path}' relative path does not contain "
+            f"a '{LHS_SEGMENT}' segment"
         ) from exc
-    return Path(*parts[:idx], RHS_SEGMENT, *parts[idx + 1:])
+    parts[idx] = RHS_SEGMENT
+    return TEMPLATES_ROOT.joinpath(*parts)
 
 
 def extract_metadata(text: str) -> tuple[dict | None, str]:
@@ -230,10 +234,13 @@ def _check_orphans(lhs: Path) -> int:
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <metadata-source-file>", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} <ets-templates-root> <test-id>", file=sys.stderr)
         return 2
-    lhs = Path(sys.argv[1])
+
+    global TEMPLATES_ROOT
+    TEMPLATES_ROOT = Path(sys.argv[1])
+    lhs = TEMPLATES_ROOT / sys.argv[2]
 
     failures = _check_pair(lhs) + _check_siblings(lhs) + _check_orphans(lhs)
     return 1 if failures > 0 else 0

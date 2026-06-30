@@ -18,7 +18,7 @@ desc: Export type with binding
 tags: [compile-only, not-a-test]
 ---*/
 
-class C {
+export class C {
   f: int = 8
 }
 

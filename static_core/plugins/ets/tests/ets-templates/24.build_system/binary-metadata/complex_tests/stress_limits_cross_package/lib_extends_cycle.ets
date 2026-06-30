@@ -14,7 +14,7 @@
  */
 /*---
 desc: Trivial library; the test exercises a cyclic 'extends' in the consumer's arktsconfig.
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 name: lib_extends_cycle
 arktsconfig: arktsconfig-extends_cycle-lib.json
 es2panda_options: ['emit-metadata']

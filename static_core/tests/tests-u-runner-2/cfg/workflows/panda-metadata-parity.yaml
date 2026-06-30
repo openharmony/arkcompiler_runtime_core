@@ -56,4 +56,5 @@ steps:
         step-type: declgen
         args:
             - "${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/tests-u-runner-2/cfg/scripts/check-metadata-parity.sh"
-            - "${parameters.ets-templates-root}/${test-id}"
+            - "${parameters.ets-templates-root}"
+            - "${test-id}"

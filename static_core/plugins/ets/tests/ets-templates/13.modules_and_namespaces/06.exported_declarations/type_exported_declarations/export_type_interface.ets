@@ -20,5 +20,5 @@ tags:
 - not-a-test
 ---*/
 
-interface I {}
+export interface I {}
 export type {I}

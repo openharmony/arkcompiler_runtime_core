@@ -20,7 +20,7 @@ tags:
 - not-a-test
 ---*/
 
-class C<T> {
+export class C<T> {
     f: T
     constructor(f: T) {
         this.f = f

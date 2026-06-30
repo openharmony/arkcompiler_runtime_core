@@ -17,7 +17,7 @@ limitations under the License.
 tags: [not-a-test, compile-only]
 ---*/
 
-class ClassA {
+export class ClassA {
   f: int
   constructor(f: int) {
     this.f = f

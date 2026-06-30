@@ -552,8 +552,6 @@ private:
     std::unique_ptr<PandaCache> pandaCache_;
     const uint32_t uniqId_;
     mutable ark::Span<const ark::panda_file::EntityPairHeader> classHashTable_;
-
-    static constexpr std::array<uint8_t, VERSION_SIZE> METADATA_SINCE_VERSION = {0, 0, 0, 7};
 };
 
 static_assert(File::GetFileBaseOffset() == 0);

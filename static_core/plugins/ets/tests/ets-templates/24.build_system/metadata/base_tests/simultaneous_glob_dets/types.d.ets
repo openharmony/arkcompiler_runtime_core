@@ -15,20 +15,14 @@
 
 /*---
 desc: >-
-    Declaration file with implementations. As SOURCE_DECL these are external refs.
-    As MODULE (bug) the bodies are compiled into abc.
+    Declaration file without implementations. When globbed in simultaneous mode,
+    .d.ets must stay SOURCE_DECL and must not be compiled into abc.
 tags: [compile-only, not-a-test]
 ---*/
 
-export class Helper {
-    value: int = 42
-    getValue(): int {
-        return this.value
-    }
+export declare class Helper {
+    value: int
+    getValue(): int
 }
 
-export function helperCreate(v: int): Helper {
-    let h = new Helper()
-    h.value = v
-    return h
-}
+export declare function helperCreate(v: int): Helper

@@ -114,10 +114,14 @@ class BaseValidator(IValidator):
         return ValidationResult(False, ValidatorFailKind.STEP_FAILED, "")
 
     @staticmethod
+    def _is_negative_step(test: "TestStandardFlow", step: StepFields) -> bool:
+        return step.step_name in test.negative_steps or step.step_kind in test.negative_steps
+
+    @staticmethod
     def _step_passed(test: "TestStandardFlow", return_code: int, step: StepFields) -> tuple[bool, str]:
         expected_rc = [0]
         if test.negative_steps:
-            if step.step_name in test.negative_steps:
+            if BaseValidator._is_negative_step(test, step):
                 if step.step_kind in (StepKind.RUNTIME.value, StepKind.VERIFIER.value):
                     expected_rc = [1, 255]
                 else:

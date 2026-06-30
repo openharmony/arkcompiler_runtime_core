@@ -2911,7 +2911,7 @@ export class DateTimeFormat {
     /**
     * Implementation of SegmentData with private fields and pub getters/setters
     */
-    export class SegmentDataImpl implements SegmentData {
+    class SegmentDataImpl implements SegmentData {
         // Private backing fields
         private _index: int = 0;
         private _input: string = '';

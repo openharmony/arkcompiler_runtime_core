@@ -2513,7 +2513,7 @@ export namespace taskpool {
         readonly state: Any;
     }
 
-    export class SeqRunnerImpl {
+    class SeqRunnerImpl {
         constructor(id: int) {
             this.id = id;
             this.seqPromise = Promise.resolve<Any>(new Object());
@@ -2642,8 +2642,8 @@ export namespace taskpool {
 
         private impl: SeqRunnerImpl;
 
-        static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
-        static mutex: Object = ConcurrencyHelpers.mutexCreate();
+        private static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
+        private static mutex: Object = ConcurrencyHelpers.mutexCreate();
     }
 
     class AsyncRunnerImpl {

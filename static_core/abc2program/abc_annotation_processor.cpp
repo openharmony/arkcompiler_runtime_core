@@ -99,6 +99,7 @@ static pandasm::AnnotationElement CreateAnnoElem(std::string &annotationElemName
         annotationElemName, std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<P_TYPE>(value)));
 }
 
+// CC-OFFNXT(huge_method,huge_cyclomatic_complexity,G.FUN.01-CPP) big switch-case, solid logic
 std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotationElement(
     const panda_file::AnnotationDataAccessor::Elem &annotationDataAccessorElem, std::string &annotationElemName,
     pandasm::Value::Type valueType)

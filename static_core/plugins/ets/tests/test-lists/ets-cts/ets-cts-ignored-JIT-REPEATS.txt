@@ -7,3 +7,7 @@
 
 #35674
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_31.ets 
+
+# AOT IrBuilder default compiler-max-bytecode-size=30000 is below this generated encodeAll() bytecode size (~920k).
+24.build_system/metadata/complex_tests/stress_limits_cross_package/test_multi_import_index_overflow.ets
+24.build_system/binary-metadata/complex_tests/stress_limits_cross_package/test_multi_import_index_overflow.ets

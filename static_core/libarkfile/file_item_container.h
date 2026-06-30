@@ -57,6 +57,10 @@ public:
 
     PANDA_PUBLIC_API StringItem *GetOrCreateStringItem(const std::string &str);
 
+    bool IsMetadataEnabled() const;
+
+    uint32_t GetMetadataSize() const;
+
     const std::array<uint8_t, File::VERSION_SIZE> &GetCurrentVersion() const;
 
     PANDA_PUBLIC_API LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);

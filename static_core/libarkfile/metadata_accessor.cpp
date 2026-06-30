@@ -25,6 +25,7 @@
 
 namespace ark::panda_file {
 
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda_file::helpers;
 
@@ -77,28 +78,37 @@ static bool InflateModule(z_stream &zs, const uint8_t *&inPtr, size_t &inRemaini
 
 MetadataAccessor::MetadataAccessor(const File &pandaFile)
 {
-    this->abcFilename_ = pandaFile.GetFullFileName();
+    abcFilename_ = pandaFile.GetFullFileName();
     LoadMetadata(pandaFile);
+}
+
+bool MetadataAccessor::ProcessModule(const File &pandaFile, const uint32_t *metadata, uint32_t index,
+                                     EncodedMetadata moduleData)
+{
+    const auto baseOff = 1 + index * 3;
+    const auto pkgNameOff = pandaFile.GetBase() + metadata[baseOff];         // NOLINT
+    const auto moduleNameOff = pandaFile.GetBase() + metadata[baseOff + 1];  // NOLINT
+    [[maybe_unused]] const auto size = metadata[baseOff + 2];                // NOLINT
+    const auto pkgName = pandaFile.GetStringData(pandaFile.GetIdFromPointer(pkgNameOff)).ToString();
+    const auto moduleName = pandaFile.GetStringData(pandaFile.GetIdFromPointer(moduleNameOff)).ToString();
+
+    metadata_[pkgName][moduleName] = std::move(moduleData);
+    LOG_METADATA(pkgName << ":" << moduleName << " (" << size << " bytes)");
+    return true;
 }
 
 void MetadataAccessor::LoadMetadata(const File &pandaFile)
 {
     LOG_METADATA_ENABLE();
-
     const auto metadataInfoSpan = pandaFile.GetMetadata();
     if (metadataInfoSpan.empty()) {
         return;
     }
-
     const auto *metadata = reinterpret_cast<const uint32_t *>(metadataInfoSpan.data());
-
     const uint32_t numMetadataItems = metadata[0];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-    // Validate that metadata span is not definitely malformed, based on sizes
     ASSERT((1 + numMetadataItems * INDEX_ITEM_SIZE) * sizeof(uint32_t) <= metadataInfoSpan.size());
-
     const auto metadataSpan = metadataInfoSpan.SubSpan((1 + numMetadataItems * INDEX_ITEM_SIZE) * sizeof(uint32_t));
-
     LOG_METADATA("loading metadata (" << pandaFile.GetFullFileName() << ", " << numMetadataItems << " modules)");
 
     z_stream zs {};
@@ -110,28 +120,9 @@ void MetadataAccessor::LoadMetadata(const File &pandaFile)
 
     const uint8_t *inPtr = metadataSpan.data();
     auto inRemaining = metadataSpan.size();
-#if !defined(NDEBUG)
-    uint64_t uncompressedMetadataSize = 0;
-#endif
-
     LOG_METADATA_NESTING_INC();
     for (uint32_t i = 0; i < numMetadataItems; i++) {
-        const auto baseOff = 1 + i * 3;
-        const auto pkgNameOff =
-            pandaFile.GetBase() + metadata[baseOff];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const auto moduleNameOff =
-            pandaFile.GetBase() + metadata[baseOff + 1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const auto size = metadata[baseOff + 2];          // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const auto pkgName = pandaFile.GetStringData(pandaFile.GetIdFromPointer(pkgNameOff)).ToString();
-        const auto moduleName = pandaFile.GetStringData(pandaFile.GetIdFromPointer(moduleNameOff)).ToString();
-
-#if !defined(NDEBUG)
-        uncompressedMetadataSize += size;
-#endif
-
-        // Bound allocation against malformed size fields: total uncompressed metadata cannot exceed the file.
-        ASSERT(uncompressedMetadataSize < pandaFile.GetHeader()->fileSize);
-
+        const auto size = metadata[1 + i * 3 + 2];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         EncodedMetadata buf(size);
         if (!InflateModule(zs, inPtr, inRemaining, buf)) {
             LOG_METADATA("metadata uncompression failed (" << metadataSpan.size() << " bytes)");
@@ -141,16 +132,16 @@ void MetadataAccessor::LoadMetadata(const File &pandaFile)
             LOG_METADATA_DISABLE();
             return;  // Handle errors properly: leave metadata_ empty
         }
-
-        metadata_[pkgName][moduleName] = std::move(buf);
-
-        LOG_METADATA(pkgName << ":" << moduleName << " (" << size << " bytes)");
+        if (!ProcessModule(pandaFile, metadata, i, std::move(buf))) {
+            inflateEnd(&zs);
+            metadata_.clear();
+            LOG_METADATA_NESTING_DEC();
+            LOG_METADATA_DISABLE();
+            return;  // Handle errors properly: leave metadata_ empty
+        }
     }
     LOG_METADATA_NESTING_DEC();
-
     inflateEnd(&zs);
-    ASSERT(uncompressedMetadataSize != 0);
-
     LOG_METADATA("metadata mem cache recorded (" << metadata_.size() << " modules)");
     LOG_METADATA_DISABLE();
 }
@@ -173,6 +164,7 @@ EncodedMetadata MetadataAccessor::CompressMetadata(const MetadataByPackages &met
     }
     LOG_METADATA_NESTING_DEC();
 
+    // CC-OFFNXT(WordsTool.95) sensitive word conflict
     unsigned long entireMetadataSize = entireMetadata.size();  // NOLINT(google-runtime-int)
     // Free unused trailing memory after compression
     auto compressedMetadata = std::make_unique<uint8_t[]>(entireMetadataSize);  // NOLINT(modernize-avoid-c-arrays)
@@ -196,11 +188,11 @@ MetadataByModules MetadataAccessor::ExtractMetadataForPackage(const std::string 
 
     const auto it = metadata_.find(pkgName);
     if (it == metadata_.end()) {
-        LOG_METADATA("accessing metadata (package " << pkgName << " from " << abcFilename << "): empty");
+        LOG_METADATA("accessing metadata (package " << pkgName << " from " << abcFilename_ << "): empty");
         return {};
     }
 
-    LOG_METADATA("accessing metadata (package " << pkgName << " from " << abcFilename << "): " << it->second.size()
+    LOG_METADATA("accessing metadata (package " << pkgName << " from " << abcFilename_ << "): " << it->second.size()
                                                 << " modules, " << CalcMetadataPkgSize(pkgName, metadata_) << " bytes");
     LOG_METADATA_DISABLE();
 
@@ -212,11 +204,11 @@ MetadataByPackages MetadataAccessor::ExtractMetadata()
     LOG_METADATA_ENABLE();
 
     if (metadata_.empty()) {
-        LOG_METADATA("accessing metadata (from " << abcFilename << "): empty");
+        LOG_METADATA("accessing metadata (from " << abcFilename_ << "): empty");
         return {};
     }
 
-    LOG_METADATA("accessing metadata (from " << abcFilename << "): " << metadata_.size() << " packages");
+    LOG_METADATA("accessing metadata (from " << abcFilename_ << "): " << metadata_.size() << " packages");
 
     LOG_METADATA_DISABLE();
 

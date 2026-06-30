@@ -15,7 +15,7 @@
 
 /*---
 desc: Simple import lib
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 name: test_lib1
 arktsconfig: arktsconfig-lib1.json
 es2panda_options: ['emit-metadata', 'simultaneous']

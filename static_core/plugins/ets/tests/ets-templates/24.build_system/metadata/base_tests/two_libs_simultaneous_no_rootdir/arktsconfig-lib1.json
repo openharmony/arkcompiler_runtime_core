@@ -77,7 +77,7 @@
     }
   },
   "files": [
-    "${WORK_DIR}/${SUITE_NAME}/gen/24.build_system/metadata/base_tests/two_libs_simultaneous/test_lib1.ets",
-    "${WORK_DIR}/${SUITE_NAME}/gen/24.build_system/metadata/base_tests/two_libs_simultaneous/test_lib2.ets"
+    "${WORK_DIR}/${SUITE_NAME}/gen/24.build_system/metadata/base_tests/two_libs_simultaneous_no_rootdir/test_lib1.ets",
+    "${WORK_DIR}/${SUITE_NAME}/gen/24.build_system/metadata/base_tests/two_libs_simultaneous_no_rootdir/test_lib2.ets"
   ]
 }

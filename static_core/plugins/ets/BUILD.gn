@@ -424,6 +424,7 @@ if (with_stdlib) {
       "--extension=ets",
       "--opt-level=2",
       "--gen-stdlib=true",
+      "--emit-metadata",
       "--output=" + rebase_path(outputs[0], root_build_dir),
     ]
     if (ark_use_common_runtime) {

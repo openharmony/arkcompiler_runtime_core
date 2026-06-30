@@ -15,9 +15,8 @@
 
 /*---
 desc: >-
-    Cross-package source that REDEFINES a standard-library class name
-    ('Date' is exported from std/core).
-tags: [not-a-test, compile-only]
+   standard-library class name 'Date' cannot be redefined.
+tags: [not-a-test, compile-only, negative]
 name: lib_class
 arktsconfig: arktsconfig-lib.json
 es2panda_options: ['emit-metadata']

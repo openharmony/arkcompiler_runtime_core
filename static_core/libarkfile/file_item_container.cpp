@@ -303,8 +303,7 @@ uint32_t ItemContainer::GetMetadataSize() const
     if (!IsMetadataEnabled()) {
         return 0;
     }
-    return File::METADATA_FLAG_SIZE +
-           (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
+    return metadata_->CalculateSize();
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
@@ -693,7 +692,7 @@ uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection, bool updateOrde
     uint32_t classIdxOffset = sizeof(File::Header);
     uint32_t exportIdxOffset = classIdxOffset + numClasses * ID_SIZE;
     uint32_t curOffset;
-    uint32_t metadataSize = metadata_->CalculateSize();
+    uint32_t metadataSize = GetMetadataSize();
     if (metadataSize > 0) {
         curOffset = exportIdxOffset + (numExportClasses + numLiteralarrays) * ID_SIZE + metadataSize;
     } else {
@@ -915,7 +914,7 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
     }
 
     uint32_t classMapSize = classMap_.size() * ID_SIZE;
-    uint32_t metadataSize = metadata_->CalculateSize();
+    uint32_t metadataSize = GetMetadataSize();
     uint32_t exportDataSize = exportMap_.size() * ID_SIZE + metadataSize;
     if (!writer->Write<uint32_t>(IsMetadataEnabled() ? exportDataSize : exportMap_.size())) {
         return false;
@@ -1159,17 +1158,27 @@ bool ItemContainer::WriteExportData(Writer *writer)
 
     // If metadata isn't enabled, the export map size equals to numExportTable - METADATA_FLAG_SIZE,
     // then don't write it to keep backward compatibility and save space
-    if (metadata_->IsEnabled() && !writer->Write<uint32_t>(exportMap_.size() * ID_SIZE)) {
+    if (!metadata_->IsEnabled()) {
+        for (const auto &[_, item] : exportMap_) {
+            if (!writer->Write(item->GetOffset())) {
+                return false;
+            }
+        }
+        return writer->Align(ID_SIZE);
+    }
+
+    if (!writer->Write<uint32_t>(exportMap_.size() * ID_SIZE)) {
         return false;
     }
+
     for (const auto &[_, item] : exportMap_) {
         if (!writer->Write(item->GetOffset())) {
             return false;
         }
     }
 
-    if (!metadata_->IsEnabled() || metadata_->IsEmpty()) {
-        return true;
+    if (metadata_->IsEmpty()) {
+        return writer->Align(ID_SIZE);
     }
 
     if (!writer->Write<uint32_t>(metadata_->NumItems())) {
@@ -1190,7 +1199,11 @@ bool ItemContainer::WriteExportData(Writer *writer)
         }
     }
 
-    return writer->WriteBytes(metadata_->Compressed());
+    if (!writer->WriteBytes(metadata_->Compressed())) {
+        return false;
+    }
+
+    return writer->Align(ID_SIZE);
 }
 
 bool ItemContainer::PrepareRegionSectionForWrite(RegionSectionMode regionSectionMode, bool *rebuildRegionSection,
@@ -1572,7 +1585,7 @@ bool ItemContainer::IndexItem::Add(IndexedItem *item)
     auto size = GetNumItems();
     ASSERT(size <= maxIndex_);
 
-    if (size == maxIndex_) {
+    if (size >= maxIndex_) {
         return false;
     }
 

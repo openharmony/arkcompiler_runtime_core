@@ -59,6 +59,7 @@ private:
     MetadataByPackages metadata_;
 
     void LoadMetadata(const File &pandaFile);
+    bool ProcessModule(const File &pandaFile, const uint32_t *metadata, uint32_t index, EncodedMetadata moduleData);
 };
 
 }  // namespace ark::panda_file

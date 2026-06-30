@@ -15,18 +15,13 @@
 
 /*---
 desc: >-
-    A consumer imports the redefined class 'Date' from the library,
-    instantiates it, reads a field and CALLS A METHOD on it. The imported
-    (user) class must be the one resolved, so both the field and the method
-    of the redefinition are exercised.
+    A consumer cannot import class 'Date' from the library,
+    because the standard-library entity cannot be redefined.
 files: [lib_class.ets]
+tags: [compile-only, negative]
 name: test_import
 arktsconfig: arktsconfig-import.json
 es2panda_options: ['read-metadata']
-expected_out:
-    runtime:
-        - "7"
-        - "user-date"
 ---*/
 
 import { Date } from '@panda/lib/lib_class'

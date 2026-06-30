@@ -974,7 +974,7 @@ size_t MetadataItems::CalculateSize() const
         metadataSize += NumItems() * ID_SIZE * MetadataAccessor::INDEX_ITEM_SIZE;
         metadataSize += CompressedSize();
     }
-    return metadataSize;
+    return RoundUp(metadataSize, ID_SIZE);
 }
 
 ScalarValueItem *ValueItem::GetAsScalar()

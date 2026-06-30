@@ -15,7 +15,7 @@
 
 /*---
 desc: Simple import lib
-files: [l1.ets, l2.ets, l3.ets, l5.ets, l6.ets, l7.ets, ]
+files: [l1.ets, l2.ets, l3.ets, l4.ets, l5.ets, l6.ets, l7.ets, l8.ets, l9.ets ]
 name: test_import
 arktsconfig: arktsconfig-main.json
 es2panda_options: ['read-metadata']

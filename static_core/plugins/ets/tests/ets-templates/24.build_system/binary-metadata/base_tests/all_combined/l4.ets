@@ -15,8 +15,10 @@
 
 /*---
 desc: Simple import lib34
-tags: [not-a-test]
+tags: [not-a-test, compile-only]
 name: l4
+arktsconfig: arktsconfig-34.json
+es2panda_options: ['emit-metadata', 'simultaneous']
 ---*/
 
 import {NiceA} from "@panda/lib2/l2"

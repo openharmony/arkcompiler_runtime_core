@@ -15,15 +15,17 @@
 
 /*---
 desc: >-
-    Negative runtime test: .d.ets file with method implementations is present in the
-    directory. arktsconfig has no "files" section, so GetSourceList uses glob which
-    matches .d.ets (ends with .ets). In simultaneous mode, InitParseQueueForSimult
-    incorrectly sets MODULE kind on the .d.ets file instead of SOURCE_DECL.
-    When .d.ets is SOURCE_DECL (correct): types are external, no implementation in abc,
-    runtime fails with "Cannot find class" — expected behavior for this test.
-    When .d.ets is MODULE (bug): implementations are compiled into abc, runtime succeeds
-    — this test will incorrectly PASS, exposing the bug.
+    Negative runtime test: arktsconfig has no "files" section, so GetSourceList
+    uses glob which matches .d.ets (ends with .ets). In simultaneous mode,
+    globbed .d.ets files must stay SOURCE_DECL instead of MODULE. SOURCE_DECL
+    gives type information but no implementation in abc, so runtime fails with
+    a missing implementation. If .d.ets is compiled as MODULE, runtime succeeds
+    and prints 42.
 tags: [negative]
+negative_steps: [verifier, runtime]
+expected_error:
+  verifier: ["E/verifier: Cannot link class: Cannot find method 'helperCreate (I)Ltypes/Helper;' in class 'types.ETSGLOBAL'"]
+  runtime: ["Unhandled exception: std.core.LinkerVerificationError"]
 name: test_main
 arktsconfig: arktsconfig.json
 es2panda_options: ['simultaneous']

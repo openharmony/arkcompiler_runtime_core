@@ -828,9 +828,10 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                 AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities);
                 return;
             }
+            LOG(ERROR, ASSEMBLER) << "Internal error: bytecode instruction references missing symbol '" << id
+                                  << "', instruction: " << insn.ToString();
             UNREACHABLE();
         }
-        ASSERT_PRINT(it != items.cend(), "Symbol '" << id << "' not found");
 
         auto *item = it->second;
         ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);

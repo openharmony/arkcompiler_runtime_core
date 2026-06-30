@@ -14,14 +14,14 @@
 #
 # Per-test wrapper invoked by cfg/workflows/panda-metadata-parity.yaml.
 # Activates the project Python venv (so PyYAML is available) and runs
-# check-metadata-parity.py on the (LHS, RHS) pair passed by the workflow.
+# check-metadata-parity.py with the templates root and test-id as
+# separate arguments so the script can derive the RHS path from the
+# relative test-id without guessing in the absolute path.
 
 set -e
 
-if [[ -z "${1}" ]]; then
-    echo "Usage: $0 <metadata-source-file>" >&2
-    echo "  The binary-metadata counterpart path is derived by swapping the" >&2
-    echo "  'metadata' segment in the given path with 'binary-metadata'." >&2
+if [[ -z "${1}" || -z "${2}" ]]; then
+    echo "Usage: $0 <ets-templates-root> <test-id>" >&2
     exit 1
 fi
 

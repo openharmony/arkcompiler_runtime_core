@@ -60,6 +60,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     if ("${ETS_SRC}" STREQUAL "GEN_STD_LIB")
         set(E2P ${es2panda_bin_stdlib})
         list(APPEND ES2PANDA_ARGUMENTS "--gen-stdlib=true")
+        list(APPEND ES2PANDA_ARGUMENTS "--emit-metadata")
         list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${STDLIB}/stdconfig.json")
 
         set(STAMP "${OUTPUT_ABC}.stamp")

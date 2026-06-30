@@ -14,13 +14,13 @@
 cases:
   - description: '0. Duplicated export type. Class. With AS. Expect warning.'
     data:
-      - 'class D {}'
+      - 'export class D {}'
     export_ex:
       - 'type {D, D as F}'    
     expected_out: "Warning W125428: 'D' has already imported"
   - description: '1. Duplicated export type. Class. Expect warning.'
     data:
-      - 'class D {}'
+      - 'export class D {}'
     export_ex:
       - 'type {D, D}'    
     expected_out:
@@ -28,7 +28,7 @@ cases:
       - "Warning W0073: Duplicated export aliases for 'D'."
   - description: '2. Duplicated export type. Class. Expect warning.'
     data:
-      - 'class D {}'
+      - 'export class D {}'
     export_ex:
       - 'type {D}'
       - 'type {D}'
@@ -41,14 +41,14 @@ cases:
       - 'type A = D'
   - description: '4. Duplicated export type. Type alias. Expect warning.'
     data:
-      - 'type NUM = int'
+      - 'export type NUM = int'
     export_ex:
       - 'type {NUM}'
       - 'type {NUM}'
     expected_out: "Warning W0073: Duplicated export aliases for 'NUM'."
   - description: '5. Duplicated export type. Type alias. Expect warning.'
     data:
-      - 'type NUM = int'
+      - 'export type NUM = int'
     export_ex:
       - 'type {NUM, NUM}'
     expected_out:
@@ -56,13 +56,13 @@ cases:
       - "Warning W125428: 'NUM' has already imported"
   - description: '6. Duplicated export type. Type alias. With AS. Expect warning.'
     data:
-      - 'type NUM = int'
+      - 'export type NUM = int'
     export_ex:
       - 'type {NUM, NUM as V}'
     expected_out: "Warning W125428: 'NUM' has already imported"
   - description: '7. Duplicated export type. Class. With AS DEFAULT. Expect warning.'
     data:
-      - 'class D {}'
+      - 'export class D {}'
     export_ex:
       - 'type {D, D as default}'
     expected_out: "Warning W0073: Duplicated export aliases for 'D'."

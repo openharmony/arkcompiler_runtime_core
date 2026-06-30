@@ -18,12 +18,12 @@ limitations under the License.
 /*---
 desc: String comparison {{str.left}} {{str.op}} {{str.right}}
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0144: Type name 'string' used in the wrong context"
+expected_out: {{str.expected}}
 ---*/
 
 function main(): void {
-  let x: string = {{str.left}}
-  let y: string = {{str.right}}
+  let x: string = "{{str.left}}"
+  let y: string = "{{str.right}}"
   let z: String = new String("{{str.right}}")
   arktest.assertEQ((x {{str.op}} y), {{str.result}})
   arktest.assertEQ((x {{str.op}} z), {{str.result}})

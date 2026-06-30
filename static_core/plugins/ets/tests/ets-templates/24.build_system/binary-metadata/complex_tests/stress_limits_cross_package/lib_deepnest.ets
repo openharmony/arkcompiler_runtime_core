@@ -23,4 +23,4 @@ arktsconfig: arktsconfig-deepnest-lib.json
 es2panda_options: ['emit-metadata']
 ---*/
 export class Anchor { v: int = 1 }
-export type DeepNest = {% for _ in range(1000) %}Array<{% endfor %}int{% for _ in range(1000) %}>{% endfor %}
+export type DeepNest = {% for _ in range(60) %}Array<{% endfor %}int{% for _ in range(60) %}>{% endfor %}

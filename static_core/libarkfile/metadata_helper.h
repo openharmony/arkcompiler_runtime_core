@@ -17,7 +17,9 @@
 
 namespace ark::panda_file::helpers {
 
+#ifndef METADATA_VERBOSE
 #define METADATA_VERBOSE false
+#endif
 
 #if defined(METADATA_VERBOSE) && METADATA_VERBOSE
 

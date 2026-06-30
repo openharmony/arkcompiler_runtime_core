@@ -15,7 +15,7 @@
 
 /*---
 desc: Simple import lib
-files: [test_lib1.ets]
+files: [test_lib1.ets, test_lib2.ets]
 name: test_import
 arktsconfig: arktsconfig-import.json
 expected_out:

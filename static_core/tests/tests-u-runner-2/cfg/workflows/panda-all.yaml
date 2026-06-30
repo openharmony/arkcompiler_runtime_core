@@ -27,7 +27,9 @@ parameters:
     es2panda-timeout: 80
     verifier-timeout: 60
     es2panda-args: [ ]
+    es2panda-test-suite-args: [ ]
     verifier-args: [ ]
+    verifier-test-suite-args: [ ]
 
     # ark - for all launches
     gc-type: g1-gc
@@ -68,7 +70,9 @@ steps:
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
         es2panda-args: ${parameters.es2panda-args}
+        es2panda-test-suite-args: ${parameters.es2panda-test-suite-args}
         verifier-args: ${parameters.verifier-args}
+        verifier-test-suite-args: ${parameters.verifier-test-suite-args}
         boot-panda-files: ${parameters.boot-panda-files}
     ark-int-cpp-stw:
         from: panda-int

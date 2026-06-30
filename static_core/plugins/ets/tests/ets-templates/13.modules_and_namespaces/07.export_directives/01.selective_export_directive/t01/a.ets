@@ -17,7 +17,7 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-let Describe: int = 1;
+export let Describe: int = 1;
 
 export {
     Describe as describe
