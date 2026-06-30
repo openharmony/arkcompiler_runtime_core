@@ -15,6 +15,8 @@
 #include "modify_name_helper.h"
 
 #include <iostream>
+#include <algorithm>
+#include <functional>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -930,6 +932,58 @@ static bool RefreshExportedAnnotationElement(ark::pandasm::Record *record, const
     return true;
 }
 
+template <typename Owner>
+void WalkOwnedObjectLiteralsOnHosts(Owner *owner, const std::function<bool(const AbckitCoreClass *)> &shouldRefresh,
+                                    bool (*doRefresh)(AbckitCoreClass *, const std::string &), const char *logTag)
+{
+    if (owner == nullptr) {
+        return;
+    }
+
+    auto refreshOnClassHost = [&](AbckitCoreClass *host) {
+        if (host == nullptr) {
+            return;
+        }
+        const auto baseName = libabckit::GetStaticImplRecord(host)->name;
+        for (const auto &ol : host->objectLiterals) {
+            if (ol == nullptr || !shouldRefresh(ol.get())) {
+                continue;
+            }
+            LIBABCKIT_LOG(DEBUG) << logTag << ": refresh " << libabckit::GetStaticImplRecord(ol.get())->name
+                                 << " under host " << baseName << std::endl;
+            doRefresh(ol.get(), baseName);
+        }
+    };
+
+    auto refreshOnIfaceHost = [&](AbckitCoreInterface *iface) {
+        if (iface == nullptr) {
+            return;
+        }
+        const auto baseName = libabckit::GetStaticImplRecord(iface)->name;
+        for (const auto &ol : iface->objectLiterals) {
+            if (ol == nullptr || !shouldRefresh(ol.get())) {
+                continue;
+            }
+            LIBABCKIT_LOG(DEBUG) << logTag << ": refresh " << libabckit::GetStaticImplRecord(ol.get())->name
+                                 << " under host " << baseName << std::endl;
+            doRefresh(ol.get(), baseName);
+        }
+    };
+
+    for (const auto &[_, klass] : owner->ct) {
+        refreshOnClassHost(klass.get());
+        if (klass != nullptr && klass->partial != nullptr) {
+            refreshOnClassHost(klass->partial.get());
+        }
+    }
+    for (const auto &[_, iface] : owner->it) {
+        refreshOnIfaceHost(iface.get());
+        if (iface != nullptr && iface->partial != nullptr) {
+            refreshOnClassHost(iface->partial.get());
+        }
+    }
+}
+
 }  // namespace
 
 // --------------------------------------- public ----------------------
@@ -983,6 +1037,7 @@ bool libabckit::ModifyNameHelper::ModuleRefreshName(AbckitCoreModule *m, const s
     ModuleRefreshEnums(m);
     ModuleRefreshInterfaces(m);
     ModuleRefreshClasses(m);
+    ModuleRefreshOwnedObjectLiterals(m);
     ModuleRefreshFunctions(m);
     ModuleRefreshAnnotationInterfaces(m);
 
@@ -1037,6 +1092,7 @@ bool libabckit::ModifyNameHelper::NamespaceRefreshName(AbckitCoreNamespace *ns, 
     NamespaceRefreshEnums(ns);
     NamespaceRefreshInterfaces(ns);
     NamespaceRefreshClasses(ns);
+    NamespaceRefreshOwnedObjectLiterals(ns, oldFullName);
     NamespaceRefreshFunctions(ns);
     NamespaceRefreshAnnotationInterfaces(ns);
 
@@ -1445,6 +1501,94 @@ bool libabckit::ModifyNameHelper::ModuleRefreshAnnotationInterfaces(AbckitCoreMo
         if (!AnnotationInterfaceRefreshName(ai.get())) {
             return false;
         }
+    }
+    return true;
+}
+
+bool libabckit::ModifyNameHelper::ModuleRefreshOwnedObjectLiterals(AbckitCoreModule *m)
+{
+    LIBABCKIT_LOG_FUNC;
+    if (m == nullptr || m->file == nullptr) {
+        return true;
+    }
+
+    const auto shouldRefresh = [m](const AbckitCoreClass *ol) { return ol != nullptr && ol->owningModule == m; };
+    const auto doRefresh = &ModifyNameHelper::ObjectLiteralRefreshName;
+    constexpr const char *logTag = "ModuleRefreshOwnedObjectLiterals";
+
+    for (const auto &[_, extMod] : m->file->externalModules) {
+        WalkOwnedObjectLiteralsOnHosts(extMod.get(), shouldRefresh, doRefresh, logTag);
+    }
+    for (const auto &[_, mod] : m->file->localModules) {
+        if (mod.get() == m) {
+            continue;
+        }
+        WalkOwnedObjectLiteralsOnHosts(mod.get(), shouldRefresh, doRefresh, logTag);
+    }
+    return true;
+}
+
+bool libabckit::ModifyNameHelper::NamespaceRefreshOwnedObjectLiterals(AbckitCoreNamespace *ns,
+                                                                      const std::string &oldFullNsName)
+{
+    LIBABCKIT_LOG_FUNC;
+    if (ns == nullptr || ns->owningModule == nullptr || ns->owningModule->file == nullptr) {
+        return true;
+    }
+    if (oldFullNsName.empty()) {
+        return true;
+    }
+
+    auto *file = ns->owningModule->file;
+    auto *owningModule = ns->owningModule;
+
+    std::string flatNsPrefix = oldFullNsName;
+    std::replace(flatNsPrefix.begin(), flatNsPrefix.end(), '.', '$');
+    flatNsPrefix += '$';
+
+    const auto shouldRefresh = [owningModule, flatNsPrefix](const AbckitCoreClass *ol) -> bool {
+        if (ol == nullptr || ol->owningModule != owningModule) {
+            return false;
+        }
+        const auto &name = libabckit::GetStaticImplRecord(const_cast<AbckitCoreClass *>(ol))->name;
+        const auto firstDot = name.find('.');
+        if (firstDot == std::string::npos) {
+            return false;
+        }
+        const std::string_view flatPart(name.data() + firstDot + 1, name.size() - firstDot - 1);
+        return flatPart.rfind(flatNsPrefix, 0) == 0;
+    };
+    const auto doRefresh = &ModifyNameHelper::ObjectLiteralRefreshName;
+    constexpr const char *logTag = "NamespaceRefreshOwnedObjectLiterals";
+
+    const auto walkModuleAndNamespaces = [&](AbckitCoreModule *mod) {
+        if (mod == nullptr) {
+            return;
+        }
+        WalkOwnedObjectLiteralsOnHosts(mod, shouldRefresh, doRefresh, logTag);
+        std::function<void(AbckitCoreNamespace *)> walkNs = [&](AbckitCoreNamespace *cur) {
+            if (cur == nullptr || cur == ns) {
+                return;
+            }
+            WalkOwnedObjectLiteralsOnHosts(cur, shouldRefresh, doRefresh, logTag);
+            for (const auto &[_, child] : cur->nt) {
+                walkNs(child.get());
+            }
+        };
+        for (const auto &[_, child] : mod->nt) {
+            walkNs(child.get());
+        }
+    };
+
+    walkModuleAndNamespaces(owningModule);
+    for (const auto &[_, mod] : file->localModules) {
+        if (mod.get() == owningModule) {
+            continue;
+        }
+        walkModuleAndNamespaces(mod.get());
+    }
+    for (const auto &[_, mod] : file->externalModules) {
+        walkModuleAndNamespaces(mod.get());
     }
     return true;
 }

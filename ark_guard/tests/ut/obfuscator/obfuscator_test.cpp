@@ -1785,3 +1785,96 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_041, TestSize.Level1)
     VerifyAbcRunResult(oriModuleName, oriMethodName, obfModuleName, obfMethodName);
 #endif
 }
+
+/**
+ * @tc.name: obfuscator_test_042
+ * @tc.desc: ObjectLiteral whose host is an external interface (std.core.Intl.DateTimeFormatOptions).
+ *           The OL is "owned" by the user module but lives in an external module's
+ *           interface->objectLiterals, so it is not reachable from m->ct/m->it.
+ *           Without ModuleRefreshOwnedObjectLiterals the OL record name and its
+ *           constructor's parameter type stay anchored to the old module name
+ *           after obfuscation, producing a hybrid bytecode id that infinite-recurses
+ *           in AsmEmitter::AddBytecodeIndexDependencies on INITOBJ_*.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_042, TestSize.Level1)
+{
+    std::string abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/module_external_intf_objliteral_demo.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/module_external_intf_objliteral_demo.updated.abc";
+    std::string nameCacheFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/module_external_intf_objliteral_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("module_external_intf_objliteral_demo", "main");
+
+    AddModuleElement("module_external_intf_objliteral_demo", "module_external_intf_objliteral_demo");
+    AddElement<abckit_wrapper::Class>("module_external_intf_objliteral_demo.IntlHolder", "IntlHolder");
+    AddElement<abckit_wrapper::Field>("module_external_intf_objliteral_demo.IntlHolder.opts", "opts");
+
+    this->VerifyObfuscated();
+}
+
+/**
+ * @tc.name: obfuscator_test_043
+ * @tc.desc: NEWARR with a union element type mixing user interface + std.core types.
+ *           Before the inst_modifier fix, ModifyInstClass/GetUnionTypeNewName would
+ *           leave the NEWARR id stale when the full canonical union-array string
+ *           is absent from file->nameToClass even though component types were
+ *           successfully renamed; recordTable's key gets rewritten via components,
+ *           so the stale id no longer matches any entry in classItems and
+ *           AsmEmitter::AddBytecodeIndexDependencies crashes on UNREACHABLE().
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_043, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/newarr_union_array_demo.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/newarr_union_array_demo.updated.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/newarr_union_array_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("newarr_union_array_demo", "main");
+
+    AddModuleElement("newarr_union_array_demo", "newarr_union_array_demo");
+    AddElement<abckit_wrapper::Class>("newarr_union_array_demo.A", "A");
+    AddElement<abckit_wrapper::Class>("newarr_union_array_demo.BaseI100", "BaseI100");
+    AddElement<abckit_wrapper::Field>("newarr_union_array_demo.A.id", "id");
+
+    this->VerifyObfuscated();
+}
+
+/**
+ * @tc.name: obfuscator_test_044
+ * @tc.desc: Namespace-scoped class constructs an ObjectLiteral whose host is an EXTERNAL
+ *           interface. Exercises NamespaceRefreshOwnedObjectLiterals together with the
+ *           module-level helper: when both the module and a nested namespace rename, the
+ *           OL must end up consistent with the refreshed recordTable / classItems keys.
+ *           Without the namespace-side hardening, an OL whose flattened host name still
+ *           encodes the old namespace path can drift out of sync with the recordTable
+ *           and reproduce the same INITOBJ_* / NEWARR hazards.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_044, TestSize.Level1)
+{
+    std::string abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/namespace_external_intf_objliteral_demo.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/namespace_external_intf_objliteral_demo.updated.abc";
+    std::string nameCacheFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/namespace_external_intf_objliteral_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("namespace_external_intf_objliteral_demo", "main");
+
+    AddModuleElement("namespace_external_intf_objliteral_demo", "namespace_external_intf_objliteral_demo");
+    AddElement<abckit_wrapper::Namespace>("namespace_external_intf_objliteral_demo.Ns", "Ns");
+    AddElement<abckit_wrapper::Class>("namespace_external_intf_objliteral_demo.Ns.Holder", "Holder");
+    AddElement<abckit_wrapper::Field>("namespace_external_intf_objliteral_demo.Ns.Holder.opts", "opts");
+
+    this->VerifyObfuscated();
+}
