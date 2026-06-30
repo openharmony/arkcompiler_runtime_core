@@ -135,7 +135,7 @@ public:
     // Read a length-prefixed string, advancing offset. Returns empty string on error and sets offset to bufferSize.
     static inline std::string_view ReadStringFromBuffer(const uint8_t *buffer, size_t bufferSize, size_t &offset)
     {
-        uint32_t strLen;
+        uint32_t strLen = 0;
         if (DeserializeLE<uint32_t>(buffer, bufferSize, offset, strLen) != 0) {
             return {};
         }
