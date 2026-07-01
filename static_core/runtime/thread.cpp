@@ -247,6 +247,9 @@ void ManagedThread::InitForStackOverflowCheck(size_t nativeStackReservedSize, si
     if (guardSize < ark::os::mem::GetPageSize()) {
         guardSize = ark::os::mem::GetPageSize();
     }
+#ifdef PANDA_TARGET_EMULATOR
+    guardSize += ark::os::mem::GetPageSize();
+#endif
     if (stackSize <= nativeStackReservedSize + nativeStackProtectedSize + guardSize) {
         LOG(ERROR, RUNTIME) << "InitForStackOverflowCheck: stack size not enough"
                             << ", stack_base = " << stackBase << ", stack_size = " << stackSize
