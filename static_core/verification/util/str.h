@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,13 +40,12 @@ template <typename Int, typename = std::enable_if_t<std::is_integral_v<Int>>>
 PandaString NumToStr(Int val, Int base = 10, size_t width = 0)
 {
     PandaString result {};
-    bool neg = false;
-    if (val < 0) {
-        neg = true;
-        val = -val;
-    }
+    using UInt = std::make_unsigned_t<Int>;
+    const bool neg = val < 0;
+    UInt uval = neg ? static_cast<UInt>(0) - static_cast<UInt>(val) : static_cast<UInt>(val);
+    const auto ubase = static_cast<UInt>(base);
     do {
-        char c = static_cast<char>(val % base);
+        char c = static_cast<char>(uval % ubase);
         constexpr char LETTER_DIGIT_START = static_cast<char>(10);
         if (c >= LETTER_DIGIT_START) {
             c += 'a' - LETTER_DIGIT_START;
@@ -54,8 +53,8 @@ PandaString NumToStr(Int val, Int base = 10, size_t width = 0)
             c += '0';
         }
         result.insert(0, 1, c);
-        val = val / base;
-    } while (val);
+        uval /= ubase;
+    } while (uval);
     if (width > 0) {
         if (neg) {
             width -= 1;

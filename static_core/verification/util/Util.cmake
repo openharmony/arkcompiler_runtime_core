@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,6 +26,7 @@ set(UTIL_TESTS_SOURCES
     ${VERIFICATION_SOURCES_DIR}/util/tests/saturated_enum_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/shifted_vector_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/str_test.cpp
+    ${VERIFICATION_SOURCES_DIR}/util/tests/range_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/struct_field_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/callable_test.cpp
     ${VERIFICATION_SOURCES_DIR}/util/tests/function_traits_test.cpp

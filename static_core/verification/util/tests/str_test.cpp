@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <limits>
 #include <string>
 
 #include "util/str.h"
@@ -45,6 +46,7 @@ TEST_F(VerifierTest, str)
     EXPECT_EQ(Join<std::string>(Generator, "."), "G.e.n.e.r.a.t.o.r");
 
     EXPECT_EQ(NumToStr(-1456_I), "-1456");
+    EXPECT_EQ(NumToStr(std::numeric_limits<int32_t>::min()), "-2147483648");
     EXPECT_EQ(NumToStr(0x1C, 0x10), "1c");
 }
 

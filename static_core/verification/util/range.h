@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,8 +89,15 @@ public:
     };
     template <typename Container>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    Range(const Container &cont) : from_ {0}, to_ {cont.size() - 1}
+    Range(const Container &cont)
     {
+        if (cont.empty()) {
+            from_ = 1;
+            to_ = 0;
+        } else {
+            from_ = 0;
+            to_ = static_cast<Int>(cont.size() - 1);
+        }
     }
     Range(const Int from, const Int to) : from_ {std::min(from, to)}, to_ {std::max(from, to)} {}
     Range() = default;
@@ -118,6 +125,9 @@ public:
     }
     bool Contains(Int point) const
     {
+        if (to_ < from_) {
+            return false;
+        }
         return point >= from_ && point <= to_;
     }
     Int PutInBounds(Int point) const
