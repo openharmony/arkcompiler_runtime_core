@@ -107,7 +107,7 @@ public:
     }
     static constexpr uint32_t GetPreBuffOffset()
     {
-        return MEMBER_OFFSET(Mutator, preBuff_);
+        return MEMBER_OFFSET(Mutator, satbBuff_);
     }
     static constexpr uint32_t GetG1PostBarrierBufferOffset()
     {
@@ -161,16 +161,49 @@ public:
         return gcPhase_.load(std::memory_order_acquire);
     }
 
-    PandaVector<ObjectHeader *> *GetPreBuff() const
+    ObjectPointerType *GetSatbBuff() const
     {
-        return preBuff_;
+        return satbBuff_;
     }
-    PandaVector<ObjectHeader *> *MovePreBuff()
+
+    ObjectPointerType *MoveSatbBuff()
     {
-        auto res = preBuff_;
-        preBuff_ = nullptr;
+        auto res = satbBuff_;
+        satbBuff_ = nullptr;
         return res;
     }
+
+    void ClearSatbBuff()
+    {
+        satbBuffSize_ = 0U;
+    }
+
+    void AddToSatbBuff(const ObjectPointerType elem)
+    {
+        if (satbBuffSize_ == Mutator::PRE_BUFF_CAPACITY) {
+            auto oldSatbBuff = MoveSatbBuff();
+            PushSatbBuff({oldSatbBuff, Mutator::PRE_BUFF_CAPACITY});
+            AllocateSatbBuff();
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,-warnings-as-errors)
+        satbBuff_[satbBuffSize_++] = elem;
+    }
+
+    void AllocateSatbBuff(mem::InternalAllocatorPtr allocator = nullptr);
+
+    size_t GetSatbBuffSize() const
+    {
+        return satbBuffSize_;
+    }
+
+    void PushSatbBuff(const std::pair<ObjectPointerType *, size_t> &entry);
+
+    void SetSatbBuffList(PandaList<std::pair<ObjectPointerType *, size_t>> *list, os::memory::Mutex *mutex)
+    {
+        satbBuffList_ = list;
+        satbBuffMutex_ = mutex;
+    }
+
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *GetG1PostBarrierBuffer()
     {
         return g1PostBarrierRingBuffer_;
@@ -302,6 +335,8 @@ public:
      */
 
     void InitBuffers();
+
+    static constexpr size_t PRE_BUFF_CAPACITY = 1024U;
 
 private:
     // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
@@ -463,12 +498,17 @@ private:
     void *postWrbOneObject_ {nullptr};
     // keeps IRtoC GC PostWrb impl for storing two objects
     void *postWrbTwoObjects_ {nullptr};
-    PandaVector<ObjectHeader *> *preBuff_ {nullptr};
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
     // Keep these here to speed up interpreter
     mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
     mem::BarrierType postBarrierType_ {mem::BarrierType::POST_WRB_NONE};
     void *readBarrierEntrypoint_ {nullptr};
+
+    ObjectPointerType *satbBuff_ {nullptr};
+    size_t satbBuffSize_ = 0U;
+
+    PandaList<std::pair<ObjectPointerType *, size_t>> *satbBuffList_ = nullptr;
+    os::memory::Mutex *satbBuffMutex_ = nullptr;
 };
 
 /**

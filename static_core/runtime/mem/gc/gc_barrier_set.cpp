@@ -88,12 +88,11 @@ extern "C" void PreWrbFuncEntrypoint(ObjectPointerType oldval)
     ASSERT(IsAddressInObjectsHeap(reinterpret_cast<const ObjectHeader *>(oldval)->ClassAddr<BaseClass>()));
     LOG(DEBUG, GC) << "G1GC pre barrier val = " << oldval;
     ValidateObject(RootType::SATB_BUFFER, reinterpret_cast<const ObjectHeader *>(oldval));
-    auto *thread = Mutator::GetCurrent();
+    auto *mutator = Mutator::GetCurrent();
     // thread can't be null here because pre-barrier is called only in concurrent-mark, but we don't process
     // weak-references in concurrent mark
-    ASSERT(thread != nullptr);
-    auto bufferVec = thread->GetPreBuff();
-    bufferVec->push_back(reinterpret_cast<ObjectHeader *>(oldval));
+    ASSERT(mutator != nullptr);
+    mutator->AddToSatbBuff(oldval);
 }
 
 static void PostInterregionBarrier(ObjectPointerType object, size_t offset, ObjectPointerType value,
@@ -242,7 +241,7 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
         updatedRefsQueue_->push_back(card);
     } else {
         // general fast-path for mutators
-        ASSERT(mutator->GetPreBuff() != nullptr);  // write barrier cant be called after Terminate
+        ASSERT(mutator->GetSatbBuff() != nullptr);  // write barrier cant be called after Terminate
         auto *buffer = mutator->GetG1PostBarrierBuffer();
         ASSERT(buffer != nullptr);
         // try to push it twice

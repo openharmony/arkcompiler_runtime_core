@@ -780,7 +780,7 @@ void ManagedThread::DestroyInternalResources(mem::MutatorUnregistrationMode mode
 {
     if (mode == mem::MutatorUnregistrationMode::UNREGISTER) {
         GetVM()->GetGC()->OnMutatorTerminate(this, mode, mem::BuffersKeepingFlag::DELETE);
-        ASSERT(GetPreBuff() == nullptr);
+        ASSERT(GetSatbBuff() == nullptr);
         ASSERT(GetG1PostBarrierBuffer() == nullptr);
     }
     ptThreadInfo_->Destroy();

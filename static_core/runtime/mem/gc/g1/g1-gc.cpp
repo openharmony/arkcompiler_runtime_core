@@ -92,9 +92,10 @@ G1GC<LanguageConfig>::~G1GC()
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     {
-        for (auto objVector : satbBuffList_) {
-            allocator->Delete(objVector);
+        for (auto entry : satbBuffList_) {
+            allocator->DeleteArray(entry.first);
         }
+        satbBuffList_.clear();
     }
     allocator->Delete(updatedRefsQueue_);
     allocator->Delete(updatedRefsQueueTemp_);
@@ -2423,19 +2424,13 @@ void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistr
     // The method must be called while the lock which guards thread/coroutine list is hold
     LOG(DEBUG, GC) << "Call OnMutatorTerminate";
     GC::OnMutatorTerminate(mutator, mode, keepBuffers);
-    PandaVector<ObjectHeader *> *preBuff = nullptr;
-    if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
-        preBuff = allocator->New<PandaVector<ObjectHeader *>>(*mutator->GetPreBuff());
-        ASSERT(preBuff != nullptr);
-        mutator->GetPreBuff()->clear();
-    } else {  // keep_buffers == mem::BuffersKeepingFlag::DELETE
-        preBuff = mutator->MovePreBuff();
-    }
+    ObjectPointerType *preBuff = mutator->MoveSatbBuff();
     ASSERT(preBuff != nullptr);
-    {
-        os::memory::LockHolder lock(satbAndNewobjBufLock_);
-        satbBuffList_.push_back(preBuff);
+    size_t preBuffSize = mutator->GetSatbBuffSize();
+    if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
+        mutator->AllocateSatbBuff(allocator);
     }
+    mutator->PushSatbBuff({preBuff, preBuffSize});
     {
         auto *localBuffer = mutator->GetG1PostBarrierBuffer();
         ASSERT(localBuffer != nullptr);
@@ -2462,6 +2457,7 @@ void G1GC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
         mutator->InitBuffers();
     }
 
+    mutator->SetSatbBuffList(&satbBuffList_, &satbAndNewobjBufLock_);
     // We want to register mutator only after buffers are created or else there will be data race
     // with reading buffers from update remset worker
     this->GetPandaVm()->GetMutatorManager()->RegisterMutator(mutator, [this](Mutator *mttr) {
@@ -2509,33 +2505,37 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack, Marker
         // release own pre_buf_ while GC thread iterates over threads and gets theirs
         // pre_buf_.
         os::memory::LockHolder lock(satbAndNewobjBufLock_);
-        auto *preBuff = mutator->GetPreBuff();
+        auto *preBuff = mutator->GetSatbBuff();
         if (preBuff == nullptr) {
             // This can happens when the thread gives us own satb_buffer but
             // doesn't unregister from ThreadManaged.
             // At this perion GC can happen and we get pre_buff null here.
             return true;
         }
-        for (auto obj : *preBuff) {
-            if (marker.MarkIfNotMarked(obj)) {
-                objectStack->PushToStack(RootType::SATB_BUFFER, obj);
+        for (size_t i = 0U; i < mutator->GetSatbBuffSize(); i++) {
+            auto obj = preBuff[i];
+            auto objectHeader = reinterpret_cast<ObjectHeader *>(obj);
+            if (marker.MarkIfNotMarked(objectHeader)) {
+                objectStack->PushToStack(RootType::SATB_BUFFER, objectHeader);
             }
         }
-        preBuff->clear();
+        mutator->ClearSatbBuff();
         return true;
     };
     this->GetPandaVm()->GetMutatorManager()->ForEachMutator(callback);
 
     // Process satb buffers of the terminated threads
     os::memory::LockHolder lock(satbAndNewobjBufLock_);
-    for (auto objVector : satbBuffList_) {
-        ASSERT(objVector != nullptr);
-        for (auto obj : *objVector) {
-            if (marker.MarkIfNotMarked(obj)) {
-                objectStack->PushToStack(RootType::SATB_BUFFER, obj);
+    for (auto entry : satbBuffList_) {
+        ASSERT(entry.first != nullptr);
+        for (size_t i = 0U; i < entry.second; i++) {
+            auto obj = entry.first[i];
+            auto objectHeader = reinterpret_cast<ObjectHeader *>(obj);
+            if (marker.MarkIfNotMarked(objectHeader)) {
+                objectStack->PushToStack(RootType::SATB_BUFFER, objectHeader);
             }
         }
-        this->GetInternalAllocator()->Delete(objVector);
+        this->GetInternalAllocator()->DeleteArray(entry.first);
     }
     satbBuffList_.clear();
     for (auto obj : newobjBuffer_) {
@@ -2578,17 +2578,14 @@ void G1GC<LanguageConfig>::ClearSatb()
     // Process satb buffers of the active threads
     this->GetPandaVm()->GetMutatorManager()->ForEachMutator([this](Mutator *mutator) {
         os::memory::LockHolder lock(satbAndNewobjBufLock_);
-        auto preBuff = mutator->GetPreBuff();
-        if (preBuff != nullptr) {
-            preBuff->clear();
-        }
+        mutator->ClearSatbBuff();
         return true;
     });
 
     os::memory::LockHolder lock(satbAndNewobjBufLock_);
     // Process satb buffers of the terminated threads
-    for (auto objVector : satbBuffList_) {
-        this->GetInternalAllocator()->Delete(objVector);
+    for (auto entry : satbBuffList_) {
+        this->GetInternalAllocator()->DeleteArray(entry.first);
     }
     satbBuffList_.clear();
     newobjBuffer_.clear();

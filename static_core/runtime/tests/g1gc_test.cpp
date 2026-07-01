@@ -1387,8 +1387,8 @@ public:
         EXPECT_EQ(0, region->GetLiveBytes());
         // Check GC has cleared SATB buffer
         Mutator *mutator = Mutator::GetCurrent();
-        EXPECT_NE(nullptr, mutator->GetPreBuff());
-        EXPECT_EQ(0, mutator->GetPreBuff()->size());
+        EXPECT_NE(nullptr, mutator->GetSatbBuff());
+        EXPECT_EQ(0, mutator->GetSatbBuffSize());
     }
 
 private:

@@ -517,11 +517,12 @@ private:
     std::function<void(const void *, const void *)> postQueueFunc_ {nullptr};
     /// Current pre WRB entrypoint: either nullptr or the real function
     ObjRefProcessFunc currentPreWrbEntrypoint_ {nullptr};
+
     /**
      * After first process it stores humongous objects only, after marking them it's still store them for updating
      * pointers from Humongous
      */
-    PandaList<PandaVector<ObjectHeader *> *> satbBuffList_ GUARDED_BY(satbAndNewobjBufLock_) {};
+    PandaList<std::pair<ObjectPointerType *, size_t>> satbBuffList_ GUARDED_BY(satbAndNewobjBufLock_) {};
     PandaVector<ObjectHeader *> newobjBuffer_ GUARDED_BY(satbAndNewobjBufLock_);
     // The lock guards both variables: satb_buff_list_ and newobj_buffer_
     os::memory::Mutex satbAndNewobjBufLock_;

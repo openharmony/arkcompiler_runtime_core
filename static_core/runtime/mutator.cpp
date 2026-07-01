@@ -98,8 +98,26 @@ Mutator::Mutator(PandaVM *vm, MutatorType type) : vm_(vm), type_(type)
 Mutator::~Mutator()
 {
     // Internal resources should be deleted in OnMutatorTerminate, if GC created them
-    ASSERT(preBuff_ == nullptr);
+    ASSERT(satbBuff_ == nullptr);
     ASSERT(g1PostBarrierRingBuffer_ == nullptr);
+}
+
+void Mutator::AllocateSatbBuff(mem::InternalAllocatorPtr allocator)
+{
+    if (allocator == nullptr) {
+        allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    }
+    satbBuff_ = allocator->New<ObjectPointerType[]>(Mutator::PRE_BUFF_CAPACITY);
+    satbBuffSize_ = 0U;
+}
+
+void Mutator::PushSatbBuff(const std::pair<ObjectPointerType *, size_t> &entry)
+{
+    ASSERT(satbBuffList_ != nullptr);
+    ASSERT(satbBuffMutex_ != nullptr);
+
+    os::memory::LockHolder lock(*satbBuffMutex_);
+    satbBuffList_->push_back(entry);
 }
 
 CONSTEXPR_IN_RELEASE MutatorFlag GetInitialMutatorFlag()
@@ -375,9 +393,9 @@ void Mutator::InitBuffers()
     if (barrier->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
         // we need to recreate buffers if it was detach (we removed all structures) and attach again
         // skip initializing in first attach after constructor
-        if (preBuff_ == nullptr) {
-            ASSERT(preBuff_ == nullptr);
-            preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
+        if (satbBuff_ == nullptr) {
+            ASSERT(satbBuff_ == nullptr);
+            AllocateSatbBuff();
             ASSERT(g1PostBarrierRingBuffer_ == nullptr);
             g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
         }
