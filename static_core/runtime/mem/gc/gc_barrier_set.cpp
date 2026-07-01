@@ -18,6 +18,7 @@
 #include "libarkbase/mem/mem.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/object_accessor.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/rem_set.h"
@@ -267,17 +268,21 @@ extern "C" void *ReadBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType *f
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     auto *gc = static_cast<ark::mem::CmcGC<EtsLanguageConfig> *>(Mutator::GetCurrent()->GetVM()->GetGC());
-    auto &field = reinterpret_cast<ark::mem::RefField<false> &>(*fieldPtr);
     do {
-        auto *targetObj = field.GetTargetObject();
+        auto oldValue = AtomicLoad(fieldPtr, std::memory_order_relaxed);
+        auto *targetObj = reinterpret_cast<ObjectHeader *>(static_cast<uintptr_t>(oldValue));
         if (LIKELY(!gc->IsFromObject(targetObj))) {
             return targetObj;
         }
 
-        ark::common_vm::BaseObject *toObj = nullptr;
-        if (gc->TryForwardRefField(nullptr, field, toObj)) {
-            return toObj;
+        auto *toObj = gc->TryForwardObject(targetObj);
+        if (toObj == nullptr) {
+            continue;
         }
+
+        auto newValue = ToObjPtrType(toObj);
+        AtomicCmpxchgStrong(fieldPtr, oldValue, newValue, std::memory_order_relaxed);
+        return toObj;
     } while (true);
 #else
     UNREACHABLE();
@@ -368,8 +373,8 @@ void *GCCMCBarrierSet::VolatileReadBarrier([[maybe_unused]] void **refAddr)
 #if defined(ARK_USE_COMMON_RUNTIME)
     if constexpr (USE_READ_BARRIERS) {
         auto *fieldPtr = reinterpret_cast<ObjectPointerType *>(refAddr);
-        auto &atomicField = reinterpret_cast<ark::mem::RefField<true> &>(*fieldPtr);
-        ark::mem::RefField<false> tmpField(atomicField.GetFieldValue(std::memory_order_acquire));
+        auto oldValue = AtomicLoad(fieldPtr, std::memory_order_acquire);
+        ObjectPointerType tmpField = oldValue;
         return ReadBarrier(reinterpret_cast<void **>(&tmpField));
     }
 #endif
@@ -384,8 +389,8 @@ void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
             return reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(reinterpret_cast<ObjectPointerType *>(refAddr));
         }
     }
-    auto *field = reinterpret_cast<ark::mem::RefField<true> *>(refAddr);
-    return field->GetTargetObject();
+    auto *fieldPtr = reinterpret_cast<ObjectPointerType *>(refAddr);
+    return reinterpret_cast<void *>(static_cast<uintptr_t>(AtomicLoad(fieldPtr, std::memory_order_relaxed)));
 }
 
 void GCCMCBarrierSet::UpdateRememberSet([[maybe_unused]] void *object, [[maybe_unused]] void *ref) const

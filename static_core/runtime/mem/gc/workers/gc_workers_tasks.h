@@ -36,6 +36,8 @@ enum class GCWorkersTaskTypes : uint32_t {
     TASK_ENQUEUE_REMSET_REFS,
     TASK_EVACUATE_REGIONS,
     TASK_MARK_WHOLE_REGION,
+    TASK_CONCURRENT_FIX,
+    TASK_CONCURRENT_POST_FIX
 };
 
 constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
@@ -65,6 +67,10 @@ constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
             return "Evacuate regions task";
         case GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION:
             return "Mark whole region task";
+        case GCWorkersTaskTypes::TASK_CONCURRENT_FIX:
+            return "Fix whole region task";
+        case GCWorkersTaskTypes::TASK_CONCURRENT_POST_FIX:
+            return "Post fix whole region task";
         default:
             return "Unknown task";
     }

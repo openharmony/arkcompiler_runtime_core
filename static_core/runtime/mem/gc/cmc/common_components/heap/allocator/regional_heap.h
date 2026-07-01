@@ -359,7 +359,7 @@ public:
         return IsMarkedObject(obj) || IsResurrectedObject(obj);
     }
 
-    static bool IsMarkedObject(const BaseObject *obj)
+    static bool IsMarkedObject(const ObjectHeader *obj)
     {
         RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->IsMarkedObject(obj);

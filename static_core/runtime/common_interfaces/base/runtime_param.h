@@ -94,11 +94,6 @@ struct GCParam {
     bool enableGC;
 
     /*
-     * Set true swicth to stop-the-world GC, set false swicth to concurrent-copying GC, default is false
-     */
-    bool enableStwGC;
-
-    /*
      * GC will be triggered when heap allocated size is greater than this threshold.
      * Measured in KB, must be > 0.
      */
@@ -164,11 +159,6 @@ struct GCParam {
      * The maximum remaining bytes for next heuristic gc, the default value is 512KB.
      */
     size_t kMaxConcurrentRemainingBytes;
-
-    /*
-     * true if young compaction without premarking is enabled, otherwise false
-     */
-    bool singlePassCompactionEnabled;
 };
 
 /*

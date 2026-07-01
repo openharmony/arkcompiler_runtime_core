@@ -307,10 +307,6 @@ public:
 
     PANDA_PUBLIC_API void WaitSuspension() NO_THREAD_SAFETY_ANALYSIS;
 
-#if defined(ARK_USE_COMMON_RUNTIME)
-    void VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor) override;
-#endif
-
     void MakeTSANHappyForThreadState();
 
 #if defined(SAFEPOINT_TIME_CHECKER_ENABLED)

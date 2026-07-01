@@ -42,15 +42,15 @@ public:
     void CollectFixTasks(FixHeapTaskList &taskList)
     {
         if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
-            FixHeapWorker::CollectFixHeapTasks(taskList, oldRegionList_, FIX_OLD_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, oldRegionList_, FixRegionType::FIX_OLD_REGION);
             ark::os::memory::LockHolder lock(lock_);
-            FixHeapWorker::CollectFixHeapTasks(taskList, tlOldRegionList_, FIX_RECENT_OLD_REGION);
-            FixHeapWorker::CollectFixHeapTasks(taskList, recentFullOldRegionList_, FIX_RECENT_OLD_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, tlOldRegionList_, FixRegionType::FIX_RECENT_OLD_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, recentFullOldRegionList_, FixRegionType::FIX_RECENT_OLD_REGION);
         } else {
-            FixHeapWorker::CollectFixHeapTasks(taskList, oldRegionList_, FIX_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, oldRegionList_, FixRegionType::FIX_REGION);
             ark::os::memory::LockHolder lock(lock_);
-            FixHeapWorker::CollectFixHeapTasks(taskList, tlOldRegionList_, FIX_RECENT_REGION);
-            FixHeapWorker::CollectFixHeapTasks(taskList, recentFullOldRegionList_, FIX_RECENT_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, tlOldRegionList_, FixRegionType::FIX_RECENT_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, recentFullOldRegionList_, FixRegionType::FIX_RECENT_REGION);
         }
     }
 

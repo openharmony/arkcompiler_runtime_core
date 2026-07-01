@@ -23,13 +23,13 @@
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_state_word.h"
-#include "common_interfaces/objects/ref_field.h"
 #include "runtime/include/mem/panda_string.h"
+#include "runtime/include/object_accessor.h"
 #include "runtime/mem/gc/cmc/cmc-gc.h"
 #include "runtime/mem/gc/gc_phase.h"
+#include "runtime/mem/object-references-iterator-inl.h"
 #include "securec.h"
 #include <iomanip>
-#include <sstream>
 
 /**
  * Heap Verify:
@@ -111,30 +111,27 @@ PandaString GetObjectInfo(const BaseObject *obj)
     return s.str();
 }
 
-PandaString GetRefInfo(const RefField<> &ref)
+static BaseObject *ReadRefSlot(ObjectPointerType *ref)
+{
+    auto value = ObjectAccessor::Load(ref);
+    return reinterpret_cast<BaseObject *>(static_cast<uintptr_t>(value));
+}
+
+PandaString GetRefInfo(ObjectPointerType *ref)
 {
     PandaOStringStream s;
-    s << std::hex << std::endl << ">>> Ref value: 0x" << ref.GetFieldValue();
-    if (Heap::IsTaggedObject(ref.GetFieldValue())) {
-        s << GetObjectInfo(ref.GetTargetObject()) << std::endl;
-    } else {
-        s << "> Raw memory:" << std::endl << "Skip: primitive" << std::endl;
-    }
+    s << std::hex << std::endl << ">>> Ref value: 0x" << ReadRefSlot(ref);
+    s << GetObjectInfo(ReadRefSlot(ref)) << std::endl;
     return s.str();
 }
 
-void IsValidRef(const BaseObject *obj, const RefField<> &ref)
+void IsValidRef(const BaseObject *obj, ObjectPointerType *ref)
 {
     // Maybe we need to check ref later
     // ...
 
-    LOG_IF(!(Heap::IsTaggedObject(ref.GetFieldValue())), FATAL, COMMON)
-        << "Check failed: Heap::IsTaggedObject(ref.GetFieldValue())" << CONTEXT << "Object: " << GetObjectInfo(obj)
-        << std::endl
-        << "Ref: " << GetRefInfo(ref) << std::endl;
-
     // check referenee
-    auto refObj = ref.GetTargetObject();
+    auto refObj = ReadRefSlot(ref);
 
     LOG_IF(!(Heap::IsHeapAddress(refObj)), FATAL, COMMON)
         << "Check failed: Heap::IsHeapAddress(refObj)" << CONTEXT << std::hex << "Object address: 0x"
@@ -167,13 +164,7 @@ void IsValidRef(const BaseObject *obj, const RefField<> &ref)
 
 class VerifyVisitor {
 public:
-    void VerifyRef(const BaseObject *obj, RefField<> &ref)
-    {
-        VerifyRefImpl(obj, ref);
-        count_++;
-    }
-
-    void VerifyRef(const BaseObject *obj, const RefField<> &ref)
+    void VerifyRef(const BaseObject *obj, ObjectPointerType *ref)
     {
         VerifyRefImpl(obj, ref);
         count_++;
@@ -185,12 +176,7 @@ public:
     }
 
 protected:
-    virtual void VerifyRefImpl(const BaseObject *obj, RefField<> &ref)
-    {
-        VerifyRefImpl(obj, static_cast<const RefField<> &>(ref));
-    }
-
-    virtual void VerifyRefImpl(const BaseObject *obj, const RefField<> &ref)
+    virtual void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref)
     {
         UNREACHABLE();
     }
@@ -202,12 +188,12 @@ private:
 template <bool IsSTWRootVerify = true>
 class AfterMarkVisitor : public VerifyVisitor {
 public:
-    void VerifyRefImpl(const BaseObject *obj, const RefField<> &ref) override
+    void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref) override
     {
         IsValidRef(obj, ref);
 
         // check remarked objects, so they must be in one of the states below
-        auto refObj = ref.GetTargetObject();
+        auto refObj = ReadRefSlot(ref);
         RegionDesc *region = RegionDesc::GetRegionDescAt(refObj);
 
         // if obj is nullptr, this means it is a root object
@@ -250,77 +236,33 @@ public:
 
 class AfterForwardVisitor : public VerifyVisitor {
 public:
-    void VerifyRefImpl(const BaseObject *obj, const RefField<> &ref) override
+    void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref) override
     {
         // check objects in from-space, only alive objects are forwarded
-        auto refObj = ref.GetTargetObject();
+        auto refObj = ReadRefSlot(ref);
         if (RegionalHeap::IsMarkedObject(refObj) || RegionalHeap::IsResurrectedObject(refObj)) {
             LOG_IF(!(refObj->IsForwarded()), FATAL, COMMON)
                 << "Check failed: refObj->IsForwarded()" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
                 << "Ref: " << GetRefInfo(ref) << std::endl;
 
             auto toObj = refObj->GetForwardingPointer();
-            IsValidRef(obj, RefField<>(toObj));
+            ObjectPointerType toSlot = ToObjPtrType(toObj);
+            IsValidRef(obj, &toSlot);
         }
     }
 };
 
 class AfterFixVisitor : public VerifyVisitor {
 public:
-    void VerifyRefImpl(const BaseObject *obj, const RefField<> &ref) override
+    void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref) override
     {
         IsValidRef(obj, ref);
 
-        auto refRegion = RegionDesc::GetRegionDescAt(ref.GetTargetObject());
+        auto refRegion = RegionDesc::GetRegionDescAt(ReadRefSlot(ref));
         LOG_IF(!(refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION), FATAL, COMMON)
             << "Check failed: refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION" << CONTEXT
             << "Object: " << GetObjectInfo(obj) << std::endl
             << "Ref: " << GetRefInfo(ref) << std::endl;
-    }
-};
-
-class ReadBarrierVisitor : public VerifyVisitor {
-protected:
-    constexpr static MAddress TAG_RB_DFX_SHIFT = 47;
-    constexpr static MAddress TAG_RB_DFX = 0x1ULL << TAG_RB_DFX_SHIFT;
-};
-
-class ReadBarrierSetter : public ReadBarrierVisitor {
-public:
-    void VerifyRefImpl(const BaseObject *obj, RefField<> &ref) override
-    {
-        if (obj == nullptr) {
-            // skip roots
-            return;
-        }
-
-        auto regionType = RegionDesc::GetRegionDescAt(ref.GetTargetObject())->GetRegionType();
-        if (regionType == RegionDesc::RegionType::RECENT_POLYSIZE_NONMOVABLE_REGION ||
-            regionType == RegionDesc::RegionType::FULL_POLYSIZE_NONMOVABLE_REGION ||
-            regionType == RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION ||
-            regionType == RegionDesc::RegionType::FULL_MONOSIZE_NONMOVABLE_REGION) {
-            // Read barrier for non-movable objects might be optimized out, so don't set dfx tag
-            return;
-        }
-
-        auto newRefValue = ref.GetFieldValue() | TAG_RB_DFX;
-        ref.SetFieldValue(newRefValue);
-    }
-};
-
-class ReadBarrierUnsetter : public ReadBarrierVisitor {
-public:
-    void VerifyRefImpl(const BaseObject *obj, RefField<> &ref) override
-    {
-        auto newRefValue = ref.GetFieldValue() & (~TAG_RB_DFX);
-        ref.SetFieldValue(newRefValue);
-    }
-
-    static BaseObject *GetTargetObject(const RefField<> &ref)
-    {
-        // Get the target object from the reference field, ignoring the read barrier tag
-        BaseObject *targetObj = ref.GetTargetObject();
-        return reinterpret_cast<BaseObject *>(reinterpret_cast<MAddress>(targetObj) & (~TAG_RB_DFX));
     }
 };
 
@@ -337,7 +279,7 @@ public:
     {
         MarkStack<BaseObject *> roots;
 
-        RefFieldVisitor refVisitor = [&](RefField<> &ref) { visitor.VerifyRef(nullptr, ref); };
+        RefFieldVisitor refVisitor = [&](ObjectPointerType *ref) { visitor.VerifyRef(nullptr, ref); };
         Heap::GetHeap().GetCollector().VisitRootsI(refVisitor);
     }
 
@@ -345,7 +287,7 @@ public:
     {
         MarkStack<BaseObject *> roots;
 
-        WeakRefFieldVisitor refVisitor = [&](RefField<> &ref) {
+        WeakRefFieldVisitor refVisitor = [&](ObjectPointerType *ref) {
             visitor.VerifyRef(nullptr, ref);
             return true;
         };
@@ -369,44 +311,41 @@ public:
 
     // By default, IterateRemarked uses the VisitRoots method to traverse GC roots
     template <void (*VisitRoot)(const RefFieldVisitor &) = IterateRemarkedDefaultVisitor>
-    void IterateRemarked(VerifyVisitor &visitor, PandaUnorderedSet<BaseObject *> &markSet, bool forRBDFX = false)
+    void IterateRemarked(VerifyVisitor &visitor, PandaUnorderedSet<BaseObject *> &markSet)
     {
         MarkStack<BaseObject *> markStack;
         BaseObject *obj = nullptr;
 
-        auto markFunc = [&visitor, &markStack, &markSet, &obj, &forRBDFX](RefField<> &field) {
-            if (!Heap::IsTaggedObject(reinterpret_cast<MAddress>(field.GetFieldValue()))) {
-                return;
+        auto markFunc = [&visitor, &markStack, &markSet, &obj]([[maybe_unused]] ObjectHeader *fromObject,
+                                                               ObjectPointerType *field) {
+            if (*field == 0) {
+                return true;
             }
-
-            BaseObject *refObj = nullptr;
-            if (forRBDFX) {
-                refObj = ReadBarrierUnsetter::GetTargetObject(field);
-            } else {
-                refObj = field.GetTargetObject();
-            }
+            BaseObject *refObj = ReadRefSlot(field);
             // If it is forwarded, its toVersion must have been traversed during
             // EnumRoot or created during Remark, so it must have been marked. There is no need for me to
             // check it, nor to push it into the mark stack.
             if (refObj->IsForwarded()) {
-                return;
+                return true;
             }
 
             visitor.VerifyRef(obj, field);
 
             if (markSet.find(refObj) != markSet.end()) {
-                return;
+                return true;
             }
             markSet.insert(refObj);
             markStack.push_back(refObj);
+            return true;
         };
 
-        VisitRoot(markFunc);
+        VisitRoot([&markFunc](ObjectPointerType *field) { markFunc(nullptr, field); });
         while (!markStack.empty()) {
             obj = markStack.back();
             markStack.pop_back();
 
-            obj->ForEachRefField(markFunc, markFunc);
+            auto *cls = obj->template ClassAddr<Class>();
+            mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, obj, markFunc);
         }
     }
 
@@ -414,7 +353,10 @@ private:
     void IterateRegionList(RegionList &list, VerifyVisitor &visitor)
     {
         list.VisitAllRegions([&](RegionDesc *region) {
-            region->VisitAllObjects([&](BaseObject *obj) { visitor.VerifyRef(nullptr, RefField<>(obj)); });
+            region->VisitAllObjects([&](BaseObject *obj) {
+                ObjectPointerType ref = ToObjPtrType(obj);
+                visitor.VerifyRef(nullptr, &ref);
+            });
         });
     }
 
@@ -509,55 +451,6 @@ void WVerify::VerifyAfterFix(mem::GCPhase phase, bool isWorldStopped)
         VerifyAfterFixInternal(space, phase);
     } else {
         VerifyAfterFixInternal(space, phase);
-    }
-}
-
-void WVerify::EnableReadBarrierDFXInternal(RegionalHeap &space)
-{
-    auto iter = VerifyIterator(space);
-    auto setter = ReadBarrierSetter();
-    auto unsetter = ReadBarrierUnsetter();
-
-    PandaUnorderedSet<BaseObject *> markSet;
-    iter.IterateRemarked(setter, markSet, true);
-    // some slots of heap object are also roots, so we need to unset them
-    iter.IterateRoot(unsetter);
-}
-
-void WVerify::EnableReadBarrierDFX(bool isWorldStopped)
-{
-#if !defined(ENABLE_CMC_RB_DFX)
-    return;
-#endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
-    if (!isWorldStopped) {
-        ark::ScopedStopTheWorld stw;
-        EnableReadBarrierDFXInternal(space);
-    } else {
-        EnableReadBarrierDFXInternal(space);
-    }
-}
-
-void WVerify::DisableReadBarrierDFXInternal(RegionalHeap &space)
-{
-    auto iter = VerifyIterator(space);
-    auto unsetter = ReadBarrierUnsetter();
-
-    PandaUnorderedSet<BaseObject *> markSet;
-    iter.IterateRemarked(unsetter, markSet, true);
-}
-
-void WVerify::DisableReadBarrierDFX(bool isWorldStopped)
-{
-#if !defined(ENABLE_CMC_RB_DFX)
-    return;
-#endif
-    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
-    if (!isWorldStopped) {
-        ark::ScopedStopTheWorld stw;
-        DisableReadBarrierDFXInternal(space);
-    } else {
-        DisableReadBarrierDFXInternal(space);
     }
 }
 

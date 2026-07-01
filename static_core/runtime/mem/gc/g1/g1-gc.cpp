@@ -1474,7 +1474,7 @@ void G1GC<LanguageConfig>::MergeRemSet(RemSet<> *remset)
     }
 
     // All dirty cards which do not correspond to regions in the collection set are processed and reenqueued in case of
-    // cross region references during evacuation, see EvacuationObjectPointerHandler::ProcessObjectPointer
+    // cross region references during evacuation, see EvacuationObjectPointerHandler::operator()
     dirtyCards_.clear();
 }
 

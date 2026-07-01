@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,41 +31,41 @@ class ObjectIterator<LANG_TYPE_STATIC> {
 public:
     /// Iterates references in object and passes pointers of them to the handler
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(ObjectHeader *obj, Handler *handler, void *begin, void *end);
+    static bool Iterate(ObjectHeader *obj, Handler &handler, void *begin, void *end);
 
     template <typename Handler>
-    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler);
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler);
 
     template <typename Handler>
-    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(const Class *cls, ObjectHeader *obj, Handler *handler);
+    static bool Iterate(const Class *cls, ObjectHeader *obj, Handler &handler);
 
 private:
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+    static bool Iterate(Class *cls, ObjectHeader *obj, Handler &handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, const Class *objClass, Handler *handler);
+    static bool IterateObjectReferences(ObjectHeader *object, const Class *objClass, Handler &handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler *handler, void *begin,
+    static bool IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler &handler, void *begin,
                                         void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateClassReferences(Class *cls, Handler *handler);
+    static bool IterateClassReferences(Class *cls, Handler &handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end);
+    static bool IterateClassReferences(Class *cls, Handler &handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart, const ObjectPointerType *refEnd,
-                             Handler *handler);
+                             Handler &handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart, ObjectPointerType *refEnd,
-                             Handler *handler, void *begin, void *end);
+                             Handler &handler, void *begin, void *end);
 };
 
 /// Provides functionality to iterate through references in object for dynamic languages
@@ -74,32 +74,32 @@ class ObjectIterator<LANG_TYPE_DYNAMIC> {
 public:
     /// Iterates references in object and passes pointers of them to the handler
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(ObjectHeader *obj, Handler *handler, void *begin, void *end);
+    static bool Iterate(ObjectHeader *obj, Handler &handler, void *begin, void *end);
 
     template <typename Handler>
-    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler);
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler);
 
     template <typename Handler>
-    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler, void *begin, void *end);
 
 private:
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(HClass *cls, ObjectHeader *obj, Handler *handler);
+    static bool Iterate(HClass *cls, ObjectHeader *obj, Handler &handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(HClass *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+    static bool Iterate(HClass *cls, ObjectHeader *obj, Handler &handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler);
+    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler &handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler, void *begin, void *end);
+    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler &handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler);
+    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler &handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler, void *begin, void *end);
+    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler &handler, void *begin, void *end);
 };
 }  // namespace ark::mem
 

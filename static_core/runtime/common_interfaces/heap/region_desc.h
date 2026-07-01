@@ -259,7 +259,7 @@ public:
         SetResurrectedRegionFlag(0);
     }
 
-    NO_INLINE bool MarkObjectForLargeRegion(const BaseObject *obj)
+    NO_INLINE bool MarkObjectForLargeRegion(const ObjectHeader *obj)
     {
         if (metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_MARKED_REGION, 1) != 1) {
             SetMarkedRegionFlag(1);
@@ -267,7 +267,7 @@ public:
         }
         return true;
     }
-    ALWAYS_INLINE bool MarkObject(const BaseObject *obj)
+    ALWAYS_INLINE bool MarkObject(const ObjectHeader *obj)
     {
         if (IsLargeRegion()) {
             return MarkObjectForLargeRegion(obj);
@@ -321,7 +321,7 @@ public:
         return resurrectBitmap->IsMarked(offset);
     }
 
-    bool IsMarkedObject(const BaseObject *obj)
+    bool IsMarkedObject(const ObjectHeader *obj)
     {
         if (IsLargeRegion()) {
             return (metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_MARKED_REGION, 1) == 1);
@@ -357,7 +357,7 @@ public:
         metadata.regionRSet_->ClearCardTable();
     }
 
-    bool MarkRSetCardTable(BaseObject *obj)
+    bool MarkRSetCardTable(ObjectHeader *obj)
     {
         size_t offset = GetAddressOffset(reinterpret_cast<HeapAddress>(obj));
         return GetRSet()->MarkCardTable(offset);

@@ -61,7 +61,7 @@ public:
 
     void CollectFixTasks(FixHeapTaskList &taskList)
     {
-        FixHeapWorker::CollectFixHeapTasks(taskList, exemptedFromRegionList_, FIX_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, exemptedFromRegionList_, FixRegionType::FIX_REGION);
     }
 
     size_t GetUsedUnitCount() const

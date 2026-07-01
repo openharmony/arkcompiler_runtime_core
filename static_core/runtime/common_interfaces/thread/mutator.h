@@ -52,7 +52,6 @@ private:
 };
 
 class Mutator;
-using FlipFunction = std::function<void(Mutator &)>;
 class PANDA_PUBLIC_API Mutator {
 public:
     virtual ~Mutator();
@@ -60,8 +59,6 @@ public:
     void ResetMutator();
 
     void HandleGCPhase(mem::GCPhase newPhase);
-
-    virtual void VisitMutatorRoots(const RefFieldVisitor &visitor);
 
     NO_INLINE void RememberObjectInSatbBuffer(const BaseObject *obj)
     {

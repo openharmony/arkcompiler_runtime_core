@@ -167,12 +167,6 @@ public:
         return *p;
     }
 
-    template <typename P>
-    static P LoadAtomic(P *p)
-    {
-        return AtomicLoad(p, std::memory_order_relaxed);
-    }
-
     template <LangTypeT LANGUAGE_TYPE>
     static void Store(
         std::conditional_t<LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC, ObjectPointerType, coretypes::TaggedType> *ref,

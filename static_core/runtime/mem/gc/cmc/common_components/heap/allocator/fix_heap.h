@@ -16,11 +16,9 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_FIX_HEAP_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_FIX_HEAP_H
 
-#include <functional>
 #include <stack>
-#include <vector>
-#include "common_components/taskpool/task.h"
 #include "runtime/include/mem/panda_containers.h"
+
 namespace ark::common_vm {
 
 class Collector;
@@ -35,8 +33,7 @@ using ark::mem::RegionDesc;
 class RegionList;
 class BaseObject;
 
-/// Enum representing different types of heap region fixing tasks
-enum FixRegionType {
+enum class FixRegionType {
     FIX_OLD_REGION,         // Fix all rset objects
     FIX_RECENT_OLD_REGION,  // Fix all rset objects before copyline
     FIX_RECENT_REGION,      // Fix all objects before copyline
@@ -44,96 +41,49 @@ enum FixRegionType {
     FIX_TO_REGION,          // Fix objects in to region
 };
 
-/// Task unit for parallel heap fixing operations
-struct FixHeapTask final {
-    RegionDesc *region;
-    FixRegionType type;
-
-    FixHeapTask(RegionDesc *region, FixRegionType type) noexcept : region(region), type(type) {}
-
-    // Explicitly delete copy
-    FixHeapTask(const FixHeapTask &) = delete;
-    FixHeapTask &operator=(const FixHeapTask &) = delete;
-
-    // Default move operations
-    FixHeapTask(FixHeapTask &&) = default;
-    FixHeapTask &operator=(FixHeapTask &&) = default;
+struct FixRegionResult {
+    ark::PandaVector<std::tuple<RegionDesc *, BaseObject *, size_t>> monoSizeNonMovableGarbages;
+    ark::PandaVector<std::pair<BaseObject *, size_t>> polySizeNonMovableGarbages;
+    size_t numProcessedRegions = 0;
 };
 
-using FixHeapTaskList = ark::PandaVector<FixHeapTask>;
-
-/// Worker class for parallel heap fixing operations
-class FixHeapWorker : public Task {
+class FixTaskInfo {
 public:
-    /// Result structure containing the collected garbages and stats of heap fixing operations
-    struct Result {
-        ark::PandaVector<std::tuple<RegionDesc *, BaseObject *, size_t>> monoSizeNonMovableGarbages;
-        ark::PandaVector<std::pair<BaseObject *, size_t>> polySizeNonMovableGarbages;
-        size_t numProcessedRegions = 0;
-    };
+    FixTaskInfo(RegionDesc *region, common_vm::FixRegionType type) : region_(region), type_(type) {}
 
-    FixHeapWorker(Collector *collector, TaskPackMonitor &monitor, Result &result,
-                  std::function<FixHeapTask *()> &next) noexcept
-        : Task(0), collector_(collector), monitor_(monitor), result_(result), getNextTask_(next)
+    RegionDesc *GetRegion() const
     {
+        return region_;
     }
 
-    /// Dispatches a region fixing task based on its type
-    void DispatchRegionFixTask(FixHeapTask *task);
-
-    bool Run([[maybe_unused]] uint32_t threadIndex) override;
-
-    /// Collect fix heap tasks from a region list
-    static void CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &regionList, FixRegionType type);
+    common_vm::FixRegionType GetType() const
+    {
+        return type_;
+    }
 
 private:
-    /// Enum defining how to handle dead objects in a region
-    enum DeadObjectHandlerType {
-        FILL_FREE,                    // Fill in free object immediately
-        COLLECT_MONOSIZE_NONMOVABLE,  // Collect mono size non-movable objects (to be added to freelist)
-        COLLECT_POLYSIZE_NONMOVABLE,  // Collect non-movable objects (to be filled free later)
-        IGNORED,                      // Ignore dead objects
-    };
+    RegionDesc *region_ {nullptr};
+    common_vm::FixRegionType type_;
+};
 
-    void FixOldRegion(RegionDesc *region);
-    void FixRecentOldRegion(RegionDesc *region);
-    void FixToRegion(RegionDesc *region);
+using FixHeapTaskList = ark::PandaVector<FixTaskInfo>;
 
-    template <DeadObjectHandlerType HandlerType>
-    void FixRegion(RegionDesc *region);
-
-    template <DeadObjectHandlerType HandlerType>
-    void FixRecentRegion(RegionDesc *region);
-
-    Collector *collector_;
-    TaskPackMonitor &monitor_;
-    Result &result_;
-    std::function<FixHeapTask *()> getNextTask_;
+/// Worker class for parallel heap fixing operations
+class FixHeap {
+public:
+    /// Collect fix heap tasks from a region list
+    static void CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &regionList, common_vm::FixRegionType type);
 };
 
 /// Worker class for collecting garbages units after heap fixing operations
-class PostFixHeapWorker : public Task {
+class PostFixHeap {
 public:
-    PostFixHeapWorker(FixHeapWorker::Result &result, TaskPackMonitor &monitor) noexcept
-        : Task(0), monitor_(monitor), result_(result)
-    {
-    }
-
-    /// Performs post-processing cleanup tasks
-    void PostClearTask();
-
     // During fix phase we also collect the entire empty regions into garbage list from non-movable region.
     // However, we can only do it during post-fix because those region can contains metadata for getObjectSize
     // NOTE(d.chikunov) - make it PandaStack in future
     static std::stack<std::pair<RegionList *, RegionDesc *>> emptyRegionsToCollect;
     static void AddEmptyRegionToCollectDuringPostFix(RegionList *list, RegionDesc *region);
     static size_t CollectEmptyRegions();
-
-    bool Run([[maybe_unused]] uint32_t threadIndex) override;
-
-private:
-    TaskPackMonitor &monitor_;
-    FixHeapWorker::Result &result_;
 };
 
 };  // namespace ark::common_vm
