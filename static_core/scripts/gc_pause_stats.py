@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,7 +54,6 @@ def stdev_mean_percent(times: list) -> float:
     return statistics.stdev(times) / m * 100.0
 
 
-# TODO(ipetrov): Process remark pause
 class StatsInfo:
     """Saved sequence of time"""
     STATS_MAP = {
@@ -117,6 +116,7 @@ class GCStatsTable:
 
     TOTAL = "Total"
     WO_FULL = "Total without FULL"
+    REMARK = "Remark"
 
     def __init__(self, name: str) -> None:
         self.name = name
@@ -124,6 +124,7 @@ class GCStatsTable:
             GCStatsTable.TOTAL: GCTypeStats(GCStatsTable.TOTAL),
             GCStatsTable.WO_FULL: GCTypeStats(GCStatsTable.WO_FULL)
         }
+        self.remark = StatsInfo()
 
     def add(self, gc_type: str, gc_type_cause: str, gc_time: float) -> None:
         self.stats.get(GCStatsTable.TOTAL).add(
@@ -133,6 +134,9 @@ class GCStatsTable:
                 GCStatsTable.WO_FULL, gc_time)
         self.stats.setdefault(gc_type, GCTypeStats(
             gc_type)).add(gc_type_cause, gc_time)
+
+    def add_remark(self, remark_time: float) -> None:
+        self.remark.add(remark_time)
 
     def save_table(self, saving_file: str) -> int:
         if len(self.stats.get("Total")) == 0:
@@ -163,6 +167,8 @@ class GCStatsTable:
         )[0], self.stats.get(GCStatsTable.WO_FULL).get_stats()[0]]
         for gc_type_stat in stats_list:
             result += gc_type_stat.get_stats()
+        if len(self.remark) != 0:
+            result.append((GCStatsTable.REMARK, self.remark.get_stats()))
         return result
 
 
@@ -210,11 +216,11 @@ class GCStatsCollector:
         raise ValueError("Unsupported gc cause")
 
     @staticmethod
-    def get_ms_time(line: str) -> float:
+    def get_ms_time(line: str, detected_str: str = PAUSE_DETECT_STR) -> float:
         """Return time in ms"""
-        i = line.find(GCStatsCollector.PAUSE_DETECT_STR)
-        j = line.find(" ", i + len(GCStatsCollector.PAUSE_DETECT_STR))
-        time_str = line[i + len(GCStatsCollector.PAUSE_DETECT_STR):j]
+        i = line.find(detected_str)
+        j = line.find(" ", i + len(detected_str))
+        time_str = line[i + len(detected_str):j]
         for time_end in GCStatsCollector.TIMES:
             if time_str.endswith(time_end[0]):
                 return float(time_str[:-len(time_end[0])]) * time_end[1]
@@ -237,6 +243,11 @@ class GCStatsCollector:
                         gc_info_str)
                     table.add(gc_type, gc_type_cuase, time_v)
                     self.all_table.add(gc_type, gc_type_cuase, time_v)
+                    if gc_info_str.find(GCStatsCollector.REMARK_DETECT_STR) != -1:
+                        remark_time = GCStatsCollector.get_ms_time(
+                            gc_info_str, GCStatsCollector.REMARK_DETECT_STR)
+                        table.add_remark(remark_time)
+                        self.all_table.add_remark(remark_time)
         return self.save_table(table)
 
 
