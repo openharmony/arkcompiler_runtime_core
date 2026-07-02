@@ -14,6 +14,7 @@
  */
 
 import { launch } from "std/concurrency"
+import { Job } from "std/core"
 
 let was_scheduled = false;
 let js_is_ready = false;
@@ -26,8 +27,8 @@ function jsIsReady() {
     js_is_ready = true;
 }
 
-async function asyncFoo(p: Promise<void>): Promise<void> {
-    await p;
+async function asyncFoo(p: Job<void>): Promise<void> {
+    p.Await();
     was_scheduled = true;
     return Promise.resolve();
 }

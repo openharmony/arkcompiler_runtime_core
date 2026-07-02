@@ -65,7 +65,7 @@ function main(): int {
             arktest.assertEQ(concurrentHashMap.get(arrValues[i]), arrKeys[i]);
         }
     });
-    concurrentHashMapTestsuite.addAsyncTest("twiceTest_002", async () =>
+    concurrentHashMapTestsuite.addTest("twiceTest_002", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         arrValuesTest1 = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
@@ -74,8 +74,8 @@ function main(): int {
         setAll();
         let p1 = launch(getAll);
         let p2 = launch(getAll1);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if ((arrValuesTest[i] == concurrentHashMapOne.get(i)) &&
@@ -86,7 +86,7 @@ function main(): int {
         }
         arktest.assertEQ(flagCounter, 10);
     });
-    concurrentHashMapTestsuite.addAsyncTest("getAndTest_001", async () =>
+    concurrentHashMapTestsuite.addTest("getAndTest_001", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -94,8 +94,8 @@ function main(): int {
         setAll();
         let p1 = launch(getAll);
         let p2 = launch(hasAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValues[i] == arrValuesTest[i]) {
@@ -104,7 +104,7 @@ function main(): int {
         }
         arktest.assertEQ(flagCounter, 10);
     });
-    concurrentHashMapTestsuite.addAsyncTest("getAndTest_002", async () =>
+    concurrentHashMapTestsuite.addTest("getAndTest_002", () =>
     {
         Atomics.store(flag, 0, 0);
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
@@ -113,8 +113,8 @@ function main(): int {
         setAll();
         let p1 = launch(getAll);
         let p2 = launch(deleteAllBack);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         for (let i = 0; i < 10; i++) {
             if (arrValues[i] == arrValuesTest[i]) {
                 Atomics.add(flag, 0, 1);
@@ -122,7 +122,7 @@ function main(): int {
         }
         arktest.assertTrue(Atomics.load(flag, 0) >= 10);
     });
-    concurrentHashMapTestsuite.addAsyncTest("getAndTest_003", async () =>
+    concurrentHashMapTestsuite.addTest("getAndTest_003", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -130,8 +130,8 @@ function main(): int {
         setAll();
         let p1 = launch(replaceAll);
         let p2 = launch(getAllBack);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i] + "-re") {
@@ -140,7 +140,7 @@ function main(): int {
         }
         arktest.assertTrue(flagCounter >= 0);
     });
-    concurrentHashMapTestsuite.addAsyncTest("getAndTest_004", async () =>
+    concurrentHashMapTestsuite.addTest("getAndTest_004", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -148,8 +148,8 @@ function main(): int {
         setAll();
         let p1 = launch(getAll);
         let p2 = launch(isEmptyFun);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i]) {
@@ -158,7 +158,7 @@ function main(): int {
         }
         arktest.assertEQ(flagCounter, 10);
     });
-    concurrentHashMapTestsuite.addAsyncTest("getAndTest_005", async () =>
+    concurrentHashMapTestsuite.addTest("getAndTest_005", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -166,8 +166,8 @@ function main(): int {
         setAll();
         let p1 = launch(getAll);
         let p2 = launch(clearAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i]) {
@@ -176,7 +176,7 @@ function main(): int {
         }
         arktest.assertTrue(flagCounter >= 0);
     });
-    concurrentHashMapTestsuite.addAsyncTest("getAndTest_006", async () =>
+    concurrentHashMapTestsuite.addTest("getAndTest_006", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         arrValuesTest1 = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
@@ -185,8 +185,8 @@ function main(): int {
         setAll();
         let p1 = launch(getAll1);
         let p2 = launch(removeAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValuesTest1[i]) {

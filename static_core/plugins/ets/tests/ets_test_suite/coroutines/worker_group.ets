@@ -41,38 +41,38 @@ function getWorkerId(): int {
 // 1. Generates group ID using domain and hint
 // 2. Launches callback using generated group
 // 3. Verifies that callback launched on worker with ID from list of expected IDs
-async function verifyWorkerId(domain: WorkerDomain, hint: Array<WorkerId>, expected: Array<WorkerId>, mayThrow: boolean = false) {
+function verifyWorkerId(domain: WorkerDomain, hint: Array<WorkerId>, expected: Array<WorkerId>, mayThrow: boolean = false) {
     const params: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(domain, hint)};
     workerGroupAssertNe(params.workerGroupId, WorkerGroup.INVALID_ID);
     if (mayThrow) {
         try {
-            await launch(params){
+            launch(params){
                 verifyWorkerIdCallback(expected)
-            };
+            }.Await();
         } catch (e) {
             arktest.assertEQ((e as Error).message, 'Unable to launch coroutine: no suitable worker was found');
         }
     } else {
-        await launch(params) {
+        launch(params) {
             verifyWorkerIdCallback(expected)
-        };
+        }.Await();
     }
 }
 
 
-async function testGeneralDomain(): Promise<void> {
+function testGeneralDomain() {
     const mainId = getWorkerId();
 
     const ea = new EAWorker();
     ea.start();
-    const eaId = await ea.run<int>(getWorkerId);
+    const eaId = ea.run<int>(getWorkerId).Await();
 
     // Collect some general worker IDs
     let generalWorkerIds = new Set<WorkerId>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
         const params: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)};
         workerGroupAssertNe(params.workerGroupId, WorkerGroup.INVALID_ID);
-        await launch(params) { generalWorkerIds.add(getWorkerId()); };
+        launch(params) { generalWorkerIds.add(getWorkerId()); }.Await();
     }
     arktest.assertFalse(generalWorkerIds.has(mainId));
     const generalWorkerIdsArr = Array.from<WorkerId>(generalWorkerIds);
@@ -88,113 +88,101 @@ async function testGeneralDomain(): Promise<void> {
     // Test that for GENERAL domain coroutines are executed only on workers from "generalWorkerIds"
     // Test that eaId and mainId hints are ignored
     // Test that general worker ID hint is not ignored
-    const test = async (mayThrow: boolean): Promise<void> => {
+    const test = (mayThrow: boolean) => {
         for (let id of generalWorkerIds) {
-            await verifyWorkerId(WorkerDomain.GENERAL, [id, eaId, mainId], [id], mayThrow);
+            verifyWorkerId(WorkerDomain.GENERAL, [id, eaId, mainId], [id], mayThrow);
         }
-        await verifyWorkerId(WorkerDomain.GENERAL, [], possibleWorkerIdsArr, mayThrow);
-        await verifyWorkerId(WorkerDomain.GENERAL, [eaId], possibleWorkerIdsArr, mayThrow);
-        await verifyWorkerId(WorkerDomain.GENERAL, [mainId], possibleWorkerIdsArr, mayThrow);
+        verifyWorkerId(WorkerDomain.GENERAL, [], possibleWorkerIdsArr, mayThrow);
+        verifyWorkerId(WorkerDomain.GENERAL, [eaId], possibleWorkerIdsArr, mayThrow);
+        verifyWorkerId(WorkerDomain.GENERAL, [mainId], possibleWorkerIdsArr, mayThrow);
     };
 
-    let jobs = Array<Promise<void>>();
-    let promises = Array<Promise<void>>();
+    let jobs = Array<Job<void>>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-        await test(false);
-        await launch<Promise<void>>() { return test(false); };
-        await ea.run<Promise<void>>(async () => { await test(false); });
+        test(false);
+        launch() { test(false); }.Await();
+        ea.run<void>(() => { test(false); }).Await();
         jobs.push(launch() { test(true); });
-        promises.push(ea.run<void>(async () => { test(true); }));
+        jobs.push(ea.run<void>(() => { test(true); }));
     }
 
-    await ea.join();
+    ea.join();
 
     for (let job of jobs) {
-        await job;
-    }
-    for (let p of promises) {
-        await p;
+        job.Await();
     }
 }
 
-async function testExactIdDomain(): Promise<void> {
+function testExactIdDomain() {
     // Collect some worker IDs (main + ea + workers on which "launch" launches callbacks)
     let workerIds = new Set<WorkerId>();
     const ea = new EAWorker();
     ea.start();
-    const eaId = await ea.run<int>(getWorkerId);
+    const eaId = ea.run<int>(getWorkerId).Await();
     workerIds.add(eaId);
     const mainId = getWorkerId();
     workerIds.add(mainId);
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-        await launch() { workerIds.add(getWorkerId()); };
+        launch() { workerIds.add(getWorkerId()); }.Await();
     }
     const workerIdsArr = Array.from<WorkerId>(workerIds);
 
     // Test that for EXACT_ID domain any particular id hint (including main ID and EA ID) is not ignored
-    const test = async (mayThrow: boolean): Promise<void> => {
+    const test = (mayThrow: boolean) => {
         for (let id of workerIds) {
-            await verifyWorkerId(WorkerDomain.EXACT_ID, [id], [id], mayThrow);
-            await verifyWorkerId(WorkerDomain.EXACT_ID, [workerIdsArr[0], workerIdsArr[1], id], [workerIdsArr[0], workerIdsArr[1], id], mayThrow);
+            verifyWorkerId(WorkerDomain.EXACT_ID, [id], [id], mayThrow);
+            verifyWorkerId(WorkerDomain.EXACT_ID, [workerIdsArr[0], workerIdsArr[1], id], [workerIdsArr[0], workerIdsArr[1], id], mayThrow);
         }
     };
 
-    let jobs = Array<Promise<void>>();
-    let promises = Array<Promise<void>>();
+    let jobs = Array<Job<void>>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-        await test(false);
-        await launch<Promise<void>>() { return test(false); };
-        await ea.run<Promise<void>>(async () => { await test(false); });
+        test(false);
+        launch() { test(false); }.Await();
+        ea.run<void>(() => { test(false); }).Await();
         jobs.push(launch() { test(true); });
-        promises.push(ea.run<void>(async () => { await test(true); }));
+        jobs.push(ea.run<void>(() => { test(true); }));
     }
 
-    await ea.join();
+    ea.join();
 
     // Test that for EXACT_ID domain with empty hint ANY_ID worker group is generated
     workerGroupAssertEq(WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, []), WorkerGroup.ANY_ID);
     workerGroupAssertEq(WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID), WorkerGroup.ANY_ID);
 
     for (let job of jobs) {
-        await job;
-    }
-    for (let p of promises) {
-        await p;
+        job.Await();
     }
 }
 
-async function testMainDomain(): Promise<void> {
+function testMainDomain() {
     const mainId = getWorkerId();
     const ea = new EAWorker();
     ea.start();
 
     // Test that for MAIN domain any hint is ignored and coroutines are always executed on main worker
-    const test = async (mayThrow: boolean): Promise<void> => {
-        await verifyWorkerId(WorkerDomain.MAIN, [], [mainId], mayThrow);
-        await verifyWorkerId(WorkerDomain.MAIN, [1, 2, 3], [mainId], mayThrow);
+    const test = (mayThrow: boolean) => {
+        verifyWorkerId(WorkerDomain.MAIN, [], [mainId], mayThrow);
+        verifyWorkerId(WorkerDomain.MAIN, [1, 2, 3], [mainId], mayThrow);
     };
 
-    let jobs = Array<Promise<void>>();
-    let promises = Array<Promise<void>>();
+    let jobs = Array<Job<void>>();
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-        await test(false);
-        await launch<Promise<void>>() { return test(false); };
-        await ea.run<Promise<void>>(async () => { await test(false); });
+        test(false);
+        launch(){ test(false); }.Await();
+        ea.run<void>(() => { test(false); }).Await();
         jobs.push(launch() { test(true); });
-        promises.push(ea.run<void>(async () => { await test(true); }));
+        jobs.push(ea.run<void>(() => { test(true); }));
     }
 
-    await ea.join();
+    ea.join();
 
     for (let job of jobs) {
-        await job;
-    }
-    for (let p of promises) {
-        await p;
+        job.Await();
     }
 }
 
-async function testEADomain(): Promise<void> {
+function testEADomain() {
     // Test that without created EA workers group ID is invalid
     workerGroupAssertEq(WorkerGroup.generateGroupId(WorkerDomain.EA), WorkerGroup.INVALID_ID);
 
@@ -204,49 +192,46 @@ async function testEADomain(): Promise<void> {
     ea1.start();
     const ea2 = new EAWorker();
     ea2.start();
-    const eaId1 = await ea1.run<int>(getWorkerId);
+    const eaId1 = ea1.run<int>(getWorkerId).Await();
     const params1: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaId1])};
-    const eaId2 = await ea2.run<int>(getWorkerId);
+    const eaId2 = ea2.run<int>(getWorkerId).Await();
     const params2: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaId2])};
 
     // Test that for EA domain coroutines are always executed on EA workers
     // Test hint: non-EA worker IDs are ignored and EA worker IDs are not ignored
-    const test = async (mayThrow: boolean): Promise<void> => {
-        await verifyWorkerId(WorkerDomain.EA, [eaId1, mainId], [eaId1], mayThrow);
-        await verifyWorkerId(WorkerDomain.EA, [eaId2, mainId], [eaId2], mayThrow);
-        await verifyWorkerId(WorkerDomain.EA, [], [eaId1, eaId2], mayThrow);
-        await verifyWorkerId(WorkerDomain.EA, [eaId1, eaId2, mainId, 0, 1, 2], [eaId1, eaId2], mayThrow);
+    const test = (mayThrow: boolean) => {
+        verifyWorkerId(WorkerDomain.EA, [eaId1, mainId], [eaId1], mayThrow);
+        verifyWorkerId(WorkerDomain.EA, [eaId2, mainId], [eaId2], mayThrow);
+        verifyWorkerId(WorkerDomain.EA, [], [eaId1, eaId2], mayThrow);
+        verifyWorkerId(WorkerDomain.EA, [eaId1, eaId2, mainId, 0, 1, 2], [eaId1, eaId2], mayThrow);
     }
 
     // NOTE: await all jobs so eaworkers won't be destroyed before generateGroupId + launch
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-        await test(false);
-        await launch<Promise<void>>() { return test(false); };
-        await ea1.run<void>(async () => { await test(false); });
-        await ea2.run<Promise<void>>(async () => { await test(false); });
+        test(false);
+        launch() { test(false); }.Await();
+        ea1.run<void>(() => { test(false); }).Await();
+        ea2.run<void>(() => { test(false); }).Await();
     }
 
-    await ea1.join();
-    await ea2.join();
+    ea1.join();
+    ea2.join();
 }
 
-async function testInvalidGroupId() {
+function testInvalidGroupId() {
     const params: LaunchParams = {workerGroupId: WorkerGroup.INVALID_ID};
-    try {
-        await launch(params) {};
-        arktest.assertTrue(false, 'Expected exception was not thrown');
-    } catch (e) {
-        arktest.assertEQ((e as Error).message, 'Cannot launch with invalid group id!');
-    }
+    arktest.expectThrow(() => { launch(params) {}.Await(); }, (e: Error) => {
+        return (e as Error).message === 'Cannot launch with invalid group id!';
+    });
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.worker_group');
-    testSuite.addAsyncTest('testEADomain', testEADomain);
-    testSuite.addAsyncTest('testGeneralDomain', testGeneralDomain);
-    testSuite.addAsyncTest('testExactIdDomain', testExactIdDomain);
-    testSuite.addAsyncTest('testMainDomain', testMainDomain);
-    testSuite.addAsyncTest('testInvalidGroupId', testInvalidGroupId);
+    testSuite.addTest('testEADomain', testEADomain);
+    testSuite.addTest('testGeneralDomain', testGeneralDomain);
+    testSuite.addTest('testExactIdDomain', testExactIdDomain);
+    testSuite.addTest('testMainDomain', testMainDomain);
+    testSuite.addTest('testInvalidGroupId', testInvalidGroupId);
     let res = await testSuite.runAsync();
     return res;
 }

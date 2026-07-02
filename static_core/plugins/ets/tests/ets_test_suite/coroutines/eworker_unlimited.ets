@@ -33,7 +33,7 @@ function CheckLimitReached() {
     try {
         let w = new EAWorker();
         w.start();
-        w.quit();
+        w.join();
     } catch(e) {
         catched = true;
     }
@@ -41,26 +41,26 @@ function CheckLimitReached() {
     return catched;
 }
 
-function LoadWorkers(workers: Array<EAWorker>): Array<Promise<int>> {
-    let promises = new Array<Promise<int>>();
+function LoadWorkers(workers: Array<EAWorker>): Array<Job<int>> {
+    let jobs = new Array<Job<int>>();
 
     for (let i = 0; i < NUM_EWORKERS; i++) {
-        let promise = workers[i].run<int>(():int => {
+        let job = workers[i].run<int>(():int => {
             let runId = CoroutineExtras.getWorkerId();
             arktest.assertNE(runId, mainId);
             return runId;
         });
-        promises.push(promise);
+        jobs.push(job);
     }
 
-    return promises;
+    return jobs;
 }
 
-async function AwaitPromises(promises: Array<Promise<int>>): Promise<Array<int>> {
+function AwaitJobs(jobs: Array<Job<int>>): Array<int> {
     let ids = Array<int>();
 
     for (let i = 0; i < NUM_EWORKERS; i++) {
-        let id = await promises[i];
+        let id = jobs[i].Await();
         ids.push(id);
     }
 
@@ -69,7 +69,7 @@ async function AwaitPromises(promises: Array<Promise<int>>): Promise<Array<int>>
 
 function JoinWorkers(workers: Array<EAWorker>) {
     workers.forEach((eaWorker: EAWorker) => {
-        eaWorker.quit();
+        eaWorker.join();
     });
 }
 
@@ -78,7 +78,7 @@ function CheckUnique(arr: Array<int>) {
     arktest.assertEQ(s.size, arr.length);
 }
 
-async function testEworkerUnlimited(): Promise<void> {
+function testEworkerUnlimited(): void {
     let workers = CreateWorkers();
 
     if (!CheckLimitReached()) {
@@ -86,15 +86,15 @@ async function testEworkerUnlimited(): Promise<void> {
         arktest.assertTrue(false, 'EAWorkers limit should be reached before');
     }
 
-    let promises = LoadWorkers(workers);
-    let ids = await AwaitPromises(promises);
+    let jobs = LoadWorkers(workers);
+    let ids = AwaitJobs(jobs);
     CheckUnique(ids);
     JoinWorkers(workers);
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_unlimited');
-    testSuite.addAsyncTest('testEworkerUnlimited', testEworkerUnlimited);
-    let res = testSuite.run();
+    testSuite.addTest('testEworkerUnlimited', testEworkerUnlimited);
+    let res = await testSuite.runAsync();
     return res;
 }

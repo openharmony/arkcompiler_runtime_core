@@ -22,12 +22,12 @@ function callback(): int {
 
 native function NativeCall(id: int): void;
 
-export async function TestMain(): Promise<int> {
+export function TestMain(): int {
     mainWorkerId = CoroutineExtras.getWorkerId();
     let ea = new EAWorker();
     ea.start();
-    let id = await ea.run<int>(callback);
+    let id = ea.run<int>(callback).Await();
     NativeCall(id);
-    ea.quit();
+    ea.join();
     return 0;
 }

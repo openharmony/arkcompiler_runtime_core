@@ -38,14 +38,14 @@ function nonconcurrentCompareAndSwapTest() {
     arktest.assertEQ(atomicChar.compareAndSwap(c'a', c'b'), c'a');
     arktest.assertEQ(atomicChar.load(), c'b');
     arktest.assertEQ(atomicChar.compareAndSwap(c'a', c'c'), c'b');
-    arktest.assertEQ(atomicChar.load(), c'b');       
+    arktest.assertEQ(atomicChar.load(), c'b');
 }
 
 function concurrentLoadStoreTest() {
     let atomicChar = new AtomicChar(c'a');
     let count : int = 0;
 
-    let worker = new EAWorker;     
+    let worker = new EAWorker;
     worker.start();
     worker.run<void>(() => {
         count = 1;
@@ -56,7 +56,7 @@ function concurrentLoadStoreTest() {
         // wait here
     }
     arktest.assertEQ(count, 1);
-    worker.quit();
+    worker.join();
 }
 
 // Checks correctness of visibility
@@ -86,18 +86,18 @@ function concurrentExchangeTest() {
         // wait here
     }
     arktest.assertEQ(count, 2);
-    worker1.quit();
-    worker2.quit();
+    worker1.join();
+    worker2.join();
 }
 
 function concurrentCompareAndSwapTest() {
     let atomicChar = new AtomicChar(c'a');
 
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let w1 = false;
     let worker2 = new EAWorker;
     let w2 = false;
-    
+
     worker1.start();
     worker2.start();
     worker1.run<void>(() => {
@@ -115,9 +115,9 @@ function concurrentCompareAndSwapTest() {
         }
     });
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertTrue((w1 && !w2) || (!w1 && w2));
 }
 

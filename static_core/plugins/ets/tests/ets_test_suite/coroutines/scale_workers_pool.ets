@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-async function testScaleWorkersPool(): Promise<void> {
+function testScaleWorkersPool() {
     let mainId = CoroutineExtras.getWorkerId();
 
     CoroutineExtras.scaleWorkersPool(1);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    let workerId = await launch(CoroutineExtras.getWorkerId);
+    let workerId = launch(CoroutineExtras.getWorkerId).Await();
     CoroutineExtras.scaleWorkersPool(-1);
     arktest.assertNE(mainId, workerId);
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
-    workerId = await launch(CoroutineExtras.getWorkerId);
+    workerId = launch(CoroutineExtras.getWorkerId).Await();
     arktest.assertEQ(mainId, workerId);
 }
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.scale_workers_pool');
-    testSuite.addAsyncTest('testScaleWorkersPool', testScaleWorkersPool);
+    testSuite.addTest('testScaleWorkersPool', testScaleWorkersPool);
     let res = await testSuite.runAsync();
     return res;
 }

@@ -14,14 +14,16 @@
  */
 
 import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 // This test covers case of storing Promises returned from launch instruction
 // into array for different modes: INT, AOT, JIT
 
 class TestCoroutine {
     public static threadsCount: int = 2;
-    public static jArray: (Promise<Object> | null)[] = [null, null];
+    public static jArray: (Job<Object> | null)[] = [null, null];
 
-    public jCor(): Promise<Object> {
+    public jCor(): Job<Object> {
         const factory = () => {return new Object();}
         return launch(factory);
     }

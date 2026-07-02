@@ -54,13 +54,13 @@ function sleep(ms: int) {
 function testMessageHandlerCreation() {
     let eaw = new EAWorker();
     eaw.start();
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         // do nothing
     }, eaw);
-    
+
     arktest.assertEQ(handler.getWorker(), eaw);
-    eaw.quit();
+    eaw.join();
 }
 
 function testMessageHandlerWithoutWorker() {
@@ -77,17 +77,17 @@ function testSendEmptyMessage() {
     eaw.start();
     let event = new Event();
     let messageReceived = false;
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), MessageType.EMPTY);
         messageReceived = true;
         event.fire();
     }, eaw);
-    
+
     handler.sendEmptyMessage(MessageType.EMPTY);
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.quit();
+    eaw.join();
 }
 
 function testSendStringMessage() {
@@ -95,18 +95,18 @@ function testSendStringMessage() {
     eaw.start();
     let event = new Event();
     let messageReceived = false;
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), MessageType.STRING);
         arktest.assertEQ(msg.getObject(), 'test');
         messageReceived = true;
         event.fire();
     }, eaw);
-    
+
     handler.sendMessage(new concurrency.Message(MessageType.STRING, 'test', handler));
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.quit();
+    eaw.join();
 }
 
 function testSendNumberMessage() {
@@ -114,18 +114,18 @@ function testSendNumberMessage() {
     eaw.start();
     let event = new Event();
     let messageReceived = false;
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), MessageType.NUMBER);
         arktest.assertEQ(msg.getObject(), 100);
         messageReceived = true;
         event.fire();
     }, eaw);
-    
+
     handler.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler));
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.quit();
+    eaw.join();
 }
 
 function testSendBooleanMessage() {
@@ -133,18 +133,18 @@ function testSendBooleanMessage() {
     eaw.start();
     let event = new Event();
     let messageReceived = false;
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), MessageType.BOOLEAN);
         arktest.assertEQ(msg.getObject(), true);
         messageReceived = true;
         event.fire();
     }, eaw);
-    
+
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
     event.wait();
     arktest.assertEQ(messageReceived, true);
-    eaw.quit();
+    eaw.join();
 }
 
 
@@ -154,7 +154,7 @@ function testHasMessages() {
     let waiter1 = new Event();
     let waiter2 = new Event();
     let handler: concurrency.MessageHandler;
-    
+
     handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         if (msg.getCallback() != undefined) {
             let cb = msg.getCallback() as Callback;
@@ -168,13 +168,13 @@ function testHasMessages() {
         arktest.assertEQ(handler.hasMessages(MessageType.STRING, 'test'), true);
         arktest.assertEQ(handler.hasMessages(MessageType.NUMBER, 100), true);
         arktest.assertEQ(handler.hasMessages(MessageType.BOOLEAN, true), true);
-        
+
         arktest.assertEQ(handler.hasMessages(MessageType.STRING, 'wrong'), false);
         arktest.assertEQ(handler.hasMessages(MessageType.NUMBER, 999), false);
         arktest.assertEQ(handler.hasMessages(MessageType.ARRAY), false);
         waiter2.fire();
     }
-    
+
     handler.sendMessage(new concurrency.Message(cb, handler));
     handler.sendEmptyMessage(MessageType.EMPTY);
     handler.sendMessage(new concurrency.Message(MessageType.STRING, 'test', handler));
@@ -182,7 +182,7 @@ function testHasMessages() {
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
     waiter1.fire();
     waiter2.wait();
-    eaw.quit();
+    eaw.join();
 }
 
 function testMessageCounting() {
@@ -194,7 +194,7 @@ function testMessageCounting() {
     let countString = 0;
     let countNumber = 0;
     let countBoolean = 0;
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         count++;
         if (msg.getWhat() == MessageType.EMPTY.valueOf()) {
@@ -206,7 +206,7 @@ function testMessageCounting() {
         } else if (msg.getWhat() == MessageType.BOOLEAN.valueOf()) {
             countBoolean++;
         }
-        
+
         if (count >= 4) {
             arktest.assertEQ(count, 4);
             arktest.assertEQ(countEmpty, 1);
@@ -216,14 +216,14 @@ function testMessageCounting() {
             event.fire();
         }
     }, eaw);
-    
+
     handler.sendEmptyMessage(MessageType.EMPTY);
     handler.sendMessage(new concurrency.Message(MessageType.STRING, 'test', handler));
     handler.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler));
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
-    
+
     event.wait();
-    eaw.quit();
+    eaw.join();
 }
 
 
@@ -232,25 +232,25 @@ function testMessageCallback() {
     eaw.start();
     let event = new Event();
     let callbackExecuted = false;
-    
+
     let callback = () => {
         callbackExecuted = true;
         event.fire();
     };
-    
+
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         if (msg.getCallback() != undefined) {
             let cb = msg.getCallback() as Callback;
             cb();
         }
     }, eaw);
-    
+
     let msg = new concurrency.Message(callback, handler);
     handler.sendMessage(msg);
-    
+
     event.wait();
     arktest.assertEQ(callbackExecuted, true);
-    eaw.quit();
+    eaw.join();
 }
 
 
@@ -280,14 +280,14 @@ function testRemoveMultipleMessages() {
             cb();
         }
     }, eaw2);
-    
+
     let callback = () => {
         waiter1.wait();
 
         let isMsg1 = handler1.removeMessages(MessageType.STRING, 'test');
         let isMsg2 = handler1.removeMessages(MessageType.NUMBER, 100);
         let isMsg3 = handler1.removeMessages(MessageType.BOOLEAN, true);
-    
+
         if (isMsg1){
             arktest.assertEQ(handler1.hasMessages(MessageType.STRING, 'test'), false);
             --expectedExecuteCount;
@@ -313,7 +313,7 @@ function testRemoveMultipleMessages() {
     handler1.sendMessage(new concurrency.Message(MessageType.STRING, 'test', handler1));
     handler1.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler1));
     handler1.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler1));
-    
+
     waiter1.fire();
     waiter2.wait();
 
@@ -355,7 +355,7 @@ function testHasMessage2() {
 
     handler.sendMessage(new concurrency.Message(callback, handler));
     waiter.wait();
-    eaw.quit();
+    eaw.join();
 }
 
 function testMessageHandlerMismatch() {
@@ -370,7 +370,7 @@ function testMessageHandlerMismatch() {
 
     let msg = new concurrency.Message(MessageType.STRING, 'test', handler);
     arktest.assertEQ(handler2.sendMessage(msg), false);
-    eaw.quit();
+    eaw.join();
 }
 
 function testDoubleRemoveMessage() {
@@ -396,13 +396,13 @@ function testDoubleRemoveMessage() {
 function testRemoveMessagesZeroNotAffectDefaultWhatMessage() {
     let eaw1 = new EAWorker();
     eaw1.start();
-    
+
     let blockStarted = new Event();
     let messageDone = new Event();
     let handlerBlocked = new Event();
     let defaultWhatExecuted = 0;
     let whatZeroExecuted = 0;
-    
+
     let handler1 = new concurrency.MessageHandler((msg: concurrency.Message) => {
         if (msg.getCallback() != undefined) {
             let cb = msg.getCallback() as Callback;
@@ -422,7 +422,7 @@ function testRemoveMessagesZeroNotAffectDefaultWhatMessage() {
         handlerBlocked.wait();
     }, handler1));
     blockStarted.wait();
-    
+
     handler1.sendMessage(new concurrency.Message(() => {
         defaultWhatExecuted++;
     }, handler1));
@@ -441,7 +441,7 @@ function testRemoveMessagesZeroNotAffectDefaultWhatMessage() {
 
 function main() {
     let testSuite = new arktest.ArkTestsuite('messageHandlerBasicInterface');
-    
+
     testSuite.addTest('testMessageHandlerCreation', testMessageHandlerCreation);
     testSuite.addTest('testSendEmptyMessage', testSendEmptyMessage);
     testSuite.addTest('testSendStringMessage', testSendStringMessage);

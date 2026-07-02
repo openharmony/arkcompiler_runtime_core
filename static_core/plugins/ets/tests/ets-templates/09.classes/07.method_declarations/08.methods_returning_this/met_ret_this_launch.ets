@@ -18,6 +18,7 @@ desc: calling method returning 'this' from coroutine
 ---*/
 
 import { launch } from "std/concurrency"
+import { Job } from "std/core"
 
 class A {
     fld: int = 0
@@ -30,7 +31,7 @@ class A {
         return this
     }
 
-    bar(): Promise<this> {
+    bar(): Job<this> {
         let self = this.foo().foo()
         return launch<this>() {
             return self.foo()
@@ -38,9 +39,9 @@ class A {
     }
 }
 
-async function main(): Promise<void> {
+function main(): void {
     let a = new A()
 
-    arktest.assertEQ(await a.bar(), a)
+    arktest.assertEQ(a.bar().Await(), a)
     arktest.assertEQ(a.fld, 3)
 }

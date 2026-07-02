@@ -23,7 +23,7 @@ let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQ
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetSizeTest");
 
-    ArrayBlockingQueueTestsuite.addAsyncTest("GetSizeTestInt003", async () =>
+    ArrayBlockingQueueTestsuite.addTest("GetSizeTestInt003", () =>
     {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
@@ -35,10 +35,10 @@ function main(): int {
         let p2 = launch(queueIntSizedata);
         let p3 = launch(queueIntSizedata);
         let p4 = launch(queueIntSizedata);
-        await p1;
-        await p2;
-        await p3;
-        await p4;
+        p1.Await();
+        p2.Await();
+        p3.Await();
+        p4.Await();
         arktest.assertEQ(queueInt.size, elementsNum);
     });
 

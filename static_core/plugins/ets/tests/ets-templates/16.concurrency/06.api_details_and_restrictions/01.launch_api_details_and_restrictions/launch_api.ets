@@ -24,6 +24,7 @@ tags: [no-warmup]
 
 import { CoroutineExtras } from "std/debug/concurrency"
 import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
+import { Job } from "std/core"
 
 const MAIN_WORKER_ID: int = 0;
 
@@ -34,27 +35,27 @@ function getWorkerId(): int {
 function main(): int {
     let suite = new arktest.ArkTestsuite("launch API details and restrictions");
 
-    suite.addAsyncTest("MAIN domain runs on main worker", async () => {
+    suite.addTest("MAIN domain runs on main worker", () => {
         const mainWorkerId: int = getWorkerId();
         arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID);
 
         const params: LaunchParams = {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)
         };
-        let job: Promise<int> = launch<int>(params, getWorkerId);
-        arktest.assertEQ(await job, MAIN_WORKER_ID);
+        let job: Job<int> = launch<int>(params, getWorkerId);
+        arktest.assertEQ(job.Await(), MAIN_WORKER_ID);
     });
 
-    suite.addAsyncTest("GENERAL domain runs on non-main worker", async () => {
+    suite.addTest("GENERAL domain runs on non-main worker", () => {
         const mainWorkerId: int = getWorkerId();
         const params: LaunchParams = {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
         };
-        let job: Promise<int> = launch<int>(params, getWorkerId);
-        arktest.assertNE(await job, mainWorkerId);
+        let job: Job<int> = launch<int>(params, getWorkerId);
+        arktest.assertNE(job.Await(), mainWorkerId);
     });
 
-    suite.addAsyncTest("Immutable group reused across multiple launches", async () => {
+    suite.addTest("Immutable group reused across multiple launches", () => {
         const mainWorkerId: int = getWorkerId();
         const params: LaunchParams = {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
@@ -62,30 +63,30 @@ function main(): int {
 
         let workerIds = new Set<int>();
         for (let i = 0; i < 15; i++) {
-            let job: Promise<int> = launch<int>(params, getWorkerId);
-            const workerId: int = await job;
+            let job: Job<int> = launch<int>(params, getWorkerId);
+            const workerId: int = job.Await();
             arktest.assertNE(workerId, mainWorkerId);
             workerIds.add(workerId);
         }
         arktest.assertTrue(workerIds.size >= 1);
     });
 
-    suite.addAsyncTest("Hint targets specific general worker", async () => {
+    suite.addTest("Hint targets specific general worker", () => {
         const mainWorkerId: int = getWorkerId();
 
         const defaultParams: LaunchParams = {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
         };
-        let job0: Promise<int> = launch<int>(defaultParams, getWorkerId);
-        const targetWorkerId: int = await job0;
+        let job0: Job<int> = launch<int>(defaultParams, getWorkerId);
+        const targetWorkerId: int = job0.Await();
         arktest.assertNE(targetWorkerId, mainWorkerId);
 
         const hintParams: LaunchParams = {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL, [targetWorkerId])
         };
         for (let i = 0; i < 5; i++) {
-            let job: Promise<int> = launch<int>(hintParams, getWorkerId);
-            arktest.assertEQ(await job, targetWorkerId);
+            let job: Job<int> = launch<int>(hintParams, getWorkerId);
+            arktest.assertEQ(job.Await(), targetWorkerId);
         }
     });
 

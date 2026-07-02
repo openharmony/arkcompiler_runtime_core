@@ -28,22 +28,22 @@ async function suspendable(order: int[]): Promise<int> {
   return 0
 }
 
-async function startTest(): Promise<void> {
+function startTest(): void {
   let order: int[] = []
 
   const ea = new EAWorker()
   ea.start()
 
-  await ea.run<undefined>(async () => {
+  ea.run<undefined>(() => {
     let high: Promise<int> = suspendable(order)
 
-    let low: Promise<undefined> = launch<undefined>() {
+    let low = launch<undefined>() {
       order.push(2)
     }
 
-    await high
-    await low
-  })
+    high.awaitSync()
+    low.Await()
+  }).Await()
 
   arktest.assertEQ(order.length, 2)
   arktest.assertEQ(order[0], 1)
@@ -52,6 +52,6 @@ async function startTest(): Promise<void> {
   ea.quit()
 }
 
-async function main(): Promise<void> {
-  await startTest()
+function main(): void {
+  startTest()
 }

@@ -27,10 +27,10 @@ async function testMain() {
     heavyComputation()
     let producerJob = producerWorker.run<Int>(producer)
 
-    await producerJob;
-    await consumerJob;
-    await consumerWorker.join();
-    await producerWorker.join();
+    producerJob.Await();
+    consumerJob.Await();
+    consumerWorker.join();
+    producerWorker.join();
 }
 
 function producer(): Int {

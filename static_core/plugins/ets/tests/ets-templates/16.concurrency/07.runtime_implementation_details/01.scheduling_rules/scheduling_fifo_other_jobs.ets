@@ -18,24 +18,24 @@ desc: Other jobs with the same priority are scheduled in FIFO order
 tags: [no-warmup]
 ---*/
 
-async function startTest(): Promise<void> {
+function startTest(): void {
   let order: int[] = []
 
   const ea = new EAWorker()
   ea.start()
 
-  await ea.run<undefined>(async () => {
-    let j1: Promise<undefined> = launch<undefined>() {
+  ea.run<undefined>(() => {
+    let j1 = launch<undefined>() {
       order.push(1)
     }
 
-    let j2: Promise<undefined> = launch<undefined>() {
+    let j2 = launch<undefined>() {
       order.push(2)
     }
 
-    await j1
-    await j2
-  })
+    j1.Await()
+    j2.Await()
+  }).Await()
 
   arktest.assertEQ(order.length, 2)
   arktest.assertEQ(order[0], 1)
@@ -44,6 +44,6 @@ async function startTest(): Promise<void> {
   ea.quit()
 }
 
-async function main(): Promise<void> {
-  await startTest()
+function main(): void {
+  startTest()
 }

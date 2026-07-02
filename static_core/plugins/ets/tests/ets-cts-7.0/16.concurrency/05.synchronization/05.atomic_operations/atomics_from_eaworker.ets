@@ -35,21 +35,17 @@ function addInWorker(): long {
   return Atomics.add(view, 0, 41)
 }
 
-async function startTest(): Promise<void> {
+function main(): void {
   Atomics.store(view, 0, 1)
 
   const eaWorker = new EAWorker()
   eaWorker.start()
 
-  const oldValue: long = await eaWorker.run<long>(addInWorker)
+  const oldValue: long = eaWorker.run<long>(addInWorker).Await()
 
   arktest.assertEQ(1, oldValue)
   arktest.assertEQ(42, Atomics.load(view, 0))
 
   eaWorker.quit()
-}
-
-async function main(): Promise<void> {
-  await startTest()
 }
 {%- endfor %}

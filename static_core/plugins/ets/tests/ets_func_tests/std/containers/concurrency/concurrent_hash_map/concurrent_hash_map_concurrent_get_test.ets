@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push((await arr[i]) as T);
+		res.push(arr[i].Await());
 	return res;
 }
 
@@ -38,7 +38,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-async function testConcurrentGet(): Promise<void> {
+function testConcurrentGet() {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 100;
 
@@ -50,15 +50,15 @@ async function testConcurrentGet(): Promise<void> {
 		for (let i = start; i < end; ++ i)
 			arktest.assertEQ(map.get(i), i);
 	}
-	let getJobs: Promise<void>[] = [];
+	let getJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		let start = SET_COUNT * i;
 		addLaunch(getJobs, makeGetF(start, start + SET_COUNT));
 	}
-	await awaitAll(getJobs);
+	awaitAll(getJobs);
 }
 
-async function testConcurrentGet2(): Promise<void> {
+function testConcurrentGet2() {
 	const JOB_COUNT = 10;
 	const SET_COUNT = 100;
 
@@ -69,17 +69,17 @@ async function testConcurrentGet2(): Promise<void> {
 		for (let i = 0; i < SET_COUNT; ++ i)
 			arktest.assertEQ(map.get(i), i);
 	}
-	let getJobs: Promise<void>[] = [];
+	let getJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(getJobs, getF);
 	}
-	await awaitAll(getJobs);
+	awaitAll(getJobs);
 }
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addAsyncTest("testConcurrentGet", async () => { await testConcurrentGet(); });
-	CHMTestSuitecase.addAsyncTest("testConcurrentGet2", async () => { await testConcurrentGet2(); });
+	CHMTestSuitecase.addTest("testConcurrentGet", testConcurrentGet);
+	CHMTestSuitecase.addTest("testConcurrentGet2", testConcurrentGet2);
 
     return CHMTestSuitecase.run();
 }

@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push((await arr[i]) as T);
+		res.push(arr[i].Await());
 	return res;
 }
 
@@ -38,7 +38,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-async function testConcurrentReplace(): Promise<void> {
+function testConcurrentReplace() {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 20;
 
@@ -50,17 +50,17 @@ async function testConcurrentReplace(): Promise<void> {
 			arktest.assertTrue(map.replace(i, i));
 	}
 
-	let replaceJobs: Promise<void>[] = [];
+	let replaceJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		let start = i * SET_COUNT;
 		addLaunch(replaceJobs, makeReplaceF(start, start + SET_COUNT));
 	}
-	await awaitAll(replaceJobs);
+	awaitAll(replaceJobs);
 	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i)
 		arktest.assertEQ(map.get(i), i);
 }
 
-async function testConcurrentReplace2(): Promise<void> {
+function testConcurrentReplace2() {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 20;
 
@@ -72,16 +72,16 @@ async function testConcurrentReplace2(): Promise<void> {
 			arktest.assertTrue(map.replace(i, i + seed * SET_COUNT));
 	}
 
-	let replaceJobs: Promise<void>[] = [];
+	let replaceJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(replaceJobs, makeReplaceF(i));
 	}
-	await awaitAll(replaceJobs);
+	awaitAll(replaceJobs);
 	for (let i = 0; i < SET_COUNT; ++ i)
 		arktest.assertEQ(map.get(i) as int % SET_COUNT, i);
 }
 
-async function testConcurrentReplaceAndGet(): Promise<void> {
+function testConcurrentReplaceAndGet() {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 20;
 
@@ -106,21 +106,21 @@ async function testConcurrentReplaceAndGet(): Promise<void> {
 			arktest.assertTrue(map.replace(i, seed * SET_COUNT + i));
 	}
 
-	let getJobs: Promise<void>[] = [];
-	let replaceJobs: Promise<void>[] = [];
+	let getJobs: Job<void>[] = [];
+	let replaceJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(getJobs, getF);
 		addLaunch(replaceJobs, makeReplaceF(i));
 	}
-	await awaitAll(getJobs);
-	await awaitAll(replaceJobs);
+	awaitAll(getJobs);
+	awaitAll(replaceJobs);
 }
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addAsyncTest("testConcurrentReplace", async () => { await testConcurrentReplace(); });
-	CHMTestSuitecase.addAsyncTest("testConcurrentReplace2", async () => { await testConcurrentReplace2(); });
-	CHMTestSuitecase.addAsyncTest("testConcurrentReplaceAndGet", async () => { await testConcurrentReplaceAndGet(); });
+	CHMTestSuitecase.addTest("testConcurrentReplace", testConcurrentReplace);
+	CHMTestSuitecase.addTest("testConcurrentReplace2", testConcurrentReplace2);
+	CHMTestSuitecase.addTest("testConcurrentReplaceAndGet", testConcurrentReplaceAndGet);
 
     return CHMTestSuitecase.run();
 }

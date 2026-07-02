@@ -63,15 +63,15 @@ function main(): int {
         }
         arktest.assertTrue(concurrentHashMap.isEmpty());
     });
-    concurrentHashMapTestsuite.addAsyncTest("twiceTest_006", async () =>
+    concurrentHashMapTestsuite.addTest("twiceTest_006", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch(removeAll);
         let p2 = launch(removeAllBack);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
 

@@ -36,6 +36,15 @@ def create_tmp_interop_import_file(interop_path: str) -> None:
         export class Map<K, V> {}
         export class Set<T> {}
     }
+    export class Job<T> {
+        Await(): T;
+    }
+    declare global {
+        class Job<T> {
+            Await(): T;
+        }
+    }
+    export function launch<R>(coroFun: () => R): Job<R>;
     export default st;
     """
     with open(interop_path, "w", encoding="utf-8") as f:
@@ -140,6 +149,12 @@ class TestDeclgenETS2TS(TestFileBased):
                     "baseUrl": "{self.decl_path}",
                     "paths": {{
                         "@ohos.lang.interop": [
+                            "{tmp_interop_import_path}"
+                        ],
+                        "std/core": [
+                            "{tmp_interop_import_path}"
+                        ],
+                        "std/concurrency": [
                             "{tmp_interop_import_path}"
                         ]
                     }}

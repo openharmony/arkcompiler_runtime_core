@@ -359,7 +359,7 @@ function testSetIntervalWithString(isExternalTimer: boolean): void {
     globalTest!.checkpoint(1);
 }
 
-async function testClearTimerCrossWorker(isExternalTimer: boolean)
+function testClearTimerCrossWorker(isExternalTimer: boolean)
 {
     globalTest = new Test(0);
 
@@ -378,7 +378,7 @@ async function testClearTimerCrossWorker(isExternalTimer: boolean)
             setTimeout(() => { while (!isCleared.get()) {} }, 0);
             return setTimeout(() => { arktest.assertTrue(false); }, delay);
         };
-        let id = await launch(workerTimerCb);
+        let id = launch(workerTimerCb).Await();
         clearTimeout(id);
         isCleared.set(true);
     }
@@ -389,10 +389,10 @@ async function testClearTimerCrossWorker(isExternalTimer: boolean)
         let errorThrown = false;
         let id = setTimeout(() => { arktest.assertTrue(isCleared.get()); }, delay);
         try {
-            await launch() {
+            launch() {
                 isCleared.set(true);
                 clearTimeout(id);
-            };
+            }.Await();
         } catch (e) {
             arktest.assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
             errorThrown = true;

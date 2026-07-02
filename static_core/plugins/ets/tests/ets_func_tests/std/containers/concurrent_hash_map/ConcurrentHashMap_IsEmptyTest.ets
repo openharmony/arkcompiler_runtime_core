@@ -56,7 +56,7 @@ function main(): int {
         concurrentHashMap.clear();
         arktest.assertTrue(concurrentHashMap.isEmpty());
     });
-    concurrentHashMapIsEmptyTestsuite.addAsyncTest("isEmptyAndTest_001", async () =>
+    concurrentHashMapIsEmptyTestsuite.addTest("isEmptyAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -64,11 +64,11 @@ function main(): int {
         arktest.assertFalse(concurrentHashMapOne.isEmpty());
         let p1 = launch(isEmptyFun);
         let p2 = launch(clearAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
-    concurrentHashMapIsEmptyTestsuite.addAsyncTest("isEmptyAndTest_002", async () =>
+    concurrentHashMapIsEmptyTestsuite.addTest("isEmptyAndTest_002", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -77,8 +77,8 @@ function main(): int {
         arktest.assertFalse(concurrentHashMapOne.isEmpty());
         let p1 = launch(isEmptyFun);
         let p2 = launch(removeAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         flag = 0;
         for (let i = 0; i < 10; i++) {

@@ -511,6 +511,34 @@ cases:
           arktest.assertTrue(false, 'Expected error not thrown')
 #22
     - decl: |-
+          // calling method returning 'this' from coroutine
+          import { launch } from "std/concurrency"
+          import { Job } from "std/core"
+          class A {
+              fld: int
+              foo(): this {
+                  if (this.fld == 999) {
+                      throw new Error
+                  }
+                  this.fld += 1
+                  return this
+              }
+
+              bar(): Job<this> {
+                  return launch(this.foo().foo().foo)
+              }
+          }
+
+          async function test(a: A) {
+              arktest.assertEQ((a.bar().Await()), a)
+              arktest.assertEQ(a.fld, 3)
+          }
+      async: true
+      use: |-
+          let a = new A
+          await test(a)
+#23
+    - decl: |-
           // calling extension function returning 'this' from coroutine
           class A {
               fld: int

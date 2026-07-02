@@ -39,15 +39,15 @@ function main(): int {
         });
         arktest.assertEQ(flag, 2);
     });
-    ConcurrentSetTestsuite.addAsyncTest("ForEach&AddTest003", async () =>
+    ConcurrentSetTestsuite.addTest("ForEach&AddTest003", () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
         let p1 = launch(forEachOne);
         let p2 = launch(addAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size >= 0);
     });
     ConcurrentSetTestsuite.addTest("ForEach&AddTest004", () =>
@@ -59,7 +59,7 @@ function main(): int {
         addAll();
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addAsyncTest("ForEach&DeteleTest002", async () =>
+    ConcurrentSetTestsuite.addTest("ForEach&DeteleTest002", () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
@@ -67,11 +67,11 @@ function main(): int {
         addAll();
         let p1 = launch(forEachOne);
         let p2 = launch(deleteAllBack);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
-    ConcurrentSetTestsuite.addAsyncTest("ForEach&HasTest002", async () =>
+    ConcurrentSetTestsuite.addTest("ForEach&HasTest002", () =>
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
@@ -79,20 +79,20 @@ function main(): int {
         addAll();
         let p1 = launch(forEachOne);
         let p2 = launch(hasAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addAsyncTest("ForEach&ClearTest002", async () =>
+    ConcurrentSetTestsuite.addTest("ForEach&ClearTest002", () =>
     {
         ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0); 
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachOne);
         let p2 = launch(clearTest);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
 

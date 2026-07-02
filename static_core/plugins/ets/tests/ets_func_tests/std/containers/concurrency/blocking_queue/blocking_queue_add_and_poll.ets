@@ -15,17 +15,17 @@
 
 type BlockingQueueI = containers.BlockingQueue<int>;
 type BQConstructorI = (capacity: int) => BlockingQueueI;
-type TestFunction = (constr: BQConstructorI) => Promise<void>;
+type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: () => T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: () => T): void {
     arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
     let res: T[] = [];
     for (let i = 0; i < arr.length; ++ i)
-        res.push((await arr[i]) as T);
+        res.push(arr[i].Await());
     return res;
 }
 
@@ -48,11 +48,11 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
         arktest.assertEQ(array[i], value)
 }
 
-async function testOrderAddAndPollMany(constr: BQConstructorI): Promise<void> {
+function testOrderAddAndPollMany(constr: BQConstructorI) {
     let queue = constr(8);
     const EXTRA = -1;
-    let adders: Promise<Array<int>>[] = [];
-    let pollers: Promise<Array<int>>[] = [];
+    let adders: Job<Array<int>>[] = [];
+    let pollers: Job<Array<int>>[] = [];
 
     const ADD_COUNT = 10;
     const JOB_COUNT = 3;
@@ -92,9 +92,9 @@ async function testOrderAddAndPollMany(constr: BQConstructorI): Promise<void> {
     }
 
     // each must be found in poll or lost in add
-    let check: FixedArray<int> = new FixedArray<int>(JOB_COUNT * ADD_COUNT);     await awaitAll(adders);
-    let lost = await awaitAll(adders);
-    let found = await awaitAll(pollers);
+    let check: FixedArray<int> = new FixedArray<int>(JOB_COUNT * ADD_COUNT);     awaitAll(adders);
+    let lost = awaitAll(adders);
+    let found = awaitAll(pollers);
     lost.forEach(arr => arr.forEach(i => { ++check[i] }));
     found.forEach(arr => arr.forEach(i => { ++check[i] }));
     // Found = 1, lost = 1, nothing = 0, both = 2. Only 1 is good
@@ -102,10 +102,10 @@ async function testOrderAddAndPollMany(constr: BQConstructorI): Promise<void> {
 }
 
 
-async function testAddAndPollCount(constr: BQConstructorI): Promise<void> {
+function testAddAndPollCount(constr: BQConstructorI): void {
     let queue = constr(8);
-    let adders: Promise<FixedArray<int>>[] = [];
-    let pollers: Promise<FixedArray<int>>[] = [];
+    let adders: Job<FixedArray<int>>[] = [];
+    let pollers: Job<FixedArray<int>>[] = [];
 
     const ADD_COUNT = 10;
     const JOB_COUNT = 3;
@@ -141,8 +141,8 @@ async function testAddAndPollCount(constr: BQConstructorI): Promise<void> {
     }
 
     let finalCounter: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
-    let addedCounter = await awaitAll(adders);
-    let polledCounter = await awaitAll(pollers);
+    let addedCounter = awaitAll(adders);
+    let polledCounter = awaitAll(pollers);
     for (let i = 0; i < JOB_COUNT; ++ i) {
         sumArrInto(finalCounter, addedCounter[i]);
         subArrInto(finalCounter, polledCounter[i]);
@@ -174,7 +174,7 @@ function main(): int {
         for (let i = 0; i < tests.length; ++ i) {
             let name = tests[i][0];
             let testF = tests[i][1];
-            arktestsuite.addAsyncTest(name, async () => { await testF(constr); });
+            arktestsuite.addTest(name, () => testF(constr));
         }
     }
 

@@ -86,36 +86,36 @@ function main(): int {
         arktest.assertEQ(flag, 10);
         arktest.assertEQ(iterValues.next().value, undefined);
     });
-    concurrentHashMapTestsuite.addAsyncTest("ValuesAndTest_001", async () =>
+    concurrentHashMapTestsuite.addTest("ValuesAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch(setAll);
         let p2 = launch(valuesAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
-    concurrentHashMapTestsuite.addAsyncTest("ValuesAndTest_002", async () =>
+    concurrentHashMapTestsuite.addTest("ValuesAndTest_002", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch(deleteAll);
         let p2 = launch(valuesAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
-    concurrentHashMapTestsuite.addAsyncTest("ValuesAndTest_003", async () =>
+    concurrentHashMapTestsuite.addTest("ValuesAndTest_003", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch(clearAll);
         let p2 = launch(valuesAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
 

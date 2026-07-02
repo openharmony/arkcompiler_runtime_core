@@ -32,7 +32,7 @@ function main(): int {
     let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapSetTest");
 
     // Multiple Threads Test
-    concurrentHashMapTestsuite.addAsyncTest("setAndTest_001", async () =>
+    concurrentHashMapTestsuite.addTest("setAndTest_001", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -40,8 +40,8 @@ function main(): int {
         setFront();
         let p1 = launch(setBack);
         let p2 = launch(getAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         for (let i: int = 0; i < 10; i++) {
             arktest.assertEQ(concurrentHashMapOne.get(i), arrValues[i]);
         }
@@ -53,26 +53,26 @@ function main(): int {
         }
         arktest.assertTrue(flag >= 0);
     });
-    concurrentHashMapTestsuite.addAsyncTest("setAndTest_003", async () =>
+    concurrentHashMapTestsuite.addTest("setAndTest_003", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
         let p1 = launch(setBack);
         let p2 = launch(deleteAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.size <= 5);
     });
-    concurrentHashMapTestsuite.addAsyncTest("setAndTest_004", async () =>
+    concurrentHashMapTestsuite.addTest("setAndTest_004", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
         let p1 = launch(setBack);
         let p2 = launch(replaceAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         flag = 0;
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";
@@ -82,27 +82,27 @@ function main(): int {
         }
         arktest.assertTrue(flag >= 5);
     });
-    concurrentHashMapTestsuite.addAsyncTest("setAndTest_005", async () =>
+    concurrentHashMapTestsuite.addTest("setAndTest_005", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch(setAll);
         let p2 = launch(isEmptyFun);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
-    concurrentHashMapTestsuite.addAsyncTest("setAndTest_006", async () =>
+    concurrentHashMapTestsuite.addTest("setAndTest_006", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch(setAll);
         let p2 = launch(clearAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         arktest.assertTrue(concurrentHashMapOne.get(9) == undefined || concurrentHashMapOne.get(9) == "nine");
     });
-    concurrentHashMapTestsuite.addAsyncTest("setAndTest_007", async () =>
+    concurrentHashMapTestsuite.addTest("setAndTest_007", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
@@ -110,8 +110,8 @@ function main(): int {
         setFront();
         let p1 = launch(setBack);
         let p2 = launch(removeAll);
-        await p1;
-        await p2;
+        p1.Await();
+        p2.Await();
         flag = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i]) {

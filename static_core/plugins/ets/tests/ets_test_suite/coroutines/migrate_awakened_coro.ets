@@ -14,6 +14,8 @@
  */
 
 import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 let isLaunchMigrated: AtomicFlag = new AtomicFlag(false);
 
 async function awaitee(): Promise<boolean> {
@@ -46,7 +48,7 @@ function loadThisWorker(wId: int) {
     }
 }
 
-async function testLaunch(): Promise<void> {
+function testLaunch(): void {
     let wId = CoroutineExtras.getWorkerId();
     arktest.assertTrue(wId == 1 || wId == 2);
 
@@ -59,13 +61,13 @@ async function testLaunch(): Promise<void> {
     }
 }
 
-async function checkLaunchMigration(): Promise<void> {
-    await launch (testLaunch);
+function checkLaunchMigration(): void {
+    launch(testLaunch).Await();
 }
 
-async function testAwaitMigration(): Promise<void> {
+function testAwaitMigration(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    await checkLaunchMigration();
+    checkLaunchMigration();
     let res: boolean = isLaunchMigrated.get();
     isLaunchMigrated.set(true); // to finish waiting coroutines
     arktest.assertEQ(res, true);
@@ -74,7 +76,7 @@ async function testAwaitMigration(): Promise<void> {
 
 async function main(): Promise<int> {
     let testSuite = new arktest.ArkTestsuite('coroutines.migrate_awakened_coro');
-    testSuite.addAsyncTest('testAwaitMigration', testAwaitMigration);
+    testSuite.addTest('testAwaitMigration', testAwaitMigration);
     let res = await testSuite.runAsync();
     return res;
 }

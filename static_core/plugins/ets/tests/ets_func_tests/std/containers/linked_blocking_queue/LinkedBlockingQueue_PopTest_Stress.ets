@@ -14,7 +14,7 @@
  */
 
 import { launch } from "std/concurrency"
-
+import { Job } from "std/core"
 
 const stressNum: int = 100;
 
@@ -23,19 +23,20 @@ let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBloc
 function main(): int {
     let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePopTest");
 
-    LinkedBlockingQueueTestsuite.addAsyncTest("ThreadsPopStressTest004", async () => {
+    LinkedBlockingQueueTestsuite.addTest("ThreadsPopStressTest004", () =>
+    {
         while (!sMTQueueInt.isEmpty()) {
             sMTQueueInt.pop();
         }
         for (let i = 0; i < stressNum; i++) {
             sMTQueueInt.add(i);
         }
-        let jobs = Array.create<Promise<void> | undefined>(100, undefined);
+        let jobs = Array.create<Job<void> | undefined>(100, undefined);
         for (let i = 0; i < stressNum; i++) {
             jobs[i] = launch(sQueuePopData);
         }
         for (let i: int = 0; i < 100; i++) {
-            await jobs[i]!;
+            jobs[i]!.Await();
         }
         arktest.assertEQ(sMTQueueInt.size, 0);
     });

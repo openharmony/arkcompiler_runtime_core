@@ -64,7 +64,7 @@ async function main(): Promise<int> {
     second.start();
     startFlag.store(true);
 
-    await first.join();
-    await second.join();
+    first.join().Await();
+    second.join().Await();
     return 0;
 }

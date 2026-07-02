@@ -103,23 +103,23 @@ async function testSyncTimedWaitNotifyRace(index: int) {
             return str;
         });
 
-        let event = new PromiseWithResolvers<void>();
+        let event = new CompletableJob<void>();
         let k = i;
         setTimeout(() => {
             let l = k;
             launch() {
                 Atomics.store(int32array, index, l + 1);
                 Atomics.notify(int32array, index);
-                event.resolve(undefined);
+                event.finish();
             }
         }, i);
 
-        let s = await jb;
-        await event.promise;
+        let s = jb.Await();
+        event.Await();
         arktest.assertTrue(s == 'timed-out' || s == 'ok' || s == 'not-equal', s);
     }
 
-    await w.join();
+    w.join();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
@@ -135,18 +135,18 @@ async function testAsyncTimedWaitNotifyRace(index: int) {
             p = Atomics.waitAsync(int32array, index, i);
         }
         let k = i;
-        let event = new PromiseWithResolvers<void>();
+        let event = new CompletableJob<void>();
         setTimeout(() => {
             let l = k;
             launch() {
                 Atomics.store(int32array, index, l + 1);
                 Atomics.notify(int32array, index);
-                event.resolve(undefined);
+                event.finish();
             }
         }, i);
         let s = await p;
-        await event.promise;
-        arktest.assertTrue(s == 'timed-out' || s == 'ok' || s == 'not-equal', s);
+        event.Await();
+        arktest.assertTrue(s == 'timed-out' || s == 'ok', s);
     }
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);

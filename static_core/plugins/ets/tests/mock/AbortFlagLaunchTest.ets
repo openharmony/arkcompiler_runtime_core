@@ -23,15 +23,20 @@ function SetTimeoutTest(): void {
 
 function AbortTest(): void {
     const params: LaunchParams = {abortFlag: true,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
-    launch(params, Failing);
-    Coroutine.Schedule();
+    try {
+        let j = launch(params, Failing);
+        j.Await();
+    } catch (e) {
+    }
 }
 
 function NoAbortTest(): void {
     const params: LaunchParams = {abortFlag: false,  workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.MAIN)};
-    let p = launch(params, Failing).catch((_e: Error) => {});
-    Coroutine.Schedule();
-    p.awaitSync();
+    try {
+        let j = launch(params, Failing);
+        j.Await();
+    } catch (e) {
+    }
 }
 
 export function main(args: FixedArray<string>): int {

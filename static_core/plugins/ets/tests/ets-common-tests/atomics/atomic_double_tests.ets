@@ -38,7 +38,7 @@ function nonconcurrentCompareAndSwapTest() {
     arktest.assertEQ(atomicDouble.compareAndSwap(1.0, 2.0), 1.0);
     arktest.assertEQ(atomicDouble.load(), 2);
     arktest.assertEQ(atomicDouble.compareAndSwap(1, 3), 2);
-    arktest.assertEQ(atomicDouble.load(), 2);       
+    arktest.assertEQ(atomicDouble.load(), 2);
 }
 
 function nonconcurrentFetchAdd() {
@@ -61,7 +61,7 @@ function concurrentLoadStoreTest() {
     let atomicDouble = new AtomicDouble(1);
     let count : double = 0;
 
-    let worker = new EAWorker;     
+    let worker = new EAWorker;
     worker.start();
     worker.run<void>(() => {
         count = 1;
@@ -72,7 +72,7 @@ function concurrentLoadStoreTest() {
         // wait here
     }
     arktest.assertEQ(count, 1);
-    worker.quit();
+    worker.join();
 }
 
 // Checks correctness of visibility
@@ -102,18 +102,18 @@ function concurrentExchangeTest() {
         // wait here
     }
     arktest.assertEQ(count, 2);
-    worker1.quit();
-    worker2.quit();
+    worker1.join();
+    worker2.join();
 }
 
 function concurrentCompareAndSwapTest() {
     let atomicDouble = new AtomicDouble(1);
 
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let w1 = false;
     let worker2 = new EAWorker;
     let w2 = false;
-    
+
     worker1.start();
     worker2.start();
     worker1.run<void>(() => {
@@ -131,15 +131,15 @@ function concurrentCompareAndSwapTest() {
         }
     });
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertTrue((w1 && !w2) || (!w1 && w2));
 }
 
 function concurrentFetchAdd() {
     let atomicDouble = new AtomicDouble(0);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = () => {
         for (let i: double = 0; i < 10000; i++) {
@@ -152,15 +152,15 @@ function concurrentFetchAdd() {
     worker1.run<void>(workerBody);
     worker2.run<void>(workerBody);
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertEQ(atomicDouble.load(), 20000);
 }
 
 function concurrentFetchSub() {
     let atomicDouble = new AtomicDouble(20000);
-    let worker1 = new EAWorker;     
+    let worker1 = new EAWorker;
     let worker2 = new EAWorker;
     let workerBody = () => {
         for (let i: double = 0; i < 10000; i++) {
@@ -173,9 +173,9 @@ function concurrentFetchSub() {
     worker1.run<void>(workerBody);
     worker2.run<void>(workerBody);
 
-    worker1.quit();
-    worker2.quit();
-    
+    worker1.join().Await();
+    worker2.join().Await();
+
     arktest.assertEQ(atomicDouble.load(), 0);
 }
 
@@ -193,4 +193,3 @@ function main() {
     suite.addTest('concurrentFetchSub', concurrentFetchSub);
     return suite.run()
 }
-

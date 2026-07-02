@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-
 const INCREMENT = 5;
 const EXPECTED_VALUE = 42;
 
@@ -49,40 +47,39 @@ async function throwAsyncError(): Promise<void> {
     throw new Error();
 }
 
-async function testFooLaunch(): Promise<number> {
-    let p: Promise<number> = launch(foo);
-    let result = await p;
+function testFooLaunch(): number {
+    let job : Job<number> = launch(foo);
+    let result = job.Await();
 
     return result;
 }
 
 function testAddSchedule(): void {
     clearCounter();
-    let p: Promise<void> = launch() {
+    let job: Job<void> = launch() {
         add(INCREMENT)
     }
 
     Coroutine.Schedule();
 }
 
-async function recursiveFoo(): Promise<number> {
-    let p: Promise<Promise<number>> = launch(testFooLaunch);
-    let result = await p;
+function recursiveFoo(): Job<number> {
+    let job: Job<number> = launch(testFooLaunch);
+
+    return job;
+}
+
+function testRecursiveLaunch(): number {
+    let job: Job<Job<number>> = launch(recursiveFoo);
+    let result = job.Await().Await();
 
     return result;
 }
 
-async function testRecursiveLaunch(): Promise<number> {
-    let p: Promise<Promise<number>> = launch(recursiveFoo);
-    let result = await p;
-
-    return result;
-}
-
-async function testLaunchThrow(): Promise<boolean> {
+function testLaunchThrow(): boolean {
     try {
-        let p: Promise<void> = launch(throwLaunchError);
-        await p;
+        let job: Job<void> = launch(throwLaunchError);
+        job.Await();
     } catch (e) {
         return e instanceof Error;
     }
@@ -120,103 +117,106 @@ async function testAsyncThrow(): Promise<boolean> {
     return false;
 }
 
-async function testACoroutineEaworker(): Promise<void> {
+function testACoroutineEaworker(): void {
     let ew = new EAWorker();
     ew.start();
-    let p0 = ew.run<number>(testFooLaunch);
-    let p1 = ew.run<void>(testAddSchedule);
-    let p2 = ew.run<number>(testRecursiveLaunch);
-    let p3 = ew.run<boolean>(testLaunchThrow);
+    let job0 = ew.run<number>(testFooLaunch);
+    let job1 = ew.run<void>(testAddSchedule);
+    let job2 = ew.run<number>(testRecursiveLaunch);
+    let job3 = ew.run<boolean>(testLaunchThrow);
 
-    arktest.assertEQ(EXPECTED_VALUE, await p0);
-    await p1;
+    arktest.assertEQ(EXPECTED_VALUE, job0.Await());
+    job1.Await();
     arktest.assertEQ(counter, INCREMENT);
-    arktest.assertEQ(EXPECTED_VALUE, await p2);
-    arktest.assertTrue(await p3);
+    arktest.assertEQ(EXPECTED_VALUE, job2.Await());
+    arktest.assertTrue(job3.Await());
 
-    await ew.join();
+    ew.join();
 }
 
-async function testAJCoroutineEaworker(): Promise<void> {
+function testAJCoroutineEaworker(): void {
     let ew = new EAWorker();
     ew.start();
-    let p0 = ew.run<number>(testFooAsync);
-    let p1 = ew.run<void>(testAddAsyncSchedule);
-    let p2 = ew.run<number>(testRecursiveAsync);
-    let p3 = ew.run<boolean>(testLaunchThrow);
+    let job0 = ew.run<number>(testFooAsync);
+    let job1 = ew.run<void>(testAddAsyncSchedule);
+    let job2 = ew.run<number>(testRecursiveAsync);
+    let job3 = ew.run<boolean>(testLaunchThrow);
 
-    arktest.assertEQ(EXPECTED_VALUE, await p0);
-    await p1;
+    arktest.assertEQ(EXPECTED_VALUE, job0.Await());
+    job1.Await();
     arktest.assertEQ(counter, INCREMENT);
-    arktest.assertEQ(EXPECTED_VALUE, await p2);
-    arktest.assertTrue(await p3);
+    arktest.assertEQ(EXPECTED_VALUE, job2.Await());
+    arktest.assertTrue(job3.Await());
 
-    await ew.join();
+    ew.join();
 }
 
-async function testACAJcoroutine(): Promise<void> {
+function testACAJcoroutine(): void {
     let ew = new EAWorker();
     ew.start();
-    let p1 = ew.run<number>(testFooLaunch);
-    let p2 = ew.run<number>(testFooAsync);
+    let job1 = ew.run<number>(testFooLaunch);
+    let job2 = ew.run<number>(testFooAsync);
 
-    let res1 = await p1;
-    let res2 = await p2;
+    let res1 = job1.Await();
+    let res2 = job2.Await();
 
-    await ew.join();
+    ew.join();
 
     arktest.assertEQ(res1, res2);
 }
 
-async function testACoroutineCallAJCoroutine(): Promise<void> {
+function testACoroutineCallAJCoroutine(): void {
     let ew = new EAWorker();
     ew.start();
-    let p1 = ew.run<number>(() => {
+    let job1 = ew.run<number>(() => {
         return (async (): Promise<number> => {
-            let p1: Promise<Promise<number>> = launch(fooAsync)
-            let result = await p1;
+            let job2: Job<Promise<number>> = launch(fooAsync)
+            let p = job2.Await();
+            let result = await p;
             return result;
         // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
         })().awaitSync();
     });
-    await ew.join();
-    arktest.assertEQ(EXPECTED_VALUE, await p1);
+    ew.join();
+    arktest.assertEQ(EXPECTED_VALUE, job1.Await());
 }
 
-async function AsyncCallLaunch(): Promise<Promise<number>> {
-    let p: Promise<number> = launch(foo);
+async function AsyncCallLaunch(): Promise<Job<number>> {
+    let job: Job<number> = launch(foo);
 
-    return p;
+    return job;
 }
 
 async function testAJCoroutineCallACoroutine(): Promise<void> {
     let ew = new EAWorker();
     ew.start();
-    let p1 = ew.run<Promise<number>>(AsyncCallLaunch);
-    let result = await p1;
-    await ew.join();
+    let job1 = ew.run<Promise<Job<number>>>(AsyncCallLaunch);
+    let p = job1.Await();
+    let job2: Job<number> = await p;
+    let result = job2.Await();
+    ew.join();
 
     arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
-async function testNestedEAWorker(): Promise<void> {
+function testNestedEAWorker(): void {
     clearCounter();
 
     let e1 = new EAWorker();
     e1.start();
-    let p1 = e1.run<number>(async () => {
+    let job1 = e1.run<number>(():number => {
         let e2 = new EAWorker();
         e2.start();
-        let p2 = e2.run<number>(():number => {
+        let job2 = e2.run<number>(():number => {
             return foo();
         });
-        await e2.join();
+        e2.join();
 
-        return await p2;
+        return job2.Await();
     });
-    let result = await p1;
+    let result = job1.Await();
 
-    await e1.join();
+    e1.join();
 
     arktest.assertEQ(EXPECTED_VALUE, result);
 }
@@ -241,20 +241,19 @@ function testOfPrioritySetting(): void {
     arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
     e.start();
     arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
-    e.quit();
+    e.join();
 }
 
-function main(): int {
+async function main(): Promise<int> {
     const suite = new arktest.ArkTestsuite('EAWorker Test Suite');
 
-    suite.addAsyncTest('testACoroutineEaworker', testACoroutineEaworker);
-    suite.addAsyncTest('testAJCoroutineEaworker', testAJCoroutineEaworker);
-    suite.addAsyncTest('testACAJcoroutine', testACAJcoroutine);
-    suite.addAsyncTest('testACoroutineCallAJCoroutine', testACoroutineCallAJCoroutine);
+    suite.addTest('testACoroutineEaworker', testACoroutineEaworker);
+    suite.addTest('testAJCoroutineEaworker', testAJCoroutineEaworker);
+    suite.addTest('testACAJcoroutine', testACAJcoroutine);
+    suite.addTest('testACoroutineCallAJCoroutine', testACoroutineCallAJCoroutine);
     suite.addAsyncTest('testAJCoroutineCallACoroutine', testAJCoroutineCallACoroutine);
-    suite.addAsyncTest('testNestedEAWorker', testNestedEAWorker);
-    suite.addAsyncTest('testInitTaskEAWorker', testInitTaskEAWorker);
-    suite.addTest('testOfPrioritySetting', testOfPrioritySetting);
+    suite.addTest('testNestedEAWorker', testNestedEAWorker);
 
-    return suite.run();
+    let res = await suite.runAsync();
+    return res;
 }

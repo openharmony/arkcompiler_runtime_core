@@ -23,7 +23,7 @@ cases:
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0)");
 
       // Create and start an EA worker
@@ -31,23 +31,24 @@ cases:
       ea.start();
 
       // Get the worker ID from inside the EA worker
-      const eaWorkerId: int = await (() => ea.run<int>(getWorkerId))();
+      const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
 
       // Verify that EA worker has a different ID than main worker
-      arktest.assertNE(eaWorkerId, mainWorkerId, 
+      arktest.assertNE(eaWorkerId, mainWorkerId,
           "EA worker should have a different ID than main worker");
 
       // Launch a coroutine in EA domain targeting this specific EA worker
       const params: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
       };
-      
-      const launchedWorkerId: int = await (() => launch<int>(params, getWorkerId))();
+
+      let job: Job<int> = launch<int>(params, getWorkerId);
+      const launchedWorkerId: int = job.Await();
 
       // Verify that the coroutine ran on the EA worker
-      arktest.assertEQ(launchedWorkerId, eaWorkerId, 
+      arktest.assertEQ(launchedWorkerId, eaWorkerId,
           "Coroutine in EA domain should execute on the specified EA worker");
-      arktest.assertNE(launchedWorkerId, mainWorkerId, 
+      arktest.assertNE(launchedWorkerId, mainWorkerId,
           "Coroutine in EA domain should NOT execute on main worker");
 
       // Cleanup
@@ -70,33 +71,36 @@ cases:
       ea2.start();
 
       // Get worker IDs from each EA worker
-      const eaWorkerId1: int = await (() => ea1.run<int>(getWorkerId))();
-      const eaWorkerId2: int = await (() => ea2.run<int>(getWorkerId))();
+      const eaWorkerId1: int = ea1.run<int>(getWorkerId).Await();
+      const eaWorkerId2: int = ea2.run<int>(getWorkerId).Await();
 
       // Verify EA workers have different IDs
-      arktest.assertNE(eaWorkerId1, eaWorkerId2, 
+      arktest.assertNE(eaWorkerId1, eaWorkerId2,
           "Two EA workers should have different IDs");
 
       // Launch to EA domain with hint pointing to ea1
       const params1: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId1])
       };
-      arktest.assertEQ(await (() => launch<int>(params1, getWorkerId))(), eaWorkerId1, 
+      let job1: Job<int> = launch<int>(params1, getWorkerId);
+      arktest.assertEQ(job1.Await(), eaWorkerId1,
           "Coroutine with hint [eaWorkerId1] should execute on EA worker 1");
 
       // Launch to EA domain with hint pointing to ea2
       const params2: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId2])
       };
-      arktest.assertEQ(await (() => launch<int>(params2, getWorkerId))(), eaWorkerId2, 
+      let job2: Job<int> = launch<int>(params2, getWorkerId);
+      arktest.assertEQ(job2.Await(), eaWorkerId2,
           "Coroutine with hint [eaWorkerId2] should execute on EA worker 2");
 
       // Launch with both EA IDs in hint - should use one of them
       const params3: LaunchParams = {
           workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId1, eaWorkerId2])
       };
-      const resultId: int = await (() => launch<int>(params3, getWorkerId))();
-      arktest.assertTrue(resultId == eaWorkerId1 || resultId == eaWorkerId2, 
+      let job3: Job<int> = launch<int>(params3, getWorkerId);
+      const resultId: int = job3.Await();
+      arktest.assertTrue(resultId == eaWorkerId1 || resultId == eaWorkerId2,
           "Coroutine with hint [eaWorkerId1, eaWorkerId2] should execute on one of the EA workers");
 
       // Cleanup
@@ -116,7 +120,7 @@ cases:
     logic: |-
       // Without any EA workers created, EA domain should return INVALID_ID
       const groupId: WorkerGroupId = WorkerGroup.generateGroupId(WorkerDomain.EA);
-      
+
       workerGroupAssertEq(groupId, WorkerGroup.INVALID_ID);
 
   - desc: >-
@@ -140,9 +144,9 @@ cases:
       ea3.start();
 
       // Get worker IDs
-      const eaId1: int = await (() => ea1.run<int>(getWorkerId))();
-      const eaId2: int = await (() => ea2.run<int>(getWorkerId))();
-      const eaId3: int = await (() => ea3.run<int>(getWorkerId))();
+      const eaId1: int = ea1.run<int>(getWorkerId).Await();
+      const eaId2: int = ea2.run<int>(getWorkerId).Await();
+      const eaId3: int = ea3.run<int>(getWorkerId).Await();
 
       // Verify all EA workers have unique IDs
       arktest.assertNE(eaId1, eaId2, "EA workers 1 and 2 should have different IDs");
@@ -162,8 +166,9 @@ cases:
       };
 
       for (let i = 0; i < 10; i++) {
-          const resultId: int = await (() => launch<int>(params, getWorkerId))();
-          
+          let job: Job<int> = launch<int>(params, getWorkerId);
+          const resultId: int = job.Await();
+
           arktest.assertTrue(validEaIds.includes(resultId),
               `Iteration ${i}: Coroutine should execute on one of the EA workers`);
           arktest.assertNE(resultId, mainWorkerId,
@@ -186,14 +191,14 @@ cases:
           return CoroutineExtras.getWorkerId();
       }
 
-      async function createNestedEAWorker(): Promise<int> {
+      function createNestedEAWorker(): int {
           // This function runs on the outer EA worker
           // Create and start an inner EA worker from here
           const innerEa = new EAWorker();
           innerEa.start();
 
           // Get the inner EA worker's ID
-          innerEaWorkerId = await (() => innerEa.run<int>(getWorkerId))();
+          innerEaWorkerId = innerEa.run<int>(getWorkerId).Await();
 
           // Return the outer EA worker's ID for comparison
           const outerEaId: int = getWorkerId();
@@ -205,7 +210,7 @@ cases:
       }
     logic: |-
       const mainWorkerId: int = getWorkerId();
-      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID,
           "Test precondition: main() should run on main worker (ID=0)");
 
       // Create and start the outer EA worker
@@ -213,21 +218,21 @@ cases:
       outerEa.start();
 
       // Get the outer EA worker's ID
-      const outerEaWorkerId: int = await (() => outerEa.run<int>(getWorkerId))();
-      arktest.assertNE(outerEaWorkerId, mainWorkerId, 
+      const outerEaWorkerId: int = outerEa.run<int>(getWorkerId).Await();
+      arktest.assertNE(outerEaWorkerId, mainWorkerId,
           "Outer EA worker should have different ID than main worker");
 
       // Create a nested EA worker from within the outer EA worker
-      const returnedOuterId: int = await (() => outerEa.run<int>(createNestedEAWorker))();
+      const returnedOuterId: int = outerEa.run<int>(createNestedEAWorker).Await();
 
       // Verify outer EA worker ID is consistent
-      arktest.assertEQ(returnedOuterId, outerEaWorkerId, 
+      arktest.assertEQ(returnedOuterId, outerEaWorkerId,
           "Outer EA worker ID should be consistent");
 
       // Verify inner EA worker has a different ID than outer
-      arktest.assertNE(innerEaWorkerId, outerEaWorkerId, 
+      arktest.assertNE(innerEaWorkerId, outerEaWorkerId,
           "Inner EA worker should have different ID than outer EA worker");
-      arktest.assertNE(innerEaWorkerId, mainWorkerId, 
+      arktest.assertNE(innerEaWorkerId, mainWorkerId,
           "Inner EA worker should have different ID than main worker");
 
       // Cleanup

@@ -26,6 +26,7 @@
 #include "types/ets_class.h"
 #include "types/ets_field.h"
 #include "types/ets_method.h"
+#include "types/ets_job.h"
 #include "types/ets_primitives.h"
 #include "types/ets_type.h"
 #include "types/ets_promise.h"
@@ -58,7 +59,7 @@ template <typename CoroResult>
 CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id groupId = JobWorkerThreadGroup::AnyId(),
                    bool postToMain = false)
 {
-    static_assert(std::is_same_v<CoroResult, EtsPromise>);
+    static_assert(std::is_same_v<CoroResult, EtsJob> || std::is_same_v<CoroResult, EtsPromise>);
 
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -126,11 +127,10 @@ CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id gro
 }
 
 extern "C" {
-EtsPromise *EtsLaunchInternalPromiseNative(EtsObject *func, EtsBoolean abortFlag, EtsLongArray *groupId)
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsBoolean abortFlag, EtsLongArray *groupId)
 {
     ASSERT(groupId->GetLength() == 2U);
-    return Launch<EtsPromise>(func, abortFlag != 0U,
-                              JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)}));
+    return Launch<EtsJob>(func, abortFlag != 0U, JobWorkerThreadGroup::FromTuple({groupId->Get(0), groupId->Get(1)}));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)

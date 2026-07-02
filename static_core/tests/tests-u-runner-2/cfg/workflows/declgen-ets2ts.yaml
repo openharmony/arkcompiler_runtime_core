@@ -63,6 +63,15 @@ declare namespace st {
     export class Map<K, V> {}
     export class Set<T> {}
 }
+export class Job<T> {
+    Await(): T;
+}
+declare global {
+    class Job<T> {
+        Await(): T;
+    }
+}
+export function launch<R>(coroFun: () => R): Job<R>;
 export default st;
 '
         validator: runner.extensions.validators.return_0_validator.Return0Validator
@@ -84,7 +93,9 @@ export default st;
     "compilerOptions": {
         "baseUrl": "${parameters.decl-path}",
         "paths": {
-            "@ohos.lang.interop": ["${parameters.test-interop-ets}"]
+            "@ohos.lang.interop": ["${parameters.test-interop-ets}"],
+            "std/core": ["${parameters.test-interop-ets}"],
+            "std/concurrency": ["${parameters.test-interop-ets}"]
         }
     },
     "files": ["${parameters.test-dets}"]

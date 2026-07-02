@@ -15,14 +15,14 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push((await arr[i]) as T);
+		res.push(arr[i].Await());
 	return res;
 }
 
@@ -31,12 +31,12 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-async function testConcurrentHas(): Promise<void> {
+function testConcurrentHas() {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 25;
 
 	let map = new CHMap();
-	let hasJob: Promise<void>[] = [];
+	let hasJob: Job<void>[] = [];
 
 	let makeHasF = (start: int, end: int, shouldBe: boolean) => () => {
 		for (let i = start; i < end; ++ i) {
@@ -48,26 +48,26 @@ async function testConcurrentHas(): Promise<void> {
 
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(hasJob, makeHasF(i * SET_COUNT, (i + 1) * SET_COUNT, false));
-	await awaitAll(hasJob);
+	awaitAll(hasJob);
 
 	hasJob = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(hasJob, makeHasF(i * SET_COUNT, (i + 1) * SET_COUNT, true));
 	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i)
 		map.set(i, i);
-	await awaitAll(hasJob);
+	awaitAll(hasJob);
 
 	hasJob = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(hasJob, makeHasF(i * SET_COUNT, (i + 1) * SET_COUNT, false));
 	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i)
 		map.delete(i);
-	await awaitAll(hasJob);
+	awaitAll(hasJob);
 }
 
 function main(): int {
     let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addAsyncTest("testConcurrentHas", async () => { await testConcurrentHas(); });
+	CHMTestSuitecase.addTest("testConcurrentHas", testConcurrentHas);
 
     return CHMTestSuitecase.run();
 }

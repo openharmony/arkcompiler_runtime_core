@@ -141,6 +141,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_async_context.cpp
+    ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp

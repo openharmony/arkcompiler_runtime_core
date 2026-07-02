@@ -48,7 +48,7 @@ async function foo() {
 async function bar() {
     executionOrder.checkpoint(2);
     let emptyBody = () => { return 0; };
-    promiseIsPending ? await launch (emptyBody)
+    promiseIsPending ? launch(emptyBody).Await()
                      : await Promise.resolve(0);
     executionOrder.checkpoint(5);
 }

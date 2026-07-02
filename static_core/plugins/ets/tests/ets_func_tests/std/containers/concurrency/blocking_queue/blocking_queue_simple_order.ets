@@ -15,17 +15,17 @@
 
 type BlockingQueueI = containers.BlockingQueue<int>;
 type BQConstructorI = (capacity: int)=>BlockingQueueI;
-type TestFunction = (constr: BQConstructorI) => Promise<void>;
+type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Promise<T>>, func: ()=>T): void {
+function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-async function awaitAll <T> (arr: Array<Promise<T>>): Promise<Array<T>> {
+function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res.push((await arr[i]) as T);
+		res.push(arr[i].Await());
 	return res;
 }
 
@@ -48,7 +48,7 @@ function assertEQAll(array: FixedArray<int>, value: int): void {
 		arktest.assertEQ(array[i], value)
 }
 
-async function testOrderPopAndPushF(queue: BlockingQueueI): Promise<void> {
+function testOrderPopAndPushF(queue: BlockingQueueI) {
 	let pushF = ()=>{
 		for (let i = 0; i < 100; ++ i)
 		queue.push(i);
@@ -57,7 +57,7 @@ async function testOrderPopAndPushF(queue: BlockingQueueI): Promise<void> {
 		for (let i = 0; i < 100; ++ i)
 		arktest.assertEQ(queue.pop(), i);
 	};
-	await awaitAll([
+	awaitAll([
 		launch(pushF),
 		launch(popF)
 	]);
@@ -65,7 +65,7 @@ async function testOrderPopAndPushF(queue: BlockingQueueI): Promise<void> {
 	arktest.assertTrue(queue.isEmpty());
 }
 
-async function testOrderAddAndPollF(queue: BlockingQueueI): Promise<void> {
+function testOrderAddAndPollF(queue: BlockingQueueI) {
 	let addF = ()=>{
 		for (let i = 0; i < 100; ++ i)
 		queue.add(i);
@@ -78,26 +78,26 @@ async function testOrderAddAndPollF(queue: BlockingQueueI): Promise<void> {
 			arktest.assertLT(previous, val as int);
 		}
 	}
-	await awaitAll([
+	awaitAll([
 		launch(addF),
 		launch(pollF),
 	]);
 }
 
-async function testOrderPopAndPush(constr: BQConstructorI): Promise<void> {
-	await testOrderPopAndPushF(constr(150));
+function testOrderPopAndPush(constr: BQConstructorI) {
+	testOrderPopAndPushF(constr(150));
 }
 
-async function testOrderAddAndPoll(constr: BQConstructorI): Promise<void> {
-	await testOrderAddAndPollF(constr(150));
+function testOrderAddAndPoll(constr: BQConstructorI) {
+	testOrderAddAndPollF(constr(150));
 }
 
-async function testOrderPopAndPushThin(constr: BQConstructorI): Promise<void> {
-	await testOrderPopAndPushF(constr(1));
+function testOrderPopAndPushThin(constr: BQConstructorI) {
+	testOrderPopAndPushF(constr(1));
 }
 
-async function testOrderAddAndPollThin(constr: BQConstructorI): Promise<void> {
-	await testOrderAddAndPollF(constr(1));
+function testOrderAddAndPollThin(constr: BQConstructorI) {
+	testOrderAddAndPollF(constr(1));
 }
 
 function main(): int {
@@ -125,7 +125,7 @@ function main(): int {
 		for (let i = 0; i < tests.length; ++ i) {
 			let name = tests[i][0];
 			let testF = tests[i][1];
-			arktestsuite.addAsyncTest(name, async () => { await testF(constr); });
+			arktestsuite.addTest(name, ()=>testF(constr));
 		}
 	}
 

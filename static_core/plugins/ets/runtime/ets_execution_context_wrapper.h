@@ -19,10 +19,6 @@
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/types/ets_async_context.h"
 
-namespace ark {
-class CompletionEvent;
-}  // namespace ark
-
 namespace ark::ets {
 
 // NOTE(konstanting): The stackless execution context.
@@ -81,7 +77,9 @@ public:
 
     void CacheBuiltinClasses() override;
 
-    void OnJobCompletion(Value returnValue) override;
+    void OnJobCompletion(Value result) override;
+
+    void ListUnhandledEventsOnProgramExit() override;
 
     void VisitGCRoots(const GCRootVisitor &cb) override;
 
@@ -90,11 +88,6 @@ protected:
     explicit EtsExecutionContextWrapper(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Job *job);
 
 private:
-    EtsObject *BoxReturnValue(Value returnValue);
-    EtsObject *GetCompletionObject(mem::Reference *retValueRef);
-    EtsObject *TakePendingException(Job *job);
-    void CompletePromise(EtsPromise *completedPromise, EtsObject *retObject, Job *job);
-
     EtsExecutionContext executionCtx_;
     EtsAsyncContext *asyncContext_ = nullptr;
 

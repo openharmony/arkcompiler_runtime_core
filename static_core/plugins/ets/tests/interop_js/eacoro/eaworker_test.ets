@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-async function RunTasksTest(): Promise<void> {
+function RunTasksTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
     w.start();
@@ -27,13 +27,13 @@ async function RunTasksTest(): Promise<void> {
         arktest.assertNE(runId, mainId);
         return runId;
     });
-    let runId1 = await p1;
-    let runId2 = await p2;
-    w.quit();
+    w.join();
+    let runId1 = p1.Await();
+    let runId2 = p2.Await();
     arktest.assertEQ(runId1, runId2);
 }
 
-async function RunTasksWithJsCallTest(): Promise<void> {
+function RunTasksWithJsCallTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
     w.start();
@@ -53,17 +53,17 @@ async function RunTasksWithJsCallTest(): Promise<void> {
 
     let p1 = w.run<int>(callback);
     let p2 = w.run<int>(callback);
-    let result1 = await p1;
-    let result2 = await p2;
-    w.quit();
+    w.join();
+    let result1 = p1.Await();
+    let result2 = p2.Await();
     arktest.assertEQ(result1, 0);
     arktest.assertEQ(result2, 0);
 }
 
-async function RunTasksWithJsAsyncCallTest(): Promise<void> {
+function RunTasksWithJsAsyncCallTest(): void {
     let w = new EAWorker(true);
     w.start();
-    let callback = async (): Promise<int> => {
+    let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
         let modified = false;
         let method = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait');
@@ -88,12 +88,12 @@ async function RunTasksWithJsAsyncCallTest(): Promise<void> {
     };
 
     let p = w.run<int>(callback);
-    let result = await p;
-    w.quit();
+    w.join();
+    let result = p.Await();
     arktest.assertEQ(result, 0);
 }
 
-async function CreateEAWorkerWithoutInterop(): Promise<void> {
+function CreateEAWorkerWithoutInterop(): void {
     let eaw = new EAWorker();
     eaw.start();
     let res = false;
@@ -102,59 +102,55 @@ async function CreateEAWorkerWithoutInterop(): Promise<void> {
             let module = JSRuntime.loadModule('./eaworker_test_helpers_js');
             let val = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         };
-        await eaw.run<void>(callback);
+        eaw.run<void>(callback).Await();
     } catch(e) {
         res = true;
-        eaw.quit();
+        eaw.join();
     }
-    await eaw.join();
     arktest.assertEQ(res, true);
 }
 
-async function asyncCall(task: () => void): Promise<void> {
+async function asyncCall(task: () => void) {
     task();
 }
 
-async function RunSetTimeoutTest(): Promise<void> {
+function RunSetTimeoutTest(): void {
+    let job = new CompletableJob<void>();
+
     let w = new EAWorker(true);
     w.start();
-    let resolver: ((val: Any) => void) | null = null;
-    let done = new Promise<Any>((resolve) => {
-        resolver = resolve;
-    });
     let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {});
 
-        p1.then<Any, Any>((value: Any) => {
+        let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
-                resolver!(undefined);
+                job.finish();
             }, 10);
+
         });
     });
-    await p;
-    await done;
-    w.quit();
+    w.join();
+
+    job.Await();
 }
 
-async function RunNewCoroInSetTimeoutTest(): Promise<void> {
+function RunNewCoroInSetTimeoutTest(): void {
+    let job = new CompletableJob<void>();
+
     let w = new EAWorker(true);
     w.start();
-    let resolver: ((val: Any) => void) | null = null;
-    let done = new Promise<Any>((resolve) => {
-        resolver = resolve;
-    });
     let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {
         });
-        p1.then<Any, Any>((value: Any) => {
+        let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 let p3 = asyncCall(()=>{
-                    resolver!(undefined);
+                    job.finish();
                 });
             }, 10);
         });
     });
-    await p;
-    await done;
-    w.quit();
+    w.join();
+
+    job.Await();
 }
