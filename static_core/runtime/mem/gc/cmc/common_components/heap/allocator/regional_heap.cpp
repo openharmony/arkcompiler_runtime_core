@@ -21,7 +21,6 @@
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
-#include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/heap.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
@@ -127,10 +126,7 @@ HeapAddress RegionalHeap::TryAllocateOnce(size_t allocSize, AllocType allocType)
 
 bool RegionalHeap::ShouldRetryAllocation(size_t &tryTimes) const
 {
-    {
-        // check safepoint
-        ScopedEnterSaferegion enterSaferegion(true);
-    }
+    ark::Mutator::GetCurrent()->SafepointPoll();
 
     if (!IsRuntimeThread() && tryTimes <= static_cast<size_t>(TryAllocationThreshold::RESCHEDULE)) {
         return true;

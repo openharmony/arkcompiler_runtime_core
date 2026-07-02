@@ -17,7 +17,7 @@
 
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/collector/collector_resources.h"
-#include "common_components/common/scoped_object_access.h"
+#include "runtime/include/thread_scopes.h"
 
 #if defined(_WIN64)
 #include <windows.h>
@@ -204,7 +204,7 @@ HeapAddress HeapImpl::Allocate(size_t size, AllocType allocType, bool allowGC)
 bool HeapImpl::ForEachObject(const std::function<void(BaseObject *)> &visitor, bool safe)
 {
     {
-        ScopedEnterSaferegion enterSaferegion(false);
+        ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
         this->GetCollectorResources().WaitForGCFinish();
     }
     // Expect no gc in ForEachObj, dfx tools and oom gc should be considered.

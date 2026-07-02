@@ -22,7 +22,7 @@ namespace ark::common_vm {
 class AllocationBuffer;
 class Mutator;
 
-enum class ThreadType { ARK_PROCESSOR = 0, GC_THREAD, FP_THREAD, HOT_UPDATE_THREAD };
+enum class ThreadType { ARK_PROCESSOR = 0, GC_THREAD, HOT_UPDATE_THREAD };
 
 // Backend and ArkThread will use external tls var through offset calculation, so external tls
 // must in the first place, followed by the internal tls.

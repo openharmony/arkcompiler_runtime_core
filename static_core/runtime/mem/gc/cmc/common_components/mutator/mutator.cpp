@@ -18,13 +18,9 @@
 
 #include "common_components/common/type_def.h"
 #include "mutator/satb_buffer.h"
-#include "common_components/heap/allocator/region_manager.h"
-#include "common_components/common/scoped_object_access.h"
 #include "runtime/include/mutator.h"
-#include "runtime/include/panda_vm.h"
 #include "runtime/include/mutator.h"
 #include "common_components/mutator/thread_local.h"
-#include "plugins/ets/runtime/mem/ets_reference_processor.h"
 
 namespace ark::common_vm {
 

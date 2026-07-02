@@ -21,11 +21,11 @@
 #include "common_components/base/c_string.h"
 #include "common_components/heap/collector/collector.h"
 #include "common_components/base/time_utils.h"
-#include "common_components/common/scoped_object_access.h"
 #include "common_components/heap/heap.h"
 #include "common_components/heap/allocator/fix_heap.h"
 
 #include "common_interfaces/objects/base_object.h"
+#include "runtime/include/thread_scopes.h"
 
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
@@ -484,7 +484,7 @@ void RegionManager::ForEachObjectUnsafe(const std::function<void(BaseObject *)> 
 
 void RegionManager::ForEachObjectSafe(const std::function<void(BaseObject *)> &visitor) const
 {
-    ScopedEnterSaferegion enterSaferegion(false);
+    ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
     STWParam stwParam {"visit-all-objects"};
     ScopedStopTheWorld stw(stwParam);
     ForEachObjectUnsafe(visitor);

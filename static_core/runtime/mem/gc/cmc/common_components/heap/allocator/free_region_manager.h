@@ -18,7 +18,6 @@
 
 #include "common_components/heap/allocator/treap.h"
 #include "common_interfaces/heap/region_desc.h"
-#include "common_components/common/scoped_object_access.h"
 
 namespace ark::common_vm {
 class RegionManager;
