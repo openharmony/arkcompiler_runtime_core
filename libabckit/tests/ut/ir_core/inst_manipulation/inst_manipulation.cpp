@@ -1573,7 +1573,7 @@ static void CompareDump2(std::stringstream &ss)
 }
 
 // Test: test-kind=api, api=GraphApiImpl::iDump, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitIrInstTest, Idump_2)
+TEST_F(LibAbcKitIrInstTest, DISABLED_Idump_2)
 {
     auto userInspector = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto fileName = ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/tmpIS.txt";

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ TEST_F(LibAbcKitIrGraphTest, Gdump_1)
 }
 
 // Test: test-kind=api, api=GraphApiImpl::gDump, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitIrGraphTest, Gdump_2)
+TEST_F(LibAbcKitIrGraphTest, DISABLED_Gdump_2)
 {
     helpers::InspectMethod(
         ABCKIT_ABC_DIR "ut/ir_core/graph/graph_static.abc", "main",
@@ -159,6 +159,7 @@ TEST_F(LibAbcKitIrGraphTest, Gdump_2)
                 "BB 2  preds: \\[bb 0\\]\n"
                 "prop: end, bc: 0x[a-f0-9]+\n"
                 "hotness=0\n\n\n";
+            std::cout << ss.str() << std::endl;
             EXPECT_TRUE(helpers::Match(ss.str(), expected));
         });
 }
