@@ -159,7 +159,7 @@ static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @zhangmingqi @fly971205 @lijin1039 ^templinkonstantin ^chernykhsergey ^liyiming13
 static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis ^liyiming13 @zengmanyi @LeechyLiang
 static_core/plugins/ets/verification/                    ^igelhaus @oatuwwutao ^slynkodenis ^groshevmaksim @Graceunderpressure @xhq1999
-static_core/runtime/include/mem/                         ^dmitriitr @artemu ^gitee-dakeQI @lizheng89
+static_core/runtime/include/mem/                         ^dmitriitr @artemu ^gitee-dakeQI @lizheng89 ^shemetovphilip
 static_core/runtime/include/tooling/                     @slynkodenis ^kurnevichstanislav
 static_core/runtime/tests/tooling/                       @slynkodenis ^kurnevichstanislav
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^asidorov @zengmanyi @LeechyLiang
