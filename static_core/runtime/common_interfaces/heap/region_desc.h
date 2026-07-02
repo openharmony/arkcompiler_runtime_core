@@ -660,16 +660,6 @@ public:
         return metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_REGION_CELLCOUNT, 7);
     }
 
-    void SetJitFortAwaitInstallFlag(uint8_t flag)
-    {
-        metadata.regionBits.AtomicSetValue(RegionBitOffset::BIT_OFFSET_IS_JITFORT_AWAIT_INSTALL, 1, flag);
-    }
-
-    bool IsJitFortAwaitInstallFlag()
-    {
-        return metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_IS_JITFORT_AWAIT_INSTALL, 1);
-    }
-
     RegionType GetRegionType() const
     {
         return static_cast<RegionType>(
@@ -1069,7 +1059,6 @@ private:
         BIT_OFFSET_RESURRECTED_REGION = 7,
         BIT_OFFSET_FIXED_REGION = 8,
         BIT_OFFSET_REGION_CELLCOUNT = 9,
-        BIT_OFFSET_IS_JITFORT_AWAIT_INSTALL = 16,
     };
 
     struct ObjectSlot {
@@ -1179,9 +1168,6 @@ private:
                 uint8_t isResurrected : 1;
                 uint8_t isFixed : 1;
                 uint8_t cellCount : 7;
-                // Only valid in huge region. To mark the JitFort code await for install.
-                // An awaiting JitFort does not hold valid data on and no parent reference, but considered as alive.
-                uint8_t isJitFortAwaitInstall : 1;
             };
             BitFields<uint32_t> regionBits;
         };

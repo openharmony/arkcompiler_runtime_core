@@ -111,9 +111,6 @@ void RegionDesc::VisitAllObjectsBefore(const std::function<void(BaseObject *)> &
         }
         return;
     } else if (IsLargeRegion() && (position < end)) {
-        if (IsJitFortAwaitInstallFlag()) {
-            return;
-        }
         func(reinterpret_cast<BaseObject *>(GetRegionStart()));
     } else if (IsSmallRegion()) {
         while (position < end) {
@@ -141,9 +138,6 @@ bool RegionDesc::VisitLiveObjectsUntilFalse(const std::function<bool(BaseObject 
     }
 
     if (IsLargeRegion()) {
-        if (IsJitFortAwaitInstallFlag()) {
-            return true;
-        }
         return func(reinterpret_cast<BaseObject *>(GetRegionStart()));
     }
     if (IsSmallRegion()) {
@@ -162,30 +156,18 @@ bool RegionDesc::VisitLiveObjectsUntilFalse(const std::function<bool(BaseObject 
 
 void RegionDesc::VisitRememberSetBeforeMarking(const std::function<void(BaseObject *)> &func)
 {
-    if (IsLargeRegion() && IsJitFortAwaitInstallFlag()) {
-        // machine code which is not installed should skip here.
-        return;
-    }
     uintptr_t end = std::min(GetMarkingLine(), GetRegionAllocPtr());
     GetRSet()->VisitAllMarkedCardBefore(func, GetRegionBaseFast(), end);
 }
 
 void RegionDesc::VisitRememberSetBeforeCopy(const std::function<void(BaseObject *)> &func)
 {
-    if (IsLargeRegion() && IsJitFortAwaitInstallFlag()) {
-        // machine code which is not installed should skip here.
-        return;
-    }
     uintptr_t end = std::min(GetCopyLine(), GetRegionAllocPtr());
     GetRSet()->VisitAllMarkedCardBefore(func, GetRegionBaseFast(), end);
 }
 
 void RegionDesc::VisitRememberSet(const std::function<void(BaseObject *)> &func)
 {
-    if (IsLargeRegion() && IsJitFortAwaitInstallFlag()) {
-        // machine code which is not installed should skip here.
-        return;
-    }
     GetRSet()->VisitAllMarkedCardBefore(func, GetRegionBaseFast(), GetRegionAllocPtr());
 }
 }  // namespace ark::mem

@@ -204,7 +204,6 @@ uintptr_t RegionalHeap::AllocJitFortRegion(size_t size)
 {
     uintptr_t addr = largeSpace_.Alloc(size, false);
     os::mem::TagAnonymousMemory(reinterpret_cast<void *>(addr), size, "ArkTS Code");
-    MarkJitFortMemAwaitingInstall(reinterpret_cast<BaseObject *>(addr));
     return addr;
 }
 
@@ -501,20 +500,6 @@ void RegionalHeap::MarkRememberSet(const std::function<void(BaseObject *)> &func
     oldSpace_.MarkRememberSet(func);
     nonMovableSpace_.MarkRememberSet(func);
     largeSpace_.MarkRememberSet(func);
-}
-
-void RegionalHeap::ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObject *)> &visitor) const
-{
-    for (const auto jitFort : awaitingJitFort_) {
-        visitor(jitFort);
-    }
-}
-
-void RegionalHeap::MarkJitFortMemAwaitingInstall(BaseObject *obj)
-{
-    ark::os::memory::LockHolder guard(awaitingJitFortMutex_);
-    RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(obj))->SetJitFortAwaitInstallFlag(true);
-    awaitingJitFort_.insert(obj);
 }
 
 }  // namespace ark::common_vm
