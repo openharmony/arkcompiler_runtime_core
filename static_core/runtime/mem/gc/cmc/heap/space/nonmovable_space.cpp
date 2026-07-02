@@ -90,9 +90,9 @@ void NonMovableSpace::DumpRegionStats() const
 
 uintptr_t NonMovableSpace::AllocInMonoSizeList(size_t cellCount)
 {
-    mem::GCPhase mutatorPhase = ark::Mutator::GetCurrent()->GetMutatorPhase();
+    mem::GCPhase phase = PandaVM::GetCurrent()->GetGC()->GetGCPhase();
     // workaround: make sure collector doesn't fix newly allocated incomplete objects
-    if (mutatorPhase == mem::GCPhase::GC_PHASE_MARK || mutatorPhase == mem::GCPhase::GC_PHASE_FIX) {
+    if (phase == mem::GCPhase::GC_PHASE_MARK || phase == mem::GCPhase::GC_PHASE_FIX) {
         return 0;
     }
 
@@ -100,7 +100,7 @@ uintptr_t NonMovableSpace::AllocInMonoSizeList(size_t cellCount)
     ark::os::memory::LockHolder lock(list->GetListMutex());
     uintptr_t allocPtr = list->AllocFromFreeListInLock();
     // For making bitmap comform with live object count, do not mark object repeated.
-    if (allocPtr == 0 || mutatorPhase == mem::GCPhase::GC_PHASE_IDLE) {
+    if (allocPtr == 0 || phase == mem::GCPhase::GC_PHASE_IDLE) {
         return allocPtr;
     }
 

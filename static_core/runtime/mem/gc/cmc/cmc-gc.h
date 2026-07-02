@@ -255,11 +255,10 @@ public:
         this->FireGCPhaseFinished(currentPhase);
         this->SetGCPhase(phase);
         LOG(DEBUG, GC) << "transition gc phase: " << GCScopedPhase::GetPhaseName(currentPhase) << "("
-                       << static_cast<uint8_t>(currentPhase) << ") -> " << GCScopedPhase::GetPhaseName(phase) << "("
-                       << static_cast<uint8_t>(phase) << ")";
+                       << static_cast<int>(currentPhase) << ") -> " << GCScopedPhase::GetPhaseName(phase) << "("
+                       << static_cast<int>(phase) << ")";
         ForEachManagedMutator([this, phase](Mutator *mutator) {
             mutator->HandleGCPhase(phase);
-            mutator->SetMutatorPhase(phase);
             UpdateBarrierEntrypoint(mutator, phase);
         });
         this->FireGCPhaseStarted(phase);

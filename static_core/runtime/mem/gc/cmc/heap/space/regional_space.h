@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "runtime/mem/gc/cmc/heap/allocator/region_manager.h"
+#include "runtime/include/panda_vm.h"
 #include "runtime/include/mutator.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
@@ -49,7 +50,7 @@ protected:
         if (region == nullptr) {
             return;
         }
-        mem::GCPhase phase = ::ark::Mutator::GetCurrent()->GetMutatorPhase();
+        mem::GCPhase phase = PandaVM::GetCurrent()->GetGC()->GetGCPhase();
         if (phase == mem::GCPhase::GC_PHASE_INITIAL_MARK || phase == mem::GCPhase::GC_PHASE_MARK) {
             region->SetMarkingLine();
         } else if (phase == mem::GCPhase::GC_PHASE_PRECOPY || phase == mem::GCPhase::GC_PHASE_COPY ||

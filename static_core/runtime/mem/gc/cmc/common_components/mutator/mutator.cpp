@@ -19,7 +19,7 @@
 #include "common_components/common/type_def.h"
 #include "mutator/satb_buffer.h"
 #include "runtime/include/mutator.h"
-#include "runtime/include/mutator.h"
+#include "runtime/include/panda_vm.h"
 #include "common_components/mutator/thread_local.h"
 
 namespace ark::common_vm {
@@ -32,7 +32,7 @@ ThreadLocalData *GetThreadLocalData()
         // Since the TBI(top bit ignore) feature in Aarch64,
         // set gc phase to high 8-bit of ThreadLocalData Address for gc barrier fast path.
         // 56: make gcphase value shift left 56 bit to set the high 8-bit
-        tlDataAddr = tlDataAddr | (static_cast<uint64_t>(ark::Mutator::GetCurrent()->GetMutatorPhase()) << 56);
+        tlDataAddr = tlDataAddr | (static_cast<uint64_t>(PandaVM::GetCurrent()->GetGC()->GetGCPhase()) << 56);
     }
 #endif
     return reinterpret_cast<ThreadLocalData *>(tlDataAddr);
