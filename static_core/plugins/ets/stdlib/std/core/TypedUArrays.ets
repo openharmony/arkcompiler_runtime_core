@@ -5795,7 +5795,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public includes(searchElement: long, fromIndex: int): boolean {
-        return this.indexOf(searchElement.toInt(), fromIndex) != -1
+        return this.indexOfImpl(searchElement, fromIndex) != -1
     }
 
     /**
@@ -5807,7 +5807,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public includes(searchElement: long): boolean {
-        return this.indexOf(searchElement.toInt(), 0) != -1
+        return this.indexOfImpl(searchElement, 0) != -1
     }
 
     /**

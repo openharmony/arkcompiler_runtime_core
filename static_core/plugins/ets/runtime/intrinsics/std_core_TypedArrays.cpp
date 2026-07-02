@@ -1351,13 +1351,26 @@ static EtsInt EtsStdCoreTypedArrayIndexOf(T *thisArray, EtsInt fromIndex, Pred p
     return idxIt == span.end() ? INVALID_INDEX : std::distance(span.begin(), idxIt);
 }
 
+template <typename T>
+static EtsInt EtsStdCoreTypedArrayIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex);
+
 template <typename T, typename SE>
 static EtsInt EtsStdCoreTypedArrayIndexOfLong(T *thisArray, SE searchElement, EtsInt fromIndex)
 {
     using ElementType = typename T::ElementType;
-    return EtsStdCoreTypedArrayIndexOf(
-        thisArray, fromIndex,
-        [element = static_cast<ElementType>(searchElement)](ElementType e) { return e == element; });
+    if constexpr (std::is_same_v<ElementType, int64_t> || std::is_same_v<ElementType, uint64_t>) {
+        // 64-bit integer arrays: preserve exact element-type comparison.
+        // BigInt search elements may carry values outside int64 range (wrapped by getLong),
+        // so double-domain comparison would be incorrect. static_cast to the element type
+        // correctly unwraps via two's complement.
+        return EtsStdCoreTypedArrayIndexOf(
+            thisArray, fromIndex,
+            [element = static_cast<ElementType>(searchElement)](ElementType e) { return e == element; });
+    } else {
+        // ECMAScript semantics: compare in Number (double) domain via SameValueZero.
+        // Delegate to IndexOfNumber which promotes each element to double and handles NaN.
+        return EtsStdCoreTypedArrayIndexOfNumber(thisArray, static_cast<double>(searchElement), fromIndex);
+    }
 }
 
 template <typename T>
@@ -1437,49 +1450,50 @@ ETS_STD_CORE_INDEX_OF_LONG(UInt32)
 ETS_STD_CORE_INDEX_OF_LONG(BigUInt64)
 ETS_STD_CORE_INDEX_OF_LONG(UInt8Clamped)
 
+template <typename T>
+static EtsInt EtsStdCoreTypedArrayLastIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex);
+
 template <typename T1, typename T2>
 static EtsInt EtsStdCoreTypedArrayLastIndexOfLong(T1 *thisArray, T2 searchElement, EtsInt fromIndex)
 {
-    auto *data = GetNativeData(thisArray);
-    if (UNLIKELY(data == nullptr)) {
-        return INVALID_INDEX;
-    }
-
-    /**
-     * False-positive static-analyzer report:
-     * GC can happen only on ThrowException in GetNativeData.
-     * But such case meaning data to be nullptr and retun prevents
-     * us from proceeding
-     */
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    int arrayLength = thisArray->GetLengthInt();
-    if (arrayLength == 0) {
-        return INVALID_INDEX;
-    }
-
-    int startIndex = arrayLength + fromIndex;
-    if (fromIndex >= 0) {
-        startIndex = (arrayLength - 1 < fromIndex) ? arrayLength - 1 : fromIndex;
-    }
-
     using ElementType = typename T1::ElementType;
-    /**
-     * False-positive static-analyzer report:
-     * GC can happen only on ThrowException in GetNativeData.
-     * But such case meaning data to be nullptr and retun prevents
-     * us from proceeding
-     */
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
-    auto element = static_cast<ElementType>(searchElement);
-    for (int i = startIndex; i >= 0; i--) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (array[i] == element) {
-            return i;
+    if constexpr (std::is_same_v<ElementType, int64_t> || std::is_same_v<ElementType, uint64_t>) {
+        // 64-bit integer arrays: preserve exact element-type comparison (see IndexOfLong).
+        auto *data = GetNativeData(thisArray);
+        if (UNLIKELY(data == nullptr)) {
+            return INVALID_INDEX;
         }
-    }
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+        int arrayLength = thisArray->GetLengthInt();
+        if (arrayLength == 0) {
+            return INVALID_INDEX;
+        }
 
-    return INVALID_INDEX;
+        int startIndex = arrayLength + fromIndex;
+        if (fromIndex >= 0) {
+            startIndex = (arrayLength - 1 < fromIndex) ? arrayLength - 1 : fromIndex;
+        }
+
+        /**
+         * False-positive static-analyzer report:
+         * GC can happen only on ThrowException in GetNativeData.
+         * But such case meaning data to be nullptr and retun prevents
+         * us from proceeding
+         */
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+        auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+        auto element = static_cast<ElementType>(searchElement);
+        for (int i = startIndex; i >= 0; i--) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (array[i] == element) {
+                return i;
+            }
+        }
+        return INVALID_INDEX;
+    } else {
+        // ECMAScript semantics: compare in Number (double) domain via SameValueZero.
+        return EtsStdCoreTypedArrayLastIndexOfNumber(thisArray, static_cast<double>(searchElement), fromIndex);
+    }
 }
 
 template <typename T>
@@ -2027,7 +2041,7 @@ static int Clamp(double val)
     } else if (val < minUint8) {
         val = minUint8;
     }
-    return val;
+    return std::lrint(val);
 }
 
 template <typename T1, typename T2>
