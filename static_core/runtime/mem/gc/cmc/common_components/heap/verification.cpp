@@ -38,9 +38,6 @@
  *
  * RB DFX:
  * Force to use STW GC. Force to use read barrier out of GC.
- * After GC is finished, set the lowerst bit(WEAK_TAG) of RefField which is not root or doesn't
- * point to non-movable objects.
- * The read barrier is responsible to remove the WEAK_TAG for properly deferencing the object.
  * Disabled by defualt. Controlled by gn-option `ets_runtime_enable_rb_dfx`.
  *
  * Example:
@@ -420,11 +417,6 @@ private:
         list.VisitAllRegions([&](RegionDesc *region) {
             region->VisitAllObjects([&](BaseObject *obj) { visitor.VerifyRef(nullptr, RefField<>(obj)); });
         });
-    }
-
-    void EnumStrongRoots(const std::function<void(RefField<> &)> &markFunc)
-    {
-        Heap::GetHeap().GetCollector().VisitRootsI(markFunc);
     }
 
     void Marking(MarkStack<BaseObject *> &markStack) {}

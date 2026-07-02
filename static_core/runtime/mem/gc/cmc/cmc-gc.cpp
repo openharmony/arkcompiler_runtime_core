@@ -19,6 +19,7 @@
 
 #include "runtime/mem/gc/cmc/cmc-gc.h"
 #include "runtime/mem/gc/cmc/common_components/heap/heap_manager.h"
+#include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 
 #include "common_components/base/globals.h"
 #include "common_components/heap/verification.h"
@@ -67,9 +68,26 @@ using ark::common_vm::ScopedStopTheWorld;
 using ark::common_vm::STWParam;
 using ark::common_vm::Task;
 using ark::common_vm::TaskPackMonitor;
-using ark::common_vm::ThreadLocal;
-using ark::common_vm::ThreadType;
 using ark::common_vm::WVerify;
+
+static BaseObject *ReadRefSlot(ObjectPointerType *ref)
+{
+    auto value = ObjectAccessor::Load(ref);
+    return reinterpret_cast<BaseObject *>(static_cast<uintptr_t>(value));
+}
+
+static BaseObject *AtomicReadRefSlot(ObjectPointerType *ref)
+{
+    auto value = ObjectAccessor::LoadAtomic(ref);
+    return reinterpret_cast<BaseObject *>(static_cast<uintptr_t>(value));
+}
+
+static bool CompareExchangeRefSlot(ObjectPointerType *ref, ObjectHeader *expected, ObjectHeader *desired)
+{
+    auto expectedValue = ToObjPtrType(expected);
+    auto desiredValue = ToObjPtrType(desired);
+    return AtomicCmpxchgStrong(ref, expectedValue, desiredValue, std::memory_order_relaxed) == expectedValue;
+}
 
 template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::IsUnmovableFromObject(BaseObject *obj) const
@@ -101,7 +119,7 @@ bool CmcGC<LanguageConfig>::TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &f
         if (toObj == nullptr) {  // LCOV_EXCL_BR_LINE
             return false;
         }
-        RefField<> tmpField(toObj, oldRef.IsWeak());
+        RefField<> tmpField(toObj);
         if (field.CompareExchange(oldRef.GetFieldValue(), tmpField.GetFieldValue())) {  // LCOV_EXCL_BR_LINE
             if (obj != nullptr) {                                                       // LCOV_EXCL_BR_LINE
                 LOG(DEBUG, GC) << "update obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")+"
@@ -132,13 +150,6 @@ bool CmcGC<LanguageConfig>::TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &f
     }
 
     return false;
-}
-
-template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::TryUpdateRefField(BaseObject *obj, RefField<> &field, BaseObject *&newRef) const
-{
-    BaseObject *oldRef = nullptr;
-    return TryUpdateRefFieldImpl<false>(obj, field, oldRef, newRef);
 }
 
 template <class LanguageConfig>
@@ -225,7 +236,6 @@ void CmcGC<LanguageConfig>::MarkingXRef(RefField<> &field, ParallelLocalMarkStac
                        << targetObj->GetSize() << ")";
         return;
     }
-    DCHECK(!field.IsWeak());
     if (!region->MarkObject(targetObj)) {
         workStack.Push(targetObj);
     }
@@ -275,7 +285,7 @@ void CmcGC<LanguageConfig>::FixRefField(BaseObject *obj, RefField<> &field) cons
     }
 
     CHECK(latest->IsValidObject());
-    RefField<> newField(latest, oldField.IsWeak());
+    RefField<> newField(latest);
     if (field.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
         LOG(DEBUG, GC) << "fix obj " << obj << "+" << obj->GetSize() << " ref@" << &field << ": 0x" << std::hex
                        << oldField.GetFieldValue() << " => " << std::dec << latest << "<" << latest->GetTypeInfo()
@@ -299,11 +309,10 @@ class PreforwardVisitor {
 public:
     explicit PreforwardVisitor(CmcGC<LanguageConfig> *collector) : collector_(collector) {}
 
-    void operator()(RefField<> &refField)
+    void operator()(GCRoot root)
     {
-        RefField<> oldField(refField);
-        BaseObject *oldObj = oldField.GetTargetObject();
-        LOG(DEBUG, GC) << "visit raw-ref @" << &refField << ": " << oldObj;
+        ObjectHeader *oldObj = root.GetObjectHeader();
+        LOG(DEBUG, GC) << "visit raw-ref @" << root.GetObjectPointer() << ": " << oldObj;
 
         auto regionType =
             RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(oldObj))
@@ -317,11 +326,10 @@ public:
             Heap::throwOOM();
             return;
         }
-        RefField<> newField(toVersion);
-        // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
-        if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-            LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
-        }
+
+        ASSERT(root.GetObjectHeader() == oldObj);
+        root.Update(toVersion);
+        LOG(DEBUG, GC) << "fix raw-ref @" << root.GetObjectPointer() << ": " << oldObj << " -> " << toVersion;
         MarkToObject(toVersion);
     }
 
@@ -349,20 +357,18 @@ void CmcGC<LanguageConfig>::PreforwardStaticRoots()
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardConcurrentRoots()
 {
-    RefFieldVisitor visitor = [this](RefField<> &refField) {
-        RefField<> oldField(refField);
-        BaseObject *oldObj = oldField.GetTargetObject();
-        LOG(DEBUG, GC) << "visit raw-ref @" << &refField << ": " << oldObj;
+    GCRootVisitor visitor = [this](GCRoot root) {
+        ObjectHeader *oldObj = root.GetObjectHeader();
+        LOG(DEBUG, GC) << "visit raw-ref @" << root.GetObjectPointer() << ": " << oldObj;
         if (IsFromObject(oldObj)) {
             BaseObject *toVersion = TryForwardObject(oldObj);
             ASSERT_PRINT(toVersion != nullptr, "TryForwardObject failed");
-            RefField<> newField(toVersion);
             // CAS failure means some mutator or gc thread writes a new ref (must be a to-object), no need to retry.
-            if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
-                LOG(DEBUG, MM_OBJECT_EVENTS)
-                    << "[CMC] "
-                    << "PREFORWARD concurrent ref @" << &refField << ": " << oldObj << " -> " << toVersion;
+            if (CompareExchangeRefSlot(root.GetObjectPointer(), oldObj, toVersion)) {
+                LOG(DEBUG, GC) << "fix raw-ref @" << root.GetObjectPointer() << ": " << oldObj << " -> " << toVersion;
+                LOG(DEBUG, MM_OBJECT_EVENTS) << "[CMC] "
+                                             << "PREFORWARD concurrent ref @" << root.GetObjectPointer() << ": "
+                                             << oldObj << " -> " << toVersion;
             }
         }
     };
@@ -395,14 +401,14 @@ class EnumRootsBuffer {
 public:
     EnumRootsBuffer();
     void UpdateBufferSize();
-    CArrayList<BaseObject *> *GetBuffer()
+    CArrayList<ObjectHeader *> *GetBuffer()
     {
         return &buffer_;
     }
 
 private:
     static size_t bufferSize_;
-    CArrayList<BaseObject *> buffer_;
+    CArrayList<ObjectHeader *> buffer_;
 };
 
 size_t EnumRootsBuffer::bufferSize_ = 16;
@@ -430,12 +436,12 @@ void EnumRootsBuffer::UpdateBufferSize()
 
 template <class LanguageConfig>
 template <typename CmcGC<LanguageConfig>::EnumRootsPolicy policy>
-CArrayList<BaseObject *> CmcGC<LanguageConfig>::EnumRoots()
+CArrayList<ObjectHeader *> CmcGC<LanguageConfig>::EnumRoots()
 {
     STWParam stwParam {"wgc-enumroot"};
     EnumRootsBuffer buffer;
-    CArrayList<ark::common_vm::BaseObject *> *results = buffer.GetBuffer();
-    ark::mem::RefFieldVisitor visitor = [&results](RefField<> &field) { results->push_back(field.GetTargetObject()); };
+    CArrayList<ObjectHeader *> *results = buffer.GetBuffer();
+    GCRootVisitor visitor = [&results](GCRoot root) { results->push_back(root.GetObjectHeader()); };
 
     if constexpr (policy == EnumRootsPolicy::NO_STW_AND_NO_FLIP_MUTATOR) {
         EnumRootsImpl<VisitRoots>(visitor);
@@ -457,7 +463,7 @@ CArrayList<BaseObject *> CmcGC<LanguageConfig>::EnumRoots()
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
+void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<ObjectHeader *> &collectedRoots, GCTaskCause reason)
 {
     mem::GCScope<mem::TRACE_TIMING> gcScope("Marking live objects", this);
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
@@ -509,28 +515,6 @@ WeakRefFieldVisitor CmcGC<LanguageConfig>::GetWeakRefFieldVisitor(GCTaskCause re
 }
 
 template <class LanguageConfig>
-RefFieldVisitor CmcGC<LanguageConfig>::GetPrefowardRefFieldVisitor()
-{
-    return [this](RefField<> &refField) -> void {
-        RefField<> oldField(refField);
-        BaseObject *oldObj = oldField.GetTargetObject();
-        if (IsFromObject(oldObj)) {
-            BaseObject *toVersion = TryForwardObject(oldObj);
-            CHECK(toVersion != nullptr);
-            RefField<> newField(toVersion);
-            // CAS failure means some mutator or gc thread writes a new ref (must be
-            // a to-object), no need to retry.
-            if (refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue())) {
-                LOG(DEBUG, GC) << "fix raw-ref @" << &refField << ": " << oldObj << " -> " << toVersion;
-                LOG(DEBUG, MM_OBJECT_EVENTS)
-                    << "[CMC] "
-                    << "PREFORWARD ref @" << &refField << ": " << oldObj << " -> " << toVersion;
-            }
-        }
-    };
-}
-
-template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
 {
     {
@@ -550,10 +534,7 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
 
         VisitWeakGlobalRoots(weakVisitor, reason == GCTaskCause::YOUNG_GC_CAUSE);
 
-        ForEachManagedMutator([this, reason](Mutator *mutator) {
-            WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor(reason);
-            mutator->VisitMutatorRoots(weakVisitor);
-            RefFieldVisitor visitor = GetPrefowardRefFieldVisitor();
+        ForEachManagedMutator([](Mutator *mutator) {
             // Request finalize callback in each vm-thread when gc finished.
             mutator->RequestReferencesCleanup();
         });
@@ -707,74 +688,6 @@ void CmcGC<LanguageConfig>::CollectGarbageWithXRef(GCTaskCause reason)
 }
 
 template <class LanguageConfig>
-class ConcurrentEvacuationTask : public Task {
-public:
-    ConcurrentEvacuationTask(uint32_t id, CmcGC<LanguageConfig> &tc, ParallelMarkingMonitor &monitor,
-                             GlobalEvacuationStack &globalStack)
-        : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
-    {
-    }
-
-    ~ConcurrentEvacuationTask() override = default;
-
-    // run concurrent marking task.
-    bool Run(uint32_t threadIndex) override
-    {
-        ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
-        ParallelLocalEvacuationStack stack(&globalStack_, &monitor_);
-        do {
-            if (!monitor_.TryStartStep()) {
-                break;
-            }
-            collector_.ProcessEvacuationStack(stack);
-            monitor_.FinishStep();
-        } while (monitor_.WaitNextStepOrFinished());
-        monitor_.NotifyFinishOne();
-        ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
-        return true;
-    }
-
-private:
-    CmcGC<LanguageConfig> &collector_;
-    ParallelMarkingMonitor &monitor_;
-    GlobalEvacuationStack &globalStack_;
-};
-
-template <class LanguageConfig>
-class RemarkTask : public Task {
-public:
-    RemarkTask(uint32_t id, CmcGC<LanguageConfig> &tc, ParallelMarkingMonitor &monitor,
-               GlobalEvacuationStack &globalStack)
-        : Task(id), collector_(tc), monitor_(monitor), globalStack_(globalStack)
-    {
-    }
-
-    ~RemarkTask() override = default;
-
-    // run concurrent marking task.
-    bool Run(uint32_t threadIndex) override
-    {
-        ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
-        ParallelLocalEvacuationStack stack(&globalStack_, &monitor_);
-        do {
-            if (!monitor_.TryStartStep()) {
-                break;
-            }
-            collector_.MarkEvacuationStack(stack);
-            monitor_.FinishStep();
-        } while (monitor_.WaitNextStepOrFinished());
-        monitor_.NotifyFinishOne();
-        ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
-        return true;
-    }
-
-private:
-    CmcGC<LanguageConfig> &collector_;
-    ParallelMarkingMonitor &monitor_;
-    GlobalEvacuationStack &globalStack_;
-};
-
-template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ForEachManagedMutator(const ManagedMutatorCallback &callback)
 {
     Mutator::GetCurrent()->GetVM()->GetMutatorManager()->ForEachMutator([&callback](Mutator *mutator) {
@@ -838,8 +751,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
         return;
     }
 
-    const auto avoidConcurrentMarking = Heap::GetHeap().GetGCParam().singlePassCompactionEnabled && isYoungGC;
-    if (!avoidConcurrentMarking) {
+    if (!isYoungGC) {
         auto collectedRoots = EnumRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>();
         MarkingHeap(collectedRoots, task.reason);
         PreforwardFlip(task.reason);
@@ -878,11 +790,20 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::DoGarbageCollectionWithoutConcurrentMarking()
 {
     CHECK(Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE);
-    GlobalEvacuationStack globalEvacuationStack;
-    PreforwardNonHeapRoots<EnumRootsPolicy::STW_AND_FLIP_MUTATOR>(globalEvacuationStack);
-    EnqueueRememberedSetRefs(globalEvacuationStack);
-    ProcessEvacuationStack(globalEvacuationStack);
-    RemarkYoungCollectionSpace(globalEvacuationStack);
+
+    auto useGcWorkers = this->GetSettings()->ParallelCompactingEnabled();
+    CMCGCAdaptiveStack evacuationStack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                       useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                                       GCWorkersTaskTypes::TASK_EVACUATE_REGIONS,
+                                       this->GetSettings()->GCMarkingStackNewTasksFrequency());
+    PreforwardNonHeapRoots(evacuationStack);
+    EnqueueRememberedSetRefs(evacuationStack);
+    ProcessEvacuationStack(evacuationStack);
+    if (useGcWorkers) {
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
+    }
+
+    RemarkYoungCollectionSpace();
 
     // We do not evacuate objects on remark pause to avoid too long STW
     CopyFromSpace();
@@ -893,52 +814,20 @@ void CmcGC<LanguageConfig>::DoGarbageCollectionWithoutConcurrentMarking()
 }
 
 template <class LanguageConfig>
-template <typename CmcGC<LanguageConfig>::EnumRootsPolicy policy>
-void CmcGC<LanguageConfig>::PreforwardNonHeapRoots(GlobalEvacuationStack &globalStack)
+void CmcGC<LanguageConfig>::PreforwardNonHeapRoots(CMCGCAdaptiveStack &stack)
 {
-    CArrayList<ark::common_vm::BaseObject *> roots;
-
-    if constexpr (policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR) {
-        STWParam param {"preforward-nonheap-roots"};
-        ScopedStopTheWorld stw(param);
-
-        PreforwardNonHeapRootsImpl<VisitRoots>(roots);
-        GetGCStats().recordSTWTime(param.GetElapsedNs());
-    } else if constexpr (policy == EnumRootsPolicy::STW_AND_FLIP_MUTATOR) {
-        PreforwardNonHeapRootsFlip(roots);
-    } else {
-        static_assert(policy == EnumRootsPolicy::STW_AND_FLIP_MUTATOR ||
-                          policy == EnumRootsPolicy::STW_AND_NO_FLIP_MUTATOR,
-                      "not implemented");
-    }
-    LocalEvacuationStack stack(&globalStack);
+    PandaVector<ObjectHeader *> roots = PreforwardNonHeapRootsFlip();
     for (auto *obj : roots) {
         if (MarkObjectIfNotMarked(obj)) {
             EnqueueRefsToYoungCollectionSpace(obj, stack);
         }
     }
-    stack.Publish();
 }
 
 template <class LanguageConfig>
-template <void (&rootsVisitFunc)(const ark::mem::RefFieldVisitor &)>
-void CmcGC<LanguageConfig>::PreforwardNonHeapRootsImpl(CArrayList<BaseObject *> &forwardedRoots)
+void CmcGC<LanguageConfig>::PreforwardNonHeapRoot(GCRoot root, PandaVector<ObjectHeader *> &forwardedRoots)
 {
-    auto &heap = static_cast<RegionalHeap &>(theAllocator_);
-    heap.AssembleGarbageCandidates();
-    heap.PrepareMarking();
-    heap.PrepareForward();
-
-    TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY);
-    rootsVisitFunc([this, &forwardedRoots](RefField<> &root) { PreforwardNonHeapRoot(root, forwardedRoots); });
-
-    TransitionToGCPhase(GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::PreforwardNonHeapRoot(RefField<> &root, CArrayList<BaseObject *> &forwardedRoots)
-{
-    auto *obj = root.GetTargetObject();
+    auto *obj = root.GetObjectHeader();
     auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
 
     if (!InYoungCollectionSpace(region)) {
@@ -948,59 +837,69 @@ void CmcGC<LanguageConfig>::PreforwardNonHeapRoot(RefField<> &root, CArrayList<B
 
     if (region->IsFromRegion()) {
         obj = ForwardObject(obj);
-        root.SetTargetObject(obj);
+        root.Update(obj);
     }
 
     forwardedRoots.push_back(obj);
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip(CArrayList<BaseObject *> &forwardedRoots)
+PandaVector<ObjectHeader *> CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip()
 {
-    ark::os::memory::Mutex stackMutex;
-    CArrayList<CArrayList<BaseObject *>> rootSet;  // allocate for each mutator
+    PandaVector<ObjectHeader *> forwardedRoots;
     {
         STWParam param {"preforward-non-heap-roots"};
         ScopedStopTheWorld stw(param);
 
         SetGCThreadQosPriority(PriorityMode::STW);
-        PreforwardNonHeapRootsImpl<VisitGlobalRoots>(forwardedRoots);
-        SetGCThreadQosPriority(PriorityMode::FOREGROUND);
+        auto &heap = static_cast<RegionalHeap &>(theAllocator_);
+        heap.AssembleGarbageCandidates();
+        heap.PrepareMarking();
+        heap.PrepareForward();
 
-        ForEachManagedMutator([this, &rootSet, &stackMutex](Mutator *mutator) {
-            CArrayList<BaseObject *> roots;
-            mutator->VisitMutatorRoots([this, &roots](RefField<> &root) { PreforwardNonHeapRoot(root, roots); });
-            ark::os::memory::LockHolder lockGuard(stackMutex);
-            rootSet.emplace_back(std::move(roots));
-        });
+        TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY);
+        mem::RootManager<LanguageConfig> rootManager(this->GetPandaVm());
+
+        auto callback = [this, &forwardedRoots](GCRoot root) { PreforwardNonHeapRoot(root, forwardedRoots); };
+        rootManager.VisitAotStringRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+        rootManager.VisitVmRoots(callback);
+        rootManager.VisitLocalRoots(callback);
+
+        TransitionToGCPhase(GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
+        SetGCThreadQosPriority(PriorityMode::FOREGROUND);
         GetGCStats().recordSTWTime(param.GetElapsedNs());
     }
 
-    for (const auto &roots : rootSet) {
-        std::copy(roots.begin(), roots.end(), std::back_inserter(forwardedRoots));
-    }
-
-    VisitConcurrentRoots([this, &forwardedRoots](RefField<> &root) {
-        auto *obj = root.GetTargetObject();
+    VisitConcurrentRoots([&forwardedRoots](GCRoot root) {
+        auto *obj = root.GetObjectHeader();
         auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
         if (InYoungCollectionSpace(region)) {
             CHECK(!region->IsFromRegion());
             forwardedRoots.push_back(obj);
         }
     });
+    return forwardedRoots;
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace(GlobalEvacuationStack &globalStack)
+void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace()
 {
     STWParam param {"remark-young-collection-space"};
     ScopedStopTheWorld stw(param);
 
     TransitionToGCPhase(GCPhase::GC_PHASE_REMARK);
 
-    RemarkNonHeapRoots(globalStack);
-    MarkSatbBuffer(globalStack);
-    MarkEvacuationStack(globalStack);
+    bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
+    CMCGCAdaptiveStack remarkStack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                   useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                                   GCWorkersTaskTypes::TASK_REMARK,
+                                   this->GetSettings()->GCMarkingStackNewTasksFrequency());
+    RemarkNonHeapRoots(remarkStack);
+    MarkSatbBuffer(remarkStack);
+    MarkEvacuationStack(remarkStack);
+    if (useGcWorkers) {
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
+    }
 
     // we should update forwarded weak references located in global storage
     auto weakVisitor = [this](RefField<> &refField) -> bool {
@@ -1015,7 +914,7 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace(GlobalEvacuationStack &gl
             return false;
         }
         auto *toVersion = GetForwardingPointer(oldObj);
-        RefField<> newField(toVersion, oldField.IsWeak());
+        RefField<> newField(toVersion);
         refField.CompareExchange(oldField.GetFieldValue(), newField.GetFieldValue());
         return true;
     };
@@ -1026,86 +925,48 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace(GlobalEvacuationStack &gl
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::RemarkNonHeapRoots(GlobalEvacuationStack &globalStack)
+void CmcGC<LanguageConfig>::RemarkNonHeapRoots(CMCGCAdaptiveStack &stack)
 {
-    LocalEvacuationStack stack(&globalStack);
-    VisitRoots([this, &stack](RefField<> &root) { RemarkNonHeapRoot(root, stack); });
-    stack.Publish();
+    VisitRoots([this, &stack](GCRoot root) { RemarkNonHeapRoot(root, stack); });
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::EnqueueRememberedSetRefs(GlobalEvacuationStack &globalStack)
+void CmcGC<LanguageConfig>::EnqueueRememberedSetRefs(CMCGCAdaptiveStack &stack)
 {
-    LocalEvacuationStack stack(&globalStack);
     auto &space = static_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     space.MarkRememberSet([this, &stack](BaseObject *object) { EnqueueRefsToYoungCollectionSpace(object, stack); });
-    stack.Publish();
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkSatbBuffer(GlobalEvacuationStack &globalStack)
+void CmcGC<LanguageConfig>::MarkSatbBuffer(CMCGCAdaptiveStack &stack)
 {
-    PandaStack<BaseObject *> remarkStack;
-    ForEachManagedMutator([&remarkStack](Mutator *mutator) {
+    PandaStack<BaseObject *> localStack;
+    ForEachManagedMutator([&localStack](Mutator *mutator) {
         const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator->GetSatbBufferNode());
         if (node != nullptr) {
-            const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
+            const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(localStack);
         }
     });
-    SatbBuffer::Instance().GetRetiredObjects(remarkStack);
+    SatbBuffer::Instance().GetRetiredObjects(localStack);
 
-    LocalEvacuationStack localStack(&globalStack);
-    while (!remarkStack.empty()) {
-        BaseObject *obj = remarkStack.top();
-        remarkStack.pop();
+    while (!localStack.empty()) {
+        ObjectHeader *obj = localStack.top();
+        localStack.pop();
         CHECK(Heap::IsHeapAddress(obj));
         if (IsFromObject(obj)) {
             obj = ForwardObject(obj);
         }
         auto *region = RegionDesc::GetAliveRegionDescAt(obj);
         if (MarkObjectIfNotMarked(obj)) {
-            auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, localStack);
+            auto size = obj->ObjectSize();
+            EnqueueRefsToYoungCollectionSpace(obj, stack);
             region->AddLiveByteCount(size);
         }
     }
-    localStack.Publish();
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::ProcessEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
-{
-    const auto maxWorkers = GetGCThreadCount(true) - 1;
-    if (maxWorkers > 0) {
-        auto parallelCount = maxWorkers;
-        ParallelMarkingMonitor monitor(parallelCount, parallelCount);
-
-        auto *threadPool = GetThreadPool();
-        for (uint32_t i = 0; i < parallelCount; ++i) {
-            threadPool->PostTask(
-                MakePandaUnique<ConcurrentEvacuationTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
-        }
-        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
-        do {
-            if (!monitor.TryStartStep()) {
-                break;
-            }
-            ProcessEvacuationStack(stack);
-            monitor.FinishStep();
-        } while (monitor.WaitNextStepOrFinished());
-        monitor.WaitAllFinished();
-    } else {
-        // serial marking with a single mark task.
-        // NOTE: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
-        // use monitor, but this need to add template param to `ProcessMarkStack`.
-        // So for convenience just use a fake dummy parallel one.
-        ParallelMarkingMonitor dummyMonitor(0, 0);
-        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &dummyMonitor);
-        ProcessEvacuationStack(stack);
-    }
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack &stack)
+void CmcGC<LanguageConfig>::ProcessEvacuationStack(CMCGCAdaptiveStack &stack)
 {
     // NOTE: it is performed concurrently with other GC threads and mutators
     PandaStack<BaseObject *> remarkStack;
@@ -1113,7 +974,7 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack 
         SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
         bool needProcess = false;
         while (!remarkStack.empty()) {
-            BaseObject *obj = remarkStack.top();
+            ObjectHeader *obj = remarkStack.top();
             remarkStack.pop();
             CHECK(Heap::IsHeapAddress(obj));
             if (IsFromObject(obj)) {
@@ -1130,9 +991,9 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack 
     const size_t maxIterationCount = 1000;
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
-        RefField<> *ref;
-        while (stack.Pop(&ref)) {
-            ProcessRef(*ref, stack);
+        while (!stack.Empty()) {
+            ObjectPointerType *ref = stack.PopFromStack();
+            ProcessRef(ref, stack);
         }
 
         if (++iterationCount >= maxIterationCount) {
@@ -1146,51 +1007,18 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(ParallelLocalEvacuationStack 
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkEvacuationStack(GlobalEvacuationStack &globalEvacuationStack)
+void CmcGC<LanguageConfig>::MarkEvacuationStack(CMCGCAdaptiveStack &stack)
 {
-    const auto maxWorkers = GetGCThreadCount(true) - 1;
-    if (maxWorkers > 0) {
-        auto parallelCount = maxWorkers;
-        ParallelMarkingMonitor monitor(parallelCount, parallelCount);
-
-        auto *threadPool = GetThreadPool();
-        for (uint32_t i = 0; i < parallelCount; ++i) {
-            threadPool->PostTask(MakePandaUnique<RemarkTask<LanguageConfig>>(0, *this, monitor, globalEvacuationStack));
-        }
-        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &monitor);
-        do {
-            if (!monitor.TryStartStep()) {
-                break;
-            }
-            MarkEvacuationStack(stack);
-            monitor.FinishStep();
-        } while (monitor.WaitNextStepOrFinished());
-        monitor.WaitAllFinished();
-    } else {
-        // serial marking with a single mark task.
-        // NOTE: this `ParallelLocalMarkStack` could be replaced with `SequentialLocalMarkStack`, and no need to
-        // use monitor, but this need to add template param to `ProcessMarkStack`.
-        // So for convenience just use a fake dummy parallel one.
-        ParallelMarkingMonitor dummyMonitor(0, 0);
-        ParallelLocalEvacuationStack stack(&globalEvacuationStack, &dummyMonitor);
-        MarkEvacuationStack(stack);
+    while (!stack.Empty()) {
+        ObjectPointerType *ref = stack.PopFromStack();
+        MarkRef(ReadRefSlot(ref), stack);
     }
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkEvacuationStack(ParallelLocalEvacuationStack &stack)
+void CmcGC<LanguageConfig>::RemarkNonHeapRoot(GCRoot root, CMCGCAdaptiveStack &stack)
 {
-    RefField<> *ref;
-    while (stack.Pop(&ref)) {
-        MarkRef(*ref, stack);
-    }
-}
-
-template <class LanguageConfig>
-template <typename Stack>
-void CmcGC<LanguageConfig>::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
-{
-    auto *obj = ref.GetTargetObject();
+    auto *obj = root.GetObjectHeader();
     auto *region = RegionDesc::GetAliveRegionDescAt(obj);
 
     CHECK(Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE);
@@ -1211,11 +1039,10 @@ void CmcGC<LanguageConfig>::RemarkNonHeapRoot(RefField<> &ref, Stack &stack)
 }
 
 template <class LanguageConfig>
-template <typename Stack>
-void CmcGC<LanguageConfig>::ProcessRef(RefField<> &ref, Stack &stack)
+void CmcGC<LanguageConfig>::ProcessRef(ObjectPointerType *ref, CMCGCAdaptiveStack &stack)
 {
-    RefField<> oldRef(ref);
-    auto *obj = oldRef.GetTargetObject();
+    auto *obj = AtomicReadRefSlot(ref);
+
     if (!Heap::IsHeapAddress(obj)) {
         return;
     }
@@ -1223,14 +1050,13 @@ void CmcGC<LanguageConfig>::ProcessRef(RefField<> &ref, Stack &stack)
     auto *region = RegionDesc::GetAliveRegionDescAt(obj);
 
     if (region->IsFromRegion()) {
-        auto *fwd = ForwardObject(obj);
+        ObjectHeader *fwd = ForwardObject(obj);
 
         // Object can be evacuated by mutator so mark it
         if (MarkObjectIfNotMarked(fwd)) {
             EnqueueRefsToYoungCollectionSpace(fwd, stack);
         }
-        RefField<> newRef(fwd, oldRef.IsWeak());
-        ref.CompareExchange(oldRef.GetFieldValue(), newRef.GetFieldValue());
+        CompareExchangeRefSlot(ref, obj, fwd);
         return;
     }
 
@@ -1248,13 +1074,15 @@ void CmcGC<LanguageConfig>::ProcessRef(RefField<> &ref, Stack &stack)
 }
 
 template <class LanguageConfig>
-template <typename Stack>
-void CmcGC<LanguageConfig>::MarkRef(RefField<> &ref, Stack &stack)
+void CmcGC<LanguageConfig>::MarkRef(BaseObject *obj, CMCGCAdaptiveStack &stack)
 {
-    auto *obj = ref.GetTargetObject();
-    auto *region = RegionDesc::GetAliveRegionDescAt(obj);
-
     CHECK(Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE);
+
+    if (!Heap::IsHeapAddress(obj)) {
+        return;
+    }
+
+    auto *region = RegionDesc::GetAliveRegionDescAt(obj);
 
     if (!InYoungCollectionSpace(obj)) {
         return;
@@ -1269,60 +1097,63 @@ void CmcGC<LanguageConfig>::MarkRef(RefField<> &ref, Stack &stack)
     }
 
     if (MarkObjectIfNotMarked(obj)) {
-        auto size = EnqueueRefsToYoungCollectionSpaceAndGetSize(obj, stack);
+        auto size = obj->ObjectSize();
+        EnqueueRefsToYoungCollectionSpace(obj, stack);
         region->AddLiveByteCount(size);
     }
 }
 
 template <class LanguageConfig>
-template <typename Stack>
-void CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpace(BaseObject *obj, Stack &stack)
+void CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpace(ObjectHeader *obj, CMCGCAdaptiveStack &stack)
 {
-    auto fieldHandler = [this, &stack](RefField<> &field) {
-        if (InYoungCollectionSpace(field.GetTargetObject())) {
-            stack.Push(&field);
+    class Handler final {
+    public:
+        explicit Handler(CMCGCAdaptiveStack &stack) : stack_(stack) {}
+
+        ~Handler() = default;
+
+        bool ProcessObjectPointer([[maybe_unused]] ObjectHeader *obj, ObjectPointerType *p)
+        {
+            auto ref = ReadRefSlot(p);
+            if (ref == 0) {
+                return true;
+            }
+            if (InYoungCollectionSpace(ref)) {
+                stack_.PushToStack(p);
+            }
+            return true;
         }
+
+    private:
+        CMCGCAdaptiveStack &stack_;
     };
 
-    obj->ForEachRefField(fieldHandler, fieldHandler);
+    auto *cls = obj->template ClassAddr<Class>();
+    Handler handler {stack};
+    mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, obj, &handler);
 }
 
 template <class LanguageConfig>
-template <typename Stack>
-size_t CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpaceAndGetSize(BaseObject *obj, Stack &stack)
-{
-    auto fieldHandler = [this, &stack](RefField<> &field) {
-        if (InYoungCollectionSpace(field.GetTargetObject())) {
-            stack.Push(&field);
-        }
-    };
-
-    auto sz = obj->GetSize();
-    obj->ForEachRefField(fieldHandler, fieldHandler);
-    return sz;
-}
-
-template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region) const
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region)
 {
     return InYoungCollectionSpace(region->GetRegionType());
 }
 
 template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc *region) const
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc *region)
 {
     return InYoungCollectionSpace(region->GetRegionType());
 }
 
 template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const BaseObject *obj) const
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const BaseObject *obj)
 {
     return Heap::IsHeapAddress(obj) &&
            InYoungCollectionSpace(RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj));
 }
 
 template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::InYoungCollectionSpace(RegionDesc::RegionType type) const
+bool CmcGC<LanguageConfig>::InYoungCollectionSpace(RegionDesc::RegionType type)
 {
     // During single pass evacuation in young GC objects might be concurrently evacuated by mutator. So we should
     // inspect references which point to them too.
@@ -1330,8 +1161,7 @@ bool CmcGC<LanguageConfig>::InYoungCollectionSpace(RegionDesc::RegionType type) 
 }
 
 template <class LanguageConfig>
-CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(STWParam &param,
-                                                                          const ark::mem::RefFieldVisitor &visitor)
+CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(STWParam &param, const GCRootVisitor &visitor)
 {
     ark::os::memory::Mutex stackMutex;
     CArrayList<CArrayList<BaseObject *>> rootSet;  // allcate for each mutator
@@ -1355,14 +1185,14 @@ CArrayList<CArrayList<BaseObject *>> CmcGC<LanguageConfig>::EnumRootsFlip(STWPar
 }
 
 template <class LanguageConfig>
-BaseObject *CmcGC<LanguageConfig>::ForwardObject(BaseObject *obj)
+ObjectHeader *CmcGC<LanguageConfig>::ForwardObject(ObjectHeader *obj)
 {
-    BaseObject *to = TryForwardObject(obj);
+    ObjectHeader *to = TryForwardObject(obj);
     return (to != nullptr) ? to : obj;
 }
 
 template <class LanguageConfig>
-BaseObject *CmcGC<LanguageConfig>::TryForwardObject(BaseObject *obj)
+BaseObject *CmcGC<LanguageConfig>::TryForwardObject(ObjectHeader *obj)
 {
     return static_cast<BaseObject *>(CopyObjectImpl(obj));
 }
@@ -1772,29 +1602,32 @@ void CmcGC<LanguageConfig>::HandleWeakReference(ObjectMarkerT *handler, BaseObje
 
 template <class LanguageConfig>
 template <bool HANDLE_WEAK_REFS>
-bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack, BaseObject *obj, GCTaskCause reason)
+bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack, ObjectHeader *obj, GCTaskCause reason)
 {
+    BaseObject *baseObj = static_cast<BaseObject *>(obj);
     RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
     if (reason == GCTaskCause::YOUNG_GC_CAUSE && !regionInfo->IsInYoungSpace()) {
-        LOG(DEBUG, GC) << "enum: skip old object " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ")";
+        LOG(DEBUG, GC) << "enum: skip old object " << obj << "<" << baseObj->GetTypeInfo() << ">(" << baseObj->GetSize()
+                       << ")";
         return false;
     }
 
     // inline MarkObject
-    bool marked = regionInfo->MarkObject(obj);
+    bool marked = regionInfo->MarkObject(baseObj);
     if (!marked) {
         DCHECK(!regionInfo->IsGarbageRegion());
-        LOG(DEBUG, GC) << "mark obj " << obj << "<" << obj->GetTypeInfo() << ">(" << obj->GetSize() << ") in region "
-                       << regionInfo << "(" << static_cast<size_t>(regionInfo->GetRegionType()) << ")@0x" << std::hex
-                       << regionInfo->GetRegionStart() << std::dec << ", live " << regionInfo->GetLiveByteCount();
+        LOG(DEBUG, GC) << "mark obj " << obj << "<" << baseObj->GetTypeInfo() << ">(" << baseObj->GetSize()
+                       << ") in region " << regionInfo << "(" << static_cast<size_t>(regionInfo->GetRegionType())
+                       << ")@0x" << std::hex << regionInfo->GetRegionStart() << std::dec << ", live "
+                       << regionInfo->GetLiveByteCount();
         if constexpr (HANDLE_WEAK_REFS) {
             ObjectMarker<false> marker(&collectStack, reason);
-            if (IsWeakReference(obj)) {
-                HandleWeakReference(&marker, obj);
+            if (IsWeakReference(baseObj)) {
+                HandleWeakReference(&marker, baseObj);
                 return true;
             }
         }
-        collectStack.Push(obj);
+        collectStack.Push(baseObj);
         return true;
     } else {
         return false;
@@ -1804,18 +1637,18 @@ bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack,
 template <class LanguageConfig>
 template <bool HANDLE_WEAK_REFS>
 void CmcGC<LanguageConfig>::PushRootsToWorkStack(LocalCollectStack &collectStack,
-                                                 const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
+                                                 const CArrayList<ObjectHeader *> &collectedRoots, GCTaskCause reason)
 {
     ScopedTrace tracer(("PushRootsToWorkStack_" + ToPandaString(collectedRoots.size())).c_str(),
                        ark::common_vm::ENABLE_GC_TRACING);
 
-    for (BaseObject *obj : collectedRoots) {
+    for (ObjectHeader *obj : collectedRoots) {
         PushRootToWorkStack<HANDLE_WEAK_REFS>(collectStack, obj, reason);
     }
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<BaseObject *> &collectedRoots, GCTaskCause reason)
+void CmcGC<LanguageConfig>::MarkingRoots(const CArrayList<ObjectHeader *> &collectedRoots, GCTaskCause reason)
 {
     ScopedTrace tracer("MarkingRoots", ark::common_vm::ENABLE_GC_TRACING);
 
@@ -2273,6 +2106,7 @@ void CmcGC<LanguageConfig>::InitializeImpl()
         allocator->New<GCCMCBarrierSet>(allocator, ark::helpers::math::GetIntLog2(ark::mem::RegionDesc::UNIT_SIZE));
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
+    this->CreateWorkersTaskPool();
     LOG(DEBUG, GC) << "CMC GC adapter initialized...";
 }
 
@@ -2365,14 +2199,13 @@ GCRootVisitor MakeCallback(const RefFieldVisitor &visitor)
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::VisitRoots(const RefFieldVisitor &visitor)
+void CmcGC<LanguageConfig>::VisitRoots(const GCRootVisitor &visitor)
 {
     auto *vm = PandaVM::GetCurrent();
     ASSERT(vm != nullptr);
     mem::RootManager<LanguageConfig> rootManager(vm);
 
-    const GCRootVisitor &callback = MakeCallback(visitor);
-    rootManager.VisitNonHeapRoots(callback);
+    rootManager.VisitNonHeapRoots(visitor);
 }
 
 template <class LanguageConfig>
@@ -2391,17 +2224,15 @@ void CmcGC<LanguageConfig>::VisitSTWRoots(const RefFieldVisitor &visitor)
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::VisitConcurrentRoots(const RefFieldVisitor &visitor)
+void CmcGC<LanguageConfig>::VisitConcurrentRoots(const GCRootVisitor &visitor)
 {
     auto *vm = PandaVM::GetCurrent();
     ASSERT(vm != nullptr);
     mem::RootManager<LanguageConfig> rootManager(vm);
 
-    const GCRootVisitor &callback = MakeCallback(visitor);
-
-    rootManager.VisitClassRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
-    rootManager.VisitClassLinkerContextRoots(callback);
-    vm->VisitStringTable(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitClassRoots(visitor, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitClassLinkerContextRoots(visitor);
+    vm->VisitStringTable(visitor, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
 }
 
 template <class LanguageConfig>
@@ -2422,15 +2253,14 @@ void CmcGC<LanguageConfig>::VisitWeakRoots(const WeakRefFieldVisitor &visitor)
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::VisitGlobalRoots(const RefFieldVisitor &visitor)
+void CmcGC<LanguageConfig>::VisitGlobalRoots(const GCRootVisitor &visitor)
 {
     auto *vm = PandaVM::GetCurrent();
     ASSERT(vm != nullptr);
     mem::RootManager<LanguageConfig> rootManager(vm);
 
-    const GCRootVisitor &callback = MakeCallback(visitor);
-    rootManager.VisitAotStringRoots(callback, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
-    rootManager.VisitVmRoots(callback);
+    rootManager.VisitAotStringRoots(visitor, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitVmRoots(visitor);
 }
 
 template <class LanguageConfig>
@@ -2448,6 +2278,28 @@ void CmcGC<LanguageConfig>::VisitWeakGlobalRoots(const WeakRefFieldVisitor &visi
         return (visitor(reinterpret_cast<ark::mem::RefField<> &>(*ref))) ? ObjectStatus::ALIVE_OBJECT
                                                                          : ObjectStatus::ALIVE_OBJECT;
     });
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unused]] void *workerData)
+{
+    common_vm::ScopedGcThreadType scopedGcThreadType;
+    auto *refStack = task->Cast<CMCGCWorkersTask>()->GetStack();
+    switch (task->GetType()) {
+        case GCWorkersTaskTypes::TASK_REMARK: {
+            MarkEvacuationStack(*refStack);
+            break;
+        }
+        case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS: {
+            ProcessEvacuationStack(*refStack);
+            break;
+        }
+        default:
+            LOG(FATAL, GC) << "Unimplemented for " << GCWorkersTaskTypesToString(task->GetType());
+            UNREACHABLE();
+    }
+    ASSERT(refStack->Empty());
+    this->GetInternalAllocator()->Delete(refStack);
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(CmcGC);
