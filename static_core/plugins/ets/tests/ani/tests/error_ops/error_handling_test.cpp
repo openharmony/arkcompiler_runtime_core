@@ -28,13 +28,6 @@ public:
     static const std::string NAMESPACE_DESCRIPTOR;
     static constexpr int32_t LOOP_COUNT = 3;
 
-    static std::string GetTraceLine(std::string_view functionName)
-    {
-        std::stringstream ss;
-        ss << "at error_handling_test." << NAMESPACE_NAME << '.' << functionName;
-        return ss.str();
-    }
-
 public:
     ani_function GetThrowErrorFunction()
     {
@@ -144,55 +137,49 @@ TEST_F(ErrorHandlingTest, throw_error_test)
     ASSERT_EQ(env_->c_api->ThrowError(nullptr, error), ANI_INVALID_ARGS);
 }
 
-static size_t CountSubstr(const std::string &str, const std::string &substr)
+static std::string GetErrorProperty(ani_env *aniEnv, ani_error aniError, const char *property)
 {
-    if (substr.empty()) {
-        return 0;
+    std::string propertyValue;
+    ani_type errorType = nullptr;
+    if ((aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
+        return propertyValue;
     }
-    size_t count = 0;
-    size_t pos = str.find(substr);
-    while (pos != std::string::npos) {
-        ++count;
-        pos = str.find(substr, pos + substr.length());
+    ani_method getterMethod = nullptr;
+    if ((aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
+        return propertyValue;
     }
-    return count;
+    ani_ref aniRef = nullptr;
+    if ((aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+        return propertyValue;
+    }
+    auto aniString = reinterpret_cast<ani_string>(aniRef);
+    ani_size sz {};
+    if ((aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        return propertyValue;
+    }
+    propertyValue.resize(sz + 1);
+    if ((aniEnv->String_GetUTF8SubString(aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz)) !=
+        ANI_OK) {
+        return propertyValue;
+    }
+    propertyValue.resize(sz);
+    return propertyValue;
 }
 
-static void GetErrorDescription(ani_env *env, std::string &output)
+static void CheckOrderedSubstrings(const std::string &str, const std::vector<std::string> &substrings)
 {
-    std::ostringstream buffer;
-
-    std::streambuf *oldStderr = std::cerr.rdbuf(buffer.rdbuf());
-    ani_status status = env->DescribeError();
-    std::cerr.rdbuf(oldStderr);
-
-    ASSERT_EQ(status, ANI_OK);
-    output = buffer.str();
+    size_t pos = 0;
+    for (const auto &substring : substrings) {
+        pos = str.find(substring, pos);
+        ASSERT_NE(pos, std::string::npos) << "not found in string: " << substring;
+        pos += substring.length();
+    }
 }
 
-static void CheckErrorDescription(const std::string &errorDescription, const std::string &errorMessage,
-                                  const std::vector<std::string> &stackTrace)
+static void TestDescribeError(ani_env *env, ani_function func, ani_int arg, ani_error *error)
 {
-    std::vector<size_t> stackTraceIndexes;
-    stackTraceIndexes.reserve(stackTrace.size() + 1);
-    stackTraceIndexes.push_back(errorDescription.find(errorMessage));
-    for (const auto &traceLine : stackTrace) {
-        stackTraceIndexes.push_back(errorDescription.find(traceLine, stackTraceIndexes.back() + 1));
-    }
+    ASSERT_NE(error, nullptr);
 
-    for (size_t i = 0; i < stackTraceIndexes.size(); ++i) {
-        ASSERT_NE(stackTraceIndexes[i], std::string::npos)
-            << "not found in error message: " << ((i == 0) ? errorMessage : stackTrace[i - 1]);
-    }
-    for (size_t i = 0; i < stackTraceIndexes.size() - 1; ++i) {
-        ASSERT_LT(stackTraceIndexes[i], stackTraceIndexes[i + 1]) << "wrong order at line " << i;
-    }
-    std::string stackTracePrefix = "at ";
-    ASSERT_EQ(CountSubstr(errorDescription, stackTracePrefix), stackTrace.size());
-}
-
-static void TestDescribeError(ani_env *env, ani_function func, ani_int arg, std::string &output)
-{
     ani_boolean errorExists = ANI_FALSE;
     ASSERT_EQ(env->ExistUnhandledError(&errorExists), ANI_OK);
     ASSERT_EQ(errorExists, ANI_FALSE);
@@ -201,33 +188,36 @@ static void TestDescribeError(ani_env *env, ani_function func, ani_int arg, std:
     ASSERT_EQ(env->ExistUnhandledError(&errorExists), ANI_OK);
     ASSERT_EQ(errorExists, ANI_TRUE);
 
-    GetErrorDescription(env, output);
+    ASSERT_EQ(env->GetUnhandledError(error), ANI_OK);
+    ASSERT_NE(*error, nullptr);
+
+    ASSERT_EQ(env->DescribeError(), ANI_OK);
 
     // Check that error still exists
     ASSERT_EQ(env->ExistUnhandledError(&errorExists), ANI_OK);
     ASSERT_EQ(errorExists, ANI_TRUE);
+
+    ASSERT_EQ(env->ResetError(), ANI_OK);
 }
 
 TEST_F(ErrorHandlingTest, describe_error_test_one_frame)
 {
     auto func = GetThrowErrorFunction();
 
-    std::string output;
-    TestDescribeError(env_, func, MAGIC_NUMBER, output);
-
-    CheckErrorDescription(output, std::string(MESSAGE_FROM_THROW_ERROR), {GetTraceLine("throwError")});
+    ani_error error {};
+    TestDescribeError(env_, func, MAGIC_NUMBER, &error);
+    ASSERT_EQ(GetErrorProperty(env_, error, "message"), std::string(MESSAGE_FROM_THROW_ERROR));
+    CheckOrderedSubstrings(GetErrorProperty(env_, error, "stack"), {"throwError"});
 }
 
 TEST_F(ErrorHandlingTest, describe_error_test_nested)
 {
     auto func = GetThrowErrorNested();
 
-    std::string output;
-    TestDescribeError(env_, func, MAGIC_NUMBER, output);
-
-    CheckErrorDescription(
-        output, std::string(MESSAGE_FROM_THROW_ERROR),
-        {GetTraceLine("throwError"), GetTraceLine("bar"), GetTraceLine("baz"), GetTraceLine("throwErrorNested")});
+    ani_error error {};
+    TestDescribeError(env_, func, MAGIC_NUMBER, &error);
+    ASSERT_EQ(GetErrorProperty(env_, error, "message"), std::string(MESSAGE_FROM_THROW_ERROR));
+    CheckOrderedSubstrings(GetErrorProperty(env_, error, "stack"), {"throwError", "bar", "baz", "throwErrorNested"});
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -266,12 +256,13 @@ TEST_F(ErrorHandlingTest, describe_error_thrown_through_native)
     ani_native_function fn {"callThroughNative", "i:i", reinterpret_cast<void *>(callThroughNative)};
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &fn, 1), ANI_OK);
 
-    std::string output;
-    TestDescribeError(env_, func, MAGIC_NUMBER, output);
+    ani_error error {};
+    TestDescribeError(env_, func, MAGIC_NUMBER, &error);
 
-    CheckErrorDescription(output, "Error",
-                          {GetTraceLine("throwToNativeCaller"), GetTraceLine("callThroughNative"),
-                           GetTraceLine("throwErrorThroughNative")});
+    ASSERT_EQ(GetErrorProperty(env_, error, "name"), "Error");
+    ASSERT_EQ(GetErrorProperty(env_, error, "message"), "");
+    CheckOrderedSubstrings(GetErrorProperty(env_, error, "stack"),
+                           {"throwToNativeCaller", "callThroughNative", "throwErrorThroughNative"});
 }
 
 TEST_F(ErrorHandlingTest, exist_invalid_args_test)
@@ -486,12 +477,14 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
     ASSERT_EQ(env_->GetUnhandledError(&thrownError), ANI_OK);
     ASSERT_NE(thrownError, nullptr);
 
-    std::string errorDescription {};
-    GetErrorDescription(env_, errorDescription);
-    CheckErrorDescription(errorDescription, std::string(MESSAGE_FROM_THROW_ERROR),
-                          {"at std.core.Error.<ctor>", "at std.core.Error.<ctor>"});
-
     ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+    ani_boolean isSameError = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_StrictEquals(errorObject, thrownError, &isSameError), ANI_OK);
+    ASSERT_EQ(isSameError, ANI_TRUE);
+    ASSERT_EQ(GetErrorProperty(env_, thrownError, "message"), std::string(MESSAGE_FROM_THROW_ERROR));
+    CheckOrderedSubstrings(GetErrorProperty(env_, thrownError, "stack"), {"<ctor>", "<ctor>"});
+
     ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);
     ASSERT_EQ(hasError, ANI_FALSE);
 }
@@ -621,35 +614,6 @@ TEST_F(ErrorHandlingTest, combined_scenes_test_3)
     ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
     ASSERT_EQ(env_->ThrowError(error), ANI_OK);
-}
-
-static std::string GetErrorProperty(ani_env *aniEnv, ani_error aniError, const char *property)
-{
-    std::string propertyValue;
-    ani_type errorType = nullptr;
-    if ((aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
-        return propertyValue;
-    }
-    ani_method getterMethod = nullptr;
-    if ((aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
-        return propertyValue;
-    }
-    ani_ref aniRef = nullptr;
-    if ((aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
-        return propertyValue;
-    }
-    auto aniString = reinterpret_cast<ani_string>(aniRef);
-    ani_size sz {};
-    if ((aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
-        return propertyValue;
-    }
-    propertyValue.resize(sz + 1);
-    if ((aniEnv->String_GetUTF8SubString(aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz)) !=
-        ANI_OK) {
-        return propertyValue;
-    }
-    propertyValue.resize(sz);
-    return propertyValue;
 }
 
 TEST_F(ErrorHandlingTest, call_error_stack)
