@@ -85,7 +85,8 @@ export class TypeConversionTraverser extends VisitorTraverser<PrevState, LocalSt
           this[FaultID.NoReservedKeywordAsIdentifier].bind(this),
           this[FaultID.NoETSKeyword].bind(this),
           this[FaultID.RemoveLimitDecorator].bind(this),
-          this[FaultID.NoOptionalMemberMethod].bind(this)
+          this[FaultID.NoOptionalMemberMethod].bind(this),
+          this[FaultID.ErrorTypeAlias].bind(this)
         ]
       ],
       [
@@ -250,6 +251,30 @@ export class TypeConversionTraverser extends VisitorTraverser<PrevState, LocalSt
       );
     }
     return node;
+  }
+
+  /**
+     * Rule: `arkts-convert-error-type-alias-to-error`
+     */
+  private [FaultID.ErrorTypeAlias](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isClassDeclaration(node) || !node.name) {
+      return node;
+    }
+
+    if (!isInheritingFromError(node, this.typeChecker)) {
+      return node;
+    }
+
+    const filteredModifiers = node.modifiers?.filter(
+      (mod) => ts.isModifier(mod) && mod.kind !== ts.SyntaxKind.DeclareKeyword
+    );
+
+    return this.context.factory.createTypeAliasDeclaration(
+      filteredModifiers as ts.NodeArray<ts.Modifier> | undefined,
+      node.name,
+      node.typeParameters,
+      this.context.factory.createTypeReferenceNode('Error')
+    );
   }
 
   /**
@@ -2158,4 +2183,72 @@ function isHeterogeneousEnum(node: ts.EnumDeclaration): boolean {
   }
 
   return false;
+}
+
+function isInheritingFromError(decl: ts.ClassDeclaration, typeChecker: ts.TypeChecker): boolean {
+  const visited = new Set<ts.Symbol>();
+  const type = typeChecker.getTypeAtLocation(decl);
+  return hasErrorInBaseTypes(type, typeChecker, visited) || implementsError(decl, typeChecker, visited);
+}
+
+function hasErrorInBaseTypes(type: ts.Type, typeChecker: ts.TypeChecker, visited: Set<ts.Symbol>): boolean {
+  const symbol = type.getSymbol();
+  if (!symbol || visited.has(symbol)) {
+    return false;
+  }
+  visited.add(symbol);
+
+  if (symbol.getName() === 'Error') {
+    return true;
+  }
+
+  if (type.isClassOrInterface()) {
+    for (const baseType of typeChecker.getBaseTypes(type)) {
+      if (hasErrorInBaseTypes(baseType, typeChecker, visited)) {
+        return true;
+      }
+    }
+  }
+
+  for (const decl of symbol.getDeclarations() ?? []) {
+    if (ts.isClassDeclaration(decl) && implementsError(decl, typeChecker, visited)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function implementsError(decl: ts.ClassDeclaration, typeChecker: ts.TypeChecker, visited: Set<ts.Symbol>): boolean {
+  if (!decl.heritageClauses) {
+    return false;
+  }
+  return decl.heritageClauses.some(implementsClauseInheritsError(typeChecker, visited));
+}
+
+function implementsClauseInheritsError(
+  typeChecker: ts.TypeChecker,
+  visited: Set<ts.Symbol>
+): (clause: ts.HeritageClause) => boolean {
+  return (clause) =>
+    clause.token === ts.SyntaxKind.ImplementsKeyword && clause.types.some((t) => implementsTypeError(t, typeChecker, visited));
+}
+
+function implementsTypeError(
+  typeExpr: ts.ExpressionWithTypeArguments,
+  typeChecker: ts.TypeChecker,
+  visited: Set<ts.Symbol>
+): boolean {
+  const symbol = typeChecker.getSymbolAtLocation(typeExpr.expression);
+  if (!symbol) {
+    return false;
+  }
+  const resolved = (symbol.flags & ts.SymbolFlags.Alias) ? typeChecker.getAliasedSymbol(symbol) : symbol;
+  if (visited.has(resolved)) {
+    return false;
+  }
+  if (resolved.getName() === 'Error') {
+    return true;
+  }
+  return hasErrorInBaseTypes(typeChecker.getDeclaredTypeOfSymbol(resolved), typeChecker, visited);
 }
