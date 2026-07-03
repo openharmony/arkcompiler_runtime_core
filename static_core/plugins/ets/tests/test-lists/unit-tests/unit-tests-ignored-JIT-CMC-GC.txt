@@ -4,3 +4,6 @@ ets-common-tests/taskpool/concurrent_container_set_tasks.ets
 
 #34838
 ets-common-tests/intrinsics/to_string_cache.ets
+
+#35584
+ets-common-tests/taskpool/common_tasks_new.ets
