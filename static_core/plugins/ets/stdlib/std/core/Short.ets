@@ -292,7 +292,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public toString(radix: int): string {
-        return (new Long(this.value)).toString(radix);
+        return toStrHelper(this.value, radix)
     }
 
     /**
@@ -325,7 +325,7 @@ export final class Short extends Integral implements Comparable<Short> {
             return false
         }
 
-        return this.value == (other as Short).value
+        return this.value == other.value
     }
 
     /**
@@ -371,7 +371,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public add(other: Short): Short {
-        return new Short((this.value + other.toShort()).toShort())
+        return (this.value + other).toShort()
     }
 
     /**
@@ -383,7 +383,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public sub(other: Short): Short {
-        return new Short((this.value - other.toShort()).toShort())
+        return (this.value - other).toShort()
     }
 
     /**
@@ -395,7 +395,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public mul(other: Short): Short {
-        return new Short((this.value * other.toShort()).toShort())
+        return (this.value * other).toShort()
     }
 
     /**
@@ -407,7 +407,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public div(other: Short): Short {
-        return new Short((this.value / other.toShort()).toShort())
+        return (this.value / other).toShort()
     }
 
     /**
@@ -419,7 +419,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public isLessThan(other: Short): boolean {
-        return this.value < other.toShort();
+        return this.value < other
     }
 
     /**
@@ -431,7 +431,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public isLessEqualThan(other: Short): boolean {
-        return this.value <= other.toShort();
+        return this.value <= other
     }
 
     /**
@@ -443,7 +443,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public isGreaterThan(other: Short): boolean {
-        return this.value > other.toShort();
+        return this.value > other
     }
 
     /**
@@ -455,7 +455,7 @@ export final class Short extends Integral implements Comparable<Short> {
      * @FaAndStageModel
      */
     public isGreaterEqualThan(other: Short): boolean {
-        return this.value >= other.toShort();
+        return this.value >= other
     }
 
     /**

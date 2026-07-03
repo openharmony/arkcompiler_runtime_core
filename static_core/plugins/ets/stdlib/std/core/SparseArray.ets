@@ -652,7 +652,7 @@ export final class SparseArray<T> implements Iterable<T> {
         if (this.maxLength == 0) {
             return ""
         }
-        const sepStr: String = sep === undefined ? "," : sep!
+        const sepStr: String = sep === undefined ? "," : sep
         let objArray: boolean = false;
         for (let i: int = 0; i < this.maxLength; i++) {
             if (this.buffer.has(i) && !this.isPrimitive(this.buffer.get(i) as T)) {
@@ -696,7 +696,7 @@ export final class SparseArray<T> implements Iterable<T> {
             return
         }
         visited.add(arr)
-        const sepReal = sep === undefined ? ',' : sep!
+        const sepReal = sep === undefined ? ',' : sep
         if (arr.buffer.has(0)) {
             const first_el = arr[0]
             if (first_el instanceof SparseArray) {

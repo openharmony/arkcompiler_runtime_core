@@ -129,7 +129,7 @@ function ecmaDaysInYear(year: int): int {
  * @returns Year, corresponding to the given time.
  */
 function ecmaYearFromTime(time: long): int {
-    let approx: int = (floor(time / msPerDay / 365.2425)).toInt() + 1970 as int;
+    let approx: int = (floor(time / msPerDay / 365.2425)).toInt() + 1970;
     let yearMs: long = ecmaDayFromYear(approx) * msPerDay;
 
     if (yearMs > time) {
@@ -328,14 +328,14 @@ function ecmaMakeFullYear(year: double): long {
  * @returns Elapsed number of days since Unix Epoch.
  */
 function ecmaMakeDay(year: long, month: long, date: long): long {
-    let ym = (year + floor(month.toDouble() / 12.0 as double)).toInt();
+    let ym = (year + floor(month.toDouble() / 12.0)).toInt();
     let mn = (month % 12).toByte();
 
     if (mn < 0) {
         mn += 12;
     }
 
-    let days: long = ecmaDayFromYear(ym).toLong() + (getFirstDayInMonth(ecmaInLeapYear(ym), mn)).toLong() + (date as long) - 1;
+    let days: long = ecmaDayFromYear(ym).toLong() + (getFirstDayInMonth(ecmaInLeapYear(ym), mn)).toLong() + date - 1;
 
     return days;
 }
@@ -408,7 +408,7 @@ function ecmaDayFromYear(year: int): int {
  * @see ECMA-262, 21.4.1.3, DayFromYear
  */
 function ecmaTimeFromYear(year: int): long {
-    return msPerDay as long * ecmaDayFromYear(year) as long;
+    return msPerDay * ecmaDayFromYear(year) as long;
 }
 
 /**
@@ -734,7 +734,7 @@ export class Date {
             throw new TypeError("Invalid option : dateStyle")
         }
 
-        const effectiveOptions = !options ? Date.TIME_FORMAT_OPTIONS : this.appendDefaultTimeOptions(options!)
+        const effectiveOptions = !options ? Date.TIME_FORMAT_OPTIONS : this.appendDefaultTimeOptions(options)
         return new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), effectiveOptions).format(this.getTime())
     }
 
@@ -789,10 +789,10 @@ export class Date {
     public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
         let options_: Intl.DateTimeFormatOptions | undefined = undefined
         if (options instanceof Intl.DateTimeFormatOptions) {
-            options_ = options as Intl.DateTimeFormatOptions
+            options_ = options
         }
         
-        const effectiveOptions = !options_ ? Date.DATE_TIME_FORMAT_OPTIONS : this.appendDefaultDateTimeOptions(options_!)
+        const effectiveOptions = !options_ ? Date.DATE_TIME_FORMAT_OPTIONS : this.appendDefaultDateTimeOptions(options_)
         const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), effectiveOptions)
         return formatter.format(this.getTime())
     }
@@ -860,11 +860,7 @@ export class Date {
      */
     public getDate(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        let year = ecmaYearFromTime(localTime);
-        let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(year);
-        let inLeapYear = ecmaInLeapYear(year);
-        let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return day - firstDay + 1;
+        return ecmaDateFromTime(localTime);
     }
 
     /**
@@ -890,11 +886,7 @@ export class Date {
      * @FaAndStageModel
      */
     public getUTCDate(): int {
-        let localTime = this.ms;
-        let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getUTCFullYear());
-        let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return day - firstDay + 1;
+        return ecmaDateFromTime(this.ms);
     }
 
     /**
@@ -1142,8 +1134,9 @@ export class Date {
      * @FaAndStageModel
      */
     public setHours(value: int, min: int): long {
-        this.setHours(value);
-        this.setMinutes(min);
+        let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
+        this.ms += msPerHour * (value - ecmaHourFromTime(localTime));
+        this.ms += msPerMinute * (min - ecmaMinFromTime(localTime));
         return this.ms;
     }
 
@@ -1158,9 +1151,10 @@ export class Date {
      * @FaAndStageModel
      */
     public setHours(value: int, min: int, sec: int): long {
-        this.setHours(value);
-        this.setMinutes(min);
-        this.setSeconds(sec);
+        let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
+        this.ms += msPerHour * (value - ecmaHourFromTime(localTime));
+        this.ms += msPerMinute * (min - ecmaMinFromTime(localTime));
+        this.ms += msPerSecond * (sec - ecmaSecFromTime(localTime));
         return this.ms;
     }
 
@@ -1176,10 +1170,11 @@ export class Date {
      * @FaAndStageModel
      */
     public setHours(value: int, min: int, sec: int, ms: int): long {
-        this.setHours(value);
-        this.setMinutes(min);
-        this.setSeconds(sec);
-        this.setMilliseconds(ms);
+        let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
+        this.ms += msPerHour * (value - ecmaHourFromTime(localTime));
+        this.ms += msPerMinute * (min - ecmaMinFromTime(localTime));
+        this.ms += msPerSecond * (sec - ecmaSecFromTime(localTime));
+        this.ms += ms - ecmaMsFromTime(localTime);
         return this.ms;
     }
 
@@ -1824,7 +1819,7 @@ export class Date {
         // sb.append(ms / 100);
         // sb.append((ms / 10) % 10);
         // sb.append(ms % 10);
-        sb.append(trunc(ms))
+        sb.append(ms)
         sb.append("Z");
         return sb.toString();
     }
@@ -2171,13 +2166,9 @@ class ISODateParser {
 
     private parseTimeZoneOffset(): long {
         const tzOffsetHour = this.parseInt(HOUR_COMPONENT_LENGTH)
-        if (this.match(TIME_COMPONENTS_SEPARATOR)) {
-            const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
-            return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
-        } else {
-            const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
-            return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
-         }
+        this.match(TIME_COMPONENTS_SEPARATOR)
+        const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
+        return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
     }
 
     private parseInt(length: int): int {

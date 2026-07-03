@@ -16,7 +16,6 @@
 #include <array>
 #include <cstring>
 #include <optional>
-#include <regex>
 #include <vector>
 
 #include "unicode/locid.h"
@@ -54,7 +53,6 @@ constexpr const char *STYLE_LONG = "long";
 constexpr const char *STYLE_MEDIUM = "medium";
 constexpr const char *STYLE_SHORT = "short";
 
-constexpr const char *ERROR_CTOR_SIGNATURE = ark::ets::stdlib::ERROR_CTOR_SIGNATURE;
 constexpr const char *DTF_PART_IMPL_CTOR_SIGNATURE = "C{std.core.String}C{std.core.String}:";
 constexpr const char *DTRF_PART_IMPL_CTOR_SIGNATURE = "C{std.core.String}C{std.core.String}C{std.core.String}:";
 constexpr const char *RESOLVED_OPTS_CTOR_SIGNATURE =
@@ -96,7 +94,8 @@ static void ThrowRangeError(ani_env *env, const std::string &message)
     ani_class errorClass = nullptr;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.RangeError", &errorClass));
 
-    [[maybe_unused]] ani_status status = ThrowNewError(env, errorClass, message, ERROR_CTOR_SIGNATURE);
+    [[maybe_unused]] ani_status status =
+        ThrowNewError(env, errorClass, message, ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 static std::nullptr_t ThrowInternalError(ani_env *env, const std::string &message)
@@ -104,7 +103,8 @@ static std::nullptr_t ThrowInternalError(ani_env *env, const std::string &messag
     ani_class errorClass = nullptr;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.InternalError", &errorClass));
 
-    [[maybe_unused]] ani_status status = ThrowNewError(env, errorClass, message, ERROR_CTOR_SIGNATURE);
+    [[maybe_unused]] ani_status status =
+        ThrowNewError(env, errorClass, message, ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     return nullptr;
 }
 
@@ -173,7 +173,8 @@ static std::unique_ptr<icu::UnicodeString> UnicodeStringFromAniString(ani_env *e
     return std::make_unique<icu::UnicodeString>(strBuf.data(), strSize);
 }
 
-static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateFormat, ani_object options)
+template <typename FormatType>
+static ani_status SetTimeZoneFromOptions(ani_env *env, FormatType *format, ani_object options)
 {
     ani_ref timeZoneRef = nullptr;
     ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone_", &timeZoneRef));
@@ -193,41 +194,42 @@ static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateForma
         return ANI_PENDING_ERROR;
     }
 
-    dateFormat->adoptTimeZone(formatTimeZone.release());
-
+    format->adoptTimeZone(formatTimeZone.release());
     return ANI_OK;
 }
 
-static ani_string GetLocaleHourCycle(ani_env *env, ani_object self)
+static bool LookupHourCycleFromCache(const std::string &localeStr, std::string &out)
 {
-    ani_ref localeRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "locale", &localeRef));
-    std::string localeStr = ConvertFromAniString(env, static_cast<ani_string>(localeRef));
-    {
-        os::memory::LockHolder lh(g_intlState->hourCycleMutex);
-        auto it = g_intlState->hourCycleCache.find(localeStr);
-        if (it != g_intlState->hourCycleCache.end()) {
-            const std::string &cachedHourCycle = it->second;
-            return CreateUtf8String(env, cachedHourCycle.c_str(), cachedHourCycle.length());
-        }
+    os::memory::LockHolder lh(g_intlState->hourCycleMutex);
+    auto it = g_intlState->hourCycleCache.find(localeStr);
+    if (it != g_intlState->hourCycleCache.end()) {
+        out = it->second;
+        return true;
     }
+    return false;
+}
 
-    std::unique_ptr<icu::Locale> icuLocale = ToICULocale(env, self);
-    if (!icuLocale) {
-        return nullptr;
+static bool ResolveHourCycleFromICU(ani_env *env, const std::string &localeStr, std::string &out)
+{
+    UErrorCode localeStatus = U_ZERO_ERROR;
+    icu::Locale icuLocale = icu::Locale::forLanguageTag(localeStr, localeStatus);
+    if (U_FAILURE(localeStatus) != 0) {
+        ThrowInternalError(env, "Failed to create locale for hour cycle resolution");
+        return false;
     }
 
     UErrorCode icuStatus = U_ZERO_ERROR;
     std::unique_ptr<icu::DateTimePatternGenerator> hourCycleResolver(
-        icu::DateTimePatternGenerator::createInstance(*icuLocale, icuStatus));
-
+        icu::DateTimePatternGenerator::createInstance(icuLocale, icuStatus));
     if (U_FAILURE(icuStatus) == TRUE) {
-        return ThrowInternalError(env, "Locale hour cycle resolver instance creation failed");
+        ThrowInternalError(env, "Locale hour cycle resolver instance creation failed");
+        return false;
     }
 
     UDateFormatHourCycle localeHourCycle = hourCycleResolver->getDefaultHourCycle(icuStatus);
     if (U_FAILURE(icuStatus) == TRUE) {
-        return ThrowInternalError(env, "Failed to resolve locale hour cycle");
+        ThrowInternalError(env, "Failed to resolve locale hour cycle");
+        return false;
     }
 
     const char *resolvedHourCycle = nullptr;
@@ -247,7 +249,28 @@ static ani_string GetLocaleHourCycle(ani_env *env, ani_object self)
     }
 
     if (resolvedHourCycle == nullptr) {
-        return ThrowInternalError(env, "Failed to resolve locale hour cycle");
+        ThrowInternalError(env, "Failed to resolve locale hour cycle");
+        return false;
+    }
+
+    out = resolvedHourCycle;
+    return true;
+}
+
+static ani_string GetLocaleHourCycle(ani_env *env, ani_object self)
+{
+    ani_ref localeRef = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "locale", &localeRef));
+    std::string localeStr = ConvertFromAniString(env, static_cast<ani_string>(localeRef));
+
+    std::string cachedHourCycle;
+    if (LookupHourCycleFromCache(localeStr, cachedHourCycle)) {
+        return CreateUtf8String(env, cachedHourCycle.c_str(), cachedHourCycle.length());
+    }
+
+    std::string resolvedHourCycle;
+    if (!ResolveHourCycleFromICU(env, localeStr, resolvedHourCycle)) {
+        return nullptr;
     }
 
     {
@@ -255,7 +278,7 @@ static ani_string GetLocaleHourCycle(ani_env *env, ani_object self)
         g_intlState->hourCycleCache[localeStr] = resolvedHourCycle;
     }
 
-    return CreateUtf8String(env, resolvedHourCycle, strlen(resolvedHourCycle));
+    return CreateUtf8String(env, resolvedHourCycle.c_str(), resolvedHourCycle.length());
 }
 
 static std::unique_ptr<icu::DateFormat> CreateSkeletonBasedDateFormat(ani_env *env, const icu::Locale &locale,
@@ -608,7 +631,7 @@ std::unique_ptr<icu::DateFormat> CreateICUDateFormat(ani_env *env, ani_object se
         return nullptr;
     }
 
-    aniStatus = DateFormatSetTimeZone(env, icuDateFormat.get(), options);
+    aniStatus = SetTimeZoneFromOptions(env, icuDateFormat.get(), options);
     if (aniStatus != ANI_OK) {
         if (aniStatus != ANI_PENDING_ERROR) {
             ThrowInternalError(env, "DateFormat time zone initialization failed");
@@ -751,7 +774,12 @@ static std::optional<ResolvedOptionsValues> ExtractResolvedOptionsValues(ani_env
     }
     ani_string langTag = CreateUtf8String(env, langTagStr.data(), langTagStr.size());
 
-    std::string icuCalendar = dateFormatImpl->getCalendar()->getType();
+    auto *calendar = dateFormatImpl->getCalendar();
+    if (calendar == nullptr) {
+        ThrowInternalError(env, "Failed to get calendar from DateFormat");
+        return std::nullopt;
+    }
+    std::string icuCalendar = calendar->getType();
     ani_string calendarStr = CreateUtf8String(env, icuCalendar.c_str(), icuCalendar.length());
     if (icuCalendar == "gregorian") {
         calendarStr = CreateUtf8String(env, "gregory", strlen("gregory"));
@@ -865,30 +893,6 @@ static ani_status FillDateTimeRangeFormatPartArray(ani_env *env, ani_array parts
     return ANI_OK;
 }
 
-static ani_status DateIntervalFormatSetTimeZone(ani_env *env, icu::DateIntervalFormat *format, ani_object options)
-{
-    ani_ref timeZoneRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone_", &timeZoneRef));
-
-    auto timeZone = static_cast<ani_string>(timeZoneRef);
-    std::unique_ptr<icu::UnicodeString> timeZoneId = UnicodeStringFromAniString(env, timeZone);
-    if (!timeZoneId) {
-        return ANI_OK;
-    }
-
-    std::unique_ptr<icu::TimeZone> formatTimeZone(icu::TimeZone::createTimeZone(*timeZoneId));
-    if (*formatTimeZone == icu::TimeZone::getUnknown()) {
-        std::string invalidTimeZoneId;
-        timeZoneId->toUTF8String(invalidTimeZoneId);
-
-        ThrowRangeError(env, "Invalid time zone specified: " + invalidTimeZoneId);
-        return ANI_PENDING_ERROR;
-    }
-    format->adoptTimeZone(formatTimeZone.release());
-
-    return ANI_OK;
-}
-
 static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *env, ani_object self, ani_double start,
                                                                       ani_double end, const std::string &cacheKey)
 {
@@ -916,7 +920,10 @@ static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *e
     }
 
     ani_object options = DateTimeFormatGetOptions(env, self);
-    DateIntervalFormatSetTimeZone(env, intervalFmt.get(), options);
+    ani_status tzStatus = SetTimeZoneFromOptions(env, intervalFmt.get(), options);
+    if (tzStatus != ANI_OK) {
+        return nullptr;
+    }
 
     auto interval = std::make_unique<icu::DateInterval>(start, end);
 

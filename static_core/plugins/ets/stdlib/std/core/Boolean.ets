@@ -285,7 +285,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
             return false
         }
 
-        return this.value == (other as Boolean).value
+        return this.value == other.value
     }
 
     /**

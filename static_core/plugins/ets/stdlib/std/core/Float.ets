@@ -326,7 +326,7 @@ export final class Float extends Floating implements Comparable<Float> {
             return false
         }
 
-        return this.value == (other as Float).value
+        return this.value == other.value
     }
 
     /**
@@ -419,7 +419,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the addition
      */
     public add(other: Float): Float {
-        return new Float((this.value + other.toFloat()) as float)
+        return new Float((this.value + other.toFloat()))
     }
 
     /**
@@ -430,7 +430,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the subtraction
      */
     public sub(other: Float): Float {
-        return new Float((this.value - other.toFloat()) as float)
+        return new Float((this.value - other.toFloat()))
     }
 
     /**
@@ -441,7 +441,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the multiplication
      */
     public mul(other: Float): Float {
-        return new Float((this.value * other.toFloat()) as float)
+        return new Float((this.value * other.toFloat()))
     }
 
     /**
@@ -452,7 +452,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns Result of the division
      */
     public div(other: Float): Float {
-        return new Float((this.value / other.toFloat()) as float)
+        return new Float((this.value / other.toFloat()))
     }
 
     /**

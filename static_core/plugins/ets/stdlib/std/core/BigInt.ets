@@ -315,8 +315,8 @@ export final class BigInt {
     constructor(d: string) {
         let trimmed = d.trim()
         let a = BigInt.parseFromString(trimmed)
-        this.bytes = a[0] as ValueArray<int>
-        this.sign = a[1] as int
+        this.bytes = a[0]
+        this.sign = a[1]
     }
 
     /**
@@ -420,7 +420,7 @@ export final class BigInt {
             return false
         }
 
-        return this.equals(other as BigInt)
+        return this.equals(other)
     }
 
     /**
@@ -559,7 +559,7 @@ export final class BigInt {
         }
         let fastToStringHandler = BigInt.FAST_TO_STRING_HANDLER_MAP[radix]
         if (fastToStringHandler != undefined) {
-            return fastToStringHandler!(this)
+            return fastToStringHandler(this)
         }
         return this.addSignToString(this.toStringAsGenericRadix(radix))
     }
@@ -606,7 +606,7 @@ export final class BigInt {
     private toStringAsUnsignedBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
-        const str = (i: int) => { return intToBinaryString((reversedInts[i]!).toLong() & BigInt.maskSys) }
+        const str = (i: int) => { return intToBinaryString(reversedInts[i].toLong() & BigInt.maskSys) }
         let result = new StringBuilder(str(0))
         for (let i = 1; i < reversedInts.length; ++i) {
             result = result.append(str(i).padStart(BigInt.shiftSys.toInt(), '0'))
@@ -671,7 +671,7 @@ export final class BigInt {
         let result = new StringBuilder
         let bitChunks = this.sliceToBinaryChunks(chunkSize)
         for (let bitChunk of bitChunks) {
-            result = result.append(parseInt(bitChunk!, 2).toString(radix))
+            result = result.append(parseInt(bitChunk, 2).toString(radix))
         }
         return this.addSignToString(result.toString())
     }
@@ -793,7 +793,7 @@ export final class BigInt {
     }
 
     private length(): int {
-        return this.bytes.length as int
+        return this.bytes.length
     }
 
     private isZero(): boolean {
@@ -832,7 +832,7 @@ export final class BigInt {
      * @FaAndStageModel
      */
     public operatorAdd(other: BigInt): BigInt {
-        let max_len = max(this.length(), other.length()) as int + 1
+        let max_len = max(this.length(), other.length()) + 1
         let lhs: ValueArray<int> = this.bytes
         let rhs: ValueArray<int> = other.bytes
 
@@ -1014,15 +1014,15 @@ export final class BigInt {
             ret = this.getNearestDivider(div, divisor)
             res[position++] = ret[0].toInt()
             if (idx >= 0) {
-                let size = (ret[1] as BigInt).bytes.length + 1
+                let size = ret[1].bytes.length + 1
                 bytes = new ValueArray<int>(size)
                 bytes[0] = this.bytes[idx]
-                for (let i=0; i < (ret[1] as BigInt).bytes.length; i++) {
-                    bytes[i + 1] = (ret[1] as BigInt).bytes[i]
+                for (let i=0; i < ret[1].bytes.length; i++) {
+                    bytes[i + 1] = ret[1].bytes[i]
                 }
                 div = new BigInt(bytes, 1)
             } else {
-               div = ret[1] as BigInt
+               div = ret[1]
             }
         } while(idx-- >= 0)
 
@@ -1283,7 +1283,7 @@ export final class BigInt {
         for (let i: long = 0; i < limit; i++) {
 
             let first: long = this.negative() ? 1 : 0
-            for (let j: int = (lhs.length as int) - 1; j>=0; j--) {
+            for (let j: int = lhs.length - 1; j>=0; j--) {
 
                 let a: long = lhs[j].toLong() & BigInt.maskSys
                 last = a & 0x1
@@ -1479,7 +1479,7 @@ export final class BigInt {
         }
         for (let i = 0; i < rbytes.length; i++) {
             digits = BigInt.multiplyDigits(digits, mask)
-            let b = ((rbytes[i].toLong() & BigInt.maskSys) as Long).toString()
+            let b = (rbytes[i].toLong() & BigInt.maskSys).toString()
             let temp: ValueArray<int> = new ValueArray<int>(b.length.toInt())
             for (let j = 0; j < b.length; j++) {
                 temp[j] = b.charAt(j).toInt() - c'0'.toInt();
@@ -1756,8 +1756,8 @@ export final class BigInt {
             return r
         }
 
-        let len1: int = lhs.length as int
-        let len2: int = rhs.length as int
+        let len1: int = lhs.length
+        let len2: int = rhs.length
         let product: ValueArray<int> = new ValueArray<int>(len1 + len2)
         BigInt.resetBytes(product)
 
@@ -1815,7 +1815,7 @@ export final class BigInt {
     }
 
     private static addDigits(lhs: ValueArray<int>, rhs: ValueArray<int>): ValueArray<int> {
-        let max_len = max(lhs.length, rhs.length) as int
+        let max_len = max(lhs.length, rhs.length)
         let result: ValueArray<int> = new ValueArray<int>(max_len)
 
         let carry: int = 0
@@ -1824,7 +1824,7 @@ export final class BigInt {
             let r: int = i < rhs.length ? rhs[rhs.length - i - 1] : 0
             let sum: int = l + r + carry
             carry = sum / 10
-            result[result.length - i - 1] = ((sum % 10) as int)
+            result[result.length - i - 1] = (sum % 10)
         }
 
         if (carry > 0) {
@@ -1966,13 +1966,13 @@ export final class BigInt {
      */
     static $_invoke(value: BigInt | Double | String | Boolean): BigInt {
         if (value instanceof BigInt) {
-            return new BigInt(value as BigInt)
+            return new BigInt(value)
         } else if (value instanceof Double) {
-            return new BigInt(value as Double)
+            return new BigInt(value)
         } else if (value instanceof String) {
-            return new BigInt(value as String)
+            return new BigInt(value)
         } else if (value instanceof Boolean) {
-            return new BigInt(value as Boolean)
+            return new BigInt(value)
         }
         return new BigInt(0)
     }
@@ -2015,7 +2015,7 @@ export final class BigInt {
         }
 
         // mantissaNum is integer <= 2^53-1
-        let result = new BigInt(mantissaNum as double);
+        let result = new BigInt(mantissaNum);
         if (exponent > 0) {
             result = result.operatorLeftShift(new BigInt(exponent));
         } else if (exponent < 0) {

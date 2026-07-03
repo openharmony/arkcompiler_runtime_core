@@ -299,7 +299,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public toString(radix: int): string {
-        return (new Long(this.value)).toString(radix);
+        return toStrHelper(this.value, radix);
     }
 
     /**
@@ -334,7 +334,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
             return false
         }
 
-        return this.value == (other as Byte).value
+        return this.value == other.value
     }
 
     /**
@@ -380,7 +380,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public add(other: Byte): Byte {
-        return (this.value + other.toByte()).toByte()
+        return (this.value + other).toByte()
     }
 
     /**
@@ -392,7 +392,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public sub(other: Byte): Byte {
-        return (this.value - other.toByte()).toByte()
+        return (this.value - other).toByte()
     }
 
     /**
@@ -404,7 +404,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public mul(other: Byte): Byte {
-        return (this.value * other.toByte()).toByte()
+        return (this.value * other).toByte()
     }
 
     /**
@@ -416,7 +416,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public div(other: Byte): Byte {
-        return (this.value / other.toByte()).toByte()
+        return (this.value / other).toByte()
     }
 
     /**
@@ -428,7 +428,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public isLessThan(other: Byte): boolean {
-        return this.value < other.toByte();
+        return this.value < other
     }
 
     /**
@@ -440,7 +440,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public isLessEqualThan(other: Byte): boolean {
-        return this.value <= other.toByte();
+        return this.value <= other
     }
 
     /**
@@ -452,7 +452,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public isGreaterThan(other: Byte): boolean {
-        return this.value > other.toByte();
+        return this.value > other
     }
 
     /**
@@ -464,7 +464,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @FaAndStageModel
      */
     public isGreaterEqualThan(other: Byte): boolean {
-        return this.value >= other.toByte();
+        return this.value >= other
     }
 
     /**

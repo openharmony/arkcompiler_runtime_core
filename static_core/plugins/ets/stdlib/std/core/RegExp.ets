@@ -296,20 +296,17 @@ export class RegExpMatchArray extends RegExpResultArray {
      * Parses raw group keys and values to groups
      */
     protected override updateGroups(): void {
+        if (!this.hasInput_) {
+            return
+        }
+
         const keys = this.groupKeysRaw_
         if (keys == null || keys.length == 0) {
             this.groups = undefined
             return
         }
         const vals = this.groupValsRaw_
-        if (vals == null || vals.length != keys.length * 2) {
-            throw new Error("internal error: invalid group data")
-        }
         let result = new RegExpGroupsContainer()
-
-        if (!this.hasInput_) {
-            return
-        }
 
         for (let i: int = 0; i < keys.length; ++i) {
             const index: int = vals[i * 2]
@@ -419,9 +416,6 @@ export class RegExpExecArray extends RegExpResultArray {
             return
         }
         const vals = this.groupValsRaw_
-        if (vals == null || vals.length != keys.length * 2) {
-            throw new Error("internal error: invalid group data")
-        }
         let result = new RegExpGroupsContainer()
 
         for (let i: int = 0; i < keys.length; ++i) {
@@ -644,7 +638,7 @@ export class RegExp extends Object {
      * @FaAndStageModel
      */
     public constructor(pattern: String, flags?: String) {
-        RegExp.init(this, pattern, flags === undefined ? "" : flags!)
+        RegExp.init(this, pattern, flags === undefined ? "" : flags)
     }
 
     /**
@@ -656,7 +650,7 @@ export class RegExp extends Object {
      * @FaAndStageModel
      */
     public constructor(regexp: RegExp, flags?: String) {
-        RegExp.init(this, regexp.pattern_, flags === undefined ? regexp.flags : flags!)
+        RegExp.init(this, regexp.pattern_, flags === undefined ? regexp.flags : flags)
     }
 
     /**
@@ -669,10 +663,10 @@ export class RegExp extends Object {
      */
     public constructor(regexp: RegExp | String, flags?: String) {
         if (regexp instanceof String) {
-            RegExp.init(this, regexp as String, flags === undefined ? "" : flags!)
+            RegExp.init(this, regexp, flags === undefined ? "" : flags)
         } else {
-            let re = regexp as RegExp
-            RegExp.init(this, re.pattern_, flags === undefined ? re.flags : flags!)
+            let re = regexp
+            RegExp.init(this, re.pattern_, flags === undefined ? re.flags : flags)
         }
     }
 
@@ -810,7 +804,7 @@ export class RegExp extends Object {
                 for (let n = 1; n < nCaptures; n++) {
                     captures.pushBack(result.$_get(n))
                 }
-                return String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups,
+                return String.getSubstitution(matched, str, position, captures.toArray(), result.groups,
                     replaceValue)
             })
         }
@@ -865,7 +859,7 @@ export class RegExp extends Object {
         let accumulatedResult = new StringBuilder()
         let nextSourcePosition = 0
         for (let i = 0; i < results.length; ++i) {
-            let result = results.at(i)!
+            let result = results.at(i)
             result.input = str
             result.postExecProcessing(result, str, result.index, this.hasIndices)
             let matched = result.$_get(0)!
@@ -902,7 +896,7 @@ export class RegExp extends Object {
         } else if (limit == 0) {
             return new String[0]("")
         } else {
-            lim = limit!.toLong()
+            lim = limit.toLong()
         }
         let size = str.getLength()
         if (size == 0) {

@@ -437,3 +437,44 @@ export function unescape(str: string): string {
     }
     return ret.toString();
 }
+
+function toStrHelper(val: long, radix: int): String{
+    if (radix < 2 || radix > 36) {
+        throw new RangeError('Radix must be between 2 and 36')
+    }
+    if (val == 0) {
+        return '0'
+    }
+
+    // NOTE (igorlegalov): workaround for #26305, replace with 0 when the circular dependency bug is fixed
+    const zero: int = (0.0).toInt()
+    const negative: boolean = val < 0
+
+    let digitsNum: int = negative ? 1 : zero
+    let value: long = val
+    if (negative) {
+        value /= radix
+        digitsNum++
+        value = -value
+    }
+    for (let val: long = value; val > 0; val /= radix) {
+        digitsNum++
+    }
+
+    const data: FixedArray<char> = new FixedArray<char>(digitsNum)
+    let i: int = digitsNum - 1
+    if (negative) {
+        let remainder: long = -(val % radix)
+        data[i--] = digitChars[remainder.toInt()]
+        val = -(val / radix)
+    }
+    while (val > 0) {
+        let remainder: long = val % radix
+        data[i--] = digitChars[remainder.toInt()]
+        val /= radix
+    }
+    if (negative) {
+        data[0] = c'-'
+    }
+    return new String(data)
+}

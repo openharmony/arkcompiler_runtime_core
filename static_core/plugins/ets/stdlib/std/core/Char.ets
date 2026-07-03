@@ -78,7 +78,7 @@ export final class Char extends Object implements Comparable<Char> {
             return false
         }
 
-        return this.value == (other as Char).value
+        return this.value == other.value
     }
 
     /**
@@ -106,7 +106,7 @@ export final class Char extends Object implements Comparable<Char> {
         } else if (radix == 16) {
             return Char.toHexImpl(this.value, 0, c'0');
         }
-        return this.toLong().toString(radix)
+        return toStrHelper(this.value.toLong(), radix)
     }
 
     /**
@@ -835,7 +835,7 @@ export final class Char extends Object implements Comparable<Char> {
      */
     public static fromHex(hex: string, startIndex: int = 0, length: int = 0): Char
     {
-        return new Char(Char.fromHexImpl(hex, startIndex, length));
+        return Char.fromHexImpl(hex, startIndex, length);
     }
 
     /**

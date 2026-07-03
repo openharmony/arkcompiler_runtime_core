@@ -187,3 +187,26 @@ source ~/.venv-panda/bin/activate
 python3 main.py panda-int ets-func-tests --show-progress
 deactivate
 ```
+
+## Rebuilding Stdlib After .ets Changes
+
+**CRITICAL**: When you modify `.ets` files in the stdlib, you must rebuild the boot stdlib that the runtime uses at test execution time:
+
+| Target | Output | Used by | Command |
+|---|---|---|---|
+| `etsstdlib` | `build/plugins/ets/etsstdlib.abc` | Runtime boot stdlib (`--boot-panda-files`) | `ninja plugins/ets/etsstdlib` |
+
+When tests fail with unexpected behavior after `.ets` changes, it is almost always because `etsstdlib.abc` is stale.
+
+**Best practice**: After modifying any `.ets` stdlib file, always rebuild:
+
+```bash
+cd ../../../build/
+ninja -j$(nproc) plugins/ets/etsstdlib
+```
+
+To verify freshness:
+```bash
+ls -la build/plugins/ets/etsstdlib.abc
+# Should have today's timestamp
+```

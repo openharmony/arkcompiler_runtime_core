@@ -1766,41 +1766,39 @@ class JSONWriter {
             return
         }
         if (val instanceof Boolean) {
-            this.buffer.append(val as boolean)
+            this.buffer.append(val)
             return
         }
         if (val instanceof Int) {
-            this.buffer.append(val as int)
+            this.buffer.append(val)
             return
         }
         if (val instanceof Long) {
-            this.buffer.append(val as long)
+            this.buffer.append(val)
             return
         }
         if (val instanceof Double) {
-            const d: double = val as double
-            if (Double.isFinite(d)) {
-                this.buffer.append(d)
+            if (Double.isFinite(val)) {
+                this.buffer.append(val)
             } else {
                 this.buffer.append('null')
             }
             return
         }
         if (val instanceof Float) {
-            const f: float = val as float
-            if (Float.isFinite(f)) {
-                this.buffer.append(f)
+            if (Float.isFinite(val)) {
+                this.buffer.append(val)
             } else {
                 this.buffer.append('null')
             }
             return
         }
         if (val instanceof Byte) {
-            this.buffer.append(val as byte)
+            this.buffer.append(val)
             return
         }
         if (val instanceof Short) {
-            this.buffer.append(val as short)
+            this.buffer.append(val)
             return
         }
         if (val instanceof Char) {
@@ -1872,7 +1870,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Int) {
-                    this.buffer.append(e as int)
+                    this.buffer.append(e)
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -1884,7 +1882,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Long) {
-                    this.buffer.append(e as long)
+                    this.buffer.append(e)
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -1896,8 +1894,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Double) {
-                    const d: double = e as double
-                    this.buffer.append(Double.isFinite(d) ? d : 'null')
+                    this.buffer.append(Double.isFinite(e) ? e : 'null')
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -1909,7 +1906,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Boolean) {
-                    this.buffer.append(e as boolean)
+                    this.buffer.append(e)
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -1921,8 +1918,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Float) {
-                    const f: float = e as float
-                    this.buffer.append(Float.isFinite(f) ? f : 'null')
+                    this.buffer.append(Float.isFinite(e) ? e : 'null')
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -1934,7 +1930,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Byte) {
-                    this.buffer.append(e as byte)
+                    this.buffer.append(e)
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -1946,7 +1942,7 @@ class JSONWriter {
                 if (e === null || e === undefined) {
                     this.buffer.append('null')
                 } else if (e instanceof Short) {
-                    this.buffer.append(e as short)
+                    this.buffer.append(e)
                 } else {
                     this.writeFieldValueFast(e)
                 }
@@ -2033,7 +2029,7 @@ class JSONWriter {
                     if (e === null || e === undefined) {
                         this.buffer.append('null')
                     } else if (e instanceof Int) {
-                        this.buffer.append(e as int)
+                        this.buffer.append(e)
                     } else {
                         this.writeFieldValueFast(e)
                     }
@@ -2049,7 +2045,7 @@ class JSONWriter {
                     if (e === null || e === undefined) {
                         this.buffer.append('null')
                     } else if (e instanceof Long) {
-                        this.buffer.append(e as long)
+                        this.buffer.append(e)
                     } else {
                         this.writeFieldValueFast(e)
                     }
@@ -2065,8 +2061,7 @@ class JSONWriter {
                     if (e === null || e === undefined) {
                         this.buffer.append('null')
                     } else if (e instanceof Double) {
-                        const d: double = e as double
-                        this.buffer.append(Double.isFinite(d) ? d : 'null')
+                        this.buffer.append(Double.isFinite(e) ? e : 'null')
                     } else {
                         this.writeFieldValueFast(e)
                     }
@@ -2082,7 +2077,7 @@ class JSONWriter {
                     if (e === null || e === undefined) {
                         this.buffer.append('null')
                     } else if (e instanceof String) {
-                        this.writeStringDirect(e as String)
+                        this.writeStringDirect(e)
                     } else {
                         this.writeFieldValueFast(e)
                     }
@@ -2098,7 +2093,7 @@ class JSONWriter {
                     if (e === null || e === undefined) {
                         this.buffer.append('null')
                     } else if (e instanceof Boolean) {
-                        this.buffer.append(e as boolean)
+                        this.buffer.append(e)
                     } else {
                         this.writeFieldValueFast(e)
                     }
@@ -2171,21 +2166,19 @@ class JSONWriter {
                     continue
                 }
                 if (elem instanceof String) { this.writeStringDirect(elem); prevCls = undefined; prevEntries = undefined; continue }
-                if (elem instanceof Boolean) { this.buffer.append(elem as boolean); prevCls = undefined; prevEntries = undefined; continue }
-                if (elem instanceof Int) { this.buffer.append(elem as int); prevCls = undefined; prevEntries = undefined; continue }
-                if (elem instanceof Long) { this.buffer.append(elem as long); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Boolean) { this.buffer.append(elem); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Int) { this.buffer.append(elem); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Long) { this.buffer.append(elem); prevCls = undefined; prevEntries = undefined; continue }
                 if (elem instanceof Double) {
-                    const d: double = elem as double
-                    this.buffer.append(Double.isFinite(d) ? d as double : 'null' as String)
+                    this.buffer.append(Double.isFinite(elem) ? elem : 'null')
                     prevCls = undefined; prevEntries = undefined; continue
                 }
                 if (elem instanceof Float) {
-                    const f: float = elem as float
-                    this.buffer.append(Float.isFinite(f) ? f as float : 'null' as String)
+                    this.buffer.append(Float.isFinite(elem) ? elem : 'null')
                     prevCls = undefined; prevEntries = undefined; continue
                 }
-                if (elem instanceof Byte) { this.buffer.append(elem as byte); prevCls = undefined; prevEntries = undefined; continue }
-                if (elem instanceof Short) { this.buffer.append(elem as short); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Byte) { this.buffer.append(elem); prevCls = undefined; prevEntries = undefined; continue }
+                if (elem instanceof Short) { this.buffer.append(elem); prevCls = undefined; prevEntries = undefined; continue }
                 if (elem instanceof Char) { this.buffer.append(JSON.stringify(elem)); prevCls = undefined; prevEntries = undefined; continue }
                 if (elem instanceof BigInt) { this.buffer.append(JSON.stringify(elem)); prevCls = undefined; prevEntries = undefined; continue }
                 if (elem instanceof Array) {
@@ -2545,21 +2538,19 @@ class JSONWriter {
             if (elem instanceof String) {
                 this.writeStringDirect(elem)
             } else if (elem instanceof Boolean) {
-                this.buffer.append(elem as boolean)
+                this.buffer.append(elem)
             } else if (elem instanceof Int) {
-                this.buffer.append(elem as int)
+                this.buffer.append(elem)
             } else if (elem instanceof Long) {
-                this.buffer.append(elem as long)
+                this.buffer.append(elem)
             } else if (elem instanceof Double) {
-                const d: double = elem as double
-                this.buffer.append(Double.isFinite(d) ? d : 'null')
+                this.buffer.append(Double.isFinite(elem) ? elem : 'null')
             } else if (elem instanceof Float) {
-                const f: float = elem as float
-                this.buffer.append(Float.isFinite(f) ? f : 'null')
+                this.buffer.append(Float.isFinite(elem) ? elem : 'null')
             } else if (elem instanceof Byte) {
-                this.buffer.append(elem as byte)
+                this.buffer.append(elem)
             } else if (elem instanceof Short) {
-                this.buffer.append(elem as short)
+                this.buffer.append(elem)
             } else if (elem instanceof Char) {
                 this.buffer.append(JSON.stringify(elem))
             } else if (elem instanceof BigInt) {
@@ -2788,7 +2779,7 @@ class JSONWriter {
                     } else if (!(e instanceof Double)) {
                         allDoubleOrNullOrInf = false
                         break
-                    } else if (!Double.isFinite(e as double)) {
+                    } else if (!Double.isFinite(e)) {
                         canJoin = false
                     }
                 }
@@ -2853,21 +2844,21 @@ class JSONWriter {
             if (elem instanceof String) {
                 this.writeStringDirect(elem)
             } else if (elem instanceof Boolean) {
-                this.buffer.append(elem as boolean)
+                this.buffer.append(elem)
             } else if (elem instanceof Int) {
-                this.buffer.append(elem as int)
+                this.buffer.append(elem)
             } else if (elem instanceof Long) {
-                this.buffer.append(elem as long)
+                this.buffer.append(elem)
             } else if (elem instanceof Double) {
-                const d: double = elem as double
+                const d: double = elem
                 this.buffer.append(Double.isFinite(d) ? d : 'null')
             } else if (elem instanceof Float) {
-                const f: float = elem as float
+                const f: float = elem
                 this.buffer.append(Float.isFinite(f) ? f : 'null')
             } else if (elem instanceof Byte) {
-                this.buffer.append(elem as byte)
+                this.buffer.append(elem)
             } else if (elem instanceof Short) {
-                this.buffer.append(elem as short)
+                this.buffer.append(elem)
             } else if (elem instanceof Char) {
                 this.buffer.append(JSON.stringify(elem))
             } else if (elem instanceof BigInt) {
@@ -3152,7 +3143,7 @@ function getIndentation(space?: int | string, depth: int = 0): string {
     if (space instanceof string) {
         unit = space.substring(0, 10)
     } else {
-        let n = (space as int) > 0 ? (space as int) : 0
+        let n = space > 0 ? space : 0
         unit = ' '.repeat(n > 10 ? 10 : n)
     }
     if (unit.length == 0) {
