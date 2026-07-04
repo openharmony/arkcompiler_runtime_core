@@ -19,6 +19,8 @@ desc: >-
     An explicit type annotation is allowed for a for variable.
     Enumeration value is implicitly converted to the base type - Byte.
     {{c.desc}}
+tags: {{c.tags}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 class EnumIterable<T> implements Iterable<T> {

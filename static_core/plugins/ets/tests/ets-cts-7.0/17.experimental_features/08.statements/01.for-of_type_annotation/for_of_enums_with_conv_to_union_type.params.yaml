@@ -36,6 +36,8 @@ cases:
     # unions of iterables
 
     - desc: 'Iterating over union Array<Enum1>|Array<Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           for (let v: int|string of ((): Enum1[]|Enum2[] => [Enum1.Zero, Enum1.Five, Enum1.Six])())
               res += v instanceof int ? v : 100
@@ -47,6 +49,8 @@ cases:
           arktest.assertEQ(res2, '7710')
 
     - desc: 'Iterating over union FixedArray<Enum1>|FixedArray<Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           for (let v: int|string of ((): FixedArray<Enum1>|FixedArray<Enum2> => [Enum1.Zero, Enum1.Five, Enum1.Six])())
               res += v instanceof int ? v : 100
@@ -58,6 +62,8 @@ cases:
           arktest.assertEQ(res2, '7710')
 
     - desc: 'Iterating over union Array<Enum1>|FixedArray<Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: Array<Enum1>|FixedArray<Enum2>."
       main: |-
           for (let v: int|string of ((): Enum1[]|FixedArray<Enum2> => [Enum1.Zero, Enum1.Five, Enum1.Six])())
               res += v instanceof int ? v : 100
@@ -69,6 +75,8 @@ cases:
           arktest.assertEQ(res2, '7710')
 
     - desc: 'Iterating over union of EnumIterables'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           for (let v: int|string of
               ((): EnumIterable<Enum1>|EnumIterable<Enum2> => new EnumIterable<Enum1>([Enum1.Zero, Enum1.Five, Enum1.Six]))())
@@ -82,6 +90,8 @@ cases:
           arktest.assertEQ(res2, '7710')
 
     - desc: 'Iterating over union of EnumIterable<Enum1> and Array<Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           for (let v: int|string of
               ((): EnumIterable<Enum1>|Array<Enum2> => new EnumIterable<Enum1>([Enum1.Zero, Enum1.Five, Enum1.Six]))())
@@ -110,6 +120,8 @@ cases:
     # iterables over union
 
     - desc: 'Iterating over Array<Enum1|Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           let res2 = ''
           let array: Array<Enum1|Enum2> = [Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten]
@@ -124,6 +136,8 @@ cases:
           arktest.assertEQ(res2, '710')
 
     - desc: 'Iterating over FixedArray<Enum1|Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           let res2 = ''
           let fixed_array: FixedArray<Enum1|Enum2> = [Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten]
@@ -138,6 +152,8 @@ cases:
           arktest.assertEQ(res2, '710')
 
     - desc: 'Iterating over EnumIterable<Enum1|Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2' is not assignable to the loop iterator type 'Int|String'."
       main: |-
           let res2 = ''
           let iterable: EnumIterable<Enum1|Enum2> = new EnumIterable<Enum1|Enum2>([Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten])
@@ -154,6 +170,8 @@ cases:
     # union of unions
 
     - desc: 'Iterating over Array<Enum1|Enum2>|Array<Enum3|Enum4>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2|Enum3|Enum4' is not assignable to the loop iterator type 'Int|String'."
       decl: |-
           enum Enum3: byte { Three = 3 }
           enum Enum4: short { Four = 4 }
@@ -177,6 +195,8 @@ cases:
           arktest.assertEQ(res, 7)
 
     - desc: 'Iterating over FixedArray<Enum1|Enum2>|FixedArray<Enum3|Enum4>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2|Enum3|Enum4' is not assignable to the loop iterator type 'Int|String'."
       decl: |-
           enum Enum3: byte { Three = 3 }
           enum Enum4: short { Four = 4 }
@@ -200,6 +220,8 @@ cases:
           arktest.assertEQ(res, 7)
 
     - desc: 'Iterating over FixedArray<Enum1|Enum2>|Array<Enum3|Enum4>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: FixedArray<(Enum1|Enum2)>|Array<Enum3|Enum4>."
       decl: |-
           enum Enum3: byte { Three = 3 }
           enum Enum4: short { Four = 4 }
@@ -223,6 +245,8 @@ cases:
           arktest.assertEQ(res, 7)
 
     - desc: 'Iterating over EnumIterable<Enum1|Enum2>|EnumIterable<Enum3|Enum4>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2|Enum3|Enum4' is not assignable to the loop iterator type 'Int|String'."
       decl: |-
           enum Enum3: byte { Three = 3 }
           enum Enum4: short { Four = 4 }
@@ -246,6 +270,8 @@ cases:
           arktest.assertEQ(res, 7)
 
     - desc: 'Iterating over EnumIterable<Enum1|Enum2>|Array<Enum3|Enum4>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0069: Source element type 'Enum1|Enum2|Enum3|Enum4' is not assignable to the loop iterator type 'Int|String'."
       decl: |-
           enum Enum3: byte { Three = 3 }
           enum Enum4: short { Four = 4 }

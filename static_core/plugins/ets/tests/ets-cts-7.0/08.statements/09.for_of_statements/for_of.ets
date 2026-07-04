@@ -16,6 +16,8 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: In a 'for-of' statement type 'expr' must be either array or string, or an instance of iterable class or interface.
+tags: {{c.tags}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 let res = ""

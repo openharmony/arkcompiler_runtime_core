@@ -18,6 +18,8 @@
 desc: >-
     For-of variable is local, specified inside the loop with inferred type.
     {{c.desc}}
+tags: {{c.tags}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 class EnumIterable<T> implements Iterable<T> {

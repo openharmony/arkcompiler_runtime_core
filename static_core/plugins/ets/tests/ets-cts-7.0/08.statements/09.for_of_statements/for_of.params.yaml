@@ -313,6 +313,8 @@ cases:
     # iterate over union of different arrays
     - decl: |-
           let union: Array<char>|ValueArray<number>|FixedArray<boolean> = [1.0, 2.0, 3.0]
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: Array<Char>|ValueArray<Double>|FixedArray<Boolean>."
       use: |-
           for (let v of union) res += v
           arktest.assertEQ(res, '123')
@@ -342,6 +344,8 @@ cases:
     # iterate over union of unions
     - decl: |-
           let union: Array<int|float>|FixedArray<char|string>|ValueArray<boolean> = [true, false]
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: Array<Int|Float>|FixedArray<(Char|String)>|ValueArray<Boolean>."
       use: |-
           for (let v of union) res += v === true ? 'T' : 'F'
           arktest.assertEQ(res, 'TF')

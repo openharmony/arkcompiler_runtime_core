@@ -16,6 +16,8 @@
 
 /*---
 desc: An explicit type annotation is allowed for a for variable
+tags: {{c.tags}}
+expected_out: "{{c.exp_out}}"
 ---*/
 let res = ""
 {{c.decl}}
