@@ -39,6 +39,44 @@ function testBranchLocalUpperNoDeopt(): int {
     return __noinline__branchLocalUpperNoDeopt(arr);
 }
 
+//! CHECKER      Keep bounds checks when loop overflow guard is not loop-entry
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PAOC     options: "--compiler-regex='.*__noinline__typedArrayOverflowGuard.*' --compiler-inlining=true"
+//! METHOD       "bounds_check_deopt.ETSGLOBAL::__noinline__typedArrayOverflowGuard"
+//! PASS_AFTER   "ChecksElimination"
+//! INST         "BoundsCheck D"
+//! PASS_AFTER_NEXT "ChecksElimination"
+//! INST_NOT     "DeoptimizeIf BOUNDS_CHECK"
+//! INST         "BoundsCheck D"
+//! RUN          options: "", entry: "bounds_check_deopt.ETSGLOBAL::testTypedArrayOverflowGuard", result: 0
+function __noinline__typedArrayOverflowGuard(obj: Object): int {
+    let body = (obj: Object): int => {
+        let arr = obj as Uint8ClampedArray;
+        let sum: int = 0;
+        for (let i: int = 0; i < arr.length.toInt(); i += 4) {
+            sum += arr[i];
+            arr[i] = sum;
+
+            sum -= arr[i + 1];
+            arr[i + 1] = sum;
+
+            sum *= arr[i + 2];
+            arr[i + 2] = sum;
+
+            sum /= arr[i + 3];
+            arr[i + 3] = sum;
+        }
+        return sum;
+    };
+
+    return body(obj);
+}
+
+function testTypedArrayOverflowGuard(): int {
+    let arr = new Uint8ClampedArray([1, 2, 3, 4, 5, 6, 7, 8]);
+    return __noinline__typedArrayOverflowGuard(arr);
+}
+
 //! CHECKER      Merge branch-local bounds checks in one block
 //! RUN_PAOC     options: "--compiler-regex='.*branchLocalBlockMerge.*' --compiler-inlining=false"
 //! METHOD       "bounds_check_deopt.ETSGLOBAL::__noinline__branchLocalBlockMerge"

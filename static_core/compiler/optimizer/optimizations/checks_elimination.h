@@ -181,8 +181,6 @@ private:
     Inst *InsertNewLenArray(Inst *lenArray, Inst *ss);
     bool NeedUpperDeoptimization(BasicBlock *header, InstPair insts, FlagPair flags, int64_t maxAdd,
                                  bool *insertNewLenArray);
-    void InsertDeoptimizationForIndexOverflow(CountableLoopInfo *countableLoopInfo, BoundsRange indexUpperRange,
-                                              Inst *ss);
     void ProcessingLoop(Loop *loop, LoopNotFullyRedundantBoundsCheck *lenarrIndexChecks);
     void ProcessingGroupBoundsCheck(GroupedBoundsChecks *indexBoundschecks, LoopInfo loopInfo, Inst *lenArray);
     void ReplaceBoundsCheckToDeoptimizationBeforeLoop();

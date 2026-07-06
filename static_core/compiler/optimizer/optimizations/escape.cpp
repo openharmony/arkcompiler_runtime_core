@@ -599,6 +599,7 @@ static bool CheckReturnInlineMismatch(Inst *deopt)
     if (callInst == nullptr) {
         return false;
     }
+    ASSERT(ss->GetBasicBlock() == deopt->GetBasicBlock());
     int isMatch = 0;
     Inst *inst = deopt;
     // There exists cases like this:
