@@ -17,6 +17,8 @@
 #include "runtime/execution/affinity_mask.h"
 #include "runtime/execution/job_launch.h"
 #include "runtime/execution/job_priority.h"
+#include "runtime/execution/job_events.h"
+#include "runtime/execution/job_worker_thread-inl.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
@@ -31,6 +33,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/intrinsics/helpers/intrinsic_timer_impl.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <thread>
 #include <unordered_map>
@@ -131,12 +134,101 @@ private:
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static SchedulingHelper g_eaWorkerHelper = {};
 
-static void EAWorkerLoop(PandaEtsVM *etsVM, mem::Reference *taskRef, [[maybe_unused]] mem::Reference *joiningPromiseRef)
+static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 100 * 1000U;
+static constexpr uint64_t MILLISECONDS_TO_MICROSECONDS = 1000U;
+static constexpr uint32_t INTEROP_PUMP_IMMEDIATE_LIMIT = 16U;
+
+static uint64_t ConvertEventLoopTimeoutToMicroseconds(int64_t timeoutMs)
+{
+    ASSERT(timeoutMs > 0);
+    return std::min(static_cast<uint64_t>(timeoutMs) * MILLISECONDS_TO_MICROSECONDS, ASYNC_WORK_WAITING_TIME);
+}
+
+static void SetInteropPumpWakeEvent(JobWorkerThread *worker, JobEvent *event)
+{
+    worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::INTEROP_PUMP_EVENT>(event);
+}
+
+static void AwaitInteropPumpEvent(JobWorkerThread *worker, JobEvent *event)
+{
+    event->Lock();
+    SetInteropPumpWakeEvent(worker, event);
+    JobExecutionContext::GetCurrent()->GetManager()->Await(event);
+    SetInteropPumpWakeEvent(worker, nullptr);
+}
+
+static void AwaitInteropPumpDelay(JobWorkerThread *worker, JobManager *jobMan, uint64_t waitingTimeUs)
+{
+    TimerEvent timerEvt(jobMan, 0);
+    timerEvt.SetExpirationTime(jobMan->GetCurrentTime() + waitingTimeUs);
+    AwaitInteropPumpEvent(worker, &timerEvt);
+}
+
+static void StopInteropEventLoopPump(JobWorkerThread *worker)
+{
+    worker->DestroyCallbackPoster();
+    auto *event = worker->GetLocalStorage().Get<JobWorkerThread::DataIdx::INTEROP_PUMP_EVENT, JobEvent *>();
+    if (event != nullptr) {
+        event->Happen();
+    }
+}
+
+static void InteropEventLoopPumpEntrypoint([[maybe_unused]] void *param)
+{
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *worker = executionCtx->GetWorker();
+    auto *jobMan = executionCtx->GetManager();
+    auto *etsVM = EtsExecutionContext::FromMT(executionCtx)->GetPandaVM();
+    uint32_t immediatePumpCount = 0;
+
+    while (worker->IsExternalSchedulingEnabled()) {
+        [[maybe_unused]] auto hasEventLoopWork = etsVM->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT);
+        auto timeoutMs = etsVM->GetEventLoopBackendTimeout();
+        if (timeoutMs == 0 && immediatePumpCount++ < INTEROP_PUMP_IMMEDIATE_LIMIT) {
+            continue;
+        }
+        immediatePumpCount = 0;
+        if (timeoutMs < 0) {
+            AwaitInteropPumpDelay(worker, jobMan, ASYNC_WORK_WAITING_TIME);
+        } else {
+            AwaitInteropPumpDelay(worker, jobMan,
+                                  timeoutMs == 0 ? ASYNC_WORK_WAITING_TIME
+                                                 : ConvertEventLoopTimeoutToMicroseconds(timeoutMs));
+        }
+    }
+    SetInteropPumpWakeEvent(worker, nullptr);
+}
+
+static bool StartInteropEventLoopPump()
+{
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *jobMan = executionCtx->GetManager();
+    auto epInfo = Job::NativeEntrypointInfo {InteropEventLoopPumpEntrypoint, nullptr};
+    auto *job =
+        jobMan->CreateJob("interop event loop pump", epInfo, JobPriority::DEFAULT_PRIORITY, Job::Type::MUTATOR, true);
+    auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
+    auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
+    if (launchResult != LaunchResult::OK) {
+        LOG(ERROR, COROUTINES) << "Failed to start interop event loop pump, launch result: "
+                               << static_cast<int>(launchResult);
+        jobMan->DestroyJob(job);
+        return false;
+    }
+    return true;
+}
+
+static void EAWorkerLoop(PandaEtsVM *etsVM, mem::Reference *taskRef, [[maybe_unused]] mem::Reference *joiningPromiseRef,
+                         bool supportInterop)
 {
     auto *refStorage = etsVM->GetGlobalObjectStorage();
     RunExclusiveTask(taskRef, refStorage);
 
-    JobExecutionContext::GetCurrent()->GetWorker()->ExecuteJobsUntilIdle();
+    auto *worker = JobExecutionContext::GetCurrent()->GetWorker();
+    if (supportInterop) {
+        StopInteropEventLoopPump(worker);
+    }
+
+    worker->ExecuteJobsUntilIdle();
 
     ResolveJoiningPromise(joiningPromiseRef, refStorage);
 }
@@ -208,7 +300,13 @@ static void SetupAndRunExclusiveWorker(PandaEtsVM *etsVM, JobExecutionContext *e
         etsVM->GetGlobalObjectStorage()->Remove(taskRef);
         return;
     }
-    EAWorkerLoop(etsVM, taskRef, joiningPromiseRef);
+    if (supportInterop) {
+        if (!StartInteropEventLoopPump()) {
+            LOG(ERROR, COROUTINES) << "EAWorker failed to start interop event loop pump, periodic scheduling remains "
+                                      "active";
+        }
+    }
+    EAWorkerLoop(etsVM, taskRef, joiningPromiseRef, supportInterop);
     DestroyExclusiveWorker(etsVM, supportInterop);
 }
 

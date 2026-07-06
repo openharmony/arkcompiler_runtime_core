@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <uv.h>
 #include <node_api.h>
+#include <cstdint>
 #include <queue>
 
 #include "runtime/include/external_callback_poster.h"
@@ -82,8 +83,14 @@ private:
     void PostImpl([[maybe_unused]] int64_t delayMs) override;
 
     static void CallbackExecutor(uv_async_t *async);
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    static void TimerCallbackExecutor(uv_timer_t *timer);
+#endif
 
     uv_async_t *async_ = nullptr;
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    uv_timer_t *timer_ = nullptr;
+#endif
     WrappedCallback callback_;
 };
 
@@ -108,6 +115,8 @@ public:
     static uv_loop_t *GetEventLoop();
 
     static bool RunEventLoop(EventLoopRunMode mode = EventLoopRunMode::RUN_DEFAULT);
+
+    static int64_t GetEventLoopBackendTimeout();
 
     static void WalkEventLoop(WalkEventLoopCallback &callback, void *args);
 

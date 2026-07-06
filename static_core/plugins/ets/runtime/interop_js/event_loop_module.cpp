@@ -36,6 +36,9 @@ namespace ark::ets::interop::js {
 
 thread_local uint32_t EventLoop::eventCount_ {0};
 
+// No pending backend timeout in the interop event loop.
+static constexpr int64_t NO_PENDING_EVENT_LOOP_TIMEOUT = -1;
+
 /* static */
 void EventLoop::IncrementEventCount()
 {
@@ -93,6 +96,23 @@ bool EventLoop::RunEventLoop(EventLoopRunMode mode)
             UNREACHABLE();
     };
     return true;
+}
+
+int64_t EventLoop::GetEventLoopBackendTimeout()
+{
+    if (InteropCtx::Current() == nullptr || eventCount_ == 0) {
+        return NO_PENDING_EVENT_LOOP_TIMEOUT;
+    }
+
+#if defined(PANDA_TARGET_OHOS)
+    InteropCtx::Current(EtsExecutionContext::GetCurrent())->UpdateInteropStackInfoIfNeeded();
+    auto *loop = GetEventLoop();
+    uv_update_time(loop);
+    return uv_backend_timeout(loop);
+#else
+    static constexpr int64_t FALLBACK_EVENT_LOOP_TIMEOUT_MS = 100;
+    return FALLBACK_EVENT_LOOP_TIMEOUT_MS;
+#endif
 }
 
 void EventLoop::WalkEventLoop(WalkEventLoopCallback &callback, void *args)
@@ -217,17 +237,33 @@ SingleEventPoster::SingleEventPoster(WrappedCallback &&callback) : callback_(std
     async_ = EventLoop::CreateAsyncWork();
     [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, CallbackExecutor);
     ASSERT(uvstatus == 0);
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    timer_ = EventLoop::CreateTimer();
+    [[maybe_unused]] auto timerStatus = uv_timer_init(loop, timer_);
+    ASSERT(timerStatus == 0);
+    timer_->data = this;
+#endif
     async_->data = this;
 }
 
 SingleEventPoster::~SingleEventPoster()
 {
     ASSERT(async_ != nullptr);
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    ASSERT(timer_ != nullptr);
+#endif
     if (NeedDestroyInPlace()) {
         EventLoop::DeleteAsyncWork(async_);
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+        EventLoop::CloseTimer(timer_);
+#endif
         return;
     }
     async_->data = nullptr;
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    timer_->data = nullptr;
+    EventLoop::CloseTimer(timer_);
+#endif
     uv_async_send(async_);
 }
 
@@ -242,9 +278,31 @@ void SingleEventPoster::CallbackExecutor(uv_async_t *async)
     eventPoster->callback_();
 }
 
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+void SingleEventPoster::TimerCallbackExecutor([[maybe_unused]] uv_timer_t *timer)
+{
+    auto *eventPoster = static_cast<SingleEventPoster *>(timer->data);
+    if (eventPoster == nullptr) {
+        EventLoop::CloseTimer(timer);
+        return;
+    }
+    eventPoster->callback_();
+}
+#endif
+
 void SingleEventPoster::PostImpl([[maybe_unused]] int64_t delayMs)
 {
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    if (delayMs > 0) {
+        auto loop = EventLoop::GetEventLoop();
+        uv_update_time(loop);
+        uv_timer_start(timer_, TimerCallbackExecutor, static_cast<uint64_t>(delayMs), 0);
+    } else {
+        uv_async_send(async_);
+    }
+#else
     uv_async_send(async_);
+#endif
 }
 
 void EventLoopCallbackPoster::ThreadSafeCallbackQueue::PushCallback(WrappedCallback &&callback, uv_async_t *async)
