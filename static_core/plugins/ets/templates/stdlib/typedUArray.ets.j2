@@ -1108,6 +1108,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             return false;
         }
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
+        {%- elif element['primitiveType'] == 'long' %}
+        return this.indexOfImpl(searchElement, fromIndex) != -1
         {%- else %}
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
         {%- endif %}
@@ -1127,6 +1129,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             return false;
         }
         return this.indexOf(searchElement.toInt(), 0) != -1
+        {%- elif element['primitiveType'] == 'long' %}
+        return this.indexOfImpl(searchElement, 0) != -1
         {%- else %}
         return this.indexOf(searchElement.toInt(), 0) != -1
         {%- endif %}

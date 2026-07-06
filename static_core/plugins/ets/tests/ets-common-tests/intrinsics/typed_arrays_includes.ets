@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,11 @@ function checkArray(data: Float32Array, elem: number, expected: boolean, fromInd
 function checkArrayForFloat(data: Float32Array, elem: float): void {
     arktest.assertEQ(data.includes(elem), data.indexOf(elem.toInt()) > 0, 'data.includes(elem: float) must check ' +
         'whether data.indexOf(elem.toInt()) > -1, so whether the truncated float exists within the array.');
+}
+
+function checkArray(data: Uint32Array, elem: long, expected: boolean, fromIndex?: int): void {
+    arktest.assertEQ(data.includes(elem, fromIndex), expected,
+        'Uint32Array data.includes(elem: long, fromIndex?: int) must return ' + expected);
 }
 
 function testF64ArrayNoNaN() {
@@ -378,6 +383,22 @@ function testF32ArrayNaNOnly() {
     checkNaNOnly(Float32Array.of(NaN, NaN, NaN));
 }
 
+function testU32ArrayHighValues() {
+    // Values in [2147483648, 4294967295] exceed int32.MAX — must not be narrowed by .toInt()
+    const maxUint32: long = 4294967295;
+    const aboveInt32Max: long = 2147483648;
+    let arr = new Uint32Array([100, 200, maxUint32]);
+    checkArray(arr, maxUint32, true);              // the exact bug: max uint32
+    checkArray(arr, maxUint32, true, 0);
+    checkArray(arr, maxUint32, true, 2);
+    checkArray(arr, maxUint32, false, 3);
+    checkArray(arr, maxUint32, true, -1);   // fromIndex=-1 → length+(-1)=2, arr[2]=maxUint32 → match
+    checkArray(new Uint32Array([100, 200, 300]), maxUint32, false);   // no false positive
+    checkArray(new Uint32Array([aboveInt32Max]), aboveInt32Max, true);  // int32 boundary + 1
+    checkArray(new Uint32Array([maxUint32]), 0, false);                 // 0 != 4294967295 (no wraparound)
+    checkArray(new Uint32Array([100, 200, 300]), 200, true);            // in-range still works
+}
+
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('typedArray.includes');
     testSuite.addTest('Float64 Arrays: includes for arrays w/o NaN', testF64ArrayNoNaN);
@@ -390,5 +411,6 @@ function main(): int {
     testSuite.addTest('Float32 Arrays: includes for arrays with Infinity', testF32ArrayInf);
     testSuite.addTest('Float32 Arrays: includes for arrays with NaN', testF32ArrayNaN);
     testSuite.addTest('Float32 Arrays: includes for arrays of NaN only', testF32ArrayNaNOnly);
+    testSuite.addTest('Uint32 Arrays: includes for high uint32 values (out of int32 range)', testU32ArrayHighValues);
     return testSuite.run();
 }

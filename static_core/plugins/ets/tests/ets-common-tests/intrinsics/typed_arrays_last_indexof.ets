@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,7 +223,7 @@ function testIU8Array() {
     checkArray(data, 127.0, 8);
     checkArrayForInt(data, 127, 8);
     checkArray(data, 128.0, -1);
-    checkArrayForInt(data, 128, 1); // 128 as byte in the array == -128
+    checkArrayForInt(data, 128, -1); // ECMAScript: 128 exceeds int8 range, no narrowing → -1
 
     let udata = Uint8Array.of(0, 0, 16, 48, 127, 16, 160, 255, 160);
     checkArray(udata, NaN, -1);
@@ -244,7 +244,7 @@ function testIU8Array() {
     checkArray(udata, 255.0, 7);
     checkArrayForInt(udata, 255, 7);
     checkArray(udata, 256.0, -1);
-    checkArrayForInt(udata, 256, 1);
+    checkArrayForInt(udata, 256, -1); // ECMAScript: 256 exceeds uint8 range, no narrowing → -1
 }
 
 function testIU8ArrayFromIndex() {
@@ -293,12 +293,12 @@ function testIU8ArrayFromIndex() {
     checkArray(data, 128.0, -1, data.length);
     checkArray(data, 128.0, -1, data.length - 1);
     checkArray(data, 128.0, -1, undefined);
-    checkArrayForInt(data, 128, 1, -1); // 128 as byte in the array == -128
-    checkArrayForInt(data, 128, 1, 1);
-    checkArrayForInt(data, 128, 0, 0);
-    checkArrayForInt(data, 128, 0, -data.length);
-    checkArrayForInt(data, 128, 1, -1);
-    checkArrayForInt(data, 128, 1, 2);
+    checkArrayForInt(data, 128, -1, -1); // ECMAScript: 128 exceeds int8 range, no narrowing → -1
+    checkArrayForInt(data, 128, -1, 1);
+    checkArrayForInt(data, 128, -1, 0);
+    checkArrayForInt(data, 128, -1, -data.length);
+    checkArrayForInt(data, 128, -1, -1);
+    checkArrayForInt(data, 128, -1, 2);
 
     let udata = Uint8Array.of(0, 16, 48, 127, 16, 160, 255, 160);
     checkArray(udata, NaN, -1, udata.length - 1);
@@ -365,7 +365,7 @@ function testIU16Array() {
     checkArray(data, 32767.0, 8);
     checkArrayForInt(data, 32767, 8);
     checkArray(data, 32768.0, -1);
-    checkArrayForInt(data, 32768, 0);
+    checkArrayForInt(data, 32768, -1); // ECMAScript: 32768 exceeds int16 range, no narrowing → -1
 
     let udata = Uint16Array.of(0, 0, 0, 0, 128, 2564, 32767, 65535, 65535);
     checkArray(udata, NaN, -1);
@@ -386,7 +386,7 @@ function testIU16Array() {
     checkArray(udata, 65535.0, 8);
     checkArrayForInt(udata, 65535, 8);
     checkArray(udata, 65536.0, -1);
-    checkArrayForInt(udata, 65536, 3);
+    checkArrayForInt(udata, 65536, -1); // ECMAScript: 65536 exceeds uint16 range, no narrowing → -1
 }
 
 function testIU32Array() {
