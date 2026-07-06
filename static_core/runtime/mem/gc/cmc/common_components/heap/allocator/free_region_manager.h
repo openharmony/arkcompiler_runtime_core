@@ -20,12 +20,11 @@
 #include "common_interfaces/heap/region_desc.h"
 
 namespace ark::common_vm {
-class RegionManager;
 
 // This class is and should be accessed only for region allocation. we do not rely on it to check region status.
 class FreeRegionManager {
 public:
-    explicit FreeRegionManager(RegionManager &manager) : regionManager_(manager) {}
+    FreeRegionManager() = default;
 
     virtual ~FreeRegionManager()
     {
@@ -116,18 +115,6 @@ public:
         return releasedUnitTree_.GetTotalCount();
     }
 
-#ifndef NDEBUG
-    void DumpReleasedUnitTree() const
-    {
-        releasedUnitTree_.DumpTree("released-unit tree");
-    }
-    void DumpDirtyUnitTree() const
-    {
-        dirtyUnitTree_.DumpTree("dirty-unit tree");
-    }
-#endif
-
-    size_t CalculateBytesToRelease() const;
     size_t ReleaseGarbageRegions(size_t targetCachedSize);
 
 private:
@@ -137,8 +124,6 @@ private:
             RegionDesc::ClearUnits(idx, num);
         }
     }
-    RegionManager &regionManager_;
-
     // physical pages of released units are probably released and they are prepared for allocation.
     ark::os::memory::Mutex releasedUnitTreeMutex_;
     Treap releasedUnitTree_;

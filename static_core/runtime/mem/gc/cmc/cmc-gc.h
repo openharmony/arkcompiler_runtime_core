@@ -391,11 +391,6 @@ protected:
 
     std::atomic<size_t> markedObjectCount_ = {0};
 
-    void ResetBitmap(bool heapMarked)
-    {
-        // if heap is marked and tracing result will be used during next gc, we should not reset liveInfo_.
-    }
-
     uint32_t GetGCThreadCount(const bool isConcurrent) const;
 
     ark::common_vm::Taskpool *GetThreadPool() const;

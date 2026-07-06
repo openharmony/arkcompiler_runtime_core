@@ -68,7 +68,7 @@ public:
 
     void Initialize(size_t regionNum, uintptr_t regionInfoStart);
 
-    RegionManager() : freeRegionManager_(*this), garbageRegionList_("garbage regions") {}
+    RegionManager() : garbageRegionList_("garbage regions") {}
 
     RegionManager(const RegionManager &) = delete;
 

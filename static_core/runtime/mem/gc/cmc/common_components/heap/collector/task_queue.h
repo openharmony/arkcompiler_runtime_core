@@ -20,7 +20,6 @@
 #include <list>
 
 #include "common_components/common/page_allocator.h"
-#include "common_components/heap/collector/ark_mutator_container.h"
 #include "common_components/heap/heap.h"
 
 #include "libarkbase/utils/logger.h"
@@ -298,14 +297,6 @@ public:
         return task.GetTaskIndex();
     }
 
-    // Add one task to asyncTaskQueue
-    void EnqueueAsync(const Type &task)
-    {
-        asyncTaskQueue_.Push(task);
-        ark::os::memory::LockHolder lock(taskQueueLock_);
-        taskQueueCondVar_.SignalAll();
-    }
-
     // Retrieve a garbage collection task from the task queue
     // Prioritize synchronous tasks from syncTaskQueue before asynchronous ones from asyncTaskQueue
     Type Dequeue()
@@ -332,19 +323,6 @@ public:
             }
 
             taskQueueCondVar_.TimedWait(&taskQueueLock_, 0, waitTime.count());
-        }
-    }
-
-    // GC thread poll task queue and execute gc task
-    void DrainTaskQueue(void *owner)
-    {
-        while (true) {
-            Type task = Dequeue();
-            ArkMutatorContainer mutatorContainer;
-            if (!task.Execute(owner)) {
-                Finish();
-                break;
-            }
         }
     }
 

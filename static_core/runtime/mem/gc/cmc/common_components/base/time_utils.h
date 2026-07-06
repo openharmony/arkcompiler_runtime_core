@@ -18,7 +18,6 @@
 
 #include <cinttypes>
 
-#include "common_components/base/c_string.h"
 #include "common_interfaces/base/common.h"
 
 #include "runtime/include/mem/panda_string.h"
@@ -38,17 +37,6 @@ PANDA_PUBLIC_API uint64_t NanoSeconds();
 
 // returns the monotonic time since epoch starting point in microseconds
 uint64_t MicroSeconds() noexcept;
-
-// sleep for the given count of nanoseconds
-void SleepForNano(uint64_t ns);
-
-#ifndef NDEBUG
-// returns the current date in ISO yyymmdd.hhmmss format
-CString GetDigitDate();
-#endif
-
-// returns the current date in ISO yyyy-mm-dd hh:mm::ss.ms format
-PANDA_PUBLIC_API CString GetTimestamp();
 
 PandaString PrettyDigitsFormat(uint64_t number) noexcept;
 

@@ -16,10 +16,6 @@
 #ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_MEM_COMMON_H
 #define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_MEM_COMMON_H
 
-#include <algorithm>
-#include <thread>
-#include <unordered_map>
-
 #include "common_components/common/page_pool.h"
 
 namespace ark::common_vm {
@@ -48,81 +44,6 @@ inline void *SystemAlloc(size_t kpage)
 {
     return PagePool::Instance().GetPage(kpage * COMMON_PAGE_SIZE);
 }
-
-// Return a reference to the first 4 or 8 bytes of the passed-in space
-inline void *&NextObj(void *obj)
-{
-    CHECK(obj != nullptr);
-    return *(void **)obj;
-}
-
-// The free list used to store the small fixed-size memory blocks after splitting.
-class FreeList {
-public:
-    void PushFront(void *obj)
-    {
-        CHECK(obj != nullptr);
-
-        NextObj(obj) = freeList_;
-        freeList_ = obj;
-        ++size_;
-    }
-    void *PopFront()
-    {
-        CHECK(!Empty());
-
-        void *obj = freeList_;
-        freeList_ = NextObj(obj);
-        --size_;
-
-        return obj;
-    }
-
-    void PushAtFront(void *start, void *end, size_t n)
-    {
-        CHECK(start != nullptr);
-        CHECK(end != nullptr);
-        CHECK(n > 0);
-
-        NextObj(end) = freeList_;
-        freeList_ = start;
-        size_ += n;
-    }
-
-    void PopAtFront(void *&start, size_t n)
-    {
-        CHECK(n <= size_);
-
-        start = freeList_;
-        void *end = freeList_;
-        for (size_t i = 0; i < n - 1; ++i) {
-            end = NextObj(end);
-        }
-        freeList_ = NextObj(end);
-        NextObj(end) = nullptr;
-        size_ -= n;
-    }
-
-    bool Empty()
-    {
-        return size_ == 0;
-    }
-
-    size_t &GetAdjustSize()
-    {
-        return adjustSize_;
-    }
-
-    size_t GetSize()
-    {
-        return size_;
-    }
-
-private:
-    size_t size_ = 0;        // The number of small fixed-size memory blocks
-    size_t adjustSize_ = 1;  // The slow-start adjustment value for requesting memory from the central cache.
-    void *freeList_ = nullptr;
-};
 
 // Span manages a large block of memory in units of pages.
 struct Span {
