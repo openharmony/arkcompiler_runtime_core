@@ -109,9 +109,10 @@ async def test_get_possible_breakpoints(
     async with ark_runtime.run(nursery, module=script_file) as process:
         async with debug_locator.connect(nursery) as client:
             await client.configure(nursery)
-            await client.run_if_waiting_for_debugger()
+            paused = await client.run_if_waiting_for_debugger()
+            script_id = paused.call_frames[0].location.script_id
 
-            start = debugger.Location(script_id=runtime.ScriptId(1), line_number=0)
+            start = debugger.Location(script_id=script_id, line_number=0)
             get_breakpoints = await client.get_possible_breakpoints(start)
             assert list(bp.line_number for bp in get_breakpoints) == list(range(1, 8))
 
