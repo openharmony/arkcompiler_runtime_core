@@ -13,62 +13,251 @@
 
 ---
 cases:
-  - decl: |-
-      class C {}
-      class D extends C {}
-    check: |-
-      let d: D = new D()
-      arktest.assertTrue(d instanceof C)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+    - decl: |-
+          class C {}
+          class D extends C {}
+      check: |-
+          let d: D = new D()
+          arktest.assertTrue(d instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
-  - decl: |-
-      class C {}
-      class D extends C {}
-      class E {}
-    check: |-
-      let d: D = new D()
-      arktest.assertFalse(d instanceof E)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as false'
+    - decl: |-
+          class C<T> {}
+          class D<T> extends C<T> {}
+      check: |-
+          let d: D<string> = new D<string>()
+          arktest.assertTrue(d instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
-  - decl: |-
-      interface I {}
-      class D implements I {}
-    check: |-
-      let d: D = new D()
-      arktest.assertTrue(d instanceof I)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+    - decl: |-
+          class C {}
+          class D extends C {}
+          class E {}
+      check: |-
+          let d: D = new D()
+          arktest.assertFalse(d instanceof E)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as false'
 
-  - decl: |-
-      class D {}
-    check: |-
-      let d: D = new D()
-      arktest.assertTrue(d instanceof D)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+    - decl: |-
+          class C {}
+          class D<T> extends C {}
+          class E<T> {}
+      check: |-
+          let d: D<number> = new D<number>()
+          arktest.assertFalse(d instanceof E)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as false'
 
-  - decl: |-
-      class A {}
-      class B extends A {}
-      class C extends B {}
-    check: |-
-      let c: C = new C()
-      arktest.assertTrue(c instanceof A)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+    - decl: |-
+          interface I {}
+          class D implements I {}
+      check: |-
+          let d: D = new D()
+          arktest.assertTrue(d instanceof I)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
-  - decl: |-
-      class C {}
-      class D extends C {}
-      type AliasD = D
-    check: |-
-      let x: AliasD = new D()
-      arktest.assertTrue(x instanceof C)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+    - decl: |-
+          interface I<T> {}
+          class D<T> implements I<T> {}
+      check: |-
+          let d: D<int> = new D<int>()
+          arktest.assertTrue(d instanceof I)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
-  - decl: |-
-      class C {}
-      class D extends C {}
-      class W { fld: D = new D() }
-    check: |-
-      let w: W = new W()
-      arktest.assertTrue(w.fld instanceof C)
-    expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+    - decl: |-
+          class D {}
+      check: |-
+          let d: D = new D()
+          arktest.assertTrue(d instanceof D)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
 
+    - decl: |-
+          class D<T> {}
+      check: |-
+          let d: D<Object> = new D<Object>()
+          arktest.assertTrue(d instanceof D)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class A {}
+          class B extends A {}
+          class C extends B {}
+      check: |-
+          let c: C = new C()
+          arktest.assertTrue(c instanceof A)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class A<T, U> {}
+          class B<T> extends A<T, string> {}
+          class C extends B<number> {}
+      check: |-
+          let c: C = new C()
+          arktest.assertTrue(c instanceof A)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C {}
+          class D extends C {}
+          type AliasD = D
+      check: |-
+          let x: AliasD = new D()
+          arktest.assertTrue(x instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C<T, U> {}
+          class D<T, U> extends C<T, U> {}
+          type AliasD = D<string, string>
+      check: |-
+          let x: AliasD = new AliasD()
+          arktest.assertTrue(x instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C<T, U> {}
+          class D<T, U> extends C<T, U> {}
+          type AliasD<T> = D<T, number>
+      check: |-
+          let x: AliasD<string> = new AliasD<string>()
+          arktest.assertTrue(x instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C {}
+          class D extends C {}
+          class W { fld: D = new D() }
+      check: |-
+          let w: W = new W()
+          arktest.assertTrue(w.fld instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C<T> {}
+          class D<T extends Object> extends C<T> {}
+          class W { fld: D<Object> = new D<Object>() }
+      check: |-
+          let w: W = new W()
+          arktest.assertTrue(w.fld instanceof C)
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          function foo<T extends Float>(p: T): boolean {
+              return p instanceof Float
+          }
+      check: |-
+          arktest.assertTrue(foo<Float>(1.5f))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          function foo<T extends Float>(p: T): boolean {
+              return p instanceof string
+          }
+      check: |-
+          arktest.assertFalse(foo<Float>(1.5f))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as false'
+
+    - decl: |-
+          function foo<T extends Char, U extends T>(p: T, q: U): boolean {
+              return q instanceof Char
+          }
+      check: |-
+          arktest.assertTrue(foo<Char, Char>(c'a', c'b'))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          function foo<T extends Char, U extends T>(p: T, q: U): boolean {
+              return q instanceof Int
+          }
+      check: |-
+          arktest.assertFalse(foo<Char, Char>(c'a', c'b'))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as false'
+
+    - decl: |-
+          function foo<T>(p: T) {
+              arktest.assertTrue(p instanceof Float) // No warning message expected
+          }
+      check: |-
+          foo<Float>(1.5f)
+
+    - decl: |-
+          function foo<T>(p: T) {
+              arktest.assertFalse(p instanceof Float) // No warning message expected
+          }
+      check: |-
+          foo<string>('a')
+
+    - decl: |-
+          function foo<T>(p: Any) {
+              arktest.assertTrue(p instanceof string) // No warning message expected
+          }
+      check: |-
+          foo<string>('a')
+
+    - decl: |-
+          function foo<T>(p: Any) {
+              arktest.assertFalse(p instanceof string) // No warning message expected
+          }
+      check: |-
+          foo<Float>(1.5f)
+
+    - decl: |-
+          class C {}
+          class D extends C {}
+          function foo<T extends C>(p: T) {
+              return p instanceof C
+          }
+      check: |-
+          arktest.assertTrue(foo<C>(new C))
+          arktest.assertTrue(foo<D>(new D))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C {}
+          class D extends C {}
+          function foo<T extends C>(p: T) {
+              return p instanceof D // No warning message expected
+          }
+      check: |-
+          arktest.assertFalse(foo<C>(new C))
+          arktest.assertTrue(foo<D>(new D))
+
+    - decl: |-
+          class C {}
+          class D extends C {}
+          function foo<T extends D>(p: T) {
+              return p instanceof C
+          }
+      check: |-
+          arktest.assertTrue(foo<D>(new D))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C<T> {}
+          class D<T> extends C<T> {}
+          function foo<U, T extends C<U>>(p: T) {
+              return p instanceof C
+          }
+      check: |-
+          arktest.assertTrue(foo<string, C<string>>(new C<string>()))
+          arktest.assertTrue(foo<string, D<string>>(new D<string>()))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
+
+    - decl: |-
+          class C<T> {}
+          class D<T> extends C<T> {}
+          function foo<U, T extends C<U>>(p: T) {
+              return p instanceof D // No warning message expected
+          }
+      check: |-
+          arktest.assertFalse(foo<string, C<string>>(new C<string>()))
+          arktest.assertTrue(foo<string, D<string>>(new D<string>()))
+
+    - decl: |-
+          class C<T> {}
+          class D<T> extends C<T> {}
+          function foo<U, T extends D<U>>(p: T) {
+              return p instanceof C
+          }
+      check: |-
+          arktest.assertTrue(foo<string, D<string>>(new D<string>()))
+      expected: 'Warning W1001506: the value of the instanceof expression is known at compile-time as true'
