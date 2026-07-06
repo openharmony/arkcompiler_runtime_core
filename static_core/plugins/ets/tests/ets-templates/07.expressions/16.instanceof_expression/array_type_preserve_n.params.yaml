@@ -13,29 +13,54 @@
 
 ---
 cases:
-
-
     # G6 Fixed Array with nested non-preserved type
     - expr: |-
           let a: FixedArray<Array<Int>> = [[1, 2], [3, 4], [5,6]]
           let t = pass(a) instanceof FixedArray<Array<Int>>
-      expected: |-
-           "Semantic error ESE38251: Type 'FixedArray<Array<Int>>' cannot be used on the right hand side of an 'instanceof' expression"
+      expected_out: |-
+          Semantic error ESE461884: Type 'Array<Int>' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations.
 
     - expr: |-
           let a: FixedArray<Array<string>> = [["one", "two"]]
           let t = pass(a) instanceof FixedArray<Array<string>>
-      expected: |-
-           "Semantic error ESE38251: Type 'FixedArray<Array<string>>' cannot be used on the right hand side of an 'instanceof' expression"
+      expected_out: |-
+          Semantic error ESE461884: Type 'Array<String>' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations.
 
     - expr: |-
           let a: FixedArray<(p: number) => void> = [(p: number) => {}, (p: number) => {}]
           let t = pass(a) instanceof FixedArray<(p: number) => void>
-      expected: |-
-           "Semantic error ESE38251: Type 'FixedArray<((p: number)=> void)>' cannot be used on the right hand side of an 'instanceof' expression"
+      expected_out: |-
+          Semantic error ESE461884: Type '((p1: Double) => undefined)' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations.
 
     - expr: |-
           let a: FixedArray<[int, string, boolean]> = [[0, "0", false], [1, "1", true]]
           let t = pass(a) instanceof FixedArray<[int, string, boolean]>
-      expected: |-
-          "Semantic error ESE38251: Type 'FixedArray<[int, string, boolean]>' cannot be used on the right hand side of an 'instanceof' expression"
+      expected_out: |-
+          Semantic error ESE461884: Type '[Int, String, Boolean]' is not preserved by type erasure and cannot be used as type argument for FixedArray instantiations.
+
+    # G1 Array<Any> not preserved in instanceof
+    - expr: |-
+          let a: Array<Any> = [1, "1"]
+          let t = pass(a) instanceof Array<Any>
+
+    - expr: |-
+          let a: Array<Any> = []
+          let t = pass(a) instanceof Array<Any>
+
+    - expr: |-
+          let a: Array<String> = ["String"]
+          let t = pass(a) instanceof Array<Any>
+
+    # G2 Array<Any> not preserved in instanceof
+    - expr: |-
+          let a: Array<Any> | undefined = [1]
+          let t = pass(a) instanceof Array<Any> | undefined
+
+    - expr: |-
+          let a: Array<Any> | undefined = undefined
+          let t = pass(a) instanceof Array<Any> | undefined
+
+    # G6 Fixed Array with nested non-preserved type
+    - expr: |-
+          let a: FixedArray<Array<Int>> = [[1]]
+          let t = pass(a) instanceof FixedArray<Array<Any>>
