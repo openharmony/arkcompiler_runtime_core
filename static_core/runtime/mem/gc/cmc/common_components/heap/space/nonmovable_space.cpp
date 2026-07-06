@@ -105,8 +105,8 @@ uintptr_t NonMovableSpace::AllocInMonoSizeList(size_t cellCount)
     }
 
     // Mark new allocated non-movable object.
-    RegionDesc *regionDesc = RegionDesc::GetRegionDescAt(allocPtr);
-    BaseObject *object = reinterpret_cast<BaseObject *>(allocPtr);
+    auto *object = reinterpret_cast<BaseObject *>(allocPtr);
+    RegionDesc *regionDesc = RegionDesc::GetRegionDescAt(object);
     regionDesc->MarkObject(object);
     size_t size = (cellCount + 1) * sizeof(uint64_t);
     regionDesc->AddLiveByteCount(size);

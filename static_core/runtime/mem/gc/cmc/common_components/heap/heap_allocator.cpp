@@ -120,7 +120,7 @@ Address HeapAllocator::AllocateLargeRegion(size_t size)
 
 size_t HeapAllocator::GetTLABMaxAllocSize()
 {
-    return RegionDesc::UNIT_AVAILABLE_SIZE;
+    return RegionDesc::GetUnitAvailableSize();
 }
 
 }  // namespace ark::common_vm

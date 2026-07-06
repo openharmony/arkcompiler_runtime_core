@@ -32,7 +32,7 @@ bool SatbBuffer::ShouldEnqueue(const BaseObject *obj)
         return false;
     }
     if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
-        auto *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        auto *region = RegionDesc::GetAliveRegionDescAt(obj);
         if (!region->IsToRegion() && !region->IsInYoungSpace()) {
             return false;
         }

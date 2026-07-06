@@ -92,7 +92,7 @@ size_t LargeSpace::CollectLargeGarbage()
 
 uintptr_t LargeSpace::Alloc(size_t size, bool allowGC)
 {
-    size_t alignedSize = AlignUp<size_t>(size + RegionDesc::UNIT_HEADER_SIZE, RegionDesc::UNIT_SIZE);
+    size_t alignedSize = AlignUp<size_t>(size + RegionDesc::GetUnitHeaderSize(), RegionDesc::UNIT_SIZE);
     size_t regionCount = alignedSize / RegionDesc::UNIT_SIZE;
     RegionDesc *region =
         regionManager_.TakeRegion(regionCount, RegionDesc::UnitRole::LARGE_SIZED_UNITS, false, allowGC);

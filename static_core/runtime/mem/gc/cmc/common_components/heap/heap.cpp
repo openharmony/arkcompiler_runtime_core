@@ -29,8 +29,6 @@
 #endif
 namespace ark::common_vm {
 static_assert(Heap::NORMAL_UNIT_SIZE == RegionDesc::UNIT_SIZE);
-static_assert(Heap::NORMAL_UNIT_HEADER_SIZE == RegionDesc::UNIT_HEADER_SIZE);
-static_assert(Heap::NORMAL_UNIT_AVAILABLE_SIZE == RegionDesc::UNIT_AVAILABLE_SIZE);
 
 HeapAddress Heap::heapStartAddr_ = 0;
 HeapAddress Heap::heapCurrentEnd_ = 0;
@@ -102,11 +100,6 @@ public:
         gcReason_ = reason;
     }
 
-    bool InRecentSpace(const void *addr) override
-    {
-        RegionDesc *region = RegionDesc::GetRegionDescAt(reinterpret_cast<HeapAddress>(addr));
-        return region->IsInRecentSpace();
-    }
     bool GetForceThrowOOM() const override
     {
         return isForceThrowOOM_;

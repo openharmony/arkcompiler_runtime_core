@@ -95,11 +95,11 @@ public:
         if (obj == nullptr) {
             obj = AllocString(STRING_LENGTH);
         }
-        auto *region = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(obj));
+        auto *region = cvm::RegionDesc::GetRegionDescAt(obj);
         cvm::RegionDesc *r = nullptr;
         do {
             auto *o = AllocString(STRING_LENGTH);
-            r = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(o));
+            r = cvm::RegionDesc::GetRegionDescAt(o);
         } while (r == region);
     }
 
@@ -129,7 +129,7 @@ public:
 
     cvm::RegionDesc::RegionType GetRegionType(ObjectHeader *obj)
     {
-        return cvm::RegionDesc::GetRegionDescAt(ToUintPtr(obj))->GetRegionType();
+        return cvm::RegionDesc::GetRegionDescAt(obj)->GetRegionType();
     }
 
 private:
@@ -172,7 +172,7 @@ TEST_F(CMCGCTest, AllocMovableObject)
     ASSERT_EQ(cvm::RegionDesc::RegionType::RECENT_FULL_REGION, GetRegionType(obj));
     TriggerGC(GCTaskCause::YOUNG_GC_CAUSE);
     ASSERT_NE(addr, obj.GetPtr());
-    RegionDesc *region = RegionDesc::GetRegionDescAt(ToUintPtr(addr));
+    RegionDesc *region = RegionDesc::GetRegionDescAt(addr);
     ASSERT_EQ(cvm::RegionDesc::RegionType::FREE_REGION, region->GetRegionType());
     ASSERT_EQ(cvm::RegionDesc::RegionType::OLD_REGION, GetRegionType(obj));
 }
@@ -225,7 +225,7 @@ TEST_F(CMCGCTest, CardTableTest)
     old->Set(0, young.GetPtr());
     large->Set(0, young.GetPtr());
 
-    cvm::RegionDesc *nonmovableRegion = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(nonmovable.GetPtr()));
+    cvm::RegionDesc *nonmovableRegion = cvm::RegionDesc::GetRegionDescAt(nonmovable.GetPtr());
     bool found = false;
     nonmovableRegion->GetRSet()->VisitAllMarkedCardBefore(
         [nonmovable, &found](BaseObject *obj) {
@@ -236,7 +236,7 @@ TEST_F(CMCGCTest, CardTableTest)
         nonmovableRegion->GetRegionBase(), ToUintPtr(nonmovable.GetPtr()) + OBJECT_POINTER_SIZE);
     ASSERT_TRUE(found);
 
-    cvm::RegionDesc *largeRegion = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(large.GetPtr()));
+    cvm::RegionDesc *largeRegion = cvm::RegionDesc::GetRegionDescAt(large.GetPtr());
     found = false;
     largeRegion->GetRSet()->VisitAllMarkedCardBefore(
         [large, &found](BaseObject *obj) {
@@ -247,7 +247,7 @@ TEST_F(CMCGCTest, CardTableTest)
         largeRegion->GetRegionBase(), ToUintPtr(large.GetPtr()) + OBJECT_POINTER_SIZE);
     ASSERT_TRUE(found);
 
-    cvm::RegionDesc *oldRegion = cvm::RegionDesc::GetRegionDescAt(ToUintPtr(old.GetPtr()));
+    cvm::RegionDesc *oldRegion = cvm::RegionDesc::GetRegionDescAt(old.GetPtr());
     found = false;
     oldRegion->GetRSet()->VisitAllMarkedCardBefore(
         [old, &found](BaseObject *obj) {

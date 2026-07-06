@@ -98,7 +98,7 @@ PandaString GetObjectInfo(const BaseObject *obj)
     if (!Heap::IsHeapAddress(obj)) {
         s << "Skip: Object is not in heap range" << std::endl;
     } else {
-        auto region = RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(obj));
+        auto region = RegionDesc::GetRegionDescAt(obj);
         s << std::hex << "Type: 0x" << (int)region->GetRegionType() << ", "
           << "Base: 0x" << region->GetRegionBase() << ", "
           << "Start: 0x" << region->GetRegionStart() << ", "
@@ -141,7 +141,7 @@ void IsValidRef(const BaseObject *obj, const RefField<> &ref)
         << reinterpret_cast<MAddress>(refObj) << ","
         << "Heap range: [0x" << Heap::heapStartAddr_ << ", 0x" << Heap::heapCurrentEnd_ << "]";
 
-    auto region = RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(refObj));
+    auto region = RegionDesc::GetRegionDescAt(refObj);
     LOG_IF(!(region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION), FATAL, COMMON)
         << "Check failed: region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION" << CONTEXT
         << "Object: " << GetObjectInfo(obj) << std::endl
@@ -208,7 +208,7 @@ public:
 
         // check remarked objects, so they must be in one of the states below
         auto refObj = ref.GetTargetObject();
-        RegionDesc *region = RegionDesc::GetRegionDescAt(reinterpret_cast<HeapAddress>(refObj));
+        RegionDesc *region = RegionDesc::GetRegionDescAt(refObj);
 
         // if obj is nullptr, this means it is a root object
         // We expect root objects to be already forwarded: assert(!region->isFromRegion())
@@ -271,7 +271,7 @@ public:
     {
         IsValidRef(obj, ref);
 
-        auto refRegion = RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(ref.GetTargetObject()));
+        auto refRegion = RegionDesc::GetRegionDescAt(ref.GetTargetObject());
         LOG_IF(!(refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION), FATAL, COMMON)
             << "Check failed: refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION" << CONTEXT
             << "Object: " << GetObjectInfo(obj) << std::endl
@@ -294,8 +294,7 @@ public:
             return;
         }
 
-        auto regionType =
-            RegionDesc::GetRegionDescAt(reinterpret_cast<MAddress>(ref.GetTargetObject()))->GetRegionType();
+        auto regionType = RegionDesc::GetRegionDescAt(ref.GetTargetObject())->GetRegionType();
         if (regionType == RegionDesc::RegionType::RECENT_POLYSIZE_NONMOVABLE_REGION ||
             regionType == RegionDesc::RegionType::FULL_POLYSIZE_NONMOVABLE_REGION ||
             regionType == RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION ||

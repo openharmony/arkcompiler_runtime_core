@@ -295,14 +295,14 @@ def CmcPostWriteBarrierSingleSlow()
 
             objRegion := And(obj, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint
             objRegionPtr := Cast(objRegion).SrcType(Constants::REF_UINT).ptr
-            isCollectionSet := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_IS_COLLECTION_SET_OFFSET).u8
+            isCollectionSet := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_COLLECTION_SET_OFFSET).u8
 
             If(isCollectionSet, 0).NE.Unlikely {
                 Goto(:Done)
             }
 
             valueRegion := Cast(And(value, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).SrcType(Constants::REF_UINT).ptr
-            valueRegionType := LoadI(valueRegion).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+            valueRegionType := LoadI(valueRegion).Imm(CommonRuntimeConstants::REGION_TYPE_OFFSET).u8
 
             If(valueRegionType, CommonRuntimeConstants::REGION_TYPE_THREAD_LOCAL).LT.b {
                 Goto(:Done)
@@ -412,7 +412,7 @@ def CmcPostWriteBarrierPairSlow()
 
             objRegion := And(obj, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint
             objRegionPtr := Cast(objRegion).SrcType(Constants::REF_UINT).ptr
-            isCollectionSet := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_IS_COLLECTION_SET_OFFSET).u8
+            isCollectionSet := LoadI(objRegionPtr).Imm(CommonRuntimeConstants::REGION_COLLECTION_SET_OFFSET).u8
 
             If(isCollectionSet, 0).NE.Unlikely {
                 Goto(:Done)
@@ -423,7 +423,7 @@ def CmcPostWriteBarrierPairSlow()
             }
 
             value1Region := Cast(And(value1, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).SrcType(Constants::REF_UINT).ptr
-            value1RegionType := LoadI(value1Region).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+            value1RegionType := LoadI(value1Region).Imm(CommonRuntimeConstants::REGION_TYPE_OFFSET).u8
 
             If(value1RegionType, CommonRuntimeConstants::REGION_TYPE_THREAD_LOCAL).LT.b {
                 Goto(:CheckValue2)
@@ -442,7 +442,7 @@ def CmcPostWriteBarrierPairSlow()
             }
 
             value2Region := Cast(And(value2, CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).SrcType(Constants::REF_UINT).ptr
-            value2RegionType := LoadI(value2Region).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+            value2RegionType := LoadI(value2Region).Imm(CommonRuntimeConstants::REGION_TYPE_OFFSET).u8
 
             If(value2RegionType, CommonRuntimeConstants::REGION_TYPE_THREAD_LOCAL).LT.b {
                 Goto(:Done)
@@ -509,7 +509,7 @@ def GenerateCmcReadViaBarrierIrtoc(volatile)
             }
 
             region := Bitcast(AndI(old_ref).Imm(CommonRuntimeConstants::INV_DEFAULT_REGION_UNIT_MASK).ref_uint).ref
-            region_type := LoadI(region).Imm(CommonRuntimeConstants::INLINED_REGION_METADATA_REGION_TYPE_OFFSET).u8
+            region_type := LoadI(region).Imm(CommonRuntimeConstants::REGION_TYPE_OFFSET).u8
             If(region_type, CommonRuntimeConstants::REGION_TYPE_FROM_REGION).NE.Likely {
                 Return(old_ref).ref_uint
             }
