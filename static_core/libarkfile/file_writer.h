@@ -232,9 +232,12 @@ public:
 
     bool WriteChecksum(size_t offset) override
     {
+        if (offset > data_.size() || sizeof(checksum_) > data_.size() - offset) {
+            return false;
+        }
         auto span = Span(data_.data(), data_.size());
-        auto sub = span.SubSpan(offset);
-        return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
+        auto sub = span.SubSpan(offset, sizeof(checksum_));
+        return (memcpy_s(sub.data(), sub.Size(), &checksum_, sizeof(checksum_)) == 0);
     }
 
     PANDA_PUBLIC_API bool FinalizeChecksum(size_t contentBeginOffset, size_t checksumStoreOffset) override;
@@ -283,8 +286,11 @@ public:
 
     bool WriteChecksum(size_t offset) override
     {
-        auto sub = sp_.SubSpan(offset);
-        return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
+        if (offset > sp_.Size() || sizeof(checksum_) > sp_.Size() - offset) {
+            return false;
+        }
+        auto sub = sp_.SubSpan(offset, sizeof(checksum_));
+        return (memcpy_s(sub.data(), sub.Size(), &checksum_, sizeof(checksum_)) == 0);
     }
 
     PANDA_PUBLIC_API bool FinalizeChecksum(size_t contentBeginOffset, size_t checksumStoreOffset) override;
