@@ -968,6 +968,7 @@ void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, InstPa
     auto [left, right] = args;
     auto [ss, insertAfter] = helpers;
     auto block = insertAfter->GetBasicBlock();
+    ASSERT(ss->GetBasicBlock() == block);
     Inst *newLeft = nullptr;
     if (val == 0 && left != nullptr) {
         newLeft = left;
@@ -1046,29 +1047,36 @@ Inst *ChecksElimination::InsertNewLenArray(Inst *lenArray, Inst *ss)
     return nullptr;
 }
 
-void ChecksElimination::InsertDeoptimizationForIndexOverflow(CountableLoopInfo *countableLoopInfo,
-                                                             BoundsRange indexUpperRange, Inst *ss)
+static bool GetIndexOverflowDeoptInfo(CountableLoopInfo *countableLoopInfo, BoundsRange indexUpperRange, Inst *ss,
+                                      Inst **insertAfter, int64_t *maxUpper)
 {
+    *insertAfter = nullptr;
     auto loopCc = countableLoopInfo->normalizedCc;
-    if (loopCc == CC_LT || loopCc == CC_LE) {
-        auto loopUpper = countableLoopInfo->test;
-        ASSERT(countableLoopInfo->constStep < INT64_MAX);
-        auto step = static_cast<int64_t>(countableLoopInfo->constStep);
-        auto indexType = countableLoopInfo->index->GetType();
-        ASSERT(indexType == DataType::INT32);
-        auto maxUpper = BoundsRange::GetMax(indexType) - step + (loopCc == CC_LT ? 1 : 0);
-        auto bri = loopUpper->GetBasicBlock()->GetGraph()->GetBoundsRangeInfo();
-        auto loopUpperRange = bri->FindBoundsRange(countableLoopInfo->index->GetBasicBlock(), loopUpper);
-        // Upper bound of loop index assuming (index + maxAdd < lenArray)
-        indexUpperRange = indexUpperRange.Add(BoundsRange(step)).FitInType(indexType);
-        if (!BoundsRange(maxUpper).IsMoreOrEqual(loopUpperRange) && indexUpperRange.IsMaxRange(indexType)) {
-            // loop index can overflow
-            Inst *insertAfter = loopUpper->IsDominate(ss) ? ss : loopUpper;
-            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Build deoptimize for loop index overflow";
-            // Create deoptimize if loop index can become negative
-            InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {nullptr, loopUpper}, maxUpper, {ss, insertAfter});
-        }
+    if (loopCc != CC_LT && loopCc != CC_LE) {
+        return true;
     }
+
+    auto loopUpper = countableLoopInfo->test;
+    ASSERT(countableLoopInfo->constStep < INT64_MAX);
+    auto step = static_cast<int64_t>(countableLoopInfo->constStep);
+    auto indexType = countableLoopInfo->index->GetType();
+    ASSERT(indexType == DataType::INT32);
+    *maxUpper = BoundsRange::GetMax(indexType) - step + (loopCc == CC_LT ? 1 : 0);
+    auto bri = loopUpper->GetBasicBlock()->GetGraph()->GetBoundsRangeInfo();
+    auto header = countableLoopInfo->index->GetBasicBlock();
+    auto loopUpperRange = bri->FindBoundsRange(header, loopUpper);
+    // Upper bound of loop index assuming (index + maxAdd < lenArray)
+    indexUpperRange = indexUpperRange.Add(BoundsRange(step)).FitInType(indexType);
+    if (BoundsRange(*maxUpper).IsMoreOrEqual(loopUpperRange) || !indexUpperRange.IsMaxRange(indexType)) {
+        return true;
+    }
+
+    *insertAfter = loopUpper->IsDominate(ss) ? ss : loopUpper;
+    if ((*insertAfter)->GetBasicBlock() == header || (*insertAfter)->GetBasicBlock() != ss->GetBasicBlock()) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for loop index overflow";
+        return false;
+    }
+    return true;
 }
 
 bool ChecksElimination::NeedUpperDeoptimization(BasicBlock *header, InstPair insts, FlagPair flags, int64_t maxAdd,
@@ -1108,6 +1116,9 @@ bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, In
     auto [lower, upper] = bounds;
     auto [insertDeoptAfter, ss, resultLenArray] = helpers;
     auto block = insertDeoptAfter->GetBasicBlock();
+    if (ss->GetBasicBlock() != block) {
+        return false;
+    }
     if (!lower->IsDominate(insertDeoptAfter)) {
         if (lower->GetBasicBlock() == block) {
             insertDeoptAfter = lower;
@@ -1163,6 +1174,13 @@ bool ChecksElimination::TryInsertDeoptimization(LoopInfo loopInfo, Inst *lenArra
         return false;
     }
 
+    Inst *indexOverflowInsertAfter = nullptr;
+    int64_t indexOverflowMaxUpper = 0;
+    if (!GetIndexOverflowDeoptInfo(&countableLoopInfo, lenArrayRange.Sub(BoundsRange(maxAdd)), ss,
+                                   &indexOverflowInsertAfter, &indexOverflowMaxUpper)) {
+        return false;
+    }
+
     bool insertNewLenArray = false;
     bool correctMax = (maxAdd != std::numeric_limits<int64_t>::min());
     bool correctUpperRange = upperRange.Add(BoundsRange(maxAdd)).IsLess(lenArrayRange);
@@ -1174,7 +1192,12 @@ bool ChecksElimination::TryInsertDeoptimization(LoopInfo loopInfo, Inst *lenArra
             return false;
         }
     }
-    InsertDeoptimizationForIndexOverflow(&countableLoopInfo, lenArrayRange.Sub(BoundsRange(maxAdd)), ss);
+    if (indexOverflowInsertAfter != nullptr) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Build deoptimize for loop index overflow";
+        // Create deoptimize if loop index can become negative
+        InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {nullptr, countableLoopInfo.test}, indexOverflowMaxUpper,
+                                        {ss, indexOverflowInsertAfter});
+    }
     if (needLowerDeopt) {
         COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Build deoptimize for lower value";
         // Create deoptimize if lower < 0 (or -1 for loop with CC_GT)
@@ -1200,6 +1223,10 @@ bool ChecksElimination::TryInsertUpperDeoptimization(LoopInfo loopInfo, Inst *le
     }
     ASSERT(insertDeoptAfter->GetBasicBlock()->IsDominate(header));
     if (insertDeoptAfter->GetBasicBlock() == header) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value";
+        return false;
+    }
+    if (insertDeoptAfter->GetBasicBlock() != ss->GetBasicBlock()) {
         COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value";
         return false;
     }
@@ -1373,6 +1400,9 @@ Inst *ChecksElimination::SelectInsertAfterForBoundsDeopt(Inst *lenArray, Inst *s
     ASSERT(lenArray != nullptr);
     ASSERT(saveState != nullptr);
     auto *insertAfter = lenArray->IsDominate(saveState) ? saveState : lenArray;
+    if (saveState->GetBasicBlock() != insertAfter->GetBasicBlock()) {
+        return nullptr;
+    }
     if (parentIndex == nullptr || parentIndex->IsDominate(insertAfter)) {
         return insertAfter;
     }
@@ -1407,8 +1437,7 @@ void ChecksElimination::ReplaceBoundsChecksByDeoptInOneLoop(std::pair<Loop *, Lo
             }
             auto *insertAfter = SelectInsertAfterForBoundsDeopt(lenArray, saveState, parentIndex);
             if (insertAfter == nullptr) {
-                COMPILER_LOG(DEBUG, CHECKS_ELIM)
-                    << "Skip loop deopt merge because parent index is not available at the insertion point";
+                COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Skip loop deopt merge because insertion point is not valid";
                 TryReplaceBoundsCheckByDeoptInBlock(lenArray, parentIndex, notDominateBoundsChecks);
                 continue;
             }
