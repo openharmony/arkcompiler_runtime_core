@@ -9,3 +9,6 @@ ets_func_tests/std/core/regexp/RegExpMatchAllTest.ets
 
 #32998
 ets_func_tests/std/core/get_hash.ets
+
+#34681
+ets_func_tests/std/core/IntlLocaleThreadSafetyTest.ets
