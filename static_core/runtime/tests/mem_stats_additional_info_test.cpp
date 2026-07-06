@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,15 +93,13 @@ TEST_F(MemStatsAdditionalInfoTest, AdditionalStatistic)
         reinterpret_cast<const uint8_t *>(&simpleString[0]), simpleString.length(), ctx, vm);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread_);
     [[maybe_unused]] VMHandle<ObjectHeader> handle(thread_, stringObject);
-#ifndef NDEBUG
     Class *stringClass =
         Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
-    auto statistics = thread_->GetVM()->GetMemStats()->GetStatistics();
+    auto statistics = Runtime::GetCurrent()->GetMemoryStatistics();
     // allocated
     ASSERT_TRUE(statistics.find(stringClass->GetName()) != std::string::npos);
     ASSERT_TRUE(statistics.find("footprint") != std::string::npos);
     ASSERT_TRUE(statistics.find('1') != std::string::npos);
-#endif
 }
 
 }  // namespace ark::mem::test

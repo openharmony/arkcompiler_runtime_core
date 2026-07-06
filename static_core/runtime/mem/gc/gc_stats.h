@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <ratio>
 
 namespace ark::mem {
 
@@ -33,7 +32,6 @@ class MemStatsGenGCTest;
 }  // namespace test
 
 class GCStats;
-class HeapManager;
 
 enum class ObjectTypeStats : size_t {
     YOUNG_FREED_OBJECTS = 0,
@@ -208,15 +206,13 @@ private:
 
 class GCStats {
 public:
-    explicit GCStats(MemStatsType *memStats, GCType gcTypeFromRuntime, InternalAllocatorPtr allocator);
+    explicit GCStats(MemStatsType *memStats, GCType gcTypeFromRuntime);
     ~GCStats();
 
     NO_COPY_SEMANTIC(GCStats);
     NO_MOVE_SEMANTIC(GCStats);
 
     PandaString GetStatistics();
-
-    PandaString GetFinalStatistics(HeapManager *heapManager);
 
     PandaString GetPhasePauseStat(PauseTypeStats pauseType);
 
@@ -265,38 +261,18 @@ public:
         return memStats_;
     }
 
-    void StartMutatorLock();
-    void StopMutatorLock();
-
 private:
-    // For convert from nano to 10 seconds
-    using PERIOD = std::deca;
     GCType gcType_ {GCType::INVALID_GC};
     size_t objectsFreed_ {0};
     size_t objectsFreedBytes_ {0};
     size_t largeObjectsFreed_ {0};
     size_t largeObjectsFreedBytes_ {0};
-    uint64_t startTime_ {0};
-    // CC-OFFNXT(G.FMT.03) project code style
-    size_t countMutator_ GUARDED_BY(mutatorStatsLock_) {0};
-    // CC-OFFNXT(G.FMT.03) project code style
-    uint64_t mutatorStartTime_ GUARDED_BY(mutatorStatsLock_) {0};
 
     uint64_t lastDuration_ {0};
     uint64_t totalDuration_ {0};
-    uint64_t totalPause_ {0};
-    // CC-OFFNXT(G.FMT.03) project code style
-    uint64_t totalMutatorPause_ GUARDED_BY(mutatorStatsLock_) {0};
-
-    uint64_t lastStartDuration_ {0};
-    // GC in the last PERIOD
-    uint64_t countGcPeriod_ {0};
-    // GC number of times every PERIOD
-    PandaVector<uint64_t> *allNumberDurations_ {nullptr};
 
     std::array<uint64_t, PAUSE_TYPE_STATS_SIZE> lastPause_ {};
 
-    os::memory::Mutex mutatorStatsLock_;
     MemStatsType *memStats_;
 
     void StartCollectStats();
@@ -305,10 +281,6 @@ private:
     void AddPause(uint64_t pause, GCInstanceStats *instanceStats, PauseTypeStats pauseType);
 
     void RecordDuration(uint64_t duration, GCInstanceStats *instanceStats);
-
-    uint64_t ConvertTimeToPeriod(uint64_t timeInNanos, bool ceil = false);
-
-    InternalAllocatorPtr allocator_ {nullptr};
 
 #ifndef NDEBUG
     PauseTypeStats prevPauseType_ {PauseTypeStats::COMMON_PAUSE};

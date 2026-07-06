@@ -611,11 +611,6 @@ options:
   default: false
   description: Enable/disable printing memory statistics in the end of the program
 
-- name: print-gc-statistics
-  type: bool
-  default: false
-  description: Enable/disable printing gc statistics in the end of the program
-
 - name: no-async-jit
   type: bool
   default: false

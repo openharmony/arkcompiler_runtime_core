@@ -236,8 +236,8 @@ F.e. add cpu profiling for `node`:
 
 Note: Option could be provided multiple times in one command for same tool.
 
-F.e. this line `--ark-custom-option='--heap-size-limit=536870912' --ark-custom-option='--print-memory-statistics=true'`
-will result in `ark ... --heap-size-limit=536870912 --print-memory-statistics=true ...`
+F.e. this line `--ark-custom-option='--heap-size-limit=536870912' --ark-custom-option='--run-gc-in-place'`
+will result in `ark ... --heap-size-limit=536870912 --run-gc-in-place ...`
 
 Note: spaces inside option is not allowed. Please use `=` sign.
 

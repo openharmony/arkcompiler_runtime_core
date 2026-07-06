@@ -334,23 +334,6 @@ TEST_F(MemStatsTest, TotalFootprint)
     ASSERT_EQ(RAW_ALLOC2, stats.GetFootprint(SpaceType::SPACE_TYPE_INTERNAL));
 }
 
-TEST_F(MemStatsTest, Statistics)
-{
-    static constexpr size_t BYTES_OBJECT = 10;
-    static constexpr size_t BYTES_ALLOC1 = 23;
-    static constexpr size_t BYTES_ALLOC2 = 42;
-
-    MemStatsDefault stats;
-    stats.RecordAllocateObject(BYTES_OBJECT, SpaceType::SPACE_TYPE_OBJECT);
-    stats.RecordAllocateRaw(BYTES_ALLOC1, SpaceType::SPACE_TYPE_INTERNAL);
-    stats.RecordAllocateRaw(BYTES_ALLOC2, SpaceType::SPACE_TYPE_INTERNAL);
-
-    auto statistics = stats.GetStatistics();
-    ASSERT_TRUE(statistics.find(std::to_string(BYTES_OBJECT)) != std::string::npos);
-    ASSERT_TRUE(statistics.find(std::to_string(BYTES_ALLOC1 + BYTES_ALLOC2)) != std::string::npos);
-    stats.RecordFreeRaw(BYTES_ALLOC1 + BYTES_ALLOC2, SpaceType::SPACE_TYPE_INTERNAL);
-}
-
 void FillMemStatsForConcurrency(MemStatsDefault &stats, std::condition_variable &readyToStart, std::mutex &cvMutex,
                                 std::atomic_size_t &threadsReady, coretypes::String *stringObject)
 {

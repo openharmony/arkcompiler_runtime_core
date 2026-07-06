@@ -60,7 +60,7 @@ class Tool(ToolBase):
         if OptFlags.INT_LLVM in self.flags:
             opts += '--interpreter-type=llvm '
         if OptFlags.GC_STATS in self.flags:
-            opts += '--print-gc-statistics --log-components=gc ' \
+            opts += '--log-components=gc ' \
                     '--log-level=info --log-stream=file ' \
                     '--log-file={gclog} '
         if OptFlags.JIT_STATS in self.flags:
