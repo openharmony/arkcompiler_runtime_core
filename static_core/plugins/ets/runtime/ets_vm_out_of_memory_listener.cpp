@@ -29,7 +29,7 @@ void EtsVmOutOfMemoryListener::OutOfMemory(size_t size, SpaceType spaceType)
     auto *memStats = vm_->GetMemStats();
     const size_t activeMemory = (memStats != nullptr) ? memStats->GetFootprintHeap() : 0U;
     ark::oom_stats::OomNotifier::NotifyBeforeManagedOom(heapManager->GetMaxMemory(), activeMemory, size,
-                                                        Runtime::GetOptions().GetProcessPackageName(), spaceType);
+                                                        Runtime::GetCurrent()->GetProcessPackageName(), spaceType);
 }
 
 }  // namespace ark::ets
