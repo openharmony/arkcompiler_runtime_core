@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <node_api.h>
+#include <js_native_api.h>
+#include <js_native_api_types.h>
 #include <array>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include "ets_coroutine.h"
 #include "include/mem/panda_containers.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -39,11 +41,15 @@
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_impl.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
-// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
+// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration, readability-function-size)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak)) napi_define_properties(napi_env env, napi_value object, size_t property_count,
                                                          const napi_property_descriptor *properties);
-// NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
+// CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak))
+napi_wrap_with_size(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
+                    void *finalize_hint, napi_ref *result, size_t native_binding_size);
+// NOLINTEND(readability-identifier-naming, readability-redundant-declaration, readability-function-size)
 
 namespace ark::ets::interop::js {
 
@@ -299,28 +305,54 @@ static napi_value STValueCtorImpl(napi_env env, napi_callback_info info)
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
-    if (jsArgc != 2U) {
-        ThrowJSBadArgCountError(env, jsArgc, 2U);
+    if (jsArgc != 3U) {
+        ThrowJSBadArgCountError(env, jsArgc, 3U);
         return nullptr;
     }
 
     napi_value jsThis;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    napi_value argv[2];
+    napi_value argv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, argv, &jsThis, nullptr));
 
     napi_value stValueDataPtrLow = argv[0];
     napi_value stValueDataPtrHigh = argv[1];
-
+    napi_value ptrBindingSize = argv[2];
+    int32_t stValueBindingSize;
     // set property to the instance
     NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, g_stvalueDataPtrLow, stValueDataPtrLow));
     NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, g_stvalueDataPtrHigh, stValueDataPtrHigh));
+    NAPI_CHECK_FATAL(napi_get_value_int32(env, ptrBindingSize, &stValueBindingSize));
 
     // unwrap the native object and set finalizer
     auto *dataPtr = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    NAPI_CHECK_FATAL(napi_wrap(env, jsThis, dataPtr, STValueDataFinilizer, nullptr, nullptr));
+    if (dataPtr == nullptr) {
+        STValueThrowJSError(env, "Invalid STValue instance");
+        return nullptr;
+    }
+    NAPI_CHECK_FATAL(
+        napi_wrap_with_size(env, jsThis, dataPtr, STValueDataFinilizer, nullptr, nullptr, stValueBindingSize));
 
     return jsThis;
+}
+
+std::tuple<napi_value, STValueData *> CreateSTValueInstance(napi_env env, size_t bindingSize)
+{
+    INTEROP_TRACE();
+    auto *data = new STValueData(env);
+    napi_value stvalueCtor = GetSTValueClass(env);
+    auto ptr = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
+    napi_value ptrLow;
+    napi_value ptrHigh;
+    napi_value ptrBindingSize;
+    NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ptr & 0xFFFFFFFF), &ptrLow));
+    NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ptr >> UINT32_BIT_SHIFT), &ptrHigh));
+    NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(bindingSize), &ptrBindingSize));
+
+    std::array argv = {ptrLow, ptrHigh, ptrBindingSize};
+    napi_value jsSTValue;
+    NAPI_CHECK_FATAL(napi_new_instance(env, stvalueCtor, argv.size(), argv.data(), &jsSTValue));
+    return std::tuple(jsSTValue, data);
 }
 
 bool IsSTValueInstance(napi_env env, napi_value value)

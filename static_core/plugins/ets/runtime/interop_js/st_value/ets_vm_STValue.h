@@ -20,6 +20,8 @@
 #include <js_native_api.h>
 #include <js_native_api_types.h>
 #include <node_api.h>
+#include <cstddef>
+#include <tuple>
 #include <variant>
 #include "ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -27,9 +29,51 @@
 namespace ark::ets::interop::js {
 
 constexpr uint32_t UINT32_BIT_SHIFT = 32;
+// 1GB - Total native heap size limit
+constexpr size_t NATIVE_HEAP_SIZE = 1024 * 1024 * 1024;
+// Maximum global reference storage capacity
+constexpr size_t MAX_GLOBAL_STORAGE_SIZE = 32768;
+// GC trigger threshold: 95% of native heap size
+constexpr double GC_THRESHOLD_FACTOR = 0.95;
+// Storage usage threshold: reserve 30% buffer space
+constexpr double GLOBAL_STORAGE_THRESHOLD_FACTOR = 0.7;
+// Computed STValue binding size: ~44KB
+constexpr size_t COMPUTED_STVALUE_BINDING_SIZE = static_cast<size_t>(
+    (NATIVE_HEAP_SIZE * GC_THRESHOLD_FACTOR) / (MAX_GLOBAL_STORAGE_SIZE * GLOBAL_STORAGE_THRESHOLD_FACTOR));
+// Default number of ANI local references reserved for each local scope
+constexpr ani_size DEFAULT_ANI_LOCAL_SCOPE_CAPACITY = 16;
+
+template <bool IS_NOT_DESTRUCT = true>
+ani_env *GetAniEnv();
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status);
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg);
+void AniExpectOK(ani_status status);
+
+class AniLocalScope {
+public:
+    explicit AniLocalScope(ani_env *env, ani_size nrRefs = DEFAULT_ANI_LOCAL_SCOPE_CAPACITY) : env_(env)
+    {
+        AniExpectOK(env_->CreateLocalScope(nrRefs));
+    }
+
+    ~AniLocalScope()
+    {
+        auto *aniEnv = GetAniEnv<false>();
+        if (aniEnv != nullptr) {
+            [[maybe_unused]] ani_status status = aniEnv->DestroyLocalScope();
+        }
+    }
+
+    NO_COPY_SEMANTIC(AniLocalScope);
+    NO_MOVE_SEMANTIC(AniLocalScope);
+
+private:
+    ani_env *env_;
+};
 
 class STValueData {
 public:
+    explicit STValueData([[maybe_unused]] napi_env env) {};
     STValueData([[maybe_unused]] napi_env env, ani_ref refData);
     STValueData([[maybe_unused]] napi_env env, ani_boolean booleanData);
     STValueData([[maybe_unused]] napi_env env, ani_char charData);
@@ -96,6 +140,14 @@ public:
     {
         ASSERT(IsAniDouble());
         return std::get<ani_double>(dataRef_);
+    }
+
+    void SetAniRef(napi_env env, ani_ref dataRef)
+    {
+        auto *aniEnv = GetAniEnv<true>();
+        ani_ref globalRef {nullptr};
+        AniCheckAndThrowToDynamic(env, aniEnv->GlobalReference_Create(dataRef, &globalRef));
+        this->dataRef_ = globalRef;
     }
 
     bool IsAniRef() const
@@ -176,9 +228,6 @@ enum class SType : int32_t { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBL
 PANDA_PUBLIC_API napi_value GetSTValueClass(napi_env env);
 PANDA_PUBLIC_API napi_value CreateSTypeObject(napi_env env);
 uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue);
-bool AniCheckAndThrowToDynamic(napi_env env, ani_status status);
-bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg);
-void AniExpectOK(ani_status status);
 SType GetTypeFromType(napi_env env, napi_value stNapiType);
 bool GetAniValueFromSTValue(napi_env env, napi_value element, ani_value &value);
 bool IsSTValueInstance(napi_env env, napi_value value);
@@ -201,7 +250,7 @@ void ThrowJSNonObjectError(napi_env env, const std::string &name);
 void ThrowJSThisNonObjectError(napi_env env);
 void ThrowJSOtherNonObjectError(napi_env env);
 
-template <bool IS_NOT_DESTRUCT = true>
+template <bool IS_NOT_DESTRUCT>
 ani_env *GetAniEnv()
 {
     ani_vm *vm {};
@@ -266,7 +315,7 @@ inline napi_value GetSTValueClassCached(napi_env env)
 }
 
 template <typename T>
-napi_value CreateSTValueInstance(napi_env env, T &&arg)
+napi_value CreateSTValueInstance(napi_env env, T &&arg, size_t bindingSize = COMPUTED_STVALUE_BINDING_SIZE)
 {
     INTEROP_TRACE();
     auto *data = new STValueData(env, std::forward<T>(arg));
@@ -274,14 +323,18 @@ napi_value CreateSTValueInstance(napi_env env, T &&arg)
     auto ptr = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
     napi_value ptrLow;
     napi_value ptrHigh;
+    napi_value ptrBindingSize;
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ptr & 0xFFFFFFFF), &ptrLow));
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ptr >> UINT32_BIT_SHIFT), &ptrHigh));
+    NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(bindingSize), &ptrBindingSize));
 
-    std::array argv = {ptrLow, ptrHigh};
+    std::array argv = {ptrLow, ptrHigh, ptrBindingSize};
     napi_value jsSTValue;
     NAPI_CHECK_FATAL(napi_new_instance(env, stvalueCtor, argv.size(), argv.data(), &jsSTValue));
     return jsSTValue;
 }
+
+std::tuple<napi_value, STValueData *> CreateSTValueInstance(napi_env env, size_t bindingSize);
 
 }  // namespace ark::ets::interop::js
 

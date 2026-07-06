@@ -71,6 +71,7 @@ napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info)
     }
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
@@ -233,6 +234,8 @@ napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info)
     auto valueType = static_cast<SType>(valueTypeInt);
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
+
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
@@ -290,6 +293,7 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
     auto fieldType = static_cast<SType>(fieldTypeInt);
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
@@ -524,6 +528,8 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
     auto propType = static_cast<SType>(propTypeInt);
 
     auto aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
+
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
@@ -744,6 +750,8 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
     auto elemType = static_cast<SType>(elemTypeInt);
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
+
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
@@ -968,6 +976,8 @@ napi_value ArrayGetImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &index));
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
+
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
@@ -1096,6 +1106,7 @@ napi_value ArrayPopImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
@@ -1140,6 +1151,7 @@ napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info
     auto variableType = static_cast<SType>(variableInt);
 
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
@@ -1363,6 +1375,7 @@ napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info)
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
+    AniLocalScope aniScope(aniEnv);
 
     size_t jsArgc = 0;
     napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr);
@@ -1382,6 +1395,7 @@ napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info)
 
     ani_type resType {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetType(objObject, &resType));
+
     return CreateSTValueInstance(env, resType);
 }
 
@@ -1416,7 +1430,9 @@ static napi_value STValueTemplateFindElement(napi_env env, napi_callback_info in
 
     // 3. return result
     // NOLINTNEXTLINE(performance-move-const-arg)
-    return CreateSTValueInstance<ani_ref>(env, std::move(aniElement));
+    auto jsSTValue = CreateSTValueInstance<ani_ref>(env, std::move(aniElement));
+    ANI_CHECK_ERROR_RETURN(env, GetAniEnv()->Reference_Delete(aniElement));
+    return jsSTValue;
 }
 
 ani_object CreateBoolean(ani_env *env, ani_boolean boo)
