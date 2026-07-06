@@ -56,8 +56,7 @@ public:
 
     static std::vector<MirrorFieldInfo> GetMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsBaseEnum, value_, "value"),
-                                             MIRROR_FIELD_INFO(EtsBaseEnum, name_, "name")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsBaseEnum, value_, "value")};
     }
 
     EtsClass *GetClass(const char *name)

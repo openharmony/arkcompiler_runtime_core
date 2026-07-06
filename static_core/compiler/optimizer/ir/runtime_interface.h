@@ -838,11 +838,6 @@ public:
         return false;
     }
 
-    virtual ClassPtr GetEnumBoxedClass([[maybe_unused]] ClassPtr klass) const
-    {
-        return nullptr;
-    }
-
     virtual bool IsBigIntClass([[maybe_unused]] ClassPtr klass) const
     {
         return false;

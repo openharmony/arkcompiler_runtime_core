@@ -39,6 +39,7 @@
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -5833,42 +5834,29 @@ NO_UB_SANITIZE static ani_status Enum_GetEnumItemByName(ani_env *env, ani_enum e
 
     // Get index, then call unified function for Enum_GetEnumItemByIndex
     ScopedManagedCodeFix s(env);
-    EtsExecutionContext *executionCtx = s.GetExecutionContext();
-    EtsHandleScope scope(executionCtx);
-
-    EtsObjectArray *itemsArr;
-    ani_status status = GetArrayFromEnum(s, enm, EnumArrayNames::BOXED_ITEMS.data(), &itemsArr);
+    EtsObjectArray *namesArr;
+    ani_status status = GetArrayFromEnum(s, enm, EnumArrayNames::NAMES.data(), &namesArr);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    size_t sz = namesArr->GetLength();
 
-    EtsHandle<EtsObjectArray> itemsArrHandle(executionCtx, itemsArr);
-    size_t sz = itemsArrHandle->GetLength();
-
-    EtsField *nameField = nullptr;
-    for (size_t index = 0; index < sz; ++index) {
-        EtsObject *itemObj = itemsArrHandle->Get(static_cast<uint32_t>(index));
-        if (UNLIKELY(itemObj == nullptr)) {
-            continue;
-        }
-
-        EtsHandle<EtsObject> itemObjH(executionCtx, itemObj);
-
-        if (nameField == nullptr) {
-            EtsHandle<EtsClass> itemClassH(executionCtx, itemObjH->GetClass());
-            nameField = itemClassH->GetFieldIDByName("name", nullptr);
-            ANI_CHECK_RETURN_IF_EQ(nameField, nullptr, ANI_NOT_FOUND);
-        }
-
-        EtsObject *nameObj = itemObjH->GetFieldObject(nameField);
-        if (UNLIKELY(nameObj == nullptr)) {
-            continue;
-        }
-        EtsString *etsStr = EtsString::FromEtsObject(nameObj);
+    size_t index = 0;
+    for (; index < sz; ++index) {
+        EtsObject *etsElem = namesArr->Get(index);
+        EtsString *etsStr = EtsString::FromEtsObject(etsElem);
         if (etsStr->IsEqual(name)) {
-            return s.AddLocalRef(itemObjH.GetPtr(), reinterpret_cast<ani_ref *>(result));
+            break;
         }
     }
+    if (index >= sz) {
+        return ANI_NOT_FOUND;
+    }
 
-    return ANI_NOT_FOUND;
+    EtsObjectArray *itemsArr;
+    status = GetArrayFromEnum(s, enm, EnumArrayNames::BOXED_ITEMS.data(), &itemsArr);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsObject *res = itemsArr->Get(index);
+
+    return s.AddLocalRef(res, reinterpret_cast<ani_ref *>(result));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5937,22 +5925,18 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(ani_env *env, ani_enum_it
     EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> internalEnumItem(executionCtx, s.ToInternalType(enum_item));
     EtsHandle<EtsClass> enumClass(executionCtx, internalEnumItem->GetClass());
-
-    EtsField *valueField = enumClass->GetFieldIDByName("value", nullptr);
-    ANI_CHECK_RETURN_IF_EQ(valueField, nullptr, ANI_NOT_FOUND);
-
-    EtsObject *valueObj = internalEnumItem->GetFieldObject(valueField);
-    ANI_CHECK_RETURN_IF_EQ(valueObj, nullptr, ANI_INVALID_ARGS);
-
-    if (IsCorrectBoxType<ani_int>(executionCtx, valueObj)) {
-        *result = EtsBoxPrimitive<ani_int>::Unbox(valueObj);
-        return ANI_OK;
+    ANI_CHECK_RETURN_IF_NE(enumClass->IsEtsEnum(), true, ANI_INVALID_TYPE);
+    auto *boxedValue = EtsBaseEnum::FromEtsObject(internalEnumItem.GetPtr())->GetValue();
+    if (boxedValue == nullptr) {
+        return ANI_INVALID_ARGS;
     }
 
-    return ANI_INVALID_ARGS;
+    ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<ani_int>(executionCtx, boxedValue), false, ANI_INVALID_ARGS);
+    *result = EtsBoxPrimitive<ani_int>::Unbox(boxedValue);
+    return ANI_OK;
 }
 
-static ani_status GetStringFieldFromEnumItem(ani_env *env, ani_enum_item enumItem, const char *fieldName,
+static ani_status GetStringArrayFromEnumItem(ani_env *env, ani_enum_item enumItem, const char *arrayName,
                                              ani_string *result)
 {
     ScopedManagedCodeFix s(env);
@@ -5960,38 +5944,13 @@ static ani_status GetStringFieldFromEnumItem(ani_env *env, ani_enum_item enumIte
     EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> internalEnumItem(executionCtx, s.ToInternalType(enumItem));
     EtsHandle<EtsClass> enumClass(executionCtx, internalEnumItem->GetClass());
-    EtsField *field = enumClass->GetFieldIDByName(fieldName, nullptr);
-    ANI_CHECK_RETURN_IF_EQ(field, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(enumClass->IsEtsEnum(), true, ANI_INVALID_TYPE);
+    EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
+    auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
-    EtsObject *fieldObj = internalEnumItem->GetFieldObject(field);
-    ANI_CHECK_RETURN_IF_EQ(fieldObj, nullptr, ANI_INVALID_ARGS);
-    // fieldName should be "name" or "value" and field type is string
-    if (PlatformTypes(executionCtx)->coreString->IsAssignableFrom(fieldObj->GetClass())) {
-        return s.AddLocalRef(fieldObj, reinterpret_cast<ani_ref *>(result));
-    }
-
-    // fieldName is "value" but field type is not string, then call toString()
-    if (std::string_view(fieldName) != "value") {
-        return ANI_INVALID_TYPE;
-    }
-
-    EtsMethod *toStringMethod = enumClass->GetInstanceMethod("toString", nullptr);
-    ANI_CHECK_RETURN_IF_EQ(toStringMethod, nullptr, ANI_NOT_FOUND);
-    ANI_CHECK_RETURN_IF_EQ(toStringMethod->IsStatic(), true, ANI_INVALID_TYPE);
-    ANI_CHECK_RETURN_IF_NE(toStringMethod->GetNumArgs(), 1, ANI_INVALID_TYPE);
-    ANI_CHECK_RETURN_IF_NE(toStringMethod->GetArgType(0), EtsType::OBJECT, ANI_INVALID_TYPE);
-    ANI_CHECK_RETURN_IF_NE(toStringMethod->GetReturnValueType(), EtsType::OBJECT, ANI_INVALID_TYPE);
-
-    std::array args = {Value {internalEnumItem->GetCoreType()}};
-    Value res = toStringMethod->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
-    ANI_CHECK_RETURN_IF_EQ(executionCtx->GetMT()->HasPendingException(), true, ANI_PENDING_ERROR);
-
-    EtsObject *resObj = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
-    ANI_CHECK_RETURN_IF_EQ(resObj, nullptr, ANI_ERROR);
-    ANI_CHECK_RETURN_IF_EQ(PlatformTypes(executionCtx)->coreString->IsAssignableFrom(resObj->GetClass()), false,
-                           ANI_INVALID_TYPE);
-
-    return s.AddLocalRef(resObj, reinterpret_cast<ani_ref *>(result));
+    auto *itemsArr = GetArrayFromInternalEnum<EtsObjectArray>(enumClass, arrayName);
+    EtsObject *stringObj = itemsArr->Get(ordinal);
+    return s.AddLocalRef(stringObj, reinterpret_cast<ani_ref *>(result));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6002,7 +5961,7 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_String(ani_env *env, ani_enum
     CHECK_PTR_ARG(enum_item);
     CHECK_PTR_ARG(result);
 
-    return GetStringFieldFromEnumItem(env, enum_item, "value", result);
+    return GetStringArrayFromEnumItem(env, enum_item, EnumArrayNames::STRING_VALUES.data(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6013,7 +5972,7 @@ NO_UB_SANITIZE static ani_status EnumItem_GetName(ani_env *env, ani_enum_item en
     CHECK_PTR_ARG(enum_item);
     CHECK_PTR_ARG(result);
 
-    return GetStringFieldFromEnumItem(env, enum_item, "name", result);
+    return GetStringArrayFromEnumItem(env, enum_item, EnumArrayNames::NAMES.data(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

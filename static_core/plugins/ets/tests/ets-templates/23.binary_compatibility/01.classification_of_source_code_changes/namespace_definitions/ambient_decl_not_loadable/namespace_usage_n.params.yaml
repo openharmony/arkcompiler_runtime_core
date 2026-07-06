@@ -91,20 +91,20 @@ cases:
       const a: A.ColorExp = A.ColorExp.Red
       const i: int = a
     err:
-      - >-
-        ClassCastError: std.core.String
-        cannot be cast to std.core.Int
-    runtime_only: true
+      - "E/verifier: Cannot link class: Cannot find method 'valueOf ()I' in class 'namespace_declarations_n_7.Ambient.ColorExp'"
+    err2:
+      - "E/runtime: Cannot initialize class 'namespace_usage_n_7.ETSGLOBAL'"
+      - "LinkerVerificationError: Lnamespace_usage_n_7/ETSGLOBAL;"
   - import: |-
       Ambient as A
     use: |-
       const a: A.SeasonExp = A.SeasonExp.Winter
       const s: string = a
     err:
-      - >-
-        ClassCastError: std.core.Int
-        cannot be cast to std.core.String
-    runtime_only: true
+      - "E/verifier: Cannot link class: Cannot find method 'valueOf ()Lstd/core/String;' in class 'namespace_declarations_n_8.Ambient.SeasonExp'"
+    err2:
+      - "E/runtime: Cannot initialize class 'namespace_usage_n_8.ETSGLOBAL'"
+      - "LinkerVerificationError: Lnamespace_usage_n_8/ETSGLOBAL;"
   - import: |-
       Ambient as A
     use: |-

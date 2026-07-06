@@ -41,5 +41,12 @@ cases:
         // enum constants of byte type
         enum Color: float { Red = 1f, Green= 2f, Blue=3f }
       logic: |-
-        let v: Color[] = new Color[Color.Green](Color.Blue)
-      expected_out: "Semantic error ESE0046: Type 'Color' is not compatible with type 'Int' at index 1"
+        let v: Color[] = new Color[Color.Green](new Color)
+      expected_out: "Semantic error ESE0124: Expected 2 arguments, got 0."
+
+    - decl: |-
+        // enum constants of short type
+        enum Color: short { Red = 42, Green, Blue }
+      logic: |-
+        let v: Color[] = new Color[Color.Green](new Color)
+      expected_out: "Semantic error ESE0124: Expected 2 arguments, got 0."
